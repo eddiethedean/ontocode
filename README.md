@@ -1,21 +1,69 @@
-# OntoCode 0.1.0 — OntoIndex Foundation
+# OntoCode
 
-OntoCode is a VS Code-native ontology workbench. **v0.1.0** delivers **OntoIndex**: the Rust backend that scans, parses, catalogs, and queries ontology repositories.
+**A planned VS Code extension for ontology-as-code — powered by a Rust backend.**
 
-This release implements the [v0.1 roadmap](ontocode_ontoindex_docs/ROADMAP.md) exit criterion:
+OntoCode aims to become a full ontology engineering workbench inside VS Code: browse classes and properties, edit OWL/RDF, run queries, validate in CI, review semantic diffs in pull requests, and work the way modern software teams already work with Git and editors.
+
+> Build, query, validate, refactor, reason over, and document OWL/RDF ontologies directly in VS Code.
+
+**Status:** Early development. The VS Code extension is **not shipped yet**. This repository currently contains **OntoIndex** — the Rust engine that will power the extension — plus planning specs for the full product.
+
+## Two-layer architecture
+
+OntoCode is designed as two products that ship together:
+
+| Layer | What it is | Status in v0.1.0 |
+|-------|------------|-------------------|
+| **OntoCode** | VS Code extension (explorer, inspectors, editing, LSP, graph views) | Planned — [v0.2+](https://github.com/eddiethedean/ontocode/blob/main/ontocode_ontoindex_docs/ROADMAP.md) |
+| **OntoIndex** | Rust library + CLI (scan, parse, catalog, query, validate) | **Shipping now** |
+
+```text
+┌─────────────────────────────────────┐
+│  OntoCode (planned)                 │
+│  VS Code extension + UI panels      │
+└─────────────────┬───────────────────┘
+                  │ Language Server
+┌─────────────────▼───────────────────┐
+│  OntoIndex (v0.1.0)                 │
+│  Rust index, catalog, query, CLI    │
+└─────────────────┬───────────────────┘
+                  │ Oxigraph / RDF parsers
+┌─────────────────▼───────────────────┐
+│  Your ontology repo                 │
+│  .ttl .owl .rdf .jsonld …           │
+└─────────────────────────────────────┘
+```
+
+OntoIndex is useful on its own today (CLI, CI, local analysis). The extension will call into the same engine via a language server rather than reimplementing ontology logic in TypeScript.
+
+## Why OntoCode?
+
+Protégé is strong for traditional ontology editing, but most engineering teams live in Git, pull requests, and VS Code. OntoCode is being built for that workflow:
+
+- Git-native semantic diffs and review
+- CI-friendly validation (`ontoindex validate`)
+- Editor-native navigation and refactoring
+- SQL-like and SPARQL querying over a workspace index
+- Local-first indexing — no upload by default
+
+Long-term goal: **routine ontology work in VS Code without opening Protégé.**
+
+## What's in v0.1.0 (OntoIndex foundation)
+
+This release delivers the Rust backend described in the [v0.1 roadmap](https://github.com/eddiethedean/ontocode/blob/main/ontocode_ontoindex_docs/ROADMAP.md):
+
+- **Workspace scanner** — recursive discovery, `.gitignore` support, content hashing
+- **RDF/OWL parsing** — Turtle, RDF/XML, OWL, JSON-LD, N-Triples, N-Quads, TriG via [Oxigraph](https://github.com/oxigraph/oxigraph)
+- **Semantic catalog** — ontologies, classes, properties, individuals, annotations, axioms, namespaces, imports
+- **SQL-like queries** — `SELECT`, `FROM`, `WHERE`, projections, CSV/JSON export
+- **SPARQL** — query indexed triples directly
+- **CLI** — `ontoindex index`, `query`, `sparql`, `validate`, `inspect`
+
+Exit criterion (works today):
 
 ```bash
 cargo run -- query ./fixtures "SELECT * FROM classes"
 ```
-
-## Features (v0.1.0)
-
-- **Workspace scanner** — recursive discovery with `.gitignore` support and content hashing
-- **RDF/OWL parsing** — Turtle, RDF/XML, OWL, JSON-LD, N-Triples, N-Quads, TriG via [Oxigraph](https://github.com/oxigraph/oxigraph)
-- **Semantic catalog** — ontologies, classes, properties, individuals, annotations, axioms, namespaces, imports
-- **SQL-like queries** — `SELECT`, `FROM`, `WHERE`, column projection, CSV/JSON export
-- **SPARQL** — query indexed triples directly
-- **CLI** — `index`, `query`, `sparql`, `validate`, `inspect`
 
 ## Quick start
 
@@ -35,23 +83,54 @@ cargo run -- query fixtures "SELECT short_name, labels FROM classes WHERE short_
 # SPARQL
 cargo run -- sparql fixtures "SELECT ?s ?p ?o WHERE { ?s ?p ?o } LIMIT 5"
 
-# Validate (non-zero exit on parse errors)
+# Validate (non-zero exit on parse errors — CI-friendly)
 cargo run -- validate fixtures
 
 # JSON output
 cargo run -- query fixtures "SELECT * FROM classes" --format json
 ```
 
-## Workspace layout
+Install from source after cloning, or from crates.io once published (`ontoindex-cli` provides the `ontoindex` binary).
+
+## Planned VS Code experience (not yet built)
+
+Specs and wireframes live in [ontocode_ontoindex_docs/](https://github.com/eddiethedean/ontocode/tree/main/ontocode_ontoindex_docs). Upcoming OntoCode UI includes:
+
+- Ontology Explorer sidebar (classes, properties, individuals)
+- Entity inspector with jump-to-source
+- Inline diagnostics and validation
+- Class/property/individual authoring
+- SPARQL and SQL query panels
+- Reasoner integration and graph visualization
+- Semantic Git diff viewer
+
+The extension will be a thin TypeScript shell over **ontoindex-lsp** and the OntoIndex crates — not a second ontology stack.
+
+## Roadmap
+
+| Version | Deliverable |
+|---------|-------------|
+| **v0.1** (current) | OntoIndex: scanner, parser, catalog, CLI |
+| v0.2 | VS Code extension skeleton, explorer, entity inspector |
+| v0.3 | Diagnostics and Problems panel integration |
+| v0.4 | Editing and patch-based write-back |
+| v0.5 | Query workbench |
+| v0.6–v0.9 | Reasoning, graphs, refactoring, semantic diff, docs |
+| v1.0 | Protégé-replacement release for daily ontology engineering |
+
+See [ROADMAP.md](https://github.com/eddiethedean/ontocode/blob/main/ontocode_ontoindex_docs/ROADMAP.md) and [PLAN.md](https://github.com/eddiethedean/ontocode/blob/main/ontocode_ontoindex_docs/PLAN.md) for the full product plan.
+
+## Repository layout
 
 ```text
 crates/
-├── ontoindex-core      # types, scanner
+├── ontoindex-core      # types, workspace scanner
 ├── ontoindex-parser    # RDF parsing and entity extraction
-├── ontoindex-catalog   # index builder and catalog
-├── ontoindex-query     # SQL-like and SPARQL query engines
+├── ontoindex-catalog   # index builder and semantic catalog
+├── ontoindex-query     # SQL-like and SPARQL engines
 └── ontoindex-cli       # `ontoindex` binary
 fixtures/               # sample ontology for tests
+ontocode_ontoindex_docs/  # specs, ADRs, wireframes, backlog
 tests/                  # integration and golden snapshot tests
 ```
 
@@ -75,9 +154,15 @@ tests/                  # integration and golden snapshot tests
 ## Development
 
 ```bash
-cargo test
+cargo test --workspace
 cargo fmt --all
 cargo clippy --all-targets -- -D warnings
+```
+
+Update golden snapshots:
+
+```bash
+ONTOINDEX_UPDATE_GOLDEN=1 cargo test golden_classes
 ```
 
 ## Releasing
@@ -89,23 +174,7 @@ git tag v0.1.0
 git push origin v0.1.0
 ```
 
-The [release workflow](.github/workflows/release.yml) will verify the tag, run tests, publish workspace crates to [crates.io](https://crates.io/) (in dependency order), and create a GitHub Release with the `ontoindex` Linux binary. Requires the `CARGO_REGISTRY_TOKEN` repository secret.
-
-Update golden snapshots:
-
-```bash
-ONTOINDEX_UPDATE_GOLDEN=1 cargo test golden_classes
-```
-
-## Roadmap
-
-| Version | Focus |
-|---------|-------|
-| **v0.1** (this release) | OntoIndex scanner, parser, catalog, CLI |
-| v0.2 | OntoCode VS Code explorer and entity inspector |
-| v0.3+ | Diagnostics, editing, query workbench, reasoning |
-
-See [ontocode_ontoindex_docs/](ontocode_ontoindex_docs/) for full specifications.
+The [release workflow](https://github.com/eddiethedean/ontocode/blob/main/.github/workflows/release.yml) runs tests, publishes workspace crates to [crates.io](https://crates.io/) in dependency order, and creates a GitHub Release with the `ontoindex` Linux binary. Requires the `CARGO_REGISTRY_TOKEN` repository secret.
 
 ## License
 

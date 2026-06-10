@@ -11,7 +11,71 @@ env:
   RUST_BACKTRACE: 1
 
 jobs:
+  build-lsp:
+    name: LSP (${{ matrix.bundle_dir }})
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-latest
+            bundle_dir: linux-x64
+            rust_target: ""
+            binary_ext: ""
+          - runner: ubuntu-24.04-arm
+            bundle_dir: linux-arm64
+            rust_target: ""
+            binary_ext: ""
+          - runner: macos-latest
+            bundle_dir: darwin-arm64
+            rust_target: ""
+            binary_ext: ""
+          - runner: macos-latest
+            bundle_dir: darwin-x64
+            rust_target: x86_64-apple-darwin
+            binary_ext: ""
+          - runner: windows-latest
+            bundle_dir: win32-x64
+            rust_target: ""
+            binary_ext: .exe
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Add Rust cross-compilation target
+        if: matrix.rust_target != ''
+        run: rustup target add ${{ matrix.rust_target }}
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: release-lsp-${{ matrix.bundle_dir }}
+
+      - name: Build ontoindex-lsp
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [ -n "${{ matrix.rust_target }}" ]; then
+            cargo build --release -p ontoindex-lsp --bins --target "${{ matrix.rust_target }}"
+            BIN="target/${{ matrix.rust_target }}/release/ontoindex-lsp${{ matrix.binary_ext }}"
+          else
+            cargo build --release -p ontoindex-lsp --bins
+            BIN="target/release/ontoindex-lsp${{ matrix.binary_ext }}"
+          fi
+          mkdir -p "bundle/${{ matrix.bundle_dir }}"
+          cp "${BIN}" "bundle/${{ matrix.bundle_dir }}/ontoindex-lsp${{ matrix.binary_ext }}"
+          if [ "${{ runner.os }}" != "Windows" ]; then
+            chmod +x "bundle/${{ matrix.bundle_dir }}/ontoindex-lsp${{ matrix.binary_ext }}"
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: lsp-${{ matrix.bundle_dir }}
+          path: bundle/
+          retention-days: 1
+
   release:
+    needs: build-lsp
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -33,8 +97,7 @@ jobs:
       - name: Verify crate metadata (dry-run publish)
         run: cargo publish -p ontoindex-core --dry-run
 
-      - name: Cache Rust dependencies
-        uses: Swatinem/rust-cache@v2
+      - uses: Swatinem/rust-cache@v2
         with:
           shared-key: release
 
@@ -46,7 +109,6 @@ jobs:
       - name: Publish crates to crates.io
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
-          # crates.io limits how many new crates can be published in a short window
           PUBLISH_PAUSE_SECONDS: 120
           INDEX_RETRY_SECONDS: 60
           RATE_LIMIT_RETRY_SECONDS: 180
@@ -108,24 +170,38 @@ jobs:
           publish_with_pause ontoindex-lsp
           publish_crate ontoindex-cli
 
-      - name: Build release binaries
-        run: |
-          cargo build --release -p ontoindex-cli
-          cargo build --release -p ontoindex-lsp --bins
+      - name: Build CLI binary
+        run: cargo build --release -p ontoindex-cli
 
-      - name: Package CLI binary
+      - name: Download multi-platform LSP binaries
+        uses: actions/download-artifact@v4
+        with:
+          pattern: lsp-*
+          path: extension/server
+          merge-multiple: true
+
+      - name: Package standalone binaries
         run: |
+          set -euo pipefail
           mkdir -p dist
           cp target/release/ontoindex "dist/ontoindex-${GITHUB_REF_NAME}-x86_64-unknown-linux-gnu"
           tar -czf "dist/ontoindex-${GITHUB_REF_NAME}-x86_64-unknown-linux-gnu.tar.gz" \
             -C dist "ontoindex-${GITHUB_REF_NAME}-x86_64-unknown-linux-gnu"
 
-      - name: Package LSP binary
-        run: |
-          mkdir -p dist
-          cp target/release/ontoindex-lsp "dist/ontoindex-lsp-${GITHUB_REF_NAME}-x86_64-unknown-linux-gnu"
-          tar -czf "dist/ontoindex-lsp-${GITHUB_REF_NAME}-x86_64-unknown-linux-gnu.tar.gz" \
-            -C dist "ontoindex-lsp-${GITHUB_REF_NAME}-x86_64-unknown-linux-gnu"
+          for dir in extension/server/*/; do
+            platform="$(basename "${dir}")"
+            bin="${dir}ontoindex-lsp"
+            exe="${dir}ontoindex-lsp.exe"
+            if [ -f "${bin}" ]; then
+              cp "${bin}" "dist/ontoindex-lsp-${GITHUB_REF_NAME}-${platform}"
+              tar -czf "dist/ontoindex-lsp-${GITHUB_REF_NAME}-${platform}.tar.gz" \
+                -C dist "ontoindex-lsp-${GITHUB_REF_NAME}-${platform}"
+            elif [ -f "${exe}" ]; then
+              cp "${exe}" "dist/ontoindex-lsp-${GITHUB_REF_NAME}-${platform}.exe"
+              (cd dist && zip -q "ontoindex-lsp-${GITHUB_REF_NAME}-${platform}.zip" \
+                "ontoindex-lsp-${GITHUB_REF_NAME}-${platform}.exe")
+            fi
+          done
 
       - name: Setup Node
         uses: actions/setup-node@v4
@@ -134,12 +210,10 @@ jobs:
           cache: npm
           cache-dependency-path: extension/package-lock.json
 
-      - name: Build extension VSIX
+      - name: Build multi-platform VSIX
         run: |
           set -euo pipefail
-          mkdir -p extension/server/linux-x64
-          cp target/release/ontoindex-lsp extension/server/linux-x64/ontoindex-lsp
-          chmod +x extension/server/linux-x64/ontoindex-lsp
+          ls -la extension/server/
           cd extension
           npm ci
           npm run compile
@@ -149,11 +223,13 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          assets=(
-            "dist/ontoindex-${GITHUB_REF_NAME}-x86_64-unknown-linux-gnu.tar.gz"
-            "dist/ontoindex-lsp-${GITHUB_REF_NAME}-x86_64-unknown-linux-gnu.tar.gz"
-            "dist/ontocode-${GITHUB_REF_NAME}.vsix"
-          )
+          set -euo pipefail
+          shopt -s nullglob
+          assets=(dist/*.tar.gz dist/*.zip dist/*.vsix)
+          if [ ${#assets[@]} -eq 0 ]; then
+            echo "No release assets found"
+            exit 1
+          fi
           if gh release view "${GITHUB_REF_NAME}" >/dev/null 2>&1; then
             echo "Release ${GITHUB_REF_NAME} already exists; uploading assets"
             gh release upload "${GITHUB_REF_NAME}" "${assets[@]}" --clobber

@@ -14,7 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - LSP browsing aids — hover, document/workspace symbols, go-to-definition, debounced re-index on file changes
 - Catalog entity APIs — hierarchy, entity detail, and jump-to-source helpers in `ontoindex-catalog`
 - LSP smoke integration test and CI jobs for LSP + extension builds
-- Release workflow assets for `ontoindex-lsp` binary and extension VSIX
+- Release workflow assets for `ontoindex-lsp` binary and multi-platform extension VSIX (Linux, macOS, Windows)
 
 [0.2.0]: https://github.com/eddiethedean/ontocode/releases/tag/v0.2.0
 

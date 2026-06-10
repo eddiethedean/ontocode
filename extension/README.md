@@ -10,6 +10,20 @@ Browse ontology repositories in VS Code using the OntoIndex language server.
 - Workspace indexing on open
 - Hover, document symbols, workspace symbols, and go-to-definition for ontology files
 
+## Platform support
+
+Release VSIX packages bundle `ontoindex-lsp` for:
+
+| Platform | Bundled path |
+|----------|----------------|
+| Linux x64 | `server/linux-x64/` |
+| Linux arm64 | `server/linux-arm64/` |
+| macOS Apple Silicon | `server/darwin-arm64/` |
+| macOS Intel | `server/darwin-x64/` |
+| Windows x64 | `server/win32-x64/ontoindex-lsp.exe` |
+
+If no bundled binary matches your machine, set `ontocode.lspPath` or install `ontoindex-lsp` on your `PATH`.
+
 ## Development
 
 From the repository root:
@@ -19,6 +33,8 @@ From the repository root:
 ```
 
 Then in VS Code: **Run Extension** (F5) with the `extension/` folder, or install the generated `.vsix`.
+
+To build a VSIX with all platform binaries locally, run `./scripts/package-extension.sh` on each target OS (or copy release artifacts into `extension/server/` before `vsce package`).
 
 ## Configuration
 

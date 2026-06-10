@@ -1,0 +1,162 @@
+# UI_WIREFRAMES.md
+
+## 1. VS Code Activity Bar
+
+```text
+[ Explorer ]
+[ Search   ]
+[ Source   ]
+[ Run      ]
+[ OntoCode ]  <-- new icon
+```
+
+## 2. Ontology Explorer Sidebar
+
+```text
+ONTOCODE
+
+Workspace: clinical-ontology
+
+▾ Ontologies
+  ▸ patient.ttl
+  ▸ billing.owl
+  ▸ common.ttl
+
+▾ Classes
+  ▾ Patient
+    ▸ Inpatient
+    ▸ Outpatient
+  ▾ Encounter
+  ▾ Medication
+
+▾ Object Properties
+  ▸ hasDiagnosis
+  ▸ hasProvider
+  ▸ memberOf
+
+▾ Data Properties
+  ▸ dateOfBirth
+  ▸ encounterDate
+
+▾ Annotation Properties
+  ▸ rdfs:label
+  ▸ skos:definition
+
+▾ Individuals
+  ▸ ExamplePatient001
+
+▾ Diagnostics
+  ⚠ 4 missing labels
+  ✖ 1 broken import
+```
+
+## 3. Entity Inspector
+
+```text
+CLASS: Patient
+
+IRI:
+http://example.org/ontology/Patient
+
+Labels:
+- Patient@en
+
+Comments:
+- A human receiving care.
+
+Parents:
+- Person
+
+Children:
+- Inpatient
+- Outpatient
+
+Axioms:
+- Patient SubClassOf Person
+- Patient SubClassOf hasRecord some MedicalRecord
+
+Annotations:
+- skos:definition
+- dc:created
+- owl:deprecated false
+
+Actions:
+[Add Label] [Add Axiom] [Find Usages] [Rename IRI] [Open Graph]
+```
+
+## 4. Query Workbench
+
+```text
+QUERY WORKBENCH
+
+Mode: [SQL v] [SPARQL]
+
+SELECT iri, label
+FROM classes
+WHERE deprecated = true;
+
+[Run] [Save Query] [Export CSV]
+
+Results:
+| iri | label |
+|-----|-------|
+| ... | ...   |
+```
+
+## 5. Graph View
+
+```text
+GRAPH: Patient Neighborhood
+
+          Person
+            |
+         Patient
+        /       \
+ Inpatient     Outpatient
+
+Side Panel:
+- selected node
+- relationship filters
+- depth slider
+- show inferred edges
+```
+
+## 6. Semantic Diff Panel
+
+```text
+SEMANTIC DIFF: main..feature
+
+Summary:
+- 12 classes added
+- 2 classes removed
+- 4 domains changed
+- 1 broken import introduced
+
+Breaking Changes:
+✖ Removed class: LegacyPatient
+✖ Changed range: hasProvider
+
+Entity Changes:
++ Added class: TelehealthEncounter
+~ Changed label: Provider
+- Removed property: oldIdentifier
+
+[Export Markdown] [Copy PR Summary]
+```
+
+## 7. Reasoner Results Panel
+
+```text
+REASONER: ELK
+
+Status: Completed
+
+Unsatisfiable Classes:
+✖ InvalidEncounter
+
+Inferred Changes:
++ TelehealthEncounter SubClassOf Encounter
++ PediatricPatient SubClassOf Patient
+
+[Show Inferred Hierarchy] [Explain Selected]
+```

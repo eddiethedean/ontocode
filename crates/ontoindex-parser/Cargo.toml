@@ -1,0 +1,17 @@
+[package]
+name = "ontoindex-parser"
+description = "RDF and OWL parsers for OntoIndex"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+
+[dependencies]
+ontoindex-core = { workspace = true }
+oxigraph.workspace = true
+serde.workspace = true
+thiserror.workspace = true
+
+[dev-dependencies]
+tempfile = "3"

@@ -1,0 +1,39 @@
+@prefix ex: <http://example.org/people#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://example.org/people> a owl:Ontology ;
+    rdfs:label "People Ontology" ;
+    owl:imports <http://www.w3.org/2002/07/owl> .
+
+ex:Person a owl:Class ;
+    rdfs:label "Person" ;
+    rdfs:comment "A human being." .
+
+ex:Organization a owl:Class ;
+    rdfs:label "Organization" .
+
+ex:worksFor a owl:ObjectProperty ;
+    rdfs:label "works for" ;
+    rdfs:domain ex:Person ;
+    rdfs:range ex:Organization .
+
+ex:age a owl:DatatypeProperty ;
+    rdfs:label "age" ;
+    rdfs:domain ex:Person ;
+    rdfs:range xsd:integer .
+
+ex:note a owl:AnnotationProperty ;
+    rdfs:label "note" .
+
+ex:alice a owl:NamedIndividual , ex:Person ;
+    rdfs:label "Alice" ;
+    ex:age "30"^^xsd:integer .
+
+ex:acme a owl:NamedIndividual , ex:Organization ;
+    rdfs:label "ACME Corp" .
+
+ex:alice ex:worksFor ex:acme .
+
+ex:Person rdfs:subClassOf owl:Thing .

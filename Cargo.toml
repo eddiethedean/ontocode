@@ -1,0 +1,49 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/ontoindex-core",
+    "crates/ontoindex-parser",
+    "crates/ontoindex-catalog",
+    "crates/ontoindex-query",
+    "crates/ontoindex-cli",
+]
+default-members = ["crates/ontoindex-cli"]
+
+[package]
+name = "ontocode"
+version = "0.1.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+publish = false
+
+[dev-dependencies]
+ontoindex-catalog = { workspace = true }
+ontoindex-query = { workspace = true }
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "MIT OR Apache-2.0"
+repository = "https://github.com/ontocode/ontocode"
+authors = ["OntoCode Contributors"]
+
+[workspace.dependencies]
+ontoindex-core = { path = "crates/ontoindex-core" }
+ontoindex-parser = { path = "crates/ontoindex-parser" }
+ontoindex-catalog = { path = "crates/ontoindex-catalog" }
+ontoindex-query = { path = "crates/ontoindex-query" }
+
+anyhow = "1"
+clap = { version = "4", features = ["derive"] }
+csv = "1"
+hex = "0.4"
+ignore = "0.4"
+oxigraph = "0.4"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+sha2 = "0.10"
+sqlparser = "0.53"
+thiserror = "2"
+[profile.release]
+lto = true
+codegen-units = 1

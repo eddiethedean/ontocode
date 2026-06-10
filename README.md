@@ -80,6 +80,17 @@ cargo fmt --all
 cargo clippy --all-targets -- -D warnings
 ```
 
+## Releasing
+
+Push a tag matching the workspace version in `Cargo.toml` (e.g. `v0.1.0`):
+
+```bash
+git tag v0.1.0
+git push origin v0.1.0
+```
+
+The [release workflow](.github/workflows/release.yml) will verify the tag, run tests, publish workspace crates to [crates.io](https://crates.io/) (in dependency order), and create a GitHub Release with the `ontoindex` Linux binary. Requires the `CARGO_REGISTRY_TOKEN` repository secret.
+
 Update golden snapshots:
 
 ```bash

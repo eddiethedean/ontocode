@@ -28,10 +28,10 @@ repository = "https://github.com/ontocode/ontocode"
 authors = ["OntoCode Contributors"]
 
 [workspace.dependencies]
-ontoindex-core = { path = "crates/ontoindex-core" }
-ontoindex-parser = { path = "crates/ontoindex-parser" }
-ontoindex-catalog = { path = "crates/ontoindex-catalog" }
-ontoindex-query = { path = "crates/ontoindex-query" }
+ontoindex-core = { path = "crates/ontoindex-core", version = "0.1.0" }
+ontoindex-parser = { path = "crates/ontoindex-parser", version = "0.1.0" }
+ontoindex-catalog = { path = "crates/ontoindex-catalog", version = "0.1.0" }
+ontoindex-query = { path = "crates/ontoindex-query", version = "0.1.0" }
 
 anyhow = "1"
 clap = { version = "4", features = ["derive"] }

@@ -1,0 +1,90 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
+
+env:
+  CARGO_TERM_COLOR: always
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Verify tag matches workspace version
+        run: |
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          WORKSPACE_VERSION=$(grep '^version = ' Cargo.toml | head -1 | sed 's/.*"\(.*\)".*/\1/')
+          if [ "$TAG_VERSION" != "$WORKSPACE_VERSION" ]; then
+            echo "Tag ${GITHUB_REF_NAME} (v${TAG_VERSION}) does not match workspace version ${WORKSPACE_VERSION}"
+            exit 1
+          fi
+
+      - name: Cache cargo registry
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            target
+          key: ${{ runner.os }}-cargo-release-${{ hashFiles('**/Cargo.lock') }}
+
+      - name: cargo test
+        run: cargo test --workspace
+
+      - name: Build release binary
+        run: cargo build --release -p ontoindex-cli
+
+      - name: Publish crates to crates.io
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+        run: |
+          set -euo pipefail
+
+          publish_crate() {
+            local crate="$1"
+            local attempt
+            for attempt in 1 2 3 4 5 6; do
+              echo "Publishing ${crate} (attempt ${attempt})..."
+              if cargo publish -p "${crate}"; then
+                echo "Published ${crate}"
+                return 0
+              fi
+              if [ "${attempt}" -lt 6 ]; then
+                echo "Waiting for crates.io index to update..."
+                sleep 30
+              fi
+            done
+            echo "Failed to publish ${crate}"
+            return 1
+          }
+
+          publish_crate ontoindex-core
+          publish_crate ontoindex-parser
+          publish_crate ontoindex-catalog
+          publish_crate ontoindex-query
+          publish_crate ontoindex-cli
+
+      - name: Package CLI binary
+        run: |
+          mkdir -p dist
+          cp target/release/ontoindex "dist/ontoindex-${GITHUB_REF_NAME}-x86_64-unknown-linux-gnu"
+          tar -czf "dist/ontoindex-${GITHUB_REF_NAME}-x86_64-unknown-linux-gnu.tar.gz" \
+            -C dist "ontoindex-${GITHUB_REF_NAME}-x86_64-unknown-linux-gnu"
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "${GITHUB_REF_NAME}" \
+            --title "OntoCode ${GITHUB_REF_NAME}" \
+            --generate-notes \
+            "dist/ontoindex-${GITHUB_REF_NAME}-x86_64-unknown-linux-gnu.tar.gz"

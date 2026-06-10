@@ -28,7 +28,7 @@ license = "MIT OR Apache-2.0"
 repository = "https://github.com/eddiethedean/ontocode"
 homepage = "https://github.com/eddiethedean/ontocode"
 authors = ["OntoCode Contributors"]
-keywords = ["ontology", "owl", "rdf", "sparql", "turtle", "semantic-web"]
+keywords = ["ontology", "owl", "rdf", "sparql", "turtle"]
 categories = ["command-line-utilities", "science", "parser-implementations"]
 
 [workspace.dependencies]

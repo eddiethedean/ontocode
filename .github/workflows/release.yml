@@ -39,10 +39,9 @@ jobs:
           shared-key: release
 
       - name: cargo test
-        run: cargo test --workspace
-
-      - name: Build release binary
-        run: cargo build --release -p ontoindex-cli
+        run: |
+          cargo build -p ontoindex-lsp --bins
+          cargo test --workspace
 
       - name: Publish crates to crates.io
         env:
@@ -106,7 +105,13 @@ jobs:
           publish_with_pause ontoindex-parser
           publish_with_pause ontoindex-catalog
           publish_with_pause ontoindex-query
+          publish_with_pause ontoindex-lsp
           publish_crate ontoindex-cli
+
+      - name: Build release binaries
+        run: |
+          cargo build --release -p ontoindex-cli
+          cargo build --release -p ontoindex-lsp --bins
 
       - name: Package CLI binary
         run: |
@@ -115,17 +120,46 @@ jobs:
           tar -czf "dist/ontoindex-${GITHUB_REF_NAME}-x86_64-unknown-linux-gnu.tar.gz" \
             -C dist "ontoindex-${GITHUB_REF_NAME}-x86_64-unknown-linux-gnu"
 
+      - name: Package LSP binary
+        run: |
+          mkdir -p dist
+          cp target/release/ontoindex-lsp "dist/ontoindex-lsp-${GITHUB_REF_NAME}-x86_64-unknown-linux-gnu"
+          tar -czf "dist/ontoindex-lsp-${GITHUB_REF_NAME}-x86_64-unknown-linux-gnu.tar.gz" \
+            -C dist "ontoindex-lsp-${GITHUB_REF_NAME}-x86_64-unknown-linux-gnu"
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: extension/package-lock.json
+
+      - name: Build extension VSIX
+        run: |
+          set -euo pipefail
+          mkdir -p extension/server/linux-x64
+          cp target/release/ontoindex-lsp extension/server/linux-x64/ontoindex-lsp
+          chmod +x extension/server/linux-x64/ontoindex-lsp
+          cd extension
+          npm ci
+          npm run compile
+          npx vsce package --no-dependencies -o "../dist/ontocode-${GITHUB_REF_NAME}.vsix"
+
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          asset="dist/ontoindex-${GITHUB_REF_NAME}-x86_64-unknown-linux-gnu.tar.gz"
+          assets=(
+            "dist/ontoindex-${GITHUB_REF_NAME}-x86_64-unknown-linux-gnu.tar.gz"
+            "dist/ontoindex-lsp-${GITHUB_REF_NAME}-x86_64-unknown-linux-gnu.tar.gz"
+            "dist/ontocode-${GITHUB_REF_NAME}.vsix"
+          )
           if gh release view "${GITHUB_REF_NAME}" >/dev/null 2>&1; then
-            echo "Release ${GITHUB_REF_NAME} already exists; uploading asset"
-            gh release upload "${GITHUB_REF_NAME}" "${asset}" --clobber
+            echo "Release ${GITHUB_REF_NAME} already exists; uploading assets"
+            gh release upload "${GITHUB_REF_NAME}" "${assets[@]}" --clobber
           else
             gh release create "${GITHUB_REF_NAME}" \
               --title "OntoCode ${GITHUB_REF_NAME}" \
               --generate-notes \
-              "${asset}"
+              "${assets[@]}"
           fi

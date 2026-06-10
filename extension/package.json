@@ -1,0 +1,134 @@
+{
+  "name": "ontocode",
+  "displayName": "OntoCode",
+  "description": "Browse and explore ontology repositories powered by OntoIndex",
+  "version": "0.2.0",
+  "publisher": "ontocode",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/eddiethedean/ontocode.git"
+  },
+  "homepage": "https://github.com/eddiethedean/ontocode#readme",
+  "engines": {
+    "vscode": "^1.85.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "activationEvents": [
+    "workspaceContains:**/*.ttl",
+    "onView:ontocode.explorer.ontologies"
+  ],
+  "main": "./dist/extension.js",
+  "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "ontocode",
+          "title": "OntoCode",
+          "icon": "media/icon.svg"
+        }
+      ]
+    },
+    "views": {
+      "ontocode": [
+        {
+          "id": "ontocode.explorer.ontologies",
+          "name": "Ontologies"
+        },
+        {
+          "id": "ontocode.explorer.classes",
+          "name": "Classes"
+        },
+        {
+          "id": "ontocode.explorer.properties",
+          "name": "Properties"
+        },
+        {
+          "id": "ontocode.explorer.individuals",
+          "name": "Individuals"
+        },
+        {
+          "id": "ontocode.explorer.diagnostics",
+          "name": "Diagnostics"
+        }
+      ]
+    },
+    "commands": [
+      {
+        "command": "ontocode.indexWorkspace",
+        "title": "OntoCode: Index Workspace",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "ontocode.refreshExplorer",
+        "title": "OntoCode: Refresh Explorer",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "ontocode.showEntityInspector",
+        "title": "OntoCode: Show Entity Inspector"
+      },
+      {
+        "command": "ontocode.jumpToSource",
+        "title": "OntoCode: Jump to Source"
+      },
+      {
+        "command": "ontocode.openEntity",
+        "title": "Open Entity Inspector"
+      }
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "ontocode.refreshExplorer",
+          "when": "view =~ /^ontocode\\.explorer\\./",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "ontocode.jumpToSource",
+          "when": "view =~ /^ontocode\\.explorer\\./ && viewItem == ontocodeEntity",
+          "group": "navigation"
+        },
+        {
+          "command": "ontocode.openEntity",
+          "when": "view =~ /^ontocode\\.explorer\\./ && viewItem == ontocodeEntity",
+          "group": "inline"
+        }
+      ]
+    },
+    "configuration": {
+      "title": "OntoCode",
+      "properties": {
+        "ontocode.lspPath": {
+          "type": "string",
+          "default": "",
+          "description": "Path to the ontoindex-lsp binary. When empty, the bundled server or PATH is used."
+        },
+        "ontocode.autoIndexOnOpen": {
+          "type": "boolean",
+          "default": true,
+          "description": "Automatically index the workspace when OntoCode activates."
+        }
+      }
+    }
+  },
+  "scripts": {
+    "compile": "node esbuild.mjs",
+    "watch": "node esbuild.mjs --watch",
+    "package": "npm run compile && vsce package --no-dependencies"
+  },
+  "dependencies": {
+    "vscode-languageclient": "^9.0.1"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.0",
+    "@types/vscode": "^1.85.0",
+    "esbuild": "^0.20.0",
+    "@vscode/vsce": "^2.22.0",
+    "typescript": "^5.3.3"
+  }
+}

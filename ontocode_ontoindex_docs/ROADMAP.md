@@ -18,7 +18,7 @@ Exit criteria:
 
 - User can run `ontoindex query ./repo "SELECT * FROM classes"`.
 
-## v0.2 — OntoCode Explorer
+## v0.2 — OntoCode Explorer (current)
 
 Deliverables:
 

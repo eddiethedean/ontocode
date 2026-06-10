@@ -3,79 +3,79 @@
 ## v0.1 OntoIndex MVP Backlog
 
 ### Project Setup
-- [ ] Create Rust workspace
-- [ ] Configure CI
-- [ ] Configure clippy/rustfmt
-- [ ] Add fixture ontology repository
-- [ ] Add golden snapshot test harness
+- [x] Create Rust workspace
+- [x] Configure CI
+- [x] Configure clippy/rustfmt
+- [x] Add fixture ontology repository
+- [x] Add golden snapshot test harness
 
 ### Scanner
-- [ ] Recursively scan workspace
-- [ ] Respect `.gitignore`
-- [ ] Detect ontology file extensions
-- [ ] Compute content hashes
-- [ ] Track modified files
+- [x] Recursively scan workspace
+- [x] Respect `.gitignore`
+- [x] Detect ontology file extensions
+- [x] Compute content hashes
+- [x] Track modified files
 
 ### Parser
-- [ ] Parse Turtle
-- [ ] Parse RDF/XML
-- [ ] Parse OWL
-- [ ] Parse JSON-LD
-- [ ] Extract namespaces
-- [ ] Extract imports
+- [x] Parse Turtle
+- [x] Parse RDF/XML
+- [x] Parse OWL
+- [x] Parse JSON-LD
+- [x] Extract namespaces
+- [x] Extract imports
 - [ ] Capture source locations where possible
 
 ### Catalog
-- [ ] Store ontologies
-- [ ] Store classes
-- [ ] Store object properties
-- [ ] Store data properties
-- [ ] Store individuals
-- [ ] Store annotations
-- [ ] Store axioms
+- [x] Store ontologies
+- [x] Store classes
+- [x] Store object properties
+- [x] Store data properties
+- [x] Store individuals
+- [x] Store annotations
+- [x] Store axioms
 
 ### Query
-- [ ] Implement `SELECT * FROM classes`
-- [ ] Implement filters
-- [ ] Implement projections
-- [ ] Implement CSV export
-- [ ] Implement JSON export
+- [x] Implement `SELECT * FROM classes`
+- [x] Implement filters
+- [x] Implement projections
+- [x] Implement CSV export
+- [x] Implement JSON export
 
 ### CLI
-- [ ] `ontoindex index`
-- [ ] `ontoindex query`
-- [ ] `ontoindex validate`
-- [ ] `ontoindex inspect`
+- [x] `ontoindex index`
+- [x] `ontoindex query`
+- [x] `ontoindex validate`
+- [x] `ontoindex inspect`
 
 ## v0.2 OntoCode MVP Backlog
 
 ### Extension Setup
-- [ ] Create VS Code extension
-- [ ] Register activity bar icon
-- [ ] Start language server
-- [ ] Add configuration section
+- [x] Create VS Code extension
+- [x] Register activity bar icon
+- [x] Start language server
+- [x] Add configuration section
 
 ### Explorer
-- [ ] Ontologies tree
-- [ ] Classes tree
-- [ ] Properties tree
-- [ ] Individuals tree
-- [ ] Refresh command
+- [x] Ontologies tree
+- [x] Classes tree
+- [x] Properties tree
+- [x] Individuals tree
+- [x] Refresh command
 
 ### Inspector
-- [ ] Open entity inspector
-- [ ] Show IRI
-- [ ] Show labels/comments
-- [ ] Show parents/children
-- [ ] Jump to source
+- [x] Open entity inspector
+- [x] Show IRI
+- [x] Show labels/comments
+- [x] Show parents/children
+- [x] Jump to source
 
 ### LSP
-- [ ] Publish diagnostics
-- [ ] Hover support
-- [ ] document symbols
-- [ ] workspace symbols
+- [ ] Publish diagnostics (deferred to v0.3)
+- [x] Hover support
+- [x] document symbols
+- [x] workspace symbols
 
 ### Packaging
-- [ ] Build extension locally
-- [ ] Add README
+- [x] Build extension locally
+- [x] Add README
 - [ ] Add screenshots

@@ -1,6 +1,8 @@
 mod builder;
+mod entity_api;
 
 pub use builder::{IndexBuilder, OntologyCatalog};
+pub use entity_api::{ClassHierarchy, EntityDetail, SourceHint, SubclassEdge};
 
 use ontoindex_core::{Annotation, Axiom, Entity, Import, Namespace, OntologyDocument, ParseStatus};
 use serde::Serialize;

@@ -5,3 +5,7 @@
 .vscode/
 *.swp
 *.swo
+extension/node_modules/
+extension/dist/
+extension/server/
+extension/*.vsix

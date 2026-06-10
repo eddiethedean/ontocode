@@ -11,6 +11,7 @@
 [![catalog](https://img.shields.io/crates/v/ontoindex-catalog?label=catalog)](https://crates.io/crates/ontoindex-catalog)
 [![query](https://img.shields.io/crates/v/ontoindex-query?label=query)](https://crates.io/crates/ontoindex-query)
 [![cli](https://img.shields.io/crates/v/ontoindex-cli?label=cli)](https://crates.io/crates/ontoindex-cli)
+[![lsp](https://img.shields.io/crates/v/ontoindex-lsp?label=lsp)](https://crates.io/crates/ontoindex-lsp)
 [![downloads](https://img.shields.io/crates/d/ontoindex-cli?label=downloads)](https://crates.io/crates/ontoindex-cli)
 
 **A planned VS Code extension for ontology-as-code — powered by a Rust backend.**
@@ -19,26 +20,26 @@ OntoCode aims to become a full ontology engineering workbench inside VS Code: br
 
 > Build, query, validate, refactor, reason over, and document OWL/RDF ontologies directly in VS Code.
 
-**Status:** Early development. The VS Code extension is **not shipped yet**. This repository currently contains **OntoIndex** — the Rust engine that will power the extension — plus planning specs for the full product.
+**Status:** v0.2 ships the **OntoCode Explorer** VS Code extension (dev/VSIX install) plus **OntoIndex** — the Rust engine and language server that power it. Marketplace publication is planned; install from a GitHub Release VSIX or local dev build for now.
 
 ## Two-layer architecture
 
 OntoCode is designed as two products that ship together:
 
-| Layer | What it is | Status in v0.1.0 |
+| Layer | What it is | Status in v0.2.0 |
 |-------|------------|-------------------|
-| **OntoCode** | VS Code extension (explorer, inspectors, editing, LSP, graph views) | Planned — [v0.2+](https://github.com/eddiethedean/ontocode/blob/main/ontocode_ontoindex_docs/ROADMAP.md) |
-| **OntoIndex** | Rust library + CLI (scan, parse, catalog, query, validate) | **Shipping now** |
+| **OntoCode** | VS Code extension (explorer, entity inspector, jump-to-source) | **Explorer shipping** — install VSIX or run from `extension/` |
+| **OntoIndex** | Rust library + CLI + LSP (scan, parse, catalog, query, validate) | **Shipping now** |
 
 ```text
 ┌─────────────────────────────────────┐
-│  OntoCode (planned)                 │
-│  VS Code extension + UI panels      │
+│  OntoCode (v0.2)                    │
+│  VS Code extension + explorer UI    │
 └─────────────────┬───────────────────┘
-                  │ Language Server
+                  │ ontoindex-lsp (stdio)
 ┌─────────────────▼───────────────────┐
-│  OntoIndex (v0.1.0)                 │
-│  Rust index, catalog, query, CLI    │
+│  OntoIndex (v0.2.0)                 │
+│  Rust index, catalog, query, CLI, LSP │
 └─────────────────┬───────────────────┘
                   │ Oxigraph / RDF parsers
 ┌─────────────────▼───────────────────┐
@@ -60,6 +61,33 @@ Protégé is strong for traditional ontology editing, but most engineering teams
 - Local-first indexing — no upload by default
 
 Long-term goal: **routine ontology work in VS Code without opening Protégé.**
+
+## What's in v0.2.0 (OntoCode Explorer)
+
+v0.2 adds the VS Code extension described in the [v0.2 roadmap](https://github.com/eddiethedean/ontocode/blob/main/ontocode_ontoindex_docs/ROADMAP.md):
+
+- **VS Code extension** — OntoCode activity bar with ontology tree views
+- **Entity inspector** — IRI, labels, comments, parents, children, axioms
+- **Jump to source** — open Turtle/RDF files at entity declarations
+- **`ontoindex-lsp`** — language server with custom catalog methods
+- **LSP browsing** — hover, document/workspace symbols, go-to-definition
+
+Exit criterion (works today):
+
+1. Open a repo with `.ttl` files in VS Code with the extension loaded
+2. Browse ontologies, classes, properties, and individuals in the sidebar
+3. Click an entity to inspect it and jump to its source
+
+### Install the extension (dev)
+
+```bash
+./scripts/package-extension.sh
+cd extension && npx vsce package --no-dependencies
+```
+
+Install the generated `.vsix` via **Extensions: Install from VSIX**. Or press **F5** in VS Code with the `extension/` folder open.
+
+See [extension/README.md](https://github.com/eddiethedean/ontocode/blob/main/extension/README.md) for commands and settings.
 
 ## What's in v0.1.0 (OntoIndex foundation)
 
@@ -112,26 +140,24 @@ ontoindex query ./fixtures "SELECT * FROM classes"
 
 Or build from source after cloning this repository.
 
-## Planned VS Code experience (not yet built)
+## Planned VS Code experience (v0.3+)
 
 Specs and wireframes live in [ontocode_ontoindex_docs/](https://github.com/eddiethedean/ontocode/tree/main/ontocode_ontoindex_docs). Upcoming OntoCode UI includes:
 
-- Ontology Explorer sidebar (classes, properties, individuals)
-- Entity inspector with jump-to-source
-- Inline diagnostics and validation
-- Class/property/individual authoring
-- SPARQL and SQL query panels
+- Inline diagnostics and validation (v0.3)
+- Class/property/individual authoring (v0.4)
+- SPARQL and SQL query panels (v0.5+)
 - Reasoner integration and graph visualization
 - Semantic Git diff viewer
 
-The extension will be a thin TypeScript shell over **ontoindex-lsp** and the OntoIndex crates — not a second ontology stack.
+The extension is a thin TypeScript shell over **ontoindex-lsp** and the OntoIndex crates — not a second ontology stack.
 
 ## Roadmap
 
 | Version | Deliverable |
 |---------|-------------|
-| **v0.1** (current) | OntoIndex: scanner, parser, catalog, CLI |
-| v0.2 | VS Code extension skeleton, explorer, entity inspector |
+| v0.1 | OntoIndex: scanner, parser, catalog, CLI |
+| **v0.2** (current) | VS Code extension, explorer, entity inspector, LSP |
 | v0.3 | Diagnostics and Problems panel integration |
 | v0.4 | Editing and patch-based write-back |
 | v0.5 | Query workbench |
@@ -148,8 +174,11 @@ crates/
 ├── ontoindex-parser    # RDF parsing and entity extraction
 ├── ontoindex-catalog   # index builder and semantic catalog
 ├── ontoindex-query     # SQL-like and SPARQL engines
-└── ontoindex-cli       # `ontoindex` binary
+├── ontoindex-cli       # `ontoindex` binary
+└── ontoindex-lsp       # language server for OntoCode
+extension/              # VS Code extension (OntoCode Explorer)
 fixtures/               # sample ontology for tests
+scripts/                # extension packaging helpers
 ontocode_ontoindex_docs/  # specs, ADRs, wireframes, backlog
 tests/                  # integration and golden snapshot tests
 ```
@@ -174,6 +203,7 @@ tests/                  # integration and golden snapshot tests
 ## Development
 
 ```bash
+cargo build -p ontoindex-lsp --bins
 cargo test --workspace
 cargo fmt --all
 cargo clippy --all-targets -- -D warnings
@@ -187,7 +217,7 @@ ONTOINDEX_UPDATE_GOLDEN=1 cargo test golden_classes
 
 ## Releasing
 
-Published crates (v0.1.0):
+Published crates (v0.2.0):
 
 | Crate | crates.io |
 |-------|-----------|
@@ -195,16 +225,17 @@ Published crates (v0.1.0):
 | `ontoindex-parser` | https://crates.io/crates/ontoindex-parser |
 | `ontoindex-catalog` | https://crates.io/crates/ontoindex-catalog |
 | `ontoindex-query` | https://crates.io/crates/ontoindex-query |
+| `ontoindex-lsp` | https://crates.io/crates/ontoindex-lsp |
 | `ontoindex-cli` | https://crates.io/crates/ontoindex-cli |
 
-Push a tag matching `[workspace.package].version` in `Cargo.toml` (e.g. `v0.1.0`):
+Push a tag matching `[workspace.package].version` in `Cargo.toml` (e.g. `v0.2.0`):
 
 ```bash
-git tag v0.1.0
-git push origin v0.1.0
+git tag v0.2.0
+git push origin v0.2.0
 ```
 
-The [release workflow](https://github.com/eddiethedean/ontocode/blob/main/.github/workflows/release.yml) verifies packages, runs tests, publishes workspace crates to [crates.io](https://crates.io/) in dependency order, and creates a GitHub Release with the `ontoindex` Linux binary. Requires the `CARGO_REGISTRY_TOKEN` repository secret.
+The [release workflow](https://github.com/eddiethedean/ontocode/blob/main/.github/workflows/release.yml) verifies packages, runs tests, publishes workspace crates to [crates.io](https://crates.io/) in dependency order, and creates a GitHub Release with the `ontoindex` and `ontoindex-lsp` Linux binaries plus an extension VSIX. Requires the `CARGO_REGISTRY_TOKEN` repository secret.
 
 See [CHANGELOG.md](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) for release notes.
 

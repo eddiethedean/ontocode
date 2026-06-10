@@ -54,6 +54,8 @@ jobs:
 
       - uses: Swatinem/rust-cache@v2
 
+      - run: cargo build -p ontoindex-lsp --bins
+
       - run: cargo test --workspace
 
   msrv:
@@ -67,6 +69,8 @@ jobs:
       - uses: Swatinem/rust-cache@v2
         with:
           shared-key: msrv
+
+      - run: cargo build -p ontoindex-lsp --bins
 
       - run: cargo test --workspace
 
@@ -98,9 +102,41 @@ jobs:
         with:
           shared-key: release
 
-      - run: cargo build --release --locked -p ontoindex-cli
+      - run: cargo build --release --locked -p ontoindex-cli -p ontoindex-lsp --bins
 
       - run: ./target/release/ontoindex inspect fixtures
+
+  lsp-build:
+    name: LSP build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+
+      - run: cargo build --locked -p ontoindex-lsp --bins
+
+      - run: cargo test -p ontocode --test lsp_smoke
+
+  extension-build:
+    name: extension build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: extension/package-lock.json
+
+      - run: npm ci
+        working-directory: extension
+
+      - run: npm run compile
+        working-directory: extension
 
   package:
     name: crate packaging
@@ -114,7 +150,5 @@ jobs:
 
       - run: |
           set -euo pipefail
-          for crate in ontoindex-core ontoindex-parser ontoindex-catalog ontoindex-query ontoindex-cli; do
-            echo "Packaging ${crate}..."
-            cargo package -p "${crate}" --no-verify
-          done
+          # Full crate graph is verified at release (publish in dependency order on tag).
+          cargo publish -p ontoindex-core --dry-run

@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/eddiethedean/ontocode/actions/workflows/ci.yml/badge.svg)](https://github.com/eddiethedean/ontocode/actions/workflows/ci.yml)
 [![License](https://img.shields.io/crates/l/ontoindex-core)](https://github.com/eddiethedean/ontocode/blob/main/LICENSE-MIT)
-[![MSRV](https://img.shields.io/badge/MSRV-1.83+-orange)](https://github.com/eddiethedean/ontocode/blob/main/Cargo.toml)
+[![MSRV](https://img.shields.io/badge/MSRV-1.85+-orange)](https://github.com/eddiethedean/ontocode/blob/main/Cargo.toml)
 [![Rust edition](https://img.shields.io/badge/edition-2021-red)](https://www.rust-lang.org)
 
 [![crates](https://img.shields.io/badge/crates-lightgrey?style=flat-square&logo=rust)](https://crates.io/search?q=ontoindex)

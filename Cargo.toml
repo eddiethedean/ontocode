@@ -26,7 +26,7 @@ serde_json.workspace = true
 [workspace.package]
 version = "0.2.0"
 edition = "2021"
-rust-version = "1.85"
+rust-version = "1.86"
 license = "MIT OR Apache-2.0"
 repository = "https://github.com/eddiethedean/ontocode"
 homepage = "https://github.com/eddiethedean/ontocode"

@@ -765,9 +765,11 @@ name = "ontocode"
 version = "0.2.0"
 dependencies = [
  "ontoindex-catalog",
+ "ontoindex-core",
  "ontoindex-lsp",
  "ontoindex-query",
  "serde_json",
+ "tempfile",
 ]
 
 [[package]]

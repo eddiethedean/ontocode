@@ -1,7 +1,14 @@
 import * as path from "path";
 import * as vscode from "vscode";
 import { CatalogSnapshot, Entity } from "../lsp/protocol";
-import { entityKindLabel, shortLabel } from "../utils/iri";
+import { entityKindLabel } from "../utils/iri";
+import {
+  childEntitiesForClass,
+  classRootEntities,
+  entityDisplayLabel,
+  filterEntitiesByKind,
+  propertyGroupsPresent,
+} from "./explorerLogic";
 
 export type ExplorerViewKind =
   | "ontologies"
@@ -95,11 +102,26 @@ export class ExplorerTreeProvider implements vscode.TreeDataProvider<OntologyTre
           return item;
         });
       case "classes":
-        return this.buildClassRoots();
+        return classRootEntities(this.snapshot).map((e) =>
+          this.entityItem(e, this.hasChildren(e.iri))
+        );
       case "properties":
-        return this.buildPropertyGroups();
+        return propertyGroupsPresent(this.snapshot).map(({ kind, label }) => {
+          const item = new OntologyTreeItem(
+            "group",
+            label,
+            vscode.TreeItemCollapsibleState.Collapsed,
+            undefined,
+            undefined,
+            kind
+          );
+          item.iconPath = new vscode.ThemeIcon("folder");
+          return item;
+        });
       case "individuals":
-        return this.filterEntities("individual").map((e) => this.entityItem(e));
+        return filterEntitiesByKind(this.snapshot.entities, "individual").map(
+          (e) => this.entityItem(e)
+        );
       case "diagnostics":
         return [
           new OntologyTreeItem(
@@ -114,55 +136,21 @@ export class ExplorerTreeProvider implements vscode.TreeDataProvider<OntologyTre
   }
 
   private getChildNodes(parent: OntologyTreeItem): OntologyTreeItem[] {
+    if (!this.snapshot) {
+      return [];
+    }
+
     if (parent.nodeKind === "group" && parent.propertyKind) {
-      return this.filterEntities(parent.propertyKind).map((e) =>
-        this.entityItem(e)
+      return filterEntitiesByKind(this.snapshot.entities, parent.propertyKind).map(
+        (e) => this.entityItem(e)
       );
     }
     if (parent.nodeKind !== "entity" || !parent.iri || this.viewKind !== "classes") {
       return [];
     }
-    const children = this.snapshot?.hierarchy.children[parent.iri] ?? [];
-    return children
-      .map((iri) => this.snapshot?.entities.find((e) => e.iri === iri))
-      .filter((e): e is Entity => !!e)
-      .map((e) => this.entityItem(e, this.hasChildren(e.iri)));
-  }
-
-  private buildClassRoots(): OntologyTreeItem[] {
-    const classes = this.filterEntities("class");
-    const childSet = new Set(
-      this.snapshot?.hierarchy.edges.map((e) => e.child) ?? []
+    return childEntitiesForClass(this.snapshot, parent.iri).map((e) =>
+      this.entityItem(e, this.hasChildren(e.iri))
     );
-    const roots = classes.filter((c) => !childSet.has(c.iri));
-    return roots.map((e) => this.entityItem(e, this.hasChildren(e.iri)));
-  }
-
-  private buildPropertyGroups(): OntologyTreeItem[] {
-    const groups: Array<{ kind: string; label: string }> = [
-      { kind: "object_property", label: "Object Properties" },
-      { kind: "data_property", label: "Data Properties" },
-      { kind: "annotation_property", label: "Annotation Properties" },
-    ];
-
-    return groups
-      .filter(({ kind }) => this.filterEntities(kind).length > 0)
-      .map(({ kind, label }) => {
-        const item = new OntologyTreeItem(
-          "group",
-          label,
-          vscode.TreeItemCollapsibleState.Collapsed,
-          undefined,
-          undefined,
-          kind
-        );
-        item.iconPath = new vscode.ThemeIcon("folder");
-        return item;
-      });
-  }
-
-  private filterEntities(kind: string): Entity[] {
-    return (this.snapshot?.entities ?? []).filter((e) => e.kind === kind);
   }
 
   private hasChildren(iri: string): boolean {
@@ -173,8 +161,7 @@ export class ExplorerTreeProvider implements vscode.TreeDataProvider<OntologyTre
     entity: Entity,
     expandable = false
   ): OntologyTreeItem {
-    const label =
-      entity.labels[0] ?? entity.short_name ?? shortLabel(entity.iri);
+    const label = entityDisplayLabel(entity);
     const item = new OntologyTreeItem(
       "entity",
       label,

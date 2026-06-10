@@ -1,0 +1,16 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "outDir": "dist-test",
+    "rootDir": "src"
+  },
+  "include": [
+    "src/**/*.test.ts",
+    "src/utils/iri.ts",
+    "src/lsp/protocol.ts",
+    "src/lsp/protocolGuards.ts",
+    "src/treeviews/explorerLogic.ts",
+    "src/test/fixtureSnapshot.ts"
+  ],
+  "exclude": ["node_modules", "dist", "dist-test"]
+}

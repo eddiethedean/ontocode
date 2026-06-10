@@ -119,6 +119,7 @@
   "scripts": {
     "compile": "node esbuild.mjs",
     "watch": "node esbuild.mjs --watch",
+    "test": "tsc -p tsconfig.test.json && node --test dist-test/**/*.test.js",
     "package": "npm run compile && vsce package --no-dependencies"
   },
   "dependencies": {

@@ -13,7 +13,7 @@ fn lsp_indexes_fixture_workspace() {
     let mut child = Command::new(lsp_binary())
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
-        .stderr(Stdio::null())
+        .stderr(Stdio::piped())
         .spawn()
         .expect("spawn ontoindex-lsp");
 
@@ -68,7 +68,9 @@ fn lsp_indexes_fixture_workspace() {
     }
     let stats =
         index_resp.get("result").and_then(|r| r.get("stats")).expect("stats in index result");
-    assert!(stats.get("class_count").and_then(|v| v.as_u64()).unwrap_or(0) >= 2);
+    assert_eq!(stats.get("class_count").and_then(|v| v.as_u64()), Some(2));
+    assert_eq!(stats.get("individual_count").and_then(|v| v.as_u64()), Some(2));
+    assert_eq!(stats.get("error_count").and_then(|v| v.as_u64()), Some(0));
 
     send_request(&mut stdin, 3, "ontoindex/getCatalogSnapshot", serde_json::json!(null));
 
@@ -78,10 +80,31 @@ fn lsp_indexes_fixture_workspace() {
         .and_then(|r| r.get("entities"))
         .and_then(|e| e.as_array())
         .expect("entities array");
-    assert!(!entities.is_empty());
+    let iris: Vec<&str> =
+        entities.iter().filter_map(|e| e.get("iri").and_then(|v| v.as_str())).collect();
+    assert!(iris.contains(&"http://example.org/people#Person"));
 
-    send_request(&mut stdin, 4, "shutdown", serde_json::json!(null));
-    let _ = wait_for_id(&rx, 4, Duration::from_secs(5));
+    send_request(
+        &mut stdin,
+        4,
+        "ontoindex/getEntity",
+        serde_json::json!({ "iri": "http://example.org/people#Person" }),
+    );
+
+    let entity_resp = wait_for_id(&rx, 4, Duration::from_secs(10)).expect("getEntity response");
+    if entity_resp.get("error").is_some() {
+        panic!("getEntity error: {entity_resp}");
+    }
+    let short_name = entity_resp
+        .get("result")
+        .and_then(|r| r.get("detail"))
+        .and_then(|d| d.get("entity"))
+        .and_then(|e| e.get("short_name"))
+        .and_then(|v| v.as_str());
+    assert_eq!(short_name, Some("Person"));
+
+    send_request(&mut stdin, 5, "shutdown", serde_json::json!(null));
+    let _ = wait_for_id(&rx, 5, Duration::from_secs(5));
     send_notification(&mut stdin, "exit", serde_json::Value::Null);
 
     let _ = child.wait();
@@ -146,6 +169,32 @@ fn lsp_binary() -> PathBuf {
         }
     }
 
+    if let Some(candidate) = find_lsp_binary_in_target() {
+        return candidate;
+    }
+
+    let status = Command::new("cargo")
+        .args(["build", "-p", "ontoindex-lsp", "--bins", "--quiet"])
+        .status()
+        .expect("cargo build ontoindex-lsp");
+    assert!(status.success(), "failed to build ontoindex-lsp for smoke test");
+
+    if let Ok(path) = std::env::var("CARGO_BIN_EXE_ontoindex-lsp") {
+        let candidate = PathBuf::from(path);
+        if candidate.exists() {
+            return candidate;
+        }
+    }
+
+    find_lsp_binary_in_target().unwrap_or_else(|| {
+        let target_dir = std::env::var("CARGO_TARGET_DIR")
+            .map(PathBuf::from)
+            .unwrap_or_else(|_| Path::new(env!("CARGO_MANIFEST_DIR")).join("target"));
+        panic!("ontoindex-lsp binary not found under {} after build", target_dir.display());
+    })
+}
+
+fn find_lsp_binary_in_target() -> Option<PathBuf> {
     let target_dir = std::env::var("CARGO_TARGET_DIR")
         .map(PathBuf::from)
         .unwrap_or_else(|_| Path::new(env!("CARGO_MANIFEST_DIR")).join("target"));
@@ -153,14 +202,11 @@ fn lsp_binary() -> PathBuf {
     for subdir in ["debug", "release"] {
         let candidate = target_dir.join(subdir).join("ontoindex-lsp");
         if candidate.exists() {
-            return candidate;
+            return Some(candidate);
         }
     }
 
-    panic!(
-        "ontoindex-lsp binary not found under {}. Run: cargo build -p ontoindex-lsp --bins",
-        target_dir.display()
-    );
+    None
 }
 
 fn wait_for_id(

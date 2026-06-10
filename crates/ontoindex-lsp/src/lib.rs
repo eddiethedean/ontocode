@@ -2,6 +2,9 @@ pub mod handlers;
 pub mod protocol;
 pub mod state;
 
+#[cfg(test)]
+mod handlers_test;
+
 use handlers::{handle_custom_request, handle_initialize, handle_standard_request};
 use lsp_server::{Connection, Message, Notification, Request, RequestId, Response, ResponseError};
 use lsp_types::{

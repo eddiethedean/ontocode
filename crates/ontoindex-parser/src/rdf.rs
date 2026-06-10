@@ -432,7 +432,21 @@ ex:knows a owl:ObjectProperty ;
             parse_ontology_file(&path, OntologyFormat::Turtle, "doc-1", "hash", 0).unwrap();
 
         assert_eq!(parsed.parse_status, ParseStatus::Ok);
-        assert!(parsed.entities.iter().any(|e| e.iri.contains("Person")));
-        assert!(parsed.entities.iter().any(|e| e.kind == EntityKind::ObjectProperty));
+
+        let person = parsed
+            .entities
+            .iter()
+            .find(|e| e.iri == "http://example.org/test#Person")
+            .expect("Person entity");
+        assert_eq!(person.kind, EntityKind::Class);
+        assert_eq!(person.labels, vec!["\"Person\"".to_string()]);
+
+        let knows = parsed
+            .entities
+            .iter()
+            .find(|e| e.iri == "http://example.org/test#knows")
+            .expect("knows property");
+        assert_eq!(knows.kind, EntityKind::ObjectProperty);
+        assert_eq!(knows.labels, vec!["\"knows\"".to_string()]);
     }
 }

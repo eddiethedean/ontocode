@@ -138,6 +138,9 @@ jobs:
       - run: npm run compile
         working-directory: extension
 
+      - run: npm test
+        working-directory: extension
+
   package:
     name: crate packaging
     runs-on: ubuntu-latest

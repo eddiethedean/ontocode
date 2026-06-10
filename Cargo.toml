@@ -19,9 +19,11 @@ publish = false
 
 [dev-dependencies]
 ontoindex-catalog = { workspace = true }
+ontoindex-core = { workspace = true }
 ontoindex-query = { workspace = true }
 ontoindex-lsp = { workspace = true }
 serde_json.workspace = true
+tempfile = "3"
 
 [workspace.package]
 version = "0.2.0"

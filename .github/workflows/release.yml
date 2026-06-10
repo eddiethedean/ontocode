@@ -69,9 +69,15 @@ jobs:
               if output=$(cargo publish -p "${crate}" --locked 2>&1); then
                 echo "${output}"
                 echo "Published ${crate}"
+                echo "new" > "/tmp/publish-${crate}"
                 return 0
               fi
               echo "${output}"
+              if echo "${output}" | grep -qE 'already exists on crates.io index'; then
+                echo "Skipping ${crate}: version already published"
+                echo "skip" > "/tmp/publish-${crate}"
+                return 0
+              fi
               if echo "${output}" | grep -qE 'status 400 Bad Request|expected at most'; then
                 echo "Non-retryable publish error for ${crate}"
                 return 1
@@ -90,14 +96,18 @@ jobs:
             return 1
           }
 
-          publish_crate ontoindex-core
-          wait_between_crates
-          publish_crate ontoindex-parser
-          wait_between_crates
-          publish_crate ontoindex-catalog
-          wait_between_crates
-          publish_crate ontoindex-query
-          wait_between_crates
+          publish_with_pause() {
+            local crate="$1"
+            publish_crate "${crate}"
+            if [ "$(cat "/tmp/publish-${crate}")" = "new" ]; then
+              wait_between_crates
+            fi
+          }
+
+          publish_with_pause ontoindex-core
+          publish_with_pause ontoindex-parser
+          publish_with_pause ontoindex-catalog
+          publish_with_pause ontoindex-query
           publish_crate ontoindex-cli
 
       - name: Package CLI binary
@@ -111,7 +121,13 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
-          gh release create "${GITHUB_REF_NAME}" \
-            --title "OntoCode ${GITHUB_REF_NAME}" \
-            --generate-notes \
-            "dist/ontoindex-${GITHUB_REF_NAME}-x86_64-unknown-linux-gnu.tar.gz"
+          asset="dist/ontoindex-${GITHUB_REF_NAME}-x86_64-unknown-linux-gnu.tar.gz"
+          if gh release view "${GITHUB_REF_NAME}" >/dev/null 2>&1; then
+            echo "Release ${GITHUB_REF_NAME} already exists; uploading asset"
+            gh release upload "${GITHUB_REF_NAME}" "${asset}" --clobber
+          else
+            gh release create "${GITHUB_REF_NAME}" \
+              --title "OntoCode ${GITHUB_REF_NAME}" \
+              --generate-notes \
+              "${asset}"
+          fi

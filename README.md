@@ -1,5 +1,19 @@
 # OntoCode
 
+[![CI](https://github.com/eddiethedean/ontocode/actions/workflows/ci.yml/badge.svg)](https://github.com/eddiethedean/ontocode/actions/workflows/ci.yml)
+[![Release](https://github.com/eddiethedean/ontocode/actions/workflows/release.yml/badge.svg)](https://github.com/eddiethedean/ontocode/actions/workflows/release.yml)
+[![GitHub release](https://img.shields.io/github/v/release/eddiethedean/ontocode)](https://github.com/eddiethedean/ontocode/releases)
+[![License](https://img.shields.io/crates/l/ontoindex-core)](https://github.com/eddiethedean/ontocode/blob/main/LICENSE-MIT)
+[![MSRV](https://img.shields.io/badge/MSRV-1.75+-orange)](https://github.com/eddiethedean/ontocode/blob/main/Cargo.toml)
+[![Rust edition](https://img.shields.io/badge/edition-2021-red)](https://www.rust-lang.org)
+
+[![ontoindex-core](https://img.shields.io/crates/v/ontoindex-core)](https://crates.io/crates/ontoindex-core)
+[![ontoindex-parser](https://img.shields.io/crates/v/ontoindex-parser)](https://crates.io/crates/ontoindex-parser)
+[![ontoindex-catalog](https://img.shields.io/crates/v/ontoindex-catalog)](https://crates.io/crates/ontoindex-catalog)
+[![ontoindex-query](https://img.shields.io/crates/v/ontoindex-query)](https://crates.io/crates/ontoindex-query)
+[![ontoindex-cli](https://img.shields.io/crates/v/ontoindex-cli)](https://crates.io/crates/ontoindex-cli)
+[![CLI downloads](https://img.shields.io/crates/d/ontoindex-cli)](https://crates.io/crates/ontoindex-cli)
+
 **A planned VS Code extension for ontology-as-code — powered by a Rust backend.**
 
 OntoCode aims to become a full ontology engineering workbench inside VS Code: browse classes and properties, edit OWL/RDF, run queries, validate in CI, review semantic diffs in pull requests, and work the way modern software teams already work with Git and editors.

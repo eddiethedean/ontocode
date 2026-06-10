@@ -1,4 +1,4 @@
-use crate::vocab::{OWL, Rdf, Rdfs};
+use crate::vocab::{Rdf, Rdfs, OWL};
 use ontoindex_core::{
     Annotation, Axiom, Entity, EntityKind, Import, Namespace, OntologyFormat, ParseStatus,
     SourceLocation,

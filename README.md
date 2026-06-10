@@ -7,12 +7,12 @@
 [![MSRV](https://img.shields.io/badge/MSRV-1.75+-orange)](https://github.com/eddiethedean/ontocode/blob/main/Cargo.toml)
 [![Rust edition](https://img.shields.io/badge/edition-2021-red)](https://www.rust-lang.org)
 
-[![ontoindex-core](https://img.shields.io/crates/v/ontoindex-core)](https://crates.io/crates/ontoindex-core)
-[![ontoindex-parser](https://img.shields.io/crates/v/ontoindex-parser)](https://crates.io/crates/ontoindex-parser)
-[![ontoindex-catalog](https://img.shields.io/crates/v/ontoindex-catalog)](https://crates.io/crates/ontoindex-catalog)
-[![ontoindex-query](https://img.shields.io/crates/v/ontoindex-query)](https://crates.io/crates/ontoindex-query)
-[![ontoindex-cli](https://img.shields.io/crates/v/ontoindex-cli)](https://crates.io/crates/ontoindex-cli)
-[![CLI downloads](https://img.shields.io/crates/d/ontoindex-cli)](https://crates.io/crates/ontoindex-cli)
+[![core](https://img.shields.io/crates/v/ontoindex-core?label=core)](https://crates.io/crates/ontoindex-core)
+[![parser](https://img.shields.io/crates/v/ontoindex-parser?label=parser)](https://crates.io/crates/ontoindex-parser)
+[![catalog](https://img.shields.io/crates/v/ontoindex-catalog?label=catalog)](https://crates.io/crates/ontoindex-catalog)
+[![query](https://img.shields.io/crates/v/ontoindex-query?label=query)](https://crates.io/crates/ontoindex-query)
+[![cli](https://img.shields.io/crates/v/ontoindex-cli?label=cli)](https://crates.io/crates/ontoindex-cli)
+[![downloads](https://img.shields.io/crates/d/ontoindex-cli?label=downloads)](https://crates.io/crates/ontoindex-cli)
 
 **A planned VS Code extension for ontology-as-code — powered by a Rust backend.**
 

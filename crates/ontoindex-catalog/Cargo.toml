@@ -3,9 +3,15 @@ name = "ontoindex-catalog"
 description = "Semantic catalog for OntoIndex"
 version.workspace = true
 edition.workspace = true
+rust-version.workspace = true
 license.workspace = true
 repository.workspace = true
+homepage.workspace = true
 authors.workspace = true
+readme = "../../README.md"
+keywords.workspace = true
+categories.workspace = true
+include = ["src/**/*", "Cargo.toml", "LICENSE-MIT", "LICENSE-APACHE-2.0"]
 
 [dependencies]
 ontoindex-core = { workspace = true }

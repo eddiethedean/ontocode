@@ -23,9 +23,13 @@ ontoindex-query = { workspace = true }
 [workspace.package]
 version = "0.1.0"
 edition = "2021"
+rust-version = "1.75"
 license = "MIT OR Apache-2.0"
-repository = "https://github.com/ontocode/ontocode"
+repository = "https://github.com/eddiethedean/ontocode"
+homepage = "https://github.com/eddiethedean/ontocode"
 authors = ["OntoCode Contributors"]
+keywords = ["ontology", "owl", "rdf", "sparql", "turtle", "semantic-web"]
+categories = ["command-line-utilities", "science", "parser-implementations"]
 
 [workspace.dependencies]
 ontoindex-core = { path = "crates/ontoindex-core", version = "0.1.0" }

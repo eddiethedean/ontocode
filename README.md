@@ -90,7 +90,14 @@ cargo run -- validate fixtures
 cargo run -- query fixtures "SELECT * FROM classes" --format json
 ```
 
-Install from source after cloning, or from crates.io once published (`ontoindex-cli` provides the `ontoindex` binary).
+Install the CLI from crates.io (binary name: `ontoindex`):
+
+```bash
+cargo install ontoindex-cli
+ontoindex query ./fixtures "SELECT * FROM classes"
+```
+
+Or build from source after cloning this repository.
 
 ## Planned VS Code experience (not yet built)
 
@@ -167,14 +174,26 @@ ONTOINDEX_UPDATE_GOLDEN=1 cargo test golden_classes
 
 ## Releasing
 
-Push a tag matching the workspace version in `Cargo.toml` (e.g. `v0.1.0`):
+Published crates (v0.1.0):
+
+| Crate | crates.io |
+|-------|-----------|
+| `ontoindex-core` | https://crates.io/crates/ontoindex-core |
+| `ontoindex-parser` | https://crates.io/crates/ontoindex-parser |
+| `ontoindex-catalog` | https://crates.io/crates/ontoindex-catalog |
+| `ontoindex-query` | https://crates.io/crates/ontoindex-query |
+| `ontoindex-cli` | https://crates.io/crates/ontoindex-cli |
+
+Push a tag matching `[workspace.package].version` in `Cargo.toml` (e.g. `v0.1.0`):
 
 ```bash
 git tag v0.1.0
 git push origin v0.1.0
 ```
 
-The [release workflow](https://github.com/eddiethedean/ontocode/blob/main/.github/workflows/release.yml) runs tests, publishes workspace crates to [crates.io](https://crates.io/) in dependency order, and creates a GitHub Release with the `ontoindex` Linux binary. Requires the `CARGO_REGISTRY_TOKEN` repository secret.
+The [release workflow](https://github.com/eddiethedean/ontocode/blob/main/.github/workflows/release.yml) verifies packages, runs tests, publishes workspace crates to [crates.io](https://crates.io/) in dependency order, and creates a GitHub Release with the `ontoindex` Linux binary. Requires the `CARGO_REGISTRY_TOKEN` repository secret.
+
+See [CHANGELOG.md](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) for release notes.
 
 ## License
 

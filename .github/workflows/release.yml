@@ -22,11 +22,14 @@ jobs:
       - name: Verify tag matches workspace version
         run: |
           TAG_VERSION="${GITHUB_REF_NAME#v}"
-          WORKSPACE_VERSION=$(grep '^version = ' Cargo.toml | head -1 | sed 's/.*"\(.*\)".*/\1/')
+          WORKSPACE_VERSION=$(awk '/^\[workspace.package\]/{found=1} found && /^version = /{print $3; exit}' Cargo.toml | tr -d '"')
           if [ "$TAG_VERSION" != "$WORKSPACE_VERSION" ]; then
             echo "Tag ${GITHUB_REF_NAME} (v${TAG_VERSION}) does not match workspace version ${WORKSPACE_VERSION}"
             exit 1
           fi
+
+      - name: Verify crate metadata (dry-run publish)
+        run: cargo publish -p ontoindex-core --dry-run
 
       - name: Cache cargo registry
         uses: actions/cache@v4
@@ -54,7 +57,7 @@ jobs:
             local attempt
             for attempt in 1 2 3 4 5 6; do
               echo "Publishing ${crate} (attempt ${attempt})..."
-              if cargo publish -p "${crate}"; then
+              if cargo publish -p "${crate}" --locked; then
                 echo "Published ${crate}"
                 return 0
               fi

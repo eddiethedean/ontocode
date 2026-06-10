@@ -49,8 +49,17 @@ jobs:
       - name: Publish crates to crates.io
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+          # crates.io limits how many new crates can be published in a short window
+          PUBLISH_PAUSE_SECONDS: 120
+          INDEX_RETRY_SECONDS: 60
+          RATE_LIMIT_RETRY_SECONDS: 180
         run: |
           set -euo pipefail
+
+          wait_between_crates() {
+            echo "Waiting ${PUBLISH_PAUSE_SECONDS}s before next crate (crates.io new-crate rate limit)..."
+            sleep "${PUBLISH_PAUSE_SECONDS}"
+          }
 
           publish_crate() {
             local crate="$1"
@@ -67,9 +76,14 @@ jobs:
                 echo "Non-retryable publish error for ${crate}"
                 return 1
               fi
+              if echo "${output}" | grep -qE 'status 429 Too Many Requests|published too many new crates'; then
+                echo "Rate limited by crates.io; waiting ${RATE_LIMIT_RETRY_SECONDS}s..."
+                sleep "${RATE_LIMIT_RETRY_SECONDS}"
+                continue
+              fi
               if [ "${attempt}" -lt 6 ]; then
-                echo "Waiting for crates.io index to update..."
-                sleep 30
+                echo "Waiting ${INDEX_RETRY_SECONDS}s for crates.io index to update..."
+                sleep "${INDEX_RETRY_SECONDS}"
               fi
             done
             echo "Failed to publish ${crate}"
@@ -77,9 +91,13 @@ jobs:
           }
 
           publish_crate ontoindex-core
+          wait_between_crates
           publish_crate ontoindex-parser
+          wait_between_crates
           publish_crate ontoindex-catalog
+          wait_between_crates
           publish_crate ontoindex-query
+          wait_between_crates
           publish_crate ontoindex-cli
 
       - name: Package CLI binary

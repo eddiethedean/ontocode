@@ -1,7 +1,6 @@
 # OntoCode
 
 [![CI](https://github.com/eddiethedean/ontocode/actions/workflows/ci.yml/badge.svg)](https://github.com/eddiethedean/ontocode/actions/workflows/ci.yml)
-[![Release](https://github.com/eddiethedean/ontocode/actions/workflows/release.yml/badge.svg)](https://github.com/eddiethedean/ontocode/actions/workflows/release.yml)
 [![GitHub release](https://img.shields.io/github/v/release/eddiethedean/ontocode)](https://github.com/eddiethedean/ontocode/releases)
 [![License](https://img.shields.io/crates/l/ontoindex-core)](https://github.com/eddiethedean/ontocode/blob/main/LICENSE-MIT)
 [![MSRV](https://img.shields.io/badge/MSRV-1.75+-orange)](https://github.com/eddiethedean/ontocode/blob/main/Cargo.toml)

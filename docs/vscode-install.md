@@ -51,7 +51,7 @@ Or set **OntoCode: Lsp Path** (`ontocode.lspPath`) to the absolute path of your 
 |---------|-----|
 | Extension does not activate | Ensure the workspace contains a supported ontology file (see activation in `extension/package.json`) or open the OntoCode Ontologies view |
 | `failed to start language server` | Run `./scripts/package-extension.sh`, set `ontocode.lspPath`, or `cargo install ontoindex-lsp` |
-| `spawn ... ontoindex-lsp EACCES` (macOS/Linux) | Marketplace/VSIX may strip execute permission. Run `chmod +x` on the bundled binary (path shown in the error), or upgrade to OntoCode ≥ 0.2.1 which fixes this automatically |
+| `spawn ... ontoindex-lsp EACCES` (macOS/Linux) | Upgrade to OntoCode ≥ 0.2.1 (auto-fixes on launch). Manual workaround: `chmod +x` on the bundled binary path from the error |
 | Empty explorer after open | Run **OntoCode: Index Workspace**; check **Output → OntoIndex Language Server** |
 
 See also [extension/README.md](../extension/README.md).

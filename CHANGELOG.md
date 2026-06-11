@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **VS Code extension:** set executable permission on bundled `ontoindex-lsp` before spawn (fixes `EACCES` on macOS/Linux after Marketplace or VSIX install)
 
+### Added
+
+- Extension e2e tests: simulate Marketplace `chmod 644` on bundled LSP and verify spawn after fix; CI VSIX unpack regression test
+
 [0.2.1]: https://github.com/eddiethedean/ontocode/releases/tag/v0.2.1
 
 ## [0.2.0] - 2026-06-11

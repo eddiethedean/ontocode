@@ -126,6 +126,13 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Build ontoindex-lsp for extension e2e tests
+        run: cargo build -p ontoindex-lsp --bins
+
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
@@ -138,8 +145,27 @@ jobs:
       - run: npm run compile
         working-directory: extension
 
-      - run: npm test
+      - name: Extension unit and bundled-LSP e2e tests
+        run: npm test
         working-directory: extension
+        env:
+          ONTOINDEX_LSP_BIN: ${{ github.workspace }}/target/debug/ontoindex-lsp
+
+      - name: VSIX unpack spawn e2e (Marketplace chmod regression)
+        run: |
+          set -euo pipefail
+          PLATFORM=linux-x64
+          mkdir -p "extension/server/${PLATFORM}"
+          cp target/debug/ontoindex-lsp "extension/server/${PLATFORM}/ontoindex-lsp"
+          chmod +x "extension/server/${PLATFORM}/ontoindex-lsp"
+          cd extension
+          npx vsce package --no-dependencies -o /tmp/ontocode-ci.vsix
+          rm -rf /tmp/ontocode-vsix-unpack
+          unzip -q /tmp/ontocode-ci.vsix -d /tmp/ontocode-vsix-unpack
+          export ONTOCODE_E2E_EXTENSION_ROOT=/tmp/ontocode-vsix-unpack/extension
+          npm test
+        env:
+          ONTOINDEX_LSP_BIN: ${{ github.workspace }}/target/debug/ontoindex-lsp
 
   audit:
     name: cargo audit

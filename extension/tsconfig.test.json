@@ -6,9 +6,12 @@
   },
   "include": [
     "src/**/*.test.ts",
+    "src/**/*.e2e.test.ts",
     "src/utils/iri.ts",
     "src/lsp/protocol.ts",
     "src/lsp/protocolGuards.ts",
+    "src/lsp/bundledServer.ts",
+    "src/lsp/lspTestHarness.ts",
     "src/treeviews/explorerLogic.ts",
     "src/test/fixtureSnapshot.ts"
   ],

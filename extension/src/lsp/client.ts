@@ -1,5 +1,4 @@
 import * as fs from "fs";
-import * as path from "path";
 import * as vscode from "vscode";
 import {
   LanguageClient,
@@ -16,6 +15,10 @@ import {
   assertCatalogSnapshot,
   assertIndexWorkspaceResult,
 } from "./protocolGuards";
+import {
+  bundledServerPath,
+  ensureBundledServerExecutable,
+} from "./bundledServer";
 
 let client: LanguageClient | undefined;
 
@@ -90,35 +93,13 @@ function resolveServerPath(context: vscode.ExtensionContext): string {
     );
   }
 
-  const platform = process.platform;
-  const arch = process.arch;
-  const bundled = path.join(
-    context.extensionPath,
-    "server",
-    `${platform}-${arch}`,
-    platform === "win32" ? "ontoindex-lsp.exe" : "ontoindex-lsp"
-  );
+  const bundled = bundledServerPath(context.extensionPath);
   if (fs.existsSync(bundled)) {
     ensureBundledServerExecutable(bundled);
     return bundled;
   }
 
   return "ontoindex-lsp";
-}
-
-/** VSIX/Marketplace installs often drop the Unix executable bit on bundled binaries. */
-function ensureBundledServerExecutable(serverPath: string): void {
-  if (process.platform === "win32") {
-    return;
-  }
-  try {
-    const mode = fs.statSync(serverPath).mode;
-    if ((mode & 0o111) === 0) {
-      fs.chmodSync(serverPath, mode | 0o755);
-    }
-  } catch {
-    // Spawn will fail with a clear error if this cannot be fixed.
-  }
 }
 
 export async function indexWorkspace(

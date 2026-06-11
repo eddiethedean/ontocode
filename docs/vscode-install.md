@@ -36,7 +36,7 @@ Or set **OntoCode: Lsp Path** (`ontocode.lspPath`) to the absolute path of your 
 
 | Setting | Default | Description |
 |---------|---------|-------------|
-| `ontocode.lspPath` | `""` | Path to `ontoindex-lsp`; empty uses bundled binary or PATH |
+| `ontocode.lspPath` | `""` | **Trusted workspaces only.** Path to `ontoindex-lsp`; ignored in Restricted Mode. Empty uses bundled binary or PATH |
 | `ontocode.autoIndexOnOpen` | `true` | Index workspace when the extension activates |
 
 ## Commands

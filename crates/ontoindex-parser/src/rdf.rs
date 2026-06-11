@@ -1,5 +1,6 @@
 use crate::vocab::{Rdf, Rdfs, OWL};
 use ontoindex_core::{
+    limits::{MAX_FILE_BYTES, MAX_TRIPLES_PER_FILE},
     Annotation, Axiom, Entity, EntityKind, Import, Namespace, OntologyFormat, ParseStatus,
     SourceLocation,
 };
@@ -20,6 +21,9 @@ pub enum ParseError {
 
     #[error("unsupported format: {0}")]
     UnsupportedFormat(String),
+
+    #[error("limit exceeded: {0}")]
+    LimitExceeded(String),
 }
 
 pub type Result<T> = std::result::Result<T, ParseError>;
@@ -48,6 +52,13 @@ pub fn parse_ontology_file(
     modified_time: u64,
 ) -> Result<ParsedOntology> {
     let _ = (content_hash, modified_time);
+    let metadata = fs::metadata(path)?;
+    if metadata.len() > MAX_FILE_BYTES {
+        return Err(ParseError::LimitExceeded(format!(
+            "file exceeds {MAX_FILE_BYTES} bytes: {}",
+            path.display()
+        )));
+    }
     let content = fs::read(path)?;
     let rdf_format = to_rdf_format(format, path)?;
 
@@ -58,7 +69,15 @@ pub fn parse_ontology_file(
     let parser = RdfParser::from_format(rdf_format);
     for quad in parser.for_reader(content.as_slice()) {
         match quad {
-            Ok(q) => quads.push(q),
+            Ok(q) => {
+                if quads.len() >= MAX_TRIPLES_PER_FILE {
+                    return Err(ParseError::LimitExceeded(format!(
+                        "file exceeds {MAX_TRIPLES_PER_FILE} triples: {}",
+                        path.display()
+                    )));
+                }
+                quads.push(q);
+            }
             Err(e) => {
                 parse_status = ParseStatus::Error;
                 parse_message = Some(format_parse_error(&e));

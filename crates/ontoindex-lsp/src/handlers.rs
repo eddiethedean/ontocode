@@ -2,7 +2,7 @@ use crate::protocol::{
     CatalogSnapshot, GetEntityParams, GetEntityResult, IndexWorkspaceParams, IndexWorkspaceResult,
     OntoIndexError,
 };
-use crate::state::{path_to_uri, uri_to_path, ServerState};
+use crate::state::{path_to_uri, resolve_workspace_for_index, ServerState};
 use lsp_types::{
     DocumentSymbol, DocumentSymbolParams, DocumentSymbolResponse, GotoDefinitionParams,
     GotoDefinitionResponse, Hover, HoverContents, HoverParams, HoverProviderCapability,
@@ -10,7 +10,7 @@ use lsp_types::{
     Range, ServerCapabilities, SymbolInformation, SymbolKind, Uri, WorkspaceSymbolParams,
     WorkspaceSymbolResponse,
 };
-use ontoindex_core::EntityKind;
+use ontoindex_core::{resolve_document_path, EntityKind};
 use serde_json::Value;
 use std::path::Path;
 use std::str::FromStr;
@@ -23,7 +23,7 @@ pub fn handle_initialize(state: &ServerState, params: InitializeParams) -> Initi
         .or(params.root_uri);
 
     if let Some(uri) = workspace_uri {
-        if let Ok(path) = uri_to_path(uri.as_str()) {
+        if let Ok(path) = resolve_workspace_for_index(uri.as_str(), None) {
             let _ = state.index_workspace(path);
         }
     }
@@ -47,14 +47,13 @@ pub fn handle_index_workspace(
     state: &ServerState,
     params: IndexWorkspaceParams,
 ) -> Result<IndexWorkspaceResult, OntoIndexError> {
-    let workspace = params
-        .workspace_uri
-        .as_deref()
-        .map(uri_to_path)
-        .transpose()
-        .map_err(OntoIndexError::index_failed)?
-        .or_else(|| state.workspace())
-        .ok_or_else(|| OntoIndexError::index_failed("no workspace URI provided".to_string()))?;
+    let workspace = match params.workspace_uri.as_deref() {
+        Some(uri) => resolve_workspace_for_index(uri, state.workspace_root().as_deref())
+            .map_err(OntoIndexError::index_failed)?,
+        None => state
+            .workspace_root()
+            .ok_or_else(|| OntoIndexError::index_failed("no workspace URI provided".to_string()))?,
+    };
 
     let (stats, indexed_at) =
         state.index_workspace(workspace).map_err(OntoIndexError::index_failed)?;
@@ -87,23 +86,47 @@ pub fn handle_get_entity(
 }
 
 pub fn handle_hover(state: &ServerState, params: HoverParams) -> Option<Hover> {
-    let path = lsp_uri_to_path(&params.text_document_position_params.text_document.uri)?;
+    let path = lsp_document_path(state, &params.text_document_position_params.text_document.uri)?;
     let position = params.text_document_position_params.position;
     let content = std::fs::read_to_string(&path).ok()?;
     let iri = iri_at_position(&content, position)?;
 
     state.with_catalog(|catalog| {
         let detail = catalog.entity_detail(&iri)?;
-        let mut md =
-            format!("**{}** (`{}`)\n\n", detail.entity.short_name, detail.entity.kind.as_str());
+        let mut md = format!(
+            "**{}** (`{}`)\n\n",
+            escape_markdown(&detail.entity.short_name),
+            escape_markdown(detail.entity.kind.as_str())
+        );
         if !detail.entity.labels.is_empty() {
-            md.push_str(&format!("Labels: {}\n\n", detail.entity.labels.join(", ")));
+            md.push_str(&format!(
+                "Labels: {}\n\n",
+                detail
+                    .entity
+                    .labels
+                    .iter()
+                    .map(|l| escape_markdown(l))
+                    .collect::<Vec<_>>()
+                    .join(", ")
+            ));
         }
         if !detail.entity.comments.is_empty() {
-            md.push_str(&format!("Comments: {}\n\n", detail.entity.comments.join(", ")));
+            md.push_str(&format!(
+                "Comments: {}\n\n",
+                detail
+                    .entity
+                    .comments
+                    .iter()
+                    .map(|c| escape_markdown(c))
+                    .collect::<Vec<_>>()
+                    .join(", ")
+            ));
         }
         if !detail.parents.is_empty() {
-            md.push_str(&format!("Parents: {}\n", detail.parents.join(", ")));
+            md.push_str(&format!(
+                "Parents: {}\n",
+                detail.parents.iter().map(|p| escape_markdown(p)).collect::<Vec<_>>().join(", ")
+            ));
         }
         if detail.entity.deprecated {
             md.push_str("\n*deprecated*");
@@ -123,7 +146,7 @@ pub fn handle_document_symbol(
     state: &ServerState,
     params: DocumentSymbolParams,
 ) -> Option<DocumentSymbolResponse> {
-    let path = lsp_uri_to_path(&params.text_document.uri)?;
+    let path = lsp_document_path(state, &params.text_document.uri)?;
     state.with_catalog(|catalog| {
         let entities = catalog.entities_in_document(&path);
         if entities.is_empty() {
@@ -184,7 +207,7 @@ pub fn handle_goto_definition(
     state: &ServerState,
     params: GotoDefinitionParams,
 ) -> Option<GotoDefinitionResponse> {
-    let path = lsp_uri_to_path(&params.text_document_position_params.text_document.uri)?;
+    let path = lsp_document_path(state, &params.text_document_position_params.text_document.uri)?;
     let position = params.text_document_position_params.position;
     let content = std::fs::read_to_string(&path).ok()?;
     let iri = iri_at_position(&content, position)?;
@@ -259,12 +282,27 @@ pub fn handle_standard_request(
     }
 }
 
-fn lsp_uri_to_path(uri: &Uri) -> Option<std::path::PathBuf> {
-    uri_to_path(uri.as_str()).ok()
+fn lsp_document_path(state: &ServerState, uri: &Uri) -> Option<std::path::PathBuf> {
+    let root = state.workspace_root()?;
+    resolve_document_path(uri.as_str(), &root).ok()
 }
 
 fn path_to_lsp_uri(path: &Path) -> Option<Uri> {
     Uri::from_str(&path_to_uri(path)).ok()
+}
+
+fn escape_markdown(value: &str) -> String {
+    value
+        .replace('\\', "\\\\")
+        .replace('[', "\\[")
+        .replace(']', "\\]")
+        .replace('(', "\\(")
+        .replace(')', "\\)")
+        .replace('<', "\\<")
+        .replace('>', "\\>")
+        .replace('`', "\\`")
+        .replace('*', "\\*")
+        .replace('_', "\\_")
 }
 
 fn entity_kind_to_symbol_kind(kind: EntityKind) -> SymbolKind {
@@ -351,5 +389,12 @@ mod tests {
         let content = "@prefix ex: <http://example.org/people#> .\nex:Person a owl:Class .";
         let iri = expand_iri_token(content, "ex:Person").expect("expanded");
         assert_eq!(iri, "http://example.org/people#Person");
+    }
+
+    #[test]
+    fn escape_markdown_neutralizes_links() {
+        let escaped = escape_markdown("[click](https://evil.example)");
+        assert!(!escaped.contains("](https://"));
+        assert!(escaped.contains("\\["));
     }
 }

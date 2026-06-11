@@ -21,9 +21,49 @@ Include:
 
 We aim to acknowledge reports within a few business days.
 
+## Threat model
+
+OntoIndex and OntoCode are **local-first** tools: they index and parse files on disk and do not upload ontology content by default.
+
+### Intended deployment
+
+- `ontoindex` CLI run by the operator on paths they choose
+- `ontoindex-lsp` connected over **stdio** to a trusted editor (VS Code + OntoCode extension)
+
+### Do not expose raw LSP to the internet
+
+`ontoindex-lsp` has **no authentication, authorization, or rate limiting**. If the language server is reachable over a network (TCP proxy, shared container socket, misconfigured debug transport), an attacker can:
+
+- Request reads of arbitrary files via LSP document URIs (mitigated in v0.2+ by workspace jail when a workspace is indexed)
+- Trigger indexing of directories outside the intended project via `ontoindex/indexWorkspace` (mitigated by workspace scope validation)
+- Exhaust CPU/memory with large ontologies or expensive queries (partially mitigated by resource limits — see below)
+
+**Never bind `ontoindex-lsp` to a public interface without an authenticated reverse proxy and strict path sandboxing.**
+
+## Hardening in v0.2+
+
+| Control | Where |
+|---------|--------|
+| Workspace path jail (LSP document reads) | `ontoindex-core::path_jail`, `ontoindex-lsp` handlers |
+| `indexWorkspace` scope validation | `ontoindex-lsp` state |
+| File size / file count / triple / entity limits | `ontoindex-core::limits`, scanner, parser, catalog |
+| SQL/SPARQL query size and result row caps | `ontoindex-query` |
+| Symlink skip + `follow_links(false)` in scanner | `ontoindex-core::scanner` |
+| Markdown escaping in LSP hover | `ontoindex-lsp` handlers |
+| `ontocode.lspPath` ignored in VS Code Restricted Mode | OntoCode extension |
+
+See [docs/release-integrity.md](docs/release-integrity.md) for verifying release binaries.
+
 ## Scope
 
-OntoIndex and OntoCode are **local-first** tools: they index and parse files on disk and do not upload ontology content by default. Reports about malicious ontology content leading to denial of service or memory exhaustion in parsers are in scope.
+Reports in scope include:
+
+- Path traversal or arbitrary file read via LSP or indexing
+- Remote code execution via extension language-server path settings
+- Denial of service via malicious ontology files or queries
+- Supply-chain issues in release artifacts or dependencies
+
+Ontology **content** may contain sensitive IRIs or literals; treat indexed catalogs as confidential when workspaces contain private data.
 
 ## Safe harbor
 

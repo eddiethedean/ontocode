@@ -1,7 +1,14 @@
 pub mod error;
+pub mod limits;
 pub mod model;
+pub mod path_jail;
 pub mod scanner;
 
 pub use error::{OntoIndexError, Result};
+pub use limits::*;
 pub use model::*;
+pub use path_jail::{
+    canonical_workspace_root, file_uri_to_path, is_path_within, resolve_document_path,
+    validate_workspace_scope, workspace_uri_to_path,
+};
 pub use scanner::{OntologyFile, WorkspaceScanner};

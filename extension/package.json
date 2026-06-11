@@ -113,7 +113,7 @@
         "ontocode.lspPath": {
           "type": "string",
           "default": "",
-          "description": "Path to the ontoindex-lsp binary. When empty, the bundled server or PATH is used."
+          "description": "Trusted workspaces only: path to the ontoindex-lsp binary. Ignored in Restricted Mode. When empty, the bundled server or PATH is used."
         },
         "ontocode.autoIndexOnOpen": {
           "type": "boolean",

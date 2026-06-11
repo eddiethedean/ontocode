@@ -1,6 +1,6 @@
 use crate::QueryError;
 use ontoindex_catalog::OntologyCatalog;
-use ontoindex_core::EntityKind;
+use ontoindex_core::{limits::MAX_QUERY_BYTES, limits::MAX_SQL_RESULT_ROWS, EntityKind};
 use serde::Serialize;
 use sqlparser::ast::{Expr, Select, SelectItem, SetExpr, Statement, TableFactor, Value};
 use sqlparser::dialect::GenericDialect;
@@ -18,6 +18,12 @@ pub struct QueryResult {
 }
 
 pub fn run_sql(catalog: &OntologyCatalog, sql: &str) -> Result<QueryResult> {
+    if sql.len() > MAX_QUERY_BYTES {
+        return Err(QueryError::Sql(format!(
+            "query exceeds maximum length of {MAX_QUERY_BYTES} bytes"
+        )));
+    }
+
     let dialect = GenericDialect {};
     let statements =
         Parser::parse_sql(&dialect, sql).map_err(|e| QueryError::Sql(e.to_string()))?;
@@ -46,7 +52,15 @@ fn execute_select(catalog: &OntologyCatalog, select: Box<Select>) -> Result<Quer
     }
 
     let (columns, projected_rows) = project_rows(&select.projection, &rows)?;
-    Ok(QueryResult { columns, rows: projected_rows })
+    let rows = truncate_rows(projected_rows);
+    Ok(QueryResult { columns, rows })
+}
+
+fn truncate_rows(mut rows: Vec<Row>) -> Vec<Row> {
+    if rows.len() > MAX_SQL_RESULT_ROWS {
+        rows.truncate(MAX_SQL_RESULT_ROWS);
+    }
+    rows
 }
 
 fn table_name_from_select(select: &Select) -> Result<String> {

@@ -141,6 +141,19 @@ jobs:
       - run: npm test
         working-directory: extension
 
+  audit:
+    name: cargo audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - name: Install cargo-audit
+        run: cargo install cargo-audit --locked
+
+      - run: cargo audit
+
   package:
     name: crate packaging
     runs-on: ubuntu-latest

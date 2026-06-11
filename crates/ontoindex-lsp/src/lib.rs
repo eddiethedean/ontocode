@@ -90,7 +90,7 @@ fn handle_notification(
 ) {
     match notif.method.as_str() {
         Initialized::METHOD => {
-            if let Some(workspace) = state.workspace() {
+            if let Some(workspace) = state.workspace_root() {
                 schedule_reindex(pending_reindex, workspace, Duration::from_millis(500));
                 flush_due_reindex(state, pending_reindex);
             }
@@ -98,7 +98,7 @@ fn handle_notification(
         DidOpenTextDocument::METHOD
         | DidChangeTextDocument::METHOD
         | DidCloseTextDocument::METHOD => {
-            if let Some(workspace) = state.workspace() {
+            if let Some(workspace) = state.workspace_root() {
                 schedule_reindex(pending_reindex, workspace, Duration::from_millis(750));
                 flush_due_reindex(state, pending_reindex);
             }

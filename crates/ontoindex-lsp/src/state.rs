@@ -1,5 +1,6 @@
 use ontoindex_catalog::{IndexBuilder, OntologyCatalog};
-use std::path::PathBuf;
+use ontoindex_core::{canonical_workspace_root, validate_workspace_scope};
+use std::path::{Path, PathBuf};
 use std::sync::{Arc, RwLock};
 use std::time::{SystemTime, UNIX_EPOCH};
 
@@ -28,6 +29,12 @@ impl ServerState {
         &self,
         workspace: PathBuf,
     ) -> Result<(ontoindex_catalog::CatalogStats, u64), String> {
+        let workspace = canonical_workspace_root(&workspace)?;
+
+        if let Some(existing) = self.workspace_root() {
+            validate_workspace_scope(&workspace, &existing)?;
+        }
+
         let catalog =
             IndexBuilder::new().workspace(&workspace).build().map_err(|e| e.to_string())?;
 
@@ -47,7 +54,7 @@ impl ServerState {
         guard.catalog.as_ref().map(f)
     }
 
-    pub fn workspace(&self) -> Option<PathBuf> {
+    pub fn workspace_root(&self) -> Option<PathBuf> {
         self.inner.read().ok()?.workspace.clone()
     }
 }
@@ -58,12 +65,20 @@ impl Default for ServerState {
     }
 }
 
-pub fn uri_to_path(uri: &str) -> Result<PathBuf, String> {
-    let url = url::Url::parse(uri).map_err(|e| e.to_string())?;
-    url.to_file_path().map_err(|_| format!("invalid file URI: {uri}"))
+/// Resolve a workspace URI for indexing (must be a `file://` directory).
+pub fn resolve_workspace_for_index(
+    uri: &str,
+    existing_root: Option<&Path>,
+) -> Result<PathBuf, String> {
+    let path = ontoindex_core::workspace_uri_to_path(uri)?;
+    if let Some(root) = existing_root {
+        validate_workspace_scope(&path, root)
+    } else {
+        Ok(path)
+    }
 }
 
-pub fn path_to_uri(path: &std::path::Path) -> String {
+pub fn path_to_uri(path: &Path) -> String {
     let abs = path.canonicalize().unwrap_or_else(|_| path.to_path_buf());
     url::Url::from_file_path(&abs)
         .map(|u| u.to_string())

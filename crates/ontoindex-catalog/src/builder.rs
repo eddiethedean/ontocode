@@ -1,5 +1,8 @@
 use crate::OntologyCatalogData;
-use ontoindex_core::{OntologyDocument, ParseStatus, WorkspaceScanner};
+use ontoindex_core::{
+    limits::{MAX_ENTITIES, MAX_FILE_BYTES, MAX_TOTAL_TRIPLES, MAX_TRIPLES_PER_FILE},
+    OntologyDocument, ParseStatus, WorkspaceScanner,
+};
 use ontoindex_parser::parse_ontology_file;
 use oxigraph::model::Quad;
 use oxigraph::store::Store;
@@ -59,9 +62,14 @@ impl IndexBuilder {
             .map_err(|e| CatalogError::Parse { path: file.path.clone(), message: e.to_string() })?;
 
             triple_count += parsed.triple_count;
+            if triple_count > MAX_TOTAL_TRIPLES {
+                return Err(CatalogError::Core(ontoindex_core::OntoIndexError::Scanner(format!(
+                    "workspace exceeds maximum of {MAX_TOTAL_TRIPLES} triples"
+                ))));
+            }
 
             if parsed.parse_status != ParseStatus::Error {
-                load_into_store(&store, &file.path, file.format)?;
+                load_into_store(&store, &file.path, file.format, triple_count)?;
             }
 
             documents.push(OntologyDocument {
@@ -82,6 +90,12 @@ impl IndexBuilder {
             axioms.extend(parsed.axioms);
             namespaces.extend(parsed.namespace_rows);
             imports.extend(parsed.import_rows);
+
+            if entities.len() > MAX_ENTITIES {
+                return Err(CatalogError::Core(ontoindex_core::OntoIndexError::Scanner(format!(
+                    "workspace exceeds maximum of {MAX_ENTITIES} entities"
+                ))));
+            }
         }
 
         Ok(OntologyCatalog {
@@ -130,10 +144,20 @@ fn load_into_store(
     store: &Store,
     path: &Path,
     format: ontoindex_core::OntologyFormat,
+    triple_count_so_far: usize,
 ) -> Result<()> {
     use ontoindex_core::OntologyFormat;
     use oxigraph::io::{RdfFormat, RdfParser};
     use std::fs;
+
+    let metadata = fs::metadata(path)
+        .map_err(|e| CatalogError::Parse { path: path.to_path_buf(), message: e.to_string() })?;
+    if metadata.len() > MAX_FILE_BYTES {
+        return Err(CatalogError::Parse {
+            path: path.to_path_buf(),
+            message: format!("file exceeds {MAX_FILE_BYTES} bytes"),
+        });
+    }
 
     let content = fs::read(path)
         .map_err(|e| CatalogError::Parse { path: path.to_path_buf(), message: e.to_string() })?;
@@ -154,11 +178,24 @@ fn load_into_store(
     };
 
     let parser = RdfParser::from_format(rdf_format);
+    let mut file_triples = 0usize;
     for quad in parser.for_reader(content.as_slice()) {
         let quad: Quad = quad.map_err(|e| CatalogError::Parse {
             path: path.to_path_buf(),
             message: e.to_string(),
         })?;
+        file_triples += 1;
+        if file_triples > MAX_TRIPLES_PER_FILE {
+            return Err(CatalogError::Parse {
+                path: path.to_path_buf(),
+                message: format!("file exceeds {MAX_TRIPLES_PER_FILE} triples"),
+            });
+        }
+        if triple_count_so_far + file_triples > MAX_TOTAL_TRIPLES {
+            return Err(CatalogError::Core(ontoindex_core::OntoIndexError::Scanner(format!(
+                "workspace exceeds maximum of {MAX_TOTAL_TRIPLES} triples"
+            ))));
+        }
         store.insert(&quad).map_err(|e| CatalogError::Store(e.to_string()))?;
     }
 

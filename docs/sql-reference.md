@@ -13,6 +13,8 @@ OntoIndex exposes indexed ontology data as **virtual tables** queried with a SQL
 
 Not supported in v0.2: `JOIN`, subqueries, `GROUP BY`, `ORDER BY`, functions, or multiple tables.
 
+**Limits:** query strings up to 1 MiB; result sets capped at 100,000 rows (see `ontoindex-core::limits`).
+
 ## Virtual tables and columns
 
 ### `ontologies`

@@ -219,13 +219,20 @@ jobs:
           npm run compile
           npx vsce package --no-dependencies -o "../dist/ontocode-${GITHUB_REF_NAME}.vsix"
 
+      - name: Generate SHA256SUMS
+        run: |
+          set -euo pipefail
+          cd dist
+          shopt -s nullglob
+          sha256sum *.tar.gz *.zip *.vsix > SHA256SUMS
+
       - name: Create GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
           shopt -s nullglob
-          assets=(dist/*.tar.gz dist/*.zip dist/*.vsix)
+          assets=(dist/*.tar.gz dist/*.zip dist/*.vsix dist/SHA256SUMS)
           if [ ${#assets[@]} -eq 0 ]; then
             echo "No release assets found"
             exit 1

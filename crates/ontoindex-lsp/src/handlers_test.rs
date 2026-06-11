@@ -60,6 +60,27 @@ fn get_entity_unknown_iri_returns_not_found() {
 }
 
 #[test]
+fn hover_rejects_document_outside_workspace() {
+    let state = indexed_state();
+    let outside = tempfile::tempdir().unwrap();
+    let ttl = outside.path().join("other.ttl");
+    std::fs::write(&ttl, "@prefix ex: <http://ex/> .\n").unwrap();
+    let uri = Uri::from_str(&path_to_uri(&ttl)).expect("uri");
+
+    let hover = handle_hover(
+        &state,
+        HoverParams {
+            text_document_position_params: TextDocumentPositionParams {
+                text_document: TextDocumentIdentifier { uri },
+                position: Position::new(0, 0),
+            },
+            work_done_progress_params: Default::default(),
+        },
+    );
+    assert!(hover.is_none());
+}
+
+#[test]
 fn get_catalog_snapshot_returns_fixture_entities() {
     let state = indexed_state();
     let snapshot = handle_get_catalog_snapshot(&state).expect("snapshot");

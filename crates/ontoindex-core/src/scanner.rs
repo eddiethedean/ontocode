@@ -1,5 +1,7 @@
 use crate::error::{OntoIndexError, Result};
+use crate::limits::{MAX_FILE_BYTES, MAX_SCAN_FILES};
 use crate::model::OntologyFormat;
+use crate::path_jail::canonical_workspace_root;
 use ignore::WalkBuilder;
 use sha2::{Digest, Sha256};
 use std::fs;
@@ -20,11 +22,18 @@ pub struct OntologyFile {
 
 pub struct WorkspaceScanner {
     root: PathBuf,
+    canonical_root: PathBuf,
 }
 
 impl WorkspaceScanner {
     pub fn new(root: impl Into<PathBuf>) -> Self {
-        Self { root: root.into() }
+        let root = root.into();
+        let canonical_root = canonical_workspace_root(&root).unwrap_or_else(|_| root.clone());
+        Self { root, canonical_root }
+    }
+
+    pub fn canonical_root(&self) -> &Path {
+        &self.canonical_root
     }
 
     pub fn scan(&self) -> Result<Vec<OntologyFile>> {
@@ -41,17 +50,32 @@ impl WorkspaceScanner {
             .git_ignore(true)
             .git_global(true)
             .git_exclude(true)
+            .follow_links(false)
             .build();
 
         for entry in walker {
+            if files.len() >= MAX_SCAN_FILES {
+                return Err(OntoIndexError::Scanner(format!(
+                    "workspace exceeds maximum of {MAX_SCAN_FILES} ontology files"
+                )));
+            }
+
             let entry = entry.map_err(|e| OntoIndexError::Scanner(e.to_string()))?;
             let path = entry.path();
             if !path.is_file() {
                 continue;
             }
+            if path.symlink_metadata().map(|m| m.file_type().is_symlink()).unwrap_or(false) {
+                continue;
+            }
             if let Some(ext) = path.extension().and_then(|e| e.to_str()) {
                 if ONTOLOGY_EXTENSIONS.contains(&ext.to_ascii_lowercase().as_str()) {
-                    files.push(self.describe_file(path)?);
+                    let canonical =
+                        path.canonicalize().map_err(|e| OntoIndexError::Scanner(e.to_string()))?;
+                    if !canonical.starts_with(&self.canonical_root) {
+                        continue;
+                    }
+                    files.push(self.describe_file(&canonical)?);
                 }
             }
         }
@@ -62,6 +86,15 @@ impl WorkspaceScanner {
 
     fn describe_file(&self, path: &Path) -> Result<OntologyFile> {
         let metadata = fs::metadata(path)?;
+        let size_bytes = metadata.len();
+        if size_bytes > MAX_FILE_BYTES {
+            return Err(OntoIndexError::Scanner(format!(
+                "file exceeds size limit ({} bytes > {MAX_FILE_BYTES}): {}",
+                size_bytes,
+                path.display()
+            )));
+        }
+
         let content = fs::read(path)?;
         let mut hasher = Sha256::new();
         hasher.update(&content);
@@ -81,7 +114,7 @@ impl WorkspaceScanner {
             format: OntologyFormat::from_extension(ext),
             content_hash,
             modified_time,
-            size_bytes: metadata.len(),
+            size_bytes,
         })
     }
 }
@@ -106,5 +139,23 @@ mod tests {
         assert_eq!(files.len(), 1);
         assert_eq!(files[0].format, OntologyFormat::Turtle);
         assert!(!files[0].content_hash.is_empty());
+    }
+
+    #[test]
+    fn skips_symlinked_ontology_files() {
+        let dir = tempfile::tempdir().unwrap();
+        let outside = tempfile::tempdir().unwrap();
+        let secret = outside.path().join("secret.ttl");
+        fs::write(&secret, "@prefix ex: <http://ex/> .").unwrap();
+
+        #[cfg(unix)]
+        {
+            use std::os::unix::fs::symlink;
+            let link = dir.path().join("linked.ttl");
+            symlink(&secret, &link).unwrap();
+            let scanner = WorkspaceScanner::new(dir.path());
+            let files = scanner.scan().unwrap();
+            assert_eq!(files.len(), 0);
+        }
     }
 }

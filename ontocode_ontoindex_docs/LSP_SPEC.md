@@ -14,8 +14,8 @@ The OntoIndex language server provides ontology-aware editor features to OntoCod
 
 ## 2. Transport
 
-- stdio for VS Code
-- optional TCP for debugging
+- stdio for VS Code (shipped)
+- optional TCP for debugging (**not implemented** — if added, must bind `127.0.0.1` only and require explicit opt-in; never expose unauthenticated LSP on a public interface; see [SECURITY.md](../SECURITY.md))
 
 ## 3. Supported File Types
 

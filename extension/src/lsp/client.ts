@@ -67,8 +67,23 @@ function resolveServerPath(context: vscode.ExtensionContext): string {
   const configured = vscode.workspace
     .getConfiguration("ontocode")
     .get<string>("lspPath");
-  if (configured && configured.trim().length > 0 && fs.existsSync(configured)) {
+  if (
+    configured &&
+    configured.trim().length > 0 &&
+    fs.existsSync(configured) &&
+    vscode.workspace.isTrusted
+  ) {
     return configured;
+  }
+  if (
+    configured &&
+    configured.trim().length > 0 &&
+    fs.existsSync(configured) &&
+    !vscode.workspace.isTrusted
+  ) {
+    void vscode.window.showWarningMessage(
+      "OntoCode: ontocode.lspPath is ignored in Restricted Mode; using the bundled language server."
+    );
   }
 
   const platform = process.platform;

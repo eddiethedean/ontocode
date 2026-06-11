@@ -1,5 +1,6 @@
 use crate::QueryError;
 use ontoindex_catalog::OntologyCatalog;
+use ontoindex_core::limits::{MAX_QUERY_BYTES, MAX_SPARQL_RESULT_ROWS};
 use oxigraph::sparql::{QueryResults, QuerySolution};
 use serde::Serialize;
 use std::collections::BTreeMap;
@@ -13,6 +14,12 @@ pub struct SparqlResult {
 }
 
 pub fn run_sparql(catalog: &OntologyCatalog, sparql: &str) -> Result<SparqlResult> {
+    if sparql.len() > MAX_QUERY_BYTES {
+        return Err(QueryError::Sparql(format!(
+            "query exceeds maximum length of {MAX_QUERY_BYTES} bytes"
+        )));
+    }
+
     let results = catalog.store().query(sparql).map_err(|e| QueryError::Sparql(e.to_string()))?;
 
     match results {
@@ -21,6 +28,11 @@ pub fn run_sparql(catalog: &OntologyCatalog, sparql: &str) -> Result<SparqlResul
                 solutions.variables().iter().map(|v| v.as_str().to_string()).collect();
             let mut rows = Vec::new();
             for solution in solutions {
+                if rows.len() >= MAX_SPARQL_RESULT_ROWS {
+                    return Err(QueryError::Sparql(format!(
+                        "result exceeds maximum of {MAX_SPARQL_RESULT_ROWS} rows"
+                    )));
+                }
                 let solution = solution.map_err(|e| QueryError::Sparql(e.to_string()))?;
                 rows.push(solution_to_row(&solution, &columns));
             }

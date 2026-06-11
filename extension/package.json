@@ -18,6 +18,13 @@
   ],
   "activationEvents": [
     "workspaceContains:**/*.ttl",
+    "workspaceContains:**/*.owl",
+    "workspaceContains:**/*.rdf",
+    "workspaceContains:**/*.jsonld",
+    "workspaceContains:**/*.json-ld",
+    "workspaceContains:**/*.nt",
+    "workspaceContains:**/*.nq",
+    "workspaceContains:**/*.trig",
     "onView:ontocode.explorer.ontologies"
   ],
   "main": "./dist/extension.js",

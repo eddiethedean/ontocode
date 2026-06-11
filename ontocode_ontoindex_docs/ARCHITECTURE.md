@@ -1,5 +1,12 @@
 # ARCHITECTURE.md
 
+> **Document status: target architecture (v0.2 partial implementation)**
+>
+> **Implemented today:** workspace scanner, Oxigraph-based parsing, in-memory catalog and triple store,
+> SQL-like queries via `sqlparser`, SPARQL, CLI, LSP explorer integration.
+> **Not yet implemented:** diagnostics layer, diff layer, docs export, Horned-OWL modeling, DataFusion SQL.
+> See [docs/lsp-api.md](../docs/lsp-api.md) and [adr/README.md](adr/README.md) for current decisions.
+
 ## 1. Architecture Goals
 
 The architecture must support:
@@ -37,7 +44,7 @@ The architecture must support:
               v
 +---------------------------+
 |   Parser + RDF/OWL Layer  |
-| Horned-OWL / Oxigraph     |
+| Oxigraph (+ sqlparser)    |
 +-------------+-------------+
               |
               v
@@ -79,6 +86,9 @@ Responsible for normalized semantic tables:
 - diagnostics
 
 ### 3.4 Query Layer
+
+**v0.2:** implemented (`ontoindex-query` — virtual tables + SPARQL over Oxigraph store).
+
 Responsible for:
 
 - SQL-style queries
@@ -87,6 +97,9 @@ Responsible for:
 - result serialization
 
 ### 3.5 Diagnostics Layer
+
+**v0.2:** not implemented (planned v0.3).
+
 Responsible for:
 
 - syntax diagnostics
@@ -95,6 +108,9 @@ Responsible for:
 - quick fixes
 
 ### 3.6 Diff Layer
+
+**v0.2:** not implemented.
+
 Responsible for:
 
 - semantic comparison
@@ -103,6 +119,9 @@ Responsible for:
 - PR summaries
 
 ### 3.7 Docs Layer
+
+**v0.2:** not implemented.
+
 Responsible for:
 
 - Markdown export
@@ -132,7 +151,7 @@ Manages LSP lifecycle and communication with `ontoindex-lsp`.
 3. Language server scans workspace.
 4. OntoIndex parses changed ontology files.
 5. Catalog is updated.
-6. Diagnostics are published.
+6. Diagnostics are published (planned v0.3).
 7. Tree views and panels refresh.
 8. Queries and refactors use the catalog.
 

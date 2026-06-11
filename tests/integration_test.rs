@@ -12,8 +12,8 @@ use support::fixture_catalog;
 fn indexes_fixture_ontology() {
     let stats = fixture_catalog().data().stats();
 
-    assert_eq!(stats.ontology_count, 1);
-    assert_eq!(stats.class_count, 2);
+    assert_eq!(stats.ontology_count, 2);
+    assert_eq!(stats.class_count, 3);
     assert_eq!(stats.object_property_count, 1);
     assert_eq!(stats.data_property_count, 1);
     assert_eq!(stats.annotation_property_count, 1);

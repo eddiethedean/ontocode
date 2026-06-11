@@ -2,6 +2,8 @@
 
 Browse ontology repositories in VS Code using the OntoIndex language server.
 
+**Install:** [docs/vscode-install.md](../docs/vscode-install.md) (release VSIX, dev build, troubleshooting).
+
 ## Features (v0.2)
 
 - Ontology explorer sidebar (ontologies, classes, properties, individuals)
@@ -22,7 +24,13 @@ Release VSIX packages bundle `ontoindex-lsp` for:
 | macOS Intel | `server/darwin-x64/` |
 | Windows x64 | `server/win32-x64/ontoindex-lsp.exe` |
 
-If no bundled binary matches your machine, set `ontocode.lspPath` or install `ontoindex-lsp` on your `PATH`.
+If no bundled binary matches your machine:
+
+```bash
+cargo install ontoindex-lsp
+```
+
+Or set `ontocode.lspPath` to the absolute path of your `ontoindex-lsp` binary.
 
 ## Development
 

@@ -64,7 +64,7 @@ fn get_catalog_snapshot_returns_fixture_entities() {
     let state = indexed_state();
     let snapshot = handle_get_catalog_snapshot(&state).expect("snapshot");
 
-    assert_eq!(snapshot.documents.len(), 1);
+    assert_eq!(snapshot.documents.len(), 2);
     assert!(snapshot.entities.iter().any(|e| e.iri == "http://example.org/people#Person"));
     assert!(!snapshot.hierarchy.edges.is_empty());
 }

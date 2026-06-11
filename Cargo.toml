@@ -17,6 +17,14 @@ edition = "2021"
 license = "MIT OR Apache-2.0"
 publish = false
 
+[dependencies]
+ontoindex-catalog = { workspace = true }
+ontoindex-query = { workspace = true }
+
+[[example]]
+name = "index_and_query"
+path = "examples/index_and_query.rs"
+
 [dev-dependencies]
 ontoindex-catalog = { workspace = true }
 ontoindex-core = { workspace = true }

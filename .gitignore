@@ -7,5 +7,7 @@
 *.swo
 extension/node_modules/
 extension/dist/
+extension/out/
+extension/.vscode-test/
 extension/server/
 extension/*.vsix

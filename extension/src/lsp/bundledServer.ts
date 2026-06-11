@@ -1,3 +1,4 @@
+import { execFileSync } from "child_process";
 import * as fs from "fs";
 import * as path from "path";
 
@@ -36,6 +37,15 @@ export function ensureBundledServerExecutable(serverPath: string): void {
     const mode = fs.statSync(serverPath).mode;
     if (!hasExecutePermission(mode)) {
       fs.chmodSync(serverPath, mode | 0o755);
+    }
+    if (process.platform === "darwin") {
+      try {
+        execFileSync("xattr", ["-dr", "com.apple.quarantine", serverPath], {
+          stdio: "ignore",
+        });
+      } catch {
+        // xattr missing or attribute absent — ignore.
+      }
     }
   } catch {
     // Spawn will fail with a clear error if this cannot be fixed.

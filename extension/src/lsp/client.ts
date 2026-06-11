@@ -49,6 +49,7 @@ export async function startLanguageClient(
         "**/*.{ttl,owl,rdf,jsonld,nt,nq,trig}"
       ),
     },
+    outputChannelName: "OntoIndex Language Server",
   };
 
   client = new LanguageClient(
@@ -58,8 +59,23 @@ export async function startLanguageClient(
     clientOptions
   );
 
-  context.subscriptions.push(client.start());
-  await client.onReady();
+  context.subscriptions.push({
+    dispose: () => {
+      void stopLanguageClient();
+    },
+  });
+
+  try {
+    // vscode-languageclient v9: await start() — onReady() was removed.
+    await client.start();
+  } catch (err) {
+    client = undefined;
+    const detail = err instanceof Error ? err.message : String(err);
+    throw new Error(
+      `${detail} (server: ${serverPath}). See Output → OntoIndex Language Server.`
+    );
+  }
+
   return client;
 }
 

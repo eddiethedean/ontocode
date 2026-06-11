@@ -4,7 +4,7 @@ Browse ontology repositories in VS Code using the OntoIndex language server.
 
 **Install:** [docs/vscode-install.md](../docs/vscode-install.md) (release VSIX, dev build, troubleshooting).
 
-## Features (v0.2.1)
+## Features (v0.2.2)
 
 - Ontology explorer sidebar (ontologies, classes, properties, individuals)
 - Entity inspector with IRI, labels, comments, parents, children, and axioms

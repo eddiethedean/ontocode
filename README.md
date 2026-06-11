@@ -75,15 +75,15 @@ OntoIndex is useful on its own today (CLI, CI, local analysis). The extension wi
 
 Protégé is strong for traditional ontology editing, but most engineering teams live in Git, pull requests, and VS Code. OntoCode targets that workflow:
 
-| Shipped in v0.2 | Planned |
-|-----------------|---------|
-| Browse ontologies in VS Code | Inline diagnostics (v0.3) |
-| Entity inspector and jump-to-source | Authoring and write-back (v0.4) |
-| `ontoindex validate` for CI | Query workbench in VS Code (v0.5+) |
-| SQL-like and SPARQL queries via CLI | Semantic Git diff, reasoning (v0.6+) |
-| Local-first indexing | |
+| Shipped in v0.2 | Planned (v1.0 target) |
+|-----------------|-------------------------|
+| Browse ontologies in VS Code | Hybrid authoring: forms + Manchester editor |
+| Entity inspector and jump-to-source | OWL axiom editing and patch write-back |
+| `ontoindex validate` for CI | Query workbench, Rust-native reasoners + explanations |
+| SQL-like and SPARQL queries via CLI | OBO format + ROBOT interop |
+| Local-first indexing | Semantic Git diff, LSP completion/rename |
 
-Long-term goal: **routine ontology work in VS Code without opening Protégé.**
+Long-term goal: **Protégé-competitive OWL 2 DL + OBO maintenance in VS Code** — see [PROTEGE_PARITY.md](docs/design/PROTEGE_PARITY.md).
 
 ## What's in v0.2.0 (OntoCode Explorer)
 
@@ -175,12 +175,14 @@ The extension is a thin TypeScript shell over **ontoindex-lsp** and the OntoInde
 | v0.1 | OntoIndex: scanner, parser, catalog, CLI |
 | **v0.2** (current) | VS Code extension, explorer, entity inspector, LSP |
 | v0.3 | Diagnostics and Problems panel integration |
-| v0.4 | Editing and patch-based write-back |
-| v0.5 | Query workbench |
-| v0.6–v0.9 | Reasoning, graphs, refactoring, semantic diff, docs |
-| v1.0 | Protégé-replacement release for daily ontology engineering |
+| v0.4a–b | Simple write-back + Horned-OWL (`ontoindex-owl`) |
+| v0.5 | Query workbench + Manchester MVP |
+| v0.6 | Reasoners + real unsatisfiability explanations |
+| v0.7–v0.7b | Graphs + OBO/ROBOT interop |
+| v0.8–v0.9 | Full Manchester, refactoring, semantic diff |
+| v1.0 | **Protégé-competitive OWL + OBO in VS Code** ([parity checklist](docs/design/PROTEGE_PARITY.md)) |
 
-See [ROADMAP.md](https://github.com/eddiethedean/ontocode/blob/main/docs/design/ROADMAP.md) and [PLAN.md](https://github.com/eddiethedean/ontocode/blob/main/docs/design/PLAN.md) for the full product plan.
+See [ROADMAP.md](https://github.com/eddiethedean/ontocode/blob/main/docs/design/ROADMAP.md), [PLAN.md](https://github.com/eddiethedean/ontocode/blob/main/docs/design/PLAN.md), and [PROTEGE_PARITY.md](docs/design/PROTEGE_PARITY.md) for the full product plan.
 
 ## Repository layout
 

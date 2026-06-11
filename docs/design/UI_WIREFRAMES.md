@@ -147,7 +147,7 @@ Entity Changes:
 ## 7. Reasoner Results Panel
 
 ```text
-REASONER: ELK
+REASONER: whelk (OWL EL)  [Switch to DL v]
 
 Status: Completed
 
@@ -159,4 +159,73 @@ Inferred Changes:
 + PediatricPatient SubClassOf Patient
 
 [Show Inferred Hierarchy] [Explain Selected]
+
+--- Explanation panel (P0 v1.0) ---
+
+EXPLANATION: InvalidEncounter
+
+Unsatisfiable class: ex:InvalidEncounter
+
+Justification:
+1. ex:InvalidEncounter EquivalentTo ex:Foo and ex:Bar
+2. ex:Foo SubClassOf ex:Baz
+3. ex:Bar SubClassOf owl:Nothing
+4. ex:Baz SubClassOf ex:Bar
+
+[Jump to axiom] [Copy] [Re-run DL reasoner]
+```
+
+## 8. Manchester Axiom Editor
+
+```text
+MANCHESTER AXIOM EDITOR — Patient
+
+Axiom type: [SubClassOf v]
+
+Parent class:
+  [ Person                    ] (picker)
+
+Expression (Manchester):
+  hasRecord some MedicalRecord
+
+Expression tree:
+  └ SubClassOf
+      ├ Person
+      └ ObjectSomeValuesFrom
+          ├ hasRecord
+          └ MedicalRecord
+
+Turtle preview:
+  ex:Patient a owl:Class ;
+      rdfs:subClassOf [
+          a owl:Restriction ;
+          owl:onProperty ex:hasRecord ;
+          owl:someValuesFrom ex:MedicalRecord
+      ] .
+
+[Validate] [Apply] [Cancel]
+```
+
+## 9. Quick Axiom Forms
+
+```text
+ADD AXIOM — Patient
+
+Type: [SubClassOf v]
+
+Parent: [ Person          ] [Browse...]
+
+--- or ---
+
+Type: [Object property domain v]
+
+Property: [ hasRecord     ]
+Domain:   [ Patient       ]
+
+Characteristics (object property):
+[ ] Functional  [ ] Inverse functional
+[ ] Transitive  [ ] Symmetric
+[ ] Asymmetric  [ ] Reflexive  [ ] Irreflexive
+
+[Preview Turtle] [Add] [Cancel]
 ```

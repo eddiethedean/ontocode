@@ -7,8 +7,10 @@
 | [vscode-install.md](vscode-install.md) | VS Code users | Install VSIX, troubleshooting |
 | [CONTRIBUTING.md](../CONTRIBUTING.md) | Contributors | Build, test, golden updates |
 | [design/](design/) | Planners / architects | Roadmap, target specs, ADRs (not all implemented) |
+| [design/PROTEGE_PARITY.md](design/PROTEGE_PARITY.md) | v1.0 planners | **Protégé-competitive exit checklist** (P0/P1/P2) |
 
 ## Shipped vs planned
 
 - **Trust for v0.2 behavior:** `docs/lsp-api.md`, `docs/sql-reference.md`, crate `lib.rs` module docs, and tests.
 - **Target / future:** `docs/design/SPEC.md`, `docs/design/LSP_SPEC.md`, `docs/design/ROADMAP.md` — read banners; many features are not built yet.
+- **v1.0 bar:** all P0 items in [design/PROTEGE_PARITY.md](design/PROTEGE_PARITY.md) must be green before release.

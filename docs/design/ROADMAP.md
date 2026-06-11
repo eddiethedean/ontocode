@@ -1,5 +1,7 @@
 # ROADMAP.md
 
+> v1.0 exit bar: [PROTEGE_PARITY.md](PROTEGE_PARITY.md) — all **P0** items green.
+
 ## v0.1 — OntoIndex Foundation
 
 Deliverables:
@@ -51,52 +53,60 @@ Exit criteria:
 
 - User gets useful ontology diagnostics inline.
 
-## v0.4 — Editing
+## v0.4a — Simple write-back
 
 Deliverables:
 
-- create class
-- create object property
-- create data property
-- create annotation property
-- create individual
+- create class / property / individual (basic)
 - edit labels/comments
 - delete entity
-- patch-based write-back
+- patch-based write-back for annotations and simple `SubClassOf`
+- source-location fidelity ([ADR-0006](adr/0006-patch-based-write-back.md))
 
 Exit criteria:
 
-- User can perform basic authoring without Protégé.
+- User can edit labels and simple subclass axioms without Protégé.
 
-## v0.5 — Query Workbench
+## v0.4b — Horned-OWL integration
+
+Deliverables:
+
+- `ontoindex-owl` crate ([ADR-0013](adr/0013-dual-stack-oxigraph-horned-owl.md))
+- Horned-OWL axiom model in catalog
+- Oxigraph ↔ Horned-OWL consistency tests
+- Protégé round-trip fixture suite started
+
+Exit criteria:
+
+- Catalog axioms for editing come from Horned-OWL, not triple grep.
+
+## v0.5 — Query workbench + Manchester MVP
 
 Deliverables:
 
 - SQL query webview
 - SPARQL query webview
-- saved queries
-- result table
-- CSV/JSON export
-- query history
+- saved queries, result export, query history
+- Manchester editor MVP: `SubClassOf` and `EquivalentClasses` complex expressions ([OWL_AUTHORING_SPEC.md](OWL_AUTHORING_SPEC.md))
 
 Exit criteria:
 
-- User can inspect and analyze ontologies interactively.
+- User can query ontologies in VS Code and edit complex subclass/equivalent axioms via Manchester.
 
 ## v0.6 — Reasoning
 
 Deliverables:
 
-- reasoner adapter API
-- ELK adapter
-- HermiT adapter
+- reasoner adapter API ([REASONER_SPEC.md](REASONER_SPEC.md), [ADR-0014](adr/0014-rust-native-reasoners-only.md))
+- `whelk` adapter (OWL EL via whelk-rs)
+- `dl` adapter MVP (consistency + unsatisfiable classes)
 - unsatisfiable classes
-- inferred hierarchy view
-- explanation placeholder
+- inferred hierarchy view (asserted / inferred / combined toggle)
+- **explanation panel** with justification chain for unsatisfiable classes (P0 — not a placeholder)
 
 Exit criteria:
 
-- User can run classification and inspect inferred hierarchy.
+- User can classify, see inferred hierarchy, and understand unsatisfiable classes with real explanations.
 
 ## v0.7 — Visualization
 
@@ -113,53 +123,64 @@ Exit criteria:
 
 - User can navigate ontology visually.
 
-## v0.8 — Refactoring
+## v0.7b — OBO & ROBOT interop
 
 Deliverables:
 
-- safe IRI rename
-- namespace migration
-- find usages
-- move entity between files
-- extract module
+- OBO format read/write ([OBO_ROBOT_SPEC.md](OBO_ROBOT_SPEC.md))
+- `ontoindex robot validate|merge|report` wrappers
+- OBO id rendering in explorer and Manchester autocomplete
+- `examples/obo-workflow/` fixture repo
+
+Exit criteria:
+
+- Biomedical maintainer can edit OBO in VS Code and run ROBOT in CI alongside OntoCode.
+
+## v0.8 — Refactoring + full Manchester
+
+Deliverables:
+
+- safe IRI rename, namespace migration, find usages, move entity, extract module
+- full Manchester axiom catalog: restrictions, disjoint, property chains view
 - preview changes
 
 Exit criteria:
 
-- User can safely refactor ontology repositories.
+- User can safely refactor ontology repositories and author full OWL 2 DL expression sets via hybrid UI.
 
-## v0.9 — Workflow and Documentation
+## v0.9 — Workflow and documentation
 
 Deliverables:
 
-- semantic diff
+- semantic diff ([SEMANTIC_DIFF_SPEC.md](SEMANTIC_DIFF_SPEC.md))
 - Git branch comparison
 - breaking change report
-- CI validation command
-- Markdown docs export
-- HTML docs export
+- **incremental workspace index** (required — [ARCHITECTURE.md](ARCHITECTURE.md))
+- Markdown/HTML docs export
 - PR summary generation
 
 Exit criteria:
 
-- User can use OntoCode in team development workflows.
+- User can use OntoCode in team development workflows at scale.
 
-## v1.0.0 — Protégé Replacement Release
+## v1.0.0 — Protégé-competitive release
 
 Deliverables:
 
-- complete routine ontology CRUD
-- axiom editing
-- imports management
-- query workbench
-- reasoner integration
-- graph visualization
-- diagnostics
-- semantic diff
-- refactoring
-- docs export
-- stable CLI/API/LSP
+- All [PROTEGE_PARITY.md](PROTEGE_PARITY.md) **P0** items green
+- Stable CLI/API/LSP
+- VS Code Marketplace publish
+- Migration guide from Protégé (honest parity table)
+- `examples/protege-roundtrip/` ontology set
+- Performance benchmarks document
 
 Exit criteria:
 
-- A daily ontology engineer can complete routine work in VS Code without opening Protégé.
+> Daily ontology engineering (OWL 2 DL + OBO maintenance) is completable in VS Code.
+> Protégé is required only for **P2** features in [PROTEGE_PARITY.md](PROTEGE_PARITY.md).
+
+## Implementation sequencing
+
+```text
+v0.4a → v0.4b → v0.5 → v0.6 → v0.7 → v0.7b → v0.8 → v0.9 → v1.0
+```

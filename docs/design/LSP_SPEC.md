@@ -125,7 +125,11 @@ Global entity search.
 | `ontoindex/sparql` | Planned |
 | `ontoindex/getGraph` | Planned |
 | `ontoindex/getSemanticDiff` | Planned |
-| `ontoindex/runReasoner` | Planned |
+| `ontoindex/runReasoner` | Planned (v0.6) |
+| `ontoindex/applyAxiomPatch` | Planned (v0.4a+) |
+| `ontoindex/parseManchester` | Planned (v0.5) |
+| `ontoindex/getExplanation` | Planned (v0.6) |
+| `ontoindex/runRobot` | Planned (v0.7b) |
 
 ### `ontoindex/indexWorkspace`
 
@@ -158,6 +162,25 @@ Returns semantic diff between two refs or catalogs.
 ### `ontoindex/runReasoner`
 
 Runs configured reasoner.
+
+### `ontoindex/applyAxiomPatch`
+
+Apply a Horned-OWL axiom patch to a document. Used by quick forms and Manchester editor.
+See [OWL_AUTHORING_SPEC.md](OWL_AUTHORING_SPEC.md).
+
+**Params:** document URI, axiom patch (JSON), preview-only flag.
+
+### `ontoindex/parseManchester`
+
+Parse Manchester OWL Syntax expression; return diagnostics and normalized form.
+
+### `ontoindex/getExplanation`
+
+Return justification chain for unsatisfiable class. See [REASONER_SPEC.md](REASONER_SPEC.md).
+
+### `ontoindex/runRobot`
+
+Run ROBOT subcommand (`validate`, `merge`, `report`). See [OBO_ROBOT_SPEC.md](OBO_ROBOT_SPEC.md).
 
 ## 6. Error Handling
 

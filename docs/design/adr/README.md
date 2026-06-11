@@ -7,22 +7,33 @@ Canonical ADRs live in this directory. The former `adrs/` folder was merged here
 | ADR | Title | Status |
 |-----|-------|--------|
 | [0001](0001-use-rust-for-ontoindex.md) | Use Rust for OntoIndex | Accepted |
-| [0002](0002-use-horned-owl.md) | Use Horned-OWL for OWL modeling | **Superseded** (v0.2 uses Oxigraph extraction) |
+| [0002](0002-use-horned-owl.md) | Use Horned-OWL for OWL modeling | **Superseded by ADR-0013** (v0.4b+) |
 | [0003](0003-use-oxigraph.md) | Use Oxigraph | Accepted |
 | [0004](0004-use-datafusion-for-sql.md) | Use DataFusion for SQL | **Superseded** (v0.2 uses sqlparser virtual tables) |
 | [0005](0005-local-first-by-default.md) | Local-first by default | Accepted |
-| [0006](0006-patch-based-write-back.md) | Patch-based write-back | Accepted (planned v0.4) |
+| [0006](0006-patch-based-write-back.md) | Patch-based write-back | Accepted (v0.4a+) |
 | [0007](0007-language-server-boundary.md) | Language server boundary | Accepted |
-| [0008](0008-reasoner-adapters-not-built-in-reasoner.md) | Reasoner adapters | Accepted (planned) |
-| [0009](0009-semantic-diff-as-core-feature.md) | Semantic diff as core feature | Accepted (planned) |
+| [0008](0008-reasoner-adapters-not-built-in-reasoner.md) | Reasoner adapters | Accepted (v0.6) |
+| [0009](0009-semantic-diff-as-core-feature.md) | Semantic diff as core feature | Accepted (v0.9) |
 | [0010](0010-ai-features-opt-in.md) | AI features opt-in | Accepted (planned) |
 | [0011](0011-use-sqlparser-for-sql.md) | Use sqlparser for SQL virtual tables | Accepted |
 | [0012](0012-lsp-json-snake-case-enums.md) | LSP JSON snake_case enums | Accepted |
+| [0013](0013-dual-stack-oxigraph-horned-owl.md) | Dual stack Oxigraph + Horned-OWL | Accepted (v0.4b+) |
+| [0014](0014-rust-native-reasoners-only.md) | Rust-native reasoners only (no JVM) | Accepted |
 
-## Current stack (v0.2)
+## Current stack
+
+### v0.2 (shipped)
 
 - **Parsing / triple store:** Oxigraph ([ADR-0003](0003-use-oxigraph.md))
-- **SQL-like queries:** sqlparser + virtual tables in `ontoindex-query` ([ADR-0011](0011-use-sqlparser-for-sql.md))
+- **SQL-like queries:** sqlparser + virtual tables ([ADR-0011](0011-use-sqlparser-for-sql.md))
 - **Editor integration:** LSP stdio ([ADR-0007](0007-language-server-boundary.md))
+- **LSP wire format:** snake_case enums ([ADR-0012](0012-lsp-json-snake-case-enums.md))
 
-Horned-OWL and DataFusion remain documented for historical context and may be revisited for OWL-native editing or heavier analytics later.
+### v1.0 target
+
+- **OWL modeling / write-back:** Horned-OWL via `ontoindex-owl` ([ADR-0013](0013-dual-stack-oxigraph-horned-owl.md))
+- **Reasoning:** Rust-only — `whelk-rs`, `reasonable`, in-tree DL ([ADR-0014](0014-rust-native-reasoners-only.md), [REASONER_SPEC.md](../REASONER_SPEC.md))
+- **Exit bar:** [PROTEGE_PARITY.md](../PROTEGE_PARITY.md)
+
+Horned-OWL and DataFusion ADRs remain for historical context; v1.0 uses Oxigraph + Horned-OWL + sqlparser per ADR-0013 and ADR-0011.

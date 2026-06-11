@@ -29,15 +29,15 @@ Examples:
 - custom documentation portals
 
 ### 2.3 Reasoner Plugins
-Integrate external reasoners.
+Integrate **native** reasoners (Rust binary or WASM). JVM subprocess reasoners are **not supported** ([ADR-0014](adr/0014-rust-native-reasoners-only.md)).
 
 Examples:
 
-- ELK
-- HermiT
-- Pellet
-- RDFox
-- custom enterprise reasoners
+- custom Rust reasoner binary implementing the plugin protocol
+- WASM reasoner module (future)
+- organization-specific validation reasoners
+
+Built-in adapters (`whelk`, `dl`, `reasonable`) ship in `ontoindex-reasoner` — see [REASONER_SPEC.md](REASONER_SPEC.md).
 
 ### 2.4 Query Function Plugins
 Add functions to the SQL-like query layer.
@@ -88,3 +88,15 @@ pub trait ExporterPlugin {
 v1.0 plugin APIs should be semver-stable.
 
 Before v1.0, plugin APIs may change.
+
+## 7. v1.0 reference plugins (P1)
+
+Ship with v1.0 as examples and optional builtins:
+
+| Plugin | Kind | Purpose |
+|--------|------|---------|
+| `naming-convention-validator` | Validator | Enforce IRI/label naming rules |
+| `markdown-docs-exporter` | Exporter | Markdown ontology docs |
+| `shacl-validator` | Validator | SHACL via adapter ([SHACL_SPEC.md](SHACL_SPEC.md)) |
+
+These demonstrate the plugin API; they do not replace Protégé's plugin catalog (P2 in [PROTEGE_PARITY.md](PROTEGE_PARITY.md)).

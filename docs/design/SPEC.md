@@ -1,5 +1,9 @@
 # SPEC.md — OntoIndex and OntoCode Technical Specification
 
+> **Related specs:** [PROTEGE_PARITY.md](PROTEGE_PARITY.md) (v1.0 exit bar),
+> [OWL_AUTHORING_SPEC.md](OWL_AUTHORING_SPEC.md), [OBO_ROBOT_SPEC.md](OBO_ROBOT_SPEC.md),
+> [REASONER_SPEC.md](REASONER_SPEC.md), [SHACL_SPEC.md](SHACL_SPEC.md)
+
 ## 1. System Overview
 
 The system consists of four major layers:
@@ -14,17 +18,21 @@ The system consists of four major layers:
 ```text
 ontoindex/
 ├── crates/
-│   ├── ontoindex-core
-│   ├── ontoindex-parser
-│   ├── ontoindex-catalog
-│   ├── ontoindex-query
-│   ├── ontoindex-diagnostics
-│   ├── ontoindex-diff
-│   ├── ontoindex-docs
-│   ├── ontoindex-reasoner
-│   ├── ontoindex-lsp
-│   └── ontoindex-cli
+│   ├── ontoindex-core          # v0.2
+│   ├── ontoindex-parser        # v0.2 — Oxigraph RDF
+│   ├── ontoindex-owl           # v0.4b — Horned-OWL facade
+│   ├── ontoindex-catalog       # v0.2
+│   ├── ontoindex-query         # v0.2
+│   ├── ontoindex-diagnostics   # v0.3
+│   ├── ontoindex-diff          # v0.9
+│   ├── ontoindex-docs          # v0.9
+│   ├── ontoindex-reasoner      # v0.6 — Rust-only: whelk-rs, reasonable, in-tree DL
+│   ├── ontoindex-robot         # v0.7b — ROBOT CLI wrappers
+│   ├── ontoindex-lsp           # v0.2
+│   └── ontoindex-cli           # v0.2
 ├── examples/
+│   ├── protege-roundtrip/      # v1.0 — OWL round-trip fixtures
+│   └── obo-workflow/           # v0.7b — OBO + ROBOT demo
 ├── benches/
 ├── tests/
 └── docs/
@@ -130,6 +138,8 @@ Required virtual tables:
 - `orphan_classes`
 - `deprecated_usages`
 
+**v1.0:** Tables `restrictions`, `equivalent_class_axioms`, `disjoint_class_axioms`, `domain_axioms`, `range_axioms` are populated from **Horned-OWL** ([ADR-0013](adr/0013-dual-stack-oxigraph-horned-owl.md)), not triple pattern matching.
+
 ## 6. Query Interfaces
 
 ### CLI
@@ -141,6 +151,8 @@ ontoindex sparql . "SELECT ?s ?p ?o WHERE { ?s ?p ?o } LIMIT 10"
 ontoindex validate .
 ontoindex diff main..feature
 ontoindex docs . --format markdown --out docs/ontology
+ontoindex robot validate ./ontology
+ontoindex robot merge --inputs a.owl b.owl --output merged.owl
 ```
 
 ### Rust API
@@ -225,3 +237,7 @@ Required operations:
 - semantic diff regression tests
 - parser fuzz tests
 - performance benchmarks
+- **Protégé round-trip tests** (`examples/protege-roundtrip/`)
+- **Manchester parse corpus** tests
+- **ROBOT interop smoke** tests (when `robot` on PATH)
+- **Oxigraph ↔ Horned-OWL consistency** tests

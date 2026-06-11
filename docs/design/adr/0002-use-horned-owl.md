@@ -2,7 +2,7 @@
 
 ## Status
 
-**Superseded** — v0.1–v0.2 use Oxigraph-based RDF parsing and entity extraction ([ADR-0003](0003-use-oxigraph.md)). Horned-OWL may be revisited for OWL-native authoring and write-back (v0.4+).
+**Superseded by [ADR-0013](0013-dual-stack-oxigraph-horned-owl.md) for v0.4b+** — v0.1–v0.2 used Oxigraph-based RDF parsing and entity extraction only ([ADR-0003](0003-use-oxigraph.md)).
 
 ## Context
 
@@ -27,4 +27,5 @@ Negative:
 
 ## Superseded by
 
-Oxigraph + catalog entity extraction for the shipped MVP. See [adr/README.md](README.md).
+- v0.1–v0.2: Oxigraph + catalog entity extraction (MVP)
+- v0.4b+: [ADR-0013](0013-dual-stack-oxigraph-horned-owl.md) dual stack (Oxigraph + Horned-OWL)

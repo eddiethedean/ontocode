@@ -4,7 +4,7 @@
 >
 > **Implemented today:** workspace scanner, Oxigraph-based parsing, in-memory catalog and triple store,
 > SQL-like queries via `sqlparser`, SPARQL, CLI, LSP explorer integration.
-> **Not yet implemented:** diagnostics layer, diff layer, docs export, Horned-OWL modeling, DataFusion SQL.
+> **v0.4b+ target:** Horned-OWL layer per [ADR-0013](adr/0013-dual-stack-oxigraph-horned-owl.md).
 > See [docs/lsp-api.md](../lsp-api.md) and [adr/README.md](adr/README.md) for current decisions.
 
 ## 1. Architecture Goals
@@ -12,14 +12,14 @@
 The architecture must support:
 
 - Fast local indexing
-- Incremental updates
-- Multiple ontology syntaxes
+- **Incremental updates (v0.9 requirement)**
+- Multiple ontology syntaxes (including OBO at v0.7b)
 - Queryable semantic catalog
 - Editor integration
 - Reasoner integration
 - Safe write-back to source files
 - Semantic diffing
-- Future plugin ecosystem
+- Plugin ecosystem (v1.0 API + reference plugins)
 
 ## 2. High-Level Architecture
 
@@ -39,14 +39,17 @@ The architecture must support:
 +---------------------------+
 |       OntoIndex Core      |
 | catalog/query/diagnostics |
+| diff/docs/reasoner/robot  |
 +-------------+-------------+
               |
-              v
-+---------------------------+
-|   Parser + RDF/OWL Layer  |
-| Oxigraph (+ sqlparser)    |
-+-------------+-------------+
-              |
+      +-------+-------+
+      v               v
++-----------+   +-----------+
+| Oxigraph  |   | HornedOWL |
+| RDF/SPARQL|   | OWL axioms|
++-----+-----+   +-----+-----+
+      |               |
+      +───────┬───────┘
               v
 +---------------------------+
 |     Workspace Files       |
@@ -54,133 +57,95 @@ The architecture must support:
 +---------------------------+
 ```
 
-## 3. OntoIndex Internal Modules
+**Sync rule ([ADR-0013](adr/0013-dual-stack-oxigraph-horned-owl.md)):** Catalog entities/axioms for edit and diff come from Horned-OWL; triple counts and SPARQL from Oxigraph; CI consistency tests detect drift.
 
-### 3.1 Workspace Scanner
-Responsible for:
+## 3. OntoIndex Crate Layout
 
-- Recursive discovery
-- Ignore rules
-- format detection
-- content hashing
-- dependency tracking
-- change detection
+| Crate | Status | Role |
+|-------|--------|------|
+| `ontoindex-core` | v0.2 | Types, scanner, limits, path jail |
+| `ontoindex-parser` | v0.2 | RDF parse via Oxigraph |
+| `ontoindex-owl` | planned v0.4b | Horned-OWL facade |
+| `ontoindex-catalog` | v0.2 | Index builder, entity API |
+| `ontoindex-query` | v0.2 | SQL virtual tables, SPARQL |
+| `ontoindex-diagnostics` | planned v0.3 | Lint rules, quick fixes |
+| `ontoindex-diff` | planned v0.9 | Semantic diff |
+| `ontoindex-docs` | planned v0.9 | Markdown/HTML export |
+| `ontoindex-reasoner` | planned v0.6 | Rust adapters: whelk-rs, reasonable, in-tree DL |
+| `ontoindex-robot` | planned v0.7b | ROBOT CLI wrappers |
+| `ontoindex-lsp` | v0.2 | Language server |
+| `ontoindex-cli` | v0.2 | `ontoindex` binary |
 
-### 3.2 Parser Layer
-Responsible for:
+## 4. OntoIndex Internal Modules
 
-- RDF parsing
-- OWL parsing
-- namespace extraction
-- source mapping
-- parse error recovery
+### 4.1 Workspace Scanner
+- Recursive discovery, ignore rules, format detection, content hashing, dependency tracking, change detection
 
-### 3.3 Catalog Layer
-Responsible for normalized semantic tables:
+### 4.2 Parser Layer (dual)
+- **Oxigraph:** RDF parse, triple store, SPARQL
+- **Horned-OWL (v0.4b+):** OWL 2 axiom model, Manchester, round-trip editing
 
-- ontologies
-- entities
-- axioms
-- annotations
-- imports
-- diagnostics
+### 4.3 Catalog Layer
+- Ontologies, entities, axioms (from Horned-OWL), annotations, imports, diagnostics
 
-### 3.4 Query Layer
+### 4.4 Query Layer
+- **v0.2:** `ontoindex-query` — virtual tables + SPARQL
+- **v1.0:** joins, aggregations, ontology helper functions
 
-**v0.2:** implemented (`ontoindex-query` — virtual tables + SPARQL over Oxigraph store).
+### 4.5 Diagnostics Layer (v0.3+)
+- Syntax, semantic, and quality rules; quick fixes; Problems panel
 
-Responsible for:
+### 4.6 Diff Layer (v0.9+)
+- Axiom-level semantic diff, Git integration, PR summaries
 
-- SQL-style queries
-- SPARQL pass-through
-- ontology helper functions
-- result serialization
+### 4.7 Docs Layer (v0.9+)
+- Markdown/HTML export, entity pages
 
-### 3.5 Diagnostics Layer
+### 4.8 Reasoner Layer (v0.6+)
+- In-process Rust adapters; explanation cache — see [REASONER_SPEC.md](REASONER_SPEC.md), [ADR-0014](adr/0014-rust-native-reasoners-only.md)
 
-**v0.2:** not implemented (planned v0.3).
+## 5. OntoCode Internal Modules
 
-Responsible for:
+### 5.1 Extension Host
+Commands, views, webviews, language client, settings.
 
-- syntax diagnostics
-- semantic diagnostics
-- quality rules
-- quick fixes
+### 5.2 Tree Views
+Explorer (asserted/inferred toggle), diagnostics, query history.
 
-### 3.6 Diff Layer
+### 5.3 Webviews
+Graph visualization, query workbench, semantic diff, Manchester axiom editor, explanation panel.
 
-**v0.2:** not implemented.
+### 5.4 Language Client
+LSP lifecycle; protocol guards; v1.0 authoring methods.
 
-Responsible for:
+## 6. Index Lifecycle
 
-- semantic comparison
-- breaking change detection
-- Git integration
-- PR summaries
+1. User opens workspace → LSP starts
+2. Scanner discovers files → parse via Oxigraph + Horned-OWL
+3. Catalog updated → diagnostics published
+4. UI refreshes → queries/reasoner/refactor use catalog
+5. **v0.9:** incremental update on content hash change only
 
-### 3.7 Docs Layer
+## 7. Write-Back Architecture
 
-**v0.2:** not implemented.
+Per [ADR-0006](adr/0006-patch-based-write-back.md) and [OWL_AUTHORING_SPEC.md](OWL_AUTHORING_SPEC.md):
 
-Responsible for:
+- Patches from Horned-OWL axiom objects
+- Preserve comments and formatting
+- Preview for multi-file refactors
+- VS Code undo stack
 
-- Markdown export
-- HTML export
-- entity pages
-- diagrams
-- reports
+## 8. Performance Strategy
 
-## 4. OntoCode Internal Modules
-
-### 4.1 Extension Host
-Registers commands, views, webviews, language clients, and configuration.
-
-### 4.2 Tree Views
-Render ontology explorer, import graph, diagnostics, and query history.
-
-### 4.3 Webviews
-Render graph visualization, query workbench, semantic diff, and entity inspector.
-
-### 4.4 Language Client
-Manages LSP lifecycle and communication with `ontoindex-lsp`.
-
-## 5. Index Lifecycle
-
-1. User opens workspace.
-2. OntoCode starts language server.
-3. Language server scans workspace.
-4. OntoIndex parses changed ontology files.
-5. Catalog is updated.
-6. Diagnostics are published (planned v0.3).
-7. Tree views and panels refresh.
-8. Queries and refactors use the catalog.
-
-## 6. Write-Back Architecture
-
-Ontology editing must preserve user trust.
-
-Rules:
-
-- Never destructively rewrite entire files unless explicitly requested.
-- Prefer source-range patches.
-- Preserve comments where possible.
-- Preserve formatting where possible.
-- Show preview for multi-file refactors.
-- All refactors must be undoable through VS Code.
-
-## 7. Performance Strategy
-
-- Incremental index by content hash
+- Incremental index by content hash (**v0.9 required**)
 - Parallel parse independent files
-- Store normalized catalog in memory
-- Optional disk cache for large workspaces
-- Lazy-load expensive inferred views
-- Avoid blocking VS Code extension host
+- In-memory catalog; optional disk cache
+- Lazy-load inferred views after reasoner run
+- Non-blocking extension host
 
-## 8. Security Model
+## 9. Security Model
 
-- Local-first by default
+- Local-first by default ([ADR-0005](adr/0005-local-first-by-default.md))
 - No telemetry by default
-- No ontology upload without explicit user action
-- AI features opt-in
-- Workspace trust respected
+- Workspace trust for `lspPath`, `ontocode.reasoner.default`, `robotPath`
+- See [SECURITY.md](../SECURITY.md)

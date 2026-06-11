@@ -1,6 +1,6 @@
 # OntoIndex LSP API (implemented in v0.2)
 
-This document describes **what ships today** in `ontoindex-lsp`. For the long-term target design, see [LSP_SPEC.md](design/LSP_SPEC.md) (marked as planned/partial).
+This document describes **what ships today** in `ontoindex-lsp`. For the **v1.0 target** (including `applyAxiomPatch`, `parseManchester`, `getExplanation`, `runRobot`), see [LSP_SPEC.md](design/LSP_SPEC.md) — those methods are planned, not implemented in v0.2.
 
 ## Wire format (v0.2)
 

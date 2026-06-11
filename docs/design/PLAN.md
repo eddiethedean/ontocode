@@ -67,29 +67,24 @@ Primary capabilities:
 
 v1.0.0 should be positioned as:
 
-> A serious Protégé replacement for ontology-as-code workflows inside VS Code.
+> A Protégé-competitive ontology workbench for OWL 2 DL and OBO maintenance inside VS Code.
 
-The v1.0.0 release must allow daily ontology engineering work without requiring users to open Protégé for routine tasks.
+**Canonical checklist:** [PROTEGE_PARITY.md](PROTEGE_PARITY.md) — all **P0** items must be green before release.
 
-Required v1.0.0 features:
+Exit criterion:
 
-- Full workspace indexing
-- Full ontology entity browsing
-- Class/property/individual CRUD
-- Annotation editing
-- OWL axiom editing
-- Imports management
-- SPARQL query panel
-- SQL-like ontology query panel
-- Reasoner adapter support
-- Inferred hierarchy display
-- Unsatisfiable class reporting
-- Entity usage lookup
-- Safe IRI rename
-- Semantic diff
-- Git-aware review workflow
-- Documentation export
-- CI validation command
+> Daily ontology engineering (OWL 2 DL + OBO maintenance) is completable in VS Code.
+> Protégé is required only for **P2** features in PROTEGE_PARITY.md.
+
+P0 highlights (see parity matrix for full list):
+
+- Hybrid authoring: quick forms + Manchester editor ([OWL_AUTHORING_SPEC.md](OWL_AUTHORING_SPEC.md))
+- Horned-OWL + Oxigraph dual stack ([ADR-0013](adr/0013-dual-stack-oxigraph-horned-owl.md))
+- Rust-native reasoners: `whelk` (EL) + `dl` (OWL 2 DL) with **real** clash-trace explanations ([REASONER_SPEC.md](REASONER_SPEC.md), [ADR-0014](adr/0014-rust-native-reasoners-only.md))
+- Full LSP surface ([SPEC.md](SPEC.md) §9)
+- Query workbench, graphs, semantic diff, refactoring
+- OBO format + ROBOT interop ([OBO_ROBOT_SPEC.md](OBO_ROBOT_SPEC.md))
+- VS Code Marketplace + migration guide from Protégé
 
 ## 5. Target Users
 
@@ -99,7 +94,7 @@ Required v1.0.0 features:
 - Knowledge graph engineers
 - Semantic web developers
 - Data governance engineers
-- Biomedical ontology maintainers
+- **Biomedical ontology maintainers** — OBO + ROBOT pipelines ([OBO_ROBOT_SPEC.md](OBO_ROBOT_SPEC.md))
 - Enterprise taxonomy/modeling teams
 - Standards authors
 - AI/LLM knowledge modeling teams
@@ -121,6 +116,7 @@ Key differentiators:
 - Git-native semantic diffs
 - CI-friendly validation
 - VS Code-native editing
+- **Hybrid authoring without leaving VS Code** (forms + Manchester)
 - Queryable ontology repository model
 - Repo-wide refactoring
 - AI-friendly schema and docs generation
@@ -129,6 +125,7 @@ Key differentiators:
 - File-aware diagnostics
 - Documentation generation
 - Extension/plugin architecture
+- **ROBOT interop** for biomedical release pipelines (not reimplementation)
 
 ## 7. Positioning
 
@@ -145,13 +142,14 @@ Short positioning:
 - v0.1: OntoIndex scanner, parser, catalog, CLI
 - v0.2: OntoCode explorer and entity inspector
 - v0.3: diagnostics and validation
-- v0.4: editing and write-back
-- v0.5: query workbench
-- v0.6: reasoner adapters
+- v0.4a–b: simple write-back + Horned-OWL (`ontoindex-owl`)
+- v0.5: query workbench + Manchester MVP
+- v0.6: reasoners + real explanations
 - v0.7: graph visualization
-- v0.8: refactoring
-- v0.9: semantic diff, docs, CI
-- v1.0: Protégé replacement release
+- v0.7b: OBO + ROBOT interop
+- v0.8: refactoring + full Manchester
+- v0.9: semantic diff, incremental index, docs
+- v1.0: [PROTEGE_PARITY.md](PROTEGE_PARITY.md) P0 green + Marketplace
 
 ## 9. Non-Goals for Early Releases
 
@@ -162,14 +160,17 @@ Short positioning:
 - Enterprise identity management
 - Custom visual graph database hosting
 - Reimplementing a triplestore from scratch
+- **Reimplementing ROBOT** (interop only — [OBO_ROBOT_SPEC.md](OBO_ROBOT_SPEC.md))
+- **JVM reasoners** (ELK, HermiT, Pellet — [ADR-0014](adr/0014-rust-native-reasoners-only.md))
 
 ## 10. Strategic Implementation Guidance
 
 Build on existing mature components:
 
-- Use **Horned-OWL** for OWL 2 parsing/modeling where possible.
-- Use **Oxigraph** for RDF/SPARQL infrastructure.
-- Use **DataFusion** or equivalent for SQL-style query execution.
+- Use **Horned-OWL** for OWL 2 axiom modeling, Manchester, and write-back ([ADR-0013](adr/0013-dual-stack-oxigraph-horned-owl.md)).
+- Use **Oxigraph** for RDF/SPARQL infrastructure ([ADR-0003](adr/0003-use-oxigraph.md)).
+- Use **sqlparser** virtual tables for SQL; add joins/aggregations at v1.0 ([ADR-0011](adr/0011-use-sqlparser-for-sql.md)).
+- Use **Rust reasoners** only: `whelk-rs`, `reasonable`, in-tree DL in `ontoindex-reasoner` ([ADR-0014](adr/0014-rust-native-reasoners-only.md), [REASONER_SPEC.md](REASONER_SPEC.md)).
 - Use a Rust language-server backend for editor services.
 - Use TypeScript only for VS Code UI orchestration.
 - Keep OntoIndex useful as a standalone CLI even without OntoCode.

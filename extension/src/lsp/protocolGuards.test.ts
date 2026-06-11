@@ -1,5 +1,6 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
+import { fixtureCatalogSnapshot } from "../test/fixtureSnapshot";
 import {
   isCatalogSnapshot,
   isIndexWorkspaceResult,
@@ -22,6 +23,20 @@ describe("isCatalogSnapshot", () => {
       isCatalogSnapshot({
         documents: [],
         entities: [],
+      }),
+      false
+    );
+  });
+
+  it("accepts fixture snapshot wire format", () => {
+    assert.equal(isCatalogSnapshot(fixtureCatalogSnapshot), true);
+  });
+
+  it("rejects PascalCase entity kinds", () => {
+    assert.equal(
+      isCatalogSnapshot({
+        ...fixtureCatalogSnapshot,
+        entities: [{ ...fixtureCatalogSnapshot.entities[0]!, kind: "Class" }],
       }),
       false
     );

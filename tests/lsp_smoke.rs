@@ -84,6 +84,25 @@ fn lsp_indexes_fixture_workspace() {
         entities.iter().filter_map(|e| e.get("iri").and_then(|v| v.as_str())).collect();
     assert!(iris.contains(&"http://example.org/people#Person"));
 
+    let person = entities
+        .iter()
+        .find(|e| e.get("iri").and_then(|v| v.as_str()) == Some("http://example.org/people#Person"))
+        .expect("Person entity in snapshot");
+    assert_eq!(person.get("kind").and_then(|v| v.as_str()), Some("class"));
+
+    let documents = snapshot
+        .get("result")
+        .and_then(|r| r.get("documents"))
+        .and_then(|d| d.as_array())
+        .expect("documents array");
+    let example_doc = documents
+        .iter()
+        .find(|d| {
+            d.get("path").and_then(|v| v.as_str()).is_some_and(|p| p.ends_with("example.ttl"))
+        })
+        .expect("example.ttl in documents");
+    assert_eq!(example_doc.get("parse_status").and_then(|v| v.as_str()), Some("ok"));
+
     send_request(
         &mut stdin,
         4,

@@ -1,3 +1,7 @@
+//! RDF/OWL parsing into [`ontoindex_core`] entities via Oxigraph.
+//!
+//! Entry point: [`parse_ontology_file`].
+
 mod rdf;
 mod vocab;
 

@@ -5,7 +5,7 @@
 > **Implemented today:** workspace scanner, Oxigraph-based parsing, in-memory catalog and triple store,
 > SQL-like queries via `sqlparser`, SPARQL, CLI, LSP explorer integration.
 > **Not yet implemented:** diagnostics layer, diff layer, docs export, Horned-OWL modeling, DataFusion SQL.
-> See [docs/lsp-api.md](../docs/lsp-api.md) and [adr/README.md](adr/README.md) for current decisions.
+> See [docs/lsp-api.md](../lsp-api.md) and [adr/README.md](adr/README.md) for current decisions.
 
 ## 1. Architecture Goals
 

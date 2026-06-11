@@ -1,6 +1,6 @@
 use crate::protocol::{
     CatalogSnapshot, GetEntityParams, GetEntityResult, IndexWorkspaceParams, IndexWorkspaceResult,
-    OntoIndexError,
+    LspErrorPayload,
 };
 use crate::state::{path_to_uri, resolve_workspace_for_index, ServerState};
 use lsp_types::{
@@ -46,49 +46,51 @@ pub fn handle_initialize(state: &ServerState, params: InitializeParams) -> Initi
 pub fn handle_index_workspace(
     state: &ServerState,
     params: IndexWorkspaceParams,
-) -> Result<IndexWorkspaceResult, OntoIndexError> {
+) -> Result<IndexWorkspaceResult, LspErrorPayload> {
     let workspace = match params.workspace_uri.as_deref() {
         Some(uri) => resolve_workspace_for_index(uri, state.workspace_root().as_deref())
-            .map_err(OntoIndexError::index_failed)?,
-        None => state
-            .workspace_root()
-            .ok_or_else(|| OntoIndexError::index_failed("no workspace URI provided".to_string()))?,
+            .map_err(LspErrorPayload::index_failed)?,
+        None => state.workspace_root().ok_or_else(|| {
+            LspErrorPayload::index_failed("no workspace URI provided".to_string())
+        })?,
     };
 
     let (stats, indexed_at) =
-        state.index_workspace(workspace).map_err(OntoIndexError::index_failed)?;
+        state.index_workspace(workspace).map_err(LspErrorPayload::index_failed)?;
 
     Ok(IndexWorkspaceResult { stats, indexed_at })
 }
 
-pub fn handle_get_catalog_snapshot(state: &ServerState) -> Result<CatalogSnapshot, OntoIndexError> {
+pub fn handle_get_catalog_snapshot(
+    state: &ServerState,
+) -> Result<CatalogSnapshot, LspErrorPayload> {
     state
         .with_catalog(|catalog| CatalogSnapshot {
             documents: catalog.data().documents.clone(),
             entities: catalog.data().entities.clone(),
             hierarchy: catalog.class_hierarchy(),
         })
-        .ok_or_else(OntoIndexError::not_indexed)
+        .ok_or_else(LspErrorPayload::not_indexed)
 }
 
 pub fn handle_get_entity(
     state: &ServerState,
     params: GetEntityParams,
-) -> Result<GetEntityResult, OntoIndexError> {
+) -> Result<GetEntityResult, LspErrorPayload> {
     state
         .with_catalog(|catalog| {
             catalog
                 .entity_detail(&params.iri)
                 .map(|detail| GetEntityResult { detail })
-                .ok_or_else(|| OntoIndexError::not_found(&params.iri))
+                .ok_or_else(|| LspErrorPayload::not_found(&params.iri))
         })
-        .ok_or_else(OntoIndexError::not_indexed)?
+        .ok_or_else(LspErrorPayload::not_indexed)?
 }
 
 pub fn handle_hover(state: &ServerState, params: HoverParams) -> Option<Hover> {
     let path = lsp_document_path(state, &params.text_document_position_params.text_document.uri)?;
     let position = params.text_document_position_params.position;
-    let content = std::fs::read_to_string(&path).ok()?;
+    let content = state.document_text(&path)?;
     let iri = iri_at_position(&content, position)?;
 
     state.with_catalog(|catalog| {
@@ -209,7 +211,7 @@ pub fn handle_goto_definition(
 ) -> Option<GotoDefinitionResponse> {
     let path = lsp_document_path(state, &params.text_document_position_params.text_document.uri)?;
     let position = params.text_document_position_params.position;
-    let content = std::fs::read_to_string(&path).ok()?;
+    let content = state.document_text(&path)?;
     let iri = iri_at_position(&content, position)?;
 
     state.with_catalog(|catalog| {
@@ -233,26 +235,26 @@ pub fn handle_custom_request(
     state: &ServerState,
     method: &str,
     params: Option<Value>,
-) -> Result<Value, OntoIndexError> {
+) -> Result<Value, LspErrorPayload> {
     match method {
         "ontoindex/indexWorkspace" => {
             let params: IndexWorkspaceParams =
                 serde_json::from_value(params.unwrap_or(Value::Null))
-                    .map_err(|e| OntoIndexError::index_failed(format!("invalid params: {e}")))?;
+                    .map_err(|e| LspErrorPayload::index_failed(format!("invalid params: {e}")))?;
             let result = handle_index_workspace(state, params)?;
-            serde_json::to_value(result).map_err(|e| OntoIndexError::index_failed(e.to_string()))
+            serde_json::to_value(result).map_err(|e| LspErrorPayload::index_failed(e.to_string()))
         }
         "ontoindex/getCatalogSnapshot" => {
             let result = handle_get_catalog_snapshot(state)?;
-            serde_json::to_value(result).map_err(|e| OntoIndexError::index_failed(e.to_string()))
+            serde_json::to_value(result).map_err(|e| LspErrorPayload::index_failed(e.to_string()))
         }
         "ontoindex/getEntity" => {
             let params: GetEntityParams = serde_json::from_value(params.unwrap_or(Value::Null))
-                .map_err(|e| OntoIndexError::index_failed(format!("invalid params: {e}")))?;
+                .map_err(|e| LspErrorPayload::index_failed(format!("invalid params: {e}")))?;
             let result = handle_get_entity(state, params)?;
-            serde_json::to_value(result).map_err(|e| OntoIndexError::index_failed(e.to_string()))
+            serde_json::to_value(result).map_err(|e| LspErrorPayload::index_failed(e.to_string()))
         }
-        _ => Err(OntoIndexError::index_failed(format!("unknown method: {method}"))),
+        _ => Err(LspErrorPayload::index_failed(format!("unknown method: {method}"))),
     }
 }
 
@@ -317,15 +319,26 @@ fn entity_kind_to_symbol_kind(kind: EntityKind) -> SymbolKind {
     }
 }
 
+fn utf16_offset_to_byte(line: &str, utf16_col: u32) -> usize {
+    let mut utf16_seen = 0u32;
+    for (byte_idx, ch) in line.char_indices() {
+        if utf16_seen >= utf16_col {
+            return byte_idx;
+        }
+        utf16_seen += ch.len_utf16() as u32;
+    }
+    line.len()
+}
+
 fn iri_at_position(content: &str, position: Position) -> Option<String> {
     let lines: Vec<&str> = content.lines().collect();
     let line = lines.get(position.line as usize)?;
-    let ch = position.character as usize;
-    if ch > line.len() {
+    let byte_col = utf16_offset_to_byte(line, position.character);
+    if byte_col > line.len() {
         return extract_iri_from_line(line);
     }
 
-    let token = extract_token_at(line, ch);
+    let token = extract_token_at(line, byte_col);
     if token.contains(':') || token.starts_with("http") {
         return expand_iri_token(content, &token);
     }

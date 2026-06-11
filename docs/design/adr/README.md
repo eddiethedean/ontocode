@@ -17,6 +17,7 @@ Canonical ADRs live in this directory. The former `adrs/` folder was merged here
 | [0009](0009-semantic-diff-as-core-feature.md) | Semantic diff as core feature | Accepted (planned) |
 | [0010](0010-ai-features-opt-in.md) | AI features opt-in | Accepted (planned) |
 | [0011](0011-use-sqlparser-for-sql.md) | Use sqlparser for SQL virtual tables | Accepted |
+| [0012](0012-lsp-json-snake-case-enums.md) | LSP JSON snake_case enums | Accepted |
 
 ## Current stack (v0.2)
 

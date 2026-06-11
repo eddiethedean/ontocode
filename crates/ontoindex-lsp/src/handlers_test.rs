@@ -90,6 +90,37 @@ fn get_catalog_snapshot_returns_fixture_entities() {
     assert!(!snapshot.hierarchy.edges.is_empty());
 }
 
+/// Contract test: LSP JSON must use snake_case enum strings (extension + docs/lsp-api.md).
+#[test]
+fn catalog_snapshot_wire_format_uses_snake_case_enums() {
+    let state = indexed_state();
+    let snapshot = handle_get_catalog_snapshot(&state).expect("snapshot");
+    let json = serde_json::to_value(&snapshot).expect("serialize snapshot");
+
+    let person = json
+        .get("entities")
+        .and_then(|e| e.as_array())
+        .and_then(|arr| {
+            arr.iter().find(|e| {
+                e.get("iri").and_then(|v| v.as_str()) == Some("http://example.org/people#Person")
+            })
+        })
+        .expect("Person in entities");
+    assert_eq!(person.get("kind").and_then(|v| v.as_str()), Some("class"));
+
+    let doc = json
+        .get("documents")
+        .and_then(|d| d.as_array())
+        .and_then(|arr| {
+            arr.iter().find(|d| {
+                d.get("path").and_then(|v| v.as_str()).is_some_and(|p| p.ends_with("example.ttl"))
+            })
+        })
+        .expect("example.ttl document");
+    assert_eq!(doc.get("parse_status").and_then(|v| v.as_str()), Some("ok"));
+    assert_eq!(doc.get("format").and_then(|v| v.as_str()), Some("turtle"));
+}
+
 #[test]
 fn hover_on_person_returns_markdown() {
     let state = indexed_state();

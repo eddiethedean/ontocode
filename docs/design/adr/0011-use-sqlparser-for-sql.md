@@ -27,4 +27,4 @@ Negative:
 
 ## Implementation
 
-See [`crates/ontoindex-query/src/sql.rs`](../../crates/ontoindex-query/src/sql.rs) and [docs/sql-reference.md](../../docs/sql-reference.md).
+See [`crates/ontoindex-query/src/sql.rs`](../../../crates/ontoindex-query/src/sql.rs) and [docs/sql-reference.md](../../sql-reference.md).

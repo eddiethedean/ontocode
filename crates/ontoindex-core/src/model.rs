@@ -2,7 +2,9 @@ use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 use std::path::PathBuf;
 
+/// Wire format (LSP JSON) uses snake_case via serde; SQL CLI uses [`OntologyFormat::as_str`].
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub enum OntologyFormat {
     Turtle,
     RdfXml,
@@ -43,6 +45,7 @@ impl OntologyFormat {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub enum ParseStatus {
     Ok,
     Warning,
@@ -50,6 +53,7 @@ pub enum ParseStatus {
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
 pub enum EntityKind {
     Class,
     ObjectProperty,

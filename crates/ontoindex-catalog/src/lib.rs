@@ -1,3 +1,7 @@
+//! Workspace indexing: scan files, parse ontologies, build queryable catalog + Oxigraph store.
+//!
+//! Entry points: [`IndexBuilder`], [`OntologyCatalog`].
+
 mod builder;
 mod entity_api;
 

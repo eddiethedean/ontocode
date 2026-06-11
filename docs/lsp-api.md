@@ -1,6 +1,10 @@
 # OntoIndex LSP API (implemented in v0.2)
 
-This document describes **what ships today** in `ontoindex-lsp`. For the long-term target design, see [LSP_SPEC.md](../ontocode_ontoindex_docs/LSP_SPEC.md) (marked as planned/partial).
+This document describes **what ships today** in `ontoindex-lsp`. For the long-term target design, see [LSP_SPEC.md](design/LSP_SPEC.md) (marked as planned/partial).
+
+## Wire format (v0.2)
+
+LSP JSON uses **snake_case** for enums serialized from Rust (`EntityKind`, `ParseStatus`, `OntologyFormat`), e.g. `"kind": "class"`, `"parse_status": "ok"`. The SQL CLI uses the same snake_case strings via `EntityKind::as_str()` — not PascalCase serde names.
 
 **Source of truth:**
 
@@ -83,7 +87,7 @@ Return detailed entity information for the inspector.
 
 ## Structured errors
 
-Custom method failures return `OntoIndexError`:
+Custom method failures return `LspErrorPayload` (Rust type; not `ontoindex_core::OntoIndexError`):
 
 | Field | Description |
 |-------|-------------|

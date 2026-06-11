@@ -60,6 +60,7 @@ pub fn parse_ontology_file(
         )));
     }
     let content = fs::read(path)?;
+    let source_text = String::from_utf8_lossy(&content).into_owned();
     let rdf_format = to_rdf_format(format, path)?;
 
     let mut quads = Vec::new();
@@ -99,7 +100,7 @@ pub fn parse_ontology_file(
     for quad in &quads {
         builder.ingest_quad(quad);
     }
-    builder.finish(parse_status, parse_message)
+    builder.finish(parse_status, parse_message, &source_text)
 }
 
 fn to_rdf_format(format: OntologyFormat, path: &Path) -> Result<RdfFormat> {
@@ -302,6 +303,7 @@ impl OntologyBuilder {
         self,
         parse_status: ParseStatus,
         parse_message: Option<String>,
+        source_text: &str,
     ) -> Result<ParsedOntology> {
         let base_iri =
             self.namespaces.get("").cloned().or_else(|| self.namespaces.values().next().cloned());
@@ -317,12 +319,18 @@ impl OntologyBuilder {
             if state.kind == EntityKind::Other {
                 continue;
             }
+            let short_name = short_name_from_iri(iri);
             entities.push(Entity {
                 iri: iri.clone(),
-                short_name: short_name_from_iri(iri),
+                short_name: short_name.clone(),
                 kind: state.kind,
                 ontology_id: ontology_id.clone(),
-                source_location: SourceLocation::default(),
+                source_location: find_entity_source_location(
+                    source_text,
+                    iri,
+                    &short_name,
+                    &self.namespaces,
+                ),
                 labels: state.labels.clone(),
                 comments: state.comments.clone(),
                 deprecated: state.deprecated,
@@ -409,6 +417,57 @@ fn term_to_string(term: &Term) -> String {
     }
 }
 
+fn find_entity_source_location(
+    source_text: &str,
+    iri: &str,
+    short_name: &str,
+    namespaces: &BTreeMap<String, String>,
+) -> SourceLocation {
+    let mut needles = vec![
+        iri.to_string(),
+        format!("<{iri}>"),
+        format!(":{short_name}"),
+        format!("{short_name}:"),
+    ];
+    for (prefix, ns) in namespaces {
+        if iri.starts_with(ns) && !prefix.is_empty() {
+            needles.push(format!("{prefix}:{short_name}"));
+        }
+    }
+    for line in source_text.lines() {
+        let trimmed = line.trim();
+        if !(trimmed.starts_with("@prefix")
+            || trimmed.starts_with("@PREFIX")
+            || trimmed.starts_with("PREFIX "))
+        {
+            continue;
+        }
+        if let Some(colon) = trimmed.find(':') {
+            let prefix = trimmed["@prefix ".len()..colon].trim();
+            let prefix = prefix.trim_start_matches('@');
+            if let (Some(start), Some(end)) = (line.find('<'), line.find('>')) {
+                let ns = &line[start + 1..end];
+                if iri.starts_with(ns) && !prefix.is_empty() {
+                    needles.push(format!("{prefix}:{short_name}"));
+                }
+            }
+        }
+    }
+
+    for (line_idx, line) in source_text.lines().enumerate() {
+        for needle in &needles {
+            if let Some(col) = line.find(needle) {
+                return SourceLocation {
+                    line: Some((line_idx + 1) as u64),
+                    column: Some(col as u64),
+                };
+            }
+        }
+    }
+
+    SourceLocation::default()
+}
+
 fn short_name_from_iri(iri: &str) -> String {
     if let Some((_, name)) = iri.rsplit_once('#') {
         return name.to_string();
@@ -459,6 +518,7 @@ ex:knows a owl:ObjectProperty ;
             .expect("Person entity");
         assert_eq!(person.kind, EntityKind::Class);
         assert_eq!(person.labels, vec!["\"Person\"".to_string()]);
+        assert!(person.source_location.line.is_some());
 
         let knows = parsed
             .entities

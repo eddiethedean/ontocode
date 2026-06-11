@@ -1,9 +1,11 @@
 use ontoindex_catalog::{IndexBuilder, OntologyCatalog};
 use ontoindex_core::{canonical_workspace_root, validate_workspace_scope};
+use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, RwLock};
 use std::time::{SystemTime, UNIX_EPOCH};
 
+#[derive(Clone)]
 pub struct ServerState {
     inner: Arc<RwLock<InnerState>>,
 }
@@ -12,6 +14,8 @@ struct InnerState {
     catalog: Option<OntologyCatalog>,
     workspace: Option<PathBuf>,
     indexed_at: Option<u64>,
+    /// Open document text keyed by canonical file path (unsaved buffer overrides disk).
+    open_documents: HashMap<PathBuf, String>,
 }
 
 impl ServerState {
@@ -21,6 +25,7 @@ impl ServerState {
                 catalog: None,
                 workspace: None,
                 indexed_at: None,
+                open_documents: HashMap::new(),
             })),
         }
     }
@@ -56,6 +61,27 @@ impl ServerState {
 
     pub fn workspace_root(&self) -> Option<PathBuf> {
         self.inner.read().ok()?.workspace.clone()
+    }
+
+    pub fn set_document_text(&self, path: PathBuf, text: String) {
+        if let Ok(mut guard) = self.inner.write() {
+            guard.open_documents.insert(path, text);
+        }
+    }
+
+    pub fn remove_document(&self, path: &Path) {
+        if let Ok(mut guard) = self.inner.write() {
+            guard.open_documents.remove(path);
+        }
+    }
+
+    /// Prefer unsaved LSP buffer text; fall back to disk.
+    pub fn document_text(&self, path: &Path) -> Option<String> {
+        let guard = self.inner.read().ok()?;
+        if let Some(text) = guard.open_documents.get(path) {
+            return Some(text.clone());
+        }
+        std::fs::read_to_string(path).ok()
     }
 }
 

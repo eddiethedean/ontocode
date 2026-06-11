@@ -10,6 +10,8 @@ members = [
 ]
 default-members = ["crates/ontoindex-cli"]
 
+# Unpublished workspace shell: integration tests and examples only.
+# `cargo run --` runs the `ontoindex` CLI (default-member), not this package as a library.
 [package]
 name = "ontocode"
 version = "0.2.0"

@@ -26,7 +26,7 @@ What would you like to see?
 
 ## Roadmap alignment
 
-If you know the target milestone (v0.3 diagnostics, v0.4 editing, etc.), note it here. See [ROADMAP.md](../../ontocode_ontoindex_docs/ROADMAP.md).
+If you know the target milestone (v0.3 diagnostics, v0.4 editing, etc.), note it here. See [ROADMAP.md](../../docs/design/ROADMAP.md).
 
 ## Additional context
 

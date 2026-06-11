@@ -4,7 +4,7 @@ Thank you for contributing. This repository contains:
 
 - **OntoIndex** — Rust crates under `crates/` (`ontoindex` CLI, `ontoindex-lsp`)
 - **OntoCode** — VS Code extension under `extension/`
-- **Specs** — product and architecture docs under `ontocode_ontoindex_docs/`
+- **Specs** — product and architecture docs under `docs/design/`
 - **User guides** — install, SQL, and LSP API under `docs/`
 
 The root Cargo package `ontocode` is unpublished and hosts workspace integration tests (`tests/`).
@@ -85,8 +85,8 @@ cargo run -p ontocode --example index_and_query
 | Audience | Where to write |
 |----------|----------------|
 | New users (install, SQL, LSP) | `docs/` |
-| Product vision and milestones | `ontocode_ontoindex_docs/` |
-| Architecture decisions | `ontocode_ontoindex_docs/adr/` only (do not add `adrs/`) |
+| Product vision and milestones | `docs/design/` |
+| Architecture decisions | `docs/design/adr/` only (do not add `adrs/`) |
 | Extension settings and commands | `extension/README.md` |
 
 ## Code of conduct

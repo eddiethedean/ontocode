@@ -2,7 +2,7 @@
 
 > **Document status: target design (v0.2 partial implementation)**
 >
-> For what ships today, read **[docs/lsp-api.md](../docs/lsp-api.md)** (authoritative for v0.2).
+> For what ships today, read **[docs/lsp-api.md](../lsp-api.md)** (authoritative for v0.2).
 > Implemented: hover, document/workspace symbols, go-to-definition, and custom methods
 > `ontoindex/indexWorkspace`, `ontoindex/getCatalogSnapshot`, `ontoindex/getEntity`.
 > See [`crates/ontoindex-lsp/src/handlers.rs`](../crates/ontoindex-lsp/src/handlers.rs) and

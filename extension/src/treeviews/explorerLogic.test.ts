@@ -16,11 +16,11 @@ describe("explorerLogic", () => {
     assert.equal(classes[0]?.short_name, "Person");
   });
 
-  it("finds class roots excluding subclass children", () => {
+  it("finds class roots and classes with external parents", () => {
     const roots = classRootEntities(fixtureCatalogSnapshot);
     assert.deepEqual(
       roots.map((e) => e.short_name).sort(),
-      ["Organization"]
+      ["Organization", "Person"]
     );
   });
 

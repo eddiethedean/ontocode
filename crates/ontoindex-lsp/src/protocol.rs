@@ -31,15 +31,16 @@ pub struct GetEntityResult {
     pub detail: EntityDetail,
 }
 
+/// LSP JSON error payload for custom `ontoindex/*` methods (not [`ontoindex_core::OntoIndexError`]).
 #[derive(Debug, Serialize)]
-pub struct OntoIndexError {
+pub struct LspErrorPayload {
     pub code: String,
     pub message: String,
     pub recoverable: bool,
     pub user_action: Option<String>,
 }
 
-impl OntoIndexError {
+impl LspErrorPayload {
     pub fn not_indexed() -> Self {
         Self {
             code: "NOT_INDEXED".to_string(),

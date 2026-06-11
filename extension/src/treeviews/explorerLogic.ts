@@ -6,8 +6,17 @@ export function filterEntitiesByKind(entities: Entity[], kind: string): Entity[]
 
 export function classRootEntities(snapshot: CatalogSnapshot): Entity[] {
   const classes = filterEntitiesByKind(snapshot.entities, "class");
+  const entityIris = new Set(snapshot.entities.map((e) => e.iri));
   const childSet = new Set(snapshot.hierarchy.edges.map((e) => e.child));
-  return classes.filter((c) => !childSet.has(c.iri));
+
+  return classes.filter((c) => {
+    if (!childSet.has(c.iri)) {
+      return true;
+    }
+    const parents = snapshot.hierarchy.parents[c.iri] ?? [];
+    const hasCatalogParent = parents.some((p) => entityIris.has(p));
+    return !hasCatalogParent;
+  });
 }
 
 export function propertyGroupsPresent(

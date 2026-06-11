@@ -43,27 +43,11 @@ impl OntologyCatalog {
         let entity = self.find_entity(iri)?;
         let data = self.data();
 
-        if let Some(doc) = data.documents.iter().find(|d| {
-            d.base_iri.as_ref() == Some(&entity.ontology_id)
-                || entity.ontology_id == d.id
-                || d.path.to_string_lossy().contains(&entity.ontology_id)
-        }) {
+        if let Some(doc) = data.documents.iter().find(|d| document_matches_entity(entity, d)) {
             return Some(doc);
         }
 
-        for doc in &data.documents {
-            if entity.iri.starts_with(doc.base_iri.as_deref().unwrap_or("")) {
-                return Some(doc);
-            }
-        }
-
-        for doc in &data.documents {
-            if file_contains_iri(&doc.path, iri, &entity.short_name) {
-                return Some(doc);
-            }
-        }
-
-        data.documents.first()
+        data.documents.iter().find(|doc| file_contains_entity(&doc.path, iri, &entity.short_name))
     }
 
     pub fn class_hierarchy(&self) -> ClassHierarchy {
@@ -152,23 +136,38 @@ fn predicate_label(predicate: &str) -> &'static str {
     }
 }
 
-fn file_contains_iri(path: &std::path::Path, iri: &str, short_name: &str) -> bool {
-    fs::read_to_string(path)
-        .ok()
-        .map(|content| content.contains(iri) || content.contains(short_name))
-        .unwrap_or(false)
+fn normalize_iri_prefix(iri: &str) -> String {
+    iri.trim_end_matches('#').trim_end_matches('/').to_string()
+}
+
+fn document_matches_entity(entity: &Entity, doc: &ontoindex_core::OntologyDocument) -> bool {
+    if entity.ontology_id == doc.id {
+        return true;
+    }
+    if let Some(base) = &doc.base_iri {
+        if normalize_iri_prefix(base) == normalize_iri_prefix(&entity.ontology_id) {
+            return true;
+        }
+        if entity.iri.starts_with(base) {
+            return true;
+        }
+    }
+    doc.path.to_string_lossy().contains(&entity.ontology_id)
+}
+
+fn file_contains_entity(path: &std::path::Path, iri: &str, short_name: &str) -> bool {
+    fs::read_to_string(path).ok().is_some_and(|content| {
+        content.contains(iri)
+            || content.contains(&format!(":{short_name}"))
+            || content.contains(&format!(" {short_name} "))
+    })
 }
 
 fn scan_file_for_iri(path: &std::path::Path, iri: &str, short_name: &str) -> Option<SourceHint> {
     let content = fs::read_to_string(path).ok()?;
-    let local_name = iri.rsplit(['#', '/']).next().unwrap_or(iri);
+    let local_name = iri.rsplit(['#', '/']).next().unwrap_or(short_name);
 
-    let needles = [
-        iri.to_string(),
-        format!("{}:", local_name),
-        format!("#{}", local_name),
-        short_name.to_string(),
-    ];
+    let needles = [iri.to_string(), format!("<{iri}>"), format!("{local_name}:")];
 
     for (line_idx, line) in content.lines().enumerate() {
         for needle in &needles {

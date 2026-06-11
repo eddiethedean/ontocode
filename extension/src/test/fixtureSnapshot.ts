@@ -7,7 +7,7 @@ export const fixtureCatalogSnapshot: CatalogSnapshot = {
       path: "fixtures/example.ttl",
       format: "turtle",
       base_iri: "http://example.org/people",
-      parse_status: "Ok",
+      parse_status: "ok",
     },
   ],
   entities: [

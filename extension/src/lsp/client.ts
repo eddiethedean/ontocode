@@ -12,6 +12,10 @@ import {
   GetEntityResult,
   IndexWorkspaceResult,
 } from "./protocol";
+import {
+  assertCatalogSnapshot,
+  assertIndexWorkspaceResult,
+} from "./protocolGuards";
 
 let client: LanguageClient | undefined;
 
@@ -108,14 +112,19 @@ export async function indexWorkspace(
   const uri =
     workspaceUri ??
     vscode.workspace.workspaceFolders?.[0]?.uri.toString();
-  return c.sendRequest<IndexWorkspaceResult>("ontoindex/indexWorkspace", {
+  const result = await c.sendRequest<unknown>("ontoindex/indexWorkspace", {
     workspaceUri: uri,
   });
+  return assertIndexWorkspaceResult(result) as IndexWorkspaceResult;
 }
 
 export async function getCatalogSnapshot(): Promise<CatalogSnapshot> {
   const c = requireClient();
-  return c.sendRequest<CatalogSnapshot>("ontoindex/getCatalogSnapshot", null);
+  const result = await c.sendRequest<unknown>(
+    "ontoindex/getCatalogSnapshot",
+    null
+  );
+  return assertCatalogSnapshot(result);
 }
 
 export async function getEntity(iri: string): Promise<GetEntityResult> {

@@ -1,11 +1,11 @@
 # OntoIndex + OntoCode Documentation Package
 
-This package contains **product vision and specification** documents. For **user-facing guides** (install, SQL, implemented LSP API), see [`docs/`](../docs/) at the repository root.
+This package contains **product vision and specification** documents. For **user-facing guides** (install, SQL, implemented LSP API), see [`docs/`](../) at the repository root.
 
 | Package | Audience |
 |---------|----------|
-| [`docs/`](../docs/) | New users and integrators (install, SQL reference, LSP API v0.2) |
-| `ontocode_ontoindex_docs/` | Contributors and planners (roadmap, target architecture, ADRs) |
+| [`docs/`](../) | New users and integrators (install, SQL reference, LSP API v0.2) |
+| `docs/design/` (this folder) | Contributors and planners (roadmap, target architecture, ADRs) |
 
 Two related products:
 
@@ -16,8 +16,8 @@ Two related products:
 
 Many specs describe **target** behavior. Check the banner at the top of each doc, or:
 
-- **Implemented v0.2 LSP:** [docs/lsp-api.md](../docs/lsp-api.md)
-- **Implemented SQL tables:** [docs/sql-reference.md](../docs/sql-reference.md)
+- **Implemented v0.2 LSP:** [docs/lsp-api.md](../lsp-api.md)
+- **Implemented SQL tables:** [docs/sql-reference.md](../sql-reference.md)
 - **ADRs (canonical):** [adr/README.md](adr/README.md)
 
 ## Documents

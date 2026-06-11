@@ -87,7 +87,7 @@ Long-term goal: **routine ontology work in VS Code without opening Protégé.**
 
 ## What's in v0.2.0 (OntoCode Explorer)
 
-v0.2 adds the VS Code extension described in the [v0.2 roadmap](https://github.com/eddiethedean/ontocode/blob/main/ontocode_ontoindex_docs/ROADMAP.md):
+v0.2 adds the VS Code extension described in the [v0.2 roadmap](https://github.com/eddiethedean/ontocode/blob/main/docs/design/ROADMAP.md):
 
 - **VS Code extension** — OntoCode activity bar with ontology tree views
 - **Entity inspector** — IRI, labels, comments, parents, children, axioms
@@ -107,7 +107,7 @@ See [docs/vscode-install.md](docs/vscode-install.md) (release VSIX, dev build, L
 
 ## What's in v0.1.0 (OntoIndex foundation)
 
-This release delivers the Rust backend described in the [v0.1 roadmap](https://github.com/eddiethedean/ontocode/blob/main/ontocode_ontoindex_docs/ROADMAP.md):
+This release delivers the Rust backend described in the [v0.1 roadmap](https://github.com/eddiethedean/ontocode/blob/main/docs/design/ROADMAP.md):
 
 - **Workspace scanner** — recursive discovery, `.gitignore` support, content hashing
 - **RDF/OWL parsing** — Turtle, RDF/XML, OWL, JSON-LD, N-Triples, N-Quads, TriG via [Oxigraph](https://github.com/oxigraph/oxigraph)
@@ -158,7 +158,7 @@ Or build from source after cloning this repository.
 
 ## Planned VS Code experience (v0.3+)
 
-Specs and wireframes live in [ontocode_ontoindex_docs/](https://github.com/eddiethedean/ontocode/tree/main/ontocode_ontoindex_docs). Upcoming OntoCode UI includes:
+Specs and wireframes live in [docs/design/](https://github.com/eddiethedean/ontocode/tree/main/docs/design). Upcoming OntoCode UI includes:
 
 - Inline diagnostics and validation (v0.3)
 - Class/property/individual authoring (v0.4)
@@ -180,7 +180,7 @@ The extension is a thin TypeScript shell over **ontoindex-lsp** and the OntoInde
 | v0.6–v0.9 | Reasoning, graphs, refactoring, semantic diff, docs |
 | v1.0 | Protégé-replacement release for daily ontology engineering |
 
-See [ROADMAP.md](https://github.com/eddiethedean/ontocode/blob/main/ontocode_ontoindex_docs/ROADMAP.md) and [PLAN.md](https://github.com/eddiethedean/ontocode/blob/main/ontocode_ontoindex_docs/PLAN.md) for the full product plan.
+See [ROADMAP.md](https://github.com/eddiethedean/ontocode/blob/main/docs/design/ROADMAP.md) and [PLAN.md](https://github.com/eddiethedean/ontocode/blob/main/docs/design/PLAN.md) for the full product plan.
 
 ## Repository layout
 
@@ -196,7 +196,7 @@ extension/              # VS Code extension (OntoCode Explorer)
 fixtures/               # sample ontology for tests
 scripts/                # extension packaging helpers
 docs/                   # user guides (install, SQL, LSP API)
-ontocode_ontoindex_docs/  # product specs, ADRs, wireframes, backlog
+docs/design/  # product specs, ADRs, wireframes, backlog
 examples/               # Rust examples and query cookbook
 tests/                  # integration and golden snapshot tests
 ```

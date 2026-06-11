@@ -6,6 +6,7 @@ import {
 } from "../lsp/client";
 import { EntityInspectorPanel } from "../webviews/inspector";
 import { ExplorerTreeProvider } from "../treeviews/explorer";
+import { resolveEntityIri } from "../utils/resolveEntityIri";
 
 export function registerCommands(
   context: vscode.ExtensionContext,
@@ -41,13 +42,18 @@ export function registerCommands(
     ),
     vscode.commands.registerCommand(
       "ontocode.openEntity",
-      async (iri: string) => {
+      async (arg?: unknown) => {
+        const iri = resolveEntityIri(arg);
+        if (!iri) {
+          return;
+        }
         await openInspector(context.extensionUri, iri);
       }
     ),
     vscode.commands.registerCommand(
       "ontocode.jumpToSource",
-      async (iri?: string) => {
+      async (arg?: unknown) => {
+        let iri = resolveEntityIri(arg);
         if (!iri) {
           iri = await vscode.window.showInputBox({ prompt: "Entity IRI" });
         }

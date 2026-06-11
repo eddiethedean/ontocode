@@ -30,7 +30,7 @@
   <text class="title" x="68" y="256">Individuals</text>
   <text class="text" x="80" y="278">alice</text>
   <rect class="panel" x="276" y="0" width="644" height="520"/>
-  <text class="title" x="292" y="28">Entity Inspector  ex:Person</text>
+  <text class="title" x="292" y="28">Entity Inspector  ex:Person</text>
   <text class="muted" x="292" y="56">IRI</text>
   <text class="text" x="292" y="76">http://example.org/people#Person</text>
   <text class="muted" x="292" y="108">Label</text>
@@ -43,5 +43,5 @@
   <text class="text" x="292" y="284">rdfs:subClassOf owl:Thing</text>
   <text class="muted" x="292" y="316">Source</text>
   <text class="accent" x="292" y="336">fixtures/example.ttl:10</text>
-  <text class="muted" x="292" y="480">OntoCode v0.2  browse, inspect, jump to source</text>
+  <text class="muted" x="292" y="480">OntoCode  browse, inspect, jump to source</text>
 </svg>

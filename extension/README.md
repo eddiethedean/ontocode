@@ -1,76 +1,145 @@
-# OntoCode VS Code Extension
+# OntoCode
 
-Browse ontology repositories in VS Code using the OntoIndex language server.
+**Browse OWL/RDF ontologies in VS Code** — index a workspace, explore classes and properties in the sidebar, inspect entities, and jump to Turtle/RDF source.
 
-**Install:** [docs/vscode-install.md](../docs/vscode-install.md) (release VSIX, dev build, troubleshooting).
+![OntoCode Explorer — sidebar views and entity inspector](media/explorer-preview.png)
 
-## Features (v0.2.2)
+---
 
-- Ontology explorer sidebar (ontologies, classes, properties, individuals)
-- Entity inspector with IRI, labels, comments, parents, children, and axioms
-- Jump to source in Turtle/RDF files
-- Workspace indexing on open
-- Hover, document symbols, workspace symbols, and go-to-definition for ontology files
+## Quick start
 
-## Platform support
+1. **Install** OntoCode from the Marketplace (you are here).
+2. **File → Open Folder…** and choose a project that contains ontology files.
+3. If VS Code asks, **Trust** the workspace (required for the bundled language server).
+4. Click the **OntoCode** icon in the **Activity Bar** (left edge of the window).
+5. Open **Classes**, **Properties**, or **Individuals** and **click an entity name** to open the Entity Inspector.
 
-Release VSIX packages bundle `ontoindex-lsp` for:
+OntoCode indexes supported files automatically when the folder opens (`ontocode.autoIndexOnOpen`, default **on**).
 
-| Platform | Bundled path |
-|----------|----------------|
-| Linux x64 | `server/linux-x64/` |
-| Linux arm64 | `server/linux-arm64/` |
-| macOS Apple Silicon | `server/darwin-arm64/` |
-| macOS Intel | `server/darwin-x64/` |
-| Windows x64 | `server/win32-x64/ontoindex-lsp.exe` |
+---
 
-If no bundled binary matches your machine:
+## Supported files
 
-```bash
-cargo install ontoindex-lsp
-```
+OntoCode activates when your workspace contains any of:
 
-Or set `ontocode.lspPath` to the absolute path of your `ontoindex-lsp` binary.
+| Extension | Format |
+|-----------|--------|
+| `.ttl` | Turtle |
+| `.owl`, `.rdf` | RDF/XML |
+| `.jsonld`, `.json-ld` | JSON-LD |
+| `.nt`, `.nq` | N-Triples / N-Quads |
+| `.trig` | TriG |
 
-## Development
+You can also open the **OntoCode → Ontologies** view to force activation.
 
-From the repository root:
+---
 
-```bash
-./scripts/package-extension.sh
-```
+## Using the sidebar
 
-Then in VS Code: **Run Extension** (F5) with the `extension/` folder, or install the generated `.vsix`.
+After indexing, the **OntoCode** activity bar shows five views:
 
-To build a VSIX with all platform binaries locally, run `./scripts/package-extension.sh` on each target OS (or copy release artifacts into `extension/server/` before `vsce package`).
+| View | What you see |
+|------|----------------|
+| **Ontologies** | Indexed `.ttl` / `.owl` / … files and parse status |
+| **Classes** | Class hierarchy (subclasses nested under parents) |
+| **Properties** | Object, data, and annotation properties (grouped) |
+| **Individuals** | Named individuals |
+| **Diagnostics** | Placeholder (full validation UI planned for v0.3) |
 
-## Testing
+**Refresh** — click the ↻ icon on any view title, or run **OntoCode: Refresh Explorer**.
 
-```bash
-# From repo root: build LSP and unit / spawn e2e tests
-cargo build -p ontoindex-lsp --bins
-cd extension && npm ci && npm test
+**Re-index** — run **OntoCode: Index Workspace** from the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`) after you add or change ontology files.
 
-# VS Code integration tests (downloads VS Code under extension/.vscode-test/)
-./scripts/prepare-extension-server.sh "$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m | sed 's/x86_64/x64/;s/aarch64/arm64/')"
-cd extension && npm run compile && npm run compile:vscode-test && npm run test:vscode
+---
 
-# Pin a VS Code version (matches extension engines minimum)
-VSCODE_VERSION=1.85.0 npm run test:vscode
-```
+## Entity Inspector
 
-CI runs the VS Code matrix in [`.github/workflows/extension-vscode-e2e.yml`](../.github/workflows/extension-vscode-e2e.yml): Ubuntu (x64 + arm64), macOS, and Windows against VS Code **1.85.0** (minimum) and **stable**. Each job strips the bundled LSP execute bit before launch to catch Marketplace install regressions.
+To inspect a class, property, or individual:
 
-## Configuration
+1. Expand **Classes** (or **Properties** / **Individuals**).
+2. **Click the entity name** (e.g. `Person`).
+
+The **Entity Inspector** panel opens with:
+
+- IRI and kind (class, object property, individual, …)
+- Labels and comments
+- Parent and child classes
+- Axioms (e.g. `SubClassOf`)
+- **Jump to Source** — opens the `.ttl` / `.owl` file at the declaration
+
+**Right-click** an entity for **Jump to Source** in the context menu.
+
+**Command Palette:** **OntoCode: Show Entity Inspector** — paste an entity IRI if you know it.
+
+---
+
+## In the editor
+
+Open a `.ttl` (or other supported) file and use standard VS Code navigation:
+
+| Action | Shortcut (macOS) | Shortcut (Windows/Linux) |
+|--------|------------------|--------------------------|
+| Hover summary on an IRI | hover | hover |
+| Go to definition | `F12` | `F12` |
+| Document outline (symbols) | `Cmd+Shift+O` | `Ctrl+Shift+O` |
+| Workspace symbol search | `Cmd+T` | `Ctrl+T` |
+
+---
+
+## Command Palette
+
+| Command | When to use |
+|---------|-------------|
+| **OntoCode: Index Workspace** | After adding/changing ontology files |
+| **OntoCode: Refresh Explorer** | Reload tree views from the catalog |
+| **OntoCode: Show Entity Inspector** | Open inspector by IRI |
+| **OntoCode: Jump to Source** | Go to declaration by IRI |
+
+---
+
+## Settings
+
+Open **Settings** and search `ontocode`:
 
 | Setting | Default | Description |
 |---------|---------|-------------|
-| `ontocode.lspPath` | `""` | Path to `ontoindex-lsp` binary |
-| `ontocode.autoIndexOnOpen` | `true` | Index workspace when the extension activates |
+| `ontocode.autoIndexOnOpen` | `true` | Index the workspace when OntoCode activates |
+| `ontocode.lspPath` | *(empty)* | Path to `ontoindex-lsp` binary. **Trusted workspaces only.** Leave empty to use the bundled server |
 
-## Commands
+---
 
-- **OntoCode: Index Workspace** — rebuild the ontology catalog
-- **OntoCode: Refresh Explorer** — refresh tree views from the catalog
-- **OntoCode: Show Entity Inspector** — open inspector for an IRI
-- **OntoCode: Jump to Source** — navigate to entity declaration
+## Troubleshooting
+
+| Problem | What to try |
+|---------|-------------|
+| Sidebar says *“Index workspace to browse ontologies”* | Run **OntoCode: Index Workspace**; confirm the folder contains `.ttl`, `.owl`, etc. |
+| Extension never activates | Open a supported ontology file, or click **OntoCode → Ontologies** |
+| `failed to start language server` | Check **View → Output → OntoIndex Language Server**. Uninstall older OntoCode versions. Set `ontocode.lspPath` or run `cargo install ontoindex-lsp` |
+| Empty **Classes** after indexing | **Output → OntoIndex Language Server** for errors; run **Index Workspace** again |
+| Workspace is Restricted | **Trust** the folder — `ontocode.lspPath` is ignored in Restricted Mode |
+
+More detail: [Installation & troubleshooting](https://github.com/eddiethedean/ontocode/blob/main/docs/vscode-install.md)
+
+---
+
+## What’s included in v0.2.3
+
+**Shipped today:** explorer, entity inspector, jump-to-source, hover, symbols, go-to-definition.
+
+**Planned:** inline diagnostics, axiom editing, query workbench, reasoners — see the [roadmap](https://github.com/eddiethedean/ontocode/blob/main/docs/design/ROADMAP.md).
+
+---
+
+## Platform support
+
+Release builds bundle `ontoindex-lsp` for Linux (x64, arm64), macOS (Apple Silicon, Intel), and Windows (x64). No extra install needed on those platforms.
+
+---
+
+## Links
+
+- [GitHub repository](https://github.com/eddiethedean/ontocode)
+- [Report an issue](https://github.com/eddiethedean/ontocode/issues)
+- [Changelog](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md)
+
+**Contributing / building from source:** see the [repo README](https://github.com/eddiethedean/ontocode#development).

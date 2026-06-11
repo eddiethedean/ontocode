@@ -1,6 +1,6 @@
 # Installing OntoCode in VS Code
 
-Install **OntoCode** from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) (v0.2.2+ recommended; v0.2.1+ for basic explorer), or use a release VSIX / local dev build below.
+Install **OntoCode** from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) (v0.2.3+ recommended), or use a release VSIX / local dev build below.
 
 ## Option A — GitHub Release VSIX (recommended)
 

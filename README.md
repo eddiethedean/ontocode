@@ -14,7 +14,7 @@
 [![lsp](https://img.shields.io/crates/v/ontoindex-lsp?label=lsp)](https://crates.io/crates/ontoindex-lsp)
 [![downloads](https://img.shields.io/crates/d/ontoindex-cli?label=downloads)](https://crates.io/crates/ontoindex-cli)
 
-**Ontology-as-code for Git and VS Code — v0.2 ships today.**
+**Ontology-as-code for Git and VS Code — v0.2.1 ships today.**
 
 Browse OWL/RDF in VS Code, query and validate in CI, and index workspaces locally with a Rust engine. Editing, diagnostics, reasoning, and semantic diffs are on the [roadmap](#roadmap).
 
@@ -34,10 +34,9 @@ From a clone, `cargo run --` runs the `ontoindex` binary (workspace default-memb
 
 ### Use VS Code (OntoCode Explorer)
 
-1. Download the latest VSIX from [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) (Marketplace coming later).
-2. **Extensions → Install from VSIX…**
-3. Open a folder with `.ttl`, `.owl`, `.rdf`, or other supported ontology files.
-4. Use the **OntoCode** activity bar to browse entities and open the inspector.
+1. Install [OntoCode from the Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode), or download a VSIX from [GitHub Releases](https://github.com/eddiethedean/ontocode/releases).
+2. Open a folder with `.ttl`, `.owl`, `.rdf`, or other supported ontology files.
+3. Use the **OntoCode** activity bar to browse entities and open the inspector.
 
 Full install and troubleshooting: [docs/vscode-install.md](docs/vscode-install.md).
 
@@ -47,7 +46,7 @@ Full install and troubleshooting: [docs/vscode-install.md](docs/vscode-install.m
 
 OntoCode is designed as two products that ship together:
 
-| Layer | What it is | Status in v0.2.0 |
+| Layer | What it is | Status in v0.2.1 |
 |-------|------------|-------------------|
 | **OntoCode** | VS Code extension (explorer, entity inspector, jump-to-source) | **Explorer shipping** — install VSIX or run from `extension/` |
 | **OntoIndex** | Rust library + CLI + LSP (scan, parse, catalog, query, validate) | **Shipping now** |
@@ -59,7 +58,7 @@ OntoCode is designed as two products that ship together:
 └─────────────────┬───────────────────┘
                   │ ontoindex-lsp (stdio)
 ┌─────────────────▼───────────────────┐
-│  OntoIndex (v0.2.0)                 │
+│  OntoIndex (v0.2.1)                 │
 │  Rust index, catalog, query, CLI, LSP │
 └─────────────────┬───────────────────┘
                   │ Oxigraph / RDF parsers
@@ -85,7 +84,7 @@ Protégé is strong for traditional ontology editing, but most engineering teams
 
 Long-term goal: **Protégé-competitive OWL 2 DL + OBO maintenance in VS Code** — see [PROTEGE_PARITY.md](docs/design/PROTEGE_PARITY.md).
 
-## What's in v0.2.0 (OntoCode Explorer)
+## What's in v0.2.1 (OntoCode Explorer)
 
 v0.2 adds the VS Code extension described in the [v0.2 roadmap](https://github.com/eddiethedean/ontocode/blob/main/docs/design/ROADMAP.md):
 
@@ -173,7 +172,7 @@ The extension is a thin TypeScript shell over **ontoindex-lsp** and the OntoInde
 | Version | Deliverable |
 |---------|-------------|
 | v0.1 | OntoIndex: scanner, parser, catalog, CLI |
-| **v0.2** (current) | VS Code extension, explorer, entity inspector, LSP |
+| **v0.2.1** (current) | VS Code extension, explorer, entity inspector, LSP |
 | v0.3 | Diagnostics and Problems panel integration |
 | v0.4a–b | Simple write-back + Horned-OWL (`ontoindex-owl`) |
 | v0.5 | Query workbench + Manchester MVP |
@@ -242,7 +241,7 @@ ONTOINDEX_UPDATE_GOLDEN=1 cargo test golden_classes
 
 ## Releasing
 
-Published crates (v0.2.0):
+Published crates (v0.2.1):
 
 | Crate | crates.io |
 |-------|-----------|
@@ -253,11 +252,11 @@ Published crates (v0.2.0):
 | `ontoindex-lsp` | https://crates.io/crates/ontoindex-lsp |
 | `ontoindex-cli` | https://crates.io/crates/ontoindex-cli |
 
-Push a tag matching `[workspace.package].version` in `Cargo.toml` (e.g. `v0.2.0`):
+Push a tag matching `[workspace.package].version` in `Cargo.toml` (e.g. `v0.2.1`):
 
 ```bash
-git tag v0.2.0
-git push origin v0.2.0
+git tag v0.2.1
+git push origin v0.2.1
 ```
 
 The [release workflow](https://github.com/eddiethedean/ontocode/blob/main/.github/workflows/release.yml) verifies packages, runs tests, publishes workspace crates to [crates.io](https://crates.io/) in dependency order, and creates a GitHub Release with the `ontoindex` Linux binary, per-platform `ontoindex-lsp` archives, and a **multi-platform VSIX** (Linux, macOS, Windows). Requires the `CARGO_REGISTRY_TOKEN` repository secret.

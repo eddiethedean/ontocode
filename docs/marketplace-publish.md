@@ -1,6 +1,6 @@
 # Publishing OntoCode to the VS Code Marketplace
 
-OntoCode is not yet on the Marketplace. This checklist is for maintainers when publication is ready.
+OntoCode is on the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode). This checklist is for maintainers publishing new versions.
 
 ## Prerequisites
 

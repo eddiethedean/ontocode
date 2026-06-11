@@ -99,10 +99,26 @@ function resolveServerPath(context: vscode.ExtensionContext): string {
     platform === "win32" ? "ontoindex-lsp.exe" : "ontoindex-lsp"
   );
   if (fs.existsSync(bundled)) {
+    ensureBundledServerExecutable(bundled);
     return bundled;
   }
 
   return "ontoindex-lsp";
+}
+
+/** VSIX/Marketplace installs often drop the Unix executable bit on bundled binaries. */
+function ensureBundledServerExecutable(serverPath: string): void {
+  if (process.platform === "win32") {
+    return;
+  }
+  try {
+    const mode = fs.statSync(serverPath).mode;
+    if ((mode & 0o111) === 0) {
+      fs.chmodSync(serverPath, mode | 0o755);
+    }
+  } catch {
+    // Spawn will fail with a clear error if this cannot be fixed.
+  }
 }
 
 export async function indexWorkspace(

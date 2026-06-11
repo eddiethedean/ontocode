@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.2.1] - 2026-06-11
+
+### Fixed
+
+- **VS Code extension:** set executable permission on bundled `ontoindex-lsp` before spawn (fixes `EACCES` on macOS/Linux after Marketplace or VSIX install)
+
+[0.2.1]: https://github.com/eddiethedean/ontocode/releases/tag/v0.2.1
+
 ## [0.2.0] - 2026-06-11
 
 ### Added

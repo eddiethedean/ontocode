@@ -14,7 +14,7 @@ default-members = ["crates/ontoindex-cli"]
 # `cargo run --` runs the `ontoindex` CLI (default-member), not this package as a library.
 [package]
 name = "ontocode"
-version = "0.2.0"
+version = "0.2.1"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 publish = false
@@ -36,7 +36,7 @@ serde_json.workspace = true
 tempfile = "3"
 
 [workspace.package]
-version = "0.2.0"
+version = "0.2.1"
 edition = "2021"
 rust-version = "1.86"
 license = "MIT OR Apache-2.0"
@@ -47,11 +47,11 @@ keywords = ["ontology", "owl", "rdf", "sparql", "turtle"]
 categories = ["command-line-utilities", "science", "parser-implementations"]
 
 [workspace.dependencies]
-ontoindex-core = { path = "crates/ontoindex-core", version = "0.2.0" }
-ontoindex-parser = { path = "crates/ontoindex-parser", version = "0.2.0" }
-ontoindex-catalog = { path = "crates/ontoindex-catalog", version = "0.2.0" }
-ontoindex-query = { path = "crates/ontoindex-query", version = "0.2.0" }
-ontoindex-lsp = { path = "crates/ontoindex-lsp", version = "0.2.0" }
+ontoindex-core = { path = "crates/ontoindex-core", version = "0.2.1" }
+ontoindex-parser = { path = "crates/ontoindex-parser", version = "0.2.1" }
+ontoindex-catalog = { path = "crates/ontoindex-catalog", version = "0.2.1" }
+ontoindex-query = { path = "crates/ontoindex-query", version = "0.2.1" }
+ontoindex-lsp = { path = "crates/ontoindex-lsp", version = "0.2.1" }
 
 lsp-server = "0.7"
 lsp-types = "0.97"

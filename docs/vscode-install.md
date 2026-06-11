@@ -1,6 +1,6 @@
 # Installing OntoCode in VS Code
 
-OntoCode v0.2 is not yet on the VS Code Marketplace. Use a release VSIX or a local dev build.
+Install **OntoCode** from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) (v0.2.1+), or use a release VSIX / local dev build below.
 
 ## Option A — GitHub Release VSIX (recommended)
 
@@ -51,6 +51,7 @@ Or set **OntoCode: Lsp Path** (`ontocode.lspPath`) to the absolute path of your 
 |---------|-----|
 | Extension does not activate | Ensure the workspace contains a supported ontology file (see activation in `extension/package.json`) or open the OntoCode Ontologies view |
 | `failed to start language server` | Run `./scripts/package-extension.sh`, set `ontocode.lspPath`, or `cargo install ontoindex-lsp` |
+| `spawn ... ontoindex-lsp EACCES` (macOS/Linux) | Marketplace/VSIX may strip execute permission. Run `chmod +x` on the bundled binary (path shown in the error), or upgrade to OntoCode ≥ 0.2.1 which fixes this automatically |
 | Empty explorer after open | Run **OntoCode: Index Workspace**; check **Output → OntoIndex Language Server** |
 
 See also [extension/README.md](../extension/README.md).

@@ -26,7 +26,7 @@ ontoindex/
 │   ├── ontoindex-diagnostics   # v0.3
 │   ├── ontoindex-diff          # v0.9
 │   ├── ontoindex-docs          # v0.9
-│   ├── ontoindex-reasoner      # v0.6 — Rust-only: whelk-rs, reasonable, in-tree DL
+│   ├── ontoindex-reasoner      # v0.6 — OntoLogos facade (0.9→1.0)
 │   ├── ontoindex-robot         # v0.7b — ROBOT CLI wrappers
 │   ├── ontoindex-lsp           # v0.2
 │   └── ontoindex-cli           # v0.2

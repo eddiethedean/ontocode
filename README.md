@@ -79,7 +79,7 @@ Protégé is strong for traditional ontology editing, but most engineering teams
 |-----------------|-------------------------|
 | Browse ontologies in VS Code | Hybrid authoring: forms + Manchester editor |
 | Entity inspector and jump-to-source | OWL axiom editing and patch write-back |
-| `ontoindex validate` for CI | Query workbench, Rust-native reasoners + explanations |
+| `ontoindex validate` for CI | Query workbench, [OntoLogos](https://github.com/eddiethedean/ontologos)-backed reasoners + explanations |
 | SQL-like and SPARQL queries via CLI | OBO format + ROBOT interop |
 | Local-first indexing | Semantic Git diff, LSP completion/rename |
 
@@ -179,10 +179,10 @@ The extension is a thin TypeScript shell over **ontoindex-lsp** and the OntoInde
 | v0.3 | Diagnostics and Problems panel integration |
 | v0.4a–b | Simple write-back + Horned-OWL (`ontoindex-owl`) |
 | v0.5 | Query workbench + Manchester MVP |
-| v0.6 | Reasoners + real unsatisfiability explanations |
+| v0.6 | Reasoning via [OntoLogos](https://github.com/eddiethedean/ontologos) 0.9.0 (EL, RL, inferred hierarchy) |
 | v0.7–v0.7b | Graphs + OBO/ROBOT interop |
-| v0.8–v0.9 | Full Manchester, refactoring, semantic diff |
-| v1.0 | **Protégé-competitive OWL + OBO in VS Code** ([parity checklist](docs/design/PROTEGE_PARITY.md)) |
+| v0.8–v0.9 | Full Manchester, refactoring, semantic diff; `ontologos-watch` hook |
+| v1.0 | **Protégé-competitive OWL + OBO in VS Code** — DL via OntoLogos 1.0.0 ([parity checklist](docs/design/PROTEGE_PARITY.md)) |
 
 See [ROADMAP.md](https://github.com/eddiethedean/ontocode/blob/main/docs/design/ROADMAP.md), [PLAN.md](https://github.com/eddiethedean/ontocode/blob/main/docs/design/PLAN.md), and [PROTEGE_PARITY.md](docs/design/PROTEGE_PARITY.md) for the full product plan.
 

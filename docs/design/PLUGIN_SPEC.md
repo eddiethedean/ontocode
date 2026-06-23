@@ -37,7 +37,7 @@ Examples:
 - WASM reasoner module (future)
 - organization-specific validation reasoners
 
-Built-in adapters (`whelk`, `dl`, `reasonable`) ship in `ontoindex-reasoner` — see [REASONER_SPEC.md](REASONER_SPEC.md).
+Built-in adapters (`el`, `dl`, `rl`, `rdfs`, `auto`) ship in `ontoindex-reasoner` as thin wrappers over [OntoLogos](https://github.com/eddiethedean/ontologos) — see [REASONER_SPEC.md](REASONER_SPEC.md), [ADR-0015](adr/0015-adopt-ontologos-reasoner.md).
 
 ### 2.4 Query Function Plugins
 Add functions to the SQL-like query layer.

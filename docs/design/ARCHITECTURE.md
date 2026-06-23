@@ -42,20 +42,22 @@ The architecture must support:
 | diff/docs/reasoner/robot  |
 +-------------+-------------+
               |
-      +-------+-------+
-      v               v
-+-----------+   +-----------+
-| Oxigraph  |   | HornedOWL |
-| RDF/SPARQL|   | OWL axioms|
-+-----+-----+   +-----+-----+
-      |               |
-      +───────┬───────┘
-              v
-+---------------------------+
-|     Workspace Files       |
+      +-------+-------+-------+
+      v       v               v
++-----------+ +-----------+ +------------------+
+| Oxigraph  | | HornedOWL | | OntoLogos        |
+| RDF/SPARQL| | OWL axioms| | reasoners 0.9/1.0|
++-----+-----+ +-----+-----+ +--------+---------+
+      |               |              |
+      +───────┬───────┘              |
+              v                      |
++---------------------------+        |
+|     Workspace Files       |◄───────┘
 | owl/rdf/ttl/jsonld/obo    |
 +---------------------------+
 ```
+
+**Reasoning ([ADR-0015](adr/0015-adopt-ontologos-reasoner.md)):** `ontoindex-reasoner` delegates to [OntoLogos](https://github.com/eddiethedean/ontologos) crates (`ontologos-el`, `ontologos-rl`, `ontologos-dl`, etc.). Pin **0.9.0** at v0.6; bump to **1.0.0** for DL parity at OntoCode v1.0.
 
 **Sync rule ([ADR-0013](adr/0013-dual-stack-oxigraph-horned-owl.md)):** Catalog entities/axioms for edit and diff come from Horned-OWL; triple counts and SPARQL from Oxigraph; CI consistency tests detect drift.
 
@@ -71,7 +73,7 @@ The architecture must support:
 | `ontoindex-diagnostics` | planned v0.3 | Lint rules, quick fixes |
 | `ontoindex-diff` | planned v0.9 | Semantic diff |
 | `ontoindex-docs` | planned v0.9 | Markdown/HTML export |
-| `ontoindex-reasoner` | planned v0.6 | Rust adapters: whelk-rs, reasonable, in-tree DL |
+| `ontoindex-reasoner` | planned v0.6 | Thin facade over OntoLogos 0.9→1.0 ([ADR-0015](adr/0015-adopt-ontologos-reasoner.md)) |
 | `ontoindex-robot` | planned v0.7b | ROBOT CLI wrappers |
 | `ontoindex-lsp` | v0.2 | Language server |
 | `ontoindex-cli` | v0.2 | `ontoindex` binary |
@@ -102,7 +104,10 @@ The architecture must support:
 - Markdown/HTML export, entity pages
 
 ### 4.8 Reasoner Layer (v0.6+)
-- In-process Rust adapters; explanation cache — see [REASONER_SPEC.md](REASONER_SPEC.md), [ADR-0014](adr/0014-rust-native-reasoners-only.md)
+- `ontoindex-reasoner` thin facade over OntoLogos — see [REASONER_SPEC.md](REASONER_SPEC.md), [ADR-0014](adr/0014-rust-native-reasoners-only.md), [ADR-0015](adr/0015-adopt-ontologos-reasoner.md)
+- v0.6: `ontologos-*` 0.9.0 (`el`, `rl`, `rdfs`, `explain`)
+- v1.0: `ontologos-*` 1.0.0 (`dl`, `facade`, full DL explanations)
+- v0.9: optional `ontologos-watch` for incremental reclassify
 
 ## 5. OntoCode Internal Modules
 

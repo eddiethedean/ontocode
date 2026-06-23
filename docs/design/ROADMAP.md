@@ -97,16 +97,18 @@ Exit criteria:
 
 Deliverables:
 
-- reasoner adapter API ([REASONER_SPEC.md](REASONER_SPEC.md), [ADR-0014](adr/0014-rust-native-reasoners-only.md))
-- `whelk` adapter (OWL EL via whelk-rs)
-- `dl` adapter MVP (consistency + unsatisfiable classes)
-- unsatisfiable classes
+- `ontoindex-reasoner` crate — thin facade over [OntoLogos](https://github.com/eddiethedean/ontologos) **0.9.0** ([REASONER_SPEC.md](REASONER_SPEC.md), [ADR-0014](adr/0014-rust-native-reasoners-only.md), [ADR-0015](adr/0015-adopt-ontologos-reasoner.md))
+- `el` adapter → `ontologos-el` (OWL EL classification)
+- `rl` / `rdfs` adapters → `ontologos-rl` / `ontologos-rdfs` (P1)
+- profile detection via `ontologos-profile`
+- unsatisfiable classes (EL scope in 0.9.0)
 - inferred hierarchy view (asserted / inferred / combined toggle)
-- **explanation panel** with justification chain for unsatisfiable classes (P0 — not a placeholder)
+- **explanation panel** — EL-first via `ontologos-explain` (DL clash traces deferred to v1.0 / OntoLogos 1.0.0)
 
 Exit criteria:
 
-- User can classify, see inferred hierarchy, and understand unsatisfiable classes with real explanations.
+- User can classify EL ontologies, see inferred hierarchy, and get EL explanations where available.
+- `dl` adapter stubbed with clear UI until OntoLogos 1.0.0 ships on crates.io.
 
 ## v0.7 — Visualization
 
@@ -156,6 +158,7 @@ Deliverables:
 - Git branch comparison
 - breaking change report
 - **incremental workspace index** (required — [ARCHITECTURE.md](ARCHITECTURE.md))
+- evaluate `ontologos-watch` for file-change → reclassify hook ([ADR-0015](adr/0015-adopt-ontologos-reasoner.md))
 - Markdown/HTML docs export
 - PR summary generation
 
@@ -168,9 +171,11 @@ Exit criteria:
 Deliverables:
 
 - All [PROTEGE_PARITY.md](PROTEGE_PARITY.md) **P0** items green
+- Bump `ontologos-*` to **1.0.0** — enable `dl` and `auto` adapters ([ADR-0015](adr/0015-adopt-ontologos-reasoner.md))
+- DL classification + clash-trace explanations via `ontologos-dl` + `ontologos-explain`
 - Stable CLI/API/LSP
 - VS Code Marketplace publish
-- Migration guide from Protégé (honest parity table)
+- Migration guide from Protégé (honest parity table; cite OntoLogos supported constructs)
 - `examples/protege-roundtrip/` ontology set
 - Performance benchmarks document
 
@@ -178,6 +183,8 @@ Exit criteria:
 
 > Daily ontology engineering (OWL 2 DL + OBO maintenance) is completable in VS Code.
 > Protégé is required only for **P2** features in [PROTEGE_PARITY.md](PROTEGE_PARITY.md).
+
+**External gate:** OntoLogos **1.0.0** published to crates.io with HermiT catalog parity complete ([OntoLogos ROADMAP](https://github.com/eddiethedean/ontologos/blob/main/ROADMAP.md)).
 
 ## Implementation sequencing
 

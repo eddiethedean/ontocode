@@ -147,7 +147,7 @@ Entity Changes:
 ## 7. Reasoner Results Panel
 
 ```text
-REASONER: whelk (OWL EL)  [Switch to DL v]
+REASONER: el (OWL EL)  [Switch to DL — requires OntoLogos 1.0]
 
 Status: Completed
 

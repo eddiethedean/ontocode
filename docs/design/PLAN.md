@@ -80,7 +80,7 @@ P0 highlights (see parity matrix for full list):
 
 - Hybrid authoring: quick forms + Manchester editor ([OWL_AUTHORING_SPEC.md](OWL_AUTHORING_SPEC.md))
 - Horned-OWL + Oxigraph dual stack ([ADR-0013](adr/0013-dual-stack-oxigraph-horned-owl.md))
-- Rust-native reasoners: `whelk` (EL) + `dl` (OWL 2 DL) with **real** clash-trace explanations ([REASONER_SPEC.md](REASONER_SPEC.md), [ADR-0014](adr/0014-rust-native-reasoners-only.md))
+- Rust-native reasoners via **[OntoLogos](https://github.com/eddiethedean/ontologos)**: `el` (0.9.0) + `dl` (1.0.0) with **real** clash-trace explanations ([REASONER_SPEC.md](REASONER_SPEC.md), [ADR-0014](adr/0014-rust-native-reasoners-only.md), [ADR-0015](adr/0015-adopt-ontologos-reasoner.md))
 - Full LSP surface ([SPEC.md](SPEC.md) §9)
 - Query workbench, graphs, semantic diff, refactoring
 - OBO format + ROBOT interop ([OBO_ROBOT_SPEC.md](OBO_ROBOT_SPEC.md))
@@ -170,7 +170,7 @@ Build on existing mature components:
 - Use **Horned-OWL** for OWL 2 axiom modeling, Manchester, and write-back ([ADR-0013](adr/0013-dual-stack-oxigraph-horned-owl.md)).
 - Use **Oxigraph** for RDF/SPARQL infrastructure ([ADR-0003](adr/0003-use-oxigraph.md)).
 - Use **sqlparser** virtual tables for SQL; add joins/aggregations at v1.0 ([ADR-0011](adr/0011-use-sqlparser-for-sql.md)).
-- Use **Rust reasoners** only: `whelk-rs`, `reasonable`, in-tree DL in `ontoindex-reasoner` ([ADR-0014](adr/0014-rust-native-reasoners-only.md), [REASONER_SPEC.md](REASONER_SPEC.md)).
+- Use **OntoLogos** for all reasoning: pin `0.9` at v0.6, `1.0` at OntoCode v1.0 ([ADR-0015](adr/0015-adopt-ontologos-reasoner.md), [REASONER_SPEC.md](REASONER_SPEC.md)).
 - Use a Rust language-server backend for editor services.
 - Use TypeScript only for VS Code UI orchestration.
 - Keep OntoIndex useful as a standalone CLI even without OntoCode.

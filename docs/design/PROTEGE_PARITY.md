@@ -31,8 +31,8 @@
 
 | Item | Spec | v0.2 |
 |------|------|------|
-| `whelk` adapter (OWL EL) | [REASONER_SPEC.md](REASONER_SPEC.md) | No |
-| `dl` adapter (OWL 2 DL classification + consistency) | [REASONER_SPEC.md](REASONER_SPEC.md) | No |
+| `el` adapter (OWL EL) | [REASONER_SPEC.md](REASONER_SPEC.md) | No |
+| `dl` adapter (OWL 2 DL classification + consistency) | [REASONER_SPEC.md](REASONER_SPEC.md) | No — requires [OntoLogos 1.0.0](https://github.com/eddiethedean/ontologos) |
 | Unsatisfiable class reporting | [REASONER_SPEC.md](REASONER_SPEC.md) | No |
 | **Real** unsatisfiability explanations (clash-trace justification) | [REASONER_SPEC.md](REASONER_SPEC.md) | No |
 | Asserted / inferred / combined hierarchy toggle | [REASONER_SPEC.md](REASONER_SPEC.md) | Asserted only |
@@ -79,7 +79,7 @@
 |------|------|
 | SHACL validation via adapter | [SHACL_SPEC.md](SHACL_SPEC.md) |
 | SWRL rule **viewing** (authoring is P2) | [PROTEGE_PARITY.md](PROTEGE_PARITY.md) |
-| `reasonable` adapter (OWL 2 RL) | [REASONER_SPEC.md](REASONER_SPEC.md) |
+| `rl` / `rdfs` adapters (OWL 2 RL / RDFS) | [REASONER_SPEC.md](REASONER_SPEC.md) |
 | Instance checking | [REASONER_SPEC.md](REASONER_SPEC.md) |
 | Plugin API stable + 3 reference plugins | [PLUGIN_SPEC.md](PLUGIN_SPEC.md) |
 | SQL joins and aggregations | [SPEC.md](SPEC.md) |

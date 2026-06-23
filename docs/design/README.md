@@ -12,6 +12,8 @@ Two related products:
 1. **OntoIndex** — Rust ontology index/query engine (`ontoindex-*` crates).
 2. **OntoCode** — VS Code extension (OntoCode Explorer in v0.2; full workbench at v1.0).
 
+**Sibling project:** [OntoLogos](https://github.com/eddiethedean/ontologos) — Rust ontology reasoner. OntoCode delegates all reasoning to OntoLogos crates per [ADR-0015](adr/0015-adopt-ontologos-reasoner.md) (0.9.0 at v0.6, 1.0.0 at v1.0).
+
 ## v1.0 exit bar
 
 **[PROTEGE_PARITY.md](PROTEGE_PARITY.md)** — canonical P0/P1/P2 checklist for Protégé-competitive release.
@@ -39,7 +41,7 @@ Many specs describe **target** behavior. Check the banner at the top of each doc
 - [ARCHITECTURE.md](ARCHITECTURE.md) — target architecture
 - [OWL_AUTHORING_SPEC.md](OWL_AUTHORING_SPEC.md) — hybrid forms + Manchester authoring
 - [OBO_ROBOT_SPEC.md](OBO_ROBOT_SPEC.md) — OBO format + ROBOT interop
-- [REASONER_SPEC.md](REASONER_SPEC.md) — Rust-native reasoners (whelk, DL, reasonable)
+- [REASONER_SPEC.md](REASONER_SPEC.md) — OntoLogos-backed reasoners (0.9.0 → 1.0.0)
 - [SHACL_SPEC.md](SHACL_SPEC.md) — SHACL validation (P1)
 - [SEMANTIC_DIFF_SPEC.md](SEMANTIC_DIFF_SPEC.md) — semantic ontology diff
 - [LSP_SPEC.md](LSP_SPEC.md) — target language server (v1.0 methods)

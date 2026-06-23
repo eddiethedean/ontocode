@@ -20,6 +20,7 @@ Canonical ADRs live in this directory. The former `adrs/` folder was merged here
 | [0012](0012-lsp-json-snake-case-enums.md) | LSP JSON snake_case enums | Accepted |
 | [0013](0013-dual-stack-oxigraph-horned-owl.md) | Dual stack Oxigraph + Horned-OWL | Accepted (v0.4b+) |
 | [0014](0014-rust-native-reasoners-only.md) | Rust-native reasoners only (no JVM) | Accepted |
+| [0015](0015-adopt-ontologos-reasoner.md) | Adopt OntoLogos as reasoner backend | Accepted |
 
 ## Current stack
 
@@ -33,7 +34,7 @@ Canonical ADRs live in this directory. The former `adrs/` folder was merged here
 ### v1.0 target
 
 - **OWL modeling / write-back:** Horned-OWL via `ontoindex-owl` ([ADR-0013](0013-dual-stack-oxigraph-horned-owl.md))
-- **Reasoning:** Rust-only — `whelk-rs`, `reasonable`, in-tree DL ([ADR-0014](0014-rust-native-reasoners-only.md), [REASONER_SPEC.md](../REASONER_SPEC.md))
+- **Reasoning:** [OntoLogos](https://github.com/eddiethedean/ontologos) via `ontoindex-reasoner` — 0.9.0 at v0.6, 1.0.0 at v1.0 ([ADR-0014](0014-rust-native-reasoners-only.md), [ADR-0015](0015-adopt-ontologos-reasoner.md), [REASONER_SPEC.md](../REASONER_SPEC.md))
 - **Exit bar:** [PROTEGE_PARITY.md](../PROTEGE_PARITY.md)
 
 Horned-OWL and DataFusion ADRs remain for historical context; v1.0 uses Oxigraph + Horned-OWL + sqlparser per ADR-0013 and ADR-0011.

@@ -56,9 +56,10 @@ describe("bundledServer e2e", () => {
     await assertSpawnAfterMarketplaceChmod(extensionRoot);
   });
 
-  it("spawns from unpacked VSIX extension root when ONTOCODE_E2E_EXTENSION_ROOT is set", async () => {
+  it("spawns from unpacked VSIX extension root when ONTOCODE_E2E_EXTENSION_ROOT is set", async (t) => {
     const extensionRoot = process.env.ONTOCODE_E2E_EXTENSION_ROOT?.trim();
     if (!extensionRoot) {
+      t.skip("ONTOCODE_E2E_EXTENSION_ROOT not set");
       return;
     }
     await assertSpawnAfterMarketplaceChmod(extensionRoot);

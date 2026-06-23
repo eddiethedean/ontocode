@@ -17,7 +17,7 @@
 
 ### OWL 2 DL authoring (hybrid UX)
 
-| Item | Spec | Dependency | v0.2 |
+| Item | Spec | Dependency | v0.3 |
 |------|------|------------|------|
 | Quick forms: labels, comments, deprecated | [OWL_AUTHORING_SPEC.md](OWL_AUTHORING_SPEC.md) | `horned-owl` | Partial (read-only inspector) |
 | Quick forms: `SubClassOf`, domain, range, property characteristics | [OWL_AUTHORING_SPEC.md](OWL_AUTHORING_SPEC.md) | `horned-owl` | No |
@@ -31,7 +31,7 @@
 
 ### Reasoning (Rust-native — [ADR-0014](adr/0014-rust-native-reasoners-only.md))
 
-| Item | Spec | Dependency | v0.2 |
+| Item | Spec | Dependency | v0.3 |
 |------|------|------------|------|
 | `el` adapter (OWL EL) | [REASONER_SPEC.md](REASONER_SPEC.md) | OntoLogos `ontologos-el` | No |
 | `dl` adapter (OWL 2 DL classification + consistency) | [REASONER_SPEC.md](REASONER_SPEC.md) | OntoLogos `ontologos-dl` 1.0.0 | No |
@@ -43,9 +43,9 @@
 
 ### Editor & LSP
 
-| Item | Spec | v0.2 |
+| Item | Spec | v0.3 |
 |------|------|------|
-| Diagnostics → Problems panel | [SPEC.md](SPEC.md) §9 | Yes (v0.3) |
+| Diagnostics → Problems panel | [SPEC.md](SPEC.md) §9 | Yes |
 | Completion | [SPEC.md](SPEC.md) §9 | No |
 | Rename (safe IRI) | [SPEC.md](SPEC.md) §9 | No |
 | Find references | [SPEC.md](SPEC.md) §9 | No |
@@ -55,7 +55,7 @@
 
 ### Workflow & platform
 
-| Item | Spec | v0.2 |
+| Item | Spec | v0.3 |
 |------|------|------|
 | Imports management UI | [SPEC.md](SPEC.md) | No |
 | SQL + SPARQL query workbench | [SPEC.md](SPEC.md) | CLI only |
@@ -69,7 +69,7 @@
 
 ### OBO & biomedical
 
-| Item | Spec | Dependency | v0.2 |
+| Item | Spec | Dependency | v0.3 |
 |------|------|------------|------|
 | OBO format read/write | [OBO_ROBOT_SPEC.md](OBO_ROBOT_SPEC.md) | `fastobo`, `fastobo-owl` | No |
 | ROBOT interop (`validate`, `merge`, `report`) | [OBO_ROBOT_SPEC.md](OBO_ROBOT_SPEC.md) | ROBOT CLI | No |

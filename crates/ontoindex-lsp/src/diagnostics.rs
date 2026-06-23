@@ -3,31 +3,51 @@ use lsp_server::Message;
 use lsp_types::notification::Notification as _;
 use lsp_types::notification::PublishDiagnostics;
 use lsp_types::{Diagnostic, DiagnosticSeverity, NumberOrString, Position, Range, Uri};
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
 use std::str::FromStr;
+use std::sync::Mutex;
 
+use crate::positions::byte_col_to_utf16;
 use crate::state::path_to_uri;
+
+static PUBLISHED_URIS: Mutex<BTreeSet<String>> = Mutex::new(BTreeSet::new());
 
 pub fn publish_catalog_diagnostics(
     sender: &Sender<Message>,
     documents: &[ontoindex_core::OntologyDocument],
     diagnostics: &[ontoindex_core::Diagnostic],
+    document_text: &dyn Fn(&Path) -> Option<String>,
 ) {
     let mut by_file: BTreeMap<&Path, Vec<&ontoindex_core::Diagnostic>> = BTreeMap::new();
     for diag in diagnostics {
         by_file.entry(diag.file.as_path()).or_default().push(diag);
     }
 
+    let mut current_uris = BTreeSet::new();
+
     for doc in documents {
-        let uri = path_to_lsp_uri(&doc.path);
+        let uri = path_to_uri(&doc.path);
+        current_uris.insert(uri.clone());
         let file_diags = by_file.remove(doc.path.as_path()).unwrap_or_default();
-        send_publish(sender, &uri, file_diags);
+        send_publish(sender, &uri, file_diags, document_text);
     }
 
     for (path, diags) in by_file {
-        let uri = path_to_lsp_uri(path);
-        send_publish(sender, &uri, diags);
+        let uri = path_to_uri(path);
+        current_uris.insert(uri.clone());
+        send_publish(sender, &uri, diags, document_text);
+    }
+
+    let stale: Vec<String> = {
+        let mut published = PUBLISHED_URIS.lock().unwrap_or_else(|e| e.into_inner());
+        let stale: Vec<String> = published.difference(&current_uris).cloned().collect();
+        *published = current_uris;
+        stale
+    };
+
+    for uri in stale {
+        send_empty_publish(sender, &uri);
     }
 }
 
@@ -35,13 +55,32 @@ fn send_publish(
     sender: &Sender<Message>,
     uri: &str,
     diagnostics: Vec<&ontoindex_core::Diagnostic>,
+    document_text: &dyn Fn(&Path) -> Option<String>,
 ) {
-    let lsp_uri = Uri::from_str(uri).unwrap_or_else(|_| Uri::from_str("file:///").expect("uri"));
+    let Ok(lsp_uri) = Uri::from_str(uri) else {
+        eprintln!("ontoindex-lsp: skip diagnostics for invalid URI: {uri}");
+        return;
+    };
     let params = lsp_types::PublishDiagnosticsParams {
         uri: lsp_uri,
-        diagnostics: diagnostics.into_iter().map(to_lsp_diagnostic).collect(),
+        diagnostics: diagnostics.into_iter().map(|d| to_lsp_diagnostic(d, document_text)).collect(),
         version: None,
     };
+    let notif = lsp_server::Notification {
+        method: PublishDiagnostics::METHOD.to_string(),
+        params: serde_json::to_value(params).unwrap_or_default(),
+    };
+    if sender.send(Message::Notification(notif)).is_err() {
+        eprintln!("ontoindex-lsp: failed to send publishDiagnostics");
+    }
+}
+
+fn send_empty_publish(sender: &Sender<Message>, uri: &str) {
+    let Ok(lsp_uri) = Uri::from_str(uri) else {
+        return;
+    };
+    let params =
+        lsp_types::PublishDiagnosticsParams { uri: lsp_uri, diagnostics: vec![], version: None };
     let notif = lsp_server::Notification {
         method: PublishDiagnostics::METHOD.to_string(),
         params: serde_json::to_value(params).unwrap_or_default(),
@@ -49,13 +88,20 @@ fn send_publish(
     let _ = sender.send(Message::Notification(notif));
 }
 
-fn to_lsp_diagnostic(diag: &ontoindex_core::Diagnostic) -> Diagnostic {
-    let line = diag.range.line.unwrap_or(1).saturating_sub(1) as u32;
-    let column = diag.range.column.unwrap_or(0) as u32;
+fn to_lsp_diagnostic(
+    diag: &ontoindex_core::Diagnostic,
+    document_text: &dyn Fn(&Path) -> Option<String>,
+) -> Diagnostic {
+    let line_idx = diag.range.line.unwrap_or(1).saturating_sub(1) as u32;
+    let byte_col = diag.range.column.unwrap_or(0) as usize;
+    let line_text = document_text(&diag.file)
+        .and_then(|text| text.lines().nth(line_idx as usize).map(|s| s.to_string()));
+    let character =
+        line_text.as_deref().map(|l| byte_col_to_utf16(l, byte_col)).unwrap_or(byte_col as u32);
     Diagnostic {
         range: Range {
-            start: Position { line, character: column },
-            end: Position { line, character: column.saturating_add(1) },
+            start: Position { line: line_idx, character },
+            end: Position { line: line_idx, character: character.saturating_add(1) },
         },
         severity: Some(match diag.severity {
             ontoindex_core::DiagnosticSeverity::Error => DiagnosticSeverity::ERROR,
@@ -67,10 +113,6 @@ fn to_lsp_diagnostic(diag: &ontoindex_core::Diagnostic) -> Diagnostic {
         message: diag.message.clone(),
         ..Default::default()
     }
-}
-
-fn path_to_lsp_uri(path: &Path) -> String {
-    path_to_uri(path)
 }
 
 #[cfg(test)]
@@ -90,7 +132,7 @@ mod tests {
             entity_iri: None,
             quick_fix: None,
         };
-        let lsp = to_lsp_diagnostic(&diag);
+        let lsp = to_lsp_diagnostic(&diag, &|_| None);
         assert_eq!(lsp.range.start.line, 1);
         assert_eq!(lsp.range.start.character, 4);
         assert_eq!(lsp.code, Some(NumberOrString::String("broken_import".to_string())));

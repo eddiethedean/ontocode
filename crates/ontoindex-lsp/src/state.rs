@@ -30,6 +30,13 @@ impl ServerState {
         }
     }
 
+    pub fn set_workspace_root(&self, workspace: PathBuf) -> Result<(), String> {
+        let workspace = canonical_workspace_root(&workspace)?;
+        let mut guard = self.inner.write().map_err(|e| e.to_string())?;
+        guard.workspace = Some(workspace);
+        Ok(())
+    }
+
     pub fn index_workspace(
         &self,
         workspace: PathBuf,
@@ -63,7 +70,13 @@ impl ServerState {
     }
 
     pub fn with_catalog<T>(&self, f: impl FnOnce(&OntologyCatalog) -> T) -> Option<T> {
-        let guard = self.inner.read().ok()?;
+        let guard = match self.inner.read() {
+            Ok(g) => g,
+            Err(e) => {
+                eprintln!("ontoindex-lsp: catalog read lock poisoned: {e}");
+                return None;
+            }
+        };
         guard.catalog.as_ref().map(f)
     }
 
@@ -72,14 +85,22 @@ impl ServerState {
     }
 
     pub fn set_document_text(&self, path: PathBuf, text: String) {
-        if let Ok(mut guard) = self.inner.write() {
-            guard.open_documents.insert(path, text);
+        let path = path.canonicalize().unwrap_or(path);
+        match self.inner.write() {
+            Ok(mut guard) => {
+                guard.open_documents.insert(path, text);
+            }
+            Err(e) => eprintln!("ontoindex-lsp: failed to store open document: {e}"),
         }
     }
 
     pub fn remove_document(&self, path: &Path) {
-        if let Ok(mut guard) = self.inner.write() {
-            guard.open_documents.remove(path);
+        let path = path.canonicalize().unwrap_or_else(|_| path.to_path_buf());
+        match self.inner.write() {
+            Ok(mut guard) => {
+                guard.open_documents.remove(&path);
+            }
+            Err(e) => eprintln!("ontoindex-lsp: failed to remove open document: {e}"),
         }
     }
 

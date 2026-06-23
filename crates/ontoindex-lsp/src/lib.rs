@@ -4,6 +4,7 @@
 
 pub(crate) mod diagnostics;
 pub(crate) mod handlers;
+pub(crate) mod positions;
 pub(crate) mod protocol;
 pub(crate) mod state;
 
@@ -12,7 +13,9 @@ mod handlers_test;
 
 use crossbeam_channel::Sender;
 use diagnostics::publish_catalog_diagnostics;
-use handlers::{handle_custom_request, handle_initialize, handle_standard_request};
+use handlers::{
+    handle_custom_request, handle_initialize, handle_standard_request, StandardRequestOutcome,
+};
 use lsp_server::{Connection, Message, Notification, Request, RequestId, Response, ResponseError};
 use lsp_types::{
     notification::Notification as _,
@@ -39,6 +42,7 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
     let pending_reindex: Arc<Mutex<Option<PendingReindex>>> = Arc::new(Mutex::new(None));
     let pending_diagnostic_publish = Arc::new(AtomicBool::new(false));
 
+    let timer_sender = connection.sender.clone();
     let timer_state = state.clone();
     let timer_pending = Arc::clone(&pending_reindex);
     let timer_publish = Arc::clone(&pending_diagnostic_publish);
@@ -46,6 +50,7 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
         thread::sleep(Duration::from_millis(100));
         if flush_due_reindex(&timer_state, &timer_pending) {
             timer_publish.store(true, Ordering::SeqCst);
+            publish_pending_diagnostics(&timer_sender, &timer_state, &timer_publish);
         }
     });
 
@@ -125,23 +130,36 @@ fn handle_lsp_request(
         };
     }
 
-    if let Some(result) = handle_standard_request(state, &req.method, Some(req.params)) {
-        return Some(ok_response(id, result));
+    match handle_standard_request(state, &req.method, Some(req.params)) {
+        StandardRequestOutcome::Ok(result) => Some(ok_response(id, result)),
+        StandardRequestOutcome::MethodNotFound => Some(error_response(
+            id,
+            ResponseError {
+                code: -32601,
+                message: format!("Method not found: {}", req.method),
+                data: None,
+            },
+        )),
+        StandardRequestOutcome::InvalidParams(err) => Some(error_response(id, err)),
     }
-
-    None
 }
 
 fn handle_notification(
     state: &ServerState,
     pending_reindex: &Arc<Mutex<Option<PendingReindex>>>,
-    _pending_diagnostic_publish: &Arc<AtomicBool>,
+    pending_diagnostic_publish: &Arc<AtomicBool>,
     notif: Notification,
 ) {
     match notif.method.as_str() {
         Initialized::METHOD => {
             if let Some(workspace) = state.workspace_root() {
                 schedule_reindex(pending_reindex, workspace, Duration::from_millis(500));
+            }
+        }
+        "workspace/didChangeWatchedFiles" => {
+            if let Some(workspace) = state.workspace_root() {
+                schedule_reindex(pending_reindex, workspace, Duration::from_millis(500));
+                pending_diagnostic_publish.store(true, Ordering::SeqCst);
             }
         }
         DidOpenTextDocument::METHOD => {
@@ -194,8 +212,15 @@ fn publish_pending_diagnostics(
     if !pending.swap(false, Ordering::SeqCst) {
         return;
     }
+    let state = state.clone();
+    let text_fn = |path: &std::path::Path| state.document_text(path);
     state.with_catalog(|catalog| {
-        publish_catalog_diagnostics(sender, &catalog.data().documents, &catalog.data().diagnostics);
+        publish_catalog_diagnostics(
+            sender,
+            &catalog.data().documents,
+            &catalog.data().diagnostics,
+            &text_fn,
+        );
     });
 }
 
@@ -228,6 +253,11 @@ fn apply_text_change(text: &str, range: &lsp_types::Range, new_text: &str) -> St
     let start_line = range.start.line as usize;
     let end_line = range.end.line as usize;
     if start_line >= lines.len() {
+        eprintln!(
+            "ontoindex-lsp: text change start line {} out of range ({} lines)",
+            start_line,
+            lines.len()
+        );
         return text.to_string();
     }
     let start_line_str = lines.get(start_line).copied().unwrap_or("");

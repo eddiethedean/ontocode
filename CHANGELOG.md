@@ -17,6 +17,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `ontoindex validate` prints all diagnostics; non-zero exit on errors
 - Open-buffer parsing for inline diagnostics on unsaved edits
 
+### Fixed
+
+- Diagnostic file paths when entity `ontology_id` is an ontology IRI (not `doc-N`)
+- LSP always responds to hover/definition/symbol requests (`null` when no result)
+- LSP advertises `textDocumentSync` so unsaved-buffer diagnostics work in VS Code
+- RDF/XML `xmlns` prefix extraction; fewer false `undefined_prefix` reports
+- Orphan-class heuristic skips taxonomy roots with in-workspace children
+- Import IRI normalization (trailing slash); stale Problems panel entries cleared after reindex
+
 [0.3.0]: https://github.com/eddiethedean/ontocode/releases/tag/v0.3.0
 
 ## [0.2.3] - 2026-06-11

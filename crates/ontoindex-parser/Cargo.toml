@@ -16,6 +16,7 @@ include = ["src/**/*", "Cargo.toml", "LICENSE-MIT", "LICENSE-APACHE-2.0"]
 [dependencies]
 ontoindex-core = { workspace = true }
 oxigraph.workspace = true
+regex = "1"
 serde.workspace = true
 thiserror.workspace = true
 

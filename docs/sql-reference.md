@@ -11,7 +11,7 @@ OntoIndex exposes indexed ontology data as **virtual tables** queried with a SQL
 - `WHERE` with simple comparisons: `column = 'value'` (string literals only)
 - Output formats: text (default), JSON (`--format json`), CSV (`--format csv`)
 
-Not supported in v0.2: `JOIN`, subqueries, `GROUP BY`, `ORDER BY`, functions, or multiple tables.
+Not supported in v0.3: `JOIN`, subqueries, `GROUP BY`, `ORDER BY`, functions, or multiple tables.
 
 **v1.0 plan:** extend [`sqlparser`](https://crates.io/crates/sqlparser) virtual-table joins/aggregations first ([ADR-0011](../docs/design/adr/0011-use-sqlparser-for-sql.md) amendment). Revisit [DataFusion](https://crates.io/crates/datafusion) only if scope exceeds hand-rolled implementation — see [DEPENDENCY_MATRIX.md](../docs/design/DEPENDENCY_MATRIX.md).
 

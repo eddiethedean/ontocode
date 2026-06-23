@@ -32,6 +32,7 @@ export class OntologyTreeItem extends vscode.TreeItem {
     public readonly iri?: string,
     public readonly filePath?: string,
     public readonly propertyKind?: string,
+    public readonly diagnosticSeverity?: string,
     public readonly diagnostic?: import("../lsp/protocol").DiagnosticSummary
   ) {
     super(label, collapsibleState);
@@ -173,7 +174,11 @@ export class ExplorerTreeProvider implements vscode.TreeDataProvider<OntologyTre
           const item = new OntologyTreeItem(
             "group",
             `${severity} (${items.length})`,
-            vscode.TreeItemCollapsibleState.Collapsed
+            vscode.TreeItemCollapsibleState.Collapsed,
+            undefined,
+            undefined,
+            undefined,
+            severity
           );
           item.contextValue = `diagnostics-${severity}`;
           item.iconPath = new vscode.ThemeIcon(
@@ -204,28 +209,10 @@ export class ExplorerTreeProvider implements vscode.TreeDataProvider<OntologyTre
     if (
       parent.nodeKind === "group" &&
       this.viewKind === "diagnostics" &&
-      parent.label.startsWith("error")
+      parent.diagnosticSeverity
     ) {
       return (this.snapshot.diagnostics ?? [])
-        .filter((d) => d.severity === "error")
-        .map((d) => this.diagnosticItem(d));
-    }
-    if (
-      parent.nodeKind === "group" &&
-      this.viewKind === "diagnostics" &&
-      parent.label.startsWith("warning")
-    ) {
-      return (this.snapshot.diagnostics ?? [])
-        .filter((d) => d.severity === "warning")
-        .map((d) => this.diagnosticItem(d));
-    }
-    if (
-      parent.nodeKind === "group" &&
-      this.viewKind === "diagnostics" &&
-      parent.label.startsWith("info")
-    ) {
-      return (this.snapshot.diagnostics ?? [])
-        .filter((d) => d.severity === "info")
+        .filter((d) => d.severity === parent.diagnosticSeverity)
         .map((d) => this.diagnosticItem(d));
     }
     if (parent.nodeKind !== "entity" || !parent.iri || this.viewKind !== "classes") {

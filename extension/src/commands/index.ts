@@ -7,6 +7,7 @@ import {
 import { EntityInspectorPanel } from "../webviews/inspector";
 import { ExplorerTreeProvider } from "../treeviews/explorer";
 import { resolveEntityIri } from "../utils/resolveEntityIri";
+import { byteColToUtf16 } from "../utils/positions";
 
 export function registerCommands(
   context: vscode.ExtensionContext,
@@ -36,7 +37,14 @@ export function registerCommands(
           });
         }
         if (iri) {
-          await openInspector(context.extensionUri, iri);
+          try {
+            await openInspector(context.extensionUri, iri);
+          } catch (err) {
+            const message = err instanceof Error ? err.message : String(err);
+            void vscode.window.showErrorMessage(
+              `OntoCode: could not open entity — ${message}`
+            );
+          }
         }
       }
     ),
@@ -47,7 +55,14 @@ export function registerCommands(
         if (!iri) {
           return;
         }
-        await openInspector(context.extensionUri, iri);
+        try {
+          await openInspector(context.extensionUri, iri);
+        } catch (err) {
+          const message = err instanceof Error ? err.message : String(err);
+          void vscode.window.showErrorMessage(
+            `OntoCode: could not open entity — ${message}`
+          );
+        }
       }
     ),
     vscode.commands.registerCommand(
@@ -60,25 +75,35 @@ export function registerCommands(
         if (!iri) {
           return;
         }
-        const { detail } = await getEntity(iri);
-        if (!detail.source) {
-          vscode.window.showWarningMessage(
-            `No source location found for ${iri}`
+        try {
+          const { detail } = await getEntity(iri);
+          if (!detail.source) {
+            void vscode.window.showWarningMessage(
+              `No source location found for ${iri}`
+            );
+            return;
+          }
+          const doc = await vscode.workspace.openTextDocument(
+            vscode.Uri.file(detail.source.path)
           );
-          return;
+          const editor = await vscode.window.showTextDocument(doc);
+          const lineText = doc.lineAt(
+            Math.max(0, detail.source.line - 1)
+          ).text;
+          const line = Math.max(0, detail.source.line - 1);
+          const col = byteColToUtf16(lineText, Math.max(0, detail.source.column));
+          const pos = new vscode.Position(line, col);
+          editor.selection = new vscode.Selection(pos, pos);
+          editor.revealRange(
+            new vscode.Range(pos, pos),
+            vscode.TextEditorRevealType.InCenter
+          );
+        } catch (err) {
+          const message = err instanceof Error ? err.message : String(err);
+          void vscode.window.showErrorMessage(
+            `OntoCode: jump to source failed — ${message}`
+          );
         }
-        const doc = await vscode.workspace.openTextDocument(
-          vscode.Uri.file(detail.source.path)
-        );
-        const editor = await vscode.window.showTextDocument(doc);
-        const line = Math.max(0, detail.source.line - 1);
-        const col = Math.max(0, detail.source.column);
-        const pos = new vscode.Position(line, col);
-        editor.selection = new vscode.Selection(pos, pos);
-        editor.revealRange(
-          new vscode.Range(pos, pos),
-          vscode.TextEditorRevealType.InCenter
-        );
       }
     )
   );

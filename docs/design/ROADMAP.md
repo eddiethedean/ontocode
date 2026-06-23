@@ -42,7 +42,7 @@ Exit criteria:
 
 **Dependencies:** `lsp-server`, `lsp-types`, OntoIndex crates above.
 
-## v0.3 — Diagnostics (current)
+## v0.3 — Diagnostics (shipped)
 
 Deliverables:
 

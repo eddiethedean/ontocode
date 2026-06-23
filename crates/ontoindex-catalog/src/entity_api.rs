@@ -1,5 +1,5 @@
 use crate::OntologyCatalog;
-use ontoindex_core::{Entity, EntityKind};
+use ontoindex_core::{document_matches_entity, Entity, EntityKind};
 use serde::Serialize;
 use std::collections::{BTreeMap, BTreeSet};
 use std::fs;
@@ -134,25 +134,6 @@ fn predicate_label(predicate: &str) -> &'static str {
     } else {
         "predicate"
     }
-}
-
-fn normalize_iri_prefix(iri: &str) -> String {
-    iri.trim_end_matches('#').trim_end_matches('/').to_string()
-}
-
-fn document_matches_entity(entity: &Entity, doc: &ontoindex_core::OntologyDocument) -> bool {
-    if entity.ontology_id == doc.id {
-        return true;
-    }
-    if let Some(base) = &doc.base_iri {
-        if normalize_iri_prefix(base) == normalize_iri_prefix(&entity.ontology_id) {
-            return true;
-        }
-        if entity.iri.starts_with(base) {
-            return true;
-        }
-    }
-    doc.path.to_string_lossy().contains(&entity.ontology_id)
 }
 
 fn file_contains_entity(path: &std::path::Path, iri: &str, short_name: &str) -> bool {

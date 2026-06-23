@@ -123,6 +123,22 @@ export function assertCatalogSnapshot(value: unknown): CatalogSnapshot {
   return snapshot;
 }
 
+export function assertGetEntityResult(value: unknown): import("./protocol").GetEntityResult {
+  if (!value || typeof value !== "object") {
+    throw new Error("Invalid getEntity result from language server");
+  }
+  const result = value as Record<string, unknown>;
+  const detail = result.detail;
+  if (!detail || typeof detail !== "object") {
+    throw new Error("Invalid getEntity result: missing detail");
+  }
+  const d = detail as Record<string, unknown>;
+  if (!d.entity || typeof d.entity !== "object") {
+    throw new Error("Invalid getEntity result: missing entity");
+  }
+  return value as import("./protocol").GetEntityResult;
+}
+
 export function assertIndexWorkspaceResult(
   value: unknown
 ): { stats: { class_count: number; error_count: number }; indexed_at: number } {

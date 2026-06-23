@@ -4,6 +4,7 @@
 
 | Version | Supported |
 |---------|-----------|
+| 0.3.x   | Yes       |
 | 0.2.x   | Yes       |
 | < 0.2   | No        |
 
@@ -40,7 +41,7 @@ OntoIndex and OntoCode are **local-first** tools: they index and parse files on 
 
 **Never bind `ontoindex-lsp` to a public interface without an authenticated reverse proxy and strict path sandboxing.**
 
-## Hardening in v0.2+
+## Hardening in v0.2+ (extended in v0.3)
 
 | Control | Where |
 |---------|--------|

@@ -96,6 +96,75 @@ fn validate_reports_diagnostics() {
 }
 
 #[test]
+fn fixture_diagnostics_use_real_file_paths() {
+    let catalog = fixture_catalog();
+    let diags = &catalog.data().diagnostics;
+    for diag in diags {
+        assert!(
+            diag.file.file_name().is_some(),
+            "diagnostic should not use '.' fallback: {:?}",
+            diag
+        );
+        assert_ne!(diag.file, std::path::Path::new("."), "bad file path for {:?}", diag);
+    }
+}
+
+#[test]
+fn fixture_rdf_xml_has_no_spurious_undefined_prefix() {
+    let catalog = fixture_catalog();
+    let owl_path = support::fixture_workspace().join("organization.owl");
+    let undefined_on_owl: Vec<_> = catalog
+        .data()
+        .diagnostics
+        .iter()
+        .filter(|d| d.code == ontoindex_core::DiagnosticCode::UndefinedPrefix && d.file == owl_path)
+        .collect();
+    assert!(
+        undefined_on_owl.is_empty(),
+        "unexpected undefined_prefix on organization.owl: {:?}",
+        undefined_on_owl
+    );
+}
+
+#[test]
+fn fixture_root_class_not_orphan() {
+    let catalog = fixture_catalog();
+    let thing_orphan = catalog.data().diagnostics.iter().any(|d| {
+        d.code == ontoindex_core::DiagnosticCode::OrphanClass
+            && d.entity_iri.as_deref() == Some("http://example.org/people#Thing")
+    });
+    assert!(!thing_orphan, "ex:Thing should not be flagged orphan");
+}
+
+#[test]
+fn open_buffer_diagnostics_detect_undefined_prefix() {
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("live.ttl");
+    let base = "@prefix ex: <http://example.org/live#> .\n@prefix owl: <http://www.w3.org/2002/07/owl#> .\n<http://example.org/live> a owl:Ontology .\n";
+    std::fs::write(&path, format!("{base}ex:Ok a owl:Class .\n")).unwrap();
+    let canonical = path.canonicalize().expect("canonical path");
+
+    let mut overrides = std::collections::HashMap::new();
+    overrides.insert(canonical, format!("{base}ex:Ok a owl:Class .\nun:Bad a owl:Class .\n"));
+
+    let catalog = IndexBuilder::new()
+        .workspace(dir.path())
+        .document_overrides(overrides)
+        .build()
+        .expect("build");
+
+    let diags = &catalog.data().diagnostics;
+    assert!(
+        diags.iter().any(|d| {
+            (d.code == ontoindex_core::DiagnosticCode::UndefinedPrefix
+                || d.code == ontoindex_core::DiagnosticCode::ParseError)
+                && d.file.file_name() == path.file_name()
+        }),
+        "expected undefined prefix diagnostic on buffer override, got: {diags:?}"
+    );
+}
+
+#[test]
 fn classes_snapshot() {
     golden::assert_golden_snapshot(
         "fixtures",

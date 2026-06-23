@@ -88,6 +88,7 @@ jobs:
           set -euo pipefail
           cargo run -- query fixtures "SELECT * FROM classes"
           cargo run -- validate fixtures
+          cargo run -- query fixtures "SELECT code FROM diagnostics"
           cargo run -- sparql fixtures "SELECT ?s WHERE { ?s ?p ?o } LIMIT 1"
 
   release-build:
@@ -194,3 +195,5 @@ jobs:
           set -euo pipefail
           # Full crate graph is verified at release (publish in dependency order on tag).
           cargo publish -p ontoindex-core --dry-run
+          # diagnostics publish dry-run needs ontoindex-core 0.3.0 on crates.io; build verifies the crate until then.
+          cargo build -p ontoindex-diagnostics

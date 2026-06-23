@@ -1,6 +1,6 @@
 use crate::handlers::{
     handle_get_catalog_snapshot, handle_get_entity, handle_goto_definition, handle_hover,
-    handle_workspace_symbol,
+    handle_standard_request, handle_workspace_symbol, StandardRequestOutcome,
 };
 use crate::protocol::GetEntityParams;
 use crate::state::{path_to_uri, ServerState};
@@ -191,4 +191,22 @@ fn workspace_symbol_finds_person() {
         panic!("expected flat symbols");
     };
     assert!(symbols.iter().any(|s| s.name == "Person"));
+}
+
+#[test]
+fn hover_on_blank_line_returns_null_result() {
+    let state = indexed_state();
+    let uri = fixture_ttl_uri();
+    let outcome = handle_standard_request(
+        &state,
+        "textDocument/hover",
+        Some(serde_json::json!({
+            "textDocument": { "uri": uri },
+            "position": { "line": 9999, "character": 0 }
+        })),
+    );
+    match outcome {
+        StandardRequestOutcome::Ok(value) => assert!(value.is_null()),
+        other => panic!("expected null hover result, got {other:?}"),
+    }
 }

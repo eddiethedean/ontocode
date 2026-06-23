@@ -1,14 +1,16 @@
+use crate::positions::{byte_col_to_utf16, utf16_offset_to_byte};
 use crate::protocol::{
     CatalogSnapshot, DiagnosticSummary, GetEntityParams, GetEntityResult, IndexWorkspaceParams,
     IndexWorkspaceResult, LspErrorPayload,
 };
 use crate::state::{path_to_uri, resolve_workspace_for_index, ServerState};
+use lsp_server::ResponseError;
 use lsp_types::{
     DocumentSymbol, DocumentSymbolParams, DocumentSymbolResponse, GotoDefinitionParams,
     GotoDefinitionResponse, Hover, HoverContents, HoverParams, HoverProviderCapability,
     InitializeParams, InitializeResult, Location, MarkupContent, MarkupKind, OneOf, Position,
-    Range, ServerCapabilities, SymbolInformation, SymbolKind, Uri, WorkspaceSymbolParams,
-    WorkspaceSymbolResponse,
+    Range, ServerCapabilities, SymbolInformation, SymbolKind, TextDocumentSyncCapability,
+    TextDocumentSyncKind, Uri, WorkspaceSymbolParams, WorkspaceSymbolResponse,
 };
 use ontoindex_core::{resolve_document_path, EntityKind};
 use serde_json::Value;
@@ -24,7 +26,7 @@ pub fn handle_initialize(state: &ServerState, params: InitializeParams) -> Initi
 
     if let Some(uri) = workspace_uri {
         if let Ok(path) = resolve_workspace_for_index(uri.as_str(), None) {
-            let _ = state.index_workspace(path);
+            let _ = state.set_workspace_root(path);
         }
     }
 
@@ -34,6 +36,7 @@ pub fn handle_initialize(state: &ServerState, params: InitializeParams) -> Initi
             hover_provider: Some(HoverProviderCapability::Simple(true)),
             document_symbol_provider: Some(OneOf::Left(true)),
             workspace_symbol_provider: Some(OneOf::Left(true)),
+            text_document_sync: Some(TextDocumentSyncCapability::Kind(TextDocumentSyncKind::FULL)),
             ..Default::default()
         },
         server_info: Some(lsp_types::ServerInfo {
@@ -157,15 +160,18 @@ pub fn handle_document_symbol(
         }
         let symbols: Vec<DocumentSymbol> = entities
             .into_iter()
-            .map(|e| DocumentSymbol {
-                name: e.short_name.clone(),
-                detail: Some(e.iri.clone()),
-                kind: entity_kind_to_symbol_kind(e.kind),
-                tags: None,
-                deprecated: None,
-                range: Range::default(),
-                selection_range: Range::default(),
-                children: None,
+            .map(|e| {
+                let range = entity_source_range(state, &path, e);
+                DocumentSymbol {
+                    name: e.short_name.clone(),
+                    detail: Some(e.iri.clone()),
+                    kind: entity_kind_to_symbol_kind(e.kind),
+                    tags: None,
+                    deprecated: None,
+                    range,
+                    selection_range: range,
+                    children: None,
+                }
             })
             .collect();
         Some(DocumentSymbolResponse::Nested(symbols))
@@ -192,12 +198,13 @@ pub fn handle_workspace_symbol(
             .filter_map(|e| {
                 let doc = catalog.entity_document(&e.iri)?;
                 let uri = path_to_lsp_uri(&doc.path)?;
+                let range = entity_source_range(state, &doc.path, e);
                 Some(SymbolInformation {
                     name: e.short_name.clone(),
                     kind: entity_kind_to_symbol_kind(e.kind),
                     tags: None,
                     deprecated: None,
-                    location: Location { uri, range: Range::default() },
+                    location: Location { uri, range },
                     container_name: None,
                 })
             })
@@ -218,14 +225,18 @@ pub fn handle_goto_definition(
     state.with_catalog(|catalog| {
         let source = catalog.find_source_location(&iri)?;
         let uri = path_to_lsp_uri(&source.path)?;
+        let line_text = state.document_text(&source.path).and_then(|text| {
+            text.lines().nth(source.line.saturating_sub(1) as usize).map(|s| s.to_string())
+        });
+        let character = line_text
+            .as_deref()
+            .map(|l| byte_col_to_utf16(l, source.column as usize))
+            .unwrap_or(source.column as u32);
         let range = Range {
-            start: Position {
-                line: (source.line.saturating_sub(1)) as u32,
-                character: source.column as u32,
-            },
+            start: Position { line: (source.line.saturating_sub(1)) as u32, character },
             end: Position {
                 line: (source.line.saturating_sub(1)) as u32,
-                character: (source.column.saturating_add(1)) as u32,
+                character: character.saturating_add(1),
             },
         };
         Some(GotoDefinitionResponse::Scalar(Location { uri, range }))
@@ -259,29 +270,82 @@ pub fn handle_custom_request(
     }
 }
 
+#[derive(Debug)]
+pub enum StandardRequestOutcome {
+    Ok(Value),
+    MethodNotFound,
+    InvalidParams(ResponseError),
+}
+
 pub fn handle_standard_request(
     state: &ServerState,
     method: &str,
     params: Option<Value>,
-) -> Option<Value> {
+) -> StandardRequestOutcome {
     match method {
         "textDocument/hover" => {
-            let params: HoverParams = serde_json::from_value(params?).ok()?;
-            serde_json::to_value(handle_hover(state, params)?).ok()
+            let Ok(params) = serde_json::from_value(params.unwrap_or(Value::Null)) else {
+                return StandardRequestOutcome::InvalidParams(invalid_params("hover"));
+            };
+            match handle_hover(state, params) {
+                Some(hover) => serde_json::to_value(hover)
+                    .map(StandardRequestOutcome::Ok)
+                    .unwrap_or(StandardRequestOutcome::Ok(Value::Null)),
+                None => StandardRequestOutcome::Ok(Value::Null),
+            }
         }
         "textDocument/documentSymbol" => {
-            let params: DocumentSymbolParams = serde_json::from_value(params?).ok()?;
-            serde_json::to_value(handle_document_symbol(state, params)?).ok()
+            let Ok(params) = serde_json::from_value(params.unwrap_or(Value::Null)) else {
+                return StandardRequestOutcome::InvalidParams(invalid_params("documentSymbol"));
+            };
+            match handle_document_symbol(state, params) {
+                Some(symbols) => serde_json::to_value(symbols)
+                    .map(StandardRequestOutcome::Ok)
+                    .unwrap_or(StandardRequestOutcome::Ok(Value::Null)),
+                None => StandardRequestOutcome::Ok(Value::Null),
+            }
         }
         "workspace/symbol" => {
-            let params: WorkspaceSymbolParams = serde_json::from_value(params?).ok()?;
-            serde_json::to_value(handle_workspace_symbol(state, params)?).ok()
+            let Ok(params) = serde_json::from_value(params.unwrap_or(Value::Null)) else {
+                return StandardRequestOutcome::InvalidParams(invalid_params("workspace/symbol"));
+            };
+            match handle_workspace_symbol(state, params) {
+                Some(symbols) => serde_json::to_value(symbols)
+                    .map(StandardRequestOutcome::Ok)
+                    .unwrap_or(StandardRequestOutcome::Ok(Value::Array(vec![]))),
+                None => StandardRequestOutcome::Ok(Value::Array(vec![])),
+            }
         }
         "textDocument/definition" => {
-            let params: GotoDefinitionParams = serde_json::from_value(params?).ok()?;
-            serde_json::to_value(handle_goto_definition(state, params)?).ok()
+            let Ok(params) = serde_json::from_value(params.unwrap_or(Value::Null)) else {
+                return StandardRequestOutcome::InvalidParams(invalid_params("definition"));
+            };
+            match handle_goto_definition(state, params) {
+                Some(def) => serde_json::to_value(def)
+                    .map(StandardRequestOutcome::Ok)
+                    .unwrap_or(StandardRequestOutcome::Ok(Value::Null)),
+                None => StandardRequestOutcome::Ok(Value::Null),
+            }
         }
-        _ => None,
+        _ => StandardRequestOutcome::MethodNotFound,
+    }
+}
+
+fn invalid_params(method: &str) -> ResponseError {
+    ResponseError { code: -32602, message: format!("invalid params for {method}"), data: None }
+}
+
+fn entity_source_range(state: &ServerState, path: &Path, entity: &ontoindex_core::Entity) -> Range {
+    let line_idx = entity.source_location.line.unwrap_or(1).saturating_sub(1) as u32;
+    let byte_col = entity.source_location.column.unwrap_or(0) as usize;
+    let line_text = state
+        .document_text(path)
+        .and_then(|text| text.lines().nth(line_idx as usize).map(|s| s.to_string()));
+    let character =
+        line_text.as_deref().map(|l| byte_col_to_utf16(l, byte_col)).unwrap_or(byte_col as u32);
+    Range {
+        start: Position { line: line_idx, character },
+        end: Position { line: line_idx, character: character.saturating_add(1) },
     }
 }
 
@@ -318,17 +382,6 @@ fn entity_kind_to_symbol_kind(kind: EntityKind) -> SymbolKind {
         EntityKind::Ontology => SymbolKind::NAMESPACE,
         EntityKind::Other => SymbolKind::OBJECT,
     }
-}
-
-fn utf16_offset_to_byte(line: &str, utf16_col: u32) -> usize {
-    let mut utf16_seen = 0u32;
-    for (byte_idx, ch) in line.char_indices() {
-        if utf16_seen >= utf16_col {
-            return byte_idx;
-        }
-        utf16_seen += ch.len_utf16() as u32;
-    }
-    line.len()
 }
 
 fn iri_at_position(content: &str, position: Position) -> Option<String> {

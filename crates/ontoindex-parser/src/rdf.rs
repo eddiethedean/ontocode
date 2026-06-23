@@ -43,6 +43,7 @@ pub struct ParsedOntology {
     pub parse_message: Option<String>,
     pub parse_error_location: Option<SourceLocation>,
     pub triple_count: usize,
+    pub quads: Vec<Quad>,
 }
 
 pub fn parse_ontology_file(
@@ -111,7 +112,8 @@ pub fn parse_ontology_text(
         ));
     }
 
-    let mut namespaces = extract_prefixes(&quads);
+    let mut namespaces =
+        if format == OntologyFormat::TriG { extract_prefixes(&quads) } else { BTreeMap::new() };
     namespaces.extend(extract_declared_prefixes(source_text, format));
     if namespaces.is_empty() {
         namespaces.insert("".to_string(), default_base_iri(path));
@@ -121,7 +123,7 @@ pub fn parse_ontology_text(
     for quad in &quads {
         builder.ingest_quad(quad);
     }
-    builder.finish(parse_status, parse_message, parse_error_location, source_text)
+    builder.finish(parse_status, parse_message, parse_error_location, source_text, quads)
 }
 
 fn to_rdf_format(format: OntologyFormat, path: &Path) -> Result<RdfFormat> {
@@ -174,31 +176,43 @@ fn extract_declared_prefixes(
     source_text: &str,
     format: OntologyFormat,
 ) -> BTreeMap<String, String> {
-    if !matches!(format, OntologyFormat::Turtle | OntologyFormat::TriG) {
-        return BTreeMap::new();
-    }
-
     let mut prefixes = BTreeMap::new();
-    for line in source_text.lines() {
-        let trimmed = line.trim();
-        let rest = trimmed
-            .strip_prefix("@prefix ")
-            .or_else(|| trimmed.strip_prefix("@PREFIX "))
-            .or_else(|| trimmed.strip_prefix("PREFIX "));
-        let Some(rest) = rest else {
-            continue;
-        };
-        let Some((prefix_part, iri_part)) = rest.split_once('<') else {
-            continue;
-        };
-        let prefix = prefix_part.trim().trim_end_matches(':');
-        let Some(iri) = iri_part.split('>').next() else {
-            continue;
-        };
-        if !prefix.is_empty() {
+
+    if matches!(format, OntologyFormat::Turtle | OntologyFormat::TriG) {
+        for line in source_text.lines() {
+            let trimmed = line.trim();
+            let rest = trimmed
+                .strip_prefix("@prefix ")
+                .or_else(|| trimmed.strip_prefix("@PREFIX "))
+                .or_else(|| trimmed.strip_prefix("PREFIX "));
+            let Some(rest) = rest else {
+                continue;
+            };
+            let Some((prefix_part, iri_part)) = rest.split_once('<') else {
+                continue;
+            };
+            let prefix = prefix_part.trim().trim_end_matches(':');
+            let Some(iri) = iri_part.split('>').next() else {
+                continue;
+            };
             prefixes.insert(prefix.to_string(), iri.to_string());
         }
+        return prefixes;
     }
+
+    if matches!(format, OntologyFormat::RdfXml | OntologyFormat::Owl) {
+        static XMLNS_ATTR: std::sync::LazyLock<regex::Regex> = std::sync::LazyLock::new(|| {
+            regex::Regex::new(r#"xmlns(?::([A-Za-z][\w-]*))?="([^"]+)""#).expect("xmlns regex")
+        });
+        for cap in XMLNS_ATTR.captures_iter(source_text) {
+            let prefix = cap.get(1).map(|m| m.as_str()).unwrap_or("");
+            let iri = cap.get(2).map(|m| m.as_str()).unwrap_or("");
+            if !iri.is_empty() {
+                prefixes.insert(prefix.to_string(), iri.to_string());
+            }
+        }
+    }
+
     prefixes
 }
 
@@ -243,6 +257,7 @@ fn empty_result(
         parse_message,
         parse_error_location,
         triple_count: 0,
+        quads: Vec::new(),
     }
 }
 
@@ -362,9 +377,15 @@ impl OntologyBuilder {
         }
 
         if quad.predicate == OWL::deprecated() {
-            if let Some(entity) = self.entities.get_mut(&subject) {
-                entity.deprecated = object == "true";
-            }
+            let entry = self.entities.entry(subject.clone()).or_insert_with(|| EntityState {
+                kind: EntityKind::Other,
+                labels: Vec::new(),
+                comments: Vec::new(),
+                deprecated: false,
+                types: BTreeSet::new(),
+            });
+            entry.deprecated = object == "true" || object.contains("true");
+            return;
         }
 
         if quad.predicate == Rdfs::sub_class_of() {
@@ -386,6 +407,7 @@ impl OntologyBuilder {
         parse_message: Option<String>,
         parse_error_location: Option<SourceLocation>,
         source_text: &str,
+        quads: Vec<Quad>,
     ) -> Result<ParsedOntology> {
         let base_iri = self
             .ontology_iris
@@ -458,6 +480,7 @@ impl OntologyBuilder {
             parse_message,
             parse_error_location,
             triple_count: self.triple_count,
+            quads,
         })
     }
 }
@@ -511,12 +534,7 @@ fn find_entity_source_location(
     short_name: &str,
     namespaces: &BTreeMap<String, String>,
 ) -> SourceLocation {
-    let mut needles = vec![
-        iri.to_string(),
-        format!("<{iri}>"),
-        format!(":{short_name}"),
-        format!("{short_name}:"),
-    ];
+    let mut needles = vec![iri.to_string(), format!("<{iri}>"), format!(":{short_name}")];
     for (prefix, ns) in namespaces {
         if iri.starts_with(ns) && !prefix.is_empty() {
             needles.push(format!("{prefix}:{short_name}"));

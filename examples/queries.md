@@ -34,6 +34,13 @@ ontoindex query fixtures "SELECT * FROM namespaces"
 ontoindex query fixtures "SELECT * FROM imports"
 ```
 
+## Diagnostics and validation (v0.3)
+
+```bash
+ontoindex query fixtures "SELECT code, severity, message, file FROM diagnostics"
+ontoindex validate fixtures
+```
+
 ## SPARQL
 
 ```bash

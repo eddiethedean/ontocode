@@ -185,7 +185,8 @@ The extension is a thin TypeScript shell over **ontoindex-lsp** and the OntoInde
 | Version | Deliverable |
 |---------|-------------|
 | v0.1 | OntoIndex: scanner, parser, catalog, CLI |
-| **v0.3.0** (current) | VS Code extension, explorer, entity inspector, LSP, **diagnostics** |
+| v0.2 | VS Code extension, explorer, entity inspector, LSP |
+| **v0.3.0** (current) | **Diagnostics** — Problems panel, `diagnostics` SQL table, `ontoindex validate` |
 | v0.4a–b | Simple write-back + Horned-OWL (`ontoindex-owl`) |
 | v0.5 | Query workbench + Manchester MVP |
 | v0.6 | Reasoning via [OntoLogos](https://github.com/eddiethedean/ontologos) 0.9.0 (EL, RL, inferred hierarchy) |
@@ -217,6 +218,7 @@ crates/
 ├── ontoindex-core      # types, workspace scanner
 ├── ontoindex-parser    # RDF parsing and entity extraction
 ├── ontoindex-catalog   # index builder and semantic catalog
+├── ontoindex-diagnostics # lint rules and diagnostic collection
 ├── ontoindex-query     # SQL-like and SPARQL engines
 ├── ontoindex-cli       # `ontoindex` binary
 └── ontoindex-lsp       # language server for OntoCode
@@ -244,6 +246,7 @@ tests/                  # integration and golden snapshot tests
 | `axioms` | Extracted axioms (e.g. SubClassOf) |
 | `namespaces` | Namespace prefixes |
 | `imports` | Ontology imports |
+| `diagnostics` | Lint and parse diagnostics (v0.3) |
 | `properties` | Union of all property kinds |
 
 Column schemas, SQL limits, and examples: [docs/sql-reference.md](docs/sql-reference.md). LSP methods: [docs/lsp-api.md](docs/lsp-api.md).

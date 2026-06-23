@@ -1,7 +1,7 @@
 {
   "name": "ontocode",
   "displayName": "OntoCode",
-  "description": "Browse OWL/RDF ontologies in VS Code: open a folder with .ttl/.owl files, use the OntoCode sidebar to explore classes and properties, and inspect entities with jump-to-source.",
+  "description": "Browse OWL/RDF ontologies in VS Code with inline diagnostics: explore classes and properties, inspect entities, validate in CI, and jump to source.",
   "version": "0.3.0",
   "publisher": "ontocode",
   "license": "MIT",
@@ -24,7 +24,10 @@
     "sparql",
     "semantic web",
     "knowledge graph",
-    "explorer"
+    "explorer",
+    "diagnostics",
+    "linter",
+    "validate"
   ],
   "activationEvents": [
     "workspaceContains:**/*.ttl",

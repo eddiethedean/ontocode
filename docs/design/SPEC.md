@@ -29,8 +29,8 @@ ontoindex/
 │   ├── ontoindex-docs          # v0.9 — pulldown-cmark, minijinja
 │   ├── ontoindex-reasoner      # v0.6 — OntoLogos 0.9→1.0
 │   ├── ontoindex-robot         # v0.7b — ROBOT CLI (external)
-│   ├── ontoindex-lsp           # v0.2 — lsp-server, lsp-types
-│   └── ontoindex-cli           # v0.2
+│   ├── ontoindex-lsp           # v0.3 — lsp-server, lsp-types, diagnostics
+│   └── ontoindex-cli           # v0.3
 ├── examples/
 │   ├── protege-roundtrip/      # v1.0 — OWL round-trip fixtures
 │   └── obo-workflow/           # v0.7b — OBO + ROBOT demo

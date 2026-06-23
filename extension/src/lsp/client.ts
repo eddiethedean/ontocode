@@ -13,6 +13,7 @@ import {
 } from "./protocol";
 import {
   assertCatalogSnapshot,
+  assertGetEntityResult,
   assertIndexWorkspaceResult,
 } from "./protocolGuards";
 import {
@@ -142,7 +143,8 @@ export async function getCatalogSnapshot(): Promise<CatalogSnapshot> {
 
 export async function getEntity(iri: string): Promise<GetEntityResult> {
   const c = requireClient();
-  return c.sendRequest<GetEntityResult>("ontoindex/getEntity", { iri });
+  const result = await c.sendRequest<unknown>("ontoindex/getEntity", { iri });
+  return assertGetEntityResult(result);
 }
 
 function requireClient(): LanguageClient {

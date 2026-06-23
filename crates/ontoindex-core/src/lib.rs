@@ -4,12 +4,17 @@
 //! See [SQL reference](https://github.com/eddiethedean/ontocode/blob/main/docs/sql-reference.md)
 //! and [LSP API](https://github.com/eddiethedean/ontocode/blob/main/docs/lsp-api.md) for v0.3 behavior.
 
+pub mod document_lookup;
 pub mod error;
 pub mod limits;
 pub mod model;
 pub mod path_jail;
 pub mod scanner;
 
+pub use document_lookup::{
+    document_for_entity, document_for_ontology_id, document_matches_entity,
+    document_matches_ontology_id, file_uri_for_path, normalize_iri,
+};
 pub use error::{OntoIndexError, Result};
 pub use limits::*;
 pub use model::*;

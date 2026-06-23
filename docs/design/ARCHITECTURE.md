@@ -1,9 +1,9 @@
 # ARCHITECTURE.md
 
-> **Document status: target architecture (v0.2 partial implementation)**
+> **Document status: target architecture (v0.3 partial implementation)**
 >
 > **Implemented today:** workspace scanner, Oxigraph-based parsing, in-memory catalog and triple store,
-> SQL-like queries via `sqlparser`, SPARQL, CLI, LSP explorer integration.
+> SQL-like queries via `sqlparser`, SPARQL, diagnostics lint rules, CLI, LSP explorer + Problems panel integration.
 > **v0.4b+ target:** Horned-OWL layer per [ADR-0013](adr/0013-dual-stack-oxigraph-horned-owl.md).
 > See [docs/lsp-api.md](../lsp-api.md), [adr/README.md](adr/README.md), and [DEPENDENCY_MATRIX.md](DEPENDENCY_MATRIX.md) for current decisions.
 
@@ -77,8 +77,8 @@ The architecture must support:
 | `ontoindex-docs` | planned v0.9 | Markdown/HTML export | `pulldown-cmark`, `minijinja` |
 | `ontoindex-reasoner` | planned v0.6 | Reasoner facade | OntoLogos `0.9`→`1.0` |
 | `ontoindex-robot` | planned v0.7b | ROBOT CLI wrappers | ROBOT CLI (external) |
-| `ontoindex-lsp` | v0.2 | Language server | `lsp-server`, `lsp-types` |
-| `ontoindex-cli` | v0.2 | `ontoindex` binary | composes above |
+| `ontoindex-lsp` | v0.3 | Language server + diagnostics publish | `lsp-server`, `lsp-types` |
+| `ontoindex-cli` | v0.3 | `ontoindex` binary | composes above |
 
 ## 4. OntoIndex Internal Modules
 

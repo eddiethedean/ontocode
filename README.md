@@ -15,9 +15,9 @@
 [![lsp](https://img.shields.io/crates/v/ontoindex-lsp?label=lsp)](https://crates.io/crates/ontoindex-lsp)
 [![downloads](https://img.shields.io/crates/d/ontoindex-cli?label=downloads)](https://crates.io/crates/ontoindex-cli)
 
-**Ontology-as-code for Git and VS Code — v0.2.3 ships today.**
+**Ontology-as-code for Git and VS Code — v0.3.0 ships today.**
 
-Browse OWL/RDF in VS Code, query and validate in CI, and index workspaces locally with a Rust engine. Editing, diagnostics, reasoning, and semantic diffs are on the [roadmap](#roadmap).
+Browse OWL/RDF in VS Code, query and validate in CI, and index workspaces locally with a Rust engine. **v0.3** adds ontology diagnostics in the Problems panel and explorer; editing, reasoning, and semantic diffs are on the [roadmap](#roadmap).
 
 > **Naming:** **OntoCode** is the VS Code extension (product UI). **OntoIndex** is the Rust engine (`ontoindex` CLI, `ontoindex-*` crates, `ontoindex-lsp`). This repo contains both.
 
@@ -162,7 +162,7 @@ Or build from source after cloning this repository.
 
 Specs and wireframes live in [docs/design/](https://github.com/eddiethedean/ontocode/tree/main/docs/design). Upcoming OntoCode UI includes:
 
-- Inline diagnostics and validation (v0.3)
+- Inline diagnostics and validation (v0.3) — **shipped in v0.3.0**
 - Class/property/individual authoring (v0.4)
 - SPARQL and SQL query panels (v0.5+)
 - Reasoner integration and graph visualization
@@ -175,8 +175,7 @@ The extension is a thin TypeScript shell over **ontoindex-lsp** and the OntoInde
 | Version | Deliverable |
 |---------|-------------|
 | v0.1 | OntoIndex: scanner, parser, catalog, CLI |
-| **v0.2.3** (current) | VS Code extension, explorer, entity inspector, LSP |
-| v0.3 | Diagnostics and Problems panel integration |
+| **v0.3.0** (current) | VS Code extension, explorer, entity inspector, LSP, **diagnostics** |
 | v0.4a–b | Simple write-back + Horned-OWL (`ontoindex-owl`) |
 | v0.5 | Query workbench + Manchester MVP |
 | v0.6 | Reasoning via [OntoLogos](https://github.com/eddiethedean/ontologos) 0.9.0 (EL, RL, inferred hierarchy) |

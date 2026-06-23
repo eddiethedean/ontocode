@@ -2,6 +2,7 @@
 //!
 //! See [docs/lsp-api.md](https://github.com/eddiethedean/ontocode/blob/main/docs/lsp-api.md).
 
+pub(crate) mod diagnostics;
 pub(crate) mod handlers;
 pub(crate) mod protocol;
 pub(crate) mod state;
@@ -9,15 +10,18 @@ pub(crate) mod state;
 #[cfg(test)]
 mod handlers_test;
 
+use diagnostics::publish_catalog_diagnostics;
 use handlers::{handle_custom_request, handle_initialize, handle_standard_request};
+use crossbeam_channel::Sender;
 use lsp_server::{Connection, Message, Notification, Request, RequestId, Response, ResponseError};
 use lsp_types::{
     notification::Notification as _,
-    notification::{DidChangeTextDocument, DidCloseTextDocument, DidOpenTextDocument, Initialized},
+    notification::{DidChangeTextDocument, DidCloseTextDocument, DidOpenTextDocument, Exit, Initialized},
     InitializeParams,
 };
 use serde_json::Value;
 use state::ServerState;
+use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 use std::thread;
 use std::time::{Duration, Instant};
@@ -31,12 +35,16 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
     let (connection, io_threads) = Connection::stdio();
     let state = ServerState::new();
     let pending_reindex: Arc<Mutex<Option<PendingReindex>>> = Arc::new(Mutex::new(None));
+    let pending_diagnostic_publish = Arc::new(AtomicBool::new(false));
 
     let timer_state = state.clone();
     let timer_pending = Arc::clone(&pending_reindex);
+    let timer_publish = Arc::clone(&pending_diagnostic_publish);
     thread::spawn(move || loop {
         thread::sleep(Duration::from_millis(100));
-        flush_due_reindex(&timer_state, &timer_pending);
+        if flush_due_reindex(&timer_state, &timer_pending) {
+            timer_publish.store(true, Ordering::SeqCst);
+        }
     });
 
     for msg in &connection.receiver {
@@ -45,12 +53,19 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
                 if connection.handle_shutdown(&req)? {
                     break;
                 }
-                if let Some(resp) = handle_lsp_request(&state, &pending_reindex, req) {
+                if let Some(resp) =
+                    handle_lsp_request(&state, &pending_reindex, &pending_diagnostic_publish, req)
+                {
                     connection.sender.send(Message::Response(resp))?;
                 }
+                publish_pending_diagnostics(&connection.sender, &state, &pending_diagnostic_publish);
             }
             Message::Notification(notif) => {
-                handle_notification(&state, &pending_reindex, notif);
+                if notif.method == Exit::METHOD {
+                    break;
+                }
+                handle_notification(&state, &pending_reindex, &pending_diagnostic_publish, notif);
+                publish_pending_diagnostics(&connection.sender, &state, &pending_diagnostic_publish);
             }
             Message::Response(_) => {}
         }
@@ -64,9 +79,12 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
 fn handle_lsp_request(
     state: &ServerState,
     pending_reindex: &Arc<Mutex<Option<PendingReindex>>>,
+    pending_diagnostic_publish: &Arc<AtomicBool>,
     req: Request,
 ) -> Option<Response> {
-    flush_due_reindex(state, pending_reindex);
+    if flush_due_reindex(state, pending_reindex) {
+        pending_diagnostic_publish.store(true, Ordering::SeqCst);
+    }
     let id = req.id.clone();
 
     if req.method == "initialize" {
@@ -75,6 +93,9 @@ fn handle_lsp_request(
             Err(e) => return Some(error_response(id, e)),
         };
         let result = handle_initialize(state, params);
+        if state.with_catalog(|_| ()).is_some() {
+            pending_diagnostic_publish.store(true, Ordering::SeqCst);
+        }
         return Some(ok_response(id, result));
     }
 
@@ -84,7 +105,12 @@ fn handle_lsp_request(
 
     if req.method.starts_with("ontoindex/") {
         return match handle_custom_request(state, &req.method, Some(req.params)) {
-            Ok(result) => Some(ok_response(id, result)),
+            Ok(result) => {
+                if req.method == "ontoindex/indexWorkspace" {
+                    pending_diagnostic_publish.store(true, Ordering::SeqCst);
+                }
+                Some(ok_response(id, result))
+            }
             Err(err) => Some(ontoindex_error_response(id, err)),
         };
     }
@@ -99,13 +125,13 @@ fn handle_lsp_request(
 fn handle_notification(
     state: &ServerState,
     pending_reindex: &Arc<Mutex<Option<PendingReindex>>>,
+    _pending_diagnostic_publish: &Arc<AtomicBool>,
     notif: Notification,
 ) {
     match notif.method.as_str() {
         Initialized::METHOD => {
             if let Some(workspace) = state.workspace_root() {
                 schedule_reindex(pending_reindex, workspace, Duration::from_millis(500));
-                flush_due_reindex(state, pending_reindex);
             }
         }
         DidOpenTextDocument::METHOD => {
@@ -148,6 +174,23 @@ fn handle_notification(
         }
         _ => {}
     }
+}
+
+fn publish_pending_diagnostics(
+    sender: &Sender<Message>,
+    state: &ServerState,
+    pending: &Arc<AtomicBool>,
+) {
+    if !pending.swap(false, Ordering::SeqCst) {
+        return;
+    }
+    state.with_catalog(|catalog| {
+        publish_catalog_diagnostics(
+            sender,
+            &catalog.data().documents,
+            &catalog.data().diagnostics,
+        );
+    });
 }
 
 fn document_path_from_uri(
@@ -235,22 +278,25 @@ fn schedule_reindex(
     }
 }
 
-fn flush_due_reindex(state: &ServerState, pending: &Arc<Mutex<Option<PendingReindex>>>) {
+fn flush_due_reindex(
+    state: &ServerState,
+    pending: &Arc<Mutex<Option<PendingReindex>>>,
+) -> bool {
     let due = {
         let Ok(mut guard) = pending.lock() else {
-            return;
+            return false;
         };
         let Some(entry) = guard.as_ref() else {
-            return;
+            return false;
         };
         if Instant::now() < entry.scheduled_at {
-            return;
+            return false;
         }
         let workspace = entry.workspace.clone();
         *guard = None;
         workspace
     };
-    let _ = state.index_workspace(due);
+    state.index_workspace(due).is_ok()
 }
 
 fn parse_params<T: serde::de::DeserializeOwned>(params: Option<Value>) -> Result<T, ResponseError> {
@@ -294,7 +340,7 @@ mod debounce_tests {
         assert!(pending.lock().unwrap().is_some());
         thread::sleep(Duration::from_millis(60));
         let state = ServerState::new();
-        flush_due_reindex(&state, &pending);
+        assert!(flush_due_reindex(&state, &pending));
         assert!(pending.lock().unwrap().is_none());
     }
 }

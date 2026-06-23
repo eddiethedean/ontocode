@@ -8,7 +8,9 @@ mod entity_api;
 pub use builder::{IndexBuilder, OntologyCatalog};
 pub use entity_api::{ClassHierarchy, EntityDetail, SourceHint, SubclassEdge};
 
-use ontoindex_core::{Annotation, Axiom, Entity, Import, Namespace, OntologyDocument, ParseStatus};
+use ontoindex_core::{
+    Annotation, Axiom, Diagnostic, Entity, Import, Namespace, OntologyDocument, ParseStatus,
+};
 use serde::Serialize;
 
 #[derive(Debug, Clone, Serialize)]
@@ -23,6 +25,9 @@ pub struct CatalogStats {
     pub annotation_count: usize,
     pub triple_count: usize,
     pub error_count: usize,
+    pub diagnostic_error_count: usize,
+    pub diagnostic_warning_count: usize,
+    pub diagnostic_info_count: usize,
 }
 
 #[derive(Debug, Clone)]
@@ -34,6 +39,7 @@ pub struct OntologyCatalogData {
     pub namespaces: Vec<Namespace>,
     pub imports: Vec<Import>,
     pub triple_count: usize,
+    pub diagnostics: Vec<Diagnostic>,
 }
 
 impl OntologyCatalogData {
@@ -72,6 +78,21 @@ impl OntologyCatalogData {
                 .documents
                 .iter()
                 .filter(|d| d.parse_status == ParseStatus::Error)
+                .count(),
+            diagnostic_error_count: self
+                .diagnostics
+                .iter()
+                .filter(|d| d.severity == ontoindex_core::DiagnosticSeverity::Error)
+                .count(),
+            diagnostic_warning_count: self
+                .diagnostics
+                .iter()
+                .filter(|d| d.severity == ontoindex_core::DiagnosticSeverity::Warning)
+                .count(),
+            diagnostic_info_count: self
+                .diagnostics
+                .iter()
+                .filter(|d| d.severity == ontoindex_core::DiagnosticSeverity::Info)
                 .count(),
         }
     }

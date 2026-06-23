@@ -41,10 +41,21 @@ export interface ClassHierarchy {
   children: Record<string, string[]>;
 }
 
+export interface DiagnosticSummary {
+  code: string;
+  severity: string;
+  message: string;
+  file: string;
+  line?: number;
+  column?: number;
+  entity_iri?: string;
+}
+
 export interface CatalogSnapshot {
   documents: OntologyDocument[];
   entities: Entity[];
   hierarchy: ClassHierarchy;
+  diagnostics: DiagnosticSummary[];
 }
 
 export interface SourceHint {

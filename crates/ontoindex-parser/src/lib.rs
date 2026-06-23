@@ -5,5 +5,5 @@
 mod rdf;
 mod vocab;
 
-pub use rdf::{parse_ontology_file, ParsedOntology};
+pub use rdf::{parse_ontology_file, parse_ontology_text, ParsedOntology};
 pub use vocab::OWL;

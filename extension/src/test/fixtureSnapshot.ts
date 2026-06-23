@@ -93,4 +93,5 @@ export const fixtureCatalogSnapshot: CatalogSnapshot = {
       ],
     },
   },
+  diagnostics: [],
 };

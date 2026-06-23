@@ -40,8 +40,12 @@ impl ServerState {
             validate_workspace_scope(&workspace, &existing)?;
         }
 
-        let catalog =
-            IndexBuilder::new().workspace(&workspace).build().map_err(|e| e.to_string())?;
+        let overrides = self.open_documents_snapshot();
+        let catalog = IndexBuilder::new()
+            .workspace(&workspace)
+            .document_overrides(overrides)
+            .build()
+            .map_err(|e| e.to_string())?;
 
         let stats = catalog.data().stats();
         let indexed_at = now_epoch_secs();
@@ -52,6 +56,14 @@ impl ServerState {
         guard.indexed_at = Some(indexed_at);
 
         Ok((stats, indexed_at))
+    }
+
+    fn open_documents_snapshot(&self) -> HashMap<PathBuf, String> {
+        self.inner
+            .read()
+            .ok()
+            .map(|g| g.open_documents.clone())
+            .unwrap_or_default()
     }
 
     pub fn with_catalog<T>(&self, f: impl FnOnce(&OntologyCatalog) -> T) -> Option<T> {

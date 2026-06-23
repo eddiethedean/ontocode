@@ -7,6 +7,8 @@ Sample ontology files for tests, examples, and local experimentation.
 | `example.ttl` | Turtle | Primary fixture — classes, properties, individuals |
 | `organization.owl` | RDF/XML | Second file format; imports people ontology |
 
+Diagnostic lint fixtures live under [`tests/fixtures/diagnostics/`](../tests/fixtures/diagnostics/) (not indexed with the main fixture set).
+
 Try:
 
 ```bash

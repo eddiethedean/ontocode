@@ -24,7 +24,7 @@ LSP JSON uses **snake_case** for enums serialized from Rust (`EntityKind`, `Pars
 | `textDocument/documentSymbol` | Implemented |
 | `workspace/symbol` | Implemented |
 | `textDocument/definition` | Implemented |
-| Diagnostics | Planned (v0.3) |
+| Diagnostics | **Implemented** (v0.3) — server pushes `textDocument/publishDiagnostics` after each reindex |
 | Completion | Planned |
 | Rename | Planned |
 
@@ -65,7 +65,8 @@ Return documents, entities, and class hierarchy for the explorer UI.
 {
   "documents": [ "... OntologyDocument ..." ],
   "entities": [ "... Entity ..." ],
-  "hierarchy": { "edges": [], "parents": {}, "children": {} }
+  "hierarchy": { "edges": [], "parents": {}, "children": {} },
+  "diagnostics": [ "... DiagnosticSummary ..." ]
 }
 ```
 

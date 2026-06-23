@@ -13,7 +13,7 @@ fn lsp_indexes_fixture_workspace() {
     let mut child = Command::new(lsp_binary())
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
-        .stderr(Stdio::piped())
+        .stderr(Stdio::null())
         .spawn()
         .expect("spawn ontoindex-lsp");
 
@@ -95,6 +95,13 @@ fn lsp_indexes_fixture_workspace() {
         .and_then(|r| r.get("documents"))
         .and_then(|d| d.as_array())
         .expect("documents array");
+    let diagnostics = snapshot
+        .get("result")
+        .and_then(|r| r.get("diagnostics"))
+        .and_then(|d| d.as_array())
+        .expect("diagnostics array");
+    assert!(!diagnostics.is_empty(), "expected workspace diagnostics in snapshot");
+
     let example_doc = documents
         .iter()
         .find(|d| {
@@ -126,7 +133,14 @@ fn lsp_indexes_fixture_workspace() {
     let _ = wait_for_id(&rx, 5, Duration::from_secs(5));
     send_notification(&mut stdin, "exit", serde_json::Value::Null);
 
-    let _ = child.wait();
+    let deadline = std::time::Instant::now() + Duration::from_secs(3);
+    while std::time::Instant::now() < deadline {
+        if let Ok(Some(_)) = child.try_wait() {
+            return;
+        }
+        thread::sleep(Duration::from_millis(50));
+    }
+    let _ = child.kill();
 }
 
 fn read_lsp_message<R: BufRead>(reader: &mut R) -> std::io::Result<Option<String>> {
@@ -188,28 +202,14 @@ fn lsp_binary() -> PathBuf {
         }
     }
 
-    if let Some(candidate) = find_lsp_binary_in_target() {
-        return candidate;
-    }
-
-    let status = Command::new("cargo")
-        .args(["build", "-p", "ontoindex-lsp", "--bins", "--quiet"])
-        .status()
-        .expect("cargo build ontoindex-lsp");
-    assert!(status.success(), "failed to build ontoindex-lsp for smoke test");
-
-    if let Ok(path) = std::env::var("CARGO_BIN_EXE_ontoindex-lsp") {
-        let candidate = PathBuf::from(path);
-        if candidate.exists() {
-            return candidate;
-        }
-    }
-
     find_lsp_binary_in_target().unwrap_or_else(|| {
         let target_dir = std::env::var("CARGO_TARGET_DIR")
             .map(PathBuf::from)
             .unwrap_or_else(|_| Path::new(env!("CARGO_MANIFEST_DIR")).join("target"));
-        panic!("ontoindex-lsp binary not found under {} after build", target_dir.display());
+        panic!(
+            "ontoindex-lsp binary not found under {} (run `cargo build -p ontoindex-lsp` first)",
+            target_dir.display()
+        );
     })
 }
 

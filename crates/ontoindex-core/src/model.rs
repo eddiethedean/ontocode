@@ -84,6 +84,61 @@ pub struct SourceLocation {
     pub column: Option<u64>,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum DiagnosticSeverity {
+    Error,
+    Warning,
+    Info,
+}
+
+impl DiagnosticSeverity {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Self::Error => "error",
+            Self::Warning => "warning",
+            Self::Info => "info",
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum DiagnosticCode {
+    ParseError,
+    BrokenImport,
+    UndefinedPrefix,
+    DuplicateLabel,
+    MissingLabel,
+    OrphanClass,
+}
+
+impl DiagnosticCode {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Self::ParseError => "parse_error",
+            Self::BrokenImport => "broken_import",
+            Self::UndefinedPrefix => "undefined_prefix",
+            Self::DuplicateLabel => "duplicate_label",
+            Self::MissingLabel => "missing_label",
+            Self::OrphanClass => "orphan_class",
+        }
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct Diagnostic {
+    pub code: DiagnosticCode,
+    pub severity: DiagnosticSeverity,
+    pub message: String,
+    pub file: PathBuf,
+    pub range: SourceLocation,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub entity_iri: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub quick_fix: Option<String>,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct OntologyDocument {
     pub id: String,
@@ -96,6 +151,7 @@ pub struct OntologyDocument {
     pub content_hash: String,
     pub modified_time: u64,
     pub parse_message: Option<String>,
+    pub parse_error_location: Option<SourceLocation>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

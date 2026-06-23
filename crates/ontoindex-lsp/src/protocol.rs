@@ -1,6 +1,32 @@
 use ontoindex_catalog::{CatalogStats, ClassHierarchy, EntityDetail};
-use ontoindex_core::{Entity, OntologyDocument};
+use ontoindex_core::{Diagnostic, Entity, OntologyDocument};
 use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Clone, Serialize)]
+pub struct DiagnosticSummary {
+    pub code: String,
+    pub severity: String,
+    pub message: String,
+    pub file: String,
+    pub line: Option<u64>,
+    pub column: Option<u64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub entity_iri: Option<String>,
+}
+
+impl From<&Diagnostic> for DiagnosticSummary {
+    fn from(d: &Diagnostic) -> Self {
+        Self {
+            code: d.code.as_str().to_string(),
+            severity: d.severity.as_str().to_string(),
+            message: d.message.clone(),
+            file: d.file.display().to_string(),
+            line: d.range.line,
+            column: d.range.column,
+            entity_iri: d.entity_iri.clone(),
+        }
+    }
+}
 
 #[derive(Debug, Deserialize)]
 pub struct IndexWorkspaceParams {
@@ -19,6 +45,7 @@ pub struct CatalogSnapshot {
     pub documents: Vec<OntologyDocument>,
     pub entities: Vec<Entity>,
     pub hierarchy: ClassHierarchy,
+    pub diagnostics: Vec<DiagnosticSummary>,
 }
 
 #[derive(Debug, Deserialize)]

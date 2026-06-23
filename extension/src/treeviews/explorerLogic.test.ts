@@ -4,8 +4,10 @@ import { fixtureCatalogSnapshot } from "../test/fixtureSnapshot";
 import {
   childEntitiesForClass,
   classRootEntities,
+  diagnosticLabel,
   entityDisplayLabel,
   filterEntitiesByKind,
+  groupDiagnosticsBySeverity,
   propertyGroupsPresent,
 } from "../treeviews/explorerLogic";
 
@@ -45,5 +47,26 @@ describe("explorerLogic", () => {
       entityDisplayLabel(fixtureCatalogSnapshot.entities[0]!),
       "Person"
     );
+  });
+
+  it("groups diagnostics by severity", () => {
+    const groups = groupDiagnosticsBySeverity([
+      {
+        code: "broken_import",
+        severity: "error",
+        message: "missing import",
+        file: "a.ttl",
+        line: 2,
+      },
+      {
+        code: "orphan_class",
+        severity: "warning",
+        message: "no parent",
+        file: "a.ttl",
+      },
+    ]);
+    assert.equal(groups.get("error")?.length, 1);
+    assert.equal(groups.get("warning")?.length, 1);
+    assert.match(diagnosticLabel(groups.get("error")![0]!), /missing import/);
   });
 });

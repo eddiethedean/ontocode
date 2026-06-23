@@ -1,6 +1,6 @@
 [package]
-name = "ontoindex-catalog"
-description = "Semantic catalog for OntoIndex"
+name = "ontoindex-diagnostics"
+description = "Ontology lint rules and diagnostic collection for OntoIndex"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -15,8 +15,4 @@ include = ["src/**/*", "Cargo.toml", "LICENSE-MIT", "LICENSE-APACHE-2.0"]
 
 [dependencies]
 ontoindex-core = { workspace = true }
-ontoindex-diagnostics = { workspace = true }
-ontoindex-parser = { workspace = true }
-oxigraph.workspace = true
-serde.workspace = true
-thiserror.workspace = true
+regex = "1"

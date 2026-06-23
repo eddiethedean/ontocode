@@ -1,11 +1,13 @@
 use crate::OntologyCatalogData;
 use ontoindex_core::{
     limits::{MAX_ENTITIES, MAX_FILE_BYTES, MAX_TOTAL_TRIPLES, MAX_TRIPLES_PER_FILE},
-    OntologyDocument, ParseStatus, WorkspaceScanner,
+    OntologyDocument, OntologyFormat, ParseStatus, WorkspaceScanner,
 };
-use ontoindex_parser::parse_ontology_file;
+use ontoindex_diagnostics::{collect_diagnostics_with_sources, DiagnosticInput};
+use ontoindex_parser::{parse_ontology_file, parse_ontology_text};
 use oxigraph::model::Quad;
 use oxigraph::store::Store;
+use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use thiserror::Error;
 
@@ -25,15 +27,22 @@ pub type Result<T> = std::result::Result<T, CatalogError>;
 
 pub struct IndexBuilder {
     workspace: PathBuf,
+    document_overrides: HashMap<PathBuf, String>,
 }
 
 impl IndexBuilder {
     pub fn new() -> Self {
-        Self { workspace: PathBuf::from(".") }
+        Self { workspace: PathBuf::from("."), document_overrides: HashMap::new() }
     }
 
     pub fn workspace(mut self, path: impl Into<PathBuf>) -> Self {
         self.workspace = path.into();
+        self
+    }
+
+    /// Use in-memory text instead of disk for specific paths (LSP open buffers).
+    pub fn document_overrides(mut self, overrides: HashMap<PathBuf, String>) -> Self {
+        self.document_overrides = overrides;
         self
     }
 
@@ -52,14 +61,25 @@ impl IndexBuilder {
 
         for (idx, file) in files.iter().enumerate() {
             let doc_id = format!("doc-{}", idx + 1);
-            let parsed = parse_ontology_file(
-                &file.path,
-                file.format,
-                &doc_id,
-                &file.content_hash,
-                file.modified_time,
-            )
-            .map_err(|e| CatalogError::Parse { path: file.path.clone(), message: e.to_string() })?;
+            let parsed = if let Some(text) = self.document_overrides.get(&file.path) {
+                parse_ontology_text(
+                    &file.path,
+                    file.format,
+                    &doc_id,
+                    text,
+                    text.as_bytes(),
+                )
+                .map_err(|e| CatalogError::Parse { path: file.path.clone(), message: e.to_string() })?
+            } else {
+                parse_ontology_file(
+                    &file.path,
+                    file.format,
+                    &doc_id,
+                    &file.content_hash,
+                    file.modified_time,
+                )
+                .map_err(|e| CatalogError::Parse { path: file.path.clone(), message: e.to_string() })?
+            };
 
             triple_count += parsed.triple_count;
             if triple_count > MAX_TOTAL_TRIPLES {
@@ -69,7 +89,11 @@ impl IndexBuilder {
             }
 
             if parsed.parse_status != ParseStatus::Error {
-                load_into_store(&store, &file.path, file.format, triple_count)?;
+                if let Some(text) = self.document_overrides.get(&file.path) {
+                    load_text_into_store(&store, &file.path, file.format, text, triple_count)?;
+                } else {
+                    load_into_store(&store, &file.path, file.format, triple_count)?;
+                }
             }
 
             documents.push(OntologyDocument {
@@ -83,6 +107,7 @@ impl IndexBuilder {
                 content_hash: file.content_hash.clone(),
                 modified_time: file.modified_time,
                 parse_message: parsed.parse_message.clone(),
+                parse_error_location: parsed.parse_error_location.clone(),
             });
 
             entities.extend(parsed.entities);
@@ -98,17 +123,30 @@ impl IndexBuilder {
             }
         }
 
+        let mut data = OntologyCatalogData {
+            documents,
+            entities,
+            annotations,
+            axioms,
+            namespaces,
+            imports,
+            triple_count,
+            diagnostics: Vec::new(),
+        };
+        let lint_input = DiagnosticInput {
+            documents: &data.documents,
+            entities: &data.entities,
+            annotations: &data.annotations,
+            axioms: &data.axioms,
+            namespaces: &data.namespaces,
+            imports: &data.imports,
+        };
+        data.diagnostics =
+            collect_diagnostics_with_sources(&lint_input, &self.document_overrides);
+
         Ok(OntologyCatalog {
             workspace: self.workspace,
-            data: OntologyCatalogData {
-                documents,
-                entities,
-                annotations,
-                axioms,
-                namespaces,
-                imports,
-                triple_count,
-            },
+            data,
             store,
         })
     }
@@ -140,14 +178,28 @@ impl OntologyCatalog {
     }
 }
 
+fn load_text_into_store(
+    store: &Store,
+    path: &Path,
+    format: ontoindex_core::OntologyFormat,
+    content: &str,
+    triple_count_so_far: usize,
+) -> Result<()> {
+    if content.len() as u64 > MAX_FILE_BYTES {
+        return Err(CatalogError::Parse {
+            path: path.to_path_buf(),
+            message: format!("file exceeds {MAX_FILE_BYTES} bytes"),
+        });
+    }
+    load_bytes_into_store(store, path, format, content.as_bytes(), triple_count_so_far)
+}
+
 fn load_into_store(
     store: &Store,
     path: &Path,
     format: ontoindex_core::OntologyFormat,
     triple_count_so_far: usize,
 ) -> Result<()> {
-    use ontoindex_core::OntologyFormat;
-    use oxigraph::io::{RdfFormat, RdfParser};
     use std::fs;
 
     let metadata = fs::metadata(path)
@@ -161,6 +213,19 @@ fn load_into_store(
 
     let content = fs::read(path)
         .map_err(|e| CatalogError::Parse { path: path.to_path_buf(), message: e.to_string() })?;
+
+    load_bytes_into_store(store, path, format, &content, triple_count_so_far)
+}
+
+fn load_bytes_into_store(
+    store: &Store,
+    path: &Path,
+    format: OntologyFormat,
+    content: &[u8],
+    triple_count_so_far: usize,
+) -> Result<()> {
+    use ontoindex_core::OntologyFormat;
+    use oxigraph::io::{RdfFormat, RdfParser};
 
     let rdf_format = match format {
         OntologyFormat::Turtle => RdfFormat::Turtle,
@@ -179,7 +244,7 @@ fn load_into_store(
 
     let parser = RdfParser::from_format(rdf_format);
     let mut file_triples = 0usize;
-    for quad in parser.for_reader(content.as_slice()) {
+    for quad in parser.for_reader(content) {
         let quad: Quad = quad.map_err(|e| CatalogError::Parse {
             path: path.to_path_buf(),
             message: e.to_string(),

@@ -1,0 +1,13 @@
+@prefix ex: <http://example.org/dup#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+<http://example.org/dup> a owl:Ontology .
+
+ex:Alpha a owl:Class ;
+    rdfs:label "Shared" .
+
+ex:Beta a owl:Class ;
+    rdfs:label "Shared" .
+
+ex:Gamma a owl:Class .

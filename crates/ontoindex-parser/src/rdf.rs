@@ -41,6 +41,7 @@ pub struct ParsedOntology {
     pub import_rows: Vec<Import>,
     pub parse_status: ParseStatus,
     pub parse_message: Option<String>,
+    pub parse_error_location: Option<SourceLocation>,
     pub triple_count: usize,
 }
 
@@ -61,14 +62,26 @@ pub fn parse_ontology_file(
     }
     let content = fs::read(path)?;
     let source_text = String::from_utf8_lossy(&content).into_owned();
+    parse_ontology_text(path, format, ontology_id, &source_text, &content)
+}
+
+/// Parse ontology source text (used for LSP open buffers and file parsing).
+pub fn parse_ontology_text(
+    path: &Path,
+    format: OntologyFormat,
+    ontology_id: &str,
+    source_text: &str,
+    raw_bytes: &[u8],
+) -> Result<ParsedOntology> {
     let rdf_format = to_rdf_format(format, path)?;
 
     let mut quads = Vec::new();
     let mut parse_message = None;
+    let mut parse_error_location = None;
     let mut parse_status = ParseStatus::Ok;
 
     let parser = RdfParser::from_format(rdf_format);
-    for quad in parser.for_reader(content.as_slice()) {
+    for quad in parser.for_reader(raw_bytes) {
         match quad {
             Ok(q) => {
                 if quads.len() >= MAX_TRIPLES_PER_FILE {
@@ -82,13 +95,20 @@ pub fn parse_ontology_file(
             Err(e) => {
                 parse_status = ParseStatus::Error;
                 parse_message = Some(format_parse_error(&e));
+                parse_error_location = extract_parse_error_location(&e, source_text);
                 break;
             }
         }
     }
 
     if parse_status == ParseStatus::Error {
-        return Ok(empty_result(ontology_id, parse_status, parse_message, BTreeMap::new()));
+        return Ok(empty_result(
+            ontology_id,
+            parse_status,
+            parse_message,
+            parse_error_location,
+            BTreeMap::new(),
+        ));
     }
 
     let mut namespaces = extract_prefixes(&quads);
@@ -100,7 +120,7 @@ pub fn parse_ontology_file(
     for quad in &quads {
         builder.ingest_quad(quad);
     }
-    builder.finish(parse_status, parse_message, &source_text)
+    builder.finish(parse_status, parse_message, parse_error_location, source_text)
 }
 
 fn to_rdf_format(format: OntologyFormat, path: &Path) -> Result<RdfFormat> {
@@ -117,6 +137,37 @@ fn to_rdf_format(format: OntologyFormat, path: &Path) -> Result<RdfFormat> {
 
 fn format_parse_error(error: &RdfParseError) -> String {
     error.to_string()
+}
+
+fn extract_parse_error_location(error: &RdfParseError, _source_text: &str) -> Option<SourceLocation> {
+    let msg = error.to_string();
+    let line = msg
+        .split_whitespace()
+        .collect::<Vec<_>>()
+        .windows(2)
+        .find_map(|w| {
+            if w[0].eq_ignore_ascii_case("line") {
+                w[1].trim_end_matches(':').parse().ok()
+            } else {
+                None
+            }
+        });
+    let column = msg
+        .split_whitespace()
+        .collect::<Vec<_>>()
+        .windows(2)
+        .find_map(|w| {
+            if w[0].eq_ignore_ascii_case("column") || w[0].eq_ignore_ascii_case("col") {
+                w[1].trim_end_matches(':').parse().ok()
+            } else {
+                None
+            }
+        });
+    if line.is_some() || column.is_some() {
+        Some(SourceLocation { line, column })
+    } else {
+        None
+    }
 }
 
 fn default_base_iri(path: &Path) -> String {
@@ -144,6 +195,7 @@ fn empty_result(
     ontology_id: &str,
     parse_status: ParseStatus,
     parse_message: Option<String>,
+    parse_error_location: Option<SourceLocation>,
     namespaces: BTreeMap<String, String>,
 ) -> ParsedOntology {
     ParsedOntology {
@@ -161,6 +213,7 @@ fn empty_result(
         import_rows: Vec::new(),
         parse_status,
         parse_message,
+        parse_error_location,
         triple_count: 0,
     }
 }
@@ -303,6 +356,7 @@ impl OntologyBuilder {
         self,
         parse_status: ParseStatus,
         parse_message: Option<String>,
+        parse_error_location: Option<SourceLocation>,
         source_text: &str,
     ) -> Result<ParsedOntology> {
         let base_iri =
@@ -369,6 +423,7 @@ impl OntologyBuilder {
             import_rows,
             parse_status,
             parse_message,
+            parse_error_location,
             triple_count: self.triple_count,
         })
     }

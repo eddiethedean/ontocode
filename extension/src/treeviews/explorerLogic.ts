@@ -1,7 +1,29 @@
-import { CatalogSnapshot, Entity } from "../lsp/protocol";
+import { CatalogSnapshot, DiagnosticSummary, Entity } from "../lsp/protocol";
 
 export function filterEntitiesByKind(entities: Entity[], kind: string): Entity[] {
   return entities.filter((e) => e.kind === kind);
+}
+
+export function diagnosticLabel(diag: DiagnosticSummary): string {
+  const loc =
+    diag.line != null
+      ? `:${diag.line}${diag.column != null ? `:${diag.column}` : ""}`
+      : "";
+  const base = diag.entity_iri ?? diag.code;
+  return `${base}${loc} — ${diag.message}`;
+}
+
+export function groupDiagnosticsBySeverity(
+  diagnostics: DiagnosticSummary[]
+): Map<string, DiagnosticSummary[]> {
+  const groups = new Map<string, DiagnosticSummary[]>();
+  for (const diag of diagnostics) {
+    const key = diag.severity;
+    const list = groups.get(key) ?? [];
+    list.push(diag);
+    groups.set(key, list);
+  }
+  return groups;
 }
 
 export function classRootEntities(snapshot: CatalogSnapshot): Entity[] {

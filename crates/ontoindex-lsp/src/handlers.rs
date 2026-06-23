@@ -1,6 +1,6 @@
 use crate::protocol::{
-    CatalogSnapshot, GetEntityParams, GetEntityResult, IndexWorkspaceParams, IndexWorkspaceResult,
-    LspErrorPayload,
+    CatalogSnapshot, DiagnosticSummary, GetEntityParams, GetEntityResult, IndexWorkspaceParams,
+    IndexWorkspaceResult, LspErrorPayload,
 };
 use crate::state::{path_to_uri, resolve_workspace_for_index, ServerState};
 use lsp_types::{
@@ -69,6 +69,12 @@ pub fn handle_get_catalog_snapshot(
             documents: catalog.data().documents.clone(),
             entities: catalog.data().entities.clone(),
             hierarchy: catalog.class_hierarchy(),
+            diagnostics: catalog
+                .data()
+                .diagnostics
+                .iter()
+                .map(DiagnosticSummary::from)
+                .collect(),
         })
         .ok_or_else(LspErrorPayload::not_indexed)
 }

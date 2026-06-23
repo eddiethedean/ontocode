@@ -1,4 +1,4 @@
-# SQL query reference (OntoIndex v0.2)
+# SQL query reference (OntoIndex v0.3)
 
 OntoIndex exposes indexed ontology data as **virtual tables** queried with a SQL-like `SELECT` syntax. The CLI (`ontoindex query`) and Rust API (`query_catalog`) use the same engine.
 
@@ -80,6 +80,18 @@ Entity tables share these columns (`properties` is the union of all property kin
 | `ontology_id` | Importing document id |
 | `import_iri` | Imported ontology IRI |
 
+### `diagnostics` (v0.3)
+
+| Column | Description |
+|--------|-------------|
+| `code` | `parse_error`, `broken_import`, `undefined_prefix`, `duplicate_label`, `missing_label`, `orphan_class` |
+| `severity` | `error`, `warning`, or `info` |
+| `message` | Human-readable description |
+| `file` | Filesystem path |
+| `line` | 1-based line number (empty if unknown) |
+| `column` | 0-based column (empty if unknown) |
+| `entity_iri` | Related entity IRI, if any |
+
 ## Examples
 
 See [examples/queries.md](../examples/queries.md) for a copy-paste cookbook.
@@ -88,4 +100,5 @@ See [examples/queries.md](../examples/queries.md) for a copy-paste cookbook.
 ontoindex query ./fixtures "SELECT * FROM classes"
 ontoindex query ./fixtures "SELECT short_name, labels FROM classes WHERE short_name = 'Person'"
 ontoindex query ./fixtures "SELECT * FROM annotations" --format json
+ontoindex query ./fixtures "SELECT code, message FROM diagnostics WHERE severity = 'warning'"
 ```

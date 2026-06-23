@@ -42,6 +42,19 @@ function isOntologyDocument(value: unknown): boolean {
   );
 }
 
+function isDiagnosticSummary(value: unknown): boolean {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+  const d = value as Record<string, unknown>;
+  return (
+    typeof d.code === "string" &&
+    typeof d.severity === "string" &&
+    typeof d.message === "string" &&
+    typeof d.file === "string"
+  );
+}
+
 export function isCatalogSnapshot(value: unknown): value is CatalogSnapshot {
   if (!value || typeof value !== "object") {
     return false;
@@ -65,7 +78,13 @@ export function isCatalogSnapshot(value: unknown): value is CatalogSnapshot {
   }
 
   const h = hierarchy as Record<string, unknown>;
+  const diagnosticsOk =
+    snapshot.diagnostics === undefined ||
+    (Array.isArray(snapshot.diagnostics) &&
+      snapshot.diagnostics.every(isDiagnosticSummary));
+
   return (
+    diagnosticsOk &&
     Array.isArray(h.edges) &&
     typeof h.parents === "object" &&
     h.parents !== null &&
@@ -97,7 +116,11 @@ export function assertCatalogSnapshot(value: unknown): CatalogSnapshot {
       "Invalid catalog snapshot from language server (expected snake_case entity kinds and parse_status values)"
     );
   }
-  return value;
+  const snapshot = value as CatalogSnapshot;
+  if (!snapshot.diagnostics) {
+    snapshot.diagnostics = [];
+  }
+  return snapshot;
 }
 
 export function assertIndexWorkspaceResult(

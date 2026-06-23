@@ -5,8 +5,10 @@ import { entityKindLabel } from "../utils/iri";
 import {
   childEntitiesForClass,
   classRootEntities,
+  diagnosticLabel,
   entityDisplayLabel,
   filterEntitiesByKind,
+  groupDiagnosticsBySeverity,
   propertyGroupsPresent,
 } from "./explorerLogic";
 
@@ -19,12 +21,18 @@ export type ExplorerViewKind =
 
 export class OntologyTreeItem extends vscode.TreeItem {
   constructor(
-    public readonly nodeKind: "document" | "entity" | "group" | "placeholder",
+    public readonly nodeKind:
+      | "document"
+      | "entity"
+      | "group"
+      | "placeholder"
+      | "diagnostic",
     label: string,
     collapsibleState: vscode.TreeItemCollapsibleState,
     public readonly iri?: string,
     public readonly filePath?: string,
-    public readonly propertyKind?: string
+    public readonly propertyKind?: string,
+    public readonly diagnostic?: import("../lsp/protocol").DiagnosticSummary
   ) {
     super(label, collapsibleState);
     if (nodeKind === "entity" && iri) {
@@ -42,6 +50,32 @@ export class OntologyTreeItem extends vscode.TreeItem {
         title: "Open File",
         arguments: [vscode.Uri.file(filePath)],
       };
+    }
+    if (nodeKind === "diagnostic" && diagnostic) {
+      this.tooltip = diagnostic.message;
+      const args: [vscode.Uri, vscode.Position?] = [
+        vscode.Uri.file(diagnostic.file),
+      ];
+      if (diagnostic.line != null) {
+        args.push(
+          new vscode.Position(
+            Math.max(0, diagnostic.line - 1),
+            diagnostic.column ?? 0
+          )
+        );
+      }
+      this.command = {
+        command: "vscode.open",
+        title: "Open Diagnostic",
+        arguments: args,
+      };
+      this.iconPath = new vscode.ThemeIcon(
+        diagnostic.severity === "error"
+          ? "error"
+          : diagnostic.severity === "warning"
+            ? "warning"
+            : "info"
+      );
     }
   }
 }
@@ -122,14 +156,36 @@ export class ExplorerTreeProvider implements vscode.TreeDataProvider<OntologyTre
         return filterEntitiesByKind(this.snapshot.entities, "individual").map(
           (e) => this.entityItem(e)
         );
-      case "diagnostics":
-        return [
-          new OntologyTreeItem(
-            "placeholder",
-            "Diagnostics available in v0.3",
-            vscode.TreeItemCollapsibleState.None
-          ),
-        ];
+      case "diagnostics": {
+        const groups = groupDiagnosticsBySeverity(
+          this.snapshot.diagnostics ?? []
+        );
+        if (groups.size === 0) {
+          return [
+            new OntologyTreeItem(
+              "placeholder",
+              "No diagnostics",
+              vscode.TreeItemCollapsibleState.None
+            ),
+          ];
+        }
+        return [...groups.entries()].map(([severity, items]) => {
+          const item = new OntologyTreeItem(
+            "group",
+            `${severity} (${items.length})`,
+            vscode.TreeItemCollapsibleState.Collapsed
+          );
+          item.contextValue = `diagnostics-${severity}`;
+          item.iconPath = new vscode.ThemeIcon(
+            severity === "error"
+              ? "error"
+              : severity === "warning"
+                ? "warning"
+                : "info"
+          );
+          return item;
+        });
+      }
       default:
         return [];
     }
@@ -145,6 +201,33 @@ export class ExplorerTreeProvider implements vscode.TreeDataProvider<OntologyTre
         (e) => this.entityItem(e)
       );
     }
+    if (
+      parent.nodeKind === "group" &&
+      this.viewKind === "diagnostics" &&
+      parent.label.startsWith("error")
+    ) {
+      return (this.snapshot.diagnostics ?? [])
+        .filter((d) => d.severity === "error")
+        .map((d) => this.diagnosticItem(d));
+    }
+    if (
+      parent.nodeKind === "group" &&
+      this.viewKind === "diagnostics" &&
+      parent.label.startsWith("warning")
+    ) {
+      return (this.snapshot.diagnostics ?? [])
+        .filter((d) => d.severity === "warning")
+        .map((d) => this.diagnosticItem(d));
+    }
+    if (
+      parent.nodeKind === "group" &&
+      this.viewKind === "diagnostics" &&
+      parent.label.startsWith("info")
+    ) {
+      return (this.snapshot.diagnostics ?? [])
+        .filter((d) => d.severity === "info")
+        .map((d) => this.diagnosticItem(d));
+    }
     if (parent.nodeKind !== "entity" || !parent.iri || this.viewKind !== "classes") {
       return [];
     }
@@ -155,6 +238,20 @@ export class ExplorerTreeProvider implements vscode.TreeDataProvider<OntologyTre
 
   private hasChildren(iri: string): boolean {
     return (this.snapshot?.hierarchy.children[iri]?.length ?? 0) > 0;
+  }
+
+  private diagnosticItem(
+    diagnostic: import("../lsp/protocol").DiagnosticSummary
+  ): OntologyTreeItem {
+    return new OntologyTreeItem(
+      "diagnostic",
+      diagnosticLabel(diagnostic),
+      vscode.TreeItemCollapsibleState.None,
+      undefined,
+      diagnostic.file,
+      undefined,
+      diagnostic
+    );
   }
 
   private entityItem(

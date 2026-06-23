@@ -13,7 +13,7 @@ use std::path::PathBuf;
 #[command(
     name = "ontoindex",
     version,
-    about = "Local-first ontology index and query engine (OntoCode v0.2)"
+    about = "Local-first ontology index and query engine (OntoCode v0.3)"
 )]
 struct Cli {
     #[command(subcommand)]
@@ -94,22 +94,54 @@ fn main() -> Result<()> {
         }
         Commands::Validate { workspace } => {
             let catalog = build_catalog(&workspace)?;
-            let stats = catalog.data().stats();
-            if stats.error_count > 0 {
-                for doc in &catalog.data().documents {
-                    if matches!(doc.parse_status, ontoindex_core::ParseStatus::Error) {
+            let data = catalog.data();
+            let mut error_count = 0usize;
+            let mut warning_count = 0usize;
+
+            for diag in &data.diagnostics {
+                match diag.severity {
+                    ontoindex_core::DiagnosticSeverity::Error => {
+                        error_count += 1;
                         eprintln!(
-                            "ERROR {}: {}",
-                            doc.path.display(),
-                            doc.parse_message.as_deref().unwrap_or("parse error")
+                            "ERROR [{}] {}:{}:{}: {}",
+                            diag.code.as_str(),
+                            diag.file.display(),
+                            diag.range.line.unwrap_or(0),
+                            diag.range.column.unwrap_or(0),
+                            diag.message
+                        );
+                    }
+                    ontoindex_core::DiagnosticSeverity::Warning => {
+                        warning_count += 1;
+                        eprintln!(
+                            "WARN  [{}] {}:{}:{}: {}",
+                            diag.code.as_str(),
+                            diag.file.display(),
+                            diag.range.line.unwrap_or(0),
+                            diag.range.column.unwrap_or(0),
+                            diag.message
+                        );
+                    }
+                    ontoindex_core::DiagnosticSeverity::Info => {
+                        eprintln!(
+                            "INFO  [{}] {}: {}",
+                            diag.code.as_str(),
+                            diag.file.display(),
+                            diag.message
                         );
                     }
                 }
-                bail!("validation failed with {} error(s)", stats.error_count);
+            }
+
+            if error_count > 0 {
+                bail!(
+                    "validation failed with {error_count} error(s), {warning_count} warning(s)"
+                );
             }
             println!(
-                "OK: indexed {} ontology file(s), {} parse error(s)",
-                stats.ontology_count, stats.error_count
+                "OK: indexed {} ontology file(s), {} warning(s)",
+                data.stats().ontology_count,
+                warning_count
             );
         }
         Commands::Inspect { workspace, format } => {
@@ -141,6 +173,8 @@ fn print_stats(stats: &CatalogStats, format: OutputFormat) -> Result<()> {
             println!("annotations:           {}", stats.annotation_count);
             println!("triples:               {}", stats.triple_count);
             println!("parse_errors:          {}", stats.error_count);
+            println!("diagnostic_errors:     {}", stats.diagnostic_error_count);
+            println!("diagnostic_warnings:   {}", stats.diagnostic_warning_count);
         }
     }
     Ok(())

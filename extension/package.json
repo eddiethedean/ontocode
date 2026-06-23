@@ -2,7 +2,7 @@
   "name": "ontocode",
   "displayName": "OntoCode",
   "description": "Browse OWL/RDF ontologies in VS Code: open a folder with .ttl/.owl files, use the OntoCode sidebar to explore classes and properties, and inspect entities with jump-to-source.",
-  "version": "0.2.3",
+  "version": "0.3.0",
   "publisher": "ontocode",
   "license": "MIT",
   "repository": {

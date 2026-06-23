@@ -54,6 +54,54 @@ fn valid_file_still_indexes_when_sibling_has_parse_error() {
 }
 
 #[test]
+fn sql_diagnostics_table() {
+    let dir = tempfile::tempdir().unwrap();
+    for name in ["lint-broken-import.ttl", "lint-duplicate-labels.ttl", "lint-orphan.ttl"] {
+        std::fs::copy(
+            PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+                .join("tests/fixtures/diagnostics")
+                .join(name),
+            dir.path().join(name),
+        )
+        .unwrap();
+    }
+
+    let catalog = IndexBuilder::new().workspace(dir.path()).build().expect("build");
+    let result = query_catalog(&catalog, "SELECT code, severity FROM diagnostics")
+        .expect("diagnostics query");
+
+    let codes: Vec<_> = result
+        .rows
+        .iter()
+        .filter_map(|r| r.get("code").cloned())
+        .collect();
+    assert!(codes.iter().any(|c| c == "broken_import"));
+    assert!(codes.iter().any(|c| c == "duplicate_label"));
+    assert!(codes.iter().any(|c| c == "orphan_class"));
+    assert!(codes.iter().any(|c| c == "missing_label"));
+}
+
+#[test]
+fn validate_reports_diagnostics() {
+    let dir = tempfile::tempdir().unwrap();
+    std::fs::copy(
+        PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("tests/fixtures/diagnostics/lint-broken-import.ttl"),
+        dir.path().join("bad.ttl"),
+    )
+    .unwrap();
+
+    let catalog = IndexBuilder::new().workspace(dir.path()).build().expect("build");
+    let errors = catalog
+        .data()
+        .diagnostics
+        .iter()
+        .filter(|d| d.severity == ontoindex_core::DiagnosticSeverity::Error)
+        .count();
+    assert!(errors >= 1);
+}
+
+#[test]
 fn classes_snapshot() {
     golden::assert_golden_snapshot(
         "fixtures",

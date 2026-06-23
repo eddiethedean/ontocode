@@ -10,13 +10,15 @@ pub(crate) mod state;
 #[cfg(test)]
 mod handlers_test;
 
+use crossbeam_channel::Sender;
 use diagnostics::publish_catalog_diagnostics;
 use handlers::{handle_custom_request, handle_initialize, handle_standard_request};
-use crossbeam_channel::Sender;
 use lsp_server::{Connection, Message, Notification, Request, RequestId, Response, ResponseError};
 use lsp_types::{
     notification::Notification as _,
-    notification::{DidChangeTextDocument, DidCloseTextDocument, DidOpenTextDocument, Exit, Initialized},
+    notification::{
+        DidChangeTextDocument, DidCloseTextDocument, DidOpenTextDocument, Exit, Initialized,
+    },
     InitializeParams,
 };
 use serde_json::Value;
@@ -58,14 +60,22 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
                 {
                     connection.sender.send(Message::Response(resp))?;
                 }
-                publish_pending_diagnostics(&connection.sender, &state, &pending_diagnostic_publish);
+                publish_pending_diagnostics(
+                    &connection.sender,
+                    &state,
+                    &pending_diagnostic_publish,
+                );
             }
             Message::Notification(notif) => {
                 if notif.method == Exit::METHOD {
                     break;
                 }
                 handle_notification(&state, &pending_reindex, &pending_diagnostic_publish, notif);
-                publish_pending_diagnostics(&connection.sender, &state, &pending_diagnostic_publish);
+                publish_pending_diagnostics(
+                    &connection.sender,
+                    &state,
+                    &pending_diagnostic_publish,
+                );
             }
             Message::Response(_) => {}
         }
@@ -185,11 +195,7 @@ fn publish_pending_diagnostics(
         return;
     }
     state.with_catalog(|catalog| {
-        publish_catalog_diagnostics(
-            sender,
-            &catalog.data().documents,
-            &catalog.data().diagnostics,
-        );
+        publish_catalog_diagnostics(sender, &catalog.data().documents, &catalog.data().diagnostics);
     });
 }
 
@@ -278,10 +284,7 @@ fn schedule_reindex(
     }
 }
 
-fn flush_due_reindex(
-    state: &ServerState,
-    pending: &Arc<Mutex<Option<PendingReindex>>>,
-) -> bool {
+fn flush_due_reindex(state: &ServerState, pending: &Arc<Mutex<Option<PendingReindex>>>) -> bool {
     let due = {
         let Ok(mut guard) = pending.lock() else {
             return false;

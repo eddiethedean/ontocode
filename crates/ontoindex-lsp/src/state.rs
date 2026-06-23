@@ -59,11 +59,7 @@ impl ServerState {
     }
 
     fn open_documents_snapshot(&self) -> HashMap<PathBuf, String> {
-        self.inner
-            .read()
-            .ok()
-            .map(|g| g.open_documents.clone())
-            .unwrap_or_default()
+        self.inner.read().ok().map(|g| g.open_documents.clone()).unwrap_or_default()
     }
 
     pub fn with_catalog<T>(&self, f: impl FnOnce(&OntologyCatalog) -> T) -> Option<T> {

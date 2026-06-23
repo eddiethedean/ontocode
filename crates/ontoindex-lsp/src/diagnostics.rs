@@ -3,7 +3,6 @@ use lsp_server::Message;
 use lsp_types::notification::Notification as _;
 use lsp_types::notification::PublishDiagnostics;
 use lsp_types::{Diagnostic, DiagnosticSeverity, NumberOrString, Position, Range, Uri};
-use ontoindex_core;
 use std::collections::BTreeMap;
 use std::path::Path;
 use std::str::FromStr;
@@ -56,10 +55,7 @@ fn to_lsp_diagnostic(diag: &ontoindex_core::Diagnostic) -> Diagnostic {
     Diagnostic {
         range: Range {
             start: Position { line, character: column },
-            end: Position {
-                line,
-                character: column.saturating_add(1),
-            },
+            end: Position { line, character: column.saturating_add(1) },
         },
         severity: Some(match diag.severity {
             ontoindex_core::DiagnosticSeverity::Error => DiagnosticSeverity::ERROR,
@@ -97,9 +93,6 @@ mod tests {
         let lsp = to_lsp_diagnostic(&diag);
         assert_eq!(lsp.range.start.line, 1);
         assert_eq!(lsp.range.start.character, 4);
-        assert_eq!(
-            lsp.code,
-            Some(NumberOrString::String("broken_import".to_string()))
-        );
+        assert_eq!(lsp.code, Some(NumberOrString::String("broken_import".to_string())));
     }
 }

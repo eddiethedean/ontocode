@@ -62,14 +62,11 @@ impl IndexBuilder {
         for (idx, file) in files.iter().enumerate() {
             let doc_id = format!("doc-{}", idx + 1);
             let parsed = if let Some(text) = self.document_overrides.get(&file.path) {
-                parse_ontology_text(
-                    &file.path,
-                    file.format,
-                    &doc_id,
-                    text,
-                    text.as_bytes(),
-                )
-                .map_err(|e| CatalogError::Parse { path: file.path.clone(), message: e.to_string() })?
+                parse_ontology_text(&file.path, file.format, &doc_id, text, text.as_bytes())
+                    .map_err(|e| CatalogError::Parse {
+                        path: file.path.clone(),
+                        message: e.to_string(),
+                    })?
             } else {
                 parse_ontology_file(
                     &file.path,
@@ -78,7 +75,10 @@ impl IndexBuilder {
                     &file.content_hash,
                     file.modified_time,
                 )
-                .map_err(|e| CatalogError::Parse { path: file.path.clone(), message: e.to_string() })?
+                .map_err(|e| CatalogError::Parse {
+                    path: file.path.clone(),
+                    message: e.to_string(),
+                })?
             };
 
             triple_count += parsed.triple_count;
@@ -141,14 +141,9 @@ impl IndexBuilder {
             namespaces: &data.namespaces,
             imports: &data.imports,
         };
-        data.diagnostics =
-            collect_diagnostics_with_sources(&lint_input, &self.document_overrides);
+        data.diagnostics = collect_diagnostics_with_sources(&lint_input, &self.document_overrides);
 
-        Ok(OntologyCatalog {
-            workspace: self.workspace,
-            data,
-            store,
-        })
+        Ok(OntologyCatalog { workspace: self.workspace, data, store })
     }
 }
 

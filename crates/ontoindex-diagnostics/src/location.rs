@@ -1,10 +1,7 @@
 use ontoindex_core::SourceLocation;
 use std::collections::BTreeMap;
 
-pub fn find_in_source(
-    source_text: &str,
-    needles: &[String],
-) -> SourceLocation {
+pub fn find_in_source(source_text: &str, needles: &[String]) -> SourceLocation {
     for (line_idx, line) in source_text.lines().enumerate() {
         for needle in needles {
             if let Some(col) = line.find(needle) {
@@ -33,11 +30,7 @@ pub fn entity_needles(
     short_name: &str,
     namespaces: &BTreeMap<String, String>,
 ) -> Vec<String> {
-    let mut needles = vec![
-        iri.to_string(),
-        format!("<{iri}>"),
-        format!(":{short_name}"),
-    ];
+    let mut needles = vec![iri.to_string(), format!("<{iri}>"), format!(":{short_name}")];
     for (prefix, ns) in namespaces {
         if iri.starts_with(ns) && !prefix.is_empty() {
             needles.push(format!("{prefix}:{short_name}"));

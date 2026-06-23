@@ -69,12 +69,7 @@ pub fn handle_get_catalog_snapshot(
             documents: catalog.data().documents.clone(),
             entities: catalog.data().entities.clone(),
             hierarchy: catalog.class_hierarchy(),
-            diagnostics: catalog
-                .data()
-                .diagnostics
-                .iter()
-                .map(DiagnosticSummary::from)
-                .collect(),
+            diagnostics: catalog.data().diagnostics.iter().map(DiagnosticSummary::from).collect(),
         })
         .ok_or_else(LspErrorPayload::not_indexed)
 }

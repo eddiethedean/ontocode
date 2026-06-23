@@ -13,7 +13,7 @@ fn indexes_fixture_ontology() {
     let stats = fixture_catalog().data().stats();
 
     assert_eq!(stats.ontology_count, 2);
-    assert_eq!(stats.class_count, 3);
+    assert_eq!(stats.class_count, 4);
     assert_eq!(stats.object_property_count, 1);
     assert_eq!(stats.data_property_count, 1);
     assert_eq!(stats.annotation_property_count, 1);
@@ -50,7 +50,7 @@ fn valid_file_still_indexes_when_sibling_has_parse_error() {
 
     assert_eq!(stats.ontology_count, 2);
     assert_eq!(stats.error_count, 1);
-    assert_eq!(stats.class_count, 2);
+    assert_eq!(stats.class_count, 3);
 }
 
 #[test]
@@ -58,9 +58,7 @@ fn sql_diagnostics_table() {
     let dir = tempfile::tempdir().unwrap();
     for name in ["lint-broken-import.ttl", "lint-duplicate-labels.ttl", "lint-orphan.ttl"] {
         std::fs::copy(
-            PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-                .join("tests/fixtures/diagnostics")
-                .join(name),
+            PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/diagnostics").join(name),
             dir.path().join(name),
         )
         .unwrap();
@@ -70,11 +68,7 @@ fn sql_diagnostics_table() {
     let result = query_catalog(&catalog, "SELECT code, severity FROM diagnostics")
         .expect("diagnostics query");
 
-    let codes: Vec<_> = result
-        .rows
-        .iter()
-        .filter_map(|r| r.get("code").cloned())
-        .collect();
+    let codes: Vec<_> = result.rows.iter().filter_map(|r| r.get("code").cloned()).collect();
     assert!(codes.iter().any(|c| c == "broken_import"));
     assert!(codes.iter().any(|c| c == "duplicate_label"));
     assert!(codes.iter().any(|c| c == "orphan_class"));

@@ -112,6 +112,7 @@ pub fn parse_ontology_text(
     }
 
     let mut namespaces = extract_prefixes(&quads);
+    namespaces.extend(extract_declared_prefixes(source_text, format));
     if namespaces.is_empty() {
         namespaces.insert("".to_string(), default_base_iri(path));
     }
@@ -139,30 +140,25 @@ fn format_parse_error(error: &RdfParseError) -> String {
     error.to_string()
 }
 
-fn extract_parse_error_location(error: &RdfParseError, _source_text: &str) -> Option<SourceLocation> {
+fn extract_parse_error_location(
+    error: &RdfParseError,
+    _source_text: &str,
+) -> Option<SourceLocation> {
     let msg = error.to_string();
-    let line = msg
-        .split_whitespace()
-        .collect::<Vec<_>>()
-        .windows(2)
-        .find_map(|w| {
-            if w[0].eq_ignore_ascii_case("line") {
-                w[1].trim_end_matches(':').parse().ok()
-            } else {
-                None
-            }
-        });
-    let column = msg
-        .split_whitespace()
-        .collect::<Vec<_>>()
-        .windows(2)
-        .find_map(|w| {
-            if w[0].eq_ignore_ascii_case("column") || w[0].eq_ignore_ascii_case("col") {
-                w[1].trim_end_matches(':').parse().ok()
-            } else {
-                None
-            }
-        });
+    let line = msg.split_whitespace().collect::<Vec<_>>().windows(2).find_map(|w| {
+        if w[0].eq_ignore_ascii_case("line") {
+            w[1].trim_end_matches(':').parse().ok()
+        } else {
+            None
+        }
+    });
+    let column = msg.split_whitespace().collect::<Vec<_>>().windows(2).find_map(|w| {
+        if w[0].eq_ignore_ascii_case("column") || w[0].eq_ignore_ascii_case("col") {
+            w[1].trim_end_matches(':').parse().ok()
+        } else {
+            None
+        }
+    });
     if line.is_some() || column.is_some() {
         Some(SourceLocation { line, column })
     } else {
@@ -172,6 +168,38 @@ fn extract_parse_error_location(error: &RdfParseError, _source_text: &str) -> Op
 
 fn default_base_iri(path: &Path) -> String {
     format!("file://{}", path.display())
+}
+
+fn extract_declared_prefixes(
+    source_text: &str,
+    format: OntologyFormat,
+) -> BTreeMap<String, String> {
+    if !matches!(format, OntologyFormat::Turtle | OntologyFormat::TriG) {
+        return BTreeMap::new();
+    }
+
+    let mut prefixes = BTreeMap::new();
+    for line in source_text.lines() {
+        let trimmed = line.trim();
+        let rest = trimmed
+            .strip_prefix("@prefix ")
+            .or_else(|| trimmed.strip_prefix("@PREFIX "))
+            .or_else(|| trimmed.strip_prefix("PREFIX "));
+        let Some(rest) = rest else {
+            continue;
+        };
+        let Some((prefix_part, iri_part)) = rest.split_once('<') else {
+            continue;
+        };
+        let prefix = prefix_part.trim().trim_end_matches(':');
+        let Some(iri) = iri_part.split('>').next() else {
+            continue;
+        };
+        if !prefix.is_empty() {
+            prefixes.insert(prefix.to_string(), iri.to_string());
+        }
+    }
+    prefixes
 }
 
 fn extract_prefixes(quads: &[Quad]) -> BTreeMap<String, String> {
@@ -359,8 +387,13 @@ impl OntologyBuilder {
         parse_error_location: Option<SourceLocation>,
         source_text: &str,
     ) -> Result<ParsedOntology> {
-        let base_iri =
-            self.namespaces.get("").cloned().or_else(|| self.namespaces.values().next().cloned());
+        let base_iri = self
+            .ontology_iris
+            .iter()
+            .next()
+            .cloned()
+            .or_else(|| self.namespaces.get("").cloned())
+            .or_else(|| self.namespaces.values().next().cloned());
 
         let ontology_id = if let Some(iri) = self.ontology_iris.iter().next() {
             iri.clone()
@@ -582,5 +615,31 @@ ex:knows a owl:ObjectProperty ;
             .expect("knows property");
         assert_eq!(knows.kind, EntityKind::ObjectProperty);
         assert_eq!(knows.labels, vec!["\"knows\"".to_string()]);
+    }
+
+    #[test]
+    fn extracts_turtle_prefix_declarations() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("test.ttl");
+        let mut f = fs::File::create(&path).unwrap();
+        writeln!(
+            f,
+            r#"@prefix ex: <http://example.org/test#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+<http://example.org/test> a owl:Ontology .
+ex:Person a owl:Class .
+"#
+        )
+        .unwrap();
+
+        let parsed =
+            parse_ontology_file(&path, OntologyFormat::Turtle, "doc-1", "hash", 0).unwrap();
+
+        assert_eq!(parsed.base_iri.as_deref(), Some("http://example.org/test"));
+        assert_eq!(
+            parsed.namespaces.get("ex").map(String::as_str),
+            Some("http://example.org/test#")
+        );
     }
 }

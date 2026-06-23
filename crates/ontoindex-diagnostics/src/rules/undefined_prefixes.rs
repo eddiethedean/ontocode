@@ -1,5 +1,5 @@
-use crate::location::find_prefix_in_source;
 use crate::input::DiagnosticInput;
+use crate::location::find_prefix_in_source;
 use ontoindex_core::{Diagnostic, DiagnosticCode, DiagnosticSeverity, ParseStatus};
 use std::collections::BTreeSet;
 use std::path::Path;
@@ -50,11 +50,9 @@ pub fn undefined_prefixes(
 }
 
 fn builtin_prefixes() -> BTreeSet<&'static str> {
-    [
-        "rdf", "rdfs", "owl", "xsd", "xml", "sh", "skos", "dc", "dcterms", "foaf", "schema",
-    ]
-    .into_iter()
-    .collect()
+    ["rdf", "rdfs", "owl", "xsd", "xml", "xmlns", "sh", "skos", "dc", "dcterms", "foaf", "schema"]
+        .into_iter()
+        .collect()
 }
 
 static QNAME_RE: std::sync::LazyLock<regex::Regex> = std::sync::LazyLock::new(|| {

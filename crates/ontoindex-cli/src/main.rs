@@ -134,9 +134,7 @@ fn main() -> Result<()> {
             }
 
             if error_count > 0 {
-                bail!(
-                    "validation failed with {error_count} error(s), {warning_count} warning(s)"
-                );
+                bail!("validation failed with {error_count} error(s), {warning_count} warning(s)");
             }
             println!(
                 "OK: indexed {} ontology file(s), {} warning(s)",

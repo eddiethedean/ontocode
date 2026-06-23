@@ -1,5 +1,5 @@
-use crate::location::find_in_source;
 use crate::input::DiagnosticInput;
+use crate::location::find_in_source;
 use ontoindex_core::{Diagnostic, DiagnosticCode, DiagnosticSeverity, ParseStatus};
 use std::collections::BTreeSet;
 use std::path::Path;
@@ -28,9 +28,7 @@ pub fn broken_imports(
             continue;
         }
         let doc = data.documents.iter().find(|d| d.id == imp.ontology_id);
-        let file = doc
-            .map(|d| d.path.clone())
-            .unwrap_or_else(|| Path::new(".").to_path_buf());
+        let file = doc.map(|d| d.path.clone()).unwrap_or_else(|| Path::new(".").to_path_buf());
 
         let text = source(&file);
         let range =

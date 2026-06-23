@@ -8,11 +8,7 @@ pub fn orphan_classes(
     data: &DiagnosticInput<'_>,
     source: &dyn Fn(&Path) -> String,
 ) -> Vec<Diagnostic> {
-    let classes: Vec<_> = data
-        .entities
-        .iter()
-        .filter(|e| e.kind == EntityKind::Class)
-        .collect();
+    let classes: Vec<_> = data.entities.iter().filter(|e| e.kind == EntityKind::Class).collect();
     let entity_iris: BTreeSet<&str> = data.entities.iter().map(|e| e.iri.as_str()).collect();
     let child_set: BTreeSet<&str> = data
         .axioms
@@ -38,9 +34,7 @@ pub fn orphan_classes(
             continue;
         }
         let doc = data.documents.iter().find(|d| d.id == class.ontology_id);
-        let file = doc
-            .map(|d| d.path.clone())
-            .unwrap_or_else(|| Path::new(".").to_path_buf());
+        let file = doc.map(|d| d.path.clone()).unwrap_or_else(|| Path::new(".").to_path_buf());
         let namespaces = doc.map(|d| &d.namespaces).cloned().unwrap_or_default();
         let text = source(&file);
         let needles = entity_needles(&class.iri, &class.short_name, &namespaces);

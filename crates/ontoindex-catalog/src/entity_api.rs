@@ -215,7 +215,7 @@ mod tests {
         assert!(hierarchy
             .parents
             .get("http://example.org/people#Person")
-            .is_some_and(|p| p.contains(&"http://www.w3.org/2002/07/owl#Thing".to_string())));
+            .is_some_and(|p| p.contains(&"http://example.org/people#Thing".to_string())));
     }
 
     #[test]

@@ -1,5 +1,5 @@
-use crate::location::{entity_needles, find_in_source};
 use crate::input::DiagnosticInput;
+use crate::location::{entity_needles, find_in_source};
 use ontoindex_core::{Diagnostic, DiagnosticCode, DiagnosticSeverity, EntityKind};
 use std::path::Path;
 
@@ -19,9 +19,7 @@ pub fn missing_labels(
             continue;
         }
         let doc = data.documents.iter().find(|d| d.id == entity.ontology_id);
-        let file = doc
-            .map(|d| d.path.clone())
-            .unwrap_or_else(|| Path::new(".").to_path_buf());
+        let file = doc.map(|d| d.path.clone()).unwrap_or_else(|| Path::new(".").to_path_buf());
         let namespaces = doc.map(|d| &d.namespaces).cloned().unwrap_or_default();
         let text = source(&file);
         let needles = entity_needles(&entity.iri, &entity.short_name, &namespaces);

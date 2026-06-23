@@ -153,18 +153,12 @@ fn table_rows(catalog: &OntologyCatalog, table: &str) -> Result<Vec<Row>> {
                 row.insert("severity".into(), d.severity.as_str().to_string());
                 row.insert("message".into(), d.message.clone());
                 row.insert("file".into(), d.file.display().to_string());
-                row.insert(
-                    "line".into(),
-                    d.range.line.map(|l| l.to_string()).unwrap_or_default(),
-                );
+                row.insert("line".into(), d.range.line.map(|l| l.to_string()).unwrap_or_default());
                 row.insert(
                     "column".into(),
                     d.range.column.map(|c| c.to_string()).unwrap_or_default(),
                 );
-                row.insert(
-                    "entity_iri".into(),
-                    d.entity_iri.clone().unwrap_or_default(),
-                );
+                row.insert("entity_iri".into(), d.entity_iri.clone().unwrap_or_default());
                 row
             })
             .collect()),

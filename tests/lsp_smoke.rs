@@ -68,7 +68,7 @@ fn lsp_indexes_fixture_workspace() {
     }
     let stats =
         index_resp.get("result").and_then(|r| r.get("stats")).expect("stats in index result");
-    assert_eq!(stats.get("class_count").and_then(|v| v.as_u64()), Some(3));
+    assert_eq!(stats.get("class_count").and_then(|v| v.as_u64()), Some(4));
     assert_eq!(stats.get("individual_count").and_then(|v| v.as_u64()), Some(2));
     assert_eq!(stats.get("error_count").and_then(|v| v.as_u64()), Some(0));
 
@@ -135,12 +135,15 @@ fn lsp_indexes_fixture_workspace() {
 
     let deadline = std::time::Instant::now() + Duration::from_secs(3);
     while std::time::Instant::now() < deadline {
-        if let Ok(Some(_)) = child.try_wait() {
-            return;
+        if child.try_wait().ok().flatten().is_some() {
+            break;
         }
         thread::sleep(Duration::from_millis(50));
     }
-    let _ = child.kill();
+    if child.try_wait().ok().flatten().is_none() {
+        let _ = child.kill();
+    }
+    let _ = child.wait();
 }
 
 fn read_lsp_message<R: BufRead>(reader: &mut R) -> std::io::Result<Option<String>> {

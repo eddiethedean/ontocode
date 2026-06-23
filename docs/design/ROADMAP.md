@@ -24,7 +24,7 @@ Exit criteria:
 
 **Dependencies:** `oxigraph`, `sqlparser`, `ignore`, `clap`.
 
-## v0.2 — OntoCode Explorer (current)
+## v0.2 — OntoCode Explorer (shipped)
 
 Deliverables:
 
@@ -42,7 +42,7 @@ Exit criteria:
 
 **Dependencies:** `lsp-server`, `lsp-types`, OntoIndex crates above.
 
-## v0.3 — Diagnostics
+## v0.3 — Diagnostics (current)
 
 Deliverables:
 

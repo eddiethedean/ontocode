@@ -4,18 +4,19 @@ OntoCode / OntoIndex is licensed under **MIT OR Apache-2.0** at your option (see
 
 This document summarizes **third-party licenses** for dependencies named in [DEPENDENCY_MATRIX.md](DEPENDENCY_MATRIX.md). It is not legal advice. Regenerate NOTICES before releases when dependency sets change.
 
-## Direct dependencies (shipped v0.2)
+## Direct dependencies (shipped v0.3)
 
 | Crate | License | Distribution notes |
 |-------|---------|-------------------|
 | `oxigraph` | MIT OR Apache-2.0 | Compatible |
 | `sqlparser` | Apache-2.0 | Compatible |
 | `ignore` | Unlicense OR MIT | Compatible |
+| `regex` | MIT OR Apache-2.0 | Compatible (`ontoindex-diagnostics`) |
 | `lsp-server` | MIT OR Apache-2.0 | Compatible |
 | `lsp-types` | MIT | Compatible |
 | `serde`, `clap`, `thiserror`, etc. | MIT OR Apache-2.0 | Compatible |
 
-## Planned dependencies (v0.3+)
+## Planned dependencies (v0.4+)
 
 | Crate | License | Distribution notes |
 |-------|---------|-------------------|

@@ -17,7 +17,7 @@ assignees: ''
 
 ## Version
 
-- OntoIndex / OntoCode version (e.g. 0.2.3, git commit, or crates.io):
+- OntoIndex / OntoCode version (e.g. 0.3.0, git commit, or crates.io):
 - OS and architecture:
 - Rust version (if building from source):
 - VS Code version (if extension):

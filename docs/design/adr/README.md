@@ -32,6 +32,11 @@ Canonical ADRs live in this directory. The former `adrs/` folder was merged here
 - **Editor integration:** LSP stdio ([ADR-0007](0007-language-server-boundary.md))
 - **LSP wire format:** snake_case enums ([ADR-0012](0012-lsp-json-snake-case-enums.md))
 
+### v0.3 (shipped)
+
+- **Diagnostics:** in-house `ontoindex-diagnostics` + Oxigraph parse errors ([ADR-0016](0016-dependency-first-implementation.md), [DEPENDENCY_MATRIX.md](../DEPENDENCY_MATRIX.md))
+- **LSP:** `textDocument/publishDiagnostics` after reindex; `CatalogSnapshot.diagnostics`
+
 ### v1.0 target
 
 - **Dependency policy:** [DEPENDENCY_MATRIX.md](../DEPENDENCY_MATRIX.md), [ADR-0016](0016-dependency-first-implementation.md)

@@ -1,8 +1,8 @@
-# OntoIndex LSP API (implemented in v0.2)
+# OntoIndex LSP API (implemented in v0.3)
 
-This document describes **what ships today** in `ontoindex-lsp`. For the **v1.0 target** (including `applyAxiomPatch`, `parseManchester`, `getExplanation`, `runRobot`), see [LSP_SPEC.md](design/LSP_SPEC.md) — those methods are planned, not implemented in v0.2.
+This document describes **what ships today** in `ontoindex-lsp`. For the **v1.0 target** (including `applyAxiomPatch`, `parseManchester`, `getExplanation`, `runRobot`), see [LSP_SPEC.md](design/LSP_SPEC.md) — those methods are planned, not implemented in v0.3.
 
-## Wire format (v0.2)
+## Wire format (v0.3)
 
 LSP JSON uses **snake_case** for enums serialized from Rust (`EntityKind`, `ParseStatus`, `OntologyFormat`), e.g. `"kind": "class"`, `"parse_status": "ok"`. The SQL CLI uses the same snake_case strings via `EntityKind::as_str()` — not PascalCase serde names.
 
@@ -16,7 +16,7 @@ LSP JSON uses **snake_case** for enums serialized from Rust (`EntityKind`, `Pars
 
 - stdio (VS Code language client)
 
-## Standard LSP capabilities (v0.2)
+## Standard LSP capabilities (v0.3)
 
 | Capability | Status |
 |------------|--------|
@@ -28,7 +28,7 @@ LSP JSON uses **snake_case** for enums serialized from Rust (`EntityKind`, `Pars
 | Completion | Planned |
 | Rename | Planned |
 
-## Custom methods (v0.2)
+## Custom methods (v0.3)
 
 All custom methods use the `ontoindex/` prefix.
 

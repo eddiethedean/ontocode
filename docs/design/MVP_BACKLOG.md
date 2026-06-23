@@ -70,7 +70,7 @@
 - [x] Jump to source
 
 ### LSP
-- [ ] Publish diagnostics (deferred to v0.3)
+- [x] Publish diagnostics (v0.3)
 - [x] Hover support
 - [x] document symbols
 - [x] workspace symbols
@@ -79,3 +79,22 @@
 - [x] Build extension locally
 - [x] Add README
 - [ ] Add screenshots
+
+## v0.3 Diagnostics Backlog
+
+### Engine
+- [x] `ontoindex-diagnostics` crate with catalog lint rules
+- [x] `diagnostics` SQL virtual table
+- [x] Parse error locations from Oxigraph
+- [x] Open-buffer parsing for unsaved edits
+
+### LSP
+- [x] `textDocument/publishDiagnostics` after reindex
+- [x] `CatalogSnapshot.diagnostics` for explorer
+
+### Extension
+- [x] Diagnostics explorer tree grouped by severity
+- [x] Problems panel via LSP (no client wiring required)
+
+### CLI
+- [x] `ontoindex validate` prints all diagnostics; non-zero exit on errors

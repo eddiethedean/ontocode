@@ -2,7 +2,7 @@
 //!
 //! Published as [`ontoindex-core`](https://crates.io/crates/ontoindex-core).
 //! See [SQL reference](https://github.com/eddiethedean/ontocode/blob/main/docs/sql-reference.md)
-//! and [LSP API](https://github.com/eddiethedean/ontocode/blob/main/docs/lsp-api.md) for v0.2 behavior.
+//! and [LSP API](https://github.com/eddiethedean/ontocode/blob/main/docs/lsp-api.md) for v0.3 behavior.
 
 pub mod error;
 pub mod limits;

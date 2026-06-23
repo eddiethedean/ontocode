@@ -45,7 +45,7 @@
 
 | Item | Spec | v0.2 |
 |------|------|------|
-| Diagnostics → Problems panel | [SPEC.md](SPEC.md) §9 | No |
+| Diagnostics → Problems panel | [SPEC.md](SPEC.md) §9 | Yes (v0.3) |
 | Completion | [SPEC.md](SPEC.md) §9 | No |
 | Rename (safe IRI) | [SPEC.md](SPEC.md) §9 | No |
 | Find references | [SPEC.md](SPEC.md) §9 | No |

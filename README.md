@@ -13,6 +13,7 @@
 [![query](https://img.shields.io/crates/v/ontoindex-query?label=query)](https://crates.io/crates/ontoindex-query)
 [![cli](https://img.shields.io/crates/v/ontoindex-cli?label=cli)](https://crates.io/crates/ontoindex-cli)
 [![lsp](https://img.shields.io/crates/v/ontoindex-lsp?label=lsp)](https://crates.io/crates/ontoindex-lsp)
+[![diagnostics](https://img.shields.io/crates/v/ontoindex-diagnostics?label=diagnostics)](https://crates.io/crates/ontoindex-diagnostics)
 [![downloads](https://img.shields.io/crates/d/ontoindex-cli?label=downloads)](https://crates.io/crates/ontoindex-cli)
 
 **Ontology-as-code for Git and VS Code — v0.3.0 ships today.**
@@ -47,19 +48,19 @@ Full install and troubleshooting: [docs/vscode-install.md](docs/vscode-install.m
 
 OntoCode is designed as two products that ship together:
 
-| Layer | What it is | Status in v0.2.3 |
+| Layer | What it is | Status in v0.3.0 |
 |-------|------------|-------------------|
-| **OntoCode** | VS Code extension (explorer, entity inspector, jump-to-source) | **Explorer shipping** — install VSIX or run from `extension/` |
-| **OntoIndex** | Rust library + CLI + LSP (scan, parse, catalog, query, validate) | **Shipping now** |
+| **OntoCode** | VS Code extension (explorer, entity inspector, diagnostics, jump-to-source) | **Shipping** — install VSIX or run from `extension/` |
+| **OntoIndex** | Rust library + CLI + LSP (scan, parse, catalog, query, validate, diagnostics) | **Shipping** |
 
 ```text
 ┌─────────────────────────────────────┐
-│  OntoCode (v0.2)                    │
+│  OntoCode (v0.3)                    │
 │  VS Code extension + explorer UI    │
 └─────────────────┬───────────────────┘
                   │ ontoindex-lsp (stdio)
 ┌─────────────────▼───────────────────┐
-│  OntoIndex (v0.2.3)                 │
+│  OntoIndex (v0.3.0)                 │
 │  Rust index, catalog, query, CLI, LSP │
 └─────────────────┬───────────────────┘
                   │ Oxigraph / RDF parsers
@@ -75,33 +76,40 @@ OntoIndex is useful on its own today (CLI, CI, local analysis). The extension wi
 
 Protégé is strong for traditional ontology editing, but most engineering teams live in Git, pull requests, and VS Code. OntoCode targets that workflow:
 
-| Shipped in v0.2 | Planned (v1.0 target) |
+| Shipped in v0.3 | Planned (v1.0 target) |
 |-----------------|-------------------------|
 | Browse ontologies in VS Code | Hybrid authoring: forms + Manchester editor |
 | Entity inspector and jump-to-source | OWL axiom editing and patch write-back |
-| `ontoindex validate` for CI | Query workbench, [OntoLogos](https://github.com/eddiethedean/ontologos)-backed reasoners + explanations |
-| SQL-like and SPARQL queries via CLI | OBO format + ROBOT interop |
-| Local-first indexing | Semantic Git diff, LSP completion/rename |
+| Inline diagnostics (Problems panel + explorer) | Query workbench, [OntoLogos](https://github.com/eddiethedean/ontologos)-backed reasoners + explanations |
+| `ontoindex validate` and `SELECT * FROM diagnostics` for CI | OBO format + ROBOT interop |
+| SQL-like and SPARQL queries via CLI | Semantic Git diff, LSP completion/rename |
+| Local-first indexing | SHACL validation (rudof) |
 
 Long-term goal: **Protégé-competitive OWL 2 DL + OBO maintenance in VS Code** — see [PROTEGE_PARITY.md](docs/design/PROTEGE_PARITY.md).
 
-## What's in v0.2.3 (OntoCode Explorer)
+## What's in v0.3.0 (Ontology Diagnostics)
 
-v0.2 adds the VS Code extension described in the [v0.2 roadmap](https://github.com/eddiethedean/ontocode/blob/main/docs/design/ROADMAP.md):
+v0.3 adds ontology linting and editor integration described in the [v0.3 roadmap](https://github.com/eddiethedean/ontocode/blob/main/docs/design/ROADMAP.md):
+
+- **Catalog lint rules** — parse errors, broken imports, undefined prefixes, duplicate/missing labels, orphan classes
+- **`diagnostics` SQL table** — `SELECT * FROM diagnostics WHERE severity = 'error'`
+- **LSP `publishDiagnostics`** — Problems panel updates after each workspace reindex
+- **Diagnostics explorer** — sidebar tree grouped by severity; click to jump to source
+- **`ontoindex validate`** — prints all diagnostics; non-zero exit on errors (CI-friendly)
+- **Open-buffer parsing** — unsaved edits show parse errors without saving
+
+Exit criterion (works today):
+
+1. Open a repo with ontology files in VS Code
+2. See parse and lint issues in the **Problems** panel and **Diagnostics** sidebar
+3. Run `ontoindex validate .` or query the `diagnostics` table in CI
+
+### Also since v0.2 (OntoCode Explorer)
 
 - **VS Code extension** — OntoCode activity bar with ontology tree views
 - **Entity inspector** — IRI, labels, comments, parents, children, axioms
 - **Jump to source** — open Turtle/RDF files at entity declarations
-- **`ontoindex-lsp`** — language server with custom catalog methods
-- **LSP browsing** — hover, document/workspace symbols, go-to-definition
-
-**Recent fixes** (see [CHANGELOG.md](CHANGELOG.md)): LSP startup after Marketplace install (0.2.2), explorer context-menu inspector (0.2.3).
-
-Exit criterion (works today):
-
-1. Open a repo with `.ttl` files in VS Code with the extension loaded
-2. Browse ontologies, classes, properties, and individuals in the sidebar
-3. Click an entity to inspect it and jump to its source
+- **`ontoindex-lsp`** — hover, document/workspace symbols, go-to-definition
 
 ### Install the extension
 
@@ -142,8 +150,11 @@ cargo run -- query fixtures "SELECT short_name, labels FROM classes WHERE short_
 # SPARQL
 cargo run -- sparql fixtures "SELECT ?s ?p ?o WHERE { ?s ?p ?o } LIMIT 5"
 
-# Validate (non-zero exit on parse errors — CI-friendly)
+# Validate (non-zero exit on diagnostic errors — CI-friendly)
 cargo run -- validate fixtures
+
+# Query diagnostics
+cargo run -- query fixtures "SELECT code, severity, message FROM diagnostics"
 
 # JSON output
 cargo run -- query fixtures "SELECT * FROM classes" --format json
@@ -158,11 +169,10 @@ ontoindex query ./fixtures "SELECT * FROM classes"
 
 Or build from source after cloning this repository.
 
-## Planned VS Code experience (v0.3+)
+## Planned VS Code experience (v0.4+)
 
 Specs and wireframes live in [docs/design/](https://github.com/eddiethedean/ontocode/tree/main/docs/design). Upcoming OntoCode UI includes:
 
-- Inline diagnostics and validation (v0.3) — **shipped in v0.3.0**
 - Class/property/individual authoring (v0.4)
 - SPARQL and SQL query panels (v0.5+)
 - Reasoner integration and graph visualization
@@ -258,22 +268,23 @@ ONTOINDEX_UPDATE_GOLDEN=1 cargo test golden_classes
 
 ## Releasing
 
-Published crates (v0.2.3):
+Published crates (v0.3.0):
 
 | Crate | crates.io |
 |-------|-----------|
 | `ontoindex-core` | https://crates.io/crates/ontoindex-core |
 | `ontoindex-parser` | https://crates.io/crates/ontoindex-parser |
+| `ontoindex-diagnostics` | https://crates.io/crates/ontoindex-diagnostics |
 | `ontoindex-catalog` | https://crates.io/crates/ontoindex-catalog |
 | `ontoindex-query` | https://crates.io/crates/ontoindex-query |
 | `ontoindex-lsp` | https://crates.io/crates/ontoindex-lsp |
 | `ontoindex-cli` | https://crates.io/crates/ontoindex-cli |
 
-Push a tag matching `[workspace.package].version` in `Cargo.toml` (e.g. `v0.2.3`):
+Push a tag matching `[workspace.package].version` in `Cargo.toml` (e.g. `v0.3.0`):
 
 ```bash
-git tag v0.2.3
-git push origin v0.2.3
+git tag v0.3.0
+git push origin v0.3.0
 ```
 
 The [release workflow](https://github.com/eddiethedean/ontocode/blob/main/.github/workflows/release.yml) verifies packages, runs tests, publishes workspace crates to [crates.io](https://crates.io/) in dependency order, and creates a GitHub Release with the `ontoindex` Linux binary, per-platform `ontoindex-lsp` archives, and a **multi-platform VSIX** (Linux, macOS, Windows). Requires the `CARGO_REGISTRY_TOKEN` repository secret.

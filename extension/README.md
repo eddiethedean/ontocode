@@ -44,7 +44,7 @@ After indexing, the **OntoCode** activity bar shows five views:
 | **Classes** | Class hierarchy (subclasses nested under parents) |
 | **Properties** | Object, data, and annotation properties (grouped) |
 | **Individuals** | Named individuals |
-| **Diagnostics** | Placeholder (full validation UI planned for v0.3) |
+| **Diagnostics** | Lint issues grouped by severity (Problems panel + sidebar); click to open source |
 
 **Refresh** — click the ↻ icon on any view title, or run **OntoCode: Refresh Explorer**.
 
@@ -116,17 +116,18 @@ Open **Settings** and search `ontocode`:
 | Extension never activates | Open a supported ontology file, or click **OntoCode → Ontologies** |
 | `failed to start language server` | Check **View → Output → OntoIndex Language Server**. Uninstall older OntoCode versions. Set `ontocode.lspPath` or run `cargo install ontoindex-lsp` |
 | Empty **Classes** after indexing | **Output → OntoIndex Language Server** for errors; run **Index Workspace** again |
+| No items under **Diagnostics** | Index must complete first; check **Problems** panel for the same issues |
 | Workspace is Restricted | **Trust** the folder — `ontocode.lspPath` is ignored in Restricted Mode |
 
 More detail: [Installation & troubleshooting](https://github.com/eddiethedean/ontocode/blob/main/docs/vscode-install.md)
 
 ---
 
-## What’s included in v0.2.3
+## What’s included in v0.3.0
 
-**Shipped today:** explorer, entity inspector, jump-to-source, hover, symbols, go-to-definition.
+**Shipped today:** explorer, entity inspector, jump-to-source, hover, symbols, go-to-definition, **ontology diagnostics** (Problems panel + Diagnostics sidebar), `ontoindex validate` integration.
 
-**Planned:** inline diagnostics, axiom editing, query workbench, reasoners — see the [roadmap](https://github.com/eddiethedean/ontocode/blob/main/docs/design/ROADMAP.md).
+**Planned:** axiom editing, query workbench, reasoners — see the [roadmap](https://github.com/eddiethedean/ontocode/blob/main/docs/design/ROADMAP.md).
 
 ---
 

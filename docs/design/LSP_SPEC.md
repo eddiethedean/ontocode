@@ -1,9 +1,9 @@
 # LSP_SPEC.md
 
-> **Document status: target design (v0.2 partial implementation)**
+> **Document status: target design (v0.3 partial implementation)**
 >
-> For what ships today, read **[docs/lsp-api.md](../lsp-api.md)** (authoritative for v0.2).
-> Implemented: hover, document/workspace symbols, go-to-definition, and custom methods
+> For what ships today, read **[docs/lsp-api.md](../lsp-api.md)** (authoritative for v0.3).
+> Implemented: hover, document/workspace symbols, go-to-definition, diagnostics publishing,
 > `ontoindex/indexWorkspace`, `ontoindex/getCatalogSnapshot`, `ontoindex/getEntity`.
 > See [`crates/ontoindex-lsp/src/handlers.rs`](../crates/ontoindex-lsp/src/handlers.rs) and
 > [`crates/ontoindex-lsp/src/protocol.rs`](../crates/ontoindex-lsp/src/protocol.rs).
@@ -33,7 +33,7 @@ Sections below describe the **target** capability set. Implementation status is 
 
 ### 4.1 Diagnostics
 
-**v0.2:** not implemented (planned v0.3).
+**v0.3 (shipped):** parse errors, broken imports, undefined prefixes, duplicate/missing labels, orphan classes — via `textDocument/publishDiagnostics` and `CatalogSnapshot.diagnostics`. Deferred to later milestones: missing comments, deprecated usage, invalid domain/range.
 
 **Sources ([DEPENDENCY_MATRIX.md](DEPENDENCY_MATRIX.md)):**
 
@@ -123,7 +123,7 @@ Global entity search.
 
 ## 5. Custom LSP Methods
 
-| Method | v0.2 status |
+| Method | v0.3 status |
 |--------|-------------|
 | `ontoindex/indexWorkspace` | **Implemented** |
 | `ontoindex/getCatalogSnapshot` | **Implemented** (not listed in early drafts; used by explorer) |
@@ -144,7 +144,7 @@ Indexes the workspace.
 
 ### `ontoindex/getCatalogSnapshot`
 
-Returns documents, entities, and class hierarchy for UI clients.
+Returns documents, entities, class hierarchy, and diagnostics for UI clients.
 
 ### `ontoindex/query`
 

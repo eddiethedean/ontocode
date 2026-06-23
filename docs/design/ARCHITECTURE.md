@@ -72,7 +72,7 @@ The architecture must support:
 | `ontoindex-owl` | planned v0.4b | OWL axiom facade, Manchester | `horned-owl`, `horned-functional` |
 | `ontoindex-catalog` | v0.2 | Index builder, entity API | — |
 | `ontoindex-query` | v0.2 | SQL virtual tables, SPARQL | `sqlparser`, `oxigraph` |
-| `ontoindex-diagnostics` | planned v0.3 | Lint rules, LSP diagnostics | `oxigraph` (+ `fastobo-validator` v0.7b) |
+| `ontoindex-diagnostics` | v0.3 | Lint rules, LSP diagnostics | `regex` (+ `fastobo-validator` v0.7b) |
 | `ontoindex-diff` | planned v0.9 | Semantic diff, Git compare | `horned-owl`, `git2` |
 | `ontoindex-docs` | planned v0.9 | Markdown/HTML export | `pulldown-cmark`, `minijinja` |
 | `ontoindex-reasoner` | planned v0.6 | Reasoner facade | OntoLogos `0.9`→`1.0` |

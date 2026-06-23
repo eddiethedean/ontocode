@@ -1,6 +1,7 @@
 # SPEC.md — OntoIndex and OntoCode Technical Specification
 
 > **Related specs:** [PROTEGE_PARITY.md](PROTEGE_PARITY.md) (v1.0 exit bar),
+> [DEPENDENCY_MATRIX.md](DEPENDENCY_MATRIX.md) (external crates),
 > [OWL_AUTHORING_SPEC.md](OWL_AUTHORING_SPEC.md), [OBO_ROBOT_SPEC.md](OBO_ROBOT_SPEC.md),
 > [REASONER_SPEC.md](REASONER_SPEC.md), [SHACL_SPEC.md](SHACL_SPEC.md)
 
@@ -18,17 +19,17 @@ The system consists of four major layers:
 ```text
 ontoindex/
 ├── crates/
-│   ├── ontoindex-core          # v0.2
-│   ├── ontoindex-parser        # v0.2 — Oxigraph RDF
-│   ├── ontoindex-owl           # v0.4b — Horned-OWL facade
+│   ├── ontoindex-core          # v0.2 — ignore
+│   ├── ontoindex-parser        # v0.2 — oxigraph (+ fastobo v0.7b)
+│   ├── ontoindex-owl           # v0.4b — horned-owl, horned-functional
 │   ├── ontoindex-catalog       # v0.2
-│   ├── ontoindex-query         # v0.2
-│   ├── ontoindex-diagnostics   # v0.3
-│   ├── ontoindex-diff          # v0.9
-│   ├── ontoindex-docs          # v0.9
-│   ├── ontoindex-reasoner      # v0.6 — OntoLogos facade (0.9→1.0)
-│   ├── ontoindex-robot         # v0.7b — ROBOT CLI wrappers
-│   ├── ontoindex-lsp           # v0.2
+│   ├── ontoindex-query         # v0.2 — sqlparser, oxigraph SPARQL
+│   ├── ontoindex-diagnostics   # v0.3 — oxigraph + catalog lints
+│   ├── ontoindex-diff          # v0.9 — horned-owl, git2
+│   ├── ontoindex-docs          # v0.9 — pulldown-cmark, minijinja
+│   ├── ontoindex-reasoner      # v0.6 — OntoLogos 0.9→1.0
+│   ├── ontoindex-robot         # v0.7b — ROBOT CLI (external)
+│   ├── ontoindex-lsp           # v0.2 — lsp-server, lsp-types
 │   └── ontoindex-cli           # v0.2
 ├── examples/
 │   ├── protege-roundtrip/      # v1.0 — OWL round-trip fixtures

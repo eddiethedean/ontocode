@@ -5,7 +5,7 @@
 > **Implemented today:** workspace scanner, Oxigraph-based parsing, in-memory catalog and triple store,
 > SQL-like queries via `sqlparser`, SPARQL, CLI, LSP explorer integration.
 > **v0.4b+ target:** Horned-OWL layer per [ADR-0013](adr/0013-dual-stack-oxigraph-horned-owl.md).
-> See [docs/lsp-api.md](../lsp-api.md) and [adr/README.md](adr/README.md) for current decisions.
+> See [docs/lsp-api.md](../lsp-api.md), [adr/README.md](adr/README.md), and [DEPENDENCY_MATRIX.md](DEPENDENCY_MATRIX.md) for current decisions.
 
 ## 1. Architecture Goals
 
@@ -61,22 +61,24 @@ The architecture must support:
 
 **Sync rule ([ADR-0013](adr/0013-dual-stack-oxigraph-horned-owl.md)):** Catalog entities/axioms for edit and diff come from Horned-OWL; triple counts and SPARQL from Oxigraph; CI consistency tests detect drift.
 
+**Dependency policy:** [ADR-0016](adr/0016-dependency-first-implementation.md), [DEPENDENCY_MATRIX.md](DEPENDENCY_MATRIX.md).
+
 ## 3. OntoIndex Crate Layout
 
-| Crate | Status | Role |
-|-------|--------|------|
-| `ontoindex-core` | v0.2 | Types, scanner, limits, path jail |
-| `ontoindex-parser` | v0.2 | RDF parse via Oxigraph |
-| `ontoindex-owl` | planned v0.4b | Horned-OWL facade |
-| `ontoindex-catalog` | v0.2 | Index builder, entity API |
-| `ontoindex-query` | v0.2 | SQL virtual tables, SPARQL |
-| `ontoindex-diagnostics` | planned v0.3 | Lint rules, quick fixes |
-| `ontoindex-diff` | planned v0.9 | Semantic diff |
-| `ontoindex-docs` | planned v0.9 | Markdown/HTML export |
-| `ontoindex-reasoner` | planned v0.6 | Thin facade over OntoLogos 0.9→1.0 ([ADR-0015](adr/0015-adopt-ontologos-reasoner.md)) |
-| `ontoindex-robot` | planned v0.7b | ROBOT CLI wrappers |
-| `ontoindex-lsp` | v0.2 | Language server |
-| `ontoindex-cli` | v0.2 | `ontoindex` binary |
+| Crate | Status | Role | External dependency |
+|-------|--------|------|---------------------|
+| `ontoindex-core` | v0.2 | Types, scanner, limits, path jail | `ignore` |
+| `ontoindex-parser` | v0.2 | RDF parse, entity extraction | `oxigraph` |
+| `ontoindex-owl` | planned v0.4b | OWL axiom facade, Manchester | `horned-owl`, `horned-functional` |
+| `ontoindex-catalog` | v0.2 | Index builder, entity API | — |
+| `ontoindex-query` | v0.2 | SQL virtual tables, SPARQL | `sqlparser`, `oxigraph` |
+| `ontoindex-diagnostics` | planned v0.3 | Lint rules, LSP diagnostics | `oxigraph` (+ `fastobo-validator` v0.7b) |
+| `ontoindex-diff` | planned v0.9 | Semantic diff, Git compare | `horned-owl`, `git2` |
+| `ontoindex-docs` | planned v0.9 | Markdown/HTML export | `pulldown-cmark`, `minijinja` |
+| `ontoindex-reasoner` | planned v0.6 | Reasoner facade | OntoLogos `0.9`→`1.0` |
+| `ontoindex-robot` | planned v0.7b | ROBOT CLI wrappers | ROBOT CLI (external) |
+| `ontoindex-lsp` | v0.2 | Language server | `lsp-server`, `lsp-types` |
+| `ontoindex-cli` | v0.2 | `ontoindex` binary | composes above |
 
 ## 4. OntoIndex Internal Modules
 
@@ -84,24 +86,25 @@ The architecture must support:
 - Recursive discovery, ignore rules, format detection, content hashing, dependency tracking, change detection
 
 ### 4.2 Parser Layer (dual)
-- **Oxigraph:** RDF parse, triple store, SPARQL
-- **Horned-OWL (v0.4b+):** OWL 2 axiom model, Manchester, round-trip editing
+- **Oxigraph:** RDF parse, triple store, SPARQL ([ADR-0003](adr/0003-use-oxigraph.md))
+- **Horned-OWL (v0.4b+):** OWL 2 axiom model via `horned-owl` + `horned-functional` ([ADR-0013](adr/0013-dual-stack-oxigraph-horned-owl.md), [ADR-0016](adr/0016-dependency-first-implementation.md))
+- **OBO (v0.7b+):** `fastobo`, `fastobo-owl`
 
 ### 4.3 Catalog Layer
 - Ontologies, entities, axioms (from Horned-OWL), annotations, imports, diagnostics
 
 ### 4.4 Query Layer
-- **v0.2:** `ontoindex-query` — virtual tables + SPARQL
-- **v1.0:** joins, aggregations, ontology helper functions
+- **v0.2:** `ontoindex-query` — `sqlparser` virtual tables + Oxigraph SPARQL
+- **v1.0:** joins/aggregations via extended virtual tables first; DataFusion if triggered ([ADR-0011](adr/0011-use-sqlparser-for-sql.md) amendment)
 
 ### 4.5 Diagnostics Layer (v0.3+)
-- Syntax, semantic, and quality rules; quick fixes; Problems panel
+- Oxigraph parse errors + in-house catalog lint rules; `diagnostics` SQL table; LSP Problems panel ([DEPENDENCY_MATRIX.md](DEPENDENCY_MATRIX.md))
 
 ### 4.6 Diff Layer (v0.9+)
-- Axiom-level semantic diff, Git integration, PR summaries
+- Horned-OWL axiom diff (in-house logic); `git2` for branch/commit inputs; PR summaries
 
 ### 4.7 Docs Layer (v0.9+)
-- Markdown/HTML export, entity pages
+- `pulldown-cmark` + `minijinja` templates; entity pages
 
 ### 4.8 Reasoner Layer (v0.6+)
 - `ontoindex-reasoner` thin facade over OntoLogos — see [REASONER_SPEC.md](REASONER_SPEC.md), [ADR-0014](adr/0014-rust-native-reasoners-only.md), [ADR-0015](adr/0015-adopt-ontologos-reasoner.md)

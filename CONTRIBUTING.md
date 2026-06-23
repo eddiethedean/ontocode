@@ -4,7 +4,7 @@ Thank you for contributing. This repository contains:
 
 - **OntoIndex** — Rust crates under `crates/` (`ontoindex` CLI, `ontoindex-lsp`)
 - **OntoCode** — VS Code extension under `extension/`
-- **Specs** — product and architecture docs under `docs/design/`
+- **Specs** — product and architecture docs under `docs/design/` ([DEPENDENCY_MATRIX.md](docs/design/DEPENDENCY_MATRIX.md) for external crates)
 - **User guides** — install, SQL, and LSP API under `docs/`
 
 The root Cargo package `ontocode` is unpublished and hosts workspace integration tests (`tests/`).
@@ -85,9 +85,18 @@ cargo run -p ontocode --example index_and_query
 | Audience | Where to write |
 |----------|----------------|
 | New users (install, SQL, LSP) | `docs/` |
-| Product vision and milestones | `docs/design/` |
+| Product vision, roadmap, ADRs | `docs/design/` |
 | Architecture decisions | `docs/design/adr/` only (do not add `adrs/`) |
 | Extension settings and commands | `extension/README.md` |
+
+### Adding dependencies
+
+Before adding a Rust crate dependency:
+
+1. Check [DEPENDENCY_MATRIX.md](docs/design/DEPENDENCY_MATRIX.md) — prefer listed crates over new alternatives.
+2. Follow [ADR-0016](docs/design/adr/0016-dependency-first-implementation.md) — `ontoindex-*` crates are facades, not reimplementations.
+3. Update DEPENDENCY_MATRIX and [LICENSES.md](docs/design/LICENSES.md) if the crate is new or uses a non-MIT/Apache license.
+4. Pin in workspace `[workspace.dependencies]` in root `Cargo.toml`.
 
 ## Code of conduct
 

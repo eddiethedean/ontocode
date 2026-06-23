@@ -165,12 +165,30 @@ Short positioning:
 
 ## 10. Strategic Implementation Guidance
 
-Build on existing mature components:
+**Policy:** [ADR-0016](adr/0016-dependency-first-implementation.md) — delegate to mature crates; `ontoindex-*` crates are thin facades. Full inventory: [DEPENDENCY_MATRIX.md](DEPENDENCY_MATRIX.md).
 
-- Use **Horned-OWL** for OWL 2 axiom modeling, Manchester, and write-back ([ADR-0013](adr/0013-dual-stack-oxigraph-horned-owl.md)).
-- Use **Oxigraph** for RDF/SPARQL infrastructure ([ADR-0003](adr/0003-use-oxigraph.md)).
-- Use **sqlparser** virtual tables for SQL; add joins/aggregations at v1.0 ([ADR-0011](adr/0011-use-sqlparser-for-sql.md)).
-- Use **OntoLogos** for all reasoning: pin `0.9` at v0.6, `1.0` at OntoCode v1.0 ([ADR-0015](adr/0015-adopt-ontologos-reasoner.md), [REASONER_SPEC.md](REASONER_SPEC.md)).
-- Use a Rust language-server backend for editor services.
+| Layer | Dependency | OntoIndex facade | Phase |
+|-------|------------|------------------|-------|
+| RDF / SPARQL | `oxigraph` | `ontoindex-parser`, `ontoindex-query` | v0.2 |
+| SQL parse | `sqlparser` | `ontoindex-query` | v0.2 |
+| Workspace scan | `ignore` | `ontoindex-core` | v0.2 |
+| LSP wire | `lsp-server`, `lsp-types` | `ontoindex-lsp` | v0.2 |
+| Diagnostics | `oxigraph` + catalog rules | `ontoindex-diagnostics` | v0.3 |
+| OWL axioms / Manchester | `horned-owl`, `horned-functional` | `ontoindex-owl` | v0.4b+ |
+| Reasoning | OntoLogos `0.9`→`1.0` | `ontoindex-reasoner` | v0.6 / v1.0 |
+| Graph structure | `petgraph` | LSP graph export | v0.7 |
+| OBO | `fastobo`, `fastobo-owl` | `ontoindex-parser` / `ontoindex-owl` | v0.7b |
+| ROBOT CI | ROBOT CLI | `ontoindex-robot` | v0.7b |
+| File watch | `notify` / `ontologos-watch` | `ontoindex-lsp` | v0.9 |
+| Git diff inputs | `git2` | `ontoindex-diff` | v0.9 |
+| Docs export | `pulldown-cmark`, `minijinja` | `ontoindex-docs` | v0.9 |
+| SHACL (P1) | `rudof` | plugin / diagnostics | v1.0 P1 |
+
+Build on existing mature components — do not reimplement parsers, reasoners, triple stores, OBO parsers, or SHACL engines when a maintained Rust crate covers the profile.
+
+- Use **Horned-OWL** (+ `horned-functional`) for OWL 2 axiom modeling and write-back ([ADR-0013](adr/0013-dual-stack-oxigraph-horned-owl.md)).
+- Use **Oxigraph** for RDF/SPARQL ([ADR-0003](adr/0003-use-oxigraph.md)).
+- Use **sqlparser** virtual tables for SQL; extend for v1.0 joins before considering DataFusion ([ADR-0011](adr/0011-use-sqlparser-for-sql.md)).
+- Use **OntoLogos** for all reasoning ([ADR-0015](adr/0015-adopt-ontologos-reasoner.md)).
 - Use TypeScript only for VS Code UI orchestration.
 - Keep OntoIndex useful as a standalone CLI even without OntoCode.

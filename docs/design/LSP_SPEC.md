@@ -35,6 +35,13 @@ Sections below describe the **target** capability set. Implementation status is 
 
 **v0.2:** not implemented (planned v0.3).
 
+**Sources ([DEPENDENCY_MATRIX.md](DEPENDENCY_MATRIX.md)):**
+
+- **Parse errors** — [`oxigraph`](https://crates.io/crates/oxigraph) via `ontoindex-parser`
+- **Import / prefix / quality rules** — in-house `ontoindex-diagnostics` on catalog (duplicate labels, orphans, broken imports, undefined prefixes)
+- **OBO (v0.7b)** — [`fastobo-validator`](https://crates.io/crates/fastobo-validator) violations mapped to LSP
+- **SHACL (v1.0 P1)** — [`rudof`](https://crates.io/crates/rudof) via plugin adapter
+
 Diagnostics include:
 
 - parse errors

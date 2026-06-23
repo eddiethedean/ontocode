@@ -12,7 +12,9 @@ Two related products:
 1. **OntoIndex** — Rust ontology index/query engine (`ontoindex-*` crates).
 2. **OntoCode** — VS Code extension (OntoCode Explorer in v0.2; full workbench at v1.0).
 
-**Sibling project:** [OntoLogos](https://github.com/eddiethedean/ontologos) — Rust ontology reasoner. OntoCode delegates all reasoning to OntoLogos crates per [ADR-0015](adr/0015-adopt-ontologos-reasoner.md) (0.9.0 at v0.6, 1.0.0 at v1.0).
+**Sibling project:** [OntoLogos](https://github.com/eddiethedean/ontologos) — Rust ontology reasoner. OntoCode delegates reasoning to OntoLogos per [ADR-0015](adr/0015-adopt-ontologos-reasoner.md).
+
+**Dependency policy:** [ADR-0016](adr/0016-dependency-first-implementation.md) — thin `ontoindex-*` facades over mature crates. Inventory: [DEPENDENCY_MATRIX.md](DEPENDENCY_MATRIX.md). Licenses: [LICENSES.md](LICENSES.md).
 
 ## v1.0 exit bar
 
@@ -32,6 +34,8 @@ Many specs describe **target** behavior. Check the banner at the top of each doc
 
 - [PLAN.md](PLAN.md) — combined product plan
 - [ROADMAP.md](ROADMAP.md) — milestone roadmap v0.1 → v1.0
+- [DEPENDENCY_MATRIX.md](DEPENDENCY_MATRIX.md) — **external crate inventory**
+- [LICENSES.md](LICENSES.md) — third-party license summary
 - [PROTEGE_PARITY.md](PROTEGE_PARITY.md) — **v1.0 compete checklist**
 - [v1.0_BACKLOG.md](v1.0_BACKLOG.md) — implementation backlog
 

@@ -186,6 +186,21 @@ The extension is a thin TypeScript shell over **ontoindex-lsp** and the OntoInde
 
 See [ROADMAP.md](https://github.com/eddiethedean/ontocode/blob/main/docs/design/ROADMAP.md), [PLAN.md](https://github.com/eddiethedean/ontocode/blob/main/docs/design/PLAN.md), and [PROTEGE_PARITY.md](docs/design/PROTEGE_PARITY.md) for the full product plan.
 
+## Built on
+
+OntoIndex delegates to mature Rust libraries — see [DEPENDENCY_MATRIX.md](docs/design/DEPENDENCY_MATRIX.md).
+
+| Layer | Crates |
+|-------|--------|
+| RDF / SPARQL | [Oxigraph](https://crates.io/crates/oxigraph) |
+| SQL queries | [sqlparser](https://crates.io/crates/sqlparser) |
+| OWL axioms (planned) | [horned-owl](https://crates.io/crates/horned-owl), [horned-functional](https://crates.io/crates/horned-functional) |
+| Reasoning (planned) | [OntoLogos](https://github.com/eddiethedean/ontologos) |
+| OBO (planned) | [fastobo](https://crates.io/crates/fastobo) |
+| LSP | [lsp-server](https://crates.io/crates/lsp-server), [lsp-types](https://crates.io/crates/lsp-types) |
+
+Policy: [ADR-0016](docs/design/adr/0016-dependency-first-implementation.md). Third-party licenses: [LICENSES.md](docs/design/LICENSES.md).
+
 ## Repository layout
 
 ```text

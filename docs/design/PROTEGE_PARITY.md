@@ -2,6 +2,8 @@
 
 > **Canonical exit bar for v1.0.0.** All **P0** items must be green before release.
 > See [ROADMAP.md](ROADMAP.md) v1.0 and [PLAN.md](PLAN.md) §4.
+>
+> **Dependencies:** [DEPENDENCY_MATRIX.md](DEPENDENCY_MATRIX.md)
 
 ## Tier definitions
 
@@ -15,29 +17,29 @@
 
 ### OWL 2 DL authoring (hybrid UX)
 
-| Item | Spec | v0.2 |
-|------|------|------|
-| Quick forms: labels, comments, deprecated | [OWL_AUTHORING_SPEC.md](OWL_AUTHORING_SPEC.md) | Partial (read-only inspector) |
-| Quick forms: `SubClassOf`, domain, range, property characteristics | [OWL_AUTHORING_SPEC.md](OWL_AUTHORING_SPEC.md) | No |
-| Manchester editor for complex class expressions | [OWL_AUTHORING_SPEC.md](OWL_AUTHORING_SPEC.md) | No |
-| Axiom types: `SubClassOf`, `EquivalentClasses`, `DisjointClasses` | [OWL_AUTHORING_SPEC.md](OWL_AUTHORING_SPEC.md) | Partial (extract only) |
-| Object/data property domain, range, characteristics | [OWL_AUTHORING_SPEC.md](OWL_AUTHORING_SPEC.md) | Partial |
-| Class/object/data property assertions on individuals | [OWL_AUTHORING_SPEC.md](OWL_AUTHORING_SPEC.md) | Partial |
-| Annotation assertions | [OWL_AUTHORING_SPEC.md](OWL_AUTHORING_SPEC.md) | Partial |
-| Horned-OWL manipulation layer + round-trip tests | [ADR-0013](adr/0013-dual-stack-oxigraph-horned-owl.md) | No (Oxigraph extraction only) |
-| Patch-based write-back from OWL objects | [ADR-0006](adr/0006-patch-based-write-back.md) | No |
+| Item | Spec | Dependency | v0.2 |
+|------|------|------------|------|
+| Quick forms: labels, comments, deprecated | [OWL_AUTHORING_SPEC.md](OWL_AUTHORING_SPEC.md) | `horned-owl` | Partial (read-only inspector) |
+| Quick forms: `SubClassOf`, domain, range, property characteristics | [OWL_AUTHORING_SPEC.md](OWL_AUTHORING_SPEC.md) | `horned-owl` | No |
+| Manchester editor for complex class expressions | [OWL_AUTHORING_SPEC.md](OWL_AUTHORING_SPEC.md) | `horned-functional` | No |
+| Axiom types: `SubClassOf`, `EquivalentClasses`, `DisjointClasses` | [OWL_AUTHORING_SPEC.md](OWL_AUTHORING_SPEC.md) | `horned-owl` | Partial (extract only) |
+| Object/data property domain, range, characteristics | [OWL_AUTHORING_SPEC.md](OWL_AUTHORING_SPEC.md) | `horned-owl` | Partial |
+| Class/object/data property assertions on individuals | [OWL_AUTHORING_SPEC.md](OWL_AUTHORING_SPEC.md) | `horned-owl` | Partial |
+| Annotation assertions | [OWL_AUTHORING_SPEC.md](OWL_AUTHORING_SPEC.md) | `horned-owl` | Partial |
+| Horned-OWL manipulation layer + round-trip tests | [ADR-0013](adr/0013-dual-stack-oxigraph-horned-owl.md) | `horned-owl`, `horned-functional` | No (Oxigraph extraction only) |
+| Patch-based write-back from OWL objects | [ADR-0006](adr/0006-patch-based-write-back.md) | in-house patches | No |
 
 ### Reasoning (Rust-native — [ADR-0014](adr/0014-rust-native-reasoners-only.md))
 
-| Item | Spec | v0.2 |
-|------|------|------|
-| `el` adapter (OWL EL) | [REASONER_SPEC.md](REASONER_SPEC.md) | No |
-| `dl` adapter (OWL 2 DL classification + consistency) | [REASONER_SPEC.md](REASONER_SPEC.md) | No — requires [OntoLogos 1.0.0](https://github.com/eddiethedean/ontologos) |
-| Unsatisfiable class reporting | [REASONER_SPEC.md](REASONER_SPEC.md) | No |
-| **Real** unsatisfiability explanations (clash-trace justification) | [REASONER_SPEC.md](REASONER_SPEC.md) | No |
-| Asserted / inferred / combined hierarchy toggle | [REASONER_SPEC.md](REASONER_SPEC.md) | Asserted only |
-| Consistency check | [REASONER_SPEC.md](REASONER_SPEC.md) | No |
-| Zero JVM / Java dependency for reasoning | [ADR-0014](adr/0014-rust-native-reasoners-only.md) | Yes (no reasoner yet) |
+| Item | Spec | Dependency | v0.2 |
+|------|------|------------|------|
+| `el` adapter (OWL EL) | [REASONER_SPEC.md](REASONER_SPEC.md) | OntoLogos `ontologos-el` | No |
+| `dl` adapter (OWL 2 DL classification + consistency) | [REASONER_SPEC.md](REASONER_SPEC.md) | OntoLogos `ontologos-dl` 1.0.0 | No |
+| Unsatisfiable class reporting | [REASONER_SPEC.md](REASONER_SPEC.md) | OntoLogos | No |
+| **Real** unsatisfiability explanations (clash-trace justification) | [REASONER_SPEC.md](REASONER_SPEC.md) | `ontologos-explain` + `ontologos-dl` | No |
+| Asserted / inferred / combined hierarchy toggle | [REASONER_SPEC.md](REASONER_SPEC.md) | OntoLogos | Asserted only |
+| Consistency check | [REASONER_SPEC.md](REASONER_SPEC.md) | OntoLogos | No |
+| Zero JVM / Java dependency for reasoning | [ADR-0014](adr/0014-rust-native-reasoners-only.md) | — | Yes (no reasoner yet) |
 
 ### Editor & LSP
 
@@ -67,24 +69,24 @@
 
 ### OBO & biomedical
 
-| Item | Spec | v0.2 |
-|------|------|------|
-| OBO format read/write | [OBO_ROBOT_SPEC.md](OBO_ROBOT_SPEC.md) | No |
-| ROBOT interop (`validate`, `merge`, `report`) | [OBO_ROBOT_SPEC.md](OBO_ROBOT_SPEC.md) | No |
-| OBO id rendering in explorer / Manchester autocomplete | [OBO_ROBOT_SPEC.md](OBO_ROBOT_SPEC.md) | No |
+| Item | Spec | Dependency | v0.2 |
+|------|------|------------|------|
+| OBO format read/write | [OBO_ROBOT_SPEC.md](OBO_ROBOT_SPEC.md) | `fastobo`, `fastobo-owl` | No |
+| ROBOT interop (`validate`, `merge`, `report`) | [OBO_ROBOT_SPEC.md](OBO_ROBOT_SPEC.md) | ROBOT CLI | No |
+| OBO id rendering in explorer / Manchester autocomplete | [OBO_ROBOT_SPEC.md](OBO_ROBOT_SPEC.md) | `fastobo` | No |
 
 ## P1 — v1.0 targets
 
-| Item | Spec |
-|------|------|
-| SHACL validation via adapter | [SHACL_SPEC.md](SHACL_SPEC.md) |
-| SWRL rule **viewing** (authoring is P2) | [PROTEGE_PARITY.md](PROTEGE_PARITY.md) |
-| `rl` / `rdfs` adapters (OWL 2 RL / RDFS) | [REASONER_SPEC.md](REASONER_SPEC.md) |
-| Instance checking | [REASONER_SPEC.md](REASONER_SPEC.md) |
-| Plugin API stable + 3 reference plugins | [PLUGIN_SPEC.md](PLUGIN_SPEC.md) |
-| SQL joins and aggregations | [SPEC.md](SPEC.md) |
-| Incremental workspace index | [ARCHITECTURE.md](ARCHITECTURE.md) |
-| Performance benchmarks (large ontology targets) | [v1.0_BACKLOG.md](v1.0_BACKLOG.md) |
+| Item | Spec | Dependency |
+|------|------|------------|
+| SHACL validation via adapter | [SHACL_SPEC.md](SHACL_SPEC.md) | `rudof` |
+| SWRL rule **viewing** (authoring is P2) | [PROTEGE_PARITY.md](PROTEGE_PARITY.md) | in-house |
+| `rl` / `rdfs` adapters (OWL 2 RL / RDFS) | [REASONER_SPEC.md](REASONER_SPEC.md) | OntoLogos `ontologos-rl`, `ontologos-rdfs` |
+| Instance checking | [REASONER_SPEC.md](REASONER_SPEC.md) | OntoLogos `ontologos-abox` (1.0+) |
+| Plugin API stable + 3 reference plugins | [PLUGIN_SPEC.md](PLUGIN_SPEC.md) | — |
+| SQL joins and aggregations | [SPEC.md](SPEC.md) | `sqlparser` extend; DataFusion TBD |
+| Incremental workspace index | [ARCHITECTURE.md](ARCHITECTURE.md) | `notify` / `ontologos-watch` |
+| Performance benchmarks (large ontology targets) | [v1.0_BACKLOG.md](v1.0_BACKLOG.md) | — |
 
 ## P2 — post-1.0
 

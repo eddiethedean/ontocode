@@ -21,6 +21,7 @@ Canonical ADRs live in this directory. The former `adrs/` folder was merged here
 | [0013](0013-dual-stack-oxigraph-horned-owl.md) | Dual stack Oxigraph + Horned-OWL | Accepted (v0.4b+) |
 | [0014](0014-rust-native-reasoners-only.md) | Rust-native reasoners only (no JVM) | Accepted |
 | [0015](0015-adopt-ontologos-reasoner.md) | Adopt OntoLogos as reasoner backend | Accepted |
+| [0016](0016-dependency-first-implementation.md) | Dependency-first implementation | Accepted |
 
 ## Current stack
 
@@ -33,8 +34,11 @@ Canonical ADRs live in this directory. The former `adrs/` folder was merged here
 
 ### v1.0 target
 
-- **OWL modeling / write-back:** Horned-OWL via `ontoindex-owl` ([ADR-0013](0013-dual-stack-oxigraph-horned-owl.md))
-- **Reasoning:** [OntoLogos](https://github.com/eddiethedean/ontologos) via `ontoindex-reasoner` — 0.9.0 at v0.6, 1.0.0 at v1.0 ([ADR-0014](0014-rust-native-reasoners-only.md), [ADR-0015](0015-adopt-ontologos-reasoner.md), [REASONER_SPEC.md](../REASONER_SPEC.md))
+- **Dependency policy:** [DEPENDENCY_MATRIX.md](../DEPENDENCY_MATRIX.md), [ADR-0016](0016-dependency-first-implementation.md)
+- **OWL modeling / write-back:** `horned-owl` + `horned-functional` via `ontoindex-owl` ([ADR-0013](0013-dual-stack-oxigraph-horned-owl.md))
+- **Reasoning:** [OntoLogos](https://github.com/eddiethedean/ontologos) via `ontoindex-reasoner` — 0.9.0 at v0.6, 1.0.0 at v1.0 ([ADR-0014](0014-rust-native-reasoners-only.md), [ADR-0015](0015-adopt-ontologos-reasoner.md))
+- **OBO:** `fastobo` / `fastobo-owl` ([DEPENDENCY_MATRIX.md](../DEPENDENCY_MATRIX.md))
+- **SHACL (P1):** `rudof` ([SHACL_SPEC.md](../SHACL_SPEC.md))
 - **Exit bar:** [PROTEGE_PARITY.md](../PROTEGE_PARITY.md)
 
 Horned-OWL and DataFusion ADRs remain for historical context; v1.0 uses Oxigraph + Horned-OWL + sqlparser per ADR-0013 and ADR-0011.

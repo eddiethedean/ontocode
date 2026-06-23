@@ -82,5 +82,7 @@ Negative:
 
 - Amends [ADR-0014](0014-rust-native-reasoners-only.md) (Rust-native via OntoLogos, not in-tree DL).
 - Amends [ADR-0008](0008-reasoner-adapters-not-built-in-reasoner.md) (adapters delegate to OntoLogos).
-- [REASONER_SPEC.md](../REASONER_SPEC.md) — updated adapter table.
-- [OntoLogos ROADMAP](https://github.com/eddiethedean/ontologos/blob/main/ROADMAP.md) — HermiT parity phases.
+- [ADR-0016](0016-dependency-first-implementation.md) — dependency-first implementation policy
+- [DEPENDENCY_MATRIX.md](../DEPENDENCY_MATRIX.md) — canonical crate inventory
+- [REASONER_SPEC.md](../REASONER_SPEC.md) — adapter table
+- [OntoLogos ROADMAP](https://github.com/eddiethedean/ontologos/blob/main/ROADMAP.md) — HermiT parity phases

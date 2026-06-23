@@ -206,7 +206,17 @@ v0.9: evaluate `ontologos-watch` for invalidating cache on file change ([ADR-001
 
 Track OntoLogos progress: [github.com/eddiethedean/ontologos](https://github.com/eddiethedean/ontologos).
 
-## 12. Honest risks
+## 12. Transitive dependencies (via OntoLogos — do not depend directly)
+
+| Crate | Role in OntoLogos | OntoIndex access |
+|-------|-------------------|------------------|
+| [`reasonable`](https://crates.io/crates/reasonable) | OWL RL + RDFS materialization | `ontologos-rl`, `ontologos-rdfs` |
+| [`horned-owl`](https://crates.io/crates/horned-owl) | OWL parse in `ontologos-parser` | `ontologos-parser` only (authoring uses direct horned-owl in `ontoindex-owl`) |
+| [`petgraph`](https://crates.io/crates/petgraph) | Taxonomy + proof graphs | `ontologos-query`, `ontologos-explain` |
+
+See [DEPENDENCY_MATRIX.md](DEPENDENCY_MATRIX.md) and [LICENSES.md](LICENSES.md) (BSD-3 `reasonable`, LGPL-3.0 `horned-owl`).
+
+## 13. Honest risks
 
 - OntoCode v1.0 DL quality **tracks OntoLogos 1.0.0 HermiT parity** (~64% in progress at 2026-06-23), not a separate engine.
 - Partial OWL mapping in OntoLogos applies until supported-constructs coverage grows.

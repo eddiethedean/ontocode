@@ -23,7 +23,7 @@ Use a **dual stack**:
 | **RDF / SPARQL** | Oxigraph | Parse/store triples, SPARQL, triple counts, fast scan |
 | **OWL modeling** | Horned-OWL | OWL 2 axiom model, Manchester syntax, class expressions, edit/diff round-trip |
 
-New crate: **`ontoindex-owl`** — Horned-OWL facade used by catalog, write-back, diff, and LSP authoring methods.
+New crate: **`ontoindex-owl`** — Horned-OWL facade (`horned-owl` + `horned-functional` direct per [ADR-0016](0016-dependency-first-implementation.md) Appendix A). Reasoning loads via `ontologos-parser` in `ontoindex-reasoner`, not in `ontoindex-owl`.
 
 ### Data flow
 

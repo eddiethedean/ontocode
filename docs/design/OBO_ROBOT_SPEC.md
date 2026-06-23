@@ -12,7 +12,8 @@ Enable biomedical ontology maintainers to use OntoCode as a **primary IDE** alon
 
 ### Parser / writer
 
-- Read and write OBO Format 1.4 (`.obo`)
+- Read and write OBO Format 1.4 (`.obo`) via [`fastobo`](https://crates.io/crates/fastobo) + [`fastobo-owl`](https://crates.io/crates/fastobo-owl) ([DEPENDENCY_MATRIX.md](DEPENDENCY_MATRIX.md))
+- Validate with [`fastobo-validator`](https://crates.io/crates/fastobo-validator) where applicable
 - Map OBO ids to IRIs in catalog (`obo_id`, `iri`, `namespace`)
 - Support `synonymtypedef`, `property_value`, `xref` in catalog annotations table
 

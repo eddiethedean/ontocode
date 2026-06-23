@@ -39,6 +39,8 @@ Examples:
 
 Built-in adapters (`el`, `dl`, `rl`, `rdfs`, `auto`) ship in `ontoindex-reasoner` as thin wrappers over [OntoLogos](https://github.com/eddiethedean/ontologos) — see [REASONER_SPEC.md](REASONER_SPEC.md), [ADR-0015](adr/0015-adopt-ontologos-reasoner.md).
 
+Built-in SHACL adapter (P1) wraps [`rudof`](https://crates.io/crates/rudof) — see [SHACL_SPEC.md](SHACL_SPEC.md), [DEPENDENCY_MATRIX.md](DEPENDENCY_MATRIX.md).
+
 ### 2.4 Query Function Plugins
 Add functions to the SQL-like query layer.
 

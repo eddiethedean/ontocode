@@ -1,5 +1,7 @@
 # SEMANTIC_DIFF_SPEC.md
 
+> **Dependencies:** [`horned-owl`](https://crates.io/crates/horned-owl) (axiom diff), [`git2`](https://crates.io/crates/git2) (branch/commit inputs). See [DEPENDENCY_MATRIX.md](DEPENDENCY_MATRIX.md).
+
 ## 1. Purpose
 
 Text diffs are insufficient for ontology review. Semantic diffs should explain what changed in ontology meaning.
@@ -10,10 +12,12 @@ Supported inputs:
 
 - two files
 - two directories
-- two Git branches
+- two Git branches (`git2` checkout / tree walk)
 - two Git commits
 - working tree vs HEAD
 - cached catalog snapshots
+
+**OntoIndex owns:** axiom-level diff logic on Horned-OWL models, breaking-change heuristics, PR markdown, VS Code panel. No ontology semantic-diff crate exists — intentionally in-house per [ADR-0016](adr/0016-dependency-first-implementation.md).
 
 ## 3. Diff Categories
 

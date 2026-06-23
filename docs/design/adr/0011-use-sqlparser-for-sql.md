@@ -22,8 +22,16 @@ Positive:
 
 Negative:
 
-- Limited SQL (single table, simple filters)
-- No Arrow/Parquet integration until a future migration or DataFusion adapter
+- Limited SQL (single table, simple filters in v0.2)
+- No Arrow/Parquet integration until v1.0 joins evaluation
+
+## Amendment ([ADR-0016](0016-dependency-first-implementation.md) Appendix B)
+
+**v1.0 joins / aggregations:** extend hand-rolled virtual tables in `ontoindex-query` using `sqlparser` AST first.
+
+**Revisit [ADR-0004](0004-use-datafusion-for-sql.md) / DataFusion** only if: join logic exceeds maintainability, Parquet/Arrow export becomes P0, or aggregations need a query optimizer beyond hand-rolled plans.
+
+Record final choice in [DEPENDENCY_MATRIX.md](../DEPENDENCY_MATRIX.md).
 
 ## Implementation
 

@@ -2,8 +2,9 @@
 
 > **Status:** target design (not implemented in v0.2)
 >
-> Depends on [ADR-0013](adr/0013-dual-stack-oxigraph-horned-owl.md) (Horned-OWL layer) and
-> [ADR-0006](adr/0006-patch-based-write-back.md) (patch write-back).
+> Depends on [ADR-0013](adr/0013-dual-stack-oxigraph-horned-owl.md) (Horned-OWL layer),
+> [ADR-0006](adr/0006-patch-based-write-back.md) (patch write-back), and
+> [DEPENDENCY_MATRIX.md](DEPENDENCY_MATRIX.md).
 > Tracked in [PROTEGE_PARITY.md](PROTEGE_PARITY.md) P0.
 
 ## 1. Purpose
@@ -40,7 +41,8 @@ Specify **hybrid authoring** for Protégé-competitive v1.0:
 
 ## 4. Manchester requirements (P0)
 
-- Parse and serialize Manchester OWL Syntax for class expressions in subclass and equivalent axioms
+- Parse and serialize Manchester OWL Syntax via [`horned-functional`](https://crates.io/crates/horned-functional) + [`horned-owl`](https://crates.io/crates/horned-owl) in `ontoindex-owl` ([ADR-0016](adr/0016-dependency-first-implementation.md))
+- Optional: evaluate [`owl-ms-language-server`](https://crates.io/crates/owl-ms-language-server) for embedded Manchester assist in webview (v0.5)
 - Autocomplete: classes, properties, individuals in scope, XSD datatypes, OBO ids ([OBO_ROBOT_SPEC.md](OBO_ROBOT_SPEC.md))
 - Parse errors from Horned-OWL → LSP diagnostics with file range
 - **Open in Manchester** action from Entity Inspector for any editable axiom

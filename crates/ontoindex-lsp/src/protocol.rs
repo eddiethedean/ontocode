@@ -1,6 +1,7 @@
 use ontoindex_catalog::{CatalogStats, ClassHierarchy, EntityDetail};
 use ontoindex_core::{Diagnostic, Entity, OntologyDocument};
 use serde::{Deserialize, Serialize};
+use std::collections::BTreeMap;
 
 #[derive(Debug, Clone, Serialize)]
 pub struct DiagnosticSummary {
@@ -67,6 +68,51 @@ pub struct ApplyAxiomPatchParams {
     pub preview_only: bool,
 }
 
+#[derive(Debug, Deserialize)]
+pub struct QueryParams {
+    pub sql: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct SparqlParams {
+    pub query: String,
+}
+
+#[derive(Debug, Serialize)]
+pub struct TabularQueryResult {
+    pub columns: Vec<String>,
+    pub rows: Vec<BTreeMap<String, String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub truncated: Option<bool>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct ParseManchesterParams {
+    pub expression: String,
+    pub axiom_kind: String,
+    #[serde(default)]
+    pub entity_iri: Option<String>,
+    #[serde(default)]
+    pub document_uri: Option<String>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct ManchesterCompletions {
+    pub classes: Vec<String>,
+    pub object_properties: Vec<String>,
+    pub data_properties: Vec<String>,
+    pub datatypes: Vec<String>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct ParseManchesterResult {
+    pub normalized: String,
+    pub turtle_fragment: String,
+    pub tree: serde_json::Value,
+    pub diagnostics: Vec<ontoindex_owl::PatchDiagnostic>,
+    pub completions: ManchesterCompletions,
+}
+
 #[derive(Debug, Serialize)]
 pub struct ApplyAxiomPatchResult {
     #[serde(flatten)]
@@ -127,6 +173,24 @@ impl LspErrorPayload {
             message,
             recoverable: true,
             user_action: Some("Save as Turtle (.ttl) for write-back".to_string()),
+        }
+    }
+
+    pub fn query_failed(message: String) -> Self {
+        Self {
+            code: "QUERY_FAILED".to_string(),
+            message,
+            recoverable: true,
+            user_action: Some("Check query syntax and virtual table names".to_string()),
+        }
+    }
+
+    pub fn manchester_invalid(message: String) -> Self {
+        Self {
+            code: "MANCHESTER_INVALID".to_string(),
+            message,
+            recoverable: true,
+            user_action: Some("Fix the Manchester class expression".to_string()),
         }
     }
 }

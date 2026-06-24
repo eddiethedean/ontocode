@@ -132,11 +132,11 @@ More detail: [Installation & troubleshooting](https://onto-code.readthedocs.io/e
 
 ---
 
-## What's included in v0.4.0
+## What's included in v0.5.0
 
-**Shipped:** explorer, inspector, **editing** (labels, comments, parents, create/delete in `.ttl`), diagnostics, jump-to-source, hover, symbols, go-to-definition.
+**Shipped:** explorer, inspector, **editing** (labels, comments, parents, create/delete in `.ttl`), **Query Workbench** (SQL + SPARQL), **Manchester editor** (complex subclass + equivalent), diagnostics, jump-to-source, hover, symbols, go-to-definition.
 
-**Planned (v0.5+):** Manchester editor, query workbench, reasoners — [roadmap](https://onto-code.readthedocs.io/en/latest/design/ROADMAP/).
+**Planned (v0.6+):** reasoners, graph visualization — [roadmap](https://onto-code.readthedocs.io/en/latest/design/ROADMAP/).
 
 ---
 

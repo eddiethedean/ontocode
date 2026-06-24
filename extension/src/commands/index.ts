@@ -7,6 +7,11 @@ import {
 } from "../lsp/client";
 import { PatchEntityKind, PatchOp } from "../lsp/protocol";
 import { EntityInspectorPanel } from "../webviews/inspector";
+import { QueryWorkbenchPanel } from "../webviews/queryWorkbench";
+import {
+  ManchesterEditorPanel,
+  ManchesterEditorOptions,
+} from "../webviews/manchesterEditor";
 import { ExplorerTreeProvider } from "../treeviews/explorer";
 import { resolveEntityIri } from "../utils/resolveEntityIri";
 import { byteColToUtf16 } from "../utils/positions";
@@ -161,7 +166,34 @@ export function registerCommands(
         const message = err instanceof Error ? err.message : String(err);
         void vscode.window.showErrorMessage(`Delete failed: ${message}`);
       }
-    })
+    }),
+    vscode.commands.registerCommand("ontocode.openQueryWorkbench", () => {
+      QueryWorkbenchPanel.show(context);
+    }),
+    vscode.commands.registerCommand(
+      "ontocode.openManchesterEditor",
+      async (arg?: ManchesterEditorOptions) => {
+        if (!arg?.iri || !arg.documentUri) {
+          void vscode.window.showErrorMessage(
+            "OntoCode: Manchester editor requires entity IRI and document URI"
+          );
+          return;
+        }
+        await ManchesterEditorPanel.show({
+          ...arg,
+          onRefresh: async () => refreshExplorer(providers),
+        });
+      }
+    ),
+    vscode.commands.registerCommand(
+      "ontocode.addManchesterAxiom",
+      async (arg?: ManchesterEditorOptions) => {
+        await vscode.commands.executeCommand(
+          "ontocode.openManchesterEditor",
+          arg
+        );
+      }
+    )
   );
 }
 

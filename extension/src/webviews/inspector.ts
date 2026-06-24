@@ -34,6 +34,26 @@ export class EntityInspectorPanel {
           Boolean(message.previewOnly)
         );
       }
+      if (message.command === "openManchester" && this.iri && this.documentUri) {
+        const axiom = message.axiom as {
+          kind: string;
+          manchester?: string;
+        };
+        await vscode.commands.executeCommand("ontocode.openManchesterEditor", {
+          iri: this.iri,
+          documentUri: this.documentUri,
+          axiomKind: axiom.kind,
+          initialExpression: axiom.manchester ?? "",
+          mode: axiom.manchester ? "edit" : "add",
+        });
+      }
+      if (message.command === "addManchesterAxiom" && this.iri && this.documentUri) {
+        await vscode.commands.executeCommand("ontocode.openManchesterEditor", {
+          iri: this.iri,
+          documentUri: this.documentUri,
+          mode: "add",
+        });
+      }
     });
   }
 
@@ -193,7 +213,25 @@ export class EntityInspectorPanel {
   ${list(children)}
 
   <h2>Axioms</h2>
-  ${list(axioms)}
+  ${
+    axioms.length > 0
+      ? `<ul>${axioms
+          .map(
+            (a, idx) =>
+              `<li><code>${escapeHtml(a.display)}</code> ${
+                editable && entity.kind === "class"
+                  ? `<button data-axiom-idx="${idx}" class="editManchester secondary">Edit in Manchester</button>`
+                  : ""
+              }</li>`
+          )
+          .join("")}</ul>`
+      : `<p class="muted">None</p>`
+  }
+  ${
+    editable && entity.kind === "class"
+      ? `<button id="addManchesterAxiom" class="secondary">Add Manchester axiom</button>`
+      : ""
+  }
 
   ${editSection}
 
@@ -201,6 +239,7 @@ export class EntityInspectorPanel {
   <script>
     const vscode = acquireVsCodeApi();
     const entityIri = ${JSON.stringify(entity.iri)};
+    const axioms = ${JSON.stringify(axioms)};
 
     document.getElementById('jump').addEventListener('click', () => {
       vscode.postMessage({ command: 'jumpToSource' });
@@ -254,6 +293,18 @@ export class EntityInspectorPanel {
         if (confirm('Delete this entity from the ontology file?')) {
           apply([{ op: 'delete_entity', entity_iri: entityIri }], false);
         }
+      });
+    }
+    document.querySelectorAll('.editManchester').forEach((btn) => {
+      btn.addEventListener('click', () => {
+        const idx = Number(btn.getAttribute('data-axiom-idx'));
+        vscode.postMessage({ command: 'openManchester', axiom: axioms[idx] });
+      });
+    });
+    const addManchester = document.getElementById('addManchesterAxiom');
+    if (addManchester) {
+      addManchester.addEventListener('click', () => {
+        vscode.postMessage({ command: 'addManchesterAxiom' });
       });
     }
   </script>

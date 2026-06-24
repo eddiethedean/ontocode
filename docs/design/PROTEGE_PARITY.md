@@ -21,7 +21,7 @@
 |------|------|------------|------|
 | Quick forms: labels, comments, deprecated | [OWL_AUTHORING_SPEC.md](OWL_AUTHORING_SPEC.md) | `horned-owl` | Yes (Turtle, v0.4) |
 | Quick forms: `SubClassOf`, domain, range, property characteristics | [OWL_AUTHORING_SPEC.md](OWL_AUTHORING_SPEC.md) | `horned-owl` | Partial (`SubClassOf` named parent only) |
-| Manchester editor for complex class expressions | [OWL_AUTHORING_SPEC.md](OWL_AUTHORING_SPEC.md) | `horned-functional` | No |
+| Manchester editor for complex class expressions | [OWL_AUTHORING_SPEC.md](OWL_AUTHORING_SPEC.md) | `horned-functional` | MVP (v0.5) |
 | Axiom types: `SubClassOf`, `EquivalentClasses`, `DisjointClasses` | [OWL_AUTHORING_SPEC.md](OWL_AUTHORING_SPEC.md) | `horned-owl` | Partial (extract + simple `SubClassOf` edit) |
 | Object/data property domain, range, characteristics | [OWL_AUTHORING_SPEC.md](OWL_AUTHORING_SPEC.md) | `horned-owl` | Partial (extract only) |
 | Class/object/data property assertions on individuals | [OWL_AUTHORING_SPEC.md](OWL_AUTHORING_SPEC.md) | `horned-owl` | Partial (create individual) |
@@ -58,7 +58,7 @@
 | Item | Spec | v0.4 |
 |------|------|------|
 | Imports management UI | [SPEC.md](SPEC.md) | No |
-| SQL + SPARQL query workbench | [SPEC.md](SPEC.md) | CLI only |
+| SQL + SPARQL query workbench | [SPEC.md](SPEC.md) | VS Code + CLI (v0.5) |
 | Semantic diff + Git branch compare | [SEMANTIC_DIFF_SPEC.md](SEMANTIC_DIFF_SPEC.md) | No |
 | Safe IRI rename across workspace | [ROADMAP.md](ROADMAP.md) v0.8 | No |
 | Graph visualization (class, property, import, neighborhood) | [ROADMAP.md](ROADMAP.md) v0.7 | No |

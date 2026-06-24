@@ -27,4 +27,7 @@ pub enum OwlError {
 
     #[error("store error: {0}")]
     Store(String),
+
+    #[error("invalid Manchester expression: {0}")]
+    ManchesterInvalid(String),
 }

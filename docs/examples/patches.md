@@ -28,3 +28,20 @@ ontoindex patch ./people.ttl patches.json
 ```
 
 Download: [patches.json](patches.json)
+
+## Complex axioms (v0.5)
+
+```json
+[
+  {
+    "op": "add_complex_sub_class_of",
+    "entity_iri": "http://example.org/clinic#Patient",
+    "manchester": "ex:hasRecord some ex:MedicalRecord"
+  },
+  {
+    "op": "set_equivalent_class",
+    "entity_iri": "http://example.org/clinic#Staff",
+    "manchester": "ex:Employee"
+  }
+]
+```

@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/eddiethedean/ontocode/docs/lsp-protocol.schema.json",
-  "title": "OntoIndex LSP protocol (v0.4)",
-  "description": "JSON Schema for ontoindex/* custom LSP methods (v0.4 subset).",
+  "title": "OntoIndex LSP protocol (v0.5)",
+  "description": "JSON Schema for ontoindex/* custom LSP methods (v0.5 subset).",
   "definitions": {
     "EntityKind": {
       "type": "string",
@@ -34,9 +34,91 @@
         "entity_iri": { "type": "string" },
         "kind": { "$ref": "#/definitions/PatchEntityKind" },
         "value": { "type": "string" },
-        "parent_iri": { "type": "string" }
+        "parent_iri": { "type": "string" },
+        "manchester": { "type": "string" }
       },
       "additionalProperties": true
+    },
+    "EntityAxiomSummary": {
+      "type": "object",
+      "required": ["kind", "display", "editable"],
+      "properties": {
+        "kind": { "type": "string" },
+        "display": { "type": "string" },
+        "manchester": { "type": ["string", "null"] },
+        "parent_iri": { "type": ["string", "null"] },
+        "editable": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "TabularQueryResult": {
+      "type": "object",
+      "required": ["columns", "rows"],
+      "properties": {
+        "columns": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "rows": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": { "type": "string" }
+          }
+        },
+        "truncated": { "type": ["boolean", "null"] }
+      },
+      "additionalProperties": false
+    },
+    "QueryParams": {
+      "type": "object",
+      "required": ["sql"],
+      "properties": {
+        "sql": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "SparqlParams": {
+      "type": "object",
+      "required": ["query"],
+      "properties": {
+        "query": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "ManchesterCompletions": {
+      "type": "object",
+      "required": ["classes", "object_properties", "data_properties", "datatypes"],
+      "properties": {
+        "classes": { "type": "array", "items": { "type": "string" } },
+        "object_properties": { "type": "array", "items": { "type": "string" } },
+        "data_properties": { "type": "array", "items": { "type": "string" } },
+        "datatypes": { "type": "array", "items": { "type": "string" } }
+      },
+      "additionalProperties": false
+    },
+    "ParseManchesterParams": {
+      "type": "object",
+      "required": ["expression", "axiom_kind"],
+      "properties": {
+        "expression": { "type": "string" },
+        "axiom_kind": { "type": "string" },
+        "entity_iri": { "type": ["string", "null"] },
+        "document_uri": { "type": ["string", "null"] }
+      },
+      "additionalProperties": false
+    },
+    "ParseManchesterResult": {
+      "type": "object",
+      "required": ["normalized", "turtle_fragment", "tree", "diagnostics", "completions"],
+      "properties": {
+        "normalized": { "type": "string" },
+        "turtle_fragment": { "type": "string" },
+        "tree": {},
+        "diagnostics": { "type": "array" },
+        "completions": { "$ref": "#/definitions/ManchesterCompletions" }
+      },
+      "additionalProperties": false
     },
     "ApplyAxiomPatchParams": {
       "type": "object",

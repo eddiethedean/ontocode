@@ -2,7 +2,7 @@
 
 This page helps security, platform, and ontology teams decide whether OntoCode v0.4 fits your workflow. It is honest about **what ships today** vs the v1.0 Protégé-competitive target.
 
-## What v0.4.0 delivers
+## What v0.5.0 delivers
 
 | Capability | Status |
 |------------|--------|
@@ -10,7 +10,8 @@ This page helps security, platform, and ontology teams decide whether OntoCode v
 | Turtle (`.ttl`) write-back (labels, parents, create/delete) | Shipped |
 | CLI SQL/SPARQL queries and `validate` for CI | Shipped |
 | Inline diagnostics (Problems panel) | Shipped |
-| Reasoning, Manchester editor, query workbench in VS Code | **Not shipped** (roadmap) |
+| Reasoning, inferred hierarchy | **Not shipped** (v0.6 roadmap) |
+| Query workbench + Manchester editor in VS Code | **Shipped** (v0.5) |
 | OBO format + ROBOT interop | **Not shipped** (v0.7b target) |
 | Semantic Git diff | **Not shipped** (v0.9 target) |
 

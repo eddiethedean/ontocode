@@ -1,5 +1,8 @@
 use crate::OntologyCatalog;
-use ontoindex_core::{document_matches_entity, Entity, EntityKind, AXIOM_KIND_SUB_CLASS_OF};
+use ontoindex_core::{
+    document_matches_entity, Entity, EntityKind, AXIOM_KIND_EQUIVALENT_CLASS,
+    AXIOM_KIND_SUB_CLASS_OF,
+};
 use serde::Serialize;
 use std::collections::{BTreeMap, BTreeSet};
 use std::fs;
@@ -26,11 +29,22 @@ pub struct SourceHint {
 }
 
 #[derive(Debug, Clone, Serialize)]
+pub struct EntityAxiomSummary {
+    pub kind: String,
+    pub display: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub manchester: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub parent_iri: Option<String>,
+    pub editable: bool,
+}
+
+#[derive(Debug, Clone, Serialize)]
 pub struct EntityDetail {
     pub entity: Entity,
     pub parents: Vec<String>,
     pub children: Vec<String>,
-    pub axioms: Vec<String>,
+    pub axioms: Vec<EntityAxiomSummary>,
     pub source: Option<SourceHint>,
     pub editable: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -71,6 +85,9 @@ impl OntologyCatalog {
             if !class_iris.contains(axiom.subject.as_str()) {
                 continue;
             }
+            if !class_iris.contains(axiom.object.as_str()) {
+                continue;
+            }
             let edge = SubclassEdge { child: axiom.subject.clone(), parent: axiom.object.clone() };
             edges.push(edge.clone());
             parents.entry(edge.child.clone()).or_default().push(edge.parent.clone());
@@ -92,14 +109,6 @@ impl OntologyCatalog {
         let parents = hierarchy.parents.get(iri).cloned().unwrap_or_default();
         let children = hierarchy.children.get(iri).cloned().unwrap_or_default();
 
-        let axioms: Vec<String> = self
-            .data()
-            .axioms
-            .iter()
-            .filter(|a| a.subject == iri)
-            .map(|a| format!("{} {} {}", a.subject, predicate_label(&a.predicate), a.object))
-            .collect();
-
         let source = self.find_source_location(iri);
         let doc = self.entity_document(iri);
         let editable = doc.is_some_and(|d| {
@@ -107,6 +116,14 @@ impl OntologyCatalog {
                 && d.parse_status == ontoindex_core::ParseStatus::Ok
         });
         let document_path = doc.map(|d| d.path.display().to_string());
+
+        let axioms: Vec<EntityAxiomSummary> = self
+            .data()
+            .axioms
+            .iter()
+            .filter(|a| a.subject == iri)
+            .map(|a| axiom_summary(a, editable))
+            .collect();
 
         Some(EntityDetail { entity, parents, children, axioms, source, editable, document_path })
     }
@@ -145,11 +162,24 @@ impl OntologyCatalog {
     }
 }
 
-fn predicate_label(predicate: &str) -> &'static str {
-    if predicate.contains("subClassOf") || predicate.ends_with("#subClassOf") {
-        "SubClassOf"
+fn axiom_summary(a: &ontoindex_core::Axiom, editable: bool) -> EntityAxiomSummary {
+    let is_named_iri = a.object.starts_with("http://") || a.object.starts_with("https://");
+    let manchester = if is_named_iri { None } else { Some(a.object.clone()) };
+    let parent_iri = if a.axiom_kind == AXIOM_KIND_SUB_CLASS_OF && is_named_iri {
+        Some(a.object.clone())
     } else {
-        "predicate"
+        None
+    };
+    let kind_label = match a.axiom_kind.as_str() {
+        AXIOM_KIND_EQUIVALENT_CLASS => "EquivalentClasses",
+        _ => "SubClassOf",
+    };
+    EntityAxiomSummary {
+        kind: a.axiom_kind.clone(),
+        display: format!("{} {}", kind_label, a.object),
+        manchester,
+        parent_iri,
+        editable,
     }
 }
 

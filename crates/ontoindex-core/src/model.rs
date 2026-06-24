@@ -230,6 +230,7 @@ pub struct Import {
 
 /// Snake_case axiom kind stored in [`Axiom::axiom_kind`] and SQL `axioms.axiom_kind`.
 pub const AXIOM_KIND_SUB_CLASS_OF: &str = "sub_class_of";
+pub const AXIOM_KIND_EQUIVALENT_CLASS: &str = "equivalent_class";
 
 #[cfg(test)]
 mod tests {

@@ -154,3 +154,29 @@ export function assertIndexWorkspaceResult(
   }
   return value;
 }
+
+export function assertTabularQueryResult(
+  value: unknown
+): import("./protocol").TabularQueryResult {
+  if (!value || typeof value !== "object") {
+    throw new Error("Invalid query result from language server");
+  }
+  const v = value as Record<string, unknown>;
+  if (!Array.isArray(v.columns) || !Array.isArray(v.rows)) {
+    throw new Error("Invalid query result shape");
+  }
+  return value as import("./protocol").TabularQueryResult;
+}
+
+export function assertParseManchesterResult(
+  value: unknown
+): import("./protocol").ParseManchesterResult {
+  if (!value || typeof value !== "object") {
+    throw new Error("Invalid parseManchester result from language server");
+  }
+  const v = value as Record<string, unknown>;
+  if (typeof v.normalized !== "string" || typeof v.turtle_fragment !== "string") {
+    throw new Error("Invalid parseManchester result shape");
+  }
+  return value as import("./protocol").ParseManchesterResult;
+}

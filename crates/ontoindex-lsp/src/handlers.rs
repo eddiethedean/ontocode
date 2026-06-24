@@ -3,6 +3,8 @@ use crate::positions::{byte_col_to_utf16, utf16_offset_to_byte};
 use crate::protocol::{
     ApplyAxiomPatchParams, ApplyAxiomPatchResult, CatalogSnapshot, DiagnosticSummary,
     GetEntityParams, GetEntityResult, IndexWorkspaceParams, IndexWorkspaceResult, LspErrorPayload,
+    ManchesterCompletions, ParseManchesterParams, ParseManchesterResult, QueryParams, SparqlParams,
+    TabularQueryResult,
 };
 use crate::state::{path_to_uri, resolve_workspace_for_index, ServerState};
 use lsp_server::ResponseError;
@@ -13,7 +15,10 @@ use lsp_types::{
     Range, ServerCapabilities, SymbolInformation, SymbolKind, TextDocumentSyncCapability,
     TextDocumentSyncKind, Uri, WorkspaceSymbolParams, WorkspaceSymbolResponse,
 };
-use ontoindex_core::{resolve_document_path, EntityKind, OntologyFormat};
+use ontoindex_core::{
+    limits::MAX_SPARQL_RESULT_ROWS, limits::MAX_SQL_RESULT_ROWS, resolve_document_path, EntityKind,
+    OntologyFormat,
+};
 use serde_json::Value;
 use std::path::Path;
 use std::str::FromStr;
@@ -163,6 +168,11 @@ pub fn handle_apply_axiom_patch(
         | ontoindex_owl::PatchOp::RemoveComment { entity_iri, .. }
         | ontoindex_owl::PatchOp::AddSubClassOf { entity_iri, .. }
         | ontoindex_owl::PatchOp::RemoveSubClassOf { entity_iri, .. }
+        | ontoindex_owl::PatchOp::AddComplexSubClassOf { entity_iri, .. }
+        | ontoindex_owl::PatchOp::RemoveComplexSubClassOf { entity_iri, .. }
+        | ontoindex_owl::PatchOp::AddEquivalentClass { entity_iri, .. }
+        | ontoindex_owl::PatchOp::RemoveEquivalentClass { entity_iri, .. }
+        | ontoindex_owl::PatchOp::SetEquivalentClass { entity_iri, .. }
         | ontoindex_owl::PatchOp::SetDeprecated { entity_iri, .. } => entity_iri.clone(),
     });
 
@@ -175,6 +185,153 @@ pub fn handle_apply_axiom_patch(
         .flatten();
 
     Ok(ApplyAxiomPatchResult { patch: patch_result, entity_detail })
+}
+
+pub fn handle_query(
+    state: &ServerState,
+    params: QueryParams,
+) -> Result<TabularQueryResult, LspErrorPayload> {
+    state
+        .with_catalog(|catalog| {
+            let result = ontoindex_query::query_catalog(catalog, &params.sql).map_err(
+                |e: ontoindex_query::QueryError| LspErrorPayload::query_failed(e.to_string()),
+            )?;
+            let truncated =
+                if result.rows.len() >= MAX_SQL_RESULT_ROWS { Some(true) } else { None };
+            Ok(TabularQueryResult { columns: result.columns, rows: result.rows, truncated })
+        })
+        .ok_or_else(LspErrorPayload::not_indexed)?
+}
+
+pub fn handle_sparql(
+    state: &ServerState,
+    params: SparqlParams,
+) -> Result<TabularQueryResult, LspErrorPayload> {
+    state
+        .with_catalog(|catalog| {
+            let result = ontoindex_query::sparql_catalog(catalog, &params.query).map_err(
+                |e: ontoindex_query::QueryError| LspErrorPayload::query_failed(e.to_string()),
+            )?;
+            let truncated =
+                if result.rows.len() >= MAX_SPARQL_RESULT_ROWS { Some(true) } else { None };
+            Ok(TabularQueryResult { columns: result.columns, rows: result.rows, truncated })
+        })
+        .ok_or_else(LspErrorPayload::not_indexed)?
+}
+
+pub fn handle_parse_manchester(
+    state: &ServerState,
+    params: ParseManchesterParams,
+) -> Result<ParseManchesterResult, LspErrorPayload> {
+    let namespaces = resolve_namespaces_for_manchester(state, &params)?;
+    let completions = build_manchester_completions(state);
+
+    let parsed = ontoindex_owl::parse_class_expression(&params.expression, &namespaces)
+        .map_err(|e| LspErrorPayload::manchester_invalid(e.to_string()))?;
+
+    let turtle_predicate = match params.axiom_kind.as_str() {
+        "equivalent_class" => "owl:equivalentClass",
+        _ => "rdfs:subClassOf",
+    };
+
+    let turtle_fragment = ontoindex_owl::class_expression_to_turtle_fragment(
+        &parsed.expression,
+        turtle_predicate,
+        &namespaces,
+    )
+    .map_err(|e| LspErrorPayload::manchester_invalid(e.to_string()))?;
+
+    Ok(ParseManchesterResult {
+        normalized: parsed.normalized,
+        turtle_fragment,
+        tree: parsed.tree,
+        diagnostics: Vec::new(),
+        completions,
+    })
+}
+
+fn resolve_namespaces_for_manchester(
+    state: &ServerState,
+    params: &ParseManchesterParams,
+) -> Result<std::collections::BTreeMap<String, String>, LspErrorPayload> {
+    if let Some(uri) = &params.document_uri {
+        let workspace = state.workspace_root().ok_or_else(LspErrorPayload::not_indexed)?;
+        let path = ontoindex_core::resolve_lsp_document_path(uri, &workspace)
+            .map_err(|e| LspErrorPayload::manchester_invalid(e.to_string()))?;
+        if let Some(ns) = state
+            .with_catalog(|catalog| {
+                catalog
+                    .data()
+                    .documents
+                    .iter()
+                    .find(|d| {
+                        d.path.canonicalize().ok().as_ref() == path.canonicalize().ok().as_ref()
+                            || d.path == path
+                    })
+                    .map(|d| d.namespaces.clone())
+            })
+            .flatten()
+        {
+            return Ok(ns);
+        }
+    }
+    state
+        .with_catalog(|catalog| {
+            catalog
+                .data()
+                .documents
+                .iter()
+                .find(|d| {
+                    params.entity_iri.as_ref().is_some_and(|iri| {
+                        catalog.entity_document(iri).is_some_and(|ed| ed.id == d.id)
+                    })
+                })
+                .map(|d| d.namespaces.clone())
+        })
+        .flatten()
+        .ok_or_else(LspErrorPayload::not_indexed)
+}
+
+fn build_manchester_completions(state: &ServerState) -> ManchesterCompletions {
+    const DATATYPES: &[&str] = &[
+        "xsd:string",
+        "xsd:integer",
+        "xsd:decimal",
+        "xsd:boolean",
+        "xsd:dateTime",
+        "xsd:float",
+        "xsd:double",
+    ];
+
+    state
+        .with_catalog(|catalog| {
+            let mut classes = Vec::new();
+            let mut object_properties = Vec::new();
+            let mut data_properties = Vec::new();
+            for entity in &catalog.data().entities {
+                match entity.kind {
+                    EntityKind::Class => classes.push(entity.iri.clone()),
+                    EntityKind::ObjectProperty => object_properties.push(entity.iri.clone()),
+                    EntityKind::DataProperty => data_properties.push(entity.iri.clone()),
+                    _ => {}
+                }
+            }
+            classes.sort();
+            object_properties.sort();
+            data_properties.sort();
+            ManchesterCompletions {
+                classes,
+                object_properties,
+                data_properties,
+                datatypes: DATATYPES.iter().map(|s| s.to_string()).collect(),
+            }
+        })
+        .unwrap_or(ManchesterCompletions {
+            classes: Vec::new(),
+            object_properties: Vec::new(),
+            data_properties: Vec::new(),
+            datatypes: DATATYPES.iter().map(|s| s.to_string()).collect(),
+        })
 }
 
 pub fn handle_hover(state: &ServerState, params: HoverParams) -> Option<Hover> {
@@ -358,6 +515,25 @@ pub fn handle_custom_request(
                 serde_json::from_value(params.unwrap_or(Value::Null))
                     .map_err(|e| LspErrorPayload::index_failed(format!("invalid params: {e}")))?;
             let result = handle_apply_axiom_patch(state, index_worker, params)?;
+            serde_json::to_value(result).map_err(|e| LspErrorPayload::index_failed(e.to_string()))
+        }
+        "ontoindex/query" => {
+            let params: QueryParams = serde_json::from_value(params.unwrap_or(Value::Null))
+                .map_err(|e| LspErrorPayload::index_failed(format!("invalid params: {e}")))?;
+            let result = handle_query(state, params)?;
+            serde_json::to_value(result).map_err(|e| LspErrorPayload::index_failed(e.to_string()))
+        }
+        "ontoindex/sparql" => {
+            let params: SparqlParams = serde_json::from_value(params.unwrap_or(Value::Null))
+                .map_err(|e| LspErrorPayload::index_failed(format!("invalid params: {e}")))?;
+            let result = handle_sparql(state, params)?;
+            serde_json::to_value(result).map_err(|e| LspErrorPayload::index_failed(e.to_string()))
+        }
+        "ontoindex/parseManchester" => {
+            let params: ParseManchesterParams =
+                serde_json::from_value(params.unwrap_or(Value::Null))
+                    .map_err(|e| LspErrorPayload::index_failed(format!("invalid params: {e}")))?;
+            let result = handle_parse_manchester(state, params)?;
             serde_json::to_value(result).map_err(|e| LspErrorPayload::index_failed(e.to_string()))
         }
         _ => Err(LspErrorPayload::index_failed(format!("unknown method: {method}"))),

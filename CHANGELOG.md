@@ -5,6 +5,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.5.0] - 2026-06-24
+
+### Added
+
+- **Query workbench (VS Code):** SQL and SPARQL modes, result table, CSV/JSON export, saved queries, query history, starter templates
+- LSP **`ontoindex/query`** and **`ontoindex/sparql`** — tabular results against indexed workspace catalog
+- **Manchester MVP editor (VS Code):** complex `SubClassOf` and `EquivalentClasses` authoring with validate, expression tree, Turtle preview
+- LSP **`ontoindex/parseManchester`** — parse/validate Manchester expressions with catalog-based completion lists
+- **`ontoindex-owl` Manchester module** — parse, serialize, Turtle fragment generation, expression tree JSON
+- New patch ops: `add_complex_sub_class_of`, `remove_complex_sub_class_of`, `add_equivalent_class`, `remove_equivalent_class`, `set_equivalent_class`
+- **`EntityDetail.axioms`** — structured `EntityAxiomSummary` rows (kind, display, manchester, parent_iri, editable)
+- `fixtures/complex-classes.ttl` for Manchester and consistency tests
+- Extension integration tests for SQL, SPARQL, Manchester parse, and structured axioms
+
+### Changed
+
+- Inspector shows **Edit in Manchester** for complex axioms and **Add Manchester axiom**
+- README capability table: SQL + SPARQL in VS Code → **Yes**
+
+[0.5.0]: https://github.com/eddiethedean/ontocode/releases/tag/v0.5.0
+
 ## [0.4.0] - 2026-06-24
 
 ### Added

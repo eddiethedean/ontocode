@@ -2,7 +2,7 @@
   "name": "ontocode",
   "displayName": "OntoCode",
   "description": "Browse OWL/RDF ontologies in VS Code with inline diagnostics: explore classes and properties, inspect entities, validate in CI, and jump to source.",
-  "version": "0.4.0",
+  "version": "0.5.0",
   "publisher": "ontocode",
   "license": "MIT",
   "repository": {
@@ -113,6 +113,18 @@
       {
         "command": "ontocode.deleteEntity",
         "title": "OntoCode: Delete Entity"
+      },
+      {
+        "command": "ontocode.openQueryWorkbench",
+        "title": "OntoCode: Open Query Workbench"
+      },
+      {
+        "command": "ontocode.openManchesterEditor",
+        "title": "OntoCode: Open Manchester Editor"
+      },
+      {
+        "command": "ontocode.addManchesterAxiom",
+        "title": "OntoCode: Add Manchester Axiom"
       }
     ],
     "menus": {
@@ -168,6 +180,11 @@
           "type": "boolean",
           "default": true,
           "description": "Automatically index the workspace when OntoCode activates."
+        },
+        "ontocode.queryHistoryLimit": {
+          "type": "number",
+          "default": 20,
+          "description": "Maximum number of recent queries kept in the Query Workbench history."
         }
       }
     }

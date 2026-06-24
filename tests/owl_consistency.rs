@@ -55,7 +55,25 @@ fn owl_oxigraph_consistency_on_fixtures() {
             .filter(|a| a.axiom_kind == AXIOM_KIND_SUB_CLASS_OF)
             .map(|a| (a.subject.clone(), a.object.clone()))
             .collect();
-        assert_eq!(ox_subclass, horned_subclass, "subclass edges mismatch in {}", path.display());
+
+        let ox_named: BTreeSet<_> =
+            ox_subclass.iter().filter(|(_, obj)| !obj.starts_with("_:")).cloned().collect();
+        let horned_named: BTreeSet<_> = horned_subclass
+            .iter()
+            .filter(|(_, obj)| obj.starts_with("http://") || obj.starts_with("https://"))
+            .cloned()
+            .collect();
+        assert_eq!(ox_named, horned_named, "named subclass edges mismatch in {}", path.display());
+
+        for (subject, object) in &ox_subclass {
+            if object.starts_with("_:") {
+                assert!(
+                    horned_subclass.iter().any(|(s, o)| s == subject && !o.starts_with("http")),
+                    "missing complex subclass for {subject} in {}",
+                    path.display()
+                );
+            }
+        }
     }
 }
 

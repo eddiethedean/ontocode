@@ -1,5 +1,11 @@
 short_name	labels
+ClinicOrganization	Clinic Organization
+ClinicPerson	Clinic Person
 Department	"Department"
+Employee	Employee
+MedicalRecord	Medical Record
 Organization	Organization
+Patient	Patient
 Person	Person
+Staff	Staff
 Thing	Thing

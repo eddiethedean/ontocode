@@ -1,15 +1,15 @@
-# OntoIndex LSP API (v0.4)
+# OntoIndex LSP API (v0.5)
 
-This document describes **what ships today** in `ontoindex-lsp`. For the **v1.0 target** (including `parseManchester`, `getExplanation`, `runRobot`), see [LSP_SPEC.md](design/LSP_SPEC.md).
+This document describes **what ships today** in `ontoindex-lsp`. For the **v1.0 target** (including `getExplanation`, `runRobot`), see [LSP_SPEC.md](design/LSP_SPEC.md).
 
-## Wire format (v0.4)
+## Wire format (v0.5)
 
 LSP JSON uses **snake_case** for enums serialized from Rust (`EntityKind`, `ParseStatus`, `OntologyFormat`), e.g. `"kind": "class"`, `"parse_status": "ok"`. SQL virtual tables use the same snake_case strings via `as_str()` on core enums (e.g. `ParseStatus::as_str()` → `"ok"`, `EntityKind::as_str()` → `"class"`, `axiom_kind` → `"sub_class_of"`).
 
 **Source of truth:**
 
 - Types: [`protocol.rs` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/crates/ontoindex-lsp/src/protocol.rs)
-- JSON Schema (v0.4 subset): [`docs/lsp-protocol.schema.json`](lsp-protocol.schema.json)
+- JSON Schema (v0.5 subset): [`docs/lsp-protocol.schema.json`](lsp-protocol.schema.json)
 - Handlers: [`handlers.rs` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/crates/ontoindex-lsp/src/handlers.rs)
 - Extension client: [`client.ts` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/extension/src/lsp/client.ts)
 
@@ -17,7 +17,7 @@ LSP JSON uses **snake_case** for enums serialized from Rust (`EntityKind`, `Pars
 
 - stdio (VS Code language client)
 
-## Standard LSP capabilities (v0.4)
+## Standard LSP capabilities (v0.5)
 
 | Capability | Status |
 |------------|--------|
@@ -29,7 +29,7 @@ LSP JSON uses **snake_case** for enums serialized from Rust (`EntityKind`, `Pars
 | Completion | Planned |
 | Rename | Planned |
 
-## Custom methods (v0.4)
+## Custom methods (v0.5)
 
 All custom methods use the `ontoindex/` prefix.
 
@@ -127,14 +127,85 @@ Return detailed entity information for the inspector.
 | `entity` | Core `Entity` record |
 | `parents` | Parent class IRIs |
 | `children` | Child class IRIs |
-| `axioms` | Human-readable axiom strings |
+| `axioms` | `EntityAxiomSummary[]` — structured axiom rows for inspector and Manchester editor |
 | `source` | Optional `{ path, line, column }` |
-| `editable` | `true` for Turtle write-back in v0.4 |
+| `editable` | `true` for Turtle write-back |
 | `document_path` | Filesystem path to declaring file |
+
+**`EntityAxiomSummary` fields:**
+
+| Field | Description |
+|-------|-------------|
+| `kind` | `sub_class_of` or `equivalent_class` |
+| `display` | Human-readable label (e.g. `SubClassOf ex:Person` or Manchester string) |
+| `manchester` | Manchester expression when the axiom is complex (optional) |
+| `parent_iri` | Named parent class IRI for simple `SubClassOf` (optional) |
+| `editable` | Whether the axiom can be edited via patch write-back |
 
 **Errors:** `NOT_INDEXED`, `ENTITY_NOT_FOUND`
 
-### `ontoindex/applyAxiomPatch` (v0.4)
+### `ontoindex/query` (v0.5)
+
+Run a SQL-like query against the indexed workspace catalog.
+
+**Params:** `QueryParams`
+
+```json
+{ "sql": "SELECT short_name, labels FROM classes" }
+```
+
+**Result:** `TabularQueryResult`
+
+| Field | Description |
+|-------|-------------|
+| `columns` | Column names |
+| `rows` | Array of row objects (`column` → string value) |
+| `truncated` | `true` when the server row cap was hit (optional) |
+
+**Errors:** `NOT_INDEXED`, `QUERY_FAILED`
+
+### `ontoindex/sparql` (v0.5)
+
+Run SPARQL against the indexed catalog store.
+
+**Params:** `SparqlParams`
+
+```json
+{ "query": "SELECT ?s ?p ?o WHERE { ?s ?p ?o } LIMIT 10" }
+```
+
+**Result:** `TabularQueryResult` (same shape as `ontoindex/query`).
+
+**Errors:** `NOT_INDEXED`, `QUERY_FAILED`
+
+### `ontoindex/parseManchester` (v0.5)
+
+Parse and validate a Manchester class expression; return normalized text, Turtle fragment, expression tree, diagnostics, and catalog-based completion lists.
+
+**Params:** `ParseManchesterParams`
+
+```json
+{
+  "expression": "ex:hasRecord some ex:MedicalRecord",
+  "axiom_kind": "sub_class_of",
+  "entity_iri": "http://example.org/clinic#Patient",
+  "document_uri": "file:///path/to/ontology.ttl"
+}
+```
+
+**Result:** `ParseManchesterResult`
+
+| Field | Description |
+|-------|-------------|
+| `normalized` | Canonical Manchester string |
+| `turtle_fragment` | Turtle axiom fragment for preview |
+| `tree` | JSON expression tree for UI |
+| `diagnostics` | Parse errors (`PatchDiagnostic[]`) |
+| `completions` | `ManchesterCompletions` — classes, object/data properties, XSD datatypes from catalog |
+
+**Errors:** `NOT_INDEXED`, `MANCHESTER_INVALID`
+
+### `ontoindex/applyAxiomPatch` (v0.4+)
 
 Apply Turtle patch operations. See [authoring.md](authoring.md).
 
@@ -177,7 +248,6 @@ Custom method failures return `LspErrorPayload` in the JSON-RPC error `data` fie
 
 ## Not implemented yet (see LSP_SPEC)
 
-- `ontoindex/query`, `ontoindex/sparql`
 - `ontoindex/getGraph`, `ontoindex/getSemanticDiff`, `ontoindex/runReasoner`
 
-Use the CLI or Rust crates for SQL/SPARQL until these LSP methods land.
+Use the CLI or Rust crates for reasoning and graph APIs until those LSP methods land.

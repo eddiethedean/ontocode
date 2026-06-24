@@ -27,7 +27,7 @@ pub use limits::{
 pub use model::{
     Annotation, Axiom, Diagnostic, DiagnosticCode, DiagnosticSeverity, Entity, EntityKind, Import,
     Namespace, OntologyDocument, OntologyFormat, ParseStatus, SourceLocation,
-    AXIOM_KIND_SUB_CLASS_OF,
+    AXIOM_KIND_EQUIVALENT_CLASS, AXIOM_KIND_SUB_CLASS_OF,
 };
 pub use path_jail::{
     canonical_workspace_root, file_uri_to_path, is_path_within, resolve_document_path,

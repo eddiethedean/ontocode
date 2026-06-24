@@ -61,7 +61,7 @@ See [workspace-limits.md](workspace-limits.md).
 
 ## LSP
 
-SPARQL via LSP (`ontoindex/sparql`) is **not implemented** in v0.4. Use the CLI or Rust API until the query workbench lands (v0.5+). See [lsp-api.md](lsp-api.md).
+SPARQL is available via the CLI, Rust API, LSP (`ontoindex/sparql`), and the VS Code **Query Workbench** (v0.5+). See [lsp-api.md](lsp-api.md).
 
 ## Related
 

@@ -4,7 +4,11 @@ import { registerCommands, refreshExplorer } from "./commands";
 import {
   getCatalogSnapshot,
   getClient,
+  getEntity,
   indexWorkspace,
+  parseManchester,
+  runSqlQuery,
+  runSparqlQuery,
   startLanguageClient,
   stopLanguageClient,
 } from "./lsp/client";
@@ -83,7 +87,15 @@ export async function activate(
       void refreshExplorer(providers!);
     }, 900);
 
-    return { getClient, indexWorkspace, getCatalogSnapshot };
+    return {
+      getClient,
+      indexWorkspace,
+      getCatalogSnapshot,
+      getEntity,
+      runSqlQuery,
+      runSparqlQuery,
+      parseManchester,
+    };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     void vscode.window.showErrorMessage(

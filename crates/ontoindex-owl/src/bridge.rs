@@ -1,3 +1,4 @@
+use crate::manchester::class_expression_to_manchester;
 use crate::span::{annotate_spans, find_entity_block, short_name_from_iri};
 use horned_owl::io::rdf::reader::ConcreteRDFOntology;
 use horned_owl::model::{
@@ -6,7 +7,7 @@ use horned_owl::model::{
 use horned_owl::ontology::component_mapped::{ComponentMappedIndex, ComponentMappedOntology};
 use ontoindex_core::{
     Annotation, Axiom, Entity, EntityKind, Import, Namespace, SourceLocation,
-    AXIOM_KIND_SUB_CLASS_OF,
+    AXIOM_KIND_EQUIVALENT_CLASS, AXIOM_KIND_SUB_CLASS_OF,
 };
 use std::collections::BTreeMap;
 
@@ -82,17 +83,43 @@ pub fn bridge_ontology(
 
     let mut axiom_counter = 0usize;
     for ax in idx.sub_class_of() {
-        if let (Some(sub), Some(sup)) = (class_expr_iri(&ax.sub), class_expr_iri(&ax.sup)) {
-            axiom_counter += 1;
-            result.axioms.push(Axiom {
-                id: format!("{ontology_id}#axiom-{axiom_counter}"),
-                ontology_id: ont_id.clone(),
-                subject: sub,
-                predicate: RDFS_SUB_CLASS_OF.to_string(),
-                object: sup,
-                axiom_kind: AXIOM_KIND_SUB_CLASS_OF.to_string(),
-                source_location: SourceLocation::default(),
-            });
+        if let ClassExpression::Class(sub) = &ax.sub {
+            if let Some(sup) = class_expr_display(&ax.sup, namespaces) {
+                axiom_counter += 1;
+                result.axioms.push(Axiom {
+                    id: format!("{ontology_id}#axiom-{axiom_counter}"),
+                    ontology_id: ont_id.clone(),
+                    subject: sub.to_string(),
+                    predicate: RDFS_SUB_CLASS_OF.to_string(),
+                    object: sup,
+                    axiom_kind: AXIOM_KIND_SUB_CLASS_OF.to_string(),
+                    source_location: SourceLocation::default(),
+                });
+            }
+        }
+    }
+
+    for eq in idx.equivalent_class() {
+        for ce in &eq.0 {
+            if let ClassExpression::Class(sub) = ce {
+                for other in &eq.0 {
+                    if other == ce {
+                        continue;
+                    }
+                    if let Some(obj) = class_expr_display(other, namespaces) {
+                        axiom_counter += 1;
+                        result.axioms.push(Axiom {
+                            id: format!("{ontology_id}#axiom-{axiom_counter}"),
+                            ontology_id: ont_id.clone(),
+                            subject: sub.to_string(),
+                            predicate: "http://www.w3.org/2002/07/owl#equivalentClass".to_string(),
+                            object: obj,
+                            axiom_kind: AXIOM_KIND_EQUIVALENT_CLASS.to_string(),
+                            source_location: SourceLocation::default(),
+                        });
+                    }
+                }
+            }
         }
     }
 
@@ -136,10 +163,13 @@ fn insert_entity(
     });
 }
 
-fn class_expr_iri(expr: &ClassExpression<RcStr>) -> Option<String> {
+fn class_expr_display(
+    expr: &ClassExpression<RcStr>,
+    namespaces: &BTreeMap<String, String>,
+) -> Option<String> {
     match expr {
         ClassExpression::Class(c) => Some(c.to_string()),
-        _ => None,
+        _ => Some(class_expression_to_manchester(expr, namespaces)),
     }
 }
 

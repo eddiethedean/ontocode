@@ -78,11 +78,19 @@ export interface SourceHint {
   column: number;
 }
 
+export interface EntityAxiomSummary {
+  kind: string;
+  display: string;
+  manchester?: string;
+  parent_iri?: string;
+  editable: boolean;
+}
+
 export interface EntityDetail {
   entity: Entity;
   parents: string[];
   children: string[];
-  axioms: string[];
+  axioms: EntityAxiomSummary[];
   source?: SourceHint;
   editable: boolean;
   document_path?: string;
@@ -112,6 +120,11 @@ export type PatchOp =
   | { op: "remove_comment"; entity_iri: string; value: string }
   | { op: "add_sub_class_of"; entity_iri: string; parent_iri: string }
   | { op: "remove_sub_class_of"; entity_iri: string; parent_iri: string }
+  | { op: "add_complex_sub_class_of"; entity_iri: string; manchester: string }
+  | { op: "remove_complex_sub_class_of"; entity_iri: string; manchester: string }
+  | { op: "add_equivalent_class"; entity_iri: string; manchester: string }
+  | { op: "remove_equivalent_class"; entity_iri: string; manchester: string }
+  | { op: "set_equivalent_class"; entity_iri: string; manchester: string }
   | { op: "set_deprecated"; entity_iri: string; value: boolean };
 
 export type PatchEntityKind =
@@ -138,4 +151,38 @@ export interface ApplyAxiomPatchParams {
   document_uri: string;
   patches: PatchOp[];
   preview_only?: boolean;
+}
+
+export interface TabularQueryResult {
+  columns: string[];
+  rows: Record<string, string>[];
+  truncated?: boolean;
+}
+
+export interface ManchesterCompletions {
+  classes: string[];
+  object_properties: string[];
+  data_properties: string[];
+  datatypes: string[];
+}
+
+export interface ParseManchesterParams {
+  expression: string;
+  axiom_kind: string;
+  entity_iri?: string;
+  document_uri?: string;
+}
+
+export interface ParseManchesterResult {
+  normalized: string;
+  turtle_fragment: string;
+  tree: unknown;
+  diagnostics: PatchDiagnostic[];
+  completions: ManchesterCompletions;
+}
+
+export interface SavedQuery {
+  name: string;
+  mode: "sql" | "sparql";
+  text: string;
 }

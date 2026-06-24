@@ -48,7 +48,22 @@ You can also right-click in the explorer to **Create Class**, **Create Property*
 
 Full editing reference: [Authoring guide](../authoring.md).
 
-## 5. (Optional) Validate from the CLI
+## 5. Query the workspace (v0.5)
+
+1. Run **OntoCode: Open Query Workbench** from the Command Palette.
+2. Choose **SQL** mode and run `SELECT short_name FROM classes`.
+3. Confirm rows appear (e.g. classes from your `.ttl` files).
+4. Switch to **SPARQL** and run `SELECT ?s ?p ?o WHERE { ?s ?p ?o } LIMIT 10`.
+
+## 6. Edit a complex axiom in Manchester (v0.5)
+
+Requires a Turtle ontology with a complex subclass (git clone users: `fixtures/complex-classes.ttl`).
+
+1. Select **Patient** (or another class with a restriction) in the explorer.
+2. In the Entity Inspector, click **Edit in Manchester** on the complex axiom row.
+3. Validate the expression, preview Turtle, and apply.
+
+## 7. (Optional) Validate from the CLI
 
 To catch lint and parse errors in CI or locally:
 
@@ -77,4 +92,5 @@ More help: [FAQ](../faq.md).
 | Install options (VSIX, offline) | [vscode-install.md](../vscode-install.md) |
 | Patch JSON automation | [patch-reference.md](../patch-reference.md) |
 | SQL / SPARQL queries | [sql-reference.md](../sql-reference.md) · [sparql-reference.md](../sparql-reference.md) |
+| Query workbench + Manchester | [authoring.md](../authoring.md) |
 | CI validation | [ci-integration.md](../ci-integration.md) |

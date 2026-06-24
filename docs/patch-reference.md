@@ -1,4 +1,4 @@
-# Patch reference (OntoIndex v0.4)
+# Patch reference (OntoIndex v0.5)
 
 Turtle write-back uses a JSON array of patch operations. The CLI (`ontoindex patch`) and LSP (`ontoindex/applyAxiomPatch`) accept the same format.
 
@@ -24,6 +24,11 @@ Turtle write-back uses a JSON array of patch operations. The CLI (`ontoindex pat
 | `remove_comment` | `entity_iri`, `value` | Remove a matching comment |
 | `add_sub_class_of` | `entity_iri`, `parent_iri` | Add `rdfs:subClassOf` parent (named class IRI) |
 | `remove_sub_class_of` | `entity_iri`, `parent_iri` | Remove a `subClassOf` axiom |
+| `add_complex_sub_class_of` | `entity_iri`, `manchester` | Add complex `SubClassOf` from Manchester expression |
+| `remove_complex_sub_class_of` | `entity_iri`, `manchester` | Remove complex `SubClassOf` matching Manchester text |
+| `add_equivalent_class` | `entity_iri`, `manchester` | Add `owl:equivalentClass` from Manchester expression |
+| `remove_equivalent_class` | `entity_iri`, `manchester` | Remove equivalent class axiom |
+| `set_equivalent_class` | `entity_iri`, `manchester` | Replace equivalent class axioms with one expression |
 | `set_deprecated` | `entity_iri`, `value` | Set `owl:deprecated` (`true` or `false`) |
 
 ### `kind` values for `create_entity`
@@ -105,6 +110,30 @@ Turtle write-back uses a JSON array of patch operations. The CLI (`ontoindex pat
   {
     "op": "delete_entity",
     "entity_iri": "http://example.org/people#LegacyClass"
+  }
+]
+```
+
+### Complex subclass (Manchester)
+
+```json
+[
+  {
+    "op": "add_complex_sub_class_of",
+    "entity_iri": "http://example.org/clinic#Patient",
+    "manchester": "ex:hasRecord some ex:MedicalRecord"
+  }
+]
+```
+
+### Equivalent class (Manchester)
+
+```json
+[
+  {
+    "op": "set_equivalent_class",
+    "entity_iri": "http://example.org/clinic#Staff",
+    "manchester": "ex:Employee"
   }
 ]
 ```

@@ -128,13 +128,13 @@ Global entity search.
 | `ontoindex/indexWorkspace` | **Implemented** |
 | `ontoindex/getCatalogSnapshot` | **Implemented** (not listed in early drafts; used by explorer) |
 | `ontoindex/getEntity` | **Implemented** |
-| `ontoindex/query` | Planned |
-| `ontoindex/sparql` | Planned |
+| `ontoindex/query` | **Implemented** (v0.5) |
+| `ontoindex/sparql` | **Implemented** (v0.5) |
 | `ontoindex/getGraph` | Planned |
 | `ontoindex/getSemanticDiff` | Planned |
 | `ontoindex/runReasoner` | Planned (v0.6) |
 | `ontoindex/applyAxiomPatch` | **Implemented** (v0.4) |
-| `ontoindex/parseManchester` | Planned (v0.5) |
+| `ontoindex/parseManchester` | **Implemented** (v0.5) |
 | `ontoindex/getExplanation` | Planned (v0.6) |
 | `ontoindex/runRobot` | Planned (v0.7b) |
 
@@ -148,11 +148,11 @@ Returns documents, entities, class hierarchy, and diagnostics for UI clients.
 
 ### `ontoindex/query`
 
-Runs SQL-style query (use CLI or Rust API in v0.2).
+Runs SQL-style query against the indexed workspace catalog (implemented v0.5).
 
 ### `ontoindex/sparql`
 
-Runs SPARQL query (use CLI or Rust API in v0.2).
+Runs SPARQL query against the indexed catalog (implemented v0.5).
 
 ### `ontoindex/getEntity`
 

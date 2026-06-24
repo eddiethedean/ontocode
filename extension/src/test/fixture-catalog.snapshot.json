@@ -2,9 +2,24 @@
   "diagnostics": [],
   "documents": [
     {
-      "base_iri": "http://example.org/people",
+      "base_iri": "http://example.org/clinic",
       "format": "turtle",
       "id": "doc-1",
+      "imports": [],
+      "namespaces": {
+        "ex": "http://example.org/clinic#",
+        "owl": "http://www.w3.org/2002/07/owl#",
+        "rdfs": "http://www.w3.org/2000/01/rdf-schema#"
+      },
+      "parse_error_location": null,
+      "parse_message": null,
+      "parse_status": "ok",
+      "path": "fixtures/complex-classes.ttl"
+    },
+    {
+      "base_iri": "http://example.org/people",
+      "format": "turtle",
+      "id": "doc-2",
       "imports": [],
       "namespaces": {
         "ex": "http://example.org/people#",
@@ -20,7 +35,7 @@
     {
       "base_iri": "http://example.org/org",
       "format": "owl",
-      "id": "doc-2",
+      "id": "doc-3",
       "imports": [
         "http://example.org/people"
       ],
@@ -38,6 +53,138 @@
     }
   ],
   "entities": [
+    {
+      "comments": [],
+      "deprecated": false,
+      "iri": "http://example.org/clinic#ClinicOrganization",
+      "kind": "class",
+      "labels": [
+        "Clinic Organization"
+      ],
+      "ontology_id": "http://example.org/clinic",
+      "short_name": "ClinicOrganization",
+      "source_location": {
+        "column": 2,
+        "end_byte": 1239,
+        "line": 38,
+        "start_byte": 982
+      }
+    },
+    {
+      "comments": [],
+      "deprecated": false,
+      "iri": "http://example.org/clinic#ClinicPerson",
+      "kind": "class",
+      "labels": [
+        "Clinic Person"
+      ],
+      "ontology_id": "http://example.org/clinic",
+      "short_name": "ClinicPerson",
+      "source_location": {
+        "column": 2,
+        "end_byte": 630,
+        "line": 8,
+        "start_byte": 231
+      }
+    },
+    {
+      "comments": [],
+      "deprecated": false,
+      "iri": "http://example.org/clinic#Employee",
+      "kind": "class",
+      "labels": [
+        "Employee"
+      ],
+      "ontology_id": "http://example.org/clinic",
+      "short_name": "Employee",
+      "source_location": {
+        "column": 26,
+        "end_byte": 885,
+        "line": 32,
+        "start_byte": 874
+      }
+    },
+    {
+      "comments": [],
+      "deprecated": false,
+      "iri": "http://example.org/clinic#MedicalRecord",
+      "kind": "class",
+      "labels": [
+        "Medical Record"
+      ],
+      "ontology_id": "http://example.org/clinic",
+      "short_name": "MedicalRecord",
+      "source_location": {
+        "column": 33,
+        "end_byte": 760,
+        "line": 17,
+        "start_byte": 500
+      }
+    },
+    {
+      "comments": [],
+      "deprecated": false,
+      "iri": "http://example.org/clinic#Patient",
+      "kind": "class",
+      "labels": [
+        "Patient"
+      ],
+      "ontology_id": "http://example.org/clinic",
+      "short_name": "Patient",
+      "source_location": {
+        "column": 2,
+        "line": 11,
+        "start_byte": 295
+      }
+    },
+    {
+      "comments": [],
+      "deprecated": false,
+      "iri": "http://example.org/clinic#Staff",
+      "kind": "class",
+      "labels": [
+        "Staff"
+      ],
+      "ontology_id": "http://example.org/clinic",
+      "short_name": "Staff",
+      "source_location": {
+        "column": 2,
+        "line": 29,
+        "start_byte": 764
+      }
+    },
+    {
+      "comments": [],
+      "deprecated": false,
+      "iri": "http://example.org/clinic#hasRecord",
+      "kind": "object_property",
+      "labels": [
+        "has record"
+      ],
+      "ontology_id": "http://example.org/clinic",
+      "short_name": "hasRecord",
+      "source_location": {
+        "column": 29,
+        "line": 16,
+        "start_byte": 454
+      }
+    },
+    {
+      "comments": [],
+      "deprecated": false,
+      "iri": "http://example.org/clinic#worksFor",
+      "kind": "object_property",
+      "labels": [
+        "works for (clinic)"
+      ],
+      "ontology_id": "http://example.org/clinic",
+      "short_name": "worksFor",
+      "source_location": {
+        "column": 2,
+        "line": 42,
+        "start_byte": 1096
+      }
+    },
     {
       "comments": [],
       "deprecated": false,
@@ -208,6 +355,13 @@
   ],
   "hierarchy": {
     "children": {
+      "http://example.org/clinic#ClinicPerson": [
+        "http://example.org/clinic#ClinicOrganization",
+        "http://example.org/clinic#Employee",
+        "http://example.org/clinic#MedicalRecord",
+        "http://example.org/clinic#Patient",
+        "http://example.org/clinic#Staff"
+      ],
       "http://example.org/people#Organization": [
         "http://example.org/org#Department"
       ],
@@ -217,6 +371,26 @@
       ]
     },
     "edges": [
+      {
+        "child": "http://example.org/clinic#ClinicOrganization",
+        "parent": "http://example.org/clinic#ClinicPerson"
+      },
+      {
+        "child": "http://example.org/clinic#Employee",
+        "parent": "http://example.org/clinic#ClinicPerson"
+      },
+      {
+        "child": "http://example.org/clinic#MedicalRecord",
+        "parent": "http://example.org/clinic#ClinicPerson"
+      },
+      {
+        "child": "http://example.org/clinic#Patient",
+        "parent": "http://example.org/clinic#ClinicPerson"
+      },
+      {
+        "child": "http://example.org/clinic#Staff",
+        "parent": "http://example.org/clinic#ClinicPerson"
+      },
       {
         "child": "http://example.org/people#Organization",
         "parent": "http://example.org/people#Thing"
@@ -231,6 +405,21 @@
       }
     ],
     "parents": {
+      "http://example.org/clinic#ClinicOrganization": [
+        "http://example.org/clinic#ClinicPerson"
+      ],
+      "http://example.org/clinic#Employee": [
+        "http://example.org/clinic#ClinicPerson"
+      ],
+      "http://example.org/clinic#MedicalRecord": [
+        "http://example.org/clinic#ClinicPerson"
+      ],
+      "http://example.org/clinic#Patient": [
+        "http://example.org/clinic#ClinicPerson"
+      ],
+      "http://example.org/clinic#Staff": [
+        "http://example.org/clinic#ClinicPerson"
+      ],
       "http://example.org/org#Department": [
         "http://example.org/people#Organization"
       ],

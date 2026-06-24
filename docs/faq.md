@@ -108,7 +108,7 @@ No. The LSP has no authentication. Use stdio with a trusted editor only. See [se
 
 **When will Manchester editing / reasoning ship?**
 
-Manchester MVP is planned for v0.5; reasoning via OntoLogos for v0.6. See [design/ROADMAP.md](design/ROADMAP.md).
+Manchester MVP shipped in v0.5; reasoning via OntoLogos is planned for v0.6. See [design/ROADMAP.md](design/ROADMAP.md).
 
 **How does this compare to Protégé?**
 

@@ -1,4 +1,5 @@
 use crate::error::{OwlError, Result};
+use crate::manchester::{class_expression_to_turtle_fragment, parse_class_expression};
 use crate::span::{entity_block_range, short_name_from_iri, ByteRange};
 use ontoindex_core::{EntityKind, OntologyFormat, SourceLocation};
 use serde::{Deserialize, Serialize};
@@ -20,6 +21,11 @@ pub enum PatchOp {
     RemoveComment { entity_iri: String, value: String },
     AddSubClassOf { entity_iri: String, parent_iri: String },
     RemoveSubClassOf { entity_iri: String, parent_iri: String },
+    AddComplexSubClassOf { entity_iri: String, manchester: String },
+    RemoveComplexSubClassOf { entity_iri: String, manchester: String },
+    AddEquivalentClass { entity_iri: String, manchester: String },
+    RemoveEquivalentClass { entity_iri: String, manchester: String },
+    SetEquivalentClass { entity_iri: String, manchester: String },
     SetDeprecated { entity_iri: String, value: bool },
 }
 
@@ -155,6 +161,22 @@ fn apply_one_patch(
         PatchOp::RemoveSubClassOf { entity_iri, parent_iri } => {
             remove_subclass_triple(text, entity_iri, parent_iri, namespaces)
         }
+        PatchOp::AddComplexSubClassOf { entity_iri, manchester } => {
+            add_complex_axiom(text, entity_iri, manchester, "rdfs:subClassOf", namespaces)
+        }
+        PatchOp::RemoveComplexSubClassOf { entity_iri, manchester } => {
+            remove_complex_axiom(text, entity_iri, manchester, "rdfs:subClassOf", namespaces)
+        }
+        PatchOp::AddEquivalentClass { entity_iri, manchester } => {
+            add_complex_axiom(text, entity_iri, manchester, "owl:equivalentClass", namespaces)
+        }
+        PatchOp::RemoveEquivalentClass { entity_iri, manchester } => {
+            remove_complex_axiom(text, entity_iri, manchester, "owl:equivalentClass", namespaces)
+        }
+        PatchOp::SetEquivalentClass { entity_iri, manchester } => {
+            remove_predicate_triples(text, entity_iri, "owl:equivalentClass", namespaces)?;
+            add_complex_axiom(text, entity_iri, manchester, "owl:equivalentClass", namespaces)
+        }
         PatchOp::SetDeprecated { entity_iri, value } => {
             if *value {
                 add_object_triple(text, entity_iri, "owl:deprecated", "true", namespaces)
@@ -238,6 +260,72 @@ fn add_object_triple(
     }
     let triple = format!("    {predicate} {object} ;\n");
     insert_into_entity_block(text, entity_iri, &triple, namespaces)
+}
+
+fn add_complex_axiom(
+    text: &mut String,
+    entity_iri: &str,
+    manchester: &str,
+    predicate: &str,
+    namespaces: &BTreeMap<String, String>,
+) -> Result<()> {
+    let parsed = parse_class_expression(manchester, namespaces)?;
+    let triple = class_expression_to_turtle_fragment(&parsed.expression, predicate, namespaces)?;
+    insert_multiline_into_entity_block(text, entity_iri, &triple, namespaces)
+}
+
+fn remove_complex_axiom(
+    text: &mut String,
+    entity_iri: &str,
+    manchester: &str,
+    predicate: &str,
+    namespaces: &BTreeMap<String, String>,
+) -> Result<()> {
+    let _normalized = parse_class_expression(manchester, namespaces)
+        .map(|p| p.normalized)
+        .unwrap_or_else(|_| manchester.to_string());
+    remove_line_matching(
+        text,
+        entity_iri,
+        |line| line.contains(predicate) || line.contains("owl:Restriction"),
+        namespaces,
+    )
+}
+
+fn insert_multiline_into_entity_block(
+    text: &mut String,
+    entity_iri: &str,
+    insertion: &str,
+    namespaces: &BTreeMap<String, String>,
+) -> Result<()> {
+    let entity = ontoindex_core::Entity {
+        iri: entity_iri.to_string(),
+        short_name: short_name_from_iri(entity_iri),
+        kind: EntityKind::Class,
+        ontology_id: String::new(),
+        source_location: find_entity_location(text, entity_iri, namespaces),
+        labels: Vec::new(),
+        comments: Vec::new(),
+        deprecated: false,
+    };
+    let range = entity_block_range(text, &entity)
+        .ok_or_else(|| OwlError::EntityNotFound(entity_iri.to_string()))?;
+    let block = &text[range.start as usize..range.end as usize];
+    let trimmed = block.trim_end();
+    let mut new_block = block.to_string();
+    if trimmed.ends_with('.') {
+        if let Some(pos) = new_block.trim_end().rfind('.') {
+            let base = new_block[..pos].trim_end();
+            new_block = format!("{base} ;\n{insertion}.");
+        }
+    } else if !trimmed.ends_with(';') {
+        new_block.push_str(" ;\n");
+        new_block.push_str(insertion);
+    } else {
+        new_block.push_str(insertion);
+    }
+    replace_range(text, range, &new_block);
+    Ok(())
 }
 
 fn add_subclass_triple(

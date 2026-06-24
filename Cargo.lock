@@ -949,7 +949,7 @@ checksum = "384b8ab6d37215f3c5301a95a4accb5d64aa607f1fcb26a11b5303878451b4fe"
 
 [[package]]
 name = "ontocode"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "ontoindex-catalog",
  "ontoindex-core",
@@ -963,7 +963,7 @@ dependencies = [
 
 [[package]]
 name = "ontoindex-catalog"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "ontoindex-core",
  "ontoindex-diagnostics",
@@ -976,7 +976,7 @@ dependencies = [
 
 [[package]]
 name = "ontoindex-cli"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "anyhow",
  "clap 4.6.1",
@@ -989,7 +989,7 @@ dependencies = [
 
 [[package]]
 name = "ontoindex-core"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "hex",
  "ignore",
@@ -1002,7 +1002,7 @@ dependencies = [
 
 [[package]]
 name = "ontoindex-diagnostics"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "ontoindex-core",
  "regex",
@@ -1010,7 +1010,7 @@ dependencies = [
 
 [[package]]
 name = "ontoindex-lsp"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "crossbeam-channel",
  "lsp-server",
@@ -1018,6 +1018,7 @@ dependencies = [
  "ontoindex-catalog",
  "ontoindex-core",
  "ontoindex-owl",
+ "ontoindex-query",
  "serde",
  "serde_json",
  "tempfile",
@@ -1027,7 +1028,7 @@ dependencies = [
 
 [[package]]
 name = "ontoindex-owl"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "horned-functional",
  "horned-owl 1.4.0",
@@ -1041,7 +1042,7 @@ dependencies = [
 
 [[package]]
 name = "ontoindex-parser"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "ontoindex-core",
  "oxigraph",
@@ -1053,7 +1054,7 @@ dependencies = [
 
 [[package]]
 name = "ontoindex-query"
-version = "0.4.0"
+version = "0.5.0"
 dependencies = [
  "csv",
  "ontoindex-catalog",

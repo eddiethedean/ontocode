@@ -11,6 +11,8 @@ import {
   assertGetEntityResult,
   assertIndexWorkspaceResult,
   assertApplyPatchResult,
+  assertTabularQueryResult,
+  assertParseManchesterResult,
 } from "./protocolGuards";
 import {
   ApplyAxiomPatchParams,
@@ -18,6 +20,9 @@ import {
   CatalogSnapshot,
   GetEntityResult,
   IndexWorkspaceResult,
+  ParseManchesterParams,
+  ParseManchesterResult,
+  TabularQueryResult,
 } from "./protocol";
 import {
   bundledServerPath,
@@ -159,6 +164,31 @@ export async function applyAxiomPatch(
     params
   );
   return assertApplyPatchResult(result);
+}
+
+export async function runSqlQuery(sql: string): Promise<TabularQueryResult> {
+  const c = requireClient();
+  const result = await c.sendRequest<unknown>("ontoindex/query", { sql });
+  return assertTabularQueryResult(result);
+}
+
+export async function runSparqlQuery(
+  query: string
+): Promise<TabularQueryResult> {
+  const c = requireClient();
+  const result = await c.sendRequest<unknown>("ontoindex/sparql", { query });
+  return assertTabularQueryResult(result);
+}
+
+export async function parseManchester(
+  params: ParseManchesterParams
+): Promise<ParseManchesterResult> {
+  const c = requireClient();
+  const result = await c.sendRequest<unknown>(
+    "ontoindex/parseManchester",
+    params
+  );
+  return assertParseManchesterResult(result);
 }
 
 function requireClient(): LanguageClient {

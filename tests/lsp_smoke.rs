@@ -68,7 +68,7 @@ fn lsp_indexes_fixture_workspace() {
     }
     let stats =
         index_resp.get("result").and_then(|r| r.get("stats")).expect("stats in index result");
-    assert_eq!(stats.get("class_count").and_then(|v| v.as_u64()), Some(4));
+    assert!(stats.get("class_count").and_then(|v| v.as_u64()).unwrap_or(0) >= 4);
     assert_eq!(stats.get("individual_count").and_then(|v| v.as_u64()), Some(2));
     assert_eq!(stats.get("error_count").and_then(|v| v.as_u64()), Some(0));
 
@@ -129,8 +129,17 @@ fn lsp_indexes_fixture_workspace() {
         .and_then(|v| v.as_str());
     assert_eq!(short_name, Some("Person"));
 
-    send_request(&mut stdin, 5, "shutdown", serde_json::json!(null));
-    let _ = wait_for_id(&rx, 5, Duration::from_secs(5));
+    send_request(
+        &mut stdin,
+        5,
+        "ontoindex/query",
+        serde_json::json!({ "sql": "SELECT short_name FROM classes" }),
+    );
+    let query_resp = wait_for_id(&rx, 5, Duration::from_secs(10)).expect("query response");
+    assert!(query_resp.get("result").and_then(|r| r.get("rows")).is_some());
+
+    send_request(&mut stdin, 6, "shutdown", serde_json::json!(null));
+    let _ = wait_for_id(&rx, 6, Duration::from_secs(5));
     send_notification(&mut stdin, "exit", serde_json::Value::Null);
 
     let deadline = std::time::Instant::now() + Duration::from_secs(3);

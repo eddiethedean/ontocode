@@ -12,9 +12,9 @@ use support::fixture_catalog;
 fn indexes_fixture_ontology() {
     let stats = fixture_catalog().data().stats();
 
-    assert_eq!(stats.ontology_count, 2);
-    assert_eq!(stats.class_count, 4);
-    assert_eq!(stats.object_property_count, 1);
+    assert_eq!(stats.ontology_count, 3);
+    assert_eq!(stats.class_count, 10);
+    assert_eq!(stats.object_property_count, 3);
     assert_eq!(stats.data_property_count, 1);
     assert_eq!(stats.annotation_property_count, 1);
     assert_eq!(stats.individual_count, 2);
@@ -208,7 +208,7 @@ fn sql_query_properties_and_axioms_tables() {
 
     let properties =
         query_catalog(&catalog, "SELECT short_name, kind FROM properties").expect("properties");
-    assert_eq!(properties.rows.len(), 3);
+    assert_eq!(properties.rows.len(), 5);
 
     let axioms = query_catalog(&catalog, "SELECT axiom_kind FROM axioms").expect("axioms");
     assert!(axioms.rows.iter().any(|row| row.get("axiom_kind").map(String::as_str)

@@ -1,8 +1,9 @@
 use crate::handlers::{
     handle_get_catalog_snapshot, handle_get_entity, handle_goto_definition, handle_hover,
-    handle_standard_request, handle_workspace_symbol, StandardRequestOutcome,
+    handle_query, handle_sparql, handle_standard_request, handle_workspace_symbol,
+    StandardRequestOutcome,
 };
-use crate::protocol::GetEntityParams;
+use crate::protocol::{GetEntityParams, QueryParams, SparqlParams};
 use crate::state::{path_to_uri, ServerState};
 use lsp_types::{
     GotoDefinitionParams, GotoDefinitionResponse, HoverContents, HoverParams, Position,
@@ -87,7 +88,7 @@ fn get_catalog_snapshot_returns_fixture_entities() {
     let state = indexed_state();
     let snapshot = handle_get_catalog_snapshot(&state).expect("snapshot");
 
-    assert_eq!(snapshot.documents.len(), 2);
+    assert_eq!(snapshot.documents.len(), 3);
     assert!(snapshot.entities.iter().any(|e| e.iri == "http://example.org/people#Person"));
     assert!(!snapshot.hierarchy.edges.is_empty());
 }
@@ -264,4 +265,25 @@ fn index_workspace_params_accept_snake_case_and_legacy_camel_case() {
         serde_json::from_value(serde_json::json!({ "workspaceUri": "file:///tmp/ws" }))
             .expect("workspaceUri alias");
     assert_eq!(legacy.workspace_uri.as_deref(), Some("file:///tmp/ws"));
+}
+
+#[test]
+fn query_returns_classes() {
+    let state = indexed_state();
+    let result =
+        handle_query(&state, QueryParams { sql: "SELECT short_name FROM classes".to_string() })
+            .expect("query");
+    assert!(!result.columns.is_empty());
+    assert!(!result.rows.is_empty());
+}
+
+#[test]
+fn sparql_returns_triples() {
+    let state = indexed_state();
+    let result = handle_sparql(
+        &state,
+        SparqlParams { query: "SELECT ?s ?p ?o WHERE { ?s ?p ?o } LIMIT 5".to_string() },
+    )
+    .expect("sparql");
+    assert!(!result.columns.is_empty());
 }

@@ -83,7 +83,7 @@ Exit criteria:
 
 User docs: [docs/authoring.md](../authoring.md), [docs/patch-reference.md](../patch-reference.md).
 
-## v0.5 — Query workbench + Manchester MVP
+## v0.5 — Query workbench + Manchester MVP (shipped as v0.5.0)
 
 Deliverables:
 
@@ -96,7 +96,7 @@ Exit criteria:
 
 - User can query ontologies in VS Code and edit complex subclass/equivalent axioms via Manchester.
 
-**Dependencies:** `sqlparser`, `oxigraph`; `horned-functional`; optional `owl-ms-language-server` for Manchester assist.
+**Dependencies:** `sqlparser`, `oxigraph`; Manchester parse/serialize in `ontoindex-owl` (catalog pickers for assist; `owl-ms-language-server` deferred).
 
 ## v0.6 — Reasoning
 

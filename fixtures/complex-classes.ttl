@@ -1,0 +1,45 @@
+@prefix ex: <http://example.org/clinic#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+<http://example.org/clinic> a owl:Ontology ;
+    rdfs:label "Clinic Ontology" .
+
+ex:ClinicPerson a owl:Class ;
+    rdfs:label "Clinic Person" .
+
+ex:Patient a owl:Class ;
+    rdfs:label "Patient" ;
+    rdfs:subClassOf ex:ClinicPerson ,
+        [
+            a owl:Restriction ;
+            owl:onProperty ex:hasRecord ;
+            owl:someValuesFrom ex:MedicalRecord
+        ] .
+
+ex:MedicalRecord a owl:Class ;
+    rdfs:label "Medical Record" ;
+    rdfs:subClassOf ex:ClinicPerson .
+
+ex:hasRecord a owl:ObjectProperty ;
+    rdfs:label "has record" ;
+    rdfs:domain ex:Patient ;
+    rdfs:range ex:MedicalRecord .
+
+ex:Staff a owl:Class ;
+    rdfs:label "Staff" ;
+    rdfs:subClassOf ex:ClinicPerson ;
+    owl:equivalentClass ex:Employee .
+
+ex:Employee a owl:Class ;
+    rdfs:label "Employee" ;
+    rdfs:subClassOf ex:ClinicPerson .
+
+ex:ClinicOrganization a owl:Class ;
+    rdfs:label "Clinic Organization" ;
+    rdfs:subClassOf ex:ClinicPerson .
+
+ex:worksFor a owl:ObjectProperty ;
+    rdfs:label "works for (clinic)" ;
+    rdfs:domain ex:ClinicPerson ;
+    rdfs:range ex:ClinicOrganization .

@@ -11,14 +11,19 @@ Migration guides: [Migration index](migration/README.md)
 - **`ontoindex-reasoner` crate** — thin OntoLogos 0.9.0 facade (`el`, `rl`, `rdfs` adapters; `dl`/`auto` stubbed until OntoLogos 1.0)
 - CLI **`ontoindex classify`** and **`ontoindex explain`**
 - LSP **`ontoindex/runReasoner`** and **`ontoindex/getExplanation`**
-- VS Code **Reasoner Results** panel, **Explanation** panel, hierarchy mode toggle (`asserted` / `inferred` / `combined`)
-- Settings: `ontocode.reasoner.default`, `ontocode.reasoner.autoProfile`, `ontocode.hierarchy.mode`
-- User guide: [Reasoner guide](guides/reasoner.md)
+- VS Code **Reasoner Results** panel, **Explanation** panel, hierarchy mode toggle
+- Enterprise and adoption documentation packs (see [CHANGELOG.md](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md))
 
 ### Changed
 
 - `CatalogSnapshot` includes optional `reasoner` metadata after classification
 - Workspace crates bumped to **0.6.0**
+
+### Fixed
+
+- Turtle patch write-back corruption, file-size limit bypasses, ontology_id joins, SQL row-cap/alias bugs, extension XSS/stale-async races
+
+See [GitHub CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) for the full list and v0.5.0 and earlier.
 
 ## [0.5.0] - 2026-06-24
 

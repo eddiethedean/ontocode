@@ -56,7 +56,7 @@ Requires the `CARGO_REGISTRY_TOKEN` repository secret.
 
 ## Published crates (dependency order)
 
-`ontoindex-core` → `ontoindex-parser` → `ontoindex-owl` → `ontoindex-diagnostics` → `ontoindex-catalog` → `ontoindex-query` → `ontoindex-lsp` → `ontoindex-cli`
+`ontoindex-core` → `ontoindex-parser` → `ontoindex-owl` → `ontoindex-diagnostics` → `ontoindex-catalog` → `ontoindex-query` → `ontoindex-reasoner` → `ontoindex-lsp` → `ontoindex-cli`
 
 ## VS Code Marketplace
 

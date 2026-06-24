@@ -50,7 +50,7 @@
 | Class hierarchy tree | Named-parent edges; **inferred/combined** after reasoner run |
 | Reasoning | **EL / RL / RDFS** via OntoLogos 0.9; **DL/auto** stubbed until OntoLogos 1.0 |
 | CLI release binaries | Linux x64 only; macOS/Windows use `cargo install` or bundled LSP in VSIX |
-| Scale | See [workspace limits](workspace-limits.md) |
+| Scale | See [workspace limits](workspace-limits.md) (includes walk entry cap) |
 
 ## Where to learn more
 

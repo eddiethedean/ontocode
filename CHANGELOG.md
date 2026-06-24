@@ -16,11 +16,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Settings: `ontocode.reasoner.default`, `ontocode.reasoner.autoProfile`, `ontocode.hierarchy.mode`
 - Fixtures: `fixtures/reasoner-el.ttl`, `fixtures/reasoner-unsat.ttl`
 - User guide: [docs/guides/reasoner.md](docs/guides/reasoner.md)
+- **Enterprise documentation pack** — production-readiness, enterprise-deployment, performance-sizing, LGPL compliance guides
+- **Documentation adoption** — concepts, best-practices, Protégé coexistence, Rust library guide, migration index, crate READMEs
+- **`read_file_capped`** / **`parse_boolean_literal`** helpers in `ontoindex-core`
 
 ### Changed
 
 - `CatalogSnapshot` includes optional `reasoner` metadata after classification
 - Workspace crates bumped to **0.6.0**
+- SQL JSON export uses column-ordered row arrays
+- Inspector webview loads entity data via `postMessage` (no inline `<script>` embedding)
+
+### Fixed
+
+- **Turtle patch write-back:** multi-statement subject blocks, CRLF byte spans, predicate-object removal (not line deletion), literal-safe separator cleanup
+- **Resource limits:** capped file reads (scanner, LSP disk fallback, patch apply); `MAX_ENTITIES` fail-fast during catalog build; filesystem walk entry cap; index worker job coalescing
+- **`ontology_id` mismatch** between entities and axioms/annotations when `owl:Ontology` is declared
+- **SQL:** row cap during iteration (not after full materialization); `SELECT col AS alias` projection
+- **`owl:deprecated` false positives** from substring `.contains("true")`
+- **Extension:** inspector/query/reasoner stale-async guards; stricter LSP protocol validation
+
+[0.6.0]: https://github.com/eddiethedean/ontocode/releases/tag/v0.6.0
 
 ## [0.5.0] - 2026-06-24
 

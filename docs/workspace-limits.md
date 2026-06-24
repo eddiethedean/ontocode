@@ -10,6 +10,7 @@ Constants live in [`limits.rs` on GitHub](https://github.com/eddiethedean/ontoco
 | Guideline | Value |
 |-----------|-------|
 | Ontology files | Up to **10,000** per workspace (`MAX_SCAN_FILES`) |
+| Filesystem walk entries | Up to **500,000** visited paths during scan (`MAX_SCAN_WALK_ENTRIES`) |
 | Single file size | Up to **50 MB** on disk or in an LSP open buffer (`MAX_FILE_BYTES`) |
 | Open editor buffers (LSP) | Up to **256** tracked paths (`MAX_OPEN_DOCUMENTS`) |
 | Entities | Up to **1,000,000** per workspace (`MAX_ENTITIES`) |

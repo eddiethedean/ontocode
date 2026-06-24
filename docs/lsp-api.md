@@ -8,16 +8,16 @@ LSP JSON uses **snake_case** for enums serialized from Rust (`EntityKind`, `Pars
 
 **Source of truth:**
 
-- Types: [`crates/ontoindex-lsp/src/protocol.rs`](../crates/ontoindex-lsp/src/protocol.rs)
-- JSON Schema (v0.3 subset, codegen planned v0.4): [`docs/lsp-protocol.schema.json`](lsp-protocol.schema.json)
-- Handlers: [`crates/ontoindex-lsp/src/handlers.rs`](../crates/ontoindex-lsp/src/handlers.rs)
-- Extension client: [`extension/src/lsp/client.ts`](../extension/src/lsp/client.ts)
+- Types: [`protocol.rs` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/crates/ontoindex-lsp/src/protocol.rs)
+- JSON Schema (v0.4 subset): [`docs/lsp-protocol.schema.json`](lsp-protocol.schema.json)
+- Handlers: [`handlers.rs` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/crates/ontoindex-lsp/src/handlers.rs)
+- Extension client: [`client.ts` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/extension/src/lsp/client.ts)
 
 ## Transport
 
 - stdio (VS Code language client)
 
-## Standard LSP capabilities (v0.3)
+## Standard LSP capabilities (v0.4)
 
 | Capability | Status |
 |------------|--------|
@@ -25,11 +25,11 @@ LSP JSON uses **snake_case** for enums serialized from Rust (`EntityKind`, `Pars
 | `textDocument/documentSymbol` | Implemented |
 | `workspace/symbol` | Implemented |
 | `textDocument/definition` | Implemented |
-| Diagnostics | **Implemented** (v0.3) — server pushes `textDocument/publishDiagnostics` after each reindex |
+| Diagnostics | **Implemented** — server pushes `textDocument/publishDiagnostics` after each reindex |
 | Completion | Planned |
 | Rename | Planned |
 
-## Custom methods (v0.3)
+## Custom methods (v0.4)
 
 All custom methods use the `ontoindex/` prefix.
 

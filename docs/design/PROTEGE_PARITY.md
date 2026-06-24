@@ -17,21 +17,21 @@
 
 ### OWL 2 DL authoring (hybrid UX)
 
-| Item | Spec | Dependency | v0.3 |
+| Item | Spec | Dependency | v0.4 |
 |------|------|------------|------|
-| Quick forms: labels, comments, deprecated | [OWL_AUTHORING_SPEC.md](OWL_AUTHORING_SPEC.md) | `horned-owl` | Partial (read-only inspector) |
-| Quick forms: `SubClassOf`, domain, range, property characteristics | [OWL_AUTHORING_SPEC.md](OWL_AUTHORING_SPEC.md) | `horned-owl` | No |
+| Quick forms: labels, comments, deprecated | [OWL_AUTHORING_SPEC.md](OWL_AUTHORING_SPEC.md) | `horned-owl` | Yes (Turtle, v0.4) |
+| Quick forms: `SubClassOf`, domain, range, property characteristics | [OWL_AUTHORING_SPEC.md](OWL_AUTHORING_SPEC.md) | `horned-owl` | Partial (`SubClassOf` named parent only) |
 | Manchester editor for complex class expressions | [OWL_AUTHORING_SPEC.md](OWL_AUTHORING_SPEC.md) | `horned-functional` | No |
-| Axiom types: `SubClassOf`, `EquivalentClasses`, `DisjointClasses` | [OWL_AUTHORING_SPEC.md](OWL_AUTHORING_SPEC.md) | `horned-owl` | Partial (extract only) |
-| Object/data property domain, range, characteristics | [OWL_AUTHORING_SPEC.md](OWL_AUTHORING_SPEC.md) | `horned-owl` | Partial |
-| Class/object/data property assertions on individuals | [OWL_AUTHORING_SPEC.md](OWL_AUTHORING_SPEC.md) | `horned-owl` | Partial |
-| Annotation assertions | [OWL_AUTHORING_SPEC.md](OWL_AUTHORING_SPEC.md) | `horned-owl` | Partial |
-| Horned-OWL manipulation layer + round-trip tests | [ADR-0013](adr/0013-dual-stack-oxigraph-horned-owl.md) | `horned-owl`, `horned-functional` | No (Oxigraph extraction only) |
-| Patch-based write-back from OWL objects | [ADR-0006](adr/0006-patch-based-write-back.md) | in-house patches | No |
+| Axiom types: `SubClassOf`, `EquivalentClasses`, `DisjointClasses` | [OWL_AUTHORING_SPEC.md](OWL_AUTHORING_SPEC.md) | `horned-owl` | Partial (extract + simple `SubClassOf` edit) |
+| Object/data property domain, range, characteristics | [OWL_AUTHORING_SPEC.md](OWL_AUTHORING_SPEC.md) | `horned-owl` | Partial (extract only) |
+| Class/object/data property assertions on individuals | [OWL_AUTHORING_SPEC.md](OWL_AUTHORING_SPEC.md) | `horned-owl` | Partial (create individual) |
+| Annotation assertions | [OWL_AUTHORING_SPEC.md](OWL_AUTHORING_SPEC.md) | `horned-owl` | Partial (labels/comments) |
+| Horned-OWL manipulation layer + round-trip tests | [ADR-0013](adr/0013-dual-stack-oxigraph-horned-owl.md) | `horned-owl`, `horned-functional` | Yes (Turtle catalog + consistency tests) |
+| Patch-based write-back from OWL objects | [ADR-0006](adr/0006-patch-based-write-back.md) | in-house patches | Yes (Turtle, v0.4) |
 
 ### Reasoning (Rust-native — [ADR-0014](adr/0014-rust-native-reasoners-only.md))
 
-| Item | Spec | Dependency | v0.3 |
+| Item | Spec | Dependency | v0.4 |
 |------|------|------------|------|
 | `el` adapter (OWL EL) | [REASONER_SPEC.md](REASONER_SPEC.md) | OntoLogos `ontologos-el` | No |
 | `dl` adapter (OWL 2 DL classification + consistency) | [REASONER_SPEC.md](REASONER_SPEC.md) | OntoLogos `ontologos-dl` 1.0.0 | No |
@@ -43,7 +43,7 @@
 
 ### Editor & LSP
 
-| Item | Spec | v0.3 |
+| Item | Spec | v0.4 |
 |------|------|------|
 | Diagnostics → Problems panel | [SPEC.md](SPEC.md) §9 | Yes |
 | Completion | [SPEC.md](SPEC.md) §9 | No |
@@ -55,7 +55,7 @@
 
 ### Workflow & platform
 
-| Item | Spec | v0.3 |
+| Item | Spec | v0.4 |
 |------|------|------|
 | Imports management UI | [SPEC.md](SPEC.md) | No |
 | SQL + SPARQL query workbench | [SPEC.md](SPEC.md) | CLI only |
@@ -64,12 +64,12 @@
 | Graph visualization (class, property, import, neighborhood) | [ROADMAP.md](ROADMAP.md) v0.7 | No |
 | Documentation export (Markdown + HTML) | [ROADMAP.md](ROADMAP.md) v0.9 | No |
 | CI validation command | CLI `validate` | Yes |
-| VS Code Marketplace publish | [v1.0_BACKLOG.md](v1.0_BACKLOG.md) | No (VSIX from Releases) |
+| VS Code Marketplace publish | [v1.0_BACKLOG.md](v1.0_BACKLOG.md) | Yes |
 | Migration guide from Protégé | [v1.0_BACKLOG.md](v1.0_BACKLOG.md) | No |
 
 ### OBO & biomedical
 
-| Item | Spec | Dependency | v0.3 |
+| Item | Spec | Dependency | v0.4 |
 |------|------|------------|------|
 | OBO format read/write | [OBO_ROBOT_SPEC.md](OBO_ROBOT_SPEC.md) | `fastobo`, `fastobo-owl` | No |
 | ROBOT interop (`validate`, `merge`, `report`) | [OBO_ROBOT_SPEC.md](OBO_ROBOT_SPEC.md) | ROBOT CLI | No |

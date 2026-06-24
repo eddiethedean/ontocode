@@ -1,0 +1,3 @@
+mkdocs>=1.6,<2
+# Pin below 9.7.2 to avoid stderr MkDocs 2.0 banner on every build (see mkdocs-material #8567)
+mkdocs-material>=9.5,<9.7.2

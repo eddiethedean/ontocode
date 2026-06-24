@@ -66,7 +66,7 @@
 
 | Area | OntoIndex owns | Why |
 |------|----------------|-----|
-| Workspace scanner security | Path jail, resource limits | Product-specific ([`path_jail.rs`](../../crates/ontoindex-core/src/path_jail.rs)) |
+| Workspace scanner security | Path jail, resource limits | Product-specific ([`path_jail.rs` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/crates/ontoindex-core/src/path_jail.rs)) |
 | Catalog schema + SQL virtual tables | Table design, entity API | Product-specific |
 | Ontology quality lints | Duplicate labels, orphans, missing labels | Rules on catalog; no ontology-linter crate |
 | LSP custom protocol | `ontoindex/*` methods, snake_case enums | [ADR-0007](adr/0007-language-server-boundary.md), [ADR-0012](adr/0012-lsp-json-snake-case-enums.md) |

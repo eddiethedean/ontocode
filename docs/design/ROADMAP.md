@@ -61,36 +61,27 @@ Exit criteria:
 
 **Dependencies:** `oxigraph` (parse errors); in-house catalog lint rules in `ontoindex-diagnostics`. See [DEPENDENCY_MATRIX.md](DEPENDENCY_MATRIX.md).
 
-## v0.4a — Simple write-back
+## v0.4 — Write-back + Horned-OWL (shipped as v0.4.0)
 
 Deliverables:
 
 - create class / property / individual (basic)
-- edit labels/comments
+- edit labels/comments, simple `SubClassOf`, deprecated flag
 - delete entity
-- patch-based write-back for annotations and simple `SubClassOf`
-- source-location fidelity ([ADR-0006](adr/0006-patch-based-write-back.md))
-
-Exit criteria:
-
-- User can edit labels and simple subclass axioms without Protégé.
-
-**Dependencies:** `ontoindex-owl` (planned); patch layer in-house per [ADR-0006](adr/0006-patch-based-write-back.md).
-
-## v0.4b — Horned-OWL integration
-
-Deliverables:
-
-- `ontoindex-owl` crate ([ADR-0013](adr/0013-dual-stack-oxigraph-horned-owl.md))
-- Horned-OWL axiom model in catalog
+- patch-based write-back for Turtle ([ADR-0006](adr/0006-patch-based-write-back.md))
+- `ontoindex-owl` crate — Horned-OWL catalog bridge ([ADR-0013](adr/0013-dual-stack-oxigraph-horned-owl.md))
 - Oxigraph ↔ Horned-OWL consistency tests
-- Protégé round-trip fixture suite started
+- LSP `ontoindex/applyAxiomPatch`, CLI `ontoindex patch`
+- Editable Entity Inspector in VS Code
 
 Exit criteria:
 
-- Catalog axioms for editing come from Horned-OWL, not triple grep.
+- User can edit labels and simple subclass axioms in Turtle without Protégé.
+- Catalog axioms for Turtle editing come from Horned-OWL.
 
-**Dependencies:** `horned-owl`, `horned-functional` via `ontoindex-owl` ([ADR-0016](adr/0016-dependency-first-implementation.md) Appendix A).
+**Dependencies:** `horned-owl`, `horned-functional` via `ontoindex-owl` ([ADR-0016](adr/0016-dependency-first-implementation.md)).
+
+User docs: [docs/authoring.md](../authoring.md), [docs/patch-reference.md](../patch-reference.md).
 
 ## v0.5 — Query workbench + Manchester MVP
 

@@ -4,7 +4,7 @@ OntoCode / OntoIndex is licensed under **MIT OR Apache-2.0** at your option (see
 
 This document summarizes **third-party licenses** for dependencies named in [DEPENDENCY_MATRIX.md](DEPENDENCY_MATRIX.md). It is not legal advice. Regenerate NOTICES before releases when dependency sets change.
 
-## Direct dependencies (shipped v0.3)
+## Direct dependencies (shipped v0.4)
 
 | Crate | License | Distribution notes |
 |-------|---------|-------------------|
@@ -14,14 +14,14 @@ This document summarizes **third-party licenses** for dependencies named in [DEP
 | `regex` | MIT OR Apache-2.0 | Compatible (`ontoindex-diagnostics`) |
 | `lsp-server` | MIT OR Apache-2.0 | Compatible |
 | `lsp-types` | MIT | Compatible |
+| `horned-owl` | **LGPL-3.0** | Rust crate link via `ontoindex-owl`. Document LGPL in release artifacts; provide source offer per LGPL-3.0 if distributing binaries. |
+| `horned-functional` | MIT | Compatible (`ontoindex-owl`) |
 | `serde`, `clap`, `thiserror`, etc. | MIT OR Apache-2.0 | Compatible |
 
-## Planned dependencies (v0.4+)
+## Planned dependencies (v0.5+)
 
 | Crate | License | Distribution notes |
 |-------|---------|-------------------|
-| `horned-owl` | **LGPL-3.0** | Use as a **dynamic library dependency** (Rust crate link). Document LGPL in release artifacts; provide source offer per LGPL-3.0 if distributing binaries. |
-| `horned-functional` | MIT | Compatible |
 | `ontologos-*` | MIT OR Apache-2.0 | Compatible |
 | `reasonable` (transitive via OntoLogos) | **BSD-3-Clause** | Include BSD notice in NOTICES |
 | `fastobo`, `fastobo-owl`, `fastobo-validator` | MIT | Compatible |

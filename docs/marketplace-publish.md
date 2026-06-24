@@ -7,15 +7,16 @@ OntoCode is on the [VS Code Marketplace](https://marketplace.visualstudio.com/it
 - [Visual Studio Marketplace publisher](https://marketplace.visualstudio.com/manage) account (`ontocode` publisher id in `extension/package.json`)
 - Personal Access Token with Marketplace **Manage** scope
 - `vsce` installed (`npm i -g @vscode/vsce` or use project devDependency)
-- Multi-platform release VSIX built by [`.github/workflows/release.yml`](../.github/workflows/release.yml)
+- Multi-platform release VSIX built by [release workflow on GitHub](https://github.com/eddiethedean/ontocode/blob/main/.github/workflows/release.yml)
 
 ## Pre-publish checks
 
 1. Version bumped in `extension/package.json` and root `Cargo.toml` workspace version
-2. [CHANGELOG.md](../CHANGELOG.md) updated
-3. [extension/README.md](../extension/README.md) and [docs/vscode-install.md](vscode-install.md) mention Marketplace install
-4. `npm test` and `cargo test --workspace` pass
-5. Screenshot or preview image in README (see `docs/media/explorer-preview.svg`)
+2. [CHANGELOG.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) updated
+3. [extension/README.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/extension/README.md) and [docs/vscode-install.md](vscode-install.md) mention Marketplace install and current version
+4. User docs synced per [releasing.md](releasing.md) checklist
+5. `npm test` and `cargo test --workspace` pass
+6. Screenshot or preview image in README (see `docs/media/explorer-preview.svg`)
 
 ## Publish command
 

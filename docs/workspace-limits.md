@@ -3,7 +3,7 @@
 OntoIndex enforces limits to keep local indexing predictable and to reduce DoS risk when
 opening untrusted ontology repositories.
 
-Constants live in [`crates/ontoindex-core/src/limits.rs`](../crates/ontoindex-core/src/limits.rs).
+Constants live in [`limits.rs` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/crates/ontoindex-core/src/limits.rs).
 
 ## Recommended workspace size
 

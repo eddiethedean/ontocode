@@ -1,0 +1,117 @@
+# MkDocs site — built on Read the Docs and locally via:
+#   pip install -r docs/requirements.txt && mkdocs serve
+
+site_name: OntoCode
+site_description: Ontology-as-code for Git and VS Code — OntoIndex engine and OntoCode extension docs
+site_url: https://ontocode.readthedocs.io/
+repo_url: https://github.com/eddiethedean/ontocode
+repo_name: eddiethedean/ontocode
+edit_uri: edit/main/docs/
+
+docs_dir: docs
+strict: true
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.tracking
+    - navigation.sections
+    - navigation.expand
+    - navigation.top
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+    - content.action.edit
+
+plugins:
+  - search
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.superfences
+  - pymdownx.highlight
+  - pymdownx.inlinehilite
+  - pymdownx.tabbed:
+      alternate_style: true
+  - tables
+  - toc:
+      permalink: true
+
+nav:
+  - Home: README.md
+  - Getting started: getting-started.md
+  - User guides:
+      - Install VS Code extension: vscode-install.md
+      - Authoring (Turtle write-back): authoring.md
+      - Patch JSON reference: patch-reference.md
+      - FAQ: faq.md
+  - API reference:
+      - SQL virtual tables: sql-reference.md
+      - SPARQL: sparql-reference.md
+      - LSP API: lsp-api.md
+      - Workspace limits: workspace-limits.md
+  - Operations:
+      - CI integration: ci-integration.md
+      - Release integrity: release-integrity.md
+      - Security: security.md
+      - Releasing (maintainers): releasing.md
+      - Marketplace publish: marketplace-publish.md
+  - Contributing: contributing.md
+  - Design (target specs):
+      - Overview: design/README.md
+      - Roadmap: design/ROADMAP.md
+      - Architecture: design/ARCHITECTURE.md
+      - Protégé parity: design/PROTEGE_PARITY.md
+      - Dependency matrix: design/DEPENDENCY_MATRIX.md
+      - Licenses: design/LICENSES.md
+      - Product plan: design/PLAN.md
+      - Technical spec: design/SPEC.md
+      - v1.0 backlog: design/v1.0_BACKLOG.md
+      - MVP backlog: design/MVP_BACKLOG.md
+      - Specs:
+          - LSP (target): design/LSP_SPEC.md
+          - OWL authoring: design/OWL_AUTHORING_SPEC.md
+          - Reasoner: design/REASONER_SPEC.md
+          - Semantic diff: design/SEMANTIC_DIFF_SPEC.md
+          - SHACL: design/SHACL_SPEC.md
+          - OBO / ROBOT: design/OBO_ROBOT_SPEC.md
+          - Plugins: design/PLUGIN_SPEC.md
+          - UI wireframes: design/UI_WIREFRAMES.md
+      - ADRs:
+          - Index: design/adr/README.md
+          - "0001 Rust for OntoIndex": design/adr/0001-use-rust-for-ontoindex.md
+          - "0002 Horned-OWL": design/adr/0002-use-horned-owl.md
+          - "0003 Oxigraph": design/adr/0003-use-oxigraph.md
+          - "0004 DataFusion": design/adr/0004-use-datafusion-for-sql.md
+          - "0005 Local-first": design/adr/0005-local-first-by-default.md
+          - "0006 Patch write-back": design/adr/0006-patch-based-write-back.md
+          - "0007 LSP boundary": design/adr/0007-language-server-boundary.md
+          - "0008 Reasoner adapters": design/adr/0008-reasoner-adapters-not-built-in-reasoner.md
+          - "0009 Semantic diff": design/adr/0009-semantic-diff-as-core-feature.md
+          - "0010 AI opt-in": design/adr/0010-ai-features-opt-in.md
+          - "0011 sqlparser": design/adr/0011-use-sqlparser-for-sql.md
+          - "0012 LSP snake_case": design/adr/0012-lsp-json-snake-case-enums.md
+          - "0013 Dual stack": design/adr/0013-dual-stack-oxigraph-horned-owl.md
+          - "0014 Rust reasoners": design/adr/0014-rust-native-reasoners-only.md
+          - "0015 OntoLogos": design/adr/0015-adopt-ontologos-reasoner.md
+          - "0016 Dependency-first": design/adr/0016-dependency-first-implementation.md
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/eddiethedean/ontocode

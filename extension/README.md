@@ -1,8 +1,8 @@
 # OntoCode
 
-**Browse OWL/RDF ontologies in VS Code** — index a workspace, explore classes and properties in the sidebar, inspect entities, and jump to Turtle/RDF source.
+**Browse and edit OWL/RDF ontologies in VS Code** — index a workspace, explore classes and properties in the sidebar, inspect and edit entities in Turtle, and jump to source.
 
-![OntoCode Explorer — sidebar views and entity inspector](media/explorer-preview.png)
+![OntoCode Explorer — sidebar views and entity inspector](../docs/media/explorer-preview.svg)
 
 ---
 
@@ -14,7 +14,7 @@
 4. Click the **OntoCode** icon in the **Activity Bar** (left edge of the window).
 5. Open **Classes**, **Properties**, or **Individuals** and **click an entity name** to open the Entity Inspector.
 
-OntoCode indexes supported files automatically when the folder opens (`ontocode.autoIndexOnOpen`, default **on**).
+The language server indexes supported files automatically when the workspace opens.
 
 ---
 
@@ -24,7 +24,7 @@ OntoCode activates when your workspace contains any of:
 
 | Extension | Format |
 |-----------|--------|
-| `.ttl` | Turtle |
+| `.ttl` | Turtle (editable in v0.4) |
 | `.owl`, `.rdf` | RDF/XML |
 | `.jsonld`, `.json-ld` | JSON-LD |
 | `.nt`, `.nq` | N-Triples / N-Quads |
@@ -65,11 +65,14 @@ The **Entity Inspector** panel opens with:
 - Labels and comments
 - Parent and child classes
 - Axioms (e.g. `SubClassOf`)
+- **Edit section** (`.ttl` files only) — add labels, comments, parents; delete entity
 - **Jump to Source** — opens the `.ttl` / `.owl` file at the declaration
 
-**Right-click** an entity for **Jump to Source** in the context menu.
+**Right-click** an entity for **Jump to Source** or **Create Class/Property/Individual** in the context menu.
 
 **Command Palette:** **OntoCode: Show Entity Inspector** — paste an entity IRI if you know it.
+
+Editing guide: [docs/authoring.md](https://github.com/eddiethedean/ontocode/blob/main/docs/authoring.md).
 
 ---
 
@@ -94,6 +97,9 @@ Open a `.ttl` (or other supported) file and use standard VS Code navigation:
 | **OntoCode: Refresh Explorer** | Reload tree views from the catalog |
 | **OntoCode: Show Entity Inspector** | Open inspector by IRI |
 | **OntoCode: Jump to Source** | Go to declaration by IRI |
+| **OntoCode: Create Class** | Create a new class in a Turtle file |
+| **OntoCode: Create Property** | Create a new property in a Turtle file |
+| **OntoCode: Create Individual** | Create a new individual in a Turtle file |
 
 ---
 
@@ -103,8 +109,9 @@ Open **Settings** and search `ontocode`:
 
 | Setting | Default | Description |
 |---------|---------|-------------|
-| `ontocode.autoIndexOnOpen` | `true` | Index the workspace when OntoCode activates |
 | `ontocode.lspPath` | *(empty)* | Path to `ontoindex-lsp` binary. **Trusted workspaces only.** Leave empty to use the bundled server |
+
+Indexing is driven by the language server on startup; `ontocode.autoIndexOnOpen` is a legacy no-op kept for compatibility.
 
 ---
 
@@ -114,20 +121,22 @@ Open **Settings** and search `ontocode`:
 |---------|-------------|
 | Sidebar says *“Index workspace to browse ontologies”* | Run **OntoCode: Index Workspace**; confirm the folder contains `.ttl`, `.owl`, etc. |
 | Extension never activates | Open a supported ontology file, or click **OntoCode → Ontologies** |
-| `failed to start language server` | Check **View → Output → OntoIndex Language Server**. Uninstall older OntoCode versions. Set `ontocode.lspPath` or run `cargo install ontoindex-lsp` |
+| `failed to start language server` | Check **View → Output → OntoIndex Language Server**. Uninstall older OntoCode versions. Set `ontocode.lspPath` or `cargo install ontoindex-lsp` |
 | Empty **Classes** after indexing | **Output → OntoIndex Language Server** for errors; run **Index Workspace** again |
 | No items under **Diagnostics** | Index must complete first; check **Problems** panel for the same issues |
+| Cannot edit in inspector | Write-back is **Turtle (`.ttl`) only** in v0.4; other formats are read-only |
 | Workspace is Restricted | **Trust** the folder — `ontocode.lspPath` is ignored in Restricted Mode |
+| Multi-root workspace | Only the **first** folder is indexed — use a single-root folder or open the primary ontology project |
 
-More detail: [Installation & troubleshooting](https://github.com/eddiethedean/ontocode/blob/main/docs/vscode-install.md)
+More detail: [Installation & troubleshooting](https://github.com/eddiethedean/ontocode/blob/main/docs/vscode-install.md) · [FAQ](https://github.com/eddiethedean/ontocode/blob/main/docs/faq.md)
 
 ---
 
-## What’s included in v0.3.0
+## What's included in v0.4.0
 
-**Shipped today:** explorer, entity inspector, jump-to-source, hover, symbols, go-to-definition, **ontology diagnostics** (Problems panel + Diagnostics sidebar), `ontoindex validate` integration.
+**Shipped:** explorer, inspector, **editing** (labels, comments, parents, create/delete in `.ttl`), diagnostics, jump-to-source, hover, symbols, go-to-definition.
 
-**Planned:** axiom editing, query workbench, reasoners — see the [roadmap](https://github.com/eddiethedean/ontocode/blob/main/docs/design/ROADMAP.md).
+**Planned (v0.5+):** Manchester editor, query workbench, reasoners — [roadmap](https://github.com/eddiethedean/ontocode/blob/main/docs/design/ROADMAP.md).
 
 ---
 
@@ -140,6 +149,7 @@ Release builds bundle `ontoindex-lsp` for Linux (x64, arm64), macOS (Apple Silic
 ## Links
 
 - [GitHub repository](https://github.com/eddiethedean/ontocode)
+- [Documentation index](https://github.com/eddiethedean/ontocode/blob/main/docs/README.md)
 - [Report an issue](https://github.com/eddiethedean/ontocode/issues)
 - [Changelog](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md)
 

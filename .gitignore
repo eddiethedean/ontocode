@@ -11,3 +11,4 @@ extension/out/
 extension/.vscode-test/
 extension/server/
 extension/*.vsix
+/site/

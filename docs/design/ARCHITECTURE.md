@@ -1,10 +1,10 @@
 # ARCHITECTURE.md
 
-> **Document status: target architecture (v0.3 partial implementation)**
+> **Document status: target architecture (v0.4 partial implementation)**
 >
 > **Implemented today:** workspace scanner, Oxigraph-based parsing, in-memory catalog and triple store,
-> SQL-like queries via `sqlparser`, SPARQL, diagnostics lint rules, CLI, LSP explorer + Problems panel integration.
-> **v0.4b+ target:** Horned-OWL layer per [ADR-0013](adr/0013-dual-stack-oxigraph-horned-owl.md).
+> SQL-like queries via `sqlparser`, SPARQL, diagnostics lint rules, CLI, LSP explorer + Problems panel integration,
+> Horned-OWL catalog bridge and Turtle patch write-back (`ontoindex-owl`).
 > See [docs/lsp-api.md](../lsp-api.md), [adr/README.md](adr/README.md), and [DEPENDENCY_MATRIX.md](DEPENDENCY_MATRIX.md) for current decisions.
 
 ## 1. Architecture Goals
@@ -69,7 +69,7 @@ The architecture must support:
 |-------|--------|------|---------------------|
 | `ontoindex-core` | v0.2 | Types, scanner, limits, path jail | `ignore` |
 | `ontoindex-parser` | v0.2 | RDF parse, entity extraction | `oxigraph` |
-| `ontoindex-owl` | planned v0.4b | OWL axiom facade, Manchester | `horned-owl`, `horned-functional` |
+| `ontoindex-owl` | v0.4 | OWL axiom facade, patch write-back | `horned-owl`, `horned-functional` |
 | `ontoindex-catalog` | v0.2 | Index builder, entity API | — |
 | `ontoindex-query` | v0.2 | SQL virtual tables, SPARQL | `sqlparser`, `oxigraph` |
 | `ontoindex-diagnostics` | v0.3 | Lint rules, LSP diagnostics | `regex` (+ `fastobo-validator` v0.7b) |
@@ -77,8 +77,8 @@ The architecture must support:
 | `ontoindex-docs` | planned v0.9 | Markdown/HTML export | `pulldown-cmark`, `minijinja` |
 | `ontoindex-reasoner` | planned v0.6 | Reasoner facade | OntoLogos `0.9`→`1.0` |
 | `ontoindex-robot` | planned v0.7b | ROBOT CLI wrappers | ROBOT CLI (external) |
-| `ontoindex-lsp` | v0.3 | Language server + diagnostics publish | `lsp-server`, `lsp-types` |
-| `ontoindex-cli` | v0.3 | `ontoindex` binary | composes above |
+| `ontoindex-lsp` | v0.4 | Language server + diagnostics + patch apply | `lsp-server`, `lsp-types` |
+| `ontoindex-cli` | v0.4 | `ontoindex` binary | composes above |
 
 ## 4. OntoIndex Internal Modules
 
@@ -156,4 +156,4 @@ Per [ADR-0006](adr/0006-patch-based-write-back.md) and [OWL_AUTHORING_SPEC.md](O
 - Local-first by default ([ADR-0005](adr/0005-local-first-by-default.md))
 - No telemetry by default
 - Workspace trust for `lspPath`, `ontocode.reasoner.default`, `robotPath`
-- See [SECURITY.md](../SECURITY.md)
+- See [security.md](../security.md)

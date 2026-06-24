@@ -34,7 +34,7 @@ ontoindex query fixtures "SELECT * FROM namespaces"
 ontoindex query fixtures "SELECT * FROM imports"
 ```
 
-## Diagnostics and validation (v0.3)
+## Diagnostics and validation (v0.3+)
 
 ```bash
 ontoindex query fixtures "SELECT code, severity, message, file FROM diagnostics"
@@ -64,4 +64,4 @@ ontoindex validate fixtures   # exit 0 on success
 ontoindex validate .          # validate current directory
 ```
 
-Full column reference: [docs/sql-reference.md](../docs/sql-reference.md).
+Full column reference: [docs/sql-reference.md](../docs/sql-reference.md). SPARQL: [docs/sparql-reference.md](../docs/sparql-reference.md).

@@ -72,12 +72,22 @@ Review the diff in `tests/golden/snapshots/` before committing.
 cargo run -p ontocode --example index_and_query
 ```
 
+### Documentation site (MkDocs / Read the Docs)
+
+```bash
+pip install -r docs/requirements.txt
+mkdocs serve
+mkdocs build --strict   # CI uses this; must pass with no warnings
+```
+
+Open http://127.0.0.1:8000. Configuration: [`mkdocs.yml`](../mkdocs.yml), [`.readthedocs.yaml`](../.readthedocs.yaml).
+
 ## Pull requests
 
 1. Fork and branch from `main`.
 2. Keep changes focused; match existing style and naming.
 3. Run Rust and extension tests locally (CI runs both).
-4. Update docs when behavior or public API changes (`README.md`, `docs/`, `CHANGELOG.md` as appropriate).
+4. Update docs when behavior or public API changes (`README.md`, `docs/`, `CHANGELOG.md` as appropriate). On release, follow the checklist in [docs/releasing.md](docs/releasing.md).
 5. For spec changes, label whether they describe **implemented** vs **planned** behavior (see `docs/lsp-api.md` as a model).
 
 ## Documentation conventions

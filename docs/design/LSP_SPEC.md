@@ -1,12 +1,12 @@
 # LSP_SPEC.md
 
-> **Document status: target design (v0.3 partial implementation)**
+> **Document status: target design (v0.4 partial implementation)**
 >
-> For what ships today, read **[docs/lsp-api.md](../lsp-api.md)** (authoritative for v0.3).
+> For what ships today, read **[lsp-api.md](../lsp-api.md)** (authoritative for v0.4).
 > Implemented: hover, document/workspace symbols, go-to-definition, diagnostics publishing,
-> `ontoindex/indexWorkspace`, `ontoindex/getCatalogSnapshot`, `ontoindex/getEntity`.
-> See [`crates/ontoindex-lsp/src/handlers.rs`](../crates/ontoindex-lsp/src/handlers.rs) and
-> [`crates/ontoindex-lsp/src/protocol.rs`](../crates/ontoindex-lsp/src/protocol.rs).
+> `ontoindex/indexWorkspace`, `ontoindex/getCatalogSnapshot`, `ontoindex/getEntity`, `ontoindex/applyAxiomPatch`.
+> See [`handlers.rs` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/crates/ontoindex-lsp/src/handlers.rs) and
+> [`protocol.rs` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/crates/ontoindex-lsp/src/protocol.rs).
 
 ## 1. Purpose
 
@@ -15,7 +15,7 @@ The OntoIndex language server provides ontology-aware editor features to OntoCod
 ## 2. Transport
 
 - stdio for VS Code (shipped)
-- optional TCP for debugging (**not implemented** — if added, must bind `127.0.0.1` only and require explicit opt-in; never expose unauthenticated LSP on a public interface; see [SECURITY.md](../SECURITY.md))
+- optional TCP for debugging (**not implemented** — if added, must bind `127.0.0.1` only and require explicit opt-in; never expose unauthenticated LSP on a public interface; see [security.md](../security.md))
 
 ## 3. Supported File Types
 
@@ -133,7 +133,7 @@ Global entity search.
 | `ontoindex/getGraph` | Planned |
 | `ontoindex/getSemanticDiff` | Planned |
 | `ontoindex/runReasoner` | Planned (v0.6) |
-| `ontoindex/applyAxiomPatch` | Planned (v0.4a+) |
+| `ontoindex/applyAxiomPatch` | **Implemented** (v0.4) |
 | `ontoindex/parseManchester` | Planned (v0.5) |
 | `ontoindex/getExplanation` | Planned (v0.6) |
 | `ontoindex/runRobot` | Planned (v0.7b) |

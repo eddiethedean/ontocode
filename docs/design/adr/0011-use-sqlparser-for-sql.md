@@ -35,4 +35,4 @@ Record final choice in [DEPENDENCY_MATRIX.md](../DEPENDENCY_MATRIX.md).
 
 ## Implementation
 
-See [`crates/ontoindex-query/src/sql.rs`](../../../crates/ontoindex-query/src/sql.rs) and [docs/sql-reference.md](../../sql-reference.md).
+See [`sql.rs` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/crates/ontoindex-query/src/sql.rs) and [sql-reference.md](../../sql-reference.md).

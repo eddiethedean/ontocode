@@ -38,7 +38,7 @@ Prefer `--locked` so dependency versions match the published crate.
 
 ## Dependency auditing
 
-CI runs `cargo audit` on the Rust workspace. Report vulnerable dependencies via [SECURITY.md](../SECURITY.md).
+CI runs `cargo audit` on the Rust workspace. Report vulnerable dependencies via [security.md](security.md).
 
 ## Future: signed artifacts
 

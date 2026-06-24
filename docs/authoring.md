@@ -13,6 +13,8 @@ OntoCode v0.4 adds **Turtle write-back** for simple ontology edits without Prot√
 | Add / remove parent class | `add_sub_class_of`, `remove_sub_class_of` |
 | Set deprecated flag | `set_deprecated` |
 
+Full JSON reference: [patch-reference.md](patch-reference.md).
+
 ## Format policy
 
 - **Write-back:** Turtle (`.ttl`) only in v0.4
@@ -27,17 +29,44 @@ OntoCode v0.4 adds **Turtle write-back** for simple ontology edits without Prot√
 4. Changes apply via `ontoindex/applyAxiomPatch` and trigger a workspace reindex.
 5. VS Code undo works on saved file changes.
 
+### Example: add a label in the inspector
+
+1. Open `fixtures/example.ttl` (or your own `.ttl` file).
+2. In **OntoCode ‚Üí Classes**, click `Person`.
+3. In the inspector edit section, add or change a label and save.
+4. Confirm the change in the Turtle file and run **OntoCode: Index Workspace** if the tree does not refresh.
+
 ## CLI
 
-```bash
-# Preview patches from a JSON file
-ontoindex patch ./ontology.ttl patches.json --preview
+### Example `patches.json`
 
-# Apply patches
-ontoindex patch ./ontology.ttl patches.json
+```json
+[
+  {
+    "op": "create_entity",
+    "entity_iri": "http://example.org/people#Student",
+    "kind": "class"
+  },
+  {
+    "op": "add_label",
+    "entity_iri": "http://example.org/people#Student",
+    "value": "Student"
+  },
+  {
+    "op": "add_sub_class_of",
+    "entity_iri": "http://example.org/people#Student",
+    "parent_iri": "http://example.org/people#Person"
+  }
+]
 ```
 
-Patch JSON is an array of operations (see `ontoindex_owl::PatchOp`).
+```bash
+ontoindex patch ./people.ttl patches.json --preview
+ontoindex patch ./people.ttl patches.json
+ontoindex validate .
+```
+
+More examples: [patch-reference.md](patch-reference.md).
 
 ## Horned-OWL dual stack
 

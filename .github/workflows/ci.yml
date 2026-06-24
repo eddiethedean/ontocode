@@ -197,3 +197,19 @@ jobs:
           cargo publish -p ontoindex-core --dry-run
           # diagnostics publish dry-run needs ontoindex-core 0.3.0 on crates.io; build verifies the crate until then.
           cargo build -p ontoindex-diagnostics
+
+  docs:
+    name: mkdocs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install MkDocs
+        run: pip install -r docs/requirements.txt
+
+      - name: Build documentation
+        run: mkdocs build --strict

@@ -1,16 +1,16 @@
 # OntoIndex + OntoCode Documentation Package
 
-This package contains **product vision and specification** documents. For **user-facing guides** (install, SQL, implemented LSP API), see [`docs/`](../) at the repository root.
+This package contains **product vision and specification** documents. For **user-facing guides** (install, SQL, implemented LSP API), see the [documentation index](../README.md).
 
 | Package | Audience |
 |---------|----------|
-| [`docs/`](../) | New users and integrators (install, SQL reference, LSP API v0.3) |
+| [User docs](../README.md) | New users and integrators (install, SQL reference, LSP API v0.4) |
 | `docs/design/` (this folder) | Contributors and planners (roadmap, target architecture, ADRs) |
 
 Two related products:
 
 1. **OntoIndex** — Rust ontology index/query engine (`ontoindex-*` crates).
-2. **OntoCode** — VS Code extension (OntoCode Explorer + diagnostics in v0.3; full workbench at v1.0).
+2. **OntoCode** — VS Code extension (explorer, diagnostics, Turtle authoring in v0.4; full workbench at v1.0).
 
 **Sibling project:** [OntoLogos](https://github.com/eddiethedean/ontologos) — Rust ontology reasoner. OntoCode delegates reasoning to OntoLogos per [ADR-0015](adr/0015-adopt-ontologos-reasoner.md).
 
@@ -24,8 +24,9 @@ Two related products:
 
 Many specs describe **target** behavior. Check the banner at the top of each doc, or:
 
-- **Implemented v0.3 LSP:** [docs/lsp-api.md](../lsp-api.md)
+- **Implemented v0.4 LSP:** [docs/lsp-api.md](../lsp-api.md)
 - **Implemented SQL tables:** [docs/sql-reference.md](../sql-reference.md)
+- **Implemented authoring:** [docs/authoring.md](../authoring.md)
 - **ADRs (canonical):** [adr/README.md](adr/README.md)
 
 ## Documents
@@ -58,4 +59,4 @@ Many specs describe **target** behavior. Check the banner at the top of each doc
 ### Historical / backlog
 
 - [MVP_BACKLOG.md](MVP_BACKLOG.md) — v0.1/v0.2 backlog
-- [adr/](adr/) — architecture decision records
+- [adr/README.md](adr/README.md) — architecture decision records

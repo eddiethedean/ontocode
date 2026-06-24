@@ -1,6 +1,6 @@
 [package]
-name = "ontoindex-catalog"
-description = "Semantic catalog for OntoIndex"
+name = "ontoindex-owl"
+description = "Horned-OWL facade for OntoIndex axiom modeling and patch write-back"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -15,9 +15,12 @@ include = ["src/**/*", "Cargo.toml", "LICENSE-MIT", "LICENSE-APACHE-2.0"]
 
 [dependencies]
 ontoindex-core = { workspace = true }
-ontoindex-diagnostics = { workspace = true }
-ontoindex-owl = { workspace = true }
-ontoindex-parser = { workspace = true }
+horned-owl.workspace = true
+horned-functional.workspace = true
 oxigraph.workspace = true
-serde.workspace = true
+serde = { workspace = true, features = ["derive"] }
+serde_json.workspace = true
 thiserror.workspace = true
+
+[dev-dependencies]
+tempfile = "3"

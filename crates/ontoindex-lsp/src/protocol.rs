@@ -59,6 +59,22 @@ pub struct GetEntityResult {
     pub detail: EntityDetail,
 }
 
+#[derive(Debug, Deserialize)]
+pub struct ApplyAxiomPatchParams {
+    pub document_uri: String,
+    pub patches: Vec<ontoindex_owl::PatchOp>,
+    #[serde(default)]
+    pub preview_only: bool,
+}
+
+#[derive(Debug, Serialize)]
+pub struct ApplyAxiomPatchResult {
+    #[serde(flatten)]
+    pub patch: ontoindex_owl::ApplyPatchResult,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub entity_detail: Option<EntityDetail>,
+}
+
 /// LSP JSON error payload for custom `ontoindex/*` methods (not [`ontoindex_core::OntoIndexError`]).
 #[derive(Debug, Serialize)]
 pub struct LspErrorPayload {
@@ -93,6 +109,24 @@ impl LspErrorPayload {
             message,
             recoverable: true,
             user_action: Some("Check ontology files for parse errors".to_string()),
+        }
+    }
+
+    pub fn patch_invalid(message: String) -> Self {
+        Self {
+            code: "PATCH_INVALID".to_string(),
+            message,
+            recoverable: true,
+            user_action: Some("Check patch parameters and entity IRIs".to_string()),
+        }
+    }
+
+    pub fn unsupported_format(message: String) -> Self {
+        Self {
+            code: "UNSUPPORTED_FORMAT".to_string(),
+            message,
+            recoverable: true,
+            user_action: Some("Save as Turtle (.ttl) for write-back".to_string()),
         }
     }
 }

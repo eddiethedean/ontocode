@@ -13,7 +13,7 @@ use std::path::PathBuf;
 #[command(
     name = "ontoindex",
     version,
-    about = "Local-first ontology index and query engine (OntoCode v0.3)"
+    about = "Local-first ontology index and query engine (OntoCode v0.4)"
 )]
 struct Cli {
     #[command(subcommand)]
@@ -62,6 +62,16 @@ enum Commands {
         workspace: PathBuf,
         #[arg(long, value_enum, default_value_t = OutputFormat::Text)]
         format: OutputFormat,
+    },
+    /// Apply Turtle patch operations from a JSON file
+    Patch {
+        /// Turtle document to patch
+        document: PathBuf,
+        /// JSON file containing an array of patch operations
+        patch_file: PathBuf,
+        /// Preview changes without writing to disk
+        #[arg(long)]
+        preview: bool,
     },
 }
 
@@ -145,6 +155,30 @@ fn main() -> Result<()> {
         Commands::Inspect { workspace, format } => {
             let catalog = build_catalog(&workspace)?;
             print_stats(&catalog.data().stats(), format)?;
+        }
+        Commands::Patch { document, patch_file, preview } => {
+            let patches: Vec<ontoindex_owl::PatchOp> =
+                serde_json::from_slice(&std::fs::read(&patch_file)?)
+                    .context("failed to parse patch JSON")?;
+            let catalog = IndexBuilder::new()
+                .workspace(document.parent().unwrap_or(std::path::Path::new(".")))
+                .build()
+                .ok();
+            let namespaces = catalog
+                .as_ref()
+                .and_then(|c| {
+                    c.data().documents.iter().find(|d| {
+                        d.path.canonicalize().ok().as_ref() == document.canonicalize().ok().as_ref()
+                    })
+                })
+                .map(|d| d.namespaces.clone())
+                .unwrap_or_default();
+            let result = ontoindex_owl::apply_patches(&document, &patches, preview, &namespaces)
+                .context("patch failed")?;
+            println!("{}", serde_json::to_string_pretty(&result)?);
+            if !preview && result.applied {
+                println!("applied");
+            }
         }
     }
     Ok(())

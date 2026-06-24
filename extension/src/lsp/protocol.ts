@@ -36,7 +36,12 @@ export interface Entity {
   labels: string[];
   comments: string[];
   deprecated: boolean;
-  source_location?: { line?: number; column?: number };
+  source_location?: {
+    line?: number;
+    column?: number;
+    start_byte?: number;
+    end_byte?: number;
+  };
 }
 
 export interface SubclassEdge {
@@ -79,10 +84,11 @@ export interface EntityDetail {
   children: string[];
   axioms: string[];
   source?: SourceHint;
+  editable: boolean;
+  document_path?: string;
 }
 
 export interface IndexWorkspaceParams {
-  /** Preferred snake_case wire field; server also accepts legacy `workspaceUri`. */
   workspace_uri?: string;
 }
 
@@ -93,4 +99,43 @@ export interface IndexWorkspaceResult {
 
 export interface GetEntityResult {
   detail: EntityDetail;
+}
+
+export type PatchOp =
+  | { op: "create_entity"; entity_iri: string; kind: PatchEntityKind }
+  | { op: "delete_entity"; entity_iri: string }
+  | { op: "set_label"; entity_iri: string; value: string }
+  | { op: "add_label"; entity_iri: string; value: string }
+  | { op: "remove_label"; entity_iri: string; value: string }
+  | { op: "set_comment"; entity_iri: string; value: string }
+  | { op: "add_comment"; entity_iri: string; value: string }
+  | { op: "remove_comment"; entity_iri: string; value: string }
+  | { op: "add_sub_class_of"; entity_iri: string; parent_iri: string }
+  | { op: "remove_sub_class_of"; entity_iri: string; parent_iri: string }
+  | { op: "set_deprecated"; entity_iri: string; value: boolean };
+
+export type PatchEntityKind =
+  | "class"
+  | "object_property"
+  | "data_property"
+  | "annotation_property"
+  | "individual";
+
+export interface PatchDiagnostic {
+  severity: string;
+  message: string;
+}
+
+export interface ApplyPatchResult {
+  applied: boolean;
+  preview_text?: string;
+  diagnostics?: PatchDiagnostic[];
+  document_path?: string;
+  entity_detail?: EntityDetail;
+}
+
+export interface ApplyAxiomPatchParams {
+  document_uri: string;
+  patches: PatchOp[];
+  preview_only?: boolean;
 }

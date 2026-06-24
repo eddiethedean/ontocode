@@ -5,10 +5,7 @@ pub fn find_in_source(source_text: &str, needles: &[String]) -> SourceLocation {
     for (line_idx, line) in source_text.lines().enumerate() {
         for needle in needles {
             if let Some(col) = line.find(needle) {
-                return SourceLocation {
-                    line: Some((line_idx + 1) as u64),
-                    column: Some(col as u64),
-                };
+                return SourceLocation::at_line_col((line_idx + 1) as u64, col as u64);
             }
         }
     }

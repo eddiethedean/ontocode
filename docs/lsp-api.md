@@ -1,8 +1,8 @@
-# OntoIndex LSP API (implemented in v0.3)
+# OntoIndex LSP API (v0.4)
 
-This document describes **what ships today** in `ontoindex-lsp`. For the **v1.0 target** (including `applyAxiomPatch`, `parseManchester`, `getExplanation`, `runRobot`), see [LSP_SPEC.md](design/LSP_SPEC.md) — those methods are planned, not implemented in v0.3.
+This document describes **what ships today** in `ontoindex-lsp`. For the **v1.0 target** (including `parseManchester`, `getExplanation`, `runRobot`), see [LSP_SPEC.md](design/LSP_SPEC.md).
 
-## Wire format (v0.3)
+## Wire format (v0.4)
 
 LSP JSON uses **snake_case** for enums serialized from Rust (`EntityKind`, `ParseStatus`, `OntologyFormat`), e.g. `"kind": "class"`, `"parse_status": "ok"`. SQL virtual tables use the same snake_case strings via `as_str()` on core enums (e.g. `ParseStatus::as_str()` → `"ok"`, `EntityKind::as_str()` → `"class"`, `axiom_kind` → `"sub_class_of"`).
 
@@ -83,9 +83,29 @@ Return detailed entity information for the inspector.
 { "iri": "http://example.org/people#Person" }
 ```
 
-**Result:** `GetEntityResult` with `EntityDetail` (entity, parents, children, axioms, optional source location).
+**Result:** `GetEntityResult` with `EntityDetail` (entity, parents, children, axioms, optional source, `editable`, `document_path`).
 
 **Errors:** `NOT_INDEXED`, `ENTITY_NOT_FOUND`
+
+### `ontoindex/applyAxiomPatch` (v0.4)
+
+Apply Turtle patch operations. See [authoring.md](authoring.md).
+
+**Params:** `ApplyAxiomPatchParams`
+
+```json
+{
+  "document_uri": "file:///path/to/ontology.ttl",
+  "patches": [
+    { "op": "add_label", "entity_iri": "http://ex#Person", "value": "Human" }
+  ],
+  "preview_only": false
+}
+```
+
+**Result:** `ApplyPatchResult` — `applied`, optional `preview_text`, `entity_detail` after apply.
+
+**Errors:** `PATCH_INVALID`, `UNSUPPORTED_FORMAT`, `NOT_INDEXED`
 
 ## Structured errors
 
@@ -93,7 +113,7 @@ Custom method failures return `LspErrorPayload` (Rust type; not `ontoindex_core:
 
 | Field | Description |
 |-------|-------------|
-| `code` | Machine-readable code (`NOT_INDEXED`, `ENTITY_NOT_FOUND`, `INDEX_FAILED`, …) |
+| `code` | Machine-readable code (`NOT_INDEXED`, `ENTITY_NOT_FOUND`, `PATCH_INVALID`, `UNSUPPORTED_FORMAT`, `INDEX_FAILED`, …) |
 | `message` | Human-readable message |
 | `recoverable` | Whether the client can retry |
 | `user_action` | Suggested user action (optional) |

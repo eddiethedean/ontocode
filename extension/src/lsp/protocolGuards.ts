@@ -139,6 +139,13 @@ export function assertGetEntityResult(value: unknown): import("./protocol").GetE
   return value as import("./protocol").GetEntityResult;
 }
 
+export function assertApplyPatchResult(value: unknown): import("./protocol").ApplyPatchResult {
+  if (!value || typeof value !== "object") {
+    throw new Error("Invalid applyAxiomPatch result from language server");
+  }
+  return value as import("./protocol").ApplyPatchResult;
+}
+
 export function assertIndexWorkspaceResult(
   value: unknown
 ): { stats: { class_count: number; error_count: number }; indexed_at: number } {

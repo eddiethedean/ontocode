@@ -11,7 +11,7 @@ The root Cargo package `ontocode` is unpublished and hosts workspace integration
 
 ## Prerequisites
 
-- Rust **1.86+** (see `rust-version` in `Cargo.toml`)
+- Rust **1.88+** (see `rust-version` in `Cargo.toml`)
 - Node.js **20** (extension CI)
 - `npm` (extension build)
 

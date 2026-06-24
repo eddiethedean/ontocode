@@ -41,48 +41,37 @@
     {
       "comments": [],
       "deprecated": false,
-      "iri": "http://example.org/people",
-      "kind": "ontology",
-      "labels": [
-        "\"People Ontology\""
-      ],
-      "ontology_id": "http://example.org/people",
-      "short_name": "people",
-      "source_location": {
-        "column": 13,
-        "line": 1
-      }
-    },
-    {
-      "comments": [],
-      "deprecated": false,
       "iri": "http://example.org/people#Organization",
       "kind": "class",
       "labels": [
-        "\"Organization\""
+        "Organization"
       ],
       "ontology_id": "http://example.org/people",
       "short_name": "Organization",
       "source_location": {
         "column": 2,
-        "line": 16
+        "end_byte": 603,
+        "line": 16,
+        "start_byte": 418
       }
     },
     {
       "comments": [
-        "\"A human being.\""
+        "A human being."
       ],
       "deprecated": false,
       "iri": "http://example.org/people#Person",
       "kind": "class",
       "labels": [
-        "\"Person\""
+        "Person"
       ],
       "ontology_id": "http://example.org/people",
       "short_name": "Person",
       "source_location": {
         "column": 2,
-        "line": 12
+        "end_byte": 1028,
+        "line": 12,
+        "start_byte": 331
       }
     },
     {
@@ -91,13 +80,15 @@
       "iri": "http://example.org/people#Thing",
       "kind": "class",
       "labels": [
-        "\"Thing\""
+        "Thing"
       ],
       "ontology_id": "http://example.org/people",
       "short_name": "Thing",
       "source_location": {
         "column": 2,
-        "line": 9
+        "end_byte": 1028,
+        "line": 9,
+        "start_byte": 282
       }
     },
     {
@@ -106,13 +97,15 @@
       "iri": "http://example.org/people#acme",
       "kind": "individual",
       "labels": [
-        "\"ACME Corp\""
+        "ACME Corp"
       ],
       "ontology_id": "http://example.org/people",
       "short_name": "acme",
       "source_location": {
         "column": 2,
-        "line": 36
+        "end_byte": 990,
+        "line": 36,
+        "start_byte": 882
       }
     },
     {
@@ -121,13 +114,15 @@
       "iri": "http://example.org/people#age",
       "kind": "data_property",
       "labels": [
-        "\"age\""
+        "age"
       ],
       "ontology_id": "http://example.org/people",
       "short_name": "age",
       "source_location": {
         "column": 2,
-        "line": 24
+        "end_byte": 878,
+        "line": 24,
+        "start_byte": 607
       }
     },
     {
@@ -136,13 +131,15 @@
       "iri": "http://example.org/people#alice",
       "kind": "individual",
       "labels": [
-        "\"Alice\""
+        "Alice"
       ],
       "ontology_id": "http://example.org/people",
       "short_name": "alice",
       "source_location": {
         "column": 2,
-        "line": 32
+        "end_byte": 990,
+        "line": 32,
+        "start_byte": 780
       }
     },
     {
@@ -151,13 +148,14 @@
       "iri": "http://example.org/people#note",
       "kind": "annotation_property",
       "labels": [
-        "\"note\""
+        "note"
       ],
       "ontology_id": "http://example.org/people",
       "short_name": "note",
       "source_location": {
         "column": 2,
-        "line": 29
+        "line": 29,
+        "start_byte": 720
       }
     },
     {
@@ -166,13 +164,15 @@
       "iri": "http://example.org/people#worksFor",
       "kind": "object_property",
       "labels": [
-        "\"works for\""
+        "works for"
       ],
       "ontology_id": "http://example.org/people",
       "short_name": "worksFor",
       "source_location": {
         "column": 2,
-        "line": 19
+        "end_byte": 990,
+        "line": 19,
+        "start_byte": 481
       }
     },
     {
@@ -218,11 +218,11 @@
     },
     "edges": [
       {
-        "child": "http://example.org/people#Person",
+        "child": "http://example.org/people#Organization",
         "parent": "http://example.org/people#Thing"
       },
       {
-        "child": "http://example.org/people#Organization",
+        "child": "http://example.org/people#Person",
         "parent": "http://example.org/people#Thing"
       },
       {

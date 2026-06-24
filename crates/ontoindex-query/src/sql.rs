@@ -2,7 +2,9 @@ use crate::QueryError;
 use ontoindex_catalog::OntologyCatalog;
 use ontoindex_core::{limits::MAX_QUERY_BYTES, limits::MAX_SQL_RESULT_ROWS, EntityKind};
 use serde::Serialize;
-use sqlparser::ast::{Expr, GroupByExpr, Select, SelectItem, SetExpr, Statement, TableFactor, Value};
+use sqlparser::ast::{
+    Expr, GroupByExpr, Select, SelectItem, SetExpr, Statement, TableFactor, Value,
+};
 use sqlparser::dialect::GenericDialect;
 use sqlparser::parser::Parser;
 use std::collections::BTreeMap;
@@ -268,9 +270,7 @@ fn validate_filter(expr: &Expr) -> Result<()> {
                     validate_filter(right)?;
                     Ok(())
                 }
-                other => Err(QueryError::Sql(format!(
-                    "unsupported WHERE operator: {other:?}"
-                ))),
+                other => Err(QueryError::Sql(format!("unsupported WHERE operator: {other:?}"))),
             }
         }
         Expr::Identifier(_) | Expr::Value(_) => Ok(()),
@@ -291,15 +291,12 @@ fn evaluate_filter(expr: &Expr, row: &Row) -> Result<bool> {
                 BinaryOperator::Or => {
                     Ok(evaluate_filter(left, row)? || evaluate_filter(right, row)?)
                 }
-                other => Err(QueryError::Sql(format!(
-                    "unsupported WHERE operator: {other:?}"
-                ))),
+                other => Err(QueryError::Sql(format!("unsupported WHERE operator: {other:?}"))),
             }
         }
-        Expr::Identifier(ident) => Ok(row
-            .get(&ident.value.to_ascii_lowercase())
-            .map(|v| v == "true")
-            .unwrap_or(false)),
+        Expr::Identifier(ident) => {
+            Ok(row.get(&ident.value.to_ascii_lowercase()).map(|v| v == "true").unwrap_or(false))
+        }
         Expr::Value(Value::Boolean(b)) => Ok(*b),
         other => Err(QueryError::Sql(format!("unsupported WHERE expression: {other:?}"))),
     }
@@ -387,9 +384,8 @@ mod tests {
     #[test]
     fn unsupported_like_returns_error() {
         let catalog = fixture_catalog();
-        let err =
-            run_sql(&catalog, "SELECT short_name FROM classes WHERE short_name LIKE 'Per%'")
-                .unwrap_err();
+        let err = run_sql(&catalog, "SELECT short_name FROM classes WHERE short_name LIKE 'Per%'")
+            .unwrap_err();
         assert!(matches!(err, crate::QueryError::Sql(msg) if msg.contains("unsupported WHERE")));
     }
 

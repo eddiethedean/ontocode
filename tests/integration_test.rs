@@ -177,7 +177,7 @@ fn open_buffer_diagnostics_detect_undefined_prefix() {
                 && (d.code == ontoindex_core::DiagnosticCode::UndefinedPrefix
                     || d.code == ontoindex_core::DiagnosticCode::ParseError)
         })
-        .expect(&format!("expected undeclared prefix diagnostic, got: {diags:?}"));
+        .unwrap_or_else(|| panic!("expected undeclared prefix diagnostic, got: {diags:?}"));
     assert_eq!(undef.severity, ontoindex_core::DiagnosticSeverity::Error);
 }
 

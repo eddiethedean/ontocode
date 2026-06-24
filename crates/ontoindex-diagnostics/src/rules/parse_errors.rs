@@ -12,10 +12,7 @@ pub fn parse_errors(
             continue;
         }
         let message = doc.parse_message.clone().unwrap_or_else(|| "parse error".to_string());
-        let range = doc
-            .parse_error_location
-            .clone()
-            .unwrap_or(SourceLocation { line: Some(1), column: Some(0) });
+        let range = doc.parse_error_location.clone().unwrap_or(SourceLocation::at_line_col(1, 0));
         diagnostics.push(Diagnostic {
             code: DiagnosticCode::ParseError,
             severity: DiagnosticSeverity::Error,
@@ -57,7 +54,7 @@ mod tests {
             content_hash: "h".to_string(),
             modified_time: 0,
             parse_message: Some("unexpected token".to_string()),
-            parse_error_location: Some(SourceLocation { line: Some(3), column: Some(5) }),
+            parse_error_location: Some(SourceLocation::at_line_col(3, 5)),
         }];
         let input = DiagnosticInput {
             documents: &documents,

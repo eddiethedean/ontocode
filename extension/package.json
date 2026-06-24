@@ -2,7 +2,7 @@
   "name": "ontocode",
   "displayName": "OntoCode",
   "description": "Browse OWL/RDF ontologies in VS Code with inline diagnostics: explore classes and properties, inspect entities, validate in CI, and jump to source.",
-  "version": "0.3.0",
+  "version": "0.4.0",
   "publisher": "ontocode",
   "license": "MIT",
   "repository": {
@@ -97,6 +97,22 @@
       {
         "command": "ontocode.openEntity",
         "title": "Open Entity Inspector"
+      },
+      {
+        "command": "ontocode.createClass",
+        "title": "OntoCode: Create Class"
+      },
+      {
+        "command": "ontocode.createProperty",
+        "title": "OntoCode: Create Property"
+      },
+      {
+        "command": "ontocode.createIndividual",
+        "title": "OntoCode: Create Individual"
+      },
+      {
+        "command": "ontocode.deleteEntity",
+        "title": "OntoCode: Delete Entity"
       }
     ],
     "menus": {
@@ -117,6 +133,26 @@
           "command": "ontocode.openEntity",
           "when": "view =~ /^ontocode\\.explorer\\./ && viewItem == ontocodeEntity",
           "group": "inline"
+        },
+        {
+          "command": "ontocode.deleteEntity",
+          "when": "view =~ /^ontocode\\.explorer\\./ && viewItem == ontocodeEntity",
+          "group": "2_edit"
+        },
+        {
+          "command": "ontocode.createClass",
+          "when": "view == ontocode.explorer.classes",
+          "group": "navigation"
+        },
+        {
+          "command": "ontocode.createIndividual",
+          "when": "view == ontocode.explorer.individuals",
+          "group": "navigation"
+        },
+        {
+          "command": "ontocode.createProperty",
+          "when": "view == ontocode.explorer.properties",
+          "group": "navigation"
         }
       ]
     },

@@ -59,10 +59,7 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
     let pending_reindex: Arc<Mutex<Option<PendingReindex>>> = Arc::new(Mutex::new(None));
     let pending_diagnostic_publish = Arc::new(AtomicBool::new(false));
 
-    let index_worker = IndexWorker::spawn(
-        state.clone(),
-        connection.sender.clone(),
-    );
+    let index_worker = IndexWorker::spawn(state.clone(), connection.sender.clone());
 
     let timer_worker = index_worker.clone();
     let timer_pending = Arc::clone(&pending_reindex);
@@ -199,7 +196,11 @@ fn handle_notification(
                         if let Err(err) = state.set_document_text(path, text) {
                             eprintln!("ontoindex-lsp: rejected document change: {err}");
                         } else if let Some(workspace) = state.workspace_root() {
-                            schedule_reindex(pending_reindex, workspace, Duration::from_millis(750));
+                            schedule_reindex(
+                                pending_reindex,
+                                workspace,
+                                Duration::from_millis(750),
+                            );
                         }
                     } else {
                         eprintln!(

@@ -92,6 +92,23 @@ impl EntityKind {
 pub struct SourceLocation {
     pub line: Option<u64>,
     pub column: Option<u64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub start_byte: Option<u64>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub end_byte: Option<u64>,
+}
+
+impl SourceLocation {
+    pub fn is_empty(&self) -> bool {
+        self.line.is_none()
+            && self.column.is_none()
+            && self.start_byte.is_none()
+            && self.end_byte.is_none()
+    }
+
+    pub fn at_line_col(line: u64, column: u64) -> Self {
+        Self { line: Some(line), column: Some(column), start_byte: None, end_byte: None }
+    }
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
@@ -182,6 +199,8 @@ pub struct Annotation {
     pub predicate: String,
     pub object: String,
     pub ontology_id: String,
+    #[serde(default, skip_serializing_if = "SourceLocation::is_empty")]
+    pub source_location: SourceLocation,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -192,6 +211,8 @@ pub struct Axiom {
     pub predicate: String,
     pub object: String,
     pub axiom_kind: String,
+    #[serde(default, skip_serializing_if = "SourceLocation::is_empty")]
+    pub source_location: SourceLocation,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

@@ -176,7 +176,7 @@ fn extract_parse_error_location(
         }
     });
     if line.is_some() || column.is_some() {
-        Some(SourceLocation { line, column })
+        Some(SourceLocation { line, column, ..Default::default() })
     } else {
         None
     }
@@ -365,6 +365,7 @@ impl OntologyBuilder {
                 predicate: predicate.clone(),
                 object: object.clone(),
                 ontology_id: self.ontology_id.clone(),
+                source_location: SourceLocation::default(),
             });
             return;
         }
@@ -386,6 +387,7 @@ impl OntologyBuilder {
                 predicate: predicate.clone(),
                 object: object.clone(),
                 ontology_id: self.ontology_id.clone(),
+                source_location: SourceLocation::default(),
             });
             return;
         }
@@ -411,6 +413,7 @@ impl OntologyBuilder {
                 predicate: predicate.clone(),
                 object: object.clone(),
                 axiom_kind: AXIOM_KIND_SUB_CLASS_OF.to_string(),
+                source_location: SourceLocation::default(),
             });
         }
     }
@@ -580,6 +583,8 @@ fn find_entity_source_location(
                 return SourceLocation {
                     line: Some((line_idx + 1) as u64),
                     column: Some(col as u64),
+                    start_byte: None,
+                    end_byte: None,
                 };
             }
         }

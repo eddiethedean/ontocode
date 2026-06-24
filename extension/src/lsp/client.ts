@@ -7,15 +7,18 @@ import {
   TransportKind,
 } from "vscode-languageclient/node";
 import {
+  assertCatalogSnapshot,
+  assertGetEntityResult,
+  assertIndexWorkspaceResult,
+  assertApplyPatchResult,
+} from "./protocolGuards";
+import {
+  ApplyAxiomPatchParams,
+  ApplyPatchResult,
   CatalogSnapshot,
   GetEntityResult,
   IndexWorkspaceResult,
 } from "./protocol";
-import {
-  assertCatalogSnapshot,
-  assertGetEntityResult,
-  assertIndexWorkspaceResult,
-} from "./protocolGuards";
 import {
   bundledServerPath,
   ensureBundledServerExecutable,
@@ -145,6 +148,17 @@ export async function getEntity(iri: string): Promise<GetEntityResult> {
   const c = requireClient();
   const result = await c.sendRequest<unknown>("ontoindex/getEntity", { iri });
   return assertGetEntityResult(result);
+}
+
+export async function applyAxiomPatch(
+  params: ApplyAxiomPatchParams
+): Promise<ApplyPatchResult> {
+  const c = requireClient();
+  const result = await c.sendRequest<unknown>(
+    "ontoindex/applyAxiomPatch",
+    params
+  );
+  return assertApplyPatchResult(result);
 }
 
 function requireClient(): LanguageClient {

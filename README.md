@@ -3,7 +3,7 @@
 [![CI](https://github.com/eddiethedean/ontocode/actions/workflows/ci.yml/badge.svg)](https://github.com/eddiethedean/ontocode/actions/workflows/ci.yml)
 [![Extension VS Code E2E](https://github.com/eddiethedean/ontocode/actions/workflows/extension-vscode-e2e.yml/badge.svg)](https://github.com/eddiethedean/ontocode/actions/workflows/extension-vscode-e2e.yml)
 [![License](https://img.shields.io/crates/l/ontoindex-core)](https://github.com/eddiethedean/ontocode/blob/main/LICENSE-MIT)
-[![MSRV](https://img.shields.io/badge/MSRV-1.86+-orange)](https://github.com/eddiethedean/ontocode/blob/main/Cargo.toml)
+[![MSRV](https://img.shields.io/badge/MSRV-1.88+-orange)](https://github.com/eddiethedean/ontocode/blob/main/Cargo.toml)
 [![Rust edition](https://img.shields.io/badge/edition-2021-red)](https://www.rust-lang.org)
 
 [![crates](https://img.shields.io/badge/crates-lightgrey?style=flat-square&logo=rust)](https://crates.io/search?q=ontoindex)
@@ -13,12 +13,12 @@
 [![query](https://img.shields.io/crates/v/ontoindex-query?label=query)](https://crates.io/crates/ontoindex-query)
 [![cli](https://img.shields.io/crates/v/ontoindex-cli?label=cli)](https://crates.io/crates/ontoindex-cli)
 [![lsp](https://img.shields.io/crates/v/ontoindex-lsp?label=lsp)](https://crates.io/crates/ontoindex-lsp)
-[![diagnostics](https://img.shields.io/crates/v/ontoindex-diagnostics?label=diagnostics)](https://crates.io/crates/ontoindex-diagnostics)
+[![owl](https://img.shields.io/crates/v/ontoindex-owl?label=owl)](https://crates.io/crates/ontoindex-owl)
 [![downloads](https://img.shields.io/crates/d/ontoindex-cli?label=downloads)](https://crates.io/crates/ontoindex-cli)
 
-**Ontology-as-code for Git and VS Code — v0.3.0 ships today.**
+**Ontology-as-code for Git and VS Code — v0.4.0 ships today.**
 
-Browse OWL/RDF in VS Code, query and validate in CI, and index workspaces locally with a Rust engine. **v0.3** adds ontology diagnostics in the Problems panel and explorer; editing, reasoning, and semantic diffs are on the [roadmap](#roadmap).
+Browse OWL/RDF in VS Code, **edit Turtle ontologies**, query and validate in CI, and index workspaces locally with a Rust engine. **v0.4** adds patch-based write-back and Horned-OWL catalog integration; Manchester editing and reasoning are on the [roadmap](#roadmap).
 
 > **Naming:** **OntoCode** is the VS Code extension (product UI). **OntoIndex** is the Rust engine (`ontoindex` CLI, `ontoindex-*` crates, `ontoindex-lsp`). This repo contains both.
 
@@ -48,10 +48,10 @@ Full install and troubleshooting: [docs/vscode-install.md](docs/vscode-install.m
 
 OntoCode is designed as two products that ship together:
 
-| Layer | What it is | Status in v0.3.0 |
+| Layer | What it is | Status in v0.4.0 |
 |-------|------------|-------------------|
-| **OntoCode** | VS Code extension (explorer, entity inspector, diagnostics, jump-to-source) | **Shipping** — install VSIX or run from `extension/` |
-| **OntoIndex** | Rust library + CLI + LSP (scan, parse, catalog, query, validate, diagnostics) | **Shipping** |
+| **OntoCode** | VS Code extension (explorer, entity inspector, diagnostics, **authoring**) | **Shipping** |
+| **OntoIndex** | Rust library + CLI + LSP (scan, parse, catalog, query, validate, diagnostics, **write-back**) | **Shipping** |
 
 ```text
 ┌─────────────────────────────────────┐
@@ -76,12 +76,14 @@ OntoIndex is useful on its own today (CLI, CI, local analysis). The extension wi
 
 Protégé is strong for traditional ontology editing, but most engineering teams live in Git, pull requests, and VS Code. OntoCode targets that workflow:
 
-| Shipped in v0.3 | Planned (v1.0 target) |
+| Shipped in v0.4 | Planned (v1.0 target) |
 |-----------------|-------------------------|
 | Browse ontologies in VS Code | Hybrid authoring: forms + Manchester editor |
-| Entity inspector and jump-to-source | OWL axiom editing and patch write-back |
-| Inline diagnostics (Problems panel + explorer) | Query workbench, [OntoLogos](https://github.com/eddiethedean/ontologos)-backed reasoners + explanations |
-| `ontoindex validate` and `SELECT * FROM diagnostics` for CI | OBO format + ROBOT interop |
+| Entity inspector with **edit labels, parents, create/delete** | Complex class expressions in Manchester |
+| Patch write-back for Turtle (`.ttl`) | Multi-format write-back |
+| Horned-OWL catalog for Turtle axioms | Full OWL 2 DL axiom editing |
+| Inline diagnostics (Problems panel + explorer) | Query workbench, reasoners + explanations |
+| `ontoindex validate` and `ontoindex patch` for CI | OBO format + ROBOT interop |
 | SQL-like and SPARQL queries via CLI | Semantic Git diff, LSP completion/rename |
 | Local-first indexing | SHACL validation (rudof) |
 
@@ -186,8 +188,7 @@ The extension is a thin TypeScript shell over **ontoindex-lsp** and the OntoInde
 |---------|-------------|
 | v0.1 | OntoIndex: scanner, parser, catalog, CLI |
 | v0.2 | VS Code extension, explorer, entity inspector, LSP |
-| **v0.3.0** (current) | **Diagnostics** — Problems panel, `diagnostics` SQL table, `ontoindex validate` |
-| v0.4a–b | Simple write-back + Horned-OWL (`ontoindex-owl`) |
+| **v0.4.0** (current) | **Write-back** — Turtle patches, Horned-OWL catalog, editable inspector |
 | v0.5 | Query workbench + Manchester MVP |
 | v0.6 | Reasoning via [OntoLogos](https://github.com/eddiethedean/ontologos) 0.9.0 (EL, RL, inferred hierarchy) |
 | v0.7–v0.7b | Graphs + OBO/ROBOT interop |
@@ -204,7 +205,7 @@ OntoIndex delegates to mature Rust libraries — see [DEPENDENCY_MATRIX.md](docs
 |-------|--------|
 | RDF / SPARQL | [Oxigraph](https://crates.io/crates/oxigraph) |
 | SQL queries | [sqlparser](https://crates.io/crates/sqlparser) |
-| OWL axioms (planned) | [horned-owl](https://crates.io/crates/horned-owl), [horned-functional](https://crates.io/crates/horned-functional) |
+| OWL axioms / write-back | [horned-owl](https://crates.io/crates/horned-owl), [horned-functional](https://crates.io/crates/horned-functional) | `ontoindex-owl` | v0.4 |
 | Reasoning (planned) | [OntoLogos](https://github.com/eddiethedean/ontologos) |
 | OBO (planned) | [fastobo](https://crates.io/crates/fastobo) |
 | LSP | [lsp-server](https://crates.io/crates/lsp-server), [lsp-types](https://crates.io/crates/lsp-types) |
@@ -217,6 +218,7 @@ Policy: [ADR-0016](docs/design/adr/0016-dependency-first-implementation.md). Thi
 crates/
 ├── ontoindex-core      # types, workspace scanner
 ├── ontoindex-parser    # RDF parsing and entity extraction
+├── ontoindex-owl       # Horned-OWL facade, patch write-back (v0.4)
 ├── ontoindex-catalog   # index builder and semantic catalog
 ├── ontoindex-diagnostics # lint rules and diagnostic collection
 ├── ontoindex-query     # SQL-like and SPARQL engines
@@ -278,12 +280,13 @@ ONTOINDEX_UPDATE_GOLDEN=1 cargo test golden_classes
 
 ## Releasing
 
-Published crates (v0.3.0):
+Published crates (v0.4.0):
 
 | Crate | crates.io |
 |-------|-----------|
 | `ontoindex-core` | https://crates.io/crates/ontoindex-core |
 | `ontoindex-parser` | https://crates.io/crates/ontoindex-parser |
+| `ontoindex-owl` | https://crates.io/crates/ontoindex-owl |
 | `ontoindex-diagnostics` | https://crates.io/crates/ontoindex-diagnostics |
 | `ontoindex-catalog` | https://crates.io/crates/ontoindex-catalog |
 | `ontoindex-query` | https://crates.io/crates/ontoindex-query |

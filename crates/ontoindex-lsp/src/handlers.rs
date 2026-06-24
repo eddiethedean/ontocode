@@ -1,8 +1,8 @@
 use crate::index_worker::IndexWorker;
 use crate::positions::{byte_col_to_utf16, utf16_offset_to_byte};
 use crate::protocol::{
-    CatalogSnapshot, DiagnosticSummary, GetEntityParams, GetEntityResult, IndexWorkspaceParams,
-    IndexWorkspaceResult, LspErrorPayload,
+    ApplyAxiomPatchParams, ApplyAxiomPatchResult, CatalogSnapshot, DiagnosticSummary,
+    GetEntityParams, GetEntityResult, IndexWorkspaceParams, IndexWorkspaceResult, LspErrorPayload,
 };
 use crate::state::{path_to_uri, resolve_workspace_for_index, ServerState};
 use lsp_server::ResponseError;
@@ -13,7 +13,7 @@ use lsp_types::{
     Range, ServerCapabilities, SymbolInformation, SymbolKind, TextDocumentSyncCapability,
     TextDocumentSyncKind, Uri, WorkspaceSymbolParams, WorkspaceSymbolResponse,
 };
-use ontoindex_core::{resolve_document_path, EntityKind};
+use ontoindex_core::{resolve_document_path, EntityKind, OntologyFormat};
 use serde_json::Value;
 use std::path::Path;
 use std::str::FromStr;
@@ -93,6 +93,88 @@ pub fn handle_get_entity(
                 .ok_or_else(|| LspErrorPayload::not_found(&params.iri))
         })
         .ok_or_else(LspErrorPayload::not_indexed)?
+}
+
+pub fn handle_apply_axiom_patch(
+    state: &ServerState,
+    index_worker: &IndexWorker,
+    params: ApplyAxiomPatchParams,
+) -> Result<ApplyAxiomPatchResult, LspErrorPayload> {
+    let workspace = state.workspace_root().ok_or_else(LspErrorPayload::not_indexed)?;
+    let document_path = ontoindex_core::resolve_lsp_document_path(&params.document_uri, &workspace)
+        .map_err(|e| LspErrorPayload::patch_invalid(e.to_string()))?;
+
+    let namespaces = state
+        .with_catalog(|catalog| {
+            catalog
+                .data()
+                .documents
+                .iter()
+                .find(|d| {
+                    d.path.canonicalize().ok().as_ref()
+                        == document_path.canonicalize().ok().as_ref()
+                        || d.path == document_path
+                })
+                .map(|d| d.namespaces.clone())
+        })
+        .flatten()
+        .unwrap_or_default();
+
+    let format = OntologyFormat::from_extension(
+        document_path.extension().and_then(|e| e.to_str()).unwrap_or(""),
+    );
+    if format != OntologyFormat::Turtle {
+        return Err(LspErrorPayload::unsupported_format(format!(
+            "write-back supports Turtle only, got {}",
+            format.as_str()
+        )));
+    }
+
+    let patch_result = ontoindex_owl::apply_patches(
+        &document_path,
+        &params.patches,
+        params.preview_only,
+        &namespaces,
+    )
+    .map_err(|e| match e {
+        ontoindex_owl::OwlError::UnsupportedFormat(m) => LspErrorPayload::unsupported_format(m),
+        _ => LspErrorPayload::patch_invalid(e.to_string()),
+    })?;
+
+    if !patch_result.diagnostics.is_empty() {
+        return Err(LspErrorPayload::patch_invalid(
+            patch_result
+                .diagnostics
+                .iter()
+                .map(|d| d.message.clone())
+                .collect::<Vec<_>>()
+                .join("; "),
+        ));
+    }
+
+    let entity_iri = params.patches.first().map(|p| match p {
+        ontoindex_owl::PatchOp::CreateEntity { entity_iri, .. }
+        | ontoindex_owl::PatchOp::DeleteEntity { entity_iri }
+        | ontoindex_owl::PatchOp::SetLabel { entity_iri, .. }
+        | ontoindex_owl::PatchOp::AddLabel { entity_iri, .. }
+        | ontoindex_owl::PatchOp::RemoveLabel { entity_iri, .. }
+        | ontoindex_owl::PatchOp::SetComment { entity_iri, .. }
+        | ontoindex_owl::PatchOp::AddComment { entity_iri, .. }
+        | ontoindex_owl::PatchOp::RemoveComment { entity_iri, .. }
+        | ontoindex_owl::PatchOp::AddSubClassOf { entity_iri, .. }
+        | ontoindex_owl::PatchOp::RemoveSubClassOf { entity_iri, .. }
+        | ontoindex_owl::PatchOp::SetDeprecated { entity_iri, .. } => entity_iri.clone(),
+    });
+
+    if patch_result.applied && !params.preview_only {
+        let _ = index_worker.enqueue_sync(workspace).map_err(LspErrorPayload::index_failed)?;
+    }
+
+    let entity_detail = entity_iri
+        .and_then(|iri| state.with_catalog(|catalog| catalog.entity_detail(&iri)))
+        .flatten();
+
+    Ok(ApplyAxiomPatchResult { patch: patch_result, entity_detail })
 }
 
 pub fn handle_hover(state: &ServerState, params: HoverParams) -> Option<Hover> {
@@ -269,6 +351,13 @@ pub fn handle_custom_request(
             let params: GetEntityParams = serde_json::from_value(params.unwrap_or(Value::Null))
                 .map_err(|e| LspErrorPayload::index_failed(format!("invalid params: {e}")))?;
             let result = handle_get_entity(state, params)?;
+            serde_json::to_value(result).map_err(|e| LspErrorPayload::index_failed(e.to_string()))
+        }
+        "ontoindex/applyAxiomPatch" => {
+            let params: ApplyAxiomPatchParams =
+                serde_json::from_value(params.unwrap_or(Value::Null))
+                    .map_err(|e| LspErrorPayload::index_failed(format!("invalid params: {e}")))?;
+            let result = handle_apply_axiom_patch(state, index_worker, params)?;
             serde_json::to_value(result).map_err(|e| LspErrorPayload::index_failed(e.to_string()))
         }
         _ => Err(LspErrorPayload::index_failed(format!("unknown method: {method}"))),

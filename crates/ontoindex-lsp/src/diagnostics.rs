@@ -20,12 +20,7 @@ pub fn publish_diagnostics_for_state(sender: &Sender<Message>, state: &ServerSta
         None => return,
     };
     let text_fn = |path: &Path| state.document_text(path);
-    publish_catalog_diagnostics(
-        sender,
-        &snapshot.documents,
-        &snapshot.diagnostics,
-        &text_fn,
-    );
+    publish_catalog_diagnostics(sender, &snapshot.documents, &snapshot.diagnostics, &text_fn);
 }
 
 pub fn publish_catalog_diagnostics(
@@ -143,7 +138,7 @@ mod tests {
             severity: DiagnosticSeverity::Error,
             message: "test".to_string(),
             file: PathBuf::from("a.ttl"),
-            range: SourceLocation { line: Some(2), column: Some(4) },
+            range: SourceLocation::at_line_col(2, 4),
             entity_iri: None,
             quick_fix: None,
         };
@@ -187,7 +182,7 @@ mod tests {
             severity: DiagnosticSeverity::Error,
             message: "undefined prefix: un:".to_string(),
             file: path.to_path_buf(),
-            range: SourceLocation { line: Some(1), column: Some(0) },
+            range: SourceLocation::at_line_col(1, 0),
             entity_iri: None,
             quick_fix: None,
         };

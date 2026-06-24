@@ -51,9 +51,7 @@ impl ServerState {
     ) -> Result<(ontoindex_catalog::CatalogStats, u64), String> {
         let workspace = canonical_workspace_root(&workspace)?;
 
-        let root = self
-            .workspace_root()
-            .ok_or_else(|| "workspace not initialized".to_string())?;
+        let root = self.workspace_root().ok_or_else(|| "workspace not initialized".to_string())?;
         validate_workspace_scope(&workspace, &root)?;
 
         let overrides = self.open_documents_snapshot();
@@ -191,7 +189,10 @@ fn now_epoch_secs() -> u64 {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use ontoindex_core::{is_path_within, limits::{MAX_FILE_BYTES, MAX_OPEN_DOCUMENTS}};
+    use ontoindex_core::{
+        is_path_within,
+        limits::{MAX_FILE_BYTES, MAX_OPEN_DOCUMENTS},
+    };
     use std::path::PathBuf;
 
     #[test]

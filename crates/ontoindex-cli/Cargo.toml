@@ -20,6 +20,7 @@ path = "src/main.rs"
 [dependencies]
 ontoindex-catalog = { workspace = true }
 ontoindex-core = { workspace = true }
+ontoindex-owl = { workspace = true }
 ontoindex-query = { workspace = true }
 anyhow.workspace = true
 clap.workspace = true

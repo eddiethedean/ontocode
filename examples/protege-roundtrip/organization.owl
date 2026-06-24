@@ -1,0 +1,19 @@
+<?xml version="1.0"?>
+<rdf:RDF xmlns="http://example.org/org#"
+     xml:base="http://example.org/org"
+     xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:ex="http://example.org/people#">
+
+    <owl:Ontology rdf:about="http://example.org/org">
+        <rdfs:label>Organization extension</rdfs:label>
+        <owl:imports rdf:resource="http://example.org/people"/>
+    </owl:Ontology>
+
+    <owl:Class rdf:about="http://example.org/org#Department">
+        <rdfs:label>Department</rdfs:label>
+        <rdfs:subClassOf rdf:resource="http://example.org/people#Organization"/>
+    </owl:Class>
+
+</rdf:RDF>

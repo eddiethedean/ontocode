@@ -1,9 +1,11 @@
 import * as vscode from "vscode";
 import {
+  applyAxiomPatch,
   getCatalogSnapshot,
   getEntity,
   indexWorkspace,
 } from "../lsp/client";
+import { PatchEntityKind, PatchOp } from "../lsp/protocol";
 import { EntityInspectorPanel } from "../webviews/inspector";
 import { ExplorerTreeProvider } from "../treeviews/explorer";
 import { resolveEntityIri } from "../utils/resolveEntityIri";
@@ -38,7 +40,9 @@ export function registerCommands(
         }
         if (iri) {
           try {
-            await openInspector(context.extensionUri, iri);
+            await openInspector(context.extensionUri, iri, async () =>
+              refreshExplorer(providers)
+            );
           } catch (err) {
             const message = err instanceof Error ? err.message : String(err);
             void vscode.window.showErrorMessage(
@@ -56,7 +60,9 @@ export function registerCommands(
           return;
         }
         try {
-          await openInspector(context.extensionUri, iri);
+          await openInspector(context.extensionUri, iri, async () =>
+            refreshExplorer(providers)
+          );
         } catch (err) {
           const message = err instanceof Error ? err.message : String(err);
           void vscode.window.showErrorMessage(
@@ -105,7 +111,57 @@ export function registerCommands(
           );
         }
       }
-    )
+    ),
+    vscode.commands.registerCommand("ontocode.createClass", async () => {
+      await createEntity(context, providers, "class");
+    }),
+    vscode.commands.registerCommand("ontocode.createProperty", async () => {
+      const kind = await vscode.window.showQuickPick(
+        [
+          { label: "Object property", value: "object_property" as PatchEntityKind },
+          { label: "Data property", value: "data_property" as PatchEntityKind },
+          { label: "Annotation property", value: "annotation_property" as PatchEntityKind },
+        ],
+        { placeHolder: "Property kind" }
+      );
+      if (kind) {
+        await createEntity(context, providers, kind.value);
+      }
+    }),
+    vscode.commands.registerCommand("ontocode.createIndividual", async () => {
+      await createEntity(context, providers, "individual");
+    }),
+    vscode.commands.registerCommand("ontocode.deleteEntity", async (arg?: unknown) => {
+      const iri = resolveEntityIri(arg);
+      if (!iri) {
+        return;
+      }
+      const confirm = await vscode.window.showWarningMessage(
+        `Delete entity ${iri}?`,
+        { modal: true },
+        "Delete"
+      );
+      if (confirm !== "Delete") {
+        return;
+      }
+      try {
+        const { detail } = await getEntity(iri);
+        if (!detail.document_path) {
+          void vscode.window.showErrorMessage("Entity is not in an editable Turtle file");
+          return;
+        }
+        await applyAxiomPatch({
+          document_uri: vscode.Uri.file(detail.document_path).toString(),
+          patches: [{ op: "delete_entity", entity_iri: iri }],
+          preview_only: false,
+        });
+        await refreshExplorer(providers);
+        void vscode.window.showInformationMessage("Entity deleted");
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        void vscode.window.showErrorMessage(`Delete failed: ${message}`);
+      }
+    })
   );
 }
 
@@ -142,8 +198,71 @@ export async function refreshExplorer(providers: {
 
 async function openInspector(
   extensionUri: vscode.Uri,
-  iri: string
+  iri: string,
+  onRefresh?: () => Promise<void>
 ): Promise<void> {
+  const snapshot = await getCatalogSnapshot();
+  const classOptions = snapshot.entities
+    .filter((e) => e.kind === "class")
+    .map((e) => e.iri);
   const { detail } = await getEntity(iri);
-  EntityInspectorPanel.show(extensionUri, detail);
+  EntityInspectorPanel.show(extensionUri, detail, classOptions, onRefresh);
+}
+
+async function createEntity(
+  context: vscode.ExtensionContext,
+  providers: Parameters<typeof refreshExplorer>[0],
+  kind: PatchEntityKind
+): Promise<void> {
+  const localName = await vscode.window.showInputBox({
+    prompt: "Local name (e.g. Employee)",
+  });
+  if (!localName?.trim()) {
+    return;
+  }
+  const snapshot = await getCatalogSnapshot();
+  const ttlDocs = snapshot.documents.filter((d) => d.format === "turtle");
+  if (ttlDocs.length === 0) {
+    void vscode.window.showErrorMessage("No Turtle (.ttl) ontology in workspace");
+    return;
+  }
+  const docPick =
+    ttlDocs.length === 1
+      ? ttlDocs[0]
+      : await vscode.window
+          .showQuickPick(
+            ttlDocs.map((d) => ({ label: d.path, doc: d })),
+            { placeHolder: "Target ontology file" }
+          )
+          .then((p) => p?.doc);
+  if (!docPick) {
+    return;
+  }
+  const base =
+    docPick.base_iri ??
+    Object.values(docPick.namespaces ?? {}).find(
+      (ns) => ns.endsWith("#") || ns.endsWith("/")
+    ) ??
+    "http://example.org/ontology#";
+  const entity_iri = `${base}${localName.trim()}`;
+  const patches: PatchOp[] = [
+    { op: "create_entity", entity_iri, kind },
+    { op: "add_label", entity_iri, value: localName.trim() },
+  ];
+  try {
+    await applyAxiomPatch({
+      document_uri: vscode.Uri.file(docPick.path).toString(),
+      patches,
+      preview_only: false,
+    });
+    await refreshExplorer(providers);
+    await openInspector(
+      context.extensionUri,
+      entity_iri,
+      async () => refreshExplorer(providers)
+    );
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    void vscode.window.showErrorMessage(`Create failed: ${message}`);
+  }
 }

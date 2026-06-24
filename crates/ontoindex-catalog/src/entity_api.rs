@@ -32,6 +32,9 @@ pub struct EntityDetail {
     pub children: Vec<String>,
     pub axioms: Vec<String>,
     pub source: Option<SourceHint>,
+    pub editable: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub document_path: Option<String>,
 }
 
 impl OntologyCatalog {
@@ -98,8 +101,14 @@ impl OntologyCatalog {
             .collect();
 
         let source = self.find_source_location(iri);
+        let doc = self.entity_document(iri);
+        let editable = doc.is_some_and(|d| {
+            d.format == ontoindex_core::OntologyFormat::Turtle
+                && d.parse_status == ontoindex_core::ParseStatus::Ok
+        });
+        let document_path = doc.map(|d| d.path.display().to_string());
 
-        Some(EntityDetail { entity, parents, children, axioms, source })
+        Some(EntityDetail { entity, parents, children, axioms, source, editable, document_path })
     }
 
     pub fn find_source_location(&self, iri: &str) -> Option<SourceHint> {

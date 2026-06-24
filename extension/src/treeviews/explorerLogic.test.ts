@@ -51,7 +51,7 @@ describe("explorerLogic", () => {
       (e) => e.short_name === "Person"
     );
     assert.ok(person);
-    assert.equal(entityDisplayLabel(person!), "\"Person\"");
+    assert.equal(entityDisplayLabel(person!), "Person");
   });
 
   it("groups diagnostics by severity", () => {

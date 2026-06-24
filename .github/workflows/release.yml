@@ -165,6 +165,7 @@ jobs:
 
           publish_with_pause ontoindex-core
           publish_with_pause ontoindex-parser
+          publish_with_pause ontoindex-owl
           publish_with_pause ontoindex-diagnostics
           publish_with_pause ontoindex-catalog
           publish_with_pause ontoindex-query

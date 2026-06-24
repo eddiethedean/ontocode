@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/eddiethedean/ontocode/docs/lsp-protocol.schema.json",
-  "title": "OntoIndex LSP protocol (v0.3)",
-  "description": "JSON Schema for implemented ontoindex/* custom LSP methods. Full codegen (typeshare or schema-to-TS) is planned for v0.4 before additional methods ship.",
+  "title": "OntoIndex LSP protocol (v0.4)",
+  "description": "JSON Schema for ontoindex/* custom LSP methods (v0.4 subset).",
   "definitions": {
     "EntityKind": {
       "type": "string",
@@ -15,6 +15,41 @@
         "ontology",
         "other"
       ]
+    },
+    "PatchEntityKind": {
+      "type": "string",
+      "enum": [
+        "class",
+        "object_property",
+        "data_property",
+        "annotation_property",
+        "individual"
+      ]
+    },
+    "PatchOp": {
+      "type": "object",
+      "required": ["op"],
+      "properties": {
+        "op": { "type": "string" },
+        "entity_iri": { "type": "string" },
+        "kind": { "$ref": "#/definitions/PatchEntityKind" },
+        "value": { "type": "string" },
+        "parent_iri": { "type": "string" }
+      },
+      "additionalProperties": true
+    },
+    "ApplyAxiomPatchParams": {
+      "type": "object",
+      "required": ["document_uri", "patches"],
+      "properties": {
+        "document_uri": { "type": "string" },
+        "patches": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/PatchOp" }
+        },
+        "preview_only": { "type": "boolean", "default": false }
+      },
+      "additionalProperties": false
     },
     "DiagnosticSummary": {
       "type": "object",
@@ -47,8 +82,7 @@
     "IndexWorkspaceParams": {
       "type": "object",
       "properties": {
-        "workspace_uri": { "type": ["string", "null"] },
-        "workspaceUri": { "type": ["string", "null"], "description": "Legacy camelCase alias (deprecated)" }
+        "workspace_uri": { "type": ["string", "null"] }
       },
       "additionalProperties": false
     },

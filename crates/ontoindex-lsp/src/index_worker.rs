@@ -22,10 +22,7 @@ pub struct IndexWorker {
 }
 
 impl IndexWorker {
-    pub fn spawn(
-        state: ServerState,
-        lsp_sender: Sender<Message>,
-    ) -> Self {
+    pub fn spawn(state: ServerState, lsp_sender: Sender<Message>) -> Self {
         let (job_tx, job_rx) = crossbeam_channel::unbounded();
         thread::spawn(move || run_worker(state, job_rx, lsp_sender));
         Self { job_tx }
@@ -46,11 +43,7 @@ impl IndexWorker {
     }
 }
 
-fn run_worker(
-    state: ServerState,
-    job_rx: Receiver<IndexJob>,
-    lsp_sender: Sender<Message>,
-) {
+fn run_worker(state: ServerState, job_rx: Receiver<IndexJob>, lsp_sender: Sender<Message>) {
     while let Ok(job) = job_rx.recv() {
         let replies: Vec<Sender<Result<(CatalogStats, u64), String>>> =
             job.reply.into_iter().collect();

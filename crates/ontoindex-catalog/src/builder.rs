@@ -1,13 +1,16 @@
 use crate::OntologyCatalogData;
 use ontoindex_core::{
     limits::{MAX_ENTITIES, MAX_TOTAL_TRIPLES, MAX_TRIPLES_PER_FILE},
-    Entity, OntologyDocument, ParseStatus, WorkspaceScanner,
+    Annotation, Axiom, Entity, Import, Namespace, OntologyDocument, OntologyFormat, ParseStatus,
+    WorkspaceScanner,
 };
 use ontoindex_diagnostics::{collect_diagnostics_with_sources, DiagnosticInput};
-use ontoindex_parser::{parse_ontology_file, parse_ontology_text};
+use ontoindex_owl::{load_turtle_text, supports_horned_load};
+use ontoindex_parser::{parse_ontology_file, parse_ontology_text, ParsedOntology};
 use oxigraph::model::Quad;
 use oxigraph::store::Store;
 use std::collections::HashMap;
+use std::fs;
 use std::path::{Path, PathBuf};
 use thiserror::Error;
 
@@ -102,7 +105,7 @@ impl IndexBuilder {
             }
 
             documents.push(OntologyDocument {
-                id: doc_id,
+                id: doc_id.clone(),
                 path: file.path.clone(),
                 format: file.format,
                 base_iri: parsed.base_iri.clone(),
@@ -118,7 +121,15 @@ impl IndexBuilder {
             let doc_idx = documents.len() - 1;
             let mut doc_entity_iris = Vec::new();
 
-            for entity in parsed.entities {
+            let semantics = semantics_for_document(
+                &file.path,
+                file.format,
+                &doc_id,
+                &parsed,
+                self.document_override_text(&file.path),
+            );
+
+            for entity in semantics.entities {
                 if let Some(&prev_doc_idx) = entity_to_document.get(&entity.iri) {
                     if prev_doc_idx != doc_idx {
                         document_entity_iris[prev_doc_idx].retain(|iri| iri != &entity.iri);
@@ -135,10 +146,10 @@ impl IndexBuilder {
                 }
             }
             document_entity_iris.push(doc_entity_iris);
-            annotations.extend(parsed.annotations);
-            axioms.extend(parsed.axioms);
-            namespaces.extend(parsed.namespace_rows);
-            imports.extend(parsed.import_rows);
+            annotations.extend(semantics.annotations);
+            axioms.extend(semantics.axioms);
+            namespaces.extend(semantics.namespace_rows);
+            imports.extend(semantics.imports);
 
             if entities.len() > MAX_ENTITIES {
                 return Err(CatalogError::Core(ontoindex_core::OntoIndexError::Scanner(format!(
@@ -224,6 +235,58 @@ fn merge_entity(existing: &mut Entity, incoming: &Entity) {
     existing.ontology_id = incoming.ontology_id.clone();
     if existing.short_name.is_empty() {
         existing.short_name = incoming.short_name.clone();
+    }
+}
+
+struct DocumentSemantics {
+    entities: Vec<Entity>,
+    annotations: Vec<Annotation>,
+    axioms: Vec<Axiom>,
+    namespace_rows: Vec<Namespace>,
+    imports: Vec<Import>,
+}
+
+fn semantics_for_document(
+    path: &Path,
+    format: OntologyFormat,
+    doc_id: &str,
+    parsed: &ParsedOntology,
+    override_text: Option<&String>,
+) -> DocumentSemantics {
+    if parsed.parse_status == ParseStatus::Error || !supports_horned_load(format) {
+        return DocumentSemantics {
+            entities: parsed.entities.clone(),
+            annotations: parsed.annotations.clone(),
+            axioms: parsed.axioms.clone(),
+            namespace_rows: parsed.namespace_rows.clone(),
+            imports: parsed.import_rows.clone(),
+        };
+    }
+
+    let source_text = if let Some(text) = override_text {
+        text.clone()
+    } else {
+        fs::read_to_string(path).unwrap_or_default()
+    };
+
+    if let Ok(owl) =
+        load_turtle_text(path, doc_id, &source_text, parsed.quads(), &parsed.namespaces)
+    {
+        return DocumentSemantics {
+            entities: owl.bridge.entities,
+            annotations: owl.bridge.annotations,
+            axioms: owl.bridge.axioms,
+            namespace_rows: owl.bridge.namespace_rows,
+            imports: owl.bridge.imports,
+        };
+    }
+
+    DocumentSemantics {
+        entities: parsed.entities.clone(),
+        annotations: parsed.annotations.clone(),
+        axioms: parsed.axioms.clone(),
+        namespace_rows: parsed.namespace_rows.clone(),
+        imports: parsed.import_rows.clone(),
     }
 }
 

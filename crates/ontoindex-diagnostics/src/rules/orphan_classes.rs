@@ -168,6 +168,7 @@ mod tests {
             predicate: "subClassOf".to_string(),
             object: "http://ex/Thing".to_string(),
             axiom_kind: AXIOM_KIND_SUB_CLASS_OF.to_string(),
+            source_location: Default::default(),
         }];
         let input = DiagnosticInput {
             documents: &documents,

@@ -205,9 +205,11 @@ Parse and validate a Manchester class expression; return normalized text, Turtle
 
 **Errors:** `NOT_INDEXED`, `MANCHESTER_INVALID`
 
-### `ontoindex/applyAxiomPatch` (v0.4+)
+### `ontoindex/applyAxiomPatch` (v0.5)
 
 Apply Turtle patch operations. See [authoring.md](authoring.md).
+
+**Buffer-first (VS Code):** Reads the open document buffer when available, applies patches in memory, updates the buffer, writes disk, then reindexes. See [errors.md](errors.md) for `APPLIED_NOT_INDEXED`.
 
 **Params:** `ApplyAxiomPatchParams`
 
@@ -233,7 +235,7 @@ Apply Turtle patch operations. See [authoring.md](authoring.md).
 
 See [patch-reference.md](patch-reference.md) for CLI `ApplyPatchResult` examples and [errors.md](errors.md) for failure codes.
 
-**Errors:** `PATCH_INVALID`, `UNSUPPORTED_FORMAT`, `NOT_INDEXED`
+**Errors:** `PATCH_INVALID`, `UNSUPPORTED_FORMAT`, `NOT_INDEXED`, `APPLIED_NOT_INDEXED`
 
 ## Structured errors
 
@@ -241,7 +243,7 @@ Custom method failures return `LspErrorPayload` in the JSON-RPC error `data` fie
 
 | Field | Description |
 |-------|-------------|
-| `code` | Machine-readable code (`NOT_INDEXED`, `ENTITY_NOT_FOUND`, `PATCH_INVALID`, `UNSUPPORTED_FORMAT`, `INDEX_FAILED`, …) |
+| `code` | Machine-readable code (`NOT_INDEXED`, `ENTITY_NOT_FOUND`, `PATCH_INVALID`, `UNSUPPORTED_FORMAT`, `INDEX_FAILED`, `QUERY_FAILED`, `MANCHESTER_INVALID`, `APPLIED_NOT_INDEXED`, …) |
 | `message` | Human-readable message |
 | `recoverable` | Whether the client can retry |
 | `user_action` | Suggested user action (optional) |

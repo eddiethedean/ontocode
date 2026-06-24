@@ -7,27 +7,34 @@ Maintainer checklist for publishing crates, binaries, and the VS Code extension.
 1. Update `[workspace.package].version` in root [Cargo.toml on GitHub](https://github.com/eddiethedean/ontocode/blob/main/Cargo.toml)
 2. Update `extension/package.json` `version`
 3. Update [CHANGELOG.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md)
-4. Regenerate [NOTICES](../NOTICES) if dependencies changed (`cargo license` recommended)
+4. Regenerate [NOTICES on GitHub](https://github.com/eddiethedean/ontocode/blob/main/NOTICES) if dependencies changed (`cargo license` recommended)
 5. Sync user-facing docs (see checklist below)
 
 ## Documentation sync checklist (every release)
 
-- [ ] [Root README on GitHub](https://github.com/eddiethedean/ontocode/blob/main/README.md) — version, "What ships", architecture diagram, Read the Docs badge
-- [ ] [docs index](index.md) — shipped version labels
-- [ ] [extension/README.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/extension/README.md) — "What's included"
-- [ ] [docs/vscode-install.md](vscode-install.md) — recommended version
+- [ ] **[docs/SHIPPED.md](SHIPPED.md)** — canonical capability matrix (update first)
+- [ ] [Root README on GitHub](https://github.com/eddiethedean/ontocode/blob/main/README.md) — version, link to SHIPPED.md, Read the Docs badge
+- [ ] [docs/index.md](index.md) — hero version, capability table, documentation map
+- [ ] [extension/README.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/extension/README.md) — "What's included", command table
+- [ ] [docs/vscode-install.md](vscode-install.md) — recommended version, commands
+- [ ] [docs/getting-started.md](getting-started.md) — release binary examples (Path D)
+- [ ] [docs/faq.md](faq.md) — API version, Protégé comparison
+- [ ] [docs/errors.md](errors.md) / [docs/workspace-limits.md](workspace-limits.md) — behavior changes
+- [ ] [docs/guides/enterprise-eval.md](guides/enterprise-eval.md) — shipped capabilities
 - [ ] [security.md](security.md) / [SECURITY.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/SECURITY.md) — supported versions table
-- [ ] [docs/lsp-api.md](lsp-api.md) / [docs/sql-reference.md](sql-reference.md) — version headers
+- [ ] [docs/lsp-api.md](lsp-api.md) — new methods or error codes
 - [ ] [docs/design/PROTEGE_PARITY.md](design/PROTEGE_PARITY.md) — status columns if features shipped
+- [ ] [docs/design/ARCHITECTURE.md](design/ARCHITECTURE.md) / [OWL_AUTHORING_SPEC.md](design/OWL_AUTHORING_SPEC.md) — shipped vs target banners
 - [ ] [docs/design/LICENSES.md](design/LICENSES.md) — dependency sections
+- [ ] Run `mkdocs build --strict` locally before tagging
 
 ## Tag and publish
 
 Push a tag matching `[workspace.package].version` in `Cargo.toml`:
 
 ```bash
-git tag v0.4.0
-git push origin v0.4.0
+git tag v0.5.0
+git push origin v0.5.0
 ```
 
 The [release workflow on GitHub](https://github.com/eddiethedean/ontocode/blob/main/.github/workflows/release.yml):

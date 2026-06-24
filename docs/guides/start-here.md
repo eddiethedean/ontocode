@@ -12,7 +12,13 @@ Pick the path that matches how you work. Each link is a single next step — not
 
 [Getting started in 5 minutes](../getting-started.md) — `cargo install ontoindex-cli` or clone the repo and use `fixtures/`.
 
+**Query in VS Code:** [Query Workbench guide](../guides/query-workbench.md)
+
 **Then automate in CI:** [CI integration](../ci-integration.md) — `ontoindex validate` in GitHub Actions.
+
+## Complex axioms (Manchester)
+
+[Manchester editor guide](../guides/manchester-editor.md) — edit `SubClassOf` and `EquivalentClasses` in Turtle.
 
 ## Automate edits (patch JSON)
 
@@ -24,7 +30,7 @@ Pick the path that matches how you work. Each link is a single next step — not
 
 ## Evaluate for your team
 
-[Enterprise evaluation](enterprise-eval.md) · [FAQ](../faq.md) · [Workspace limits](../workspace-limits.md) · [Security](../security.md) · [Release integrity](../release-integrity.md)
+[Enterprise evaluation](enterprise-eval.md) · [What ships today](../SHIPPED.md) · [FAQ](../faq.md) · [Troubleshooting](../troubleshooting.md) · [Workspace limits](../workspace-limits.md) · [Security](../security.md) · [Release integrity](../release-integrity.md)
 
 ## Contribute to OntoCode / OntoIndex
 
@@ -33,6 +39,8 @@ Pick the path that matches how you work. Each link is a single next step — not
 ## Common questions
 
 [FAQ](../faq.md) — naming, `cargo install` vs clone, multi-root workspaces, LGPL (horned-owl).
+
+[Troubleshooting](../troubleshooting.md) — LSP start failures, empty explorer, patch apply issues.
 
 ## Full documentation map
 

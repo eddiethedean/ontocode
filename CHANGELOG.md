@@ -5,18 +5,6 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.5.1] - 2026-06-24
-
-### Fixed
-
-- **Turtle span/patch engine:** structural subject/block detection; complex axiom removal via blank-node spans; transactional patch apply; Turtle literal escaping
-- **Manchester:** `and` / `or` serialization emits full operand lists; SubClassOf edit uses remove+add (no duplicate axioms)
-- **LSP:** patches apply to open document buffer before disk write; `APPLIED_NOT_INDEXED` when reindex fails after apply
-- **Query layer:** SPARQL truncates at row cap instead of hard-failing; SQL filter errors propagate; correct `truncated` flag at exactly 100k rows
-- **Extension:** query result table uses safe DOM APIs (XSS); validate/run sequence IDs ignore stale responses; `@prefix` fallback when catalog namespaces are unavailable
-
-[0.5.1]: https://github.com/eddiethedean/ontocode/releases/tag/v0.5.1
-
 ## [0.5.0] - 2026-06-24
 
 ### Added
@@ -35,6 +23,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Inspector shows **Edit in Manchester** for complex axioms and **Add Manchester axiom**
 - README capability table: SQL + SPARQL in VS Code → **Yes**
+
+### Fixed
+
+- **Turtle span/patch engine:** structural subject/block detection; complex axiom removal via blank-node spans; transactional patch apply; Turtle literal escaping
+- **Manchester:** `and` / `or` serialization emits full operand lists; SubClassOf edit uses remove+add (no duplicate axioms)
+- **LSP:** patches apply to open document buffer before disk write; `APPLIED_NOT_INDEXED` when reindex fails after apply
+- **Query layer:** SPARQL truncates at row cap instead of hard-failing; SQL filter errors propagate; correct `truncated` flag at exactly 100k rows
+- **Extension:** query result table uses safe DOM APIs (XSS); validate/run sequence IDs ignore stale responses; `@prefix` fallback when catalog namespaces are unavailable
 
 [0.5.0]: https://github.com/eddiethedean/ontocode/releases/tag/v0.5.0
 

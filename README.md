@@ -23,7 +23,7 @@ Browse OWL/RDF in VS Code, **edit Turtle ontologies**, query and validate in CI,
 
 > **Naming:** **OntoCode** is the VS Code extension (product UI). **OntoIndex** is the Rust engine (`ontoindex` CLI, `ontoindex-*` crates, `ontoindex-lsp`). This repo contains both.
 
-**Documentation:** [Read the Docs](https://onto-code.readthedocs.io/) — [Start here](https://onto-code.readthedocs.io/en/latest/guides/start-here/) · [5-minute guide](https://onto-code.readthedocs.io/en/latest/getting-started/)
+**Documentation:** [Read the Docs](https://onto-code.readthedocs.io/) — [What ships today](https://onto-code.readthedocs.io/en/latest/SHIPPED/) · [Start here](https://onto-code.readthedocs.io/en/latest/guides/start-here/) · [5-minute guide](https://onto-code.readthedocs.io/en/latest/getting-started/)
 
 ## Choose your path
 
@@ -82,6 +82,8 @@ OntoCode is designed as two products that ship together:
 OntoIndex is useful on its own today (CLI, CI, local analysis). The extension calls into the same engine via a language server rather than reimplementing ontology logic in TypeScript.
 
 ## What ships in v0.5.0
+
+Canonical matrix: **[What ships today](https://onto-code.readthedocs.io/en/latest/SHIPPED/)** (updated each release).
 
 **VS Code (OntoCode):** Browse ontologies, entity inspector with **editing**, diagnostics, jump-to-source, **Query Workbench** (SQL + SPARQL), **Manchester editor** for complex axioms.
 
@@ -220,7 +222,7 @@ Column schemas: [SQL reference](https://onto-code.readthedocs.io/en/latest/sql-r
 
 ## API stability (pre-1.0)
 
-Published `ontoindex-*` crates are at **0.4.x**. Library APIs, LSP wire JSON, and SQL virtual
+Published `ontoindex-*` crates are at **0.5.x**. Library APIs, LSP wire JSON, and SQL virtual
 table columns may change between minor releases until [v1.0 stable core](https://onto-code.readthedocs.io/en/latest/design/v1.0_BACKLOG/)
 is complete. The CLI `validate` exit code (errors fail, warnings pass) is documented in
 [workspace limits](https://onto-code.readthedocs.io/en/latest/workspace-limits/).

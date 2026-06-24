@@ -1,6 +1,6 @@
 # Errors reference
 
-Unified catalog of error codes, exit behavior, and failure modes for OntoIndex v0.4.
+Unified catalog of error codes, exit behavior, and failure modes for OntoIndex **v0.5**.
 
 ## CLI exit codes
 
@@ -8,12 +8,12 @@ Unified catalog of error codes, exit behavior, and failure modes for OntoIndex v
 |---------|--------|---------------|
 | `ontoindex validate` | No diagnostic **errors** (warnings/info allowed) | One or more diagnostic **errors** |
 | `ontoindex query` | Query succeeded | Parse error, unsupported SQL, I/O failure |
-| `ontoindex sparql` | Query succeeded within row cap | Parse error, result row cap exceeded, I/O failure |
+| `ontoindex sparql` | Query succeeded (results may be truncated at row cap) | Parse error, I/O failure |
 | `ontoindex patch` | Patch applied or preview succeeded | Invalid patch, unsupported format, I/O failure |
 
 `validate` exit semantics are stable for CI — see [workspace-limits.md](workspace-limits.md) and [ci-integration.md](ci-integration.md).
 
-Other CLI commands return non-zero on failure with a human-readable message on stderr (no stable machine-readable code enum in v0.4).
+Other CLI commands return non-zero on failure with a human-readable message on stderr.
 
 ## LSP custom method errors (`LspErrorPayload`)
 
@@ -35,6 +35,9 @@ Custom `ontoindex/*` method failures return JSON-RPC errors with `data` containi
 | `PATCH_INVALID` | Patch JSON invalid or entity missing | Check patch parameters and entity IRIs |
 | `UNSUPPORTED_FORMAT` | Write-back on non-Turtle file | Save as Turtle (.ttl) for write-back |
 | `INDEX_FAILED` | Indexing failed (parse, limits, I/O) | Check ontology files for parse errors |
+| `QUERY_FAILED` | SQL or SPARQL query failed | Check query syntax and [sql-reference](sql-reference.md) |
+| `MANCHESTER_INVALID` | Manchester expression parse failed | Fix expression; see [Manchester guide](guides/manchester-editor.md) |
+| `APPLIED_NOT_INDEXED` | Patch written to buffer/disk but reindex failed | Run Index Workspace; file may already be updated (`recoverable: true`) |
 
 ### Example JSON-RPC error envelope
 
@@ -75,6 +78,8 @@ When `ontoindex patch` or `ontoindex/applyAxiomPatch` fails validation, the resu
 
 LSP `applyAxiomPatch` returns the same `ApplyPatchResult` fields (`applied`, `preview_text`, `diagnostics`, `document_path`) plus optional `entity_detail` on success.
 
+**Buffer-first apply (v0.5):** When called from VS Code, patches apply to the **open document buffer** first, then disk, then trigger reindex. If reindex fails after a successful write, the server returns `APPLIED_NOT_INDEXED` — the buffer/disk may already contain the patch.
+
 ## Lint diagnostic codes (`diagnostics` table)
 
 | Code | Severity | Meaning |
@@ -99,8 +104,8 @@ Query diagnostics: `SELECT code, severity, message, file FROM diagnostics WHERE 
 | Triples total | `MAX_TOTAL_TRIPLES` (20M) | Index error |
 | Triples per file | `MAX_TRIPLES_PER_FILE` (5M) | Per-file index error |
 | Query size | `MAX_QUERY_BYTES` (1 MiB) | Query rejected |
-| SQL rows | `MAX_SQL_RESULT_ROWS` (100k) | **Silent truncation** |
-| SPARQL rows | `MAX_SPARQL_RESULT_ROWS` (100k) | Query error |
+| SQL rows | `MAX_SQL_RESULT_ROWS` (100k) | **Silent truncation** (`truncated: true` in LSP) |
+| SPARQL rows | `MAX_SPARQL_RESULT_ROWS` (100k) | **Silent truncation** (`truncated: true` in LSP) |
 
 Full limits: [workspace-limits.md](workspace-limits.md).
 
@@ -112,7 +117,7 @@ Integrators using `ontoindex-*` crates directly should handle:
 |-------|------------|---------------|
 | `ontoindex-parser` | `ParseError` | Invalid RDF syntax |
 | `ontoindex-catalog` | `CatalogError` | Index build failure |
-| `ontoindex-query` | `QueryError` | Unsupported SQL, SPARQL cap |
+| `ontoindex-query` | `QueryError` | Unsupported SQL, SPARQL parse error |
 | `ontoindex-owl` | `OwlError` | Patch apply failure |
 
 Example: [`examples/error_handling.rs`](https://github.com/eddiethedean/ontocode/blob/main/examples/error_handling.rs) on GitHub.
@@ -123,3 +128,4 @@ Example: [`examples/error_handling.rs`](https://github.com/eddiethedean/ontocode
 - [patch-reference.md](patch-reference.md) — patch operations
 - [sql-reference.md](sql-reference.md) — virtual tables and SQL subset
 - [faq.md](faq.md) — common troubleshooting
+- [troubleshooting.md](troubleshooting.md) — step-by-step fixes

@@ -95,6 +95,9 @@ Open a `.ttl` (or other supported) file and use standard VS Code navigation:
 |---------|-------------|
 | **OntoCode: Index Workspace** | After adding/changing ontology files |
 | **OntoCode: Refresh Explorer** | Reload tree views from the catalog |
+| **OntoCode: Open Query Workbench** | Run SQL/SPARQL against indexed workspace |
+| **OntoCode: Open Manchester Editor** | Edit complex axiom on selected entity |
+| **OntoCode: Add Manchester Axiom** | Add complex subclass or equivalent |
 | **OntoCode: Show Entity Inspector** | Open inspector by IRI |
 | **OntoCode: Jump to Source** | Go to declaration by IRI |
 | **OntoCode: Create Class** | Create a new class in a Turtle file |
@@ -124,7 +127,7 @@ Indexing is driven by the language server on startup; `ontocode.autoIndexOnOpen`
 | `failed to start language server` | Check **View → Output → OntoIndex Language Server**. Uninstall older OntoCode versions. Set `ontocode.lspPath` or `cargo install ontoindex-lsp` |
 | Empty **Classes** after indexing | **Output → OntoIndex Language Server** for errors; run **Index Workspace** again |
 | No items under **Diagnostics** | Index must complete first; check **Problems** panel for the same issues |
-| Cannot edit in inspector | Write-back is **Turtle (`.ttl`) only** in v0.4; other formats are read-only |
+| Cannot edit in inspector | Write-back is **Turtle (`.ttl`) only**; other formats are read-only |
 | Workspace is Restricted | **Trust** the folder — `ontocode.lspPath` is ignored in Restricted Mode |
 | Multi-root workspace | Only the **first** folder is indexed — use a single-root folder or open the primary ontology project |
 
@@ -149,7 +152,7 @@ Release builds bundle `ontoindex-lsp` for Linux (x64, arm64), macOS (Apple Silic
 ## Links
 
 - [GitHub repository](https://github.com/eddiethedean/ontocode)
-- [Documentation](https://onto-code.readthedocs.io/en/latest/) — [Start here](https://onto-code.readthedocs.io/en/latest/guides/start-here/) · [Install guide](https://onto-code.readthedocs.io/en/latest/vscode-install/)
+- [Documentation](https://onto-code.readthedocs.io/en/latest/) — [What ships today](https://onto-code.readthedocs.io/en/latest/SHIPPED/) · [Query Workbench](https://onto-code.readthedocs.io/en/latest/guides/query-workbench/) · [Manchester editor](https://onto-code.readthedocs.io/en/latest/guides/manchester-editor/)
 - [Report an issue](https://github.com/eddiethedean/ontocode/issues)
 - [Changelog](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md)
 

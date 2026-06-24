@@ -1,6 +1,8 @@
 # Evaluating OntoCode for your organization
 
-This page helps security, platform, and ontology teams decide whether OntoCode v0.4 fits your workflow. It is honest about **what ships today** vs the v1.0 Protégé-competitive target.
+This page helps security, platform, and ontology teams decide whether OntoCode **v0.5** fits your workflow. It is honest about **what ships today** vs the v1.0 Protégé-competitive target.
+
+Canonical capability matrix: [What ships today](../SHIPPED.md).
 
 ## What v0.5.0 delivers
 
@@ -32,7 +34,7 @@ Full gap analysis: [Protégé parity matrix](../design/PROTEGE_PARITY.md).
 | Vulnerability reporting | GitHub Security Advisories (not public issues) |
 | `ontocode.lspPath` | Trusted workspaces only; ignored in VS Code Restricted Mode |
 | Resource limits | [workspace-limits.md](../workspace-limits.md) — file count, size, triple caps |
-| Telemetry | **No telemetry** in v0.4. AI features are opt-in per [ADR-0010](../design/adr/0010-ai-features-opt-in.md) (not shipped) |
+| Telemetry | **No telemetry**. AI features are opt-in per [ADR-0010](../design/adr/0010-ai-features-opt-in.md) (not shipped) |
 | Supply chain | SHA256 checksums on release artifacts; `cargo audit` in CI. Code signing planned — not shipped yet |
 
 ## Licensing
@@ -46,7 +48,7 @@ Full gap analysis: [Protégé parity matrix](../design/PROTEGE_PARITY.md).
 | Limitation | Impact |
 |------------|--------|
 | **Multi-root VS Code workspaces** | Only the **first** folder is indexed |
-| **Write-back** | **Turtle only** in v0.4; OWL/XML is read-only in the inspector |
+| **Write-back** | **Turtle only**; OWL/XML is read-only in the inspector |
 | **CLI release binaries** | Linux x64 only; macOS/Windows use `cargo install` or bundled LSP in VSIX |
 | **Scale** | Workspaces above [workspace limits](../workspace-limits.md) may fail indexing — prefer CLI batch workflows for very large terminologies |
 | **ROBOT / Java** | Planned ROBOT CLI interop (v0.7b) requires an external Java process — not JVM-free for that workflow |
@@ -55,9 +57,10 @@ Full gap analysis: [Protégé parity matrix](../design/PROTEGE_PARITY.md).
 
 A full migration guide is a **v1.0 deliverable**. Today:
 
-- Use OntoCode for **Git-native Turtle editing** and **CI validation** alongside or instead of Protégé for simple edits
-- Expect to keep Protégé for **DL reasoning**, **Manchester axioms**, and **complex OWL editing** until v1.0
-- See [Protégé parity matrix](../design/PROTEGE_PARITY.md) for the canonical P0 checklist
+- Use OntoCode for **Git-native Turtle editing**, **CI validation**, **SQL/SPARQL queries**, and **Manchester MVP** (complex `SubClassOf` and `EquivalentClasses` in Turtle)
+- **Manchester MVP (v0.5)** covers restrictions, `and`/`or`, and cardinality — not disjoint axioms, property chains, or the full axiom catalog
+- Expect to keep Protégé for **DL reasoning**, **disjoint axioms**, **OBO id workflows**, and **full OWL 2 DL editing** until v0.8–v1.0
+- See [Protégé parity matrix](../design/PROTEGE_PARITY.md) and [What ships today](../SHIPPED.md)
 
 ## Evaluation checklist
 
@@ -69,4 +72,4 @@ A full migration guide is a **v1.0 deliverable**. Today:
 
 ## Questions
 
-[FAQ](../faq.md) · [errors reference](../errors.md) · [Report an issue](https://github.com/eddiethedean/ontocode/issues)
+[FAQ](../faq.md) · [Troubleshooting](../troubleshooting.md) · [errors reference](../errors.md) · [Report an issue](https://github.com/eddiethedean/ontocode/issues)

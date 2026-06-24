@@ -1,6 +1,6 @@
 # OWL Authoring Specification (v1.0)
 
-> **Status:** v0.4.0 ships **Turtle patch write-back** (labels, comments, `SubClassOf`, create/delete). Manchester editor and full hybrid forms are **v1.0 target** — see [authoring.md](../authoring.md) for what ships today.
+> **Status: Target spec for v1.0.** Partial implementation ships in **v0.5** — see [What ships today](../SHIPPED.md) and [authoring.md](../authoring.md) for the current Manchester MVP and Turtle patch write-back.
 >
 > Depends on [ADR-0013](adr/0013-dual-stack-oxigraph-horned-owl.md) (Horned-OWL layer),
 > [ADR-0006](adr/0006-patch-based-write-back.md) (patch write-back), and

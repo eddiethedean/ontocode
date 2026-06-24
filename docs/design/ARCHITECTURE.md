@@ -1,11 +1,12 @@
 # ARCHITECTURE.md
 
-> **Document status: target architecture (v0.4 partial implementation)**
+> **Document status: target architecture with v0.5 partial implementation**
 >
-> **Implemented today:** workspace scanner, Oxigraph-based parsing, in-memory catalog and triple store,
-> SQL-like queries via `sqlparser`, SPARQL, diagnostics lint rules, CLI, LSP explorer + Problems panel integration,
-> Horned-OWL catalog bridge and Turtle patch write-back (`ontoindex-owl`).
-> See [docs/lsp-api.md](../lsp-api.md), [adr/README.md](adr/README.md), and [DEPENDENCY_MATRIX.md](DEPENDENCY_MATRIX.md) for current decisions.
+> **Shipped in v0.5:** workspace scanner, Oxigraph parsing, in-memory catalog, SQL/SPARQL queries, diagnostics, CLI, LSP explorer + Problems panel, Turtle patch write-back, Query Workbench + Manchester editor (extension), Horned-OWL catalog bridge (`ontoindex-owl`). See [What ships today](../SHIPPED.md).
+>
+> **Planned:** reasoning (v0.6), graph visualization, semantic diff, full Manchester catalog, OBO/ROBOT interop. See [ROADMAP.md](ROADMAP.md).
+>
+> **Reference:** [lsp-api.md](../lsp-api.md), [adr/README.md](adr/README.md), [DEPENDENCY_MATRIX.md](DEPENDENCY_MATRIX.md).
 
 ## 1. Architecture Goals
 
@@ -121,7 +122,14 @@ Commands, views, webviews, language client, settings.
 Explorer (asserted/inferred toggle), diagnostics, query history.
 
 ### 5.3 Webviews
-Graph visualization, query workbench, semantic diff, Manchester axiom editor, explanation panel.
+
+| Webview | Status |
+|---------|--------|
+| Query workbench | **Shipped** (v0.5) |
+| Manchester axiom editor | **Shipped** (v0.5 MVP) |
+| Graph visualization | Planned (v0.7) |
+| Semantic diff | Planned (v0.9) |
+| Explanation panel | Planned (v1.0) |
 
 ### 5.4 Language Client
 LSP lifecycle; protocol guards; v1.0 authoring methods.

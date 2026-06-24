@@ -74,7 +74,10 @@ nav:
       - 5-minute guide: getting-started.md
       - Install VS Code: vscode-install.md
   - Guides:
+      - What ships today: SHIPPED.md
       - Authoring (Turtle): authoring.md
+      - Query Workbench: guides/query-workbench.md
+      - Manchester editor: guides/manchester-editor.md
       - Patch JSON: patch-reference.md
       - CI integration: ci-integration.md
       - Enterprise evaluation: guides/enterprise-eval.md
@@ -89,9 +92,11 @@ nav:
       - Sample patches: examples/patches.md
   - Help:
       - FAQ: faq.md
+      - Troubleshooting: troubleshooting.md
       - Security: security.md
       - Release integrity: release-integrity.md
   - Project:
+      - What ships today: SHIPPED.md
       - Overview: design/README.md
       - Roadmap: design/ROADMAP.md
       - Architecture: design/ARCHITECTURE.md

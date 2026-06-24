@@ -35,7 +35,7 @@ If views are empty, run **OntoCode: Index Workspace** from the Command Palette (
 
 ## 4. Edit a Turtle entity
 
-Write-back works in **Turtle (`.ttl`) files only** in v0.4. RDF/XML and other formats are read-only in the inspector.
+Write-back works in **Turtle (`.ttl`) files only**. RDF/XML and other formats are read-only in the inspector.
 
 1. Select a class from a `.ttl` file in the explorer.
 2. In the Entity Inspector **Edit** section:
@@ -83,14 +83,16 @@ Exit code **0** means no diagnostic **errors** (warnings are allowed). See [CI i
 | Language server failed to start | See [Install VS Code](../vscode-install.md#troubleshooting) |
 | Empty **Classes** after indexing | Check **Output → OntoIndex Language Server**; re-run **Index Workspace** |
 
-More help: [FAQ](../faq.md).
+More help: [Troubleshooting](../troubleshooting.md) · [FAQ](../faq.md).
 
 ## Next steps
 
 | Goal | Document |
 |------|----------|
 | Install options (VSIX, offline) | [vscode-install.md](../vscode-install.md) |
+| Query workbench | [guides/query-workbench.md](../guides/query-workbench.md) |
+| Manchester editor | [guides/manchester-editor.md](../guides/manchester-editor.md) |
 | Patch JSON automation | [patch-reference.md](../patch-reference.md) |
-| SQL / SPARQL queries | [sql-reference.md](../sql-reference.md) · [sparql-reference.md](../sparql-reference.md) |
-| Query workbench + Manchester | [authoring.md](../authoring.md) |
+| SQL / SPARQL reference | [sql-reference.md](../sql-reference.md) · [sparql-reference.md](../sparql-reference.md) |
+| Authoring overview | [authoring.md](../authoring.md) |
 | CI validation | [ci-integration.md](../ci-integration.md) |

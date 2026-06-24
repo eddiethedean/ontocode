@@ -26,7 +26,9 @@ indexing improvements.
 |-------|-------|
 | SQL/SPARQL query string | **1 MB** (`MAX_QUERY_BYTES`) |
 | SQL result rows | **100,000** — **silently truncated** (no error) |
-| SPARQL result rows | **100,000** — **error** if exceeded |
+| SPARQL result rows | **100,000** — **silently truncated** (no error) |
+
+LSP `ontoindex/query` and `ontoindex/sparql` set `truncated: true` on `TabularQueryResult` when the cap is hit.
 
 ## `ontoindex validate` exit codes
 

@@ -18,14 +18,15 @@ Browse OWL/RDF in VS Code, edit Turtle ontologies, query and validate in CI, and
 <span class="oc-badge oc-badge--accent">VS Code extension</span>
 <span class="oc-badge oc-badge--accent">Rust CLI</span>
 <span class="oc-badge">Turtle write-back</span>
+<span class="oc-badge">Query Workbench</span>
+<span class="oc-badge">Manchester editor</span>
 <span class="oc-badge">SPARQL + SQL</span>
-<span class="oc-badge">LSP</span>
 </div>
 
 <div class="oc-hero-actions" markdown>
 [Start here](guides/start-here.md){ .md-button .md-button--primary }
+[What ships today](SHIPPED.md){ .md-button }
 [First success](guides/first-success.md){ .md-button }
-[5-minute guide](getting-started.md){ .md-button }
 </div>
 
 </div>
@@ -66,25 +67,45 @@ Browse OWL/RDF in VS Code, edit Turtle ontologies, query and validate in CI, and
 
     [:octicons-arrow-right-24: Authoring guide](authoring.md)
 
+-   :material-database-search:{ .lg .middle } **Query Workbench**
+
+    ---
+
+    Run SQL and SPARQL against your indexed workspace from VS Code.
+
+    [:octicons-arrow-right-24: Query Workbench](guides/query-workbench.md)
+
+-   :material-code-braces:{ .lg .middle } **Manchester editor**
+
+    ---
+
+    Edit complex SubClassOf and EquivalentClasses axioms in Manchester syntax.
+
+    [:octicons-arrow-right-24: Manchester guide](guides/manchester-editor.md)
+
 -   :material-help-circle:{ .lg .middle } **Questions?**
 
     ---
 
     FAQ, troubleshooting, workspace limits, and security.
 
-    [:octicons-arrow-right-24: FAQ](faq.md)
+    [:octicons-arrow-right-24: Troubleshooting](troubleshooting.md)
 
 </div>
 
-## What ships in v0.4
+## What ships in v0.5.0
+
+See the full matrix: **[What ships today](SHIPPED.md)**.
 
 | Capability | VS Code | CLI |
 |------------|---------|-----|
 | Browse classes, properties, individuals | Yes | via SQL |
 | Edit labels, comments, parents (`.ttl`) | Yes | `ontoindex patch` |
+| Complex `SubClassOf` / `EquivalentClasses` (Manchester) | Yes | `ontoindex patch` |
 | Create / delete entities (`.ttl`) | Yes | `ontoindex patch` |
+| SQL-like queries | Query Workbench | `ontoindex query` |
+| SPARQL | Query Workbench | `ontoindex sparql` |
 | Diagnostics / lint | Problems panel | `ontoindex validate` |
-| SPARQL | — | `ontoindex sparql` |
 
 ## Quick start
 
@@ -114,10 +135,14 @@ Browse OWL/RDF in VS Code, edit Turtle ontologies, query and validate in CI, and
 
 | Topic | Link |
 |-------|------|
+| **What ships today (canonical)** | [SHIPPED.md](SHIPPED.md) |
 | Start here (pick a path) | [guides/start-here.md](guides/start-here.md) |
 | First success tutorial | [guides/first-success.md](guides/first-success.md) |
+| Query Workbench | [guides/query-workbench.md](guides/query-workbench.md) |
+| Manchester editor | [guides/manchester-editor.md](guides/manchester-editor.md) |
 | Install VS Code | [vscode-install.md](vscode-install.md) |
 | Getting started (CLI) | [getting-started.md](getting-started.md) |
+| Troubleshooting | [troubleshooting.md](troubleshooting.md) |
 | SQL virtual tables | [sql-reference.md](sql-reference.md) |
 | SPARQL | [sparql-reference.md](sparql-reference.md) |
 | LSP API | [lsp-api.md](lsp-api.md) |

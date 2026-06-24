@@ -1,19 +1,23 @@
 # FAQ
 
-Common questions about OntoCode and OntoIndex.
+Common questions about OntoCode and OntoIndex. For step-by-step fixes, see [Troubleshooting](troubleshooting.md).
 
 ## Naming and products
 
 **What is the difference between OntoCode and OntoIndex?**
 
-- **OntoCode** — VS Code extension (explorer UI, inspector, diagnostics, editing).
+- **OntoCode** — VS Code extension (explorer, inspector, Query Workbench, Manchester editor, diagnostics).
 - **OntoIndex** — Rust engine (`ontoindex` CLI, `ontoindex-*` crates, `ontoindex-lsp`).
 
 This repository contains both.
 
 **Is the API stable?**
 
-Pre-1.0. Published crates are at 0.4.x. Library APIs, LSP JSON, and SQL table columns may change between minor releases until v1.0. The `validate` exit code (errors fail, warnings pass) is stable — see [workspace-limits.md](workspace-limits.md).
+Pre-1.0. Published crates are at **0.5.x**. Library APIs, LSP JSON, and SQL table columns may change between minor releases until v1.0. The `validate` exit code (errors fail, warnings pass) is stable — see [workspace-limits.md](workspace-limits.md).
+
+**What ships in the current release?**
+
+See [What ships today](SHIPPED.md) for the canonical capability matrix.
 
 ## Installation
 
@@ -43,9 +47,17 @@ Yes. Download release binaries and VSIX from [GitHub Releases](https://github.co
 2. Check **View → Output → OntoIndex Language Server** for errors.
 3. Confirm the folder contains supported files (`.ttl`, `.owl`, etc.).
 
+**How do I run SQL or SPARQL in VS Code?**
+
+Command Palette → **OntoCode: Open Query Workbench**. See [Query Workbench guide](guides/query-workbench.md).
+
+**How do I edit complex axioms?**
+
+Select a class in a `.ttl` file → Entity Inspector → **Edit in Manchester** or **Add Manchester axiom**. See [Manchester editor guide](guides/manchester-editor.md).
+
 **I cannot edit in the Entity Inspector.**
 
-Write-back is **Turtle (`.ttl`) only** in v0.4. RDF/XML, OWL, and JSON-LD files are read-only in the inspector.
+Write-back is **Turtle (`.ttl`) only**. RDF/XML, OWL XML, and JSON-LD files are read-only in the inspector.
 
 **Only one folder in my multi-root workspace is indexed.**
 
@@ -56,17 +68,17 @@ Known limitation: only the **first** workspace folder is indexed. Open the prima
 - Trust the workspace.
 - Uninstall duplicate OntoCode versions.
 - Set `ontocode.lspPath` to a local `ontoindex-lsp` binary (`cargo install ontoindex-lsp`).
-- See [vscode-install.md](vscode-install.md).
+- See [vscode-install.md](vscode-install.md) and [troubleshooting.md](troubleshooting.md).
 
 **Does `ontocode.autoIndexOnOpen` do anything?**
 
-It is a legacy setting. Indexing is driven by the language server on startup in v0.4.
+It is a legacy setting. Indexing is driven by the language server on workspace open.
 
 ## CLI and queries
 
 **What SQL is supported?**
 
-A subset: single-table `SELECT`, `FROM`, `WHERE` with `=`, `!=`, `AND`, `OR`, and boolean columns. No `JOIN`, `GROUP BY`, or `ORDER BY`. See [sql-reference.md](sql-reference.md).
+A subset: single-table `SELECT`, `FROM`, `WHERE` with `=`, `!=`, `AND`, `OR`, and boolean columns. No `JOIN`, `GROUP BY`, `ORDER BY`, or `LIMIT`. See [sql-reference.md](sql-reference.md).
 
 **How do I run SPARQL?**
 
@@ -76,6 +88,10 @@ ontoindex sparql /path/to/ontologies "SELECT ?s ?p ?o WHERE { ?s ?p ?o } LIMIT 1
 
 See [sparql-reference.md](sparql-reference.md).
 
+**What happens at 100,000 result rows?**
+
+Both SQL and SPARQL **truncate** at 100,000 rows (no error). LSP responses include `truncated: true` when the cap is hit. See [workspace-limits.md](workspace-limits.md).
+
 **What does `ontoindex validate` check?**
 
 Parse errors plus catalog lint rules: broken imports, undefined prefixes, duplicate/missing labels, orphan classes. See [sql-reference.md](sql-reference.md) (`diagnostics` table).
@@ -84,7 +100,7 @@ Parse errors plus catalog lint rules: broken imports, undefined prefixes, duplic
 
 **Which formats can I edit?**
 
-Turtle (`.ttl`) only in v0.4. All supported formats can be indexed and queried.
+Turtle (`.ttl`) only for write-back. All supported formats can be indexed and queried.
 
 **Where is the patch JSON format documented?**
 
@@ -106,10 +122,10 @@ No. The LSP has no authentication. Use stdio with a trusted editor only. See [se
 
 ## Roadmap
 
-**When will Manchester editing / reasoning ship?**
+**When will reasoning ship?**
 
-Manchester MVP shipped in v0.5; reasoning via OntoLogos is planned for v0.6. See [design/ROADMAP.md](design/ROADMAP.md).
+Reasoning via OntoLogos is planned for v0.6. Manchester MVP shipped in v0.5. See [design/ROADMAP.md](design/ROADMAP.md).
 
 **How does this compare to Protégé?**
 
-v0.4 targets Git + VS Code workflows with browse, lint, and simple Turtle editing. Full Protégé parity is the v1.0 goal — see [design/PROTEGE_PARITY.md](design/PROTEGE_PARITY.md).
+v0.5 targets Git + VS Code workflows: browse, lint, Turtle editing, SQL/SPARQL queries, and **Manchester MVP** for complex subclass and equivalent axioms. Full Protégé parity (reasoning, disjoint axioms, OBO, semantic diff) is the v1.0 goal — see [design/PROTEGE_PARITY.md](design/PROTEGE_PARITY.md) and [SHIPPED.md](SHIPPED.md).

@@ -54,7 +54,7 @@ jobs:
 
       - uses: Swatinem/rust-cache@v2
 
-      - run: cargo build -p ontoindex-lsp --bins
+      - run: cargo build -p ontoindex-lsp -p ontoindex-cli --bins
 
       - run: cargo test --workspace
 
@@ -70,7 +70,7 @@ jobs:
         with:
           shared-key: msrv
 
-      - run: cargo build -p ontoindex-lsp --bins
+      - run: cargo build -p ontoindex-lsp -p ontoindex-cli --bins
 
       - run: cargo test --workspace
 

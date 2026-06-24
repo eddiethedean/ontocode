@@ -1,6 +1,9 @@
-# Ontology authoring (v0.5)
+# Ontology authoring (v0.6)
 
-OntoCode v0.5 adds **Turtle write-back** for simple and **Manchester** ontology edits without Protégé.
+> **Status:** Documents behavior in **OntoIndex v0.6.0**. Pre-1.0 APIs may change.
+> Canonical feature list: [What ships today](SHIPPED.md).
+
+OntoCode provides **Turtle write-back** for simple and **Manchester** ontology edits without Protégé.
 
 ## Supported operations
 
@@ -31,7 +34,7 @@ Full JSON reference: [patch-reference.md](patch-reference.md).
 4. Changes apply via `ontoindex/applyAxiomPatch` and trigger a workspace reindex.
 5. VS Code undo works on saved file changes.
 
-## Manchester editor (v0.5)
+## Manchester editor
 
 For complex class expressions (restrictions, `and`/`or`, cardinality):
 
@@ -45,7 +48,7 @@ For complex class expressions (restrictions, `and`/`or`, cardinality):
 
 Manchester MVP scope: named classes, `and`/`or`, `some`/`only`, `min`/`max`/`exact` cardinality, and nesting. Disjoint axioms and property chains are deferred to v0.8.
 
-## Query workbench (v0.5)
+## Query workbench
 
 Run **OntoCode: Open Query Workbench** from the Command Palette.
 
@@ -95,9 +98,9 @@ For Turtle files, catalog **entities and axioms** come from [Horned-OWL](https:/
 
 When you apply a patch or Manchester edit in VS Code, the language server uses the **open editor buffer** as the source of truth (not only the file on disk). Unsaved edits in the buffer are preserved and patched in place. If reindex fails after a successful write, you may see `APPLIED_NOT_INDEXED` — run **Index Workspace**. See [errors.md](errors.md).
 
-## Limitations (v0.5)
+## Limitations
 
 - Write-back is **Turtle only**
-- Complex axioms appear in the inspector and Manchester editor but **not** as edges in the class hierarchy tree (named-parent edges only; inferred hierarchy is v0.6)
-- Manchester autocomplete uses catalog **Insert** pickers (no inline `owl-ms-language-server` in v0.5)
+- Complex axioms appear in the inspector and Manchester editor but **not** as edges in the class hierarchy tree (named-parent edges only; use reasoner for inferred hierarchy)
+- Manchester autocomplete uses catalog **Insert** pickers (no inline buffer autocomplete yet)
 - No SQL/SPARQL editor autocomplete in the workbench (v0.8+)

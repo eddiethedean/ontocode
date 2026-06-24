@@ -1,5 +1,7 @@
 # Installing OntoCode in VS Code
 
+> **Multi-root workspaces:** Only the **first** folder is indexed. Open your ontology project as a **single-root** folder, or put it first in a multi-root workspace.
+
 ## Option A — VS Code Marketplace (recommended)
 
 1. Install [OntoCode from the Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) (v0.6.0+).

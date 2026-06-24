@@ -26,8 +26,8 @@ Browse OWL/RDF in VS Code, edit Turtle ontologies, run EL/RL/RDFS reasoning, que
 
 <div class="oc-hero-actions" markdown>
 [Start here](guides/start-here.md){ .md-button .md-button--primary }
+[First success (10 min)](guides/first-success.md){ .md-button }
 [What ships today](SHIPPED.md){ .md-button }
-[First success](guides/first-success.md){ .md-button }
 </div>
 
 </div>

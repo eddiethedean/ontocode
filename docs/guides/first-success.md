@@ -2,13 +2,15 @@
 
 This is the **canonical tutorial** for new OntoCode users. You do not need to clone this repository.
 
+> **Multi-root workspaces:** Only the **first** folder is indexed. Open your ontology project as a **single-root** folder, or put it first in a multi-root workspace.
+
 ## What you will do
 
 1. Install OntoCode in VS Code
-2. Open a folder with a Turtle ontology
+2. Open a folder with Turtle ontology files (download samples below if needed)
 3. Browse classes in the sidebar
 4. Edit an entity in the Entity Inspector
-5. (Optional) Validate the workspace from the CLI
+5. (Optional) Query, Manchester editing, reasoner, and CLI validate
 
 ## 1. Install OntoCode
 
@@ -16,12 +18,19 @@ Install from the [VS Code Marketplace](https://marketplace.visualstudio.com/item
 
 For offline or air-gapped environments, use a release VSIX instead — see [Install VS Code](../vscode-install.md).
 
-## 2. Open an ontology folder
+## 2. Get sample ontology files (if you don't have any)
 
-1. **File → Open Folder…** and choose a project that contains ontology files (`.ttl`, `.owl`, `.rdf`, etc.).
-2. If VS Code asks, **Trust** the workspace (required for the bundled language server).
+Download a minimal tutorial pack:
 
-> **Multi-root workspaces:** Only the **first** folder is indexed. Open your primary ontology project as a single-root folder, or put it first in a multi-root workspace.
+```bash
+mkdir ontocode-tutorial && cd ontocode-tutorial
+curl -fsSLO https://raw.githubusercontent.com/eddiethedean/ontocode/main/fixtures/example.ttl
+curl -fsSLO https://raw.githubusercontent.com/eddiethedean/ontocode/main/fixtures/complex-classes.ttl
+```
+
+Then **File → Open Folder…** and select `ontocode-tutorial`.
+
+If you already have `.ttl`, `.owl`, or other ontology files, open that folder instead.
 
 ## 3. Browse the explorer
 
@@ -48,22 +57,22 @@ You can also right-click in the explorer to **Create Class**, **Create Property*
 
 Full editing reference: [Authoring guide](../authoring.md).
 
-## 5. Query the workspace (v0.5)
+## 5. Query the workspace
 
 1. Run **OntoCode: Open Query Workbench** from the Command Palette.
 2. Choose **SQL** mode and run `SELECT short_name FROM classes`.
 3. Confirm rows appear (e.g. classes from your `.ttl` files).
 4. Switch to **SPARQL** and run `SELECT ?s ?p ?o WHERE { ?s ?p ?o } LIMIT 10`.
 
-## 6. Edit a complex axiom in Manchester (v0.5)
+## 6. Edit a complex axiom in Manchester
 
-Requires a Turtle ontology with a complex subclass (git clone users: `fixtures/complex-classes.ttl`).
+Requires a Turtle ontology with a complex subclass (included in the sample pack as `complex-classes.ttl`).
 
 1. Select **Patient** (or another class with a restriction) in the explorer.
 2. In the Entity Inspector, click **Edit in Manchester** on the complex axiom row.
 3. Validate the expression, preview Turtle, and apply.
 
-## 7. (Optional) Run the reasoner (v0.6)
+## 7. (Optional) Run the reasoner
 
 1. Run **OntoCode: Run Reasoner** from the Command Palette.
 2. Review the **Reasoner Results** panel (profile, consistency, unsatisfiable classes).
@@ -80,7 +89,7 @@ cargo install ontoindex-cli --locked
 ontoindex validate /path/to/your/ontology/folder
 ```
 
-Exit code **0** means no diagnostic **errors** (warnings are allowed). See [CI integration](../ci-integration.md).
+Use the folder you opened in VS Code (e.g. `ontocode-tutorial`). Exit code **0** means no diagnostic **errors** (warnings are allowed). See [CI integration](../ci-integration.md).
 
 ## Troubleshooting
 

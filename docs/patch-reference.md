@@ -1,4 +1,7 @@
-# Patch reference (OntoIndex v0.5)
+# Patch reference (OntoIndex v0.6)
+
+> **Status:** Documents behavior in **OntoIndex v0.6.0**. Pre-1.0 APIs may change.
+> Canonical feature list: [What ships today](SHIPPED.md).
 
 Turtle write-back uses a JSON array of patch operations. The CLI (`ontoindex patch`) and LSP (`ontoindex/applyAxiomPatch`) accept the same format.
 

@@ -6,7 +6,7 @@ Maintainer checklist for publishing crates, binaries, and the VS Code extension.
 
 1. Update `[workspace.package].version` in root [Cargo.toml on GitHub](https://github.com/eddiethedean/ontocode/blob/main/Cargo.toml)
 2. Update `extension/package.json` `version`
-3. Update [CHANGELOG.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md)
+3. Update [CHANGELOG.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) and [docs/changelog.md](changelog.md)
 4. Regenerate [NOTICES on GitHub](https://github.com/eddiethedean/ontocode/blob/main/NOTICES) if dependencies changed (`cargo license` recommended)
 5. Sync user-facing docs (see checklist below)
 
@@ -22,6 +22,7 @@ Maintainer checklist for publishing crates, binaries, and the VS Code extension.
 - [ ] [docs/errors.md](errors.md) / [docs/workspace-limits.md](workspace-limits.md) — behavior changes
 - [ ] [docs/guides/enterprise-eval.md](guides/enterprise-eval.md) — shipped capabilities
 - [ ] [security.md](security.md) / [SECURITY.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/SECURITY.md) — supported versions table
+- [ ] [docs/changelog.md](changelog.md) — mirror recent releases from CHANGELOG.md
 - [ ] [docs/lsp-api.md](lsp-api.md) — new methods or error codes
 - [ ] [docs/design/PROTEGE_PARITY.md](design/PROTEGE_PARITY.md) — status columns if features shipped
 - [ ] [docs/design/ARCHITECTURE.md](design/ARCHITECTURE.md) / [OWL_AUTHORING_SPEC.md](design/OWL_AUTHORING_SPEC.md) — shipped vs target banners
@@ -34,8 +35,8 @@ Maintainer checklist for publishing crates, binaries, and the VS Code extension.
 Push a tag matching `[workspace.package].version` in `Cargo.toml`:
 
 ```bash
-git tag v0.5.0
-git push origin v0.5.0
+git tag v0.6.0   # must match [workspace.package].version in Cargo.toml
+git push origin v0.6.0
 ```
 
 The [release workflow on GitHub](https://github.com/eddiethedean/ontocode/blob/main/.github/workflows/release.yml):

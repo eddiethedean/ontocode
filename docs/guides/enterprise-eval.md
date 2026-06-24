@@ -60,6 +60,8 @@ Full gap analysis: [Protégé parity matrix](../design/PROTEGE_PARITY.md).
 
 A full migration guide is a **v1.0 deliverable**. Today:
 
+- [Protégé coexistence guide](protege-coexistence.md) — interim split workflow
+
 - Use OntoCode for **Git-native Turtle editing**, **CI validation**, **SQL/SPARQL queries**, **Manchester MVP**, and **EL/RL/RDFS classification**
 - **Manchester MVP (v0.5+)** covers restrictions, `and`/`or`, and cardinality — not disjoint axioms, property chains, or the full axiom catalog
 - Keep Protégé for **full OWL 2 DL reasoning**, **disjoint axioms**, **OBO id workflows**, and **full OWL 2 DL editing** until v0.8–v1.0

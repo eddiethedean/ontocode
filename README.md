@@ -18,13 +18,15 @@
 [![downloads](https://img.shields.io/crates/d/ontoindex-cli?label=downloads)](https://crates.io/crates/ontoindex-cli)
 [![Docs](https://readthedocs.org/projects/onto-code/badge/?version=latest)](https://onto-code.readthedocs.io/en/latest/)
 
-**Ontology-as-code for Git and VS Code — v0.6.0 ships today.**
+**OntoCode** brings OWL/RDF ontology editing into VS Code and Git — browse classes, edit Turtle, run EL reasoning, and validate in CI without Protégé.
 
-Browse OWL/RDF in VS Code, edit Turtle ontologies, run EL/RL/RDFS reasoning, query and validate in CI, and index workspaces locally with a Rust engine. **v0.6** adds classification and inferred hierarchy via OntoLogos; **v0.5** added the Query Workbench (SQL + SPARQL) and Manchester MVP editor.
+**OntoIndex** is the Rust engine behind it: a local CLI and language server that indexes your workspace and exposes SQL, SPARQL, and patch APIs.
+
+**Start here:** [Documentation — Start here](https://onto-code.readthedocs.io/en/latest/guides/start-here/) · [First success tutorial](https://onto-code.readthedocs.io/en/latest/guides/first-success/) · [`cargo install ontoindex-cli`](https://crates.io/crates/ontoindex-cli). You do not need to clone this repo.
 
 > **Naming:** **OntoCode** is the VS Code extension (product UI). **OntoIndex** is the Rust engine (`ontoindex` CLI, `ontoindex-*` crates, `ontoindex-lsp`). This repo contains both.
 
-**Documentation:** [Read the Docs](https://onto-code.readthedocs.io/) — [What ships today](https://onto-code.readthedocs.io/en/latest/SHIPPED/) · [Start here](https://onto-code.readthedocs.io/en/latest/guides/start-here/) · [5-minute guide](https://onto-code.readthedocs.io/en/latest/getting-started/)
+**Documentation:** [Read the Docs](https://onto-code.readthedocs.io/) — [What ships today](https://onto-code.readthedocs.io/en/latest/SHIPPED/)
 
 ## Choose your path
 
@@ -84,26 +86,9 @@ OntoIndex is useful on its own today (CLI, CI, local analysis). The extension ca
 
 ## What ships in v0.6.0
 
-Canonical matrix: **[What ships today](https://onto-code.readthedocs.io/en/latest/SHIPPED/)** (updated each release).
+See the full capability matrix: **[What ships today](https://onto-code.readthedocs.io/en/latest/SHIPPED/)** (updated each release).
 
-**VS Code (OntoCode):** Browse ontologies, entity inspector with **editing**, diagnostics, jump-to-source, **Query Workbench** (SQL + SPARQL), **Manchester editor**, **Reasoner Results** panel, inferred hierarchy toggle, **EL explanations**.
-
-**Engine (OntoIndex):** Index, SQL/SPARQL query, validate, patch write-back for Turtle, **EL/RL/RDFS classification**.
-
-| Capability | VS Code | CLI |
-|------------|---------|-----|
-| Browse classes, properties, individuals | Yes | via SQL |
-| Edit labels, comments, parents (`.ttl`) | Yes | `ontoindex patch` |
-| Complex `SubClassOf` / `EquivalentClasses` (Manchester) | Yes | `ontoindex patch` |
-| Create / delete entities (`.ttl`) | Yes | `ontoindex patch` |
-| Diagnostics / lint | Problems panel | `ontoindex validate` |
-| SPARQL | Query Workbench | `ontoindex sparql` |
-| SQL-like queries | Query Workbench | `ontoindex query` |
-| EL/RL/RDFS classification | Reasoner panel | `ontoindex classify` |
-| Inferred hierarchy (asserted / inferred / combined) | Explorer toggle | via `classify` JSON |
-| EL explanations (where available) | Explanation panel | `ontoindex explain` |
-
-Earlier releases: see [CHANGELOG.md](CHANGELOG.md).
+Earlier releases: [Changelog](https://onto-code.readthedocs.io/en/latest/changelog/) · [CHANGELOG.md](CHANGELOG.md) on GitHub.
 
 ## Why OntoCode?
 
@@ -127,7 +112,7 @@ Long-term goal: **Protégé-competitive OWL 2 DL + OBO maintenance in VS Code** 
 
 ## Quick start
 
-See the [getting started guide](https://onto-code.readthedocs.io/en/latest/getting-started/) or [First success in 10 minutes](https://onto-code.readthedocs.io/en/latest/guides/first-success/) for full paths (clone, `cargo install`, release binaries, VS Code).
+See **[Start here](https://onto-code.readthedocs.io/en/latest/guides/start-here/)** or [First success in 10 minutes](https://onto-code.readthedocs.io/en/latest/guides/first-success/) for the canonical onboarding path.
 
 ```bash
 # From a git clone

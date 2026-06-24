@@ -68,17 +68,21 @@ markdown_extensions:
 
 nav:
   - Home: index.md
-  - Getting started:
+  - Tutorials:
       - Start here: guides/start-here.md
       - First success (10 min): guides/first-success.md
-      - 5-minute guide: getting-started.md
+      - Ontology concepts: concepts.md
       - Install VS Code: vscode-install.md
+      - CLI getting started: getting-started.md
+      - Best practices: guides/best-practices.md
   - Guides:
       - What ships today: SHIPPED.md
       - Reasoner: guides/reasoner.md
       - Query Workbench: guides/query-workbench.md
       - Manchester editor: guides/manchester-editor.md
       - Authoring (Turtle): authoring.md
+      - Protégé coexistence: guides/protege-coexistence.md
+      - Rust library: guides/rust-library.md
       - Patch JSON: patch-reference.md
       - CI integration: ci-integration.md
       - Enterprise evaluation: guides/enterprise-eval.md
@@ -95,10 +99,13 @@ nav:
   - Help:
       - FAQ: faq.md
       - Troubleshooting: troubleshooting.md
-      - Migration v0.5 → v0.6: migration/v0.6.md
+      - Changelog: changelog.md
+      - Migrations:
+          - Migration index: migration/README.md
+          - v0.5 → v0.6: migration/v0.6.md
       - Security: security.md
       - Release integrity: release-integrity.md
-  - Project:
+  - Design (planned):
       - Overview: design/README.md
       - Roadmap: design/ROADMAP.md
       - Architecture: design/ARCHITECTURE.md

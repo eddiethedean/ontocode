@@ -2,6 +2,17 @@
 
 OntoIndex and OntoCode are **local-first** tools: they index and parse files on disk and do not upload ontology content by default.
 
+## Supported versions
+
+| Version | Supported |
+|---------|-----------|
+| 0.6.x   | Yes       |
+| 0.5.x   | Yes       |
+| 0.4.x   | Best effort |
+| < 0.4   | No        |
+
+Full policy: **[SECURITY.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/SECURITY.md)**
+
 ## Threat model summary
 
 - **`ontoindex-lsp` has no authentication.** Treat it like any local dev server — do not expose it to the internet or untrusted networks.

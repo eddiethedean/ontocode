@@ -1,4 +1,7 @@
-# SPARQL reference (OntoIndex v0.5)
+# SPARQL reference (OntoIndex v0.6)
+
+> **Status:** Documents behavior in **OntoIndex v0.6.0**. Pre-1.0 APIs may change.
+> Canonical feature list: [What ships today](SHIPPED.md).
 
 Run SPARQL queries over the **indexed triple store** built from workspace ontology files.
 

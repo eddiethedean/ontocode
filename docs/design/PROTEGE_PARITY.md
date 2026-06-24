@@ -31,15 +31,16 @@
 
 ### Reasoning (Rust-native — [ADR-0014](adr/0014-rust-native-reasoners-only.md))
 
-| Item | Spec | Dependency | v0.4 |
+| Item | Spec | Dependency | v0.6 |
 |------|------|------------|------|
-| `el` adapter (OWL EL) | [REASONER_SPEC.md](REASONER_SPEC.md) | OntoLogos `ontologos-el` | No |
-| `dl` adapter (OWL 2 DL classification + consistency) | [REASONER_SPEC.md](REASONER_SPEC.md) | OntoLogos `ontologos-dl` 1.0.0 | No |
-| Unsatisfiable class reporting | [REASONER_SPEC.md](REASONER_SPEC.md) | OntoLogos | No |
-| **Real** unsatisfiability explanations (clash-trace justification) | [REASONER_SPEC.md](REASONER_SPEC.md) | `ontologos-explain` + `ontologos-dl` | No |
-| Asserted / inferred / combined hierarchy toggle | [REASONER_SPEC.md](REASONER_SPEC.md) | OntoLogos | Asserted only |
-| Consistency check | [REASONER_SPEC.md](REASONER_SPEC.md) | OntoLogos | No |
-| Zero JVM / Java dependency for reasoning | [ADR-0014](adr/0014-rust-native-reasoners-only.md) | — | Yes (no reasoner yet) |
+| `el` adapter (OWL EL) | [REASONER_SPEC.md](REASONER_SPEC.md) | OntoLogos `ontologos-el` | Yes |
+| `rl` / `rdfs` adapters | [REASONER_SPEC.md](REASONER_SPEC.md) | OntoLogos `ontologos-rl`, `ontologos-rdfs` | Yes |
+| `dl` adapter (OWL 2 DL classification + consistency) | [REASONER_SPEC.md](REASONER_SPEC.md) | OntoLogos `ontologos-dl` 1.0.0 | No (stub) |
+| Unsatisfiable class reporting | [REASONER_SPEC.md](REASONER_SPEC.md) | OntoLogos | Yes |
+| **Real** unsatisfiability explanations (clash-trace justification) | [REASONER_SPEC.md](REASONER_SPEC.md) | `ontologos-explain` + `ontologos-dl` | Partial (EL-first) |
+| Asserted / inferred / combined hierarchy toggle | [REASONER_SPEC.md](REASONER_SPEC.md) | OntoLogos | Yes |
+| Consistency check | [REASONER_SPEC.md](REASONER_SPEC.md) | OntoLogos | Yes |
+| Zero JVM / Java dependency for reasoning | [ADR-0014](adr/0014-rust-native-reasoners-only.md) | — | Yes |
 
 ### Editor & LSP
 
@@ -58,14 +59,14 @@
 | Item | Spec | v0.4 |
 |------|------|------|
 | Imports management UI | [SPEC.md](SPEC.md) | No |
-| SQL + SPARQL query workbench | [SPEC.md](SPEC.md) | VS Code + CLI (v0.5) |
+| SQL + SPARQL query workbench | [SPEC.md](SPEC.md) | VS Code + CLI (v0.5+) |
 | Semantic diff + Git branch compare | [SEMANTIC_DIFF_SPEC.md](SEMANTIC_DIFF_SPEC.md) | No |
 | Safe IRI rename across workspace | [ROADMAP.md](ROADMAP.md) v0.8 | No |
 | Graph visualization (class, property, import, neighborhood) | [ROADMAP.md](ROADMAP.md) v0.7 | No |
 | Documentation export (Markdown + HTML) | [ROADMAP.md](ROADMAP.md) v0.9 | No |
 | CI validation command | CLI `validate` | Yes |
 | VS Code Marketplace publish | [v1.0_BACKLOG.md](v1.0_BACKLOG.md) | Yes |
-| Migration guide from Protégé | [v1.0_BACKLOG.md](v1.0_BACKLOG.md) | No |
+| Migration guide from Protégé | [v1.0_BACKLOG.md](v1.0_BACKLOG.md) | Partial ([coexistence guide](../guides/protege-coexistence.md)) |
 
 ### OBO & biomedical
 

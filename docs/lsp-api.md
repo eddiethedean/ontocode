@@ -1,8 +1,11 @@
 # OntoIndex LSP API (v0.6)
 
+> **Status:** Documents behavior in **OntoIndex v0.6.0**. Pre-1.0 APIs may change.
+> Canonical feature list: [What ships today](SHIPPED.md).
+
 This document describes **what ships today** in `ontoindex-lsp`. For the **v1.0 target** (including `runRobot`, graph APIs), see [LSP_SPEC.md](design/LSP_SPEC.md).
 
-## Wire format (v0.5)
+## Wire format
 
 LSP JSON uses **snake_case** for enums serialized from Rust (`EntityKind`, `ParseStatus`, `OntologyFormat`), e.g. `"kind": "class"`, `"parse_status": "ok"`. SQL virtual tables use the same snake_case strings via `as_str()` on core enums (e.g. `ParseStatus::as_str()` → `"ok"`, `EntityKind::as_str()` → `"class"`, `axiom_kind` → `"sub_class_of"`).
 
@@ -17,7 +20,7 @@ LSP JSON uses **snake_case** for enums serialized from Rust (`EntityKind`, `Pars
 
 - stdio (VS Code language client)
 
-## Standard LSP capabilities (v0.5)
+## Standard LSP capabilities
 
 | Capability | Status |
 |------------|--------|
@@ -29,7 +32,7 @@ LSP JSON uses **snake_case** for enums serialized from Rust (`EntityKind`, `Pars
 | Completion | Planned |
 | Rename | Planned |
 
-## Custom methods (v0.5)
+## Custom methods
 
 All custom methods use the `ontoindex/` prefix.
 
@@ -145,7 +148,7 @@ Return detailed entity information for the inspector.
 
 **Errors:** `NOT_INDEXED`, `ENTITY_NOT_FOUND`
 
-### `ontoindex/query` (v0.5)
+### `ontoindex/query`
 
 Run a SQL-like query against the indexed workspace catalog.
 
@@ -165,7 +168,7 @@ Run a SQL-like query against the indexed workspace catalog.
 
 **Errors:** `NOT_INDEXED`, `QUERY_FAILED`
 
-### `ontoindex/sparql` (v0.5)
+### `ontoindex/sparql`
 
 Run SPARQL against the indexed catalog store.
 
@@ -179,7 +182,7 @@ Run SPARQL against the indexed catalog store.
 
 **Errors:** `NOT_INDEXED`, `QUERY_FAILED`
 
-### `ontoindex/parseManchester` (v0.5)
+### `ontoindex/parseManchester`
 
 Parse and validate a Manchester class expression; return normalized text, Turtle fragment, expression tree, diagnostics, and catalog-based completion lists.
 
@@ -206,7 +209,7 @@ Parse and validate a Manchester class expression; return normalized text, Turtle
 
 **Errors:** `NOT_INDEXED`, `MANCHESTER_INVALID`
 
-### `ontoindex/applyAxiomPatch` (v0.5)
+### `ontoindex/applyAxiomPatch`
 
 Apply Turtle patch operations. See [authoring.md](authoring.md).
 
@@ -238,7 +241,7 @@ See [patch-reference.md](patch-reference.md) for CLI `ApplyPatchResult` examples
 
 **Errors:** `PATCH_INVALID`, `UNSUPPORTED_FORMAT`, `NOT_INDEXED`, `APPLIED_NOT_INDEXED`
 
-### `ontoindex/runReasoner` (v0.6)
+### `ontoindex/runReasoner`
 
 Run OWL classification via OntoLogos 0.9.0 (`el`, `rl`, `rdfs`). `dl` and `auto` return an error until OntoLogos 1.0.
 
@@ -268,7 +271,7 @@ Run OWL classification via OntoLogos 0.9.0 (`el`, `rl`, `rdfs`). `dl` and `auto`
 
 **Errors:** `NOT_INDEXED`, `REASONER_FAILED`
 
-### `ontoindex/getExplanation` (v0.6)
+### `ontoindex/getExplanation`
 
 Return an EL/RL/RDFS explanation for an unsatisfiable class (requires a prior reasoner run or loads ontology on demand).
 

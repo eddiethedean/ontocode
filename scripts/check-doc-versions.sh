@@ -32,6 +32,33 @@ check_file_contains "docs/index.md" "v${VERSION}" "docs index hero version"
 check_file_contains "extension/README.md" "v${VERSION}" "extension README version"
 check_file_contains "extension/package.json" "\"version\": \"${VERSION}\"" "extension package.json version"
 check_file_contains "docs/guides/enterprise-eval.md" "v${VERSION}" "enterprise eval version"
+MINOR_VERSION="${VERSION%.*}"
+check_file_contains "SECURITY.md" "${MINOR_VERSION}\.x" "SECURITY.md supported versions"
+check_file_contains "docs/release-integrity.md" "VERSION=${VERSION}" "release-integrity example version"
+
+# Reference page titles must not lag current release
+for file in docs/authoring.md docs/sql-reference.md docs/sparql-reference.md docs/patch-reference.md; do
+  if grep -qE '^# .+ \(OntoIndex v0\.5\)' "$file"; then
+    echo "FAIL: stale v0.5 title in $file" >&2
+    fail=1
+  else
+    echo "ok: reference title $file"
+  fi
+done
+
+# release-integrity must not pin an old example version
+if grep -qE '^VERSION=0\.5\.0' docs/release-integrity.md; then
+  echo "FAIL: stale VERSION=0.5.0 in docs/release-integrity.md" >&2
+  fail=1
+fi
+
+# releasing.md tag example must match workspace version
+if ! grep -qE "git tag v${VERSION}" docs/releasing.md; then
+  echo "FAIL: docs/releasing.md tag example should use v${VERSION}" >&2
+  fail=1
+else
+  echo "ok: releasing.md tag example"
+fi
 
 # Stale v0.5 current-release banners (allow historical mentions in changelog/roadmap)
 for file in README.md docs/index.md extension/README.md docs/guides/enterprise-eval.md; do

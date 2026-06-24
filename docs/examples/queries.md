@@ -1,65 +1,71 @@
 # Query cookbook
 
-Runnable against the `fixtures/` directory in a git clone. Use `cargo run --` from the repo root or `ontoindex` if installed.
+Runnable examples against an ontology workspace. Replace `/path/to/ontologies` with your project folder.
+
+```bash
+ontoindex query /path/to/ontologies "SELECT * FROM classes"
+ontoindex query /path/to/ontologies "SELECT short_name, labels FROM classes WHERE short_name = 'Person'"
+```
+
+From a git clone, use `fixtures` instead of `/path/to/ontologies`, or `cargo run --` from the repo root.
 
 ## Classes and entities
 
 ```bash
-ontoindex query fixtures "SELECT * FROM classes"
-ontoindex query fixtures "SELECT short_name, labels FROM classes WHERE short_name = 'Person'"
-ontoindex query fixtures "SELECT * FROM individuals"
-ontoindex query fixtures "SELECT * FROM entities"
+ontoindex query /path/to/ontologies "SELECT * FROM classes"
+ontoindex query /path/to/ontologies "SELECT short_name, labels FROM classes WHERE short_name = 'Person'"
+ontoindex query /path/to/ontologies "SELECT * FROM individuals"
+ontoindex query /path/to/ontologies "SELECT * FROM entities"
 ```
 
 ## Properties
 
 ```bash
-ontoindex query fixtures "SELECT * FROM object_properties"
-ontoindex query fixtures "SELECT * FROM data_properties"
-ontoindex query fixtures "SELECT * FROM properties"
+ontoindex query /path/to/ontologies "SELECT * FROM object_properties"
+ontoindex query /path/to/ontologies "SELECT * FROM data_properties"
+ontoindex query /path/to/ontologies "SELECT * FROM properties"
 ```
 
 ## Annotations and axioms
 
 ```bash
-ontoindex query fixtures "SELECT * FROM annotations"
-ontoindex query fixtures "SELECT * FROM axioms"
+ontoindex query /path/to/ontologies "SELECT * FROM annotations"
+ontoindex query /path/to/ontologies "SELECT * FROM axioms"
 ```
 
 ## Ontology metadata
 
 ```bash
-ontoindex query fixtures "SELECT * FROM ontologies"
-ontoindex query fixtures "SELECT * FROM namespaces"
-ontoindex query fixtures "SELECT * FROM imports"
+ontoindex query /path/to/ontologies "SELECT * FROM ontologies"
+ontoindex query /path/to/ontologies "SELECT * FROM namespaces"
+ontoindex query /path/to/ontologies "SELECT * FROM imports"
 ```
 
-## Diagnostics and validation (v0.3+)
+## Diagnostics and validation
 
 ```bash
-ontoindex query fixtures "SELECT code, severity, message, file FROM diagnostics"
-ontoindex validate fixtures
+ontoindex query /path/to/ontologies "SELECT code, severity, message, file FROM diagnostics"
+ontoindex validate /path/to/ontologies
 ```
 
 ## SPARQL
 
 ```bash
-ontoindex sparql fixtures "SELECT ?s ?p ?o WHERE { ?s ?p ?o } LIMIT 5"
-ontoindex sparql fixtures "PREFIX ex: <http://example.org/> SELECT ?label WHERE { ex:Person rdfs:label ?label }"
+ontoindex sparql /path/to/ontologies "SELECT ?s ?p ?o WHERE { ?s ?p ?o } LIMIT 5"
+ontoindex sparql /path/to/ontologies "PREFIX ex: <http://example.org/> SELECT ?label WHERE { ex:Person rdfs:label ?label }"
 ```
 
 ## Export formats
 
 ```bash
-ontoindex query fixtures "SELECT * FROM classes" --format json
-ontoindex query fixtures "SELECT * FROM classes" --format csv
+ontoindex query /path/to/ontologies "SELECT * FROM classes" --format json
+ontoindex query /path/to/ontologies "SELECT * FROM classes" --format csv
 ```
 
 ## CI validation
 
 ```bash
-ontoindex validate fixtures   # exit 0 on success
-ontoindex validate .          # validate current directory
+ontoindex validate /path/to/ontologies   # exit 0 when no diagnostic errors
 ```
 
 Full column reference: [sql-reference.md](../sql-reference.md). SPARQL: [sparql-reference.md](../sparql-reference.md). Errors: [errors.md](../errors.md).

@@ -1,4 +1,7 @@
-# SQL query reference (OntoIndex v0.5)
+# SQL query reference (OntoIndex v0.6)
+
+> **Status:** Documents behavior in **OntoIndex v0.6.0**. Pre-1.0 APIs may change.
+> Canonical feature list: [What ships today](SHIPPED.md).
 
 OntoIndex exposes indexed ontology data as **virtual tables** queried with a SQL-like `SELECT` syntax. The CLI (`ontoindex query`) and Rust API (`query_catalog`) use the same engine.
 
@@ -17,9 +20,11 @@ OntoIndex exposes indexed ontology data as **virtual tables** queried with a SQL
 Not supported: `JOIN`, subqueries, `GROUP BY`, `ORDER BY`, SQL functions, `LIKE`, `IN`, or multiple tables.
 
 ```bash
-ontoindex query ./fixtures "SELECT short_name FROM classes WHERE short_name != 'Person'"
-ontoindex query ./fixtures "SELECT short_name FROM classes WHERE deprecated = 'false' AND short_name = 'Person'"
+ontoindex query /path/to/ontologies "SELECT short_name FROM classes WHERE short_name != 'Person'"
+ontoindex query /path/to/ontologies "SELECT short_name FROM classes WHERE deprecated = 'false' AND short_name = 'Person'"
 ```
+
+From a git clone, replace `/path/to/ontologies` with `fixtures`.
 
 SPARQL over indexed triples: [sparql-reference.md](sparql-reference.md).
 
@@ -27,7 +32,7 @@ SPARQL over indexed triples: [sparql-reference.md](sparql-reference.md).
 
 **Limits:** query strings up to 1 MiB; result sets capped at 100,000 rows (see [workspace-limits.md](workspace-limits.md)).
 
-> **Warning:** SQL results are **silently truncated** at 100,000 rows. SPARQL returns an **error** at the same cap. Do not use SQL row counts as strict CI gates without checking [workspace-limits.md](workspace-limits.md).
+> **Warning:** Both SQL and SPARQL silently truncate at 100,000 rows. The CLI does not exit non-zero for truncation. LSP responses set `truncated: true`. Do not use row counts as strict CI gates without checking [workspace-limits.md](workspace-limits.md).
 
 ## Virtual tables and columns
 

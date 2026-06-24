@@ -2,15 +2,17 @@
 
 Pick the path that matches how you work. Each link is a single next step — not the full documentation map.
 
+New to OWL/RDF vocabulary? Read [Ontology concepts](../concepts.md) first.
+
 ## Browse and edit in VS Code
 
-[First success in 10 minutes](first-success.md) — install, browse, edit `.ttl`, optional CLI validate.
+[First success in 10 minutes](first-success.md) — install, download sample ontologies, browse, edit `.ttl`, optional CLI validate.
 
 **Then:** [Install options](../vscode-install.md) · [Authoring guide](../authoring.md)
 
 ## Query and validate from the CLI
 
-[Getting started in 5 minutes](../getting-started.md) — `cargo install ontoindex-cli` or clone the repo and use `fixtures/`.
+[CLI getting started](../getting-started.md) — `cargo install ontoindex-cli` or clone the repo.
 
 **Query in VS Code:** [Query Workbench guide](../guides/query-workbench.md)
 
@@ -32,19 +34,23 @@ Pick the path that matches how you work. Each link is a single next step — not
 
 [LSP API](../lsp-api.md) — `ontoindex-lsp` over stdio, custom `ontoindex/*` methods.
 
+**Rust embedding:** [Rust library guide](../guides/rust-library.md)
+
 ## Evaluate for your team
 
-[Enterprise evaluation](enterprise-eval.md) · [What ships today](../SHIPPED.md) · [FAQ](../faq.md) · [Troubleshooting](../troubleshooting.md) · [Workspace limits](../workspace-limits.md) · [Security](../security.md) · [Release integrity](../release-integrity.md)
+[Enterprise evaluation](enterprise-eval.md) · [Protégé coexistence](protege-coexistence.md) · [What ships today](../SHIPPED.md) · [FAQ](../faq.md) · [Troubleshooting](../troubleshooting.md) · [Workspace limits](../workspace-limits.md) · [Security](../security.md)
 
 ## Contribute to OntoCode / OntoIndex
 
-[Contributing](../contributing.md) · [Design specs](../design/README.md) · [Releasing](../releasing.md) (maintainers)
+[Contributing](../contributing.md) · [Design specs (planned)](../design/README.md) · [Releasing](../releasing.md) (maintainers)
 
 ## Common questions
 
 [FAQ](../faq.md) — naming, `cargo install` vs clone, multi-root workspaces, LGPL (horned-owl).
 
 [Troubleshooting](../troubleshooting.md) — LSP start failures, empty explorer, patch apply issues.
+
+[Best practices](best-practices.md) — repo layout, SQL vs SPARQL vs classify.
 
 ## Full documentation map
 

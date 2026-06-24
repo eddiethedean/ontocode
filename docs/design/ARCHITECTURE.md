@@ -1,10 +1,10 @@
 # ARCHITECTURE.md
 
-> **Document status: target architecture with v0.5 partial implementation**
+> **Document status: target architecture with v0.6 partial implementation**
 >
-> **Shipped in v0.5:** workspace scanner, Oxigraph parsing, in-memory catalog, SQL/SPARQL queries, diagnostics, CLI, LSP explorer + Problems panel, Turtle patch write-back, Query Workbench + Manchester editor (extension), Horned-OWL catalog bridge (`ontoindex-owl`). See [What ships today](../SHIPPED.md).
+> **Shipped in v0.6:** workspace scanner, Oxigraph parsing, in-memory catalog, SQL/SPARQL queries, diagnostics, CLI, LSP explorer + Problems panel, Turtle patch write-back, Query Workbench + Manchester editor (extension), Horned-OWL catalog bridge (`ontoindex-owl`), **EL/RL/RDFS reasoning** (`ontoindex-reasoner`). See [What ships today](../SHIPPED.md).
 >
-> **Planned:** reasoning (v0.6), graph visualization, semantic diff, full Manchester catalog, OBO/ROBOT interop. See [ROADMAP.md](ROADMAP.md).
+> **Planned:** full DL reasoning (OntoLogos 1.0), graph visualization, semantic diff, full Manchester catalog, OBO/ROBOT interop. See [ROADMAP.md](ROADMAP.md).
 >
 > **Reference:** [lsp-api.md](../lsp-api.md), [adr/README.md](adr/README.md), [DEPENDENCY_MATRIX.md](DEPENDENCY_MATRIX.md).
 
@@ -76,7 +76,7 @@ The architecture must support:
 | `ontoindex-diagnostics` | v0.3 | Lint rules, LSP diagnostics | `regex` (+ `fastobo-validator` v0.7b) |
 | `ontoindex-diff` | planned v0.9 | Semantic diff, Git compare | `horned-owl`, `git2` |
 | `ontoindex-docs` | planned v0.9 | Markdown/HTML export | `pulldown-cmark`, `minijinja` |
-| `ontoindex-reasoner` | planned v0.6 | Reasoner facade | OntoLogos `0.9`→`1.0` |
+| `ontoindex-reasoner` | v0.6 | Reasoner facade | OntoLogos `0.9`→`1.0` |
 | `ontoindex-robot` | planned v0.7b | ROBOT CLI wrappers | ROBOT CLI (external) |
 | `ontoindex-lsp` | v0.4 | Language server + diagnostics + patch apply | `lsp-server`, `lsp-types` |
 | `ontoindex-cli` | v0.4 | `ontoindex` binary | composes above |

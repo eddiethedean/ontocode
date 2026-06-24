@@ -75,13 +75,15 @@ nav:
       - Install VS Code: vscode-install.md
   - Guides:
       - What ships today: SHIPPED.md
-      - Authoring (Turtle): authoring.md
+      - Reasoner: guides/reasoner.md
       - Query Workbench: guides/query-workbench.md
       - Manchester editor: guides/manchester-editor.md
+      - Authoring (Turtle): authoring.md
       - Patch JSON: patch-reference.md
       - CI integration: ci-integration.md
       - Enterprise evaluation: guides/enterprise-eval.md
   - Reference:
+      - CLI reference: cli-reference.md
       - SQL virtual tables: sql-reference.md
       - SPARQL: sparql-reference.md
       - LSP API: lsp-api.md
@@ -93,10 +95,10 @@ nav:
   - Help:
       - FAQ: faq.md
       - Troubleshooting: troubleshooting.md
+      - Migration v0.5 → v0.6: migration/v0.6.md
       - Security: security.md
       - Release integrity: release-integrity.md
   - Project:
-      - What ships today: SHIPPED.md
       - Overview: design/README.md
       - Roadmap: design/ROADMAP.md
       - Architecture: design/ARCHITECTURE.md

@@ -30,6 +30,15 @@ jobs:
 
       - run: cargo fmt --all -- --check
 
+  doc-versions:
+    name: documentation version sync
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - run: chmod +x scripts/check-doc-versions.sh
+      - run: ./scripts/check-doc-versions.sh
+
   clippy:
     name: clippy
     runs-on: ubuntu-latest

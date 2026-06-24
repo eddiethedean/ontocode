@@ -1,10 +1,10 @@
 # Evaluating OntoCode for your organization
 
-This page helps security, platform, and ontology teams decide whether OntoCode **v0.5** fits your workflow. It is honest about **what ships today** vs the v1.0 Protégé-competitive target.
+This page helps security, platform, and ontology teams decide whether OntoCode **v0.6** fits your workflow. It is honest about **what ships today** vs the v1.0 Protégé-competitive target.
 
 Canonical capability matrix: [What ships today](../SHIPPED.md).
 
-## What v0.5.0 delivers
+## What v0.6.0 delivers
 
 | Capability | Status |
 |------------|--------|
@@ -12,8 +12,10 @@ Canonical capability matrix: [What ships today](../SHIPPED.md).
 | Turtle (`.ttl`) write-back (labels, parents, create/delete) | Shipped |
 | CLI SQL/SPARQL queries and `validate` for CI | Shipped |
 | Inline diagnostics (Problems panel) | Shipped |
-| Reasoning, inferred hierarchy | **Not shipped** (v0.6 roadmap) |
-| Query workbench + Manchester editor in VS Code | **Shipped** (v0.5) |
+| Query workbench + Manchester editor in VS Code | Shipped |
+| EL/RL/RDFS reasoning + inferred hierarchy | **Shipped** (OntoLogos 0.9.0) |
+| EL explanations (where OntoLogos supports) | **Shipped** (EL-first) |
+| Full OWL 2 DL reasoning (`dl` / `auto` profiles) | **Not shipped** (OntoLogos 1.0 target) |
 | OBO format + ROBOT interop | **Not shipped** (v0.7b target) |
 | Semantic Git diff | **Not shipped** (v0.9 target) |
 
@@ -24,7 +26,7 @@ Full gap analysis: [Protégé parity matrix](../design/PROTEGE_PARITY.md).
 - **Local-first:** OntoIndex indexes files on disk. Ontology content is **not uploaded** to a cloud service by default.
 - **Language server:** `ontoindex-lsp` runs as a child process of VS Code over stdio. **Do not expose it to the network** without authentication — see [security policy](../security.md).
 - **Offline install:** VSIX from [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) + `SHA256SUMS` verification ([release-integrity.md](../release-integrity.md)).
-- **CI-only usage:** Teams can run `ontoindex validate` in pipelines without installing the VS Code extension ([ci-integration.md](../ci-integration.md)).
+- **CI-only usage:** Teams can run `ontoindex validate` and `ontoindex classify` in pipelines without installing the VS Code extension ([ci-integration.md](../ci-integration.md)).
 
 ## Security and compliance
 
@@ -49,24 +51,25 @@ Full gap analysis: [Protégé parity matrix](../design/PROTEGE_PARITY.md).
 |------------|--------|
 | **Multi-root VS Code workspaces** | Only the **first** folder is indexed |
 | **Write-back** | **Turtle only**; OWL/XML is read-only in the inspector |
+| **Reasoning** | EL/RL/RDFS via OntoLogos 0.9; **DL/auto** stubbed until OntoLogos 1.0; results may differ from Protégé on partial OWL mappings |
 | **CLI release binaries** | Linux x64 only; macOS/Windows use `cargo install` or bundled LSP in VSIX |
 | **Scale** | Workspaces above [workspace limits](../workspace-limits.md) may fail indexing — prefer CLI batch workflows for very large terminologies |
 | **ROBOT / Java** | Planned ROBOT CLI interop (v0.7b) requires an external Java process — not JVM-free for that workflow |
 
-## Protégé migration
+## Protégé coexistence
 
 A full migration guide is a **v1.0 deliverable**. Today:
 
-- Use OntoCode for **Git-native Turtle editing**, **CI validation**, **SQL/SPARQL queries**, and **Manchester MVP** (complex `SubClassOf` and `EquivalentClasses` in Turtle)
-- **Manchester MVP (v0.5)** covers restrictions, `and`/`or`, and cardinality — not disjoint axioms, property chains, or the full axiom catalog
-- Expect to keep Protégé for **DL reasoning**, **disjoint axioms**, **OBO id workflows**, and **full OWL 2 DL editing** until v0.8–v1.0
+- Use OntoCode for **Git-native Turtle editing**, **CI validation**, **SQL/SPARQL queries**, **Manchester MVP**, and **EL/RL/RDFS classification**
+- **Manchester MVP (v0.5+)** covers restrictions, `and`/`or`, and cardinality — not disjoint axioms, property chains, or the full axiom catalog
+- Keep Protégé for **full OWL 2 DL reasoning**, **disjoint axioms**, **OBO id workflows**, and **full OWL 2 DL editing** until v0.8–v1.0
 - See [Protégé parity matrix](../design/PROTEGE_PARITY.md) and [What ships today](../SHIPPED.md)
 
 ## Evaluation checklist
 
 1. Install from [Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) or offline VSIX
 2. Complete [First success in 10 minutes](first-success.md) on a representative `.ttl` project
-3. Run `ontoindex validate` in a test CI job ([ci-integration.md](../ci-integration.md))
+3. Run `ontoindex validate` and optionally `ontoindex classify --profile el` in a test CI job ([ci-integration.md](../ci-integration.md))
 4. Review [security policy](../security.md) with your platform team
 5. Compare [Protégé parity matrix](../design/PROTEGE_PARITY.md) against your requirements
 

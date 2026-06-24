@@ -48,13 +48,13 @@ ontoindex validate /path/to/your/ontologies
 
 ## Path D — Release binaries (no Rust)
 
-1. Open [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) for the latest **v0.5.x** tag.
-2. Download the CLI tarball for your platform (Linux x64 example below) or `ontoindex-lsp-v0.5.0-<platform>.tar.gz` / `.zip` for LSP-only use.
+1. Open [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) for the latest **v0.6.x** tag.
+2. Download the CLI tarball for your platform (Linux x64 example below) or `ontoindex-lsp-v0.6.0-<platform>.tar.gz` / `.zip` for LSP-only use.
 3. Verify with `SHA256SUMS` — see [release-integrity.md](release-integrity.md).
-4. Extract and run (replace `0.5.0` with your release tag):
+4. Extract and run (replace `0.6.0` with your release tag):
 
 ```bash
-VERSION=0.5.0
+VERSION=0.6.0
 ASSET="ontoindex-v${VERSION}-x86_64-unknown-linux-gnu.tar.gz"
 BIN="ontoindex-v${VERSION}-x86_64-unknown-linux-gnu"
 tar xzf "${ASSET}"
@@ -74,6 +74,7 @@ For VS Code, install the `ontocode-*.vsix` from the same release.
 | What ships today | [SHIPPED.md](SHIPPED.md) |
 | Query Workbench (VS Code) | [guides/query-workbench.md](guides/query-workbench.md) |
 | Manchester editor | [guides/manchester-editor.md](guides/manchester-editor.md) |
+| Reasoner | [guides/reasoner.md](guides/reasoner.md) |
 | SQL queries | [sql-reference.md](sql-reference.md) · [query cookbook](examples/queries.md) |
 | SPARQL | [sparql-reference.md](sparql-reference.md) |
 | Edit Turtle files | [authoring.md](authoring.md) · [patch-reference.md](patch-reference.md) |

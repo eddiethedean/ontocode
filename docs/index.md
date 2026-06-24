@@ -6,12 +6,12 @@ hide:
 
 <div class="oc-hero" markdown>
 
-<p class="oc-hero-kicker">OntoCode documentation · v0.5.0</p>
+<p class="oc-hero-kicker">OntoCode documentation · v0.6.0</p>
 
 <p class="oc-hero-title">Ontology-as-code for Git and VS Code</p>
 
 <p class="oc-hero-lead">
-Browse OWL/RDF in VS Code, edit Turtle ontologies, query and validate in CI, and index workspaces locally with the Rust <strong>OntoIndex</strong> engine.
+Browse OWL/RDF in VS Code, edit Turtle ontologies, run EL/RL/RDFS reasoning, query and validate in CI, and index workspaces locally with the Rust <strong>OntoIndex</strong> engine.
 </p>
 
 <div class="oc-hero-badges" markdown>
@@ -20,6 +20,7 @@ Browse OWL/RDF in VS Code, edit Turtle ontologies, query and validate in CI, and
 <span class="oc-badge">Turtle write-back</span>
 <span class="oc-badge">Query Workbench</span>
 <span class="oc-badge">Manchester editor</span>
+<span class="oc-badge">Reasoner (EL)</span>
 <span class="oc-badge">SPARQL + SQL</span>
 </div>
 
@@ -33,7 +34,7 @@ Browse OWL/RDF in VS Code, edit Turtle ontologies, query and validate in CI, and
 
 <div class="oc-callout" markdown>
 
-**Not sure where to begin?** Use [Start here](guides/start-here.md) to pick a path — VS Code explorer, CLI indexing, Turtle editing, or CI validation. You do **not** need to clone this repo to use the Marketplace extension or `cargo install ontoindex-cli`.
+**Not sure where to begin?** Use [Start here](guides/start-here.md) to pick a path — VS Code explorer, CLI indexing, Turtle editing, reasoning, or CI validation. You do **not** need to clone this repo to use the Marketplace extension or `cargo install ontoindex-cli`.
 
 > **Naming:** **OntoCode** is the VS Code UI. **OntoIndex** is the engine (`ontoindex` CLI, `ontoindex-*` crates, `ontoindex-lsp`).
 
@@ -47,7 +48,7 @@ Browse OWL/RDF in VS Code, edit Turtle ontologies, query and validate in CI, and
 
     ---
 
-    Index ontologies, run SQL/SPARQL queries, validate in CI, and apply Turtle patches.
+    Index ontologies, run SQL/SPARQL queries, validate and classify in CI, and apply Turtle patches.
 
     [:octicons-arrow-right-24: Getting started](getting-started.md)
 
@@ -58,6 +59,14 @@ Browse OWL/RDF in VS Code, edit Turtle ontologies, query and validate in CI, and
     Browse classes and properties, edit Turtle in the inspector, and see diagnostics inline.
 
     [:octicons-arrow-right-24: Install extension](vscode-install.md)
+
+-   :material-brain:{ .lg .middle } **Reasoner**
+
+    ---
+
+    Run EL/RL/RDFS classification, toggle inferred hierarchy, and open EL explanations.
+
+    [:octicons-arrow-right-24: Reasoner guide](guides/reasoner.md)
 
 -   :material-pencil-outline:{ .lg .middle } **Authoring**
 
@@ -93,7 +102,7 @@ Browse OWL/RDF in VS Code, edit Turtle ontologies, query and validate in CI, and
 
 </div>
 
-## What ships in v0.5.0
+## What ships in v0.6.0
 
 See the full matrix: **[What ships today](SHIPPED.md)**.
 
@@ -105,6 +114,9 @@ See the full matrix: **[What ships today](SHIPPED.md)**.
 | Create / delete entities (`.ttl`) | Yes | `ontoindex patch` |
 | SQL-like queries | Query Workbench | `ontoindex query` |
 | SPARQL | Query Workbench | `ontoindex sparql` |
+| EL/RL/RDFS classification | Reasoner panel | `ontoindex classify` |
+| Inferred hierarchy toggle | Explorer | via `classify` JSON |
+| EL explanations (where available) | Explanation panel | `ontoindex explain` |
 | Diagnostics / lint | Problems panel | `ontoindex validate` |
 
 ## Quick start
@@ -138,10 +150,12 @@ See the full matrix: **[What ships today](SHIPPED.md)**.
 | **What ships today (canonical)** | [SHIPPED.md](SHIPPED.md) |
 | Start here (pick a path) | [guides/start-here.md](guides/start-here.md) |
 | First success tutorial | [guides/first-success.md](guides/first-success.md) |
+| Reasoner | [guides/reasoner.md](guides/reasoner.md) |
 | Query Workbench | [guides/query-workbench.md](guides/query-workbench.md) |
 | Manchester editor | [guides/manchester-editor.md](guides/manchester-editor.md) |
 | Install VS Code | [vscode-install.md](vscode-install.md) |
 | Getting started (CLI) | [getting-started.md](getting-started.md) |
+| CLI reference | [cli-reference.md](cli-reference.md) |
 | Troubleshooting | [troubleshooting.md](troubleshooting.md) |
 | SQL virtual tables | [sql-reference.md](sql-reference.md) |
 | SPARQL | [sparql-reference.md](sparql-reference.md) |

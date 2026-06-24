@@ -27,6 +27,7 @@ Maintainer checklist for publishing crates, binaries, and the VS Code extension.
 - [ ] [docs/design/ARCHITECTURE.md](design/ARCHITECTURE.md) / [OWL_AUTHORING_SPEC.md](design/OWL_AUTHORING_SPEC.md) — shipped vs target banners
 - [ ] [docs/design/LICENSES.md](design/LICENSES.md) — dependency sections
 - [ ] Run `mkdocs build --strict` locally before tagging
+- [ ] Run `./scripts/check-doc-versions.sh` (also enforced in CI)
 
 ## Tag and publish
 

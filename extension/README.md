@@ -103,6 +103,9 @@ Open a `.ttl` (or other supported) file and use standard VS Code navigation:
 | **OntoCode: Create Class** | Create a new class in a Turtle file |
 | **OntoCode: Create Property** | Create a new property in a Turtle file |
 | **OntoCode: Create Individual** | Create a new individual in a Turtle file |
+| **OntoCode: Run Reasoner** | Classify workspace (EL/RL/RDFS) and open Results panel |
+| **OntoCode: Show Explanation** | Open explanation for an unsatisfiable class |
+| **OntoCode: Set Hierarchy Mode** | Toggle asserted / inferred / combined class tree |
 
 ---
 
@@ -113,6 +116,10 @@ Open **Settings** and search `ontocode`:
 | Setting | Default | Description |
 |---------|---------|-------------|
 | `ontocode.lspPath` | *(empty)* | Path to `ontoindex-lsp` binary. **Trusted workspaces only.** Leave empty to use the bundled server |
+| `ontocode.queryHistoryLimit` | `20` | Max entries in Query Workbench history |
+| `ontocode.reasoner.default` | `el` | Default profile for Run Reasoner |
+| `ontocode.reasoner.autoProfile` | `true` | Profile-detection warnings |
+| `ontocode.hierarchy.mode` | `asserted` | Class tree: asserted / inferred / combined |
 
 Indexing is driven by the language server on startup; `ontocode.autoIndexOnOpen` is a legacy no-op kept for compatibility.
 
@@ -135,11 +142,11 @@ More detail: [Installation & troubleshooting](https://onto-code.readthedocs.io/e
 
 ---
 
-## What's included in v0.5.0
+## What's included in v0.6.0
 
-**Shipped:** explorer, inspector, **editing** (labels, comments, parents, create/delete in `.ttl`), **Query Workbench** (SQL + SPARQL), **Manchester editor** (complex subclass + equivalent), diagnostics, jump-to-source, hover, symbols, go-to-definition.
+**Shipped:** explorer, inspector, **editing** (labels, comments, parents, create/delete in `.ttl`), **Query Workbench** (SQL + SPARQL), **Manchester editor**, **EL/RL/RDFS reasoner**, inferred hierarchy toggle, EL explanations (where available), diagnostics, jump-to-source, hover, symbols, go-to-definition.
 
-**Planned (v0.6+):** reasoners, graph visualization — [roadmap](https://onto-code.readthedocs.io/en/latest/design/ROADMAP/).
+**Planned:** full DL reasoning (OntoLogos 1.0), graph visualization (v0.7) — [roadmap](https://onto-code.readthedocs.io/en/latest/design/ROADMAP/).
 
 ---
 
@@ -152,7 +159,7 @@ Release builds bundle `ontoindex-lsp` for Linux (x64, arm64), macOS (Apple Silic
 ## Links
 
 - [GitHub repository](https://github.com/eddiethedean/ontocode)
-- [Documentation](https://onto-code.readthedocs.io/en/latest/) — [What ships today](https://onto-code.readthedocs.io/en/latest/SHIPPED/) · [Query Workbench](https://onto-code.readthedocs.io/en/latest/guides/query-workbench/) · [Manchester editor](https://onto-code.readthedocs.io/en/latest/guides/manchester-editor/)
+- [Documentation](https://onto-code.readthedocs.io/en/latest/) — [What ships today](https://onto-code.readthedocs.io/en/latest/SHIPPED/) · [Reasoner](https://onto-code.readthedocs.io/en/latest/guides/reasoner/) · [Query Workbench](https://onto-code.readthedocs.io/en/latest/guides/query-workbench/) · [Manchester editor](https://onto-code.readthedocs.io/en/latest/guides/manchester-editor/)
 - [Report an issue](https://github.com/eddiethedean/ontocode/issues)
 - [Changelog](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md)
 

@@ -13,7 +13,7 @@ This repository contains both.
 
 **Is the API stable?**
 
-Pre-1.0. Published crates are at **0.5.x**. Library APIs, LSP JSON, and SQL table columns may change between minor releases until v1.0. The `validate` exit code (errors fail, warnings pass) is stable — see [workspace-limits.md](workspace-limits.md).
+Pre-1.0. Published crates are at **0.6.x**. Library APIs, LSP JSON, and SQL table columns may change between minor releases until v1.0. The `validate` and `classify` exit codes are documented in [workspace-limits.md](workspace-limits.md).
 
 **What ships in the current release?**
 
@@ -120,12 +120,34 @@ No. OntoIndex and OntoCode are local-first by default. See [security.md](securit
 
 No. The LSP has no authentication. Use stdio with a trusted editor only. See [security.md](security.md).
 
+## Reasoning
+
+**How do I run the reasoner in VS Code?**
+
+Run **OntoCode: Run Reasoner** from the Command Palette, then use **OntoCode: Set Hierarchy Mode** for asserted / inferred / combined. See [Reasoner guide](guides/reasoner.md).
+
+**How do I classify in CI?**
+
+```bash
+ontoindex classify /path/to/ontologies --profile el --format json
+```
+
+Exits non-zero when unsatisfiable classes are found. See [CI integration](ci-integration.md) and [workspace-limits.md](workspace-limits.md).
+
+**Why does `dl` or `auto` fail?**
+
+Full OWL 2 DL profiles require OntoLogos 1.0. Use `el`, `rl`, or `rdfs` today.
+
+**Why is explanation empty for a class?**
+
+Explanations require an unsatisfiable class and a prior reasoner run (or successful `classify`). EL explanations are limited compared to full DL clash traces.
+
 ## Roadmap
 
-**When will reasoning ship?**
+**When will full DL reasoning ship?**
 
-Reasoning via OntoLogos is planned for v0.6. Manchester MVP shipped in v0.5. See [design/ROADMAP.md](design/ROADMAP.md).
+EL/RL/RDFS shipped in **v0.6.0** via OntoLogos 0.9.0. Full OWL 2 DL (`dl` / `auto`) requires OntoLogos 1.0. See [Reasoner guide](guides/reasoner.md) and [design/ROADMAP.md](design/ROADMAP.md).
 
 **How does this compare to Protégé?**
 
-v0.5 targets Git + VS Code workflows: browse, lint, Turtle editing, SQL/SPARQL queries, and **Manchester MVP** for complex subclass and equivalent axioms. Full Protégé parity (reasoning, disjoint axioms, OBO, semantic diff) is the v1.0 goal — see [design/PROTEGE_PARITY.md](design/PROTEGE_PARITY.md) and [SHIPPED.md](SHIPPED.md).
+v0.6 targets Git + VS Code workflows: browse, lint, Turtle editing, SQL/SPARQL queries, Manchester MVP, and **EL/RL/RDFS reasoning**. Full Protégé parity (DL reasoning, disjoint axioms, OBO, semantic diff) is the v1.0 goal — see [design/PROTEGE_PARITY.md](design/PROTEGE_PARITY.md) and [SHIPPED.md](SHIPPED.md).

@@ -1,18 +1,18 @@
 # OntoIndex + OntoCode Documentation Package
 
-> **Note:** Documents in this folder describe **product vision, target architecture, and planned features**. For **what ships in v0.5.0**, see [What ships today](../SHIPPED.md) and the [user guides](https://onto-code.readthedocs.io/en/latest/).
+> **Note:** Documents in this folder describe **product vision, target architecture, and planned features**. For **what ships in v0.6.0**, see [What ships today](../SHIPPED.md) and the [user guides](https://onto-code.readthedocs.io/en/latest/).
 
 This package contains **product vision and specification** documents. For **user-facing guides** (install, SQL, implemented LSP API), see the [documentation home](https://onto-code.readthedocs.io/en/latest/).
 
 | Package | Audience |
 |---------|----------|
-| [User docs](https://onto-code.readthedocs.io/en/latest/) | New users and integrators (install, SQL/SPARQL, LSP API v0.5) |
+| [User docs](https://onto-code.readthedocs.io/en/latest/) | New users and integrators (install, SQL/SPARQL, reasoner, LSP API v0.6) |
 | `docs/design/` (this folder) | Contributors and planners (roadmap, target architecture, ADRs) |
 
 Two related products:
 
 1. **OntoIndex** — Rust ontology index/query engine (`ontoindex-*` crates).
-2. **OntoCode** — VS Code extension (explorer, diagnostics, Turtle + Manchester authoring, Query Workbench in v0.5).
+2. **OntoCode** — VS Code extension (explorer, diagnostics, Turtle + Manchester authoring, Query Workbench, reasoner in v0.6).
 
 **Sibling project:** [OntoLogos](https://github.com/eddiethedean/ontologos) — Rust ontology reasoner. OntoCode delegates reasoning to OntoLogos per [ADR-0015](adr/0015-adopt-ontologos-reasoner.md).
 
@@ -26,7 +26,8 @@ Two related products:
 
 Many specs describe **target** behavior. Check the banner at the top of each doc, or:
 
-- **Implemented v0.5 LSP:** [LSP API](https://onto-code.readthedocs.io/en/latest/lsp-api/) — includes `query`, `sparql`, `parseManchester`
+- **Implemented v0.6 LSP:** [LSP API](https://onto-code.readthedocs.io/en/latest/lsp-api/) — includes `query`, `sparql`, `parseManchester`, `runReasoner`, `getExplanation`
+- **Implemented reasoner:** [Reasoner guide](https://onto-code.readthedocs.io/en/latest/guides/reasoner/)
 - **Implemented SQL tables:** [SQL reference](https://onto-code.readthedocs.io/en/latest/sql-reference/)
 - **Implemented authoring:** [authoring guide](https://onto-code.readthedocs.io/en/latest/authoring/)
 - **ADRs (canonical):** [adr/README.md](adr/README.md)

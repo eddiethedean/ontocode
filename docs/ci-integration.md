@@ -41,6 +41,20 @@ jobs:
 
 Adjust the path (`.` or `ontologies/`) to the directory containing your `.ttl`, `.owl`, etc.
 
+## Classify in CI (v0.6)
+
+Fail the job when EL classification finds unsatisfiable classes:
+
+```yaml
+      - name: Install ontoindex CLI
+        run: cargo install ontoindex-cli --locked
+
+      - name: Classify ontologies (EL)
+        run: ontoindex classify . --profile el --format json
+```
+
+`classify` exits **non-zero** when `consistent` is false. See [workspace-limits.md](workspace-limits.md) and [Reasoner guide](guides/reasoner.md).
+
 ## GitHub Actions (release binary)
 
 For faster CI without compiling Rust dependencies:
@@ -48,7 +62,7 @@ For faster CI without compiling Rust dependencies:
 ```yaml
       - name: Download and validate ontology files
         run: |
-          VERSION=0.5.0
+          VERSION=0.6.0
           ASSET="ontoindex-v${VERSION}-x86_64-unknown-linux-gnu.tar.gz"
           BIN="ontoindex-v${VERSION}-x86_64-unknown-linux-gnu"
           curl -fsSL -o "${ASSET}" \

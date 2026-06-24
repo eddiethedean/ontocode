@@ -63,7 +63,15 @@ Requires a Turtle ontology with a complex subclass (git clone users: `fixtures/c
 2. In the Entity Inspector, click **Edit in Manchester** on the complex axiom row.
 3. Validate the expression, preview Turtle, and apply.
 
-## 7. (Optional) Validate from the CLI
+## 7. (Optional) Run the reasoner (v0.6)
+
+1. Run **OntoCode: Run Reasoner** from the Command Palette.
+2. Review the **Reasoner Results** panel (profile, consistency, unsatisfiable classes).
+3. Run **OntoCode: Set Hierarchy Mode** → choose **inferred** or **combined** to update the Classes tree.
+
+Full guide: [Reasoner guide](../guides/reasoner.md).
+
+## 8. (Optional) Validate from the CLI
 
 To catch lint and parse errors in CI or locally:
 
@@ -91,6 +99,7 @@ More help: [Troubleshooting](../troubleshooting.md) · [FAQ](../faq.md).
 |------|----------|
 | Install options (VSIX, offline) | [vscode-install.md](../vscode-install.md) |
 | Query workbench | [guides/query-workbench.md](../guides/query-workbench.md) |
+| Reasoner | [guides/reasoner.md](../guides/reasoner.md) |
 | Manchester editor | [guides/manchester-editor.md](../guides/manchester-editor.md) |
 | Patch JSON automation | [patch-reference.md](../patch-reference.md) |
 | SQL / SPARQL reference | [sql-reference.md](../sql-reference.md) · [sparql-reference.md](../sparql-reference.md) |

@@ -1,6 +1,6 @@
 # Errors reference
 
-Unified catalog of error codes, exit behavior, and failure modes for OntoIndex **v0.5**.
+Unified catalog of error codes, exit behavior, and failure modes for OntoIndex **v0.6**.
 
 ## CLI exit codes
 
@@ -10,8 +10,10 @@ Unified catalog of error codes, exit behavior, and failure modes for OntoIndex *
 | `ontoindex query` | Query succeeded | Parse error, unsupported SQL, I/O failure |
 | `ontoindex sparql` | Query succeeded (results may be truncated at row cap) | Parse error, I/O failure |
 | `ontoindex patch` | Patch applied or preview succeeded | Invalid patch, unsupported format, I/O failure |
+| `ontoindex classify` | Consistent ontology (no unsatisfiable classes) | Unsatisfiable classes, reasoner error, I/O failure |
+| `ontoindex explain` | Explanation produced | Class not found, explanation unavailable, reasoner error |
 
-`validate` exit semantics are stable for CI — see [workspace-limits.md](workspace-limits.md) and [ci-integration.md](ci-integration.md).
+`validate` and `classify` exit semantics are stable for CI — see [workspace-limits.md](workspace-limits.md) and [ci-integration.md](ci-integration.md).
 
 Other CLI commands return non-zero on failure with a human-readable message on stderr.
 
@@ -38,6 +40,8 @@ Custom `ontoindex/*` method failures return JSON-RPC errors with `data` containi
 | `QUERY_FAILED` | SQL or SPARQL query failed | Check query syntax and [sql-reference](sql-reference.md) |
 | `MANCHESTER_INVALID` | Manchester expression parse failed | Fix expression; see [Manchester guide](guides/manchester-editor.md) |
 | `APPLIED_NOT_INDEXED` | Patch written to buffer/disk but reindex failed | Run Index Workspace; file may already be updated (`recoverable: true`) |
+| `REASONER_FAILED` | `runReasoner` failed (profile, parse, OntoLogos error) | Try another profile or fix ontology axioms |
+| `EXPLANATION_FAILED` | `getExplanation` failed | Run reasoner first or choose another class |
 
 ### Example JSON-RPC error envelope
 
@@ -119,6 +123,7 @@ Integrators using `ontoindex-*` crates directly should handle:
 | `ontoindex-catalog` | `CatalogError` | Index build failure |
 | `ontoindex-query` | `QueryError` | Unsupported SQL, SPARQL parse error |
 | `ontoindex-owl` | `OwlError` | Patch apply failure |
+| `ontoindex-reasoner` | `ReasonerError` | Classify/explain failure, unsupported profile |
 
 Example: [`examples/error_handling.rs`](https://github.com/eddiethedean/ontocode/blob/main/examples/error_handling.rs) on GitHub.
 

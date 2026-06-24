@@ -2,7 +2,7 @@
 
 ## Option A — VS Code Marketplace (recommended)
 
-1. Install [OntoCode from the Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) (v0.5.0+).
+1. Install [OntoCode from the Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) (v0.6.0+).
 2. **File → Open Folder…** and choose a directory with ontology files.
 3. **Trust** the workspace when prompted.
 4. Open the **OntoCode** activity bar and browse ontologies, classes, properties, individuals, and **Diagnostics**.
@@ -65,6 +65,9 @@ Click an entity name to open the **Entity Inspector**. For `.ttl` files, use the
 |---------|---------|-------------|
 | `ontocode.lspPath` | `""` | **Trusted workspaces only.** Path to `ontoindex-lsp`; ignored in Restricted Mode. Empty uses bundled binary |
 | `ontocode.queryHistoryLimit` | `20` | Max entries in Query Workbench history |
+| `ontocode.reasoner.default` | `el` | Default profile for Run Reasoner (`dl`/`auto` require OntoLogos 1.0) |
+| `ontocode.reasoner.autoProfile` | `true` | Profile-detection warnings when running reasoner |
+| `ontocode.hierarchy.mode` | `asserted` | Explorer hierarchy: `asserted`, `inferred`, or `combined` |
 
 Indexing runs on workspace open. `ontocode.autoIndexOnOpen` is a legacy setting (no-op).
 
@@ -74,6 +77,9 @@ Indexing runs on workspace open. `ontocode.autoIndexOnOpen` is a legacy setting 
 - **OntoCode: Refresh Explorer** — refresh tree views (including diagnostics)
 - **OntoCode: Open Query Workbench** — SQL and SPARQL against indexed workspace ([guide](guides/query-workbench.md))
 - **OntoCode: Open Manchester Editor** / **Add Manchester Axiom** — complex class expressions ([guide](guides/manchester-editor.md))
+- **OntoCode: Run Reasoner** — EL/RL/RDFS classification ([guide](guides/reasoner.md))
+- **OntoCode: Show Explanation** — justification for unsatisfiable class
+- **OntoCode: Set Hierarchy Mode** — asserted / inferred / combined class tree
 - **OntoCode: Create Class / Property / Individual** — authoring in `.ttl` files
 - **Problems panel** — inline diagnostics from `ontoindex-lsp` after indexing
 - **OntoCode: Show Entity Inspector** / **Jump to Source** — from explorer context menu

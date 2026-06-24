@@ -133,10 +133,10 @@ Global entity search.
 | `ontoindex/sparql` | **Implemented** (v0.5) |
 | `ontoindex/getGraph` | Planned |
 | `ontoindex/getSemanticDiff` | Planned |
-| `ontoindex/runReasoner` | Planned (v0.6) |
+| `ontoindex/runReasoner` | **Implemented** (v0.6) — see [lsp-api.md](../lsp-api.md) |
 | `ontoindex/applyAxiomPatch` | **Implemented** (v0.4) |
 | `ontoindex/parseManchester` | **Implemented** (v0.5) |
-| `ontoindex/getExplanation` | Planned (v0.6) |
+| `ontoindex/getExplanation` | **Implemented** (v0.6) — see [lsp-api.md](../lsp-api.md) |
 | `ontoindex/runRobot` | Planned (v0.7b) |
 
 ### `ontoindex/indexWorkspace`

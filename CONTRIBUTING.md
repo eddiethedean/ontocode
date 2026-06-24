@@ -98,6 +98,7 @@ cargo run -p ontocode --example index_and_query
 pip install -r docs/requirements.txt   # Python 3.12 in CI
 mkdocs serve
 mkdocs build --strict   # CI uses this; must pass with no warnings
+./scripts/check-doc-versions.sh   # README / RTD / extension version sync
 ```
 
 Open http://127.0.0.1:8000. Configuration: [`mkdocs.yml`](../mkdocs.yml), [`.readthedocs.yaml`](../.readthedocs.yaml).

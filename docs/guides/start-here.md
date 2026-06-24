@@ -20,6 +20,10 @@ Pick the path that matches how you work. Each link is a single next step — not
 
 [Manchester editor guide](../guides/manchester-editor.md) — edit `SubClassOf` and `EquivalentClasses` in Turtle.
 
+## Reasoning (EL / RL / RDFS)
+
+[Reasoner guide](../guides/reasoner.md) — classify in VS Code or CLI, toggle inferred hierarchy, open explanations.
+
 ## Automate edits (patch JSON)
 
 [Patch reference](../patch-reference.md) — `ontoindex patch` and LSP `applyAxiomPatch` with copy-paste JSON examples.

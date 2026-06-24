@@ -14,12 +14,13 @@
 [![cli](https://img.shields.io/crates/v/ontoindex-cli?label=cli)](https://crates.io/crates/ontoindex-cli)
 [![lsp](https://img.shields.io/crates/v/ontoindex-lsp?label=lsp)](https://crates.io/crates/ontoindex-lsp)
 [![owl](https://img.shields.io/crates/v/ontoindex-owl?label=owl)](https://crates.io/crates/ontoindex-owl)
+[![reasoner](https://img.shields.io/crates/v/ontoindex-reasoner?label=reasoner)](https://crates.io/crates/ontoindex-reasoner)
 [![downloads](https://img.shields.io/crates/d/ontoindex-cli?label=downloads)](https://crates.io/crates/ontoindex-cli)
 [![Docs](https://readthedocs.org/projects/onto-code/badge/?version=latest)](https://onto-code.readthedocs.io/en/latest/)
 
 **Ontology-as-code for Git and VS Code — v0.6.0 ships today.**
 
-Browse OWL/RDF in VS Code, **edit Turtle ontologies**, query and validate in CI, and index workspaces locally with a Rust engine. **v0.5** adds the **Query Workbench** (SQL + SPARQL in VS Code) and a **Manchester MVP editor** for complex subclass and equivalent-class axioms.
+Browse OWL/RDF in VS Code, edit Turtle ontologies, run EL/RL/RDFS reasoning, query and validate in CI, and index workspaces locally with a Rust engine. **v0.6** adds classification and inferred hierarchy via OntoLogos; **v0.5** added the Query Workbench (SQL + SPARQL) and Manchester MVP editor.
 
 > **Naming:** **OntoCode** is the VS Code extension (product UI). **OntoIndex** is the Rust engine (`ontoindex` CLI, `ontoindex-*` crates, `ontoindex-lsp`). This repo contains both.
 
@@ -57,22 +58,22 @@ Full install and troubleshooting: [install guide](https://onto-code.readthedocs.
 
 OntoCode is designed as two products that ship together:
 
-| Layer | What it is | Status in v0.5.0 |
+| Layer | What it is | Status in v0.6.0 |
 |-------|------------|-------------------|
-| **OntoCode** | VS Code extension (explorer, entity inspector, diagnostics, **authoring**, **query workbench**, **Manchester editor**) | **Shipping** |
-| **OntoIndex** | Rust library + CLI + LSP (scan, parse, catalog, query, validate, diagnostics, **write-back**) | **Shipping** |
+| **OntoCode** | VS Code extension (explorer, entity inspector, diagnostics, **authoring**, **query workbench**, **Manchester editor**, **reasoner**) | **Shipping** |
+| **OntoIndex** | Rust library + CLI + LSP (scan, parse, catalog, query, validate, diagnostics, **write-back**, **classify**) | **Shipping** |
 
 ```text
 ┌─────────────────────────────────────┐
-│  OntoCode (v0.5.0)                  │
+│  OntoCode (v0.6.0)                  │
 │  VS Code extension + explorer UI    │
 └─────────────────┬───────────────────┘
                   │ ontoindex-lsp (stdio)
 ┌─────────────────▼───────────────────┐
-│  OntoIndex (v0.5.0)                 │
+│  OntoIndex (v0.6.0)                 │
 │  Rust index, catalog, query, CLI, LSP │
 └─────────────────┬───────────────────┘
-                  │ Oxigraph / Horned-OWL
+                  │ Oxigraph / Horned-OWL / OntoLogos
 ┌─────────────────▼───────────────────┐
 │  Your ontology repo                 │
 │  .ttl .owl .rdf .jsonld …           │
@@ -81,13 +82,13 @@ OntoCode is designed as two products that ship together:
 
 OntoIndex is useful on its own today (CLI, CI, local analysis). The extension calls into the same engine via a language server rather than reimplementing ontology logic in TypeScript.
 
-## What ships in v0.5.0
+## What ships in v0.6.0
 
 Canonical matrix: **[What ships today](https://onto-code.readthedocs.io/en/latest/SHIPPED/)** (updated each release).
 
-**VS Code (OntoCode):** Browse ontologies, entity inspector with **editing**, diagnostics, jump-to-source, **Query Workbench** (SQL + SPARQL), **Manchester editor** for complex axioms.
+**VS Code (OntoCode):** Browse ontologies, entity inspector with **editing**, diagnostics, jump-to-source, **Query Workbench** (SQL + SPARQL), **Manchester editor**, **Reasoner Results** panel, inferred hierarchy toggle, **EL explanations**.
 
-**Engine (OntoIndex):** Index, SQL/SPARQL query, validate, patch write-back for Turtle (simple + Manchester complex axioms).
+**Engine (OntoIndex):** Index, SQL/SPARQL query, validate, patch write-back for Turtle, **EL/RL/RDFS classification**.
 
 | Capability | VS Code | CLI |
 |------------|---------|-----|
@@ -98,6 +99,9 @@ Canonical matrix: **[What ships today](https://onto-code.readthedocs.io/en/lates
 | Diagnostics / lint | Problems panel | `ontoindex validate` |
 | SPARQL | Query Workbench | `ontoindex sparql` |
 | SQL-like queries | Query Workbench | `ontoindex query` |
+| EL/RL/RDFS classification | Reasoner panel | `ontoindex classify` |
+| Inferred hierarchy (asserted / inferred / combined) | Explorer toggle | via `classify` JSON |
+| EL explanations (where available) | Explanation panel | `ontoindex explain` |
 
 Earlier releases: see [CHANGELOG.md](CHANGELOG.md).
 
@@ -105,17 +109,19 @@ Earlier releases: see [CHANGELOG.md](CHANGELOG.md).
 
 Protégé is strong for traditional ontology editing, but most engineering teams live in Git, pull requests, and VS Code. OntoCode targets that workflow:
 
-| Shipped in v0.5 | Planned (v1.0 target) |
+| Shipped in v0.6 | Planned (v1.0 target) |
 |-----------------|-------------------------|
 | Browse ontologies in VS Code | Full OWL 2 DL axiom catalog |
 | Entity inspector with **edit labels, parents, create/delete** | Multi-format write-back |
 | **Query workbench** (SQL + SPARQL) in VS Code | Inline SQL/SPARQL editor autocomplete |
 | **Manchester editor** (complex subclass + equivalent) | Full Manchester catalog (disjoint, chains, …) |
+| **EL/RL/RDFS reasoning** + inferred hierarchy | Full OWL 2 DL reasoning (`dl` / `auto`) |
+| EL explanations (where OntoLogos supports) | Full DL clash-trace explanations |
 | Patch write-back for Turtle (`.ttl`) | OBO format + ROBOT interop |
-| Horned-OWL catalog for Turtle axioms | Reasoners + explanations |
-| Inline diagnostics (Problems panel + explorer) | Semantic Git diff, LSP completion/rename |
-| `ontoindex validate` and `ontoindex patch` for CI | SHACL validation (rudof) |
-| SQL-like and SPARQL queries via CLI and LSP | `ontologos-watch` hook |
+| Horned-OWL catalog for Turtle axioms | Semantic Git diff, LSP completion/rename |
+| Inline diagnostics (Problems panel + explorer) | SHACL validation (rudof) |
+| `ontoindex validate`, `classify`, and `patch` for CI | `ontologos-watch` hook |
+| SQL-like and SPARQL queries via CLI and LSP | |
 
 Long-term goal: **Protégé-competitive OWL 2 DL + OBO maintenance in VS Code** — see [Protégé parity checklist](https://onto-code.readthedocs.io/en/latest/design/PROTEGE_PARITY/).
 
@@ -145,7 +151,7 @@ ontoindex validate /path/to/ontologies
 - LSP: `ontoindex/runReasoner`, `ontoindex/getExplanation`
 - Explorer hierarchy mode: asserted / inferred / combined
 
-See [reasoner guide](docs/guides/reasoner.md). DL and `auto` profiles require OntoLogos 1.0.
+See [reasoner guide](https://onto-code.readthedocs.io/en/latest/guides/reasoner.md). DL and `auto` profiles require OntoLogos 1.0.
 
 ## Coming in v0.7+
 
@@ -225,9 +231,9 @@ Column schemas: [SQL reference](https://onto-code.readthedocs.io/en/latest/sql-r
 
 ## API stability (pre-1.0)
 
-Published `ontoindex-*` crates are at **0.5.x**. Library APIs, LSP wire JSON, and SQL virtual
+Published `ontoindex-*` crates are at **0.6.x**. Library APIs, LSP wire JSON, and SQL virtual
 table columns may change between minor releases until [v1.0 stable core](https://onto-code.readthedocs.io/en/latest/design/v1.0_BACKLOG/)
-is complete. The CLI `validate` exit code (errors fail, warnings pass) is documented in
+is complete. The CLI `validate` and `classify` exit codes are documented in
 [workspace limits](https://onto-code.readthedocs.io/en/latest/workspace-limits/).
 
 ## Development
@@ -258,7 +264,7 @@ Pre-built artifacts on [GitHub Releases](https://github.com/eddiethedean/ontocod
 
 Verify downloads: [release integrity](https://onto-code.readthedocs.io/en/latest/release-integrity/). Maintainer release process: [releasing guide](https://onto-code.readthedocs.io/en/latest/releasing/).
 
-Workspace crates **publish to [crates.io](https://crates.io/) on each `v0.5.x` release tag** (first publish in v0.4.0): `ontoindex-core`, `ontoindex-parser`, `ontoindex-owl`, `ontoindex-diagnostics`, `ontoindex-catalog`, `ontoindex-query`, `ontoindex-lsp`, `ontoindex-cli`.
+Workspace crates **publish to [crates.io](https://crates.io/) on each `v0.6.x` release tag**: `ontoindex-core`, `ontoindex-parser`, `ontoindex-owl`, `ontoindex-diagnostics`, `ontoindex-catalog`, `ontoindex-query`, `ontoindex-reasoner`, `ontoindex-lsp`, `ontoindex-cli`.
 
 See [CHANGELOG.md](CHANGELOG.md) for release notes. Security: [security policy](https://onto-code.readthedocs.io/en/latest/security/).
 

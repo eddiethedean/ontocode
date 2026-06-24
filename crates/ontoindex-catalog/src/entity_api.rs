@@ -1,5 +1,5 @@
 use crate::OntologyCatalog;
-use ontoindex_core::{document_matches_entity, Entity, EntityKind};
+use ontoindex_core::{document_matches_entity, Entity, EntityKind, AXIOM_KIND_SUB_CLASS_OF};
 use serde::Serialize;
 use std::collections::{BTreeMap, BTreeSet};
 use std::fs;
@@ -62,7 +62,7 @@ impl OntologyCatalog {
             .collect();
 
         for axiom in &self.data().axioms {
-            if axiom.axiom_kind != "SubClassOf" {
+            if axiom.axiom_kind != AXIOM_KIND_SUB_CLASS_OF {
                 continue;
             }
             if !class_iris.contains(axiom.subject.as_str()) {

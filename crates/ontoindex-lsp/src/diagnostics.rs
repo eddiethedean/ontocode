@@ -9,9 +9,24 @@ use std::str::FromStr;
 use std::sync::Mutex;
 
 use crate::positions::byte_col_to_utf16;
-use crate::state::path_to_uri;
+use crate::state::{path_to_uri, ServerState};
 
 static PUBLISHED_URIS: Mutex<BTreeSet<String>> = Mutex::new(BTreeSet::new());
+
+/// Publish diagnostics from catalog data held in [`ServerState`].
+pub fn publish_diagnostics_for_state(sender: &Sender<Message>, state: &ServerState) {
+    let snapshot = match state.catalog_diagnostic_snapshot() {
+        Some(s) => s,
+        None => return,
+    };
+    let text_fn = |path: &Path| state.document_text(path);
+    publish_catalog_diagnostics(
+        sender,
+        &snapshot.documents,
+        &snapshot.diagnostics,
+        &text_fn,
+    );
+}
 
 pub fn publish_catalog_diagnostics(
     sender: &Sender<Message>,

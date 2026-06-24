@@ -2,7 +2,7 @@ use crate::vocab::{Rdf, Rdfs, OWL};
 use ontoindex_core::{
     limits::{MAX_FILE_BYTES, MAX_TRIPLES_PER_FILE},
     Annotation, Axiom, Entity, EntityKind, Import, Namespace, OntologyFormat, ParseStatus,
-    SourceLocation,
+    SourceLocation, AXIOM_KIND_SUB_CLASS_OF,
 };
 use oxigraph::io::{RdfFormat, RdfParseError, RdfParser};
 use oxigraph::model::{Quad, Subject, Term};
@@ -43,7 +43,15 @@ pub struct ParsedOntology {
     pub parse_message: Option<String>,
     pub parse_error_location: Option<SourceLocation>,
     pub triple_count: usize,
-    pub quads: Vec<Quad>,
+    quads: Vec<Quad>,
+}
+
+impl ParsedOntology {
+    /// RDF quads for catalog indexing only — not a stable public API.
+    #[doc(hidden)]
+    pub fn quads(&self) -> &[Quad] {
+        &self.quads
+    }
 }
 
 pub fn parse_ontology_file(
@@ -402,7 +410,7 @@ impl OntologyBuilder {
                 subject: subject.clone(),
                 predicate: predicate.clone(),
                 object: object.clone(),
-                axiom_kind: "SubClassOf".to_string(),
+                axiom_kind: AXIOM_KIND_SUB_CLASS_OF.to_string(),
             });
         }
     }

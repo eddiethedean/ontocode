@@ -1,3 +1,4 @@
+use crate::diagnostics::publish_diagnostics_for_state;
 use crate::state::ServerState;
 use crossbeam_channel::{Receiver, Sender};
 use lsp_server::{Message, Notification};
@@ -7,8 +8,6 @@ use lsp_types::{
 };
 use ontoindex_catalog::CatalogStats;
 use std::path::PathBuf;
-use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::Arc;
 use std::thread;
 
 struct IndexJob {
@@ -25,11 +24,10 @@ pub struct IndexWorker {
 impl IndexWorker {
     pub fn spawn(
         state: ServerState,
-        pending_diagnostic_publish: Arc<AtomicBool>,
         lsp_sender: Sender<Message>,
     ) -> Self {
         let (job_tx, job_rx) = crossbeam_channel::unbounded();
-        thread::spawn(move || run_worker(state, job_rx, pending_diagnostic_publish, lsp_sender));
+        thread::spawn(move || run_worker(state, job_rx, lsp_sender));
         Self { job_tx }
     }
 
@@ -51,24 +49,17 @@ impl IndexWorker {
 fn run_worker(
     state: ServerState,
     job_rx: Receiver<IndexJob>,
-    pending_diagnostic_publish: Arc<AtomicBool>,
     lsp_sender: Sender<Message>,
 ) {
-    while let Ok(mut job) = job_rx.recv() {
-        let mut replies = Vec::new();
-        if let Some(reply) = job.reply.take() {
-            replies.push(reply);
-        }
-        while let Ok(next) = job_rx.try_recv() {
-            if let Some(reply) = next.reply {
-                replies.push(reply);
-            }
-            job.workspace = next.workspace;
-        }
+    while let Ok(job) = job_rx.recv() {
+        let replies: Vec<Sender<Result<(CatalogStats, u64), String>>> =
+            job.reply.into_iter().collect();
 
         let result = state.index_workspace(job.workspace);
         match &result {
-            Ok(_) => pending_diagnostic_publish.store(true, Ordering::SeqCst),
+            Ok(_) => {
+                publish_diagnostics_for_state(&lsp_sender, &state);
+            }
             Err(message) => notify_index_failure(&lsp_sender, message),
         }
         for reply in replies {

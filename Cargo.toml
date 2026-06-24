@@ -22,15 +22,22 @@ publish = false
 
 [dependencies]
 ontoindex-catalog = { workspace = true }
+ontoindex-core = { workspace = true }
+ontoindex-parser = { workspace = true }
 ontoindex-query = { workspace = true }
 
 [[example]]
 name = "index_and_query"
 path = "examples/index_and_query.rs"
 
+[[example]]
+name = "error_handling"
+path = "examples/error_handling.rs"
+
 [dev-dependencies]
 ontoindex-catalog = { workspace = true }
 ontoindex-core = { workspace = true }
+ontoindex-parser = { workspace = true }
 ontoindex-query = { workspace = true }
 ontoindex-lsp = { workspace = true }
 serde_json.workspace = true

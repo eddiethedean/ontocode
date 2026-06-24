@@ -18,7 +18,9 @@ fn fixture_workspace() -> PathBuf {
 
 fn indexed_state() -> ServerState {
     let state = ServerState::new();
-    state.index_workspace(fixture_workspace()).expect("index fixture workspace");
+    let ws = fixture_workspace();
+    state.set_workspace_root(ws.clone()).expect("set workspace");
+    state.index_workspace(ws).expect("index fixture workspace");
     state
 }
 
@@ -219,7 +221,9 @@ fn open_buffer_override_surfaces_undefined_prefix_in_snapshot() {
     std::fs::write(&path, format!("{base}ex:Ok a owl:Class .\n")).unwrap();
 
     let state = ServerState::new();
-    state.index_workspace(dir.path().to_path_buf()).expect("initial index");
+    let ws = dir.path().to_path_buf();
+    state.set_workspace_root(ws.clone()).expect("set workspace");
+    state.index_workspace(ws.clone()).expect("initial index");
 
     let doc_path = state
         .with_catalog(|catalog| {
@@ -235,7 +239,7 @@ fn open_buffer_override_surfaces_undefined_prefix_in_snapshot() {
 
     let _ = state
         .set_document_text(doc_path, format!("{base}ex:Ok a owl:Class .\nun:Bad a owl:Class .\n"));
-    state.index_workspace(dir.path().to_path_buf()).expect("reindex with buffer");
+    state.index_workspace(ws).expect("reindex with buffer");
 
     let snapshot = handle_get_catalog_snapshot(&state).expect("snapshot");
     assert!(
@@ -247,4 +251,17 @@ fn open_buffer_override_surfaces_undefined_prefix_in_snapshot() {
         "expected undeclared prefix diagnostic from open buffer, got: {:?}",
         snapshot.diagnostics
     );
+}
+
+#[test]
+fn index_workspace_params_accept_snake_case_and_legacy_camel_case() {
+    let snake: crate::protocol::IndexWorkspaceParams =
+        serde_json::from_value(serde_json::json!({ "workspace_uri": "file:///tmp/ws" }))
+            .expect("workspace_uri");
+    assert_eq!(snake.workspace_uri.as_deref(), Some("file:///tmp/ws"));
+
+    let legacy: crate::protocol::IndexWorkspaceParams =
+        serde_json::from_value(serde_json::json!({ "workspaceUri": "file:///tmp/ws" }))
+            .expect("workspaceUri alias");
+    assert_eq!(legacy.workspace_uri.as_deref(), Some("file:///tmp/ws"));
 }

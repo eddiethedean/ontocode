@@ -127,7 +127,7 @@ export async function indexWorkspace(
     workspaceUri ??
     vscode.workspace.workspaceFolders?.[0]?.uri.toString();
   const result = await c.sendRequest<unknown>("ontoindex/indexWorkspace", {
-    workspaceUri: uri,
+    workspace_uri: uri,
   });
   return assertIndexWorkspaceResult(result) as IndexWorkspaceResult;
 }

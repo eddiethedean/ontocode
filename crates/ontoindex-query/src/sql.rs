@@ -2,7 +2,7 @@ use crate::QueryError;
 use ontoindex_catalog::OntologyCatalog;
 use ontoindex_core::{limits::MAX_QUERY_BYTES, limits::MAX_SQL_RESULT_ROWS, EntityKind};
 use serde::Serialize;
-use sqlparser::ast::{Expr, Select, SelectItem, SetExpr, Statement, TableFactor, Value};
+use sqlparser::ast::{Expr, GroupByExpr, Select, SelectItem, SetExpr, Statement, TableFactor, Value};
 use sqlparser::dialect::GenericDialect;
 use sqlparser::parser::Parser;
 use std::collections::BTreeMap;
@@ -28,11 +28,21 @@ pub fn run_sql(catalog: &OntologyCatalog, sql: &str) -> Result<QueryResult> {
     let statements =
         Parser::parse_sql(&dialect, sql).map_err(|e| QueryError::Sql(e.to_string()))?;
 
+    if statements.len() > 1 {
+        return Err(QueryError::Sql("only a single SQL statement is supported".to_string()));
+    }
+
     let statement =
         statements.into_iter().next().ok_or_else(|| QueryError::Sql("empty query".to_string()))?;
 
     match statement {
         Statement::Query(query) => {
+            if query.order_by.is_some() {
+                return Err(QueryError::Sql("ORDER BY is not supported".to_string()));
+            }
+            if query.limit.is_some() || query.offset.is_some() {
+                return Err(QueryError::Sql("LIMIT and OFFSET are not supported".to_string()));
+            }
             let select = match *query.body {
                 SetExpr::Select(select) => select,
                 _ => return Err(QueryError::Sql("only SELECT queries are supported".to_string())),
@@ -44,11 +54,21 @@ pub fn run_sql(catalog: &OntologyCatalog, sql: &str) -> Result<QueryResult> {
 }
 
 fn execute_select(catalog: &OntologyCatalog, select: Box<Select>) -> Result<QueryResult> {
+    if select.distinct.is_some() {
+        return Err(QueryError::Sql("DISTINCT is not supported".to_string()));
+    }
+    if group_by_present(&select.group_by) {
+        return Err(QueryError::Sql("GROUP BY is not supported".to_string()));
+    }
+    if select.from.len() > 1 {
+        return Err(QueryError::Sql("JOIN is not supported".to_string()));
+    }
     let table_name = table_name_from_select(&select)?;
     let mut rows = table_rows(catalog, &table_name)?;
 
     if let Some(selection) = &select.selection {
-        rows.retain(|row| evaluate_filter(selection, row));
+        validate_filter(selection)?;
+        rows.retain(|row| evaluate_filter(selection, row).unwrap_or(false));
     }
 
     let (columns, projected_rows) = project_rows(&select.projection, &rows)?;
@@ -85,7 +105,7 @@ fn table_rows(catalog: &OntologyCatalog, table: &str) -> Result<Vec<Row>> {
                 row.insert("path".into(), doc.path.display().to_string());
                 row.insert("format".into(), doc.format.as_str().to_string());
                 row.insert("base_iri".into(), doc.base_iri.clone().unwrap_or_default());
-                row.insert("parse_status".into(), format!("{:?}", doc.parse_status));
+                row.insert("parse_status".into(), doc.parse_status.as_str().to_string());
                 row.insert("content_hash".into(), doc.content_hash.clone());
                 row.insert("modified_time".into(), doc.modified_time.to_string());
                 row
@@ -228,25 +248,60 @@ fn project_rows(projection: &[SelectItem], rows: &[Row]) -> Result<(Vec<String>,
     Ok((columns, projected))
 }
 
-fn evaluate_filter(expr: &Expr, row: &Row) -> bool {
+fn group_by_present(group_by: &GroupByExpr) -> bool {
+    match group_by {
+        GroupByExpr::All(_) => true,
+        GroupByExpr::Expressions(exprs, _) => !exprs.is_empty(),
+    }
+}
+
+fn validate_filter(expr: &Expr) -> Result<()> {
     match expr {
         Expr::BinaryOp { left, op, right } => {
             use sqlparser::ast::BinaryOperator;
-            let left_val = eval_expr(left, row);
-            let right_val = eval_expr(right, row);
             match op {
-                BinaryOperator::Eq => left_val == right_val,
-                BinaryOperator::NotEq => left_val != right_val,
-                BinaryOperator::And => evaluate_filter(left, row) && evaluate_filter(right, row),
-                BinaryOperator::Or => evaluate_filter(left, row) || evaluate_filter(right, row),
-                _ => false,
+                BinaryOperator::Eq
+                | BinaryOperator::NotEq
+                | BinaryOperator::And
+                | BinaryOperator::Or => {
+                    validate_filter(left)?;
+                    validate_filter(right)?;
+                    Ok(())
+                }
+                other => Err(QueryError::Sql(format!(
+                    "unsupported WHERE operator: {other:?}"
+                ))),
             }
         }
-        Expr::Identifier(ident) => {
-            row.get(&ident.value.to_ascii_lowercase()).map(|v| v == "true").unwrap_or(false)
+        Expr::Identifier(_) | Expr::Value(_) => Ok(()),
+        other => Err(QueryError::Sql(format!("unsupported WHERE expression: {other:?}"))),
+    }
+}
+
+fn evaluate_filter(expr: &Expr, row: &Row) -> Result<bool> {
+    match expr {
+        Expr::BinaryOp { left, op, right } => {
+            use sqlparser::ast::BinaryOperator;
+            match op {
+                BinaryOperator::Eq => Ok(eval_expr(left, row) == eval_expr(right, row)),
+                BinaryOperator::NotEq => Ok(eval_expr(left, row) != eval_expr(right, row)),
+                BinaryOperator::And => {
+                    Ok(evaluate_filter(left, row)? && evaluate_filter(right, row)?)
+                }
+                BinaryOperator::Or => {
+                    Ok(evaluate_filter(left, row)? || evaluate_filter(right, row)?)
+                }
+                other => Err(QueryError::Sql(format!(
+                    "unsupported WHERE operator: {other:?}"
+                ))),
+            }
         }
-        Expr::Value(Value::Boolean(b)) => *b,
-        _ => false,
+        Expr::Identifier(ident) => Ok(row
+            .get(&ident.value.to_ascii_lowercase())
+            .map(|v| v == "true")
+            .unwrap_or(false)),
+        Expr::Value(Value::Boolean(b)) => Ok(*b),
+        other => Err(QueryError::Sql(format!("unsupported WHERE expression: {other:?}"))),
     }
 }
 
@@ -330,12 +385,19 @@ mod tests {
     }
 
     #[test]
-    fn unsupported_like_returns_no_rows() {
+    fn unsupported_like_returns_error() {
         let catalog = fixture_catalog();
-        let result =
+        let err =
             run_sql(&catalog, "SELECT short_name FROM classes WHERE short_name LIKE 'Per%'")
-                .expect("like filter");
-        assert_eq!(result.rows.len(), 0);
+                .unwrap_err();
+        assert!(matches!(err, crate::QueryError::Sql(msg) if msg.contains("unsupported WHERE")));
+    }
+
+    #[test]
+    fn unsupported_limit_returns_error() {
+        let catalog = fixture_catalog();
+        let err = run_sql(&catalog, "SELECT short_name FROM classes LIMIT 1").unwrap_err();
+        assert!(matches!(err, crate::QueryError::Sql(msg) if msg.contains("LIMIT")));
     }
 
     #[test]

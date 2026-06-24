@@ -98,7 +98,7 @@ impl IndexBuilder {
             }
 
             if parsed.parse_status != ParseStatus::Error {
-                load_quads_into_store(&store, &parsed.quads, triple_count)?;
+                load_quads_into_store(&store, parsed.quads(), triple_count)?;
             }
 
             documents.push(OntologyDocument {
@@ -119,10 +119,15 @@ impl IndexBuilder {
             let mut doc_entity_iris = Vec::new();
 
             for entity in parsed.entities {
+                if let Some(&prev_doc_idx) = entity_to_document.get(&entity.iri) {
+                    if prev_doc_idx != doc_idx {
+                        document_entity_iris[prev_doc_idx].retain(|iri| iri != &entity.iri);
+                    }
+                }
                 entity_to_document.insert(entity.iri.clone(), doc_idx);
                 doc_entity_iris.push(entity.iri.clone());
                 if let Some(&existing_idx) = entity_index.get(&entity.iri) {
-                    entities[existing_idx] = entity;
+                    merge_entity(&mut entities[existing_idx], &entity);
                 } else {
                     let idx = entities.len();
                     entity_index.insert(entity.iri.clone(), idx);
@@ -197,8 +202,28 @@ impl OntologyCatalog {
         &self.data
     }
 
+    /// Oxigraph triple store for SPARQL — not a stable public API; use [`ontoindex_query::sparql_catalog`].
+    #[doc(hidden)]
     pub fn store(&self) -> &Store {
         &self.store
+    }
+}
+
+fn merge_entity(existing: &mut Entity, incoming: &Entity) {
+    for label in &incoming.labels {
+        if !existing.labels.contains(label) {
+            existing.labels.push(label.clone());
+        }
+    }
+    for comment in &incoming.comments {
+        if !existing.comments.contains(comment) {
+            existing.comments.push(comment.clone());
+        }
+    }
+    existing.deprecated |= incoming.deprecated;
+    existing.ontology_id = incoming.ontology_id.clone();
+    if existing.short_name.is_empty() {
+        existing.short_name = incoming.short_name.clone();
     }
 }
 

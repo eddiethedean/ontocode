@@ -2,6 +2,7 @@ use crate::input::DiagnosticInput;
 use crate::location::{entity_needles, find_in_source};
 use ontoindex_core::{
     document_for_entity, Diagnostic, DiagnosticCode, DiagnosticSeverity, EntityKind,
+    AXIOM_KIND_SUB_CLASS_OF,
 };
 use std::collections::BTreeSet;
 use std::path::Path;
@@ -21,13 +22,13 @@ pub fn orphan_classes(
     let child_set: BTreeSet<&str> = data
         .axioms
         .iter()
-        .filter(|a| a.axiom_kind == "SubClassOf")
+        .filter(|a| a.axiom_kind == AXIOM_KIND_SUB_CLASS_OF)
         .map(|a| a.subject.as_str())
         .collect();
     let parent_object_set: BTreeSet<&str> = data
         .axioms
         .iter()
-        .filter(|a| a.axiom_kind == "SubClassOf")
+        .filter(|a| a.axiom_kind == AXIOM_KIND_SUB_CLASS_OF)
         .map(|a| a.object.as_str())
         .collect();
 
@@ -46,7 +47,7 @@ pub fn orphan_classes(
             let parents: Vec<_> = data
                 .axioms
                 .iter()
-                .filter(|a| a.axiom_kind == "SubClassOf" && a.subject == class.iri)
+                .filter(|a| a.axiom_kind == AXIOM_KIND_SUB_CLASS_OF && a.subject == class.iri)
                 .map(|a| a.object.as_str())
                 .collect();
             !parents.iter().any(|p| entity_iris.contains(p))
@@ -166,7 +167,7 @@ mod tests {
             subject: "http://ex/Person".to_string(),
             predicate: "subClassOf".to_string(),
             object: "http://ex/Thing".to_string(),
-            axiom_kind: "SubClassOf".to_string(),
+            axiom_kind: AXIOM_KIND_SUB_CLASS_OF.to_string(),
         }];
         let input = DiagnosticInput {
             documents: &documents,

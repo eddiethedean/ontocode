@@ -30,7 +30,8 @@ impl From<&Diagnostic> for DiagnosticSummary {
 
 #[derive(Debug, Deserialize)]
 pub struct IndexWorkspaceParams {
-    #[serde(rename = "workspaceUri")]
+    /// Workspace root URI (`file://…`). Accepts legacy camelCase `workspaceUri` during migration.
+    #[serde(alias = "workspaceUri", default)]
     pub workspace_uri: Option<String>,
 }
 

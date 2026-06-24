@@ -20,10 +20,17 @@ pub use document_lookup::{
     document_matches_ontology_id, file_uri_for_path, normalize_iri,
 };
 pub use error::{OntoIndexError, Result};
-pub use limits::*;
-pub use model::*;
+pub use limits::{
+    MAX_ENTITIES, MAX_FILE_BYTES, MAX_OPEN_DOCUMENTS, MAX_QUERY_BYTES, MAX_SCAN_FILES,
+    MAX_SPARQL_RESULT_ROWS, MAX_SQL_RESULT_ROWS, MAX_TOTAL_TRIPLES, MAX_TRIPLES_PER_FILE,
+};
+pub use model::{
+    Annotation, Axiom, Diagnostic, DiagnosticCode, DiagnosticSeverity, Entity, EntityKind, Import,
+    Namespace, OntologyDocument, OntologyFormat, ParseStatus, SourceLocation,
+    AXIOM_KIND_SUB_CLASS_OF,
+};
 pub use path_jail::{
     canonical_workspace_root, file_uri_to_path, is_path_within, resolve_document_path,
-    validate_workspace_scope, workspace_uri_to_path,
+    resolve_lsp_document_path, validate_workspace_scope, workspace_uri_to_path,
 };
 pub use scanner::{OntologyFile, WorkspaceScanner};

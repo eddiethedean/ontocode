@@ -767,6 +767,7 @@ dependencies = [
  "ontoindex-catalog",
  "ontoindex-core",
  "ontoindex-lsp",
+ "ontoindex-parser",
  "ontoindex-query",
  "serde_json",
  "tempfile",

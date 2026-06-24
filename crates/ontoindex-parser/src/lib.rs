@@ -9,5 +9,5 @@
 mod rdf;
 mod vocab;
 
-pub use rdf::{parse_ontology_file, parse_ontology_text, ParsedOntology};
+pub use rdf::{parse_ontology_file, parse_ontology_text, ParseError, ParsedOntology};
 pub use vocab::OWL;

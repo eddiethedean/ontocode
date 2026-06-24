@@ -52,6 +52,16 @@ pub enum ParseStatus {
     Error,
 }
 
+impl ParseStatus {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Self::Ok => "ok",
+            Self::Warning => "warning",
+            Self::Error => "error",
+        }
+    }
+}
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum EntityKind {
@@ -195,4 +205,19 @@ pub struct Namespace {
 pub struct Import {
     pub ontology_id: String,
     pub import_iri: String,
+}
+
+/// Snake_case axiom kind stored in [`Axiom::axiom_kind`] and SQL `axioms.axiom_kind`.
+pub const AXIOM_KIND_SUB_CLASS_OF: &str = "sub_class_of";
+
+#[cfg(test)]
+mod tests {
+    use super::ParseStatus;
+
+    #[test]
+    fn parse_status_as_str_matches_serde() {
+        assert_eq!(ParseStatus::Ok.as_str(), "ok");
+        assert_eq!(ParseStatus::Warning.as_str(), "warning");
+        assert_eq!(ParseStatus::Error.as_str(), "error");
+    }
 }

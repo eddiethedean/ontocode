@@ -2,7 +2,7 @@ use ontoindex_catalog::{IndexBuilder, OntologyCatalog};
 use ontoindex_core::{
     canonical_workspace_root,
     limits::{MAX_FILE_BYTES, MAX_OPEN_DOCUMENTS},
-    validate_workspace_scope,
+    validate_workspace_scope, Diagnostic, OntologyDocument,
 };
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
@@ -16,7 +16,10 @@ pub struct ServerState {
 
 struct InnerState {
     catalog: Option<OntologyCatalog>,
+    /// LSP workspace root for path jail (set at initialize).
     workspace: Option<PathBuf>,
+    /// Last successfully indexed directory (may be a subdirectory of [`InnerState::workspace`]).
+    indexed_workspace: Option<PathBuf>,
     indexed_at: Option<u64>,
     /// Open document text keyed by canonical file path (unsaved buffer overrides disk).
     open_documents: HashMap<PathBuf, String>,
@@ -28,6 +31,7 @@ impl ServerState {
             inner: Arc::new(RwLock::new(InnerState {
                 catalog: None,
                 workspace: None,
+                indexed_workspace: None,
                 indexed_at: None,
                 open_documents: HashMap::new(),
             })),
@@ -47,9 +51,10 @@ impl ServerState {
     ) -> Result<(ontoindex_catalog::CatalogStats, u64), String> {
         let workspace = canonical_workspace_root(&workspace)?;
 
-        if let Some(existing) = self.workspace_root() {
-            validate_workspace_scope(&workspace, &existing)?;
-        }
+        let root = self
+            .workspace_root()
+            .ok_or_else(|| "workspace not initialized".to_string())?;
+        validate_workspace_scope(&workspace, &root)?;
 
         let overrides = self.open_documents_snapshot();
         let catalog = IndexBuilder::new()
@@ -63,10 +68,25 @@ impl ServerState {
 
         let mut guard = self.inner.write().map_err(|e| e.to_string())?;
         guard.catalog = Some(catalog);
-        guard.workspace = Some(workspace);
+        guard.indexed_workspace = Some(workspace);
         guard.indexed_at = Some(indexed_at);
 
         Ok((stats, indexed_at))
+    }
+
+    /// Clone catalog documents and diagnostics for publishing outside the read lock.
+    pub fn catalog_diagnostic_snapshot(&self) -> Option<CatalogDiagnosticSnapshot> {
+        let guard = self.inner.read().ok()?;
+        let catalog = guard.catalog.as_ref()?;
+        Some(CatalogDiagnosticSnapshot {
+            documents: catalog.data().documents.clone(),
+            diagnostics: catalog.data().diagnostics.clone(),
+        })
+    }
+
+    #[allow(dead_code)]
+    pub fn indexed_workspace(&self) -> Option<PathBuf> {
+        self.inner.read().ok()?.indexed_workspace.clone()
     }
 
     fn open_documents_snapshot(&self) -> HashMap<PathBuf, String> {
@@ -123,8 +143,19 @@ impl ServerState {
         if let Some(text) = guard.open_documents.get(path) {
             return Some(text.clone());
         }
+        if let Ok(canonical) = path.canonicalize() {
+            if let Some(text) = guard.open_documents.get(&canonical) {
+                return Some(text.clone());
+            }
+        }
         std::fs::read_to_string(path).ok()
     }
+}
+
+/// Snapshot of catalog data needed to publish LSP diagnostics.
+pub struct CatalogDiagnosticSnapshot {
+    pub documents: Vec<OntologyDocument>,
+    pub diagnostics: Vec<Diagnostic>,
 }
 
 impl Default for ServerState {
@@ -160,8 +191,25 @@ fn now_epoch_secs() -> u64 {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use ontoindex_core::limits::{MAX_FILE_BYTES, MAX_OPEN_DOCUMENTS};
+    use ontoindex_core::{is_path_within, limits::{MAX_FILE_BYTES, MAX_OPEN_DOCUMENTS}};
     use std::path::PathBuf;
+
+    #[test]
+    fn subdirectory_index_does_not_shrink_workspace_root() {
+        let dir = tempfile::tempdir().unwrap();
+        let sub = dir.path().join("sub");
+        std::fs::create_dir_all(&sub).unwrap();
+        let root = dir.path().canonicalize().unwrap();
+
+        let state = ServerState::new();
+        state.set_workspace_root(root.clone()).expect("set workspace");
+        state.index_workspace(sub.clone()).expect("index subdirectory");
+
+        assert_eq!(state.workspace_root().as_deref(), Some(root.as_path()));
+        let indexed = state.indexed_workspace().expect("indexed workspace");
+        assert!(is_path_within(&root, &indexed));
+        assert_eq!(indexed.file_name(), sub.file_name());
+    }
 
     #[test]
     fn rejects_oversized_buffer() {

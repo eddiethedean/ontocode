@@ -27,7 +27,7 @@ Not supported in v0.3: `JOIN`, subqueries, `GROUP BY`, `ORDER BY`, functions, or
 | `path` | Filesystem path |
 | `format` | `turtle`, `rdf_xml`, `owl`, … |
 | `base_iri` | Declared base IRI |
-| `parse_status` | `Ok`, `Warning`, or `Error` |
+| `parse_status` | `ok`, `warning`, or `error` |
 | `content_hash` | SHA-256 content hash |
 | `modified_time` | File mtime (seconds) |
 
@@ -63,7 +63,7 @@ Entity tables share these columns (`properties` is the union of all property kin
 | `subject` | Subject IRI |
 | `predicate` | Predicate IRI |
 | `object` | Object IRI or value |
-| `axiom_kind` | e.g. `SubClassOf` |
+| `axiom_kind` | e.g. `sub_class_of` |
 
 ### `namespaces`
 

@@ -47,7 +47,8 @@
     "IndexWorkspaceParams": {
       "type": "object",
       "properties": {
-        "workspaceUri": { "type": ["string", "null"] }
+        "workspace_uri": { "type": ["string", "null"] },
+        "workspaceUri": { "type": ["string", "null"], "description": "Legacy camelCase alias (deprecated)" }
       },
       "additionalProperties": false
     },

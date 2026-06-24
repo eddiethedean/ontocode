@@ -163,7 +163,10 @@ let catalog = IndexBuilder::new()
     .workspace("./ontology")
     .build()?;
 
-let rows = catalog.query("SELECT * FROM classes WHERE deprecated = true")?;
+let rows = ontoindex_query::query_catalog(
+    &catalog,
+    "SELECT * FROM classes WHERE deprecated = true",
+)?;
 ```
 
 ## 7. OntoCode Extension Components

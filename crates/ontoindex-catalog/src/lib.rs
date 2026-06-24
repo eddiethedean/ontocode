@@ -5,12 +5,12 @@
 //! # API stability
 //!
 //! **Pre-1.0:** catalog shapes and method signatures may change until v1.0.
-//! [`OntologyCatalog::store`] exposes Oxigraph types and is not a stable integration surface.
+//! Use [`ontoindex_query::sparql_catalog`] for SPARQL; do not depend on Oxigraph types.
 
 mod builder;
 mod entity_api;
 
-pub use builder::{IndexBuilder, OntologyCatalog};
+pub use builder::{CatalogError, IndexBuilder, OntologyCatalog};
 pub use entity_api::{ClassHierarchy, EntityDetail, SourceHint, SubclassEdge};
 
 use ontoindex_core::{

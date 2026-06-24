@@ -28,7 +28,7 @@ pub fn catalog_snapshot_json(
 mod handlers_test;
 
 use crossbeam_channel::Sender;
-use diagnostics::publish_catalog_diagnostics;
+use diagnostics::publish_diagnostics_for_state;
 use handlers::{
     handle_custom_request, handle_initialize, handle_standard_request, StandardRequestOutcome,
 };
@@ -61,7 +61,6 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
 
     let index_worker = IndexWorker::spawn(
         state.clone(),
-        Arc::clone(&pending_diagnostic_publish),
         connection.sender.clone(),
     );
 
@@ -95,7 +94,7 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
                 if notif.method == Exit::METHOD {
                     break;
                 }
-                handle_notification(&state, &pending_reindex, &pending_diagnostic_publish, notif);
+                handle_notification(&state, &pending_reindex, notif);
                 publish_pending_diagnostics(
                     &connection.sender,
                     &state,
@@ -164,7 +163,6 @@ fn handle_lsp_request(
 fn handle_notification(
     state: &ServerState,
     pending_reindex: &Arc<Mutex<Option<PendingReindex>>>,
-    pending_diagnostic_publish: &Arc<AtomicBool>,
     notif: Notification,
 ) {
     match notif.method.as_str() {
@@ -176,7 +174,6 @@ fn handle_notification(
         "workspace/didChangeWatchedFiles" => {
             if let Some(workspace) = state.workspace_root() {
                 schedule_reindex(pending_reindex, workspace, Duration::from_millis(500));
-                pending_diagnostic_publish.store(true, Ordering::SeqCst);
             }
         }
         DidOpenTextDocument::METHOD => {
@@ -201,12 +198,16 @@ fn handle_notification(
                     if let Some(text) = merged_document_text(state, &path, &params) {
                         if let Err(err) = state.set_document_text(path, text) {
                             eprintln!("ontoindex-lsp: rejected document change: {err}");
+                        } else if let Some(workspace) = state.workspace_root() {
+                            schedule_reindex(pending_reindex, workspace, Duration::from_millis(750));
                         }
+                    } else {
+                        eprintln!(
+                            "ontoindex-lsp: rejected document change: invalid edit range for {}",
+                            params.text_document.uri.as_str()
+                        );
                     }
                 }
-            }
-            if let Some(workspace) = state.workspace_root() {
-                schedule_reindex(pending_reindex, workspace, Duration::from_millis(750));
             }
         }
         DidCloseTextDocument::METHOD => {
@@ -233,16 +234,7 @@ fn publish_pending_diagnostics(
     if !pending.swap(false, Ordering::SeqCst) {
         return;
     }
-    let state = state.clone();
-    let text_fn = |path: &std::path::Path| state.document_text(path);
-    state.with_catalog(|catalog| {
-        publish_catalog_diagnostics(
-            sender,
-            &catalog.data().documents,
-            &catalog.data().diagnostics,
-            &text_fn,
-        );
-    });
+    publish_diagnostics_for_state(sender, state);
 }
 
 fn document_path_from_uri(
@@ -250,7 +242,7 @@ fn document_path_from_uri(
     uri: &lsp_types::Uri,
 ) -> Result<std::path::PathBuf, String> {
     let root = state.workspace_root().ok_or_else(|| "workspace not initialized".to_string())?;
-    ontoindex_core::resolve_document_path(uri.as_str(), &root)
+    ontoindex_core::resolve_lsp_document_path(uri.as_str(), &root)
 }
 
 fn merged_document_text(
@@ -261,7 +253,7 @@ fn merged_document_text(
     let mut text = state.document_text(path)?;
     for change in &params.content_changes {
         if let Some(range) = &change.range {
-            text = apply_text_change(&text, range, &change.text);
+            text = apply_text_change(&text, range, &change.text)?;
         } else {
             text = change.text.clone();
         }
@@ -269,7 +261,7 @@ fn merged_document_text(
     Some(text)
 }
 
-fn apply_text_change(text: &str, range: &lsp_types::Range, new_text: &str) -> String {
+fn apply_text_change(text: &str, range: &lsp_types::Range, new_text: &str) -> Option<String> {
     let lines: Vec<&str> = text.lines().collect();
     let start_line = range.start.line as usize;
     let end_line = range.end.line as usize;
@@ -279,12 +271,21 @@ fn apply_text_change(text: &str, range: &lsp_types::Range, new_text: &str) -> St
             start_line,
             lines.len()
         );
-        return text.to_string();
+        return None;
     }
     let start_line_str = lines.get(start_line).copied().unwrap_or("");
     let end_line_str = lines.get(end_line).copied().unwrap_or("");
     let start_col = utf16_offset_to_byte(start_line_str, range.start.character);
     let end_col = utf16_offset_to_byte(end_line_str, range.end.character);
+
+    if end_line >= lines.len() && end_line != start_line {
+        eprintln!(
+            "ontoindex-lsp: text change end line {} out of range ({} lines)",
+            end_line,
+            lines.len()
+        );
+        return None;
+    }
 
     let mut result = String::new();
     for (i, line) in lines.iter().enumerate() {
@@ -311,7 +312,7 @@ fn apply_text_change(text: &str, range: &lsp_types::Range, new_text: &str) -> St
     if result.ends_with('\n') {
         result.pop();
     }
-    result
+    Some(result)
 }
 
 fn utf16_offset_to_byte(line: &str, utf16_col: u32) -> usize {

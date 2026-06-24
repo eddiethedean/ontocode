@@ -211,10 +211,8 @@ fn sql_query_properties_and_axioms_tables() {
     assert_eq!(properties.rows.len(), 3);
 
     let axioms = query_catalog(&catalog, "SELECT axiom_kind FROM axioms").expect("axioms");
-    assert!(axioms
-        .rows
-        .iter()
-        .any(|row| row.get("axiom_kind").map(String::as_str) == Some("SubClassOf")));
+    assert!(axioms.rows.iter().any(|row| row.get("axiom_kind").map(String::as_str)
+        == Some(ontoindex_core::AXIOM_KIND_SUB_CLASS_OF)));
 
     let imports = query_catalog(&catalog, "SELECT import_iri FROM imports").expect("imports");
     assert!(!imports.rows.is_empty());

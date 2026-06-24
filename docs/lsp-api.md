@@ -4,7 +4,7 @@ This document describes **what ships today** in `ontoindex-lsp`. For the **v1.0 
 
 ## Wire format (v0.3)
 
-LSP JSON uses **snake_case** for enums serialized from Rust (`EntityKind`, `ParseStatus`, `OntologyFormat`), e.g. `"kind": "class"`, `"parse_status": "ok"`. The SQL CLI uses the same snake_case strings via `EntityKind::as_str()` — not PascalCase serde names.
+LSP JSON uses **snake_case** for enums serialized from Rust (`EntityKind`, `ParseStatus`, `OntologyFormat`), e.g. `"kind": "class"`, `"parse_status": "ok"`. SQL virtual tables use the same snake_case strings via `as_str()` on core enums (e.g. `ParseStatus::as_str()` → `"ok"`, `EntityKind::as_str()` → `"class"`, `axiom_kind` → `"sub_class_of"`).
 
 **Source of truth:**
 
@@ -40,10 +40,10 @@ Rebuild the workspace catalog.
 **Params:** `IndexWorkspaceParams`
 
 ```json
-{ "workspaceUri": "file:///path/to/workspace" }
+{ "workspace_uri": "file:///path/to/workspace" }
 ```
 
-`workspaceUri` is optional; the server uses the initialized workspace folder when omitted.
+`workspace_uri` is optional; the server uses the initialized workspace folder when omitted. Legacy clients may send `workspaceUri` (camelCase); support will be removed in v0.4.
 
 **Result:** `IndexWorkspaceResult`
 

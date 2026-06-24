@@ -9,6 +9,9 @@ export interface CatalogStats {
   annotation_count: number;
   triple_count: number;
   error_count: number;
+  diagnostic_error_count: number;
+  diagnostic_warning_count: number;
+  diagnostic_info_count: number;
 }
 
 export interface OntologyDocument {
@@ -16,8 +19,13 @@ export interface OntologyDocument {
   path: string;
   format: string;
   base_iri?: string;
+  imports?: string[];
+  namespaces?: Record<string, string>;
   parse_status: string;
+  content_hash?: string;
+  modified_time?: number;
   parse_message?: string;
+  parse_error_location?: { line?: number; column?: number };
 }
 
 export interface Entity {
@@ -28,6 +36,7 @@ export interface Entity {
   labels: string[];
   comments: string[];
   deprecated: boolean;
+  source_location?: { line?: number; column?: number };
 }
 
 export interface SubclassEdge {
@@ -70,6 +79,11 @@ export interface EntityDetail {
   children: string[];
   axioms: string[];
   source?: SourceHint;
+}
+
+export interface IndexWorkspaceParams {
+  /** Preferred snake_case wire field; server also accepts legacy `workspaceUri`. */
+  workspace_uri?: string;
 }
 
 export interface IndexWorkspaceResult {

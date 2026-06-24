@@ -180,3 +180,29 @@ export function assertParseManchesterResult(
   }
   return value as import("./protocol").ParseManchesterResult;
 }
+
+export function assertRunReasonerResult(
+  value: unknown
+): import("./protocol").RunReasonerResult {
+  if (!value || typeof value !== "object") {
+    throw new Error("Invalid runReasoner result from language server");
+  }
+  const v = value as Record<string, unknown>;
+  if (typeof v.profile_used !== "string" || typeof v.consistent !== "boolean") {
+    throw new Error("Invalid runReasoner result shape");
+  }
+  return value as import("./protocol").RunReasonerResult;
+}
+
+export function assertGetExplanationResult(
+  value: unknown
+): import("./protocol").GetExplanationResult {
+  if (!value || typeof value !== "object") {
+    throw new Error("Invalid getExplanation result from language server");
+  }
+  const v = value as Record<string, unknown>;
+  if (typeof v.class_iri !== "string" || !Array.isArray(v.steps)) {
+    throw new Error("Invalid getExplanation result shape");
+  }
+  return value as import("./protocol").GetExplanationResult;
+}

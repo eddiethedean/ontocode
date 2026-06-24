@@ -5,6 +5,23 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.6.0] - 2026-06-24
+
+### Added
+
+- **`ontoindex-reasoner` crate** — thin OntoLogos 0.9.0 facade (`el`, `rl`, `rdfs` adapters; `dl`/`auto` stubbed until OntoLogos 1.0)
+- CLI **`ontoindex classify`** and **`ontoindex explain`**
+- LSP **`ontoindex/runReasoner`** and **`ontoindex/getExplanation`**
+- VS Code **Reasoner Results** panel, **Explanation** panel, hierarchy mode toggle (`asserted` / `inferred` / `combined`)
+- Settings: `ontocode.reasoner.default`, `ontocode.reasoner.autoProfile`, `ontocode.hierarchy.mode`
+- Fixtures: `fixtures/reasoner-el.ttl`, `fixtures/reasoner-unsat.ttl`
+- User guide: [docs/guides/reasoner.md](docs/guides/reasoner.md)
+
+### Changed
+
+- `CatalogSnapshot` includes optional `reasoner` metadata after classification
+- Workspace crates bumped to **0.6.0**
+
 ## [0.5.0] - 2026-06-24
 
 ### Added

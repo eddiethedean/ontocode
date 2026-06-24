@@ -1,4 +1,60 @@
-import { CatalogSnapshot, DiagnosticSummary, Entity } from "../lsp/protocol";
+import {
+  CatalogSnapshot,
+  ClassHierarchy,
+  DiagnosticSummary,
+  Entity,
+  HierarchyMode,
+  SubclassEdge,
+} from "../lsp/protocol";
+
+export function hierarchyModeFromConfig(mode: string | undefined): HierarchyMode {
+  if (mode === "inferred" || mode === "combined") {
+    return mode;
+  }
+  return "asserted";
+}
+
+export function activeHierarchy(snapshot: CatalogSnapshot, mode: HierarchyMode): ClassHierarchy {
+  if (mode === "asserted") {
+    return snapshot.hierarchy;
+  }
+  if (!snapshot.reasoner) {
+    return snapshot.hierarchy;
+  }
+  if (mode === "inferred") {
+    return hierarchyFromEdges(snapshot.reasoner.inferred.edges);
+  }
+  return snapshot.reasoner.inferred.combined;
+}
+
+export function hierarchyFromEdges(edges: SubclassEdge[]): ClassHierarchy {
+  const parents: Record<string, string[]> = {};
+  const children: Record<string, string[]> = {};
+  for (const edge of edges) {
+    parents[edge.child] = parents[edge.child] ?? [];
+    parents[edge.child].push(edge.parent);
+    children[edge.parent] = children[edge.parent] ?? [];
+    children[edge.parent].push(edge.child);
+  }
+  return { edges, parents, children };
+}
+
+export function isInferredOnlyEdge(
+  snapshot: CatalogSnapshot,
+  child: string,
+  parent: string
+): boolean {
+  if (!snapshot.reasoner) {
+    return false;
+  }
+  return snapshot.reasoner.inferred.edges.some(
+    (e) => e.child === child && e.parent === parent
+  );
+}
+
+export function isUnsatisfiable(snapshot: CatalogSnapshot, iri: string): boolean {
+  return snapshot.reasoner?.unsatisfiable.includes(iri) ?? false;
+}
 
 export function filterEntitiesByKind(entities: Entity[], kind: string): Entity[] {
   return entities.filter((e) => e.kind === kind);
@@ -26,16 +82,17 @@ export function groupDiagnosticsBySeverity(
   return groups;
 }
 
-export function classRootEntities(snapshot: CatalogSnapshot): Entity[] {
+export function classRootEntities(snapshot: CatalogSnapshot, mode: HierarchyMode = "asserted"): Entity[] {
+  const hierarchy = activeHierarchy(snapshot, mode);
   const classes = filterEntitiesByKind(snapshot.entities, "class");
   const entityIris = new Set(snapshot.entities.map((e) => e.iri));
-  const childSet = new Set(snapshot.hierarchy.edges.map((e) => e.child));
+  const childSet = new Set(hierarchy.edges.map((e) => e.child));
 
   return classes.filter((c) => {
     if (!childSet.has(c.iri)) {
       return true;
     }
-    const parents = snapshot.hierarchy.parents[c.iri] ?? [];
+    const parents = hierarchy.parents[c.iri] ?? [];
     const hasCatalogParent = parents.some((p) => entityIris.has(p));
     return !hasCatalogParent;
   });
@@ -60,9 +117,11 @@ export function entityDisplayLabel(entity: Entity): string {
 
 export function childEntitiesForClass(
   snapshot: CatalogSnapshot,
-  parentIri: string
+  parentIri: string,
+  mode: HierarchyMode = "asserted"
 ): Entity[] {
-  const childIris = snapshot.hierarchy.children[parentIri] ?? [];
+  const hierarchy = activeHierarchy(snapshot, mode);
+  const childIris = hierarchy.children[parentIri] ?? [];
   return childIris
     .map((iri) => snapshot.entities.find((e) => e.iri === iri))
     .filter((e): e is Entity => !!e);

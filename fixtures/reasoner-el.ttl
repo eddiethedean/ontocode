@@ -1,0 +1,17 @@
+@prefix ex: <http://example.org/reasoner-el#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+<http://example.org/reasoner-el> a owl:Ontology ;
+    rdfs:label "EL reasoner fixture" .
+
+ex:Animal a owl:Class ;
+    rdfs:label "Animal" .
+
+ex:Mammal a owl:Class ;
+    rdfs:label "Mammal" ;
+    rdfs:subClassOf ex:Animal .
+
+ex:Dog a owl:Class ;
+    rdfs:label "Dog" ;
+    rdfs:subClassOf ex:Mammal .

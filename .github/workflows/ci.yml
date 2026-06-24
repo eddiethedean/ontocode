@@ -121,6 +121,8 @@ jobs:
 
       - run: cargo test -p ontocode --test lsp_smoke
 
+      - run: cargo test -p ontocode --test lsp_reasoner
+
   extension-build:
     name: extension build
     runs-on: ubuntu-latest

@@ -1,0 +1,154 @@
+import * as vscode from "vscode";
+import { runReasoner } from "../lsp/client";
+import { RunReasonerResult } from "../lsp/protocol";
+import {
+  AVAILABLE_PROFILES,
+  summarizeResult,
+} from "./reasonerPanelLogic";
+
+export class ReasonerPanel {
+  public static current: ReasonerPanel | undefined;
+  private readonly panel: vscode.WebviewPanel;
+  private lastResult: RunReasonerResult | undefined;
+
+  private constructor(panel: vscode.WebviewPanel) {
+    this.panel = panel;
+    this.panel.onDidDispose(() => {
+      ReasonerPanel.current = undefined;
+    });
+    this.panel.webview.onDidReceiveMessage(async (msg) => {
+      if (msg.command === "run") {
+        await this.run(msg.profile as string, msg.autoDetect !== false);
+      }
+      if (msg.command === "explain" && typeof msg.classIri === "string") {
+        await vscode.commands.executeCommand(
+          "ontocode.showExplanation",
+          msg.classIri
+        );
+      }
+      if (msg.command === "showInferred") {
+        await vscode.workspace
+          .getConfiguration("ontocode")
+          .update("hierarchy.mode", "combined", vscode.ConfigurationTarget.Workspace);
+        void vscode.commands.executeCommand("ontocode.refreshExplorer");
+      }
+    });
+    this.panel.webview.html = this.renderHtml();
+  }
+
+  public static show(): ReasonerPanel {
+    if (ReasonerPanel.current) {
+      ReasonerPanel.current.panel.reveal(vscode.ViewColumn.Beside);
+      return ReasonerPanel.current;
+    }
+    const panel = vscode.window.createWebviewPanel(
+      "ontocodeReasoner",
+      "OntoCode Reasoner",
+      vscode.ViewColumn.Beside,
+      { enableScripts: true, retainContextWhenHidden: true }
+    );
+    ReasonerPanel.current = new ReasonerPanel(panel);
+    return ReasonerPanel.current;
+  }
+
+  public async runWithDefaults(): Promise<void> {
+    const cfg = vscode.workspace.getConfiguration("ontocode");
+    const profile = cfg.get<string>("reasoner.default") ?? "el";
+    const autoDetect = cfg.get<boolean>("reasoner.autoProfile") ?? true;
+    await this.run(profile, autoDetect);
+  }
+
+  private async run(profile: string, autoDetect: boolean): Promise<void> {
+    try {
+      const result = await runReasoner({ profile, auto_detect: autoDetect });
+      this.lastResult = result;
+      this.panel.webview.postMessage({
+        command: "result",
+        result,
+        summary: summarizeResult(result),
+        error: undefined,
+      });
+      void vscode.commands.executeCommand("ontocode.refreshExplorer");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      this.panel.webview.postMessage({
+        command: "result",
+        result: undefined,
+        error: message,
+      });
+    }
+  }
+
+  private renderHtml(): string {
+    const profiles = AVAILABLE_PROFILES.map(
+      (p) =>
+        `<option value="${p.id}" ${p.enabled ? "" : "disabled"} title="${p.hint ?? ""}">${p.label}${p.hint ? ` (${p.hint})` : ""}</option>`
+    ).join("");
+    return `<!DOCTYPE html>
+<html><head><meta charset="UTF-8" />
+<style>
+body { font-family: var(--vscode-font-family); padding: 12px; color: var(--vscode-foreground); }
+button { margin: 4px 4px 4px 0; }
+select { margin-right: 8px; }
+#status { margin: 8px 0; font-weight: 600; }
+.error { color: var(--vscode-errorForeground); }
+section { margin-top: 12px; }
+ul { padding-left: 18px; }
+li button { font-size: 0.9em; }
+</style></head><body>
+<h2>Reasoner</h2>
+<label>Profile <select id="profile">${profiles}</select></label>
+<label><input type="checkbox" id="auto" checked /> Profile warnings</label>
+<button id="run">Run Reasoner</button>
+<button id="inferred">Show Inferred Hierarchy</button>
+<div id="status"></div>
+<section><h3>Unsatisfiable</h3><ul id="unsat"></ul></section>
+<section><h3>Inferred Changes</h3><ul id="inferences"></ul></section>
+<section><h3>Warnings</h3><ul id="warnings"></ul></section>
+<script>
+const vscode = acquireVsCodeApi();
+document.getElementById('run').onclick = () => vscode.postMessage({
+  command: 'run',
+  profile: document.getElementById('profile').value,
+  autoDetect: document.getElementById('auto').checked,
+});
+document.getElementById('inferred').onclick = () => vscode.postMessage({ command: 'showInferred' });
+window.addEventListener('message', (e) => {
+  const msg = e.data;
+  if (msg.command !== 'result') return;
+  const status = document.getElementById('status');
+  if (msg.error) {
+    status.textContent = msg.error;
+    status.className = 'error';
+    return;
+  }
+  status.className = '';
+  status.textContent = msg.summary || 'Done';
+  const unsat = document.getElementById('unsat');
+  unsat.innerHTML = '';
+  for (const iri of (msg.result?.unsatisfiable || [])) {
+    const li = document.createElement('li');
+    const btn = document.createElement('button');
+    btn.textContent = iri;
+    btn.onclick = () => vscode.postMessage({ command: 'explain', classIri: iri });
+    li.appendChild(btn);
+    unsat.appendChild(li);
+  }
+  const inf = document.getElementById('inferences');
+  inf.innerHTML = '';
+  for (const edge of (msg.result?.new_inferences || [])) {
+    const li = document.createElement('li');
+    li.textContent = edge.child + ' SubClassOf ' + edge.parent;
+    inf.appendChild(li);
+  }
+  const warn = document.getElementById('warnings');
+  warn.innerHTML = '';
+  for (const w of (msg.result?.warnings || [])) {
+    const li = document.createElement('li');
+    li.textContent = w.message;
+    warn.appendChild(li);
+  }
+});
+</script></body></html>`;
+  }
+}

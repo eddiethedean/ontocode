@@ -2,9 +2,10 @@ use crate::index_worker::IndexWorker;
 use crate::positions::{byte_col_to_utf16, utf16_offset_to_byte};
 use crate::protocol::{
     ApplyAxiomPatchParams, ApplyAxiomPatchResult, CatalogSnapshot, DiagnosticSummary,
-    GetEntityParams, GetEntityResult, IndexWorkspaceParams, IndexWorkspaceResult, LspErrorPayload,
-    ManchesterCompletions, ParseManchesterParams, ParseManchesterResult, QueryParams, SparqlParams,
-    TabularQueryResult,
+    GetEntityParams, GetEntityResult, GetExplanationParams, GetExplanationResult,
+    IndexWorkspaceParams, IndexWorkspaceResult, LspErrorPayload, ManchesterCompletions,
+    ParseManchesterParams, ParseManchesterResult, QueryParams, RunReasonerParams,
+    RunReasonerResult, SparqlParams, TabularQueryResult,
 };
 use crate::state::{path_to_uri, resolve_workspace_for_index, ServerState};
 use lsp_server::ResponseError;
@@ -16,6 +17,9 @@ use lsp_types::{
     TextDocumentSyncKind, Uri, WorkspaceSymbolParams, WorkspaceSymbolResponse,
 };
 use ontoindex_core::{resolve_document_path, EntityKind, OntologyFormat};
+use ontoindex_reasoner::{
+    classify, explain, ExplanationRequest, ReasonerId, ReasonerSnapshot, WorkspaceInputLoader,
+};
 use serde_json::Value;
 use std::path::Path;
 use std::str::FromStr;
@@ -74,13 +78,26 @@ pub fn build_catalog_snapshot(catalog: &ontoindex_catalog::OntologyCatalog) -> C
         entities: catalog.data().entities.clone(),
         hierarchy: catalog.class_hierarchy(),
         diagnostics: catalog.data().diagnostics.iter().map(DiagnosticSummary::from).collect(),
+        reasoner: None,
     }
+}
+
+pub fn build_catalog_snapshot_with_reasoner(
+    catalog: &ontoindex_catalog::OntologyCatalog,
+    reasoner: Option<ontoindex_reasoner::ReasonerSnapshot>,
+) -> CatalogSnapshot {
+    let mut snapshot = build_catalog_snapshot(catalog);
+    snapshot.reasoner = reasoner;
+    snapshot
 }
 
 pub fn handle_get_catalog_snapshot(
     state: &ServerState,
 ) -> Result<CatalogSnapshot, LspErrorPayload> {
-    state.with_catalog(build_catalog_snapshot).ok_or_else(LspErrorPayload::not_indexed)
+    let reasoner = state.reasoner_snapshot();
+    state
+        .with_catalog(|catalog| build_catalog_snapshot_with_reasoner(catalog, reasoner))
+        .ok_or_else(LspErrorPayload::not_indexed)
 }
 
 pub fn handle_get_entity(
@@ -259,6 +276,91 @@ pub fn handle_parse_manchester(
         diagnostics: Vec::new(),
         completions,
     })
+}
+
+pub fn handle_run_reasoner(
+    state: &ServerState,
+    params: RunReasonerParams,
+) -> Result<RunReasonerResult, LspErrorPayload> {
+    let profile = ReasonerId::parse(&params.profile)
+        .map_err(|e| LspErrorPayload::reasoner_failed(e.to_string()))?;
+
+    let input = load_reasoner_input(state)?;
+
+    if let Some(cached) = state
+        .with_reasoner_cache(|cache| cache.get(&input.content_hash, profile).cloned())
+        .flatten()
+    {
+        let snapshot = cached.snapshot.clone();
+        state.set_reasoner_snapshot(snapshot.clone());
+        return Ok(run_reasoner_result_from_classification(&cached.classification, snapshot));
+    }
+
+    let classification = classify(profile, &input, params.auto_detect)
+        .map_err(|e| LspErrorPayload::reasoner_failed(e.to_string()))?;
+
+    let snapshot = state
+        .reasoner_cache_mut(|cache| {
+            cache.store_classification(input, profile, classification.clone())
+        })
+        .unwrap_or_else(|| ReasonerSnapshot::from(classification.clone()));
+    state.set_reasoner_snapshot(snapshot.clone());
+
+    Ok(run_reasoner_result_from_classification(&classification, snapshot))
+}
+
+pub fn handle_get_explanation(
+    state: &ServerState,
+    params: GetExplanationParams,
+) -> Result<GetExplanationResult, LspErrorPayload> {
+    let profile = ReasonerId::parse(&params.profile)
+        .map_err(|e| LspErrorPayload::explanation_failed(e.to_string()))?;
+
+    let input = match state
+        .with_reasoner_cache(|cache| cache.get_any_for_profile(profile).map(|c| c.input.clone()))
+    {
+        Some(Some(i)) => i,
+        _ => load_reasoner_input(state)?,
+    };
+
+    let result =
+        explain(profile, &input, &ExplanationRequest { class_iri: params.class_iri.clone() })
+            .map_err(|e| LspErrorPayload::explanation_failed(e.to_string()))?;
+
+    Ok(GetExplanationResult { class_iri: result.class_iri, steps: result.steps, text: result.text })
+}
+
+fn run_reasoner_result_from_classification(
+    classification: &ontoindex_reasoner::ClassificationResult,
+    snapshot: ReasonerSnapshot,
+) -> RunReasonerResult {
+    RunReasonerResult {
+        profile_used: classification.profile_used.clone(),
+        consistent: classification.consistent,
+        unsatisfiable: classification.unsatisfiable.clone(),
+        inferred_edge_count: classification.inferred.edges.len(),
+        new_inferences: classification.new_inferences.clone(),
+        warnings: classification.warnings.clone(),
+        duration_ms: classification.duration_ms,
+        snapshot,
+    }
+}
+
+fn load_reasoner_input(
+    state: &ServerState,
+) -> Result<ontoindex_reasoner::ReasonerInput, LspErrorPayload> {
+    let workspace = state
+        .indexed_workspace()
+        .or_else(|| state.workspace_root())
+        .ok_or_else(LspErrorPayload::not_indexed)?;
+    let asserted = state
+        .with_catalog(|catalog| catalog.class_hierarchy())
+        .ok_or_else(LspErrorPayload::not_indexed)?;
+    let overrides = state.open_documents_for_reasoner();
+    WorkspaceInputLoader::new(&workspace)
+        .document_overrides(overrides)
+        .load(asserted)
+        .map_err(|e| LspErrorPayload::reasoner_failed(e.to_string()))
 }
 
 fn resolve_namespaces_for_manchester(
@@ -546,6 +648,22 @@ pub fn handle_custom_request(
                     .map_err(|e| LspErrorPayload::index_failed(format!("invalid params: {e}")))?;
             let result = handle_parse_manchester(state, params)?;
             serde_json::to_value(result).map_err(|e| LspErrorPayload::index_failed(e.to_string()))
+        }
+        "ontoindex/runReasoner" => {
+            let params: RunReasonerParams =
+                serde_json::from_value(params.unwrap_or(Value::Null))
+                    .map_err(|e| LspErrorPayload::index_failed(format!("invalid params: {e}")))?;
+            let result = handle_run_reasoner(state, params)?;
+            serde_json::to_value(result)
+                .map_err(|e| LspErrorPayload::reasoner_failed(e.to_string()))
+        }
+        "ontoindex/getExplanation" => {
+            let params: GetExplanationParams =
+                serde_json::from_value(params.unwrap_or(Value::Null))
+                    .map_err(|e| LspErrorPayload::index_failed(format!("invalid params: {e}")))?;
+            let result = handle_get_explanation(state, params)?;
+            serde_json::to_value(result)
+                .map_err(|e| LspErrorPayload::explanation_failed(e.to_string()))
         }
         _ => Err(LspErrorPayload::index_failed(format!("unknown method: {method}"))),
     }

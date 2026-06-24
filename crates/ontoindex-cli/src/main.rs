@@ -7,13 +7,14 @@ use ontoindex_query::{
     sparql_catalog,
     sql::{to_csv as sql_to_csv, to_json as sql_to_json},
 };
+use ontoindex_reasoner::{classify, explain, ExplanationRequest, ReasonerId, WorkspaceInputLoader};
 use std::path::PathBuf;
 
 #[derive(Parser)]
 #[command(
     name = "ontoindex",
     version,
-    about = "Local-first ontology index and query engine (OntoCode v0.4)"
+    about = "Local-first ontology index and query engine (OntoCode v0.6)"
 )]
 struct Cli {
     #[command(subcommand)]
@@ -72,6 +73,34 @@ enum Commands {
         /// Preview changes without writing to disk
         #[arg(long)]
         preview: bool,
+    },
+    /// Classify ontologies in a workspace with a reasoner profile
+    Classify {
+        /// Workspace directory
+        #[arg(default_value = ".")]
+        workspace: PathBuf,
+        /// Reasoner profile: el, rl, rdfs (dl/auto require OntoLogos 1.0)
+        #[arg(long, default_value = "el")]
+        profile: String,
+        /// Emit profile-detection warnings
+        #[arg(long, default_value_t = true)]
+        auto_profile: bool,
+        #[arg(long, value_enum, default_value_t = OutputFormat::Text)]
+        format: OutputFormat,
+    },
+    /// Explain unsatisfiability for a class IRI
+    Explain {
+        /// Workspace directory
+        #[arg(default_value = ".")]
+        workspace: PathBuf,
+        /// Class IRI to explain
+        #[arg(long)]
+        class: String,
+        /// Reasoner profile
+        #[arg(long, default_value = "el")]
+        profile: String,
+        #[arg(long, value_enum, default_value_t = OutputFormat::Text)]
+        format: OutputFormat,
     },
 }
 
@@ -180,6 +209,42 @@ fn main() -> Result<()> {
                 println!("applied");
             }
         }
+        Commands::Classify { workspace, profile, auto_profile, format } => {
+            let result = run_classify(&workspace, &profile, auto_profile)?;
+            match format {
+                OutputFormat::Json => println!("{}", serde_json::to_string_pretty(&result)?),
+                OutputFormat::Text | OutputFormat::Csv => {
+                    println!("profile: {}", result.profile_used);
+                    println!("consistent: {}", result.consistent);
+                    println!("unsatisfiable: {}", result.unsatisfiable.len());
+                    println!("inferred_edges: {}", result.inferred.edges.len());
+                    println!("new_inferences: {}", result.new_inferences.len());
+                    println!("duration_ms: {}", result.duration_ms);
+                    for iri in &result.unsatisfiable {
+                        println!("UNSAT {iri}");
+                    }
+                    for edge in &result.new_inferences {
+                        println!("INFERRED {} SubClassOf {}", edge.child, edge.parent);
+                    }
+                }
+            }
+            if !result.consistent {
+                bail!(
+                    "classification found {} unsatisfiable class(es)",
+                    result.unsatisfiable.len()
+                );
+            }
+        }
+        Commands::Explain { workspace, class, profile, format } => {
+            let result = run_explain(&workspace, &class, &profile)?;
+            match format {
+                OutputFormat::Json => println!("{}", serde_json::to_string_pretty(&result)?),
+                OutputFormat::Text | OutputFormat::Csv => {
+                    println!("class: {}", result.class_iri);
+                    println!("{}", result.text);
+                }
+            }
+        }
     }
     Ok(())
 }
@@ -189,6 +254,34 @@ fn build_catalog(workspace: &PathBuf) -> Result<OntologyCatalog> {
         .workspace(workspace)
         .build()
         .with_context(|| format!("failed to index workspace {}", workspace.display()))
+}
+
+fn load_reasoner_input(workspace: &PathBuf) -> Result<ontoindex_reasoner::ReasonerInput> {
+    let catalog = build_catalog(workspace)?;
+    WorkspaceInputLoader::new(workspace)
+        .load(catalog.class_hierarchy())
+        .map_err(|e| anyhow::anyhow!(e))
+}
+
+fn run_classify(
+    workspace: &PathBuf,
+    profile: &str,
+    auto_profile: bool,
+) -> Result<ontoindex_reasoner::ClassificationResult> {
+    let profile_id = ReasonerId::parse(profile).map_err(|e| anyhow::anyhow!(e))?;
+    let input = load_reasoner_input(workspace)?;
+    classify(profile_id, &input, auto_profile).map_err(|e| anyhow::anyhow!(e))
+}
+
+fn run_explain(
+    workspace: &PathBuf,
+    class: &str,
+    profile: &str,
+) -> Result<ontoindex_reasoner::ExplanationResult> {
+    let profile_id = ReasonerId::parse(profile).map_err(|e| anyhow::anyhow!(e))?;
+    let input = load_reasoner_input(workspace)?;
+    explain(profile_id, &input, &ExplanationRequest { class_iri: class.to_string() })
+        .map_err(|e| anyhow::anyhow!(e))
 }
 
 fn print_stats(stats: &CatalogStats, format: OutputFormat) -> Result<()> {

@@ -1,8 +1,14 @@
 short_name	labels
+A	A
+Animal	Animal
+B	B
 ClinicOrganization	Clinic Organization
 ClinicPerson	Clinic Person
 Department	"Department"
+Dog	Dog
 Employee	Employee
+Invalid	Invalid
+Mammal	Mammal
 MedicalRecord	Medical Record
 Organization	Organization
 Patient	Patient

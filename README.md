@@ -17,7 +17,7 @@
 [![downloads](https://img.shields.io/crates/d/ontoindex-cli?label=downloads)](https://crates.io/crates/ontoindex-cli)
 [![Docs](https://readthedocs.org/projects/onto-code/badge/?version=latest)](https://onto-code.readthedocs.io/en/latest/)
 
-**Ontology-as-code for Git and VS Code — v0.5.0 ships today.**
+**Ontology-as-code for Git and VS Code — v0.6.0 ships today.**
 
 Browse OWL/RDF in VS Code, **edit Turtle ontologies**, query and validate in CI, and index workspaces locally with a Rust engine. **v0.5** adds the **Query Workbench** (SQL + SPARQL in VS Code) and a **Manchester MVP editor** for complex subclass and equivalent-class axioms.
 
@@ -138,13 +138,16 @@ ontoindex query /path/to/ontologies "SELECT * FROM classes"
 ontoindex validate /path/to/ontologies
 ```
 
-## Coming in v0.6+
+## Reasoning (v0.6)
 
-Future plans (not all implemented) — specs in [design docs](https://onto-code.readthedocs.io/en/latest/design/):
+- EL / RL / RDFS classification via [OntoLogos](https://github.com/eddiethedean/ontologos) 0.9.0
+- CLI: `ontoindex classify`, `ontoindex explain`
+- LSP: `ontoindex/runReasoner`, `ontoindex/getExplanation`
+- Explorer hierarchy mode: asserted / inferred / combined
 
-- Reasoner integration and inferred hierarchy
-- Graph visualization
-- Semantic Git diff viewer
+See [reasoner guide](docs/guides/reasoner.md). DL and `auto` profiles require OntoLogos 1.0.
+
+## Coming in v0.7+
 
 The extension is a thin TypeScript shell over **ontoindex-lsp** and the OntoIndex crates — not a second ontology stack.
 
@@ -156,8 +159,7 @@ The extension is a thin TypeScript shell over **ontoindex-lsp** and the OntoInde
 | v0.2 | VS Code extension, explorer, entity inspector, LSP |
 | v0.3 | Ontology diagnostics (Problems panel, `validate`) |
 | v0.4.0 | Write-back — Turtle patches, Horned-OWL catalog, editable inspector |
-| **v0.5.0** (current) | **Query workbench + Manchester MVP** |
-| v0.6 | Reasoning via [OntoLogos](https://github.com/eddiethedean/ontologos) 0.9.0 (EL, RL, inferred hierarchy) |
+| **v0.6.0** (current) | **Reasoning** — OntoLogos EL/RL/RDFS, inferred hierarchy, explanations |
 | v0.7–v0.7b | Graphs + OBO/ROBOT interop |
 | v0.8–v0.9 | Full Manchester, refactoring, semantic diff; `ontologos-watch` hook |
 | v1.0 | **Protégé-competitive OWL + OBO in VS Code** — DL via OntoLogos 1.0.0 ([parity checklist](https://onto-code.readthedocs.io/en/latest/design/PROTEGE_PARITY/)) |
@@ -173,7 +175,7 @@ OntoIndex delegates to mature Rust libraries — see [dependency matrix](https:/
 | RDF / SPARQL | [Oxigraph](https://crates.io/crates/oxigraph) | `ontoindex-parser`, `ontoindex-query` |
 | SQL queries | [sqlparser](https://crates.io/crates/sqlparser) | `ontoindex-query` |
 | OWL axioms / write-back | [horned-owl](https://crates.io/crates/horned-owl), [horned-functional](https://crates.io/crates/horned-functional) | `ontoindex-owl` |
-| Reasoning (planned) | [OntoLogos](https://github.com/eddiethedean/ontologos) | `ontoindex-reasoner` (planned) |
+| Reasoning | [OntoLogos](https://github.com/eddiethedean/ontologos) | `ontoindex-reasoner` |
 | OBO (planned) | [fastobo](https://crates.io/crates/fastobo) | planned v0.7b |
 | LSP | [lsp-server](https://crates.io/crates/lsp-server), [lsp-types](https://crates.io/crates/lsp-types) | `ontoindex-lsp` |
 
@@ -189,6 +191,7 @@ crates/
 ├── ontoindex-catalog   # index builder and semantic catalog
 ├── ontoindex-diagnostics # lint rules and diagnostic collection
 ├── ontoindex-query     # SQL-like and SPARQL engines
+├── ontoindex-reasoner  # OntoLogos EL/RL/RDFS classification (v0.6)
 ├── ontoindex-cli       # `ontoindex` binary
 └── ontoindex-lsp       # language server for OntoCode
 extension/              # VS Code extension (OntoCode Explorer)

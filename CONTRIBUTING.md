@@ -65,6 +65,7 @@ npm test
 
 ```bash
 cargo test -p ontocode --test lsp_smoke
+cargo test -p ontocode --test lsp_reasoner
 ```
 
 **VS Code E2E matrix** (separate workflow): see `.github/workflows/extension-vscode-e2e.yml`. Run locally with `@vscode/test-electron` after packaging the extension.

@@ -13,15 +13,21 @@ import {
   assertApplyPatchResult,
   assertTabularQueryResult,
   assertParseManchesterResult,
+  assertRunReasonerResult,
+  assertGetExplanationResult,
 } from "./protocolGuards";
 import {
   ApplyAxiomPatchParams,
   ApplyPatchResult,
   CatalogSnapshot,
   GetEntityResult,
+  GetExplanationParams,
+  GetExplanationResult,
   IndexWorkspaceResult,
   ParseManchesterParams,
   ParseManchesterResult,
+  RunReasonerParams,
+  RunReasonerResult,
   TabularQueryResult,
 } from "./protocol";
 import {
@@ -189,6 +195,25 @@ export async function parseManchester(
     params
   );
   return assertParseManchesterResult(result);
+}
+
+export async function runReasoner(
+  params: RunReasonerParams
+): Promise<RunReasonerResult> {
+  const c = requireClient();
+  const result = await c.sendRequest<unknown>("ontoindex/runReasoner", params);
+  return assertRunReasonerResult(result);
+}
+
+export async function getExplanation(
+  params: GetExplanationParams
+): Promise<GetExplanationResult> {
+  const c = requireClient();
+  const result = await c.sendRequest<unknown>(
+    "ontoindex/getExplanation",
+    params
+  );
+  return assertGetExplanationResult(result);
 }
 
 function requireClient(): LanguageClient {

@@ -1,6 +1,6 @@
-# OntoIndex LSP API (v0.5)
+# OntoIndex LSP API (v0.6)
 
-This document describes **what ships today** in `ontoindex-lsp`. For the **v1.0 target** (including `getExplanation`, `runRobot`), see [LSP_SPEC.md](design/LSP_SPEC.md).
+This document describes **what ships today** in `ontoindex-lsp`. For the **v1.0 target** (including `runRobot`, graph APIs), see [LSP_SPEC.md](design/LSP_SPEC.md).
 
 ## Wire format (v0.5)
 
@@ -9,7 +9,7 @@ LSP JSON uses **snake_case** for enums serialized from Rust (`EntityKind`, `Pars
 **Source of truth:**
 
 - Types: [`protocol.rs` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/crates/ontoindex-lsp/src/protocol.rs)
-- JSON Schema (v0.5 subset): [`docs/lsp-protocol.schema.json`](lsp-protocol.schema.json)
+- JSON Schema (v0.6 subset): [`docs/lsp-protocol.schema.json`](lsp-protocol.schema.json)
 - Handlers: [`handlers.rs` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/crates/ontoindex-lsp/src/handlers.rs)
 - Extension client: [`client.ts` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/extension/src/lsp/client.ts)
 
@@ -103,8 +103,9 @@ Return documents, entities, and class hierarchy for the explorer UI.
 |-------|------|-------------|
 | `documents` | `OntologyDocument[]` | Indexed files (`id`, `path`, `format`, `parse_status`, …) |
 | `entities` | `Entity[]` | All extracted entities |
-| `hierarchy` | `ClassHierarchy` | `edges`, `parents`, `children` maps |
+| `hierarchy` | `ClassHierarchy` | `edges`, `parents`, `children` maps (asserted) |
 | `diagnostics` | `DiagnosticSummary[]` | Lint summaries for explorer |
+| `reasoner` | `ReasonerSnapshot` (optional) | Last reasoner run — inferred hierarchy, unsatisfiable classes |
 
 **`Entity` fields:** `iri`, `short_name`, `kind`, `ontology_id`, `labels[]`, `comments[]`, `deprecated`, optional `source_location`.
 
@@ -237,19 +238,69 @@ See [patch-reference.md](patch-reference.md) for CLI `ApplyPatchResult` examples
 
 **Errors:** `PATCH_INVALID`, `UNSUPPORTED_FORMAT`, `NOT_INDEXED`, `APPLIED_NOT_INDEXED`
 
+### `ontoindex/runReasoner` (v0.6)
+
+Run OWL classification via OntoLogos 0.9.0 (`el`, `rl`, `rdfs`). `dl` and `auto` return an error until OntoLogos 1.0.
+
+**Params:** `RunReasonerParams`
+
+```json
+{ "profile": "el", "auto_detect": true }
+```
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `profile` | string | `"el"` | `el`, `rl`, `rdfs`, `dl`, or `auto` |
+| `auto_detect` | boolean | `true` | Run profile detection warnings via `ontologos-profile` |
+
+**Result:** `RunReasonerResult`
+
+| Field | Description |
+|-------|-------------|
+| `profile_used` | Profile that ran |
+| `consistent` | `false` when unsatisfiable classes exist |
+| `unsatisfiable` | Class IRIs |
+| `inferred_edge_count` | Count of inferred-only subsumption edges |
+| `new_inferences` | Inferred `SubclassEdge[]` not present in asserted hierarchy |
+| `warnings` | Profile / construct warnings |
+| `duration_ms` | Wall-clock classification time |
+| `snapshot` | Full `ReasonerSnapshot` (also attached to subsequent `getCatalogSnapshot`) |
+
+**Errors:** `NOT_INDEXED`, `REASONER_FAILED`
+
+### `ontoindex/getExplanation` (v0.6)
+
+Return an EL/RL/RDFS explanation for an unsatisfiable class (requires a prior reasoner run or loads ontology on demand).
+
+**Params:** `GetExplanationParams`
+
+```json
+{ "class_iri": "http://example.org#Invalid", "profile": "el" }
+```
+
+**Result:** `GetExplanationResult`
+
+| Field | Description |
+|-------|-------------|
+| `class_iri` | Requested class |
+| `steps` | Ordered `ExplanationStep[]` (`index`, `rule`, `display`, optional IRIs) |
+| `text` | Rendered proof text |
+
+**Errors:** `NOT_INDEXED`, `EXPLANATION_FAILED`
+
 ## Structured errors
 
 Custom method failures return `LspErrorPayload` in the JSON-RPC error `data` field. Full catalog: [errors.md](errors.md).
 
 | Field | Description |
 |-------|-------------|
-| `code` | Machine-readable code (`NOT_INDEXED`, `ENTITY_NOT_FOUND`, `PATCH_INVALID`, `UNSUPPORTED_FORMAT`, `INDEX_FAILED`, `QUERY_FAILED`, `MANCHESTER_INVALID`, `APPLIED_NOT_INDEXED`, …) |
+| `code` | Machine-readable code (`NOT_INDEXED`, `ENTITY_NOT_FOUND`, `PATCH_INVALID`, `UNSUPPORTED_FORMAT`, `INDEX_FAILED`, `QUERY_FAILED`, `MANCHESTER_INVALID`, `APPLIED_NOT_INDEXED`, `REASONER_FAILED`, `EXPLANATION_FAILED`, …) |
 | `message` | Human-readable message |
 | `recoverable` | Whether the client can retry |
 | `user_action` | Suggested user action (optional) |
 
 ## Not implemented yet (see LSP_SPEC)
 
-- `ontoindex/getGraph`, `ontoindex/getSemanticDiff`, `ontoindex/runReasoner`
+- `ontoindex/getGraph`, `ontoindex/getSemanticDiff`, `ontoindex/runRobot`
 
-Use the CLI or Rust crates for reasoning and graph APIs until those LSP methods land.
+Use the CLI or Rust crates for graph APIs until those LSP methods land.

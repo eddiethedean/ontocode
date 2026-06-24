@@ -12,6 +12,8 @@ import {
   ManchesterEditorPanel,
   ManchesterEditorOptions,
 } from "../webviews/manchesterEditor";
+import { ReasonerPanel } from "../webviews/reasonerPanel";
+import { ExplanationPanel } from "../webviews/explanationPanel";
 import { ExplorerTreeProvider } from "../treeviews/explorer";
 import { resolveEntityIri } from "../utils/resolveEntityIri";
 import { byteColToUtf16 } from "../utils/positions";
@@ -193,7 +195,53 @@ export function registerCommands(
           arg
         );
       }
-    )
+    ),
+    vscode.commands.registerCommand("ontocode.runReasoner", async () => {
+      const panel = ReasonerPanel.show();
+      await panel.runWithDefaults();
+    }),
+    vscode.commands.registerCommand(
+      "ontocode.showExplanation",
+      async (classIri?: string) => {
+        if (!classIri) {
+          classIri = await vscode.window.showInputBox({
+            prompt: "Unsatisfiable class IRI",
+          });
+        }
+        if (!classIri) {
+          return;
+        }
+        try {
+          await ExplanationPanel.show(classIri);
+        } catch (err) {
+          const message = err instanceof Error ? err.message : String(err);
+          void vscode.window.showErrorMessage(
+            `OntoCode: explanation failed — ${message}`
+          );
+        }
+      }
+    ),
+    vscode.commands.registerCommand("ontocode.setHierarchyMode", async () => {
+      const pick = await vscode.window.showQuickPick(
+        [
+          { label: "Asserted hierarchy", value: "asserted" },
+          { label: "Inferred hierarchy", value: "inferred" },
+          { label: "Combined hierarchy", value: "combined" },
+        ],
+        { placeHolder: "Class hierarchy display mode" }
+      );
+      if (!pick) {
+        return;
+      }
+      await vscode.workspace
+        .getConfiguration("ontocode")
+        .update(
+          "hierarchy.mode",
+          pick.value,
+          vscode.ConfigurationTarget.Workspace
+        );
+      await refreshExplorer(providers);
+    })
   );
 }
 

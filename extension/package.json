@@ -2,7 +2,7 @@
   "name": "ontocode",
   "displayName": "OntoCode",
   "description": "Browse OWL/RDF ontologies in VS Code with inline diagnostics: explore classes and properties, inspect entities, validate in CI, and jump to source.",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "publisher": "ontocode",
   "license": "MIT",
   "repository": {
@@ -125,6 +125,18 @@
       {
         "command": "ontocode.addManchesterAxiom",
         "title": "OntoCode: Add Manchester Axiom"
+      },
+      {
+        "command": "ontocode.runReasoner",
+        "title": "OntoCode: Run Reasoner"
+      },
+      {
+        "command": "ontocode.showExplanation",
+        "title": "OntoCode: Show Explanation"
+      },
+      {
+        "command": "ontocode.setHierarchyMode",
+        "title": "OntoCode: Set Hierarchy Mode"
       }
     ],
     "menus": {
@@ -185,6 +197,23 @@
           "type": "number",
           "default": 20,
           "description": "Maximum number of recent queries kept in the Query Workbench history."
+        },
+        "ontocode.reasoner.default": {
+          "type": "string",
+          "enum": ["el", "rl", "rdfs", "dl", "auto"],
+          "default": "el",
+          "description": "Default reasoner profile for Run Reasoner (dl/auto require OntoLogos 1.0)."
+        },
+        "ontocode.reasoner.autoProfile": {
+          "type": "boolean",
+          "default": true,
+          "description": "Emit profile-detection warnings when running the reasoner."
+        },
+        "ontocode.hierarchy.mode": {
+          "type": "string",
+          "enum": ["asserted", "inferred", "combined"],
+          "default": "asserted",
+          "description": "Class hierarchy display mode in the explorer after classification."
         }
       }
     }

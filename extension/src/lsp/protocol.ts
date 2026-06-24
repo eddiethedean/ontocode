@@ -70,6 +70,67 @@ export interface CatalogSnapshot {
   entities: Entity[];
   hierarchy: ClassHierarchy;
   diagnostics: DiagnosticSummary[];
+  reasoner?: ReasonerSnapshot;
+}
+
+export type HierarchyMode = "asserted" | "inferred" | "combined";
+
+export interface ReasonerWarning {
+  code: string;
+  message: string;
+  suggested_profile?: string;
+}
+
+export interface InferredHierarchy {
+  edges: SubclassEdge[];
+  unsatisfiable: string[];
+  combined: ClassHierarchy;
+}
+
+export interface ReasonerSnapshot {
+  profile_used: string;
+  consistent: boolean;
+  unsatisfiable: string[];
+  inferred: InferredHierarchy;
+  new_inferences: SubclassEdge[];
+  warnings: ReasonerWarning[];
+  duration_ms: number;
+  classified_at: number;
+}
+
+export interface RunReasonerParams {
+  profile?: string;
+  auto_detect?: boolean;
+}
+
+export interface RunReasonerResult {
+  profile_used: string;
+  consistent: boolean;
+  unsatisfiable: string[];
+  inferred_edge_count: number;
+  new_inferences: SubclassEdge[];
+  warnings: ReasonerWarning[];
+  duration_ms: number;
+  snapshot: ReasonerSnapshot;
+}
+
+export interface GetExplanationParams {
+  class_iri: string;
+  profile?: string;
+}
+
+export interface ExplanationStep {
+  index: number;
+  rule: string;
+  display: string;
+  subject_iri?: string;
+  object_iri?: string;
+}
+
+export interface GetExplanationResult {
+  class_iri: string;
+  steps: ExplanationStep[];
+  text: string;
 }
 
 export interface SourceHint {

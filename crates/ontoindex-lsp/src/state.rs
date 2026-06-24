@@ -4,6 +4,7 @@ use ontoindex_core::{
     limits::{MAX_FILE_BYTES, MAX_OPEN_DOCUMENTS},
     validate_workspace_scope, Diagnostic, OntologyDocument,
 };
+use ontoindex_reasoner::{ReasonerCacheStore, ReasonerSnapshot};
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, RwLock};
@@ -23,6 +24,8 @@ struct InnerState {
     indexed_at: Option<u64>,
     /// Open document text keyed by canonical file path (unsaved buffer overrides disk).
     open_documents: HashMap<PathBuf, String>,
+    reasoner_cache: ReasonerCacheStore,
+    reasoner_snapshot: Option<ReasonerSnapshot>,
 }
 
 impl ServerState {
@@ -34,6 +37,8 @@ impl ServerState {
                 indexed_workspace: None,
                 indexed_at: None,
                 open_documents: HashMap::new(),
+                reasoner_cache: ReasonerCacheStore::new(),
+                reasoner_snapshot: None,
             })),
         }
     }
@@ -68,8 +73,34 @@ impl ServerState {
         guard.catalog = Some(catalog);
         guard.indexed_workspace = Some(workspace);
         guard.indexed_at = Some(indexed_at);
+        guard.reasoner_cache.invalidate();
+        guard.reasoner_snapshot = None;
 
         Ok((stats, indexed_at))
+    }
+
+    pub fn reasoner_snapshot(&self) -> Option<ReasonerSnapshot> {
+        self.inner.read().ok()?.reasoner_snapshot.clone()
+    }
+
+    pub fn set_reasoner_snapshot(&self, snapshot: ReasonerSnapshot) {
+        if let Ok(mut guard) = self.inner.write() {
+            guard.reasoner_snapshot = Some(snapshot);
+        }
+    }
+
+    pub fn reasoner_cache_mut<R>(&self, f: impl FnOnce(&mut ReasonerCacheStore) -> R) -> Option<R> {
+        let mut guard = self.inner.write().ok()?;
+        Some(f(&mut guard.reasoner_cache))
+    }
+
+    pub fn with_reasoner_cache<R>(&self, f: impl FnOnce(&ReasonerCacheStore) -> R) -> Option<R> {
+        let guard = self.inner.read().ok()?;
+        Some(f(&guard.reasoner_cache))
+    }
+
+    pub fn open_documents_for_reasoner(&self) -> HashMap<PathBuf, String> {
+        self.open_documents_snapshot()
     }
 
     /// Clone catalog documents and diagnostics for publishing outside the read lock.

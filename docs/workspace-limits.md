@@ -38,3 +38,13 @@ LSP `ontoindex/query` and `ontoindex/sparql` set `truncated: true` on `TabularQu
 | One or more diagnostic **errors** | **non-zero** |
 
 Warnings and info diagnostics are printed to stderr but do not fail CI.
+
+## `ontoindex classify` exit codes
+
+| Outcome | Exit code |
+|---------|-----------|
+| Consistent ontology (no unsatisfiable classes) | **0** |
+| Inconsistent / unsatisfiable classes detected | **non-zero** |
+| Reasoner error (unknown profile, `dl`/`auto` stub, parse failure) | **non-zero** |
+
+Use `--format json` in CI to inspect `consistent`, `unsatisfiable`, and `warnings`.

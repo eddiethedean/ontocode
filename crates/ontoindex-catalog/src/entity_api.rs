@@ -3,18 +3,18 @@ use ontoindex_core::{
     document_matches_entity, Entity, EntityKind, AXIOM_KIND_EQUIVALENT_CLASS,
     AXIOM_KIND_SUB_CLASS_OF,
 };
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 use std::fs;
 use std::path::PathBuf;
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct SubclassEdge {
     pub child: String,
     pub parent: String,
 }
 
-#[derive(Debug, Clone, Default, Serialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize)]
 pub struct ClassHierarchy {
     pub edges: Vec<SubclassEdge>,
     pub parents: BTreeMap<String, Vec<String>>,

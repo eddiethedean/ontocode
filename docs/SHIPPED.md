@@ -1,8 +1,8 @@
-# What ships today (v0.5.0)
+# What ships today (v0.6.0)
 
 > **Canonical capability matrix.** Update this page on every release. Design specs under [Project](design/README.md) may describe future targets — check here for what is actually available.
 
-**Current release:** v0.5.0 · [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md)
+**Current release:** v0.6.0 · [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md)
 
 ## Products
 
@@ -21,6 +21,9 @@
 | Complex `SubClassOf` / `EquivalentClasses` (Manchester) | Yes | `ontoindex patch` |
 | SQL-like queries | Query Workbench | `ontoindex query` |
 | SPARQL | Query Workbench | `ontoindex sparql` |
+| OWL EL classification (`el` profile) | Reasoner panel + hierarchy toggle | `ontoindex classify` |
+| RL / RDFS classification | Reasoner panel | `ontoindex classify --profile rl\|rdfs` |
+| EL explanations (where available) | Explanation panel | `ontoindex explain` |
 | Diagnostics / lint | Problems panel | `ontoindex validate` |
 | Hover, go-to-definition, symbols | Yes | — |
 | Patch preview | Inspector / Manchester editor | `ontoindex patch --preview` |
@@ -44,8 +47,8 @@
 |------------|-------|
 | Multi-root VS Code workspaces | Only the **first** folder is indexed |
 | Write-back | **Turtle only** |
-| Class hierarchy tree | Named-parent edges only; complex restrictions not shown as tree edges |
-| Reasoning / inferred hierarchy | Planned v0.6 ([roadmap](design/ROADMAP.md)) |
+| Class hierarchy tree | Named-parent edges; **inferred/combined** after reasoner run |
+| Reasoning | **EL / RL / RDFS** via OntoLogos 0.9; **DL/auto** stubbed until OntoLogos 1.0 |
 | CLI release binaries | Linux x64 only; macOS/Windows use `cargo install` or bundled LSP in VSIX |
 | Scale | See [workspace limits](workspace-limits.md) |
 
@@ -55,6 +58,7 @@
 |-------|-------|
 | VS Code onboarding | [First success in 10 minutes](guides/first-success.md) |
 | Query Workbench | [Query Workbench guide](guides/query-workbench.md) |
+| Reasoner | [Reasoner guide](guides/reasoner.md) |
 | Manchester editor | [Manchester editor guide](guides/manchester-editor.md) |
 | Turtle editing & patches | [Authoring](authoring.md) · [Patch reference](patch-reference.md) |
 | CLI & CI | [Getting started](getting-started.md) · [CI integration](ci-integration.md) |

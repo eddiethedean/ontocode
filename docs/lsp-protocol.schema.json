@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/eddiethedean/ontocode/docs/lsp-protocol.schema.json",
-  "title": "OntoIndex LSP protocol (v0.5)",
-  "description": "JSON Schema for ontoindex/* custom LSP methods (v0.5 subset).",
+  "title": "OntoIndex LSP protocol (v0.6)",
+  "description": "JSON Schema for ontoindex/* custom LSP methods (v0.6 subset).",
   "definitions": {
     "EntityKind": {
       "type": "string",
@@ -133,6 +133,149 @@
       },
       "additionalProperties": false
     },
+    "SubclassEdge": {
+      "type": "object",
+      "required": ["child", "parent"],
+      "properties": {
+        "child": { "type": "string" },
+        "parent": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "ReasonerWarning": {
+      "type": "object",
+      "required": ["code", "message"],
+      "properties": {
+        "code": { "type": "string" },
+        "message": { "type": "string" },
+        "suggested_profile": { "type": ["string", "null"] }
+      },
+      "additionalProperties": false
+    },
+    "InferredHierarchy": {
+      "type": "object",
+      "required": ["edges", "unsatisfiable", "combined"],
+      "properties": {
+        "edges": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/SubclassEdge" }
+        },
+        "unsatisfiable": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "combined": { "type": "object" }
+      },
+      "additionalProperties": false
+    },
+    "ReasonerSnapshot": {
+      "type": "object",
+      "required": [
+        "profile_used",
+        "consistent",
+        "unsatisfiable",
+        "inferred",
+        "new_inferences",
+        "warnings",
+        "duration_ms",
+        "classified_at"
+      ],
+      "properties": {
+        "profile_used": { "type": "string" },
+        "consistent": { "type": "boolean" },
+        "unsatisfiable": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "inferred": { "$ref": "#/definitions/InferredHierarchy" },
+        "new_inferences": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/SubclassEdge" }
+        },
+        "warnings": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/ReasonerWarning" }
+        },
+        "duration_ms": { "type": "integer" },
+        "classified_at": { "type": "integer" }
+      },
+      "additionalProperties": false
+    },
+    "RunReasonerParams": {
+      "type": "object",
+      "properties": {
+        "profile": { "type": "string", "default": "el" },
+        "auto_detect": { "type": "boolean", "default": true }
+      },
+      "additionalProperties": false
+    },
+    "RunReasonerResult": {
+      "type": "object",
+      "required": [
+        "profile_used",
+        "consistent",
+        "unsatisfiable",
+        "inferred_edge_count",
+        "new_inferences",
+        "warnings",
+        "duration_ms",
+        "snapshot"
+      ],
+      "properties": {
+        "profile_used": { "type": "string" },
+        "consistent": { "type": "boolean" },
+        "unsatisfiable": {
+          "type": "array",
+          "items": { "type": "string" }
+        },
+        "inferred_edge_count": { "type": "integer" },
+        "new_inferences": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/SubclassEdge" }
+        },
+        "warnings": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/ReasonerWarning" }
+        },
+        "duration_ms": { "type": "integer" },
+        "snapshot": { "$ref": "#/definitions/ReasonerSnapshot" }
+      },
+      "additionalProperties": false
+    },
+    "GetExplanationParams": {
+      "type": "object",
+      "required": ["class_iri"],
+      "properties": {
+        "class_iri": { "type": "string" },
+        "profile": { "type": "string", "default": "el" }
+      },
+      "additionalProperties": false
+    },
+    "ExplanationStep": {
+      "type": "object",
+      "required": ["index", "rule", "display"],
+      "properties": {
+        "index": { "type": "integer" },
+        "rule": { "type": "string" },
+        "display": { "type": "string" },
+        "subject_iri": { "type": ["string", "null"] },
+        "object_iri": { "type": ["string", "null"] }
+      },
+      "additionalProperties": false
+    },
+    "GetExplanationResult": {
+      "type": "object",
+      "required": ["class_iri", "steps", "text"],
+      "properties": {
+        "class_iri": { "type": "string" },
+        "steps": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/ExplanationStep" }
+        },
+        "text": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
     "DiagnosticSummary": {
       "type": "object",
       "required": ["code", "severity", "message", "file"],
@@ -157,7 +300,8 @@
         "diagnostics": {
           "type": "array",
           "items": { "$ref": "#/definitions/DiagnosticSummary" }
-        }
+        },
+        "reasoner": { "$ref": "#/definitions/ReasonerSnapshot" }
       },
       "additionalProperties": true
     },

@@ -50,6 +50,36 @@
       "parse_message": null,
       "parse_status": "ok",
       "path": "fixtures/organization.owl"
+    },
+    {
+      "base_iri": "http://example.org/reasoner-el",
+      "format": "turtle",
+      "id": "doc-4",
+      "imports": [],
+      "namespaces": {
+        "ex": "http://example.org/reasoner-el#",
+        "owl": "http://www.w3.org/2002/07/owl#",
+        "rdfs": "http://www.w3.org/2000/01/rdf-schema#"
+      },
+      "parse_error_location": null,
+      "parse_message": null,
+      "parse_status": "ok",
+      "path": "fixtures/reasoner-el.ttl"
+    },
+    {
+      "base_iri": "http://example.org/reasoner-unsat",
+      "format": "turtle",
+      "id": "doc-5",
+      "imports": [],
+      "namespaces": {
+        "ex": "http://example.org/reasoner-unsat#",
+        "owl": "http://www.w3.org/2002/07/owl#",
+        "rdfs": "http://www.w3.org/2000/01/rdf-schema#"
+      },
+      "parse_error_location": null,
+      "parse_message": null,
+      "parse_status": "ok",
+      "path": "fixtures/reasoner-unsat.ttl"
     }
   ],
   "entities": [
@@ -356,6 +386,108 @@
         "column": 26,
         "line": 14
       }
+    },
+    {
+      "comments": [],
+      "deprecated": false,
+      "iri": "http://example.org/reasoner-el#Animal",
+      "kind": "class",
+      "labels": [
+        "Animal"
+      ],
+      "ontology_id": "http://example.org/reasoner-el",
+      "short_name": "Animal",
+      "source_location": {
+        "column": 0,
+        "end_byte": 292,
+        "line": 8,
+        "start_byte": 243
+      }
+    },
+    {
+      "comments": [],
+      "deprecated": false,
+      "iri": "http://example.org/reasoner-el#Dog",
+      "kind": "class",
+      "labels": [
+        "Dog"
+      ],
+      "ontology_id": "http://example.org/reasoner-el",
+      "short_name": "Dog",
+      "source_location": {
+        "column": 0,
+        "end_byte": 452,
+        "line": 15,
+        "start_byte": 377
+      }
+    },
+    {
+      "comments": [],
+      "deprecated": false,
+      "iri": "http://example.org/reasoner-el#Mammal",
+      "kind": "class",
+      "labels": [
+        "Mammal"
+      ],
+      "ontology_id": "http://example.org/reasoner-el",
+      "short_name": "Mammal",
+      "source_location": {
+        "column": 0,
+        "end_byte": 375,
+        "line": 11,
+        "start_byte": 294
+      }
+    },
+    {
+      "comments": [],
+      "deprecated": false,
+      "iri": "http://example.org/reasoner-unsat#A",
+      "kind": "class",
+      "labels": [
+        "A"
+      ],
+      "ontology_id": "http://example.org/reasoner-unsat",
+      "short_name": "A",
+      "source_location": {
+        "column": 0,
+        "end_byte": 293,
+        "line": 8,
+        "start_byte": 254
+      }
+    },
+    {
+      "comments": [],
+      "deprecated": false,
+      "iri": "http://example.org/reasoner-unsat#B",
+      "kind": "class",
+      "labels": [
+        "B"
+      ],
+      "ontology_id": "http://example.org/reasoner-unsat",
+      "short_name": "B",
+      "source_location": {
+        "column": 0,
+        "end_byte": 372,
+        "line": 11,
+        "start_byte": 295
+      }
+    },
+    {
+      "comments": [],
+      "deprecated": false,
+      "iri": "http://example.org/reasoner-unsat#Invalid",
+      "kind": "class",
+      "labels": [
+        "Invalid"
+      ],
+      "ontology_id": "http://example.org/reasoner-unsat",
+      "short_name": "Invalid",
+      "source_location": {
+        "column": 0,
+        "end_byte": 459,
+        "line": 15,
+        "start_byte": 374
+      }
     }
   ],
   "hierarchy": {
@@ -373,6 +505,18 @@
       "http://example.org/people#Thing": [
         "http://example.org/people#Organization",
         "http://example.org/people#Person"
+      ],
+      "http://example.org/reasoner-el#Animal": [
+        "http://example.org/reasoner-el#Mammal"
+      ],
+      "http://example.org/reasoner-el#Mammal": [
+        "http://example.org/reasoner-el#Dog"
+      ],
+      "http://example.org/reasoner-unsat#A": [
+        "http://example.org/reasoner-unsat#Invalid"
+      ],
+      "http://example.org/reasoner-unsat#B": [
+        "http://example.org/reasoner-unsat#Invalid"
       ]
     },
     "edges": [
@@ -407,6 +551,22 @@
       {
         "child": "http://example.org/org#Department",
         "parent": "http://example.org/people#Organization"
+      },
+      {
+        "child": "http://example.org/reasoner-el#Mammal",
+        "parent": "http://example.org/reasoner-el#Animal"
+      },
+      {
+        "child": "http://example.org/reasoner-el#Dog",
+        "parent": "http://example.org/reasoner-el#Mammal"
+      },
+      {
+        "child": "http://example.org/reasoner-unsat#Invalid",
+        "parent": "http://example.org/reasoner-unsat#A"
+      },
+      {
+        "child": "http://example.org/reasoner-unsat#Invalid",
+        "parent": "http://example.org/reasoner-unsat#B"
       }
     ],
     "parents": {
@@ -433,6 +593,16 @@
       ],
       "http://example.org/people#Person": [
         "http://example.org/people#Thing"
+      ],
+      "http://example.org/reasoner-el#Dog": [
+        "http://example.org/reasoner-el#Mammal"
+      ],
+      "http://example.org/reasoner-el#Mammal": [
+        "http://example.org/reasoner-el#Animal"
+      ],
+      "http://example.org/reasoner-unsat#Invalid": [
+        "http://example.org/reasoner-unsat#A",
+        "http://example.org/reasoner-unsat#B"
       ]
     }
   }

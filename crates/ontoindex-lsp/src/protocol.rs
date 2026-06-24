@@ -1,5 +1,6 @@
-use ontoindex_catalog::{CatalogStats, ClassHierarchy, EntityDetail};
+use ontoindex_catalog::{CatalogStats, ClassHierarchy, EntityDetail, SubclassEdge};
 use ontoindex_core::{Diagnostic, Entity, OntologyDocument};
+use ontoindex_reasoner::ReasonerSnapshot;
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 
@@ -48,6 +49,8 @@ pub struct CatalogSnapshot {
     pub entities: Vec<Entity>,
     pub hierarchy: ClassHierarchy,
     pub diagnostics: Vec<DiagnosticSummary>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub reasoner: Option<ReasonerSnapshot>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -202,4 +205,66 @@ impl LspErrorPayload {
             user_action: Some("Patch was saved; run OntoCode: Index Workspace".to_string()),
         }
     }
+
+    pub fn reasoner_failed(message: String) -> Self {
+        Self {
+            code: "REASONER_FAILED".to_string(),
+            message,
+            recoverable: true,
+            user_action: Some(
+                "Try a different reasoner profile or fix ontology axioms".to_string(),
+            ),
+        }
+    }
+
+    pub fn explanation_failed(message: String) -> Self {
+        Self {
+            code: "EXPLANATION_FAILED".to_string(),
+            message,
+            recoverable: true,
+            user_action: Some("Run the reasoner first or choose another class".to_string()),
+        }
+    }
+}
+
+#[derive(Debug, Deserialize)]
+pub struct RunReasonerParams {
+    #[serde(default = "default_reasoner_profile")]
+    pub profile: String,
+    #[serde(default = "default_auto_profile")]
+    pub auto_detect: bool,
+}
+
+fn default_reasoner_profile() -> String {
+    "el".to_string()
+}
+
+fn default_auto_profile() -> bool {
+    true
+}
+
+#[derive(Debug, Serialize)]
+pub struct RunReasonerResult {
+    pub profile_used: String,
+    pub consistent: bool,
+    pub unsatisfiable: Vec<String>,
+    pub inferred_edge_count: usize,
+    pub new_inferences: Vec<SubclassEdge>,
+    pub warnings: Vec<ontoindex_reasoner::ReasonerWarning>,
+    pub duration_ms: u64,
+    pub snapshot: ReasonerSnapshot,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct GetExplanationParams {
+    pub class_iri: String,
+    #[serde(default = "default_reasoner_profile")]
+    pub profile: String,
+}
+
+#[derive(Debug, Serialize)]
+pub struct GetExplanationResult {
+    pub class_iri: String,
+    pub steps: Vec<ontoindex_reasoner::ExplanationStep>,
+    pub text: String,
 }

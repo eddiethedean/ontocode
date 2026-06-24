@@ -9,6 +9,9 @@ import {
   entityDisplayLabel,
   filterEntitiesByKind,
   groupDiagnosticsBySeverity,
+  hierarchyModeFromConfig,
+  isInferredOnlyEdge,
+  isUnsatisfiable,
   propertyGroupsPresent,
 } from "./explorerLogic";
 
@@ -113,8 +116,12 @@ export class ExplorerTreeProvider implements vscode.TreeDataProvider<OntologyTre
       ];
     }
 
+    const hierarchyMode = hierarchyModeFromConfig(
+      vscode.workspace.getConfiguration("ontocode").get<string>("hierarchy.mode")
+    );
+
     if (element) {
-      return this.getChildNodes(element);
+      return this.getChildNodes(element, hierarchyMode);
     }
 
     switch (this.viewKind) {
@@ -137,8 +144,8 @@ export class ExplorerTreeProvider implements vscode.TreeDataProvider<OntologyTre
           return item;
         });
       case "classes":
-        return classRootEntities(this.snapshot).map((e) =>
-          this.entityItem(e, this.hasChildren(e.iri))
+        return classRootEntities(this.snapshot, hierarchyMode).map((e) =>
+          this.entityItem(e, this.hasChildren(e.iri, hierarchyMode), hierarchyMode)
         );
       case "properties":
         return propertyGroupsPresent(this.snapshot).map(({ kind, label }) => {
@@ -196,7 +203,10 @@ export class ExplorerTreeProvider implements vscode.TreeDataProvider<OntologyTre
     }
   }
 
-  private getChildNodes(parent: OntologyTreeItem): OntologyTreeItem[] {
+  private getChildNodes(
+    parent: OntologyTreeItem,
+    hierarchyMode: import("../lsp/protocol").HierarchyMode
+  ): OntologyTreeItem[] {
     if (!this.snapshot) {
       return [];
     }
@@ -218,13 +228,19 @@ export class ExplorerTreeProvider implements vscode.TreeDataProvider<OntologyTre
     if (parent.nodeKind !== "entity" || !parent.iri || this.viewKind !== "classes") {
       return [];
     }
-    return childEntitiesForClass(this.snapshot, parent.iri).map((e) =>
-      this.entityItem(e, this.hasChildren(e.iri))
+    return childEntitiesForClass(this.snapshot, parent.iri, hierarchyMode).map((e) =>
+      this.entityItem(e, this.hasChildren(e.iri, hierarchyMode), hierarchyMode)
     );
   }
 
-  private hasChildren(iri: string): boolean {
-    return (this.snapshot?.hierarchy.children[iri]?.length ?? 0) > 0;
+  private hasChildren(
+    iri: string,
+    hierarchyMode: import("../lsp/protocol").HierarchyMode
+  ): boolean {
+    const hierarchy = hierarchyMode === "asserted"
+      ? this.snapshot?.hierarchy
+      : this.snapshot?.reasoner?.inferred.combined ?? this.snapshot?.hierarchy;
+    return (hierarchy?.children[iri]?.length ?? 0) > 0;
   }
 
   private diagnosticItem(
@@ -243,12 +259,15 @@ export class ExplorerTreeProvider implements vscode.TreeDataProvider<OntologyTre
 
   private entityItem(
     entity: Entity,
-    expandable = false
+    expandable = false,
+    hierarchyMode: import("../lsp/protocol").HierarchyMode = "asserted"
   ): OntologyTreeItem {
     const label = entityDisplayLabel(entity);
+    const unsat = this.snapshot && isUnsatisfiable(this.snapshot, entity.iri);
+    const displayLabel = unsat ? `${label} (unsat)` : label;
     const item = new OntologyTreeItem(
       "entity",
-      label,
+      displayLabel,
       expandable
         ? vscode.TreeItemCollapsibleState.Collapsed
         : vscode.TreeItemCollapsibleState.None,

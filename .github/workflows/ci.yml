@@ -195,7 +195,8 @@ jobs:
           set -euo pipefail
           # Full crate graph is verified at release (publish in dependency order on tag).
           cargo publish -p ontoindex-core --dry-run
-          cargo publish -p ontoindex-diagnostics --dry-run
+          # Dependent crates cannot `publish --dry-run` until workspace deps exist on crates.io.
+          cargo build -p ontoindex-diagnostics -p ontoindex-owl -p ontoindex-cli
 
   docs:
     name: mkdocs

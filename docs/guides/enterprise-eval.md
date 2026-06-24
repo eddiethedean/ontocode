@@ -4,6 +4,16 @@ This page helps security, platform, and ontology teams decide whether OntoCode *
 
 Canonical capability matrix: [What ships today](../SHIPPED.md).
 
+## Enterprise documentation pack
+
+| Document | Audience |
+|----------|----------|
+| [Production readiness](production-readiness.md) | Engineering leadership — pilot vs production criteria |
+| [Enterprise deployment](enterprise-deployment.md) | Platform / IT — VSIX mirror, CI, air-gap |
+| [Performance and sizing](performance-sizing.md) | DevOps — limits, pilot benchmarks |
+| [LGPL compliance](lgpl-compliance.md) | Legal — horned-owl obligations |
+| [Protégé coexistence](protege-coexistence.md) | Ontology teams — split workflow with Protégé |
+
 ## What v0.6.0 delivers
 
 | Capability | Status |
@@ -42,7 +52,7 @@ Full gap analysis: [Protégé parity matrix](../design/PROTEGE_PARITY.md).
 ## Licensing
 
 - OntoIndex/OntoCode crates: **MIT OR Apache-2.0**
-- **LGPL:** [`horned-owl`](https://crates.io/crates/horned-owl) is used for OWL modeling and Turtle write-back — review LGPL obligations for your distribution model ([LICENSES.md](../design/LICENSES.md), [FAQ](../faq.md))
+- **LGPL:** [`horned-owl`](https://crates.io/crates/horned-owl) is used for OWL modeling and Turtle write-back — review LGPL obligations ([LGPL compliance](lgpl-compliance.md), [LICENSES.md](../design/LICENSES.md), [FAQ](../faq.md))
 - **NOTICES file:** Regenerate before releases per [LICENSES.md](../design/LICENSES.md); verify your release process includes third-party attribution
 
 ## Known limitations for enterprise layouts

@@ -40,7 +40,7 @@ The canonical policy (supported versions, scope, hardening table) is maintained 
 
 ## Enterprise evaluation
 
-Procurement-oriented summary: [enterprise evaluation guide](guides/enterprise-eval.md).
+Procurement-oriented summary: [enterprise evaluation guide](guides/enterprise-eval.md) · [production readiness](guides/production-readiness.md) · [LGPL compliance](guides/lgpl-compliance.md)
 
 ## Related
 

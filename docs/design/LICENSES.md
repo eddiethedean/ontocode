@@ -14,7 +14,7 @@ This document summarizes **third-party licenses** for dependencies named in [DEP
 | `regex` | MIT OR Apache-2.0 | Compatible (`ontoindex-diagnostics`) |
 | `lsp-server` | MIT OR Apache-2.0 | Compatible |
 | `lsp-types` | MIT | Compatible |
-| `horned-owl` | **LGPL-3.0** | Rust crate link via `ontoindex-owl`. Document LGPL in release artifacts; provide source offer per LGPL-3.0 if distributing binaries. |
+| `horned-owl` | **LGPL-3.0** | Rust crate link via `ontoindex-owl`. See [LGPL compliance guide](../guides/lgpl-compliance.md). Document LGPL in release artifacts; provide source offer per LGPL-3.0 if distributing binaries. |
 | `horned-functional` | MIT | Compatible (`ontoindex-owl`) |
 | `serde`, `clap`, `thiserror`, etc. | MIT OR Apache-2.0 | Compatible |
 

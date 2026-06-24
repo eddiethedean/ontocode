@@ -85,7 +85,12 @@ nav:
       - Rust library: guides/rust-library.md
       - Patch JSON: patch-reference.md
       - CI integration: ci-integration.md
-      - Enterprise evaluation: guides/enterprise-eval.md
+      - Enterprise:
+          - Evaluation overview: guides/enterprise-eval.md
+          - Production readiness: guides/production-readiness.md
+          - Enterprise deployment: guides/enterprise-deployment.md
+          - Performance and sizing: guides/performance-sizing.md
+          - LGPL compliance: guides/lgpl-compliance.md
   - Reference:
       - CLI reference: cli-reference.md
       - SQL virtual tables: sql-reference.md

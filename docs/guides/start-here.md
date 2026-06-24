@@ -38,7 +38,7 @@ New to OWL/RDF vocabulary? Read [Ontology concepts](../concepts.md) first.
 
 ## Evaluate for your team
 
-[Enterprise evaluation](enterprise-eval.md) · [Protégé coexistence](protege-coexistence.md) · [What ships today](../SHIPPED.md) · [FAQ](../faq.md) · [Troubleshooting](../troubleshooting.md) · [Workspace limits](../workspace-limits.md) · [Security](../security.md)
+[Enterprise evaluation](enterprise-eval.md) (overview) · [Production readiness](production-readiness.md) · [Enterprise deployment](enterprise-deployment.md) · [Performance and sizing](performance-sizing.md) · [LGPL compliance](lgpl-compliance.md) · [Protégé coexistence](protege-coexistence.md) · [What ships today](../SHIPPED.md) · [FAQ](../faq.md) · [Security](../security.md)
 
 ## Contribute to OntoCode / OntoIndex
 

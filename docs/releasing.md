@@ -21,6 +21,10 @@ Maintainer checklist for publishing crates, binaries, and the VS Code extension.
 - [ ] [docs/faq.md](faq.md) — API version, Protégé comparison
 - [ ] [docs/errors.md](errors.md) / [docs/workspace-limits.md](workspace-limits.md) — behavior changes
 - [ ] [docs/guides/enterprise-eval.md](guides/enterprise-eval.md) — shipped capabilities
+- [ ] [docs/guides/production-readiness.md](guides/production-readiness.md) — pilot criteria
+- [ ] [docs/guides/enterprise-deployment.md](guides/enterprise-deployment.md) — air-gap / CI rollout
+- [ ] [docs/guides/performance-sizing.md](guides/performance-sizing.md) — sizing tiers
+- [ ] [docs/guides/lgpl-compliance.md](guides/lgpl-compliance.md) — legal review pack
 - [ ] [security.md](security.md) / [SECURITY.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/SECURITY.md) — supported versions table
 - [ ] [docs/changelog.md](changelog.md) — mirror recent releases from CHANGELOG.md
 - [ ] [docs/lsp-api.md](lsp-api.md) — new methods or error codes

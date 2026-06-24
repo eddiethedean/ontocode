@@ -28,3 +28,50 @@ pub fn parse_errors(
     }
     diagnostics
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::input::DiagnosticInput;
+    use ontoindex_core::{
+        DiagnosticCode, DiagnosticSeverity, OntologyDocument, OntologyFormat, ParseStatus,
+        SourceLocation,
+    };
+    use std::collections::BTreeMap;
+    use std::path::Path;
+
+    fn empty_source(_: &Path) -> String {
+        String::new()
+    }
+
+    #[test]
+    fn maps_parse_error_document_to_diagnostic() {
+        let documents = vec![OntologyDocument {
+            id: "doc-1".to_string(),
+            path: Path::new("bad.ttl").to_path_buf(),
+            format: OntologyFormat::Turtle,
+            base_iri: None,
+            imports: vec![],
+            namespaces: BTreeMap::new(),
+            parse_status: ParseStatus::Error,
+            content_hash: "h".to_string(),
+            modified_time: 0,
+            parse_message: Some("unexpected token".to_string()),
+            parse_error_location: Some(SourceLocation { line: Some(3), column: Some(5) }),
+        }];
+        let input = DiagnosticInput {
+            documents: &documents,
+            entities: &[],
+            annotations: &[],
+            axioms: &[],
+            namespaces: &[],
+            imports: &[],
+        };
+        let diags = parse_errors(&input, &empty_source);
+        assert_eq!(diags.len(), 1);
+        assert_eq!(diags[0].code, DiagnosticCode::ParseError);
+        assert_eq!(diags[0].severity, DiagnosticSeverity::Error);
+        assert_eq!(diags[0].message, "unexpected token");
+        assert_eq!(diags[0].range.line, Some(3));
+    }
+}

@@ -64,16 +64,20 @@ pub fn handle_index_workspace(
     Ok(IndexWorkspaceResult { stats, indexed_at })
 }
 
+pub fn build_catalog_snapshot(catalog: &ontoindex_catalog::OntologyCatalog) -> CatalogSnapshot {
+    CatalogSnapshot {
+        documents: catalog.data().documents.clone(),
+        entities: catalog.data().entities.clone(),
+        hierarchy: catalog.class_hierarchy(),
+        diagnostics: catalog.data().diagnostics.iter().map(DiagnosticSummary::from).collect(),
+    }
+}
+
 pub fn handle_get_catalog_snapshot(
     state: &ServerState,
 ) -> Result<CatalogSnapshot, LspErrorPayload> {
     state
-        .with_catalog(|catalog| CatalogSnapshot {
-            documents: catalog.data().documents.clone(),
-            entities: catalog.data().entities.clone(),
-            hierarchy: catalog.class_hierarchy(),
-            diagnostics: catalog.data().diagnostics.iter().map(DiagnosticSummary::from).collect(),
-        })
+        .with_catalog(build_catalog_snapshot)
         .ok_or_else(LspErrorPayload::not_indexed)
 }
 

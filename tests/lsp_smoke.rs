@@ -100,8 +100,11 @@ fn lsp_indexes_fixture_workspace() {
         .and_then(|r| r.get("diagnostics"))
         .and_then(|d| d.as_array())
         .expect("diagnostics array");
-    // Fixtures are clean; diagnostics array may be empty after v0.3 hardening.
-    assert!(diagnostics.len() <= 1);
+    assert_eq!(
+        diagnostics.len(),
+        0,
+        "clean fixtures must not emit diagnostics: {diagnostics:?}"
+    );
 
     let example_doc = documents
         .iter()

@@ -277,3 +277,73 @@ pub fn to_csv(result: &QueryResult) -> Result<String> {
 pub fn to_json(result: &QueryResult) -> Result<String> {
     serde_json::to_string_pretty(result).map_err(|e| crate::QueryError::Export(e.to_string()))
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use ontoindex_catalog::OntologyCatalog;
+    use ontoindex_core::limits::MAX_QUERY_BYTES;
+    use std::path::PathBuf;
+
+    fn fixture_catalog() -> OntologyCatalog {
+        let fixtures = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../fixtures");
+        ontoindex_catalog::IndexBuilder::new().workspace(fixtures).build().expect("index fixtures")
+    }
+
+    #[test]
+    fn where_and_filters_rows() {
+        let catalog = fixture_catalog();
+        let result = run_sql(
+            &catalog,
+            "SELECT short_name FROM classes WHERE short_name = 'Person' AND deprecated = 'false'",
+        )
+        .expect("and filter");
+        assert_eq!(result.rows.len(), 1);
+        assert_eq!(result.rows[0].get("short_name").map(String::as_str), Some("Person"));
+    }
+
+    #[test]
+    fn where_or_filters_rows() {
+        let catalog = fixture_catalog();
+        let result = run_sql(
+            &catalog,
+            "SELECT short_name FROM classes WHERE short_name = 'Person' OR short_name = 'Thing'",
+        )
+        .expect("or filter");
+        let names: Vec<_> =
+            result.rows.iter().filter_map(|r| r.get("short_name").cloned()).collect();
+        assert!(names.contains(&"Person".to_string()));
+        assert!(names.contains(&"Thing".to_string()));
+    }
+
+    #[test]
+    fn where_not_eq_excludes_matching_row() {
+        let catalog = fixture_catalog();
+        let result =
+            run_sql(&catalog, "SELECT short_name FROM classes WHERE short_name != 'Person'")
+                .expect("not eq filter");
+        assert!(!result
+            .rows
+            .iter()
+            .any(|r| r.get("short_name").map(String::as_str) == Some("Person")));
+        assert!(!result.rows.is_empty());
+    }
+
+    #[test]
+    fn unsupported_like_returns_no_rows() {
+        let catalog = fixture_catalog();
+        let result =
+            run_sql(&catalog, "SELECT short_name FROM classes WHERE short_name LIKE 'Per%'")
+                .expect("like filter");
+        assert_eq!(result.rows.len(), 0);
+    }
+
+    #[test]
+    fn rejects_oversized_query() {
+        let catalog = fixture_catalog();
+        let padding = "x".repeat(MAX_QUERY_BYTES);
+        let sql = format!("SELECT short_name FROM classes WHERE short_name = '{padding}'");
+        let err = run_sql(&catalog, &sql).unwrap_err();
+        assert!(matches!(err, crate::QueryError::Sql(msg) if msg.contains("maximum length")));
+    }
+}

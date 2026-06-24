@@ -210,3 +210,43 @@ fn hover_on_blank_line_returns_null_result() {
         other => panic!("expected null hover result, got {other:?}"),
     }
 }
+
+#[test]
+fn open_buffer_override_surfaces_undefined_prefix_in_snapshot() {
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("live.ttl");
+    let base = "@prefix ex: <http://example.org/live#> .\n@prefix owl: <http://www.w3.org/2002/07/owl#> .\n<http://example.org/live> a owl:Ontology .\n";
+    std::fs::write(&path, format!("{base}ex:Ok a owl:Class .\n")).unwrap();
+
+    let state = ServerState::new();
+    state.index_workspace(dir.path().to_path_buf()).expect("initial index");
+
+    let doc_path = state
+        .with_catalog(|catalog| {
+            catalog
+                .data()
+                .documents
+                .iter()
+                .find(|d| d.path.file_name() == path.file_name())
+                .map(|d| d.path.clone())
+        })
+        .expect("indexed catalog")
+        .expect("live.ttl document");
+
+    state.set_document_text(
+        doc_path,
+        format!("{base}ex:Ok a owl:Class .\nun:Bad a owl:Class .\n"),
+    );
+    state.index_workspace(dir.path().to_path_buf()).expect("reindex with buffer");
+
+    let snapshot = handle_get_catalog_snapshot(&state).expect("snapshot");
+    assert!(
+        snapshot.diagnostics.iter().any(|d| {
+            d.severity == "error"
+                && d.message.contains("un:")
+                && (d.code == "undefined_prefix" || d.code == "parse_error")
+        }),
+        "expected undeclared prefix diagnostic from open buffer, got: {:?}",
+        snapshot.diagnostics
+    );
+}

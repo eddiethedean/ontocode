@@ -5,8 +5,16 @@
 pub(crate) mod diagnostics;
 pub(crate) mod handlers;
 pub(crate) mod positions;
-pub(crate) mod protocol;
+pub mod protocol;
 pub(crate) mod state;
+
+use handlers::build_catalog_snapshot;
+use ontoindex_catalog::OntologyCatalog;
+
+/// Serialize the LSP `ontoindex/getCatalogSnapshot` payload for a built catalog.
+pub fn catalog_snapshot_json(catalog: &OntologyCatalog) -> serde_json::Value {
+    serde_json::to_value(build_catalog_snapshot(catalog)).expect("serialize catalog snapshot")
+}
 
 #[cfg(test)]
 mod handlers_test;

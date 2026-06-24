@@ -21,6 +21,16 @@ pub fn collect_diagnostics_with_sources(
         if let Some(text) = source_overrides.get(path) {
             return text.clone();
         }
+        if let Ok(canonical) = path.canonicalize() {
+            if let Some(text) = source_overrides.get(&canonical) {
+                return text.clone();
+            }
+        }
+        for (override_path, text) in source_overrides {
+            if override_path.canonicalize().ok().as_ref() == path.canonicalize().ok().as_ref() {
+                return text.clone();
+            }
+        }
         std::fs::read_to_string(path).unwrap_or_default()
     };
 

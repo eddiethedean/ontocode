@@ -46,6 +46,12 @@ impl IndexBuilder {
         self
     }
 
+    fn document_override_text(&self, path: &Path) -> Option<&String> {
+        self.document_overrides
+            .get(path)
+            .or_else(|| path.canonicalize().ok().and_then(|p| self.document_overrides.get(&p)))
+    }
+
     pub fn build(self) -> Result<OntologyCatalog> {
         let scanner = WorkspaceScanner::new(&self.workspace);
         let files = scanner.scan()?;
@@ -62,7 +68,7 @@ impl IndexBuilder {
 
         for (idx, file) in files.iter().enumerate() {
             let doc_id = format!("doc-{}", idx + 1);
-            let parsed = if let Some(text) = self.document_overrides.get(&file.path) {
+            let parsed = if let Some(text) = self.document_override_text(&file.path) {
                 parse_ontology_text(&file.path, file.format, &doc_id, text, text.as_bytes())
                     .map_err(|e| CatalogError::Parse {
                         path: file.path.clone(),

@@ -14,15 +14,16 @@ import {
 describe("explorerLogic", () => {
   it("filters entities by kind", () => {
     const classes = filterEntitiesByKind(fixtureCatalogSnapshot.entities, "class");
-    assert.equal(classes.length, 2);
-    assert.equal(classes[0]?.short_name, "Person");
+    assert.equal(classes.length, 4);
+    assert.ok(classes.some((c) => c.short_name === "Person"));
+    assert.ok(classes.some((c) => c.short_name === "Thing"));
   });
 
-  it("finds class roots and classes with external parents", () => {
+  it("finds class roots from real fixture hierarchy", () => {
     const roots = classRootEntities(fixtureCatalogSnapshot);
     assert.deepEqual(
       roots.map((e) => e.short_name).sort(),
-      ["Organization", "Person"]
+      ["Thing"]
     );
   });
 
@@ -37,16 +38,20 @@ describe("explorerLogic", () => {
   it("returns child classes for a parent IRI", () => {
     const children = childEntitiesForClass(
       fixtureCatalogSnapshot,
-      "http://www.w3.org/2002/07/owl#Thing"
+      "http://example.org/people#Thing"
     );
-    assert.deepEqual(children.map((e) => e.short_name), ["Person"]);
+    assert.deepEqual(
+      children.map((e) => e.short_name).sort(),
+      ["Organization", "Person"]
+    );
   });
 
   it("prefers labels for display names", () => {
-    assert.equal(
-      entityDisplayLabel(fixtureCatalogSnapshot.entities[0]!),
-      "Person"
+    const person = fixtureCatalogSnapshot.entities.find(
+      (e) => e.short_name === "Person"
     );
+    assert.ok(person);
+    assert.equal(entityDisplayLabel(person!), "\"Person\"");
   });
 
   it("groups diagnostics by severity", () => {

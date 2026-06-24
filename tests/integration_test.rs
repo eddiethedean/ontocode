@@ -68,11 +68,22 @@ fn sql_diagnostics_table() {
     let result = query_catalog(&catalog, "SELECT code, severity FROM diagnostics")
         .expect("diagnostics query");
 
-    let codes: Vec<_> = result.rows.iter().filter_map(|r| r.get("code").cloned()).collect();
-    assert!(codes.iter().any(|c| c == "broken_import"));
-    assert!(codes.iter().any(|c| c == "duplicate_label"));
-    assert!(codes.iter().any(|c| c == "orphan_class"));
-    assert!(codes.iter().any(|c| c == "missing_label"));
+    let rows: Vec<_> = result
+        .rows
+        .iter()
+        .map(|r| {
+            (
+                r.get("code").cloned().unwrap_or_default(),
+                r.get("severity").cloned().unwrap_or_default(),
+            )
+        })
+        .collect();
+
+    assert!(rows.iter().any(|(c, s)| c == "broken_import" && s == "error"));
+    assert!(rows.iter().any(|(c, s)| c == "duplicate_label" && s == "warning"));
+    assert!(rows.iter().any(|(c, s)| c == "orphan_class" && s == "warning"));
+    assert!(rows.iter().any(|(c, s)| c == "missing_label" && s == "warning"));
+    assert!(rows.iter().filter(|(c, _)| c == "duplicate_label").count() >= 2);
 }
 
 #[test]
@@ -142,10 +153,9 @@ fn open_buffer_diagnostics_detect_undefined_prefix() {
     let path = dir.path().join("live.ttl");
     let base = "@prefix ex: <http://example.org/live#> .\n@prefix owl: <http://www.w3.org/2002/07/owl#> .\n<http://example.org/live> a owl:Ontology .\n";
     std::fs::write(&path, format!("{base}ex:Ok a owl:Class .\n")).unwrap();
-    let canonical = path.canonicalize().expect("canonical path");
 
     let mut overrides = std::collections::HashMap::new();
-    overrides.insert(canonical, format!("{base}ex:Ok a owl:Class .\nun:Bad a owl:Class .\n"));
+    overrides.insert(path.clone(), format!("{base}ex:Ok a owl:Class .\nun:Bad a owl:Class .\n"));
 
     let catalog = IndexBuilder::new()
         .workspace(dir.path())
@@ -153,15 +163,22 @@ fn open_buffer_diagnostics_detect_undefined_prefix() {
         .build()
         .expect("build");
 
-    let diags = &catalog.data().diagnostics;
-    assert!(
-        diags.iter().any(|d| {
-            (d.code == ontoindex_core::DiagnosticCode::UndefinedPrefix
-                || d.code == ontoindex_core::DiagnosticCode::ParseError)
-                && d.file.file_name() == path.file_name()
-        }),
-        "expected undefined prefix diagnostic on buffer override, got: {diags:?}"
-    );
+    let diags: Vec<_> = catalog
+        .data()
+        .diagnostics
+        .iter()
+        .filter(|d| d.file.file_name() == path.file_name())
+        .collect();
+
+    let undef = diags
+        .iter()
+        .find(|d| {
+            d.message.contains("un:")
+                && (d.code == ontoindex_core::DiagnosticCode::UndefinedPrefix
+                    || d.code == ontoindex_core::DiagnosticCode::ParseError)
+        })
+        .expect(&format!("expected undeclared prefix diagnostic, got: {diags:?}"));
+    assert_eq!(undef.severity, ontoindex_core::DiagnosticSeverity::Error);
 }
 
 #[test]

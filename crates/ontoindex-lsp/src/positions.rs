@@ -33,4 +33,12 @@ mod tests {
         let utf16 = byte_col_to_utf16(line, byte);
         assert_eq!(utf16_offset_to_byte(line, utf16), byte);
     }
+
+    #[test]
+    fn utf16_round_trip_multibyte_label() {
+        let line = "rdfs:label \"日本語\"";
+        let byte = line.find('日').expect("multibyte char");
+        let utf16 = byte_col_to_utf16(line, byte);
+        assert_eq!(utf16_offset_to_byte(line, utf16), byte);
+    }
 }

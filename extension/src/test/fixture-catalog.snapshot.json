@@ -1,0 +1,245 @@
+{
+  "diagnostics": [],
+  "documents": [
+    {
+      "base_iri": "http://example.org/people",
+      "format": "turtle",
+      "id": "doc-1",
+      "imports": [],
+      "namespaces": {
+        "ex": "http://example.org/people#",
+        "owl": "http://www.w3.org/2002/07/owl#",
+        "rdfs": "http://www.w3.org/2000/01/rdf-schema#",
+        "xsd": "http://www.w3.org/2001/XMLSchema#"
+      },
+      "parse_error_location": null,
+      "parse_message": null,
+      "parse_status": "ok",
+      "path": "fixtures/example.ttl"
+    },
+    {
+      "base_iri": "http://example.org/org",
+      "format": "owl",
+      "id": "doc-2",
+      "imports": [
+        "http://example.org/people"
+      ],
+      "namespaces": {
+        "": "http://example.org/org#",
+        "ex": "http://example.org/people#",
+        "owl": "http://www.w3.org/2002/07/owl#",
+        "rdf": "http://www.w3.org/1999/02/22-rdf-syntax-ns#",
+        "rdfs": "http://www.w3.org/2000/01/rdf-schema#"
+      },
+      "parse_error_location": null,
+      "parse_message": null,
+      "parse_status": "ok",
+      "path": "fixtures/organization.owl"
+    }
+  ],
+  "entities": [
+    {
+      "comments": [],
+      "deprecated": false,
+      "iri": "http://example.org/people",
+      "kind": "ontology",
+      "labels": [
+        "\"People Ontology\""
+      ],
+      "ontology_id": "http://example.org/people",
+      "short_name": "people",
+      "source_location": {
+        "column": 13,
+        "line": 1
+      }
+    },
+    {
+      "comments": [],
+      "deprecated": false,
+      "iri": "http://example.org/people#Organization",
+      "kind": "class",
+      "labels": [
+        "\"Organization\""
+      ],
+      "ontology_id": "http://example.org/people",
+      "short_name": "Organization",
+      "source_location": {
+        "column": 2,
+        "line": 16
+      }
+    },
+    {
+      "comments": [
+        "\"A human being.\""
+      ],
+      "deprecated": false,
+      "iri": "http://example.org/people#Person",
+      "kind": "class",
+      "labels": [
+        "\"Person\""
+      ],
+      "ontology_id": "http://example.org/people",
+      "short_name": "Person",
+      "source_location": {
+        "column": 2,
+        "line": 12
+      }
+    },
+    {
+      "comments": [],
+      "deprecated": false,
+      "iri": "http://example.org/people#Thing",
+      "kind": "class",
+      "labels": [
+        "\"Thing\""
+      ],
+      "ontology_id": "http://example.org/people",
+      "short_name": "Thing",
+      "source_location": {
+        "column": 2,
+        "line": 9
+      }
+    },
+    {
+      "comments": [],
+      "deprecated": false,
+      "iri": "http://example.org/people#acme",
+      "kind": "individual",
+      "labels": [
+        "\"ACME Corp\""
+      ],
+      "ontology_id": "http://example.org/people",
+      "short_name": "acme",
+      "source_location": {
+        "column": 2,
+        "line": 36
+      }
+    },
+    {
+      "comments": [],
+      "deprecated": false,
+      "iri": "http://example.org/people#age",
+      "kind": "data_property",
+      "labels": [
+        "\"age\""
+      ],
+      "ontology_id": "http://example.org/people",
+      "short_name": "age",
+      "source_location": {
+        "column": 2,
+        "line": 24
+      }
+    },
+    {
+      "comments": [],
+      "deprecated": false,
+      "iri": "http://example.org/people#alice",
+      "kind": "individual",
+      "labels": [
+        "\"Alice\""
+      ],
+      "ontology_id": "http://example.org/people",
+      "short_name": "alice",
+      "source_location": {
+        "column": 2,
+        "line": 32
+      }
+    },
+    {
+      "comments": [],
+      "deprecated": false,
+      "iri": "http://example.org/people#note",
+      "kind": "annotation_property",
+      "labels": [
+        "\"note\""
+      ],
+      "ontology_id": "http://example.org/people",
+      "short_name": "note",
+      "source_location": {
+        "column": 2,
+        "line": 29
+      }
+    },
+    {
+      "comments": [],
+      "deprecated": false,
+      "iri": "http://example.org/people#worksFor",
+      "kind": "object_property",
+      "labels": [
+        "\"works for\""
+      ],
+      "ontology_id": "http://example.org/people",
+      "short_name": "worksFor",
+      "source_location": {
+        "column": 2,
+        "line": 19
+      }
+    },
+    {
+      "comments": [],
+      "deprecated": false,
+      "iri": "http://example.org/org",
+      "kind": "ontology",
+      "labels": [
+        "\"Organization extension\""
+      ],
+      "ontology_id": "http://example.org/org",
+      "short_name": "org",
+      "source_location": {
+        "column": 16,
+        "line": 2
+      }
+    },
+    {
+      "comments": [],
+      "deprecated": false,
+      "iri": "http://example.org/org#Department",
+      "kind": "class",
+      "labels": [
+        "\"Department\""
+      ],
+      "ontology_id": "http://example.org/org",
+      "short_name": "Department",
+      "source_location": {
+        "column": 26,
+        "line": 14
+      }
+    }
+  ],
+  "hierarchy": {
+    "children": {
+      "http://example.org/people#Organization": [
+        "http://example.org/org#Department"
+      ],
+      "http://example.org/people#Thing": [
+        "http://example.org/people#Organization",
+        "http://example.org/people#Person"
+      ]
+    },
+    "edges": [
+      {
+        "child": "http://example.org/people#Person",
+        "parent": "http://example.org/people#Thing"
+      },
+      {
+        "child": "http://example.org/people#Organization",
+        "parent": "http://example.org/people#Thing"
+      },
+      {
+        "child": "http://example.org/org#Department",
+        "parent": "http://example.org/people#Organization"
+      }
+    ],
+    "parents": {
+      "http://example.org/org#Department": [
+        "http://example.org/people#Organization"
+      ],
+      "http://example.org/people#Organization": [
+        "http://example.org/people#Thing"
+      ],
+      "http://example.org/people#Person": [
+        "http://example.org/people#Thing"
+      ]
+    }
+  }
+}

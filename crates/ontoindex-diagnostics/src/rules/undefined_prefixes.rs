@@ -104,3 +104,81 @@ fn builtin_prefixes() -> BTreeSet<&'static str> {
 static QNAME_RE: std::sync::LazyLock<regex::Regex> = std::sync::LazyLock::new(|| {
     regex::Regex::new(r"([A-Za-z][\w-]*):[A-Za-z_][\w-]*").expect("qname regex")
 });
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::input::DiagnosticInput;
+    use ontoindex_core::{
+        DiagnosticCode, DiagnosticSeverity, OntologyDocument, OntologyFormat, ParseStatus,
+    };
+    use std::collections::BTreeMap;
+    use std::path::Path;
+
+    fn source_for(path: &Path) -> String {
+        match path.to_str() {
+            Some("live.ttl") => {
+                "@prefix ex: <http://example.org/live#> .\n@prefix owl: <http://www.w3.org/2002/07/owl#> .\nex:Ok a owl:Class .\nun:Bad a owl:Class .\n".to_string()
+            }
+            _ => String::new(),
+        }
+    }
+
+    #[test]
+    fn detects_undefined_prefix_in_turtle() {
+        let documents = vec![OntologyDocument {
+            id: "doc-1".to_string(),
+            path: Path::new("live.ttl").to_path_buf(),
+            format: OntologyFormat::Turtle,
+            base_iri: Some("http://example.org/live".to_string()),
+            imports: vec![],
+            namespaces: BTreeMap::from([("ex".to_string(), "http://example.org/live#".to_string())]),
+            parse_status: ParseStatus::Ok,
+            content_hash: "h".to_string(),
+            modified_time: 0,
+            parse_message: None,
+            parse_error_location: None,
+        }];
+        let input = DiagnosticInput {
+            documents: &documents,
+            entities: &[],
+            annotations: &[],
+            axioms: &[],
+            namespaces: &[],
+            imports: &[],
+        };
+        let diags = undefined_prefixes(&input, &source_for);
+        assert_eq!(diags.len(), 1);
+        assert_eq!(diags[0].code, DiagnosticCode::UndefinedPrefix);
+        assert_eq!(diags[0].severity, DiagnosticSeverity::Error);
+        assert!(diags[0].message.contains("un:"));
+    }
+
+    #[test]
+    fn ignores_undefined_prefix_inside_comment() {
+        let text = "@prefix ex: <http://ex/> .\n# un:Hidden a owl:Class .\nex:Ok a owl:Class .\n";
+        let documents = vec![OntologyDocument {
+            id: "doc-1".to_string(),
+            path: Path::new("ok.ttl").to_path_buf(),
+            format: OntologyFormat::Turtle,
+            base_iri: Some("http://ex/".to_string()),
+            imports: vec![],
+            namespaces: BTreeMap::from([("ex".to_string(), "http://ex/".to_string())]),
+            parse_status: ParseStatus::Ok,
+            content_hash: "h".to_string(),
+            modified_time: 0,
+            parse_message: None,
+            parse_error_location: None,
+        }];
+        let input = DiagnosticInput {
+            documents: &documents,
+            entities: &[],
+            annotations: &[],
+            axioms: &[],
+            namespaces: &[],
+            imports: &[],
+        };
+        let diags = undefined_prefixes(&input, &|_| text.to_string());
+        assert!(diags.is_empty(), "commented qname should not lint: {diags:?}");
+    }
+}

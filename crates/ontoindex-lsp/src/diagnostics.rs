@@ -137,4 +137,80 @@ mod tests {
         assert_eq!(lsp.range.start.character, 4);
         assert_eq!(lsp.code, Some(NumberOrString::String("broken_import".to_string())));
     }
+
+    #[test]
+    fn publish_diagnostics_clears_stale_uris() {
+        use crossbeam_channel::unbounded;
+        use lsp_server::Message;
+        use lsp_types::notification::PublishDiagnostics;
+        use ontoindex_core::{
+            OntologyDocument, OntologyFormat, ParseStatus, SourceLocation,
+        };
+        use std::collections::BTreeMap;
+        use std::time::Duration;
+
+        let dir = tempfile::tempdir().unwrap();
+        let path_a = dir.path().join("a.ttl");
+        let path_b = dir.path().join("b.ttl");
+        std::fs::write(&path_a, "@prefix ex: <http://ex/> .\n").unwrap();
+        std::fs::write(&path_b, "@prefix ex: <http://ex/> .\n").unwrap();
+
+        let doc = |path: &std::path::Path| OntologyDocument {
+            id: "doc-1".to_string(),
+            path: path.to_path_buf(),
+            format: OntologyFormat::Turtle,
+            base_iri: None,
+            imports: vec![],
+            namespaces: BTreeMap::new(),
+            parse_status: ParseStatus::Ok,
+            content_hash: "h".to_string(),
+            modified_time: 0,
+            parse_message: None,
+            parse_error_location: None,
+        };
+
+        let diagnostic = |path: &std::path::Path| ontoindex_core::Diagnostic {
+            code: DiagnosticCode::UndefinedPrefix,
+            severity: DiagnosticSeverity::Error,
+            message: "undefined prefix: un:".to_string(),
+            file: path.to_path_buf(),
+            range: SourceLocation { line: Some(1), column: Some(0) },
+            entity_iri: None,
+            quick_fix: None,
+        };
+
+        let (tx, rx) = unbounded();
+        publish_catalog_diagnostics(
+            &tx,
+            &[doc(&path_a), doc(&path_b)],
+            &[diagnostic(&path_a), diagnostic(&path_b)],
+            &|_| None,
+        );
+
+        let mut publish_count = 0usize;
+        while let Ok(Message::Notification(notif)) =
+            rx.recv_timeout(Duration::from_millis(100))
+        {
+            if notif.method == PublishDiagnostics::METHOD {
+                publish_count += 1;
+            }
+        }
+        assert_eq!(publish_count, 2);
+
+        publish_catalog_diagnostics(&tx, &[doc(&path_a)], &[diagnostic(&path_a)], &|_| None);
+
+        let mut final_notifications = Vec::new();
+        while let Ok(Message::Notification(notif)) =
+            rx.recv_timeout(Duration::from_millis(100))
+        {
+            if notif.method == PublishDiagnostics::METHOD {
+                final_notifications.push(notif);
+            }
+        }
+        assert_eq!(final_notifications.len(), 2);
+        let cleared = final_notifications
+            .iter()
+            .any(|n| n.params.get("diagnostics").and_then(|d| d.as_array()).is_some_and(|a| a.is_empty()));
+        assert!(cleared, "expected empty diagnostics publish for stale URI");
+    }
 }

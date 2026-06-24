@@ -48,3 +48,71 @@ pub fn duplicate_labels(
 fn normalize_label(label: &str) -> String {
     label.trim_matches('"').trim().to_ascii_lowercase()
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::input::DiagnosticInput;
+    use ontoindex_core::{
+        DiagnosticCode, DiagnosticSeverity, Entity, EntityKind, OntologyDocument, OntologyFormat,
+        ParseStatus,
+    };
+    use std::collections::BTreeMap;
+    use std::path::Path;
+
+    fn empty_source(_: &Path) -> String {
+        String::new()
+    }
+
+    #[test]
+    fn flags_duplicate_labels_with_warning() {
+        let documents = vec![OntologyDocument {
+            id: "doc-1".to_string(),
+            path: Path::new("dup.ttl").to_path_buf(),
+            format: OntologyFormat::Turtle,
+            base_iri: Some("http://example.org/dup".to_string()),
+            imports: vec![],
+            namespaces: BTreeMap::new(),
+            parse_status: ParseStatus::Ok,
+            content_hash: "h".to_string(),
+            modified_time: 0,
+            parse_message: None,
+            parse_error_location: None,
+        }];
+        let entities = vec![
+            Entity {
+                iri: "http://example.org/dup#Alpha".to_string(),
+                short_name: "Alpha".to_string(),
+                kind: EntityKind::Class,
+                ontology_id: "http://example.org/dup".to_string(),
+                source_location: Default::default(),
+                labels: vec!["\"Shared\"".to_string()],
+                comments: vec![],
+                deprecated: false,
+            },
+            Entity {
+                iri: "http://example.org/dup#Beta".to_string(),
+                short_name: "Beta".to_string(),
+                kind: EntityKind::Class,
+                ontology_id: "http://example.org/dup".to_string(),
+                source_location: Default::default(),
+                labels: vec!["\"Shared\"".to_string()],
+                comments: vec![],
+                deprecated: false,
+            },
+        ];
+        let input = DiagnosticInput {
+            documents: &documents,
+            entities: &entities,
+            annotations: &[],
+            axioms: &[],
+            namespaces: &[],
+            imports: &[],
+        };
+        let diags = duplicate_labels(&input, &empty_source);
+        assert_eq!(diags.len(), 2);
+        assert!(diags.iter().all(|d| d.code == DiagnosticCode::DuplicateLabel));
+        assert!(diags.iter().all(|d| d.severity == DiagnosticSeverity::Warning));
+        assert!(diags[0].message.contains("shared"));
+    }
+}

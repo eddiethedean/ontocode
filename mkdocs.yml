@@ -128,6 +128,7 @@ nav:
           - OBO / ROBOT: design/OBO_ROBOT_SPEC.md
           - Plugins: design/PLUGIN_SPEC.md
           - UI wireframes: design/UI_WIREFRAMES.md
+          - React UI plan: design/OntoCode_React_UI_Integration_Plan.md
       - Backlogs:
           - v1.0 backlog: design/v1.0_BACKLOG.md
           - MVP backlog: design/MVP_BACKLOG.md
@@ -149,6 +150,7 @@ nav:
           - "0014 Rust reasoners": design/adr/0014-rust-native-reasoners-only.md
           - "0015 OntoLogos": design/adr/0015-adopt-ontologos-reasoner.md
           - "0016 Dependency-first": design/adr/0016-dependency-first-implementation.md
+          - "0017 React webviews": design/adr/0017-react-webview-ui.md
       - Maintainers:
           - Releasing: releasing.md
           - Marketplace publish: marketplace-publish.md

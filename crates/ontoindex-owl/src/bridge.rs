@@ -69,7 +69,9 @@ pub fn bridge_ontology(
             entity_map.entry(subject.clone()).and_modify(|e| e.labels.push(object.clone()));
         } else if predicate == RDFS_COMMENT {
             entity_map.entry(subject.clone()).and_modify(|e| e.comments.push(object.clone()));
-        } else if predicate == OWL_DEPRECATED && (object == "true" || object.contains("true")) {
+        } else if predicate == OWL_DEPRECATED
+            && ontoindex_core::parse_boolean_literal(&object) == Some(true)
+        {
             entity_map.entry(subject.clone()).and_modify(|e| e.deprecated = true);
         }
         result.annotations.push(Annotation {

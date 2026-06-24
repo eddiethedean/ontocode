@@ -145,11 +145,12 @@ Short positioning:
 - v0.4a–b: simple write-back + Horned-OWL (`ontoindex-owl`)
 - v0.5: query workbench + Manchester MVP
 - v0.6: reasoners + real explanations
-- v0.7: graph visualization
+- **v0.7a: React webview foundation** ([ADR-0017](adr/0017-react-webview-ui.md), [OntoCode_React_UI_Integration_Plan.md](OntoCode_React_UI_Integration_Plan.md))
+- v0.7: graph visualization (React panels)
 - v0.7b: OBO + ROBOT interop
-- v0.8: refactoring + full Manchester
-- v0.9: semantic diff, incremental index, docs
-- v1.0: [PROTEGE_PARITY.md](PROTEGE_PARITY.md) P0 green + Marketplace
+- v0.8: refactoring + full Manchester (React query/Manchester panels)
+- v0.9: semantic diff, incremental index, docs (React reasoner/diff panels)
+- v1.0: [PROTEGE_PARITY.md](PROTEGE_PARITY.md) P0 green + Marketplace + React UI hardening
 
 ## 9. Non-Goals for Early Releases
 
@@ -177,6 +178,7 @@ Short positioning:
 | OWL axioms / Manchester | `horned-owl`, `horned-functional` | `ontoindex-owl` | v0.4b+ |
 | Reasoning | OntoLogos `0.9`→`1.0` | `ontoindex-reasoner` | v0.6 / v1.0 |
 | Graph structure | `petgraph` | LSP graph export | v0.7 |
+| Webview UI | `react`, `vite` | `extension/webview-ui` | v0.7a+ ([ADR-0017](adr/0017-react-webview-ui.md)) |
 | OBO | `fastobo`, `fastobo-owl` | `ontoindex-parser` / `ontoindex-owl` | v0.7b |
 | ROBOT CI | ROBOT CLI | `ontoindex-robot` | v0.7b |
 | File watch | `notify` / `ontologos-watch` | `ontoindex-lsp` | v0.9 |
@@ -190,5 +192,5 @@ Build on existing mature components — do not reimplement parsers, reasoners, t
 - Use **Oxigraph** for RDF/SPARQL ([ADR-0003](adr/0003-use-oxigraph.md)).
 - Use **sqlparser** virtual tables for SQL; extend for v1.0 joins before considering DataFusion ([ADR-0011](adr/0011-use-sqlparser-for-sql.md)).
 - Use **OntoLogos** for all reasoning ([ADR-0015](adr/0015-adopt-ontologos-reasoner.md)).
-- Use TypeScript only for VS Code UI orchestration.
+- Use **React + Vite** for VS Code webview panels ([ADR-0017](adr/0017-react-webview-ui.md)); TypeScript extension host for orchestration only.
 - Keep OntoIndex useful as a standalone CLI even without OntoCode.

@@ -4,7 +4,7 @@
 >
 > **Shipped in v0.6:** workspace scanner, Oxigraph parsing, in-memory catalog, SQL/SPARQL queries, diagnostics, CLI, LSP explorer + Problems panel, Turtle patch write-back, Query Workbench + Manchester editor (extension), Horned-OWL catalog bridge (`ontoindex-owl`), **EL/RL/RDFS reasoning** (`ontoindex-reasoner`). See [What ships today](../SHIPPED.md).
 >
-> **Planned:** full DL reasoning (OntoLogos 1.0), graph visualization, semantic diff, full Manchester catalog, OBO/ROBOT interop. See [ROADMAP.md](ROADMAP.md).
+> **Planned:** full DL reasoning (OntoLogos 1.0), React webview UI (v0.7a+), graph visualization, semantic diff, full Manchester catalog, OBO/ROBOT interop. See [ROADMAP.md](ROADMAP.md).
 >
 > **Reference:** [lsp-api.md](../lsp-api.md), [adr/README.md](adr/README.md), [DEPENDENCY_MATRIX.md](DEPENDENCY_MATRIX.md).
 
@@ -27,7 +27,8 @@ The architecture must support:
 ```text
 +---------------------------+
 |        OntoCode UI        |
-| VS Code panels + commands |
+| VS Code trees + commands  |
+| React webviews (v0.7a+)   |
 +-------------+-------------+
               |
               v
@@ -116,22 +117,48 @@ The architecture must support:
 ## 5. OntoCode Internal Modules
 
 ### 5.1 Extension Host
-Commands, views, webviews, language client, settings.
 
-### 5.2 Tree Views
+Commands, tree views, LSP client, settings, webview lifecycle, `postMessage` bridge to React panels.
+
+### 5.2 React Webview Application (v0.7a+)
+
+Per [ADR-0017](adr/0017-react-webview-ui.md) and [OntoCode_React_UI_Integration_Plan.md](OntoCode_React_UI_Integration_Plan.md):
+
+```text
+extension/
+  src/                    # extension host (TypeScript)
+    extension.ts
+    webviews/
+      panelHost.ts
+      messages.ts
+  webview-ui/             # React app (Vite build → dist/)
+    src/
+      panels/
+      components/
+```
+
+- Vite bundles all assets locally (Marketplace CSP: nonces, no CDNs).
+- Typed message protocol: extension host ↔ React; ontology calls go through LSP only.
+- VS Code theme variables for light/dark/high-contrast.
+
+### 5.3 Tree Views
+
 Explorer (asserted/inferred toggle), diagnostics, query history.
 
-### 5.3 Webviews
+### 5.4 Webviews
 
-| Webview | Status |
-|---------|--------|
-| Query workbench | **Shipped** (v0.5) |
-| Manchester axiom editor | **Shipped** (v0.5 MVP) |
-| Graph visualization | Planned (v0.7) |
-| Semantic diff | Planned (v0.9) |
-| Explanation panel | Planned (v1.0) |
+| Webview | Status | UI stack |
+|---------|--------|----------|
+| Entity inspector | **Shipped** (v0.4) | Legacy HTML → **React** (v0.7) |
+| Query workbench | **Shipped** (v0.5) | Legacy HTML → **React** (v0.8) |
+| Manchester axiom editor | **Shipped** (v0.5 MVP) | Legacy HTML → **React** (v0.8) |
+| Reasoner panel | **Shipped** (v0.6) | Legacy HTML → **React** (v0.9) |
+| Explanation panel | **Shipped** (v0.6 EL) | Legacy HTML → **React** (v0.9) |
+| Graph visualization | Planned (v0.7) | **React** (new) |
+| Semantic diff | Planned (v0.9) | **React** (new) |
 
-### 5.4 Language Client
+### 5.5 Language Client
+
 LSP lifecycle; protocol guards; v1.0 authoring methods.
 
 ## 6. Index Lifecycle

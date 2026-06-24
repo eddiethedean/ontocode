@@ -276,17 +276,26 @@ export async function refreshExplorer(providers: {
   }
 }
 
+let inspectorRequestSeq = 0;
+
 async function openInspector(
   extensionUri: vscode.Uri,
   iri: string,
   onRefresh?: () => Promise<void>
 ): Promise<void> {
+  const requestId = ++inspectorRequestSeq;
   const snapshot = await getCatalogSnapshot();
+  if (requestId !== inspectorRequestSeq) {
+    return;
+  }
   const classOptions = snapshot.entities
     .filter((e) => e.kind === "class")
     .map((e) => e.iri);
   const { detail } = await getEntity(iri);
-  EntityInspectorPanel.show(extensionUri, detail, classOptions, onRefresh);
+  if (requestId !== inspectorRequestSeq) {
+    return;
+  }
+  EntityInspectorPanel.show(extensionUri, detail, classOptions, onRefresh, requestId);
 }
 
 async function createEntity(

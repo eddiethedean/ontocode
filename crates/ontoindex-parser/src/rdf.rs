@@ -400,7 +400,7 @@ impl OntologyBuilder {
                 deprecated: false,
                 types: BTreeSet::new(),
             });
-            entry.deprecated = object == "true" || object.contains("true");
+            entry.deprecated = ontoindex_core::parse_boolean_literal(&object).unwrap_or(false);
             return;
         }
 
@@ -483,14 +483,23 @@ impl OntologyBuilder {
             })
             .collect();
 
+        let mut annotations = self.annotations;
+        for ann in &mut annotations {
+            ann.ontology_id = ontology_id.clone();
+        }
+        let mut axioms = self.axioms;
+        for axiom in &mut axioms {
+            axiom.ontology_id = ontology_id.clone();
+        }
+
         Ok(ParsedOntology {
             ontology_id,
             base_iri,
             imports: self.imports.into_iter().collect(),
             namespaces: self.namespaces.clone(),
             entities,
-            annotations: self.annotations,
-            axioms: self.axioms,
+            annotations,
+            axioms,
             namespace_rows,
             import_rows,
             parse_status,

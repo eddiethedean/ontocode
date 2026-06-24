@@ -117,6 +117,23 @@ Exit criteria:
 
 **Dependencies:** OntoLogos `ontologos-*` `0.9` ([ADR-0015](adr/0015-adopt-ontologos-reasoner.md)); transitive `reasonable`, `horned-owl`, `petgraph` via OntoLogos — do not depend directly.
 
+## v0.7a — React webview foundation
+
+Deliverables:
+
+- `extension/webview-ui/` — Vite + React + TypeScript ([ADR-0017](adr/0017-react-webview-ui.md), [OntoCode_React_UI_Integration_Plan.md](OntoCode_React_UI_Integration_Plan.md))
+- Typed `postMessage` protocol between extension host and webviews
+- Panel host, CSP nonce framework, bundled assets (no CDNs)
+- `npm run build:webview` integrated into VSIX packaging
+- First React panel shell (smoke panel or entity inspector scaffold)
+
+Exit criteria:
+
+- VSIX builds include React assets; at least one webview loads the React bundle with Marketplace-compliant CSP.
+- Extension host ↔ React message contract documented.
+
+**Dependencies:** `react`, `react-dom`, `vite` (extension `webview-ui` only); extension host remains TypeScript orchestration only.
+
 ## v0.7 — Visualization
 
 Deliverables:
@@ -127,12 +144,14 @@ Deliverables:
 - entity neighborhood graph
 - graph filtering
 - click node to inspect
+- **Entity Inspector on React stack** (migrate from legacy HTML webview)
 
 Exit criteria:
 
 - User can navigate ontology visually.
+- Entity inspector and new graph panels use the v0.7a React foundation.
 
-**Dependencies:** `petgraph` (graph structure export); layout/rendering in VS Code webview (TypeScript).
+**Dependencies:** `petgraph` (graph structure export); React layout/rendering in `extension/webview-ui` ([ADR-0017](adr/0017-react-webview-ui.md)).
 
 ## v0.7b — OBO & ROBOT interop
 
@@ -156,12 +175,14 @@ Deliverables:
 - safe IRI rename, namespace migration, find usages, move entity, extract module
 - full Manchester axiom catalog: restrictions, disjoint, property chains view
 - preview changes
+- **Query Workbench + Manchester Editor on React stack** (migrate from legacy HTML webviews)
 
 Exit criteria:
 
 - User can safely refactor ontology repositories and author full OWL 2 DL expression sets via hybrid UI.
+- Query workbench and Manchester editor run in React panels.
 
-**Dependencies:** `horned-owl`, `horned-functional`; in-house refactor orchestration.
+**Dependencies:** `horned-owl`, `horned-functional`; in-house refactor orchestration; React webview UI ([ADR-0017](adr/0017-react-webview-ui.md)).
 
 ## v0.9 — Workflow and documentation
 
@@ -174,12 +195,14 @@ Deliverables:
 - evaluate `ontologos-watch` for file-change → reclassify hook ([ADR-0015](adr/0015-adopt-ontologos-reasoner.md))
 - Markdown/HTML docs export
 - PR summary generation
+- **Reasoner + Explanation panels on React stack**; semantic diff panel in React
 
 Exit criteria:
 
 - User can use OntoCode in team development workflows at scale.
+- Reasoner, explanation, and semantic diff panels use the React webview stack.
 
-**Dependencies:** `git2`, `horned-owl`, `notify` or `ontologos-watch`, `pulldown-cmark`, `minijinja`.
+**Dependencies:** `git2`, `horned-owl`, `notify` or `ontologos-watch`, `pulldown-cmark`, `minijinja`; React webview UI ([ADR-0017](adr/0017-react-webview-ui.md)).
 
 ## v1.0.0 — Protégé-competitive release
 
@@ -193,18 +216,20 @@ Deliverables:
 - Migration guide from Protégé (honest parity table; cite OntoLogos supported constructs)
 - `examples/protege-roundtrip/` ontology set
 - Performance benchmarks document
+- **React webview hardening** — accessibility, integration tests, legacy HTML panels removed ([OntoCode_React_UI_Integration_Plan.md](OntoCode_React_UI_Integration_Plan.md) phase 7)
 
 Exit criteria:
 
 > Daily ontology engineering (OWL 2 DL + OBO maintenance) is completable in VS Code.
 > Protégé is required only for **P2** features in [PROTEGE_PARITY.md](PROTEGE_PARITY.md).
+> All production webview panels run on the React stack with Marketplace-compliant CSP.
 
 **External gate:** OntoLogos **1.0.0** published to crates.io with HermiT catalog parity complete ([OntoLogos ROADMAP](https://github.com/eddiethedean/ontologos/blob/main/ROADMAP.md)).
 
-**Dependencies:** OntoLogos `1.0` (`ontologos-dl`, `ontologos-facade`); extended `sqlparser` joins or DataFusion if triggered ([ADR-0011](adr/0011-use-sqlparser-for-sql.md)); `rudof` for SHACL P1.
+**Dependencies:** OntoLogos `1.0` (`ontologos-dl`, `ontologos-facade`); extended `sqlparser` joins or DataFusion if triggered ([ADR-0011](adr/0011-use-sqlparser-for-sql.md)); `rudof` for SHACL P1; `react` / `vite` (extension `webview-ui`).
 
 ## Implementation sequencing
 
 ```text
-v0.4a → v0.4b → v0.5 → v0.6 → v0.7 → v0.7b → v0.8 → v0.9 → v1.0
+v0.4a → v0.4b → v0.5 → v0.6 → v0.7a → v0.7 → v0.7b → v0.8 → v0.9 → v1.0
 ```

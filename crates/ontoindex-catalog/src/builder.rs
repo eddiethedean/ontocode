@@ -130,6 +130,11 @@ impl IndexBuilder {
             );
 
             for entity in semantics.entities {
+                if entities.len() >= MAX_ENTITIES && !entity_index.contains_key(&entity.iri) {
+                    return Err(CatalogError::Core(ontoindex_core::OntoIndexError::Scanner(
+                        format!("workspace exceeds maximum of {MAX_ENTITIES} entities"),
+                    )));
+                }
                 if let Some(&prev_doc_idx) = entity_to_document.get(&entity.iri) {
                     if prev_doc_idx != doc_idx {
                         document_entity_iris[prev_doc_idx].retain(|iri| iri != &entity.iri);

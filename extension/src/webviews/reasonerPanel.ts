@@ -10,6 +10,7 @@ export class ReasonerPanel {
   public static current: ReasonerPanel | undefined;
   private readonly panel: vscode.WebviewPanel;
   private lastResult: RunReasonerResult | undefined;
+  private runId = 0;
 
   private constructor(panel: vscode.WebviewPanel) {
     this.panel = panel;
@@ -18,7 +19,8 @@ export class ReasonerPanel {
     });
     this.panel.webview.onDidReceiveMessage(async (msg) => {
       if (msg.command === "run") {
-        await this.run(msg.profile as string, msg.autoDetect !== false);
+        const runId = ++this.runId;
+        await this.run(msg.profile as string, msg.autoDetect !== false, runId);
       }
       if (msg.command === "explain" && typeof msg.classIri === "string") {
         await vscode.commands.executeCommand(
@@ -55,24 +57,32 @@ export class ReasonerPanel {
     const cfg = vscode.workspace.getConfiguration("ontocode");
     const profile = cfg.get<string>("reasoner.default") ?? "el";
     const autoDetect = cfg.get<boolean>("reasoner.autoProfile") ?? true;
-    await this.run(profile, autoDetect);
+    await this.run(profile, autoDetect, ++this.runId);
   }
 
-  private async run(profile: string, autoDetect: boolean): Promise<void> {
+  private async run(profile: string, autoDetect: boolean, runId: number): Promise<void> {
     try {
       const result = await runReasoner({ profile, auto_detect: autoDetect });
+      if (runId !== this.runId) {
+        return;
+      }
       this.lastResult = result;
       this.panel.webview.postMessage({
         command: "result",
+        runId,
         result,
         summary: summarizeResult(result),
         error: undefined,
       });
       void vscode.commands.executeCommand("ontocode.refreshExplorer");
     } catch (err) {
+      if (runId !== this.runId) {
+        return;
+      }
       const message = err instanceof Error ? err.message : String(err);
       this.panel.webview.postMessage({
         command: "result",
+        runId,
         result: undefined,
         error: message,
       });
@@ -107,19 +117,27 @@ li button { font-size: 0.9em; }
 <section><h3>Warnings</h3><ul id="warnings"></ul></section>
 <script>
 const vscode = acquireVsCodeApi();
-document.getElementById('run').onclick = () => vscode.postMessage({
-  command: 'run',
-  profile: document.getElementById('profile').value,
-  autoDetect: document.getElementById('auto').checked,
-});
+document.getElementById('run').onclick = () => {
+  window.latestRunId = (window.latestRunId || 0) + 1;
+  vscode.postMessage({
+    command: 'run',
+    profile: document.getElementById('profile').value,
+    autoDetect: document.getElementById('auto').checked,
+    runId: window.latestRunId,
+  });
+};
 document.getElementById('inferred').onclick = () => vscode.postMessage({ command: 'showInferred' });
 window.addEventListener('message', (e) => {
   const msg = e.data;
   if (msg.command !== 'result') return;
+  if (msg.runId != null && msg.runId !== window.latestRunId) return;
   const status = document.getElementById('status');
   if (msg.error) {
     status.textContent = msg.error;
     status.className = 'error';
+    document.getElementById('unsat').innerHTML = '';
+    document.getElementById('inferences').innerHTML = '';
+    document.getElementById('warnings').innerHTML = '';
     return;
   }
   status.className = '';

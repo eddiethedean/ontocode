@@ -151,7 +151,6 @@ pub fn handle_apply_axiom_patch(
 
     let source = state
         .document_text(&document_path)
-        .or_else(|| std::fs::read_to_string(&document_path).ok())
         .ok_or_else(|| LspErrorPayload::patch_invalid("cannot read document".to_string()))?;
 
     let mut patch_result = ontoindex_owl::apply_patches_to_text(

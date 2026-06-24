@@ -24,9 +24,19 @@ function isEntity(value: unknown): boolean {
     ENTITY_KINDS.has(e.kind) &&
     typeof e.ontology_id === "string" &&
     Array.isArray(e.labels) &&
+    e.labels.every((l) => typeof l === "string") &&
     Array.isArray(e.comments) &&
+    e.comments.every((c) => typeof c === "string") &&
     typeof e.deprecated === "boolean"
   );
+}
+
+function isHierarchyEdge(value: unknown): boolean {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+  const edge = value as Record<string, unknown>;
+  return typeof edge.child === "string" && typeof edge.parent === "string";
 }
 
 function isOntologyDocument(value: unknown): boolean {
@@ -37,6 +47,7 @@ function isOntologyDocument(value: unknown): boolean {
   return (
     typeof d.id === "string" &&
     typeof d.path === "string" &&
+    typeof d.format === "string" &&
     typeof d.parse_status === "string" &&
     PARSE_STATUSES.has(d.parse_status)
   );
@@ -86,6 +97,7 @@ export function isCatalogSnapshot(value: unknown): value is CatalogSnapshot {
   return (
     diagnosticsOk &&
     Array.isArray(h.edges) &&
+    h.edges.every(isHierarchyEdge) &&
     typeof h.parents === "object" &&
     h.parents !== null &&
     typeof h.children === "object" &&
@@ -133,8 +145,14 @@ export function assertGetEntityResult(value: unknown): import("./protocol").GetE
     throw new Error("Invalid getEntity result: missing detail");
   }
   const d = detail as Record<string, unknown>;
-  if (!d.entity || typeof d.entity !== "object") {
+  if (!d.entity || typeof d.entity !== "object" || !isEntity(d.entity)) {
     throw new Error("Invalid getEntity result: missing entity");
+  }
+  if (d.parents !== undefined && (!Array.isArray(d.parents) || !d.parents.every((p) => typeof p === "string"))) {
+    throw new Error("Invalid getEntity result: parents must be string array");
+  }
+  if (d.children !== undefined && (!Array.isArray(d.children) || !d.children.every((c) => typeof c === "string"))) {
+    throw new Error("Invalid getEntity result: children must be string array");
   }
   return value as import("./protocol").GetEntityResult;
 }

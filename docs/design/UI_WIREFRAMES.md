@@ -1,5 +1,7 @@
 # UI_WIREFRAMES.md
 
+> **Target UI stack:** Panels below ship as **React webviews** from v0.7a onward ([ADR-0017](adr/0017-react-webview-ui.md), [OntoCode_React_UI_Integration_Plan.md](OntoCode_React_UI_Integration_Plan.md)). Tree views remain native VS Code `TreeDataProvider` components in the extension host.
+
 ## 1. VS Code Activity Bar
 
 ```text

@@ -171,16 +171,22 @@ let rows = ontoindex_query::query_catalog(
 
 ## 7. OntoCode Extension Components
 
+Per [ADR-0017](adr/0017-react-webview-ui.md), webview panels migrate to a React app; the extension host stays a thin orchestration layer.
+
 ```text
 extension/
-├── src/
-│   ├── activate.ts
+├── src/                      # extension host (TypeScript)
+│   ├── extension.ts
 │   ├── commands/
-│   ├── panels/
 │   ├── treeviews/
-│   ├── webviews/
+│   ├── webviews/             # panelHost, messages, getWebviewHtml
 │   ├── lsp/
 │   └── utils/
+├── webview-ui/               # React app (v0.7a+)
+│   ├── vite.config.ts
+│   └── src/
+│       ├── panels/
+│       └── components/
 ├── media/
 ├── package.json
 └── README.md

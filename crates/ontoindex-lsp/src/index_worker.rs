@@ -44,11 +44,17 @@ impl IndexWorker {
 }
 
 fn run_worker(state: ServerState, job_rx: Receiver<IndexJob>, lsp_sender: Sender<Message>) {
-    while let Ok(job) = job_rx.recv() {
-        let replies: Vec<Sender<Result<(CatalogStats, u64), String>>> =
-            job.reply.into_iter().collect();
+    while let Ok(first) = job_rx.recv() {
+        let mut batch = vec![first];
+        while let Ok(next) = job_rx.try_recv() {
+            batch.push(next);
+        }
 
-        let result = state.index_workspace(job.workspace);
+        let workspace = batch.last().map(|j| j.workspace.clone()).unwrap_or_default();
+        let replies: Vec<Sender<Result<(CatalogStats, u64), String>>> =
+            batch.into_iter().flat_map(|j| j.reply).collect();
+
+        let result = state.index_workspace(workspace);
         match &result {
             Ok(_) => {
                 publish_diagnostics_for_state(&lsp_sender, &state);

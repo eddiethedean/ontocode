@@ -58,6 +58,7 @@ Many specs describe **target** behavior. Check the banner at the top of each doc
 ### UX
 
 - [UI_WIREFRAMES.md](UI_WIREFRAMES.md) — text-based VS Code wireframes
+- [OntoCode_React_UI_Integration_Plan.md](OntoCode_React_UI_Integration_Plan.md) — **React webview migration** (v0.7a → v1.0, [ADR-0017](adr/0017-react-webview-ui.md))
 
 ### Historical / backlog
 

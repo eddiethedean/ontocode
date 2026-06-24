@@ -67,31 +67,27 @@ fn execute_select(catalog: &OntologyCatalog, select: Box<Select>) -> Result<Quer
         return Err(QueryError::Sql("JOIN is not supported".to_string()));
     }
     let table_name = table_name_from_select(&select)?;
-    let mut rows = table_rows(catalog, &table_name)?;
-
     if let Some(selection) = &select.selection {
         validate_filter(selection)?;
-        let mut filtered = Vec::with_capacity(rows.len());
-        for row in rows {
-            if evaluate_filter(selection, &row)? {
-                filtered.push(row);
+    }
+
+    let mut rows = Vec::new();
+    let mut truncated = false;
+    for row in table_row_iter(catalog, &table_name)? {
+        if let Some(selection) = &select.selection {
+            if !evaluate_filter(selection, &row)? {
+                continue;
             }
         }
-        rows = filtered;
+        if rows.len() >= MAX_SQL_RESULT_ROWS {
+            truncated = true;
+            break;
+        }
+        rows.push(row);
     }
 
     let (columns, projected_rows) = project_rows(&select.projection, &rows)?;
-    let (rows, truncated) = truncate_rows(projected_rows);
-    Ok(QueryResult { columns, rows, truncated })
-}
-
-fn truncate_rows(mut rows: Vec<Row>) -> (Vec<Row>, bool) {
-    if rows.len() > MAX_SQL_RESULT_ROWS {
-        rows.truncate(MAX_SQL_RESULT_ROWS);
-        (rows, true)
-    } else {
-        (rows, false)
-    }
+    Ok(QueryResult { columns, rows: projected_rows, truncated })
 }
 
 fn table_name_from_select(select: &Select) -> Result<String> {
@@ -104,107 +100,92 @@ fn table_name_from_select(select: &Select) -> Result<String> {
     }
 }
 
-fn table_rows(catalog: &OntologyCatalog, table: &str) -> Result<Vec<Row>> {
+fn table_row_iter<'a>(
+    catalog: &'a OntologyCatalog,
+    table: &str,
+) -> Result<Box<dyn Iterator<Item = Row> + 'a>> {
     let data = catalog.data();
     match table {
-        "ontologies" => Ok(data
-            .documents
-            .iter()
-            .map(|doc| {
-                let mut row = BTreeMap::new();
-                row.insert("id".into(), doc.id.clone());
-                row.insert("path".into(), doc.path.display().to_string());
-                row.insert("format".into(), doc.format.as_str().to_string());
-                row.insert("base_iri".into(), doc.base_iri.clone().unwrap_or_default());
-                row.insert("parse_status".into(), doc.parse_status.as_str().to_string());
-                row.insert("content_hash".into(), doc.content_hash.clone());
-                row.insert("modified_time".into(), doc.modified_time.to_string());
-                row
-            })
-            .collect()),
-        "classes" => entity_rows(catalog, EntityKind::Class),
-        "object_properties" => entity_rows(catalog, EntityKind::ObjectProperty),
-        "data_properties" => entity_rows(catalog, EntityKind::DataProperty),
-        "annotation_properties" => entity_rows(catalog, EntityKind::AnnotationProperty),
-        "individuals" => entity_rows(catalog, EntityKind::Individual),
-        "entities" => Ok(data.entities.iter().map(entity_to_row).collect()),
-        "annotations" => Ok(data
-            .annotations
-            .iter()
-            .map(|a| {
-                let mut row = BTreeMap::new();
-                row.insert("subject".into(), a.subject.clone());
-                row.insert("predicate".into(), a.predicate.clone());
-                row.insert("object".into(), a.object.clone());
-                row.insert("ontology_id".into(), a.ontology_id.clone());
-                row
-            })
-            .collect()),
-        "axioms" => Ok(data
-            .axioms
-            .iter()
-            .map(|a| {
-                let mut row = BTreeMap::new();
-                row.insert("id".into(), a.id.clone());
-                row.insert("ontology_id".into(), a.ontology_id.clone());
-                row.insert("subject".into(), a.subject.clone());
-                row.insert("predicate".into(), a.predicate.clone());
-                row.insert("object".into(), a.object.clone());
-                row.insert("axiom_kind".into(), a.axiom_kind.clone());
-                row
-            })
-            .collect()),
-        "namespaces" => Ok(data
-            .namespaces
-            .iter()
-            .map(|n| {
-                let mut row = BTreeMap::new();
-                row.insert("prefix".into(), n.prefix.clone());
-                row.insert("iri".into(), n.iri.clone());
-                row.insert("ontology_id".into(), n.ontology_id.clone());
-                row
-            })
-            .collect()),
-        "imports" => Ok(data
-            .imports
-            .iter()
-            .map(|i| {
-                let mut row = BTreeMap::new();
-                row.insert("ontology_id".into(), i.ontology_id.clone());
-                row.insert("import_iri".into(), i.import_iri.clone());
-                row
-            })
-            .collect()),
-        "diagnostics" => Ok(data
-            .diagnostics
-            .iter()
-            .map(|d| {
-                let mut row = BTreeMap::new();
-                row.insert("code".into(), d.code.as_str().to_string());
-                row.insert("severity".into(), d.severity.as_str().to_string());
-                row.insert("message".into(), d.message.clone());
-                row.insert("file".into(), d.file.display().to_string());
-                row.insert("line".into(), d.range.line.map(|l| l.to_string()).unwrap_or_default());
-                row.insert(
-                    "column".into(),
-                    d.range.column.map(|c| c.to_string()).unwrap_or_default(),
-                );
-                row.insert("entity_iri".into(), d.entity_iri.clone().unwrap_or_default());
-                row
-            })
-            .collect()),
+        "ontologies" => Ok(Box::new(data.documents.iter().map(|doc| {
+            let mut row = BTreeMap::new();
+            row.insert("id".into(), doc.id.clone());
+            row.insert("path".into(), doc.path.display().to_string());
+            row.insert("format".into(), doc.format.as_str().to_string());
+            row.insert("base_iri".into(), doc.base_iri.clone().unwrap_or_default());
+            row.insert("parse_status".into(), doc.parse_status.as_str().to_string());
+            row.insert("content_hash".into(), doc.content_hash.clone());
+            row.insert("modified_time".into(), doc.modified_time.to_string());
+            row
+        }))),
+        "classes" => entity_row_iter(catalog, EntityKind::Class),
+        "object_properties" => entity_row_iter(catalog, EntityKind::ObjectProperty),
+        "data_properties" => entity_row_iter(catalog, EntityKind::DataProperty),
+        "annotation_properties" => entity_row_iter(catalog, EntityKind::AnnotationProperty),
+        "individuals" => entity_row_iter(catalog, EntityKind::Individual),
+        "entities" => Ok(Box::new(data.entities.iter().map(entity_to_row))),
+        "annotations" => Ok(Box::new(data.annotations.iter().map(|a| {
+            let mut row = BTreeMap::new();
+            row.insert("subject".into(), a.subject.clone());
+            row.insert("predicate".into(), a.predicate.clone());
+            row.insert("object".into(), a.object.clone());
+            row.insert("ontology_id".into(), a.ontology_id.clone());
+            row
+        }))),
+        "axioms" => Ok(Box::new(data.axioms.iter().map(|a| {
+            let mut row = BTreeMap::new();
+            row.insert("id".into(), a.id.clone());
+            row.insert("ontology_id".into(), a.ontology_id.clone());
+            row.insert("subject".into(), a.subject.clone());
+            row.insert("predicate".into(), a.predicate.clone());
+            row.insert("object".into(), a.object.clone());
+            row.insert("axiom_kind".into(), a.axiom_kind.clone());
+            row
+        }))),
+        "namespaces" => Ok(Box::new(data.namespaces.iter().map(|n| {
+            let mut row = BTreeMap::new();
+            row.insert("prefix".into(), n.prefix.clone());
+            row.insert("iri".into(), n.iri.clone());
+            row.insert("ontology_id".into(), n.ontology_id.clone());
+            row
+        }))),
+        "imports" => Ok(Box::new(data.imports.iter().map(|i| {
+            let mut row = BTreeMap::new();
+            row.insert("ontology_id".into(), i.ontology_id.clone());
+            row.insert("import_iri".into(), i.import_iri.clone());
+            row
+        }))),
+        "diagnostics" => Ok(Box::new(data.diagnostics.iter().map(|d| {
+            let mut row = BTreeMap::new();
+            row.insert("code".into(), d.code.as_str().to_string());
+            row.insert("severity".into(), d.severity.as_str().to_string());
+            row.insert("message".into(), d.message.clone());
+            row.insert("file".into(), d.file.display().to_string());
+            row.insert("line".into(), d.range.line.map(|l| l.to_string()).unwrap_or_default());
+            row.insert("column".into(), d.range.column.map(|c| c.to_string()).unwrap_or_default());
+            row.insert("entity_iri".into(), d.entity_iri.clone().unwrap_or_default());
+            row
+        }))),
         "properties" => {
-            let mut rows = entity_rows(catalog, EntityKind::ObjectProperty)?;
-            rows.extend(entity_rows(catalog, EntityKind::DataProperty)?);
-            rows.extend(entity_rows(catalog, EntityKind::AnnotationProperty)?);
-            Ok(rows)
+            let mut iter: Box<dyn Iterator<Item = Row>> = Box::new(std::iter::empty());
+            for kind in [
+                EntityKind::ObjectProperty,
+                EntityKind::DataProperty,
+                EntityKind::AnnotationProperty,
+            ] {
+                let next = entity_row_iter(catalog, kind)?;
+                iter = Box::new(iter.chain(next));
+            }
+            Ok(iter)
         }
         other => Err(QueryError::Sql(format!("unknown table: {other}"))),
     }
 }
 
-fn entity_rows(catalog: &OntologyCatalog, kind: EntityKind) -> Result<Vec<Row>> {
-    Ok(catalog.data().entities.iter().filter(|e| e.kind == kind).map(entity_to_row).collect())
+fn entity_row_iter(
+    catalog: &OntologyCatalog,
+    kind: EntityKind,
+) -> Result<Box<dyn Iterator<Item = Row> + '_>> {
+    Ok(Box::new(catalog.data().entities.iter().filter(move |e| e.kind == kind).map(entity_to_row)))
 }
 
 fn entity_to_row(entity: &ontoindex_core::Entity) -> Row {
@@ -219,20 +200,33 @@ fn entity_to_row(entity: &ontoindex_core::Entity) -> Row {
     row
 }
 
-fn project_rows(projection: &[SelectItem], rows: &[Row]) -> Result<(Vec<String>, Vec<Row>)> {
+struct ProjectionCol {
+    name: String,
+    source: String,
+}
+
+fn projection_columns(projection: &[SelectItem]) -> Result<Vec<ProjectionCol>> {
     if projection.len() == 1 && matches!(projection[0], SelectItem::Wildcard(_)) {
-        let columns = rows.first().map(|r| r.keys().cloned().collect()).unwrap_or_default();
-        return Ok((columns, rows.to_vec()));
+        return Ok(Vec::new());
     }
 
     let mut columns = Vec::new();
     for item in projection {
         match item {
             SelectItem::UnnamedExpr(Expr::Identifier(ident)) => {
-                columns.push(ident.value.to_ascii_lowercase());
+                let col = ident.value.to_ascii_lowercase();
+                columns.push(ProjectionCol { name: col.clone(), source: col });
             }
-            SelectItem::ExprWithAlias { alias, .. } => {
-                columns.push(alias.value.to_ascii_lowercase());
+            SelectItem::ExprWithAlias { expr, alias, .. } => {
+                let source = match expr {
+                    Expr::Identifier(ident) => ident.value.to_ascii_lowercase(),
+                    _ => {
+                        return Err(QueryError::Sql(
+                            "only simple column projections are supported".to_string(),
+                        ));
+                    }
+                };
+                columns.push(ProjectionCol { name: alias.value.to_ascii_lowercase(), source });
             }
             SelectItem::Wildcard(_) => {
                 return Err(QueryError::Sql("wildcard projection must be used alone".to_string()));
@@ -244,13 +238,24 @@ fn project_rows(projection: &[SelectItem], rows: &[Row]) -> Result<(Vec<String>,
             }
         }
     }
+    Ok(columns)
+}
+
+fn project_rows(projection: &[SelectItem], rows: &[Row]) -> Result<(Vec<String>, Vec<Row>)> {
+    if projection.len() == 1 && matches!(projection[0], SelectItem::Wildcard(_)) {
+        let columns = rows.first().map(|r| r.keys().cloned().collect()).unwrap_or_default();
+        return Ok((columns, rows.to_vec()));
+    }
+
+    let columns_spec = projection_columns(projection)?;
+    let columns: Vec<String> = columns_spec.iter().map(|c| c.name.clone()).collect();
 
     let projected = rows
         .iter()
         .map(|row| {
             let mut out = BTreeMap::new();
-            for col in &columns {
-                out.insert(col.clone(), row.get(col).cloned().unwrap_or_default());
+            for col in &columns_spec {
+                out.insert(col.name.clone(), row.get(&col.source).cloned().unwrap_or_default());
             }
             out
         })
@@ -336,7 +341,17 @@ pub fn to_csv(result: &QueryResult) -> Result<String> {
 }
 
 pub fn to_json(result: &QueryResult) -> Result<String> {
-    serde_json::to_string_pretty(result).map_err(|e| crate::QueryError::Export(e.to_string()))
+    let rows: Vec<Vec<String>> = result
+        .rows
+        .iter()
+        .map(|row| result.columns.iter().map(|c| row.get(c).cloned().unwrap_or_default()).collect())
+        .collect();
+    serde_json::to_string_pretty(&serde_json::json!({
+        "columns": result.columns,
+        "rows": rows,
+        "truncated": result.truncated,
+    }))
+    .map_err(|e| crate::QueryError::Export(e.to_string()))
 }
 
 #[cfg(test)]
@@ -415,20 +430,12 @@ mod tests {
     }
 
     #[test]
-    fn truncate_rows_at_cap_is_not_truncated() {
-        use ontoindex_core::limits::MAX_SQL_RESULT_ROWS;
-        let rows: Vec<Row> = (0..MAX_SQL_RESULT_ROWS).map(|_| Row::new()).collect();
-        let (out, truncated) = truncate_rows(rows);
-        assert_eq!(out.len(), MAX_SQL_RESULT_ROWS);
-        assert!(!truncated);
-    }
-
-    #[test]
-    fn truncate_rows_over_cap_sets_truncated() {
-        use ontoindex_core::limits::MAX_SQL_RESULT_ROWS;
-        let rows: Vec<Row> = (0..=MAX_SQL_RESULT_ROWS).map(|_| Row::new()).collect();
-        let (out, truncated) = truncate_rows(rows);
-        assert_eq!(out.len(), MAX_SQL_RESULT_ROWS);
-        assert!(truncated);
+    fn select_alias_uses_source_column() {
+        let catalog = fixture_catalog();
+        let result =
+            run_sql(&catalog, "SELECT short_name AS name FROM classes WHERE short_name = 'Person'")
+                .expect("alias projection");
+        assert_eq!(result.rows.len(), 1);
+        assert_eq!(result.rows[0].get("name").map(String::as_str), Some("Person"));
     }
 }

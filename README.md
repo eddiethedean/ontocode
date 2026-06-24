@@ -140,7 +140,7 @@ See [reasoner guide](https://onto-code.readthedocs.io/en/latest/guides/reasoner.
 
 ## Coming in v0.7+
 
-The extension is a thin TypeScript shell over **ontoindex-lsp** and the OntoIndex crates — not a second ontology stack.
+The extension is a thin TypeScript shell over **ontoindex-lsp** and the OntoIndex crates — not a second ontology stack. **v0.7a** introduces a **React + Vite** webview layer for panels (inspector, query workbench, graphs, reasoner); see [React UI integration plan](docs/design/OntoCode_React_UI_Integration_Plan.md).
 
 ## Roadmap
 
@@ -151,9 +151,10 @@ The extension is a thin TypeScript shell over **ontoindex-lsp** and the OntoInde
 | v0.3 | Ontology diagnostics (Problems panel, `validate`) |
 | v0.4.0 | Write-back — Turtle patches, Horned-OWL catalog, editable inspector |
 | **v0.6.0** (current) | **Reasoning** — OntoLogos EL/RL/RDFS, inferred hierarchy, explanations |
-| v0.7–v0.7b | Graphs + OBO/ROBOT interop |
-| v0.8–v0.9 | Full Manchester, refactoring, semantic diff; `ontologos-watch` hook |
-| v1.0 | **Protégé-competitive OWL + OBO in VS Code** — DL via OntoLogos 1.0.0 ([parity checklist](https://onto-code.readthedocs.io/en/latest/design/PROTEGE_PARITY/)) |
+| v0.7a | **React webview foundation** — Vite, typed message protocol, CSP |
+| v0.7–v0.7b | Graphs (React) + OBO/ROBOT interop |
+| v0.8–v0.9 | Full Manchester, refactoring, semantic diff (React panels); `ontologos-watch` hook |
+| v1.0 | **Protégé-competitive OWL + OBO in VS Code** — DL via OntoLogos 1.0.0, React UI hardening ([parity checklist](https://onto-code.readthedocs.io/en/latest/design/PROTEGE_PARITY/)) |
 
 See [roadmap](https://onto-code.readthedocs.io/en/latest/design/ROADMAP/), [product plan](https://onto-code.readthedocs.io/en/latest/design/PLAN/), and [Protégé parity checklist](https://onto-code.readthedocs.io/en/latest/design/PROTEGE_PARITY/) for the full product plan.
 

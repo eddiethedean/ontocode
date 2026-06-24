@@ -177,7 +177,7 @@ impl ServerState {
                 return Some(text.clone());
             }
         }
-        std::fs::read_to_string(path).ok()
+        ontoindex_core::read_to_string_capped(path, MAX_FILE_BYTES).ok()
     }
 }
 

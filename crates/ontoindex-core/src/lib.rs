@@ -10,9 +10,11 @@
 
 pub mod document_lookup;
 pub mod error;
+pub mod io;
 pub mod limits;
 pub mod model;
 pub mod path_jail;
+pub mod rdf_literals;
 pub mod scanner;
 
 pub use document_lookup::{
@@ -20,9 +22,11 @@ pub use document_lookup::{
     document_matches_ontology_id, file_uri_for_path, normalize_iri,
 };
 pub use error::{OntoIndexError, Result};
+pub use io::{read_file_capped, read_to_string_capped};
 pub use limits::{
     MAX_ENTITIES, MAX_FILE_BYTES, MAX_OPEN_DOCUMENTS, MAX_QUERY_BYTES, MAX_SCAN_FILES,
-    MAX_SPARQL_RESULT_ROWS, MAX_SQL_RESULT_ROWS, MAX_TOTAL_TRIPLES, MAX_TRIPLES_PER_FILE,
+    MAX_SCAN_WALK_ENTRIES, MAX_SPARQL_RESULT_ROWS, MAX_SQL_RESULT_ROWS, MAX_TOTAL_TRIPLES,
+    MAX_TRIPLES_PER_FILE,
 };
 pub use model::{
     Annotation, Axiom, Diagnostic, DiagnosticCode, DiagnosticSeverity, Entity, EntityKind, Import,
@@ -33,4 +37,5 @@ pub use path_jail::{
     canonical_workspace_root, file_uri_to_path, is_path_within, resolve_document_path,
     resolve_lsp_document_path, validate_workspace_scope, workspace_uri_to_path,
 };
+pub use rdf_literals::parse_boolean_literal;
 pub use scanner::{OntologyFile, WorkspaceScanner};

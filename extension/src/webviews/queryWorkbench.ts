@@ -31,8 +31,7 @@ export class QueryWorkbenchPanel {
     });
     this.panel.webview.onDidReceiveMessage(async (msg) => {
       if (msg.command === "run") {
-        const runId =
-          typeof msg.runId === "number" ? msg.runId : ++this.runId;
+        const runId = ++this.runId;
         await this.runQuery(msg.mode as "sql" | "sparql", msg.text as string, runId);
       }
       if (msg.command === "save") {
@@ -70,6 +69,9 @@ export class QueryWorkbenchPanel {
         mode === "sql"
           ? await runSqlQuery(text)
           : await runSparqlQuery(text);
+      if (runId !== this.runId) {
+        return;
+      }
       this.lastResult = result;
       this.panel.webview.postMessage({
         command: "result",

@@ -3,7 +3,7 @@
 > **Canonical inventory** of external Rust crates and CLIs used by OntoIndex/OntoCode.
 > Policy: [ADR-0016](adr/0016-dependency-first-implementation.md). Do not add dependencies without updating this file.
 
-**Last updated:** 2026-06-23
+**Last updated:** 2026-06-24
 
 ## How to read this table
 
@@ -37,7 +37,8 @@
 | Reasoner orchestration | [OntoLogos](https://github.com/eddiethedean/ontologos) (`ontologos-*`) | `0.9` → `1.0` | `ontoindex-reasoner` | `ReasonerAdapter` trait, cache, LSP JSON | [0015](adr/0015-adopt-ontologos-reasoner.md) | v0.6 / v1.0 |
 | Reasoner file load | [`ontologos-parser`](https://crates.io/crates/ontologos-parser) | `0.9` → `1.0` | `ontoindex-reasoner` | Workspace path → ontology input bridge | [0015](adr/0015-adopt-ontologos-reasoner.md) | v0.6 |
 | Reasoning transitive (via OntoLogos) | [`reasonable`](https://crates.io/crates/reasonable), [`horned-owl`](https://crates.io/crates/horned-owl), [`petgraph`](https://crates.io/crates/petgraph) | via OntoLogos | — | Do not depend directly | [0015](adr/0015-adopt-ontologos-reasoner.md) | v0.6 |
-| Graph structure for viz | [`petgraph`](https://crates.io/crates/petgraph) | `0.8` | `ontoindex-lsp` / export API | JSON graph for VS Code webview; layout in TS | [0016](adr/0016-dependency-first-implementation.md) | v0.7 |
+| Graph structure for viz | [`petgraph`](https://crates.io/crates/petgraph) | `0.8` | `ontoindex-lsp` / export API | JSON graph for React webview; layout in `webview-ui` | [0016](adr/0016-dependency-first-implementation.md) | v0.7 |
+| Webview panel UI | [`react`](https://www.npmjs.com/package/react), [`vite`](https://www.npmjs.com/package/vite) | evaluate at v0.7a | `extension/webview-ui` | Typed `postMessage` protocol, panel host, CSP | [0017](adr/0017-react-webview-ui.md) | v0.7a+ |
 | OBO read/write | [`fastobo`](https://crates.io/crates/fastobo), [`fastobo-owl`](https://crates.io/crates/fastobo-owl) | `0.15` / `0.3` | `ontoindex-parser` or `ontoindex-owl` | Catalog mapping, OBO id ↔ IRI | [0016](adr/0016-dependency-first-implementation.md) | v0.7b |
 | ROBOT release pipelines | [ROBOT](https://github.com/ontodev/robot) CLI | external | `ontoindex-robot` | Subprocess wrapper, exit codes, settings | [OBO_ROBOT_SPEC](OBO_ROBOT_SPEC.md) | v0.7b |
 | File-watch reindex | [`notify`](https://crates.io/crates/notify) or `ontologos-watch` | `9` / via OntoLogos | `ontoindex-lsp` | Debounce, catalog invalidation | [0015](adr/0015-adopt-ontologos-reasoner.md) | v0.9 |
@@ -71,7 +72,8 @@
 | Ontology quality lints | Duplicate labels, orphans, missing labels | Rules on catalog; no ontology-linter crate |
 | LSP custom protocol | `ontoindex/*` methods, snake_case enums | [ADR-0007](adr/0007-language-server-boundary.md), [ADR-0012](adr/0012-lsp-json-snake-case-enums.md) |
 | Semantic diff UX + breaking-change report | PR summaries, Git compare UI | No ontology PR-diff library |
-| VS Code extension | Tree views, webviews, commands | TypeScript shell only |
+| VS Code extension host | Tree views, commands, LSP client, webview lifecycle | TypeScript orchestration only ([ADR-0007](adr/0007-language-server-boundary.md)) |
+| VS Code webview UI | Panel UI (inspector, query, Manchester, reasoner, graphs, diff) | React + Vite in `extension/webview-ui` ([ADR-0017](adr/0017-react-webview-ui.md)) |
 
 ---
 

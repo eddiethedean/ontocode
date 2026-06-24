@@ -9,6 +9,9 @@ pub const MAX_OPEN_DOCUMENTS: usize = 256;
 /// Maximum ontology files scanned per workspace.
 pub const MAX_SCAN_FILES: usize = 10_000;
 
+/// Maximum filesystem entries visited during a workspace scan (including non-ontology files).
+pub const MAX_SCAN_WALK_ENTRIES: usize = 500_000;
+
 /// Maximum RDF quads parsed from one file.
 pub const MAX_TRIPLES_PER_FILE: usize = 5_000_000;
 

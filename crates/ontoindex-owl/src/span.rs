@@ -55,29 +55,93 @@ fn subject_needles(
     needles
 }
 
+/// Byte offset immediately after a line's content (handles `\n` and `\r\n`).
+fn line_byte_offset_after(text: &str, line_start: usize, line: &str) -> usize {
+    let after_content = line_start + line.len();
+    let bytes = text.as_bytes();
+    if bytes.get(after_content) == Some(&b'\r') && bytes.get(after_content + 1) == Some(&b'\n') {
+        after_content + 2
+    } else if bytes.get(after_content) == Some(&b'\n') {
+        after_content + 1
+    } else {
+        after_content
+    }
+}
+
 /// Locate the byte range of an entity's subject token (first Turtle statement for that subject).
+#[allow(dead_code)]
 pub fn find_subject_statement(
     source_text: &str,
     iri: &str,
     short_name: &str,
     namespaces: &BTreeMap<String, String>,
 ) -> Option<ByteRange> {
+    all_subject_statements(source_text, iri, short_name, namespaces).into_iter().next()
+}
+
+/// All statement start positions for a subject IRI in document order.
+pub fn all_subject_statements(
+    source_text: &str,
+    iri: &str,
+    short_name: &str,
+    namespaces: &BTreeMap<String, String>,
+) -> Vec<ByteRange> {
     let needles = subject_needles(iri, short_name, namespaces);
     let mut byte_offset = 0usize;
+    let mut out = Vec::new();
     for line in source_text.lines() {
         let trimmed = line.trim_start();
         if trimmed.starts_with('@') {
-            byte_offset += line.len() + 1;
+            byte_offset = line_byte_offset_after(source_text, byte_offset, line);
             continue;
         }
         if let Some(col_in_trimmed) = subject_column_at_line_start(trimmed, &needles) {
             let ws = line.len() - trimmed.len();
             let start = byte_offset + ws + col_in_trimmed;
-            return Some(ByteRange { start: start as u64, end: start as u64 });
+            out.push(ByteRange { start: start as u64, end: start as u64 });
         }
-        byte_offset += line.len() + 1;
+        byte_offset = line_byte_offset_after(source_text, byte_offset, line);
     }
-    None
+    out
+}
+
+/// Full byte ranges for every Turtle statement whose subject is `iri`.
+pub fn all_entity_statement_ranges(
+    source_text: &str,
+    iri: &str,
+    short_name: &str,
+    namespaces: &BTreeMap<String, String>,
+) -> Vec<ByteRange> {
+    all_subject_statements(source_text, iri, short_name, namespaces)
+        .into_iter()
+        .filter_map(|start_range| {
+            let end = statement_end_byte(source_text, start_range.start as usize)?;
+            if end > start_range.start as usize {
+                Some(ByteRange { start: start_range.start, end: end as u64 })
+            } else {
+                None
+            }
+        })
+        .collect()
+}
+
+/// Prefer the subject statement that declares a type (` a `), e.g. `ex:Foo a owl:Class`.
+fn primary_entity_statement_start(
+    source_text: &str,
+    iri: &str,
+    short_name: &str,
+    namespaces: &BTreeMap<String, String>,
+) -> Option<ByteRange> {
+    let starts = all_subject_statements(source_text, iri, short_name, namespaces);
+    for start in &starts {
+        if let Some(end) = statement_end_byte(source_text, start.start as usize) {
+            let stmt = &source_text[start.start as usize..end];
+            if stmt.contains(" a ") {
+                return Some(*start);
+            }
+        }
+    }
+    starts.first().copied()
 }
 
 /// True when `needle` is the subject at the start of a trimmed Turtle line.
@@ -95,14 +159,14 @@ fn subject_column_at_line_start(trimmed: &str, needles: &[String]) -> Option<usi
     None
 }
 
-/// Locate the first occurrence of an entity subject in Turtle source.
+/// Locate the primary entity block (type declaration) in Turtle source.
 pub fn find_entity_block(
     source_text: &str,
     iri: &str,
     short_name: &str,
     namespaces: &BTreeMap<String, String>,
 ) -> SourceLocation {
-    if let Some(range) = find_subject_statement(source_text, iri, short_name, namespaces) {
+    if let Some(range) = primary_entity_statement_start(source_text, iri, short_name, namespaces) {
         let start = range.start as usize;
         let line_idx = source_text[..start].matches('\n').count();
         let line_start = source_text[..start].rfind('\n').map(|p| p + 1).unwrap_or(0);
@@ -153,14 +217,32 @@ pub fn annotate_spans(
 }
 
 pub fn entity_block_range(source_text: &str, entity: &Entity) -> Option<ByteRange> {
+    let namespaces = BTreeMap::new();
     let start = if let Some(s) = entity.source_location.start_byte {
         s as usize
     } else {
-        return None;
+        primary_entity_statement_start(source_text, &entity.iri, &entity.short_name, &namespaces)
+            .map(|r| r.start as usize)?
     };
     let end = statement_end_byte(source_text, start)?;
     if end > start {
         Some(ByteRange { start: start as u64, end: end as u64 })
+    } else {
+        None
+    }
+}
+
+/// Primary declaration block for patch insertions (type statement, not trailing triples).
+pub fn entity_primary_block_range(
+    source_text: &str,
+    entity_iri: &str,
+    namespaces: &BTreeMap<String, String>,
+) -> Option<ByteRange> {
+    let short_name = short_name_from_iri(entity_iri);
+    let start = primary_entity_statement_start(source_text, entity_iri, &short_name, namespaces)?;
+    let end = statement_end_byte(source_text, start.start as usize)?;
+    if end > start.start as usize {
+        Some(ByteRange { start: start.start, end: end as u64 })
     } else {
         None
     }
@@ -213,7 +295,14 @@ pub struct ByteRange {
 }
 
 fn line_start_byte(source_text: &str, line_idx: usize) -> u64 {
-    source_text.lines().take(line_idx).map(|l| l.len() as u64 + 1).sum()
+    let mut offset = 0usize;
+    for (i, line) in source_text.lines().enumerate() {
+        if i == line_idx {
+            return offset as u64;
+        }
+        offset = line_byte_offset_after(source_text, offset, line);
+    }
+    0
 }
 
 fn predicate_local_name(predicate: &str) -> &str {

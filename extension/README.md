@@ -146,7 +146,7 @@ More detail: [Installation & troubleshooting](https://onto-code.readthedocs.io/e
 
 **Shipped:** explorer, inspector, **editing** (labels, comments, parents, create/delete in `.ttl`), **Query Workbench** (SQL + SPARQL), **Manchester editor**, **EL/RL/RDFS reasoner**, inferred hierarchy toggle, EL explanations (where available), diagnostics, jump-to-source, hover, symbols, go-to-definition.
 
-**Planned:** full DL reasoning (OntoLogos 1.0), graph visualization (v0.7) — [roadmap](https://onto-code.readthedocs.io/en/latest/design/ROADMAP/).
+**Planned:** React webview UI (v0.7a+), full DL reasoning (OntoLogos 1.0), graph visualization (v0.7) — [roadmap](https://onto-code.readthedocs.io/en/latest/design/ROADMAP/), [React UI plan](https://onto-code.readthedocs.io/en/latest/design/OntoCode_React_UI_Integration_Plan/).
 
 ---
 

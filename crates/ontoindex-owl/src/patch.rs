@@ -1,7 +1,9 @@
 use crate::error::{OwlError, Result};
 use crate::manchester::{class_expression_to_turtle_fragment, parse_class_expression};
-use crate::span::{entity_block_range, short_name_from_iri, ByteRange};
-use ontoindex_core::{EntityKind, OntologyFormat, SourceLocation};
+use crate::span::{
+    all_entity_statement_ranges, entity_primary_block_range, short_name_from_iri, ByteRange,
+};
+use ontoindex_core::{read_to_string_capped, OntologyFormat, MAX_FILE_BYTES};
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 use std::fs;
@@ -73,7 +75,7 @@ pub fn apply_patches(
         )));
     }
 
-    let source = fs::read_to_string(document_path)?;
+    let source = read_to_string_capped(document_path, MAX_FILE_BYTES).map_err(OwlError::Core)?;
     let mut result = apply_patches_to_text(&source, patches, preview_only, namespaces)?;
     result.document_path = Some(document_path.display().to_string());
 
@@ -214,19 +216,16 @@ fn delete_entity(
     entity_iri: &str,
     namespaces: &BTreeMap<String, String>,
 ) -> Result<()> {
-    let entity = ontoindex_core::Entity {
-        iri: entity_iri.to_string(),
-        short_name: short_name_from_iri(entity_iri),
-        kind: EntityKind::Class,
-        ontology_id: String::new(),
-        source_location: find_entity_location(text, entity_iri, namespaces),
-        labels: Vec::new(),
-        comments: Vec::new(),
-        deprecated: false,
-    };
-    let range = entity_block_range(text, &entity)
-        .ok_or_else(|| OwlError::EntityNotFound(entity_iri.to_string()))?;
-    replace_range(text, range, "");
+    let namespaces = crate::span::namespaces_for_text(text, namespaces);
+    let short = short_name_from_iri(entity_iri);
+    let mut ranges = all_entity_statement_ranges(text, entity_iri, &short, &namespaces);
+    if ranges.is_empty() {
+        return Err(OwlError::EntityNotFound(entity_iri.to_string()));
+    }
+    ranges.sort_by_key(|r| r.start);
+    for range in ranges.into_iter().rev() {
+        replace_range(text, range, "");
+    }
     Ok(())
 }
 
@@ -290,18 +289,7 @@ fn insert_multiline_into_entity_block(
     insertion: &str,
     namespaces: &BTreeMap<String, String>,
 ) -> Result<()> {
-    let entity = ontoindex_core::Entity {
-        iri: entity_iri.to_string(),
-        short_name: short_name_from_iri(entity_iri),
-        kind: EntityKind::Class,
-        ontology_id: String::new(),
-        source_location: find_entity_location(text, entity_iri, namespaces),
-        labels: Vec::new(),
-        comments: Vec::new(),
-        deprecated: false,
-    };
-    let range = entity_block_range(text, &entity)
-        .ok_or_else(|| OwlError::EntityNotFound(entity_iri.to_string()))?;
+    let range = entity_primary_range(text, entity_iri, namespaces)?;
     let block = &text[range.start as usize..range.end as usize];
     let trimmed = block.trim_end();
     let mut new_block = block.to_string();
@@ -336,16 +324,8 @@ fn remove_subclass_triple(
     parent_iri: &str,
     namespaces: &BTreeMap<String, String>,
 ) -> Result<()> {
-    let parent_short = short_name_from_iri(parent_iri);
-    remove_line_matching(
-        text,
-        entity_iri,
-        |line| {
-            line.contains("subClassOf")
-                && (line.contains(parent_iri) || line.contains(&parent_short))
-        },
-        namespaces,
-    )
+    let parent = iri_to_turtle_term(parent_iri, namespaces);
+    remove_predicate_object_any_statement(text, entity_iri, "rdfs:subClassOf", &parent, namespaces)
 }
 
 fn remove_predicate_triples(
@@ -354,9 +334,7 @@ fn remove_predicate_triples(
     predicate: &str,
     namespaces: &BTreeMap<String, String>,
 ) -> Result<()> {
-    let entity = entity_stub(text, entity_iri, namespaces);
-    let range = entity_block_range(text, &entity)
-        .ok_or_else(|| OwlError::EntityNotFound(entity_iri.to_string()))?;
+    let range = entity_primary_range(text, entity_iri, namespaces)?;
     let block = &text[range.start as usize..range.end as usize];
     let new_block = remove_all_predicate_objects(block, predicate);
     replace_range(text, range, &new_block);
@@ -370,44 +348,9 @@ fn remove_matching_predicate(
     value: &str,
     namespaces: &BTreeMap<String, String>,
 ) -> Result<()> {
-    let needle = value.trim_matches('"');
-    remove_line_matching(
-        text,
-        entity_iri,
-        |line| line.contains(predicate) && line.contains(needle),
-        namespaces,
-    )
-}
-
-fn remove_line_matching(
-    text: &mut String,
-    entity_iri: &str,
-    pred: impl Fn(&str) -> bool,
-    namespaces: &BTreeMap<String, String>,
-) -> Result<()> {
-    let entity = ontoindex_core::Entity {
-        iri: entity_iri.to_string(),
-        short_name: short_name_from_iri(entity_iri),
-        kind: EntityKind::Class,
-        ontology_id: String::new(),
-        source_location: find_entity_location(text, entity_iri, namespaces),
-        labels: Vec::new(),
-        comments: Vec::new(),
-        deprecated: false,
-    };
-    let range = entity_block_range(text, &entity)
-        .ok_or_else(|| OwlError::EntityNotFound(entity_iri.to_string()))?;
-    let block = &text[range.start as usize..range.end as usize];
-    let mut new_block = String::new();
-    for line in block.lines() {
-        if pred(line) {
-            continue;
-        }
-        new_block.push_str(line);
-        new_block.push('\n');
-    }
-    replace_range(text, range, &new_block);
-    Ok(())
+    let escaped = escape_turtle_string(value.trim_matches('"'));
+    let object = format!("\"{escaped}\"");
+    remove_predicate_object(text, entity_iri, predicate, &object, namespaces)
 }
 
 fn insert_into_entity_block(
@@ -416,18 +359,7 @@ fn insert_into_entity_block(
     insertion: &str,
     namespaces: &BTreeMap<String, String>,
 ) -> Result<()> {
-    let entity = ontoindex_core::Entity {
-        iri: entity_iri.to_string(),
-        short_name: short_name_from_iri(entity_iri),
-        kind: EntityKind::Class,
-        ontology_id: String::new(),
-        source_location: find_entity_location(text, entity_iri, namespaces),
-        labels: Vec::new(),
-        comments: Vec::new(),
-        deprecated: false,
-    };
-    let range = entity_block_range(text, &entity)
-        .ok_or_else(|| OwlError::EntityNotFound(entity_iri.to_string()))?;
+    let range = entity_primary_range(text, entity_iri, namespaces)?;
     let block = &text[range.start as usize..range.end as usize];
     let trimmed = block.trim_end();
     let ends_with_dot = trimmed.ends_with('.');
@@ -474,21 +406,37 @@ fn escape_turtle_string(value: &str) -> String {
     out
 }
 
-fn entity_stub(
+fn entity_primary_range(
     text: &str,
     entity_iri: &str,
     namespaces: &BTreeMap<String, String>,
-) -> ontoindex_core::Entity {
-    ontoindex_core::Entity {
-        iri: entity_iri.to_string(),
-        short_name: short_name_from_iri(entity_iri),
-        kind: EntityKind::Class,
-        ontology_id: String::new(),
-        source_location: find_entity_location(text, entity_iri, namespaces),
-        labels: Vec::new(),
-        comments: Vec::new(),
-        deprecated: false,
+) -> Result<ByteRange> {
+    let ns = crate::span::namespaces_for_text(text, namespaces);
+    entity_primary_block_range(text, entity_iri, &ns)
+        .ok_or_else(|| OwlError::EntityNotFound(entity_iri.to_string()))
+}
+
+fn remove_predicate_object_any_statement(
+    text: &mut String,
+    entity_iri: &str,
+    predicate: &str,
+    object_value: &str,
+    namespaces: &BTreeMap<String, String>,
+) -> Result<()> {
+    let ns = crate::span::namespaces_for_text(text, namespaces);
+    let short = short_name_from_iri(entity_iri);
+    let ranges = all_entity_statement_ranges(text, entity_iri, &short, &ns);
+    if ranges.is_empty() {
+        return Err(OwlError::EntityNotFound(entity_iri.to_string()));
     }
+    for range in ranges {
+        let block = &text[range.start as usize..range.end as usize];
+        if let Some(new_block) = remove_matching_predicate_object(block, predicate, object_value) {
+            replace_range(text, range, &new_block);
+            return Ok(());
+        }
+    }
+    Err(OwlError::ManchesterInvalid(format!("no matching {predicate} axiom")))
 }
 
 fn normalize_ws(s: &str) -> String {
@@ -559,8 +507,7 @@ fn cleanup_block_separators(block: &str) -> String {
     while lines.last().is_some_and(|l| l.trim().is_empty()) {
         lines.pop();
     }
-    let joined = lines.join("\n");
-    joined.replace(";\n    ;", ";\n").replace(",\n        ,", ",\n").replace("  ", " ")
+    lines.join("\n").replace(";\n    ;", ";\n").replace(",\n        ,", ",\n")
 }
 
 fn remove_all_predicate_objects(block: &str, predicate: &str) -> String {
@@ -602,9 +549,7 @@ fn remove_predicate_object(
     object_value: &str,
     namespaces: &BTreeMap<String, String>,
 ) -> Result<()> {
-    let entity = entity_stub(text, entity_iri, namespaces);
-    let range = entity_block_range(text, &entity)
-        .ok_or_else(|| OwlError::EntityNotFound(entity_iri.to_string()))?;
+    let range = entity_primary_range(text, entity_iri, namespaces)?;
     let block = &text[range.start as usize..range.end as usize];
     let new_block = remove_matching_predicate_object(block, predicate, object_value)
         .ok_or_else(|| OwlError::ManchesterInvalid(format!("no matching {predicate} axiom")))?;
@@ -686,15 +631,6 @@ fn text_contains_entity(
         || namespaces.iter().any(|(prefix, ns)| {
             entity_iri.starts_with(ns) && text.contains(&format!("{prefix}:{short}"))
         })
-}
-
-fn find_entity_location(
-    text: &str,
-    entity_iri: &str,
-    namespaces: &BTreeMap<String, String>,
-) -> SourceLocation {
-    let namespaces = crate::span::namespaces_for_text(text, namespaces);
-    crate::span::find_entity_block(text, entity_iri, &short_name_from_iri(entity_iri), &namespaces)
 }
 
 fn iri_to_turtle_term(iri: &str, namespaces: &BTreeMap<String, String>) -> String {
@@ -782,15 +718,47 @@ mod tests {
     }
 
     #[test]
-    fn label_with_newline_is_escaped() {
+    fn remove_subclass_from_trailing_triple() {
         let ttl = include_str!("../../../fixtures/example.ttl");
-        let patches = vec![PatchOp::AddLabel {
+        let patches = vec![PatchOp::RemoveSubClassOf {
             entity_iri: "http://example.org/people#Person".to_string(),
-            value: "Line1\nLine2".to_string(),
+            parent_iri: "http://example.org/people#Thing".to_string(),
         }];
         let result = apply_patches_to_text(ttl, &patches, true, &ex_ns()).expect("patch");
         let preview = result.preview_text.expect("preview");
-        assert!(preview.contains("\\n"));
-        assert!(!preview.contains("\"Line1\n"));
+        assert!(!preview.contains("ex:Person rdfs:subClassOf ex:Thing"));
+        assert!(preview.contains("ex:Person a owl:Class"));
+    }
+
+    #[test]
+    fn delete_entity_removes_all_statements() {
+        let ttl = include_str!("../../../fixtures/example.ttl");
+        let patches = vec![PatchOp::DeleteEntity {
+            entity_iri: "http://example.org/people#Person".to_string(),
+        }];
+        let result = apply_patches_to_text(ttl, &patches, true, &ex_ns()).expect("patch");
+        let preview = result.preview_text.expect("preview");
+        assert!(!preview.contains("ex:Person a owl:Class"));
+        assert!(!preview.contains("ex:Person rdfs:subClassOf"));
+    }
+
+    #[test]
+    fn crlf_line_offsets_match_byte_positions() {
+        let ttl = "ex:Foo a owl:Class ;\r\n    rdfs:label \"Bar\" .\r\n";
+        let ns = BTreeMap::from([
+            ("ex".into(), "http://example.org/".into()),
+            ("owl".into(), "http://www.w3.org/2002/07/owl#".into()),
+        ]);
+        let range = entity_primary_block_range(ttl, "http://example.org/Foo", &ns).expect("range");
+        let block = &ttl[range.start as usize..range.end as usize];
+        assert!(block.contains("rdfs:label"));
+        assert!(block.trim_end().ends_with('.'));
+    }
+
+    #[test]
+    fn cleanup_preserves_literal_double_spaces() {
+        let block = "ex:Foo rdfs:label \"a  b\" .";
+        let cleaned = cleanup_block_separators(block);
+        assert!(cleaned.contains("\"a  b\""));
     }
 }

@@ -1,5 +1,5 @@
 use crate::error::{OntoIndexError, Result};
-use crate::limits::{MAX_FILE_BYTES, MAX_SCAN_FILES};
+use crate::limits::{MAX_FILE_BYTES, MAX_SCAN_FILES, MAX_SCAN_WALK_ENTRIES};
 use crate::model::OntologyFormat;
 use crate::path_jail::canonical_workspace_root;
 use ignore::WalkBuilder;
@@ -45,6 +45,7 @@ impl WorkspaceScanner {
         }
 
         let mut files = Vec::new();
+        let mut walked = 0usize;
         let walker = WalkBuilder::new(&self.root)
             .hidden(false)
             .git_ignore(true)
@@ -54,6 +55,12 @@ impl WorkspaceScanner {
             .build();
 
         for entry in walker {
+            walked += 1;
+            if walked > MAX_SCAN_WALK_ENTRIES {
+                return Err(OntoIndexError::Scanner(format!(
+                    "workspace walk exceeds maximum of {MAX_SCAN_WALK_ENTRIES} entries"
+                )));
+            }
             if files.len() >= MAX_SCAN_FILES {
                 return Err(OntoIndexError::Scanner(format!(
                     "workspace exceeds maximum of {MAX_SCAN_FILES} ontology files"
@@ -95,7 +102,7 @@ impl WorkspaceScanner {
             )));
         }
 
-        let content = fs::read(path)?;
+        let content = crate::io::read_file_capped(path, MAX_FILE_BYTES)?;
         let mut hasher = Sha256::new();
         hasher.update(&content);
         let content_hash = hex::encode(hasher.finalize());

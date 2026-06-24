@@ -11,6 +11,7 @@ export class EntityInspectorPanel {
   private iri: string | undefined;
   private documentUri: string | undefined;
   private classOptions: string[] = [];
+  private activeRequestId = 0;
 
   private constructor(
     panel: vscode.WebviewPanel,
@@ -61,13 +62,14 @@ export class EntityInspectorPanel {
     extensionUri: vscode.Uri,
     detail: EntityDetail,
     classOptions: string[] = [],
-    providers?: RefreshFn
+    providers?: RefreshFn,
+    requestId?: number
   ): EntityInspectorPanel {
     if (EntityInspectorPanel.currentPanel) {
       EntityInspectorPanel.currentPanel.panel.reveal(
         vscode.ViewColumn.Beside
       );
-      EntityInspectorPanel.currentPanel.update(detail, classOptions);
+      EntityInspectorPanel.currentPanel.update(detail, classOptions, requestId);
       return EntityInspectorPanel.currentPanel;
     }
 
@@ -83,20 +85,35 @@ export class EntityInspectorPanel {
       extensionUri,
       providers
     );
-    EntityInspectorPanel.currentPanel.update(detail, classOptions);
+    EntityInspectorPanel.currentPanel.update(detail, classOptions, requestId);
     return EntityInspectorPanel.currentPanel;
   }
 
-  public update(detail: EntityDetail, classOptions: string[] = []): void {
+  public update(
+    detail: EntityDetail,
+    classOptions: string[] = [],
+    requestId?: number
+  ): void {
+    if (requestId !== undefined && requestId !== this.activeRequestId && this.activeRequestId !== 0) {
+      return;
+    }
+    if (requestId !== undefined) {
+      this.activeRequestId = requestId;
+    }
     this.iri = detail.entity.iri;
     this.classOptions = classOptions;
-    if (detail.document_path) {
-      this.documentUri = vscode.Uri.file(detail.document_path).toString();
-    }
+    this.documentUri = detail.document_path
+      ? vscode.Uri.file(detail.document_path).toString()
+      : undefined;
     this.panel.title = `${entityKindLabel(detail.entity.kind)}: ${
       detail.entity.labels[0] ?? detail.entity.short_name
     }`;
     this.panel.webview.html = this.renderHtml(detail);
+    this.panel.webview.postMessage({
+      command: "init",
+      entityIri: detail.entity.iri,
+      axioms: detail.axioms,
+    });
   }
 
   private async runPatch(
@@ -107,12 +124,16 @@ export class EntityInspectorPanel {
       void vscode.window.showErrorMessage("No editable Turtle document for this entity");
       return;
     }
+    const iriAtStart = this.iri;
     try {
       const result = await applyAxiomPatch({
         document_uri: this.documentUri,
         patches,
         preview_only: previewOnly,
       });
+      if (iriAtStart !== this.iri) {
+        return;
+      }
       if (previewOnly && result.preview_text) {
         this.panel.webview.postMessage({
           command: "preview",
@@ -120,10 +141,16 @@ export class EntityInspectorPanel {
         });
         return;
       }
-      if (result.entity_detail && this.iri) {
+      if (result.entity_detail) {
+        if (result.entity_detail.entity.iri !== this.iri) {
+          return;
+        }
         this.update(result.entity_detail, this.classOptions);
       } else if (this.iri) {
         const { detail } = await getEntity(this.iri);
+        if (iriAtStart !== this.iri) {
+          return;
+        }
         this.update(detail, this.classOptions);
       }
       if (this.onRefresh) {
@@ -238,75 +265,82 @@ export class EntityInspectorPanel {
   <button id="jump">Jump to Source</button>
   <script>
     const vscode = acquireVsCodeApi();
-    const entityIri = ${JSON.stringify(entity.iri)};
-    const axioms = ${JSON.stringify(axioms)};
+    let entityIri = '';
+    let axioms = [];
 
-    document.getElementById('jump').addEventListener('click', () => {
-      vscode.postMessage({ command: 'jumpToSource' });
-    });
+    function bindHandlers() {
+      document.getElementById('jump').addEventListener('click', () => {
+        vscode.postMessage({ command: 'jumpToSource' });
+      });
+
+      const addLabel = document.getElementById('addLabel');
+      if (addLabel) {
+        addLabel.addEventListener('click', () => {
+          const value = document.getElementById('newLabel').value.trim();
+          if (!value) return;
+          apply([{ op: 'add_label', entity_iri: entityIri, value }], false);
+        });
+      }
+      const addComment = document.getElementById('addComment');
+      if (addComment) {
+        addComment.addEventListener('click', () => {
+          const value = document.getElementById('newComment').value.trim();
+          if (!value) return;
+          apply([{ op: 'add_comment', entity_iri: entityIri, value }], false);
+        });
+      }
+      const addParent = document.getElementById('addParent');
+      if (addParent) {
+        addParent.addEventListener('click', () => {
+          const parent = document.getElementById('parentPick').value;
+          if (!parent) return;
+          apply([{ op: 'add_sub_class_of', entity_iri: entityIri, parent_iri: parent }], false);
+        });
+      }
+      const previewPatch = document.getElementById('previewPatch');
+      if (previewPatch) {
+        previewPatch.addEventListener('click', () => {
+          const value = document.getElementById('newLabel').value.trim();
+          if (!value) return;
+          apply([{ op: 'add_label', entity_iri: entityIri, value }], true);
+        });
+      }
+      const deleteEntity = document.getElementById('deleteEntity');
+      if (deleteEntity) {
+        deleteEntity.addEventListener('click', () => {
+          if (confirm('Delete this entity from the ontology file?')) {
+            apply([{ op: 'delete_entity', entity_iri: entityIri }], false);
+          }
+        });
+      }
+      document.querySelectorAll('.editManchester').forEach((btn) => {
+        btn.addEventListener('click', () => {
+          const idx = Number(btn.getAttribute('data-axiom-idx'));
+          vscode.postMessage({ command: 'openManchester', axiom: axioms[idx] });
+        });
+      });
+      const addManchester = document.getElementById('addManchesterAxiom');
+      if (addManchester) {
+        addManchester.addEventListener('click', () => {
+          vscode.postMessage({ command: 'addManchesterAxiom' });
+        });
+      }
+    }
 
     function apply(patches, previewOnly) {
       vscode.postMessage({ command: 'applyPatch', patches, previewOnly });
     }
 
     window.addEventListener('message', (event) => {
+      if (event.data.command === 'init') {
+        entityIri = event.data.entityIri || '';
+        axioms = event.data.axioms || [];
+        bindHandlers();
+      }
       if (event.data.command === 'preview') {
         document.getElementById('preview').textContent = event.data.text || '';
       }
     });
-
-    const addLabel = document.getElementById('addLabel');
-    if (addLabel) {
-      addLabel.addEventListener('click', () => {
-        const value = document.getElementById('newLabel').value.trim();
-        if (!value) return;
-        apply([{ op: 'add_label', entity_iri: entityIri, value }], false);
-      });
-    }
-    const addComment = document.getElementById('addComment');
-    if (addComment) {
-      addComment.addEventListener('click', () => {
-        const value = document.getElementById('newComment').value.trim();
-        if (!value) return;
-        apply([{ op: 'add_comment', entity_iri: entityIri, value }], false);
-      });
-    }
-    const addParent = document.getElementById('addParent');
-    if (addParent) {
-      addParent.addEventListener('click', () => {
-        const parent = document.getElementById('parentPick').value;
-        if (!parent) return;
-        apply([{ op: 'add_sub_class_of', entity_iri: entityIri, parent_iri: parent }], false);
-      });
-    }
-    const previewPatch = document.getElementById('previewPatch');
-    if (previewPatch) {
-      previewPatch.addEventListener('click', () => {
-        const value = document.getElementById('newLabel').value.trim();
-        if (!value) return;
-        apply([{ op: 'add_label', entity_iri: entityIri, value }], true);
-      });
-    }
-    const deleteEntity = document.getElementById('deleteEntity');
-    if (deleteEntity) {
-      deleteEntity.addEventListener('click', () => {
-        if (confirm('Delete this entity from the ontology file?')) {
-          apply([{ op: 'delete_entity', entity_iri: entityIri }], false);
-        }
-      });
-    }
-    document.querySelectorAll('.editManchester').forEach((btn) => {
-      btn.addEventListener('click', () => {
-        const idx = Number(btn.getAttribute('data-axiom-idx'));
-        vscode.postMessage({ command: 'openManchester', axiom: axioms[idx] });
-      });
-    });
-    const addManchester = document.getElementById('addManchesterAxiom');
-    if (addManchester) {
-      addManchester.addEventListener('click', () => {
-        vscode.postMessage({ command: 'addManchesterAxiom' });
-      });
-    }
   </script>
 </body>
 </html>`;

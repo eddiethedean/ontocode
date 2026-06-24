@@ -1,4 +1,4 @@
-# SPARQL reference (OntoIndex v0.4)
+# SPARQL reference (OntoIndex v0.5)
 
 Run SPARQL queries over the **indexed triple store** built from workspace ontology files.
 

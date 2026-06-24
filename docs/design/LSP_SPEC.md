@@ -1,10 +1,11 @@
 # LSP_SPEC.md
 
-> **Document status: target design (v0.4 partial implementation)**
+> **Document status: target design (v0.5 partial implementation)**
 >
-> For what ships today, read **[lsp-api.md](../lsp-api.md)** (authoritative for v0.4).
+> For what ships today, read **[lsp-api.md](../lsp-api.md)** (authoritative for v0.5).
 > Implemented: hover, document/workspace symbols, go-to-definition, diagnostics publishing,
-> `ontoindex/indexWorkspace`, `ontoindex/getCatalogSnapshot`, `ontoindex/getEntity`, `ontoindex/applyAxiomPatch`.
+> `ontoindex/indexWorkspace`, `ontoindex/getCatalogSnapshot`, `ontoindex/getEntity`, `ontoindex/applyAxiomPatch`,
+> `ontoindex/query`, `ontoindex/sparql`, `ontoindex/parseManchester`.
 > See [`handlers.rs` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/crates/ontoindex-lsp/src/handlers.rs) and
 > [`protocol.rs` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/crates/ontoindex-lsp/src/protocol.rs).
 

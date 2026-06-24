@@ -4,7 +4,7 @@ OntoCode / OntoIndex is licensed under **MIT OR Apache-2.0** at your option (see
 
 This document summarizes **third-party licenses** for dependencies named in [DEPENDENCY_MATRIX.md](DEPENDENCY_MATRIX.md). It is not legal advice. Regenerate NOTICES before releases when dependency sets change.
 
-## Direct dependencies (shipped v0.4)
+## Direct dependencies (shipped v0.5)
 
 | Crate | License | Distribution notes |
 |-------|---------|-------------------|

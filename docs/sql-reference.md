@@ -1,4 +1,4 @@
-# SQL query reference (OntoIndex v0.4)
+# SQL query reference (OntoIndex v0.5)
 
 OntoIndex exposes indexed ontology data as **virtual tables** queried with a SQL-like `SELECT` syntax. The CLI (`ontoindex query`) and Rust API (`query_catalog`) use the same engine.
 
@@ -11,10 +11,10 @@ OntoIndex exposes indexed ontology data as **virtual tables** queried with a SQL
 - `WHERE` with comparisons and boolean combinations:
   - `column = 'value'` or `column != 'value'` (string literals)
   - `column` or `NOT column` (boolean column identifiers, e.g. `deprecated`)
-  - Combine with `AND` / `OR` (no parentheses in v0.4)
+  - Combine with `AND` / `OR` (no parentheses)
 - Output formats: text (default), JSON (`--format json`), CSV (`--format csv`)
 
-Not supported in v0.4: `JOIN`, subqueries, `GROUP BY`, `ORDER BY`, SQL functions, `LIKE`, `IN`, or multiple tables.
+Not supported: `JOIN`, subqueries, `GROUP BY`, `ORDER BY`, SQL functions, `LIKE`, `IN`, or multiple tables.
 
 ```bash
 ontoindex query ./fixtures "SELECT short_name FROM classes WHERE short_name != 'Person'"

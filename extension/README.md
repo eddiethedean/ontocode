@@ -24,7 +24,7 @@ OntoCode activates when your workspace contains any of:
 
 | Extension | Format |
 |-----------|--------|
-| `.ttl` | Turtle (editable in v0.4) |
+| `.ttl` | Turtle (editable) |
 | `.owl`, `.rdf` | RDF/XML |
 | `.jsonld`, `.json-ld` | JSON-LD |
 | `.nt`, `.nq` | N-Triples / N-Quads |

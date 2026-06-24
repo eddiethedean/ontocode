@@ -182,8 +182,9 @@ Method: `ontoindex/applyAxiomPatch`
 
 See [lsp-api.md](lsp-api.md) and [authoring.md](authoring.md).
 
-## Limitations (v0.4)
+## Limitations (v0.5)
 
 - Turtle only; RDF/XML, OWL/XML, JSON-LD are read-only
-- `add_sub_class_of` parent must be a **named class IRI** (no class expressions)
+- Simple `add_sub_class_of` parent must be a **named class IRI**; use Manchester ops (`add_complex_sub_class_of`, `add_equivalent_class`, etc.) for class expressions
+- Manchester MVP: `SubClassOf` and `EquivalentClasses` only — no disjoint axioms or property chains
 - Patch engine uses targeted text edits; unusual formatting may need manual review

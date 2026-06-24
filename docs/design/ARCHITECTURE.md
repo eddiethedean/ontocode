@@ -87,7 +87,7 @@ The architecture must support:
 
 ### 4.2 Parser Layer (dual)
 - **Oxigraph:** RDF parse, triple store, SPARQL ([ADR-0003](adr/0003-use-oxigraph.md))
-- **Horned-OWL (v0.4b+):** OWL 2 axiom model via `horned-owl` + `horned-functional` ([ADR-0013](adr/0013-dual-stack-oxigraph-horned-owl.md), [ADR-0016](adr/0016-dependency-first-implementation.md))
+- **Horned-OWL (v0.4.0+):** OWL 2 axiom model via `horned-owl` + `horned-functional` ([ADR-0013](adr/0013-dual-stack-oxigraph-horned-owl.md), [ADR-0016](adr/0016-dependency-first-implementation.md))
 - **OBO (v0.7b+):** `fastobo`, `fastobo-owl`
 
 ### 4.3 Catalog Layer

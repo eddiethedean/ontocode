@@ -50,6 +50,25 @@ npm run compile
 npm test
 ```
 
+Extension tests expect a built `ontoindex-lsp` binary. From the repo root:
+
+```bash
+cargo build -p ontoindex-lsp --bins
+cd extension
+export ONTOINDEX_LSP_BIN="$(pwd)/../target/debug/ontoindex-lsp"
+npm test
+```
+
+**F5 / Run Extension:** Open the `extension/` folder in VS Code, build LSP (`cargo build -p ontoindex-lsp --bins`), optionally set `ontocode.lspPath` to your debug binary, then launch **Run Extension**.
+
+**LSP integration smoke test** (workspace crate):
+
+```bash
+cargo test -p ontocode --test lsp_smoke
+```
+
+**VS Code E2E matrix** (separate workflow): see `.github/workflows/extension-vscode-e2e.yml`. Run locally with `@vscode/test-electron` after packaging the extension.
+
 Full extension packaging (bundles LSP for current platform):
 
 ```bash
@@ -75,7 +94,7 @@ cargo run -p ontocode --example index_and_query
 ### Documentation site (MkDocs / Read the Docs)
 
 ```bash
-pip install -r docs/requirements.txt
+pip install -r docs/requirements.txt   # Python 3.12 in CI
 mkdocs serve
 mkdocs build --strict   # CI uses this; must pass with no warnings
 ```

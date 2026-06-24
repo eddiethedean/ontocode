@@ -6,9 +6,9 @@ How to verify OntoCode / OntoIndex release artifacts from [GitHub Releases](http
 
 Each release includes `SHA256SUMS` with SHA-256 hashes of:
 
-- `ontoindex-*.tar.gz` (CLI binary)
-- `ontoindex-lsp-*.tar.gz` / `.zip` (per-platform LSP)
-- `ontocode-*.vsix` (VS Code extension)
+- `ontoindex-v<version>-x86_64-unknown-linux-gnu.tar.gz` (CLI binary, Linux x64)
+- `ontoindex-lsp-v<version>-<platform>.tar.gz` / `.zip` (per-platform LSP)
+- `ontocode-<version>.vsix` (VS Code extension)
 
 Verify after download:
 
@@ -17,6 +17,18 @@ shasum -a 256 -c SHA256SUMS
 ```
 
 On Linux you may use `sha256sum -c SHA256SUMS` instead.
+
+## Worked example (Linux x64 CLI)
+
+```bash
+VERSION=0.4.0
+curl -fsSLO "https://github.com/eddiethedean/ontocode/releases/download/v${VERSION}/SHA256SUMS"
+curl -fsSLO "https://github.com/eddiethedean/ontocode/releases/download/v${VERSION}/ontoindex-v${VERSION}-x86_64-unknown-linux-gnu.tar.gz"
+sha256sum -c SHA256SUMS
+tar xzf "ontoindex-v${VERSION}-x86_64-unknown-linux-gnu.tar.gz"
+chmod +x "ontoindex-v${VERSION}-x86_64-unknown-linux-gnu"
+./ontoindex-v${VERSION}-x86_64-unknown-linux-gnu --version
+```
 
 ## crates.io
 

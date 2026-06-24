@@ -31,10 +31,12 @@ Full JSON reference: [patch-reference.md](patch-reference.md).
 
 ### Example: add a label in the inspector
 
-1. Open `fixtures/example.ttl` (or your own `.ttl` file).
-2. In **OntoCode → Classes**, click `Person`.
-3. In the inspector edit section, add or change a label and save.
-4. Confirm the change in the Turtle file and run **OntoCode: Index Workspace** if the tree does not refresh.
+1. Open a **`.ttl`** file in your workspace (any Turtle ontology you are editing).
+2. In **OntoCode → Classes**, click a class (e.g. one named `Person` in your ontology).
+3. In the inspector **Edit** section, add or change a label and save.
+4. Confirm the change in the Turtle file. Run **OntoCode: Index Workspace** if the tree does not refresh.
+
+> **Git clone users:** the repository includes `fixtures/example.ttl` for CLI examples and tests. Marketplace users should use their own `.ttl` files — you do not need the repo fixtures.
 
 ## CLI
 

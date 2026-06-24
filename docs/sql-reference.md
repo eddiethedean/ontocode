@@ -8,16 +8,26 @@ OntoIndex exposes indexed ontology data as **virtual tables** queried with a SQL
 
 - `SELECT *` or `SELECT col1, col2, ...` from a single virtual table
 - `FROM table_name` (one table only)
-- `WHERE` with simple comparisons: `column = 'value'` (string literals only)
+- `WHERE` with comparisons and boolean combinations:
+  - `column = 'value'` or `column != 'value'` (string literals)
+  - `column` or `NOT column` (boolean column identifiers, e.g. `deprecated`)
+  - Combine with `AND` / `OR` (no parentheses in v0.4)
 - Output formats: text (default), JSON (`--format json`), CSV (`--format csv`)
 
-Not supported in v0.4: `JOIN`, subqueries, `GROUP BY`, `ORDER BY`, functions, or multiple tables.
+Not supported in v0.4: `JOIN`, subqueries, `GROUP BY`, `ORDER BY`, SQL functions, `LIKE`, `IN`, or multiple tables.
+
+```bash
+ontoindex query ./fixtures "SELECT short_name FROM classes WHERE short_name != 'Person'"
+ontoindex query ./fixtures "SELECT short_name FROM classes WHERE deprecated = 'false' AND short_name = 'Person'"
+```
 
 SPARQL over indexed triples: [sparql-reference.md](sparql-reference.md).
 
 **v1.0 plan:** extend [`sqlparser`](https://crates.io/crates/sqlparser) virtual-table joins/aggregations first ([ADR-0011](design/adr/0011-use-sqlparser-for-sql.md) amendment). Revisit [DataFusion](https://crates.io/crates/datafusion) only if scope exceeds hand-rolled implementation — see [DEPENDENCY_MATRIX.md](design/DEPENDENCY_MATRIX.md).
 
-**Limits:** query strings up to 1 MiB; result sets capped at 100,000 rows (see `ontoindex-core::limits`).
+**Limits:** query strings up to 1 MiB; result sets capped at 100,000 rows (see [workspace-limits.md](workspace-limits.md)).
+
+> **Warning:** SQL results are **silently truncated** at 100,000 rows. SPARQL returns an **error** at the same cap. Do not use SQL row counts as strict CI gates without checking [workspace-limits.md](workspace-limits.md).
 
 ## Virtual tables and columns
 
@@ -96,7 +106,7 @@ Entity tables share these columns (`properties` is the union of all property kin
 
 ## Examples
 
-See [query cookbook](https://github.com/eddiethedean/ontocode/blob/main/examples/queries.md) for a copy-paste cookbook.
+See [query cookbook](examples/queries.md) for a copy-paste cookbook.
 
 ```bash
 ontoindex query ./fixtures "SELECT * FROM classes"

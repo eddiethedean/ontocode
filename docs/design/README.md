@@ -1,10 +1,12 @@
 # OntoIndex + OntoCode Documentation Package
 
-This package contains **product vision and specification** documents. For **user-facing guides** (install, SQL, implemented LSP API), see the [documentation home](../index.md).
+> **Note:** Documents in this folder describe **product vision, target architecture, and planned features**. For **what ships in v0.4.0**, use the user guides ([documentation home](https://onto-code.readthedocs.io/en/latest/)) and [lsp-api.md](https://onto-code.readthedocs.io/en/latest/lsp-api/).
+
+This package contains **product vision and specification** documents. For **user-facing guides** (install, SQL, implemented LSP API), see the [documentation home](https://onto-code.readthedocs.io/en/latest/).
 
 | Package | Audience |
 |---------|----------|
-| [User docs](../index.md) | New users and integrators (install, SQL reference, LSP API v0.4) |
+| [User docs](https://onto-code.readthedocs.io/en/latest/) | New users and integrators (install, SQL reference, LSP API v0.4) |
 | `docs/design/` (this folder) | Contributors and planners (roadmap, target architecture, ADRs) |
 
 Two related products:
@@ -24,9 +26,9 @@ Two related products:
 
 Many specs describe **target** behavior. Check the banner at the top of each doc, or:
 
-- **Implemented v0.4 LSP:** [docs/lsp-api.md](../lsp-api.md)
-- **Implemented SQL tables:** [docs/sql-reference.md](../sql-reference.md)
-- **Implemented authoring:** [docs/authoring.md](../authoring.md)
+- **Implemented v0.4 LSP:** [LSP API](https://onto-code.readthedocs.io/en/latest/lsp-api/)
+- **Implemented SQL tables:** [SQL reference](https://onto-code.readthedocs.io/en/latest/sql-reference/)
+- **Implemented authoring:** [authoring guide](https://onto-code.readthedocs.io/en/latest/authoring/)
 - **ADRs (canonical):** [adr/README.md](adr/README.md)
 
 ## Documents

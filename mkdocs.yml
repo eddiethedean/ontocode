@@ -70,17 +70,23 @@ nav:
   - Home: index.md
   - Getting started:
       - Start here: guides/start-here.md
+      - First success (10 min): guides/first-success.md
       - 5-minute guide: getting-started.md
       - Install VS Code: vscode-install.md
-      - Workspace limits: workspace-limits.md
   - Guides:
       - Authoring (Turtle): authoring.md
       - Patch JSON: patch-reference.md
       - CI integration: ci-integration.md
+      - Enterprise evaluation: guides/enterprise-eval.md
   - Reference:
       - SQL virtual tables: sql-reference.md
       - SPARQL: sparql-reference.md
       - LSP API: lsp-api.md
+      - Errors: errors.md
+      - Workspace limits: workspace-limits.md
+  - Examples:
+      - Query cookbook: examples/queries.md
+      - Sample patches: examples/patches.md
   - Help:
       - FAQ: faq.md
       - Security: security.md

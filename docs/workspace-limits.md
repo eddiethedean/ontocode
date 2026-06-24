@@ -14,6 +14,7 @@ Constants live in [`limits.rs` on GitHub](https://github.com/eddiethedean/ontoco
 | Open editor buffers (LSP) | Up to **256** tracked paths (`MAX_OPEN_DOCUMENTS`) |
 | Entities | Up to **1,000,000** per workspace (`MAX_ENTITIES`) |
 | RDF triples | Up to **20,000,000** total (`MAX_TOTAL_TRIPLES`) |
+| Triples per file | Up to **5,000,000** (`MAX_TRIPLES_PER_FILE`) |
 
 Workspaces above these limits may fail indexing with a clear error. For very large
 terminologies (e.g. full OBO), prefer CLI batch workflows and expect v0.4+ incremental
@@ -24,8 +25,8 @@ indexing improvements.
 | Limit | Value |
 |-------|-------|
 | SQL/SPARQL query string | **1 MB** (`MAX_QUERY_BYTES`) |
-| SQL result rows | **100,000** (truncated) |
-| SPARQL result rows | **100,000** (error) |
+| SQL result rows | **100,000** — **silently truncated** (no error) |
+| SPARQL result rows | **100,000** — **error** if exceeded |
 
 ## `ontoindex validate` exit codes
 

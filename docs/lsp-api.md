@@ -43,13 +43,50 @@ Rebuild the workspace catalog.
 { "workspace_uri": "file:///path/to/workspace" }
 ```
 
-`workspace_uri` is optional; the server uses the initialized workspace folder when omitted. Legacy clients may send `workspaceUri` (camelCase); support will be removed in v0.4.
+`workspace_uri` is optional; the server uses the initialized workspace folder when omitted. Legacy clients may send `workspaceUri` (camelCase); prefer `workspace_uri` for new integrations.
 
 **Result:** `IndexWorkspaceResult`
 
+| Field | Type | Description |
+|-------|------|-------------|
+| `stats` | `CatalogStats` | Counts after indexing (see below) |
+| `indexed_at` | number | Unix timestamp (seconds) |
+
+**`CatalogStats` fields:**
+
+| Field | Description |
+|-------|-------------|
+| `ontology_count` | Indexed ontology documents |
+| `class_count` | Classes |
+| `object_property_count` | Object properties |
+| `data_property_count` | Data properties |
+| `annotation_property_count` | Annotation properties |
+| `individual_count` | Named individuals |
+| `axiom_count` | Extracted axioms |
+| `annotation_count` | Annotation triples |
+| `triple_count` | Total RDF triples (Oxigraph) |
+| `error_count` | Documents with parse errors |
+| `diagnostic_error_count` | Lint errors |
+| `diagnostic_warning_count` | Lint warnings |
+| `diagnostic_info_count` | Lint info |
+
 ```json
 {
-  "stats": { "class_count": 2, "ontology_count": 1, "...": "..." },
+  "stats": {
+    "ontology_count": 1,
+    "class_count": 2,
+    "object_property_count": 1,
+    "data_property_count": 0,
+    "annotation_property_count": 0,
+    "individual_count": 1,
+    "axiom_count": 2,
+    "annotation_count": 4,
+    "triple_count": 12,
+    "error_count": 0,
+    "diagnostic_error_count": 0,
+    "diagnostic_warning_count": 0,
+    "diagnostic_info_count": 0
+  },
   "indexed_at": 1718000000
 }
 ```
@@ -62,14 +99,14 @@ Return documents, entities, and class hierarchy for the explorer UI.
 
 **Result:** `CatalogSnapshot`
 
-```json
-{
-  "documents": [ "... OntologyDocument ..." ],
-  "entities": [ "... Entity ..." ],
-  "hierarchy": { "edges": [], "parents": {}, "children": {} },
-  "diagnostics": [ "... DiagnosticSummary ..." ]
-}
-```
+| Field | Type | Description |
+|-------|------|-------------|
+| `documents` | `OntologyDocument[]` | Indexed files (`id`, `path`, `format`, `parse_status`, …) |
+| `entities` | `Entity[]` | All extracted entities |
+| `hierarchy` | `ClassHierarchy` | `edges`, `parents`, `children` maps |
+| `diagnostics` | `DiagnosticSummary[]` | Lint summaries for explorer |
+
+**`Entity` fields:** `iri`, `short_name`, `kind`, `ontology_id`, `labels[]`, `comments[]`, `deprecated`, optional `source_location`.
 
 **Errors:** `NOT_INDEXED` if the workspace has not been indexed.
 
@@ -83,7 +120,17 @@ Return detailed entity information for the inspector.
 { "iri": "http://example.org/people#Person" }
 ```
 
-**Result:** `GetEntityResult` with `EntityDetail` (entity, parents, children, axioms, optional source, `editable`, `document_path`).
+**Result:** `GetEntityResult` with `detail` (`EntityDetail`):
+
+| Field | Description |
+|-------|-------------|
+| `entity` | Core `Entity` record |
+| `parents` | Parent class IRIs |
+| `children` | Child class IRIs |
+| `axioms` | Human-readable axiom strings |
+| `source` | Optional `{ path, line, column }` |
+| `editable` | `true` for Turtle write-back in v0.4 |
+| `document_path` | Filesystem path to declaring file |
 
 **Errors:** `NOT_INDEXED`, `ENTITY_NOT_FOUND`
 
@@ -103,13 +150,23 @@ Apply Turtle patch operations. See [authoring.md](authoring.md).
 }
 ```
 
-**Result:** `ApplyPatchResult` — `applied`, optional `preview_text`, `entity_detail` after apply.
+**Result:** `ApplyAxiomPatchResult` (flattened patch result + optional entity):
+
+| Field | Description |
+|-------|-------------|
+| `applied` | `true` if patches were written (false for preview-only or validation failure) |
+| `preview_text` | Turtle preview when `preview_only: true` |
+| `diagnostics` | `PatchDiagnostic[]` on failure (`severity`, `message`) |
+| `document_path` | Path to modified file |
+| `entity_detail` | Updated `EntityDetail` after successful apply (LSP only) |
+
+See [patch-reference.md](patch-reference.md) for CLI `ApplyPatchResult` examples and [errors.md](errors.md) for failure codes.
 
 **Errors:** `PATCH_INVALID`, `UNSUPPORTED_FORMAT`, `NOT_INDEXED`
 
 ## Structured errors
 
-Custom method failures return `LspErrorPayload` (Rust type; not `ontoindex_core::OntoIndexError`):
+Custom method failures return `LspErrorPayload` in the JSON-RPC error `data` field. Full catalog: [errors.md](errors.md).
 
 | Field | Description |
 |-------|-------------|

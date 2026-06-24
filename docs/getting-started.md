@@ -13,12 +13,7 @@ Five-minute paths to success with OntoIndex (CLI) and OntoCode (VS Code).
 
 ## Path A — VS Code (recommended for browsing and editing)
 
-1. Install [OntoCode from the Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) or a [release VSIX](https://github.com/eddiethedean/ontocode/releases).
-2. **File → Open Folder…** and choose a directory with `.ttl`, `.owl`, or other ontology files.
-3. **Trust** the workspace when prompted.
-4. Click the **OntoCode** icon in the Activity Bar.
-5. Expand **Classes** and click an entity to open the **Entity Inspector**.
-6. For `.ttl` files, use the edit section to change labels or parents.
+Follow [First success in 10 minutes](guides/first-success.md) — Marketplace install, browse the explorer, edit `.ttl` in the Entity Inspector.
 
 Details: [vscode-install.md](vscode-install.md) · [authoring.md](authoring.md)
 
@@ -54,15 +49,21 @@ ontoindex validate /path/to/your/ontologies
 ## Path D — Release binaries (no Rust)
 
 1. Open [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) for the latest v0.4.x tag.
-2. Download `ontoindex-*.tar.gz` (CLI, Linux x64) or `ontoindex-lsp-*.tar.gz` for your platform.
+2. Download the CLI tarball for your platform (Linux x64 example below) or `ontoindex-lsp-v0.4.0-<platform>.tar.gz` / `.zip` for LSP-only use.
 3. Verify with `SHA256SUMS` — see [release-integrity.md](release-integrity.md).
-4. Extract and run:
+4. Extract and run (replace `0.4.0` with your release tag):
 
 ```bash
-tar xzf ontoindex-*.tar.gz
-./ontoindex query /path/to/ontologies "SELECT * FROM classes"
-./ontoindex validate /path/to/ontologies
+VERSION=0.4.0
+ASSET="ontoindex-v${VERSION}-x86_64-unknown-linux-gnu.tar.gz"
+BIN="ontoindex-v${VERSION}-x86_64-unknown-linux-gnu"
+tar xzf "${ASSET}"
+chmod +x "${BIN}"
+./"${BIN}" query /path/to/ontologies "SELECT * FROM classes"
+./"${BIN}" validate /path/to/ontologies
 ```
+
+> **Note:** The extracted binary is versioned (not plain `ontoindex`). CLI release tarballs are **Linux x64 only**; macOS/Windows users should use `cargo install ontoindex-cli` or the bundled LSP inside the VSIX.
 
 For VS Code, install the `ontocode-*.vsix` from the same release.
 
@@ -70,7 +71,7 @@ For VS Code, install the `ontocode-*.vsix` from the same release.
 
 | Goal | Document |
 |------|----------|
-| SQL queries | [sql-reference.md](sql-reference.md) · [query cookbook](https://github.com/eddiethedean/ontocode/blob/main/examples/queries.md) |
+| SQL queries | [sql-reference.md](sql-reference.md) · [query cookbook](examples/queries.md) |
 | SPARQL | [sparql-reference.md](sparql-reference.md) |
 | Edit Turtle files | [authoring.md](authoring.md) · [patch-reference.md](patch-reference.md) |
 | CI validation | [ci-integration.md](ci-integration.md) |

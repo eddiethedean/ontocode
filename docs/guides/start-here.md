@@ -4,9 +4,9 @@ Pick the path that matches how you work. Each link is a single next step — not
 
 ## Browse and edit in VS Code
 
-[Install the extension](../vscode-install.md) → open a folder with `.ttl` / `.owl` files → use the **OntoCode** activity bar.
+[First success in 10 minutes](first-success.md) — install, browse, edit `.ttl`, optional CLI validate.
 
-**Then edit Turtle:** [Authoring guide](../authoring.md) — labels, parents, create/delete in `.ttl` via the Entity Inspector.
+**Then:** [Install options](../vscode-install.md) · [Authoring guide](../authoring.md)
 
 ## Query and validate from the CLI
 
@@ -24,7 +24,7 @@ Pick the path that matches how you work. Each link is a single next step — not
 
 ## Evaluate for your team
 
-[FAQ](../faq.md) · [Workspace limits](../workspace-limits.md) · [Security](../security.md) · [Release integrity](../release-integrity.md) · [Protégé parity matrix](../design/PROTEGE_PARITY.md)
+[Enterprise evaluation](enterprise-eval.md) · [FAQ](../faq.md) · [Workspace limits](../workspace-limits.md) · [Security](../security.md) · [Release integrity](../release-integrity.md)
 
 ## Contribute to OntoCode / OntoIndex
 

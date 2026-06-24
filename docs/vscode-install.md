@@ -1,20 +1,26 @@
 # Installing OntoCode in VS Code
 
-Install **OntoCode** from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) (v0.4.0+ recommended), or use a release VSIX / local dev build below.
+## Option A — VS Code Marketplace (recommended)
 
-## Option A — GitHub Release VSIX (recommended)
-
-1. Open [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) and download the latest `ontocode-*.vsix` for your platform.
-2. In VS Code: **Extensions** → **…** menu → **Install from VSIX…**
-3. Open a folder containing ontology files (`.ttl`, `.owl`, `.rdf`, `.jsonld`, `.nt`, `.nq`, `.trig`).
+1. Install [OntoCode from the Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) (v0.4.0+).
+2. **File → Open Folder…** and choose a directory with ontology files.
+3. **Trust** the workspace when prompted.
 4. Open the **OntoCode** activity bar and browse ontologies, classes, properties, individuals, and **Diagnostics**.
-5. Select a `.ttl` entity to **edit** in the Entity Inspector (v0.4).
+
+For a full walkthrough, see [First success in 10 minutes](guides/first-success.md).
 
 > **Multi-root workspaces:** Only the **first** workspace folder is indexed. Use a single-root folder or open the primary ontology project as the first folder.
 
+## Option B — GitHub Release VSIX (offline / air-gapped)
+
+1. Open [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) and download the latest `ontocode-*.vsix`.
+2. In VS Code: **Extensions** → **…** menu → **Install from VSIX…**
+3. Verify against `SHA256SUMS` — see [release-integrity.md](release-integrity.md).
+4. Open a folder containing ontology files (`.ttl`, `.owl`, `.rdf`, `.jsonld`, `.nt`, `.nq`, `.trig`).
+
 Release VSIX packages bundle `ontoindex-lsp` for Linux, macOS, and Windows.
 
-## Option B — Build from source
+## Option C — Build from source
 
 From the repository root:
 
@@ -25,23 +31,41 @@ cd extension && npx vsce package --no-dependencies
 
 Install the generated `.vsix` via **Install from VSIX…**, or press **F5** in VS Code with the `extension/` folder open (Run Extension).
 
-## Option C — Language server on PATH
+## Option D — Language server on PATH
 
-If the bundled server is missing, install the LSP binary:
+Use this only when the bundled server is missing or you are developing the LSP:
 
 ```bash
 cargo install ontoindex-lsp
 ```
 
-Or set **OntoCode: Lsp Path** (`ontocode.lspPath`) to the absolute path of your `ontoindex-lsp` binary.
+Set **OntoCode: Lsp Path** (`ontocode.lspPath`) to the absolute path of your `ontoindex-lsp` binary. **Trusted workspaces only** — ignored in Restricted Mode.
+
+## Using the sidebar
+
+After indexing, the **OntoCode** activity bar shows five views:
+
+| View | What you see |
+|------|----------------|
+| **Ontologies** | Indexed files and parse status |
+| **Classes** | Class hierarchy |
+| **Properties** | Object, data, and annotation properties |
+| **Individuals** | Named individuals |
+| **Diagnostics** | Lint issues; click to open source |
+
+**Refresh** — click ↻ on a view title, or run **OntoCode: Refresh Explorer**.
+
+**Re-index** — run **OntoCode: Index Workspace** after adding or changing ontology files.
+
+Click an entity name to open the **Entity Inspector**. For `.ttl` files, use the edit section to change labels, parents, or delete entities. See [authoring.md](authoring.md).
 
 ## Settings
 
 | Setting | Default | Description |
 |---------|---------|-------------|
-| `ontocode.lspPath` | `""` | **Trusted workspaces only.** Path to `ontoindex-lsp`; ignored in Restricted Mode. Empty uses bundled binary or PATH |
+| `ontocode.lspPath` | `""` | **Trusted workspaces only.** Path to `ontoindex-lsp`; ignored in Restricted Mode. Empty uses bundled binary |
 
-Indexing is driven by the language server on startup. `ontocode.autoIndexOnOpen` is a legacy setting (no-op in v0.4).
+Indexing runs on workspace open. `ontocode.autoIndexOnOpen` is a legacy setting (no-op in v0.4).
 
 ## Commands
 
@@ -55,11 +79,11 @@ Indexing is driven by the language server on startup. `ontocode.autoIndexOnOpen`
 
 | Symptom | Fix |
 |---------|-----|
-| Extension does not activate | Ensure the workspace contains a supported ontology file (see activation in `extension/package.json`) or open the OntoCode Ontologies view |
+| Extension does not activate | Open a supported ontology file or the **OntoCode → Ontologies** view |
 | `failed to start language server` | Run `./scripts/package-extension.sh`, set `ontocode.lspPath`, or `cargo install ontoindex-lsp` |
-| `spawn ... ontoindex-lsp EACCES` (macOS/Linux) | Upgrade to OntoCode ≥ 0.3.0. Manual: `chmod +x` on the bundled binary path from the error |
-| `couldn't create connection to server` | Check **Output → OntoIndex Language Server**. Uninstall older OntoCode versions (keep only latest). Try `cargo install ontoindex-lsp` and set `ontocode.lspPath` |
+| `spawn ... ontoindex-lsp EACCES` (macOS/Linux) | Upgrade to OntoCode ≥ 0.4.0. Manual: `chmod +x` on the bundled binary path from the error |
+| `couldn't create connection to server` | Check **Output → OntoIndex Language Server**. Uninstall older OntoCode versions. Try `cargo install ontoindex-lsp` and set `ontocode.lspPath` |
 | Empty explorer after open | Run **OntoCode: Index Workspace**; check **Output → OntoIndex Language Server** |
-| Inspector has no edit controls | Entity must be in a **Turtle (`.ttl`)** file; RDF/XML and other formats are read-only in v0.4 |
+| Inspector has no edit controls | Entity must be in a **Turtle (`.ttl`)** file; other formats are read-only in v0.4 |
 
-See also [extension README on GitHub](https://github.com/eddiethedean/ontocode/blob/main/extension/README.md) and [faq.md](faq.md).
+See also [faq.md](faq.md) and [First success in 10 minutes](guides/first-success.md).

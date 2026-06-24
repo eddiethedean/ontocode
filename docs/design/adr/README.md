@@ -11,14 +11,14 @@ Canonical ADRs live in this directory. The former `adrs/` folder was merged here
 | [0003](0003-use-oxigraph.md) | Use Oxigraph | Accepted |
 | [0004](0004-use-datafusion-for-sql.md) | Use DataFusion for SQL | **Superseded** (v0.2 uses sqlparser virtual tables) |
 | [0005](0005-local-first-by-default.md) | Local-first by default | Accepted |
-| [0006](0006-patch-based-write-back.md) | Patch-based write-back | Accepted (v0.4a+) |
+| [0006](0006-patch-based-write-back.md) | Patch-based write-back | Accepted (v0.4.0) |
 | [0007](0007-language-server-boundary.md) | Language server boundary | Accepted |
 | [0008](0008-reasoner-adapters-not-built-in-reasoner.md) | Reasoner adapters | Accepted (v0.6) |
 | [0009](0009-semantic-diff-as-core-feature.md) | Semantic diff as core feature | Accepted (v0.9) |
 | [0010](0010-ai-features-opt-in.md) | AI features opt-in | Accepted (planned) |
 | [0011](0011-use-sqlparser-for-sql.md) | Use sqlparser for SQL virtual tables | Accepted |
 | [0012](0012-lsp-json-snake-case-enums.md) | LSP JSON snake_case enums | Accepted |
-| [0013](0013-dual-stack-oxigraph-horned-owl.md) | Dual stack Oxigraph + Horned-OWL | Accepted (v0.4b+) |
+| [0013](0013-dual-stack-oxigraph-horned-owl.md) | Dual stack Oxigraph + Horned-OWL | Accepted (v0.4.0) |
 | [0014](0014-rust-native-reasoners-only.md) | Rust-native reasoners only (no JVM) | Accepted |
 | [0015](0015-adopt-ontologos-reasoner.md) | Adopt OntoLogos as reasoner backend | Accepted |
 | [0016](0016-dependency-first-implementation.md) | Dependency-first implementation | Accepted |

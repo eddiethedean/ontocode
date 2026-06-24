@@ -31,7 +31,7 @@
 | LSP protocol | [`lsp-server`](https://crates.io/crates/lsp-server), [`lsp-types`](https://crates.io/crates/lsp-types) | `0.7` / `0.97` | `ontoindex-lsp` | Custom methods, catalog JSON, path sandbox | [0007](adr/0007-language-server-boundary.md) | v0.2 |
 | Parse / import / prefix diagnostics | [`oxigraph`](https://crates.io/crates/oxigraph) parse errors + catalog rules | `0.4` | `ontoindex-diagnostics` | Lint rules: duplicate/missing labels, orphans, broken imports | [0016](adr/0016-dependency-first-implementation.md) | v0.3 |
 | OBO validation (future) | [`fastobo-validator`](https://crates.io/crates/fastobo-validator) | `0.4` | `ontoindex-diagnostics` | Map violations to LSP diagnostics | [0016](adr/0016-dependency-first-implementation.md) | v0.7b |
-| OWL axiom model + round-trip | [`horned-owl`](https://crates.io/crates/horned-owl) | `1.4` | `ontoindex-owl` | Catalog bridge, patch write-back, consistency tests | [0013](adr/0013-dual-stack-oxigraph-horned-owl.md) | v0.4b |
+| OWL axiom model + round-trip | [`horned-owl`](https://crates.io/crates/horned-owl) | `1.4` | `ontoindex-owl` | Catalog bridge, patch write-back, consistency tests | [0013](adr/0013-dual-stack-oxigraph-horned-owl.md) | v0.4.0 |
 | Manchester functional syntax | [`horned-functional`](https://crates.io/crates/horned-functional) | `0.4` | `ontoindex-owl` | LSP range mapping, webview wire format | [0016](adr/0016-dependency-first-implementation.md) | v0.5 |
 | Manchester editor assist (optional) | [`owl-ms-language-server`](https://crates.io/crates/owl-ms-language-server) | evaluate at v0.5 | extension / LSP | Embed vs subprocess decision at implementation | [0016](adr/0016-dependency-first-implementation.md) | v0.5 |
 | Reasoner orchestration | [OntoLogos](https://github.com/eddiethedean/ontologos) (`ontologos-*`) | `0.9` → `1.0` | `ontoindex-reasoner` | `ReasonerAdapter` trait, cache, LSP JSON | [0015](adr/0015-adopt-ontologos-reasoner.md) | v0.6 / v1.0 |
@@ -98,7 +98,7 @@ See [LICENSES.md](LICENSES.md). Summary:
 | `horned-owl` 1.4 | **1.88** |
 | OntoLogos 0.9+ | **1.88** |
 
-**Action:** Bump workspace `rust-version` to **1.88** when integrating `ontoindex-owl` (v0.4b) or `ontoindex-reasoner` (v0.6), whichever comes first.
+**Action:** Bump workspace `rust-version` to **1.88** when integrating `ontoindex-reasoner` (v0.6). (`ontoindex-owl` shipped in v0.4.0 at MSRV 1.88.)
 
 ---
 

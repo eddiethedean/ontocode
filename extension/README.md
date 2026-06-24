@@ -72,7 +72,7 @@ The **Entity Inspector** panel opens with:
 
 **Command Palette:** **OntoCode: Show Entity Inspector** — paste an entity IRI if you know it.
 
-Editing guide: [docs/authoring.md](https://github.com/eddiethedean/ontocode/blob/main/docs/authoring.md).
+Editing guide: [authoring guide](https://onto-code.readthedocs.io/en/latest/authoring/).
 
 ---
 
@@ -128,7 +128,7 @@ Indexing is driven by the language server on startup; `ontocode.autoIndexOnOpen`
 | Workspace is Restricted | **Trust** the folder — `ontocode.lspPath` is ignored in Restricted Mode |
 | Multi-root workspace | Only the **first** folder is indexed — use a single-root folder or open the primary ontology project |
 
-More detail: [Installation & troubleshooting](https://github.com/eddiethedean/ontocode/blob/main/docs/vscode-install.md) · [FAQ](https://github.com/eddiethedean/ontocode/blob/main/docs/faq.md)
+More detail: [Installation & troubleshooting](https://onto-code.readthedocs.io/en/latest/vscode-install/) · [FAQ](https://onto-code.readthedocs.io/en/latest/faq/)
 
 ---
 
@@ -136,7 +136,7 @@ More detail: [Installation & troubleshooting](https://github.com/eddiethedean/on
 
 **Shipped:** explorer, inspector, **editing** (labels, comments, parents, create/delete in `.ttl`), diagnostics, jump-to-source, hover, symbols, go-to-definition.
 
-**Planned (v0.5+):** Manchester editor, query workbench, reasoners — [roadmap](https://github.com/eddiethedean/ontocode/blob/main/docs/design/ROADMAP.md).
+**Planned (v0.5+):** Manchester editor, query workbench, reasoners — [roadmap](https://onto-code.readthedocs.io/en/latest/design/ROADMAP/).
 
 ---
 
@@ -149,7 +149,7 @@ Release builds bundle `ontoindex-lsp` for Linux (x64, arm64), macOS (Apple Silic
 ## Links
 
 - [GitHub repository](https://github.com/eddiethedean/ontocode)
-- [Documentation](https://onto-code.readthedocs.io/)
+- [Documentation](https://onto-code.readthedocs.io/en/latest/) — [Start here](https://onto-code.readthedocs.io/en/latest/guides/start-here/) · [Install guide](https://onto-code.readthedocs.io/en/latest/vscode-install/)
 - [Report an issue](https://github.com/eddiethedean/ontocode/issues)
 - [Changelog](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md)
 

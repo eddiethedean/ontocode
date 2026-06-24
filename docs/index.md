@@ -24,8 +24,8 @@ Browse OWL/RDF in VS Code, edit Turtle ontologies, query and validate in CI, and
 
 <div class="oc-hero-actions" markdown>
 [Start here](guides/start-here.md){ .md-button .md-button--primary }
+[First success](guides/first-success.md){ .md-button }
 [5-minute guide](getting-started.md){ .md-button }
-[Install VS Code](vscode-install.md){ .md-button }
 </div>
 
 </div>
@@ -82,6 +82,7 @@ Browse OWL/RDF in VS Code, edit Turtle ontologies, query and validate in CI, and
 |------------|---------|-----|
 | Browse classes, properties, individuals | Yes | via SQL |
 | Edit labels, comments, parents (`.ttl`) | Yes | `ontoindex patch` |
+| Create / delete entities (`.ttl`) | Yes | `ontoindex patch` |
 | Diagnostics / lint | Problems panel | `ontoindex validate` |
 | SPARQL | — | `ontoindex sparql` |
 
@@ -107,18 +108,23 @@ Browse OWL/RDF in VS Code, edit Turtle ontologies, query and validate in CI, and
     git clone https://github.com/eddiethedean/ontocode.git
     cd ontocode
     cargo run -- query fixtures "SELECT * FROM classes"
-  ```
+    ```
 
 ## Documentation map
 
 | Topic | Link |
 |-------|------|
 | Start here (pick a path) | [guides/start-here.md](guides/start-here.md) |
+| First success tutorial | [guides/first-success.md](guides/first-success.md) |
+| Install VS Code | [vscode-install.md](vscode-install.md) |
+| Getting started (CLI) | [getting-started.md](getting-started.md) |
 | SQL virtual tables | [sql-reference.md](sql-reference.md) |
 | SPARQL | [sparql-reference.md](sparql-reference.md) |
 | LSP API | [lsp-api.md](lsp-api.md) |
+| Errors reference | [errors.md](errors.md) |
 | Patch JSON | [patch-reference.md](patch-reference.md) |
 | CI integration | [ci-integration.md](ci-integration.md) |
+| Examples | [examples/queries.md](examples/queries.md) |
 | Design specs & roadmap | [design/README.md](design/README.md) |
 | Contributing | [contributing.md](contributing.md) |
 

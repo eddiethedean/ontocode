@@ -1,6 +1,6 @@
 # Query cookbook
 
-Runnable against the `fixtures/` directory. Use `cargo run --` from the repo root or `ontoindex` if installed.
+Runnable against the `fixtures/` directory in a git clone. Use `cargo run --` from the repo root or `ontoindex` if installed.
 
 ## Classes and entities
 
@@ -62,4 +62,4 @@ ontoindex validate fixtures   # exit 0 on success
 ontoindex validate .          # validate current directory
 ```
 
-Full column reference: [docs/sql-reference.md](../docs/sql-reference.md). SPARQL: [docs/sparql-reference.md](../docs/sparql-reference.md). Errors: [docs/errors.md](../docs/errors.md).
+Full column reference: [sql-reference.md](../sql-reference.md). SPARQL: [sparql-reference.md](../sparql-reference.md). Errors: [errors.md](../errors.md).

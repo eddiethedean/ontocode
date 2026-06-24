@@ -46,16 +46,16 @@ Adjust the path (`.` or `ontologies/`) to the directory containing your `.ttl`, 
 For faster CI without compiling Rust dependencies:
 
 ```yaml
-      - name: Download ontoindex CLI
+      - name: Download and validate ontology files
         run: |
           VERSION=0.4.0
-          curl -fsSL -o ontoindex.tar.gz \
-            "https://github.com/eddiethedean/ontocode/releases/download/v${VERSION}/ontoindex-linux-x64.tar.gz"
-          tar xzf ontoindex.tar.gz
-          chmod +x ontoindex
-
-      - name: Validate ontology files
-        run: ./ontoindex validate .
+          ASSET="ontoindex-v${VERSION}-x86_64-unknown-linux-gnu.tar.gz"
+          BIN="ontoindex-v${VERSION}-x86_64-unknown-linux-gnu"
+          curl -fsSL -o "${ASSET}" \
+            "https://github.com/eddiethedean/ontocode/releases/download/v${VERSION}/${ASSET}"
+          tar xzf "${ASSET}"
+          chmod +x "${BIN}"
+          ./"${BIN}" validate .
 ```
 
 Verify checksums per [release-integrity.md](release-integrity.md) in production pipelines.

@@ -66,7 +66,7 @@ It is a legacy setting. Indexing is driven by the language server on startup in 
 
 **What SQL is supported?**
 
-A subset: single-table `SELECT`, `FROM`, `WHERE` with string equality. No `JOIN`, `GROUP BY`, or `ORDER BY`. See [sql-reference.md](sql-reference.md).
+A subset: single-table `SELECT`, `FROM`, `WHERE` with `=`, `!=`, `AND`, `OR`, and boolean columns. No `JOIN`, `GROUP BY`, or `ORDER BY`. See [sql-reference.md](sql-reference.md).
 
 **How do I run SPARQL?**
 

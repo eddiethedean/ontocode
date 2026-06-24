@@ -4,10 +4,10 @@ import {
   getEntity,
   parseManchester,
 } from "../lsp/client";
-import { EntityDetail, PatchOp } from "../lsp/protocol";
+import { EntityDetail } from "../lsp/protocol";
 import {
   ManchesterAxiomKind,
-  buildManchesterPatch,
+  buildManchesterPatches,
 } from "./manchesterEditorLogic";
 
 export interface ManchesterEditorOptions {
@@ -29,6 +29,7 @@ export class ManchesterEditorPanel {
     data_properties: string[];
     datatypes: string[];
   } = { classes: [], object_properties: [], data_properties: [], datatypes: [] };
+  private validateSeq = 0;
 
   private constructor(
     panel: vscode.WebviewPanel,
@@ -41,7 +42,9 @@ export class ManchesterEditorPanel {
     });
     this.panel.webview.onDidReceiveMessage(async (msg) => {
       if (msg.command === "validate") {
-        await this.validate(msg.expression, msg.axiomKind);
+        const seq =
+          typeof msg.seq === "number" ? msg.seq : ++this.validateSeq;
+        await this.validate(msg.expression, msg.axiomKind, seq);
       }
       if (msg.command === "preview") {
         await this.apply(msg.expression, msg.axiomKind, true);
@@ -93,7 +96,8 @@ export class ManchesterEditorPanel {
 
   private async validate(
     expression: string,
-    axiomKind: ManchesterAxiomKind
+    axiomKind: ManchesterAxiomKind,
+    seq: number
   ): Promise<void> {
     try {
       const result = await parseManchester({
@@ -105,12 +109,14 @@ export class ManchesterEditorPanel {
       this.completions = result.completions;
       this.panel.webview.postMessage({
         command: "validated",
+        seq,
         result,
       });
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       this.panel.webview.postMessage({
         command: "validated",
+        seq,
         error: message,
       });
     }
@@ -122,19 +128,17 @@ export class ManchesterEditorPanel {
     previewOnly: boolean
   ): Promise<void> {
     const mode = this.options.mode ?? "add";
-    const patch: PatchOp = buildManchesterPatch(
+    const patches = buildManchesterPatches(
       axiomKind,
       this.options.iri,
       expression,
-      mode === "edit" ? "set" : "add"
+      mode,
+      this.options.initialExpression
     );
-    if (axiomKind === "sub_class_of" && mode === "add") {
-      // use add_complex_sub_class_of via buildManchesterPatch
-    }
     try {
       const result = await applyAxiomPatch({
         document_uri: this.options.documentUri,
-        patches: [patch],
+        patches,
         preview_only: previewOnly,
       });
       if (previewOnly && result.preview_text) {
@@ -145,6 +149,12 @@ export class ManchesterEditorPanel {
         return;
       }
       if (!previewOnly) {
+        if (!result.applied) {
+          void vscode.window.showWarningMessage(
+            "OntoCode: No changes were applied"
+          );
+          return;
+        }
         if (this.options.onRefresh) {
           await this.options.onRefresh();
         }
@@ -230,15 +240,20 @@ export class ManchesterEditorPanel {
     });
 
     let validateTimer;
+    let latestValidateSeq = 0;
     exprEl.addEventListener('input', () => {
       clearTimeout(validateTimer);
       validateTimer = setTimeout(() => {
-        vscode.postMessage({ command: 'validate', expression: exprEl.value, axiomKind: axiomEl.value });
+        latestValidateSeq += 1;
+        const seq = latestValidateSeq;
+        vscode.postMessage({ command: 'validate', expression: exprEl.value, axiomKind: axiomEl.value, seq });
       }, 500);
     });
 
     document.getElementById('validate').addEventListener('click', () => {
-      vscode.postMessage({ command: 'validate', expression: exprEl.value, axiomKind: axiomEl.value });
+      latestValidateSeq += 1;
+      const seq = latestValidateSeq;
+      vscode.postMessage({ command: 'validate', expression: exprEl.value, axiomKind: axiomEl.value, seq });
     });
     document.getElementById('preview').addEventListener('click', () => {
       vscode.postMessage({ command: 'preview', expression: exprEl.value, axiomKind: axiomEl.value });
@@ -250,6 +265,7 @@ export class ManchesterEditorPanel {
     window.addEventListener('message', (event) => {
       const msg = event.data;
       if (msg.command === 'validated') {
+        if (msg.seq != null && msg.seq !== latestValidateSeq) return;
         document.getElementById('diag').textContent = msg.error || (msg.result?.diagnostics?.map(d => d.message).join('; ') || '');
         document.getElementById('tree').textContent = msg.result ? JSON.stringify(msg.result.tree, null, 2) : '';
         document.getElementById('turtlePreview').textContent = msg.result?.turtle_fragment || '';

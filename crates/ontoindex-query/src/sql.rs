@@ -17,6 +17,7 @@ type Row = BTreeMap<String, String>;
 pub struct QueryResult {
     pub columns: Vec<String>,
     pub rows: Vec<Row>,
+    pub truncated: bool,
 }
 
 pub fn run_sql(catalog: &OntologyCatalog, sql: &str) -> Result<QueryResult> {
@@ -70,19 +71,27 @@ fn execute_select(catalog: &OntologyCatalog, select: Box<Select>) -> Result<Quer
 
     if let Some(selection) = &select.selection {
         validate_filter(selection)?;
-        rows.retain(|row| evaluate_filter(selection, row).unwrap_or(false));
+        let mut filtered = Vec::with_capacity(rows.len());
+        for row in rows {
+            if evaluate_filter(selection, &row)? {
+                filtered.push(row);
+            }
+        }
+        rows = filtered;
     }
 
     let (columns, projected_rows) = project_rows(&select.projection, &rows)?;
-    let rows = truncate_rows(projected_rows);
-    Ok(QueryResult { columns, rows })
+    let (rows, truncated) = truncate_rows(projected_rows);
+    Ok(QueryResult { columns, rows, truncated })
 }
 
-fn truncate_rows(mut rows: Vec<Row>) -> Vec<Row> {
+fn truncate_rows(mut rows: Vec<Row>) -> (Vec<Row>, bool) {
     if rows.len() > MAX_SQL_RESULT_ROWS {
         rows.truncate(MAX_SQL_RESULT_ROWS);
+        (rows, true)
+    } else {
+        (rows, false)
     }
-    rows
 }
 
 fn table_name_from_select(select: &Select) -> Result<String> {
@@ -403,5 +412,23 @@ mod tests {
         let sql = format!("SELECT short_name FROM classes WHERE short_name = '{padding}'");
         let err = run_sql(&catalog, &sql).unwrap_err();
         assert!(matches!(err, crate::QueryError::Sql(msg) if msg.contains("maximum length")));
+    }
+
+    #[test]
+    fn truncate_rows_at_cap_is_not_truncated() {
+        use ontoindex_core::limits::MAX_SQL_RESULT_ROWS;
+        let rows: Vec<Row> = (0..MAX_SQL_RESULT_ROWS).map(|_| Row::new()).collect();
+        let (out, truncated) = truncate_rows(rows);
+        assert_eq!(out.len(), MAX_SQL_RESULT_ROWS);
+        assert!(!truncated);
+    }
+
+    #[test]
+    fn truncate_rows_over_cap_sets_truncated() {
+        use ontoindex_core::limits::MAX_SQL_RESULT_ROWS;
+        let rows: Vec<Row> = (0..=MAX_SQL_RESULT_ROWS).map(|_| Row::new()).collect();
+        let (out, truncated) = truncate_rows(rows);
+        assert_eq!(out.len(), MAX_SQL_RESULT_ROWS);
+        assert!(truncated);
     }
 }

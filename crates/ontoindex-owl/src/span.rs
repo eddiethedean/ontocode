@@ -11,6 +11,90 @@ pub fn short_name_from_iri(iri: &str) -> String {
     iri.to_string()
 }
 
+/// Parse `@prefix` declarations from Turtle source.
+pub fn prefixes_from_turtle(source_text: &str) -> BTreeMap<String, String> {
+    let mut map = BTreeMap::new();
+    for line in source_text.lines() {
+        let trimmed = line.trim();
+        if let Some(rest) = trimmed.strip_prefix("@prefix ") {
+            let mut parts = rest.split_whitespace();
+            let Some(prefix_raw) = parts.next() else { continue };
+            let Some(uri_raw) = parts.next() else { continue };
+            let prefix = prefix_raw.trim_end_matches(':').to_string();
+            let uri = uri_raw.trim_matches(|c: char| c == '<' || c == '>' || c == '.');
+            if !prefix.is_empty() && !uri.is_empty() {
+                map.insert(prefix, uri.to_string());
+            }
+        } else if !trimmed.is_empty() && !trimmed.starts_with('#') && !trimmed.starts_with('@') {
+            break;
+        }
+    }
+    map
+}
+
+pub fn namespaces_for_text(
+    source_text: &str,
+    declared: &BTreeMap<String, String>,
+) -> BTreeMap<String, String> {
+    let mut merged = declared.clone();
+    merged.extend(prefixes_from_turtle(source_text));
+    merged
+}
+
+fn subject_needles(
+    iri: &str,
+    short_name: &str,
+    namespaces: &BTreeMap<String, String>,
+) -> Vec<String> {
+    let mut needles = vec![format!("<{iri}>"), format!(":{short_name}")];
+    for (prefix, ns) in namespaces {
+        if iri.starts_with(ns) && !prefix.is_empty() {
+            needles.push(format!("{prefix}:{short_name}"));
+        }
+    }
+    needles
+}
+
+/// Locate the byte range of an entity's subject token (first Turtle statement for that subject).
+pub fn find_subject_statement(
+    source_text: &str,
+    iri: &str,
+    short_name: &str,
+    namespaces: &BTreeMap<String, String>,
+) -> Option<ByteRange> {
+    let needles = subject_needles(iri, short_name, namespaces);
+    let mut byte_offset = 0usize;
+    for line in source_text.lines() {
+        let trimmed = line.trim_start();
+        if trimmed.starts_with('@') {
+            byte_offset += line.len() + 1;
+            continue;
+        }
+        if let Some(col_in_trimmed) = subject_column_at_line_start(trimmed, &needles) {
+            let ws = line.len() - trimmed.len();
+            let start = byte_offset + ws + col_in_trimmed;
+            return Some(ByteRange { start: start as u64, end: start as u64 });
+        }
+        byte_offset += line.len() + 1;
+    }
+    None
+}
+
+/// True when `needle` is the subject at the start of a trimmed Turtle line.
+fn subject_column_at_line_start(trimmed: &str, needles: &[String]) -> Option<usize> {
+    for needle in needles {
+        if !trimmed.starts_with(needle) {
+            continue;
+        }
+        let rest = &trimmed[needle.len()..];
+        if rest.is_empty() || rest.starts_with(|c: char| c.is_whitespace() || c == ';' || c == '.')
+        {
+            return Some(0);
+        }
+    }
+    None
+}
+
 /// Locate the first occurrence of an entity subject in Turtle source.
 pub fn find_entity_block(
     source_text: &str,
@@ -18,25 +102,17 @@ pub fn find_entity_block(
     short_name: &str,
     namespaces: &BTreeMap<String, String>,
 ) -> SourceLocation {
-    let mut needles = vec![iri.to_string(), format!("<{iri}>"), format!(":{short_name}")];
-    for (prefix, ns) in namespaces {
-        if iri.starts_with(ns) && !prefix.is_empty() {
-            needles.push(format!("{prefix}:{short_name}"));
-        }
-    }
-
-    for (line_idx, line) in source_text.lines().enumerate() {
-        for needle in &needles {
-            if let Some(col) = line.find(needle) {
-                let start_byte = line_start_byte(source_text, line_idx);
-                return SourceLocation {
-                    line: Some((line_idx + 1) as u64),
-                    column: Some(col as u64),
-                    start_byte: Some(start_byte + col as u64),
-                    end_byte: None,
-                };
-            }
-        }
+    if let Some(range) = find_subject_statement(source_text, iri, short_name, namespaces) {
+        let start = range.start as usize;
+        let line_idx = source_text[..start].matches('\n').count();
+        let line_start = source_text[..start].rfind('\n').map(|p| p + 1).unwrap_or(0);
+        let col = start - line_start;
+        return SourceLocation {
+            line: Some((line_idx + 1) as u64),
+            column: Some(col as u64),
+            start_byte: Some(range.start),
+            end_byte: None,
+        };
     }
     SourceLocation::default()
 }
@@ -77,31 +153,57 @@ pub fn annotate_spans(
 }
 
 pub fn entity_block_range(source_text: &str, entity: &Entity) -> Option<ByteRange> {
-    let start = entity.source_location.start_byte?;
-    let mut end = start;
-    let bytes = source_text.as_bytes();
-    let mut i = start as usize;
-    let mut subject_seen = false;
-    while i < bytes.len() {
-        if bytes[i] == b'.' {
-            let line_start =
-                bytes[..=i].iter().rposition(|&b| b == b'\n').map(|p| p + 1).unwrap_or(0);
-            let line = &source_text[line_start..=i];
-            if subject_seen || line_contains_subject(line, entity) {
-                end = (i + 1) as u64;
-                if !line.trim_end().ends_with(';') {
-                    break;
-                }
-                subject_seen = true;
-            }
-        }
-        i += 1;
-    }
+    let start = if let Some(s) = entity.source_location.start_byte {
+        s as usize
+    } else {
+        return None;
+    };
+    let end = statement_end_byte(source_text, start)?;
     if end > start {
-        Some(ByteRange { start, end })
+        Some(ByteRange { start: start as u64, end: end as u64 })
     } else {
         None
     }
+}
+
+/// Walk from subject start to the terminating `.` of this statement (bracket/string aware).
+fn statement_end_byte(source_text: &str, start: usize) -> Option<usize> {
+    let bytes = source_text.as_bytes();
+    if start >= bytes.len() {
+        return None;
+    }
+    let mut i = start;
+    let mut bracket_depth = 0i32;
+    let mut paren_depth = 0i32;
+    let mut in_string = false;
+    let mut escape = false;
+
+    while i < bytes.len() {
+        let b = bytes[i];
+        if in_string {
+            if escape {
+                escape = false;
+            } else if b == b'\\' {
+                escape = true;
+            } else if b == b'"' {
+                in_string = false;
+            }
+            i += 1;
+            continue;
+        }
+
+        match b {
+            b'"' => in_string = true,
+            b'[' => bracket_depth += 1,
+            b']' => bracket_depth = bracket_depth.saturating_sub(1),
+            b'(' => paren_depth += 1,
+            b')' => paren_depth = paren_depth.saturating_sub(1),
+            b'.' if bracket_depth == 0 && paren_depth == 0 => return Some(i + 1),
+            _ => {}
+        }
+        i += 1;
+    }
+    None
 }
 
 #[derive(Debug, Clone, Copy)]
@@ -112,13 +214,6 @@ pub struct ByteRange {
 
 fn line_start_byte(source_text: &str, line_idx: usize) -> u64 {
     source_text.lines().take(line_idx).map(|l| l.len() as u64 + 1).sum()
-}
-
-fn line_contains_subject(line: &str, entity: &Entity) -> bool {
-    let trimmed = line.trim();
-    trimmed.contains(&entity.iri)
-        || trimmed.contains(&format!("<{}>", entity.iri))
-        || trimmed.contains(&format!(":{}", entity.short_name))
 }
 
 fn predicate_local_name(predicate: &str) -> &str {
@@ -182,16 +277,80 @@ fn find_subclass_span(source_text: &str, subject: &str, parent: &str) -> Option<
 #[cfg(test)]
 mod tests {
     use super::*;
+    use ontoindex_core::{Entity, EntityKind};
+
+    fn ex_ns() -> BTreeMap<String, String> {
+        BTreeMap::from([
+            ("ex".into(), "http://example.org/people#".into()),
+            ("owl".into(), "http://www.w3.org/2002/07/owl#".into()),
+        ])
+    }
+
+    fn clinic_ns() -> BTreeMap<String, String> {
+        BTreeMap::from([("ex".into(), "http://example.org/clinic#".into())])
+    }
 
     #[test]
     fn finds_entity_line() {
         let ttl = include_str!("../../../fixtures/example.ttl");
-        let loc = find_entity_block(
-            ttl,
-            "http://example.org/people#Person",
-            "Person",
-            &BTreeMap::from([("ex".into(), "http://example.org/people#".into())]),
-        );
+        let loc = find_entity_block(ttl, "http://example.org/people#Person", "Person", &ex_ns());
         assert!(loc.line.is_some());
+        let line = ttl.lines().nth(loc.line.unwrap() as usize - 1).unwrap();
+        assert!(line.contains("ex:Person a owl:Class"));
+    }
+
+    #[test]
+    fn subject_not_domain_mention() {
+        let ttl = include_str!("../../../fixtures/example.ttl");
+        let range =
+            find_subject_statement(ttl, "http://example.org/people#Person", "Person", &ex_ns())
+                .expect("subject");
+        let line = ttl[..range.start as usize].rfind('\n').map(|p| p + 1).unwrap_or(0);
+        let subject_line = &ttl[line..];
+        assert!(subject_line.starts_with("ex:Person a"));
+    }
+
+    #[test]
+    fn patient_block_includes_multiline_restriction() {
+        let ttl = include_str!("../../../fixtures/complex-classes.ttl");
+        let entity = Entity {
+            iri: "http://example.org/clinic#Patient".into(),
+            short_name: "Patient".into(),
+            kind: EntityKind::Class,
+            ontology_id: String::new(),
+            source_location: find_entity_block(
+                ttl,
+                "http://example.org/clinic#Patient",
+                "Patient",
+                &clinic_ns(),
+            ),
+            labels: vec![],
+            comments: vec![],
+            deprecated: false,
+        };
+        let range = entity_block_range(ttl, &entity).expect("block");
+        let block = &ttl[range.start as usize..range.end as usize];
+        assert!(block.contains("owl:Restriction"));
+        assert!(block.contains("owl:someValuesFrom"));
+        assert!(block.trim_end().ends_with('.'));
+    }
+
+    #[test]
+    fn add_label_targets_class_block_not_trailing_triple() {
+        use crate::patch::{apply_patches_to_text, PatchOp};
+        let ttl = include_str!("../../../fixtures/example.ttl");
+        let patches = vec![PatchOp::AddLabel {
+            entity_iri: "http://example.org/people#Person".into(),
+            value: "Human".into(),
+        }];
+        let result = apply_patches_to_text(ttl, &patches, true, &ex_ns()).expect("patch");
+        let preview = result.preview_text.expect("preview");
+        let person_block_start = preview.find("ex:Person a owl:Class").expect("class decl");
+        let human_pos = preview.find("Human").expect("label");
+        assert!(human_pos > person_block_start);
+        let trailing = preview.find("ex:Person rdfs:subClassOf ex:Thing");
+        if let Some(t) = trailing {
+            assert!(human_pos < t, "label must be in class block, not trailing triple");
+        }
     }
 }

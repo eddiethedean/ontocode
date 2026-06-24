@@ -457,7 +457,7 @@ impl ManchesterParser {
     }
 }
 
-fn class_expression_to_turtle_value(
+pub(crate) fn class_expression_to_turtle_value(
     expr: &ClassExpression<RcStr>,
     namespaces: &BTreeMap<String, String>,
     indent: usize,
@@ -499,6 +499,32 @@ fn class_expression_to_turtle_value(
         }
         ClassExpression::ObjectExactCardinality { n, ope, bce } => {
             cardinality_turtle("owl:qualifiedCardinality", *n, ope, bce, namespaces, indent)
+        }
+        ClassExpression::ObjectIntersectionOf(v) if v.len() > 1 => {
+            let terms: Vec<String> = v
+                .iter()
+                .map(|e| class_expression_to_turtle_value(e, namespaces, indent + 2))
+                .collect::<Result<_>>()?;
+            let list = terms.join(" ");
+            let mut out = String::new();
+            writeln!(out, "[").ok();
+            writeln!(out, "{inner_pad}a owl:Class ;").ok();
+            writeln!(out, "{inner_pad}owl:intersectionOf ( {list} )").ok();
+            write!(out, "{pad}]").ok();
+            Ok(out)
+        }
+        ClassExpression::ObjectUnionOf(v) if v.len() > 1 => {
+            let terms: Vec<String> = v
+                .iter()
+                .map(|e| class_expression_to_turtle_value(e, namespaces, indent + 2))
+                .collect::<Result<_>>()?;
+            let list = terms.join(" ");
+            let mut out = String::new();
+            writeln!(out, "[").ok();
+            writeln!(out, "{inner_pad}a owl:Class ;").ok();
+            writeln!(out, "{inner_pad}owl:unionOf ( {list} )").ok();
+            write!(out, "{pad}]").ok();
+            Ok(out)
         }
         ClassExpression::ObjectIntersectionOf(v) => {
             class_expression_to_turtle_value(&v[0], namespaces, indent)
@@ -611,5 +637,15 @@ mod tests {
             .expect("turtle");
         assert!(turtle.contains("owl:Restriction"));
         assert!(turtle.contains("owl:someValuesFrom"));
+    }
+
+    #[test]
+    fn turtle_intersection_includes_all_operands() {
+        let ns = ex_ns();
+        let out = parse_class_expression("ex:Person and ex:Organization", &ns).expect("parse");
+        let turtle = class_expression_to_turtle_value(&out.expression, &ns, 0).expect("turtle");
+        assert!(turtle.contains("ex:Person"));
+        assert!(turtle.contains("ex:Organization"));
+        assert!(turtle.contains("owl:intersectionOf"));
     }
 }

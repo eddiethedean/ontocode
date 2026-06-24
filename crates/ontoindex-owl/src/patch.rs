@@ -92,34 +92,31 @@ pub fn apply_patches_to_text(
     preview_only: bool,
     namespaces: &BTreeMap<String, String>,
 ) -> Result<ApplyPatchResult> {
-    let mut text = source.to_string();
+    let mut working = source.to_string();
     let mut diagnostics = Vec::new();
 
     for patch in patches {
-        match apply_one_patch(&mut text, patch, namespaces) {
+        match apply_one_patch(&mut working, patch, namespaces) {
             Ok(()) => {}
             Err(e) => {
                 diagnostics.push(PatchDiagnostic {
                     severity: "error".to_string(),
                     message: e.to_string(),
                 });
+                return Ok(ApplyPatchResult {
+                    applied: false,
+                    preview_text: None,
+                    diagnostics,
+                    document_path: None,
+                });
             }
         }
     }
 
-    if !diagnostics.is_empty() {
-        return Ok(ApplyPatchResult {
-            applied: false,
-            preview_text: Some(text),
-            diagnostics,
-            document_path: None,
-        });
-    }
-
-    let changed = text != source;
+    let changed = working != source;
     Ok(ApplyPatchResult {
         applied: changed && !preview_only,
-        preview_text: if changed { Some(text) } else { None },
+        preview_text: if changed { Some(working) } else { None },
         diagnostics,
         document_path: None,
     })
@@ -243,7 +240,7 @@ fn add_annotation_triple(
     if !text_contains_entity(text, entity_iri, namespaces) {
         return Err(OwlError::EntityNotFound(entity_iri.to_string()));
     }
-    let escaped = value.replace('"', "\\\"");
+    let escaped = escape_turtle_string(value);
     let triple = format!("    {predicate} \"{escaped}\" ;\n");
     insert_into_entity_block(text, entity_iri, &triple, namespaces)
 }
@@ -281,15 +278,10 @@ fn remove_complex_axiom(
     predicate: &str,
     namespaces: &BTreeMap<String, String>,
 ) -> Result<()> {
-    let _normalized = parse_class_expression(manchester, namespaces)
-        .map(|p| p.normalized)
-        .unwrap_or_else(|_| manchester.to_string());
-    remove_line_matching(
-        text,
-        entity_iri,
-        |line| line.contains(predicate) || line.contains("owl:Restriction"),
-        namespaces,
-    )
+    let parsed = parse_class_expression(manchester, namespaces)?;
+    let object_value =
+        crate::manchester::class_expression_to_turtle_value(&parsed.expression, namespaces, 0)?;
+    remove_predicate_object(text, entity_iri, predicate, &object_value, namespaces)
 }
 
 fn insert_multiline_into_entity_block(
@@ -362,7 +354,13 @@ fn remove_predicate_triples(
     predicate: &str,
     namespaces: &BTreeMap<String, String>,
 ) -> Result<()> {
-    remove_line_matching(text, entity_iri, |line| line.contains(predicate), namespaces)
+    let entity = entity_stub(text, entity_iri, namespaces);
+    let range = entity_block_range(text, &entity)
+        .ok_or_else(|| OwlError::EntityNotFound(entity_iri.to_string()))?;
+    let block = &text[range.start as usize..range.end as usize];
+    let new_block = remove_all_predicate_objects(block, predicate);
+    replace_range(text, range, &new_block);
+    Ok(())
 }
 
 fn remove_matching_predicate(
@@ -461,11 +459,227 @@ fn replace_range(text: &mut String, range: ByteRange, replacement: &str) {
     text.replace_range(start..end, replacement);
 }
 
+fn escape_turtle_string(value: &str) -> String {
+    let mut out = String::with_capacity(value.len());
+    for ch in value.chars() {
+        match ch {
+            '\\' => out.push_str("\\\\"),
+            '"' => out.push_str("\\\""),
+            '\n' => out.push_str("\\n"),
+            '\r' => out.push_str("\\r"),
+            '\t' => out.push_str("\\t"),
+            c => out.push(c),
+        }
+    }
+    out
+}
+
+fn entity_stub(
+    text: &str,
+    entity_iri: &str,
+    namespaces: &BTreeMap<String, String>,
+) -> ontoindex_core::Entity {
+    ontoindex_core::Entity {
+        iri: entity_iri.to_string(),
+        short_name: short_name_from_iri(entity_iri),
+        kind: EntityKind::Class,
+        ontology_id: String::new(),
+        source_location: find_entity_location(text, entity_iri, namespaces),
+        labels: Vec::new(),
+        comments: Vec::new(),
+        deprecated: false,
+    }
+}
+
+fn normalize_ws(s: &str) -> String {
+    s.split_whitespace().collect::<Vec<_>>().join(" ")
+}
+
+fn bracket_end_index(text: &str, bracket_start: usize) -> Option<usize> {
+    let bytes = text.as_bytes();
+    if bytes.get(bracket_start) != Some(&b'[') {
+        return None;
+    }
+    let mut depth = 0i32;
+    let mut in_string = false;
+    let mut escape = false;
+    let mut i = bracket_start;
+    while i < bytes.len() {
+        let b = bytes[i];
+        if in_string {
+            if escape {
+                escape = false;
+            } else if b == b'\\' {
+                escape = true;
+            } else if b == b'"' {
+                in_string = false;
+            }
+            i += 1;
+            continue;
+        }
+        match b {
+            b'"' => in_string = true,
+            b'[' => depth += 1,
+            b']' => {
+                depth -= 1;
+                if depth == 0 {
+                    return Some(i + 1);
+                }
+            }
+            _ => {}
+        }
+        i += 1;
+    }
+    None
+}
+
+fn extend_removal_span(block: &str, pred_start: usize, obj_end: usize) -> (usize, usize) {
+    let mut start = pred_start;
+    while start > 0 && block.as_bytes()[start - 1].is_ascii_whitespace() {
+        start -= 1;
+    }
+    if start > 0 && block.as_bytes()[start - 1] == b',' {
+        start -= 1;
+        while start > 0 && block.as_bytes()[start - 1].is_ascii_whitespace() {
+            start -= 1;
+        }
+    }
+    let mut end = obj_end;
+    while end < block.len() && block.as_bytes()[end].is_ascii_whitespace() {
+        end += 1;
+    }
+    if end < block.len() && (block.as_bytes()[end] == b',' || block.as_bytes()[end] == b';') {
+        end += 1;
+    }
+    (start, end)
+}
+
+fn cleanup_block_separators(block: &str) -> String {
+    let mut lines: Vec<&str> = block.lines().collect();
+    while lines.last().is_some_and(|l| l.trim().is_empty()) {
+        lines.pop();
+    }
+    let joined = lines.join("\n");
+    joined.replace(";\n    ;", ";\n").replace(",\n        ,", ",\n").replace("  ", " ")
+}
+
+fn remove_all_predicate_objects(block: &str, predicate: &str) -> String {
+    let mut result = block.to_string();
+    while let Some(next) = remove_first_predicate_object(&result, predicate) {
+        result = next;
+    }
+    cleanup_block_separators(&result)
+}
+
+fn remove_first_predicate_object(block: &str, predicate: &str) -> Option<String> {
+    let pred_pos = block.find(predicate)?;
+    let (obj_start, obj_end) =
+        objects_in_predicate_value(block, pred_pos, predicate).first().copied()?;
+    let (remove_start, remove_end) = extend_removal_span(block, obj_start, obj_end);
+    let mut out = String::new();
+    out.push_str(&block[..remove_start]);
+    out.push_str(&block[remove_end..]);
+    Some(cleanup_block_separators(&out))
+}
+
+fn find_named_object_end(block: &str, obj_start: usize) -> Option<usize> {
+    let bytes = block.as_bytes();
+    let mut i = obj_start;
+    while i < bytes.len() {
+        let b = bytes[i];
+        if b == b',' || b == b';' || b == b'.' {
+            return Some(i);
+        }
+        i += 1;
+    }
+    Some(block.len())
+}
+
+fn remove_predicate_object(
+    text: &mut String,
+    entity_iri: &str,
+    predicate: &str,
+    object_value: &str,
+    namespaces: &BTreeMap<String, String>,
+) -> Result<()> {
+    let entity = entity_stub(text, entity_iri, namespaces);
+    let range = entity_block_range(text, &entity)
+        .ok_or_else(|| OwlError::EntityNotFound(entity_iri.to_string()))?;
+    let block = &text[range.start as usize..range.end as usize];
+    let new_block = remove_matching_predicate_object(block, predicate, object_value)
+        .ok_or_else(|| OwlError::ManchesterInvalid(format!("no matching {predicate} axiom")))?;
+    replace_range(text, range, &new_block);
+    Ok(())
+}
+
+fn objects_in_predicate_value(
+    block: &str,
+    pred_pos: usize,
+    predicate: &str,
+) -> Vec<(usize, usize)> {
+    let list_start = pred_pos + predicate.len();
+    let mut objects = Vec::new();
+    let mut i = list_start;
+    loop {
+        let rest = block.get(i..).unwrap_or("").trim_start();
+        if rest.is_empty() || rest.starts_with(';') || rest.starts_with('.') {
+            break;
+        }
+        i += block[i..].len() - rest.len();
+        if block.as_bytes().get(i) == Some(&b'[') {
+            if let Some(end) = bracket_end_index(block, i) {
+                objects.push((i, end));
+                i = end;
+            } else {
+                break;
+            }
+        } else {
+            let end = find_named_object_end(block, i).unwrap_or(block.len());
+            objects.push((i, end));
+            i = end;
+        }
+        let rest = block.get(i..).unwrap_or("").trim_start();
+        i += block[i..].len() - rest.len();
+        if rest.starts_with(',') {
+            i += 1;
+        } else {
+            break;
+        }
+    }
+    objects
+}
+
+fn remove_matching_predicate_object(
+    block: &str,
+    predicate: &str,
+    object_value: &str,
+) -> Option<String> {
+    let obj_trim = object_value.trim();
+    let norm_obj = normalize_ws(obj_trim);
+    let mut search_from = 0;
+    while let Some(rel) = block[search_from..].find(predicate) {
+        let pred_pos = search_from + rel;
+        for (obj_start, obj_end) in objects_in_predicate_value(block, pred_pos, predicate) {
+            let candidate = normalize_ws(block[obj_start..obj_end].trim());
+            if candidate == norm_obj || block[obj_start..obj_end].contains(obj_trim) {
+                let (remove_start, remove_end) = extend_removal_span(block, obj_start, obj_end);
+                let mut out = String::new();
+                out.push_str(&block[..remove_start]);
+                out.push_str(&block[remove_end..]);
+                return Some(cleanup_block_separators(&out));
+            }
+        }
+        search_from = pred_pos + 1;
+    }
+    None
+}
+
 fn text_contains_entity(
     text: &str,
     entity_iri: &str,
     namespaces: &BTreeMap<String, String>,
 ) -> bool {
+    let namespaces = crate::span::namespaces_for_text(text, namespaces);
     let short = short_name_from_iri(entity_iri);
     text.contains(entity_iri)
         || text.contains(&format!("<{entity_iri}>"))
@@ -479,7 +693,8 @@ fn find_entity_location(
     entity_iri: &str,
     namespaces: &BTreeMap<String, String>,
 ) -> SourceLocation {
-    crate::span::find_entity_block(text, entity_iri, &short_name_from_iri(entity_iri), namespaces)
+    let namespaces = crate::span::namespaces_for_text(text, namespaces);
+    crate::span::find_entity_block(text, entity_iri, &short_name_from_iri(entity_iri), &namespaces)
 }
 
 fn iri_to_turtle_term(iri: &str, namespaces: &BTreeMap<String, String>) -> String {
@@ -525,5 +740,57 @@ mod tests {
         }];
         let result = apply_patches_to_text(ttl, &patches, true, &ex_ns()).expect("patch");
         assert!(result.preview_text.unwrap().contains("ex:Employee"));
+    }
+
+    #[test]
+    fn batch_failure_leaves_source_unchanged() {
+        let ttl = include_str!("../../../fixtures/example.ttl");
+        let patches = vec![
+            PatchOp::AddLabel {
+                entity_iri: "http://example.org/people#Person".to_string(),
+                value: "Human".to_string(),
+            },
+            PatchOp::AddLabel {
+                entity_iri: "http://example.org/people#NoSuch".to_string(),
+                value: "X".to_string(),
+            },
+        ];
+        let result = apply_patches_to_text(ttl, &patches, true, &ex_ns()).expect("patch");
+        assert!(!result.diagnostics.is_empty());
+        assert!(result.preview_text.is_none());
+    }
+
+    fn clinic_ns() -> BTreeMap<String, String> {
+        BTreeMap::from([
+            ("ex".to_string(), "http://example.org/clinic#".to_string()),
+            ("owl".to_string(), "http://www.w3.org/2002/07/owl#".to_string()),
+            ("rdfs".to_string(), "http://www.w3.org/2000/01/rdf-schema#".to_string()),
+        ])
+    }
+
+    #[test]
+    fn remove_complex_subclass_keeps_named_parent() {
+        let ttl = include_str!("../../../fixtures/complex-classes.ttl");
+        let patches = vec![PatchOp::RemoveComplexSubClassOf {
+            entity_iri: "http://example.org/clinic#Patient".to_string(),
+            manchester: "ex:hasRecord some ex:MedicalRecord".to_string(),
+        }];
+        let result = apply_patches_to_text(ttl, &patches, true, &clinic_ns()).expect("patch");
+        let preview = result.preview_text.expect("preview");
+        assert!(!preview.contains("owl:someValuesFrom"));
+        assert!(preview.contains("rdfs:subClassOf ex:ClinicPerson"));
+    }
+
+    #[test]
+    fn label_with_newline_is_escaped() {
+        let ttl = include_str!("../../../fixtures/example.ttl");
+        let patches = vec![PatchOp::AddLabel {
+            entity_iri: "http://example.org/people#Person".to_string(),
+            value: "Line1\nLine2".to_string(),
+        }];
+        let result = apply_patches_to_text(ttl, &patches, true, &ex_ns()).expect("patch");
+        let preview = result.preview_text.expect("preview");
+        assert!(preview.contains("\\n"));
+        assert!(!preview.contains("\"Line1\n"));
     }
 }

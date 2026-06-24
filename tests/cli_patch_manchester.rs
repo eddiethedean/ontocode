@@ -11,10 +11,12 @@ fn patch_complex_subclass_manchester() {
     let dst = tmp.path().join("complex-classes.ttl");
     fs::copy(&src, &dst).expect("copy fixture");
 
+    let before = fs::read_to_string(&dst).unwrap();
+
     let patch = serde_json::json!([{
         "op": "add_complex_sub_class_of",
-        "entity_iri": "http://example.org/clinic#Patient",
-        "manchester": "ex:hasRecord some ex:MedicalRecord"
+        "entity_iri": "http://example.org/clinic#Staff",
+        "manchester": "ex:worksFor some ex:ClinicOrganization"
     }]);
 
     let patch_file = tmp.path().join("patch.json");
@@ -22,10 +24,23 @@ fn patch_complex_subclass_manchester() {
 
     let bin = support::ontoindex_binary();
     let output = Command::new(&bin)
-        .args(["patch", dst.to_str().unwrap(), patch_file.to_str().unwrap(), "--preview"])
+        .args(["patch", dst.to_str().unwrap(), patch_file.to_str().unwrap()])
         .output()
         .expect("run patch");
     assert!(output.status.success(), "patch failed: {}", String::from_utf8_lossy(&output.stderr));
-    let stdout = String::from_utf8_lossy(&output.stdout);
-    assert!(stdout.contains("owl:Restriction") || stdout.contains("preview"));
+
+    let after = fs::read_to_string(&dst).unwrap();
+    assert_ne!(before, after, "patch should modify file content");
+    assert!(
+        after.contains("worksFor") && after.contains("ClinicOrganization"),
+        "expected new restriction in Turtle output"
+    );
+
+    let validate =
+        Command::new(&bin).args(["validate", dst.to_str().unwrap()]).output().expect("validate");
+    assert!(
+        validate.status.success(),
+        "patched file should validate: {}",
+        String::from_utf8_lossy(&validate.stderr)
+    );
 }

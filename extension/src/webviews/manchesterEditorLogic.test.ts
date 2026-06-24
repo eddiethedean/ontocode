@@ -1,4 +1,4 @@
-import { buildManchesterPatch } from "./manchesterEditorLogic";
+import { buildManchesterPatch, buildManchesterPatches } from "./manchesterEditorLogic";
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
@@ -20,4 +20,29 @@ test("buildManchesterPatch for equivalent", () => {
     "set"
   );
   assert.equal(patch.op, "set_equivalent_class");
+});
+
+test("buildManchesterPatches for subclass edit removes then adds", () => {
+  const patches = buildManchesterPatches(
+    "sub_class_of",
+    "http://ex/Patient",
+    "ex:hasRecord some ex:NewRecord",
+    "edit",
+    "ex:hasRecord some ex:MedicalRecord"
+  );
+  assert.equal(patches.length, 2);
+  assert.equal(patches[0].op, "remove_complex_sub_class_of");
+  assert.equal(patches[1].op, "add_complex_sub_class_of");
+});
+
+test("buildManchesterPatches for equivalent edit is single set", () => {
+  const patches = buildManchesterPatches(
+    "equivalent_class",
+    "http://ex/Staff",
+    "ex:Person and ex:Employee",
+    "edit",
+    "ex:Person"
+  );
+  assert.equal(patches.length, 1);
+  assert.equal(patches[0].op, "set_equivalent_class");
 });

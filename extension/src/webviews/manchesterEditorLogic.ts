@@ -38,3 +38,30 @@ export function buildManchesterPatch(
     manchester,
   };
 }
+
+/** Build patch list for apply (handles SubClassOf edit as remove+add). */
+export function buildManchesterPatches(
+  axiomKind: ManchesterAxiomKind,
+  entityIri: string,
+  expression: string,
+  mode: "add" | "edit",
+  initialExpression?: string
+): PatchOp[] {
+  if (mode === "edit" && axiomKind === "sub_class_of") {
+    const patches: PatchOp[] = [];
+    if (initialExpression?.trim()) {
+      patches.push(
+        buildManchesterPatch(
+          axiomKind,
+          entityIri,
+          initialExpression,
+          "remove"
+        )
+      );
+    }
+    patches.push(buildManchesterPatch(axiomKind, entityIri, expression, "add"));
+    return patches;
+  }
+  const patchMode = mode === "edit" ? "set" : "add";
+  return [buildManchesterPatch(axiomKind, entityIri, expression, patchMode)];
+}

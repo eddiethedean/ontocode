@@ -1,10 +1,13 @@
 use crate::handlers::{
-    handle_get_catalog_snapshot, handle_get_entity, handle_goto_definition, handle_hover,
-    handle_query, handle_sparql, handle_standard_request, handle_workspace_symbol,
-    StandardRequestOutcome,
+    handle_apply_axiom_patch, handle_get_catalog_snapshot, handle_get_entity,
+    handle_goto_definition, handle_hover, handle_query, handle_sparql, handle_standard_request,
+    handle_workspace_symbol, StandardRequestOutcome,
 };
-use crate::protocol::{GetEntityParams, QueryParams, SparqlParams};
+use crate::index_worker::IndexWorker;
+use crate::protocol::{ApplyAxiomPatchParams, GetEntityParams, QueryParams, SparqlParams};
 use crate::state::{path_to_uri, ServerState};
+use crossbeam_channel::unbounded;
+use lsp_server::Message;
 use lsp_types::{
     GotoDefinitionParams, GotoDefinitionResponse, HoverContents, HoverParams, Position,
     TextDocumentIdentifier, TextDocumentPositionParams, Uri, WorkspaceSymbolParams,
@@ -286,4 +289,47 @@ fn sparql_returns_triples() {
     )
     .expect("sparql");
     assert!(!result.columns.is_empty());
+}
+
+#[test]
+fn apply_axiom_patch_uses_open_buffer_not_disk() {
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("example.ttl");
+    std::fs::copy(fixture_workspace().join("example.ttl"), &path).unwrap();
+
+    let state = ServerState::new();
+    let ws = dir.path().to_path_buf();
+    state.set_workspace_root(ws.clone()).expect("set workspace");
+    state.index_workspace(ws.clone()).expect("index");
+
+    let buffer_marker = "# unsaved buffer marker\n";
+    let disk = std::fs::read_to_string(&path).unwrap();
+    let buffer = format!("{buffer_marker}{disk}");
+    state.set_document_text(path.clone(), buffer).expect("set buffer");
+
+    let (tx, _rx) = unbounded::<Message>();
+    let worker = IndexWorker::spawn(state.clone(), tx);
+
+    let uri = path_to_uri(&path);
+    let result = handle_apply_axiom_patch(
+        &state,
+        &worker,
+        ApplyAxiomPatchParams {
+            document_uri: uri,
+            patches: vec![ontoindex_owl::PatchOp::AddLabel {
+                entity_iri: "http://example.org/people#Person".into(),
+                value: "Human".into(),
+            }],
+            preview_only: false,
+        },
+    )
+    .expect("apply patch");
+
+    assert!(result.patch.applied);
+    let updated = state.document_text(&path).expect("buffer after patch");
+    assert!(
+        updated.contains(buffer_marker),
+        "patch should apply to open buffer, not disk-only source"
+    );
+    assert!(updated.contains("Human"));
 }

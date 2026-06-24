@@ -15,10 +15,7 @@ use lsp_types::{
     Range, ServerCapabilities, SymbolInformation, SymbolKind, TextDocumentSyncCapability,
     TextDocumentSyncKind, Uri, WorkspaceSymbolParams, WorkspaceSymbolResponse,
 };
-use ontoindex_core::{
-    limits::MAX_SPARQL_RESULT_ROWS, limits::MAX_SQL_RESULT_ROWS, resolve_document_path, EntityKind,
-    OntologyFormat,
-};
+use ontoindex_core::{resolve_document_path, EntityKind, OntologyFormat};
 use serde_json::Value;
 use std::path::Path;
 use std::str::FromStr;
@@ -135,8 +132,13 @@ pub fn handle_apply_axiom_patch(
         )));
     }
 
-    let patch_result = ontoindex_owl::apply_patches(
-        &document_path,
+    let source = state
+        .document_text(&document_path)
+        .or_else(|| std::fs::read_to_string(&document_path).ok())
+        .ok_or_else(|| LspErrorPayload::patch_invalid("cannot read document".to_string()))?;
+
+    let mut patch_result = ontoindex_owl::apply_patches_to_text(
+        &source,
         &params.patches,
         params.preview_only,
         &namespaces,
@@ -145,6 +147,7 @@ pub fn handle_apply_axiom_patch(
         ontoindex_owl::OwlError::UnsupportedFormat(m) => LspErrorPayload::unsupported_format(m),
         _ => LspErrorPayload::patch_invalid(e.to_string()),
     })?;
+    patch_result.document_path = Some(document_path.display().to_string());
 
     if !patch_result.diagnostics.is_empty() {
         return Err(LspErrorPayload::patch_invalid(
@@ -177,7 +180,17 @@ pub fn handle_apply_axiom_patch(
     });
 
     if patch_result.applied && !params.preview_only {
-        let _ = index_worker.enqueue_sync(workspace).map_err(LspErrorPayload::index_failed)?;
+        if let Some(text) = &patch_result.preview_text {
+            state
+                .set_document_text(document_path.clone(), text.clone())
+                .map_err(LspErrorPayload::patch_invalid)?;
+            std::fs::write(&document_path, text).map_err(|e| {
+                LspErrorPayload::patch_invalid(format!("failed to write document: {e}"))
+            })?;
+        }
+        if let Err(msg) = index_worker.enqueue_sync(workspace) {
+            return Err(LspErrorPayload::applied_not_indexed(msg));
+        }
     }
 
     let entity_detail = entity_iri
@@ -196,8 +209,7 @@ pub fn handle_query(
             let result = ontoindex_query::query_catalog(catalog, &params.sql).map_err(
                 |e: ontoindex_query::QueryError| LspErrorPayload::query_failed(e.to_string()),
             )?;
-            let truncated =
-                if result.rows.len() >= MAX_SQL_RESULT_ROWS { Some(true) } else { None };
+            let truncated = if result.truncated { Some(true) } else { None };
             Ok(TabularQueryResult { columns: result.columns, rows: result.rows, truncated })
         })
         .ok_or_else(LspErrorPayload::not_indexed)?
@@ -212,8 +224,7 @@ pub fn handle_sparql(
             let result = ontoindex_query::sparql_catalog(catalog, &params.query).map_err(
                 |e: ontoindex_query::QueryError| LspErrorPayload::query_failed(e.to_string()),
             )?;
-            let truncated =
-                if result.rows.len() >= MAX_SPARQL_RESULT_ROWS { Some(true) } else { None };
+            let truncated = if result.truncated { Some(true) } else { None };
             Ok(TabularQueryResult { columns: result.columns, rows: result.rows, truncated })
         })
         .ok_or_else(LspErrorPayload::not_indexed)?

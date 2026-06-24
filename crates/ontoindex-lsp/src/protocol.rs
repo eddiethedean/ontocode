@@ -193,4 +193,13 @@ impl LspErrorPayload {
             user_action: Some("Fix the Manchester class expression".to_string()),
         }
     }
+
+    pub fn applied_not_indexed(message: String) -> Self {
+        Self {
+            code: "APPLIED_NOT_INDEXED".to_string(),
+            message,
+            recoverable: true,
+            user_action: Some("Patch was saved; run OntoCode: Index Workspace".to_string()),
+        }
+    }
 }

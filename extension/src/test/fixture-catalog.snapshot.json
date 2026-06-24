@@ -64,10 +64,10 @@
       "ontology_id": "http://example.org/clinic",
       "short_name": "ClinicOrganization",
       "source_location": {
-        "column": 2,
-        "end_byte": 1239,
+        "column": 0,
+        "end_byte": 1092,
         "line": 38,
-        "start_byte": 982
+        "start_byte": 980
       }
     },
     {
@@ -81,10 +81,10 @@
       "ontology_id": "http://example.org/clinic",
       "short_name": "ClinicPerson",
       "source_location": {
-        "column": 2,
-        "end_byte": 630,
+        "column": 0,
+        "end_byte": 291,
         "line": 8,
-        "start_byte": 231
+        "start_byte": 229
       }
     },
     {
@@ -98,10 +98,10 @@
       "ontology_id": "http://example.org/clinic",
       "short_name": "Employee",
       "source_location": {
-        "column": 26,
-        "end_byte": 885,
-        "line": 32,
-        "start_byte": 874
+        "column": 0,
+        "end_byte": 978,
+        "line": 34,
+        "start_byte": 887
       }
     },
     {
@@ -115,10 +115,10 @@
       "ontology_id": "http://example.org/clinic",
       "short_name": "MedicalRecord",
       "source_location": {
-        "column": 33,
-        "end_byte": 760,
-        "line": 17,
-        "start_byte": 500
+        "column": 0,
+        "end_byte": 630,
+        "line": 20,
+        "start_byte": 528
       }
     },
     {
@@ -132,9 +132,10 @@
       "ontology_id": "http://example.org/clinic",
       "short_name": "Patient",
       "source_location": {
-        "column": 2,
+        "column": 0,
+        "end_byte": 526,
         "line": 11,
-        "start_byte": 295
+        "start_byte": 293
       }
     },
     {
@@ -148,9 +149,10 @@
       "ontology_id": "http://example.org/clinic",
       "short_name": "Staff",
       "source_location": {
-        "column": 2,
+        "column": 0,
+        "end_byte": 885,
         "line": 29,
-        "start_byte": 764
+        "start_byte": 762
       }
     },
     {
@@ -164,9 +166,10 @@
       "ontology_id": "http://example.org/clinic",
       "short_name": "hasRecord",
       "source_location": {
-        "column": 29,
-        "line": 16,
-        "start_byte": 454
+        "column": 0,
+        "end_byte": 760,
+        "line": 24,
+        "start_byte": 632
       }
     },
     {
@@ -180,9 +183,10 @@
       "ontology_id": "http://example.org/clinic",
       "short_name": "worksFor",
       "source_location": {
-        "column": 2,
+        "column": 0,
+        "end_byte": 1239,
         "line": 42,
-        "start_byte": 1096
+        "start_byte": 1094
       }
     },
     {
@@ -196,10 +200,10 @@
       "ontology_id": "http://example.org/people",
       "short_name": "Organization",
       "source_location": {
-        "column": 2,
-        "end_byte": 603,
+        "column": 0,
+        "end_byte": 477,
         "line": 16,
-        "start_byte": 418
+        "start_byte": 416
       }
     },
     {
@@ -215,10 +219,10 @@
       "ontology_id": "http://example.org/people",
       "short_name": "Person",
       "source_location": {
-        "column": 2,
-        "end_byte": 1028,
+        "column": 0,
+        "end_byte": 414,
         "line": 12,
-        "start_byte": 331
+        "start_byte": 329
       }
     },
     {
@@ -232,10 +236,10 @@
       "ontology_id": "http://example.org/people",
       "short_name": "Thing",
       "source_location": {
-        "column": 2,
-        "end_byte": 1028,
+        "column": 0,
+        "end_byte": 327,
         "line": 9,
-        "start_byte": 282
+        "start_byte": 280
       }
     },
     {
@@ -249,10 +253,10 @@
       "ontology_id": "http://example.org/people",
       "short_name": "acme",
       "source_location": {
-        "column": 2,
-        "end_byte": 990,
+        "column": 0,
+        "end_byte": 958,
         "line": 36,
-        "start_byte": 882
+        "start_byte": 880
       }
     },
     {
@@ -266,10 +270,10 @@
       "ontology_id": "http://example.org/people",
       "short_name": "age",
       "source_location": {
-        "column": 2,
-        "end_byte": 878,
+        "column": 0,
+        "end_byte": 716,
         "line": 24,
-        "start_byte": 607
+        "start_byte": 605
       }
     },
     {
@@ -283,10 +287,10 @@
       "ontology_id": "http://example.org/people",
       "short_name": "alice",
       "source_location": {
-        "column": 2,
-        "end_byte": 990,
+        "column": 0,
+        "end_byte": 878,
         "line": 32,
-        "start_byte": 780
+        "start_byte": 778
       }
     },
     {
@@ -300,9 +304,10 @@
       "ontology_id": "http://example.org/people",
       "short_name": "note",
       "source_location": {
-        "column": 2,
+        "column": 0,
+        "end_byte": 776,
         "line": 29,
-        "start_byte": 720
+        "start_byte": 718
       }
     },
     {
@@ -316,10 +321,10 @@
       "ontology_id": "http://example.org/people",
       "short_name": "worksFor",
       "source_location": {
-        "column": 2,
-        "end_byte": 990,
+        "column": 0,
+        "end_byte": 603,
         "line": 19,
-        "start_byte": 481
+        "start_byte": 479
       }
     },
     {

@@ -19,6 +19,7 @@ export class QueryWorkbenchPanel {
   public static current: QueryWorkbenchPanel | undefined;
   private readonly panel: vscode.WebviewPanel;
   private lastResult: TabularQueryResult | undefined;
+  private runId = 0;
 
   private constructor(
     panel: vscode.WebviewPanel,
@@ -30,7 +31,9 @@ export class QueryWorkbenchPanel {
     });
     this.panel.webview.onDidReceiveMessage(async (msg) => {
       if (msg.command === "run") {
-        await this.runQuery(msg.mode as "sql" | "sparql", msg.text as string);
+        const runId =
+          typeof msg.runId === "number" ? msg.runId : ++this.runId;
+        await this.runQuery(msg.mode as "sql" | "sparql", msg.text as string, runId);
       }
       if (msg.command === "save") {
         await this.saveQuery(msg.mode, msg.text, msg.name);
@@ -57,7 +60,11 @@ export class QueryWorkbenchPanel {
     return QueryWorkbenchPanel.current;
   }
 
-  private async runQuery(mode: "sql" | "sparql", text: string): Promise<void> {
+  private async runQuery(
+    mode: "sql" | "sparql",
+    text: string,
+    runId: number
+  ): Promise<void> {
     try {
       const result =
         mode === "sql"
@@ -66,6 +73,7 @@ export class QueryWorkbenchPanel {
       this.lastResult = result;
       this.panel.webview.postMessage({
         command: "result",
+        runId,
         result,
         error: undefined,
       });
@@ -81,6 +89,7 @@ export class QueryWorkbenchPanel {
       const message = err instanceof Error ? err.message : String(err);
       this.panel.webview.postMessage({
         command: "result",
+        runId,
         error: message,
       });
     }
@@ -190,7 +199,8 @@ export class QueryWorkbenchPanel {
     document.getElementById('historyPick').addEventListener('change', (e) => loadPick(e.target));
 
     document.getElementById('run').addEventListener('click', () => {
-      vscode.postMessage({ command: 'run', mode: modeEl.value, text: queryEl.value });
+      window.latestRunId = (window.latestRunId || 0) + 1;
+      vscode.postMessage({ command: 'run', mode: modeEl.value, text: queryEl.value, runId: window.latestRunId });
     });
     document.getElementById('save').addEventListener('click', () => {
       vscode.postMessage({ command: 'save', mode: modeEl.value, text: queryEl.value });
@@ -201,19 +211,38 @@ export class QueryWorkbenchPanel {
     window.addEventListener('message', (event) => {
       const msg = event.data;
       if (msg.command === 'result') {
+        if (msg.runId != null && msg.runId !== window.latestRunId) return;
         document.getElementById('error').textContent = msg.error || '';
         const banner = document.getElementById('banner');
         const results = document.getElementById('results');
-        if (!msg.result) { results.innerHTML = ''; banner.textContent = ''; return; }
+        if (!msg.result) { results.textContent = ''; banner.textContent = ''; return; }
         banner.textContent = msg.result.truncated ? 'Results truncated at server row limit.' : '';
         const cols = msg.result.columns;
         const rows = msg.result.rows;
-        let html = '<table><thead><tr>' + cols.map(c => '<th>' + c + '</th>').join('') + '</tr></thead><tbody>';
-        for (const row of rows) {
-          html += '<tr>' + cols.map(c => '<td>' + (row[c] ?? '') + '</td>').join('') + '</tr>';
+        results.replaceChildren();
+        const table = document.createElement('table');
+        const thead = document.createElement('thead');
+        const headerRow = document.createElement('tr');
+        for (const c of cols) {
+          const th = document.createElement('th');
+          th.textContent = c;
+          headerRow.appendChild(th);
         }
-        html += '</tbody></table>';
-        results.innerHTML = html;
+        thead.appendChild(headerRow);
+        table.appendChild(thead);
+        const tbody = document.createElement('tbody');
+        for (const row of rows) {
+          const tr = document.createElement('tr');
+          for (const c of cols) {
+            const td = document.createElement('td');
+            const val = row[c];
+            td.textContent = val == null ? '' : String(val);
+            tr.appendChild(td);
+          }
+          tbody.appendChild(tr);
+        }
+        table.appendChild(tbody);
+        results.appendChild(table);
       }
     });
   </script>

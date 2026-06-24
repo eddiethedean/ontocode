@@ -217,8 +217,11 @@ fn print_query_result(
     rows: &[std::collections::BTreeMap<String, String>],
     format: OutputFormat,
 ) -> Result<()> {
-    let result =
-        ontoindex_query::sql::QueryResult { columns: columns.to_vec(), rows: rows.to_vec() };
+    let result = ontoindex_query::sql::QueryResult {
+        columns: columns.to_vec(),
+        rows: rows.to_vec(),
+        truncated: false,
+    };
     match format {
         OutputFormat::Json => println!("{}", sql_to_json(&result)?),
         OutputFormat::Csv => print!("{}", sql_to_csv(&result)?),

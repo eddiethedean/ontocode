@@ -103,7 +103,7 @@ jobs:
 
       - name: cargo test
         run: |
-          cargo build -p ontoindex-lsp --bins
+          cargo build -p ontoindex-lsp -p ontoindex-cli --bins
           cargo test --workspace
 
       - name: Publish crates to crates.io

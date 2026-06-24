@@ -252,7 +252,7 @@ Pre-built artifacts on [GitHub Releases](https://github.com/eddiethedean/ontocod
 
 Verify downloads: [release integrity](https://onto-code.readthedocs.io/en/latest/release-integrity/). Maintainer release process: [releasing guide](https://onto-code.readthedocs.io/en/latest/releasing/).
 
-Published crates (v0.4.0) on [crates.io](https://crates.io/): `ontoindex-core`, `ontoindex-parser`, `ontoindex-owl`, `ontoindex-diagnostics`, `ontoindex-catalog`, `ontoindex-query`, `ontoindex-lsp`, `ontoindex-cli`.
+Workspace crates **publish to [crates.io](https://crates.io/) on each `v0.4.x` release tag** (first publish in v0.4.0): `ontoindex-core`, `ontoindex-parser`, `ontoindex-owl`, `ontoindex-diagnostics`, `ontoindex-catalog`, `ontoindex-query`, `ontoindex-lsp`, `ontoindex-cli`.
 
 See [CHANGELOG.md](CHANGELOG.md) for release notes. Security: [security policy](https://onto-code.readthedocs.io/en/latest/security/).
 

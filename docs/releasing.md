@@ -7,7 +7,8 @@ Maintainer checklist for publishing crates, binaries, and the VS Code extension.
 1. Update `[workspace.package].version` in root [Cargo.toml on GitHub](https://github.com/eddiethedean/ontocode/blob/main/Cargo.toml)
 2. Update `extension/package.json` `version`
 3. Update [CHANGELOG.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md)
-4. Sync user-facing docs (see checklist below)
+4. Regenerate [NOTICES](../NOTICES) if dependencies changed (`cargo license` recommended)
+5. Sync user-facing docs (see checklist below)
 
 ## Documentation sync checklist (every release)
 

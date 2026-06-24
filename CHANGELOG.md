@@ -23,6 +23,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Turtle catalog entities/axioms sourced from Horned-OWL when parse succeeds (dual stack per ADR-0013)
 - Workspace MSRV bumped to **1.88** (Horned-OWL 1.4)
 - Label strings in catalog normalized (no extra RDF literal quotes from Horned-OWL bridge)
+- Read the Docs site, first-success tutorial, errors reference, and enterprise evaluation guide
 
 [0.4.0]: https://github.com/eddiethedean/ontocode/releases/tag/v0.4.0
 

@@ -9,6 +9,7 @@ Each release includes `SHA256SUMS` with SHA-256 hashes of:
 - `ontoindex-v<version>-x86_64-unknown-linux-gnu.tar.gz` (CLI binary, Linux x64)
 - `ontoindex-lsp-v<version>-<platform>.tar.gz` / `.zip` (per-platform LSP)
 - `ontocode-<version>.vsix` (VS Code extension)
+- `NOTICES` (third-party license summary)
 
 Verify after download:
 

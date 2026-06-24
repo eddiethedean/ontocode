@@ -1,0 +1,23 @@
+OntoCode / OntoIndex third-party notices (v0.4.0)
+
+This product includes software developed by third parties. OntoIndex and
+OntoCode are licensed under MIT OR Apache-2.0 at your option (see LICENSE-MIT
+and LICENSE-APACHE-2.0 in this repository).
+
+Direct runtime dependencies (v0.4.0 workspace):
+
+- Oxigraph (MIT OR Apache-2.0) — https://github.com/oxigraph/oxigraph
+- sqlparser (Apache-2.0) — https://github.com/sqlparser-rs/sqlparser-rs
+- ignore (Unlicense OR MIT) — https://github.com/BurntSushi/ripgrep/tree/master/crates/ignore
+- horned-owl (LGPL-3.0) — https://github.com/phillord/horned-owl
+  Linked via ontoindex-owl for OWL modeling and Turtle write-back. If you
+  distribute binaries, comply with LGPL-3.0 (source offer, license text).
+- horned-functional (MIT) — https://github.com/phillord/horned-owl
+- lsp-server (MIT OR Apache-2.0) — https://github.com/gluon-lang/lsp-types
+- lsp-types (MIT) — https://github.com/gluon-lang/lsp-types
+- serde, clap, thiserror, anyhow, csv, hex, sha2, url, regex, and other
+  crates.io dependencies — see Cargo.lock for versions and licenses.
+
+Regenerate this file when dependency versions change (`cargo license` recommended).
+
+Full summary: docs/design/LICENSES.md

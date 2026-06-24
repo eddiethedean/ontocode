@@ -224,6 +224,7 @@ jobs:
       - name: Generate SHA256SUMS
         run: |
           set -euo pipefail
+          cp NOTICES dist/NOTICES
           cd dist
           shopt -s nullglob
           sha256sum *.tar.gz *.zip *.vsix > SHA256SUMS
@@ -234,7 +235,7 @@ jobs:
         run: |
           set -euo pipefail
           shopt -s nullglob
-          assets=(dist/*.tar.gz dist/*.zip dist/*.vsix dist/SHA256SUMS)
+          assets=(dist/*.tar.gz dist/*.zip dist/*.vsix dist/SHA256SUMS dist/NOTICES)
           if [ ${#assets[@]} -eq 0 ]; then
             echo "No release assets found"
             exit 1

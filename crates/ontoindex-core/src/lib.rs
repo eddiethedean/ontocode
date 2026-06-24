@@ -1,8 +1,12 @@
 //! Core types, workspace scanning, path sandboxing, and resource limits for OntoIndex.
 //!
 //! Published as [`ontoindex-core`](https://crates.io/crates/ontoindex-core).
-//! See [SQL reference](https://github.com/eddiethedean/ontocode/blob/main/docs/sql-reference.md)
-//! and [LSP API](https://github.com/eddiethedean/ontocode/blob/main/docs/lsp-api.md) for v0.3 behavior.
+//!
+//! # API stability
+//!
+//! **Pre-1.0:** public types and constants may change between minor releases until
+//! [v1.0 stable core](https://github.com/eddiethedean/ontocode/blob/main/docs/design/v1.0_BACKLOG.md)
+//! is complete. See [workspace limits](https://github.com/eddiethedean/ontocode/blob/main/docs/workspace-limits.md).
 
 pub mod document_lookup;
 pub mod error;

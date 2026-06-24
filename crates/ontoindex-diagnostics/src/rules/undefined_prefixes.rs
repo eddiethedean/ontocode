@@ -132,7 +132,10 @@ mod tests {
             format: OntologyFormat::Turtle,
             base_iri: Some("http://example.org/live".to_string()),
             imports: vec![],
-            namespaces: BTreeMap::from([("ex".to_string(), "http://example.org/live#".to_string())]),
+            namespaces: BTreeMap::from([(
+                "ex".to_string(),
+                "http://example.org/live#".to_string(),
+            )]),
             parse_status: ParseStatus::Ok,
             content_hash: "h".to_string(),
             modified_time: 0,

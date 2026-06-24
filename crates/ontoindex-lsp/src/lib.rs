@@ -1,9 +1,15 @@
 //! Language server for OntoCode (stdio). Custom methods under `ontoindex/*`.
 //!
 //! See [docs/lsp-api.md](https://github.com/eddiethedean/ontocode/blob/main/docs/lsp-api.md).
+//!
+//! # API stability
+//!
+//! The LSP wire format and custom `ontoindex/*` methods are **pre-1.0** and may change
+//! between minor releases. See the repository README for semver policy.
 
 pub(crate) mod diagnostics;
 pub(crate) mod handlers;
+pub(crate) mod index_worker;
 pub(crate) mod positions;
 pub mod protocol;
 pub(crate) mod state;
@@ -12,8 +18,10 @@ use handlers::build_catalog_snapshot;
 use ontoindex_catalog::OntologyCatalog;
 
 /// Serialize the LSP `ontoindex/getCatalogSnapshot` payload for a built catalog.
-pub fn catalog_snapshot_json(catalog: &OntologyCatalog) -> serde_json::Value {
-    serde_json::to_value(build_catalog_snapshot(catalog)).expect("serialize catalog snapshot")
+pub fn catalog_snapshot_json(
+    catalog: &OntologyCatalog,
+) -> Result<serde_json::Value, serde_json::Error> {
+    serde_json::to_value(build_catalog_snapshot(catalog))
 }
 
 #[cfg(test)]
@@ -24,6 +32,7 @@ use diagnostics::publish_catalog_diagnostics;
 use handlers::{
     handle_custom_request, handle_initialize, handle_standard_request, StandardRequestOutcome,
 };
+use index_worker::IndexWorker;
 use lsp_server::{Connection, Message, Notification, Request, RequestId, Response, ResponseError};
 use lsp_types::{
     notification::Notification as _,
@@ -50,15 +59,18 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
     let pending_reindex: Arc<Mutex<Option<PendingReindex>>> = Arc::new(Mutex::new(None));
     let pending_diagnostic_publish = Arc::new(AtomicBool::new(false));
 
-    let timer_sender = connection.sender.clone();
-    let timer_state = state.clone();
+    let index_worker = IndexWorker::spawn(
+        state.clone(),
+        Arc::clone(&pending_diagnostic_publish),
+        connection.sender.clone(),
+    );
+
+    let timer_worker = index_worker.clone();
     let timer_pending = Arc::clone(&pending_reindex);
-    let timer_publish = Arc::clone(&pending_diagnostic_publish);
     thread::spawn(move || loop {
         thread::sleep(Duration::from_millis(100));
-        if flush_due_reindex(&timer_state, &timer_pending) {
-            timer_publish.store(true, Ordering::SeqCst);
-            publish_pending_diagnostics(&timer_sender, &timer_state, &timer_publish);
+        if let Some(workspace) = take_due_reindex_workspace(&timer_pending) {
+            timer_worker.enqueue(workspace);
         }
     });
 
@@ -69,7 +81,7 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
                     break;
                 }
                 if let Some(resp) =
-                    handle_lsp_request(&state, &pending_reindex, &pending_diagnostic_publish, req)
+                    handle_lsp_request(&state, &index_worker, &pending_diagnostic_publish, req)
                 {
                     connection.sender.send(Message::Response(resp))?;
                 }
@@ -101,13 +113,10 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
 
 fn handle_lsp_request(
     state: &ServerState,
-    pending_reindex: &Arc<Mutex<Option<PendingReindex>>>,
+    index_worker: &IndexWorker,
     pending_diagnostic_publish: &Arc<AtomicBool>,
     req: Request,
 ) -> Option<Response> {
-    if flush_due_reindex(state, pending_reindex) {
-        pending_diagnostic_publish.store(true, Ordering::SeqCst);
-    }
     let id = req.id.clone();
 
     if req.method == "initialize" {
@@ -127,7 +136,7 @@ fn handle_lsp_request(
     }
 
     if req.method.starts_with("ontoindex/") {
-        return match handle_custom_request(state, &req.method, Some(req.params)) {
+        return match handle_custom_request(state, index_worker, &req.method, Some(req.params)) {
             Ok(result) => {
                 if req.method == "ontoindex/indexWorkspace" {
                     pending_diagnostic_publish.store(true, Ordering::SeqCst);
@@ -175,7 +184,9 @@ fn handle_notification(
                 serde_json::from_value::<lsp_types::DidOpenTextDocumentParams>(notif.params)
             {
                 if let Ok(path) = document_path_from_uri(state, &params.text_document.uri) {
-                    state.set_document_text(path, params.text_document.text);
+                    if let Err(err) = state.set_document_text(path, params.text_document.text) {
+                        eprintln!("ontoindex-lsp: rejected open document: {err}");
+                    }
                 }
             }
             if let Some(workspace) = state.workspace_root() {
@@ -188,7 +199,9 @@ fn handle_notification(
             {
                 if let Ok(path) = document_path_from_uri(state, &params.text_document.uri) {
                     if let Some(text) = merged_document_text(state, &path, &params) {
-                        state.set_document_text(path, text);
+                        if let Err(err) = state.set_document_text(path, text) {
+                            eprintln!("ontoindex-lsp: rejected document change: {err}");
+                        }
                     }
                 }
             }
@@ -322,22 +335,19 @@ fn schedule_reindex(
     }
 }
 
-fn flush_due_reindex(state: &ServerState, pending: &Arc<Mutex<Option<PendingReindex>>>) -> bool {
-    let due = {
-        let Ok(mut guard) = pending.lock() else {
-            return false;
-        };
-        let Some(entry) = guard.as_ref() else {
-            return false;
-        };
-        if Instant::now() < entry.scheduled_at {
-            return false;
-        }
-        let workspace = entry.workspace.clone();
-        *guard = None;
-        workspace
+fn take_due_reindex_workspace(
+    pending: &Arc<Mutex<Option<PendingReindex>>>,
+) -> Option<std::path::PathBuf> {
+    let Ok(mut guard) = pending.lock() else {
+        return None;
     };
-    state.index_workspace(due).is_ok()
+    let entry = guard.as_ref()?;
+    if Instant::now() < entry.scheduled_at {
+        return None;
+    }
+    let workspace = entry.workspace.clone();
+    *guard = None;
+    Some(workspace)
 }
 
 fn parse_params<T: serde::de::DeserializeOwned>(params: Option<Value>) -> Result<T, ResponseError> {
@@ -374,14 +384,14 @@ mod debounce_tests {
     use std::path::PathBuf;
 
     #[test]
-    fn flush_clears_pending_after_delay() {
+    fn take_due_clears_pending_after_delay() {
         let pending: Arc<Mutex<Option<PendingReindex>>> = Arc::new(Mutex::new(None));
         let ws = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../fixtures");
-        schedule_reindex(&pending, ws, Duration::from_millis(30));
+        schedule_reindex(&pending, ws.clone(), Duration::from_millis(30));
         assert!(pending.lock().unwrap().is_some());
         thread::sleep(Duration::from_millis(60));
-        let state = ServerState::new();
-        assert!(flush_due_reindex(&state, &pending));
+        let taken = take_due_reindex_workspace(&pending);
+        assert_eq!(taken, Some(ws));
         assert!(pending.lock().unwrap().is_none());
     }
 }

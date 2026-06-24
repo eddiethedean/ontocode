@@ -40,14 +40,12 @@ impl OntologyCatalog {
     }
 
     pub fn entity_document(&self, iri: &str) -> Option<&ontoindex_core::OntologyDocument> {
-        let entity = self.find_entity(iri)?;
-        let data = self.data();
-
-        if let Some(doc) = data.documents.iter().find(|d| document_matches_entity(entity, d)) {
-            return Some(doc);
+        if let Some(&doc_idx) = self.entity_to_document.get(iri) {
+            return self.data().documents.get(doc_idx);
         }
 
-        data.documents.iter().find(|doc| file_contains_entity(&doc.path, iri, &entity.short_name))
+        let entity = self.find_entity(iri)?;
+        self.data().documents.iter().find(|d| document_matches_entity(entity, d))
     }
 
     pub fn class_hierarchy(&self) -> ClassHierarchy {
@@ -120,10 +118,20 @@ impl OntologyCatalog {
     }
 
     pub fn entities_in_document(&self, doc_path: &std::path::Path) -> Vec<&Entity> {
-        self.data()
-            .entities
+        let doc_path = doc_path.canonicalize().unwrap_or_else(|_| doc_path.to_path_buf());
+        let Some(doc_idx) = self
+            .data()
+            .documents
             .iter()
-            .filter(|e| self.entity_document(&e.iri).map(|d| d.path == doc_path).unwrap_or(false))
+            .position(|d| d.path.canonicalize().unwrap_or_else(|_| d.path.clone()) == doc_path)
+        else {
+            return Vec::new();
+        };
+        self.document_entity_iris
+            .get(doc_idx)
+            .into_iter()
+            .flatten()
+            .filter_map(|iri| self.find_entity(iri))
             .collect()
     }
 }
@@ -134,14 +142,6 @@ fn predicate_label(predicate: &str) -> &'static str {
     } else {
         "predicate"
     }
-}
-
-fn file_contains_entity(path: &std::path::Path, iri: &str, short_name: &str) -> bool {
-    fs::read_to_string(path).ok().is_some_and(|content| {
-        content.contains(iri)
-            || content.contains(&format!(":{short_name}"))
-            || content.contains(&format!(" {short_name} "))
-    })
 }
 
 fn scan_file_for_iri(path: &std::path::Path, iri: &str, short_name: &str) -> Option<SourceHint> {
@@ -216,5 +216,13 @@ mod tests {
             .expect("source location");
         assert!(source.path.ends_with("example.ttl"));
         assert!(source.line > 0);
+    }
+
+    #[test]
+    fn entities_in_document_uses_build_time_index() {
+        let catalog = fixture_catalog();
+        let doc_path = fixture_workspace().join("example.ttl");
+        let entities = catalog.entities_in_document(&doc_path);
+        assert!(entities.iter().any(|e| e.short_name == "Person"));
     }
 }

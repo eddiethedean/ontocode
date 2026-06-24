@@ -35,19 +35,15 @@ fn normalize_snapshot_paths(mut value: Value) -> Value {
 }
 
 fn relative_fixture_path(path: &str) -> String {
-    let name = Path::new(path)
-        .file_name()
-        .and_then(|n| n.to_str())
-        .unwrap_or(path);
+    let name = Path::new(path).file_name().and_then(|n| n.to_str()).unwrap_or(path);
     format!("fixtures/{name}")
 }
 
 pub fn extension_fixture_snapshot_json() -> String {
-    let catalog = IndexBuilder::new()
-        .workspace(fixture_workspace())
-        .build()
-        .expect("index fixtures");
-    let value = normalize_snapshot_paths(catalog_snapshot_json(&catalog));
+    let catalog =
+        IndexBuilder::new().workspace(fixture_workspace()).build().expect("index fixtures");
+    let value =
+        normalize_snapshot_paths(catalog_snapshot_json(&catalog).expect("serialize snapshot"));
     serde_json::to_string_pretty(&value).expect("serialize snapshot")
 }
 

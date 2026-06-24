@@ -59,6 +59,8 @@ impl IndexBuilder {
         let mut documents = Vec::new();
         let mut entities: Vec<Entity> = Vec::new();
         let mut entity_index: HashMap<String, usize> = HashMap::new();
+        let mut entity_to_document: HashMap<String, usize> = HashMap::new();
+        let mut document_entity_iris: Vec<Vec<String>> = Vec::new();
         let mut annotations = Vec::new();
         let mut axioms = Vec::new();
         let mut namespaces = Vec::new();
@@ -113,7 +115,12 @@ impl IndexBuilder {
                 parse_error_location: parsed.parse_error_location.clone(),
             });
 
+            let doc_idx = documents.len() - 1;
+            let mut doc_entity_iris = Vec::new();
+
             for entity in parsed.entities {
+                entity_to_document.insert(entity.iri.clone(), doc_idx);
+                doc_entity_iris.push(entity.iri.clone());
                 if let Some(&existing_idx) = entity_index.get(&entity.iri) {
                     entities[existing_idx] = entity;
                 } else {
@@ -122,6 +129,7 @@ impl IndexBuilder {
                     entities.push(entity);
                 }
             }
+            document_entity_iris.push(doc_entity_iris);
             annotations.extend(parsed.annotations);
             axioms.extend(parsed.axioms);
             namespaces.extend(parsed.namespace_rows);
@@ -154,7 +162,13 @@ impl IndexBuilder {
         };
         data.diagnostics = collect_diagnostics_with_sources(&lint_input, &self.document_overrides);
 
-        Ok(OntologyCatalog { workspace: self.workspace, data, store })
+        Ok(OntologyCatalog {
+            workspace: self.workspace,
+            data,
+            store,
+            entity_to_document,
+            document_entity_iris,
+        })
     }
 }
 
@@ -168,6 +182,10 @@ pub struct OntologyCatalog {
     workspace: PathBuf,
     data: OntologyCatalogData,
     store: Store,
+    /// Entity IRI → index in [`OntologyCatalogData::documents`].
+    pub(crate) entity_to_document: HashMap<String, usize>,
+    /// Entity IRIs declared per document (parallel to `documents`).
+    pub(crate) document_entity_iris: Vec<Vec<String>>,
 }
 
 impl OntologyCatalog {

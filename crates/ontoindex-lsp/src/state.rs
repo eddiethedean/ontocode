@@ -1,5 +1,9 @@
 use ontoindex_catalog::{IndexBuilder, OntologyCatalog};
-use ontoindex_core::{canonical_workspace_root, validate_workspace_scope};
+use ontoindex_core::{
+    canonical_workspace_root,
+    limits::{MAX_FILE_BYTES, MAX_OPEN_DOCUMENTS},
+    validate_workspace_scope,
+};
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, RwLock};
@@ -84,14 +88,23 @@ impl ServerState {
         self.inner.read().ok()?.workspace.clone()
     }
 
-    pub fn set_document_text(&self, path: PathBuf, text: String) {
-        let path = path.canonicalize().unwrap_or(path);
-        match self.inner.write() {
-            Ok(mut guard) => {
-                guard.open_documents.insert(path, text);
-            }
-            Err(e) => eprintln!("ontoindex-lsp: failed to store open document: {e}"),
+    /// Store unsaved buffer text for a workspace document.
+    ///
+    /// Returns an error when the buffer exceeds [`MAX_FILE_BYTES`] or when
+    /// [`MAX_OPEN_DOCUMENTS`] would be exceeded for a newly opened path.
+    pub fn set_document_text(&self, path: PathBuf, text: String) -> Result<(), String> {
+        if text.len() as u64 > MAX_FILE_BYTES {
+            return Err(format!("document exceeds maximum size of {MAX_FILE_BYTES} bytes"));
         }
+        let path = path.canonicalize().unwrap_or(path);
+        let mut guard = self.inner.write().map_err(|e| e.to_string())?;
+        if !guard.open_documents.contains_key(&path)
+            && guard.open_documents.len() >= MAX_OPEN_DOCUMENTS
+        {
+            return Err(format!("open document limit of {MAX_OPEN_DOCUMENTS} reached"));
+        }
+        guard.open_documents.insert(path, text);
+        Ok(())
     }
 
     pub fn remove_document(&self, path: &Path) {
@@ -142,4 +155,32 @@ pub fn path_to_uri(path: &Path) -> String {
 
 fn now_epoch_secs() -> u64 {
     SystemTime::now().duration_since(UNIX_EPOCH).map(|d| d.as_secs()).unwrap_or(0)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use ontoindex_core::limits::{MAX_FILE_BYTES, MAX_OPEN_DOCUMENTS};
+    use std::path::PathBuf;
+
+    #[test]
+    fn rejects_oversized_buffer() {
+        let state = ServerState::new();
+        let path = PathBuf::from("/tmp/oversized.ttl");
+        let text = "x".repeat((MAX_FILE_BYTES + 1) as usize);
+        let err = state.set_document_text(path, text).unwrap_err();
+        assert!(err.contains("exceeds maximum size"));
+    }
+
+    #[test]
+    fn rejects_when_open_document_limit_reached() {
+        let state = ServerState::new();
+        for i in 0..MAX_OPEN_DOCUMENTS {
+            let path = PathBuf::from(format!("/tmp/doc-{i}.ttl"));
+            state.set_document_text(path, "@prefix ex: <http://ex#> .".to_string()).unwrap();
+        }
+        let err =
+            state.set_document_text(PathBuf::from("/tmp/extra.ttl"), "x".to_string()).unwrap_err();
+        assert!(err.contains("open document limit"));
+    }
 }

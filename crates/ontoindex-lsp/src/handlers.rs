@@ -1,3 +1,4 @@
+use crate::index_worker::IndexWorker;
 use crate::positions::{byte_col_to_utf16, utf16_offset_to_byte};
 use crate::protocol::{
     CatalogSnapshot, DiagnosticSummary, GetEntityParams, GetEntityResult, IndexWorkspaceParams,
@@ -48,6 +49,7 @@ pub fn handle_initialize(state: &ServerState, params: InitializeParams) -> Initi
 
 pub fn handle_index_workspace(
     state: &ServerState,
+    index_worker: &IndexWorker,
     params: IndexWorkspaceParams,
 ) -> Result<IndexWorkspaceResult, LspErrorPayload> {
     let workspace = match params.workspace_uri.as_deref() {
@@ -59,7 +61,7 @@ pub fn handle_index_workspace(
     };
 
     let (stats, indexed_at) =
-        state.index_workspace(workspace).map_err(LspErrorPayload::index_failed)?;
+        index_worker.enqueue_sync(workspace).map_err(LspErrorPayload::index_failed)?;
 
     Ok(IndexWorkspaceResult { stats, indexed_at })
 }
@@ -76,9 +78,7 @@ pub fn build_catalog_snapshot(catalog: &ontoindex_catalog::OntologyCatalog) -> C
 pub fn handle_get_catalog_snapshot(
     state: &ServerState,
 ) -> Result<CatalogSnapshot, LspErrorPayload> {
-    state
-        .with_catalog(build_catalog_snapshot)
-        .ok_or_else(LspErrorPayload::not_indexed)
+    state.with_catalog(build_catalog_snapshot).ok_or_else(LspErrorPayload::not_indexed)
 }
 
 pub fn handle_get_entity(
@@ -249,6 +249,7 @@ pub fn handle_goto_definition(
 
 pub fn handle_custom_request(
     state: &ServerState,
+    index_worker: &IndexWorker,
     method: &str,
     params: Option<Value>,
 ) -> Result<Value, LspErrorPayload> {
@@ -257,7 +258,7 @@ pub fn handle_custom_request(
             let params: IndexWorkspaceParams =
                 serde_json::from_value(params.unwrap_or(Value::Null))
                     .map_err(|e| LspErrorPayload::index_failed(format!("invalid params: {e}")))?;
-            let result = handle_index_workspace(state, params)?;
+            let result = handle_index_workspace(state, index_worker, params)?;
             serde_json::to_value(result).map_err(|e| LspErrorPayload::index_failed(e.to_string()))
         }
         "ontoindex/getCatalogSnapshot" => {

@@ -143,9 +143,7 @@ mod tests {
         use crossbeam_channel::unbounded;
         use lsp_server::Message;
         use lsp_types::notification::PublishDiagnostics;
-        use ontoindex_core::{
-            OntologyDocument, OntologyFormat, ParseStatus, SourceLocation,
-        };
+        use ontoindex_core::{OntologyDocument, OntologyFormat, ParseStatus, SourceLocation};
         use std::collections::BTreeMap;
         use std::time::Duration;
 
@@ -188,9 +186,7 @@ mod tests {
         );
 
         let mut publish_count = 0usize;
-        while let Ok(Message::Notification(notif)) =
-            rx.recv_timeout(Duration::from_millis(100))
-        {
+        while let Ok(Message::Notification(notif)) = rx.recv_timeout(Duration::from_millis(100)) {
             if notif.method == PublishDiagnostics::METHOD {
                 publish_count += 1;
             }
@@ -200,17 +196,15 @@ mod tests {
         publish_catalog_diagnostics(&tx, &[doc(&path_a)], &[diagnostic(&path_a)], &|_| None);
 
         let mut final_notifications = Vec::new();
-        while let Ok(Message::Notification(notif)) =
-            rx.recv_timeout(Duration::from_millis(100))
-        {
+        while let Ok(Message::Notification(notif)) = rx.recv_timeout(Duration::from_millis(100)) {
             if notif.method == PublishDiagnostics::METHOD {
                 final_notifications.push(notif);
             }
         }
         assert_eq!(final_notifications.len(), 2);
-        let cleared = final_notifications
-            .iter()
-            .any(|n| n.params.get("diagnostics").and_then(|d| d.as_array()).is_some_and(|a| a.is_empty()));
+        let cleared = final_notifications.iter().any(|n| {
+            n.params.get("diagnostics").and_then(|d| d.as_array()).is_some_and(|a| a.is_empty())
+        });
         assert!(cleared, "expected empty diagnostics publish for stale URI");
     }
 }

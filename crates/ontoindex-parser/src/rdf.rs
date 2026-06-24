@@ -74,6 +74,12 @@ pub fn parse_ontology_text(
     source_text: &str,
     raw_bytes: &[u8],
 ) -> Result<ParsedOntology> {
+    if raw_bytes.len() as u64 > MAX_FILE_BYTES {
+        return Err(ParseError::LimitExceeded(format!(
+            "source exceeds {MAX_FILE_BYTES} bytes: {}",
+            path.display()
+        )));
+    }
     let rdf_format = to_rdf_format(format, path)?;
 
     let mut quads = Vec::new();
@@ -588,6 +594,22 @@ fn short_name_from_iri(iri: &str) -> String {
 mod tests {
     use super::*;
     use std::io::Write;
+
+    #[test]
+    fn rejects_oversized_source_text() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("huge.ttl");
+        let oversized = "x".repeat((MAX_FILE_BYTES + 1) as usize);
+        let err = parse_ontology_text(
+            &path,
+            OntologyFormat::Turtle,
+            "doc-1",
+            &oversized,
+            oversized.as_bytes(),
+        )
+        .unwrap_err();
+        assert!(matches!(err, ParseError::LimitExceeded(_)));
+    }
 
     #[test]
     fn parses_simple_turtle_ontology() {

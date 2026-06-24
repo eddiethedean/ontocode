@@ -1,7 +1,10 @@
 //! Resource limits for indexing and querying (DoS hardening).
 
-/// Maximum size of a single ontology file read from disk.
+/// Maximum size of a single ontology file read from disk or held in an LSP open buffer.
 pub const MAX_FILE_BYTES: u64 = 50 * 1024 * 1024;
+
+/// Maximum open LSP document buffers tracked per workspace.
+pub const MAX_OPEN_DOCUMENTS: usize = 256;
 
 /// Maximum ontology files scanned per workspace.
 pub const MAX_SCAN_FILES: usize = 10_000;

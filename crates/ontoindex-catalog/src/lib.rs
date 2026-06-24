@@ -1,6 +1,11 @@
 //! Workspace indexing: scan files, parse ontologies, build queryable catalog + Oxigraph store.
 //!
 //! Entry points: [`IndexBuilder`], [`OntologyCatalog`].
+//!
+//! # API stability
+//!
+//! **Pre-1.0:** catalog shapes and method signatures may change until v1.0.
+//! [`OntologyCatalog::store`] exposes Oxigraph types and is not a stable integration surface.
 
 mod builder;
 mod entity_api;

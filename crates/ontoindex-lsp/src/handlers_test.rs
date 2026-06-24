@@ -233,10 +233,8 @@ fn open_buffer_override_surfaces_undefined_prefix_in_snapshot() {
         .expect("indexed catalog")
         .expect("live.ttl document");
 
-    state.set_document_text(
-        doc_path,
-        format!("{base}ex:Ok a owl:Class .\nun:Bad a owl:Class .\n"),
-    );
+    let _ = state
+        .set_document_text(doc_path, format!("{base}ex:Ok a owl:Class .\nun:Bad a owl:Class .\n"));
     state.index_workspace(dir.path().to_path_buf()).expect("reindex with buffer");
 
     let snapshot = handle_get_catalog_snapshot(&state).expect("snapshot");

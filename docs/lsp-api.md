@@ -9,6 +9,7 @@ LSP JSON uses **snake_case** for enums serialized from Rust (`EntityKind`, `Pars
 **Source of truth:**
 
 - Types: [`crates/ontoindex-lsp/src/protocol.rs`](../crates/ontoindex-lsp/src/protocol.rs)
+- JSON Schema (v0.3 subset, codegen planned v0.4): [`docs/lsp-protocol.schema.json`](lsp-protocol.schema.json)
 - Handlers: [`crates/ontoindex-lsp/src/handlers.rs`](../crates/ontoindex-lsp/src/handlers.rs)
 - Extension client: [`extension/src/lsp/client.ts`](../extension/src/lsp/client.ts)
 

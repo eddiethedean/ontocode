@@ -249,7 +249,14 @@ tests/                  # integration and golden snapshot tests
 | `diagnostics` | Lint and parse diagnostics (v0.3) |
 | `properties` | Union of all property kinds |
 
-Column schemas, SQL limits, and examples: [docs/sql-reference.md](docs/sql-reference.md). LSP methods: [docs/lsp-api.md](docs/lsp-api.md).
+Column schemas, SQL limits, and examples: [docs/sql-reference.md](docs/sql-reference.md). LSP methods: [docs/lsp-api.md](docs/lsp-api.md). Workspace limits: [docs/workspace-limits.md](docs/workspace-limits.md).
+
+## API stability (pre-1.0)
+
+Published `ontoindex-*` crates are at **0.3.x**. Library APIs, LSP wire JSON, and SQL virtual
+table columns may change between minor releases until [v1.0 stable core](docs/design/v1.0_BACKLOG.md)
+is complete. The CLI `validate` exit code (errors fail, warnings pass) is documented in
+[docs/workspace-limits.md](docs/workspace-limits.md).
 
 ## Development
 

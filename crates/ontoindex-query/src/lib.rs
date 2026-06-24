@@ -1,6 +1,11 @@
 //! SQL-like virtual tables and SPARQL over an [`OntologyCatalog`].
 //!
 //! See [docs/sql-reference.md](https://github.com/eddiethedean/ontocode/blob/main/docs/sql-reference.md).
+//!
+//! # API stability
+//!
+//! **Pre-1.0:** virtual table names and column sets are documented but may gain columns
+//! without a major version until v1.0.
 
 pub mod sparql;
 pub mod sql;

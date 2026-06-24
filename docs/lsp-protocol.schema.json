@@ -1,0 +1,74 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://github.com/eddiethedean/ontocode/docs/lsp-protocol.schema.json",
+  "title": "OntoIndex LSP protocol (v0.3)",
+  "description": "JSON Schema for implemented ontoindex/* custom LSP methods. Full codegen (typeshare or schema-to-TS) is planned for v0.4 before additional methods ship.",
+  "definitions": {
+    "EntityKind": {
+      "type": "string",
+      "enum": [
+        "class",
+        "object_property",
+        "data_property",
+        "annotation_property",
+        "individual",
+        "ontology",
+        "other"
+      ]
+    },
+    "DiagnosticSummary": {
+      "type": "object",
+      "required": ["code", "severity", "message", "file"],
+      "properties": {
+        "code": { "type": "string" },
+        "severity": { "type": "string", "enum": ["error", "warning", "info"] },
+        "message": { "type": "string" },
+        "file": { "type": "string" },
+        "line": { "type": ["integer", "null"] },
+        "column": { "type": ["integer", "null"] },
+        "entity_iri": { "type": ["string", "null"] }
+      },
+      "additionalProperties": false
+    },
+    "CatalogSnapshot": {
+      "type": "object",
+      "required": ["documents", "entities", "hierarchy", "diagnostics"],
+      "properties": {
+        "documents": { "type": "array" },
+        "entities": { "type": "array" },
+        "hierarchy": { "type": "object" },
+        "diagnostics": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/DiagnosticSummary" }
+        }
+      },
+      "additionalProperties": true
+    },
+    "IndexWorkspaceParams": {
+      "type": "object",
+      "properties": {
+        "workspaceUri": { "type": ["string", "null"] }
+      },
+      "additionalProperties": false
+    },
+    "GetEntityParams": {
+      "type": "object",
+      "required": ["iri"],
+      "properties": {
+        "iri": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "LspErrorPayload": {
+      "type": "object",
+      "required": ["code", "message", "recoverable"],
+      "properties": {
+        "code": { "type": "string" },
+        "message": { "type": "string" },
+        "recoverable": { "type": "boolean" },
+        "user_action": { "type": ["string", "null"] }
+      },
+      "additionalProperties": false
+    }
+  }
+}

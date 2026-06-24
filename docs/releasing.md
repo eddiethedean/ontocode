@@ -12,7 +12,7 @@ Maintainer checklist for publishing crates, binaries, and the VS Code extension.
 ## Documentation sync checklist (every release)
 
 - [ ] [Root README on GitHub](https://github.com/eddiethedean/ontocode/blob/main/README.md) — version, "What ships", architecture diagram, Read the Docs badge
-- [ ] [docs/README.md](README.md) — shipped version labels
+- [ ] [docs index](index.md) — shipped version labels
 - [ ] [extension/README.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/extension/README.md) — "What's included"
 - [ ] [docs/vscode-install.md](vscode-install.md) — recommended version
 - [ ] [security.md](security.md) / [SECURITY.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/SECURITY.md) — supported versions table

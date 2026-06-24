@@ -1,10 +1,10 @@
 # OntoIndex + OntoCode Documentation Package
 
-This package contains **product vision and specification** documents. For **user-facing guides** (install, SQL, implemented LSP API), see the [documentation index](../README.md).
+This package contains **product vision and specification** documents. For **user-facing guides** (install, SQL, implemented LSP API), see the [documentation home](../index.md).
 
 | Package | Audience |
 |---------|----------|
-| [User docs](../README.md) | New users and integrators (install, SQL reference, LSP API v0.4) |
+| [User docs](../index.md) | New users and integrators (install, SQL reference, LSP API v0.4) |
 | `docs/design/` (this folder) | Contributors and planners (roadmap, target architecture, ADRs) |
 
 Two related products:

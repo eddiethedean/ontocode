@@ -23,7 +23,7 @@ Browse OWL/RDF in VS Code, **edit Turtle ontologies**, query and validate in CI,
 
 > **Naming:** **OntoCode** is the VS Code extension (product UI). **OntoIndex** is the Rust engine (`ontoindex` CLI, `ontoindex-*` crates, `ontoindex-lsp`). This repo contains both.
 
-**Documentation:** [Read the Docs](https://onto-code.readthedocs.io/) · [docs index](docs/README.md) — install, getting started, authoring, SQL/SPARQL, LSP API, CI integration.
+**Documentation:** [Read the Docs](https://onto-code.readthedocs.io/) — [Start here](https://onto-code.readthedocs.io/en/latest/guides/start-here/) · [5-minute guide](https://onto-code.readthedocs.io/en/latest/getting-started/)
 
 ## Choose your path
 

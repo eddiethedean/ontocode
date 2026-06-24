@@ -1,0 +1,164 @@
+/* OntoCode docs — modern layer on Material for MkDocs (lessonkit-inspired) */
+
+:root {
+  --oc-brand: #2563eb;
+  --oc-brand-muted: #1e40af;
+  --oc-accent: #7c3aed;
+}
+
+[data-md-color-scheme="slate"] {
+  --oc-brand: #60a5fa;
+  --oc-brand-muted: #93c5fd;
+  --oc-accent: #c4b5fd;
+}
+
+/* Landing hero */
+.oc-hero {
+  margin: 0 0 2.5rem;
+  padding: 2.75rem 2rem 2.5rem;
+  border-radius: 1.25rem;
+  border: 1px solid var(--md-default-fg-color--lightest);
+  background:
+    radial-gradient(ellipse 120% 80% at 100% -20%, rgba(37, 99, 235, 0.14), transparent 55%),
+    radial-gradient(ellipse 80% 60% at 0% 100%, rgba(124, 58, 237, 0.1), transparent 50%),
+    var(--md-default-bg-color--light);
+  position: relative;
+}
+
+[data-md-color-scheme="slate"] .oc-hero {
+  background:
+    radial-gradient(ellipse 120% 80% at 100% -20%, rgba(96, 165, 250, 0.12), transparent 55%),
+    radial-gradient(ellipse 80% 60% at 0% 100%, rgba(196, 181, 253, 0.08), transparent 50%),
+    var(--md-default-bg-color--light);
+}
+
+.oc-hero-kicker {
+  margin: 0 0 0.5rem;
+  font-size: 0.9375rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--md-default-fg-color--light);
+}
+
+.oc-hero-title {
+  font-size: clamp(1.85rem, 4vw, 2.65rem);
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.2;
+  margin: 0 0 0.75rem;
+  text-wrap: balance;
+}
+
+.oc-hero-lead {
+  font-size: 1.1rem;
+  line-height: 1.65;
+  color: var(--md-default-fg-color--light);
+  max-width: 42rem;
+  margin: 0 0 1.25rem;
+}
+
+.oc-hero-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.oc-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.25rem 0.65rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  border-radius: 999px;
+  border: 1px solid var(--md-default-fg-color--lightest);
+  background: var(--md-default-bg-color);
+  color: var(--md-default-fg-color--light);
+}
+
+.oc-badge--accent {
+  border-color: rgba(37, 99, 235, 0.35);
+  background: rgba(37, 99, 235, 0.08);
+  color: var(--oc-brand-muted);
+}
+
+[data-md-color-scheme="slate"] .oc-badge--accent {
+  color: var(--oc-brand);
+}
+
+.oc-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.oc-hero-actions .md-button {
+  margin: 0;
+}
+
+/* Hide duplicate page title when hero is first child */
+.md-typeset .oc-hero:first-child {
+  margin-top: 0;
+}
+
+.md-content__inner > .md-typeset > h1:first-child {
+  display: none;
+}
+
+.md-content__inner > .md-typeset > h1:first-child + .oc-hero {
+  margin-top: 0;
+}
+
+/* Grid cards polish */
+.md-typeset .grid.cards > ul > li {
+  border-radius: 1rem;
+  border: 1px solid var(--md-default-fg-color--lightest);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.md-typeset .grid.cards > ul > li:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px -12px rgba(15, 23, 42, 0.15);
+  border-color: rgba(37, 99, 235, 0.35);
+}
+
+[data-md-color-scheme="slate"] .md-typeset .grid.cards > ul > li:hover {
+  box-shadow: 0 12px 40px -12px rgba(0, 0, 0, 0.45);
+}
+
+/* Callout */
+.oc-callout {
+  padding: 1rem 1.25rem;
+  margin: 1.5rem 0;
+  border-radius: 0.75rem;
+  border-left: 4px solid var(--oc-brand);
+  background: rgba(37, 99, 235, 0.06);
+}
+
+[data-md-color-scheme="slate"] .oc-callout {
+  background: rgba(96, 165, 250, 0.08);
+}
+
+/* Tables */
+.md-typeset table:not([class]) {
+  border-radius: 0.75rem;
+  overflow: hidden;
+  border: 1px solid var(--md-default-fg-color--lightest);
+}
+
+.md-typeset table:not([class]) thead {
+  background: var(--md-default-bg-color--light);
+}
+
+/* Code blocks */
+.md-typeset div.highlight,
+.md-typeset pre {
+  border-radius: 0.75rem;
+}
+
+/* Brand header tint */
+.md-header {
+  background-color: var(--md-primary-fg-color);
+}

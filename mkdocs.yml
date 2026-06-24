@@ -13,77 +13,88 @@ strict: true
 
 theme:
   name: material
+  logo: assets/logo.svg
+  favicon: assets/logo.svg
   palette:
     - scheme: default
-      primary: indigo
-      accent: indigo
+      primary: blue
+      accent: deep purple
       toggle:
         icon: material/brightness-7
         name: Switch to dark mode
     - scheme: slate
-      primary: indigo
-      accent: indigo
+      primary: blue
+      accent: deep purple
       toggle:
         icon: material/brightness-4
         name: Switch to light mode
   features:
     - navigation.instant
     - navigation.tracking
+    - navigation.tabs
+    - navigation.tabs.sticky
     - navigation.sections
     - navigation.expand
     - navigation.top
+    - navigation.footer
     - search.suggest
     - search.highlight
     - content.code.copy
     - content.action.edit
+    - toc.follow
 
 plugins:
   - search
 
+extra_css:
+  - stylesheets/extra.css
+
 markdown_extensions:
   - admonition
+  - attr_list
+  - md_in_html
   - pymdownx.details
   - pymdownx.superfences
   - pymdownx.highlight
   - pymdownx.inlinehilite
   - pymdownx.tabbed:
       alternate_style: true
+  - pymdownx.emoji:
+      emoji_index: !!python/name:material.extensions.emoji.twemoji
+      emoji_generator: !!python/name:material.extensions.emoji.to_svg
   - tables
   - toc:
       permalink: true
 
 nav:
-  - Home: README.md
-  - Getting started: getting-started.md
-  - User guides:
-      - Install VS Code extension: vscode-install.md
-      - Authoring (Turtle write-back): authoring.md
-      - Patch JSON reference: patch-reference.md
-      - FAQ: faq.md
-  - API reference:
+  - Home: index.md
+  - Getting started:
+      - Start here: guides/start-here.md
+      - 5-minute guide: getting-started.md
+      - Install VS Code: vscode-install.md
+      - Workspace limits: workspace-limits.md
+  - Guides:
+      - Authoring (Turtle): authoring.md
+      - Patch JSON: patch-reference.md
+      - CI integration: ci-integration.md
+  - Reference:
       - SQL virtual tables: sql-reference.md
       - SPARQL: sparql-reference.md
       - LSP API: lsp-api.md
-      - Workspace limits: workspace-limits.md
-  - Operations:
-      - CI integration: ci-integration.md
-      - Release integrity: release-integrity.md
+  - Help:
+      - FAQ: faq.md
       - Security: security.md
-      - Releasing (maintainers): releasing.md
-      - Marketplace publish: marketplace-publish.md
-  - Contributing: contributing.md
-  - Design (target specs):
+      - Release integrity: release-integrity.md
+  - Project:
       - Overview: design/README.md
       - Roadmap: design/ROADMAP.md
       - Architecture: design/ARCHITECTURE.md
       - Protégé parity: design/PROTEGE_PARITY.md
       - Dependency matrix: design/DEPENDENCY_MATRIX.md
       - Licenses: design/LICENSES.md
-      - Product plan: design/PLAN.md
-      - Technical spec: design/SPEC.md
-      - v1.0 backlog: design/v1.0_BACKLOG.md
-      - MVP backlog: design/MVP_BACKLOG.md
       - Specs:
+          - Product plan: design/PLAN.md
+          - Technical spec: design/SPEC.md
           - LSP (target): design/LSP_SPEC.md
           - OWL authoring: design/OWL_AUTHORING_SPEC.md
           - Reasoner: design/REASONER_SPEC.md
@@ -92,6 +103,9 @@ nav:
           - OBO / ROBOT: design/OBO_ROBOT_SPEC.md
           - Plugins: design/PLUGIN_SPEC.md
           - UI wireframes: design/UI_WIREFRAMES.md
+      - Backlogs:
+          - v1.0 backlog: design/v1.0_BACKLOG.md
+          - MVP backlog: design/MVP_BACKLOG.md
       - ADRs:
           - Index: design/adr/README.md
           - "0001 Rust for OntoIndex": design/adr/0001-use-rust-for-ontoindex.md
@@ -110,8 +124,14 @@ nav:
           - "0014 Rust reasoners": design/adr/0014-rust-native-reasoners-only.md
           - "0015 OntoLogos": design/adr/0015-adopt-ontologos-reasoner.md
           - "0016 Dependency-first": design/adr/0016-dependency-first-implementation.md
+      - Maintainers:
+          - Releasing: releasing.md
+          - Marketplace publish: marketplace-publish.md
+  - Contributing: contributing.md
 
 extra:
   social:
     - icon: fontawesome/brands/github
       link: https://github.com/eddiethedean/ontocode
+    - icon: fontawesome/brands/rust
+      link: https://crates.io/search?q=ontoindex

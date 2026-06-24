@@ -149,7 +149,7 @@ Release builds bundle `ontoindex-lsp` for Linux (x64, arm64), macOS (Apple Silic
 ## Links
 
 - [GitHub repository](https://github.com/eddiethedean/ontocode)
-- [Documentation index](https://github.com/eddiethedean/ontocode/blob/main/docs/README.md)
+- [Documentation](https://onto-code.readthedocs.io/)
 - [Report an issue](https://github.com/eddiethedean/ontocode/issues)
 - [Changelog](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md)
 

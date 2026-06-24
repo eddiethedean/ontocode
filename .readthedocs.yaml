@@ -8,6 +8,10 @@ build:
   tools:
     python: "3.12"
 
+python:
+  install:
+    - requirements: docs/requirements.txt
+
 mkdocs:
   configuration: mkdocs.yml
   fail_on_warning: true

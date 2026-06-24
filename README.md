@@ -15,7 +15,7 @@
 [![lsp](https://img.shields.io/crates/v/ontoindex-lsp?label=lsp)](https://crates.io/crates/ontoindex-lsp)
 [![owl](https://img.shields.io/crates/v/ontoindex-owl?label=owl)](https://crates.io/crates/ontoindex-owl)
 [![downloads](https://img.shields.io/crates/d/ontoindex-cli?label=downloads)](https://crates.io/crates/ontoindex-cli)
-[![Docs](https://readthedocs.org/projects/ontocode/badge/?version=latest)](https://ontocode.readthedocs.io/en/latest/)
+[![Docs](https://readthedocs.org/projects/ontocode-vs/badge/?version=latest)](https://ontocode-vs.readthedocs.io/en/latest/)
 
 **Ontology-as-code for Git and VS Code — v0.4.0 ships today.**
 
@@ -23,7 +23,7 @@ Browse OWL/RDF in VS Code, **edit Turtle ontologies**, query and validate in CI,
 
 > **Naming:** **OntoCode** is the VS Code extension (product UI). **OntoIndex** is the Rust engine (`ontoindex` CLI, `ontoindex-*` crates, `ontoindex-lsp`). This repo contains both.
 
-**Documentation:** [Read the Docs](https://ontocode.readthedocs.io/) · [docs index](README.md) — install, getting started, authoring, SQL/SPARQL, LSP API, CI integration.
+**Documentation:** [Read the Docs](https://ontocode-vs.readthedocs.io/) · [docs index](docs/README.md) — install, getting started, authoring, SQL/SPARQL, LSP API, CI integration.
 
 ## Choose your path
 

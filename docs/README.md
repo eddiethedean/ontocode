@@ -1,6 +1,6 @@
 # Documentation index
 
-**Browse online:** [ontocode.readthedocs.io](https://ontocode.readthedocs.io/)
+**Browse online:** [ontocode-vs.readthedocs.io](https://ontocode-vs.readthedocs.io/)
 
 ## Start here
 

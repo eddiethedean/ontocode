@@ -58,9 +58,9 @@ Report vulnerabilities per [security.md](security.md) — not via public issues.
 
 ## Read the Docs
 
-The documentation site is built with [MkDocs](https://www.mkdocs.org/) and hosted on [Read the Docs](https://ontocode.readthedocs.io/).
+The documentation site is built with [MkDocs](https://www.mkdocs.org/) and hosted on [Read the Docs](https://ontocode-vs.readthedocs.io/).
 
-1. Import the GitHub repository at [readthedocs.org/dashboard/import](https://readthedocs.org/dashboard/import/) (project slug: `ontocode`).
+1. Import the GitHub repository at [readthedocs.org/dashboard/import](https://readthedocs.org/dashboard/import/) (project slug: `ontocode-vs`).
 2. RTD reads [`.readthedocs.yaml` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/.readthedocs.yaml) and installs [docs/requirements.txt](requirements.txt).
 3. Pushes to `main` rebuild the `latest` version; tags can publish versioned docs.
 

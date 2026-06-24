@@ -3,7 +3,7 @@
 
 site_name: OntoCode
 site_description: Ontology-as-code for Git and VS Code — OntoIndex engine and OntoCode extension docs
-site_url: https://ontocode.readthedocs.io/
+site_url: https://ontocode-vs.readthedocs.io/
 repo_url: https://github.com/eddiethedean/ontocode
 repo_name: eddiethedean/ontocode
 edit_uri: edit/main/docs/

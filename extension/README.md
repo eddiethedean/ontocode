@@ -2,7 +2,7 @@
 
 **Browse and edit OWL/RDF ontologies in VS Code** — index a workspace, explore classes and properties in the sidebar, inspect and edit entities in Turtle, and jump to source.
 
-![OntoCode Explorer — sidebar views and entity inspector](../docs/media/explorer-preview.svg)
+![OntoCode Explorer — sidebar views and entity inspector](media/explorer-preview.png)
 
 ---
 

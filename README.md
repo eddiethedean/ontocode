@@ -51,7 +51,7 @@ cargo run -- query fixtures "SELECT * FROM classes"
 
 Full install and troubleshooting: [docs/vscode-install.md](docs/vscode-install.md). Editing guide: [docs/authoring.md](docs/authoring.md).
 
-![OntoCode Explorer preview](docs/media/explorer-preview.svg)
+![OntoCode Explorer preview](docs/media/explorer-preview.png)
 
 ## Two-layer architecture
 

@@ -16,7 +16,7 @@ OntoCode is on the [VS Code Marketplace](https://marketplace.visualstudio.com/it
 3. [extension/README.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/extension/README.md) and [docs/vscode-install.md](vscode-install.md) mention Marketplace install and current version
 4. User docs synced per [releasing.md](releasing.md) checklist
 5. `npm test` and `cargo test --workspace` pass
-6. Screenshot or preview image in README (see `docs/media/explorer-preview.svg`)
+6. Screenshot or preview image in README (see `docs/media/explorer-preview.png`)
 
 ## Publish command
 

@@ -1,60 +1,50 @@
 import * as vscode from "vscode";
 import { applyAxiomPatch, getEntity } from "../lsp/client";
 import { EntityDetail, PatchOp } from "../lsp/protocol";
-import { entityKindLabel, shortLabel } from "../utils/iri";
+import { entityKindLabel } from "../utils/iri";
+import { PanelHost } from "./panelHost";
+import type { EntityDetailPayload, WebviewMessage } from "./messages";
+import { GraphPanel } from "./graphPanel";
 
 type RefreshFn = () => Promise<void>;
 
+function toPayload(detail: EntityDetail): EntityDetailPayload {
+  return {
+    entity: {
+      iri: detail.entity.iri,
+      short_name: detail.entity.short_name,
+      kind: detail.entity.kind,
+      labels: detail.entity.labels,
+      comments: detail.entity.comments,
+      deprecated: detail.entity.deprecated,
+      obo_id: (detail.entity as { obo_id?: string }).obo_id,
+    },
+    parents: detail.parents,
+    children: detail.children,
+    axioms: detail.axioms,
+    editable: detail.editable,
+    document_path: detail.document_path,
+  };
+}
+
 export class EntityInspectorPanel {
   public static currentPanel: EntityInspectorPanel | undefined;
-  private readonly panel: vscode.WebviewPanel;
+  private host: PanelHost;
+  private readonly extensionUri: vscode.Uri;
   private iri: string | undefined;
   private documentUri: string | undefined;
   private classOptions: string[] = [];
   private activeRequestId = 0;
 
   private constructor(
-    panel: vscode.WebviewPanel,
-    private readonly extensionUri: vscode.Uri,
+    host: PanelHost,
+    extensionUri: vscode.Uri,
     private readonly onRefresh?: RefreshFn
   ) {
-    this.panel = panel;
-    this.panel.onDidDispose(() => {
+    this.host = host;
+    this.extensionUri = extensionUri;
+    host.panel.onDidDispose(() => {
       EntityInspectorPanel.currentPanel = undefined;
-    });
-    this.panel.webview.onDidReceiveMessage(async (message) => {
-      if (message.command === "jumpToSource" && this.iri) {
-        await vscode.commands.executeCommand(
-          "ontocode.jumpToSource",
-          this.iri
-        );
-      }
-      if (message.command === "applyPatch" && this.documentUri) {
-        await this.runPatch(
-          message.patches as PatchOp[],
-          Boolean(message.previewOnly)
-        );
-      }
-      if (message.command === "openManchester" && this.iri && this.documentUri) {
-        const axiom = message.axiom as {
-          kind: string;
-          manchester?: string;
-        };
-        await vscode.commands.executeCommand("ontocode.openManchesterEditor", {
-          iri: this.iri,
-          documentUri: this.documentUri,
-          axiomKind: axiom.kind,
-          initialExpression: axiom.manchester ?? "",
-          mode: axiom.manchester ? "edit" : "add",
-        });
-      }
-      if (message.command === "addManchesterAxiom" && this.iri && this.documentUri) {
-        await vscode.commands.executeCommand("ontocode.openManchesterEditor", {
-          iri: this.iri,
-          documentUri: this.documentUri,
-          mode: "add",
-        });
-      }
     });
   }
 
@@ -62,34 +52,34 @@ export class EntityInspectorPanel {
     extensionUri: vscode.Uri,
     detail: EntityDetail,
     classOptions: string[] = [],
-    providers?: RefreshFn,
+    onRefresh?: RefreshFn,
     requestId?: number
   ): EntityInspectorPanel {
     if (EntityInspectorPanel.currentPanel) {
-      EntityInspectorPanel.currentPanel.panel.reveal(
-        vscode.ViewColumn.Beside
-      );
-      EntityInspectorPanel.currentPanel.update(detail, classOptions, requestId);
+      EntityInspectorPanel.currentPanel.reveal(detail, classOptions, requestId);
       return EntityInspectorPanel.currentPanel;
     }
 
-    const panel = vscode.window.createWebviewPanel(
-      "ontocodeInspector",
-      `Entity: ${detail.entity.short_name || shortLabel(detail.entity.iri)}`,
-      vscode.ViewColumn.Beside,
-      { enableScripts: true, retainContextWhenHidden: true }
-    );
+    const host = PanelHost.create(extensionUri, {
+      viewType: "ontocodeInspector",
+      title: panelTitle(detail),
+      panel: "inspector",
+      onMessage: async (message: WebviewMessage) => {
+        const panel = EntityInspectorPanel.currentPanel;
+        if (!panel) {
+          return;
+        }
+        await panel.handleMessage(message);
+      },
+    });
 
-    EntityInspectorPanel.currentPanel = new EntityInspectorPanel(
-      panel,
-      extensionUri,
-      providers
-    );
-    EntityInspectorPanel.currentPanel.update(detail, classOptions, requestId);
-    return EntityInspectorPanel.currentPanel;
+    const instance = new EntityInspectorPanel(host, extensionUri, onRefresh);
+    EntityInspectorPanel.currentPanel = instance;
+    instance.reveal(detail, classOptions, requestId);
+    return instance;
   }
 
-  public update(
+  private reveal(
     detail: EntityDetail,
     classOptions: string[] = [],
     requestId?: number
@@ -105,15 +95,46 @@ export class EntityInspectorPanel {
     this.documentUri = detail.document_path
       ? vscode.Uri.file(detail.document_path).toString()
       : undefined;
-    this.panel.title = `${entityKindLabel(detail.entity.kind)}: ${
-      detail.entity.labels[0] ?? detail.entity.short_name
-    }`;
-    this.panel.webview.html = this.renderHtml(detail);
-    this.panel.webview.postMessage({
-      command: "init",
-      entityIri: detail.entity.iri,
-      axioms: detail.axioms,
+    this.host.panel.title = panelTitle(detail);
+    this.host.postMessage({
+      type: "loadEntity",
+      detail: toPayload(detail),
+      classOptions,
     });
+  }
+
+  private async handleMessage(message: WebviewMessage): Promise<void> {
+    if (message.type === "jumpToSource" && this.iri) {
+      await vscode.commands.executeCommand("ontocode.jumpToSource", this.iri);
+    }
+    if (message.type === "applyPatch" && this.documentUri) {
+      await this.runPatch(message.patches as PatchOp[], message.previewOnly);
+    }
+    if (message.type === "openManchester" && this.iri && this.documentUri) {
+      await vscode.commands.executeCommand("ontocode.openManchesterEditor", {
+        iri: this.iri,
+        documentUri: this.documentUri,
+        axiomKind: message.axiom.kind,
+        initialExpression: message.axiom.manchester ?? "",
+        mode: message.axiom.manchester ? "edit" : "add",
+      });
+    }
+    if (message.type === "addManchesterAxiom" && this.iri && this.documentUri) {
+      await vscode.commands.executeCommand("ontocode.openManchesterEditor", {
+        iri: this.iri,
+        documentUri: this.documentUri,
+        mode: "add",
+      });
+    }
+    if (message.type === "openGraph") {
+      await GraphPanel.show(this.extensionUri, {
+        graphKind: "neighborhood",
+        rootIri: message.rootIri ?? this.iri,
+      });
+    }
+    if (message.type === "selectNode") {
+      await vscode.commands.executeCommand("ontocode.openEntity", message.iri);
+    }
   }
 
   private async runPatch(
@@ -121,7 +142,9 @@ export class EntityInspectorPanel {
     previewOnly: boolean
   ): Promise<void> {
     if (!this.documentUri) {
-      void vscode.window.showErrorMessage("No editable Turtle document for this entity");
+      void vscode.window.showErrorMessage(
+        "No editable document for this entity"
+      );
       return;
     }
     const iriAtStart = this.iri;
@@ -135,23 +158,20 @@ export class EntityInspectorPanel {
         return;
       }
       if (previewOnly && result.preview_text) {
-        this.panel.webview.postMessage({
-          command: "preview",
-          text: result.preview_text,
-        });
+        this.host.postMessage({ type: "preview", text: result.preview_text });
         return;
       }
       if (result.entity_detail) {
         if (result.entity_detail.entity.iri !== this.iri) {
           return;
         }
-        this.update(result.entity_detail, this.classOptions);
+        this.reveal(result.entity_detail, this.classOptions);
       } else if (this.iri) {
         const { detail } = await getEntity(this.iri);
         if (iriAtStart !== this.iri) {
           return;
         }
-        this.update(detail, this.classOptions);
+        this.reveal(detail, this.classOptions);
       }
       if (this.onRefresh) {
         await this.onRefresh();
@@ -160,197 +180,14 @@ export class EntityInspectorPanel {
         void vscode.window.showInformationMessage("OntoCode: changes applied");
       }
     } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
-      void vscode.window.showErrorMessage(`OntoCode: patch failed — ${message}`);
+      const msg = err instanceof Error ? err.message : String(err);
+      void vscode.window.showErrorMessage(`OntoCode: patch failed — ${msg}`);
     }
-  }
-
-  private renderHtml(detail: EntityDetail): string {
-    const { entity, parents, children, axioms, editable } = detail;
-    const list = (items: string[]) =>
-      items.length > 0
-        ? `<ul>${items.map((i) => `<li><code>${escapeHtml(shortLabel(i))}</code> <span class="muted">${escapeHtml(i)}</span></li>`).join("")}</ul>`
-        : `<p class="muted">None</p>`;
-
-    const parentOptions = this.classOptions
-      .filter((c) => c !== entity.iri)
-      .map(
-        (c) =>
-          `<option value="${escapeHtml(c)}">${escapeHtml(shortLabel(c))}</option>`
-      )
-      .join("");
-
-    const editSection = editable
-      ? `
-  <h2>Edit</h2>
-  <div class="form">
-    <label>Add label <input id="newLabel" type="text" /></label>
-    <button id="addLabel">Add Label</button>
-    <label>Add comment <input id="newComment" type="text" /></label>
-    <button id="addComment">Add Comment</button>
-    <label>Add parent
-      <select id="parentPick"><option value="">—</option>${parentOptions}</select>
-    </label>
-    <button id="addParent">Add Parent (SubClassOf)</button>
-    <button id="previewPatch" class="secondary">Preview</button>
-    <button id="deleteEntity" class="danger">Delete Entity</button>
-    <pre id="preview" class="preview muted"></pre>
-  </div>`
-      : `<p class="muted">Editing is available for Turtle (.ttl) documents only.</p>`;
-
-    return `<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <style>
-    body { font-family: var(--vscode-font-family); color: var(--vscode-foreground); background: var(--vscode-editor-background); padding: 16px; }
-    h1 { font-size: 1.2rem; margin-bottom: 0.25rem; }
-    h2 { font-size: 0.95rem; margin-top: 1.25rem; border-bottom: 1px solid var(--vscode-panel-border); padding-bottom: 4px; }
-    code { font-family: var(--vscode-editor-font-family); }
-    .muted { color: var(--vscode-descriptionForeground); font-size: 0.85rem; }
-    .iri { word-break: break-all; }
-    button { background: var(--vscode-button-background); color: var(--vscode-button-foreground); border: none; padding: 6px 12px; cursor: pointer; margin: 4px 4px 4px 0; }
-    button:hover { background: var(--vscode-button-hoverBackground); }
-    button.secondary { background: var(--vscode-button-secondaryBackground); color: var(--vscode-button-secondaryForeground); }
-    button.danger { background: var(--vscode-inputValidation-errorBackground); }
-    .deprecated { color: var(--vscode-errorForeground); font-weight: bold; }
-    .form label { display: block; margin: 8px 0 4px; }
-    .form input, .form select { width: 100%; box-sizing: border-box; }
-    .preview { max-height: 200px; overflow: auto; white-space: pre-wrap; border: 1px solid var(--vscode-panel-border); padding: 8px; margin-top: 8px; }
-  </style>
-</head>
-<body>
-  <h1>${escapeHtml(entity.labels[0] ?? entity.short_name)}</h1>
-  <p class="muted">${escapeHtml(entityKindLabel(entity.kind))}${entity.deprecated ? ' <span class="deprecated">(deprecated)</span>' : ""}</p>
-
-  <h2>IRI</h2>
-  <p class="iri"><code>${escapeHtml(entity.iri)}</code></p>
-
-  <h2>Labels</h2>
-  ${list(entity.labels)}
-
-  <h2>Comments</h2>
-  ${list(entity.comments)}
-
-  <h2>Parents</h2>
-  ${list(parents)}
-
-  <h2>Children</h2>
-  ${list(children)}
-
-  <h2>Axioms</h2>
-  ${
-    axioms.length > 0
-      ? `<ul>${axioms
-          .map(
-            (a, idx) =>
-              `<li><code>${escapeHtml(a.display)}</code> ${
-                editable && entity.kind === "class"
-                  ? `<button data-axiom-idx="${idx}" class="editManchester secondary">Edit in Manchester</button>`
-                  : ""
-              }</li>`
-          )
-          .join("")}</ul>`
-      : `<p class="muted">None</p>`
-  }
-  ${
-    editable && entity.kind === "class"
-      ? `<button id="addManchesterAxiom" class="secondary">Add Manchester axiom</button>`
-      : ""
-  }
-
-  ${editSection}
-
-  <button id="jump">Jump to Source</button>
-  <script>
-    const vscode = acquireVsCodeApi();
-    let entityIri = '';
-    let axioms = [];
-
-    function bindHandlers() {
-      document.getElementById('jump').addEventListener('click', () => {
-        vscode.postMessage({ command: 'jumpToSource' });
-      });
-
-      const addLabel = document.getElementById('addLabel');
-      if (addLabel) {
-        addLabel.addEventListener('click', () => {
-          const value = document.getElementById('newLabel').value.trim();
-          if (!value) return;
-          apply([{ op: 'add_label', entity_iri: entityIri, value }], false);
-        });
-      }
-      const addComment = document.getElementById('addComment');
-      if (addComment) {
-        addComment.addEventListener('click', () => {
-          const value = document.getElementById('newComment').value.trim();
-          if (!value) return;
-          apply([{ op: 'add_comment', entity_iri: entityIri, value }], false);
-        });
-      }
-      const addParent = document.getElementById('addParent');
-      if (addParent) {
-        addParent.addEventListener('click', () => {
-          const parent = document.getElementById('parentPick').value;
-          if (!parent) return;
-          apply([{ op: 'add_sub_class_of', entity_iri: entityIri, parent_iri: parent }], false);
-        });
-      }
-      const previewPatch = document.getElementById('previewPatch');
-      if (previewPatch) {
-        previewPatch.addEventListener('click', () => {
-          const value = document.getElementById('newLabel').value.trim();
-          if (!value) return;
-          apply([{ op: 'add_label', entity_iri: entityIri, value }], true);
-        });
-      }
-      const deleteEntity = document.getElementById('deleteEntity');
-      if (deleteEntity) {
-        deleteEntity.addEventListener('click', () => {
-          if (confirm('Delete this entity from the ontology file?')) {
-            apply([{ op: 'delete_entity', entity_iri: entityIri }], false);
-          }
-        });
-      }
-      document.querySelectorAll('.editManchester').forEach((btn) => {
-        btn.addEventListener('click', () => {
-          const idx = Number(btn.getAttribute('data-axiom-idx'));
-          vscode.postMessage({ command: 'openManchester', axiom: axioms[idx] });
-        });
-      });
-      const addManchester = document.getElementById('addManchesterAxiom');
-      if (addManchester) {
-        addManchester.addEventListener('click', () => {
-          vscode.postMessage({ command: 'addManchesterAxiom' });
-        });
-      }
-    }
-
-    function apply(patches, previewOnly) {
-      vscode.postMessage({ command: 'applyPatch', patches, previewOnly });
-    }
-
-    window.addEventListener('message', (event) => {
-      if (event.data.command === 'init') {
-        entityIri = event.data.entityIri || '';
-        axioms = event.data.axioms || [];
-        bindHandlers();
-      }
-      if (event.data.command === 'preview') {
-        document.getElementById('preview').textContent = event.data.text || '';
-      }
-    });
-  </script>
-</body>
-</html>`;
   }
 }
 
-function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
+function panelTitle(detail: EntityDetail): string {
+  return `${entityKindLabel(detail.entity.kind)}: ${
+    detail.entity.labels[0] ?? detail.entity.short_name
+  }`;
 }

@@ -224,3 +224,29 @@ export function assertGetExplanationResult(
   }
   return value as import("./protocol").GetExplanationResult;
 }
+
+export function assertGetGraphResult(
+  value: unknown
+): import("./protocol").GetGraphResult {
+  if (!value || typeof value !== "object") {
+    throw new Error("Invalid getGraph result from language server");
+  }
+  const v = value as Record<string, unknown>;
+  if (!v.graph || typeof v.graph !== "object") {
+    throw new Error("Invalid getGraph result shape");
+  }
+  return value as import("./protocol").GetGraphResult;
+}
+
+export function assertRunRobotResult(
+  value: unknown
+): import("./protocol").RunRobotResult {
+  if (!value || typeof value !== "object") {
+    throw new Error("Invalid runRobot result from language server");
+  }
+  const v = value as Record<string, unknown>;
+  if (typeof v.exit_code !== "number") {
+    throw new Error("Invalid runRobot result shape");
+  }
+  return value as import("./protocol").RunRobotResult;
+}

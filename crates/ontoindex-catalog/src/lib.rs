@@ -9,9 +9,13 @@
 
 mod builder;
 mod entity_api;
+mod graph;
 
 pub use builder::{CatalogError, IndexBuilder, OntologyCatalog};
 pub use entity_api::{ClassHierarchy, EntityDetail, SourceHint, SubclassEdge};
+pub use graph::{
+    GraphBuilder, GraphEdge, GraphFilters, GraphKind, GraphNode, GraphPayload, GraphRequest,
+};
 
 use ontoindex_core::{
     Annotation, Axiom, Diagnostic, Entity, Import, Namespace, OntologyDocument, ParseStatus,

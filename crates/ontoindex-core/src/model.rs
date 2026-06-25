@@ -13,6 +13,7 @@ pub enum OntologyFormat {
     NTriples,
     NQuads,
     TriG,
+    Obo,
     Unknown,
 }
 
@@ -26,6 +27,7 @@ impl OntologyFormat {
             "nt" => Self::NTriples,
             "nq" => Self::NQuads,
             "trig" => Self::TriG,
+            "obo" => Self::Obo,
             _ => Self::Unknown,
         }
     }
@@ -39,6 +41,7 @@ impl OntologyFormat {
             Self::NTriples => "n_triples",
             Self::NQuads => "n_quads",
             Self::TriG => "trig",
+            Self::Obo => "obo",
             Self::Unknown => "unknown",
         }
     }
@@ -191,6 +194,8 @@ pub struct Entity {
     pub labels: Vec<String>,
     pub comments: Vec<String>,
     pub deprecated: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub obo_id: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

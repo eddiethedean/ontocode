@@ -91,6 +91,7 @@ mod tests {
             labels: vec![],
             comments: vec![],
             deprecated: false,
+            obo_id: None,
         };
         assert!(document_matches_entity(&entity, &doc));
     }

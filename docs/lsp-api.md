@@ -1,6 +1,6 @@
-# OntoIndex LSP API (v0.6)
+# OntoIndex LSP API (v0.7)
 
-> **Status:** Documents behavior in **OntoIndex v0.6.0**. Pre-1.0 APIs may change.
+> **Status:** Documents behavior in **OntoIndex v0.7.0**. Pre-1.0 APIs may change.
 > Canonical feature list: [What ships today](SHIPPED.md).
 
 This document describes **what ships today** in `ontoindex-lsp`. For the **v1.0 target** (including `runRobot`, graph APIs), see [LSP_SPEC.md](design/LSP_SPEC.md).
@@ -304,6 +304,30 @@ Custom method failures return `LspErrorPayload` in the JSON-RPC error `data` fie
 
 ## Not implemented yet (see LSP_SPEC)
 
-- `ontoindex/getGraph`, `ontoindex/getSemanticDiff`, `ontoindex/runRobot`
+- `ontoindex/getSemanticDiff`
 
-Use the CLI or Rust crates for graph APIs until those LSP methods land.
+Use the CLI or Rust crates for semantic diff until that LSP method lands.
+
+### `ontoindex/getGraph` (v0.7)
+
+Returns graph nodes and edges for visualization webviews.
+
+**Params:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `graph_kind` | string | `class`, `property`, `import`, or `neighborhood` |
+| `root_iri` | string? | Required for `neighborhood` |
+| `depth` | number? | BFS depth for neighborhood (default 2, max 5) |
+| `include_inferred` | boolean? | Include reasoner edges when snapshot exists |
+| `filters` | object? | `ontology_iri`, `hide_deprecated` |
+
+**Result:** `{ graph: { nodes, edges, truncated, graph_kind } }`
+
+### `ontoindex/runRobot` (v0.7)
+
+Runs a ROBOT CLI subcommand.
+
+**Params:** `{ subcommand, args?, robot_path? }`
+
+**Result:** `{ exit_code, stdout, stderr }`

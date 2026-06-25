@@ -2,10 +2,10 @@ use crate::index_worker::IndexWorker;
 use crate::positions::{byte_col_to_utf16, utf16_offset_to_byte};
 use crate::protocol::{
     ApplyAxiomPatchParams, ApplyAxiomPatchResult, CatalogSnapshot, DiagnosticSummary,
-    GetEntityParams, GetEntityResult, GetExplanationParams, GetExplanationResult,
+    GetEntityParams, GetEntityResult, GetExplanationParams, GetExplanationResult, GetGraphResult,
     IndexWorkspaceParams, IndexWorkspaceResult, LspErrorPayload, ManchesterCompletions,
     ParseManchesterParams, ParseManchesterResult, QueryParams, RunReasonerParams,
-    RunReasonerResult, SparqlParams, TabularQueryResult,
+    RunReasonerResult, RunRobotParams, RunRobotResult, SparqlParams, TabularQueryResult,
 };
 use crate::state::{path_to_uri, resolve_workspace_for_index, ServerState};
 use lsp_server::ResponseError;
@@ -16,6 +16,7 @@ use lsp_types::{
     Range, ServerCapabilities, SymbolInformation, SymbolKind, TextDocumentSyncCapability,
     TextDocumentSyncKind, Uri, WorkspaceSymbolParams, WorkspaceSymbolResponse,
 };
+use ontoindex_catalog::{GraphBuilder, GraphRequest};
 use ontoindex_core::{resolve_document_path, EntityKind, OntologyFormat};
 use ontoindex_reasoner::{
     classify, explain, ExplanationRequest, ReasonerId, ReasonerSnapshot, WorkspaceInputLoader,
@@ -112,6 +113,35 @@ pub fn handle_get_entity(
                 .ok_or_else(|| LspErrorPayload::not_found(&params.iri))
         })
         .ok_or_else(LspErrorPayload::not_indexed)?
+}
+
+pub fn handle_get_graph(
+    state: &ServerState,
+    params: GraphRequest,
+) -> Result<GetGraphResult, LspErrorPayload> {
+    let inferred_edges = if params.include_inferred {
+        state.reasoner_snapshot().map(|s| s.inferred.edges.clone())
+    } else {
+        None
+    };
+    state
+        .with_catalog(|catalog| {
+            let mut builder = GraphBuilder::new(catalog);
+            if let Some(ref edges) = inferred_edges {
+                builder = builder.with_inferred_edges(edges);
+            }
+            let graph = builder.build(&params).map_err(LspErrorPayload::index_failed)?;
+            Ok(GetGraphResult { graph })
+        })
+        .ok_or_else(LspErrorPayload::not_indexed)?
+}
+
+pub fn handle_run_robot(params: RunRobotParams) -> Result<RunRobotResult, LspErrorPayload> {
+    let mut args = vec![params.subcommand];
+    args.extend(params.args);
+    let output = ontoindex_robot::run_robot(params.robot_path.as_deref(), &args)
+        .map_err(|e| LspErrorPayload::index_failed(e.to_string()))?;
+    Ok(RunRobotResult { exit_code: output.exit_code, stdout: output.stdout, stderr: output.stderr })
 }
 
 pub fn handle_apply_axiom_patch(
@@ -622,6 +652,12 @@ pub fn handle_custom_request(
             let result = handle_get_entity(state, params)?;
             serde_json::to_value(result).map_err(|e| LspErrorPayload::index_failed(e.to_string()))
         }
+        "ontoindex/getGraph" => {
+            let params: GraphRequest = serde_json::from_value(params.unwrap_or(Value::Null))
+                .map_err(|e| LspErrorPayload::index_failed(format!("invalid params: {e}")))?;
+            let result = handle_get_graph(state, params)?;
+            serde_json::to_value(result).map_err(|e| LspErrorPayload::index_failed(e.to_string()))
+        }
         "ontoindex/applyAxiomPatch" => {
             let params: ApplyAxiomPatchParams =
                 serde_json::from_value(params.unwrap_or(Value::Null))
@@ -663,6 +699,12 @@ pub fn handle_custom_request(
             let result = handle_get_explanation(state, params)?;
             serde_json::to_value(result)
                 .map_err(|e| LspErrorPayload::explanation_failed(e.to_string()))
+        }
+        "ontoindex/runRobot" => {
+            let params: RunRobotParams = serde_json::from_value(params.unwrap_or(Value::Null))
+                .map_err(|e| LspErrorPayload::index_failed(format!("invalid params: {e}")))?;
+            let result = handle_run_robot(params)?;
+            serde_json::to_value(result).map_err(|e| LspErrorPayload::index_failed(e.to_string()))
         }
         _ => Err(LspErrorPayload::index_failed(format!("unknown method: {method}"))),
     }

@@ -162,6 +162,7 @@ fn insert_entity(
         labels: Vec::new(),
         comments: Vec::new(),
         deprecated: false,
+        obo_id: None,
     });
 }
 

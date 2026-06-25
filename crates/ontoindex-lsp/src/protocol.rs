@@ -263,6 +263,27 @@ pub struct GetExplanationParams {
 }
 
 #[derive(Debug, Serialize)]
+pub struct GetGraphResult {
+    pub graph: ontoindex_catalog::GraphPayload,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct RunRobotParams {
+    pub subcommand: String,
+    #[serde(default)]
+    pub args: Vec<String>,
+    #[serde(default)]
+    pub robot_path: Option<String>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct RunRobotResult {
+    pub exit_code: i32,
+    pub stdout: String,
+    pub stderr: String,
+}
+
+#[derive(Debug, Serialize)]
 pub struct GetExplanationResult {
     pub class_iri: String,
     pub steps: Vec<ontoindex_reasoner::ExplanationStep>,

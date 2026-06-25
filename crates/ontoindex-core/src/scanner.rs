@@ -9,7 +9,7 @@ use std::path::{Path, PathBuf};
 use std::time::UNIX_EPOCH;
 
 const ONTOLOGY_EXTENSIONS: &[&str] =
-    &["ttl", "rdf", "owl", "jsonld", "json-ld", "nt", "nq", "trig"];
+    &["ttl", "rdf", "owl", "jsonld", "json-ld", "nt", "nq", "trig", "obo"];
 
 #[derive(Debug, Clone)]
 pub struct OntologyFile {

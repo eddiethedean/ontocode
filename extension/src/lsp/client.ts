@@ -15,6 +15,8 @@ import {
   assertParseManchesterResult,
   assertRunReasonerResult,
   assertGetExplanationResult,
+  assertGetGraphResult,
+  assertRunRobotResult,
 } from "./protocolGuards";
 import {
   ApplyAxiomPatchParams,
@@ -23,11 +25,15 @@ import {
   GetEntityResult,
   GetExplanationParams,
   GetExplanationResult,
+  GetGraphParams,
+  GetGraphResult,
   IndexWorkspaceResult,
   ParseManchesterParams,
   ParseManchesterResult,
   RunReasonerParams,
   RunReasonerResult,
+  RunRobotParams,
+  RunRobotResult,
   TabularQueryResult,
 } from "./protocol";
 import {
@@ -214,6 +220,18 @@ export async function getExplanation(
     params
   );
   return assertGetExplanationResult(result);
+}
+
+export async function getGraph(params: GetGraphParams): Promise<GetGraphResult> {
+  const c = requireClient();
+  const result = await c.sendRequest<unknown>("ontoindex/getGraph", params);
+  return assertGetGraphResult(result);
+}
+
+export async function runRobot(params: RunRobotParams): Promise<RunRobotResult> {
+  const c = requireClient();
+  const result = await c.sendRequest<unknown>("ontoindex/runRobot", params);
+  return assertRunRobotResult(result);
 }
 
 function requireClient(): LanguageClient {

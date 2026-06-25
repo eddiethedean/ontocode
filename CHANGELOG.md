@@ -5,6 +5,24 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.0] - 2026-06-25
+
+### Added
+
+- **React webview foundation** (`extension/webview-ui/`) — Vite + React, typed message protocol, CSP panel host
+- **Graph visualization** — class, property, import, and neighborhood graphs via LSP `ontoindex/getGraph` and React `@xyflow/react` panels
+- **React Entity Inspector** — migrated from legacy HTML webview with edit/patch parity
+- **OBO format** — `.obo` scanning, parsing, `obo_id` in catalog/SQL, explorer labels
+- **`ontoindex-robot` crate** — ROBOT CLI wrappers; CLI `ontoindex robot validate|merge|report`; LSP `ontoindex/runRobot`
+- Extension commands: `openClassGraph`, `openPropertyGraph`, `openImportGraph`, `openNeighborhoodGraph`, `openGraph`
+- OBO TextMate grammar, `ontocode.robotPath` setting, `examples/obo-workflow/`
+- Docs: [webview-protocol.md](docs/webview-protocol.md)
+
+### Changed
+
+- Workspace and extension version **0.7.0**
+- Entity inspector and graph panels use React bundle in VSIX
+
 ## [0.6.0] - 2026-06-24
 
 ### Added

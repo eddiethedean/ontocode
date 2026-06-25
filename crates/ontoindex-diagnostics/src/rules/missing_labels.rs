@@ -78,6 +78,7 @@ mod tests {
             labels: vec![],
             comments: vec![],
             deprecated: false,
+            obo_id: None,
         }];
         let input = DiagnosticInput {
             documents: &documents,

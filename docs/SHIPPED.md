@@ -1,14 +1,14 @@
-# What ships today (v0.6.0)
+# What ships today (v0.7.0)
 
 > **Canonical capability matrix.** Update this page on every release. Design specs under [Project](design/README.md) may describe future targets — check here for what is actually available.
 
-**Current release:** v0.6.0 · [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md)
+**Current release:** v0.7.0 · [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md)
 
 ## Products
 
 | Product | What it is |
 |---------|------------|
-| **OntoCode** | VS Code extension — explorer, inspector, Query Workbench, Manchester editor |
+| **OntoCode** | VS Code extension — explorer, React inspector, graphs, Query Workbench, Manchester editor, reasoner |
 | **OntoIndex** | Rust engine — `ontoindex` CLI, `ontoindex-*` crates, `ontoindex-lsp` |
 
 ## Capability matrix
@@ -16,24 +16,28 @@
 | Capability | VS Code | CLI |
 |------------|---------|-----|
 | Browse classes, properties, individuals | Yes | via SQL |
-| Edit labels, comments, parents (`.ttl`) | Yes | `ontoindex patch` |
+| Edit labels, comments, parents (`.ttl`, `.obo`) | Yes (React inspector) | `ontoindex patch` (Turtle) |
 | Create / delete entities (`.ttl`) | Yes | `ontoindex patch` |
 | Complex `SubClassOf` / `EquivalentClasses` (Manchester) | Yes | `ontoindex patch` |
 | SQL-like queries | Query Workbench | `ontoindex query` |
 | SPARQL | Query Workbench | `ontoindex sparql` |
+| Graph visualization (class, property, import, neighborhood) | Yes (React) | LSP `ontoindex/getGraph` |
 | OWL EL classification (`el` profile) | Reasoner panel + hierarchy toggle | `ontoindex classify` |
 | RL / RDFS classification | Reasoner panel | `ontoindex classify --profile rl\|rdfs` |
 | EL explanations (where available) | Explanation panel | `ontoindex explain` |
+| OBO format index + `obo_id` in explorer | Yes | `ontoindex inspect` |
+| ROBOT interop | — | `ontoindex robot validate\|merge\|report` |
 | Diagnostics / lint | Problems panel | `ontoindex validate` |
 | Hover, go-to-definition, symbols | Yes | — |
 | Patch preview | Inspector / Manchester editor | `ontoindex patch --preview` |
+| React webview UI | Inspector + graphs | — |
 
 ## Format support
 
-| Operation | Turtle (`.ttl`) | RDF/XML, JSON-LD, N-Triples, TriG |
-|-----------|-----------------|-----------------------------------|
-| Index / query | Yes | Yes |
-| Write-back (inspector, patches) | Yes | Read-only in VS Code |
+| Operation | Turtle (`.ttl`) | OBO (`.obo`) | RDF/XML, JSON-LD, N-Triples, TriG |
+|-----------|-----------------|--------------|-----------------------------------|
+| Index / query | Yes | Yes | Yes |
+| Write-back (inspector, patches) | Yes | Read-only in VS Code | Read-only in VS Code |
 
 ## Manchester MVP scope (v0.5)
 

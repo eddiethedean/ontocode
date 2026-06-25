@@ -1,0 +1,11 @@
+format-version: 1.2
+ontology: demo
+
+[Term]
+id: DEMO:0000001
+name: example disease
+is_a: DEMO:0000002
+
+[Term]
+id: DEMO:0000002
+name: disease

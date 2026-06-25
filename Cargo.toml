@@ -8,6 +8,7 @@ members = [
     "crates/ontoindex-diagnostics",
     "crates/ontoindex-query",
     "crates/ontoindex-reasoner",
+    "crates/ontoindex-robot",
     "crates/ontoindex-cli",
     "crates/ontoindex-lsp",
 ]
@@ -17,7 +18,7 @@ default-members = ["crates/ontoindex-cli"]
 # `cargo run --` runs the `ontoindex` CLI (default-member), not this package as a library.
 [package]
 name = "ontocode"
-version = "0.6.0"
+version = "0.7.0"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 publish = false
@@ -48,7 +49,7 @@ serde_json.workspace = true
 tempfile = "3"
 
 [workspace.package]
-version = "0.6.0"
+version = "0.7.0"
 edition = "2021"
 rust-version = "1.88"
 license = "MIT OR Apache-2.0"
@@ -59,14 +60,15 @@ keywords = ["ontology", "owl", "rdf", "sparql", "turtle"]
 categories = ["command-line-utilities", "science", "parser-implementations"]
 
 [workspace.dependencies]
-ontoindex-core = { path = "crates/ontoindex-core", version = "0.6.0" }
-ontoindex-parser = { path = "crates/ontoindex-parser", version = "0.6.0" }
-ontoindex-owl = { path = "crates/ontoindex-owl", version = "0.6.0" }
-ontoindex-catalog = { path = "crates/ontoindex-catalog", version = "0.6.0" }
-ontoindex-diagnostics = { path = "crates/ontoindex-diagnostics", version = "0.6.0" }
-ontoindex-query = { path = "crates/ontoindex-query", version = "0.6.0" }
-ontoindex-lsp = { path = "crates/ontoindex-lsp", version = "0.6.0" }
-ontoindex-reasoner = { path = "crates/ontoindex-reasoner", version = "0.6.0" }
+ontoindex-core = { path = "crates/ontoindex-core", version = "0.7.0" }
+ontoindex-parser = { path = "crates/ontoindex-parser", version = "0.7.0" }
+ontoindex-owl = { path = "crates/ontoindex-owl", version = "0.7.0" }
+ontoindex-catalog = { path = "crates/ontoindex-catalog", version = "0.7.0" }
+ontoindex-diagnostics = { path = "crates/ontoindex-diagnostics", version = "0.7.0" }
+ontoindex-query = { path = "crates/ontoindex-query", version = "0.7.0" }
+ontoindex-lsp = { path = "crates/ontoindex-lsp", version = "0.7.0" }
+ontoindex-reasoner = { path = "crates/ontoindex-reasoner", version = "0.7.0" }
+ontoindex-robot = { path = "crates/ontoindex-robot", version = "0.7.0" }
 
 ontologos-core = "0.9.0"
 ontologos-parser = "0.9.0"
@@ -95,6 +97,10 @@ sqlparser = "0.53"
 thiserror = "2"
 horned-owl = "1.4"
 horned-functional = "0.4"
+fastobo = "0.15"
+fastobo-owl = "0.3"
+fastobo-validator = "0.4"
+petgraph = "0.8"
 [profile.release]
 lto = true
 codegen-units = 1

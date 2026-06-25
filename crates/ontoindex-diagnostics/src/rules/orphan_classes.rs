@@ -110,6 +110,7 @@ mod tests {
             labels: vec!["\"Orphan\"".to_string()],
             comments: vec![],
             deprecated: false,
+            obo_id: None,
         }];
         let input = DiagnosticInput {
             documents: &documents,
@@ -149,6 +150,7 @@ mod tests {
                 labels: vec![],
                 comments: vec![],
                 deprecated: false,
+                obo_id: None,
             },
             Entity {
                 iri: "http://ex/Person".to_string(),
@@ -159,6 +161,7 @@ mod tests {
                 labels: vec![],
                 comments: vec![],
                 deprecated: false,
+                obo_id: None,
             },
         ];
         let axioms = vec![ontoindex_core::Axiom {

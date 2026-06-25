@@ -36,6 +36,7 @@ export interface Entity {
   labels: string[];
   comments: string[];
   deprecated: boolean;
+  obo_id?: string;
   source_location?: {
     line?: number;
     column?: number;
@@ -168,6 +169,55 @@ export interface IndexWorkspaceResult {
 
 export interface GetEntityResult {
   detail: EntityDetail;
+}
+
+export interface GraphFilters {
+  ontology_iri?: string;
+  hide_deprecated?: boolean;
+}
+
+export interface GetGraphParams {
+  graph_kind: string;
+  root_iri?: string;
+  depth?: number;
+  include_inferred?: boolean;
+  filters?: GraphFilters;
+}
+
+export interface GraphNode {
+  id: string;
+  label: string;
+  kind: string;
+}
+
+export interface GraphEdge {
+  source: string;
+  target: string;
+  kind: string;
+  inferred: boolean;
+}
+
+export interface GraphPayload {
+  nodes: GraphNode[];
+  edges: GraphEdge[];
+  truncated: boolean;
+  graph_kind: string;
+}
+
+export interface GetGraphResult {
+  graph: GraphPayload;
+}
+
+export interface RunRobotParams {
+  subcommand: string;
+  args?: string[];
+  robot_path?: string;
+}
+
+export interface RunRobotResult {
+  exit_code: number;
+  stdout: string;
+  stderr: string;
 }
 
 export type PatchOp =

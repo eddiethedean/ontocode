@@ -89,6 +89,7 @@ mod tests {
                 labels: vec!["\"Shared\"".to_string()],
                 comments: vec![],
                 deprecated: false,
+                obo_id: None,
             },
             Entity {
                 iri: "http://example.org/dup#Beta".to_string(),
@@ -99,6 +100,7 @@ mod tests {
                 labels: vec!["\"Shared\"".to_string()],
                 comments: vec![],
                 deprecated: false,
+                obo_id: None,
             },
         ];
         let input = DiagnosticInput {

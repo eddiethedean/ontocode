@@ -416,6 +416,7 @@ mod tests {
             labels: vec![],
             comments: vec![],
             deprecated: false,
+            obo_id: None,
         };
         let range = entity_block_range(ttl, &entity).expect("block");
         let block = &ttl[range.start as usize..range.end as usize];

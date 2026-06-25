@@ -152,7 +152,7 @@ More detail: [Installation & troubleshooting](https://ontocode-vs.readthedocs.io
 
 ---
 
-## What's included in v0.6.0
+## What's included in v0.7.0
 
 **Shipped:** explorer, inspector, **editing** (labels, comments, parents, create/delete in `.ttl`), **Query Workbench** (SQL + SPARQL), **Manchester editor**, **EL/RL/RDFS reasoner**, inferred hierarchy toggle, EL explanations (where available), diagnostics, jump-to-source, hover, symbols, go-to-definition.
 

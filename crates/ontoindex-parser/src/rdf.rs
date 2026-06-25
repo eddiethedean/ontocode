@@ -61,6 +61,9 @@ pub fn parse_ontology_file(
     content_hash: &str,
     modified_time: u64,
 ) -> Result<ParsedOntology> {
+    if format == OntologyFormat::Obo {
+        return crate::obo::parse_obo_file(path, ontology_id, content_hash, modified_time);
+    }
     let _ = (content_hash, modified_time);
     let metadata = fs::metadata(path)?;
     if metadata.len() > MAX_FILE_BYTES {
@@ -82,6 +85,9 @@ pub fn parse_ontology_text(
     source_text: &str,
     raw_bytes: &[u8],
 ) -> Result<ParsedOntology> {
+    if format == OntologyFormat::Obo {
+        return crate::obo::parse_obo_text(path, ontology_id, source_text);
+    }
     if raw_bytes.len() as u64 > MAX_FILE_BYTES {
         return Err(ParseError::LimitExceeded(format!(
             "source exceeds {MAX_FILE_BYTES} bytes: {}",
@@ -148,6 +154,9 @@ fn to_rdf_format(format: OntologyFormat, path: &Path) -> Result<RdfFormat> {
         OntologyFormat::NTriples => Ok(RdfFormat::NTriples),
         OntologyFormat::NQuads => Ok(RdfFormat::NQuads),
         OntologyFormat::TriG => Ok(RdfFormat::TriG),
+        OntologyFormat::Obo => {
+            Err(ParseError::UnsupportedFormat("OBO format must use parse_obo_text".to_string()))
+        }
         OntologyFormat::Unknown => Err(ParseError::UnsupportedFormat(path.display().to_string())),
     }
 }
@@ -245,6 +254,40 @@ fn extract_prefixes(quads: &[Quad]) -> BTreeMap<String, String> {
         }
     }
     prefixes
+}
+
+pub(crate) fn assemble_parsed_ontology(
+    ontology_id: &str,
+    base_iri: Option<String>,
+    namespaces: BTreeMap<String, String>,
+    entities: Vec<Entity>,
+    annotations: Vec<Annotation>,
+    axioms: Vec<Axiom>,
+) -> ParsedOntology {
+    let namespace_rows: Vec<Namespace> = namespaces
+        .iter()
+        .map(|(prefix, iri)| Namespace {
+            prefix: prefix.clone(),
+            iri: iri.clone(),
+            ontology_id: ontology_id.to_string(),
+        })
+        .collect();
+    ParsedOntology {
+        ontology_id: ontology_id.to_string(),
+        base_iri,
+        imports: Vec::new(),
+        namespaces: namespaces.clone(),
+        entities,
+        annotations,
+        axioms,
+        namespace_rows,
+        import_rows: Vec::new(),
+        parse_status: ParseStatus::Ok,
+        parse_message: None,
+        parse_error_location: None,
+        triple_count: 0,
+        quads: Vec::new(),
+    }
 }
 
 fn empty_result(
@@ -460,6 +503,7 @@ impl OntologyBuilder {
                 labels: state.labels.clone(),
                 comments: state.comments.clone(),
                 deprecated: state.deprecated,
+                obo_id: None,
             });
         }
         entities.sort_by(|a, b| a.iri.cmp(&b.iri));

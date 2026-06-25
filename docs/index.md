@@ -6,7 +6,7 @@ hide:
 
 <div class="oc-hero" markdown>
 
-<p class="oc-hero-kicker">OntoCode documentation · v0.6.0</p>
+<p class="oc-hero-kicker">OntoCode documentation · v0.7.0</p>
 
 <p class="oc-hero-title">Ontology-as-code for Git and VS Code</p>
 
@@ -107,7 +107,7 @@ You do **not** need to clone this repo to use the extension or `cargo install on
 
 </div>
 
-## What ships in v0.6.0
+## What ships in v0.7.0
 
 See the full matrix: **[What ships today](SHIPPED.md)**.
 

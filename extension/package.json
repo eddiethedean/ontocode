@@ -2,7 +2,7 @@
   "name": "ontocode",
   "displayName": "OntoCode",
   "description": "Browse OWL/RDF ontologies in VS Code with inline diagnostics: explore classes and properties, inspect entities, validate in CI, and jump to source.",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "publisher": "ontocode",
   "license": "MIT",
   "repository": {
@@ -41,10 +41,26 @@
     "workspaceContains:**/*.nt",
     "workspaceContains:**/*.nq",
     "workspaceContains:**/*.trig",
+    "workspaceContains:**/*.obo",
     "onView:ontocode.explorer.ontologies"
   ],
   "main": "./dist/extension.js",
   "contributes": {
+    "languages": [
+      {
+        "id": "obo",
+        "aliases": ["OBO", "obo"],
+        "extensions": [".obo"],
+        "configuration": "./language-configuration.json"
+      }
+    ],
+    "grammars": [
+      {
+        "language": "obo",
+        "scopeName": "source.obo",
+        "path": "./syntaxes/obo.tmLanguage.json"
+      }
+    ],
     "viewsContainers": {
       "activitybar": [
         {
@@ -140,6 +156,30 @@
       {
         "command": "ontocode.setHierarchyMode",
         "title": "OntoCode: Set Hierarchy Mode"
+      },
+      {
+        "command": "ontocode.openClassGraph",
+        "title": "OntoCode: Open Class Graph"
+      },
+      {
+        "command": "ontocode.openPropertyGraph",
+        "title": "OntoCode: Open Property Graph"
+      },
+      {
+        "command": "ontocode.openImportGraph",
+        "title": "OntoCode: Open Import Graph"
+      },
+      {
+        "command": "ontocode.openNeighborhoodGraph",
+        "title": "OntoCode: Open Neighborhood Graph"
+      },
+      {
+        "command": "ontocode.openGraph",
+        "title": "OntoCode: Open Graph"
+      },
+      {
+        "command": "ontocode.openSmokePanel",
+        "title": "OntoCode: Open React Smoke Panel"
       }
     ],
     "menus": {
@@ -160,6 +200,16 @@
           "command": "ontocode.openEntity",
           "when": "view =~ /^ontocode\\.explorer\\./ && viewItem == ontocodeEntity",
           "group": "inline"
+        },
+        {
+          "command": "ontocode.openNeighborhoodGraph",
+          "when": "view =~ /^ontocode\\.explorer\\./ && viewItem == ontocodeEntity",
+          "group": "navigation"
+        },
+        {
+          "command": "ontocode.openGraph",
+          "when": "view =~ /^ontocode\\.explorer\\./ && viewItem == ontocodeEntity",
+          "group": "navigation"
         },
         {
           "command": "ontocode.deleteEntity",
@@ -217,12 +267,18 @@
           "enum": ["asserted", "inferred", "combined"],
           "default": "asserted",
           "description": "Class hierarchy display mode in the explorer after classification."
+        },
+        "ontocode.robotPath": {
+          "type": "string",
+          "default": "",
+          "description": "Trusted workspaces only: path to ROBOT CLI or JAR. When empty, ROBOT is resolved from PATH."
         }
       }
     }
   },
   "scripts": {
-    "compile": "node esbuild.mjs",
+    "build:webview": "npm --prefix webview-ui ci && npm --prefix webview-ui run build",
+    "compile": "npm run build:webview && node esbuild.mjs",
     "watch": "node esbuild.mjs --watch",
     "test": "npm run compile && tsc -p tsconfig.test.json && node --test dist-test/**/*.test.js dist-test/**/*.e2e.test.js dist-test/**/*.guard.test.js",
     "compile:vscode-test": "tsc -p tsconfig.vscode-test.json",

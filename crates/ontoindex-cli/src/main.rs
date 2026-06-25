@@ -102,6 +102,40 @@ enum Commands {
         #[arg(long, value_enum, default_value_t = OutputFormat::Text)]
         format: OutputFormat,
     },
+    /// Run ROBOT CLI subcommands (validate, merge, report)
+    Robot {
+        #[command(subcommand)]
+        command: RobotCommands,
+    },
+}
+
+#[derive(Subcommand)]
+enum RobotCommands {
+    /// Run `robot validate`
+    Validate {
+        /// Ontology file or directory
+        path: PathBuf,
+        #[arg(long)]
+        robot_path: Option<String>,
+    },
+    /// Run `robot merge`
+    Merge {
+        #[arg(long, required = true)]
+        inputs: Vec<PathBuf>,
+        #[arg(long)]
+        output: PathBuf,
+        #[arg(long)]
+        robot_path: Option<String>,
+    },
+    /// Run `robot report`
+    Report {
+        /// Ontology file or directory
+        path: PathBuf,
+        #[arg(long)]
+        report: PathBuf,
+        #[arg(long)]
+        robot_path: Option<String>,
+    },
 }
 
 #[derive(Clone, Copy, ValueEnum)]
@@ -243,6 +277,31 @@ fn main() -> Result<()> {
                     println!("class: {}", result.class_iri);
                     println!("{}", result.text);
                 }
+            }
+        }
+        Commands::Robot { command } => {
+            use ontoindex_robot::{robot_merge, robot_report, robot_validate};
+            let output = match command {
+                RobotCommands::Validate { path, robot_path } => {
+                    robot_validate(robot_path.as_deref(), &path)?
+                }
+                RobotCommands::Merge { inputs, output, robot_path } => {
+                    let input_strs: Vec<String> =
+                        inputs.iter().map(|p| p.display().to_string()).collect();
+                    robot_merge(robot_path.as_deref(), &input_strs, &output)?
+                }
+                RobotCommands::Report { path, report, robot_path } => {
+                    robot_report(robot_path.as_deref(), &path, &report)?
+                }
+            };
+            if !output.stdout.is_empty() {
+                print!("{}", output.stdout);
+            }
+            if !output.stderr.is_empty() {
+                eprint!("{}", output.stderr);
+            }
+            if output.exit_code != 0 {
+                std::process::exit(output.exit_code);
             }
         }
     }

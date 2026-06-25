@@ -197,6 +197,9 @@ fn entity_to_row(entity: &ontoindex_core::Entity) -> Row {
     row.insert("labels".into(), entity.labels.join("; "));
     row.insert("comments".into(), entity.comments.join("; "));
     row.insert("deprecated".into(), entity.deprecated.to_string());
+    if let Some(ref obo_id) = entity.obo_id {
+        row.insert("obo_id".into(), obo_id.clone());
+    }
     row
 }
 

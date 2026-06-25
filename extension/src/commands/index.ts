@@ -7,6 +7,7 @@ import {
 } from "../lsp/client";
 import { PatchEntityKind, PatchOp } from "../lsp/protocol";
 import { EntityInspectorPanel } from "../webviews/inspector";
+import { GraphPanel } from "../webviews/graphPanel";
 import { QueryWorkbenchPanel } from "../webviews/queryWorkbench";
 import {
   ManchesterEditorPanel,
@@ -241,6 +242,45 @@ export function registerCommands(
           vscode.ConfigurationTarget.Workspace
         );
       await refreshExplorer(providers);
+    }),
+    vscode.commands.registerCommand("ontocode.openClassGraph", async () => {
+      await GraphPanel.show(context.extensionUri, { graphKind: "class" }, "Class Graph");
+    }),
+    vscode.commands.registerCommand("ontocode.openPropertyGraph", async () => {
+      await GraphPanel.show(context.extensionUri, { graphKind: "property" }, "Property Graph");
+    }),
+    vscode.commands.registerCommand("ontocode.openImportGraph", async () => {
+      await GraphPanel.show(context.extensionUri, { graphKind: "import" }, "Import Graph");
+    }),
+    vscode.commands.registerCommand(
+      "ontocode.openNeighborhoodGraph",
+      async (arg?: unknown) => {
+        const iri = resolveEntityIri(arg);
+        await GraphPanel.show(
+          context.extensionUri,
+          { graphKind: "neighborhood", rootIri: iri },
+          iri ? `Neighborhood: ${iri}` : "Neighborhood Graph"
+        );
+      }
+    ),
+    vscode.commands.registerCommand(
+      "ontocode.openGraph",
+      async (arg?: unknown) => {
+        const iri = resolveEntityIri(arg);
+        await GraphPanel.show(
+          context.extensionUri,
+          { graphKind: "neighborhood", rootIri: iri },
+          "Ontology Graph"
+        );
+      }
+    ),
+    vscode.commands.registerCommand("ontocode.openSmokePanel", async () => {
+      const { PanelHost } = await import("../webviews/panelHost");
+      PanelHost.create(context.extensionUri, {
+        viewType: "ontocodeSmoke",
+        title: "OntoCode React Smoke",
+        panel: "smoke",
+      });
     })
   );
 }

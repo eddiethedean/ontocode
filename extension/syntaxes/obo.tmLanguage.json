@@ -1,0 +1,34 @@
+{
+  "scopeName": "source.obo",
+  "patterns": [
+    { "include": "#comments" },
+    { "include": "#sections" },
+    { "include": "#tags" }
+  ],
+  "repository": {
+    "comments": {
+      "patterns": [
+        {
+          "name": "comment.line.obo",
+          "match": "!.*$"
+        }
+      ]
+    },
+    "sections": {
+      "patterns": [
+        {
+          "name": "entity.name.section.obo",
+          "match": "^\\[[^\\]]+\\]$"
+        }
+      ]
+    },
+    "tags": {
+      "patterns": [
+        {
+          "name": "keyword.other.obo",
+          "match": "^(format-version|ontology|idspace|id|name|def|comment|synonym|xref|is_a|relationship|property_value|is_obsolete):"
+        }
+      ]
+    }
+  }
+}

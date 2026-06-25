@@ -29,3 +29,9 @@ pub const MAX_SQL_RESULT_ROWS: usize = 100_000;
 
 /// Maximum rows returned from a SPARQL query.
 pub const MAX_SPARQL_RESULT_ROWS: usize = 100_000;
+
+/// Maximum nodes in a graph export payload.
+pub const MAX_GRAPH_NODES: usize = 2_000;
+
+/// Maximum edges in a graph export payload.
+pub const MAX_GRAPH_EDGES: usize = 5_000;

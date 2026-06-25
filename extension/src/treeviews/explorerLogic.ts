@@ -112,7 +112,11 @@ export function propertyGroupsPresent(
 }
 
 export function entityDisplayLabel(entity: Entity): string {
-  return entity.labels[0] ?? entity.short_name ?? entity.iri;
+  const label = entity.labels[0] ?? entity.short_name ?? entity.iri;
+  if (entity.obo_id) {
+    return `${entity.obo_id} — ${label}`;
+  }
+  return label;
 }
 
 export function childEntitiesForClass(

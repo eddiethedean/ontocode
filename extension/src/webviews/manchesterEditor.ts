@@ -161,7 +161,6 @@ export class ManchesterEditorPanel {
         const { detail } = await getEntity(this.options.iri);
         this.options.initialExpression = expression;
         void vscode.window.showInformationMessage("OntoCode: Manchester axiom applied");
-        this.panel.webview.postMessage({ command: "applied", detail });
       }
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);

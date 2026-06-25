@@ -75,6 +75,7 @@ export type WebviewMessage =
   | { type: "addManchesterAxiom" }
   | { type: "requestGraph"; graphKind: string; rootIri?: string; depth?: number; includeInferred?: boolean; filters?: GraphFilters }
   | { type: "selectNode"; iri: string }
+  | { type: "openEntity"; iri: string }
   | { type: "openGraph"; rootIri?: string };
 
 export function isWebviewMessage(data: unknown): data is WebviewMessage {

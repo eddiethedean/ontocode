@@ -68,6 +68,11 @@ fn execute_select(catalog: &OntologyCatalog, select: Box<Select>) -> Result<Quer
     }
     let table_name = table_name_from_select(&select)?;
     if let Some(selection) = &select.selection {
+        if matches!(selection, Expr::Identifier(_)) {
+            return Err(QueryError::Sql(
+                "bare column names are not supported in WHERE; use column = 'value'".to_string(),
+            ));
+        }
         validate_filter(selection)?;
     }
 

@@ -50,7 +50,7 @@ Custom `ontoindex/*` method failures return JSON-RPC errors with `data` containi
   "jsonrpc": "2.0",
   "id": 3,
   "error": {
-    "code": -32603,
+    "code": -32000,
     "message": "Workspace has not been indexed yet",
     "data": {
       "code": "NOT_INDEXED",

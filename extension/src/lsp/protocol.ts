@@ -256,6 +256,7 @@ export interface ApplyPatchResult {
   diagnostics?: PatchDiagnostic[];
   document_path?: string;
   entity_detail?: EntityDetail;
+  reindex_warning?: string;
 }
 
 export interface ApplyAxiomPatchParams {

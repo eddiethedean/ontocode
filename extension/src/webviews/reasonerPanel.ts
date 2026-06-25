@@ -11,6 +11,8 @@ export class ReasonerPanel {
   private readonly panel: vscode.WebviewPanel;
   private lastResult: RunReasonerResult | undefined;
   private runId = 0;
+  private webviewReady = false;
+  private pendingMessages: unknown[] = [];
 
   private constructor(panel: vscode.WebviewPanel) {
     this.panel = panel;
@@ -18,8 +20,14 @@ export class ReasonerPanel {
       ReasonerPanel.current = undefined;
     });
     this.panel.webview.onDidReceiveMessage(async (msg) => {
+      if (msg.command === "ready") {
+        this.webviewReady = true;
+        this.flushPending();
+        return;
+      }
       if (msg.command === "run") {
-        const runId = ++this.runId;
+        const runId =
+          typeof msg.runId === "number" ? msg.runId : ++this.runId;
         await this.run(msg.profile as string, msg.autoDetect !== false, runId);
       }
       if (msg.command === "explain" && typeof msg.classIri === "string") {
@@ -36,6 +44,22 @@ export class ReasonerPanel {
       }
     });
     this.panel.webview.html = this.renderHtml();
+  }
+
+  private postToWebview(message: unknown): void {
+    if (!this.webviewReady) {
+      this.pendingMessages.push(message);
+      return;
+    }
+    void this.panel.webview.postMessage(message);
+  }
+
+  private flushPending(): void {
+    const queued = this.pendingMessages;
+    this.pendingMessages = [];
+    for (const message of queued) {
+      void this.panel.webview.postMessage(message);
+    }
   }
 
   public static show(): ReasonerPanel {
@@ -67,7 +91,7 @@ export class ReasonerPanel {
         return;
       }
       this.lastResult = result;
-      this.panel.webview.postMessage({
+      this.postToWebview({
         command: "result",
         runId,
         result,
@@ -80,7 +104,7 @@ export class ReasonerPanel {
         return;
       }
       const message = err instanceof Error ? err.message : String(err);
-      this.panel.webview.postMessage({
+      this.postToWebview({
         command: "result",
         runId,
         result: undefined,
@@ -117,6 +141,7 @@ li button { font-size: 0.9em; }
 <section><h3>Warnings</h3><ul id="warnings"></ul></section>
 <script>
 const vscode = acquireVsCodeApi();
+vscode.postMessage({ command: 'ready' });
 document.getElementById('run').onclick = () => {
   window.latestRunId = (window.latestRunId || 0) + 1;
   vscode.postMessage({

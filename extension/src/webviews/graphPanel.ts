@@ -39,7 +39,10 @@ export class GraphPanel {
       viewType: "ontocodeGraph",
       title,
       panel: "graph",
-      extraQuery: options.rootIri ? { root: options.rootIri } : undefined,
+      extraQuery: {
+        graphKind: options.graphKind,
+        ...(options.rootIri ? { root: options.rootIri } : {}),
+      },
       onMessage: async (message: WebviewMessage) => {
         const panel = GraphPanel.currentPanel;
         if (!panel) {

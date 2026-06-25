@@ -17,16 +17,16 @@ Short glossary for engineers new to OWL/RDF who are evaluating OntoCode.
 
 ## Manchester syntax
 
-A text notation for OWL class expressions (e.g. `ex:hasRecord some ex:MedicalRecord`). OntoCode v0.6 supports an MVP subset via the Manchester editor — see [Manchester guide](guides/manchester-editor.md).
+A text notation for OWL class expressions (e.g. `ex:hasRecord some ex:MedicalRecord`). OntoCode v0.7 supports an MVP subset via the Manchester editor — see [Manchester guide](guides/manchester-editor.md).
 
 ## Reasoning profiles
 
 | Profile | Typical use |
 |---------|-------------|
-| **EL** | OWL EL ontologies (default in OntoCode v0.6) |
+| **EL** | OWL EL ontologies (default in OntoCode v0.7) |
 | **RL** | OWL RL materialization |
 | **RDFS** | RDFS entailment |
-| **DL** | Full OWL 2 DL — requires OntoLogos 1.0 (not shipped in v0.6) |
+| **DL** | Full OWL 2 DL — requires OntoLogos 1.0 (not shipped in v0.7) |
 
 ## Asserted vs inferred hierarchy
 

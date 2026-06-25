@@ -27,6 +27,7 @@ pub fn catalog_snapshot_json(
 #[cfg(test)]
 mod handlers_test;
 
+use crate::positions::utf16_offset_to_byte;
 use crossbeam_channel::Sender;
 use diagnostics::publish_diagnostics_for_state;
 use handlers::{
@@ -164,12 +165,12 @@ fn handle_notification(
 ) {
     match notif.method.as_str() {
         Initialized::METHOD => {
-            if let Some(workspace) = state.workspace_root() {
+            if let Some(workspace) = state.effective_index_root() {
                 schedule_reindex(pending_reindex, workspace, Duration::from_millis(500));
             }
         }
         "workspace/didChangeWatchedFiles" => {
-            if let Some(workspace) = state.workspace_root() {
+            if let Some(workspace) = state.effective_index_root() {
                 schedule_reindex(pending_reindex, workspace, Duration::from_millis(500));
             }
         }
@@ -183,7 +184,7 @@ fn handle_notification(
                     }
                 }
             }
-            if let Some(workspace) = state.workspace_root() {
+            if let Some(workspace) = state.effective_index_root() {
                 schedule_reindex(pending_reindex, workspace, Duration::from_millis(750));
             }
         }
@@ -195,7 +196,7 @@ fn handle_notification(
                     if let Some(text) = merged_document_text(state, &path, &params) {
                         if let Err(err) = state.set_document_text(path, text) {
                             eprintln!("ontoindex-lsp: rejected document change: {err}");
-                        } else if let Some(workspace) = state.workspace_root() {
+                        } else if let Some(workspace) = state.effective_index_root() {
                             schedule_reindex(
                                 pending_reindex,
                                 workspace,
@@ -219,7 +220,7 @@ fn handle_notification(
                     state.remove_document(&path);
                 }
             }
-            if let Some(workspace) = state.workspace_root() {
+            if let Some(workspace) = state.effective_index_root() {
                 schedule_reindex(pending_reindex, workspace, Duration::from_millis(750));
             }
         }
@@ -314,17 +315,6 @@ fn apply_text_change(text: &str, range: &lsp_types::Range, new_text: &str) -> Op
         result.pop();
     }
     Some(result)
-}
-
-fn utf16_offset_to_byte(line: &str, utf16_col: u32) -> usize {
-    let mut utf16_seen = 0u32;
-    for (byte_idx, ch) in line.char_indices() {
-        if utf16_seen >= utf16_col {
-            return byte_idx;
-        }
-        utf16_seen += ch.len_utf16() as u32;
-    }
-    line.len()
 }
 
 fn schedule_reindex(

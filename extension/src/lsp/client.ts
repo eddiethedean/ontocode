@@ -63,11 +63,12 @@ export async function startLanguageClient(
   const clientOptions: LanguageClientOptions = {
     documentSelector: [
       { scheme: "file", language: "turtle" },
-      { scheme: "file", pattern: "**/*.{ttl,owl,rdf,jsonld,nt,nq,trig}" },
+      { scheme: "file", language: "obo" },
+      { scheme: "file", pattern: "**/*.{ttl,owl,rdf,jsonld,json-ld,nt,nq,trig,obo}" },
     ],
     synchronize: {
       fileEvents: vscode.workspace.createFileSystemWatcher(
-        "**/*.{ttl,owl,rdf,jsonld,nt,nq,trig}"
+        "**/*.{ttl,owl,rdf,jsonld,json-ld,nt,nq,trig,obo}"
       ),
     },
     outputChannelName: "OntoIndex Language Server",
@@ -136,20 +137,39 @@ function resolveServerPath(context: vscode.ExtensionContext): string {
     return bundled;
   }
 
-  return "ontoindex-lsp";
+  throw new Error(
+    "Bundled ontoindex-lsp binary not found. Rebuild the extension (npm run compile) or set ontocode.lspPath to a local ontoindex-lsp binary."
+  );
 }
 
 export async function indexWorkspace(
   workspaceUri?: string
 ): Promise<IndexWorkspaceResult> {
   const c = requireClient();
-  const uri =
-    workspaceUri ??
-    vscode.workspace.workspaceFolders?.[0]?.uri.toString();
+  const uri = workspaceUri ?? (await pickWorkspaceFolderUri());
+  if (!uri) {
+    throw new Error(
+      "No workspace folder is open. Open a folder containing ontology files, then run Index Workspace."
+    );
+  }
   const result = await c.sendRequest<unknown>("ontoindex/indexWorkspace", {
     workspace_uri: uri,
   });
   return assertIndexWorkspaceResult(result) as IndexWorkspaceResult;
+}
+
+async function pickWorkspaceFolderUri(): Promise<string | undefined> {
+  const folders = vscode.workspace.workspaceFolders;
+  if (!folders || folders.length === 0) {
+    return undefined;
+  }
+  if (folders.length === 1) {
+    return folders[0].uri.toString();
+  }
+  const picked = await vscode.window.showWorkspaceFolderPick({
+    placeHolder: "Select workspace folder to index",
+  });
+  return picked?.uri.toString();
 }
 
 export async function getCatalogSnapshot(): Promise<CatalogSnapshot> {
@@ -230,7 +250,13 @@ export async function getGraph(params: GetGraphParams): Promise<GetGraphResult> 
 
 export async function runRobot(params: RunRobotParams): Promise<RunRobotResult> {
   const c = requireClient();
-  const result = await c.sendRequest<unknown>("ontoindex/runRobot", params);
+  const robotPath =
+    params.robot_path ??
+    vscode.workspace.getConfiguration("ontocode").get<string>("robotPath");
+  const result = await c.sendRequest<unknown>("ontoindex/runRobot", {
+    ...params,
+    robot_path: robotPath || undefined,
+  });
   return assertRunRobotResult(result);
 }
 

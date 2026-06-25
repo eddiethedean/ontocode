@@ -21,6 +21,22 @@ pub fn run_sparql(catalog: &OntologyCatalog, sparql: &str) -> Result<SparqlResul
         )));
     }
 
+    let trimmed_upper = sparql.trim_start().to_ascii_uppercase();
+    if trimmed_upper.starts_with("INSERT")
+        || trimmed_upper.starts_with("DELETE")
+        || trimmed_upper.starts_with("LOAD")
+        || trimmed_upper.starts_with("CLEAR")
+        || trimmed_upper.starts_with("CREATE")
+        || trimmed_upper.starts_with("DROP")
+        || trimmed_upper.starts_with("MOVE")
+        || trimmed_upper.starts_with("COPY")
+        || trimmed_upper.starts_with("ADD")
+    {
+        return Err(QueryError::Sparql(
+            "SPARQL update operations are not supported; use read-only queries".to_string(),
+        ));
+    }
+
     let results = catalog.store().query(sparql).map_err(|e| QueryError::Sparql(e.to_string()))?;
 
     match results {

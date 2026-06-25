@@ -112,8 +112,7 @@ impl OntologyCatalog {
         let source = self.find_source_location(iri);
         let doc = self.entity_document(iri);
         let editable = doc.is_some_and(|d| {
-            (d.format == ontoindex_core::OntologyFormat::Turtle
-                || d.format == ontoindex_core::OntologyFormat::Obo)
+            d.format == ontoindex_core::OntologyFormat::Turtle
                 && d.parse_status == ontoindex_core::ParseStatus::Ok
         });
         let document_path = doc.map(|d| d.path.display().to_string());

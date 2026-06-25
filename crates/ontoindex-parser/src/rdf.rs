@@ -592,7 +592,7 @@ fn term_to_string(term: &Term) -> String {
     match term {
         Term::NamedNode(node) => node.as_str().to_string(),
         Term::BlankNode(node) => format!("_:{}", node.as_str()),
-        Term::Literal(lit) => lit.to_string(),
+        Term::Literal(lit) => lit.value().to_string(),
         #[allow(unreachable_patterns)]
         _ => term.to_string(),
     }
@@ -711,7 +711,7 @@ ex:knows a owl:ObjectProperty ;
             .find(|e| e.iri == "http://example.org/test#Person")
             .expect("Person entity");
         assert_eq!(person.kind, EntityKind::Class);
-        assert_eq!(person.labels, vec!["\"Person\"".to_string()]);
+        assert_eq!(person.labels, vec!["Person".to_string()]);
         assert!(person.source_location.line.is_some());
 
         let knows = parsed
@@ -720,7 +720,7 @@ ex:knows a owl:ObjectProperty ;
             .find(|e| e.iri == "http://example.org/test#knows")
             .expect("knows property");
         assert_eq!(knows.kind, EntityKind::ObjectProperty);
-        assert_eq!(knows.labels, vec!["\"knows\"".to_string()]);
+        assert_eq!(knows.labels, vec!["knows".to_string()]);
     }
 
     #[test]

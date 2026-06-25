@@ -172,11 +172,11 @@ fn ast_to_class_expression(
 ) -> Result<ClassExpression<RcStr>> {
     match ast {
         ManchesterAst::Class(iri) => {
-            let resolved = resolve_term_iri(iri, namespaces);
+            let resolved = resolve_term_iri(iri, namespaces)?;
             Ok(ClassExpression::Class(build.class(resolved)))
         }
         ManchesterAst::Some { property, filler } => {
-            let prop = build.object_property(resolve_term_iri(property, namespaces));
+            let prop = build.object_property(resolve_term_iri(property, namespaces)?);
             let bce = Box::new(ast_to_class_expression(filler, build, namespaces)?);
             Ok(ClassExpression::ObjectSomeValuesFrom {
                 ope: ObjectPropertyExpression::ObjectProperty(prop),
@@ -184,7 +184,7 @@ fn ast_to_class_expression(
             })
         }
         ManchesterAst::Only { property, filler } => {
-            let prop = build.object_property(resolve_term_iri(property, namespaces));
+            let prop = build.object_property(resolve_term_iri(property, namespaces)?);
             let bce = Box::new(ast_to_class_expression(filler, build, namespaces)?);
             Ok(ClassExpression::ObjectAllValuesFrom {
                 ope: ObjectPropertyExpression::ObjectProperty(prop),
@@ -202,7 +202,7 @@ fn ast_to_class_expression(
             Ok(ClassExpression::ObjectUnionOf(exprs?))
         }
         ManchesterAst::Min { n, property, filler } => {
-            let prop = build.object_property(resolve_term_iri(property, namespaces));
+            let prop = build.object_property(resolve_term_iri(property, namespaces)?);
             let bce = Box::new(ast_to_class_expression(filler, build, namespaces)?);
             Ok(ClassExpression::ObjectMinCardinality {
                 n: *n,
@@ -211,7 +211,7 @@ fn ast_to_class_expression(
             })
         }
         ManchesterAst::Max { n, property, filler } => {
-            let prop = build.object_property(resolve_term_iri(property, namespaces));
+            let prop = build.object_property(resolve_term_iri(property, namespaces)?);
             let bce = Box::new(ast_to_class_expression(filler, build, namespaces)?);
             Ok(ClassExpression::ObjectMaxCardinality {
                 n: *n,
@@ -220,7 +220,7 @@ fn ast_to_class_expression(
             })
         }
         ManchesterAst::Exactly { n, property, filler } => {
-            let prop = build.object_property(resolve_term_iri(property, namespaces));
+            let prop = build.object_property(resolve_term_iri(property, namespaces)?);
             let bce = Box::new(ast_to_class_expression(filler, build, namespaces)?);
             Ok(ClassExpression::ObjectExactCardinality {
                 n: *n,
@@ -231,19 +231,23 @@ fn ast_to_class_expression(
     }
 }
 
-fn resolve_term_iri(term: &str, namespaces: &BTreeMap<String, String>) -> String {
+fn resolve_term_iri(term: &str, namespaces: &BTreeMap<String, String>) -> Result<String> {
     if term.starts_with("http://") || term.starts_with("https://") {
-        return term.to_string();
+        return Ok(term.to_string());
     }
     if let Some(stripped) = term.strip_prefix('<').and_then(|s| s.strip_suffix('>')) {
-        return stripped.to_string();
+        return Ok(stripped.to_string());
     }
     if let Some((prefix, local)) = term.split_once(':') {
-        if let Some(ns) = namespaces.get(prefix) {
-            return format!("{ns}{local}");
+        if prefix.is_empty() {
+            return Err(OwlError::ManchesterInvalid(format!("empty prefix in QName '{term}'")));
         }
+        if let Some(ns) = namespaces.get(prefix) {
+            return Ok(format!("{ns}{local}"));
+        }
+        return Err(OwlError::ManchesterInvalid(format!("unknown prefix '{prefix}' in '{term}'")));
     }
-    term.to_string()
+    Ok(term.to_string())
 }
 
 fn tokenize(input: &str) -> std::result::Result<Vec<Token>, String> {
@@ -258,11 +262,16 @@ fn tokenize(input: &str) -> std::result::Result<Vec<Token>, String> {
             ')' => tokens.push(Token::RParen),
             '<' => {
                 let mut iri = String::new();
+                let mut closed = false;
                 for (_, c) in chars.by_ref() {
                     if c == '>' {
+                        closed = true;
                         break;
                     }
                     iri.push(c);
+                }
+                if !closed {
+                    return Err(format!("unclosed IRI starting at {start}"));
                 }
                 tokens.push(Token::Iri(iri));
             }
@@ -409,7 +418,7 @@ impl ManchesterParser {
                 Token::Keyword(Keyword::Only) => {
                     Ok(ManchesterAst::Only { property: name, filler: Box::new(filler) })
                 }
-                _ => unreachable!(),
+                _ => return Err("internal parser error after some/only keyword".to_string()),
             };
         }
         Ok(ManchesterAst::Class(name))

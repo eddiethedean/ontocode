@@ -14,6 +14,8 @@ export interface PanelHostOptions {
 
 export class PanelHost {
   private disposed = false;
+  private webviewReady = false;
+  private pendingMessages: HostMessage[] = [];
 
   constructor(
     public readonly panel: vscode.WebviewPanel,
@@ -29,10 +31,36 @@ export class PanelHost {
     return this.disposed;
   }
 
+  /** Post a host message; buffers until the webview sends `ready`. */
   postMessage(message: HostMessage): void {
-    if (!this.disposed) {
+    if (this.disposed) {
+      return;
+    }
+    if (!this.webviewReady) {
+      this.pendingMessages.push(message);
+      return;
+    }
+    void this.panel.webview.postMessage(message);
+  }
+
+  private flushPending(): void {
+    if (this.disposed) {
+      return;
+    }
+    const queued = this.pendingMessages;
+    this.pendingMessages = [];
+    for (const message of queued) {
       void this.panel.webview.postMessage(message);
     }
+  }
+
+  private onWebviewReady(): void {
+    if (this.webviewReady || this.disposed) {
+      return;
+    }
+    this.webviewReady = true;
+    void this.panel.webview.postMessage({ type: "init", panel: this.panelKind });
+    this.flushPending();
   }
 
   static create(
@@ -73,7 +101,7 @@ export class PanelHost {
         return;
       }
       if (data.type === "ready" && data.panel === options.panel) {
-        host.postMessage({ type: "init", panel: options.panel });
+        host.onWebviewReady();
       }
       if (options.onMessage) {
         await options.onMessage(data, panel);

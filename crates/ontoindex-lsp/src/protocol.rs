@@ -122,6 +122,9 @@ pub struct ApplyAxiomPatchResult {
     pub patch: ontoindex_owl::ApplyPatchResult,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub entity_detail: Option<EntityDetail>,
+    /// Set when the patch was written but workspace reindex failed.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub reindex_warning: Option<String>,
 }
 
 /// LSP JSON error payload for custom `ontoindex/*` methods (not [`ontoindex_core::OntoIndexError`]).
@@ -158,6 +161,28 @@ impl LspErrorPayload {
             message,
             recoverable: true,
             user_action: Some("Check ontology files for parse errors".to_string()),
+        }
+    }
+
+    pub fn invalid_params(message: String) -> Self {
+        Self { code: "INVALID_PARAMS".to_string(), message, recoverable: true, user_action: None }
+    }
+
+    pub fn graph_failed(message: String) -> Self {
+        Self {
+            code: "GRAPH_FAILED".to_string(),
+            message,
+            recoverable: true,
+            user_action: Some("Adjust graph kind, root IRI, or filters".to_string()),
+        }
+    }
+
+    pub fn robot_failed(message: String) -> Self {
+        Self {
+            code: "ROBOT_FAILED".to_string(),
+            message,
+            recoverable: true,
+            user_action: Some("Check ROBOT CLI installation and arguments".to_string()),
         }
     }
 

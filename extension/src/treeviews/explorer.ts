@@ -3,6 +3,7 @@ import * as vscode from "vscode";
 import { CatalogSnapshot, Entity } from "../lsp/protocol";
 import { entityKindLabel } from "../utils/iri";
 import {
+  activeHierarchy,
   childEntitiesForClass,
   classRootEntities,
   diagnosticLabel,
@@ -10,7 +11,6 @@ import {
   filterEntitiesByKind,
   groupDiagnosticsBySeverity,
   hierarchyModeFromConfig,
-  isInferredOnlyEdge,
   isUnsatisfiable,
   propertyGroupsPresent,
 } from "./explorerLogic";
@@ -57,21 +57,10 @@ export class OntologyTreeItem extends vscode.TreeItem {
     }
     if (nodeKind === "diagnostic" && diagnostic) {
       this.tooltip = diagnostic.message;
-      const args: [vscode.Uri, vscode.Position?] = [
-        vscode.Uri.file(diagnostic.file),
-      ];
-      if (diagnostic.line != null) {
-        args.push(
-          new vscode.Position(
-            Math.max(0, diagnostic.line - 1),
-            diagnostic.column ?? 0
-          )
-        );
-      }
       this.command = {
-        command: "vscode.open",
+        command: "ontocode.openDiagnostic",
         title: "Open Diagnostic",
-        arguments: args,
+        arguments: [diagnostic],
       };
       this.iconPath = new vscode.ThemeIcon(
         diagnostic.severity === "error"
@@ -237,10 +226,11 @@ export class ExplorerTreeProvider implements vscode.TreeDataProvider<OntologyTre
     iri: string,
     hierarchyMode: import("../lsp/protocol").HierarchyMode
   ): boolean {
-    const hierarchy = hierarchyMode === "asserted"
-      ? this.snapshot?.hierarchy
-      : this.snapshot?.reasoner?.inferred.combined ?? this.snapshot?.hierarchy;
-    return (hierarchy?.children[iri]?.length ?? 0) > 0;
+    if (!this.snapshot) {
+      return false;
+    }
+    const hierarchy = activeHierarchy(this.snapshot, hierarchyMode);
+    return (hierarchy.children[iri]?.length ?? 0) > 0;
   }
 
   private diagnosticItem(

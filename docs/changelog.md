@@ -4,6 +4,23 @@ Canonical source: [CHANGELOG.md on GitHub](https://github.com/eddiethedean/ontoc
 
 Migration guides: [Migration index](migration/README.md)
 
+## [0.7.0] - 2026-06-25
+
+### Added
+
+- React Entity Inspector and graph visualization panels
+- OBO format index, ROBOT CLI wrappers, graph LSP method
+
+### Changed
+
+- Workspace and extension version **0.7.0**
+
+### Fixed
+
+- Webview ready/init races, LSP index root consistency, patch result contract, reasoner cache staleness, OBO editable mismatch, diagnostics and query hardening
+
+See [GitHub CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) for the full v0.7.0 list.
+
 ## [0.6.0] - 2026-06-24
 
 ### Added

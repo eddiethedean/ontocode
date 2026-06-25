@@ -6,12 +6,9 @@ use lsp_types::{Diagnostic, DiagnosticSeverity, NumberOrString, Position, Range,
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
 use std::str::FromStr;
-use std::sync::Mutex;
 
 use crate::positions::byte_col_to_utf16;
 use crate::state::{path_to_uri, ServerState};
-
-static PUBLISHED_URIS: Mutex<BTreeSet<String>> = Mutex::new(BTreeSet::new());
 
 /// Publish diagnostics from catalog data held in [`ServerState`].
 pub fn publish_diagnostics_for_state(sender: &Sender<Message>, state: &ServerState) {
@@ -20,11 +17,18 @@ pub fn publish_diagnostics_for_state(sender: &Sender<Message>, state: &ServerSta
         None => return,
     };
     let text_fn = |path: &Path| state.document_text(path);
-    publish_catalog_diagnostics(sender, &snapshot.documents, &snapshot.diagnostics, &text_fn);
+    publish_catalog_diagnostics(
+        sender,
+        state,
+        &snapshot.documents,
+        &snapshot.diagnostics,
+        &text_fn,
+    );
 }
 
 pub fn publish_catalog_diagnostics(
     sender: &Sender<Message>,
+    state: &ServerState,
     documents: &[ontoindex_core::OntologyDocument],
     diagnostics: &[ontoindex_core::Diagnostic],
     document_text: &dyn Fn(&Path) -> Option<String>,
@@ -50,9 +54,9 @@ pub fn publish_catalog_diagnostics(
     }
 
     let stale: Vec<String> = {
-        let mut published = PUBLISHED_URIS.lock().unwrap_or_else(|e| e.into_inner());
+        let published = state.published_diagnostic_uris();
         let stale: Vec<String> = published.difference(&current_uris).cloned().collect();
-        *published = current_uris;
+        state.set_published_diagnostic_uris(current_uris);
         stale
     };
 
@@ -187,9 +191,11 @@ mod tests {
             quick_fix: None,
         };
 
+        let state = ServerState::new();
         let (tx, rx) = unbounded();
         publish_catalog_diagnostics(
             &tx,
+            &state,
             &[doc(&path_a), doc(&path_b)],
             &[diagnostic(&path_a), diagnostic(&path_b)],
             &|_| None,
@@ -203,7 +209,9 @@ mod tests {
         }
         assert_eq!(publish_count, 2);
 
-        publish_catalog_diagnostics(&tx, &[doc(&path_a)], &[diagnostic(&path_a)], &|_| None);
+        publish_catalog_diagnostics(&tx, &state, &[doc(&path_a)], &[diagnostic(&path_a)], &|_| {
+            None
+        });
 
         let mut final_notifications = Vec::new();
         while let Ok(Message::Notification(notif)) = rx.recv_timeout(Duration::from_millis(100)) {

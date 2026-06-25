@@ -161,6 +161,22 @@ export function assertApplyPatchResult(value: unknown): import("./protocol").App
   if (!value || typeof value !== "object") {
     throw new Error("Invalid applyAxiomPatch result from language server");
   }
+  const v = value as Record<string, unknown>;
+  if (typeof v.applied !== "boolean") {
+    throw new Error("Invalid applyAxiomPatch result: missing applied flag");
+  }
+  if (
+    v.diagnostics !== undefined &&
+    (!Array.isArray(v.diagnostics) ||
+      !v.diagnostics.every(
+        (d) =>
+          d &&
+          typeof d === "object" &&
+          typeof (d as Record<string, unknown>).message === "string"
+      ))
+  ) {
+    throw new Error("Invalid applyAxiomPatch result: diagnostics must be an array");
+  }
   return value as import("./protocol").ApplyPatchResult;
 }
 
@@ -232,8 +248,13 @@ export function assertGetGraphResult(
     throw new Error("Invalid getGraph result from language server");
   }
   const v = value as Record<string, unknown>;
-  if (!v.graph || typeof v.graph !== "object") {
+  const graph = v.graph;
+  if (!graph || typeof graph !== "object") {
     throw new Error("Invalid getGraph result shape");
+  }
+  const g = graph as Record<string, unknown>;
+  if (!Array.isArray(g.nodes) || !Array.isArray(g.edges)) {
+    throw new Error("Invalid getGraph result: graph must include nodes and edges");
   }
   return value as import("./protocol").GetGraphResult;
 }

@@ -18,7 +18,13 @@ function kindLabel(kind: string): string {
   return kind.replace(/_/g, " ");
 }
 
-function EntityList({ items }: { items: string[] }): JSX.Element {
+function EntityList({
+  items,
+  onSelect,
+}: {
+  items: string[];
+  onSelect?: (iri: string) => void;
+}): JSX.Element {
   if (items.length === 0) {
     return <p className="muted">None</p>;
   }
@@ -26,7 +32,18 @@ function EntityList({ items }: { items: string[] }): JSX.Element {
     <ul>
       {items.map((i) => (
         <li key={i}>
-          <code>{shortLabel(i)}</code>{" "}
+          {onSelect ? (
+            <button
+              type="button"
+              className="secondary"
+              style={{ padding: "2px 6px", marginRight: 6 }}
+              onClick={() => onSelect(i)}
+            >
+              <code>{shortLabel(i)}</code>
+            </button>
+          ) : (
+            <code>{shortLabel(i)}</code>
+          )}{" "}
           <span className="muted">{i}</span>
         </li>
       ))}
@@ -41,6 +58,10 @@ export function EntityInspectorPanel(): JSX.Element {
   const [newLabel, setNewLabel] = useState("");
   const [newComment, setNewComment] = useState("");
   const [parentPick, setParentPick] = useState("");
+
+  const openEntity = useCallback((iri: string) => {
+    getVsCodeApi().postMessage({ type: "openEntity", iri });
+  }, []);
 
   const apply = useCallback((patches: PatchOp[], previewOnly: boolean) => {
     getVsCodeApi().postMessage({ type: "applyPatch", patches, previewOnly });
@@ -102,10 +123,10 @@ export function EntityInspectorPanel(): JSX.Element {
       <EntityList items={entity.comments} />
 
       <h2>Parents</h2>
-      <EntityList items={parents} />
+      <EntityList items={parents} onSelect={openEntity} />
 
       <h2>Children</h2>
-      <EntityList items={children} />
+      <EntityList items={children} onSelect={openEntity} />
 
       <h2>Axioms</h2>
       {axioms.length > 0 ? (
@@ -266,7 +287,7 @@ export function EntityInspectorPanel(): JSX.Element {
         </>
       ) : (
         <p className="muted">
-          Editing is available for Turtle (.ttl) and OBO (.obo) documents only.
+          Editing is available for Turtle (.ttl) documents only.
         </p>
       )}
 

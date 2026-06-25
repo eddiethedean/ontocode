@@ -189,7 +189,7 @@ pub fn annotate_spans(
     axioms: &mut [Axiom],
 ) {
     for entity in entities.iter_mut() {
-        if let Some(block) = entity_block_range(source_text, entity) {
+        if let Some(block) = entity_block_range(source_text, entity, &BTreeMap::new()) {
             if entity.source_location.end_byte.is_none() {
                 entity.source_location.end_byte = Some(block.end);
             }
@@ -216,8 +216,12 @@ pub fn annotate_spans(
     }
 }
 
-pub fn entity_block_range(source_text: &str, entity: &Entity) -> Option<ByteRange> {
-    let namespaces = BTreeMap::new();
+pub fn entity_block_range(
+    source_text: &str,
+    entity: &Entity,
+    declared_namespaces: &BTreeMap<String, String>,
+) -> Option<ByteRange> {
+    let namespaces = namespaces_for_text(source_text, declared_namespaces);
     let start = if let Some(s) = entity.source_location.start_byte {
         s as usize
     } else {
@@ -418,7 +422,7 @@ mod tests {
             deprecated: false,
             obo_id: None,
         };
-        let range = entity_block_range(ttl, &entity).expect("block");
+        let range = entity_block_range(ttl, &entity, &clinic_ns()).expect("block");
         let block = &ttl[range.start as usize..range.end as usize];
         assert!(block.contains("owl:Restriction"));
         assert!(block.contains("owl:someValuesFrom"));

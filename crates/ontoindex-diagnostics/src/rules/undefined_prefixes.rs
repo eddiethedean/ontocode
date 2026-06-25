@@ -13,11 +13,17 @@ pub fn undefined_prefixes(
         if doc.parse_status == ParseStatus::Error {
             continue;
         }
-        if !matches!(doc.format, OntologyFormat::Turtle | OntologyFormat::TriG) {
-            // RDF/XML namespaces come from xmlns extraction; skip raw regex scan.
-            if matches!(doc.format, OntologyFormat::RdfXml | OntologyFormat::Owl) {
-                continue;
-            }
+        if !matches!(
+            doc.format,
+            OntologyFormat::Turtle
+                | OntologyFormat::TriG
+                | OntologyFormat::Owl
+                | OntologyFormat::RdfXml
+        ) {
+            continue;
+        }
+        if matches!(doc.format, OntologyFormat::RdfXml | OntologyFormat::Owl) {
+            continue;
         }
         let text = source(&doc.path);
         let declared: BTreeSet<&str> = doc.namespaces.keys().map(String::as_str).collect();
@@ -42,6 +48,7 @@ pub fn undefined_prefixes(
                 d.file == doc.path
                     && d.code == DiagnosticCode::UndefinedPrefix
                     && d.message == message
+                    && d.range.line == range.line
             }) {
                 continue;
             }
@@ -69,13 +76,25 @@ fn strip_comments_and_strings(text: &str) -> String {
                 out.push(' ');
             }
             '"' => {
-                #[allow(clippy::while_let_on_iterator)]
-                while let Some(ch) = chars.next() {
-                    if ch == '"' {
-                        break;
+                if chars.peek() == Some(&'"') && chars.nth(1) == Some('"') {
+                    while let Some(ch) = chars.next() {
+                        if ch == '"' && chars.peek() == Some(&'"') {
+                            let _ = chars.next();
+                            if chars.peek() == Some(&'"') {
+                                chars.next();
+                                break;
+                            }
+                        }
                     }
-                    if ch == '\\' {
-                        chars.next();
+                } else {
+                    #[allow(clippy::while_let_on_iterator)]
+                    while let Some(ch) = chars.next() {
+                        if ch == '"' {
+                            break;
+                        }
+                        if ch == '\\' {
+                            chars.next();
+                        }
                     }
                 }
                 out.push(' ');

@@ -123,6 +123,8 @@ check_file_contains "extension/package.json" "guides/vscode-extension/" "extensi
 check_file_contains "extension/README.md" "guides/vscode-extension/" "extension README VS Code docs path"
 check_file_contains "docs/guides/vscode-extension.md" "rust-crates.md" "vscode hub cross-link"
 check_file_contains "docs/guides/rust-crates.md" "vscode-extension.md" "rust hub cross-link"
+check_file_contains "crates/ontoindex-cli/src/main.rs" "OntoCode v${VERSION%.*}" "CLI about string version"
+check_file_contains "docs/changelog.md" "v${VERSION}" "docs changelog current release"
 
 if [[ "$fail" -ne 0 ]]; then
   echo "Documentation version check failed." >&2

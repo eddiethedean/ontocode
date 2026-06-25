@@ -296,8 +296,9 @@ impl<'a> GraphBuilder<'a> {
         }
 
         for ann in &self.catalog.data().annotations {
-            let is_domain = ann.predicate.ends_with("domain");
-            let is_range = ann.predicate.ends_with("range");
+            let is_domain =
+                ann.predicate.ends_with("#domain") || ann.predicate.ends_with("/domain");
+            let is_range = ann.predicate.ends_with("#range") || ann.predicate.ends_with("/range");
             if !is_domain && !is_range {
                 continue;
             }

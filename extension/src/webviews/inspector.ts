@@ -132,7 +132,7 @@ export class EntityInspectorPanel {
         rootIri: message.rootIri ?? this.iri,
       });
     }
-    if (message.type === "selectNode") {
+    if (message.type === "selectNode" || message.type === "openEntity") {
       await vscode.commands.executeCommand("ontocode.openEntity", message.iri);
     }
   }
@@ -160,6 +160,23 @@ export class EntityInspectorPanel {
       if (previewOnly && result.preview_text) {
         this.host.postMessage({ type: "preview", text: result.preview_text });
         return;
+      }
+      if (!previewOnly) {
+        const deleted = patches.some((p) => p.op === "delete_entity");
+        if (deleted && result.applied) {
+          this.host.panel.dispose();
+          EntityInspectorPanel.currentPanel = undefined;
+          if (this.onRefresh) {
+            await this.onRefresh();
+          }
+          void vscode.window.showInformationMessage("OntoCode: entity deleted");
+          return;
+        }
+        if (result.reindex_warning) {
+          void vscode.window.showWarningMessage(
+            `OntoCode: changes saved but reindex failed — ${result.reindex_warning}`
+          );
+        }
       }
       if (result.entity_detail) {
         if (result.entity_detail.entity.iri !== this.iri) {

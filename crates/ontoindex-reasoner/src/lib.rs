@@ -1,4 +1,4 @@
-//! OntoLogos-backed reasoner facade for OntoIndex (v0.6).
+//! OntoLogos-backed reasoner facade for OntoIndex (v0.7).
 //!
 //! Published as [`ontoindex-reasoner`](https://crates.io/crates/ontoindex-reasoner).
 

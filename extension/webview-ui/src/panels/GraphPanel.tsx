@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ReactFlow,
   Background,
@@ -16,6 +16,14 @@ import {
   HostMessage,
   isHostMessage,
 } from "../messages";
+
+function readInitialParams(): { graphKind: string; rootIri?: string } {
+  const params = new URLSearchParams(window.location.search);
+  return {
+    graphKind: params.get("graphKind") ?? "class",
+    rootIri: params.get("root") ?? undefined,
+  };
+}
 
 function layoutNodes(graph: GraphPayload): Node[] {
   const byKind = new Map<string, number>();
@@ -54,14 +62,16 @@ function toFlowEdges(graph: GraphPayload, showInferred: boolean): Edge[] {
 }
 
 export function GraphPanel(): JSX.Element {
+  const initial = useMemo(() => readInitialParams(), []);
   const [graph, setGraph] = useState<GraphPayload | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [depth, setDepth] = useState(2);
   const [includeInferred, setIncludeInferred] = useState(false);
   const [showInferred, setShowInferred] = useState(true);
   const [hideDeprecated, setHideDeprecated] = useState(false);
-  const [graphKind, setGraphKind] = useState("class");
-  const [rootIri, setRootIri] = useState<string | undefined>();
+  const [graphKind, setGraphKind] = useState(initial.graphKind);
+  const [rootIri, setRootIri] = useState<string | undefined>(initial.rootIri);
+  const hasGraphData = useRef(false);
 
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
@@ -86,10 +96,13 @@ export function GraphPanel(): JSX.Element {
       }
       const msg: HostMessage = event.data;
       if (msg.type === "graphData") {
+        hasGraphData.current = true;
         setGraph(msg.graph);
         setGraphKind(msg.graph.graph_kind);
       } else if (msg.type === "init" && msg.panel === "graph") {
-        requestGraph();
+        if (!hasGraphData.current) {
+          requestGraph();
+        }
       }
     };
     window.addEventListener("message", handler);
@@ -121,7 +134,6 @@ export function GraphPanel(): JSX.Element {
             fitView
             onNodeClick={(_, node) => {
               setSelectedId(node.id);
-              getVsCodeApi().postMessage({ type: "selectNode", iri: node.id });
             }}
           >
             <Background />

@@ -82,6 +82,14 @@ export async function activate(
 
     registerCommands(context, providers);
 
+    context.subscriptions.push(
+      vscode.workspace.onDidChangeConfiguration((e) => {
+        if (e.affectsConfiguration("ontocode.hierarchy.mode") && providers) {
+          void refreshExplorer(providers);
+        }
+      })
+    );
+
     // Server indexes on `initialized` (debounced); refresh explorer once it settles.
     setTimeout(() => {
       void refreshExplorer(providers!);
@@ -94,7 +102,18 @@ export async function activate(
       getEntity,
       runSqlQuery,
       runSparqlQuery,
-      parseManchester,
+      parseManchester: (
+        expression: string,
+        axiomKind: string,
+        entityIri?: string,
+        documentUri?: string
+      ) =>
+        parseManchester({
+          expression,
+          axiom_kind: axiomKind,
+          entity_iri: entityIri,
+          document_uri: documentUri,
+        }),
     };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);

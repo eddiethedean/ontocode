@@ -363,7 +363,7 @@
       "iri": "http://example.org/org",
       "kind": "ontology",
       "labels": [
-        "\"Organization extension\""
+        "Organization extension"
       ],
       "ontology_id": "http://example.org/org",
       "short_name": "org",
@@ -378,7 +378,7 @@
       "iri": "http://example.org/org#Department",
       "kind": "class",
       "labels": [
-        "\"Department\""
+        "Department"
       ],
       "ontology_id": "http://example.org/org",
       "short_name": "Department",

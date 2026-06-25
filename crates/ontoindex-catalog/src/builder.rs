@@ -10,7 +10,6 @@ use ontoindex_parser::{parse_ontology_file, parse_ontology_text, ParsedOntology}
 use oxigraph::model::Quad;
 use oxigraph::store::Store;
 use std::collections::HashMap;
-use std::fs;
 use std::path::{Path, PathBuf};
 use thiserror::Error;
 
@@ -127,7 +126,7 @@ impl IndexBuilder {
                 &doc_id,
                 &parsed,
                 self.document_override_text(&file.path),
-            );
+            )?;
 
             for entity in semantics.entities {
                 if entities.len() >= MAX_ENTITIES && !entity_index.contains_key(&entity.iri) {
@@ -257,41 +256,44 @@ fn semantics_for_document(
     doc_id: &str,
     parsed: &ParsedOntology,
     override_text: Option<&String>,
-) -> DocumentSemantics {
+) -> Result<DocumentSemantics> {
     if parsed.parse_status == ParseStatus::Error || !supports_horned_load(format) {
-        return DocumentSemantics {
+        return Ok(DocumentSemantics {
             entities: parsed.entities.clone(),
             annotations: parsed.annotations.clone(),
             axioms: parsed.axioms.clone(),
             namespace_rows: parsed.namespace_rows.clone(),
             imports: parsed.import_rows.clone(),
-        };
+        });
     }
 
     let source_text = if let Some(text) = override_text {
         text.clone()
     } else {
-        fs::read_to_string(path).unwrap_or_default()
+        std::fs::read_to_string(path).map_err(|e| CatalogError::Core(e.into()))?
     };
 
-    if let Ok(owl) =
-        load_turtle_text(path, doc_id, &source_text, parsed.quads(), &parsed.namespaces)
-    {
-        return DocumentSemantics {
+    match load_turtle_text(path, doc_id, &source_text, parsed.quads(), &parsed.namespaces) {
+        Ok(owl) => Ok(DocumentSemantics {
             entities: owl.bridge.entities,
             annotations: owl.bridge.annotations,
             axioms: owl.bridge.axioms,
             namespace_rows: owl.bridge.namespace_rows,
             imports: owl.bridge.imports,
-        };
-    }
-
-    DocumentSemantics {
-        entities: parsed.entities.clone(),
-        annotations: parsed.annotations.clone(),
-        axioms: parsed.axioms.clone(),
-        namespace_rows: parsed.namespace_rows.clone(),
-        imports: parsed.import_rows.clone(),
+        }),
+        Err(e) => {
+            eprintln!(
+                "ontoindex-catalog: Horned-OWL load failed for {}: {e}; using parser entities",
+                path.display()
+            );
+            Ok(DocumentSemantics {
+                entities: parsed.entities.clone(),
+                annotations: parsed.annotations.clone(),
+                axioms: parsed.axioms.clone(),
+                namespace_rows: parsed.namespace_rows.clone(),
+                imports: parsed.import_rows.clone(),
+            })
+        }
     }
 }
 

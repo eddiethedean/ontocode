@@ -50,7 +50,7 @@ pub fn orphan_classes(
                 .filter(|a| a.axiom_kind == AXIOM_KIND_SUB_CLASS_OF && a.subject == class.iri)
                 .map(|a| a.object.as_str())
                 .collect();
-            !parents.iter().any(|p| entity_iris.contains(p))
+            !parents.iter().any(|p| entity_iris.contains(p) || BUILTIN_ROOTS.contains(p))
         };
         if !is_orphan {
             continue;

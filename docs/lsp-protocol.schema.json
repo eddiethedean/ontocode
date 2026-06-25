@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/eddiethedean/ontocode/docs/lsp-protocol.schema.json",
-  "title": "OntoIndex LSP protocol (v0.6)",
-  "description": "JSON Schema for ontoindex/* custom LSP methods (v0.6 subset).",
+  "title": "OntoIndex LSP protocol (v0.7)",
+  "description": "JSON Schema for ontoindex/* custom LSP methods (v0.7 subset).",
   "definitions": {
     "EntityKind": {
       "type": "string",

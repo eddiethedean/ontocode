@@ -80,6 +80,25 @@ export function registerCommands(
       }
     ),
     vscode.commands.registerCommand(
+      "ontocode.openDiagnostic",
+      async (diagnostic: import("../lsp/protocol").DiagnosticSummary) => {
+        const uri = vscode.Uri.file(diagnostic.file);
+        const doc = await vscode.workspace.openTextDocument(uri);
+        const editor = await vscode.window.showTextDocument(doc);
+        if (diagnostic.line != null) {
+          const line = Math.max(0, diagnostic.line - 1);
+          const lineText = doc.lineAt(line).text;
+          const col = byteColToUtf16(lineText, diagnostic.column ?? 0);
+          const pos = new vscode.Position(line, col);
+          editor.selection = new vscode.Selection(pos, pos);
+          editor.revealRange(
+            new vscode.Range(pos, pos),
+            vscode.TextEditorRevealType.InCenter
+          );
+        }
+      }
+    ),
+    vscode.commands.registerCommand(
       "ontocode.jumpToSource",
       async (arg?: unknown) => {
         let iri = resolveEntityIri(arg);
@@ -275,6 +294,12 @@ export function registerCommands(
       }
     ),
     vscode.commands.registerCommand("ontocode.openSmokePanel", async () => {
+      if (context.extensionMode !== vscode.ExtensionMode.Development) {
+        void vscode.window.showWarningMessage(
+          "OntoCode smoke panel is only available in development mode."
+        );
+        return;
+      }
       const { PanelHost } = await import("../webviews/panelHost");
       PanelHost.create(context.extensionUri, {
         viewType: "ontocodeSmoke",
@@ -350,7 +375,18 @@ async function createEntity(
     return;
   }
   const snapshot = await getCatalogSnapshot();
-  const ttlDocs = snapshot.documents.filter((d) => d.format === "turtle");
+  let ttlDocs = snapshot.documents.filter((d) => d.format === "turtle");
+  const activeEditor = vscode.window.activeTextEditor;
+  if (activeEditor) {
+    const folder = vscode.workspace.getWorkspaceFolder(activeEditor.document.uri);
+    if (folder) {
+      const prefix = folder.uri.fsPath;
+      const inFolder = ttlDocs.filter((d) => d.path.startsWith(prefix));
+      if (inFolder.length > 0) {
+        ttlDocs = inFolder;
+      }
+    }
+  }
   if (ttlDocs.length === 0) {
     void vscode.window.showErrorMessage("No Turtle (.ttl) ontology in workspace");
     return;

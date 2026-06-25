@@ -5,14 +5,16 @@ use ontoindex_core::{
     validate_workspace_scope, Diagnostic, OntologyDocument,
 };
 use ontoindex_reasoner::{ReasonerCacheStore, ReasonerSnapshot};
-use std::collections::HashMap;
+use std::collections::{BTreeSet, HashMap};
 use std::path::{Path, PathBuf};
-use std::sync::{Arc, RwLock};
+use std::sync::{Arc, Mutex, RwLock};
 use std::time::{SystemTime, UNIX_EPOCH};
 
 #[derive(Clone)]
 pub struct ServerState {
     inner: Arc<RwLock<InnerState>>,
+    /// Serializes catalog rebuilds and reasoner runs against the same workspace state.
+    ops_lock: Arc<Mutex<()>>,
 }
 
 struct InnerState {
@@ -26,6 +28,8 @@ struct InnerState {
     open_documents: HashMap<PathBuf, String>,
     reasoner_cache: ReasonerCacheStore,
     reasoner_snapshot: Option<ReasonerSnapshot>,
+    /// URIs that received `publishDiagnostics` (for stale clears).
+    published_diagnostic_uris: BTreeSet<String>,
 }
 
 impl ServerState {
@@ -39,8 +43,14 @@ impl ServerState {
                 open_documents: HashMap::new(),
                 reasoner_cache: ReasonerCacheStore::new(),
                 reasoner_snapshot: None,
+                published_diagnostic_uris: BTreeSet::new(),
             })),
+            ops_lock: Arc::new(Mutex::new(())),
         }
+    }
+
+    pub fn ops_lock(&self) -> Arc<Mutex<()>> {
+        Arc::clone(&self.ops_lock)
     }
 
     pub fn set_workspace_root(&self, workspace: PathBuf) -> Result<(), String> {
@@ -54,6 +64,7 @@ impl ServerState {
         &self,
         workspace: PathBuf,
     ) -> Result<(ontoindex_catalog::CatalogStats, u64), String> {
+        let _guard = self.ops_lock.lock().map_err(|e| e.to_string())?;
         let workspace = canonical_workspace_root(&workspace)?;
 
         let root = self.workspace_root().ok_or_else(|| "workspace not initialized".to_string())?;
@@ -113,9 +124,24 @@ impl ServerState {
         })
     }
 
-    #[allow(dead_code)]
     pub fn indexed_workspace(&self) -> Option<PathBuf> {
         self.inner.read().ok()?.indexed_workspace.clone()
+    }
+
+    /// Directory used for reindex and reasoner input: last indexed path, else workspace root.
+    pub fn effective_index_root(&self) -> Option<PathBuf> {
+        let guard = self.inner.read().ok()?;
+        guard.indexed_workspace.clone().or_else(|| guard.workspace.clone())
+    }
+
+    pub fn published_diagnostic_uris(&self) -> BTreeSet<String> {
+        self.inner.read().ok().map(|g| g.published_diagnostic_uris.clone()).unwrap_or_default()
+    }
+
+    pub fn set_published_diagnostic_uris(&self, uris: BTreeSet<String>) {
+        if let Ok(mut guard) = self.inner.write() {
+            guard.published_diagnostic_uris = uris;
+        }
     }
 
     fn open_documents_snapshot(&self) -> HashMap<PathBuf, String> {

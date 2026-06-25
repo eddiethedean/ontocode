@@ -62,7 +62,7 @@ pub fn handle_index_workspace(
     let workspace = match params.workspace_uri.as_deref() {
         Some(uri) => resolve_workspace_for_index(uri, state.workspace_root().as_deref())
             .map_err(LspErrorPayload::index_failed)?,
-        None => state.workspace_root().ok_or_else(|| {
+        None => state.effective_index_root().ok_or_else(|| {
             LspErrorPayload::index_failed("no workspace URI provided".to_string())
         })?,
     };
@@ -130,18 +130,19 @@ pub fn handle_get_graph(
             if let Some(ref edges) = inferred_edges {
                 builder = builder.with_inferred_edges(edges);
             }
-            let graph = builder.build(&params).map_err(LspErrorPayload::index_failed)?;
+            let graph = builder.build(&params).map_err(LspErrorPayload::graph_failed)?;
             Ok(GetGraphResult { graph })
         })
         .ok_or_else(LspErrorPayload::not_indexed)?
 }
 
-pub fn handle_run_robot(params: RunRobotParams) -> Result<RunRobotResult, LspErrorPayload> {
+pub fn handle_run_robot(
+    index_worker: &IndexWorker,
+    params: RunRobotParams,
+) -> Result<RunRobotResult, LspErrorPayload> {
     let mut args = vec![params.subcommand];
     args.extend(params.args);
-    let output = ontoindex_robot::run_robot(params.robot_path.as_deref(), &args)
-        .map_err(|e| LspErrorPayload::index_failed(e.to_string()))?;
-    Ok(RunRobotResult { exit_code: output.exit_code, stdout: output.stdout, stderr: output.stderr })
+    index_worker.run_robot_sync(params.robot_path, args).map_err(LspErrorPayload::robot_failed)
 }
 
 pub fn handle_apply_axiom_patch(
@@ -149,7 +150,7 @@ pub fn handle_apply_axiom_patch(
     index_worker: &IndexWorker,
     params: ApplyAxiomPatchParams,
 ) -> Result<ApplyAxiomPatchResult, LspErrorPayload> {
-    let workspace = state.workspace_root().ok_or_else(LspErrorPayload::not_indexed)?;
+    let workspace = state.effective_index_root().ok_or_else(LspErrorPayload::not_indexed)?;
     let document_path = ontoindex_core::resolve_lsp_document_path(&params.document_uri, &workspace)
         .map_err(|e| LspErrorPayload::patch_invalid(e.to_string()))?;
 
@@ -195,15 +196,12 @@ pub fn handle_apply_axiom_patch(
     })?;
     patch_result.document_path = Some(document_path.display().to_string());
 
-    if !patch_result.diagnostics.is_empty() {
-        return Err(LspErrorPayload::patch_invalid(
-            patch_result
-                .diagnostics
-                .iter()
-                .map(|d| d.message.clone())
-                .collect::<Vec<_>>()
-                .join("; "),
-        ));
+    if !patch_result.applied && !patch_result.diagnostics.is_empty() {
+        return Ok(ApplyAxiomPatchResult {
+            patch: patch_result,
+            entity_detail: None,
+            reindex_warning: None,
+        });
     }
 
     let entity_iri = params.patches.first().map(|p| match p {
@@ -225,17 +223,19 @@ pub fn handle_apply_axiom_patch(
         | ontoindex_owl::PatchOp::SetDeprecated { entity_iri, .. } => entity_iri.clone(),
     });
 
+    let mut reindex_warning = None;
+
     if patch_result.applied && !params.preview_only {
         if let Some(text) = &patch_result.preview_text {
-            state
-                .set_document_text(document_path.clone(), text.clone())
-                .map_err(LspErrorPayload::patch_invalid)?;
             std::fs::write(&document_path, text).map_err(|e| {
                 LspErrorPayload::patch_invalid(format!("failed to write document: {e}"))
             })?;
+            state
+                .set_document_text(document_path.clone(), text.clone())
+                .map_err(LspErrorPayload::patch_invalid)?;
         }
         if let Err(msg) = index_worker.enqueue_sync(workspace) {
-            return Err(LspErrorPayload::applied_not_indexed(msg));
+            reindex_warning = Some(msg);
         }
     }
 
@@ -243,7 +243,7 @@ pub fn handle_apply_axiom_patch(
         .and_then(|iri| state.with_catalog(|catalog| catalog.entity_detail(&iri)))
         .flatten();
 
-    Ok(ApplyAxiomPatchResult { patch: patch_result, entity_detail })
+    Ok(ApplyAxiomPatchResult { patch: patch_result, entity_detail, reindex_warning })
 }
 
 pub fn handle_query(
@@ -302,7 +302,14 @@ pub fn handle_parse_manchester(
         normalized: parsed.normalized,
         turtle_fragment,
         tree: parsed.tree,
-        diagnostics: Vec::new(),
+        diagnostics: parsed
+            .diagnostics
+            .into_iter()
+            .map(|d| ontoindex_owl::PatchDiagnostic {
+                severity: "warning".to_string(),
+                message: d.message,
+            })
+            .collect(),
         completions,
     })
 }
@@ -311,6 +318,9 @@ pub fn handle_run_reasoner(
     state: &ServerState,
     params: RunReasonerParams,
 ) -> Result<RunReasonerResult, LspErrorPayload> {
+    let ops_lock = state.ops_lock();
+    let _guard = ops_lock.lock().map_err(|e| LspErrorPayload::reasoner_failed(e.to_string()))?;
+
     let profile = ReasonerId::parse(&params.profile)
         .map_err(|e| LspErrorPayload::reasoner_failed(e.to_string()))?;
 
@@ -342,15 +352,19 @@ pub fn handle_get_explanation(
     state: &ServerState,
     params: GetExplanationParams,
 ) -> Result<GetExplanationResult, LspErrorPayload> {
+    let ops_lock = state.ops_lock();
+    let _guard = ops_lock.lock().map_err(|e| LspErrorPayload::explanation_failed(e.to_string()))?;
+
     let profile = ReasonerId::parse(&params.profile)
         .map_err(|e| LspErrorPayload::explanation_failed(e.to_string()))?;
 
-    let input = match state
-        .with_reasoner_cache(|cache| cache.get_any_for_profile(profile).map(|c| c.input.clone()))
-    {
-        Some(Some(i)) => i,
-        _ => load_reasoner_input(state)?,
-    };
+    let fresh_input = load_reasoner_input(state)?;
+    let input = state
+        .with_reasoner_cache(|cache| {
+            cache.get(&fresh_input.content_hash, profile).map(|c| c.input.clone())
+        })
+        .flatten()
+        .unwrap_or(fresh_input);
 
     let result =
         explain(profile, &input, &ExplanationRequest { class_iri: params.class_iri.clone() })
@@ -702,11 +716,11 @@ pub fn handle_custom_request(
         }
         "ontoindex/runRobot" => {
             let params: RunRobotParams = serde_json::from_value(params.unwrap_or(Value::Null))
-                .map_err(|e| LspErrorPayload::index_failed(format!("invalid params: {e}")))?;
-            let result = handle_run_robot(params)?;
-            serde_json::to_value(result).map_err(|e| LspErrorPayload::index_failed(e.to_string()))
+                .map_err(|e| LspErrorPayload::invalid_params(format!("invalid params: {e}")))?;
+            let result = handle_run_robot(index_worker, params)?;
+            serde_json::to_value(result).map_err(|e| LspErrorPayload::robot_failed(e.to_string()))
         }
-        _ => Err(LspErrorPayload::index_failed(format!("unknown method: {method}"))),
+        _ => Err(LspErrorPayload::invalid_params(format!("unknown method: {method}"))),
     }
 }
 

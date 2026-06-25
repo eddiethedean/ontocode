@@ -107,7 +107,7 @@ pub fn apply_patches_to_text(
                 });
                 return Ok(ApplyPatchResult {
                     applied: false,
-                    preview_text: None,
+                    preview_text: Some(working),
                     diagnostics,
                     document_path: None,
                 });
@@ -606,7 +606,7 @@ fn remove_matching_predicate_object(
         let pred_pos = search_from + rel;
         for (obj_start, obj_end) in objects_in_predicate_value(block, pred_pos, predicate) {
             let candidate = normalize_ws(block[obj_start..obj_end].trim());
-            if candidate == norm_obj || block[obj_start..obj_end].contains(obj_trim) {
+            if candidate == norm_obj {
                 let (remove_start, remove_end) = extend_removal_span(block, obj_start, obj_end);
                 let mut out = String::new();
                 out.push_str(&block[..remove_start]);
@@ -626,11 +626,24 @@ fn text_contains_entity(
 ) -> bool {
     let namespaces = crate::span::namespaces_for_text(text, namespaces);
     let short = short_name_from_iri(entity_iri);
-    text.contains(entity_iri)
-        || text.contains(&format!("<{entity_iri}>"))
-        || namespaces.iter().any(|(prefix, ns)| {
-            entity_iri.starts_with(ns) && text.contains(&format!("{prefix}:{short}"))
-        })
+    let mut needles = vec![entity_iri.to_string(), format!("<{entity_iri}>")];
+    for (prefix, ns) in &namespaces {
+        if entity_iri.starts_with(ns) {
+            needles.push(format!("{prefix}:{short}"));
+        }
+    }
+    text.lines().any(|line| {
+        let trimmed = line.trim_start();
+        needles.iter().any(|needle| line_starts_with_subject(trimmed, needle))
+    })
+}
+
+fn line_starts_with_subject(trimmed: &str, subject: &str) -> bool {
+    trimmed == subject
+        || trimmed.starts_with(&format!("{subject} "))
+        || trimmed.starts_with(&format!("{subject}\t"))
+        || trimmed.starts_with(&format!("{subject};"))
+        || trimmed.starts_with(&format!("{subject}."))
 }
 
 fn iri_to_turtle_term(iri: &str, namespaces: &BTreeMap<String, String>) -> String {
@@ -693,7 +706,8 @@ mod tests {
         ];
         let result = apply_patches_to_text(ttl, &patches, true, &ex_ns()).expect("patch");
         assert!(!result.diagnostics.is_empty());
-        assert!(result.preview_text.is_none());
+        assert!(result.preview_text.as_ref().is_some_and(|t| t.contains("Human")));
+        assert!(!result.applied);
     }
 
     fn clinic_ns() -> BTreeMap<String, String> {

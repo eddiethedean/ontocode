@@ -215,6 +215,13 @@ pub fn parse_obo_file(
     _content_hash: &str,
     _modified_time: u64,
 ) -> Result<ParsedOntology> {
+    let metadata = std::fs::metadata(path).map_err(ParseError::Io)?;
+    if metadata.len() > ontoindex_core::MAX_FILE_BYTES {
+        return Err(ParseError::Io(std::io::Error::new(
+            std::io::ErrorKind::InvalidData,
+            format!("file exceeds maximum size of {} bytes", ontoindex_core::MAX_FILE_BYTES),
+        )));
+    }
     let content = std::fs::read_to_string(path).map_err(ParseError::Io)?;
     parse_obo_text(path, ontology_id, &content)
 }

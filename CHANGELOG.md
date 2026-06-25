@@ -23,6 +23,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Workspace and extension version **0.7.0**
 - Entity inspector and graph panels use React bundle in VSIX
 
+### Fixed
+
+- Webview ready/init races (graph, reasoner, inspector panels buffer messages until `ready`)
+- LSP `effective_index_root()` for consistent reindex and patch paths
+- `applyAxiomPatch` result contract (`reindex_warning`, disk-before-buffer write, diagnostics on partial apply)
+- Reasoner vs index worker serialization; `getExplanation` content-hash cache staleness
+- Patch engine: safer removal, subject-boundary entity detection, batch preview on failure
+- Manchester: unclosed IRI errors, unknown-prefix validation
+- OBO files no longer marked editable in catalog; OBO file size cap enforced
+- Diagnostics: orphan import roots, undefined-prefix false positives
+- SQL/SPARQL: reject top-level bare `WHERE` columns and SPARQL UPDATE forms
+- Extension: multi-root folder picker, `obo`/`json-ld` document selectors, diagnostic UTF-16 columns, hierarchy `hasChildren`
+
+[0.7.0]: https://github.com/eddiethedean/ontocode/releases/tag/v0.7.0
+
 ## [0.6.0] - 2026-06-24
 
 ### Added

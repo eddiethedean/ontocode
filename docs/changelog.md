@@ -17,7 +17,7 @@ Migration guides: [Migration index](migration/README.md)
 
 ### Fixed
 
-- Webview ready/init races, LSP index root consistency, patch result contract, reasoner cache staleness, OBO editable mismatch, diagnostics and query hardening
+- Webview ready/init races, LSP index root consistency, patch result contract, reasoner cache staleness, patch/Manchester safety, OBO editable mismatch, diagnostics and query hardening, extension multi-root and UTF-16 diagnostics
 
 See [GitHub CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) for the full v0.7.0 list.
 

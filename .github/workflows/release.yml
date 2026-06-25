@@ -170,6 +170,7 @@ jobs:
           publish_with_pause ontoindex-catalog
           publish_with_pause ontoindex-query
           publish_with_pause ontoindex-reasoner
+          publish_with_pause ontoindex-robot
           publish_with_pause ontoindex-lsp
           publish_crate ontoindex-cli
 

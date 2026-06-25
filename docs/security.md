@@ -6,10 +6,12 @@ OntoIndex and OntoCode are **local-first** tools: they index and parse files on 
 
 | Version | Supported |
 |---------|-----------|
-| 0.6.x   | Yes       |
-| 0.5.x   | Yes       |
-| 0.4.x   | Best effort |
-| < 0.4   | No        |
+| 0.7.x   | Yes       |
+| 0.6.x   | Best effort |
+| 0.5.x   | No        |
+| 0.4.x   | No        |
+| 0.3.x   | No        |
+| < 0.3   | No        |
 
 Full policy: **[SECURITY.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/SECURITY.md)**
 

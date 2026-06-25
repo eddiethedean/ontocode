@@ -3,7 +3,7 @@
 
 site_name: OntoCode
 site_description: Ontology-as-code for Git and VS Code — OntoIndex engine and OntoCode extension docs
-site_url: https://onto-code.readthedocs.io/
+site_url: https://ontocode-vs.readthedocs.io/
 repo_url: https://github.com/eddiethedean/ontocode
 repo_name: eddiethedean/ontocode
 edit_uri: edit/main/docs/
@@ -68,40 +68,39 @@ markdown_extensions:
 
 nav:
   - Home: index.md
-  - Tutorials:
-      - Start here: guides/start-here.md
+  - VS Code Extension:
+      - Overview: guides/vscode-extension.md
       - First success (10 min): guides/first-success.md
       - Ontology concepts: concepts.md
-      - Install VS Code: vscode-install.md
-      - CLI getting started: getting-started.md
-      - Best practices: guides/best-practices.md
-  - Guides:
-      - What ships today: SHIPPED.md
-      - Reasoner: guides/reasoner.md
+      - Install: vscode-install.md
+      - Authoring (Turtle): authoring.md
       - Query Workbench: guides/query-workbench.md
       - Manchester editor: guides/manchester-editor.md
-      - Authoring (Turtle): authoring.md
+      - Reasoner: guides/reasoner.md
       - Protégé coexistence: guides/protege-coexistence.md
-      - Rust library: guides/rust-library.md
-      - Patch JSON: patch-reference.md
-      - CI integration: ci-integration.md
+      - Best practices: guides/best-practices.md
       - Enterprise:
           - Evaluation overview: guides/enterprise-eval.md
           - Production readiness: guides/production-readiness.md
           - Enterprise deployment: guides/enterprise-deployment.md
           - Performance and sizing: guides/performance-sizing.md
           - LGPL compliance: guides/lgpl-compliance.md
-  - Reference:
+  - Rust & CLI:
+      - Overview: guides/rust-crates.md
+      - Getting started: getting-started.md
       - CLI reference: cli-reference.md
+      - Rust library: guides/rust-library.md
+      - CI integration: ci-integration.md
       - SQL virtual tables: sql-reference.md
       - SPARQL: sparql-reference.md
+      - Patch JSON: patch-reference.md
       - LSP API: lsp-api.md
-      - Errors: errors.md
-      - Workspace limits: workspace-limits.md
-  - Examples:
-      - Query cookbook: examples/queries.md
-      - Sample patches: examples/patches.md
+      - Examples:
+          - Query cookbook: examples/queries.md
+          - Sample patches: examples/patches.md
   - Help:
+      - What ships today: SHIPPED.md
+      - Pick a task: guides/start-here.md
       - FAQ: faq.md
       - Troubleshooting: troubleshooting.md
       - Changelog: changelog.md
@@ -110,6 +109,8 @@ nav:
           - v0.5 → v0.6: migration/v0.6.md
       - Security: security.md
       - Release integrity: release-integrity.md
+      - Errors: errors.md
+      - Workspace limits: workspace-limits.md
   - Design (planned):
       - Overview: design/README.md
       - Roadmap: design/ROADMAP.md

@@ -120,6 +120,18 @@ Open http://127.0.0.1:8000. Configuration: [mkdocs.yml on GitHub](https://github
 | Architecture decisions | `docs/design/adr/` only (do not add `adrs/`) |
 | Extension settings and commands | `extension/README.md` |
 
+### Read the Docs URLs
+
+Canonical base: `https://ontocode-vs.readthedocs.io/en/latest/` (project slug `ontocode-vs`).
+
+| Link type | Example |
+|-----------|---------|
+| VS Code extension path | `.../guides/vscode-extension/` |
+| Rust & CLI path | `.../guides/rust-crates/` |
+| Page path | Trailing slash, no `.md` — e.g. `.../guides/reasoner/` not `.../reasoner.md` |
+
+`mkdocs.yml` `site_url` stays at project root (`https://ontocode-vs.readthedocs.io/`); all user-facing links in READMEs use `/en/latest/`.
+
 ### Adding dependencies
 
 Before adding a Rust crate dependency:

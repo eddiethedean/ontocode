@@ -1,12 +1,19 @@
 # OntoIndex + OntoCode Documentation Package
 
-> **Note:** Documents in this folder describe **product vision, target architecture, and planned features**. For **what ships in v0.6.0**, see [What ships today](../SHIPPED.md) and the [user guides](https://onto-code.readthedocs.io/en/latest/).
+> **Note:** Documents in this folder describe **product vision, target architecture, and planned features**. For **what ships in v0.6.0**, see [What ships today](../SHIPPED.md) and the [user guides](https://ontocode-vs.readthedocs.io/en/latest/).
 
-This package contains **product vision and specification** documents. For **user-facing guides** (install, SQL, implemented LSP API), see the [documentation home](https://onto-code.readthedocs.io/en/latest/).
+This package contains **product vision and specification** documents. For **user-facing guides**, pick a documentation path:
+
+| Path | Audience | Start |
+|------|----------|-------|
+| [VS Code extension](https://ontocode-vs.readthedocs.io/en/latest/guides/vscode-extension/) | Explorer, inspector, Query Workbench, reasoner panels | Marketplace install, no Rust required |
+| [Rust & CLI](https://ontocode-vs.readthedocs.io/en/latest/guides/rust-crates/) | `ontoindex` CLI, crates.io libraries, CI, LSP integrators | `cargo install ontoindex-cli` |
+
+[Documentation home](https://ontocode-vs.readthedocs.io/en/latest/) · [What ships today](../SHIPPED.md)
 
 | Package | Audience |
 |---------|----------|
-| [User docs](https://onto-code.readthedocs.io/en/latest/) | New users and integrators (install, SQL/SPARQL, reasoner, LSP API v0.6) |
+| User docs (paths above) | New users and integrators |
 | `docs/design/` (this folder) | Contributors and planners (roadmap, target architecture, ADRs) |
 
 Two related products:
@@ -26,10 +33,10 @@ Two related products:
 
 Many specs describe **target** behavior. Check the banner at the top of each doc, or:
 
-- **Implemented v0.6 LSP:** [LSP API](https://onto-code.readthedocs.io/en/latest/lsp-api/) — includes `query`, `sparql`, `parseManchester`, `runReasoner`, `getExplanation`
-- **Implemented reasoner:** [Reasoner guide](https://onto-code.readthedocs.io/en/latest/guides/reasoner/)
-- **Implemented SQL tables:** [SQL reference](https://onto-code.readthedocs.io/en/latest/sql-reference/)
-- **Implemented authoring:** [authoring guide](https://onto-code.readthedocs.io/en/latest/authoring/)
+- **Implemented v0.6 LSP:** [LSP API](https://ontocode-vs.readthedocs.io/en/latest/lsp-api/) — includes `query`, `sparql`, `parseManchester`, `runReasoner`, `getExplanation`
+- **Implemented reasoner:** [Reasoner guide](https://ontocode-vs.readthedocs.io/en/latest/guides/reasoner/)
+- **Implemented SQL tables:** [SQL reference](https://ontocode-vs.readthedocs.io/en/latest/sql-reference/)
+- **Implemented authoring:** [authoring guide](https://ontocode-vs.readthedocs.io/en/latest/authoring/)
 - **ADRs (canonical):** [adr/README.md](adr/README.md)
 
 ## Documents

@@ -25,8 +25,9 @@ CLI equivalent: `ontoindex classify <workspace> --profile el`.
 
 ## Documentation
 
-- [Reasoner guide](https://onto-code.readthedocs.io/en/latest/guides/reasoner/)
-- [REASONER_SPEC](https://onto-code.readthedocs.io/en/latest/design/REASONER_SPEC/)
+- [Rust & CLI docs](https://ontocode-vs.readthedocs.io/en/latest/guides/rust-crates/)
+- [Reasoner guide](https://ontocode-vs.readthedocs.io/en/latest/guides/reasoner/)
+- [REASONER_SPEC](https://ontocode-vs.readthedocs.io/en/latest/design/REASONER_SPEC/)
 
 ## License
 

@@ -16,21 +16,23 @@
 [![owl](https://img.shields.io/crates/v/ontoindex-owl?label=owl)](https://crates.io/crates/ontoindex-owl)
 [![reasoner](https://img.shields.io/crates/v/ontoindex-reasoner?label=reasoner)](https://crates.io/crates/ontoindex-reasoner)
 [![downloads](https://img.shields.io/crates/d/ontoindex-cli?label=downloads)](https://crates.io/crates/ontoindex-cli)
-[![Docs](https://readthedocs.org/projects/onto-code/badge/?version=latest)](https://onto-code.readthedocs.io/en/latest/)
+[![Docs](https://readthedocs.org/projects/ontocode-vs/badge/?version=latest)](https://ontocode-vs.readthedocs.io/en/latest/)
 
 **OntoCode** brings OWL/RDF ontology editing into VS Code and Git — browse classes, edit Turtle, run EL reasoning, and validate in CI without Protégé.
 
 **OntoIndex** is the Rust engine behind it: a local CLI and language server that indexes your workspace and exposes SQL, SPARQL, and patch APIs.
 
-**Start here:** [Documentation — Start here](https://onto-code.readthedocs.io/en/latest/guides/start-here/) · [First success tutorial](https://onto-code.readthedocs.io/en/latest/guides/first-success/) · [`cargo install ontoindex-cli`](https://crates.io/crates/ontoindex-cli). You do not need to clone this repo.
+**Documentation:** [VS Code extension](https://ontocode-vs.readthedocs.io/en/latest/guides/vscode-extension/) · [Rust & CLI](https://ontocode-vs.readthedocs.io/en/latest/guides/rust-crates/) · [First success tutorial](https://ontocode-vs.readthedocs.io/en/latest/guides/first-success/) · [`cargo install ontoindex-cli`](https://crates.io/crates/ontoindex-cli). You do not need to clone this repo.
 
 > **Naming:** **OntoCode** is the VS Code extension (product UI). **OntoIndex** is the Rust engine (`ontoindex` CLI, `ontoindex-*` crates, `ontoindex-lsp`). This repo contains both.
 
-**Documentation:** [Read the Docs](https://onto-code.readthedocs.io/) — [What ships today](https://onto-code.readthedocs.io/en/latest/SHIPPED/)
+**Documentation:** [Read the Docs](https://ontocode-vs.readthedocs.io/en/latest/) — [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/)
 
 ## Choose your path
 
 ### Use the CLI (OntoIndex)
+
+Docs: [Rust & CLI guide](https://ontocode-vs.readthedocs.io/en/latest/guides/rust-crates/).
 
 ```bash
 cargo install ontoindex-cli
@@ -38,7 +40,7 @@ ontoindex query /path/to/your/ontologies "SELECT * FROM classes"
 ontoindex validate .
 ```
 
-> **Note:** `./fixtures` exists only in a git clone. After `cargo install`, point at your own ontology folder (see [getting started guide](https://onto-code.readthedocs.io/en/latest/getting-started/)).
+> **Note:** `./fixtures` exists only in a git clone. After `cargo install`, point at your own ontology folder (see [getting started guide](https://ontocode-vs.readthedocs.io/en/latest/getting-started/)).
 
 From a clone, `cargo run --` runs the `ontoindex` binary (workspace default-member is `ontoindex-cli`):
 
@@ -48,11 +50,13 @@ cargo run -- query fixtures "SELECT * FROM classes"
 
 ### Use VS Code (OntoCode Explorer)
 
+Docs: [VS Code extension guide](https://ontocode-vs.readthedocs.io/en/latest/guides/vscode-extension/).
+
 1. Install [OntoCode from the Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode), or download a VSIX from [GitHub Releases](https://github.com/eddiethedean/ontocode/releases).
 2. Open a folder with `.ttl`, `.owl`, `.rdf`, or other supported ontology files.
 3. Use the **OntoCode** activity bar to browse entities, edit in the inspector, and open diagnostics.
 
-Full install and troubleshooting: [install guide](https://onto-code.readthedocs.io/en/latest/vscode-install/). Editing guide: [authoring guide](https://onto-code.readthedocs.io/en/latest/authoring/).
+Full install and troubleshooting: [install guide](https://ontocode-vs.readthedocs.io/en/latest/vscode-install/). Editing guide: [authoring guide](https://ontocode-vs.readthedocs.io/en/latest/authoring/).
 
 ![OntoCode Explorer preview](docs/media/explorer-preview.png)
 
@@ -86,9 +90,9 @@ OntoIndex is useful on its own today (CLI, CI, local analysis). The extension ca
 
 ## What ships in v0.6.0
 
-See the full capability matrix: **[What ships today](https://onto-code.readthedocs.io/en/latest/SHIPPED/)** (updated each release).
+See the full capability matrix: **[What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/)** (updated each release).
 
-Earlier releases: [Changelog](https://onto-code.readthedocs.io/en/latest/changelog/) · [CHANGELOG.md](CHANGELOG.md) on GitHub.
+Earlier releases: [Changelog](https://ontocode-vs.readthedocs.io/en/latest/changelog/) · [CHANGELOG.md](CHANGELOG.md) on GitHub.
 
 ## Why OntoCode?
 
@@ -108,11 +112,11 @@ Protégé is strong for traditional ontology editing, but most engineering teams
 | `ontoindex validate`, `classify`, and `patch` for CI | `ontologos-watch` hook |
 | SQL-like and SPARQL queries via CLI and LSP | |
 
-Long-term goal: **Protégé-competitive OWL 2 DL + OBO maintenance in VS Code** — see [Protégé parity checklist](https://onto-code.readthedocs.io/en/latest/design/PROTEGE_PARITY/).
+Long-term goal: **Protégé-competitive OWL 2 DL + OBO maintenance in VS Code** — see [Protégé parity checklist](https://ontocode-vs.readthedocs.io/en/latest/design/PROTEGE_PARITY/).
 
 ## Quick start
 
-See **[Start here](https://onto-code.readthedocs.io/en/latest/guides/start-here/)** or [First success in 10 minutes](https://onto-code.readthedocs.io/en/latest/guides/first-success/) for the canonical onboarding path.
+See the **[VS Code extension docs](https://ontocode-vs.readthedocs.io/en/latest/guides/vscode-extension/)** or **[Rust & CLI docs](https://ontocode-vs.readthedocs.io/en/latest/guides/rust-crates/)** — or [First success in 10 minutes](https://ontocode-vs.readthedocs.io/en/latest/guides/first-success/) for a guided walkthrough.
 
 ```bash
 # From a git clone
@@ -136,7 +140,7 @@ ontoindex validate /path/to/ontologies
 - LSP: `ontoindex/runReasoner`, `ontoindex/getExplanation`
 - Explorer hierarchy mode: asserted / inferred / combined
 
-See [reasoner guide](https://onto-code.readthedocs.io/en/latest/guides/reasoner.md). DL and `auto` profiles require OntoLogos 1.0.
+See [reasoner guide](https://ontocode-vs.readthedocs.io/en/latest/guides/reasoner/). DL and `auto` profiles require OntoLogos 1.0.
 
 ## Coming in v0.7+
 
@@ -154,13 +158,13 @@ The extension is a thin TypeScript shell over **ontoindex-lsp** and the OntoInde
 | v0.7a | **React webview foundation** — Vite, typed message protocol, CSP |
 | v0.7–v0.7b | Graphs (React) + OBO/ROBOT interop |
 | v0.8–v0.9 | Full Manchester, refactoring, semantic diff (React panels); `ontologos-watch` hook |
-| v1.0 | **Protégé-competitive OWL + OBO in VS Code** — DL via OntoLogos 1.0.0, React UI hardening ([parity checklist](https://onto-code.readthedocs.io/en/latest/design/PROTEGE_PARITY/)) |
+| v1.0 | **Protégé-competitive OWL + OBO in VS Code** — DL via OntoLogos 1.0.0, React UI hardening ([parity checklist](https://ontocode-vs.readthedocs.io/en/latest/design/PROTEGE_PARITY/)) |
 
-See [roadmap](https://onto-code.readthedocs.io/en/latest/design/ROADMAP/), [product plan](https://onto-code.readthedocs.io/en/latest/design/PLAN/), and [Protégé parity checklist](https://onto-code.readthedocs.io/en/latest/design/PROTEGE_PARITY/) for the full product plan.
+See [roadmap](https://ontocode-vs.readthedocs.io/en/latest/design/ROADMAP/), [product plan](https://ontocode-vs.readthedocs.io/en/latest/design/PLAN/), and [Protégé parity checklist](https://ontocode-vs.readthedocs.io/en/latest/design/PROTEGE_PARITY/) for the full product plan.
 
 ## Built on
 
-OntoIndex delegates to mature Rust libraries — see [dependency matrix](https://onto-code.readthedocs.io/en/latest/design/DEPENDENCY_MATRIX/).
+OntoIndex delegates to mature Rust libraries — see [dependency matrix](https://ontocode-vs.readthedocs.io/en/latest/design/DEPENDENCY_MATRIX/).
 
 | Layer | Crates | Crate |
 |-------|--------|-------|
@@ -171,7 +175,7 @@ OntoIndex delegates to mature Rust libraries — see [dependency matrix](https:/
 | OBO (planned) | [fastobo](https://crates.io/crates/fastobo) | planned v0.7b |
 | LSP | [lsp-server](https://crates.io/crates/lsp-server), [lsp-types](https://crates.io/crates/lsp-types) | `ontoindex-lsp` |
 
-Policy: [ADR-0016](https://onto-code.readthedocs.io/en/latest/design/adr/0016-dependency-first-implementation/). Third-party licenses (including LGPL for horned-owl): [LICENSES](https://onto-code.readthedocs.io/en/latest/design/LICENSES/).
+Policy: [ADR-0016](https://ontocode-vs.readthedocs.io/en/latest/design/adr/0016-dependency-first-implementation/). Third-party licenses (including LGPL for horned-owl): [LICENSES](https://ontocode-vs.readthedocs.io/en/latest/design/LICENSES/).
 
 ## Repository layout
 
@@ -213,18 +217,18 @@ tests/                  # integration and golden snapshot tests
 | `diagnostics` | Lint and parse diagnostics |
 | `properties` | Union of all property kinds |
 
-Column schemas: [SQL reference](https://onto-code.readthedocs.io/en/latest/sql-reference/). SPARQL: [SPARQL reference](https://onto-code.readthedocs.io/en/latest/sparql-reference/). LSP methods: [LSP API](https://onto-code.readthedocs.io/en/latest/lsp-api/). Workspace limits: [workspace limits](https://onto-code.readthedocs.io/en/latest/workspace-limits/).
+Column schemas: [SQL reference](https://ontocode-vs.readthedocs.io/en/latest/sql-reference/). SPARQL: [SPARQL reference](https://ontocode-vs.readthedocs.io/en/latest/sparql-reference/). LSP methods: [LSP API](https://ontocode-vs.readthedocs.io/en/latest/lsp-api/). Workspace limits: [workspace limits](https://ontocode-vs.readthedocs.io/en/latest/workspace-limits/).
 
 ## API stability (pre-1.0)
 
 Published `ontoindex-*` crates are at **0.6.x**. Library APIs, LSP wire JSON, and SQL virtual
-table columns may change between minor releases until [v1.0 stable core](https://onto-code.readthedocs.io/en/latest/design/v1.0_BACKLOG/)
+table columns may change between minor releases until [v1.0 stable core](https://ontocode-vs.readthedocs.io/en/latest/design/v1.0_BACKLOG/)
 is complete. The CLI `validate` and `classify` exit codes are documented in
-[workspace limits](https://onto-code.readthedocs.io/en/latest/workspace-limits/).
+[workspace limits](https://ontocode-vs.readthedocs.io/en/latest/workspace-limits/).
 
 ## Development
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) or the [contributing guide](https://onto-code.readthedocs.io/en/latest/contributing/). Quick checks:
+See [CONTRIBUTING.md](CONTRIBUTING.md) or the [contributing guide](https://ontocode-vs.readthedocs.io/en/latest/contributing/). Quick checks:
 
 ```bash
 cargo build -p ontoindex-lsp --bins
@@ -248,12 +252,12 @@ Pre-built artifacts on [GitHub Releases](https://github.com/eddiethedean/ontocod
 - `ontoindex-lsp` per platform (Linux, macOS, Windows)
 - `ontocode-*.vsix` (VS Code extension)
 
-Verify downloads: [release integrity](https://onto-code.readthedocs.io/en/latest/release-integrity/). Maintainer release process: [releasing guide](https://onto-code.readthedocs.io/en/latest/releasing/).
+Verify downloads: [release integrity](https://ontocode-vs.readthedocs.io/en/latest/release-integrity/). Maintainer release process: [releasing guide](https://ontocode-vs.readthedocs.io/en/latest/releasing/).
 
 Workspace crates **publish to [crates.io](https://crates.io/) on each `v0.6.x` release tag**: `ontoindex-core`, `ontoindex-parser`, `ontoindex-owl`, `ontoindex-diagnostics`, `ontoindex-catalog`, `ontoindex-query`, `ontoindex-reasoner`, `ontoindex-lsp`, `ontoindex-cli`.
 
-See [CHANGELOG.md](CHANGELOG.md) for release notes. Security: [security policy](https://onto-code.readthedocs.io/en/latest/security/).
+See [CHANGELOG.md](CHANGELOG.md) for release notes. Security: [security policy](https://ontocode-vs.readthedocs.io/en/latest/security/).
 
 ## License
 
-MIT OR Apache-2.0. Third-party licenses: [LICENSES](https://onto-code.readthedocs.io/en/latest/design/LICENSES/).
+MIT OR Apache-2.0. Third-party licenses: [LICENSES](https://ontocode-vs.readthedocs.io/en/latest/design/LICENSES/).

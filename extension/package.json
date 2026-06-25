@@ -9,7 +9,7 @@
     "type": "git",
     "url": "https://github.com/eddiethedean/ontocode.git"
   },
-  "homepage": "https://onto-code.readthedocs.io/en/latest/",
+  "homepage": "https://ontocode-vs.readthedocs.io/en/latest/guides/vscode-extension/",
   "bugs": {
     "url": "https://github.com/eddiethedean/ontocode/issues"
   },

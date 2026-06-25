@@ -19,9 +19,10 @@ ontoindex classify /path/to/ontologies --profile el --format json
 
 ## Documentation
 
-- [CLI reference](https://onto-code.readthedocs.io/en/latest/cli-reference/)
-- [Getting started](https://onto-code.readthedocs.io/en/latest/getting-started/)
-- [What ships today](https://onto-code.readthedocs.io/en/latest/SHIPPED/)
+- [Rust & CLI docs](https://ontocode-vs.readthedocs.io/en/latest/guides/rust-crates/)
+- [CLI reference](https://ontocode-vs.readthedocs.io/en/latest/cli-reference/)
+- [Getting started](https://ontocode-vs.readthedocs.io/en/latest/getting-started/)
+- [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/)
 
 ## License
 

@@ -25,8 +25,8 @@ Browse OWL/RDF in VS Code, edit Turtle ontologies, run EL/RL/RDFS reasoning, que
 </div>
 
 <div class="oc-hero-actions" markdown>
-[Start here](guides/start-here.md){ .md-button .md-button--primary }
-[First success (10 min)](guides/first-success.md){ .md-button }
+[VS Code extension](guides/vscode-extension.md){ .md-button .md-button--primary }
+[Rust & CLI](guides/rust-crates.md){ .md-button .md-button--primary }
 [What ships today](SHIPPED.md){ .md-button }
 </div>
 
@@ -34,7 +34,12 @@ Browse OWL/RDF in VS Code, edit Turtle ontologies, run EL/RL/RDFS reasoning, que
 
 <div class="oc-callout" markdown>
 
-**Not sure where to begin?** Use [Start here](guides/start-here.md) to pick a path — VS Code explorer, CLI indexing, Turtle editing, reasoning, or CI validation. You do **not** need to clone this repo to use the Marketplace extension or `cargo install ontoindex-cli`.
+**Not sure where to begin?** Pick a path:
+
+- **[VS Code extension](guides/vscode-extension.md)** — Marketplace install, explorer, inspector, Query Workbench (no Rust required).
+- **[Rust & CLI](guides/rust-crates.md)** — `cargo install ontoindex-cli`, crates.io libraries, CI and embedding.
+
+You do **not** need to clone this repo to use the extension or `cargo install ontoindex-cli`.
 
 > **Naming:** **OntoCode** is the VS Code UI. **OntoIndex** is the engine (`ontoindex` CLI, `ontoindex-*` crates, `ontoindex-lsp`).
 
@@ -44,21 +49,21 @@ Browse OWL/RDF in VS Code, edit Turtle ontologies, run EL/RL/RDFS reasoning, que
 
 <div class="grid cards" markdown>
 
--   :material-console:{ .lg .middle } **CLI & OntoIndex**
+-   :material-microsoft-visual-studio-code:{ .lg .middle } **VS Code extension**
 
     ---
 
-    Index ontologies, run SQL/SPARQL queries, validate and classify in CI, and apply Turtle patches.
+    Browse, edit Turtle, run queries and the reasoner from the OntoCode activity bar.
 
-    [:octicons-arrow-right-24: Getting started](getting-started.md)
+    [:octicons-arrow-right-24: VS Code extension docs](guides/vscode-extension.md)
 
--   :material-microsoft-visual-studio-code:{ .lg .middle } **VS Code (OntoCode)**
+-   :material-console:{ .lg .middle } **Rust & CLI**
 
     ---
 
-    Browse classes and properties, edit Turtle in the inspector, and see diagnostics inline.
+    `cargo install ontoindex-cli`, embed `ontoindex-*` crates, validate and classify in CI.
 
-    [:octicons-arrow-right-24: Install extension](vscode-install.md)
+    [:octicons-arrow-right-24: Rust & CLI docs](guides/rust-crates.md)
 
 -   :material-brain:{ .lg .middle } **Reasoner**
 
@@ -147,8 +152,10 @@ See the full matrix: **[What ships today](SHIPPED.md)**.
 
 | Topic | Link |
 |-------|------|
+| **VS Code extension (start here)** | [guides/vscode-extension.md](guides/vscode-extension.md) |
+| **Rust & CLI (start here)** | [guides/rust-crates.md](guides/rust-crates.md) |
 | **What ships today (canonical)** | [SHIPPED.md](SHIPPED.md) |
-| Start here (pick a path) | [guides/start-here.md](guides/start-here.md) |
+| Pick a task (all paths) | [guides/start-here.md](guides/start-here.md) |
 | First success tutorial | [guides/first-success.md](guides/first-success.md) |
 | Reasoner | [guides/reasoner.md](guides/reasoner.md) |
 | Query Workbench | [guides/query-workbench.md](guides/query-workbench.md) |

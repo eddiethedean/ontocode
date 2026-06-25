@@ -2,11 +2,13 @@
 
 **Browse and edit OWL/RDF ontologies in VS Code** — index a workspace, explore classes and properties in the sidebar, inspect and edit entities in Turtle, and jump to source.
 
-[![Documentation](https://readthedocs.org/projects/onto-code/badge/?version=latest)](https://onto-code.readthedocs.io/en/latest/)
-[![VS Code install guide](https://img.shields.io/badge/docs-VS%20Code%20install-blue)](https://onto-code.readthedocs.io/en/latest/vscode-install/)
-[![Start here](https://img.shields.io/badge/docs-Start%20here-blue)](https://onto-code.readthedocs.io/en/latest/guides/start-here/)
+[![Documentation](https://readthedocs.org/projects/ontocode-vs/badge/?version=latest)](https://ontocode-vs.readthedocs.io/en/latest/guides/vscode-extension/)
+[![VS Code extension docs](https://img.shields.io/badge/docs-VS%20Code%20extension-blue)](https://ontocode-vs.readthedocs.io/en/latest/guides/vscode-extension/)
+[![First success](https://img.shields.io/badge/docs-First%20success-blue)](https://ontocode-vs.readthedocs.io/en/latest/guides/first-success/)
 
-**Documentation:** [Read the Docs](https://onto-code.readthedocs.io/en/latest/) — [First success in 10 minutes](https://onto-code.readthedocs.io/en/latest/guides/first-success/) · [What ships today](https://onto-code.readthedocs.io/en/latest/SHIPPED/) · [FAQ](https://onto-code.readthedocs.io/en/latest/faq/)
+**Documentation:** [VS Code extension guide](https://ontocode-vs.readthedocs.io/en/latest/guides/vscode-extension/) — [First success in 10 minutes](https://ontocode-vs.readthedocs.io/en/latest/guides/first-success/) · [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) · [FAQ](https://ontocode-vs.readthedocs.io/en/latest/faq/)
+
+> **CLI or Rust crates?** See the [Rust & CLI documentation path](https://ontocode-vs.readthedocs.io/en/latest/guides/rust-crates/).
 
 ![OntoCode Explorer — sidebar views and entity inspector](media/explorer-preview.png)
 
@@ -20,7 +22,7 @@
 4. Click the **OntoCode** icon in the **Activity Bar** (left edge of the window).
 5. Open **Classes**, **Properties**, or **Individuals** and **click an entity name** to open the Entity Inspector.
 
-New to OntoCode? Follow the [first success tutorial](https://onto-code.readthedocs.io/en/latest/guides/first-success/) on Read the Docs.
+New to OntoCode? Follow the [first success tutorial](https://ontocode-vs.readthedocs.io/en/latest/guides/first-success/) on Read the Docs.
 
 The language server indexes supported files automatically when the workspace opens.
 
@@ -80,7 +82,7 @@ The **Entity Inspector** panel opens with:
 
 **Command Palette:** **OntoCode: Show Entity Inspector** — paste an entity IRI if you know it.
 
-Editing guide: [authoring guide](https://onto-code.readthedocs.io/en/latest/authoring/).
+Editing guide: [authoring guide](https://ontocode-vs.readthedocs.io/en/latest/authoring/).
 
 ---
 
@@ -146,7 +148,7 @@ Indexing is driven by the language server on startup; `ontocode.autoIndexOnOpen`
 | Workspace is Restricted | **Trust** the folder — `ontocode.lspPath` is ignored in Restricted Mode |
 | Multi-root workspace | Only the **first** folder is indexed — use a single-root folder or open the primary ontology project |
 
-More detail: [Installation & troubleshooting](https://onto-code.readthedocs.io/en/latest/vscode-install/) · [FAQ](https://onto-code.readthedocs.io/en/latest/faq/)
+More detail: [Installation & troubleshooting](https://ontocode-vs.readthedocs.io/en/latest/vscode-install/) · [FAQ](https://ontocode-vs.readthedocs.io/en/latest/faq/)
 
 ---
 
@@ -154,7 +156,7 @@ More detail: [Installation & troubleshooting](https://onto-code.readthedocs.io/e
 
 **Shipped:** explorer, inspector, **editing** (labels, comments, parents, create/delete in `.ttl`), **Query Workbench** (SQL + SPARQL), **Manchester editor**, **EL/RL/RDFS reasoner**, inferred hierarchy toggle, EL explanations (where available), diagnostics, jump-to-source, hover, symbols, go-to-definition.
 
-**Planned:** React webview UI (v0.7a+), full DL reasoning (OntoLogos 1.0), graph visualization (v0.7) — [roadmap](https://onto-code.readthedocs.io/en/latest/design/ROADMAP/), [React UI plan](https://onto-code.readthedocs.io/en/latest/design/OntoCode_React_UI_Integration_Plan/).
+**Planned:** React webview UI (v0.7a+), full DL reasoning (OntoLogos 1.0), graph visualization (v0.7) — [roadmap](https://ontocode-vs.readthedocs.io/en/latest/design/ROADMAP/), [React UI plan](https://ontocode-vs.readthedocs.io/en/latest/design/OntoCode_React_UI_Integration_Plan/).
 
 ---
 
@@ -166,13 +168,13 @@ Release builds bundle `ontoindex-lsp` for Linux (x64, arm64), macOS (Apple Silic
 
 ## Links
 
-- [Read the Docs](https://onto-code.readthedocs.io/en/latest/) — full documentation site
-- **Getting started:** [Start here](https://onto-code.readthedocs.io/en/latest/guides/start-here/) · [First success](https://onto-code.readthedocs.io/en/latest/guides/first-success/) · [VS Code install & troubleshooting](https://onto-code.readthedocs.io/en/latest/vscode-install/)
-- **Guides:** [Reasoner](https://onto-code.readthedocs.io/en/latest/guides/reasoner/) · [Query Workbench](https://onto-code.readthedocs.io/en/latest/guides/query-workbench/) · [Manchester editor](https://onto-code.readthedocs.io/en/latest/guides/manchester-editor/) · [Authoring & patches](https://onto-code.readthedocs.io/en/latest/authoring/)
-- **Reference:** [What ships today](https://onto-code.readthedocs.io/en/latest/SHIPPED/) · [Patch reference](https://onto-code.readthedocs.io/en/latest/patch-reference/) · [SQL](https://onto-code.readthedocs.io/en/latest/sql-reference/) · [SPARQL](https://onto-code.readthedocs.io/en/latest/sparql-reference/) · [LSP API](https://onto-code.readthedocs.io/en/latest/lsp-api/)
-- **Enterprise:** [Evaluation guide](https://onto-code.readthedocs.io/en/latest/guides/enterprise-eval/) · [Production readiness](https://onto-code.readthedocs.io/en/latest/guides/production-readiness/)
+- [VS Code extension documentation](https://ontocode-vs.readthedocs.io/en/latest/guides/vscode-extension/) — full extension guide on Read the Docs
+- **Getting started:** [First success](https://ontocode-vs.readthedocs.io/en/latest/guides/first-success/) · [VS Code install & troubleshooting](https://ontocode-vs.readthedocs.io/en/latest/vscode-install/)
+- **Guides:** [Reasoner](https://ontocode-vs.readthedocs.io/en/latest/guides/reasoner/) · [Query Workbench](https://ontocode-vs.readthedocs.io/en/latest/guides/query-workbench/) · [Manchester editor](https://ontocode-vs.readthedocs.io/en/latest/guides/manchester-editor/) · [Authoring & patches](https://ontocode-vs.readthedocs.io/en/latest/authoring/)
+- **Reference:** [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) · [Patch reference](https://ontocode-vs.readthedocs.io/en/latest/patch-reference/) · [SQL](https://ontocode-vs.readthedocs.io/en/latest/sql-reference/) · [SPARQL](https://ontocode-vs.readthedocs.io/en/latest/sparql-reference/) · [LSP API](https://ontocode-vs.readthedocs.io/en/latest/lsp-api/)
+- **Enterprise:** [Evaluation guide](https://ontocode-vs.readthedocs.io/en/latest/guides/enterprise-eval/) · [Production readiness](https://ontocode-vs.readthedocs.io/en/latest/guides/production-readiness/)
 - [GitHub repository](https://github.com/eddiethedean/ontocode)
 - [Report an issue](https://github.com/eddiethedean/ontocode/issues)
-- [Changelog](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) · [Docs changelog](https://onto-code.readthedocs.io/en/latest/changelog/)
+- [Changelog](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) · [Docs changelog](https://ontocode-vs.readthedocs.io/en/latest/changelog/)
 
 **Contributing / building from source:** see the [repo README](https://github.com/eddiethedean/ontocode#development).

@@ -20,9 +20,10 @@ let result = query_catalog(&catalog, "SELECT short_name FROM classes")?;
 
 ## Documentation
 
-- [SQL reference](https://onto-code.readthedocs.io/en/latest/sql-reference/)
-- [SPARQL reference](https://onto-code.readthedocs.io/en/latest/sparql-reference/)
-- [Query cookbook](https://onto-code.readthedocs.io/en/latest/examples/queries/)
+- [Rust & CLI docs](https://ontocode-vs.readthedocs.io/en/latest/guides/rust-crates/)
+- [SQL reference](https://ontocode-vs.readthedocs.io/en/latest/sql-reference/)
+- [SPARQL reference](https://ontocode-vs.readthedocs.io/en/latest/sparql-reference/)
+- [Query cookbook](https://ontocode-vs.readthedocs.io/en/latest/examples/queries/)
 - [docs.rs](https://docs.rs/ontoindex-query)
 
 ## License

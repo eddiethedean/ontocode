@@ -35,6 +35,8 @@ check_file_contains "docs/guides/enterprise-eval.md" "v${VERSION}" "enterprise e
 MINOR_VERSION="${VERSION%.*}"
 check_file_contains "SECURITY.md" "${MINOR_VERSION}\.x" "SECURITY.md supported versions"
 check_file_contains "docs/release-integrity.md" "VERSION=${VERSION}" "release-integrity example version"
+check_file_contains "mkdocs.yml" "site_url: https://ontocode-vs.readthedocs.io/" "mkdocs site_url matches RTD"
+check_file_contains "README.md" "readthedocs.org/projects/ontocode-vs/badge" "RTD docs badge slug"
 
 # Reference page titles must not lag current release
 for file in docs/authoring.md docs/sql-reference.md docs/sparql-reference.md docs/patch-reference.md; do
@@ -67,6 +69,39 @@ for file in README.md docs/index.md extension/README.md docs/guides/enterprise-e
     fail=1
   fi
 done
+
+# RTD URL hygiene (search source paths only — exclude built site/)
+RTD_SEARCH_PATHS=(
+  README.md CONTRIBUTING.md extension crates docs scripts .github
+)
+
+if rg -q 'onto-code\.readthedocs|readthedocs\.org/projects/onto-code' "${RTD_SEARCH_PATHS[@]}"; then
+  echo "FAIL: stale onto-code RTD slug found" >&2
+  fail=1
+else
+  echo "ok: no dead onto-code RTD slug"
+fi
+
+if rg -q 'https://ontocode-vs\.readthedocs\.io/en/latest/[^)"[:space:]]+\.md' "${RTD_SEARCH_PATHS[@]}"; then
+  echo "FAIL: absolute RTD URLs must not use .md extension (use trailing slash paths)" >&2
+  rg -n 'https://ontocode-vs\.readthedocs\.io/en/latest/[^)"[:space:]]+\.md' "${RTD_SEARCH_PATHS[@]}" >&2 || true
+  fail=1
+else
+  echo "ok: RTD URLs without .md extension"
+fi
+
+if rg -q 'https://ontocode-vs\.readthedocs\.io/"' README.md CONTRIBUTING.md extension crates docs; then
+  echo "FAIL: RTD page URLs must include /en/latest/ (not bare project root)" >&2
+  rg -n 'https://ontocode-vs\.readthedocs\.io/"' README.md CONTRIBUTING.md extension crates docs >&2 || true
+  fail=1
+else
+  echo "ok: RTD page URLs use /en/latest/"
+fi
+
+check_file_contains "extension/package.json" "guides/vscode-extension/" "extension homepage VS Code docs path"
+check_file_contains "extension/README.md" "guides/vscode-extension/" "extension README VS Code docs path"
+check_file_contains "docs/guides/vscode-extension.md" "rust-crates.md" "vscode hub cross-link"
+check_file_contains "docs/guides/rust-crates.md" "vscode-extension.md" "rust hub cross-link"
 
 if [[ "$fail" -ne 0 ]]; then
   echo "Documentation version check failed." >&2

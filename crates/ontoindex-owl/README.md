@@ -10,11 +10,13 @@ ontoindex-owl = "0.6"
 
 ## Documentation
 
-- [Authoring guide](https://onto-code.readthedocs.io/en/latest/authoring/)
-- [Patch reference](https://onto-code.readthedocs.io/en/latest/patch-reference/)
-- [Manchester editor guide](https://onto-code.readthedocs.io/en/latest/guides/manchester-editor/)
+- [VS Code extension docs](https://ontocode-vs.readthedocs.io/en/latest/guides/vscode-extension/)
+- [Rust & CLI docs](https://ontocode-vs.readthedocs.io/en/latest/guides/rust-crates/)
+- [Authoring guide](https://ontocode-vs.readthedocs.io/en/latest/authoring/)
+- [Patch reference](https://ontocode-vs.readthedocs.io/en/latest/patch-reference/)
+- [Manchester editor guide](https://ontocode-vs.readthedocs.io/en/latest/guides/manchester-editor/)
 - [docs.rs](https://docs.rs/ontoindex-owl)
 
 ## License
 
-MIT OR Apache-2.0 (links LGPL `horned-owl` — see [LICENSES](https://onto-code.readthedocs.io/en/latest/design/LICENSES/))
+MIT OR Apache-2.0 (links LGPL `horned-owl` — see [LICENSES](https://ontocode-vs.readthedocs.io/en/latest/design/LICENSES/))

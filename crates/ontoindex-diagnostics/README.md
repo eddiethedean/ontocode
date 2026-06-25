@@ -10,8 +10,9 @@ ontoindex-diagnostics = "0.6"
 
 ## Documentation
 
-- [Errors reference](https://onto-code.readthedocs.io/en/latest/errors/)
-- [CI integration](https://onto-code.readthedocs.io/en/latest/ci-integration/)
+- [Rust & CLI docs](https://ontocode-vs.readthedocs.io/en/latest/guides/rust-crates/)
+- [Errors reference](https://ontocode-vs.readthedocs.io/en/latest/errors/)
+- [CI integration](https://ontocode-vs.readthedocs.io/en/latest/ci-integration/)
 - [docs.rs](https://docs.rs/ontoindex-diagnostics)
 
 ## License

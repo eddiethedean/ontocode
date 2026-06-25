@@ -10,8 +10,9 @@ ontoindex-parser = "0.6"
 
 ## Documentation
 
-- [Rust library guide](https://onto-code.readthedocs.io/en/latest/guides/rust-library/)
-- [SPARQL reference](https://onto-code.readthedocs.io/en/latest/sparql-reference/)
+- [Rust & CLI docs](https://ontocode-vs.readthedocs.io/en/latest/guides/rust-crates/)
+- [Rust library guide](https://ontocode-vs.readthedocs.io/en/latest/guides/rust-library/)
+- [SPARQL reference](https://ontocode-vs.readthedocs.io/en/latest/sparql-reference/)
 - [docs.rs](https://docs.rs/ontoindex-parser)
 
 ## License

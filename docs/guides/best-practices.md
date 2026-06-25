@@ -47,6 +47,7 @@ Embed OntoIndex in tools or pipelines via the published crates — see [Rust lib
 
 ## Related
 
-- [Start here](../guides/start-here.md)
+- [VS Code extension docs](vscode-extension.md)
+- [Rust & CLI docs](rust-crates.md)
 - [Enterprise evaluation](enterprise-eval.md)
 - [FAQ](../faq.md)

@@ -22,11 +22,9 @@
 
 **OntoIndex** is the Rust engine behind it: a local CLI and language server that indexes your workspace and exposes SQL, SPARQL, and patch APIs.
 
-**Documentation:** [VS Code extension](https://ontocode-vs.readthedocs.io/en/latest/guides/vscode-extension/) · [Rust & CLI](https://ontocode-vs.readthedocs.io/en/latest/guides/rust-crates/) · [First success tutorial](https://ontocode-vs.readthedocs.io/en/latest/guides/first-success/) · [`cargo install ontoindex-cli`](https://crates.io/crates/ontoindex-cli). You do not need to clone this repo.
+**Documentation:** [Read the Docs](https://ontocode-vs.readthedocs.io/en/latest/) — [VS Code extension](https://ontocode-vs.readthedocs.io/en/latest/guides/vscode-extension/) · [Rust & CLI](https://ontocode-vs.readthedocs.io/en/latest/guides/rust-crates/) · [First success tutorial](https://ontocode-vs.readthedocs.io/en/latest/guides/first-success/) · [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) · [`cargo install ontoindex-cli --locked`](https://crates.io/crates/ontoindex-cli). You do not need to clone this repo.
 
 > **Naming:** **OntoCode** is the VS Code extension (product UI). **OntoIndex** is the Rust engine (`ontoindex` CLI, `ontoindex-*` crates, `ontoindex-lsp`). This repo contains both.
-
-**Documentation:** [Read the Docs](https://ontocode-vs.readthedocs.io/en/latest/) — [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/)
 
 ## Choose your path
 
@@ -35,7 +33,7 @@
 Docs: [Rust & CLI guide](https://ontocode-vs.readthedocs.io/en/latest/guides/rust-crates/).
 
 ```bash
-cargo install ontoindex-cli
+cargo install ontoindex-cli --locked
 ontoindex query /path/to/your/ontologies "SELECT * FROM classes"
 ontoindex validate .
 ```
@@ -53,7 +51,7 @@ cargo run -- query fixtures "SELECT * FROM classes"
 Docs: [VS Code extension guide](https://ontocode-vs.readthedocs.io/en/latest/guides/vscode-extension/).
 
 1. Install [OntoCode from the Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode), or download a VSIX from [GitHub Releases](https://github.com/eddiethedean/ontocode/releases).
-2. Open a folder with `.ttl`, `.owl`, `.rdf`, or other supported ontology files.
+2. Open a folder with `.ttl`, `.owl`, `.obo`, `.rdf`, or other supported ontology files.
 3. Use the **OntoCode** activity bar to browse entities, edit in the inspector, and open diagnostics.
 
 Full install and troubleshooting: [install guide](https://ontocode-vs.readthedocs.io/en/latest/vscode-install/). Editing guide: [authoring guide](https://ontocode-vs.readthedocs.io/en/latest/authoring/).
@@ -98,19 +96,14 @@ Earlier releases: [Changelog](https://ontocode-vs.readthedocs.io/en/latest/chang
 
 Protégé is strong for traditional ontology editing, but most engineering teams live in Git, pull requests, and VS Code. OntoCode targets that workflow:
 
-| Shipped in v0.6 | Planned (v1.0 target) |
-|-----------------|-------------------------|
-| Browse ontologies in VS Code | Full OWL 2 DL axiom catalog |
-| Entity inspector with **edit labels, parents, create/delete** | Multi-format write-back |
-| **Query workbench** (SQL + SPARQL) in VS Code | Inline SQL/SPARQL editor autocomplete |
-| **Manchester editor** (complex subclass + equivalent) | Full Manchester catalog (disjoint, chains, …) |
-| **EL/RL/RDFS reasoning** + inferred hierarchy | Full OWL 2 DL reasoning (`dl` / `auto`) |
-| EL explanations (where OntoLogos supports) | Full DL clash-trace explanations |
-| Patch write-back for Turtle (`.ttl`) | OBO format + ROBOT interop |
-| Horned-OWL catalog for Turtle axioms | Semantic Git diff, LSP completion/rename |
-| Inline diagnostics (Problems panel + explorer) | SHACL validation (rudof) |
-| `ontoindex validate`, `classify`, and `patch` for CI | `ontologos-watch` hook |
-| SQL-like and SPARQL queries via CLI and LSP | |
+| Shipped in v0.7.0 | Planned (v1.0 target) |
+|-------------------|------------------------|
+| Browse and edit Turtle in VS Code (React inspector) | Full OWL 2 DL axiom catalog |
+| Query Workbench (SQL + SPARQL) and graph visualization | Inline SQL/SPARQL autocomplete |
+| Manchester editor (complex subclass + equivalent) | Full Manchester catalog |
+| EL/RL/RDFS reasoning + inferred hierarchy | OWL 2 DL reasoning (`dl` / `auto`) |
+| OBO index + `obo_id` in explorer; ROBOT CLI wrappers | Full OBO write-back in VS Code |
+| Patch write-back for Turtle; `validate` / `classify` for CI | Semantic Git diff, SHACL validation |
 
 Long-term goal: **Protégé-competitive OWL 2 DL + OBO maintenance in VS Code** — see [Protégé parity checklist](https://ontocode-vs.readthedocs.io/en/latest/design/PROTEGE_PARITY/).
 
@@ -128,12 +121,12 @@ cargo run -- validate fixtures
 
 ```bash
 # Installed CLI (use your ontology path, not ./fixtures)
-cargo install ontoindex-cli
+cargo install ontoindex-cli --locked
 ontoindex query /path/to/ontologies "SELECT * FROM classes"
 ontoindex validate /path/to/ontologies
 ```
 
-## Reasoning (v0.6)
+## Reasoning
 
 - EL / RL / RDFS classification via [OntoLogos](https://github.com/eddiethedean/ontologos) 0.9.0
 - CLI: `ontoindex classify`, `ontoindex explain`
@@ -142,24 +135,19 @@ ontoindex validate /path/to/ontologies
 
 See [reasoner guide](https://ontocode-vs.readthedocs.io/en/latest/guides/reasoner/). DL and `auto` profiles require OntoLogos 1.0.
 
-## Coming in v0.7+
+## UI architecture (v0.7.0)
 
-The extension is a thin TypeScript shell over **ontoindex-lsp** and the OntoIndex crates — not a second ontology stack. **v0.7a** introduces a **React + Vite** webview layer for panels (inspector, query workbench, graphs, reasoner); see [React UI integration plan](docs/design/OntoCode_React_UI_Integration_Plan.md).
+The VS Code extension is a thin TypeScript shell over **ontoindex-lsp**. Inspector and graph panels use **React + Vite** webviews with a typed message protocol ([webview protocol](https://ontocode-vs.readthedocs.io/en/latest/webview-protocol/)). Query workbench, Manchester editor, and reasoner panels still use legacy HTML webviews until v0.8+.
 
 ## Roadmap
 
 | Version | Deliverable |
 |---------|-------------|
-| v0.1 | OntoIndex: scanner, parser, catalog, CLI |
-| v0.2 | VS Code extension, explorer, entity inspector, LSP |
-| v0.3 | Ontology diagnostics (Problems panel, `validate`) |
-| v0.4.0 | Write-back — Turtle patches, Horned-OWL catalog, editable inspector |
-| **v0.7.0** (current) | **React UI + graphs + OBO/ROBOT** — React inspector/graphs, OBO index, ROBOT wrappers |
-| **v0.6.0** | **Reasoning** — OntoLogos EL/RL/RDFS, inferred hierarchy, explanations |
-| v0.7a | **React webview foundation** — Vite, typed message protocol, CSP |
-| v0.7–v0.7b | Graphs (React) + OBO/ROBOT interop |
-| v0.8–v0.9 | Full Manchester, refactoring, semantic diff (React panels); `ontologos-watch` hook |
-| v1.0 | **Protégé-competitive OWL + OBO in VS Code** — DL via OntoLogos 1.0.0, React UI hardening ([parity checklist](https://ontocode-vs.readthedocs.io/en/latest/design/PROTEGE_PARITY/)) |
+| v0.1–v0.4 | OntoIndex core, VS Code extension, diagnostics, Turtle write-back |
+| v0.6.0 | Reasoning — OntoLogos EL/RL/RDFS, inferred hierarchy, explanations |
+| **v0.7.0** (current) | React inspector + graphs, OBO index, ROBOT CLI wrappers |
+| v0.8–v0.9 | Migrate remaining panels to React; semantic diff; `ontologos-watch` hook |
+| v1.0 | **Protégé-competitive OWL + OBO in VS Code** — DL via OntoLogos 1.0.0 ([parity checklist](https://ontocode-vs.readthedocs.io/en/latest/design/PROTEGE_PARITY/)) |
 
 See [roadmap](https://ontocode-vs.readthedocs.io/en/latest/design/ROADMAP/), [product plan](https://ontocode-vs.readthedocs.io/en/latest/design/PLAN/), and [Protégé parity checklist](https://ontocode-vs.readthedocs.io/en/latest/design/PROTEGE_PARITY/) for the full product plan.
 
@@ -173,7 +161,8 @@ OntoIndex delegates to mature Rust libraries — see [dependency matrix](https:/
 | SQL queries | [sqlparser](https://crates.io/crates/sqlparser) | `ontoindex-query` |
 | OWL axioms / write-back | [horned-owl](https://crates.io/crates/horned-owl), [horned-functional](https://crates.io/crates/horned-functional) | `ontoindex-owl` |
 | Reasoning | [OntoLogos](https://github.com/eddiethedean/ontologos) | `ontoindex-reasoner` |
-| OBO (planned) | [fastobo](https://crates.io/crates/fastobo) | planned v0.7b |
+| OBO index | line-based parser in `ontoindex-parser` | `ontoindex-parser`, `ontoindex-catalog` |
+| ROBOT interop | external `robot` CLI (Java) | `ontoindex-robot`, `ontoindex-cli` |
 | LSP | [lsp-server](https://crates.io/crates/lsp-server), [lsp-types](https://crates.io/crates/lsp-types) | `ontoindex-lsp` |
 
 Policy: [ADR-0016](https://ontocode-vs.readthedocs.io/en/latest/design/adr/0016-dependency-first-implementation/). Third-party licenses (including LGPL for horned-owl): [LICENSES](https://ontocode-vs.readthedocs.io/en/latest/design/LICENSES/).

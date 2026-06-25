@@ -20,7 +20,7 @@ Hard limits: [workspace limits](../workspace-limits.md). Pilot criteria: [produc
 
 Use these tiers to choose pilot scope. **Run `ontoindex inspect` on your repo** to measure actual counts.
 
-| Tier | Files | Triples (order of magnitude) | Typical profile | v0.6 fit |
+| Tier | Files | Triples (order of magnitude) | Typical profile | v0.7 fit |
 |------|-------|------------------------------|-----------------|----------|
 | **Small** | 1–20 | &lt; 100k | Single-domain Turtle, EL | Excellent |
 | **Medium** | 20–500 | 100k–5M | Multi-file imports, mixed formats | Good — monitor index time |
@@ -29,7 +29,7 @@ Use these tiers to choose pilot scope. **Run `ontoindex inspect` on your repo** 
 
 ## Reference measurement (tutorial fixtures)
 
-Measured with `ontoindex inspect fixtures --format json` on release **0.6.0** (repository tutorial corpus):
+Measured with `ontoindex inspect fixtures --format json` on release **0.7.0** (repository tutorial corpus):
 
 | Metric | Value |
 |--------|-------|
@@ -47,7 +47,7 @@ Run on a **representative clone** of your production ontology tree:
 ```bash
 # Replace with your ontology root
 ONTO=/path/to/ontologies
-VERSION=0.6.0
+VERSION=0.7.0
 
 # Catalog stats
 time ./ontoindex-v${VERSION}-x86_64-unknown-linux-gnu inspect "$ONTO" --format json
@@ -71,7 +71,7 @@ Record:
 
 **Acceptance suggestion:** CI `validate` completes within your pipeline stage budget (e.g. &lt; 5 minutes) on `main` branch corpora.
 
-## Memory model (v0.6)
+## Memory model (v0.7)
 
 Documentation and architecture specs describe **multiple in-memory representations**:
 

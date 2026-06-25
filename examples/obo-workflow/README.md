@@ -28,4 +28,4 @@ cargo run -- robot validate examples/obo-workflow/demo.obo
   run: ontoindex robot validate examples/obo-workflow/demo.obo
 ```
 
-See [OBO workflow guide](https://onto-code.readthedocs.io/en/latest/guides/obo-workflow/).
+See [OBO workflow guide](https://ontocode-vs.readthedocs.io/en/latest/guides/obo-workflow/).

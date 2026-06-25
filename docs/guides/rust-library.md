@@ -66,7 +66,7 @@ Uses `OntoIndexError` from `ontoindex-core` — see [`examples/error_handling.rs
 
 ## API stability
 
-- Crates are at **0.6.x** on crates.io
+- Crates are at **0.7.x** on crates.io
 - LSP wire JSON: [LSP API](../lsp-api.md)
 - SQL tables: [SQL reference](../sql-reference.md)
 - Exit codes: [workspace limits](../workspace-limits.md)

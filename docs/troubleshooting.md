@@ -74,6 +74,14 @@ See [workspace limits](workspace-limits.md).
 
 Indexing may fail above [workspace limits](workspace-limits.md) (file count, size, triple caps). For very large terminologies, use CLI batch workflows on a subset.
 
+## Graphs, OBO, and ROBOT
+
+| Problem | What to try |
+|---------|-------------|
+| Graph commands missing | Run **Index Workspace** first — [Graph guide](guides/graph-visualization.md) |
+| Cannot edit `.obo` in inspector | OBO is read-only in VS Code; use Turtle write-back or external tools — [OBO guide](guides/obo-workflow.md) |
+| `robot` not found | Install Java + ROBOT; set `ontocode.robotPath` — [ROBOT guide](guides/robot-interop.md) |
+
 ## Reasoner
 
 | Problem | What to try |

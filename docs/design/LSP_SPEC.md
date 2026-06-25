@@ -131,13 +131,13 @@ Global entity search.
 | `ontoindex/getEntity` | **Implemented** |
 | `ontoindex/query` | **Implemented** (v0.5) |
 | `ontoindex/sparql` | **Implemented** (v0.5) |
-| `ontoindex/getGraph` | Planned |
+| `ontoindex/getGraph` | **Implemented** (v0.7) — see [lsp-api.md](../lsp-api.md) |
 | `ontoindex/getSemanticDiff` | Planned |
 | `ontoindex/runReasoner` | **Implemented** (v0.6) — see [lsp-api.md](../lsp-api.md) |
 | `ontoindex/applyAxiomPatch` | **Implemented** (v0.4) |
 | `ontoindex/parseManchester` | **Implemented** (v0.5) |
 | `ontoindex/getExplanation` | **Implemented** (v0.6) — see [lsp-api.md](../lsp-api.md) |
-| `ontoindex/runRobot` | Planned (v0.7b) |
+| `ontoindex/runRobot` | **Implemented** (v0.7) — see [lsp-api.md](../lsp-api.md) |
 
 ### `ontoindex/indexWorkspace`
 

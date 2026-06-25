@@ -39,6 +39,9 @@ OntoCode activates when your workspace contains any of:
 | `.jsonld`, `.json-ld` | JSON-LD |
 | `.nt`, `.nq` | N-Triples / N-Quads |
 | `.trig` | TriG |
+| `.obo` | OBO Format (index + syntax highlighting; read-only in inspector) |
+
+Write-back in the inspector is **Turtle (`.ttl`) only**.
 
 You can also open the **OntoCode → Ontologies** view to force activation.
 
@@ -154,9 +157,9 @@ More detail: [Installation & troubleshooting](https://ontocode-vs.readthedocs.io
 
 ## What's included in v0.7.0
 
-**Shipped:** explorer, inspector, **editing** (labels, comments, parents, create/delete in `.ttl`), **Query Workbench** (SQL + SPARQL), **Manchester editor**, **EL/RL/RDFS reasoner**, inferred hierarchy toggle, EL explanations (where available), diagnostics, jump-to-source, hover, symbols, go-to-definition.
+**Shipped:** explorer; **React** entity inspector and **graph panels**; Query Workbench; Manchester editor; EL/RL/RDFS reasoner; OBO syntax highlighting and indexing (write-back: Turtle only); diagnostics; LSP navigation features.
 
-**Planned:** React webview UI (v0.7a+), full DL reasoning (OntoLogos 1.0), graph visualization (v0.7) — [roadmap](https://ontocode-vs.readthedocs.io/en/latest/design/ROADMAP/), [React UI plan](https://ontocode-vs.readthedocs.io/en/latest/design/OntoCode_React_UI_Integration_Plan/).
+**Planned:** migrate remaining panels to React (v0.8+); full DL reasoning (OntoLogos 1.0); semantic diff (v0.9).
 
 ---
 

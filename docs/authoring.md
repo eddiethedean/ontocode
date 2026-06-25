@@ -1,6 +1,6 @@
-# Ontology authoring (v0.6)
+# Ontology authoring (OntoIndex v0.7)
 
-> **Status:** Documents behavior in **OntoIndex v0.6.0**. Pre-1.0 APIs may change.
+> **Status:** Documents behavior in **OntoIndex v0.7.0**. Pre-1.0 APIs may change.
 > Canonical feature list: [What ships today](SHIPPED.md).
 
 OntoCode provides **Turtle write-back** for simple and **Manchester** ontology edits without Protégé.

@@ -21,7 +21,9 @@ Browse OWL/RDF in VS Code, edit Turtle ontologies, run EL/RL/RDFS reasoning, que
 <span class="oc-badge">Query Workbench</span>
 <span class="oc-badge">Manchester editor</span>
 <span class="oc-badge">Reasoner (EL)</span>
-<span class="oc-badge">SPARQL + SQL</span>
+<span class="oc-badge">OBO index</span>
+<span class="oc-badge">Graph visualization</span>
+<span class="oc-badge">ROBOT CLI</span>
 </div>
 
 <div class="oc-hero-actions" markdown>
@@ -97,6 +99,22 @@ You do **not** need to clone this repo to use the extension or `cargo install on
 
     [:octicons-arrow-right-24: Manchester guide](guides/manchester-editor.md)
 
+-   :material-graph-outline:{ .lg .middle } **Graph visualization**
+
+    ---
+
+    Open class, property, import, and neighborhood graphs from the explorer.
+
+    [:octicons-arrow-right-24: Graph guide](guides/graph-visualization.md)
+
+-   :material-file-document-outline:{ .lg .middle } **OBO workflows**
+
+    ---
+
+    Index `.obo` files, browse `obo_id` in the explorer, and run ROBOT from the CLI.
+
+    [:octicons-arrow-right-24: OBO workflow guide](guides/obo-workflow.md)
+
 -   :material-help-circle:{ .lg .middle } **Questions?**
 
     ---
@@ -119,6 +137,10 @@ See the full matrix: **[What ships today](SHIPPED.md)**.
 | Create / delete entities (`.ttl`) | Yes | `ontoindex patch` |
 | SQL-like queries | Query Workbench | `ontoindex query` |
 | SPARQL | Query Workbench | `ontoindex sparql` |
+| Graph visualization (class, property, import, neighborhood) | Yes (React) | LSP `ontoindex/getGraph` |
+| OBO format index + `obo_id` in explorer | Yes | `ontoindex inspect` |
+| ROBOT interop | — | `ontoindex robot validate\|merge\|report` |
+| React webview UI | Inspector + graphs | — |
 | EL/RL/RDFS classification | Reasoner panel | `ontoindex classify` |
 | Inferred hierarchy toggle | Explorer | via `classify` JSON |
 | EL explanations (where available) | Explanation panel | `ontoindex explain` |
@@ -129,13 +151,13 @@ See the full matrix: **[What ships today](SHIPPED.md)**.
 === "VS Code"
 
     1. Install [OntoCode from the Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode)
-    2. Open a folder with `.ttl`, `.owl`, or other ontology files
+    2. Open a folder with `.ttl`, `.owl`, `.obo`, or other ontology files
     3. Open the **OntoCode** activity bar → browse **Classes** → click an entity
 
 === "CLI (install)"
 
     ```bash
-    cargo install ontoindex-cli
+    cargo install ontoindex-cli --locked
     ontoindex query /path/to/ontologies "SELECT * FROM classes"
     ontoindex validate /path/to/ontologies
     ```
@@ -166,6 +188,10 @@ See the full matrix: **[What ships today](SHIPPED.md)**.
 | Troubleshooting | [troubleshooting.md](troubleshooting.md) |
 | SQL virtual tables | [sql-reference.md](sql-reference.md) |
 | SPARQL | [sparql-reference.md](sparql-reference.md) |
+| Graph visualization | [guides/graph-visualization.md](guides/graph-visualization.md) |
+| OBO workflows | [guides/obo-workflow.md](guides/obo-workflow.md) |
+| ROBOT interop | [guides/robot-interop.md](guides/robot-interop.md) |
+| Webview protocol | [webview-protocol.md](webview-protocol.md) |
 | LSP API | [lsp-api.md](lsp-api.md) |
 | Errors reference | [errors.md](errors.md) |
 | Patch JSON | [patch-reference.md](patch-reference.md) |

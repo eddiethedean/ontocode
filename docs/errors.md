@@ -1,6 +1,6 @@
 # Errors reference
 
-Unified catalog of error codes, exit behavior, and failure modes for OntoIndex **v0.6**.
+Unified catalog of error codes, exit behavior, and failure modes for OntoIndex **v0.7**.
 
 ## CLI exit codes
 

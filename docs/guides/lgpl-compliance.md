@@ -1,6 +1,6 @@
 # LGPL compliance guide (horned-owl)
 
-This page helps **legal, security, and platform teams** evaluate copyleft obligations when adopting OntoCode / OntoIndex **v0.6.0**. It summarizes documentation and dependency licenses — **it is not legal advice**. Engage your counsel for binding decisions.
+This page helps **legal, security, and platform teams** evaluate copyleft obligations when adopting OntoCode / OntoIndex **v0.7.0**. It summarizes documentation and dependency licenses — **it is not legal advice**. Engage your counsel for binding decisions.
 
 Dependency inventory: [LICENSES.md](../design/LICENSES.md) · [DEPENDENCY_MATRIX.md](../design/DEPENDENCY_MATRIX.md).
 
@@ -14,7 +14,7 @@ Dependency inventory: [LICENSES.md](../design/LICENSES.md) · [DEPENDENCY_MATRIX
 
 If your organization **does not use Turtle write-back or Manchester editing**, you may still pull `horned-owl` transitively when using the full VS Code extension or CLI — verify your deployment surface with `cargo license` or the release `NOTICES` file.
 
-Other notable licenses in v0.6:
+Other notable licenses in v0.7:
 
 | Component | License | Trigger |
 |-----------|---------|---------|
@@ -79,7 +79,7 @@ Maintainers regenerate `NOTICES` before releases per [releasing.md](../releasing
 | Mitigation | When |
 |------------|------|
 | **CI-only adoption** | Minimize desktop extension rollout until legal sign-off |
-| **Pin versions** | `cargo install ontoindex-cli --locked --version 0.6.0` or release tarball |
+| **Pin versions** | `cargo install ontoindex-cli --locked --version 0.7.0` or release tarball |
 | **Archive NOTICES** | Store with internal artifact registry |
 | **Protégé coexistence** | Teams that cannot accept LGPL on desktops use Protégé for authoring; OntoIndex in Linux CI only |
 | **Air-gapped mirror** | Host VSIX + CLI + `NOTICES` + source snapshot internally — [enterprise deployment](enterprise-deployment.md) |

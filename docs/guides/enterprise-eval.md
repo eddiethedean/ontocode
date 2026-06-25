@@ -25,8 +25,11 @@ Canonical capability matrix: [What ships today](../SHIPPED.md).
 | Query workbench + Manchester editor in VS Code | Shipped |
 | EL/RL/RDFS reasoning + inferred hierarchy | **Shipped** (OntoLogos 0.9.0) |
 | EL explanations (where OntoLogos supports) | **Shipped** (EL-first) |
+| React entity inspector + graph visualization | **Shipped** |
+| OBO format index + `obo_id` in explorer | **Shipped** (write-back: Turtle only in VS Code) |
+| ROBOT CLI interop (`ontoindex robot`, LSP `runRobot`) | **Shipped** (requires Java + `robot` on PATH) |
 | Full OWL 2 DL reasoning (`dl` / `auto` profiles) | **Not shipped** (OntoLogos 1.0 target) |
-| OBO format + ROBOT interop | **Not shipped** (v0.7b target) |
+| Full OBO write-back in VS Code | **Not shipped** (v1.0 target) |
 | Semantic Git diff | **Not shipped** (v0.9 target) |
 
 Full gap analysis: [Protégé parity matrix](../design/PROTEGE_PARITY.md).
@@ -64,7 +67,7 @@ Full gap analysis: [Protégé parity matrix](../design/PROTEGE_PARITY.md).
 | **Reasoning** | EL/RL/RDFS via OntoLogos 0.9; **DL/auto** stubbed until OntoLogos 1.0; results may differ from Protégé on partial OWL mappings |
 | **CLI release binaries** | Linux x64 only; macOS/Windows use `cargo install` or bundled LSP in VSIX |
 | **Scale** | Workspaces above [workspace limits](../workspace-limits.md) may fail indexing — prefer CLI batch workflows for very large terminologies |
-| **ROBOT / Java** | Planned ROBOT CLI interop (v0.7b) requires an external Java process — not JVM-free for that workflow |
+| **ROBOT / Java** | `ontoindex robot` and LSP `runRobot` spawn an external Java `robot` process — not JVM-free for that workflow |
 
 ## Protégé coexistence
 
@@ -74,7 +77,7 @@ A full migration guide is a **v1.0 deliverable**. Today:
 
 - Use OntoCode for **Git-native Turtle editing**, **CI validation**, **SQL/SPARQL queries**, **Manchester MVP**, and **EL/RL/RDFS classification**
 - **Manchester MVP (v0.5+)** covers restrictions, `and`/`or`, and cardinality — not disjoint axioms, property chains, or the full axiom catalog
-- Keep Protégé for **full OWL 2 DL reasoning**, **disjoint axioms**, **OBO id workflows**, and **full OWL 2 DL editing** until v0.8–v1.0
+- Keep Protégé for **full OWL 2 DL reasoning**, **disjoint axioms**, **full OBO write-back**, and **full OWL 2 DL editing** until v0.8–v1.0
 - See [Protégé parity matrix](../design/PROTEGE_PARITY.md) and [What ships today](../SHIPPED.md)
 
 ## Evaluation checklist

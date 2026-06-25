@@ -1,10 +1,10 @@
 # ARCHITECTURE.md
 
-> **Document status: target architecture with v0.6 partial implementation**
+> **Document status: target architecture with v0.7 partial implementation**
 >
-> **Shipped in v0.6:** workspace scanner, Oxigraph parsing, in-memory catalog, SQL/SPARQL queries, diagnostics, CLI, LSP explorer + Problems panel, Turtle patch write-back, Query Workbench + Manchester editor (extension), Horned-OWL catalog bridge (`ontoindex-owl`), **EL/RL/RDFS reasoning** (`ontoindex-reasoner`). See [What ships today](../SHIPPED.md).
+> **Shipped in v0.7:** workspace scanner, Oxigraph parsing, in-memory catalog, SQL/SPARQL queries, diagnostics, CLI, LSP explorer + Problems panel, Turtle patch write-back, Query Workbench + Manchester editor (extension), Horned-OWL catalog bridge (`ontoindex-owl`), **EL/RL/RDFS reasoning** (`ontoindex-reasoner`), **React inspector + graphs**, **OBO index**, **ROBOT CLI wrappers**. See [What ships today](../SHIPPED.md).
 >
-> **Planned:** full DL reasoning (OntoLogos 1.0), React webview UI (v0.7a+), graph visualization, semantic diff, full Manchester catalog, OBO/ROBOT interop. See [ROADMAP.md](ROADMAP.md).
+> **Planned:** full DL reasoning (OntoLogos 1.0), migrate remaining panels to React (v0.8+), semantic diff, full Manchester catalog, full OBO write-back. See [ROADMAP.md](ROADMAP.md).
 >
 > **Reference:** [lsp-api.md](../lsp-api.md), [adr/README.md](adr/README.md), [DEPENDENCY_MATRIX.md](DEPENDENCY_MATRIX.md).
 
@@ -78,7 +78,7 @@ The architecture must support:
 | `ontoindex-diff` | planned v0.9 | Semantic diff, Git compare | `horned-owl`, `git2` |
 | `ontoindex-docs` | planned v0.9 | Markdown/HTML export | `pulldown-cmark`, `minijinja` |
 | `ontoindex-reasoner` | v0.6 | Reasoner facade | OntoLogos `0.9`→`1.0` |
-| `ontoindex-robot` | planned v0.7b | ROBOT CLI wrappers | ROBOT CLI (external) |
+| `ontoindex-robot` | v0.7 | ROBOT CLI wrappers | ROBOT CLI (external) |
 | `ontoindex-lsp` | v0.4 | Language server + diagnostics + patch apply | `lsp-server`, `lsp-types` |
 | `ontoindex-cli` | v0.4 | `ontoindex` binary | composes above |
 
@@ -154,7 +154,7 @@ Explorer (asserted/inferred toggle), diagnostics, query history.
 | Manchester axiom editor | **Shipped** (v0.5 MVP) | Legacy HTML → **React** (v0.8) |
 | Reasoner panel | **Shipped** (v0.6) | Legacy HTML → **React** (v0.9) |
 | Explanation panel | **Shipped** (v0.6 EL) | Legacy HTML → **React** (v0.9) |
-| Graph visualization | Planned (v0.7) | **React** (new) |
+| Graph visualization | **Shipped** (v0.7 React) | Extend filters / layout |
 | Semantic diff | Planned (v0.9) | **React** (new) |
 
 ### 5.5 Language Client

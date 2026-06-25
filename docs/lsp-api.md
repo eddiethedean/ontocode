@@ -12,7 +12,7 @@ LSP JSON uses **snake_case** for enums serialized from Rust (`EntityKind`, `Pars
 **Source of truth:**
 
 - Types: [`protocol.rs` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/crates/ontoindex-lsp/src/protocol.rs)
-- JSON Schema (v0.6 subset): [`docs/lsp-protocol.schema.json`](lsp-protocol.schema.json)
+- JSON Schema (partial v0.7 subset): [`docs/lsp-protocol.schema.json`](lsp-protocol.schema.json) — covers core query/patch methods; `getGraph` and `runRobot` are documented below but not yet in the schema.
 - Handlers: [`handlers.rs` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/crates/ontoindex-lsp/src/handlers.rs)
 - Extension client: [`client.ts` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/extension/src/lsp/client.ts)
 
@@ -291,23 +291,6 @@ Return an EL/RL/RDFS explanation for an unsatisfiable class (requires a prior re
 
 **Errors:** `NOT_INDEXED`, `EXPLANATION_FAILED`
 
-## Structured errors
-
-Custom method failures return `LspErrorPayload` in the JSON-RPC error `data` field. Full catalog: [errors.md](errors.md).
-
-| Field | Description |
-|-------|-------------|
-| `code` | Machine-readable code (`NOT_INDEXED`, `ENTITY_NOT_FOUND`, `PATCH_INVALID`, `UNSUPPORTED_FORMAT`, `INDEX_FAILED`, `QUERY_FAILED`, `MANCHESTER_INVALID`, `APPLIED_NOT_INDEXED`, `REASONER_FAILED`, `EXPLANATION_FAILED`, …) |
-| `message` | Human-readable message |
-| `recoverable` | Whether the client can retry |
-| `user_action` | Suggested user action (optional) |
-
-## Not implemented yet (see LSP_SPEC)
-
-- `ontoindex/getSemanticDiff`
-
-Use the CLI or Rust crates for semantic diff until that LSP method lands.
-
 ### `ontoindex/getGraph` (v0.7)
 
 Returns graph nodes and edges for visualization webviews.
@@ -331,3 +314,20 @@ Runs a ROBOT CLI subcommand.
 **Params:** `{ subcommand, args?, robot_path? }`
 
 **Result:** `{ exit_code, stdout, stderr }`
+
+## Structured errors
+
+Custom method failures return `LspErrorPayload` in the JSON-RPC error `data` field. Full catalog: [errors.md](errors.md).
+
+| Field | Description |
+|-------|-------------|
+| `code` | Machine-readable code (`NOT_INDEXED`, `ENTITY_NOT_FOUND`, `PATCH_INVALID`, `UNSUPPORTED_FORMAT`, `INDEX_FAILED`, `QUERY_FAILED`, `MANCHESTER_INVALID`, `APPLIED_NOT_INDEXED`, `REASONER_FAILED`, `EXPLANATION_FAILED`, …) |
+| `message` | Human-readable message |
+| `recoverable` | Whether the client can retry |
+| `user_action` | Suggested user action (optional) |
+
+## Not implemented yet (see LSP_SPEC)
+
+- `ontoindex/getSemanticDiff`
+
+Use the CLI or Rust crates for semantic diff until that LSP method lands.

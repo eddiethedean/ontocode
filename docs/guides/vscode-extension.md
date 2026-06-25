@@ -36,7 +36,7 @@
 
 | Topic | Link |
 |-------|------|
-| What ships in v0.6 | [What ships today](../SHIPPED.md) |
+| What ships in v0.7 | [What ships today](../SHIPPED.md) |
 | Patch JSON (inspector / LSP) | [Patch reference](../patch-reference.md) |
 | LSP methods (advanced) | [LSP API](../lsp-api.md) |
 | Workspace limits | [Workspace limits](../workspace-limits.md) |

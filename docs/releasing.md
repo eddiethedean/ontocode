@@ -28,6 +28,9 @@ Maintainer checklist for publishing crates, binaries, and the VS Code extension.
 - [ ] [security.md](security.md) / [SECURITY.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/SECURITY.md) — supported versions table
 - [ ] [docs/changelog.md](changelog.md) — mirror recent releases from CHANGELOG.md
 - [ ] [docs/lsp-api.md](lsp-api.md) — new methods or error codes
+- [ ] [docs/webview-protocol.md](webview-protocol.md) — React panel message protocol
+- [ ] [docs/guides/graph-visualization.md](guides/graph-visualization.md), [obo-workflow.md](guides/obo-workflow.md), [robot-interop.md](guides/robot-interop.md)
+- [ ] [docs/migration/v0.7.md](migration/v0.7.md) — upgrade notes when applicable
 - [ ] [docs/design/PROTEGE_PARITY.md](design/PROTEGE_PARITY.md) — status columns if features shipped
 - [ ] [docs/design/ARCHITECTURE.md](design/ARCHITECTURE.md) / [OWL_AUTHORING_SPEC.md](design/OWL_AUTHORING_SPEC.md) — shipped vs target banners
 - [ ] [docs/design/LICENSES.md](design/LICENSES.md) — dependency sections
@@ -56,7 +59,7 @@ Requires the `CARGO_REGISTRY_TOKEN` repository secret.
 
 ## Published crates (dependency order)
 
-`ontoindex-core` → `ontoindex-parser` → `ontoindex-owl` → `ontoindex-diagnostics` → `ontoindex-catalog` → `ontoindex-query` → `ontoindex-reasoner` → `ontoindex-lsp` → `ontoindex-cli`
+`ontoindex-core` → `ontoindex-parser` → `ontoindex-owl` → `ontoindex-diagnostics` → `ontoindex-catalog` → `ontoindex-query` → `ontoindex-reasoner` → `ontoindex-robot` → `ontoindex-lsp` → `ontoindex-cli`
 
 ## VS Code Marketplace
 

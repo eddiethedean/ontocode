@@ -1,6 +1,6 @@
-# SQL query reference (OntoIndex v0.6)
+# SQL query reference (OntoIndex v0.7)
 
-> **Status:** Documents behavior in **OntoIndex v0.6.0**. Pre-1.0 APIs may change.
+> **Status:** Documents behavior in **OntoIndex v0.7.0**. Pre-1.0 APIs may change.
 > Canonical feature list: [What ships today](SHIPPED.md).
 
 OntoIndex exposes indexed ontology data as **virtual tables** queried with a SQL-like `SELECT` syntax. The CLI (`ontoindex query`) and Rust API (`query_catalog`) use the same engine.
@@ -61,6 +61,7 @@ Entity tables share these columns (`properties` is the union of all property kin
 | `labels` | Semicolon-separated labels |
 | `comments` | Semicolon-separated comments |
 | `deprecated` | `true` or `false` |
+| `obo_id` | OBO id when indexed from `.obo` (empty for RDF-only entities) |
 
 ### `annotations`
 

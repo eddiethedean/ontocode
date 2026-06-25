@@ -13,7 +13,7 @@ This repository contains both.
 
 **Is the API stable?**
 
-Pre-1.0. Published crates are at **0.6.x**. Library APIs, LSP JSON, and SQL table columns may change between minor releases until v1.0. The `validate` and `classify` exit codes are documented in [workspace-limits.md](workspace-limits.md).
+Pre-1.0. Published crates are at **0.7.x**. Library APIs, LSP JSON, and SQL table columns may change between minor releases until v1.0. The `validate` and `classify` exit codes are documented in [workspace-limits.md](workspace-limits.md).
 
 **What ships in the current release?**
 
@@ -150,4 +150,22 @@ EL/RL/RDFS shipped in **v0.6.0** via OntoLogos 0.9.0. Full OWL 2 DL (`dl` / `aut
 
 **How does this compare to Protégé?**
 
-v0.6 targets Git + VS Code workflows: browse, lint, Turtle editing, SQL/SPARQL queries, Manchester MVP, and **EL/RL/RDFS reasoning**. Full Protégé parity (DL reasoning, disjoint axioms, OBO, semantic diff) is the v1.0 goal — see [design/PROTEGE_PARITY.md](design/PROTEGE_PARITY.md) and [SHIPPED.md](SHIPPED.md).
+v0.7 targets Git + VS Code workflows: browse, lint, Turtle editing, SQL/SPARQL queries, Manchester MVP, **EL/RL/RDFS reasoning**, **graph visualization**, **OBO index**, and **ROBOT CLI wrappers**. Full Protégé parity (DL reasoning, disjoint axioms, full OBO write-back, semantic diff) is the v1.0 goal — see [design/PROTEGE_PARITY.md](design/PROTEGE_PARITY.md) and [SHIPPED.md](SHIPPED.md).
+
+## OBO and graphs (v0.7)
+
+**Can I edit `.obo` files in the inspector?**
+
+No — OBO is indexed and syntax-highlighted, but write-back is **Turtle only**. See [OBO workflow guide](guides/obo-workflow.md).
+
+**How do I open ontology graphs?**
+
+Use **OntoCode: Open Class Graph** (and related commands). See [Graph visualization guide](guides/graph-visualization.md).
+
+**Does ROBOT require Java?**
+
+Yes. `ontoindex robot` and LSP `runRobot` spawn the external `robot` CLI. See [ROBOT interop guide](guides/robot-interop.md).
+
+**Which panels use React vs legacy HTML?**
+
+v0.7: **Entity Inspector** and **graph panels** are React. Query Workbench, Manchester editor, and reasoner panels remain legacy HTML until v0.8+.

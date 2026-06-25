@@ -16,7 +16,7 @@
 | Capability | VS Code | CLI |
 |------------|---------|-----|
 | Browse classes, properties, individuals | Yes | via SQL |
-| Edit labels, comments, parents (`.ttl`, `.obo`) | Yes (React inspector) | `ontoindex patch` (Turtle) |
+| Edit labels, comments, parents (`.ttl` only; `.obo` read-only in inspector) | Yes (React inspector) | `ontoindex patch` (Turtle) |
 | Create / delete entities (`.ttl`) | Yes | `ontoindex patch` |
 | Complex `SubClassOf` / `EquivalentClasses` (Manchester) | Yes | `ontoindex patch` |
 | SQL-like queries | Query Workbench | `ontoindex query` |
@@ -66,5 +66,8 @@
 | Manchester editor | [Manchester editor guide](guides/manchester-editor.md) |
 | Turtle editing & patches | [Authoring](authoring.md) · [Patch reference](patch-reference.md) |
 | CLI & CI | [Getting started](getting-started.md) · [CI integration](ci-integration.md) |
-| LSP integrators | [LSP API](lsp-api.md) |
+| Graph visualization | [Graph visualization guide](guides/graph-visualization.md) |
+| OBO workflows | [OBO workflow guide](guides/obo-workflow.md) |
+| ROBOT interop | [ROBOT interop guide](guides/robot-interop.md) |
+| LSP integrators | [LSP API](lsp-api.md) · [Webview protocol](webview-protocol.md) |
 | Enterprise evaluation | [Enterprise evaluation](guides/enterprise-eval.md) |

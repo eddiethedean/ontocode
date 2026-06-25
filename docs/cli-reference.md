@@ -1,4 +1,4 @@
-# CLI reference (OntoIndex v0.6)
+# CLI reference (OntoIndex v0.7)
 
 The `ontoindex` binary indexes ontology workspaces and exposes query, validation, patch, and reasoning commands.
 
@@ -78,6 +78,26 @@ ontoindex patch ./ontology.ttl patches.json
 ```
 
 **Exit:** 0 on success; non-zero on invalid patch or unsupported format.
+
+### `robot`
+
+Run [ROBOT](http://robot.obolibrary.org/) CLI subcommands. Requires Java and `robot` on `PATH` (or `--robot-path`). See [ROBOT interop guide](guides/robot-interop.md).
+
+```bash
+ontoindex robot validate path/to/ontology.owl
+ontoindex robot merge --inputs a.owl --inputs b.owl --output merged.owl
+ontoindex robot report path/to/ontology.owl --report report.tsv
+```
+
+| Subcommand | Description |
+|------------|-------------|
+| `validate` | `robot validate` on a file |
+| `merge` | Merge multiple ontology files |
+| `report` | Generate a ROBOT report |
+
+Optional `--robot-path` overrides the `robot` executable (same as VS Code `ontocode.robotPath`).
+
+**Exit:** matches ROBOT exit code (0 on success).
 
 ### `classify`
 

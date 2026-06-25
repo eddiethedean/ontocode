@@ -38,15 +38,36 @@ check_file_contains "docs/release-integrity.md" "VERSION=${VERSION}" "release-in
 check_file_contains "mkdocs.yml" "site_url: https://ontocode-vs.readthedocs.io/" "mkdocs site_url matches RTD"
 check_file_contains "README.md" "readthedocs.org/projects/ontocode-vs/badge" "RTD docs badge slug"
 
-# Reference page titles must not lag current release
-for file in docs/authoring.md docs/sql-reference.md docs/sparql-reference.md docs/patch-reference.md; do
-  if grep -qE '^# .+ \(OntoIndex v0\.5\)' "$file"; then
+# Reference page titles must match current release
+for file in docs/authoring.md docs/sql-reference.md docs/sparql-reference.md docs/patch-reference.md docs/cli-reference.md; do
+  if grep -qE "^# .+ \(OntoIndex v0\.5\)" "$file"; then
     echo "FAIL: stale v0.5 title in $file" >&2
+    fail=1
+  elif ! grep -qE "^# .+ \(OntoIndex v${VERSION%.*}\)" "$file"; then
+    echo "FAIL: reference title in $file should mention OntoIndex v${VERSION%.*}" >&2
     fail=1
   else
     echo "ok: reference title $file"
   fi
 done
+
+# Install pins must not reference an older release (allow changelog/migration history)
+STALE_PIN_PATHS=(README.md docs extension crates .github)
+if rg -q 'VERSION=0\.6\.0' "${STALE_PIN_PATHS[@]}" --glob '!**/changelog.md' --glob '!**/CHANGELOG.md' --glob '!**/migration/**' --glob '!**/design/**' 2>/dev/null; then
+  echo "FAIL: stale VERSION=0.6.0 found outside changelog/migration/design" >&2
+  rg -n 'VERSION=0\.6\.0' "${STALE_PIN_PATHS[@]}" --glob '!**/changelog.md' --glob '!**/CHANGELOG.md' --glob '!**/migration/**' --glob '!**/design/**' 2>/dev/null || true
+  fail=1
+else
+  echo "ok: no stale VERSION=0.6.0 install pins"
+fi
+
+# Enterprise eval must not claim OBO/ROBOT are unshipped when SHIPPED lists them
+if grep -qE 'OBO format \+ ROBOT interop.*Not shipped' docs/guides/enterprise-eval.md; then
+  echo "FAIL: enterprise-eval.md contradicts SHIPPED.md on OBO/ROBOT" >&2
+  fail=1
+else
+  echo "ok: enterprise-eval OBO/ROBOT status"
+fi
 
 # release-integrity must not pin an old example version
 if grep -qE '^VERSION=0\.5\.0' docs/release-integrity.md; then

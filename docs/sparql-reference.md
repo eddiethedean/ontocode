@@ -1,6 +1,6 @@
-# SPARQL reference (OntoIndex v0.6)
+# SPARQL reference (OntoIndex v0.7)
 
-> **Status:** Documents behavior in **OntoIndex v0.6.0**. Pre-1.0 APIs may change.
+> **Status:** Documents behavior in **OntoIndex v0.7.0**. Pre-1.0 APIs may change.
 > Canonical feature list: [What ships today](SHIPPED.md).
 
 Run SPARQL queries over the **indexed triple store** built from workspace ontology files.
@@ -58,7 +58,7 @@ More examples: [query cookbook on GitHub](https://github.com/eddiethedean/ontoco
 | Limit | Value |
 |-------|-------|
 | Query string size | 1 MiB (`MAX_QUERY_BYTES`) |
-| Result rows | 100,000 (error if exceeded) |
+| Result rows | 100,000 (silently truncated; LSP sets `truncated: true`) |
 
 See [workspace-limits.md](workspace-limits.md).
 

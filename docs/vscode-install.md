@@ -4,7 +4,7 @@
 
 ## Option A — VS Code Marketplace (recommended)
 
-1. Install [OntoCode from the Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) (v0.6.0+).
+1. Install [OntoCode from the Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) (v0.7.0+).
 2. **File → Open Folder…** and choose a directory with ontology files.
 3. **Trust** the workspace when prompted.
 4. Open the **OntoCode** activity bar and browse ontologies, classes, properties, individuals, and **Diagnostics**.
@@ -18,11 +18,13 @@ For a full walkthrough, see [First success in 10 minutes](guides/first-success.m
 1. Open [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) and download the latest `ontocode-*.vsix`.
 2. In VS Code: **Extensions** → **…** menu → **Install from VSIX…**
 3. Verify against `SHA256SUMS` — see [release-integrity.md](release-integrity.md).
-4. Open a folder containing ontology files (`.ttl`, `.owl`, `.rdf`, `.jsonld`, `.nt`, `.nq`, `.trig`).
+4. Open a folder containing ontology files (`.ttl`, `.obo`, `.owl`, `.rdf`, `.jsonld`, `.nt`, `.nq`, `.trig`).
 
 Release VSIX packages bundle `ontoindex-lsp` for Linux, macOS, and Windows.
 
 ## Option C — Build from source
+
+**Prerequisites:** Rust **1.88+**, Node **20+**, npm (see [contributing.md](contributing.md)).
 
 From the repository root:
 
@@ -38,7 +40,7 @@ Install the generated `.vsix` via **Install from VSIX…**, or press **F5** in V
 Use this only when the bundled server is missing or you are developing the LSP:
 
 ```bash
-cargo install ontoindex-lsp
+cargo install ontoindex-lsp --locked
 ```
 
 Set **OntoCode: Lsp Path** (`ontocode.lspPath`) to the absolute path of your `ontoindex-lsp` binary. **Trusted workspaces only** — ignored in Restricted Mode.
@@ -82,6 +84,7 @@ Indexing runs on workspace open. `ontocode.autoIndexOnOpen` is a legacy setting 
 - **OntoCode: Run Reasoner** — EL/RL/RDFS classification ([guide](guides/reasoner.md))
 - **OntoCode: Show Explanation** — justification for unsatisfiable class
 - **OntoCode: Set Hierarchy Mode** — asserted / inferred / combined class tree
+- **OntoCode: Open Class Graph** / **Property Graph** / **Import Graph** / **Neighborhood Graph** — visualization ([guide](guides/graph-visualization.md))
 - **OntoCode: Create Class / Property / Individual** — authoring in `.ttl` files
 - **Problems panel** — inline diagnostics from `ontoindex-lsp` after indexing
 - **OntoCode: Show Entity Inspector** / **Jump to Source** — from explorer context menu

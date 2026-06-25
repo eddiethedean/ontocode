@@ -76,6 +76,8 @@ nav:
       - Authoring (Turtle): authoring.md
       - Query Workbench: guides/query-workbench.md
       - Manchester editor: guides/manchester-editor.md
+      - Graph visualization: guides/graph-visualization.md
+      - OBO workflows: guides/obo-workflow.md
       - Reasoner: guides/reasoner.md
       - Protégé coexistence: guides/protege-coexistence.md
       - Best practices: guides/best-practices.md
@@ -91,10 +93,12 @@ nav:
       - CLI reference: cli-reference.md
       - Rust library: guides/rust-library.md
       - CI integration: ci-integration.md
+      - ROBOT interop: guides/robot-interop.md
       - SQL virtual tables: sql-reference.md
       - SPARQL: sparql-reference.md
       - Patch JSON: patch-reference.md
       - LSP API: lsp-api.md
+      - Webview protocol: webview-protocol.md
       - Examples:
           - Query cookbook: examples/queries.md
           - Sample patches: examples/patches.md
@@ -107,6 +111,7 @@ nav:
       - Migrations:
           - Migration index: migration/README.md
           - v0.5 → v0.6: migration/v0.6.md
+          - v0.6 → v0.7: migration/v0.7.md
       - Security: security.md
       - Release integrity: release-integrity.md
       - Errors: errors.md

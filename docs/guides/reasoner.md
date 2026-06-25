@@ -1,6 +1,6 @@
-# Reasoner guide (v0.6)
+# Reasoner guide
 
-OntoCode v0.6 adds **OWL EL classification** via [OntoLogos](https://github.com/eddiethedean/ontologos) 0.9.0, with optional **RL** and **RDFS** profiles.
+OntoCode ships **OWL EL classification** via [OntoLogos](https://github.com/eddiethedean/ontologos) 0.9.0, with optional **RL** and **RDFS** profiles (since v0.6.0).
 
 ## Run in VS Code
 

@@ -354,4 +354,30 @@ export interface PreviewRefactorResult {
 export interface ApplyRefactorResult {
   files_written: number;
   reindex_warning?: string;
+  workspace_edit?: LspWorkspaceEdit;
+}
+
+export interface LspPosition {
+  line: number;
+  character: number;
+}
+
+export interface LspRange {
+  start: LspPosition;
+  end: LspPosition;
+}
+
+export interface LspTextEdit {
+  range: LspRange;
+  new_text?: string;
+  newText?: string;
+}
+
+export interface LspTextDocumentEdit {
+  text_document: { uri: string; version?: number | null };
+  edits: LspTextEdit[];
+}
+
+export interface LspWorkspaceEdit {
+  document_changes?: LspTextDocumentEdit[];
 }

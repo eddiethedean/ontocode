@@ -370,4 +370,6 @@ pub struct ApplyRefactorResult {
     pub files_written: usize,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub reindex_warning: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub workspace_edit: Option<lsp_types::WorkspaceEdit>,
 }

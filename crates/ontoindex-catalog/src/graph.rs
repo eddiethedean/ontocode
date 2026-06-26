@@ -4,7 +4,8 @@ use crate::entity_api::SubclassEdge;
 use crate::OntologyCatalog;
 use ontoindex_core::{
     limits::{MAX_GRAPH_EDGES, MAX_GRAPH_NODES},
-    EntityKind,
+    EntityKind, AXIOM_KIND_DOMAIN, AXIOM_KIND_EQUIVALENT_CLASS, AXIOM_KIND_RANGE,
+    AXIOM_KIND_SUB_CLASS_OF,
 };
 use serde::{Deserialize, Serialize};
 use std::collections::{HashSet, VecDeque};
@@ -295,36 +296,34 @@ impl<'a> GraphBuilder<'a> {
             );
         }
 
-        for ann in &self.catalog.data().annotations {
-            let is_domain =
-                ann.predicate.ends_with("#domain") || ann.predicate.ends_with("/domain");
-            let is_range = ann.predicate.ends_with("#range") || ann.predicate.ends_with("/range");
-            if !is_domain && !is_range {
-                continue;
-            }
-            let Some(prop) = self.catalog.find_entity(&ann.subject) else {
+        for axiom in &self.catalog.data().axioms {
+            let edge_kind = match axiom.axiom_kind.as_str() {
+                AXIOM_KIND_DOMAIN => "domain",
+                AXIOM_KIND_RANGE => "range",
+                _ => continue,
+            };
+            let Some(prop) = self.catalog.find_entity(&axiom.subject) else {
                 continue;
             };
             if prop.kind != EntityKind::ObjectProperty && prop.kind != EntityKind::DataProperty {
                 continue;
             }
-            if !self.entity_allowed(&ann.subject, &request.filters) {
+            if !self.entity_allowed(&axiom.subject, &request.filters) {
                 continue;
             }
-            let edge_kind = if is_domain { "domain" } else { "range" };
             Self::add_node(
                 &mut nodes,
                 &mut node_ids,
                 &mut truncated,
-                ann.object.clone(),
-                self.label_for(&ann.object),
-                self.kind_for(&ann.object),
+                axiom.object.clone(),
+                self.label_for(&axiom.object),
+                self.kind_for(&axiom.object),
             );
             Self::add_edge(
                 &mut edges,
                 &mut truncated,
-                ann.subject.clone(),
-                ann.object.clone(),
+                axiom.subject.clone(),
+                axiom.object.clone(),
                 edge_kind.to_string(),
                 false,
             );
@@ -425,20 +424,34 @@ impl<'a> GraphBuilder<'a> {
             }
         }
 
-        for ann in &self.catalog.data().annotations {
-            if ann.predicate.ends_with("type") && ann.object.contains("Restriction") {
-                continue;
-            }
-            if ann.predicate.ends_with("someValuesFrom")
-                || ann.predicate.ends_with("allValuesFrom")
-                || ann.predicate.contains("ObjectProperty")
+        for axiom in &self.catalog.data().axioms {
+            if axiom.axiom_kind == AXIOM_KIND_EQUIVALENT_CLASS
+                && (axiom.object.starts_with("http://") || axiom.object.starts_with("https://"))
             {
                 adjacency.push((
-                    ann.subject.clone(),
-                    ann.object.clone(),
-                    "related".to_string(),
+                    axiom.subject.clone(),
+                    axiom.object.clone(),
+                    "equivalent_class".to_string(),
                     false,
                 ));
+                adjacency.push((
+                    axiom.object.clone(),
+                    axiom.subject.clone(),
+                    "equivalent_class".to_string(),
+                    false,
+                ));
+            } else if axiom.axiom_kind == AXIOM_KIND_SUB_CLASS_OF
+                && !axiom.object.starts_with("http://")
+                && !axiom.object.starts_with("https://")
+            {
+                for filler in restriction_fillers_in_expr(&axiom.object, self.catalog) {
+                    adjacency.push((
+                        axiom.subject.clone(),
+                        filler,
+                        "some_values_from".to_string(),
+                        false,
+                    ));
+                }
             }
         }
 
@@ -504,6 +517,17 @@ fn short_name(iri: &str) -> String {
     }
 }
 
+fn restriction_fillers_in_expr(expr: &str, catalog: &OntologyCatalog) -> Vec<String> {
+    catalog
+        .data()
+        .entities
+        .iter()
+        .filter(|e| e.kind == EntityKind::Class)
+        .filter(|e| expr.contains(&e.iri) || expr.contains(&format!(":{}", e.short_name)))
+        .map(|e| e.iri.clone())
+        .collect()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -541,5 +565,49 @@ mod tests {
             })
             .expect("graph");
         assert!(!payload.nodes.is_empty());
+    }
+
+    #[test]
+    fn property_graph_includes_domain_range_from_axioms() {
+        let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../fixtures");
+        let catalog = IndexBuilder::new().workspace(&root).build().expect("build");
+        let payload = GraphBuilder::new(&catalog)
+            .build(&GraphRequest {
+                graph_kind: "property".to_string(),
+                root_iri: None,
+                depth: 2,
+                include_inferred: false,
+                filters: GraphFilters::default(),
+            })
+            .expect("graph");
+        assert!(
+            payload.edges.iter().any(|e| e.kind == "domain"),
+            "expected domain edges from axioms"
+        );
+        assert!(
+            payload.edges.iter().any(|e| e.kind == "range"),
+            "expected range edges from axioms"
+        );
+    }
+
+    #[test]
+    fn neighborhood_graph_includes_restriction_fillers_from_axioms() {
+        let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../fixtures");
+        let catalog = IndexBuilder::new().workspace(&root).build().expect("build");
+        let patient = "http://example.org/clinic#Patient";
+        let record = "http://example.org/clinic#MedicalRecord";
+        let payload = GraphBuilder::new(&catalog)
+            .build(&GraphRequest {
+                graph_kind: "neighborhood".to_string(),
+                root_iri: Some(patient.to_string()),
+                depth: 2,
+                include_inferred: false,
+                filters: GraphFilters::default(),
+            })
+            .expect("graph");
+        assert!(
+            payload.edges.iter().any(|e| e.source == patient && e.target == record),
+            "expected Patient -> MedicalRecord restriction edge"
+        );
     }
 }

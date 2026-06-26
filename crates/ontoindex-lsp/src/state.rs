@@ -196,6 +196,21 @@ impl ServerState {
         }
     }
 
+    /// True when the path has an unsaved LSP buffer (not merely on disk).
+    pub fn is_document_open(&self, path: &Path) -> bool {
+        let guard = match self.inner.read() {
+            Ok(g) => g,
+            Err(_) => return false,
+        };
+        if guard.open_documents.contains_key(path) {
+            return true;
+        }
+        if let Ok(canonical) = path.canonicalize() {
+            return guard.open_documents.contains_key(&canonical);
+        }
+        false
+    }
+
     /// Prefer unsaved LSP buffer text; fall back to disk.
     pub fn document_text(&self, path: &Path) -> Option<String> {
         let guard = self.inner.read().ok()?;

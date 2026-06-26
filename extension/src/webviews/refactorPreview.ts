@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import { applyRefactor, findUsages, previewRefactor } from "../lsp/client";
+import { applyLspWorkspaceEdit } from "../lsp/workspaceEdit";
 import { RefactorPlan, RefactorRequest } from "../lsp/protocol";
 import { PanelHost } from "./panelHost";
 import type { WebviewMessage } from "./messages";
@@ -239,6 +240,14 @@ export class RefactorPreviewPanel {
       const requestSnapshot = this.request;
       try {
         const result = await applyRefactor(planSnapshot, requestSnapshot, false);
+        if (result.workspace_edit) {
+          const applied = await applyLspWorkspaceEdit(result.workspace_edit);
+          if (!applied) {
+            void vscode.window.showWarningMessage(
+              "OntoCode: refactor wrote to disk but editor sync was cancelled"
+            );
+          }
+        }
         if (result.reindex_warning) {
           void vscode.window.showWarningMessage(result.reindex_warning);
         }

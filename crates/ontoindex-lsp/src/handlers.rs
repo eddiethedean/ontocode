@@ -717,13 +717,15 @@ pub fn handle_apply_refactor(
             .map_err(|e| LspErrorPayload::refactor_failed(e.to_string()))?;
 
     if params.preview_only {
-        return Ok(ApplyRefactorResult { files_written: 0, reindex_warning: None });
+        return Ok(ApplyRefactorResult {
+            files_written: 0,
+            reindex_warning: None,
+            workspace_edit: None,
+        });
     }
 
     for change in &server_plan.changes {
-        if change.preview_text != change.original_text
-            && state.document_text(&change.path).is_some()
-        {
+        if change.preview_text != change.original_text && state.is_document_open(&change.path) {
             state
                 .set_document_text(change.path.clone(), change.preview_text.clone())
                 .map_err(LspErrorPayload::refactor_failed)?;
@@ -737,7 +739,8 @@ pub fn handle_apply_refactor(
         },
         None => Some("refactor applied but workspace root unknown".to_string()),
     };
-    Ok(ApplyRefactorResult { files_written, reindex_warning })
+    let workspace_edit = plan_to_workspace_edit(&server_plan);
+    Ok(ApplyRefactorResult { files_written, reindex_warning, workspace_edit })
 }
 
 pub fn handle_references(state: &ServerState, params: ReferenceParams) -> Option<Vec<Location>> {

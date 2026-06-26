@@ -159,11 +159,12 @@ export class EntityInspectorPanel {
 
   private async loadEntity(iri: string): Promise<void> {
     const iriAtStart = this.iri;
+    const requestId = ++this.activeRequestId;
     const { detail } = await getEntity(iri);
     if (iriAtStart !== this.iri) {
       return;
     }
-    this.reveal(detail, this.classOptions);
+    this.reveal(detail, this.classOptions, requestId);
   }
 
   private async runPatch(
@@ -177,6 +178,7 @@ export class EntityInspectorPanel {
       return;
     }
     const iriAtStart = this.iri;
+    const requestId = ++this.activeRequestId;
     try {
       const result = await applyAxiomPatch({
         document_uri: this.documentUri,
@@ -211,13 +213,13 @@ export class EntityInspectorPanel {
         if (result.entity_detail.entity.iri !== this.iri) {
           return;
         }
-        this.reveal(result.entity_detail, this.classOptions);
+        this.reveal(result.entity_detail, this.classOptions, requestId);
       } else if (this.iri) {
         const { detail } = await getEntity(this.iri);
         if (iriAtStart !== this.iri) {
           return;
         }
-        this.reveal(detail, this.classOptions);
+        this.reveal(detail, this.classOptions, requestId);
       }
       if (this.onRefresh) {
         await this.onRefresh();

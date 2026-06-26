@@ -118,7 +118,7 @@ export interface ManchesterValidationResult {
 export type HostMessage =
   | { type: "init"; panel: PanelKind }
   | { type: "loadEntity"; detail: EntityDetailPayload; classOptions: string[] }
-  | { type: "graphData"; graph: GraphPayload }
+  | { type: "graphData"; graph: GraphPayload; rootIri?: string }
   | { type: "preview"; text: string }
   | { type: "loadRefactorPlan"; plan: RefactorPlanPayload }
   | { type: "queryInit"; saved: SavedQuery[]; history: SavedQuery[]; sqlTables: string[] }

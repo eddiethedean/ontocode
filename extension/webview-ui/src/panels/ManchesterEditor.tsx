@@ -210,6 +210,7 @@ export function ManchesterEditorPanel(): JSX.Element {
           type="button"
           onClick={() => {
             const next = seq + 1;
+            seqRef.current = next;
             setSeq(next);
             validate(expression, axiomKind, next);
           }}

@@ -121,7 +121,8 @@ pub fn is_safe_replacement_boundary(text: &str, start: usize, end: usize) -> boo
     let before = text.as_bytes().get(start.wrapping_sub(1)).copied();
     let after = text.as_bytes().get(end).copied();
     let ok_before = before.is_none_or(|b| !b.is_ascii_alphanumeric() && b != b':' && b != b'#');
-    let ok_after = after.is_none_or(|b| !b.is_ascii_alphanumeric() && b != b':' && b != b'#');
+    let ok_after =
+        after.is_none_or(|b| !b.is_ascii_alphanumeric() && b != b':' && b != b'#' && b != b'/');
     ok_before && ok_after
 }
 
@@ -138,5 +139,17 @@ mod tests {
         assert!(!hunks.is_empty());
         assert!(out.contains("ex:Bar"));
         assert!(!out.contains("ex:Foo"));
+    }
+
+    #[test]
+    fn replace_iri_does_not_corrupt_slash_extended_iri() {
+        let ttl = "@prefix ex: <http://example.org#> .\n\
+                   ex:Role a owl:Class .\n\
+                   <http://example.org#Person/role> a owl:Class .\n";
+        let ns = BTreeMap::from([("ex".to_string(), "http://example.org#".to_string())]);
+        let (out, _) =
+            replace_iri_in_text(ttl, "http://example.org#Person", "http://example.org#Agent", &ns);
+        assert!(out.contains("<http://example.org#Person/role>"));
+        assert!(!out.contains("<http://example.org#Agent/role>"));
     }
 }

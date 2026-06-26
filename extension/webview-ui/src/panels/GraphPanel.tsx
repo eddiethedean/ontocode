@@ -71,6 +71,7 @@ export function GraphPanel(): JSX.Element {
   const [hideDeprecated, setHideDeprecated] = useState(false);
   const [graphKind, setGraphKind] = useState(initial.graphKind);
   const [rootIri, setRootIri] = useState<string | undefined>(initial.rootIri);
+  const [error, setError] = useState("");
   const hasGraphData = useRef(false);
 
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
@@ -97,8 +98,15 @@ export function GraphPanel(): JSX.Element {
       const msg: HostMessage = event.data;
       if (msg.type === "graphData") {
         hasGraphData.current = true;
+        setError("");
         setGraph(msg.graph);
         setGraphKind(msg.graph.graph_kind);
+        if (msg.rootIri !== undefined) {
+          setRootIri(msg.rootIri);
+        }
+      } else if (msg.type === "error") {
+        setGraph(null);
+        setError(msg.message);
       } else if (msg.type === "init" && msg.panel === "graph") {
         if (!hasGraphData.current) {
           requestGraph();
@@ -142,7 +150,9 @@ export function GraphPanel(): JSX.Element {
           </ReactFlow>
         ) : (
           <div style={{ padding: 16 }}>
-            <p className="muted">No graph data. Adjust filters or index the workspace.</p>
+            <p className="muted">
+              {error || "No graph data. Adjust filters or index the workspace."}
+            </p>
           </div>
         )}
       </div>

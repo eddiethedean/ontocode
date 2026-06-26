@@ -133,11 +133,8 @@ pub fn preview_migrate_namespace(
 
         for (prefix, ns) in &doc.namespaces {
             if normalize_namespace_base(ns) == from {
-                let new_ns = if to.ends_with('#') || to.ends_with('/') {
-                    to.clone()
-                } else {
-                    format!("{to}#")
-                };
+                let terminator = if ns.ends_with('/') { '/' } else { '#' };
+                let new_ns = format!("{to}{terminator}");
                 let (next, raw_hunks) = replace_prefix_uri(&preview, prefix, ns, &new_ns);
                 if next != preview {
                     preview = next;

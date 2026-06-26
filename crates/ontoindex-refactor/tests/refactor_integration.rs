@@ -87,6 +87,32 @@ fn migrate_namespace_updates_prefix_and_entity_iris() {
 }
 
 #[test]
+fn migrate_namespace_preserves_slash_prefix_terminator() {
+    let tmp = TempDir::new().unwrap();
+    let ws = tmp.path();
+    std::fs::create_dir_all(ws).unwrap();
+    let ttl = r#"@prefix ex: <http://example.org/org/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+ex:Person a owl:Class .
+<http://example.org/org/Person> a owl:Class .
+"#;
+    std::fs::write(ws.join("slash.ttl"), ttl).unwrap();
+    let catalog = build_catalog(ws);
+    let plan = preview_migrate_namespace(
+        &catalog,
+        "http://example.org/org/",
+        "http://example.org/v2/org/",
+        &empty_overrides(),
+    )
+    .expect("plan");
+    let preview = plan.changes.iter().find(|c| c.path.ends_with("slash.ttl")).expect("change");
+    assert!(preview.preview_text.contains("<http://example.org/v2/org/>"));
+    assert!(preview.preview_text.contains("@prefix ex: <http://example.org/v2/org/>"));
+    assert!(!preview.preview_text.contains("<http://example.org/v2/org#>"));
+}
+
+#[test]
 fn migrate_namespace_renames_multiple_angle_bracket_iris_in_one_file() {
     let tmp = TempDir::new().unwrap();
     let ws = tmp.path();

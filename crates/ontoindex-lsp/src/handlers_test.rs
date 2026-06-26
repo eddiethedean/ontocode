@@ -1,11 +1,13 @@
 use crate::handlers::{
-    handle_apply_axiom_patch, handle_find_usages, handle_get_catalog_snapshot, handle_get_entity,
-    handle_goto_definition, handle_hover, handle_query, handle_references, handle_sparql,
-    handle_standard_request, handle_workspace_symbol, StandardRequestOutcome,
+    handle_apply_axiom_patch, handle_apply_refactor, handle_find_usages,
+    handle_get_catalog_snapshot, handle_get_entity, handle_goto_definition, handle_hover,
+    handle_query, handle_references, handle_sparql, handle_standard_request,
+    handle_workspace_symbol, StandardRequestOutcome,
 };
 use crate::index_worker::IndexWorker;
 use crate::protocol::{
-    ApplyAxiomPatchParams, FindUsagesParams, GetEntityParams, QueryParams, SparqlParams,
+    ApplyAxiomPatchParams, ApplyRefactorParams, FindUsagesParams, GetEntityParams, QueryParams,
+    SparqlParams,
 };
 use crate::state::{path_to_uri, ServerState};
 use crossbeam_channel::unbounded;
@@ -15,6 +17,8 @@ use lsp_types::{
     ReferenceContext, ReferenceParams, TextDocumentIdentifier, TextDocumentPositionParams, Uri,
     WorkspaceSymbolParams, WorkspaceSymbolResponse,
 };
+use ontoindex_refactor::{preview_rename_iri, RefactorRequest};
+use std::collections::HashMap;
 use std::path::PathBuf;
 use std::str::FromStr;
 
@@ -373,4 +377,82 @@ fn apply_axiom_patch_uses_open_buffer_not_disk() {
         "patch should apply to open buffer, not disk-only source"
     );
     assert!(updated.contains("Human"));
+}
+
+fn refactor_fixture(path: &str) -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../tests/fixtures/refactor").join(path)
+}
+
+#[test]
+fn apply_refactor_tracks_only_open_buffers() {
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("people.ttl");
+    std::fs::copy(refactor_fixture("people.ttl"), &path).unwrap();
+
+    let state = ServerState::new();
+    let ws = dir.path().to_path_buf();
+    state.set_workspace_root(ws.clone()).expect("set workspace");
+    state.index_workspace(ws.clone()).expect("index");
+
+    let from = "http://example.org/org#Agent";
+    let to = "http://example.org/org#Worker";
+    let overrides = HashMap::new();
+    let plan = state
+        .with_catalog(|catalog| preview_rename_iri(catalog, from, to, &overrides).ok())
+        .flatten()
+        .expect("plan");
+
+    let (tx, _rx) = unbounded::<Message>();
+    let worker = IndexWorker::spawn(state.clone(), tx);
+
+    let result = handle_apply_refactor(
+        &state,
+        &worker,
+        ApplyRefactorParams {
+            plan: plan.clone(),
+            request: RefactorRequest::RenameIri {
+                from_iri: from.to_string(),
+                to_iri: to.to_string(),
+            },
+            preview_only: false,
+        },
+    )
+    .expect("apply refactor");
+
+    assert!(result.workspace_edit.is_some());
+    assert!(
+        state.open_document_overrides().is_empty(),
+        "closed files must not be injected into open_documents"
+    );
+
+    let disk = std::fs::read_to_string(&path).unwrap();
+    assert!(disk.contains("Worker") || disk.contains("ex:Worker"));
+
+    let buffer_marker = "# unsaved buffer marker\n";
+    let buffer = format!("{buffer_marker}{}", std::fs::read_to_string(&path).unwrap());
+    state.set_document_text(path.clone(), buffer.clone()).expect("open buffer");
+
+    let overrides = state.open_document_overrides();
+    let plan2 = state
+        .with_catalog(|catalog| preview_rename_iri(catalog, to, from, &overrides).ok())
+        .flatten()
+        .expect("plan2");
+
+    handle_apply_refactor(
+        &state,
+        &worker,
+        ApplyRefactorParams {
+            plan: plan2,
+            request: RefactorRequest::RenameIri {
+                from_iri: to.to_string(),
+                to_iri: from.to_string(),
+            },
+            preview_only: false,
+        },
+    )
+    .expect("apply refactor to open buffer");
+
+    let updated = state.document_text(&path).expect("buffer after refactor");
+    assert!(updated.contains(buffer_marker), "refactor should update open buffer in place");
+    assert!(updated.contains("Agent") || updated.contains("ex:Agent"));
 }

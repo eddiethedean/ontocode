@@ -430,6 +430,10 @@ fn insert_into_entity_block(
 ) -> Result<()> {
     let range = entity_primary_range(text, entity_iri, namespaces)?;
     let block = &text[range.start as usize..range.end as usize];
+    let insertion_key = insertion.trim().trim_end_matches(';').trim();
+    if block.contains(insertion_key) {
+        return Ok(());
+    }
     let trimmed = block.trim_end();
     let ends_with_dot = trimmed.ends_with('.');
     let ends_with_semi = trimmed.ends_with(';');
@@ -443,12 +447,10 @@ fn insert_into_entity_block(
     } else if !ends_with_semi {
         new_block = format!("{new_block} ;\n");
     }
-    if !new_block.contains(insertion.trim()) {
-        if let Some(pos) = new_block.rfind('.') {
-            new_block.insert_str(pos, &format!("\n{insertion}"));
-        } else {
-            new_block.push_str(insertion);
-        }
+    if let Some(pos) = new_block.rfind('.') {
+        new_block.insert_str(pos, &format!("\n{insertion}"));
+    } else {
+        new_block.push_str(insertion);
     }
     replace_range(text, range, &new_block);
     Ok(())
@@ -857,8 +859,9 @@ mod tests {
             entity_iri: "http://example.org/org#Cat".to_string(),
             other_iri: "http://example.org/org#Dog".to_string(),
         }];
+        let before = ttl.matches("owl:disjointWith").count();
         let result = apply_patches_to_text(ttl, &patches, true, &ns).expect("patch");
-        let preview = result.preview_text.expect("preview");
-        assert!(preview.contains("owl:disjointWith"));
+        let preview = result.preview_text.as_deref().unwrap_or(ttl);
+        assert_eq!(before, preview.matches("owl:disjointWith").count());
     }
 }

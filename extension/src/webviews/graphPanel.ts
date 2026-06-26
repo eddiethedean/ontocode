@@ -83,7 +83,11 @@ export class GraphPanel {
         include_inferred: this.options.includeInferred ?? false,
         filters: this.options.filters,
       });
-      this.host.postMessage({ type: "graphData", graph: result.graph });
+      this.host.postMessage({
+        type: "graphData",
+        graph: result.graph,
+        rootIri: this.options.rootIri,
+      });
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       this.host.postMessage({ type: "error", message: msg });

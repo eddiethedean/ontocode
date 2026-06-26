@@ -91,7 +91,7 @@ pub fn apply_patches(
     Ok(result)
 }
 
-fn atomic_write(path: &Path, contents: &str) -> Result<()> {
+pub fn atomic_write(path: &Path, contents: &str) -> Result<()> {
     let parent =
         path.parent().filter(|p| !p.as_os_str().is_empty()).unwrap_or_else(|| Path::new("."));
     fs::create_dir_all(parent)?;

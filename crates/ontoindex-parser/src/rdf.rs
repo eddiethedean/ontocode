@@ -1,12 +1,13 @@
 use crate::vocab::{Rdf, Rdfs, OWL};
 use ontoindex_core::{
     limits::{MAX_FILE_BYTES, MAX_TRIPLES_PER_FILE},
-    Annotation, Axiom, Entity, EntityKind, Import, Namespace, OntologyFormat, ParseStatus,
-    SourceLocation, AXIOM_KIND_SUB_CLASS_OF,
+    read_file_capped, Annotation, Axiom, Entity, EntityKind, Import, Namespace, OntologyFormat,
+    ParseStatus, SourceLocation, AXIOM_KIND_SUB_CLASS_OF,
 };
 use oxigraph::io::{RdfFormat, RdfParseError, RdfParser};
 use oxigraph::model::{Quad, Subject, Term};
 use std::collections::{BTreeMap, BTreeSet, HashMap};
+#[cfg(test)]
 use std::fs;
 use std::path::Path;
 use thiserror::Error;
@@ -65,14 +66,8 @@ pub fn parse_ontology_file(
         return crate::obo::parse_obo_file(path, ontology_id, content_hash, modified_time);
     }
     let _ = (content_hash, modified_time);
-    let metadata = fs::metadata(path)?;
-    if metadata.len() > MAX_FILE_BYTES {
-        return Err(ParseError::LimitExceeded(format!(
-            "file exceeds {MAX_FILE_BYTES} bytes: {}",
-            path.display()
-        )));
-    }
-    let content = fs::read(path)?;
+    let content = read_file_capped(path, MAX_FILE_BYTES)
+        .map_err(|e| ParseError::LimitExceeded(e.to_string()))?;
     let source_text = String::from_utf8_lossy(&content).into_owned();
     parse_ontology_text(path, format, ontology_id, &source_text, &content)
 }

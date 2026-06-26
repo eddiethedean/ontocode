@@ -1,3 +1,4 @@
+use crate::sparql_update::is_sparql_update;
 use crate::QueryError;
 use ontoindex_catalog::OntologyCatalog;
 use ontoindex_core::limits::{MAX_QUERY_BYTES, MAX_SPARQL_RESULT_ROWS};
@@ -21,17 +22,7 @@ pub fn run_sparql(catalog: &OntologyCatalog, sparql: &str) -> Result<SparqlResul
         )));
     }
 
-    let trimmed_upper = sparql.trim_start().to_ascii_uppercase();
-    if trimmed_upper.starts_with("INSERT")
-        || trimmed_upper.starts_with("DELETE")
-        || trimmed_upper.starts_with("LOAD")
-        || trimmed_upper.starts_with("CLEAR")
-        || trimmed_upper.starts_with("CREATE")
-        || trimmed_upper.starts_with("DROP")
-        || trimmed_upper.starts_with("MOVE")
-        || trimmed_upper.starts_with("COPY")
-        || trimmed_upper.starts_with("ADD")
-    {
+    if is_sparql_update(sparql) {
         return Err(QueryError::Sparql(
             "SPARQL update operations are not supported; use read-only queries".to_string(),
         ));

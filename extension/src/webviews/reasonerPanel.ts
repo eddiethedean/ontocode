@@ -85,6 +85,8 @@ export class ReasonerPanel {
   }
 
   private async run(profile: string, autoDetect: boolean, runId: number): Promise<void> {
+    this.runId = runId;
+    this.postToWebview({ command: "syncRunId", runId });
     try {
       const result = await runReasoner({ profile, auto_detect: autoDetect });
       if (runId !== this.runId) {
@@ -154,6 +156,10 @@ document.getElementById('run').onclick = () => {
 document.getElementById('inferred').onclick = () => vscode.postMessage({ command: 'showInferred' });
 window.addEventListener('message', (e) => {
   const msg = e.data;
+  if (msg.command === 'syncRunId' && typeof msg.runId === 'number') {
+    window.latestRunId = msg.runId;
+    return;
+  }
   if (msg.command !== 'result') return;
   if (msg.runId != null && msg.runId !== window.latestRunId) return;
   const status = document.getElementById('status');

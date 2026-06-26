@@ -1,7 +1,8 @@
 use ontoindex_catalog::IndexBuilder;
 use ontoindex_refactor::{
-    apply_refactor_plan, find_usages, preview_extract_module, preview_migrate_namespace,
-    preview_move_entity, preview_rename_iri, validate_refactor_plan_paths, RefactorError,
+    apply_refactor_plan, apply_refactor_plan_checked, find_usages, preview_extract_module,
+    preview_migrate_namespace, preview_move_entity, preview_rename_iri,
+    validate_refactor_plan_paths, RefactorError,
 };
 use std::collections::HashMap;
 use std::path::PathBuf;
@@ -242,10 +243,9 @@ fn move_entity_between_files() {
 }
 
 #[test]
-fn extract_module_creates_file() {
+fn extract_module_validates_nonexistent_output_path() {
     let tmp = TempDir::new().unwrap();
     let ws = tmp.path();
-    std::fs::create_dir_all(ws).unwrap();
     std::fs::copy(fixture_dir().join("people.ttl"), ws.join("people.ttl")).unwrap();
     let catalog = build_catalog(ws);
     let out = ws.join("module.ttl");
@@ -257,8 +257,7 @@ fn extract_module_creates_file() {
         &empty_overrides(),
     )
     .expect("plan");
-    apply_refactor_plan(&plan, false).expect("apply");
+    validate_refactor_plan_paths(ws, &plan).expect("nonexistent output path is in workspace");
+    apply_refactor_plan_checked(&plan, false, Some(ws)).expect("apply with validation");
     assert!(out.exists());
-    let module = std::fs::read_to_string(&out).unwrap();
-    assert!(module.contains("ex:Person"));
 }

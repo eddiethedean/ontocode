@@ -1,8 +1,8 @@
 use crate::OntologyCatalogData;
 use ontoindex_core::{
     limits::{MAX_ENTITIES, MAX_TOTAL_TRIPLES, MAX_TRIPLES_PER_FILE},
-    Annotation, Axiom, Entity, Import, Namespace, OntologyDocument, OntologyFormat, ParseStatus,
-    WorkspaceScanner,
+    read_to_string_capped, Annotation, Axiom, Entity, Import, Namespace, OntologyDocument,
+    OntologyFormat, ParseStatus, WorkspaceScanner, MAX_FILE_BYTES,
 };
 use ontoindex_diagnostics::{collect_diagnostics_with_sources, DiagnosticInput};
 use ontoindex_owl::{load_turtle_text, supports_horned_load};
@@ -162,6 +162,99 @@ impl IndexBuilder {
             }
         }
 
+        for (override_path, override_text) in &self.document_overrides {
+            if files.iter().any(|f| paths_equal(&f.path, override_path)) {
+                continue;
+            }
+            let format = OntologyFormat::from_extension(
+                override_path.extension().and_then(|e| e.to_str()).unwrap_or("ttl"),
+            );
+            if matches!(format, OntologyFormat::Unknown) {
+                continue;
+            }
+            let doc_id = format!("doc-{}", documents.len() + 1);
+            let parsed = parse_ontology_text(
+                override_path,
+                format,
+                &doc_id,
+                override_text,
+                override_text.as_bytes(),
+            )
+            .map_err(|e| CatalogError::Parse {
+                path: override_path.clone(),
+                message: e.to_string(),
+            })?;
+
+            triple_count += parsed.triple_count;
+            if triple_count > MAX_TOTAL_TRIPLES {
+                return Err(CatalogError::Core(ontoindex_core::OntoIndexError::Scanner(format!(
+                    "workspace exceeds maximum of {MAX_TOTAL_TRIPLES} triples"
+                ))));
+            }
+
+            if parsed.parse_status != ParseStatus::Error {
+                load_quads_into_store(&store, parsed.quads(), triple_count)?;
+            }
+
+            documents.push(OntologyDocument {
+                id: doc_id.clone(),
+                path: override_path.clone(),
+                format,
+                base_iri: parsed.base_iri.clone(),
+                imports: parsed.imports.clone(),
+                namespaces: parsed.namespaces.clone(),
+                parse_status: parsed.parse_status,
+                content_hash: buffer_content_hash(override_text),
+                modified_time: 0,
+                parse_message: parsed.parse_message.clone(),
+                parse_error_location: parsed.parse_error_location.clone(),
+            });
+
+            let doc_idx = documents.len() - 1;
+            let mut doc_entity_iris = Vec::new();
+
+            let semantics = semantics_for_document(
+                override_path,
+                format,
+                &doc_id,
+                &parsed,
+                Some(override_text),
+            )?;
+
+            for entity in semantics.entities {
+                if entities.len() >= MAX_ENTITIES && !entity_index.contains_key(&entity.iri) {
+                    return Err(CatalogError::Core(ontoindex_core::OntoIndexError::Scanner(
+                        format!("workspace exceeds maximum of {MAX_ENTITIES} entities"),
+                    )));
+                }
+                if let Some(&prev_doc_idx) = entity_to_document.get(&entity.iri) {
+                    if prev_doc_idx != doc_idx {
+                        document_entity_iris[prev_doc_idx].retain(|iri| iri != &entity.iri);
+                    }
+                }
+                entity_to_document.insert(entity.iri.clone(), doc_idx);
+                doc_entity_iris.push(entity.iri.clone());
+                if let Some(&existing_idx) = entity_index.get(&entity.iri) {
+                    merge_entity(&mut entities[existing_idx], &entity);
+                } else {
+                    let idx = entities.len();
+                    entity_index.insert(entity.iri.clone(), idx);
+                    entities.push(entity);
+                }
+            }
+            document_entity_iris.push(doc_entity_iris);
+            annotations.extend(semantics.annotations);
+            axioms.extend(semantics.axioms);
+            namespaces.extend(semantics.namespace_rows);
+            imports.extend(semantics.imports);
+
+            if entities.len() > MAX_ENTITIES {
+                return Err(CatalogError::Core(ontoindex_core::OntoIndexError::Scanner(format!(
+                    "workspace exceeds maximum of {MAX_ENTITIES} entities"
+                ))));
+            }
+        }
+
         let mut data = OntologyCatalogData {
             documents,
             entities,
@@ -270,7 +363,7 @@ fn semantics_for_document(
     let source_text = if let Some(text) = override_text {
         text.clone()
     } else {
-        std::fs::read_to_string(path).map_err(|e| CatalogError::Core(e.into()))?
+        read_to_string_capped(path, MAX_FILE_BYTES).map_err(CatalogError::Core)?
     };
 
     match load_turtle_text(path, doc_id, &source_text, parsed.quads(), &parsed.namespaces) {
@@ -295,6 +388,18 @@ fn semantics_for_document(
             })
         }
     }
+}
+
+fn paths_equal(a: &Path, b: &Path) -> bool {
+    a == b || a.canonicalize().ok().zip(b.canonicalize().ok()).is_some_and(|(x, y)| x == y)
+}
+
+fn buffer_content_hash(text: &str) -> String {
+    use std::collections::hash_map::DefaultHasher;
+    use std::hash::{Hash, Hasher};
+    let mut hasher = DefaultHasher::new();
+    text.hash(&mut hasher);
+    format!("buffer:{:016x}", hasher.finish())
 }
 
 fn load_quads_into_store(store: &Store, quads: &[Quad], triple_count_so_far: usize) -> Result<()> {

@@ -1,6 +1,7 @@
 use crate::error::{ReasonerError, Result};
 use ontoindex_catalog::ClassHierarchy;
 use ontoindex_core::WorkspaceScanner;
+use ontologos_bridge::{core_to_triples_all, merge_triples_into_ontology};
 use ontologos_core::Ontology;
 use ontologos_parser::load_ontology;
 use sha2::{Digest, Sha256};
@@ -94,8 +95,9 @@ fn load_ontology_from_temp(path: &Path, text: &str) -> Result<Ontology> {
 }
 
 fn merge_ontology(target: &mut Ontology, source: Ontology) -> Result<()> {
-    for (_, axiom) in source.axioms().iter_asserted() {
-        let _ = target.add_axiom(axiom.clone());
-    }
+    let triples =
+        core_to_triples_all(&source).map_err(|e| ReasonerError::Ontology(e.to_string()))?;
+    merge_triples_into_ontology(target, &triples, &[])
+        .map_err(|e| ReasonerError::Ontology(e.to_string()))?;
     Ok(())
 }

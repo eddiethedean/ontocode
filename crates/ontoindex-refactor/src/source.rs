@@ -1,4 +1,5 @@
 use crate::error::Result;
+use ontoindex_core::{read_to_string_capped, MAX_FILE_BYTES};
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 
@@ -12,5 +13,5 @@ pub fn read_source_text(path: &Path, overrides: &HashMap<PathBuf, String>) -> Re
             return Ok(text.clone());
         }
     }
-    Ok(std::fs::read_to_string(path)?)
+    read_to_string_capped(path, MAX_FILE_BYTES).map_err(Into::into)
 }

@@ -178,3 +178,13 @@ pub fn unsatisfiable_iris(
 ) -> Result<Vec<String>, String> {
     taxonomy.unsatisfiable.iter().map(|id| entity_iri(ontology, *id)).collect()
 }
+
+/// Run EL classification to detect unsatisfiable classes (used after RL/RDFS saturation).
+pub fn detect_unsatisfiable_classes(
+    ontology: &ontologos_core::Ontology,
+) -> Result<Vec<String>, String> {
+    use ontologos_el::ElClassifier;
+    let taxonomy =
+        ElClassifier::new().classify(ontology).map_err(|e| format!("unsat detection: {e}"))?;
+    unsatisfiable_iris(ontology, &taxonomy)
+}

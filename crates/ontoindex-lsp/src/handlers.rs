@@ -160,9 +160,13 @@ pub fn handle_apply_axiom_patch(
     index_worker: &IndexWorker,
     params: ApplyAxiomPatchParams,
 ) -> Result<ApplyAxiomPatchResult, LspErrorPayload> {
-    let workspace = state.effective_index_root().ok_or_else(LspErrorPayload::not_indexed)?;
-    let document_path = ontoindex_core::resolve_lsp_document_path(&params.document_uri, &workspace)
-        .map_err(|e| LspErrorPayload::patch_invalid(e.to_string()))?;
+    let workspace_root = state
+        .workspace_root()
+        .ok_or_else(|| LspErrorPayload::patch_invalid("workspace not initialized".to_string()))?;
+    state.with_catalog(|_| ()).ok_or_else(LspErrorPayload::not_indexed)?;
+    let document_path =
+        ontoindex_core::resolve_lsp_document_path(&params.document_uri, &workspace_root)
+            .map_err(|e| LspErrorPayload::patch_invalid(e.to_string()))?;
 
     let namespaces = state
         .with_catalog(|catalog| {
@@ -235,19 +239,18 @@ pub fn handle_apply_axiom_patch(
         | ontoindex_owl::PatchOp::RemoveDisjointClass { entity_iri, .. } => entity_iri.clone(),
     });
 
-    let mut reindex_warning = None;
-
     if patch_result.applied && !params.preview_only {
         if let Some(text) = &patch_result.preview_text {
-            std::fs::write(&document_path, text).map_err(|e| {
-                LspErrorPayload::patch_invalid(format!("failed to write document: {e}"))
-            })?;
             state
                 .set_document_text(document_path.clone(), text.clone())
                 .map_err(LspErrorPayload::patch_invalid)?;
+            ontoindex_owl::atomic_write(&document_path, text).map_err(|e| {
+                LspErrorPayload::patch_invalid(format!("failed to write document: {e}"))
+            })?;
         }
-        if let Err(msg) = index_worker.enqueue_sync(workspace) {
-            reindex_warning = Some(msg);
+        let index_root = state.effective_index_root().unwrap_or_else(|| workspace_root.clone());
+        if let Err(msg) = index_worker.enqueue_sync(index_root) {
+            return Err(LspErrorPayload::applied_not_indexed(msg));
         }
     }
 
@@ -255,7 +258,7 @@ pub fn handle_apply_axiom_patch(
         .and_then(|iri| state.with_catalog(|catalog| catalog.entity_detail(&iri)))
         .flatten();
 
-    Ok(ApplyAxiomPatchResult { patch: patch_result, entity_detail, reindex_warning })
+    Ok(ApplyAxiomPatchResult { patch: patch_result, entity_detail, reindex_warning: None })
 }
 
 pub fn handle_query(
@@ -735,9 +738,17 @@ pub fn handle_apply_refactor(
     let reindex_warning = match state.effective_index_root() {
         Some(root) => match index_worker.enqueue_sync(root) {
             Ok(_) => None,
-            Err(e) => Some(format!("refactor applied but reindex failed: {e}")),
+            Err(e) => {
+                return Err(LspErrorPayload::applied_not_indexed(format!(
+                    "refactor applied but reindex failed: {e}"
+                )));
+            }
         },
-        None => Some("refactor applied but workspace root unknown".to_string()),
+        None => {
+            return Err(LspErrorPayload::applied_not_indexed(
+                "refactor applied but workspace root unknown".to_string(),
+            ));
+        }
     };
     let workspace_edit = plan_to_workspace_edit(&server_plan);
     Ok(ApplyRefactorResult { files_written, reindex_warning, workspace_edit })

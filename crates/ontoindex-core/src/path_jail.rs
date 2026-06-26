@@ -94,9 +94,35 @@ pub fn validate_workspace_scope(
     requested: &Path,
     workspace_root: &Path,
 ) -> Result<PathBuf, String> {
-    let requested = canonical_workspace_root(requested)?;
-    if is_path_within(workspace_root, &requested) {
-        Ok(requested)
+    if path_has_parent_escape(requested) {
+        return Err("path escapes workspace via ..".to_string());
+    }
+    let root = canonical_workspace_root(workspace_root)?;
+
+    if let Ok(canonical) = requested.canonicalize() {
+        if is_path_within(&root, &canonical) {
+            return Ok(canonical);
+        }
+        return Err("workspace URI is outside the allowed workspace root".to_string());
+    }
+
+    if let Some(parent) = requested.parent().filter(|p| !p.as_os_str().is_empty()) {
+        if let Ok(canonical_parent) = parent.canonicalize() {
+            let candidate = canonical_parent.join(requested.file_name().unwrap_or_default());
+            if is_path_within(&root, &candidate) {
+                return Ok(candidate);
+            }
+        }
+    }
+
+    let candidate = if requested.is_absolute() {
+        normalize_lexical(requested)
+    } else {
+        normalize_lexical(&root.join(requested))
+    };
+
+    if is_path_within_lexical(&root, &candidate) {
+        Ok(candidate)
     } else {
         Err("workspace URI is outside the allowed workspace root".to_string())
     }
@@ -122,6 +148,17 @@ pub fn path_has_parent_escape(path: &Path) -> bool {
 mod tests {
     use super::*;
     use std::fs;
+
+    #[test]
+    fn validate_scope_allows_nonexistent_file_under_workspace() {
+        let dir = tempfile::tempdir().unwrap();
+        let root = canonical_workspace_root(dir.path()).unwrap();
+        let new_file = dir.path().join("module.ttl");
+        let resolved =
+            validate_workspace_scope(&new_file, &root).expect("new file under workspace");
+        assert!(is_path_within(&root, &resolved));
+        assert_eq!(resolved.file_name(), new_file.file_name());
+    }
 
     #[test]
     fn lsp_document_path_allows_nonexistent_file_under_workspace() {

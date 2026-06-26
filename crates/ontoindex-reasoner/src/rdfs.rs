@@ -4,8 +4,8 @@ use crate::explain::explain_unsatisfiable_rdfs;
 use crate::hierarchy::subclass_edges_from_ontology;
 use crate::input::ReasonerInput;
 use crate::result::{
-    build_inferred_hierarchy, new_inferences, ClassificationResult, ExplanationRequest,
-    ExplanationResult,
+    build_inferred_hierarchy, detect_unsatisfiable_classes, new_inferences, ClassificationResult,
+    ExplanationRequest, ExplanationResult,
 };
 use ontologos_rdfs::RdfsEngine;
 use std::time::Instant;
@@ -29,13 +29,16 @@ impl ReasonerAdapter for RdfsAdapter {
             .map_err(|e| ReasonerError::Classify(e.to_string()))?;
 
         let iri_edges = subclass_edges_from_ontology(&ontology, &input.asserted_hierarchy);
-        let inferred = build_inferred_hierarchy(&iri_edges, &[], &input.asserted_hierarchy);
+        let unsatisfiable =
+            detect_unsatisfiable_classes(&ontology).map_err(ReasonerError::Classify)?;
+        let inferred =
+            build_inferred_hierarchy(&iri_edges, &unsatisfiable, &input.asserted_hierarchy);
         let new_inferences = new_inferences(&input.asserted_hierarchy, &inferred.edges);
 
         Ok(ClassificationResult {
             profile_used: "rdfs".to_string(),
-            consistent: true,
-            unsatisfiable: Vec::new(),
+            consistent: unsatisfiable.is_empty(),
+            unsatisfiable,
             inferred,
             new_inferences,
             warnings: Vec::new(),

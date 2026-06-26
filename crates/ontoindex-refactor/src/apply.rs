@@ -1,6 +1,8 @@
 use crate::error::{RefactorError, Result};
 use crate::model::{FileChange, RefactorPlan};
-use ontoindex_core::{canonical_workspace_root, validate_workspace_scope};
+use ontoindex_core::{
+    canonical_workspace_root, read_to_string_capped, validate_workspace_scope, MAX_FILE_BYTES,
+};
 use std::fs;
 use std::io::Write;
 use std::path::{Path, PathBuf};
@@ -59,7 +61,11 @@ struct FileBackup {
 
 fn backup_file(path: &Path) -> std::io::Result<FileBackup> {
     let created = !path.exists();
-    let previous = if created { None } else { Some(fs::read_to_string(path)?) };
+    let previous = if created {
+        None
+    } else {
+        Some(read_to_string_capped(path, MAX_FILE_BYTES).map_err(std::io::Error::other)?)
+    };
     Ok(FileBackup { path: path.to_path_buf(), previous, created })
 }
 
@@ -99,21 +105,34 @@ pub fn apply_refactor_plan_checked(
         }
         let backup = backup_file(&change.path)?;
         if let Err(e) = atomic_write(&change.path, &change.preview_text) {
-            for b in backups.iter().rev() {
-                let _ = restore_backup(b);
-            }
+            rollback_backups(&backups)?;
             return Err(RefactorError::Io(e));
         }
         backups.push(backup);
         written += 1;
     }
     if written == 0 && !plan.changes.is_empty() {
-        for b in backups.iter().rev() {
-            let _ = restore_backup(b);
-        }
+        rollback_backups(&backups)?;
         return Err(RefactorError::Invalid("no files changed".to_string()));
     }
     Ok(written)
+}
+
+fn rollback_backups(backups: &[FileBackup]) -> Result<()> {
+    let mut restore_errors = Vec::new();
+    for b in backups.iter().rev() {
+        if let Err(e) = restore_backup(b) {
+            restore_errors.push(format!("{}: {e}", b.path.display()));
+        }
+    }
+    if restore_errors.is_empty() {
+        Ok(())
+    } else {
+        Err(RefactorError::Invalid(format!(
+            "refactor rollback failed for: {}",
+            restore_errors.join("; ")
+        )))
+    }
 }
 
 pub fn plan_touches_path(plan: &RefactorPlan, path: &Path) -> bool {

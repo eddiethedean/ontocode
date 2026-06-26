@@ -5,7 +5,13 @@ mod support;
 #[test]
 fn cli_classify_el_json() {
     let bin = support::ontoindex_binary();
-    let workspace = support::fixture_workspace();
+    let dir = tempfile::tempdir().expect("tempdir");
+    let workspace = dir.path().to_path_buf();
+    std::fs::copy(
+        support::fixture_workspace().join("reasoner-el.ttl"),
+        workspace.join("reasoner-el.ttl"),
+    )
+    .expect("copy fixture");
     let output = Command::new(&bin)
         .args(["classify", workspace.to_str().unwrap(), "--profile", "el", "--format", "json"])
         .output()
@@ -15,6 +21,7 @@ fn cli_classify_el_json() {
     let stdout = String::from_utf8_lossy(&output.stdout);
     let json: serde_json::Value = serde_json::from_str(stdout.trim()).expect("json output");
     assert_eq!(json.get("profile_used").and_then(|v| v.as_str()), Some("el"));
+    assert_eq!(json.get("consistent").and_then(|v| v.as_bool()), Some(true));
 }
 
 #[test]

@@ -5,6 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Fixed
+
+- Query Workbench dropped successful results (runId stale-guard never updated)
+- Namespace migration overwrote per-IRI renames when updating `@prefix` declarations
+- Multi-entity extract module used stale byte offsets in the same file
+- LSP rename/references: prefixed rename targets, error reporting, and reference range width
+- Explorer refreshed before refactor apply; disjoint axiom edit now passes `other_iri`
+- Manchester editor: restored data property/datatype pickers; panel CSS for v0.8 React panels
+
 ## [0.8.0] - 2026-06-26
 
 ### Added

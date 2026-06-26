@@ -219,9 +219,9 @@ export function registerCommands(
         try {
           await renameEntityIri(
             context.extensionUri,
-            resolveEntityIri(iri) ?? iri
+            resolveEntityIri(iri) ?? iri,
+            () => refreshExplorer(providers)
           );
-          await refreshExplorer(providers);
         } catch (err) {
           const message = err instanceof Error ? err.message : String(err);
           void vscode.window.showErrorMessage(message);
@@ -230,8 +230,9 @@ export function registerCommands(
     ),
     vscode.commands.registerCommand("ontocode.migrateNamespace", async () => {
       try {
-        await migrateNamespace(context.extensionUri);
-        await refreshExplorer(providers);
+        await migrateNamespace(context.extensionUri, () =>
+          refreshExplorer(providers)
+        );
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
         void vscode.window.showErrorMessage(message);
@@ -243,9 +244,9 @@ export function registerCommands(
         try {
           await moveEntity(
             context.extensionUri,
-            resolveEntityIri(iri) ?? iri
+            resolveEntityIri(iri) ?? iri,
+            () => refreshExplorer(providers)
           );
-          await refreshExplorer(providers);
         } catch (err) {
           const message = err instanceof Error ? err.message : String(err);
           void vscode.window.showErrorMessage(message);
@@ -254,8 +255,9 @@ export function registerCommands(
     ),
     vscode.commands.registerCommand("ontocode.extractModule", async () => {
       try {
-        await extractModule(context.extensionUri);
-        await refreshExplorer(providers);
+        await extractModule(context.extensionUri, () =>
+          refreshExplorer(providers)
+        );
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
         void vscode.window.showErrorMessage(message);

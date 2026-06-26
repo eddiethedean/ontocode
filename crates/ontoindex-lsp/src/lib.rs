@@ -155,6 +155,7 @@ fn handle_lsp_request(
             },
         )),
         StandardRequestOutcome::InvalidParams(err) => Some(error_response(id, err)),
+        StandardRequestOutcome::LspError(err) => Some(ontoindex_error_response(id, err)),
     }
 }
 

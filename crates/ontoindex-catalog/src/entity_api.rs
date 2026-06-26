@@ -1,8 +1,8 @@
 use crate::OntologyCatalog;
 use ontoindex_core::{
-    document_matches_entity, Entity, EntityKind, AXIOM_KIND_DISJOINT_CLASS,
-    AXIOM_KIND_DOMAIN, AXIOM_KIND_EQUIVALENT_CLASS, AXIOM_KIND_PROPERTY_CHAIN,
-    AXIOM_KIND_RANGE, AXIOM_KIND_SUB_CLASS_OF,
+    document_matches_entity, Entity, EntityKind, AXIOM_KIND_DISJOINT_CLASS, AXIOM_KIND_DOMAIN,
+    AXIOM_KIND_EQUIVALENT_CLASS, AXIOM_KIND_PROPERTY_CHAIN, AXIOM_KIND_RANGE,
+    AXIOM_KIND_SUB_CLASS_OF,
 };
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
@@ -37,6 +37,8 @@ pub struct EntityAxiomSummary {
     pub manchester: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub parent_iri: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub other_iri: Option<String>,
     pub editable: bool,
 }
 
@@ -171,6 +173,11 @@ fn axiom_summary(a: &ontoindex_core::Axiom, editable: bool) -> EntityAxiomSummar
     } else {
         None
     };
+    let other_iri = if a.axiom_kind == AXIOM_KIND_DISJOINT_CLASS && is_named_iri {
+        Some(a.object.clone())
+    } else {
+        None
+    };
     let kind_label = match a.axiom_kind.as_str() {
         AXIOM_KIND_EQUIVALENT_CLASS => "EquivalentClasses",
         AXIOM_KIND_DISJOINT_CLASS => "DisjointClasses",
@@ -188,6 +195,7 @@ fn axiom_summary(a: &ontoindex_core::Axiom, editable: bool) -> EntityAxiomSummar
         display: format!("{} {}", kind_label, a.object),
         manchester,
         parent_iri,
+        other_iri,
         editable: axiom_editable,
     }
 }

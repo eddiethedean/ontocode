@@ -163,21 +163,27 @@ export function EntityInspectorPanel(): JSX.Element {
                 {items.map((a, idx) => (
                   <li key={`${kind}-${idx}`}>
                     <code>{a.display}</code>{" "}
-                    {editable &&
-                    entity.kind === "class" &&
-                    a.editable &&
-                    kind !== "property_chain" ? (
+                        {editable &&
+                        entity.kind === "class" &&
+                        a.editable &&
+                        kind !== "property_chain" ? (
                       <button
                         type="button"
                         className="secondary"
                         onClick={() =>
                           getVsCodeApi().postMessage({
                             type: "openManchester",
-                            axiom: { kind: a.kind, manchester: a.manchester },
+                            axiom: {
+                              kind: a.kind,
+                              manchester: a.manchester,
+                              other_iri: a.other_iri,
+                            },
                           })
                         }
                       >
-                        Edit in Manchester
+                        {kind === "disjoint_class"
+                          ? "Edit disjoint"
+                          : "Edit in Manchester"}
                       </button>
                     ) : null}
                   </li>

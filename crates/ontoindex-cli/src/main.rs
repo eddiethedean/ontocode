@@ -9,7 +9,7 @@ use ontoindex_query::{
 };
 use ontoindex_reasoner::{classify, explain, ExplanationRequest, ReasonerId, WorkspaceInputLoader};
 use ontoindex_refactor::{
-    apply_refactor_plan, find_usages, preview_extract_module, preview_migrate_namespace,
+    apply_refactor_plan_checked, find_usages, preview_extract_module, preview_migrate_namespace,
     preview_move_entity, preview_rename_iri, RefactorPlan,
 };
 use std::path::PathBuf;
@@ -18,7 +18,7 @@ use std::path::PathBuf;
 #[command(
     name = "ontoindex",
     version,
-    about = "Local-first ontology index and query engine (OntoCode v0.7)"
+    about = "Local-first ontology index and query engine (OntoCode v0.8)"
 )]
 struct Cli {
     #[command(subcommand)]
@@ -373,58 +373,49 @@ fn main() -> Result<()> {
                 std::process::exit(output.exit_code);
             }
         }
-        Commands::Refactor { command } => {
-            match command {
-                RefactorCommands::Usages { workspace, iri, format } => {
-                    let catalog = build_catalog(&workspace)?;
-                    let usages = find_usages(&catalog, &iri);
-                    match format {
-                        OutputFormat::Json => {
-                            println!("{}", serde_json::to_string_pretty(&usages)?);
-                        }
-                        _ => {
-                            for u in usages {
-                                println!(
-                                    "{}:{}:{} {:?} {}",
-                                    u.file.display(),
-                                    u.line.unwrap_or(0),
-                                    u.column.unwrap_or(0),
-                                    u.kind,
-                                    u.context
-                                );
-                            }
+        Commands::Refactor { command } => match command {
+            RefactorCommands::Usages { workspace, iri, format } => {
+                let catalog = build_catalog(&workspace)?;
+                let usages = find_usages(&catalog, &iri);
+                match format {
+                    OutputFormat::Json => {
+                        println!("{}", serde_json::to_string_pretty(&usages)?);
+                    }
+                    _ => {
+                        for u in usages {
+                            println!(
+                                "{}:{}:{} {:?} {}",
+                                u.file.display(),
+                                u.line.unwrap_or(0),
+                                u.column.unwrap_or(0),
+                                u.kind,
+                                u.context
+                            );
                         }
                     }
                 }
-                RefactorCommands::Rename { workspace, from, to, preview, format } => {
-                    let catalog = build_catalog(&workspace)?;
-                    let plan = preview_rename_iri(&catalog, &from, &to)?;
-                    run_refactor_plan(&plan, preview, format)?;
-                }
-                RefactorCommands::MigrateNamespace { workspace, from, to, preview, format } => {
-                    let catalog = build_catalog(&workspace)?;
-                    let plan = preview_migrate_namespace(&catalog, &from, &to)?;
-                    run_refactor_plan(&plan, preview, format)?;
-                }
-                RefactorCommands::Move { workspace, iri, to, preview, format } => {
-                    let catalog = build_catalog(&workspace)?;
-                    let plan = preview_move_entity(&catalog, &iri, &to)?;
-                    run_refactor_plan(&plan, preview, format)?;
-                }
-                RefactorCommands::Extract {
-                    workspace,
-                    entities,
-                    out,
-                    leave_stub,
-                    preview,
-                    format,
-                } => {
-                    let catalog = build_catalog(&workspace)?;
-                    let plan = preview_extract_module(&catalog, &entities, &out, leave_stub)?;
-                    run_refactor_plan(&plan, preview, format)?;
-                }
             }
-        }
+            RefactorCommands::Rename { workspace, from, to, preview, format } => {
+                let catalog = build_catalog(&workspace)?;
+                let plan = preview_rename_iri(&catalog, &from, &to)?;
+                run_refactor_plan(&plan, preview, format)?;
+            }
+            RefactorCommands::MigrateNamespace { workspace, from, to, preview, format } => {
+                let catalog = build_catalog(&workspace)?;
+                let plan = preview_migrate_namespace(&catalog, &from, &to)?;
+                run_refactor_plan(&plan, preview, format)?;
+            }
+            RefactorCommands::Move { workspace, iri, to, preview, format } => {
+                let catalog = build_catalog(&workspace)?;
+                let plan = preview_move_entity(&catalog, &iri, &to)?;
+                run_refactor_plan(&plan, preview, format)?;
+            }
+            RefactorCommands::Extract { workspace, entities, out, leave_stub, preview, format } => {
+                let catalog = build_catalog(&workspace)?;
+                let plan = preview_extract_module(&catalog, &entities, &out, leave_stub)?;
+                run_refactor_plan(&plan, preview, format)?;
+            }
+        },
     }
     Ok(())
 }
@@ -441,9 +432,9 @@ fn run_refactor_plan(plan: &RefactorPlan, preview: bool, format: OutputFormat) -
             }
         }
     }
-    apply_refactor_plan(plan, preview)?;
+    let files_written = apply_refactor_plan_checked(plan, preview)?;
     if !preview {
-        println!("applied {} file(s)", plan.changes.len());
+        println!("applied {files_written} file(s)");
     }
     Ok(())
 }

@@ -114,6 +114,10 @@
         "title": "OntoCode: Jump to Source"
       },
       {
+        "command": "ontocode.openDiagnostic",
+        "title": "OntoCode: Open Diagnostic"
+      },
+      {
         "command": "ontocode.openEntity",
         "title": "Open Entity Inspector"
       },

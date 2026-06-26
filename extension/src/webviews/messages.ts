@@ -13,6 +13,8 @@ export interface PatchOp {
   entity_iri?: string;
   value?: string;
   parent_iri?: string;
+  manchester?: string;
+  other_iri?: string;
   [key: string]: unknown;
 }
 

@@ -4,6 +4,19 @@ Canonical source: [CHANGELOG.md on GitHub](https://github.com/eddiethedean/ontoc
 
 Migration guides: [Migration index](migration/README.md)
 
+## [0.8.0] - 2026-06-26
+
+### Added
+
+- `ontoindex-refactor` crate; CLI `ontoindex refactor`; LSP refactor methods and standard rename/references
+- React Query Workbench and Manchester Editor; Refactor Preview panel; disjoint class authoring
+
+### Changed
+
+- Workspace and extension version **0.8.0**
+
+See [GitHub CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) for the full v0.8.0 list.
+
 ## [0.7.0] - 2026-06-25
 
 ### Added

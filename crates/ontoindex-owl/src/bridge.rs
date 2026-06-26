@@ -4,13 +4,13 @@ use horned_owl::io::rdf::reader::ConcreteRDFOntology;
 use horned_owl::model::{
     AnnotationSubject, AnnotationValue, ClassExpression, RcAnnotatedComponent, RcStr,
 };
+use horned_owl::model::{ObjectPropertyExpression, SubObjectPropertyExpression};
 use horned_owl::ontology::component_mapped::{ComponentMappedIndex, ComponentMappedOntology};
 use ontoindex_core::{
     Annotation, Axiom, Entity, EntityKind, Import, Namespace, SourceLocation,
     AXIOM_KIND_DISJOINT_CLASS, AXIOM_KIND_DOMAIN, AXIOM_KIND_EQUIVALENT_CLASS,
     AXIOM_KIND_PROPERTY_CHAIN, AXIOM_KIND_RANGE, AXIOM_KIND_SUB_CLASS_OF,
 };
-use horned_owl::model::{ObjectPropertyExpression, SubObjectPropertyExpression};
 use std::collections::BTreeMap;
 
 const RDFS_LABEL: &str = "http://www.w3.org/2000/01/rdf-schema#label";
@@ -220,8 +220,7 @@ pub fn bridge_ontology(
 
     for sub_prop in idx.sub_object_property_of() {
         if let SubObjectPropertyExpression::ObjectPropertyChain(chain) = &sub_prop.sub {
-            let chain_display =
-                chain.iter().map(ope_to_iri).collect::<Vec<_>>().join(" o ");
+            let chain_display = chain.iter().map(ope_to_iri).collect::<Vec<_>>().join(" o ");
             axiom_counter += 1;
             result.axioms.push(Axiom {
                 id: format!("{ontology_id}#axiom-{axiom_counter}"),
@@ -370,8 +369,9 @@ mod tests {
             parser.for_reader(ttl.as_bytes()).collect::<std::result::Result<Vec<_>, _>>().unwrap();
         let namespaces =
             BTreeMap::from([("ex".to_string(), "http://example.org/org#".to_string())]);
-        let loaded = load_turtle_text(Path::new("disjoint-classes.ttl"), "doc-1", ttl, &quads, &namespaces)
-            .expect("load");
+        let loaded =
+            load_turtle_text(Path::new("disjoint-classes.ttl"), "doc-1", ttl, &quads, &namespaces)
+                .expect("load");
         assert!(loaded.bridge.axioms.iter().any(|a| a.axiom_kind == AXIOM_KIND_DISJOINT_CLASS));
         assert!(loaded.bridge.axioms.iter().any(|a| a.axiom_kind == AXIOM_KIND_PROPERTY_CHAIN));
     }

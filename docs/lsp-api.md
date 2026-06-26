@@ -30,7 +30,7 @@ LSP JSON uses **snake_case** for enums serialized from Rust (`EntityKind`, `Pars
 | `textDocument/definition` | Implemented |
 | Diagnostics | **Implemented** — server pushes `textDocument/publishDiagnostics` after each reindex |
 | Completion | Planned |
-| Rename | **Implemented** — `textDocument/rename` with `prepareRename` |
+| Rename | **Implemented** — `textDocument/rename` (no `prepareRename` yet) |
 | Find references | **Implemented** — `textDocument/references` |
 
 ## Custom methods
@@ -237,6 +237,9 @@ Apply Turtle patch operations. See [authoring.md](authoring.md).
 | `diagnostics` | `PatchDiagnostic[]` on failure (`severity`, `message`) |
 | `document_path` | Path to modified file |
 | `entity_detail` | Updated `EntityDetail` after successful apply (LSP only) |
+| `reindex_warning` | Present when apply succeeded but reindex failed |
+
+**`EntityAxiomSummary` kinds:** `sub_class_of`, `equivalent_class`, `disjoint_class`, `domain`, `range`, `property_chain` (property chains are view-only).
 
 See [patch-reference.md](patch-reference.md) for CLI `ApplyPatchResult` examples and [errors.md](errors.md) for failure codes.
 
@@ -322,7 +325,7 @@ Return structured IRI usages across the workspace catalog and Turtle text spans.
 
 **Params:** `{ "iri": "http://example.org/people#Person" }`
 
-**Result:** `{ "usages": Usage[] }` — each usage has `iri`, `file`, `range` (`start_byte`, `end_byte`, `line`, `column`), and `kind`.
+**Result:** `{ "usages": UsageSummary[] }` — each usage has `iri`, `referenced_iri`, `file`, `line`, `column`, `kind`, `context` (byte ranges are not serialized on the wire).
 
 ### `ontoindex/previewRefactor` (v0.8)
 
@@ -334,18 +337,18 @@ Build a refactor plan without writing files.
 |--------|--------|
 | `rename_iri` | `from_iri`, `to_iri` |
 | `migrate_namespace` | `from_base`, `to_base` |
-| `move_entity` | `entity_iri`, `target_path` |
-| `extract_module` | `entity_iris[]`, `output_path` |
+| `move_entity` | `entity_iri`, `target_file` |
+| `extract_module` | `entity_iris[]`, `output_file`, `leave_stub?` |
 
-**Result:** `RefactorPlan` — `{ changes: FileChange[], warnings: string[] }` where each change has `path`, `preview_text`, and `hunks`.
+**Result:** `RefactorPlan` — `{ changes: FileChange[], warnings: string[] }` where each change has `path`, `preview_text`, `original_text`, and `hunks`.
 
 ### `ontoindex/applyRefactor` (v0.8)
 
-Apply a previously previewed refactor plan, reindex, and return diagnostics.
+Apply a previously previewed refactor plan, reindex, and return write summary.
 
-**Params:** `{ "plan": RefactorPlan }`
+**Params:** `{ "plan": RefactorPlan, "preview_only"?: boolean }`
 
-**Result:** `{ "applied": boolean, "diagnostics": DiagnosticSummary[] }`
+**Result:** `{ "files_written": number, "reindex_warning"?: string }`
 
 ## Structured errors
 

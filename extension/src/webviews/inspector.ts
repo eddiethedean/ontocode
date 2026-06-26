@@ -111,12 +111,17 @@ export class EntityInspectorPanel {
       await this.runPatch(message.patches as PatchOp[], message.previewOnly);
     }
     if (message.type === "openManchester" && this.iri && this.documentUri) {
+      const axiomKind = message.axiom.kind;
+      const initialExpression =
+        axiomKind === "disjoint_class"
+          ? (message.axiom.other_iri ?? message.axiom.manchester ?? "")
+          : (message.axiom.manchester ?? "");
       await vscode.commands.executeCommand("ontocode.openManchesterEditor", {
         iri: this.iri,
         documentUri: this.documentUri,
-        axiomKind: message.axiom.kind,
-        initialExpression: message.axiom.manchester ?? "",
-        mode: message.axiom.manchester ? "edit" : "add",
+        axiomKind,
+        initialExpression,
+        mode: initialExpression ? "edit" : "add",
       });
     }
     if (message.type === "addManchesterAxiom" && this.iri && this.documentUri) {
@@ -141,7 +146,11 @@ export class EntityInspectorPanel {
     }
     if (message.type === "renameIri" && this.iri) {
       const { renameEntityIri } = await import("./refactorPreview");
-      await renameEntityIri(this.extensionUri, this.iri);
+      await renameEntityIri(this.extensionUri, this.iri, async () => {
+        if (this.iri) {
+          await this.loadEntity(this.iri);
+        }
+      });
     }
   }
 

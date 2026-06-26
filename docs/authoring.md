@@ -16,6 +16,7 @@ OntoCode provides **Turtle write-back** for simple and **Manchester** ontology e
 | Add / remove parent class (named IRI) | `add_sub_class_of`, `remove_sub_class_of` |
 | Add / remove complex `SubClassOf` (Manchester) | `add_complex_sub_class_of`, `remove_complex_sub_class_of` |
 | Add / remove / set equivalent class (Manchester) | `add_equivalent_class`, `remove_equivalent_class`, `set_equivalent_class` |
+| Add / remove disjoint class (named IRI) | `add_disjoint_class`, `remove_disjoint_class` |
 | Set deprecated flag | `set_deprecated` |
 
 Full JSON reference: [patch-reference.md](patch-reference.md).
@@ -40,13 +41,13 @@ For complex class expressions (restrictions, `and`/`or`, cardinality):
 
 1. Select a class in a `.ttl` file.
 2. In the Entity Inspector, click **Edit in Manchester** on a complex axiom row, or **Add Manchester axiom**.
-3. Choose axiom type: **SubClassOf** or **EquivalentClasses**.
+3. Choose axiom type: **SubClassOf**, **EquivalentClasses**, or **DisjointClasses** (named class IRI for disjoint).
 4. Enter a Manchester expression (e.g. `ex:hasRecord some ex:MedicalRecord`).
 5. Use **Insert** pickers for classes, object properties, data properties, and XSD datatypes.
 6. **Validate** shows parse diagnostics and an expression tree.
 7. **Preview** shows the Turtle fragment; **Apply** writes the patch.
 
-Manchester MVP scope: named classes, `and`/`or`, `some`/`only`, `min`/`max`/`exact` cardinality, and nesting. Disjoint axioms and property chains are deferred to v0.8.
+Manchester scope: named classes, `and`/`or`, `some`/`only`, `min`/`max`/`exact` cardinality, nesting, and **DisjointClasses** via IRI patch ops. Domain, range, and property chains appear in the axiom catalog (chains are view-only).
 
 ## Query workbench
 

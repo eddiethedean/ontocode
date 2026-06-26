@@ -53,9 +53,18 @@ pub struct RefactorPlan {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "kind", rename_all = "snake_case")]
 pub enum RefactorRequest {
-    RenameIri { from_iri: String, to_iri: String },
-    MigrateNamespace { from_base: String, to_base: String },
-    MoveEntity { entity_iri: String, target_file: PathBuf },
+    RenameIri {
+        from_iri: String,
+        to_iri: String,
+    },
+    MigrateNamespace {
+        from_base: String,
+        to_base: String,
+    },
+    MoveEntity {
+        entity_iri: String,
+        target_file: PathBuf,
+    },
     ExtractModule {
         entity_iris: Vec<String>,
         output_file: PathBuf,

@@ -38,8 +38,8 @@ export function RefactorPreviewPanel(): JSX.Element {
       <h2>Refactor preview</h2>
       {plan.warnings?.length ? (
         <ul className="warnings">
-          {plan.warnings.map((w) => (
-            <li key={w}>{w}</li>
+          {plan.warnings.map((w, i) => (
+            <li key={`${i}-${w}`}>{w}</li>
           ))}
         </ul>
       ) : null}

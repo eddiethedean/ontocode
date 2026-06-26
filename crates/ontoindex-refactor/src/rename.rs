@@ -14,7 +14,9 @@ pub fn preview_rename_iri(
     if from_iri == to_iri {
         return Err(RefactorError::Invalid("from and to IRI must differ".to_string()));
     }
-    if catalog.find_entity(from_iri).is_none() && find_usages_in_catalog(catalog, from_iri).is_empty() {
+    if catalog.find_entity(from_iri).is_none()
+        && find_usages_in_catalog(catalog, from_iri).is_empty()
+    {
         return Err(RefactorError::EntityNotFound(from_iri.to_string()));
     }
 
@@ -24,15 +26,15 @@ pub fn preview_rename_iri(
     for doc in &catalog.data().documents {
         if doc.format != OntologyFormat::Turtle || doc.parse_status != ParseStatus::Ok {
             if text_contains_iri(doc, from_iri) {
-                warnings.push(format!(
-                    "skipping non-Turtle or errored file: {}",
-                    doc.path.display()
-                ));
+                warnings
+                    .push(format!("skipping non-Turtle or errored file: {}", doc.path.display()));
             }
             continue;
         }
         let original = std::fs::read_to_string(&doc.path)?;
-        if !original.contains(from_iri) && !contains_prefixed_ref(&original, from_iri, &doc.namespaces) {
+        if !original.contains(from_iri)
+            && !contains_prefixed_ref(&original, from_iri, &doc.namespaces)
+        {
             continue;
         }
         let (preview_text, raw_hunks) =
@@ -51,12 +53,7 @@ pub fn preview_rename_iri(
             .collect();
         file_changes.insert(
             doc.path.clone(),
-            FileChange {
-                path: doc.path.clone(),
-                preview_text,
-                original_text: original,
-                hunks,
-            },
+            FileChange { path: doc.path.clone(), preview_text, original_text: original, hunks },
         );
     }
 
@@ -64,10 +61,7 @@ pub fn preview_rename_iri(
         warnings.push(format!("no Turtle files changed for IRI {from_iri}"));
     }
 
-    Ok(RefactorPlan {
-        changes: file_changes.into_values().collect(),
-        warnings,
-    })
+    Ok(RefactorPlan { changes: file_changes.into_values().collect(), warnings })
 }
 
 pub fn preview_migrate_namespace(
@@ -89,18 +83,16 @@ pub fn preview_migrate_namespace(
         .iter()
         .filter(|e| remap_iri(&e.iri, &from, &to).is_some())
         .map(|e| e.iri.clone())
-        .chain(
-            catalog.data().axioms.iter().flat_map(|a| {
-                let mut v = Vec::new();
-                if remap_iri(&a.subject, &from, &to).is_some() {
-                    v.push(a.subject.clone());
-                }
-                if a.object.starts_with(&from) {
-                    v.push(a.object.clone());
-                }
-                v
-            }),
-        )
+        .chain(catalog.data().axioms.iter().flat_map(|a| {
+            let mut v = Vec::new();
+            if remap_iri(&a.subject, &from, &to).is_some() {
+                v.push(a.subject.clone());
+            }
+            if a.object.starts_with(&from) {
+                v.push(a.object.clone());
+            }
+            v
+        }))
         .collect::<BTreeSet<_>>()
         .into_iter()
         .collect();
@@ -115,7 +107,7 @@ pub fn preview_migrate_namespace(
         if doc.format != OntologyFormat::Turtle {
             continue;
         }
-        let original = std::fs::read_to_string(&doc.path).unwrap_or_default();
+        let disk_original = std::fs::read_to_string(&doc.path).unwrap_or_default();
         for (prefix, ns) in &doc.namespaces {
             if normalize_namespace_base(ns) == from {
                 let new_ns = if to.ends_with('#') || to.ends_with('/') {
@@ -123,28 +115,25 @@ pub fn preview_migrate_namespace(
                 } else {
                     format!("{to}#")
                 };
-                let (preview, hunks) = replace_prefix_uri(&original, prefix, ns, &new_ns);
-                if preview != original {
-                    let entry = merged
-                        .changes
-                        .iter_mut()
-                        .find(|c| c.path == doc.path)
-                        .map(|c| c.path.clone());
-                    if let Some(path) = entry {
-                        if let Some(change) = merged.changes.iter_mut().find(|c| c.path == path) {
-                            change.preview_text = preview;
-                            change.hunks.extend(hunks.into_iter().map(|(s, e, o, n)| Hunk {
-                                start_byte: s as u64,
-                                end_byte: e as u64,
-                                old_text: o,
-                                new_text: n,
-                            }));
-                        }
-                    } else {
+                if let Some(change) = merged.changes.iter_mut().find(|c| c.path == doc.path) {
+                    let base_text = change.preview_text.clone();
+                    let (preview, hunks) = replace_prefix_uri(&base_text, prefix, ns, &new_ns);
+                    if preview != base_text {
+                        change.preview_text = preview;
+                        change.hunks.extend(hunks.into_iter().map(|(s, e, o, n)| Hunk {
+                            start_byte: s as u64,
+                            end_byte: e as u64,
+                            old_text: o,
+                            new_text: n,
+                        }));
+                    }
+                } else {
+                    let (preview, hunks) = replace_prefix_uri(&disk_original, prefix, ns, &new_ns);
+                    if preview != disk_original {
                         merged.changes.push(FileChange {
                             path: doc.path.clone(),
                             preview_text: preview.clone(),
-                            original_text: original.clone(),
+                            original_text: disk_original.clone(),
                             hunks: hunks
                                 .into_iter()
                                 .map(|(s, e, o, n)| Hunk {
@@ -212,9 +201,7 @@ fn find_usages_in_catalog(catalog: &OntologyCatalog, iri: &str) -> Vec<()> {
 }
 
 fn text_contains_iri(doc: &ontoindex_core::OntologyDocument, iri: &str) -> bool {
-    std::fs::read_to_string(&doc.path)
-        .map(|t| t.contains(iri))
-        .unwrap_or(false)
+    std::fs::read_to_string(&doc.path).map(|t| t.contains(iri)).unwrap_or(false)
 }
 
 fn contains_prefixed_ref(text: &str, iri: &str, namespaces: &BTreeMap<String, String>) -> bool {
@@ -227,7 +214,27 @@ fn contains_prefixed_ref(text: &str, iri: &str, namespaces: &BTreeMap<String, St
     false
 }
 
-pub fn preview_refactor(catalog: &OntologyCatalog, request: &crate::model::RefactorRequest) -> Result<RefactorPlan> {
+fn prefixed_curie(iri: &str, namespaces: &BTreeMap<String, String>) -> String {
+    let short = ontoindex_owl::short_name_from_iri(iri);
+    for (prefix, ns) in namespaces {
+        if iri.starts_with(ns) && !prefix.is_empty() {
+            return format!("{prefix}:{short}");
+        }
+    }
+    format!("<{iri}>")
+}
+
+struct EntityRemoval {
+    path: PathBuf,
+    start: u64,
+    end: u64,
+    replacement: String,
+}
+
+pub fn preview_refactor(
+    catalog: &OntologyCatalog,
+    request: &crate::model::RefactorRequest,
+) -> Result<RefactorPlan> {
     match request {
         crate::model::RefactorRequest::RenameIri { from_iri, to_iri } => {
             preview_rename_iri(catalog, from_iri, to_iri)
@@ -238,11 +245,9 @@ pub fn preview_refactor(catalog: &OntologyCatalog, request: &crate::model::Refac
         crate::model::RefactorRequest::MoveEntity { entity_iri, target_file } => {
             preview_move_entity(catalog, entity_iri, target_file)
         }
-        crate::model::RefactorRequest::ExtractModule {
-            entity_iris,
-            output_file,
-            leave_stub,
-        } => preview_extract_module(catalog, entity_iris, output_file, *leave_stub),
+        crate::model::RefactorRequest::ExtractModule { entity_iris, output_file, leave_stub } => {
+            preview_extract_module(catalog, entity_iris, output_file, *leave_stub)
+        }
     }
 }
 
@@ -264,17 +269,16 @@ pub fn preview_move_entity(
     let source_text = std::fs::read_to_string(&source_doc.path)?;
     let namespaces = ontoindex_owl::namespaces_for_text(&source_text, &source_doc.namespaces);
     let block_range = ontoindex_owl::entity_block_range(&source_text, entity, &namespaces)
-        .ok_or_else(|| RefactorError::Invalid(format!("entity block not found for {entity_iri}")))?;
+        .ok_or_else(|| {
+            RefactorError::Invalid(format!("entity block not found for {entity_iri}"))
+        })?;
 
     let block_text = source_text[block_range.start as usize..block_range.end as usize].to_string();
     let mut source_without = source_text.clone();
     source_without.replace_range(block_range.start as usize..block_range.end as usize, "");
 
-    let target_original = if target_file.exists() {
-        std::fs::read_to_string(target_file)?
-    } else {
-        String::new()
-    };
+    let target_original =
+        if target_file.exists() { std::fs::read_to_string(target_file)? } else { String::new() };
     let target_preview = if target_original.is_empty() {
         format!("{block_text}\n")
     } else {
@@ -312,10 +316,7 @@ pub fn preview_move_entity(
         ));
     }
 
-    Ok(RefactorPlan {
-        changes,
-        warnings: Vec::new(),
-    })
+    Ok(RefactorPlan { changes, warnings: Vec::new() })
 }
 
 pub fn preview_extract_module(
@@ -329,57 +330,74 @@ pub fn preview_extract_module(
     }
 
     let mut blocks = Vec::new();
-    let mut source_changes: BTreeMap<PathBuf, (String, String, Vec<Hunk>)> = BTreeMap::new();
+    let mut removals: Vec<EntityRemoval> = Vec::new();
+    let mut source_texts: BTreeMap<PathBuf, String> = BTreeMap::new();
     let mut prefix_lines = BTreeSet::new();
     let mut warnings = Vec::new();
 
     for iri in entity_iris {
-        let entity = catalog
-            .find_entity(iri)
-            .ok_or_else(|| RefactorError::EntityNotFound(iri.clone()))?;
+        let entity =
+            catalog.find_entity(iri).ok_or_else(|| RefactorError::EntityNotFound(iri.clone()))?;
         let doc = catalog
             .entity_document(iri)
             .ok_or_else(|| RefactorError::Invalid(format!("no document for {iri}")))?;
         if doc.format != OntologyFormat::Turtle {
             return Err(RefactorError::UnsupportedFormat(doc.format.as_str().to_string()));
         }
-        let text = std::fs::read_to_string(&doc.path)?;
+        let text = source_texts
+            .entry(doc.path.clone())
+            .or_insert_with(|| std::fs::read_to_string(&doc.path).expect("read source"));
         for line in text.lines() {
             if line.trim_start().starts_with("@prefix") {
                 prefix_lines.insert(line.trim().to_string());
             }
         }
-        let namespaces = ontoindex_owl::namespaces_for_text(&text, &doc.namespaces);
-        let block_range = ontoindex_owl::entity_block_range(&text, entity, &namespaces)
+        let namespaces = ontoindex_owl::namespaces_for_text(text, &doc.namespaces);
+        let block_range = ontoindex_owl::entity_block_range(text, entity, &namespaces)
             .ok_or_else(|| RefactorError::Invalid(format!("block not found for {iri}")))?;
         let block = text[block_range.start as usize..block_range.end as usize].to_string();
         blocks.push(block.clone());
 
-        let entry = source_changes.entry(doc.path.clone()).or_insert_with(|| {
-            (text.clone(), text.clone(), Vec::new())
-        });
-        if leave_stub {
-            let stub = format!(
+        let replacement = if leave_stub {
+            format!(
                 "{} a owl:Class ;\n    owl:deprecated true ;\n    rdfs:comment \"Moved to {}\" .\n",
-                ontoindex_owl::short_name_from_iri(iri),
+                prefixed_curie(iri, &namespaces),
                 output_file.display()
-            );
-            entry.1.replace_range(block_range.start as usize..block_range.end as usize, &stub);
-            entry.2.push(Hunk {
-                start_byte: block_range.start,
-                end_byte: block_range.end,
-                old_text: block,
-                new_text: stub,
-            });
+            )
         } else {
-            entry.1.replace_range(block_range.start as usize..block_range.end as usize, "");
-            entry.2.push(Hunk {
-                start_byte: block_range.start,
-                end_byte: block_range.end,
-                old_text: block,
-                new_text: String::new(),
+            String::new()
+        };
+        removals.push(EntityRemoval {
+            path: doc.path.clone(),
+            start: block_range.start,
+            end: block_range.end,
+            replacement,
+        });
+    }
+
+    let mut source_changes: BTreeMap<PathBuf, (String, String, Vec<Hunk>)> = BTreeMap::new();
+    let mut removals_by_path: BTreeMap<PathBuf, Vec<EntityRemoval>> = BTreeMap::new();
+    for removal in removals {
+        removals_by_path.entry(removal.path.clone()).or_default().push(removal);
+    }
+    for (path, mut path_removals) in removals_by_path {
+        path_removals.sort_by(|a, b| b.start.cmp(&a.start));
+        let original = source_texts.remove(&path).expect("source text");
+        let mut preview = original.clone();
+        let mut hunks = Vec::new();
+        for removal in path_removals {
+            let start = removal.start as usize;
+            let end = removal.end as usize;
+            let old_text = preview[start..end].to_string();
+            preview.replace_range(start..end, &removal.replacement);
+            hunks.push(Hunk {
+                start_byte: removal.start,
+                end_byte: removal.end,
+                old_text,
+                new_text: removal.replacement.clone(),
             });
         }
+        source_changes.insert(path, (original, preview, hunks));
     }
 
     let mut module_body = blocks.join("\n\n");
@@ -419,8 +437,5 @@ pub fn preview_extract_module(
         warnings.push("left deprecated stubs in source files".to_string());
     }
 
-    Ok(RefactorPlan {
-        changes,
-        warnings,
-    })
+    Ok(RefactorPlan { changes, warnings })
 }

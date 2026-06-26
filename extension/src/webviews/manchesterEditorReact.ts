@@ -24,7 +24,6 @@ export class ManchesterEditorPanel {
   public static current: ManchesterEditorPanel | undefined;
   private host: PanelHost;
   private options: ManchesterEditorOptions;
-  private validateSeq = 0;
 
   private constructor(host: PanelHost, options: ManchesterEditorOptions) {
     this.host = host;
@@ -184,6 +183,10 @@ export class ManchesterEditorPanel {
         this.options.initialExpression = expression;
         void vscode.window.showInformationMessage(
           "OntoCode: Manchester axiom applied"
+        );
+      } else if (!previewOnly && !result.applied) {
+        void vscode.window.showWarningMessage(
+          "OntoCode: Manchester patch was not applied (see diagnostics)"
         );
       }
     } catch (err) {

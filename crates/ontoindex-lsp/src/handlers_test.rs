@@ -1,17 +1,19 @@
 use crate::handlers::{
-    handle_apply_axiom_patch, handle_get_catalog_snapshot, handle_get_entity,
-    handle_goto_definition, handle_hover, handle_query, handle_sparql, handle_standard_request,
-    handle_workspace_symbol, StandardRequestOutcome,
+    handle_apply_axiom_patch, handle_find_usages, handle_get_catalog_snapshot, handle_get_entity,
+    handle_goto_definition, handle_hover, handle_query, handle_references, handle_sparql,
+    handle_standard_request, handle_workspace_symbol, StandardRequestOutcome,
 };
 use crate::index_worker::IndexWorker;
-use crate::protocol::{ApplyAxiomPatchParams, GetEntityParams, QueryParams, SparqlParams};
+use crate::protocol::{
+    ApplyAxiomPatchParams, FindUsagesParams, GetEntityParams, QueryParams, SparqlParams,
+};
 use crate::state::{path_to_uri, ServerState};
 use crossbeam_channel::unbounded;
 use lsp_server::Message;
 use lsp_types::{
     GotoDefinitionParams, GotoDefinitionResponse, HoverContents, HoverParams, Position,
-    TextDocumentIdentifier, TextDocumentPositionParams, Uri, WorkspaceSymbolParams,
-    WorkspaceSymbolResponse,
+    ReferenceContext, ReferenceParams, TextDocumentIdentifier, TextDocumentPositionParams, Uri,
+    WorkspaceSymbolParams, WorkspaceSymbolResponse,
 };
 use std::path::PathBuf;
 use std::str::FromStr;
@@ -94,6 +96,45 @@ fn get_catalog_snapshot_returns_fixture_entities() {
     assert_eq!(snapshot.documents.len(), 6);
     assert!(snapshot.entities.iter().any(|e| e.iri == "http://example.org/people#Person"));
     assert!(!snapshot.hierarchy.edges.is_empty());
+}
+
+#[test]
+fn find_usages_returns_person_references() {
+    let state = indexed_state();
+    let result = handle_find_usages(
+        &state,
+        FindUsagesParams { iri: "http://example.org/people#Person".to_string() },
+    )
+    .expect("find usages");
+    assert!(!result.usages.is_empty());
+}
+
+#[test]
+fn references_span_covers_token_not_single_character() {
+    let state = indexed_state();
+    let content = std::fs::read_to_string(fixture_workspace().join("example.ttl")).unwrap();
+    let person_line =
+        content.lines().position(|l| l.contains("ex:Person")).expect("Person line") as u32;
+    let refs = handle_references(
+        &state,
+        ReferenceParams {
+            text_document_position: TextDocumentPositionParams {
+                text_document: TextDocumentIdentifier { uri: fixture_ttl_uri() },
+                position: Position { line: person_line, character: 0 },
+            },
+            context: ReferenceContext { include_declaration: true },
+            work_done_progress_params: Default::default(),
+            partial_result_params: Default::default(),
+        },
+    )
+    .expect("references");
+    assert!(!refs.is_empty());
+    let first = &refs[0];
+    assert!(
+        first.range.end.character > first.range.start.character.saturating_add(1),
+        "reference range should span the token, got {:?}",
+        first.range
+    );
 }
 
 /// Contract test: LSP JSON must use snake_case enum strings (extension + docs/lsp-api.md).

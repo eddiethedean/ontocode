@@ -271,3 +271,42 @@ export function assertRunRobotResult(
   }
   return value as import("./protocol").RunRobotResult;
 }
+
+export function assertFindUsagesResult(
+  value: unknown
+): import("./protocol").FindUsagesResult {
+  if (!value || typeof value !== "object") {
+    throw new Error("Invalid findUsages result from language server");
+  }
+  const v = value as Record<string, unknown>;
+  if (!Array.isArray(v.usages)) {
+    throw new Error("Invalid findUsages result shape");
+  }
+  return value as import("./protocol").FindUsagesResult;
+}
+
+export function assertPreviewRefactorResult(
+  value: unknown
+): import("./protocol").PreviewRefactorResult {
+  if (!value || typeof value !== "object") {
+    throw new Error("Invalid previewRefactor result from language server");
+  }
+  const v = value as Record<string, unknown>;
+  if (!Array.isArray(v.changes)) {
+    throw new Error("Invalid previewRefactor result shape");
+  }
+  return value as import("./protocol").PreviewRefactorResult;
+}
+
+export function assertApplyRefactorResult(
+  value: unknown
+): import("./protocol").ApplyRefactorResult {
+  if (!value || typeof value !== "object") {
+    throw new Error("Invalid applyRefactor result from language server");
+  }
+  const v = value as Record<string, unknown>;
+  if (typeof v.files_written !== "number") {
+    throw new Error("Invalid applyRefactor result shape");
+  }
+  return value as import("./protocol").ApplyRefactorResult;
+}

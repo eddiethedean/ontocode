@@ -62,3 +62,11 @@ export function upsertSavedQuery(
   const without = saved.filter((s) => s.name !== entry.name);
   return [entry, ...without];
 }
+
+/** Returns true when an async query result should be delivered to the webview. */
+export function shouldDeliverQueryResult(
+  requestedRunId: number,
+  activeRunId: number
+): boolean {
+  return requestedRunId === activeRunId;
+}

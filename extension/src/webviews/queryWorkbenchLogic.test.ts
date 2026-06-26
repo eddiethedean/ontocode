@@ -1,4 +1,9 @@
-import { exportResultCsv, mergeHistory, upsertSavedQuery } from "./queryWorkbenchLogic";
+import {
+  exportResultCsv,
+  mergeHistory,
+  shouldDeliverQueryResult,
+  upsertSavedQuery,
+} from "./queryWorkbenchLogic";
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
@@ -18,6 +23,11 @@ test("mergeHistory caps entries", () => {
   );
   assert.equal(history.length, 1);
   assert.equal(history[0]?.text, "SELECT 2");
+});
+
+test("shouldDeliverQueryResult matches active run id", () => {
+  assert.equal(shouldDeliverQueryResult(3, 3), true);
+  assert.equal(shouldDeliverQueryResult(3, 0), false);
 });
 
 test("upsertSavedQuery replaces same name", () => {

@@ -37,18 +37,25 @@ pub fn find_usages(catalog: &OntologyCatalog, target_iri: &str) -> Vec<Usage> {
             if let Some(doc) = data.documents.iter().find(|d| d.id == axiom.ontology_id) {
                 let key = (doc.path.clone(), UsageKind::AxiomSubject, axiom.id.clone());
                 if seen.insert(key) {
-                    usages.push(usage_from_axiom(doc.path.clone(), target_iri, axiom, UsageKind::AxiomSubject));
+                    usages.push(usage_from_axiom(
+                        doc.path.clone(),
+                        target_iri,
+                        axiom,
+                        UsageKind::AxiomSubject,
+                    ));
                 }
             }
         }
-        if axiom.object == target_iri
-            || axiom.object.contains(target_iri)
-            || is_named_ref(&axiom.object, target_iri)
-        {
+        if axiom.object == target_iri || is_named_ref(&axiom.object, target_iri) {
             if let Some(doc) = data.documents.iter().find(|d| d.id == axiom.ontology_id) {
                 let key = (doc.path.clone(), UsageKind::AxiomObject, axiom.id.clone());
                 if seen.insert(key) {
-                    usages.push(usage_from_axiom(doc.path.clone(), target_iri, axiom, UsageKind::AxiomObject));
+                    usages.push(usage_from_axiom(
+                        doc.path.clone(),
+                        target_iri,
+                        axiom,
+                        UsageKind::AxiomObject,
+                    ));
                 }
             }
         }
@@ -73,7 +80,7 @@ pub fn find_usages(catalog: &OntologyCatalog, target_iri: &str) -> Vec<Usage> {
                 }
             }
         }
-        if ann.object == target_iri || ann.object.contains(target_iri) {
+        if ann.object == target_iri {
             if let Some(doc) = data.documents.iter().find(|d| d.id == ann.ontology_id) {
                 let key = (
                     doc.path.clone(),
@@ -98,7 +105,7 @@ pub fn find_usages(catalog: &OntologyCatalog, target_iri: &str) -> Vec<Usage> {
     }
 
     for imp in &data.imports {
-        if imp.import_iri == target_iri || imp.import_iri.contains(target_iri) {
+        if imp.import_iri == target_iri {
             if let Some(doc) = data.documents.iter().find(|d| d.id == imp.ontology_id) {
                 let key = (doc.path.clone(), UsageKind::Import, imp.import_iri.clone());
                 if seen.insert(key) {
@@ -125,11 +132,7 @@ pub fn find_usages(catalog: &OntologyCatalog, target_iri: &str) -> Vec<Usage> {
         if let Ok(text) = std::fs::read_to_string(&doc.path) {
             let namespaces = namespaces_for_text(&text, &doc.namespaces);
             let short = short_name_from_iri(target_iri);
-            let needles = [
-                format!("<{target_iri}>"),
-                target_iri.to_string(),
-                format!(":{short}"),
-            ];
+            let needles = [format!("<{target_iri}>"), format!(":{short}")];
             for (line_idx, line) in text.lines().enumerate() {
                 for needle in &needles {
                     if !line.contains(needle.as_str()) {
@@ -216,5 +219,5 @@ fn usage_from_axiom(
 }
 
 fn is_named_ref(object: &str, target_iri: &str) -> bool {
-    object == target_iri || object.contains(&format!("<{target_iri}>"))
+    object == target_iri || object == format!("<{target_iri}>")
 }

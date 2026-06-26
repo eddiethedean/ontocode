@@ -4,7 +4,10 @@ use std::collections::BTreeMap;
 
 /// Build replacement needles for an IRI in Turtle source (reserved for future prefix-aware renames).
 #[allow(dead_code)]
-pub fn iri_replacement_needles(iri: &str, namespaces: &BTreeMap<String, String>) -> Vec<(String, String)> {
+pub fn iri_replacement_needles(
+    iri: &str,
+    namespaces: &BTreeMap<String, String>,
+) -> Vec<(String, String)> {
     let short = short_name_from_iri(iri);
     let mut needles = vec![(format!("<{iri}>"), iri.to_string())];
     for (prefix, ns) in namespaces {
@@ -23,11 +26,7 @@ pub fn remap_iri(iri: &str, from_base: &str, to_base: &str) -> Option<String> {
     let from = normalize_namespace_base(from_base);
     let to = normalize_namespace_base(to_base);
     if iri == from || iri.starts_with(&format!("{from}#")) || iri.starts_with(&format!("{from}/")) {
-        let suffix = if iri.len() > from.len() {
-            &iri[from.len()..]
-        } else {
-            ""
-        };
+        let suffix = if iri.len() > from.len() { &iri[from.len()..] } else { "" };
         Some(format!("{to}{suffix}"))
     } else {
         None
@@ -47,7 +46,8 @@ pub fn replace_iri_in_text(
     let mut hunks = Vec::new();
     let mut result = text.to_string();
 
-    let mut replacements: Vec<(String, String)> = vec![(format!("<{old_iri}>"), format!("<{new_iri}>"))];
+    let mut replacements: Vec<(String, String)> =
+        vec![(format!("<{old_iri}>"), format!("<{new_iri}>"))];
     if old_iri != new_iri {
         replacements.push((old_iri.to_string(), new_iri.to_string()));
     }
@@ -62,7 +62,8 @@ pub fn replace_iri_in_text(
                     .map(|(base, _)| base.to_string())
                     .unwrap_or_default()
             });
-            let new_prefix = prefix_for_namespace(&new_ns, &namespaces).unwrap_or_else(|| prefix.clone());
+            let new_prefix =
+                prefix_for_namespace(&new_ns, &namespaces).unwrap_or_else(|| prefix.clone());
             let new_token = format!("{new_prefix}:{new_short}");
             if old_token != new_token {
                 replacements.push((old_token, new_token));
@@ -105,10 +106,7 @@ fn namespace_for_iri(iri: &str, namespaces: &BTreeMap<String, String>) -> Option
 }
 
 fn prefix_for_namespace(ns: &str, namespaces: &BTreeMap<String, String>) -> Option<String> {
-    namespaces
-        .iter()
-        .find(|(_, v)| normalize_iri(v) == normalize_iri(ns))
-        .map(|(p, _)| p.clone())
+    namespaces.iter().find(|(_, v)| normalize_iri(v) == normalize_iri(ns)).map(|(p, _)| p.clone())
 }
 
 fn is_safe_replacement_boundary(text: &str, start: usize, end: usize) -> bool {
@@ -127,12 +125,8 @@ mod tests {
     fn replace_iri_in_angle_brackets() {
         let ttl = "@prefix ex: <http://example.org#> .\nex:Foo a owl:Class .\n";
         let ns = BTreeMap::from([("ex".to_string(), "http://example.org#".to_string())]);
-        let (out, hunks) = replace_iri_in_text(
-            ttl,
-            "http://example.org#Foo",
-            "http://example.org#Bar",
-            &ns,
-        );
+        let (out, hunks) =
+            replace_iri_in_text(ttl, "http://example.org#Foo", "http://example.org#Bar", &ns);
         assert!(!hunks.is_empty());
         assert!(out.contains("ex:Bar"));
         assert!(!out.contains("ex:Foo"));

@@ -76,8 +76,26 @@ export function ManchesterEditorPanel(): JSX.Element {
     return () => clearTimeout(timer);
   }, [expression, axiomKind, entityIri, validate]);
 
+  const formatInsertTerm = (term: string): string => {
+    if (term.includes(":") && !term.startsWith("http")) {
+      return term;
+    }
+    const local = term.split(/[#/]/).pop() ?? term;
+    const prefixed = `ex:${local}`;
+    const lists = [
+      ...completions.classes,
+      ...completions.object_properties,
+      ...completions.data_properties,
+    ];
+    if (lists.includes(prefixed)) {
+      return prefixed;
+    }
+    return term;
+  };
+
   const insertTerm = (term: string): void => {
-    setExpression((prev) => (prev ? `${prev} ${term}` : term));
+    const formatted = formatInsertTerm(term);
+    setExpression((prev) => (prev ? `${prev} ${formatted}` : formatted));
   };
 
   return (
@@ -121,7 +139,7 @@ export function ManchesterEditorPanel(): JSX.Element {
               }}
             >
               <option value="">—</option>
-              {completions.classes.map((c) => (
+              {completions.classes.slice(0, 40).map((c) => (
                 <option key={c} value={c}>
                   {c}
                 </option>
@@ -138,7 +156,41 @@ export function ManchesterEditorPanel(): JSX.Element {
               }}
             >
               <option value="">—</option>
-              {completions.object_properties.map((c) => (
+              {completions.object_properties.slice(0, 40).map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Data prop{" "}
+            <select
+              onChange={(e) => {
+                if (e.target.value) {
+                  insertTerm(e.target.value);
+                }
+              }}
+            >
+              <option value="">—</option>
+              {completions.data_properties.slice(0, 40).map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label>
+            Datatype{" "}
+            <select
+              onChange={(e) => {
+                if (e.target.value) {
+                  insertTerm(e.target.value);
+                }
+              }}
+            >
+              <option value="">—</option>
+              {completions.datatypes.slice(0, 40).map((c) => (
                 <option key={c} value={c}>
                   {c}
                 </option>

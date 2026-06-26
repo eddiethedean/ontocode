@@ -1,4 +1,4 @@
-# CLI reference (OntoIndex v0.7)
+# CLI reference (OntoIndex v0.8)
 
 The `ontoindex` binary indexes ontology workspaces and exposes query, validation, patch, and reasoning commands.
 

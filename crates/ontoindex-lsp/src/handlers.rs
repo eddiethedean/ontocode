@@ -25,7 +25,9 @@ use ontoindex_core::{resolve_document_path, EntityKind, OntologyFormat};
 use ontoindex_reasoner::{
     classify, explain, ExplanationRequest, ReasonerId, ReasonerSnapshot, WorkspaceInputLoader,
 };
-use ontoindex_refactor::{apply_refactor_plan_checked, find_usages, preview_refactor, preview_rename_iri};
+use ontoindex_refactor::{
+    apply_refactor_plan_checked, find_usages, preview_refactor, preview_rename_iri,
+};
 use serde_json::Value;
 use std::path::Path;
 use std::str::FromStr;
@@ -297,6 +299,12 @@ pub fn handle_parse_manchester(
 
     let turtle_predicate = match params.axiom_kind.as_str() {
         "equivalent_class" => "owl:equivalentClass",
+        "disjoint_class" => {
+            return Err(LspErrorPayload::manchester_invalid(
+                "disjoint_class axioms use IRI patch ops (add_disjoint_class), not Manchester expressions"
+                    .to_string(),
+            ));
+        }
         _ => "rdfs:subClassOf",
     };
 
@@ -658,9 +666,7 @@ pub fn handle_find_usages(
     state
         .with_catalog(|catalog| {
             let usages = find_usages(catalog, &params.iri);
-            Ok(FindUsagesResult {
-                usages: usages.into_iter().map(usage_to_summary).collect(),
-            })
+            Ok(FindUsagesResult { usages: usages.into_iter().map(usage_to_summary).collect() })
         })
         .ok_or_else(LspErrorPayload::not_indexed)?
 }
@@ -698,10 +704,7 @@ pub fn handle_apply_refactor(
     Ok(ApplyRefactorResult { files_written, reindex_warning })
 }
 
-pub fn handle_references(
-    state: &ServerState,
-    params: ReferenceParams,
-) -> Option<Vec<Location>> {
+pub fn handle_references(state: &ServerState, params: ReferenceParams) -> Option<Vec<Location>> {
     let path = lsp_document_path(state, &params.text_document_position.text_document.uri)?;
     let position = params.text_document_position.position;
     let content = state.document_text(&path)?;
@@ -709,26 +712,7 @@ pub fn handle_references(
     state.with_catalog(|catalog| {
         let locations: Vec<Location> = find_usages(catalog, &iri)
             .into_iter()
-            .filter_map(|u| {
-                let uri = path_to_lsp_uri(&u.file)?;
-                let line_idx = u.line.unwrap_or(1).saturating_sub(1) as u32;
-                let byte_col = u.column.unwrap_or(0) as usize;
-                let line_text = state
-                    .document_text(&u.file)
-                    .and_then(|text| text.lines().nth(line_idx as usize).map(|s| s.to_string()));
-                let character = line_text
-                    .as_deref()
-                    .map(|l| byte_col_to_utf16(l, byte_col))
-                    .unwrap_or(byte_col as u32);
-                let range = Range {
-                    start: Position { line: line_idx, character },
-                    end: Position {
-                        line: line_idx,
-                        character: character.saturating_add(1),
-                    },
-                };
-                Some(Location { uri, range })
-            })
+            .filter_map(|u| usage_to_location(state, &u))
             .collect();
         Some(locations)
     })?
@@ -737,16 +721,26 @@ pub fn handle_references(
 pub fn handle_rename(
     state: &ServerState,
     params: RenameParams,
-) -> Option<WorkspaceEdit> {
-    let path = lsp_document_path(state, &params.text_document_position.text_document.uri)?;
+) -> Result<Option<WorkspaceEdit>, LspErrorPayload> {
+    let path = lsp_document_path(state, &params.text_document_position.text_document.uri)
+        .ok_or_else(LspErrorPayload::not_indexed)?;
     let position = params.text_document_position.position;
-    let content = state.document_text(&path)?;
-    let from_iri = iri_at_position(&content, position)?;
-    let to_iri = derive_renamed_iri(&from_iri, &params.new_name);
-    state.with_catalog(|catalog| {
-        let plan = preview_rename_iri(catalog, &from_iri, &to_iri).ok()?;
-        plan_to_workspace_edit(&plan)
-    })?
+    let content = state
+        .document_text(&path)
+        .ok_or_else(|| LspErrorPayload::not_found("document not available"))?;
+    let from_iri = iri_at_position(&content, position)
+        .ok_or_else(|| LspErrorPayload::not_found("no IRI at cursor"))?;
+    let to_iri = derive_renamed_iri(&from_iri, &params.new_name, &content);
+    let edit = state
+        .with_catalog(|catalog| {
+            let plan = preview_rename_iri(catalog, &from_iri, &to_iri)
+                .map_err(|e| LspErrorPayload::refactor_failed(e.to_string()))?;
+            plan_to_workspace_edit(&plan).ok_or_else(|| {
+                LspErrorPayload::refactor_failed("rename produced no file changes".to_string())
+            })
+        })
+        .ok_or_else(LspErrorPayload::not_indexed)??;
+    Ok(Some(edit))
 }
 
 fn usage_to_summary(u: ontoindex_refactor::Usage) -> UsageSummary {
@@ -761,9 +755,14 @@ fn usage_to_summary(u: ontoindex_refactor::Usage) -> UsageSummary {
     }
 }
 
-fn derive_renamed_iri(from_iri: &str, new_name: &str) -> String {
+fn derive_renamed_iri(from_iri: &str, new_name: &str, document_content: &str) -> String {
     if new_name.contains("://") {
         return new_name.to_string();
+    }
+    if let Some(expanded) = expand_iri_token(document_content, new_name) {
+        if expanded.starts_with("http://") || expanded.starts_with("https://") {
+            return expanded;
+        }
     }
     if let Some((base, _)) = from_iri.rsplit_once('#') {
         return format!("{base}#{new_name}");
@@ -772,6 +771,47 @@ fn derive_renamed_iri(from_iri: &str, new_name: &str) -> String {
         return format!("{base}/{new_name}");
     }
     new_name.to_string()
+}
+
+fn usage_to_location(state: &ServerState, usage: &ontoindex_refactor::Usage) -> Option<Location> {
+    let uri = path_to_lsp_uri(&usage.file)?;
+    let line_idx = usage.line.unwrap_or(1).saturating_sub(1) as u32;
+    let line_text = state
+        .document_text(&usage.file)
+        .and_then(|text| text.lines().nth(line_idx as usize).map(|s| s.to_string()))?;
+    let line = line_text.as_str();
+    let byte_col = usage.column.unwrap_or(0) as usize;
+    let (start_byte, end_byte) = if byte_col < line.len() {
+        let (start, end) = token_byte_range_at(line, byte_col);
+        (start, end)
+    } else {
+        (byte_col, byte_col.saturating_add(1))
+    };
+    let start_char = byte_col_to_utf16(line, start_byte);
+    let end_char = byte_col_to_utf16(line, end_byte);
+    Some(Location {
+        uri,
+        range: Range {
+            start: Position { line: line_idx, character: start_char },
+            end: Position { line: line_idx, character: end_char.max(start_char.saturating_add(1)) },
+        },
+    })
+}
+
+fn token_byte_range_at(line: &str, byte_col: usize) -> (usize, usize) {
+    let bytes = line.as_bytes();
+    let mut start = byte_col.min(bytes.len());
+    let mut end = byte_col.min(bytes.len());
+    while start > 0 && is_iri_char(bytes[start - 1]) {
+        start -= 1;
+    }
+    while end < bytes.len() && is_iri_char(bytes[end]) {
+        end += 1;
+    }
+    if start == end && byte_col < bytes.len() {
+        end = (byte_col + 1).min(bytes.len());
+    }
+    (start, end)
 }
 
 fn plan_to_workspace_edit(plan: &ontoindex_refactor::RefactorPlan) -> Option<WorkspaceEdit> {
@@ -914,6 +954,7 @@ pub enum StandardRequestOutcome {
     Ok(Value),
     MethodNotFound,
     InvalidParams(ResponseError),
+    LspError(LspErrorPayload),
 }
 
 pub fn handle_standard_request(
@@ -982,10 +1023,11 @@ pub fn handle_standard_request(
                 return StandardRequestOutcome::InvalidParams(invalid_params("rename"));
             };
             match handle_rename(state, params) {
-                Some(edit) => serde_json::to_value(edit)
+                Ok(Some(edit)) => serde_json::to_value(edit)
                     .map(StandardRequestOutcome::Ok)
                     .unwrap_or(StandardRequestOutcome::Ok(Value::Null)),
-                None => StandardRequestOutcome::Ok(Value::Null),
+                Ok(None) => StandardRequestOutcome::Ok(Value::Null),
+                Err(err) => StandardRequestOutcome::LspError(err),
             }
         }
         _ => StandardRequestOutcome::MethodNotFound,
@@ -1111,6 +1153,13 @@ fn expand_iri_token(content: &str, token: &str) -> Option<String> {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn derive_renamed_iri_expands_prefixed_name() {
+        let content = "@prefix ex: <http://example.org/people#> .\nex:Person a owl:Class .";
+        let iri = derive_renamed_iri("http://example.org/people#Person", "ex:Human", content);
+        assert_eq!(iri, "http://example.org/people#Human");
+    }
 
     #[test]
     fn expand_prefixed_iri() {

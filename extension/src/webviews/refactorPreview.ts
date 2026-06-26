@@ -4,6 +4,28 @@ import { RefactorPlan, RefactorRequest } from "../lsp/protocol";
 import { PanelHost } from "./panelHost";
 import type { WebviewMessage } from "./messages";
 
+function byteColToUtf16Position(
+  doc: vscode.TextDocument,
+  line: number,
+  byteCol: number
+): vscode.Position {
+  const lineText = doc.lineAt(line).text;
+  let byteIdx = 0;
+  let utf16 = 0;
+  for (let i = 0; i < lineText.length; i++) {
+    if (byteIdx >= byteCol) {
+      break;
+    }
+    const code = lineText.codePointAt(i)!;
+    byteIdx += code > 0xffff ? 4 : code > 0x7ff ? 3 : code > 0x7f ? 2 : 1;
+    utf16 += code > 0xffff ? 2 : 1;
+    if (code > 0xffff) {
+      i += 1;
+    }
+  }
+  return new vscode.Position(line, utf16);
+}
+
 export async function showEntityUsages(iri: string): Promise<void> {
   const result = await findUsages(iri);
   if (result.usages.length === 0) {
@@ -27,15 +49,16 @@ export async function showEntityUsages(iri: string): Promise<void> {
   );
   const editor = await vscode.window.showTextDocument(doc, vscode.ViewColumn.One);
   const line = Math.max(0, (picked.usage.line ?? 1) - 1);
-  const col = picked.usage.column ?? 0;
-  const pos = new vscode.Position(line, col);
+  const byteCol = picked.usage.column ?? 0;
+  const pos = byteColToUtf16Position(doc, line, byteCol);
   editor.selection = new vscode.Selection(pos, pos);
   editor.revealRange(new vscode.Range(pos, pos));
 }
 
 export async function renameEntityIri(
   extensionUri: vscode.Uri,
-  iri?: string
+  iri?: string,
+  onApplied?: () => Promise<void>
 ): Promise<void> {
   const from =
     iri ??
@@ -52,15 +75,20 @@ export async function renameEntityIri(
   if (!to) {
     return;
   }
-  await runRefactorPreview(extensionUri, {
-    kind: "rename_iri",
-    from_iri: from,
-    to_iri: to,
-  });
+  await runRefactorPreview(
+    extensionUri,
+    {
+      kind: "rename_iri",
+      from_iri: from,
+      to_iri: to,
+    },
+    onApplied
+  );
 }
 
 export async function migrateNamespace(
-  extensionUri: vscode.Uri
+  extensionUri: vscode.Uri,
+  onApplied?: () => Promise<void>
 ): Promise<void> {
   const from = await vscode.window.showInputBox({
     prompt: "Old namespace base IRI",
@@ -74,16 +102,21 @@ export async function migrateNamespace(
   if (!to) {
     return;
   }
-  await runRefactorPreview(extensionUri, {
-    kind: "migrate_namespace",
-    from_base: from,
-    to_base: to,
-  });
+  await runRefactorPreview(
+    extensionUri,
+    {
+      kind: "migrate_namespace",
+      from_base: from,
+      to_base: to,
+    },
+    onApplied
+  );
 }
 
 export async function moveEntity(
   extensionUri: vscode.Uri,
-  iri?: string
+  iri?: string,
+  onApplied?: () => Promise<void>
 ): Promise<void> {
   const entity =
     iri ??
@@ -99,14 +132,21 @@ export async function moveEntity(
   if (!target?.[0]) {
     return;
   }
-  await runRefactorPreview(extensionUri, {
-    kind: "move_entity",
-    entity_iri: entity,
-    target_file: target[0].fsPath,
-  });
+  await runRefactorPreview(
+    extensionUri,
+    {
+      kind: "move_entity",
+      entity_iri: entity,
+      target_file: target[0].fsPath,
+    },
+    onApplied
+  );
 }
 
-export async function extractModule(extensionUri: vscode.Uri): Promise<void> {
+export async function extractModule(
+  extensionUri: vscode.Uri,
+  onApplied?: () => Promise<void>
+): Promise<void> {
   const entitiesRaw = await vscode.window.showInputBox({
     prompt: "Entity IRIs (comma-separated)",
   });
@@ -120,15 +160,19 @@ export async function extractModule(extensionUri: vscode.Uri): Promise<void> {
   if (!output) {
     return;
   }
-  await runRefactorPreview(extensionUri, {
-    kind: "extract_module",
-    entity_iris: entitiesRaw
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean),
-    output_file: output.fsPath,
-    leave_stub: false,
-  });
+  await runRefactorPreview(
+    extensionUri,
+    {
+      kind: "extract_module",
+      entity_iris: entitiesRaw
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean),
+      output_file: output.fsPath,
+      leave_stub: false,
+    },
+    onApplied
+  );
 }
 
 export class RefactorPreviewPanel {

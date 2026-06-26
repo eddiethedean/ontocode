@@ -150,7 +150,7 @@ EL/RL/RDFS shipped in **v0.6.0** via OntoLogos 0.9.0. Full OWL 2 DL (`dl` / `aut
 
 **How does this compare to Protégé?**
 
-v0.7 targets Git + VS Code workflows: browse, lint, Turtle editing, SQL/SPARQL queries, Manchester MVP, **EL/RL/RDFS reasoning**, **graph visualization**, **OBO index**, and **ROBOT CLI wrappers**. Full Protégé parity (DL reasoning, disjoint axioms, full OBO write-back, semantic diff) is the v1.0 goal — see [design/PROTEGE_PARITY.md](design/PROTEGE_PARITY.md) and [SHIPPED.md](SHIPPED.md).
+v0.8 ships Git + VS Code workflows: browse, lint, Turtle editing, SQL/SPARQL queries, Manchester (subclass/equivalent/disjoint IRI), **refactoring** (rename, usages, migrate, move, extract), **EL/RL/RDFS reasoning**, **graph visualization**, **OBO index**, and **ROBOT CLI wrappers**. Full Protégé parity (DL reasoning, full OBO write-back, semantic diff) is the v1.0 goal — see [design/PROTEGE_PARITY.md](design/PROTEGE_PARITY.md) and [SHIPPED.md](SHIPPED.md).
 
 ## OBO and graphs (v0.7)
 
@@ -168,4 +168,4 @@ Yes. `ontoindex robot` and LSP `runRobot` spawn the external `robot` CLI. See [R
 
 **Which panels use React vs legacy HTML?**
 
-v0.7: **Entity Inspector** and **graph panels** are React. Query Workbench, Manchester editor, and reasoner panels remain legacy HTML until v0.8+.
+v0.8: **Entity Inspector**, **graph panels**, **Query Workbench**, **Manchester editor**, and **Refactor Preview** are React. Reasoner and explanation panels remain legacy HTML until v0.9.

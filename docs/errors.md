@@ -1,6 +1,6 @@
 # Errors reference
 
-Unified catalog of error codes, exit behavior, and failure modes for OntoIndex **v0.7**.
+Unified catalog of error codes, exit behavior, and failure modes for OntoIndex **v0.8**.
 
 ## CLI exit codes
 
@@ -42,8 +42,11 @@ Custom `ontoindex/*` method failures return JSON-RPC errors with `data` containi
 | `APPLIED_NOT_INDEXED` | Patch written to buffer/disk but reindex failed | Run Index Workspace; file may already be updated (`recoverable: true`) |
 | `REASONER_FAILED` | `runReasoner` failed (profile, parse, OntoLogos error) | Try another profile or fix ontology axioms |
 | `EXPLANATION_FAILED` | `getExplanation` failed | Run reasoner first or choose another class |
+| `REFACTOR_FAILED` | Refactor preview/apply failed | Check IRIs, Turtle-only scope, and preview plan |
+| `GRAPH_FAILED` | `getGraph` failed | Re-index workspace or reduce neighborhood depth |
+| `ROBOT_FAILED` | `runRobot` external process failed | Check `ontocode.robotPath` and ROBOT install |
 
-### Example JSON-RPC error envelope
+Successful patch/refactor apply may include `reindex_warning` in the result when disk write succeeded but reindex failed.
 
 ```json
 {

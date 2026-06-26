@@ -145,6 +145,7 @@ export interface EntityAxiomSummary {
   display: string;
   manchester?: string;
   parent_iri?: string;
+  other_iri?: string;
   editable: boolean;
 }
 

@@ -330,6 +330,66 @@
         "user_action": { "type": ["string", "null"] }
       },
       "additionalProperties": false
+    },
+    "UsageSummary": {
+      "type": "object",
+      "required": ["iri", "referenced_iri", "file", "kind", "context"],
+      "properties": {
+        "iri": { "type": "string" },
+        "referenced_iri": { "type": "string" },
+        "file": { "type": "string" },
+        "line": { "type": ["integer", "null"] },
+        "column": { "type": ["integer", "null"] },
+        "kind": { "type": "string" },
+        "context": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "FindUsagesResult": {
+      "type": "object",
+      "required": ["usages"],
+      "properties": {
+        "usages": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/UsageSummary" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "RefactorFileChange": {
+      "type": "object",
+      "required": ["path", "preview_text", "original_text", "hunks"],
+      "properties": {
+        "path": { "type": "string" },
+        "preview_text": { "type": "string" },
+        "original_text": { "type": "string" },
+        "hunks": { "type": "array" }
+      },
+      "additionalProperties": true
+    },
+    "RefactorPlan": {
+      "type": "object",
+      "required": ["changes"],
+      "properties": {
+        "changes": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/RefactorFileChange" }
+        },
+        "warnings": {
+          "type": "array",
+          "items": { "type": "string" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "ApplyRefactorResult": {
+      "type": "object",
+      "required": ["files_written"],
+      "properties": {
+        "files_written": { "type": "integer" },
+        "reindex_warning": { "type": ["string", "null"] }
+      },
+      "additionalProperties": false
     }
   }
 }

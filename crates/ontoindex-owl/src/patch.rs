@@ -794,4 +794,21 @@ mod tests {
         let cleaned = cleanup_block_separators(block);
         assert!(cleaned.contains("\"a  b\""));
     }
+
+    #[test]
+    fn add_disjoint_class_is_idempotent_when_axiom_exists() {
+        let ttl = include_str!("../../../fixtures/disjoint-classes.ttl");
+        let ns = BTreeMap::from([
+            ("ex".to_string(), "http://example.org/org#".to_string()),
+            ("owl".to_string(), "http://www.w3.org/2002/07/owl#".to_string()),
+            ("rdfs".to_string(), "http://www.w3.org/2000/01/rdf-schema#".to_string()),
+        ]);
+        let patches = vec![PatchOp::AddDisjointClass {
+            entity_iri: "http://example.org/org#Cat".to_string(),
+            other_iri: "http://example.org/org#Dog".to_string(),
+        }];
+        let result = apply_patches_to_text(ttl, &patches, true, &ns).expect("patch");
+        let preview = result.preview_text.expect("preview");
+        assert!(preview.contains("owl:disjointWith"));
+    }
 }

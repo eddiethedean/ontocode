@@ -11,9 +11,7 @@ mod usages;
 
 pub use apply::{apply_refactor_plan, apply_refactor_plan_checked, plan_touches_path};
 pub use error::{RefactorError, Result};
-pub use model::{
-    FileChange, Hunk, RefactorPlan, RefactorRequest, Usage, UsageKind,
-};
+pub use model::{FileChange, Hunk, RefactorPlan, RefactorRequest, Usage, UsageKind};
 pub use rename::{
     preview_extract_module, preview_migrate_namespace, preview_move_entity, preview_refactor,
     preview_rename_iri,

@@ -5,11 +5,10 @@ import { PanelHost } from "./panelHost";
 import type { WebviewMessage } from "./messages";
 import {
   SQL_TABLES,
-  STARTER_SPARQL,
-  STARTER_SQL,
   exportResultCsv,
   exportResultJson,
   mergeHistory,
+  shouldDeliverQueryResult,
   upsertSavedQuery,
 } from "./queryWorkbenchLogic";
 
@@ -86,10 +85,11 @@ export class QueryWorkbenchPanel {
     text: string,
     runId: number
   ): Promise<void> {
+    this.runId = runId;
     try {
       const result =
         mode === "sql" ? await runSqlQuery(text) : await runSparqlQuery(text);
-      if (runId !== this.runId) {
+      if (!shouldDeliverQueryResult(runId, this.runId)) {
         return;
       }
       this.lastResult = result;

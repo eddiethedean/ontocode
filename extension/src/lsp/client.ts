@@ -17,6 +17,9 @@ import {
   assertGetExplanationResult,
   assertGetGraphResult,
   assertRunRobotResult,
+  assertFindUsagesResult,
+  assertPreviewRefactorResult,
+  assertApplyRefactorResult,
 } from "./protocolGuards";
 import {
   ApplyAxiomPatchParams,
@@ -268,7 +271,7 @@ export async function runRobot(params: RunRobotParams): Promise<RunRobotResult> 
 export async function findUsages(iri: string): Promise<FindUsagesResult> {
   const c = requireClient();
   const result = await c.sendRequest<unknown>("ontoindex/findUsages", { iri });
-  return result as FindUsagesResult;
+  return assertFindUsagesResult(result);
 }
 
 export async function previewRefactor(
@@ -279,7 +282,7 @@ export async function previewRefactor(
     "ontoindex/previewRefactor",
     request
   );
-  return result as PreviewRefactorResult;
+  return assertPreviewRefactorResult(result);
 }
 
 export async function applyRefactor(
@@ -291,7 +294,7 @@ export async function applyRefactor(
     plan,
     preview_only: previewOnly,
   });
-  return result as ApplyRefactorResult;
+  return assertApplyRefactorResult(result);
 }
 
 function requireClient(): LanguageClient {

@@ -1,6 +1,6 @@
 # OntoIndex + OntoCode Documentation Package
 
-> **Note:** Documents in this folder describe **product vision, target architecture, and planned features**. For **what ships in v0.8.0**, see [What ships today](../SHIPPED.md) and the [user guides](https://ontocode-vs.readthedocs.io/en/latest/).
+> **Note:** Documents in this folder describe **product vision, target architecture, and planned features**. They are **not** commitments. For **what ships in v0.8.0**, see [What ships today](../SHIPPED.md). For planning without fixed dates, see [Release timeline (non-commitment)](../guides/release-timeline.md).
 
 This package contains **product vision and specification** documents. For **user-facing guides**, pick a documentation path:
 

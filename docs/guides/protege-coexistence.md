@@ -1,56 +1,66 @@
 # Protégé coexistence
 
-Interim guide for teams using Protégé today and evaluating OntoCode **v0.6**. A full migration guide is a v1.0 deliverable.
+Interim guide for teams using Protégé today and evaluating OntoCode **v0.8**. A full migration guide is a **v1.0 deliverable**.
 
-Canonical capability matrix: [What ships today](../SHIPPED.md). Gap analysis: [Protégé parity matrix](../design/PROTEGE_PARITY.md).
+Canonical capability matrix: [What ships today](../SHIPPED.md). Decision matrix: [Protégé vs OntoCode](protege-decision.md). Gap analysis: [Protégé parity matrix](../design/PROTEGE_PARITY.md).
 
-## Use OntoCode for
+## Use OntoCode for (v0.8)
 
-| Workflow | v0.6 support |
-|----------|--------------|
-| Browse ontologies in VS Code | Yes |
-| Edit labels, comments, simple parents in Turtle | Yes |
-| Complex `SubClassOf` / `EquivalentClasses` (Manchester MVP) | Yes |
-| SQL/SPARQL queries over workspace | Yes |
-| CI lint (`ontoindex validate`) | Yes |
-| EL/RL/RDFS classification | Yes |
-| Inferred hierarchy toggle | Yes (after reasoner run) |
+| Workflow | Status |
+|----------|--------|
+| Browse ontologies in VS Code | Shipped |
+| Edit labels, comments, parents in Turtle | Shipped |
+| Complex `SubClassOf` / `EquivalentClasses` / disjoint (Manchester) | Shipped |
+| Workspace refactoring (rename, migrate namespace, move, extract) | Shipped (Turtle; preview + apply) |
+| SQL/SPARQL queries over workspace | Shipped |
+| Graph visualization (class, property, import, neighborhood) | Shipped |
+| CI lint (`ontoindex validate`) | Shipped — suitable for production CI |
+| EL/RL/RDFS classification | Shipped |
+| Inferred hierarchy toggle | Shipped (after reasoner run) |
+| OBO format index + `obo_id` in explorer | Shipped (write-back: Turtle only in VS Code) |
+| ROBOT CLI in CI (`ontoindex robot`) | Shipped (requires Java + `robot` on PATH) |
 
 ## Keep Protégé for (today)
 
 | Workflow | Why |
 |----------|-----|
-| Full OWL 2 DL reasoning (`dl` / `auto`) | OntoLogos 1.0 not shipped |
-| Disjoint axioms, property chains, full axiom catalog | v0.8–v1.0 target |
-| OBO id workflows and ROBOT interop | v0.7b target |
-| Editing RDF/XML or OWL/XML in place | OntoCode write-back is Turtle-only |
+| Full OWL 2 DL reasoning (`dl` / `auto` profiles) | Requires OntoLogos 1.0 — not shipped in v0.8 |
+| Property chain **editing** | View-only in OntoCode axiom catalog until v1.0 |
+| Full OBO **write-back** in VS Code | OBO is indexed/read-only in inspector; Turtle write-back only |
+| Full OWL 2 DL axiom catalog | Partial Manchester + patches; see [Protégé parity](../design/PROTEGE_PARITY.md) |
+| Editing RDF/XML or OWL/XML in place | OntoCode write-back is **Turtle only** |
+| Workflows that depend on Protégé-specific plugins | Not replicated in OntoCode |
 
 ## Practical split workflow
 
-1. **Author** routine Turtle changes in VS Code (inspector, Manchester editor, patches)
+1. **Author** routine Turtle changes in VS Code (inspector, Manchester editor, refactoring, patches)
 2. **Validate** in CI with `ontoindex validate` and optionally `ontoindex classify --profile el`
-3. **Review** complex DL axioms or OBO-specific edits in Protégé when needed
-4. **Commit** `.ttl` changes through Git pull requests
+3. **Run ROBOT** in CI when needed — [ROBOT interop](robot-interop.md)
+4. **Review** DL-heavy axioms, property chains, or OBO-specific edits in Protégé when required
+5. **Commit** `.ttl` changes through Git pull requests
 
 ## File format notes
 
-- OntoCode indexes RDF/XML, JSON-LD, and N-Triples but **writes Turtle only**
-- Round-trip through Protégé: save as Turtle for Git-native workflows when possible
+- OntoCode indexes RDF/XML, JSON-LD, OBO, and N-Triples but **writes Turtle only**
+- Prefer Turtle in Git for shared authoring; use Protégé round-trip when teams still maintain OWL/XML
 - Example round-trip fixtures: `examples/protege-roundtrip/` in the repository
 
 ## Expectations on reasoning
 
-OntoIndex maintains separate Oxigraph/Horned-OWL and OntoLogos models in v0.6. Results may differ from Protégé on partial OWL mappings — check profile warnings in the Reasoner Results panel.
+OntoIndex uses separate Oxigraph/Horned-OWL and OntoLogos models. Results **may differ from Protégé** on partial OWL mappings — check profile warnings in the Reasoner Results panel and run a pilot comparison on your corpus — [Production evidence protocol](production-evidence.md).
 
 ## Evaluation checklist
 
 1. Complete [First success in 10 minutes](first-success.md) on a representative `.ttl` project
-2. Run CI validation — [CI integration](../ci-integration.md)
-3. Compare [Protégé parity matrix](../design/PROTEGE_PARITY.md) against your requirements
-4. Review [enterprise evaluation](enterprise-eval.md) with platform/security teams
+2. Run the [production evidence protocol](production-evidence.md) on your ontology corpus
+3. Run CI validation — [CI integration](../ci-integration.md)
+4. Compare [Protégé decision matrix](protege-decision.md) and [Protégé parity matrix](../design/PROTEGE_PARITY.md) against your requirements
+5. Review [enterprise evaluation](enterprise-eval.md) with platform/security teams
 
 ## Related
 
+- [Protégé vs OntoCode decision matrix](protege-decision.md)
 - [FAQ](../faq.md) — Protégé comparison
 - [Reasoner guide](reasoner.md)
+- [Refactoring guide](refactoring.md)
 - [Authoring](../authoring.md)

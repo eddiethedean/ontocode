@@ -110,7 +110,31 @@ done
 check_file_contains "docs/faq.md" "0\.8\.x" "faq crate version"
 check_file_contains "docs/guides/production-readiness.md" "v${VERSION}" "production-readiness version"
 
-# Enterprise eval must not claim OBO/ROBOT are unshipped when SHIPPED lists them
+# Stale protege-coexistence version banner
+if grep -qE 'evaluating OntoCode \*\*v0\.6\*\*|v0\.6 support' docs/guides/protege-coexistence.md; then
+  echo "FAIL: stale v0.6 content in docs/guides/protege-coexistence.md" >&2
+  fail=1
+else
+  echo "ok: protege-coexistence version"
+fi
+
+# Enterprise adoption pack pages
+for file in \
+  docs/guides/protege-decision.md \
+  docs/guides/production-evidence.md \
+  docs/guides/governance.md \
+  docs/guides/platform-compatibility.md \
+  docs/guides/release-timeline.md; do
+  if [[ ! -f "$file" ]]; then
+    echo "FAIL: missing enterprise doc $file" >&2
+    fail=1
+  else
+    echo "ok: $file exists"
+  fi
+done
+
+check_file_contains "docs/guides/protege-coexistence.md" "v0\.8" "protege-coexistence v0.8"
+check_file_contains "docs/guides/release-timeline.md" "non-commitment" "release-timeline disclaimer"
 if grep -qE 'OBO format \+ ROBOT interop.*Not shipped' docs/guides/enterprise-eval.md; then
   echo "FAIL: enterprise-eval.md contradicts SHIPPED.md on OBO/ROBOT" >&2
   fail=1

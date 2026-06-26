@@ -1,0 +1,59 @@
+# Release timeline (non-commitment)
+
+Planning ranges for OntoCode / OntoIndex. **These are product goals, not contractual delivery dates.** Shipped behavior is always defined by [What ships today](../SHIPPED.md) for the version you deploy.
+
+## Current release
+
+| Version | Status | Date (changelog) |
+|---------|--------|------------------|
+| **0.8.0** | Current | 2026-06-26 |
+
+Pre-1.0: minor releases may change library APIs, LSP JSON, and SQL virtual table columns — [README](https://github.com/eddiethedean/ontocode/blob/main/README.md).
+
+## Documented milestone goals (not dates)
+
+| Target | Goal | Shipped in |
+|--------|------|------------|
+| **v0.9** | Reasoner/explanation React migration; semantic Git diff; `ontologos-watch` hook | Planned |
+| **v1.0** | Protégé-competitive OWL + OBO in VS Code; OWL 2 DL via OntoLogos 1.0; full migration guide | Planned |
+
+Detailed engineering backlog: [v1.0 backlog](../design/v1.0_BACKLOG.md). Exit bar: [Protégé parity P0](../design/PROTEGE_PARITY.md) all green.
+
+**There is no documented calendar date for v1.0.** Enterprise plans should not assume a quarter or year without maintainer confirmation outside these docs.
+
+## What each near-term milestone implies
+
+### v0.9 (planned)
+
+- Semantic diff for PR review workflows
+- React reasoner/explanation panels (legacy HTML removed)
+- Does **not** by itself complete Protégé parity or DL reasoning
+
+### v1.0 (planned)
+
+- OWL 2 DL classification (`dl` / `auto`) when OntoLogos 1.0 ships
+- Fuller OBO and axiom catalog goals per parity matrix
+- Formal performance benchmarks (currently v1.0 backlog — [performance sizing](performance-sizing.md))
+- Full Protégé migration guide (today: [Protégé coexistence](protege-coexistence.md) + [decision matrix](protege-decision.md))
+
+## How to plan enterprise adoption without a v1.0 date
+
+1. **Now (v0.8):** CI gates + controlled IDE pilot — [production readiness](production-readiness.md)
+2. **Run** [production evidence protocol](production-evidence.md) on your corpus
+3. **Re-evaluate** at each pinned minor bump using [migration index](../migration/README.md)
+4. **Do not** retire Protégé for DL/OBO workflows until parity matrix items you need are green in SHIPPED
+
+## Design docs vs shipped docs
+
+| Document type | Trust for procurement |
+|---------------|----------------------|
+| [SHIPPED.md](../SHIPPED.md) | **Canonical** for deployed version |
+| User guides under VS Code / Rust tabs | **Implemented** behavior for current release |
+| Contributing → Design (specs, ADRs, ROADMAP) | **Target / vision** — may not be implemented |
+
+## Related
+
+- [Governance](governance.md)
+- [Roadmap (engineering detail)](../design/ROADMAP.md)
+- [Enterprise evaluation](enterprise-eval.md)
+- [Changelog](../changelog.md)

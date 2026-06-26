@@ -21,6 +21,12 @@ Maintainer checklist for publishing crates, binaries, and the VS Code extension.
 - [ ] [docs/faq.md](faq.md) — API version, Protégé comparison
 - [ ] [docs/errors.md](errors.md) / [docs/workspace-limits.md](workspace-limits.md) — behavior changes
 - [ ] [docs/guides/enterprise-eval.md](guides/enterprise-eval.md) — shipped capabilities
+- [ ] [docs/guides/protege-coexistence.md](guides/protege-coexistence.md) — v0.8 coexistence (must match SHIPPED)
+- [ ] [docs/guides/protege-decision.md](guides/protege-decision.md) — decision matrix
+- [ ] [docs/guides/production-evidence.md](guides/production-evidence.md) — self-benchmark protocol
+- [ ] [docs/guides/governance.md](guides/governance.md) — sustainability / support policy
+- [ ] [docs/guides/platform-compatibility.md](guides/platform-compatibility.md) — VS Code / OS matrix
+- [ ] [docs/guides/release-timeline.md](guides/release-timeline.md) — non-commitment timeline
 - [ ] [docs/guides/production-readiness.md](guides/production-readiness.md) — pilot criteria
 - [ ] [docs/guides/enterprise-deployment.md](guides/enterprise-deployment.md) — air-gap / CI rollout
 - [ ] [docs/guides/performance-sizing.md](guides/performance-sizing.md) — sizing tiers

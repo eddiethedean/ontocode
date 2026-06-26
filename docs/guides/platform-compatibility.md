@@ -1,0 +1,85 @@
+# Platform and VS Code compatibility
+
+Supported platforms and environments for OntoCode **v0.8.0**. This page states **what is documented and tested in project CI** — not a formal certification.
+
+Canonical matrix: [What ships today](../SHIPPED.md).
+
+## VS Code extension
+
+| Requirement | Documented value |
+|-------------|------------------|
+| Minimum VS Code | **1.85+** — [enterprise deployment](enterprise-deployment.md), [vscode-install](../vscode-install.md) |
+| Maximum VS Code tested | **Not documented** — test your target VS Code version in pilot |
+| Marketplace ID | `ontocode.ontocode` |
+| Offline install | Release VSIX + SHA256 — [release integrity](../release-integrity.md) |
+| Workspace trust | **Required** for custom `ontocode.lspPath`; Restricted Mode uses bundled LSP |
+
+Extension CI runs VS Code E2E on **1.85.0** and stable across Linux, macOS, Windows (see repository `.github/workflows/extension-vscode-e2e.yml` — workflow name referenced in README badges).
+
+## Bundled language server (`ontoindex-lsp`)
+
+Release VSIX bundles `ontoindex-lsp` for:
+
+| OS | Architecture (documented) |
+|----|-------------------------|
+| Linux | x64, arm64 |
+| macOS | Apple Silicon, Intel |
+| Windows | x64 |
+
+No separate LSP install required for standard Marketplace/VSIX use.
+
+## CLI release binaries
+
+| Platform | Pre-built `ontoindex` CLI on GitHub Releases |
+|----------|-----------------------------------------------|
+| Linux x64 | **Yes** |
+| Linux arm64 | **No** — use `cargo install` or VSIX-bundled LSP only |
+| macOS | **No** — use `cargo install ontoindex-cli --locked` |
+| Windows | **No** — use `cargo install` or CI on Linux runners |
+
+Pin version: `VERSION=0.8.0` — [getting started](../getting-started.md).
+
+## `cargo install` prerequisites
+
+| Tool | Version |
+|------|---------|
+| Rust | **1.88+** |
+| Node (extension build only) | **20** |
+
+## Remote and containerized development
+
+| Environment | Documented status |
+|-------------|-------------------|
+| Local desktop VS Code | **Supported** (primary) |
+| Remote-SSH | **Pilot only** — install VSIX on remote host; confirm LSP arch matches remote OS — [enterprise deployment](enterprise-deployment.md) |
+| Dev Containers | **Not certified** |
+| GitHub Codespaces | **Not certified** |
+| Web VS Code | **Not documented** |
+
+Pilot checklist for Remote-SSH:
+
+1. Install VSIX on the **remote** VS Code server
+2. Confirm bundled `ontoindex-lsp` matches remote OS/architecture
+3. Open ontology folder on remote filesystem
+4. Re-run [First success](first-success.md)
+
+## Multi-root workspaces
+
+| Feature | Behavior |
+|---------|----------|
+| Multi-root VS Code workspace | Only the **first** folder is indexed |
+
+Use single-root folders for ontology projects.
+
+## Optional external tools
+
+| Tool | When required |
+|------|---------------|
+| Java + ROBOT | `ontoindex robot` and LSP `runRobot` — [ROBOT interop](robot-interop.md) |
+| Java | Not required for core OntoIndex/OntoCode paths |
+
+## Related
+
+- [Install VS Code](../vscode-install.md)
+- [Enterprise deployment](enterprise-deployment.md)
+- [Troubleshooting](../troubleshooting.md)

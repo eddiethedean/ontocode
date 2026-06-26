@@ -6,7 +6,7 @@ Five-minute paths to success with OntoIndex (CLI) and OntoCode (VS Code).
 
 | Path | Requires |
 |------|----------|
-| VS Code extension | VS Code 1.85+ |
+| Minimum VS Code | **1.85+** — see [platform compatibility guide](guides/platform-compatibility.md) |
 | `cargo install` CLI | Rust 1.88+ |
 | Git clone + `cargo run` | Rust 1.88+ |
 | Release binaries | No Rust (download from GitHub Releases) |

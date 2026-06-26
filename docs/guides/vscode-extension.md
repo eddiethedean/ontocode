@@ -30,7 +30,7 @@
 | SQL and SPARQL in VS Code | [Query Workbench](query-workbench.md) |
 | Complex axioms (Manchester) | [Manchester editor](manchester-editor.md) |
 | EL / RL / RDFS classification | [Reasoner](reasoner.md) |
-| Working alongside Protégé | [Protégé coexistence](protege-coexistence.md) |
+| Working alongside Protégé | [Protégé coexistence](protege-coexistence.md) · [Protégé decision matrix](protege-decision.md) |
 | Team evaluation | [Enterprise evaluation](enterprise-eval.md) |
 
 ## Reference

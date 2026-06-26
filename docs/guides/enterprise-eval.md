@@ -9,8 +9,13 @@ Canonical capability matrix: [What ships today](../SHIPPED.md).
 | Document | Audience |
 |----------|----------|
 | [Production readiness](production-readiness.md) | Engineering leadership — pilot vs production criteria |
+| [Protégé vs OntoCode](protege-decision.md) | Ontology teams — when to adopt, keep Protégé, or split |
+| [Production evidence protocol](production-evidence.md) | DevOps / QA — self-benchmark on your corpus |
 | [Enterprise deployment](enterprise-deployment.md) | Platform / IT — VSIX mirror, CI, air-gap |
+| [Platform compatibility](platform-compatibility.md) | Platform — VS Code versions, OS/arch, remote dev |
 | [Performance and sizing](performance-sizing.md) | DevOps — limits, pilot benchmarks |
+| [Governance](governance.md) | Leadership — sustainability, releases, security policy |
+| [Release timeline (non-commitment)](release-timeline.md) | Planning — v0.9/v1.0 goals without fixed dates |
 | [LGPL compliance](lgpl-compliance.md) | Legal — horned-owl obligations |
 | [Protégé coexistence](protege-coexistence.md) | Ontology teams — split workflow with Protégé |
 
@@ -83,9 +88,11 @@ A full migration guide is a **v1.0 deliverable**. Today:
 
 1. Install from [Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) or offline VSIX
 2. Complete [First success in 10 minutes](first-success.md) on a representative `.ttl` project
-3. Run `ontoindex validate` and optionally `ontoindex classify --profile el` in a test CI job ([ci-integration.md](../ci-integration.md))
-4. Review [security policy](../security.md) with your platform team
-5. Compare [Protégé parity matrix](../design/PROTEGE_PARITY.md) against your requirements
+3. Run the [production evidence protocol](production-evidence.md) on your corpus
+4. Run `ontoindex validate` and optionally `ontoindex classify --profile el` in a test CI job ([ci-integration.md](../ci-integration.md))
+5. Review [Protégé decision matrix](protege-decision.md) and [platform compatibility](platform-compatibility.md)
+6. Review [security policy](../security.md) and [governance](governance.md) with your platform team
+7. Compare [Protégé parity matrix](../design/PROTEGE_PARITY.md) against your requirements; read [release timeline](release-timeline.md) for planning (no fixed v1.0 date)
 
 ## Questions
 

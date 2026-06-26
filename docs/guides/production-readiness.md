@@ -34,7 +34,7 @@ OntoCode v0.8 is **not** documented as a general-availability replacement for Pr
 Complete these on a **representative** ontology project (not only tutorial fixtures):
 
 1. **Functional fit** — Compare [Protégé parity](../design/PROTEGE_PARITY.md) against required axiom types and reasoning profile.
-2. **Sizing** — Confirm workspace within [limits](../workspace-limits.md); run timing on your corpus — [performance and sizing](performance-sizing.md).
+2. **Sizing** — Confirm workspace within [limits](../workspace-limits.md); run [production evidence protocol](production-evidence.md) on your corpus — [performance and sizing](performance-sizing.md).
 3. **Security** — Platform review of [security policy](../security.md) and [enterprise deployment](enterprise-deployment.md) (LSP stdio, Restricted Mode, path jail).
 4. **Legal** — Review LGPL (`horned-owl`) and third-party notices — [LGPL compliance](lgpl-compliance.md).
 5. **CI proof** — `validate` and optional `classify` in a test pipeline on real branches.
@@ -98,6 +98,7 @@ Developers (VS Code + OntoCode VSIX)
 ## Related
 
 - [Enterprise evaluation](enterprise-eval.md)
+- [Production evidence protocol](production-evidence.md)
 - [Enterprise deployment](enterprise-deployment.md)
 - [Performance and sizing](performance-sizing.md)
 - [LGPL compliance](lgpl-compliance.md)

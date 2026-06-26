@@ -88,9 +88,14 @@ nav:
       - Best practices: guides/best-practices.md
       - Enterprise:
           - Evaluation overview: guides/enterprise-eval.md
+          - Protégé vs OntoCode: guides/protege-decision.md
           - Production readiness: guides/production-readiness.md
+          - Production evidence protocol: guides/production-evidence.md
           - Enterprise deployment: guides/enterprise-deployment.md
+          - Platform compatibility: guides/platform-compatibility.md
           - Performance and sizing: guides/performance-sizing.md
+          - Governance: guides/governance.md
+          - Release timeline: guides/release-timeline.md
           - LGPL compliance: guides/lgpl-compliance.md
   - Rust & CLI:
       - Overview: guides/rust-crates.md

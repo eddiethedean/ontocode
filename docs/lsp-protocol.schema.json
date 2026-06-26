@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/eddiethedean/ontocode/docs/lsp-protocol.schema.json",
-  "title": "OntoIndex LSP protocol (v0.7)",
-  "description": "JSON Schema for ontoindex/* custom LSP methods (v0.7 subset).",
+  "title": "OntoIndex LSP protocol (v0.8)",
+  "description": "JSON Schema for ontoindex/* custom LSP method payloads (v0.8). Method routing is documented in lsp-api.md; graph node/edge shapes are partial.",
   "definitions": {
     "EntityKind": {
       "type": "string",
@@ -388,6 +388,86 @@
       "properties": {
         "files_written": { "type": "integer" },
         "reindex_warning": { "type": ["string", "null"] }
+      },
+      "additionalProperties": false
+    },
+    "RefactorRequest": {
+      "oneOf": [
+        {
+          "type": "object",
+          "required": ["kind", "from_iri", "to_iri"],
+          "properties": {
+            "kind": { "const": "rename_iri" },
+            "from_iri": { "type": "string" },
+            "to_iri": { "type": "string" }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["kind", "from_base", "to_base"],
+          "properties": {
+            "kind": { "const": "migrate_namespace" },
+            "from_base": { "type": "string" },
+            "to_base": { "type": "string" }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["kind", "entity_iri", "target_file"],
+          "properties": {
+            "kind": { "const": "move_entity" },
+            "entity_iri": { "type": "string" },
+            "target_file": { "type": "string" }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["kind", "entity_iris", "output_file"],
+          "properties": {
+            "kind": { "const": "extract_module" },
+            "entity_iris": { "type": "array", "items": { "type": "string" } },
+            "output_file": { "type": "string" },
+            "leave_stub": { "type": "boolean", "default": false }
+          },
+          "additionalProperties": false
+        }
+      ]
+    },
+    "GetGraphParams": {
+      "type": "object",
+      "required": ["kind"],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": ["class", "property", "import", "neighborhood"]
+        },
+        "root_iri": { "type": ["string", "null"] },
+        "ontology_iri": { "type": ["string", "null"] },
+        "include_inferred": { "type": "boolean", "default": false },
+        "hide_deprecated": { "type": "boolean", "default": false }
+      },
+      "additionalProperties": false
+    },
+    "RunRobotParams": {
+      "type": "object",
+      "required": ["subcommand"],
+      "properties": {
+        "subcommand": { "type": "string" },
+        "args": { "type": "array", "items": { "type": "string" }, "default": [] },
+        "robot_path": { "type": ["string", "null"] }
+      },
+      "additionalProperties": false
+    },
+    "RunRobotResult": {
+      "type": "object",
+      "required": ["exit_code", "stdout", "stderr"],
+      "properties": {
+        "exit_code": { "type": "integer" },
+        "stdout": { "type": "string" },
+        "stderr": { "type": "string" }
       },
       "additionalProperties": false
     }

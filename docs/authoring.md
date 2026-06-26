@@ -49,6 +49,10 @@ For complex class expressions (restrictions, `and`/`or`, cardinality):
 
 Manchester scope: named classes, `and`/`or`, `some`/`only`, `min`/`max`/`exact` cardinality, nesting, and **DisjointClasses** via IRI patch ops. Domain, range, and property chains appear in the axiom catalog (chains are view-only).
 
+## Workspace refactoring
+
+For multi-file changes (rename IRI, namespace migration, move entity, extract module), use the refactor commands and **Refactor Preview** panel — see [Refactoring guide](guides/refactoring.md).
+
 ## Query workbench
 
 Run **OntoCode: Open Query Workbench** from the Command Palette.

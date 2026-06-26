@@ -12,6 +12,7 @@ Unified catalog of error codes, exit behavior, and failure modes for OntoIndex *
 | `ontoindex patch` | Patch applied or preview succeeded | Invalid patch, unsupported format, I/O failure |
 | `ontoindex classify` | Consistent ontology (no unsatisfiable classes) | Unsatisfiable classes, reasoner error, I/O failure |
 | `ontoindex explain` | Explanation produced | Class not found, explanation unavailable, reasoner error |
+| `ontoindex refactor` (subcommands) | Preview or apply succeeded | Invalid request, path outside workspace, I/O failure |
 
 `validate` and `classify` exit semantics are stable for CI — see [workspace-limits.md](workspace-limits.md) and [ci-integration.md](ci-integration.md).
 

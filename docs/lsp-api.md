@@ -12,7 +12,7 @@ LSP JSON uses **snake_case** for enums serialized from Rust (`EntityKind`, `Pars
 **Source of truth:**
 
 - Types: [`protocol.rs` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/crates/ontoindex-lsp/src/protocol.rs)
-- JSON Schema (partial v0.7 subset): [`docs/lsp-protocol.schema.json`](lsp-protocol.schema.json) — covers core query/patch methods; `getGraph` and `runRobot` are documented below but not yet in the schema.
+- JSON Schema (v0.8): [`docs/lsp-protocol.schema.json`](lsp-protocol.schema.json) — core query/patch/reasoner/refactor types; `getGraph` payload types are documented in prose below until added to the schema.
 - Handlers: [`handlers.rs` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/crates/ontoindex-lsp/src/handlers.rs)
 - Extension client: [`client.ts` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/extension/src/lsp/client.ts)
 

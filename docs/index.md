@@ -189,6 +189,7 @@ See the full matrix: **[What ships today](SHIPPED.md)**.
 | SQL virtual tables | [sql-reference.md](sql-reference.md) |
 | SPARQL | [sparql-reference.md](sparql-reference.md) |
 | Graph visualization | [guides/graph-visualization.md](guides/graph-visualization.md) |
+| Refactoring | [guides/refactoring.md](guides/refactoring.md) |
 | OBO workflows | [guides/obo-workflow.md](guides/obo-workflow.md) |
 | ROBOT interop | [guides/robot-interop.md](guides/robot-interop.md) |
 | Webview protocol | [webview-protocol.md](webview-protocol.md) |

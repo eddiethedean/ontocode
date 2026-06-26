@@ -68,7 +68,7 @@
 | Query Workbench | [Query Workbench guide](guides/query-workbench.md) |
 | Reasoner | [Reasoner guide](guides/reasoner.md) |
 | Manchester editor | [Manchester editor guide](guides/manchester-editor.md) |
-| Turtle editing & patches | [Authoring](authoring.md) · [Patch reference](patch-reference.md) |
+| Turtle editing & patches | [Authoring](authoring.md) · [Patch reference](patch-reference.md) · [Refactoring](guides/refactoring.md) |
 | CLI & CI | [Getting started](getting-started.md) · [CI integration](ci-integration.md) |
 | Graph visualization | [Graph visualization guide](guides/graph-visualization.md) |
 | OBO workflows | [OBO workflow guide](guides/obo-workflow.md) |

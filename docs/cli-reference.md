@@ -138,8 +138,103 @@ ontoindex explain . --class 'http://example.org#Invalid' --format json
 
 **Exit:** 0 when explanation produced; non-zero if class not found or explanation unavailable.
 
+### `refactor`
+
+Workspace-wide Turtle refactoring. See [Refactoring guide](guides/refactoring.md).
+
+#### `refactor usages`
+
+List usages of an entity IRI across the workspace.
+
+```bash
+ontoindex refactor usages fixtures 'http://example.org/people#Person'
+ontoindex refactor usages . 'http://example.org/people#Person' --format json
+```
+
+**Exit:** 0 on success; non-zero on index failure.
+
+#### `refactor rename`
+
+Rename an entity IRI in all Turtle files.
+
+```bash
+ontoindex refactor rename fixtures \
+  --from 'http://example.org/people#Person' \
+  --to 'http://example.org/people#Human' \
+  --preview
+
+ontoindex refactor rename fixtures \
+  --from 'http://example.org/people#Person' \
+  --to 'http://example.org/people#Human'
+```
+
+| Flag | Description |
+|------|-------------|
+| `--from` | Current entity IRI (required) |
+| `--to` | New entity IRI (required) |
+| `--preview` | Print plan without writing files |
+| `--format` | `text` (default) or `json` |
+
+#### `refactor migrate-namespace`
+
+Replace a namespace base IRI across Turtle files (`@prefix` and term IRIs).
+
+```bash
+ontoindex refactor migrate-namespace fixtures \
+  --from 'http://example.org/people#' \
+  --to 'http://example.org/v2/people#' \
+  --preview
+```
+
+| Flag | Description |
+|------|-------------|
+| `--from` | Current namespace base (required) |
+| `--to` | New namespace base (required) |
+| `--preview` | Print plan without writing |
+| `--format` | `text` or `json` |
+
+#### `refactor move`
+
+Move an entity block to another Turtle file.
+
+```bash
+ontoindex refactor move fixtures 'http://example.org/people#Student' \
+  --to ./students.ttl \
+  --preview
+```
+
+| Flag | Description |
+|------|-------------|
+| `--to` | Target `.ttl` path (required) |
+| `--preview` | Print plan without writing |
+| `--format` | `text` or `json` |
+
+#### `refactor extract`
+
+Extract selected entities into a new module file.
+
+```bash
+ontoindex refactor extract fixtures \
+  --entities 'http://example.org/people#Person,http://example.org/people#Student' \
+  --out ./core.ttl \
+  --leave-stub \
+  --preview
+```
+
+| Flag | Description |
+|------|-------------|
+| `--entities` | Comma-separated entity IRIs (required) |
+| `--out` | Output `.ttl` path (required) |
+| `--leave-stub` | Leave import stubs in source files |
+| `--preview` | Print plan without writing |
+| `--format` | `text` or `json` |
+
+**Exit (rename / migrate / move / extract):** 0 on success; non-zero on invalid request, path jail violation, or I/O failure. With `--preview`, files are not written.
+
 ## Related
 
+- [Refactoring guide](guides/refactoring.md)
+- [Examples: refactoring](examples/refactoring.md)
 - [Getting started](getting-started.md)
 - [CI integration](ci-integration.md)
 - [Errors reference](errors.md)

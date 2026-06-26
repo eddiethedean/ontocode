@@ -26,6 +26,7 @@
 |---------|-------|
 | Browse classes, properties, individuals | [First success](first-success.md) |
 | Edit Turtle (labels, parents, create/delete) | [Authoring](../authoring.md) |
+| Workspace refactoring (rename, migrate, move, extract) | [Refactoring](refactoring.md) |
 | SQL and SPARQL in VS Code | [Query Workbench](query-workbench.md) |
 | Complex axioms (Manchester) | [Manchester editor](manchester-editor.md) |
 | EL / RL / RDFS classification | [Reasoner](reasoner.md) |
@@ -36,7 +37,7 @@
 
 | Topic | Link |
 |-------|------|
-| What ships in v0.7 | [What ships today](../SHIPPED.md) |
+| What ships today | [What ships today](../SHIPPED.md) |
 | Patch JSON (inspector / LSP) | [Patch reference](../patch-reference.md) |
 | LSP methods (advanced) | [LSP API](../lsp-api.md) |
 | Workspace limits | [Workspace limits](../workspace-limits.md) |

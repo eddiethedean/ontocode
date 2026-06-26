@@ -1,6 +1,6 @@
 # Graph visualization
 
-OntoCode v0.7.0 adds **React graph panels** for exploring ontology structure. Graphs are built by OntoIndex and delivered over LSP (`ontoindex/getGraph`).
+OntoCode v0.8.0 provides **React graph panels** for exploring ontology structure. Graphs are built by OntoIndex and delivered over LSP (`ontoindex/getGraph`).
 
 Canonical capability matrix: [What ships today](../SHIPPED.md).
 
@@ -32,7 +32,7 @@ If the graph hits server limits, the panel shows a truncation notice. Limits: **
 
 Integrators can call `ontoindex/getGraph` directly — see [LSP API](../lsp-api.md).
 
-There is no standalone `ontoindex graph` CLI command in v0.7; use the VS Code panel or LSP.
+There is no standalone `ontoindex graph` CLI command; use the VS Code panel or LSP.
 
 ## Troubleshooting
 

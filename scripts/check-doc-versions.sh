@@ -61,6 +61,55 @@ else
   echo "ok: no stale VERSION=0.6.0 install pins"
 fi
 
+if rg -q 'VERSION=0\.7\.0' "${STALE_PIN_PATHS[@]}" --glob '!**/changelog.md' --glob '!**/CHANGELOG.md' --glob '!**/migration/**' --glob '!**/design/**' 2>/dev/null; then
+  echo "FAIL: stale VERSION=0.7.0 found outside changelog/migration/design" >&2
+  rg -n 'VERSION=0\.7\.0' "${STALE_PIN_PATHS[@]}" --glob '!**/changelog.md' --glob '!**/CHANGELOG.md' --glob '!**/migration/**' --glob '!**/design/**' 2>/dev/null || true
+  fail=1
+else
+  echo "ok: no stale VERSION=0.7.0 install pins"
+fi
+
+# User-facing docs must not claim 0.7.x is the current release
+USER_FACING_DOCS=(
+  docs/faq.md
+  docs/getting-started.md
+  docs/guides/production-readiness.md
+  docs/guides/rust-library.md
+  docs/concepts.md
+  docs/guides/vscode-extension.md
+  docs/security.md
+)
+for file in "${USER_FACING_DOCS[@]}"; do
+  if grep -qE '0\.7\.x \(current\)|ships in v0\.7\.0|OntoIndex v0\.7\.0|OntoCode v0\.7\.0|at \*\*0\.7\.x\*\*' "$file" 2>/dev/null; then
+    echo "FAIL: stale 0.7.x current-release claim in $file" >&2
+    fail=1
+  fi
+done
+if [[ "$fail" -eq 0 ]]; then
+  echo "ok: no stale 0.7.x current-release claims in user-facing docs"
+fi
+
+# docs/security.md supported versions must match SECURITY.md for current minor
+if ! grep -q "${MINOR_VERSION}\.x   | Yes" docs/security.md; then
+  echo "FAIL: docs/security.md should list ${MINOR_VERSION}.x as supported (Yes)" >&2
+  fail=1
+else
+  echo "ok: docs/security.md supported version"
+fi
+
+# v0.8 docs added in adoption review
+for file in docs/guides/refactoring.md docs/migration/v0.8.md docs/examples/refactoring.md; do
+  if [[ ! -f "$file" ]]; then
+    echo "FAIL: missing required doc $file" >&2
+    fail=1
+  else
+    echo "ok: $file exists"
+  fi
+done
+
+check_file_contains "docs/faq.md" "0\.8\.x" "faq crate version"
+check_file_contains "docs/guides/production-readiness.md" "v${VERSION}" "production-readiness version"
+
 # Enterprise eval must not claim OBO/ROBOT are unshipped when SHIPPED lists them
 if grep -qE 'OBO format \+ ROBOT interop.*Not shipped' docs/guides/enterprise-eval.md; then
   echo "FAIL: enterprise-eval.md contradicts SHIPPED.md on OBO/ROBOT" >&2

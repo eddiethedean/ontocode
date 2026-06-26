@@ -13,7 +13,7 @@ This repository contains both.
 
 **Is the API stable?**
 
-Pre-1.0. Published crates are at **0.7.x**. Library APIs, LSP JSON, and SQL table columns may change between minor releases until v1.0. The `validate` and `classify` exit codes are documented in [workspace-limits.md](workspace-limits.md).
+Pre-1.0. Published crates are at **0.8.x**. Library APIs, LSP JSON, and SQL table columns may change between minor releases until v1.0. Pin versions in CI with `cargo install ontoindex-cli --locked --version 0.8.0`. The `validate` and `classify` exit codes are documented in [workspace-limits.md](workspace-limits.md).
 
 **What ships in the current release?**
 
@@ -152,7 +152,7 @@ EL/RL/RDFS shipped in **v0.6.0** via OntoLogos 0.9.0. Full OWL 2 DL (`dl` / `aut
 
 v0.8 ships Git + VS Code workflows: browse, lint, Turtle editing, SQL/SPARQL queries, Manchester (subclass/equivalent/disjoint IRI), **refactoring** (rename, usages, migrate, move, extract), **EL/RL/RDFS reasoning**, **graph visualization**, **OBO index**, and **ROBOT CLI wrappers**. Full Protégé parity (DL reasoning, full OBO write-back, semantic diff) is the v1.0 goal — see [design/PROTEGE_PARITY.md](design/PROTEGE_PARITY.md) and [SHIPPED.md](SHIPPED.md).
 
-## OBO and graphs (v0.7)
+## OBO and graphs
 
 **Can I edit `.obo` files in the inspector?**
 

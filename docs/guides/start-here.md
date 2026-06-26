@@ -30,6 +30,7 @@ New to OWL/RDF vocabulary? Read [Ontology concepts](../concepts.md) first.
 | Topic | Link |
 |-------|------|
 | Complex axioms (Manchester) | [Manchester editor guide](manchester-editor.md) |
+| Workspace refactoring | [Refactoring guide](refactoring.md) |
 | Reasoning (EL / RL / RDFS) | [Reasoner guide](reasoner.md) |
 | Patch JSON | [Patch reference](../patch-reference.md) |
 | Custom editor via LSP | [LSP API](../lsp-api.md) |

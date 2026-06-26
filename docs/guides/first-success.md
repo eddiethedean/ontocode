@@ -80,14 +80,23 @@ Requires a Turtle ontology with a complex subclass (included in the sample pack 
 
 Full guide: [Reasoner guide](../guides/reasoner.md).
 
-## 8. (Optional) Open a class graph
+## 8. (Optional) Refactor an entity IRI
+
+1. Select an entity in the explorer (from a `.ttl` file).
+2. Run **OntoCode: Rename Entity IRI** from the Command Palette or Entity Inspector.
+3. Enter the new IRI and review the **Refactor Preview** diff.
+4. Click **Apply** and confirm the `.ttl` files updated.
+
+Guide: [Refactoring](../guides/refactoring.md).
+
+## 9. (Optional) Open a class graph
 
 1. Run **OntoCode: Open Class Graph** from the Command Palette.
 2. Click a node to open the Entity Inspector for that class.
 
 Guide: [Graph visualization](../guides/graph-visualization.md).
 
-## 9. (Optional) Validate from the CLI
+## 10. (Optional) Validate from the CLI
 
 To catch lint and parse errors in CI or locally:
 
@@ -119,6 +128,7 @@ More help: [Troubleshooting](../troubleshooting.md) · [FAQ](../faq.md).
 | OBO workflows | [guides/obo-workflow.md](../guides/obo-workflow.md) |
 | Reasoner | [guides/reasoner.md](../guides/reasoner.md) |
 | Manchester editor | [guides/manchester-editor.md](../guides/manchester-editor.md) |
+| Refactoring | [guides/refactoring.md](../guides/refactoring.md) |
 | Patch JSON automation | [patch-reference.md](../patch-reference.md) |
 | SQL / SPARQL reference | [sql-reference.md](../sql-reference.md) · [sparql-reference.md](../sparql-reference.md) |
 | Authoring overview | [authoring.md](../authoring.md) |

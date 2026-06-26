@@ -1,6 +1,6 @@
 # ROBOT interop
 
-OntoIndex v0.7.0 wraps the [ROBOT](http://robot.obolibrary.org/) CLI for validate, merge, and report workflows. ROBOT runs as an **external Java process** — OntoIndex does not embed a JVM.
+OntoIndex v0.8.0 wraps the [ROBOT](http://robot.obolibrary.org/) CLI for validate, merge, and report workflows. ROBOT runs as an **external Java process** — OntoIndex does not embed a JVM.
 
 Canonical capability matrix: [What ships today](../SHIPPED.md).
 
@@ -10,7 +10,7 @@ Canonical capability matrix: [What ships today](../SHIPPED.md).
 |-------------|-------|
 | **Java** | ROBOT requires a JRE on the agent or developer machine |
 | **`robot` on PATH** | Or set an explicit path (see below) |
-| **OntoIndex 0.7.0+** | `ontoindex robot` subcommand or LSP `ontoindex/runRobot` |
+| **OntoIndex 0.8.0+** | `ontoindex robot` subcommand or LSP `ontoindex/runRobot` |
 
 Install ROBOT from [robot.obolibrary.org](http://robot.obolibrary.org/).
 
@@ -45,7 +45,7 @@ LSP clients can call `ontoindex/runRobot` — see [LSP API](../lsp-api.md).
 
 ```yaml
 - name: Install OntoIndex
-  run: cargo install ontoindex-cli --locked --version 0.7.0
+  run: cargo install ontoindex-cli --locked --version 0.8.0
 
 - name: OntoIndex validate
   run: ontoindex validate ./ontologies

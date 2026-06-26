@@ -26,6 +26,7 @@ No clone required. Release binaries: [release integrity](../release-integrity.md
 | Lint / CI gate | `ontoindex validate` — [CI integration](../ci-integration.md) |
 | EL / RL / RDFS classify | `ontoindex classify` — [Reasoner](reasoner.md) |
 | Turtle patches | `ontoindex patch` — [Patch reference](../patch-reference.md) |
+| Workspace refactor | `ontoindex refactor` — [Refactoring guide](refactoring.md) |
 
 ## Rust library embedding
 
@@ -35,7 +36,7 @@ No clone required. Release binaries: [release integrity](../release-integrity.md
 | Index + query in code | [`examples/index_and_query.rs`](https://github.com/eddiethedean/ontocode/blob/main/examples/index_and_query.rs) |
 | Per-crate READMEs | [`crates/`](https://github.com/eddiethedean/ontocode/tree/main/crates) on GitHub |
 
-Published crates (dependency order): `ontoindex-core` → `ontoindex-parser` → `ontoindex-owl` → `ontoindex-diagnostics` → `ontoindex-catalog` → `ontoindex-query` → `ontoindex-reasoner` → `ontoindex-lsp` → `ontoindex-cli`.
+Published crates (dependency order): `ontoindex-core` → `ontoindex-parser` → `ontoindex-owl` → `ontoindex-diagnostics` → `ontoindex-catalog` → `ontoindex-query` → `ontoindex-reasoner` → `ontoindex-refactor` → `ontoindex-robot` → `ontoindex-lsp` → `ontoindex-cli`.
 
 ## Integrators
 

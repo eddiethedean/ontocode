@@ -6,8 +6,9 @@ OntoIndex and OntoCode are **local-first** tools: they index and parse files on 
 
 | Version | Supported |
 |---------|-----------|
-| 0.7.x   | Yes       |
-| 0.6.x   | Best effort |
+| 0.8.x   | Yes       |
+| 0.7.x   | Best effort |
+| 0.6.x   | No        |
 | 0.5.x   | No        |
 | 0.4.x   | No        |
 | 0.3.x   | No        |

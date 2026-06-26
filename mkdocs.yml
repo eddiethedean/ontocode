@@ -68,12 +68,17 @@ markdown_extensions:
 
 nav:
   - Home: index.md
+  - Get started:
+      - First success (10 min): guides/first-success.md
+      - Pick a task: guides/start-here.md
+      - What ships today: SHIPPED.md
+      - Ontology concepts: concepts.md
+      - Getting started (CLI): getting-started.md
   - VS Code Extension:
       - Overview: guides/vscode-extension.md
-      - First success (10 min): guides/first-success.md
-      - Ontology concepts: concepts.md
       - Install: vscode-install.md
       - Authoring (Turtle): authoring.md
+      - Refactoring: guides/refactoring.md
       - Query Workbench: guides/query-workbench.md
       - Manchester editor: guides/manchester-editor.md
       - Graph visualization: guides/graph-visualization.md
@@ -89,7 +94,6 @@ nav:
           - LGPL compliance: guides/lgpl-compliance.md
   - Rust & CLI:
       - Overview: guides/rust-crates.md
-      - Getting started: getting-started.md
       - CLI reference: cli-reference.md
       - Rust library: guides/rust-library.md
       - CI integration: ci-integration.md
@@ -102,9 +106,8 @@ nav:
       - Examples:
           - Query cookbook: examples/queries.md
           - Sample patches: examples/patches.md
+          - Refactoring: examples/refactoring.md
   - Help:
-      - What ships today: SHIPPED.md
-      - Pick a task: guides/start-here.md
       - FAQ: faq.md
       - Troubleshooting: troubleshooting.md
       - Changelog: changelog.md
@@ -112,55 +115,57 @@ nav:
           - Migration index: migration/README.md
           - v0.5 → v0.6: migration/v0.6.md
           - v0.6 → v0.7: migration/v0.7.md
+          - v0.7 → v0.8: migration/v0.8.md
       - Security: security.md
       - Release integrity: release-integrity.md
       - Errors: errors.md
       - Workspace limits: workspace-limits.md
-  - Design (planned):
-      - Overview: design/README.md
-      - Roadmap: design/ROADMAP.md
-      - Architecture: design/ARCHITECTURE.md
-      - Protégé parity: design/PROTEGE_PARITY.md
-      - Dependency matrix: design/DEPENDENCY_MATRIX.md
-      - Licenses: design/LICENSES.md
-      - Specs:
-          - Product plan: design/PLAN.md
-          - Technical spec: design/SPEC.md
-          - LSP (target): design/LSP_SPEC.md
-          - OWL authoring: design/OWL_AUTHORING_SPEC.md
-          - Reasoner: design/REASONER_SPEC.md
-          - Semantic diff: design/SEMANTIC_DIFF_SPEC.md
-          - SHACL: design/SHACL_SPEC.md
-          - OBO / ROBOT: design/OBO_ROBOT_SPEC.md
-          - Plugins: design/PLUGIN_SPEC.md
-          - UI wireframes: design/UI_WIREFRAMES.md
-          - React UI plan: design/OntoCode_React_UI_Integration_Plan.md
-      - Backlogs:
-          - v1.0 backlog: design/v1.0_BACKLOG.md
-          - MVP backlog: design/MVP_BACKLOG.md
-      - ADRs:
-          - Index: design/adr/README.md
-          - "0001 Rust for OntoIndex": design/adr/0001-use-rust-for-ontoindex.md
-          - "0002 Horned-OWL": design/adr/0002-use-horned-owl.md
-          - "0003 Oxigraph": design/adr/0003-use-oxigraph.md
-          - "0004 DataFusion": design/adr/0004-use-datafusion-for-sql.md
-          - "0005 Local-first": design/adr/0005-local-first-by-default.md
-          - "0006 Patch write-back": design/adr/0006-patch-based-write-back.md
-          - "0007 LSP boundary": design/adr/0007-language-server-boundary.md
-          - "0008 Reasoner adapters": design/adr/0008-reasoner-adapters-not-built-in-reasoner.md
-          - "0009 Semantic diff": design/adr/0009-semantic-diff-as-core-feature.md
-          - "0010 AI opt-in": design/adr/0010-ai-features-opt-in.md
-          - "0011 sqlparser": design/adr/0011-use-sqlparser-for-sql.md
-          - "0012 LSP snake_case": design/adr/0012-lsp-json-snake-case-enums.md
-          - "0013 Dual stack": design/adr/0013-dual-stack-oxigraph-horned-owl.md
-          - "0014 Rust reasoners": design/adr/0014-rust-native-reasoners-only.md
-          - "0015 OntoLogos": design/adr/0015-adopt-ontologos-reasoner.md
-          - "0016 Dependency-first": design/adr/0016-dependency-first-implementation.md
-          - "0017 React webviews": design/adr/0017-react-webview-ui.md
+  - Contributing:
+      - Guide: contributing.md
+      - Design (target specs):
+          - Overview: design/README.md
+          - Roadmap: design/ROADMAP.md
+          - Architecture: design/ARCHITECTURE.md
+          - Protégé parity: design/PROTEGE_PARITY.md
+          - Dependency matrix: design/DEPENDENCY_MATRIX.md
+          - Licenses: design/LICENSES.md
+          - Specs:
+              - Product plan: design/PLAN.md
+              - Technical spec: design/SPEC.md
+              - LSP (target): design/LSP_SPEC.md
+              - OWL authoring: design/OWL_AUTHORING_SPEC.md
+              - Reasoner: design/REASONER_SPEC.md
+              - Semantic diff: design/SEMANTIC_DIFF_SPEC.md
+              - SHACL: design/SHACL_SPEC.md
+              - OBO / ROBOT: design/OBO_ROBOT_SPEC.md
+              - Plugins: design/PLUGIN_SPEC.md
+              - UI wireframes: design/UI_WIREFRAMES.md
+              - React UI plan: design/OntoCode_React_UI_Integration_Plan.md
+          - Backlogs:
+              - v1.0 backlog: design/v1.0_BACKLOG.md
+              - MVP backlog: design/MVP_BACKLOG.md
+          - ADRs:
+              - Index: design/adr/README.md
+              - "0001 Rust for OntoIndex": design/adr/0001-use-rust-for-ontoindex.md
+              - "0002 Horned-OWL": design/adr/0002-use-horned-owl.md
+              - "0003 Oxigraph": design/adr/0003-use-oxigraph.md
+              - "0004 DataFusion": design/adr/0004-use-datafusion-for-sql.md
+              - "0005 Local-first": design/adr/0005-local-first-by-default.md
+              - "0006 Patch write-back": design/adr/0006-patch-based-write-back.md
+              - "0007 LSP boundary": design/adr/0007-language-server-boundary.md
+              - "0008 Reasoner adapters": design/adr/0008-reasoner-adapters-not-built-in-reasoner.md
+              - "0009 Semantic diff": design/adr/0009-semantic-diff-as-core-feature.md
+              - "0010 AI opt-in": design/adr/0010-ai-features-opt-in.md
+              - "0011 sqlparser": design/adr/0011-use-sqlparser-for-sql.md
+              - "0012 LSP snake_case": design/adr/0012-lsp-json-snake-case-enums.md
+              - "0013 Dual stack": design/adr/0013-dual-stack-oxigraph-horned-owl.md
+              - "0014 Rust reasoners": design/adr/0014-rust-native-reasoners-only.md
+              - "0015 OntoLogos": design/adr/0015-adopt-ontologos-reasoner.md
+              - "0016 Dependency-first": design/adr/0016-dependency-first-implementation.md
+              - "0017 React webviews": design/adr/0017-react-webview-ui.md
       - Maintainers:
           - Releasing: releasing.md
           - Marketplace publish: marketplace-publish.md
-  - Contributing: contributing.md
 
 extra:
   social:

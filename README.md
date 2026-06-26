@@ -146,8 +146,8 @@ The VS Code extension is a thin TypeScript shell over **ontoindex-lsp**. Inspect
 |---------|-------------|
 | v0.1–v0.4 | OntoIndex core, VS Code extension, diagnostics, Turtle write-back |
 | v0.6.0 | Reasoning — OntoLogos EL/RL/RDFS, inferred hierarchy, explanations |
-| **v0.8.0** (current) | Refactoring engine, full Manchester catalog (disjoint + chains view), React Query Workbench + Manchester editor |
 | **v0.7.0** | React inspector + graphs, OBO index, ROBOT CLI wrappers |
+| **v0.8.0** (current) | Refactoring engine, full Manchester catalog (disjoint + chains view), React Query Workbench + Manchester editor |
 | v0.9 | Reasoner/explanation React migration; semantic diff; `ontologos-watch` hook |
 | v1.0 | **Protégé-competitive OWL + OBO in VS Code** — DL via OntoLogos 1.0.0 ([parity checklist](https://ontocode-vs.readthedocs.io/en/latest/design/PROTEGE_PARITY/)) |
 
@@ -175,11 +175,13 @@ Policy: [ADR-0016](https://ontocode-vs.readthedocs.io/en/latest/design/adr/0016-
 crates/
 ├── ontoindex-core      # types, workspace scanner
 ├── ontoindex-parser    # RDF parsing and entity extraction
-├── ontoindex-owl       # Horned-OWL facade, patch write-back, Manchester (v0.5)
-├── ontoindex-catalog   # index builder and semantic catalog
+├── ontoindex-owl       # Horned-OWL facade, patch write-back, Manchester
 ├── ontoindex-diagnostics # lint rules and diagnostic collection
+├── ontoindex-catalog   # index builder and semantic catalog
 ├── ontoindex-query     # SQL-like and SPARQL engines
-├── ontoindex-reasoner  # OntoLogos EL/RL/RDFS classification (v0.6)
+├── ontoindex-reasoner  # OntoLogos EL/RL/RDFS classification
+├── ontoindex-refactor  # workspace refactoring (rename, migrate, move, extract)
+├── ontoindex-robot     # ROBOT CLI wrappers
 ├── ontoindex-cli       # `ontoindex` binary
 └── ontoindex-lsp       # language server for OntoCode
 extension/              # VS Code extension (OntoCode Explorer)

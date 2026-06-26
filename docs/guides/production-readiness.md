@@ -1,6 +1,6 @@
 # Production readiness and pilot criteria
 
-This page states what OntoCode / OntoIndex **v0.7.0** is appropriate for in production-like environments. It is not legal advice and does not replace your organization's risk review.
+This page states what OntoCode / OntoIndex **v0.8.0** is appropriate for in production-like environments. It is not legal advice and does not replace your organization's risk review.
 
 Canonical capability matrix: [What ships today](../SHIPPED.md).
 
@@ -8,19 +8,20 @@ Canonical capability matrix: [What ships today](../SHIPPED.md).
 
 | Level | Version | Meaning |
 |-------|---------|---------|
-| **Pre-1.0** | **0.7.x (current)** | Active development. Library APIs, LSP JSON, and SQL virtual table columns may change between minor releases until [v1.0](../design/v1.0_BACKLOG.md). |
-| **Stable CI gates** | 0.7.x | `ontoindex validate` and `ontoindex classify` exit codes are documented and intended for CI — see [workspace limits](../workspace-limits.md). |
+| **Pre-1.0** | **0.8.x (current)** | Active development. Library APIs, LSP JSON, and SQL virtual table columns may change between minor releases until [v1.0](../design/v1.0_BACKLOG.md). |
+| **Stable CI gates** | 0.8.x | `ontoindex validate` and `ontoindex classify` exit codes are documented and intended for CI — see [workspace limits](../workspace-limits.md). |
 | **v1.0 target** | Planned | Protégé-competitive OWL 2 DL + OBO in VS Code per [Protégé parity](../design/PROTEGE_PARITY.md). |
 
-OntoCode v0.7 is **not** documented as a general-availability replacement for Protégé or full OWL 2 DL engineering.
+OntoCode v0.8 is **not** documented as a general-availability replacement for Protégé or full OWL 2 DL engineering.
 
 ## Approved use cases (pilot or production)
 
-| Use case | v0.7 readiness | Notes |
+| Use case | v0.8 readiness | Notes |
 |----------|----------------|-------|
 | CI lint gate on ontology repos | **Suitable** | `ontoindex validate` — [CI integration](../ci-integration.md) |
 | CI consistency gate (EL profile) | **Suitable** | `ontoindex classify --profile el` — profile must match ontology |
 | Developer IDE for Turtle authoring | **Pilot** | Turtle write-back only; pre-1.0 extension APIs |
+| Workspace refactoring (rename, migrate, move, extract) | **Pilot** | Turtle only; preview before apply — [Refactoring guide](refactoring.md) |
 | Git-native ontology browse/query in VS Code | **Pilot** | Local-first; see [enterprise deployment](enterprise-deployment.md) |
 | Air-gapped VS Code install | **Pilot** | VSIX + SHA256 — [enterprise deployment](enterprise-deployment.md) |
 | OBO index + ROBOT CLI in CI | **Pilot** | Index `.obo`; `ontoindex robot validate` — requires Java + `robot` on PATH — [ROBOT interop](robot-interop.md) |
@@ -44,7 +45,7 @@ Suggested pilot duration: **4–8 weeks** with 3–10 engineers on one ontology 
 
 ## What is stable enough for automation
 
-| Surface | Stability (v0.7) |
+| Surface | Stability (v0.8) |
 |---------|------------------|
 | `ontoindex validate` exit codes | Documented for CI |
 | `ontoindex classify` exit codes | Documented for CI |
@@ -52,17 +53,17 @@ Suggested pilot duration: **4–8 weeks** with 3–10 engineers on one ontology 
 | LSP `ontoindex/*` JSON | May change pre-1.0 |
 | Rust `ontoindex-*` crate APIs | May change pre-1.0 |
 
-Pin CLI version in CI: release binary with `VERSION=0.7.0` or `cargo install ontoindex-cli --locked --version 0.7.0`.
+Pin CLI version in CI: release binary with `VERSION=0.8.0` or `cargo install ontoindex-cli --locked --version 0.8.0`.
 
 ## Support and incident response
 
-| Topic | v0.7 policy |
+| Topic | v0.8 policy |
 |-------|-------------|
 | Commercial support | **Not offered** — community / GitHub issues |
 | Security reports | [GitHub Security Advisories](https://github.com/eddiethedean/ontocode/security/advisories/new) — not public issues |
 | Acknowledgment target | Within a few business days ([SECURITY.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/SECURITY.md)) |
 | Patch SLA | **No committed SLA** — track [GitHub Security Advisories](https://github.com/eddiethedean/ontocode/security/advisories) for your version |
-| Supported versions | 0.7.x ([security policy](../security.md)) |
+| Supported versions | 0.8.x ([security policy](../security.md)) |
 
 Enterprises requiring contractual SLAs should treat OntoCode as **internal OSS adoption** with your own escalation path to maintainers via GitHub.
 

@@ -119,6 +119,11 @@ Open a `.ttl` (or other supported) file and use standard VS Code navigation:
 | **OntoCode: Run Reasoner** | Classify workspace (EL/RL/RDFS) and open Results panel |
 | **OntoCode: Show Explanation** | Open explanation for an unsatisfiable class |
 | **OntoCode: Set Hierarchy Mode** | Toggle asserted / inferred / combined class tree |
+| **OntoCode: Find Entity Usages** | List all references to an entity IRI |
+| **OntoCode: Rename Entity IRI** | Rename an entity across Turtle files (preview + apply) |
+| **OntoCode: Migrate Namespace** | Replace a namespace base IRI workspace-wide |
+| **OntoCode: Move Entity** | Move an entity block to another `.ttl` file |
+| **OntoCode: Extract Module** | Extract entities into a new module file |
 
 ---
 

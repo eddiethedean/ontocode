@@ -39,6 +39,8 @@ for row in &result.rows {
 | `ontoindex-owl` | Horned-OWL facade, patches, Manchester |
 | `ontoindex-diagnostics` | Lint rules |
 | `ontoindex-reasoner` | OntoLogos classification facade |
+| `ontoindex-refactor` | Workspace refactoring (rename, migrate, move, extract) |
+| `ontoindex-robot` | ROBOT CLI wrappers |
 | `ontoindex-lsp` | Language server binary + library |
 | `ontoindex-cli` | `ontoindex` binary |
 
@@ -66,7 +68,7 @@ Uses `OntoIndexError` from `ontoindex-core` — see [`examples/error_handling.rs
 
 ## API stability
 
-- Crates are at **0.7.x** on crates.io
+- Crates are at **0.8.x** on crates.io
 - LSP wire JSON: [LSP API](../lsp-api.md)
 - SQL tables: [SQL reference](../sql-reference.md)
 - Exit codes: [workspace limits](../workspace-limits.md)

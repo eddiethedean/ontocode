@@ -381,7 +381,7 @@ pub fn preview_extract_module(
         removals_by_path.entry(removal.path.clone()).or_default().push(removal);
     }
     for (path, mut path_removals) in removals_by_path {
-        path_removals.sort_by(|a, b| b.start.cmp(&a.start));
+        path_removals.sort_by_key(|b| std::cmp::Reverse(b.start));
         let original = source_texts.remove(&path).expect("source text");
         let mut preview = original.clone();
         let mut hunks = Vec::new();

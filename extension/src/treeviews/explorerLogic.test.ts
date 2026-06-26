@@ -24,7 +24,7 @@ describe("explorerLogic", () => {
     const roots = classRootEntities(fixtureCatalogSnapshot);
     assert.deepEqual(
       roots.map((e) => e.short_name).sort(),
-      ["A", "Animal", "B", "ClinicPerson", "Thing"]
+      ["A", "Animal", "B", "Cat", "ClinicPerson", "Dog", "Thing"]
     );
   });
 

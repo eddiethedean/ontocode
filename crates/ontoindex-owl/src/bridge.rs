@@ -7,8 +7,10 @@ use horned_owl::model::{
 use horned_owl::ontology::component_mapped::{ComponentMappedIndex, ComponentMappedOntology};
 use ontoindex_core::{
     Annotation, Axiom, Entity, EntityKind, Import, Namespace, SourceLocation,
-    AXIOM_KIND_EQUIVALENT_CLASS, AXIOM_KIND_SUB_CLASS_OF,
+    AXIOM_KIND_DISJOINT_CLASS, AXIOM_KIND_DOMAIN, AXIOM_KIND_EQUIVALENT_CLASS,
+    AXIOM_KIND_PROPERTY_CHAIN, AXIOM_KIND_RANGE, AXIOM_KIND_SUB_CLASS_OF,
 };
+use horned_owl::model::{ObjectPropertyExpression, SubObjectPropertyExpression};
 use std::collections::BTreeMap;
 
 const RDFS_LABEL: &str = "http://www.w3.org/2000/01/rdf-schema#label";
@@ -125,6 +127,114 @@ pub fn bridge_ontology(
         }
     }
 
+    for disj in idx.disjoint_class() {
+        for ce in &disj.0 {
+            if let ClassExpression::Class(sub) = ce {
+                for other in &disj.0 {
+                    if other == ce {
+                        continue;
+                    }
+                    if let ClassExpression::Class(obj) = other {
+                        axiom_counter += 1;
+                        result.axioms.push(Axiom {
+                            id: format!("{ontology_id}#axiom-{axiom_counter}"),
+                            ontology_id: ont_id.clone(),
+                            subject: sub.to_string(),
+                            predicate: "http://www.w3.org/2002/07/owl#disjointWith".to_string(),
+                            object: obj.to_string(),
+                            axiom_kind: AXIOM_KIND_DISJOINT_CLASS.to_string(),
+                            source_location: SourceLocation::default(),
+                        });
+                    } else if let Some(obj) = class_expr_display(other, namespaces) {
+                        axiom_counter += 1;
+                        result.axioms.push(Axiom {
+                            id: format!("{ontology_id}#axiom-{axiom_counter}"),
+                            ontology_id: ont_id.clone(),
+                            subject: sub.to_string(),
+                            predicate: "http://www.w3.org/2002/07/owl#disjointWith".to_string(),
+                            object: obj,
+                            axiom_kind: AXIOM_KIND_DISJOINT_CLASS.to_string(),
+                            source_location: SourceLocation::default(),
+                        });
+                    }
+                }
+            }
+        }
+    }
+
+    for dom in idx.object_property_domain() {
+        let prop = ope_to_iri(&dom.ope);
+        if let ClassExpression::Class(cls) = &dom.ce {
+            push_class_binding_axiom(
+                &mut result.axioms,
+                &mut axiom_counter,
+                &ont_id,
+                &prop,
+                cls.to_string().as_str(),
+                AXIOM_KIND_DOMAIN,
+                "http://www.w3.org/2000/01/rdf-schema#domain",
+            );
+        }
+    }
+    for rng in idx.object_property_range() {
+        let prop = ope_to_iri(&rng.ope);
+        if let ClassExpression::Class(cls) = &rng.ce {
+            push_class_binding_axiom(
+                &mut result.axioms,
+                &mut axiom_counter,
+                &ont_id,
+                &prop,
+                cls.to_string().as_str(),
+                AXIOM_KIND_RANGE,
+                "http://www.w3.org/2000/01/rdf-schema#range",
+            );
+        }
+    }
+    for dom in idx.data_property_domain() {
+        let prop = dom.dp.to_string();
+        if let ClassExpression::Class(cls) = &dom.ce {
+            push_class_binding_axiom(
+                &mut result.axioms,
+                &mut axiom_counter,
+                &ont_id,
+                &prop,
+                cls.to_string().as_str(),
+                AXIOM_KIND_DOMAIN,
+                "http://www.w3.org/2000/01/rdf-schema#domain",
+            );
+        }
+    }
+    for rng in idx.data_property_range() {
+        let prop = rng.dp.to_string();
+        let filler = data_range_display(&rng.dr);
+        push_class_binding_axiom(
+            &mut result.axioms,
+            &mut axiom_counter,
+            &ont_id,
+            &prop,
+            &filler,
+            AXIOM_KIND_RANGE,
+            "http://www.w3.org/2000/01/rdf-schema#range",
+        );
+    }
+
+    for sub_prop in idx.sub_object_property_of() {
+        if let SubObjectPropertyExpression::ObjectPropertyChain(chain) = &sub_prop.sub {
+            let chain_display =
+                chain.iter().map(ope_to_iri).collect::<Vec<_>>().join(" o ");
+            axiom_counter += 1;
+            result.axioms.push(Axiom {
+                id: format!("{ontology_id}#axiom-{axiom_counter}"),
+                ontology_id: ont_id.clone(),
+                subject: ope_to_iri(&sub_prop.sup),
+                predicate: "http://www.w3.org/2002/07/owl#propertyChainAxiom".to_string(),
+                object: chain_display,
+                axiom_kind: AXIOM_KIND_PROPERTY_CHAIN.to_string(),
+                source_location: SourceLocation::default(),
+            });
+        }
+    }
+
     for imp in idx.import() {
         result.imports.push(Import { ontology_id: ont_id.clone(), import_iri: imp.0.to_string() });
     }
@@ -176,6 +286,43 @@ fn class_expr_display(
     }
 }
 
+fn ope_to_iri(ope: &ObjectPropertyExpression<RcStr>) -> String {
+    match ope {
+        ObjectPropertyExpression::ObjectProperty(p) => p.to_string(),
+        ObjectPropertyExpression::InverseObjectProperty(p) => {
+            format!("inverse({})", p.0)
+        }
+    }
+}
+
+fn data_range_display(dr: &horned_owl::model::DataRange<RcStr>) -> String {
+    match dr {
+        horned_owl::model::DataRange::Datatype(dt) => dt.to_string(),
+        other => format!("{other:?}"),
+    }
+}
+
+fn push_class_binding_axiom(
+    axioms: &mut Vec<Axiom>,
+    counter: &mut usize,
+    ontology_id: &str,
+    subject: &str,
+    object: &str,
+    kind: &str,
+    predicate: &str,
+) {
+    *counter += 1;
+    axioms.push(Axiom {
+        id: format!("{ontology_id}#axiom-{counter}"),
+        ontology_id: ontology_id.to_string(),
+        subject: subject.to_string(),
+        predicate: predicate.to_string(),
+        object: object.to_string(),
+        axiom_kind: kind.to_string(),
+        source_location: SourceLocation::default(),
+    });
+}
+
 fn annotation_subject_iri(subject: &AnnotationSubject<RcStr>) -> String {
     match subject {
         AnnotationSubject::IRI(iri) => iri.to_string(),
@@ -195,6 +342,9 @@ fn annotation_value_string(value: &AnnotationValue<RcStr>) -> String {
 mod tests {
     use super::*;
     use crate::load::load_turtle_text;
+    use ontoindex_core::{
+        AXIOM_KIND_DISJOINT_CLASS, AXIOM_KIND_PROPERTY_CHAIN, AXIOM_KIND_SUB_CLASS_OF,
+    };
     use oxigraph::io::RdfParser;
     use oxigraph::model::Quad;
     use std::path::Path;
@@ -210,5 +360,19 @@ mod tests {
         let loaded = load_turtle_text(Path::new("example.ttl"), "doc-1", ttl, &quads, &namespaces)
             .expect("load");
         assert!(loaded.bridge.axioms.iter().any(|a| a.axiom_kind == AXIOM_KIND_SUB_CLASS_OF));
+    }
+
+    #[test]
+    fn bridge_extracts_disjoint_and_property_chain() {
+        let ttl = include_str!("../../../fixtures/disjoint-classes.ttl");
+        let parser = RdfParser::from_format(oxigraph::io::RdfFormat::Turtle);
+        let quads: Vec<Quad> =
+            parser.for_reader(ttl.as_bytes()).collect::<std::result::Result<Vec<_>, _>>().unwrap();
+        let namespaces =
+            BTreeMap::from([("ex".to_string(), "http://example.org/org#".to_string())]);
+        let loaded = load_turtle_text(Path::new("disjoint-classes.ttl"), "doc-1", ttl, &quads, &namespaces)
+            .expect("load");
+        assert!(loaded.bridge.axioms.iter().any(|a| a.axiom_kind == AXIOM_KIND_DISJOINT_CLASS));
+        assert!(loaded.bridge.axioms.iter().any(|a| a.axiom_kind == AXIOM_KIND_PROPERTY_CHAIN));
     }
 }

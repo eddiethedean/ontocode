@@ -8,6 +8,10 @@ use ontoindex_query::{
     sql::{to_csv as sql_to_csv, to_json as sql_to_json},
 };
 use ontoindex_reasoner::{classify, explain, ExplanationRequest, ReasonerId, WorkspaceInputLoader};
+use ontoindex_refactor::{
+    apply_refactor_plan, find_usages, preview_extract_module, preview_migrate_namespace,
+    preview_move_entity, preview_rename_iri, RefactorPlan,
+};
 use std::path::PathBuf;
 
 #[derive(Parser)]
@@ -106,6 +110,71 @@ enum Commands {
     Robot {
         #[command(subcommand)]
         command: RobotCommands,
+    },
+    /// Workspace refactoring (rename, migrate, move, extract)
+    Refactor {
+        #[command(subcommand)]
+        command: RefactorCommands,
+    },
+}
+
+#[derive(Subcommand)]
+enum RefactorCommands {
+    /// List usages of an entity IRI across the workspace
+    Usages {
+        workspace: PathBuf,
+        iri: String,
+        #[arg(long, value_enum, default_value_t = OutputFormat::Text)]
+        format: OutputFormat,
+    },
+    /// Rename an entity IRI across Turtle files
+    Rename {
+        workspace: PathBuf,
+        #[arg(long)]
+        from: String,
+        #[arg(long)]
+        to: String,
+        #[arg(long)]
+        preview: bool,
+        #[arg(long, value_enum, default_value_t = OutputFormat::Text)]
+        format: OutputFormat,
+    },
+    /// Migrate a namespace base IRI across the workspace
+    MigrateNamespace {
+        workspace: PathBuf,
+        #[arg(long)]
+        from: String,
+        #[arg(long)]
+        to: String,
+        #[arg(long)]
+        preview: bool,
+        #[arg(long, value_enum, default_value_t = OutputFormat::Text)]
+        format: OutputFormat,
+    },
+    /// Move an entity block to another Turtle file
+    Move {
+        workspace: PathBuf,
+        iri: String,
+        #[arg(long)]
+        to: PathBuf,
+        #[arg(long)]
+        preview: bool,
+        #[arg(long, value_enum, default_value_t = OutputFormat::Text)]
+        format: OutputFormat,
+    },
+    /// Extract selected entities into a new module file
+    Extract {
+        workspace: PathBuf,
+        #[arg(long, value_delimiter = ',')]
+        entities: Vec<String>,
+        #[arg(long)]
+        out: PathBuf,
+        #[arg(long)]
+        leave_stub: bool,
+        #[arg(long)]
+        preview: bool,
+        #[arg(long, value_enum, default_value_t = OutputFormat::Text)]
+        format: OutputFormat,
     },
 }
 
@@ -304,6 +373,77 @@ fn main() -> Result<()> {
                 std::process::exit(output.exit_code);
             }
         }
+        Commands::Refactor { command } => {
+            match command {
+                RefactorCommands::Usages { workspace, iri, format } => {
+                    let catalog = build_catalog(&workspace)?;
+                    let usages = find_usages(&catalog, &iri);
+                    match format {
+                        OutputFormat::Json => {
+                            println!("{}", serde_json::to_string_pretty(&usages)?);
+                        }
+                        _ => {
+                            for u in usages {
+                                println!(
+                                    "{}:{}:{} {:?} {}",
+                                    u.file.display(),
+                                    u.line.unwrap_or(0),
+                                    u.column.unwrap_or(0),
+                                    u.kind,
+                                    u.context
+                                );
+                            }
+                        }
+                    }
+                }
+                RefactorCommands::Rename { workspace, from, to, preview, format } => {
+                    let catalog = build_catalog(&workspace)?;
+                    let plan = preview_rename_iri(&catalog, &from, &to)?;
+                    run_refactor_plan(&plan, preview, format)?;
+                }
+                RefactorCommands::MigrateNamespace { workspace, from, to, preview, format } => {
+                    let catalog = build_catalog(&workspace)?;
+                    let plan = preview_migrate_namespace(&catalog, &from, &to)?;
+                    run_refactor_plan(&plan, preview, format)?;
+                }
+                RefactorCommands::Move { workspace, iri, to, preview, format } => {
+                    let catalog = build_catalog(&workspace)?;
+                    let plan = preview_move_entity(&catalog, &iri, &to)?;
+                    run_refactor_plan(&plan, preview, format)?;
+                }
+                RefactorCommands::Extract {
+                    workspace,
+                    entities,
+                    out,
+                    leave_stub,
+                    preview,
+                    format,
+                } => {
+                    let catalog = build_catalog(&workspace)?;
+                    let plan = preview_extract_module(&catalog, &entities, &out, leave_stub)?;
+                    run_refactor_plan(&plan, preview, format)?;
+                }
+            }
+        }
+    }
+    Ok(())
+}
+
+fn run_refactor_plan(plan: &RefactorPlan, preview: bool, format: OutputFormat) -> Result<()> {
+    match format {
+        OutputFormat::Json => println!("{}", serde_json::to_string_pretty(plan)?),
+        _ => {
+            for change in &plan.changes {
+                println!("{}: {} byte(s) changed", change.path.display(), change.hunks.len());
+            }
+            for w in &plan.warnings {
+                eprintln!("WARN: {w}");
+            }
+        }
+    }
+    apply_refactor_plan(plan, preview)?;
+    if !preview {
+        println!("applied {} file(s)", plan.changes.len());
     }
     Ok(())
 }

@@ -1,0 +1,21 @@
+@prefix ex: <http://example.org/org#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+ex:Cat a owl:Class ;
+    rdfs:label "Cat" ;
+    rdfs:subClassOf owl:Thing ;
+    owl:disjointWith ex:Dog .
+
+ex:Dog a owl:Class ;
+    rdfs:label "Canine" ;
+    rdfs:subClassOf owl:Thing .
+
+ex:chases a owl:ObjectProperty ;
+    rdfs:label "chases" ;
+    rdfs:domain ex:Dog ;
+    rdfs:range ex:Cat .
+
+ex:composed a owl:ObjectProperty ;
+    rdfs:label "composed" ;
+    owl:propertyChainAxiom ( ex:chases ex:chases ) .

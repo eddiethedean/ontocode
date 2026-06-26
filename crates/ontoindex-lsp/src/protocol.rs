@@ -250,6 +250,15 @@ impl LspErrorPayload {
             user_action: Some("Run the reasoner first or choose another class".to_string()),
         }
     }
+
+    pub fn refactor_failed(message: String) -> Self {
+        Self {
+            code: "REFACTOR_FAILED".to_string(),
+            message,
+            recoverable: true,
+            user_action: Some("Preview the refactor plan and check Turtle files".to_string()),
+        }
+    }
 }
 
 #[derive(Debug, Deserialize)]
@@ -313,4 +322,51 @@ pub struct GetExplanationResult {
     pub class_iri: String,
     pub steps: Vec<ontoindex_reasoner::ExplanationStep>,
     pub text: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct FindUsagesParams {
+    pub iri: String,
+}
+
+#[derive(Debug, Serialize)]
+pub struct UsageSummary {
+    pub iri: String,
+    pub referenced_iri: String,
+    pub file: String,
+    pub line: Option<u64>,
+    pub column: Option<u64>,
+    pub kind: String,
+    pub context: String,
+}
+
+#[derive(Debug, Serialize)]
+pub struct FindUsagesResult {
+    pub usages: Vec<UsageSummary>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct PreviewRefactorParams {
+    #[serde(flatten)]
+    pub request: ontoindex_refactor::RefactorRequest,
+}
+
+#[derive(Debug, Serialize)]
+pub struct PreviewRefactorResult {
+    #[serde(flatten)]
+    pub plan: ontoindex_refactor::RefactorPlan,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct ApplyRefactorParams {
+    pub plan: ontoindex_refactor::RefactorPlan,
+    #[serde(default)]
+    pub preview_only: bool,
+}
+
+#[derive(Debug, Serialize)]
+pub struct ApplyRefactorResult {
+    pub files_written: usize,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub reindex_warning: Option<String>,
 }

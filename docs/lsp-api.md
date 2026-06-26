@@ -1,6 +1,6 @@
-# OntoIndex LSP API (v0.7)
+# OntoIndex LSP API (v0.8)
 
-> **Status:** Documents behavior in **OntoIndex v0.7.0**. Pre-1.0 APIs may change.
+> **Status:** Documents behavior in **OntoIndex v0.8.0**. Pre-1.0 APIs may change.
 > Canonical feature list: [What ships today](SHIPPED.md).
 
 This document describes **what ships today** in `ontoindex-lsp`. For the **v1.0 target** (including `runRobot`, graph APIs), see [LSP_SPEC.md](design/LSP_SPEC.md).
@@ -30,7 +30,8 @@ LSP JSON uses **snake_case** for enums serialized from Rust (`EntityKind`, `Pars
 | `textDocument/definition` | Implemented |
 | Diagnostics | **Implemented** — server pushes `textDocument/publishDiagnostics` after each reindex |
 | Completion | Planned |
-| Rename | Planned |
+| Rename | **Implemented** — `textDocument/rename` with `prepareRename` |
+| Find references | **Implemented** — `textDocument/references` |
 
 ## Custom methods
 
@@ -314,6 +315,37 @@ Runs a ROBOT CLI subcommand.
 **Params:** `{ subcommand, args?, robot_path? }`
 
 **Result:** `{ exit_code, stdout, stderr }`
+
+### `ontoindex/findUsages` (v0.8)
+
+Return structured IRI usages across the workspace catalog and Turtle text spans.
+
+**Params:** `{ "iri": "http://example.org/people#Person" }`
+
+**Result:** `{ "usages": Usage[] }` — each usage has `iri`, `file`, `range` (`start_byte`, `end_byte`, `line`, `column`), and `kind`.
+
+### `ontoindex/previewRefactor` (v0.8)
+
+Build a refactor plan without writing files.
+
+**Params:** flattened refactor request — one of:
+
+| `kind` | Fields |
+|--------|--------|
+| `rename_iri` | `from_iri`, `to_iri` |
+| `migrate_namespace` | `from_base`, `to_base` |
+| `move_entity` | `entity_iri`, `target_path` |
+| `extract_module` | `entity_iris[]`, `output_path` |
+
+**Result:** `RefactorPlan` — `{ changes: FileChange[], warnings: string[] }` where each change has `path`, `preview_text`, and `hunks`.
+
+### `ontoindex/applyRefactor` (v0.8)
+
+Apply a previously previewed refactor plan, reindex, and return diagnostics.
+
+**Params:** `{ "plan": RefactorPlan }`
+
+**Result:** `{ "applied": boolean, "diagnostics": DiagnosticSummary[] }`
 
 ## Structured errors
 

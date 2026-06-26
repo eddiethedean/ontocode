@@ -35,6 +35,11 @@ import {
   RunRobotParams,
   RunRobotResult,
   TabularQueryResult,
+  FindUsagesResult,
+  RefactorRequest,
+  PreviewRefactorResult,
+  RefactorPlan,
+  ApplyRefactorResult,
 } from "./protocol";
 import {
   bundledServerPath,
@@ -258,6 +263,35 @@ export async function runRobot(params: RunRobotParams): Promise<RunRobotResult> 
     robot_path: robotPath || undefined,
   });
   return assertRunRobotResult(result);
+}
+
+export async function findUsages(iri: string): Promise<FindUsagesResult> {
+  const c = requireClient();
+  const result = await c.sendRequest<unknown>("ontoindex/findUsages", { iri });
+  return result as FindUsagesResult;
+}
+
+export async function previewRefactor(
+  request: RefactorRequest
+): Promise<PreviewRefactorResult> {
+  const c = requireClient();
+  const result = await c.sendRequest<unknown>(
+    "ontoindex/previewRefactor",
+    request
+  );
+  return result as PreviewRefactorResult;
+}
+
+export async function applyRefactor(
+  plan: RefactorPlan,
+  previewOnly = false
+): Promise<ApplyRefactorResult> {
+  const c = requireClient();
+  const result = await c.sendRequest<unknown>("ontoindex/applyRefactor", {
+    plan,
+    preview_only: previewOnly,
+  });
+  return result as ApplyRefactorResult;
 }
 
 function requireClient(): LanguageClient {

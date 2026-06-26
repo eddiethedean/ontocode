@@ -2,11 +2,21 @@ import type { PanelKind } from "./messages";
 import { SmokePanel } from "./panels/SmokePanel";
 import { EntityInspectorPanel } from "./panels/EntityInspector";
 import { GraphPanel } from "./panels/GraphPanel";
+import { RefactorPreviewPanel } from "./panels/RefactorPreview";
+import { QueryWorkbenchPanel } from "./panels/QueryWorkbench";
+import { ManchesterEditorPanel } from "./panels/ManchesterEditor";
 
 function panelFromQuery(): PanelKind {
   const params = new URLSearchParams(window.location.search);
   const panel = params.get("panel");
-  if (panel === "inspector" || panel === "graph" || panel === "smoke") {
+  if (
+    panel === "inspector" ||
+    panel === "graph" ||
+    panel === "smoke" ||
+    panel === "refactorPreview" ||
+    panel === "queryWorkbench" ||
+    panel === "manchesterEditor"
+  ) {
     return panel;
   }
   return "smoke";
@@ -19,6 +29,12 @@ export default function App(): JSX.Element {
       return <EntityInspectorPanel />;
     case "graph":
       return <GraphPanel />;
+    case "refactorPreview":
+      return <RefactorPreviewPanel />;
+    case "queryWorkbench":
+      return <QueryWorkbenchPanel />;
+    case "manchesterEditor":
+      return <ManchesterEditorPanel />;
     default:
       return <SmokePanel />;
   }

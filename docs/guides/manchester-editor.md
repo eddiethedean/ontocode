@@ -2,7 +2,7 @@
 
 Edit **complex class expressions** in Turtle ontologies using Manchester OWL Syntax — restrictions, intersections, unions, and cardinality.
 
-Requires **v0.5.0** and a **`.ttl`** file.
+Requires **v0.5.0+** and a **`.ttl`** file. **v0.8+** uses the React webview panel with validation UI and axiom kind picker.
 
 ## Open the editor
 
@@ -15,7 +15,7 @@ Requires **v0.5.0** and a **`.ttl`** file.
 
 ## Workflow
 
-1. Choose axiom type: **SubClassOf** or **EquivalentClasses**.
+1. Choose axiom type: **SubClassOf**, **EquivalentClasses**, or **DisjointClasses**.
 2. Enter a Manchester expression, e.g. `ex:hasRecord some ex:MedicalRecord`.
 3. Use **Insert** pickers for classes, object properties, data properties, and XSD datatypes (from the indexed catalog).
 4. **Validate** — parse diagnostics and expression tree.
@@ -39,8 +39,9 @@ Simple named-parent `SubClassOf` (e.g. `ex:Person`) is edited in the inspector q
 | Existential restriction | `ex:hasRecord some ex:MedicalRecord` |
 | Universal restriction | `ex:hasRecord only ex:MedicalRecord` |
 | Cardinality | `ex:hasPart min 2 ex:Component` |
+| Disjoint (named class) | Select **DisjointClasses** and enter the other class IRI in the inspector quick form, or use patch JSON |
 
-**Not in MVP:** disjoint classes, property chains, nested property assertions. See [What ships today](../SHIPPED.md).
+**View only in axiom catalog:** domain, range, property chains. **Not shipped:** property chain editing. See [What ships today](../SHIPPED.md).
 
 ## CLI equivalent
 

@@ -1,13 +1,34 @@
 import { PatchOp } from "../lsp/protocol";
 
-export type ManchesterAxiomKind = "sub_class_of" | "equivalent_class";
+export type ManchesterAxiomKind =
+  | "sub_class_of"
+  | "equivalent_class"
+  | "disjoint_class";
 
 export function buildManchesterPatch(
   axiomKind: ManchesterAxiomKind,
   entityIri: string,
   manchester: string,
-  mode: "add" | "remove" | "set"
+  mode: "add" | "remove" | "set",
+  otherIri?: string
 ): PatchOp {
+  if (axiomKind === "disjoint_class") {
+    if (!otherIri) {
+      throw new Error("disjoint_class requires other_iri");
+    }
+    if (mode === "remove") {
+      return {
+        op: "remove_disjoint_class",
+        entity_iri: entityIri,
+        other_iri: otherIri,
+      };
+    }
+    return {
+      op: "add_disjoint_class",
+      entity_iri: entityIri,
+      other_iri: otherIri,
+    };
+  }
   if (axiomKind === "equivalent_class") {
     if (mode === "remove") {
       return {
@@ -47,6 +68,24 @@ export function buildManchesterPatches(
   mode: "add" | "edit",
   initialExpression?: string
 ): PatchOp[] {
+  if (axiomKind === "disjoint_class") {
+    const other = expression.trim();
+    if (mode === "edit" && initialExpression?.trim()) {
+      return [
+        buildManchesterPatch(
+          axiomKind,
+          entityIri,
+          initialExpression,
+          "remove",
+          initialExpression.trim()
+        ),
+        buildManchesterPatch(axiomKind, entityIri, other, "add", other),
+      ];
+    }
+    return [
+      buildManchesterPatch(axiomKind, entityIri, other, "add", other),
+    ];
+  }
   if (mode === "edit" && axiomKind === "sub_class_of") {
     const patches: PatchOp[] = [];
     if (initialExpression?.trim()) {

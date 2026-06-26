@@ -1,6 +1,6 @@
 [package]
-name = "ontoindex-cli"
-description = "CLI for OntoIndex ontology indexing and querying"
+name = "ontoindex-refactor"
+description = "Workspace refactoring for OntoIndex (rename, migrate, move, extract)"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -13,18 +13,12 @@ keywords.workspace = true
 categories.workspace = true
 include = ["src/**/*", "Cargo.toml", "README.md", "LICENSE-MIT", "LICENSE-APACHE-2.0"]
 
-[[bin]]
-name = "ontoindex"
-path = "src/main.rs"
-
 [dependencies]
 ontoindex-catalog = { workspace = true }
 ontoindex-core = { workspace = true }
 ontoindex-owl = { workspace = true }
-ontoindex-query = { workspace = true }
-ontoindex-reasoner = { workspace = true }
-ontoindex-refactor = { workspace = true }
-ontoindex-robot = { workspace = true }
-anyhow.workspace = true
-clap.workspace = true
-serde_json.workspace = true
+serde = { workspace = true, features = ["derive"] }
+thiserror.workspace = true
+
+[dev-dependencies]
+tempfile = "3"

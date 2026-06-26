@@ -17,9 +17,24 @@
       "path": "fixtures/complex-classes.ttl"
     },
     {
-      "base_iri": "http://example.org/people",
+      "base_iri": "http://example.org/org#",
       "format": "turtle",
       "id": "doc-2",
+      "imports": [],
+      "namespaces": {
+        "ex": "http://example.org/org#",
+        "owl": "http://www.w3.org/2002/07/owl#",
+        "rdfs": "http://www.w3.org/2000/01/rdf-schema#"
+      },
+      "parse_error_location": null,
+      "parse_message": null,
+      "parse_status": "ok",
+      "path": "fixtures/disjoint-classes.ttl"
+    },
+    {
+      "base_iri": "http://example.org/people",
+      "format": "turtle",
+      "id": "doc-3",
       "imports": [],
       "namespaces": {
         "ex": "http://example.org/people#",
@@ -35,7 +50,7 @@
     {
       "base_iri": "http://example.org/org",
       "format": "owl",
-      "id": "doc-3",
+      "id": "doc-4",
       "imports": [
         "http://example.org/people"
       ],
@@ -54,7 +69,7 @@
     {
       "base_iri": "http://example.org/reasoner-el",
       "format": "turtle",
-      "id": "doc-4",
+      "id": "doc-5",
       "imports": [],
       "namespaces": {
         "ex": "http://example.org/reasoner-el#",
@@ -69,7 +84,7 @@
     {
       "base_iri": "http://example.org/reasoner-unsat",
       "format": "turtle",
-      "id": "doc-5",
+      "id": "doc-6",
       "imports": [],
       "namespaces": {
         "ex": "http://example.org/reasoner-unsat#",
@@ -217,6 +232,74 @@
         "end_byte": 1239,
         "line": 42,
         "start_byte": 1094
+      }
+    },
+    {
+      "comments": [],
+      "deprecated": false,
+      "iri": "http://example.org/org#Cat",
+      "kind": "class",
+      "labels": [
+        "Cat"
+      ],
+      "ontology_id": "doc-2",
+      "short_name": "Cat",
+      "source_location": {
+        "column": 0,
+        "end_byte": 250,
+        "line": 5,
+        "start_byte": 145
+      }
+    },
+    {
+      "comments": [],
+      "deprecated": false,
+      "iri": "http://example.org/org#Dog",
+      "kind": "class",
+      "labels": [
+        "Canine"
+      ],
+      "ontology_id": "doc-2",
+      "short_name": "Dog",
+      "source_location": {
+        "column": 0,
+        "end_byte": 330,
+        "line": 10,
+        "start_byte": 252
+      }
+    },
+    {
+      "comments": [],
+      "deprecated": false,
+      "iri": "http://example.org/org#chases",
+      "kind": "object_property",
+      "labels": [
+        "chases"
+      ],
+      "ontology_id": "doc-2",
+      "short_name": "chases",
+      "source_location": {
+        "column": 0,
+        "end_byte": 439,
+        "line": 14,
+        "start_byte": 332
+      }
+    },
+    {
+      "comments": [],
+      "deprecated": false,
+      "iri": "http://example.org/org#composed",
+      "kind": "object_property",
+      "labels": [
+        "composed"
+      ],
+      "ontology_id": "doc-2",
+      "short_name": "composed",
+      "source_location": {
+        "column": 0,
+        "end_byte": 556,
+        "line": 19,
+        "start_byte": 441
       }
     },
     {

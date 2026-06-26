@@ -135,6 +135,14 @@ export class EntityInspectorPanel {
     if (message.type === "selectNode" || message.type === "openEntity") {
       await vscode.commands.executeCommand("ontocode.openEntity", message.iri);
     }
+    if (message.type === "findUsages" && this.iri) {
+      const { showEntityUsages } = await import("./refactorPreview");
+      await showEntityUsages(this.iri);
+    }
+    if (message.type === "renameIri" && this.iri) {
+      const { renameEntityIri } = await import("./refactorPreview");
+      await renameEntityIri(this.extensionUri, this.iri);
+    }
   }
 
   private async runPatch(

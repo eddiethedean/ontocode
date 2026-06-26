@@ -967,7 +967,7 @@ checksum = "384b8ab6d37215f3c5301a95a4accb5d64aa607f1fcb26a11b5303878451b4fe"
 
 [[package]]
 name = "ontocode"
-version = "0.7.0"
+version = "0.8.0"
 dependencies = [
  "ontoindex-catalog",
  "ontoindex-core",
@@ -982,7 +982,7 @@ dependencies = [
 
 [[package]]
 name = "ontoindex-catalog"
-version = "0.7.0"
+version = "0.8.0"
 dependencies = [
  "ontoindex-core",
  "ontoindex-diagnostics",
@@ -995,7 +995,7 @@ dependencies = [
 
 [[package]]
 name = "ontoindex-cli"
-version = "0.7.0"
+version = "0.8.0"
 dependencies = [
  "anyhow",
  "clap 4.6.1",
@@ -1004,13 +1004,14 @@ dependencies = [
  "ontoindex-owl",
  "ontoindex-query",
  "ontoindex-reasoner",
+ "ontoindex-refactor",
  "ontoindex-robot",
  "serde_json",
 ]
 
 [[package]]
 name = "ontoindex-core"
-version = "0.7.0"
+version = "0.8.0"
 dependencies = [
  "hex",
  "ignore",
@@ -1023,7 +1024,7 @@ dependencies = [
 
 [[package]]
 name = "ontoindex-diagnostics"
-version = "0.7.0"
+version = "0.8.0"
 dependencies = [
  "ontoindex-core",
  "regex",
@@ -1031,7 +1032,7 @@ dependencies = [
 
 [[package]]
 name = "ontoindex-lsp"
-version = "0.7.0"
+version = "0.8.0"
 dependencies = [
  "crossbeam-channel",
  "lsp-server",
@@ -1041,6 +1042,7 @@ dependencies = [
  "ontoindex-owl",
  "ontoindex-query",
  "ontoindex-reasoner",
+ "ontoindex-refactor",
  "ontoindex-robot",
  "serde",
  "serde_json",
@@ -1051,7 +1053,7 @@ dependencies = [
 
 [[package]]
 name = "ontoindex-owl"
-version = "0.7.0"
+version = "0.8.0"
 dependencies = [
  "horned-functional",
  "horned-owl 1.4.0",
@@ -1065,7 +1067,7 @@ dependencies = [
 
 [[package]]
 name = "ontoindex-parser"
-version = "0.7.0"
+version = "0.8.0"
 dependencies = [
  "ontoindex-core",
  "oxigraph",
@@ -1077,7 +1079,7 @@ dependencies = [
 
 [[package]]
 name = "ontoindex-query"
-version = "0.7.0"
+version = "0.8.0"
 dependencies = [
  "csv",
  "ontoindex-catalog",
@@ -1091,7 +1093,7 @@ dependencies = [
 
 [[package]]
 name = "ontoindex-reasoner"
-version = "0.7.0"
+version = "0.8.0"
 dependencies = [
  "hex",
  "ontoindex-catalog",
@@ -1113,8 +1115,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "ontoindex-refactor"
+version = "0.8.0"
+dependencies = [
+ "ontoindex-catalog",
+ "ontoindex-core",
+ "ontoindex-owl",
+ "serde",
+ "tempfile",
+ "thiserror 2.0.18",
+]
+
+[[package]]
 name = "ontoindex-robot"
-version = "0.7.0"
+version = "0.8.0"
 dependencies = [
  "thiserror 2.0.18",
 ]

@@ -8,13 +8,20 @@ import {
 import { PatchEntityKind, PatchOp } from "../lsp/protocol";
 import { EntityInspectorPanel } from "../webviews/inspector";
 import { GraphPanel } from "../webviews/graphPanel";
-import { QueryWorkbenchPanel } from "../webviews/queryWorkbench";
+import { QueryWorkbenchPanel } from "../webviews/queryWorkbenchReact";
 import {
   ManchesterEditorPanel,
   ManchesterEditorOptions,
-} from "../webviews/manchesterEditor";
+} from "../webviews/manchesterEditorReact";
 import { ReasonerPanel } from "../webviews/reasonerPanel";
 import { ExplanationPanel } from "../webviews/explanationPanel";
+import {
+  extractModule,
+  migrateNamespace,
+  moveEntity,
+  renameEntityIri,
+  showEntityUsages,
+} from "../webviews/refactorPreview";
 import { ExplorerTreeProvider } from "../treeviews/explorer";
 import { resolveEntityIri } from "../utils/resolveEntityIri";
 import { byteColToUtf16 } from "../utils/positions";
@@ -189,6 +196,71 @@ export function registerCommands(
         void vscode.window.showErrorMessage(`Delete failed: ${message}`);
       }
     }),
+    vscode.commands.registerCommand(
+      "ontocode.findEntityUsages",
+      async (iri?: string) => {
+        const target =
+          resolveEntityIri(iri) ??
+          (await vscode.window.showInputBox({ prompt: "Entity IRI" }));
+        if (!target) {
+          return;
+        }
+        try {
+          await showEntityUsages(target);
+        } catch (err) {
+          const message = err instanceof Error ? err.message : String(err);
+          void vscode.window.showErrorMessage(message);
+        }
+      }
+    ),
+    vscode.commands.registerCommand(
+      "ontocode.renameEntityIri",
+      async (iri?: string) => {
+        try {
+          await renameEntityIri(
+            context.extensionUri,
+            resolveEntityIri(iri) ?? iri
+          );
+          await refreshExplorer(providers);
+        } catch (err) {
+          const message = err instanceof Error ? err.message : String(err);
+          void vscode.window.showErrorMessage(message);
+        }
+      }
+    ),
+    vscode.commands.registerCommand("ontocode.migrateNamespace", async () => {
+      try {
+        await migrateNamespace(context.extensionUri);
+        await refreshExplorer(providers);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        void vscode.window.showErrorMessage(message);
+      }
+    }),
+    vscode.commands.registerCommand(
+      "ontocode.moveEntity",
+      async (iri?: string) => {
+        try {
+          await moveEntity(
+            context.extensionUri,
+            resolveEntityIri(iri) ?? iri
+          );
+          await refreshExplorer(providers);
+        } catch (err) {
+          const message = err instanceof Error ? err.message : String(err);
+          void vscode.window.showErrorMessage(message);
+        }
+      }
+    ),
+    vscode.commands.registerCommand("ontocode.extractModule", async () => {
+      try {
+        await extractModule(context.extensionUri);
+        await refreshExplorer(providers);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        void vscode.window.showErrorMessage(message);
+      }
+    }),
     vscode.commands.registerCommand("ontocode.openQueryWorkbench", () => {
       QueryWorkbenchPanel.show(context);
     }),
@@ -201,7 +273,7 @@ export function registerCommands(
           );
           return;
         }
-        await ManchesterEditorPanel.show({
+        await ManchesterEditorPanel.show(context.extensionUri, {
           ...arg,
           onRefresh: async () => refreshExplorer(providers),
         });

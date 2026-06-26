@@ -236,7 +236,9 @@ export type PatchOp =
   | { op: "add_equivalent_class"; entity_iri: string; manchester: string }
   | { op: "remove_equivalent_class"; entity_iri: string; manchester: string }
   | { op: "set_equivalent_class"; entity_iri: string; manchester: string }
-  | { op: "set_deprecated"; entity_iri: string; value: boolean };
+  | { op: "set_deprecated"; entity_iri: string; value: boolean }
+  | { op: "add_disjoint_class"; entity_iri: string; other_iri: string }
+  | { op: "remove_disjoint_class"; entity_iri: string; other_iri: string };
 
 export type PatchEntityKind =
   | "class"
@@ -297,4 +299,58 @@ export interface SavedQuery {
   name: string;
   mode: "sql" | "sparql";
   text: string;
+}
+
+export interface UsageSummary {
+  iri: string;
+  referenced_iri: string;
+  file: string;
+  line?: number;
+  column?: number;
+  kind: string;
+  context: string;
+}
+
+export interface FindUsagesResult {
+  usages: UsageSummary[];
+}
+
+export interface RefactorHunk {
+  start_byte: number;
+  end_byte: number;
+  old_text: string;
+  new_text: string;
+}
+
+export interface RefactorFileChange {
+  path: string;
+  preview_text: string;
+  original_text: string;
+  hunks: RefactorHunk[];
+}
+
+export interface RefactorPlan {
+  changes: RefactorFileChange[];
+  warnings?: string[];
+}
+
+export type RefactorRequest =
+  | { kind: "rename_iri"; from_iri: string; to_iri: string }
+  | { kind: "migrate_namespace"; from_base: string; to_base: string }
+  | { kind: "move_entity"; entity_iri: string; target_file: string }
+  | {
+      kind: "extract_module";
+      entity_iris: string[];
+      output_file: string;
+      leave_stub?: boolean;
+    };
+
+export interface PreviewRefactorResult {
+  changes: RefactorFileChange[];
+  warnings?: string[];
+}
+
+export interface ApplyRefactorResult {
+  files_written: number;
+  reindex_warning?: string;
 }

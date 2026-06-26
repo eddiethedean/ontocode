@@ -29,6 +29,8 @@ pub enum PatchOp {
     RemoveEquivalentClass { entity_iri: String, manchester: String },
     SetEquivalentClass { entity_iri: String, manchester: String },
     SetDeprecated { entity_iri: String, value: bool },
+    AddDisjointClass { entity_iri: String, other_iri: String },
+    RemoveDisjointClass { entity_iri: String, other_iri: String },
 }
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
@@ -183,6 +185,13 @@ fn apply_one_patch(
                 remove_predicate_triples(text, entity_iri, "owl:deprecated", namespaces)
             }
         }
+        PatchOp::AddDisjointClass { entity_iri, other_iri } => {
+            let other = iri_to_turtle_term(other_iri, namespaces);
+            add_object_triple(text, entity_iri, "owl:disjointWith", &other, namespaces)
+        }
+        PatchOp::RemoveDisjointClass { entity_iri, other_iri } => {
+            remove_disjoint_triple(text, entity_iri, other_iri, namespaces)
+        }
     }
 }
 
@@ -326,6 +335,16 @@ fn remove_subclass_triple(
 ) -> Result<()> {
     let parent = iri_to_turtle_term(parent_iri, namespaces);
     remove_predicate_object_any_statement(text, entity_iri, "rdfs:subClassOf", &parent, namespaces)
+}
+
+fn remove_disjoint_triple(
+    text: &mut String,
+    entity_iri: &str,
+    other_iri: &str,
+    namespaces: &BTreeMap<String, String>,
+) -> Result<()> {
+    let other = iri_to_turtle_term(other_iri, namespaces);
+    remove_predicate_object_any_statement(text, entity_iri, "owl:disjointWith", &other, namespaces)
 }
 
 fn remove_predicate_triples(

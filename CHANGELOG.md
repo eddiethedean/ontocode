@@ -5,6 +5,29 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.8.0] - 2026-06-26
+
+### Added
+
+- **`ontoindex-refactor` crate** — workspace-wide usage index; rename IRI, namespace migration, move entity, extract module with preview/apply
+- CLI **`ontoindex refactor`** subcommands: `usages`, `rename`, `migrate-namespace`, `move`, `extract`
+- LSP refactoring: `ontoindex/findUsages`, `ontoindex/previewRefactor`, `ontoindex/applyRefactor`
+- Standard LSP **`textDocument/references`**, **`textDocument/rename`** (with `prepareRename`)
+- VS Code refactor commands and **Refactor Preview** React panel
+- Inspector **Find Usages** and **Rename IRI** actions
+- Full Manchester catalog extensions: **disjoint classes** (author + patch), **domain/range** and **property chains** (view in axiom catalog)
+- Patch ops: `add_disjoint_class`, `remove_disjoint_class`
+- **React Query Workbench** and **React Manchester Editor** panels (legacy HTML webviews removed)
+- Fixture: `fixtures/disjoint-classes.ttl`
+
+### Changed
+
+- Workspace and extension version **0.8.0**
+- Axiom catalog groups axioms by kind in React inspector
+- Manchester editor supports `disjoint_class` axiom kind with validation UI
+
+[0.8.0]: https://github.com/eddiethedean/ontocode/releases/tag/v0.8.0
+
 ## [0.7.0] - 2026-06-25
 
 ### Added

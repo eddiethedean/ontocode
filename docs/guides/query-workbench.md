@@ -7,7 +7,7 @@ Run **SQL** and **SPARQL** queries against your indexed workspace from VS Code.
 1. **Command Palette** (`Ctrl+Shift+P` / `Cmd+Shift+P`) → **OntoCode: Open Query Workbench**
 2. Or complete step 5 in [First success in 10 minutes](first-success.md)
 
-The workbench opens in a side panel beside your editor.
+The workbench opens in a side panel beside your editor. **v0.8+** uses the React webview panel (same features as the legacy HTML panel).
 
 ## Modes
 
@@ -55,9 +55,9 @@ ontoindex query /path/to/ontologies "SELECT short_name FROM classes"
 ontoindex sparql /path/to/ontologies "SELECT ?s ?p ?o WHERE { ?s ?p ?o } LIMIT 10"
 ```
 
-## Limitations (v0.5)
+## Limitations (v0.8)
 
-- No SQL/SPARQL autocomplete in the workbench editor (planned v0.8+).
+- No SQL/SPARQL autocomplete in the workbench editor (planned v0.9+).
 - Queries run against the **indexed catalog** — run **OntoCode: Index Workspace** after file changes.
 - SQL subset only: no `JOIN`, `GROUP BY`, `ORDER BY`, or `LIMIT`. See [SQL reference](../sql-reference.md).
 

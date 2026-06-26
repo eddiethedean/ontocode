@@ -20,3 +20,7 @@ pub use patch::{
     apply_patches, apply_patches_to_text, ApplyPatchResult, PatchDiagnostic, PatchEntityKind,
     PatchOp,
 };
+pub use span::{
+    all_entity_statement_ranges, entity_block_range, entity_primary_block_range,
+    namespaces_for_text, prefixes_from_turtle, short_name_from_iri, ByteRange,
+};

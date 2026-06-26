@@ -1,26 +1,31 @@
 use crate::index_worker::IndexWorker;
 use crate::positions::{byte_col_to_utf16, utf16_offset_to_byte};
 use crate::protocol::{
-    ApplyAxiomPatchParams, ApplyAxiomPatchResult, CatalogSnapshot, DiagnosticSummary,
-    GetEntityParams, GetEntityResult, GetExplanationParams, GetExplanationResult, GetGraphResult,
+    ApplyAxiomPatchParams, ApplyAxiomPatchResult, ApplyRefactorParams, ApplyRefactorResult,
+    CatalogSnapshot, DiagnosticSummary, FindUsagesParams, FindUsagesResult, GetEntityParams,
+    GetEntityResult, GetExplanationParams, GetExplanationResult, GetGraphResult,
     IndexWorkspaceParams, IndexWorkspaceResult, LspErrorPayload, ManchesterCompletions,
-    ParseManchesterParams, ParseManchesterResult, QueryParams, RunReasonerParams,
-    RunReasonerResult, RunRobotParams, RunRobotResult, SparqlParams, TabularQueryResult,
+    ParseManchesterParams, ParseManchesterResult, PreviewRefactorParams, PreviewRefactorResult,
+    QueryParams, RunReasonerParams, RunReasonerResult, RunRobotParams, RunRobotResult,
+    SparqlParams, TabularQueryResult, UsageSummary,
 };
 use crate::state::{path_to_uri, resolve_workspace_for_index, ServerState};
 use lsp_server::ResponseError;
 use lsp_types::{
-    DocumentSymbol, DocumentSymbolParams, DocumentSymbolResponse, GotoDefinitionParams,
-    GotoDefinitionResponse, Hover, HoverContents, HoverParams, HoverProviderCapability,
-    InitializeParams, InitializeResult, Location, MarkupContent, MarkupKind, OneOf, Position,
-    Range, ServerCapabilities, SymbolInformation, SymbolKind, TextDocumentSyncCapability,
-    TextDocumentSyncKind, Uri, WorkspaceSymbolParams, WorkspaceSymbolResponse,
+    DocumentChanges, DocumentSymbol, DocumentSymbolParams, DocumentSymbolResponse,
+    GotoDefinitionParams, GotoDefinitionResponse, Hover, HoverContents, HoverParams,
+    HoverProviderCapability, InitializeParams, InitializeResult, Location, MarkupContent,
+    MarkupKind, OneOf, Position, Range, ReferenceParams, RenameParams, ServerCapabilities,
+    SymbolInformation, SymbolKind, TextDocumentEdit, TextDocumentSyncCapability,
+    TextDocumentSyncKind, TextEdit, Uri, WorkspaceEdit, WorkspaceSymbolParams,
+    WorkspaceSymbolResponse,
 };
 use ontoindex_catalog::{GraphBuilder, GraphRequest};
 use ontoindex_core::{resolve_document_path, EntityKind, OntologyFormat};
 use ontoindex_reasoner::{
     classify, explain, ExplanationRequest, ReasonerId, ReasonerSnapshot, WorkspaceInputLoader,
 };
+use ontoindex_refactor::{apply_refactor_plan_checked, find_usages, preview_refactor, preview_rename_iri};
 use serde_json::Value;
 use std::path::Path;
 use std::str::FromStr;
@@ -44,6 +49,8 @@ pub fn handle_initialize(state: &ServerState, params: InitializeParams) -> Initi
             hover_provider: Some(HoverProviderCapability::Simple(true)),
             document_symbol_provider: Some(OneOf::Left(true)),
             workspace_symbol_provider: Some(OneOf::Left(true)),
+            references_provider: Some(OneOf::Left(true)),
+            rename_provider: Some(OneOf::Left(true)),
             text_document_sync: Some(TextDocumentSyncCapability::Kind(TextDocumentSyncKind::FULL)),
             ..Default::default()
         },
@@ -220,7 +227,9 @@ pub fn handle_apply_axiom_patch(
         | ontoindex_owl::PatchOp::AddEquivalentClass { entity_iri, .. }
         | ontoindex_owl::PatchOp::RemoveEquivalentClass { entity_iri, .. }
         | ontoindex_owl::PatchOp::SetEquivalentClass { entity_iri, .. }
-        | ontoindex_owl::PatchOp::SetDeprecated { entity_iri, .. } => entity_iri.clone(),
+        | ontoindex_owl::PatchOp::SetDeprecated { entity_iri, .. }
+        | ontoindex_owl::PatchOp::AddDisjointClass { entity_iri, .. }
+        | ontoindex_owl::PatchOp::RemoveDisjointClass { entity_iri, .. } => entity_iri.clone(),
     });
 
     let mut reindex_warning = None;
@@ -642,6 +651,160 @@ pub fn handle_goto_definition(
     })?
 }
 
+pub fn handle_find_usages(
+    state: &ServerState,
+    params: FindUsagesParams,
+) -> Result<FindUsagesResult, LspErrorPayload> {
+    state
+        .with_catalog(|catalog| {
+            let usages = find_usages(catalog, &params.iri);
+            Ok(FindUsagesResult {
+                usages: usages.into_iter().map(usage_to_summary).collect(),
+            })
+        })
+        .ok_or_else(LspErrorPayload::not_indexed)?
+}
+
+pub fn handle_preview_refactor(
+    state: &ServerState,
+    params: PreviewRefactorParams,
+) -> Result<PreviewRefactorResult, LspErrorPayload> {
+    state
+        .with_catalog(|catalog| {
+            let plan = preview_refactor(catalog, &params.request)
+                .map_err(|e| LspErrorPayload::refactor_failed(e.to_string()))?;
+            Ok(PreviewRefactorResult { plan })
+        })
+        .ok_or_else(LspErrorPayload::not_indexed)?
+}
+
+pub fn handle_apply_refactor(
+    state: &ServerState,
+    index_worker: &IndexWorker,
+    params: ApplyRefactorParams,
+) -> Result<ApplyRefactorResult, LspErrorPayload> {
+    let files_written = apply_refactor_plan_checked(&params.plan, params.preview_only)
+        .map_err(|e| LspErrorPayload::refactor_failed(e.to_string()))?;
+    if params.preview_only {
+        return Ok(ApplyRefactorResult { files_written: 0, reindex_warning: None });
+    }
+    let reindex_warning = match state.effective_index_root() {
+        Some(root) => match index_worker.enqueue_sync(root) {
+            Ok(_) => None,
+            Err(e) => Some(format!("refactor applied but reindex failed: {e}")),
+        },
+        None => Some("refactor applied but workspace root unknown".to_string()),
+    };
+    Ok(ApplyRefactorResult { files_written, reindex_warning })
+}
+
+pub fn handle_references(
+    state: &ServerState,
+    params: ReferenceParams,
+) -> Option<Vec<Location>> {
+    let path = lsp_document_path(state, &params.text_document_position.text_document.uri)?;
+    let position = params.text_document_position.position;
+    let content = state.document_text(&path)?;
+    let iri = iri_at_position(&content, position)?;
+    state.with_catalog(|catalog| {
+        let locations: Vec<Location> = find_usages(catalog, &iri)
+            .into_iter()
+            .filter_map(|u| {
+                let uri = path_to_lsp_uri(&u.file)?;
+                let line_idx = u.line.unwrap_or(1).saturating_sub(1) as u32;
+                let byte_col = u.column.unwrap_or(0) as usize;
+                let line_text = state
+                    .document_text(&u.file)
+                    .and_then(|text| text.lines().nth(line_idx as usize).map(|s| s.to_string()));
+                let character = line_text
+                    .as_deref()
+                    .map(|l| byte_col_to_utf16(l, byte_col))
+                    .unwrap_or(byte_col as u32);
+                let range = Range {
+                    start: Position { line: line_idx, character },
+                    end: Position {
+                        line: line_idx,
+                        character: character.saturating_add(1),
+                    },
+                };
+                Some(Location { uri, range })
+            })
+            .collect();
+        Some(locations)
+    })?
+}
+
+pub fn handle_rename(
+    state: &ServerState,
+    params: RenameParams,
+) -> Option<WorkspaceEdit> {
+    let path = lsp_document_path(state, &params.text_document_position.text_document.uri)?;
+    let position = params.text_document_position.position;
+    let content = state.document_text(&path)?;
+    let from_iri = iri_at_position(&content, position)?;
+    let to_iri = derive_renamed_iri(&from_iri, &params.new_name);
+    state.with_catalog(|catalog| {
+        let plan = preview_rename_iri(catalog, &from_iri, &to_iri).ok()?;
+        plan_to_workspace_edit(&plan)
+    })?
+}
+
+fn usage_to_summary(u: ontoindex_refactor::Usage) -> UsageSummary {
+    UsageSummary {
+        iri: u.iri,
+        referenced_iri: u.referenced_iri,
+        file: u.file.display().to_string(),
+        line: u.line,
+        column: u.column,
+        kind: format!("{:?}", u.kind).to_ascii_lowercase(),
+        context: u.context,
+    }
+}
+
+fn derive_renamed_iri(from_iri: &str, new_name: &str) -> String {
+    if new_name.contains("://") {
+        return new_name.to_string();
+    }
+    if let Some((base, _)) = from_iri.rsplit_once('#') {
+        return format!("{base}#{new_name}");
+    }
+    if let Some((base, _)) = from_iri.rsplit_once('/') {
+        return format!("{base}/{new_name}");
+    }
+    new_name.to_string()
+}
+
+fn plan_to_workspace_edit(plan: &ontoindex_refactor::RefactorPlan) -> Option<WorkspaceEdit> {
+    let mut document_changes = Vec::new();
+    for change in &plan.changes {
+        if change.preview_text == change.original_text {
+            continue;
+        }
+        let uri = path_to_lsp_uri(&change.path)?;
+        document_changes.push(TextDocumentEdit {
+            text_document: lsp_types::OptionalVersionedTextDocumentIdentifier {
+                uri,
+                version: None,
+            },
+            edits: vec![OneOf::Left(TextEdit {
+                range: Range {
+                    start: Position { line: 0, character: 0 },
+                    end: Position { line: u32::MAX, character: 0 },
+                },
+                new_text: change.preview_text.clone(),
+            })],
+        });
+    }
+    if document_changes.is_empty() {
+        return None;
+    }
+    Some(WorkspaceEdit {
+        changes: None,
+        document_changes: Some(DocumentChanges::Edits(document_changes)),
+        change_annotations: None,
+    })
+}
+
 pub fn handle_custom_request(
     state: &ServerState,
     index_worker: &IndexWorker,
@@ -720,6 +883,28 @@ pub fn handle_custom_request(
             let result = handle_run_robot(index_worker, params)?;
             serde_json::to_value(result).map_err(|e| LspErrorPayload::robot_failed(e.to_string()))
         }
+        "ontoindex/findUsages" => {
+            let params: FindUsagesParams = serde_json::from_value(params.unwrap_or(Value::Null))
+                .map_err(|e| LspErrorPayload::invalid_params(format!("invalid params: {e}")))?;
+            let result = handle_find_usages(state, params)?;
+            serde_json::to_value(result)
+                .map_err(|e| LspErrorPayload::refactor_failed(e.to_string()))
+        }
+        "ontoindex/previewRefactor" => {
+            let params: PreviewRefactorParams =
+                serde_json::from_value(params.unwrap_or(Value::Null))
+                    .map_err(|e| LspErrorPayload::invalid_params(format!("invalid params: {e}")))?;
+            let result = handle_preview_refactor(state, params)?;
+            serde_json::to_value(result)
+                .map_err(|e| LspErrorPayload::refactor_failed(e.to_string()))
+        }
+        "ontoindex/applyRefactor" => {
+            let params: ApplyRefactorParams = serde_json::from_value(params.unwrap_or(Value::Null))
+                .map_err(|e| LspErrorPayload::invalid_params(format!("invalid params: {e}")))?;
+            let result = handle_apply_refactor(state, index_worker, params)?;
+            serde_json::to_value(result)
+                .map_err(|e| LspErrorPayload::refactor_failed(e.to_string()))
+        }
         _ => Err(LspErrorPayload::invalid_params(format!("unknown method: {method}"))),
     }
 }
@@ -776,6 +961,28 @@ pub fn handle_standard_request(
             };
             match handle_goto_definition(state, params) {
                 Some(def) => serde_json::to_value(def)
+                    .map(StandardRequestOutcome::Ok)
+                    .unwrap_or(StandardRequestOutcome::Ok(Value::Null)),
+                None => StandardRequestOutcome::Ok(Value::Null),
+            }
+        }
+        "textDocument/references" => {
+            let Ok(params) = serde_json::from_value(params.unwrap_or(Value::Null)) else {
+                return StandardRequestOutcome::InvalidParams(invalid_params("references"));
+            };
+            match handle_references(state, params) {
+                Some(refs) => serde_json::to_value(refs)
+                    .map(StandardRequestOutcome::Ok)
+                    .unwrap_or(StandardRequestOutcome::Ok(Value::Array(vec![]))),
+                None => StandardRequestOutcome::Ok(Value::Array(vec![])),
+            }
+        }
+        "textDocument/rename" => {
+            let Ok(params) = serde_json::from_value(params.unwrap_or(Value::Null)) else {
+                return StandardRequestOutcome::InvalidParams(invalid_params("rename"));
+            };
+            match handle_rename(state, params) {
+                Some(edit) => serde_json::to_value(edit)
                     .map(StandardRequestOutcome::Ok)
                     .unwrap_or(StandardRequestOutcome::Ok(Value::Null)),
                 None => StandardRequestOutcome::Ok(Value::Null),

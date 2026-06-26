@@ -2,9 +2,11 @@ short_name	labels
 A	A
 Animal	Animal
 B	B
+Cat	Cat
 ClinicOrganization	Clinic Organization
 ClinicPerson	Clinic Person
 Department	Department
+Dog	Canine
 Dog	Dog
 Employee	Employee
 Invalid	Invalid

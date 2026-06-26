@@ -1,6 +1,12 @@
 /** Shared webview message types (keep in sync with webview-ui/src/messages.ts). */
 
-export type PanelKind = "smoke" | "inspector" | "graph";
+export type PanelKind =
+  | "smoke"
+  | "inspector"
+  | "graph"
+  | "refactorPreview"
+  | "queryWorkbench"
+  | "manchesterEditor";
 
 export interface PatchOp {
   op: string;
@@ -58,12 +64,60 @@ export interface EntityDetailPayload {
   document_path?: string;
 }
 
+export interface RefactorFileChange {
+  path: string;
+  preview_text: string;
+  original_text: string;
+  hunks: Array<{
+    start_byte: number;
+    end_byte: number;
+    old_text: string;
+    new_text: string;
+  }>;
+}
+
+export interface RefactorPlanPayload {
+  changes: RefactorFileChange[];
+  warnings?: string[];
+}
+
+export interface SavedQuery {
+  name: string;
+  mode: "sql" | "sparql";
+  text: string;
+}
+
+export interface TabularQueryResult {
+  columns: string[];
+  rows: Record<string, string>[];
+  truncated?: boolean;
+}
+
+export interface ManchesterCompletions {
+  classes: string[];
+  object_properties: string[];
+  data_properties: string[];
+  datatypes: string[];
+}
+
+export interface ManchesterValidationResult {
+  normalized: string;
+  turtle_fragment: string;
+  tree: unknown;
+  diagnostics: Array<{ severity: string; message: string }>;
+}
+
 /** Host → React */
 export type HostMessage =
   | { type: "init"; panel: PanelKind }
   | { type: "loadEntity"; detail: EntityDetailPayload; classOptions: string[] }
   | { type: "graphData"; graph: GraphPayload }
   | { type: "preview"; text: string }
+  | { type: "loadRefactorPlan"; plan: RefactorPlanPayload }
+  | { type: "queryInit"; saved: SavedQuery[]; history: SavedQuery[]; sqlTables: string[] }
+  | { type: "queryResult"; runId: number; result?: TabularQueryResult; error?: string }
+  | { type: "manchesterInit"; entityIri: string; axiomKind: string; expression: string; completions: ManchesterCompletions }
+  | { type: "manchesterValidation"; seq: number; result?: ManchesterValidationResult; error?: string }
   | { type: "error"; message: string };
 
 /** React → Host */
@@ -76,7 +130,16 @@ export type WebviewMessage =
   | { type: "requestGraph"; graphKind: string; rootIri?: string; depth?: number; includeInferred?: boolean; filters?: GraphFilters }
   | { type: "selectNode"; iri: string }
   | { type: "openEntity"; iri: string }
-  | { type: "openGraph"; rootIri?: string };
+  | { type: "openGraph"; rootIri?: string }
+  | { type: "findUsages" }
+  | { type: "renameIri" }
+  | { type: "applyRefactor" }
+  | { type: "cancelRefactor" }
+  | { type: "runQuery"; mode: "sql" | "sparql"; text: string; runId: number }
+  | { type: "saveQuery"; name: string; mode: "sql" | "sparql"; text: string }
+  | { type: "exportQueryResult"; format: "csv" | "json" }
+  | { type: "validateManchester"; expression: string; axiomKind: string; seq: number }
+  | { type: "applyManchester"; expression: string; axiomKind: string; previewOnly: boolean };
 
 export function isWebviewMessage(data: unknown): data is WebviewMessage {
   return (

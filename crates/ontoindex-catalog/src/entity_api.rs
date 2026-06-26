@@ -1,7 +1,8 @@
 use crate::OntologyCatalog;
 use ontoindex_core::{
-    document_matches_entity, Entity, EntityKind, AXIOM_KIND_EQUIVALENT_CLASS,
-    AXIOM_KIND_SUB_CLASS_OF,
+    document_matches_entity, Entity, EntityKind, AXIOM_KIND_DISJOINT_CLASS,
+    AXIOM_KIND_DOMAIN, AXIOM_KIND_EQUIVALENT_CLASS, AXIOM_KIND_PROPERTY_CHAIN,
+    AXIOM_KIND_RANGE, AXIOM_KIND_SUB_CLASS_OF,
 };
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
@@ -172,14 +173,22 @@ fn axiom_summary(a: &ontoindex_core::Axiom, editable: bool) -> EntityAxiomSummar
     };
     let kind_label = match a.axiom_kind.as_str() {
         AXIOM_KIND_EQUIVALENT_CLASS => "EquivalentClasses",
+        AXIOM_KIND_DISJOINT_CLASS => "DisjointClasses",
+        AXIOM_KIND_DOMAIN => "Domain",
+        AXIOM_KIND_RANGE => "Range",
+        AXIOM_KIND_PROPERTY_CHAIN => "PropertyChain",
         _ => "SubClassOf",
     };
+    let axiom_editable = editable
+        && a.axiom_kind != AXIOM_KIND_PROPERTY_CHAIN
+        && a.axiom_kind != AXIOM_KIND_DOMAIN
+        && a.axiom_kind != AXIOM_KIND_RANGE;
     EntityAxiomSummary {
         kind: a.axiom_kind.clone(),
         display: format!("{} {}", kind_label, a.object),
         manchester,
         parent_iri,
-        editable,
+        editable: axiom_editable,
     }
 }
 

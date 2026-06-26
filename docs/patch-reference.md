@@ -1,6 +1,6 @@
-# Patch reference (OntoIndex v0.7)
+# Patch reference (OntoIndex v0.8)
 
-> **Status:** Documents behavior in **OntoIndex v0.7.0**. Pre-1.0 APIs may change.
+> **Status:** Documents behavior in **OntoIndex v0.8.0**. Pre-1.0 APIs may change.
 > Canonical feature list: [What ships today](SHIPPED.md).
 
 Turtle write-back uses a JSON array of patch operations. The CLI (`ontoindex patch`) and LSP (`ontoindex/applyAxiomPatch`) accept the same format.
@@ -32,6 +32,8 @@ Turtle write-back uses a JSON array of patch operations. The CLI (`ontoindex pat
 | `add_equivalent_class` | `entity_iri`, `manchester` | Add `owl:equivalentClass` from Manchester expression |
 | `remove_equivalent_class` | `entity_iri`, `manchester` | Remove equivalent class axiom |
 | `set_equivalent_class` | `entity_iri`, `manchester` | Replace equivalent class axioms with one expression |
+| `add_disjoint_class` | `entity_iri`, `other_iri` | Add `owl:disjointWith` to another named class |
+| `remove_disjoint_class` | `entity_iri`, `other_iri` | Remove a `disjointWith` axiom |
 | `set_deprecated` | `entity_iri`, `value` | Set `owl:deprecated` (`true` or `false`) |
 
 ### `kind` values for `create_entity`
@@ -141,6 +143,18 @@ Turtle write-back uses a JSON array of patch operations. The CLI (`ontoindex pat
 ]
 ```
 
+### Disjoint classes
+
+```json
+[
+  {
+    "op": "add_disjoint_class",
+    "entity_iri": "http://example.org/org#Cat",
+    "other_iri": "http://example.org/org#Dog"
+  }
+]
+```
+
 ## CLI usage
 
 ```bash
@@ -185,9 +199,9 @@ Method: `ontoindex/applyAxiomPatch`
 
 See [lsp-api.md](lsp-api.md) and [authoring.md](authoring.md).
 
-## Limitations (v0.5)
+## Limitations (v0.8)
 
 - Turtle only; RDF/XML, OWL/XML, JSON-LD are read-only
 - Simple `add_sub_class_of` parent must be a **named class IRI**; use Manchester ops (`add_complex_sub_class_of`, `add_equivalent_class`, etc.) for class expressions
-- Manchester MVP: `SubClassOf` and `EquivalentClasses` only — no disjoint axioms or property chains
+- Manchester: `SubClassOf`, `EquivalentClasses`, and `DisjointClasses` — property chains are view-only in the axiom catalog
 - Patch engine uses targeted text edits; unusual formatting may need manual review

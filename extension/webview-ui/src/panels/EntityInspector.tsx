@@ -98,6 +98,31 @@ export function EntityInspectorPanel(): JSX.Element {
   }
 
   const { entity, parents, children, axioms, editable } = detail;
+
+  const axiomsByKind = axioms.reduce<Record<string, typeof axioms>>((acc, ax) => {
+    const key = ax.kind || "other";
+    (acc[key] ??= []).push(ax);
+    return acc;
+  }, {});
+
+  const kindTitle = (kind: string): string => {
+    switch (kind) {
+      case "sub_class_of":
+        return "SubClassOf";
+      case "equivalent_class":
+        return "EquivalentClasses";
+      case "disjoint_class":
+        return "DisjointClasses";
+      case "domain":
+        return "Domain";
+      case "range":
+        return "Range";
+      case "property_chain":
+        return "Property chains";
+      default:
+        return kind;
+    }
+  };
   const parentOptions = classOptions.filter((c) => c !== entity.iri);
 
   return (
@@ -130,27 +155,37 @@ export function EntityInspectorPanel(): JSX.Element {
 
       <h2>Axioms</h2>
       {axioms.length > 0 ? (
-        <ul>
-          {axioms.map((a, idx) => (
-            <li key={idx}>
-              <code>{a.display}</code>{" "}
-              {editable && entity.kind === "class" ? (
-                <button
-                  type="button"
-                  className="secondary"
-                  onClick={() =>
-                    getVsCodeApi().postMessage({
-                      type: "openManchester",
-                      axiom: { kind: a.kind, manchester: a.manchester },
-                    })
-                  }
-                >
-                  Edit in Manchester
-                </button>
-              ) : null}
-            </li>
+        <div>
+          {Object.entries(axiomsByKind).map(([kind, items]) => (
+            <section key={kind}>
+              <h3>{kindTitle(kind)}</h3>
+              <ul>
+                {items.map((a, idx) => (
+                  <li key={`${kind}-${idx}`}>
+                    <code>{a.display}</code>{" "}
+                    {editable &&
+                    entity.kind === "class" &&
+                    a.editable &&
+                    kind !== "property_chain" ? (
+                      <button
+                        type="button"
+                        className="secondary"
+                        onClick={() =>
+                          getVsCodeApi().postMessage({
+                            type: "openManchester",
+                            axiom: { kind: a.kind, manchester: a.manchester },
+                          })
+                        }
+                      >
+                        Edit in Manchester
+                      </button>
+                    ) : null}
+                  </li>
+                ))}
+              </ul>
+            </section>
           ))}
-        </ul>
+        </div>
       ) : (
         <p className="muted">None</p>
       )}
@@ -296,6 +331,20 @@ export function EntityInspectorPanel(): JSX.Element {
         onClick={() => getVsCodeApi().postMessage({ type: "jumpToSource" })}
       >
         Jump to Source
+      </button>
+      <button
+        type="button"
+        className="secondary"
+        onClick={() => getVsCodeApi().postMessage({ type: "findUsages" })}
+      >
+        Find Usages
+      </button>
+      <button
+        type="button"
+        className="secondary"
+        onClick={() => getVsCodeApi().postMessage({ type: "renameIri" })}
+      >
+        Rename IRI
       </button>
       <button
         type="button"

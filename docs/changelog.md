@@ -15,6 +15,13 @@ Migration guides: [Migration index](migration/README.md)
 
 - Workspace and extension version **0.8.0**
 
+### Fixed
+
+- Query Workbench runId guards, refactor/rename edge cases, Manchester editor pickers
+- EL classify unsat detection, extract/move path validation, atomic LSP patch writes
+- Reasoner panel runId sync, RL/RDFS unsatisfiability, `APPLIED_NOT_INDEXED` on reindex failure
+- SPARQL update guard after PREFIX; capped file reads across parser/catalog/refactor
+
 See [GitHub CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) for the full v0.8.0 list.
 
 ## [0.7.0] - 2026-06-25

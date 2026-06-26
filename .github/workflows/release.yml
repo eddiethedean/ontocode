@@ -168,6 +168,7 @@ jobs:
           publish_with_pause ontoindex-owl
           publish_with_pause ontoindex-diagnostics
           publish_with_pause ontoindex-catalog
+          publish_with_pause ontoindex-refactor
           publish_with_pause ontoindex-query
           publish_with_pause ontoindex-reasoner
           publish_with_pause ontoindex-robot

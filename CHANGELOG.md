@@ -7,15 +7,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-### Fixed
-
-- Query Workbench dropped successful results (runId stale-guard never updated)
-- Namespace migration overwrote per-IRI renames when updating `@prefix` declarations
-- Multi-entity extract module used stale byte offsets in the same file
-- LSP rename/references: prefixed rename targets, error reporting, and reference range width
-- Explorer refreshed before refactor apply; disjoint axiom edit now passes `other_iri`
-- Manchester editor: restored data property/datatype pickers; panel CSS for v0.8 React panels
-
 ## [0.8.0] - 2026-06-26
 
 ### Added
@@ -36,6 +27,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Workspace and extension version **0.8.0**
 - Axiom catalog groups axioms by kind in React inspector
 - Manchester editor supports `disjoint_class` axiom kind with validation UI
+
+### Fixed
+
+- Query Workbench dropped successful results (runId stale-guard never updated)
+- Namespace migration overwrote per-IRI renames when updating `@prefix` declarations
+- Multi-entity extract module used stale byte offsets in the same file
+- LSP rename/references: prefixed rename targets, error reporting, and reference range width
+- Explorer refreshed before refactor apply; disjoint axiom edit now passes `other_iri`
+- Manchester editor: restored data property/datatype pickers; panel CSS for v0.8 React panels
+- EL `classify` false negatives on unsatisfiable ontologies (reasoner ontology merge via triple bridge)
+- Extract/move to new files failed path validation when target file did not exist yet
+- LSP axiom patch uses atomic disk writes; buffer updated before disk
+- Refactor rollback errors propagated when restore fails mid-apply
+- Reasoner panel runId synchronization between host and webview
+- RL/RDFS profiles report unsatisfiable classes (EL post-check)
+- Catalog indexes orphan LSP buffer overrides not returned by workspace scan
+- LSP patch/refactor require indexed catalog; `APPLIED_NOT_INDEXED` when reindex fails after apply
+- SPARQL update guard bypass after `PREFIX` or comment lines
+- Capped file reads in parser, catalog semantics, and refactor preview/backup paths
 
 [0.8.0]: https://github.com/eddiethedean/ontocode/releases/tag/v0.8.0
 

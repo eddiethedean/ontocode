@@ -12,7 +12,8 @@ use ontoindex_refactor::{
     apply_refactor_plan_checked, find_usages, preview_extract_module, preview_migrate_namespace,
     preview_move_entity, preview_rename_iri, RefactorPlan,
 };
-use std::path::PathBuf;
+use std::collections::HashMap;
+use std::path::{Path, PathBuf};
 
 #[derive(Parser)]
 #[command(
@@ -397,30 +398,36 @@ fn main() -> Result<()> {
             }
             RefactorCommands::Rename { workspace, from, to, preview, format } => {
                 let catalog = build_catalog(&workspace)?;
-                let plan = preview_rename_iri(&catalog, &from, &to)?;
-                run_refactor_plan(&plan, preview, format)?;
+                let plan = preview_rename_iri(&catalog, &from, &to, &HashMap::new())?;
+                run_refactor_plan(&plan, preview, format, &workspace)?;
             }
             RefactorCommands::MigrateNamespace { workspace, from, to, preview, format } => {
                 let catalog = build_catalog(&workspace)?;
-                let plan = preview_migrate_namespace(&catalog, &from, &to)?;
-                run_refactor_plan(&plan, preview, format)?;
+                let plan = preview_migrate_namespace(&catalog, &from, &to, &HashMap::new())?;
+                run_refactor_plan(&plan, preview, format, &workspace)?;
             }
             RefactorCommands::Move { workspace, iri, to, preview, format } => {
                 let catalog = build_catalog(&workspace)?;
-                let plan = preview_move_entity(&catalog, &iri, &to)?;
-                run_refactor_plan(&plan, preview, format)?;
+                let plan = preview_move_entity(&catalog, &iri, &to, &HashMap::new())?;
+                run_refactor_plan(&plan, preview, format, &workspace)?;
             }
             RefactorCommands::Extract { workspace, entities, out, leave_stub, preview, format } => {
                 let catalog = build_catalog(&workspace)?;
-                let plan = preview_extract_module(&catalog, &entities, &out, leave_stub)?;
-                run_refactor_plan(&plan, preview, format)?;
+                let plan =
+                    preview_extract_module(&catalog, &entities, &out, leave_stub, &HashMap::new())?;
+                run_refactor_plan(&plan, preview, format, &workspace)?;
             }
         },
     }
     Ok(())
 }
 
-fn run_refactor_plan(plan: &RefactorPlan, preview: bool, format: OutputFormat) -> Result<()> {
+fn run_refactor_plan(
+    plan: &RefactorPlan,
+    preview: bool,
+    format: OutputFormat,
+    workspace: &Path,
+) -> Result<()> {
     match format {
         OutputFormat::Json => println!("{}", serde_json::to_string_pretty(plan)?),
         _ => {
@@ -432,7 +439,7 @@ fn run_refactor_plan(plan: &RefactorPlan, preview: bool, format: OutputFormat) -
             }
         }
     }
-    let files_written = apply_refactor_plan_checked(plan, preview)?;
+    let files_written = apply_refactor_plan_checked(plan, preview, Some(workspace))?;
     if !preview {
         println!("applied {files_written} file(s)");
     }

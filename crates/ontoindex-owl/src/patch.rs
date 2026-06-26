@@ -7,7 +7,9 @@ use ontoindex_core::{read_to_string_capped, OntologyFormat, MAX_FILE_BYTES};
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
 use std::fs;
+use std::io::Write;
 use std::path::Path;
+use std::time::{SystemTime, UNIX_EPOCH};
 
 /// A single authoring patch operation (v0.4 Turtle scope).
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
@@ -83,10 +85,29 @@ pub fn apply_patches(
 
     if result.applied && !preview_only {
         if let Some(text) = &result.preview_text {
-            fs::write(document_path, text)?;
+            atomic_write(document_path, text)?;
         }
     }
     Ok(result)
+}
+
+fn atomic_write(path: &Path, contents: &str) -> Result<()> {
+    let parent =
+        path.parent().filter(|p| !p.as_os_str().is_empty()).unwrap_or_else(|| Path::new("."));
+    fs::create_dir_all(parent)?;
+    let nanos = SystemTime::now().duration_since(UNIX_EPOCH).map(|d| d.as_nanos()).unwrap_or(0);
+    let tmp_path = parent.join(format!(
+        ".ontocode-{}-{}.tmp",
+        path.file_name().and_then(|s| s.to_str()).unwrap_or("file"),
+        nanos
+    ));
+    {
+        let mut file = fs::File::create(&tmp_path)?;
+        file.write_all(contents.as_bytes())?;
+        file.sync_all()?;
+    }
+    fs::rename(&tmp_path, path)?;
+    Ok(())
 }
 
 /// Apply patches to in-memory Turtle text.
@@ -109,7 +130,7 @@ pub fn apply_patches_to_text(
                 });
                 return Ok(ApplyPatchResult {
                     applied: false,
-                    preview_text: Some(working),
+                    preview_text: Some(source.to_string()),
                     diagnostics,
                     document_path: None,
                 });
@@ -137,24 +158,24 @@ fn apply_one_patch(
         }
         PatchOp::DeleteEntity { entity_iri } => delete_entity(text, entity_iri, namespaces),
         PatchOp::SetLabel { entity_iri, value } => {
-            remove_predicate_triples(text, entity_iri, "rdfs:label", namespaces)?;
+            remove_all_predicate_any_statement(text, entity_iri, "rdfs:label", namespaces)?;
             add_annotation_triple(text, entity_iri, "rdfs:label", value, namespaces)
         }
         PatchOp::AddLabel { entity_iri, value } => {
             add_annotation_triple(text, entity_iri, "rdfs:label", value, namespaces)
         }
         PatchOp::RemoveLabel { entity_iri, value } => {
-            remove_matching_predicate(text, entity_iri, "rdfs:label", value, namespaces)
+            remove_matching_predicate_any(text, entity_iri, "rdfs:label", value, namespaces)
         }
         PatchOp::SetComment { entity_iri, value } => {
-            remove_predicate_triples(text, entity_iri, "rdfs:comment", namespaces)?;
+            remove_all_predicate_any_statement(text, entity_iri, "rdfs:comment", namespaces)?;
             add_annotation_triple(text, entity_iri, "rdfs:comment", value, namespaces)
         }
         PatchOp::AddComment { entity_iri, value } => {
             add_annotation_triple(text, entity_iri, "rdfs:comment", value, namespaces)
         }
         PatchOp::RemoveComment { entity_iri, value } => {
-            remove_matching_predicate(text, entity_iri, "rdfs:comment", value, namespaces)
+            remove_matching_predicate_any(text, entity_iri, "rdfs:comment", value, namespaces)
         }
         PatchOp::AddSubClassOf { entity_iri, parent_iri } => {
             add_subclass_triple(text, entity_iri, parent_iri, namespaces)
@@ -360,7 +381,7 @@ fn remove_predicate_triples(
     Ok(())
 }
 
-fn remove_matching_predicate(
+fn remove_matching_predicate_any(
     text: &mut String,
     entity_iri: &str,
     predicate: &str,
@@ -369,7 +390,36 @@ fn remove_matching_predicate(
 ) -> Result<()> {
     let escaped = escape_turtle_string(value.trim_matches('"'));
     let object = format!("\"{escaped}\"");
-    remove_predicate_object(text, entity_iri, predicate, &object, namespaces)
+    remove_predicate_object_any_statement(text, entity_iri, predicate, &object, namespaces)
+}
+
+fn remove_all_predicate_any_statement(
+    text: &mut String,
+    entity_iri: &str,
+    predicate: &str,
+    namespaces: &BTreeMap<String, String>,
+) -> Result<()> {
+    loop {
+        let ns = crate::span::namespaces_for_text(text, namespaces);
+        let short = short_name_from_iri(entity_iri);
+        let ranges = all_entity_statement_ranges(text, entity_iri, &short, &ns);
+        if ranges.is_empty() {
+            return Ok(());
+        }
+        let mut removed = false;
+        for range in ranges {
+            let block = &text[range.start as usize..range.end as usize];
+            let new_block = remove_all_predicate_objects(block, predicate);
+            if new_block != block {
+                replace_range(text, range, &new_block);
+                removed = true;
+                break;
+            }
+        }
+        if !removed {
+            return Ok(());
+        }
+    }
 }
 
 fn insert_into_entity_block(
@@ -725,7 +775,7 @@ mod tests {
         ];
         let result = apply_patches_to_text(ttl, &patches, true, &ex_ns()).expect("patch");
         assert!(!result.diagnostics.is_empty());
-        assert!(result.preview_text.as_ref().is_some_and(|t| t.contains("Human")));
+        assert_eq!(result.preview_text.as_deref(), Some(ttl));
         assert!(!result.applied);
     }
 

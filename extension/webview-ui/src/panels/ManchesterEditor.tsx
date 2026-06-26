@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { getVsCodeApi } from "../vscodeApi";
 import {
   HostMessage,
@@ -23,6 +23,11 @@ export function ManchesterEditorPanel(): JSX.Element {
   const [error, setError] = useState("");
   const [preview, setPreview] = useState("");
   const [seq, setSeq] = useState(0);
+  const seqRef = useRef(0);
+
+  useEffect(() => {
+    seqRef.current = seq;
+  }, [seq]);
 
   const validate = useCallback(
     (expr: string, kind: string, nextSeq: number) => {
@@ -50,7 +55,7 @@ export function ManchesterEditorPanel(): JSX.Element {
         setCompletions(msg.completions);
       }
       if (msg.type === "manchesterValidation") {
-        if (msg.seq !== seq) {
+        if (msg.seq !== seqRef.current) {
           return;
         }
         setError(msg.error ?? "");
@@ -62,7 +67,7 @@ export function ManchesterEditorPanel(): JSX.Element {
     };
     window.addEventListener("message", handler);
     return () => window.removeEventListener("message", handler);
-  }, [seq]);
+  }, []);
 
   useEffect(() => {
     if (!entityIri) {
@@ -70,6 +75,7 @@ export function ManchesterEditorPanel(): JSX.Element {
     }
     const timer = setTimeout(() => {
       const next = Date.now();
+      seqRef.current = next;
       setSeq(next);
       validate(expression, axiomKind, next);
     }, 500);

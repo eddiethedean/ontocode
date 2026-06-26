@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { getVsCodeApi } from "../vscodeApi";
 import {
   HostMessage,
@@ -20,6 +20,11 @@ export function QueryWorkbenchPanel(): JSX.Element {
   const [result, setResult] = useState<TabularQueryResult | null>(null);
   const [error, setError] = useState("");
   const [runId, setRunId] = useState(0);
+  const runIdRef = useRef(0);
+
+  useEffect(() => {
+    runIdRef.current = runId;
+  }, [runId]);
 
   useEffect(() => {
     getVsCodeApi().postMessage({ type: "ready", panel: "queryWorkbench" });
@@ -34,7 +39,7 @@ export function QueryWorkbenchPanel(): JSX.Element {
         setSqlTables(msg.sqlTables);
       }
       if (msg.type === "queryResult") {
-        if (msg.runId !== runId) {
+        if (msg.runId !== runIdRef.current) {
           return;
         }
         setError(msg.error ?? "");
@@ -43,18 +48,21 @@ export function QueryWorkbenchPanel(): JSX.Element {
     };
     window.addEventListener("message", handler);
     return () => window.removeEventListener("message", handler);
-  }, [runId]);
+  }, []);
 
   const run = useCallback(() => {
-    const id = runId + 1;
+    const id = runIdRef.current + 1;
+    runIdRef.current = id;
     setRunId(id);
+    setError("");
+    setResult(null);
     getVsCodeApi().postMessage({
       type: "runQuery",
       mode,
       text,
       runId: id,
     });
-  }, [mode, text, runId]);
+  }, [mode, text]);
 
   return (
     <div className="panel">
@@ -121,6 +129,7 @@ export function QueryWorkbenchPanel(): JSX.Element {
             getVsCodeApi().postMessage({
               type: "exportQueryResult",
               format: "csv",
+              runId: runIdRef.current,
             })
           }
         >
@@ -133,6 +142,7 @@ export function QueryWorkbenchPanel(): JSX.Element {
             getVsCodeApi().postMessage({
               type: "exportQueryResult",
               format: "json",
+              runId: runIdRef.current,
             })
           }
         >

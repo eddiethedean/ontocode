@@ -1,8 +1,9 @@
 use ontoindex_catalog::IndexBuilder;
 use ontoindex_refactor::{
     apply_refactor_plan, find_usages, preview_extract_module, preview_migrate_namespace,
-    preview_move_entity, preview_rename_iri,
+    preview_move_entity, preview_rename_iri, validate_refactor_plan_paths, RefactorError,
 };
+use std::collections::HashMap;
 use std::path::PathBuf;
 use tempfile::TempDir;
 
@@ -11,6 +12,10 @@ fn fixture_dir() -> PathBuf {
         .join("../../tests/fixtures/refactor")
         .canonicalize()
         .expect("fixture dir")
+}
+
+fn empty_overrides() -> HashMap<PathBuf, String> {
+    HashMap::new()
 }
 
 fn build_catalog(dir: &std::path::Path) -> ontoindex_catalog::OntologyCatalog {
@@ -27,6 +32,13 @@ fn find_usages_across_files() {
 }
 
 #[test]
+fn find_usages_rejects_person_substring_in_person_type() {
+    let catalog = build_catalog(&fixture_dir());
+    let usages = find_usages(&catalog, "http://example.org/org#Person");
+    assert!(!usages.iter().any(|u| u.context.contains("PersonType")));
+}
+
+#[test]
 fn rename_iri_across_workspace() {
     let tmp = TempDir::new().unwrap();
     let ws = tmp.path();
@@ -39,6 +51,7 @@ fn rename_iri_across_workspace() {
         &catalog,
         "http://example.org/org#Person",
         "http://example.org/org#Human",
+        &empty_overrides(),
     )
     .expect("plan");
     assert!(!plan.changes.is_empty());
@@ -59,6 +72,7 @@ fn migrate_namespace_updates_prefix_and_entity_iris() {
         &catalog,
         "http://example.org/org#",
         "http://example.org/v2/org#",
+        &empty_overrides(),
     )
     .expect("plan");
     let preview =
@@ -70,6 +84,66 @@ fn migrate_namespace_updates_prefix_and_entity_iris() {
     assert!(text.contains("http://example.org/v2/org#"));
     assert!(!text.contains("http://example.org/org#Person"));
     assert!(text.contains("ex:Person") || text.contains("v2"));
+}
+
+#[test]
+fn migrate_namespace_renames_multiple_angle_bracket_iris_in_one_file() {
+    let tmp = TempDir::new().unwrap();
+    let ws = tmp.path();
+    std::fs::create_dir_all(ws).unwrap();
+    let ttl = r#"@prefix ex: <http://example.org/org#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+<http://example.org/org#Person> a owl:Class .
+<http://example.org/org#Agent> a owl:Class .
+"#;
+    std::fs::write(ws.join("multi.ttl"), ttl).unwrap();
+    let catalog = build_catalog(ws);
+    let plan = preview_migrate_namespace(
+        &catalog,
+        "http://example.org/org#",
+        "http://example.org/v2/org#",
+        &empty_overrides(),
+    )
+    .expect("plan");
+    let preview = plan.changes.iter().find(|c| c.path.ends_with("multi.ttl")).expect("change");
+    assert!(preview.preview_text.contains("<http://example.org/v2/org#Person>"));
+    assert!(preview.preview_text.contains("<http://example.org/v2/org#Agent>"));
+    assert!(!preview.preview_text.contains("<http://example.org/org#Person>"));
+    assert!(!preview.preview_text.contains("<http://example.org/org#Agent>"));
+}
+
+#[test]
+fn validate_refactor_plan_rejects_paths_outside_workspace() {
+    let tmp = TempDir::new().unwrap();
+    let ws = tmp.path().canonicalize().unwrap();
+    let outside = std::env::temp_dir().join("ontocode-outside-refactor.ttl");
+    let plan = ontoindex_refactor::RefactorPlan {
+        changes: vec![ontoindex_refactor::FileChange {
+            path: outside.clone(),
+            preview_text: "bad".to_string(),
+            original_text: String::new(),
+            hunks: vec![],
+        }],
+        warnings: vec![],
+    };
+    let err = validate_refactor_plan_paths(&ws, &plan).unwrap_err();
+    assert!(matches!(err, RefactorError::Invalid(_)));
+    let _ = std::fs::remove_file(outside);
+}
+
+#[test]
+fn move_entity_rejects_canonical_same_file() {
+    let tmp = TempDir::new().unwrap();
+    let ws = tmp.path();
+    std::fs::create_dir_all(ws).unwrap();
+    std::fs::copy(fixture_dir().join("people.ttl"), ws.join("people.ttl")).unwrap();
+    let catalog = build_catalog(ws);
+    let same = ws.join("./people.ttl");
+    let err =
+        preview_move_entity(&catalog, "http://example.org/org#Agent", &same, &empty_overrides())
+            .unwrap_err();
+    assert!(matches!(err, RefactorError::Invalid(_)));
 }
 
 #[test]
@@ -85,6 +159,7 @@ fn extract_multiple_entities_same_file() {
         &["http://example.org/org#Person".to_string(), "http://example.org/org#Agent".to_string()],
         &out,
         false,
+        &empty_overrides(),
     )
     .expect("plan");
     apply_refactor_plan(&plan, false).expect("apply");
@@ -109,12 +184,14 @@ fn extract_module_leave_stub_uses_prefixed_curie() {
         &["http://example.org/org#Person".to_string()],
         &out,
         true,
+        &empty_overrides(),
     )
     .expect("plan");
     let source_change =
         plan.changes.iter().find(|c| c.path.ends_with("people.ttl")).expect("source change");
     assert!(source_change.preview_text.contains("ex:Person"));
     assert!(source_change.preview_text.contains("owl:deprecated true"));
+    assert!(source_change.preview_text.contains("a owl:Class"));
 }
 
 #[test]
@@ -125,9 +202,13 @@ fn move_entity_between_files() {
     std::fs::copy(fixture_dir().join("people.ttl"), ws.join("people.ttl")).unwrap();
     std::fs::write(ws.join("target.ttl"), "@prefix ex: <http://example.org/org#> .\n").unwrap();
     let catalog = build_catalog(ws);
-    let plan =
-        preview_move_entity(&catalog, "http://example.org/org#Agent", &ws.join("target.ttl"))
-            .expect("plan");
+    let plan = preview_move_entity(
+        &catalog,
+        "http://example.org/org#Agent",
+        &ws.join("target.ttl"),
+        &empty_overrides(),
+    )
+    .expect("plan");
     assert_eq!(plan.changes.len(), 2);
     apply_refactor_plan(&plan, false).expect("apply");
     let target = std::fs::read_to_string(ws.join("target.ttl")).unwrap();
@@ -147,6 +228,7 @@ fn extract_module_creates_file() {
         &["http://example.org/org#Person".to_string()],
         &out,
         false,
+        &empty_overrides(),
     )
     .expect("plan");
     apply_refactor_plan(&plan, false).expect("apply");

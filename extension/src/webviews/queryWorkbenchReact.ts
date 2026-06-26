@@ -20,6 +20,7 @@ export class QueryWorkbenchPanel {
   public static current: QueryWorkbenchPanel | undefined;
   private host: PanelHost;
   private lastResult: TabularQueryResult | undefined;
+  private lastResultRunId = 0;
   private runId = 0;
 
   private constructor(
@@ -76,7 +77,7 @@ export class QueryWorkbenchPanel {
       await this.saveQuery(message.mode, message.text, message.name);
     }
     if (message.type === "exportQueryResult") {
-      await this.exportResult(message.format);
+      await this.exportResult(message.format, message.runId);
     }
   }
 
@@ -93,6 +94,7 @@ export class QueryWorkbenchPanel {
         return;
       }
       this.lastResult = result;
+      this.lastResultRunId = runId;
       this.host.postMessage({
         type: "queryResult",
         runId,
@@ -109,6 +111,11 @@ export class QueryWorkbenchPanel {
       this.bootstrap();
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
+      if (!shouldDeliverQueryResult(runId, this.runId)) {
+        return;
+      }
+      this.lastResult = undefined;
+      this.lastResultRunId = 0;
       this.host.postMessage({ type: "queryResult", runId, error: msg });
     }
   }
@@ -127,8 +134,11 @@ export class QueryWorkbenchPanel {
     void vscode.window.showInformationMessage(`OntoCode: saved query "${name}"`);
   }
 
-  private async exportResult(format: "csv" | "json"): Promise<void> {
+  private async exportResult(format: "csv" | "json", runId?: number): Promise<void> {
     if (!this.lastResult) {
+      return;
+    }
+    if (runId !== undefined && runId !== this.lastResultRunId) {
       return;
     }
     const body =

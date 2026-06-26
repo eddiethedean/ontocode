@@ -1,12 +1,23 @@
 use crate::model::{Usage, UsageKind};
+use crate::source::read_source_text;
+use crate::text::is_token_match_at;
 use ontoindex_catalog::OntologyCatalog;
 use ontoindex_core::{OntologyFormat, ParseStatus};
 use ontoindex_owl::{namespaces_for_text, short_name_from_iri};
-use std::collections::BTreeSet;
+use std::collections::{BTreeSet, HashMap};
 use std::path::PathBuf;
 
 /// Find all usages of `target_iri` across the indexed workspace.
 pub fn find_usages(catalog: &OntologyCatalog, target_iri: &str) -> Vec<Usage> {
+    find_usages_with_overrides(catalog, target_iri, &HashMap::new())
+}
+
+/// Find usages, preferring unsaved document text from `document_overrides`.
+pub fn find_usages_with_overrides(
+    catalog: &OntologyCatalog,
+    target_iri: &str,
+    document_overrides: &HashMap<PathBuf, String>,
+) -> Vec<Usage> {
     let mut usages = Vec::new();
     let data = catalog.data();
     let mut seen = BTreeSet::new();
@@ -129,61 +140,65 @@ pub fn find_usages(catalog: &OntologyCatalog, target_iri: &str) -> Vec<Usage> {
         if doc.format != OntologyFormat::Turtle || doc.parse_status != ParseStatus::Ok {
             continue;
         }
-        if let Ok(text) = std::fs::read_to_string(&doc.path) {
-            let namespaces = namespaces_for_text(&text, &doc.namespaces);
-            let short = short_name_from_iri(target_iri);
-            let needles = [format!("<{target_iri}>"), format!(":{short}")];
-            for (line_idx, line) in text.lines().enumerate() {
-                for needle in &needles {
-                    if !line.contains(needle.as_str()) {
-                        continue;
-                    }
-                    if let Some(col) = line.find(needle) {
+        let text = match read_source_text(&doc.path, document_overrides) {
+            Ok(t) => t,
+            Err(_) => continue,
+        };
+        let namespaces = namespaces_for_text(&text, &doc.namespaces);
+        let short = short_name_from_iri(target_iri);
+        let angle_needle = format!("<{target_iri}>");
+        for (line_idx, line) in text.lines().enumerate() {
+            if line.contains(angle_needle.as_str()) {
+                let mut search_from = 0usize;
+                while let Some(col) = line[search_from..].find(&angle_needle) {
+                    let col = search_from + col;
+                    if is_token_match_at(line, &angle_needle, col) {
                         let key = (
                             doc.path.clone(),
                             UsageKind::TextReference,
-                            format!("{line_idx}-{col}-{needle}"),
+                            format!("{line_idx}-{col}-{angle_needle}"),
                         );
                         if seen.insert(key) {
-                            usages.push(Usage {
-                                iri: doc.id.clone(),
-                                referenced_iri: target_iri.to_string(),
-                                file: doc.path.clone(),
-                                line: Some((line_idx + 1) as u64),
-                                column: Some(col as u64),
-                                start_byte: None,
-                                end_byte: None,
-                                kind: UsageKind::TextReference,
-                                context: line.trim().to_string(),
-                            });
+                            usages.push(text_usage(
+                                doc,
+                                target_iri,
+                                line_idx,
+                                col,
+                                line,
+                                UsageKind::TextReference,
+                            ));
                         }
                     }
+                    search_from = col + angle_needle.len();
                 }
-                for (prefix, ns) in &namespaces {
-                    if target_iri.starts_with(ns) && !prefix.is_empty() {
-                        let token = format!("{prefix}:{short}");
-                        if line.contains(&token) {
-                            if let Some(col) = line.find(&token) {
-                                let key = (
-                                    doc.path.clone(),
+            }
+            for (prefix, ns) in &namespaces {
+                if target_iri.starts_with(ns) && !prefix.is_empty() {
+                    let token = format!("{prefix}:{short}");
+                    if !line.contains(&token) {
+                        continue;
+                    }
+                    let mut search_from = 0usize;
+                    while let Some(col) = line[search_from..].find(&token) {
+                        let col = search_from + col;
+                        if is_token_match_at(line, &token, col) {
+                            let key = (
+                                doc.path.clone(),
+                                UsageKind::TextReference,
+                                format!("{line_idx}-{col}-{token}"),
+                            );
+                            if seen.insert(key) {
+                                usages.push(text_usage(
+                                    doc,
+                                    target_iri,
+                                    line_idx,
+                                    col,
+                                    line,
                                     UsageKind::TextReference,
-                                    format!("{line_idx}-{col}-{token}"),
-                                );
-                                if seen.insert(key) {
-                                    usages.push(Usage {
-                                        iri: doc.id.clone(),
-                                        referenced_iri: target_iri.to_string(),
-                                        file: doc.path.clone(),
-                                        line: Some((line_idx + 1) as u64),
-                                        column: Some(col as u64),
-                                        start_byte: None,
-                                        end_byte: None,
-                                        kind: UsageKind::TextReference,
-                                        context: line.trim().to_string(),
-                                    });
-                                }
+                                ));
                             }
                         }
+                        search_from = col + token.len();
                     }
                 }
             }
@@ -197,6 +212,27 @@ pub fn find_usages(catalog: &OntologyCatalog, target_iri: &str) -> Vec<Usage> {
             .then(a.column.unwrap_or(0).cmp(&b.column.unwrap_or(0)))
     });
     usages
+}
+
+fn text_usage(
+    doc: &ontoindex_core::OntologyDocument,
+    target_iri: &str,
+    line_idx: usize,
+    col: usize,
+    line: &str,
+    kind: UsageKind,
+) -> Usage {
+    Usage {
+        iri: doc.id.clone(),
+        referenced_iri: target_iri.to_string(),
+        file: doc.path.clone(),
+        line: Some((line_idx + 1) as u64),
+        column: Some(col as u64),
+        start_byte: None,
+        end_byte: None,
+        kind,
+        context: line.trim().to_string(),
+    }
 }
 
 fn usage_from_axiom(
@@ -220,4 +256,16 @@ fn usage_from_axiom(
 
 fn is_named_ref(object: &str, target_iri: &str) -> bool {
     object == target_iri || object == format!("<{target_iri}>")
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn token_boundary_rejects_person_in_person_type() {
+        let line = "ex:PersonType a owl:Class .";
+        assert!(!is_token_match_at(line, "ex:Person", line.find("ex:Person").unwrap()));
+        assert!(is_token_match_at(line, "ex:PersonType", line.find("ex:PersonType").unwrap()));
+    }
 }

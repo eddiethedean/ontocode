@@ -287,11 +287,13 @@ export async function previewRefactor(
 
 export async function applyRefactor(
   plan: RefactorPlan,
+  request: RefactorRequest,
   previewOnly = false
 ): Promise<ApplyRefactorResult> {
   const c = requireClient();
   const result = await c.sendRequest<unknown>("ontoindex/applyRefactor", {
     plan,
+    request,
     preview_only: previewOnly,
   });
   return assertApplyRefactorResult(result);

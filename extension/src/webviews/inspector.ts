@@ -146,12 +146,24 @@ export class EntityInspectorPanel {
     }
     if (message.type === "renameIri" && this.iri) {
       const { renameEntityIri } = await import("./refactorPreview");
-      await renameEntityIri(this.extensionUri, this.iri, async () => {
-        if (this.iri) {
-          await this.loadEntity(this.iri);
+      const fromIri = this.iri;
+      await renameEntityIri(this.extensionUri, fromIri, async (newIri) => {
+        if (newIri) {
+          await vscode.commands.executeCommand("ontocode.openEntity", newIri);
+        } else if (fromIri) {
+          await this.loadEntity(fromIri);
         }
       });
     }
+  }
+
+  private async loadEntity(iri: string): Promise<void> {
+    const iriAtStart = this.iri;
+    const { detail } = await getEntity(iri);
+    if (iriAtStart !== this.iri) {
+      return;
+    }
+    this.reveal(detail, this.classOptions);
   }
 
   private async runPatch(

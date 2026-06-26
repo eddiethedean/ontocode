@@ -1,21 +1,23 @@
 use crate::error::{RefactorError, Result};
 use crate::model::{FileChange, Hunk, RefactorPlan};
+use crate::source::read_source_text;
 use crate::text::{normalize_namespace_base, remap_iri, replace_iri_in_text};
 use ontoindex_catalog::OntologyCatalog;
-use ontoindex_core::{OntologyFormat, ParseStatus};
-use std::collections::{BTreeMap, BTreeSet};
+use ontoindex_core::{EntityKind, OntologyFormat, ParseStatus};
+use std::collections::{BTreeMap, BTreeSet, HashMap};
 use std::path::{Path, PathBuf};
 
 pub fn preview_rename_iri(
     catalog: &OntologyCatalog,
     from_iri: &str,
     to_iri: &str,
+    document_overrides: &HashMap<PathBuf, String>,
 ) -> Result<RefactorPlan> {
     if from_iri == to_iri {
         return Err(RefactorError::Invalid("from and to IRI must differ".to_string()));
     }
     if catalog.find_entity(from_iri).is_none()
-        && find_usages_in_catalog(catalog, from_iri).is_empty()
+        && find_usages_in_catalog(catalog, from_iri, document_overrides).is_empty()
     {
         return Err(RefactorError::EntityNotFound(from_iri.to_string()));
     }
@@ -25,13 +27,13 @@ pub fn preview_rename_iri(
 
     for doc in &catalog.data().documents {
         if doc.format != OntologyFormat::Turtle || doc.parse_status != ParseStatus::Ok {
-            if text_contains_iri(doc, from_iri) {
+            if text_contains_iri(doc, from_iri, document_overrides) {
                 warnings
                     .push(format!("skipping non-Turtle or errored file: {}", doc.path.display()));
             }
             continue;
         }
-        let original = std::fs::read_to_string(&doc.path)?;
+        let original = read_source_text(&doc.path, document_overrides)?;
         if !original.contains(from_iri)
             && !contains_prefixed_ref(&original, from_iri, &doc.namespaces)
         {
@@ -68,14 +70,13 @@ pub fn preview_migrate_namespace(
     catalog: &OntologyCatalog,
     from_base: &str,
     to_base: &str,
+    document_overrides: &HashMap<PathBuf, String>,
 ) -> Result<RefactorPlan> {
     let from = normalize_namespace_base(from_base);
     let to = normalize_namespace_base(to_base);
     if from == to {
         return Err(RefactorError::Invalid("from and to namespace must differ".to_string()));
     }
-
-    let mut merged = RefactorPlan { changes: Vec::new(), warnings: Vec::new() };
 
     let all_iris: Vec<String> = catalog
         .data()
@@ -88,7 +89,7 @@ pub fn preview_migrate_namespace(
             if remap_iri(&a.subject, &from, &to).is_some() {
                 v.push(a.subject.clone());
             }
-            if a.object.starts_with(&from) {
+            if remap_iri(&a.object, &from, &to).is_some() {
                 v.push(a.object.clone());
             }
             v
@@ -97,17 +98,39 @@ pub fn preview_migrate_namespace(
         .into_iter()
         .collect();
 
-    for old_iri in all_iris {
-        let new_iri = remap_iri(&old_iri, &from, &to).unwrap_or(old_iri.clone());
-        let sub = preview_rename_iri(catalog, &old_iri, &new_iri)?;
-        merge_plans(&mut merged, sub);
-    }
+    let mut changes: BTreeMap<PathBuf, FileChange> = BTreeMap::new();
+    let mut warnings = Vec::new();
 
     for doc in &catalog.data().documents {
-        if doc.format != OntologyFormat::Turtle {
+        if doc.format != OntologyFormat::Turtle || doc.parse_status != ParseStatus::Ok {
             continue;
         }
-        let disk_original = std::fs::read_to_string(&doc.path).unwrap_or_default();
+        let original = read_source_text(&doc.path, document_overrides)?;
+        let mut preview = original.clone();
+        let mut hunks = Vec::new();
+        let mut changed = false;
+
+        for old_iri in &all_iris {
+            let new_iri = remap_iri(old_iri, &from, &to).unwrap_or_else(|| old_iri.clone());
+            if !preview.contains(old_iri)
+                && !contains_prefixed_ref(&preview, old_iri, &doc.namespaces)
+            {
+                continue;
+            }
+            let (next, raw_hunks) =
+                replace_iri_in_text(&preview, old_iri, &new_iri, &doc.namespaces);
+            if next != preview {
+                preview = next;
+                changed = true;
+                hunks.extend(raw_hunks.into_iter().map(|(s, e, o, n)| Hunk {
+                    start_byte: s as u64,
+                    end_byte: e as u64,
+                    old_text: o,
+                    new_text: n,
+                }));
+            }
+        }
+
         for (prefix, ns) in &doc.namespaces {
             if normalize_namespace_base(ns) == from {
                 let new_ns = if to.ends_with('#') || to.ends_with('/') {
@@ -115,42 +138,38 @@ pub fn preview_migrate_namespace(
                 } else {
                     format!("{to}#")
                 };
-                if let Some(change) = merged.changes.iter_mut().find(|c| c.path == doc.path) {
-                    let base_text = change.preview_text.clone();
-                    let (preview, hunks) = replace_prefix_uri(&base_text, prefix, ns, &new_ns);
-                    if preview != base_text {
-                        change.preview_text = preview;
-                        change.hunks.extend(hunks.into_iter().map(|(s, e, o, n)| Hunk {
-                            start_byte: s as u64,
-                            end_byte: e as u64,
-                            old_text: o,
-                            new_text: n,
-                        }));
-                    }
-                } else {
-                    let (preview, hunks) = replace_prefix_uri(&disk_original, prefix, ns, &new_ns);
-                    if preview != disk_original {
-                        merged.changes.push(FileChange {
-                            path: doc.path.clone(),
-                            preview_text: preview.clone(),
-                            original_text: disk_original.clone(),
-                            hunks: hunks
-                                .into_iter()
-                                .map(|(s, e, o, n)| Hunk {
-                                    start_byte: s as u64,
-                                    end_byte: e as u64,
-                                    old_text: o,
-                                    new_text: n,
-                                })
-                                .collect(),
-                        });
-                    }
+                let (next, raw_hunks) = replace_prefix_uri(&preview, prefix, ns, &new_ns);
+                if next != preview {
+                    preview = next;
+                    changed = true;
+                    hunks.extend(raw_hunks.into_iter().map(|(s, e, o, n)| Hunk {
+                        start_byte: s as u64,
+                        end_byte: e as u64,
+                        old_text: o,
+                        new_text: n,
+                    }));
                 }
             }
         }
+
+        if changed {
+            changes.insert(
+                doc.path.clone(),
+                FileChange {
+                    path: doc.path.clone(),
+                    preview_text: preview,
+                    original_text: original,
+                    hunks,
+                },
+            );
+        }
     }
 
-    Ok(merged)
+    if changes.is_empty() {
+        warnings.push(format!("no Turtle files changed for namespace migration {from} -> {to}"));
+    }
+
+    Ok(RefactorPlan { changes: changes.into_values().collect(), warnings })
 }
 
 fn replace_prefix_uri(
@@ -181,27 +200,21 @@ impl Replacements for str {
     }
 }
 
-fn merge_plans(target: &mut RefactorPlan, other: RefactorPlan) {
-    target.warnings.extend(other.warnings);
-    for change in other.changes {
-        if let Some(existing) = target.changes.iter_mut().find(|c| c.path == change.path) {
-            if change.preview_text != existing.original_text {
-                existing.preview_text = change.preview_text;
-                existing.hunks.extend(change.hunks);
-            }
-        } else {
-            target.changes.push(change);
-        }
-    }
-}
-
-fn find_usages_in_catalog(catalog: &OntologyCatalog, iri: &str) -> Vec<()> {
-    let u = crate::usages::find_usages(catalog, iri);
+fn find_usages_in_catalog(
+    catalog: &OntologyCatalog,
+    iri: &str,
+    document_overrides: &HashMap<PathBuf, String>,
+) -> Vec<()> {
+    let u = crate::usages::find_usages_with_overrides(catalog, iri, document_overrides);
     vec![(); u.len()]
 }
 
-fn text_contains_iri(doc: &ontoindex_core::OntologyDocument, iri: &str) -> bool {
-    std::fs::read_to_string(&doc.path).map(|t| t.contains(iri)).unwrap_or(false)
+fn text_contains_iri(
+    doc: &ontoindex_core::OntologyDocument,
+    iri: &str,
+    document_overrides: &HashMap<PathBuf, String>,
+) -> bool {
+    read_source_text(&doc.path, document_overrides).map(|t| t.contains(iri)).unwrap_or(false)
 }
 
 fn contains_prefixed_ref(text: &str, iri: &str, namespaces: &BTreeMap<String, String>) -> bool {
@@ -224,6 +237,17 @@ fn prefixed_curie(iri: &str, namespaces: &BTreeMap<String, String>) -> String {
     format!("<{iri}>")
 }
 
+fn owl_type_for_kind(kind: EntityKind) -> &'static str {
+    match kind {
+        EntityKind::Class => "owl:Class",
+        EntityKind::ObjectProperty => "owl:ObjectProperty",
+        EntityKind::DataProperty => "owl:DatatypeProperty",
+        EntityKind::AnnotationProperty => "owl:AnnotationProperty",
+        EntityKind::Individual => "owl:NamedIndividual",
+        EntityKind::Ontology | EntityKind::Other => "owl:Class",
+    }
+}
+
 struct EntityRemoval {
     path: PathBuf,
     start: u64,
@@ -234,27 +258,39 @@ struct EntityRemoval {
 pub fn preview_refactor(
     catalog: &OntologyCatalog,
     request: &crate::model::RefactorRequest,
+    document_overrides: &HashMap<PathBuf, String>,
 ) -> Result<RefactorPlan> {
     match request {
         crate::model::RefactorRequest::RenameIri { from_iri, to_iri } => {
-            preview_rename_iri(catalog, from_iri, to_iri)
+            preview_rename_iri(catalog, from_iri, to_iri, document_overrides)
         }
         crate::model::RefactorRequest::MigrateNamespace { from_base, to_base } => {
-            preview_migrate_namespace(catalog, from_base, to_base)
+            preview_migrate_namespace(catalog, from_base, to_base, document_overrides)
         }
         crate::model::RefactorRequest::MoveEntity { entity_iri, target_file } => {
-            preview_move_entity(catalog, entity_iri, target_file)
+            preview_move_entity(catalog, entity_iri, target_file, document_overrides)
         }
         crate::model::RefactorRequest::ExtractModule { entity_iris, output_file, leave_stub } => {
-            preview_extract_module(catalog, entity_iris, output_file, *leave_stub)
+            preview_extract_module(
+                catalog,
+                entity_iris,
+                output_file,
+                *leave_stub,
+                document_overrides,
+            )
         }
     }
+}
+
+fn canonical_path(path: &Path) -> PathBuf {
+    path.canonicalize().unwrap_or_else(|_| path.to_path_buf())
 }
 
 pub fn preview_move_entity(
     catalog: &OntologyCatalog,
     entity_iri: &str,
     target_file: &Path,
+    document_overrides: &HashMap<PathBuf, String>,
 ) -> Result<RefactorPlan> {
     let entity = catalog
         .find_entity(entity_iri)
@@ -266,7 +302,15 @@ pub fn preview_move_entity(
         return Err(RefactorError::UnsupportedFormat(source_doc.format.as_str().to_string()));
     }
 
-    let source_text = std::fs::read_to_string(&source_doc.path)?;
+    let source_canon = canonical_path(&source_doc.path);
+    let target_canon = canonical_path(target_file);
+    if source_canon == target_canon {
+        return Err(RefactorError::Invalid(
+            "target file must differ from source document".to_string(),
+        ));
+    }
+
+    let source_text = read_source_text(&source_doc.path, document_overrides)?;
     let namespaces = ontoindex_owl::namespaces_for_text(&source_text, &source_doc.namespaces);
     let block_range = ontoindex_owl::entity_block_range(&source_text, entity, &namespaces)
         .ok_or_else(|| {
@@ -277,46 +321,44 @@ pub fn preview_move_entity(
     let mut source_without = source_text.clone();
     source_without.replace_range(block_range.start as usize..block_range.end as usize, "");
 
-    let target_original =
-        if target_file.exists() { std::fs::read_to_string(target_file)? } else { String::new() };
+    let target_original = if target_file.exists() {
+        read_source_text(target_file, document_overrides)?
+    } else {
+        String::new()
+    };
     let target_preview = if target_original.is_empty() {
         format!("{block_text}\n")
     } else {
         format!("{target_original}\n\n{block_text}")
     };
 
-    let changes = vec![
-        FileChange {
-            path: source_doc.path.clone(),
-            preview_text: source_without,
-            original_text: source_text,
-            hunks: vec![Hunk {
-                start_byte: block_range.start,
-                end_byte: block_range.end,
-                old_text: block_text.clone(),
-                new_text: String::new(),
-            }],
-        },
-        FileChange {
-            path: target_file.to_path_buf(),
-            preview_text: target_preview.clone(),
-            original_text: target_original,
-            hunks: vec![Hunk {
-                start_byte: 0,
-                end_byte: 0,
-                old_text: String::new(),
-                new_text: block_text.to_string(),
-            }],
-        },
-    ];
-
-    if source_doc.path == target_file {
-        return Err(RefactorError::Invalid(
-            "target file must differ from source document".to_string(),
-        ));
-    }
-
-    Ok(RefactorPlan { changes, warnings: Vec::new() })
+    Ok(RefactorPlan {
+        changes: vec![
+            FileChange {
+                path: source_doc.path.clone(),
+                preview_text: source_without,
+                original_text: source_text,
+                hunks: vec![Hunk {
+                    start_byte: block_range.start,
+                    end_byte: block_range.end,
+                    old_text: block_text.clone(),
+                    new_text: String::new(),
+                }],
+            },
+            FileChange {
+                path: target_file.to_path_buf(),
+                preview_text: target_preview,
+                original_text: target_original,
+                hunks: vec![Hunk {
+                    start_byte: 0,
+                    end_byte: 0,
+                    old_text: String::new(),
+                    new_text: block_text,
+                }],
+            },
+        ],
+        warnings: Vec::new(),
+    })
 }
 
 pub fn preview_extract_module(
@@ -324,6 +366,7 @@ pub fn preview_extract_module(
     entity_iris: &[String],
     output_file: &Path,
     leave_stub: bool,
+    document_overrides: &HashMap<PathBuf, String>,
 ) -> Result<RefactorPlan> {
     if entity_iris.is_empty() {
         return Err(RefactorError::Invalid("no entities selected".to_string()));
@@ -344,23 +387,27 @@ pub fn preview_extract_module(
         if doc.format != OntologyFormat::Turtle {
             return Err(RefactorError::UnsupportedFormat(doc.format.as_str().to_string()));
         }
-        let text = source_texts
-            .entry(doc.path.clone())
-            .or_insert_with(|| std::fs::read_to_string(&doc.path).expect("read source"));
+        let text = if let Some(existing) = source_texts.get(&doc.path) {
+            existing.clone()
+        } else {
+            read_source_text(&doc.path, document_overrides)?
+        };
+        source_texts.insert(doc.path.clone(), text.clone());
         for line in text.lines() {
             if line.trim_start().starts_with("@prefix") {
                 prefix_lines.insert(line.trim().to_string());
             }
         }
-        let namespaces = ontoindex_owl::namespaces_for_text(text, &doc.namespaces);
-        let block_range = ontoindex_owl::entity_block_range(text, entity, &namespaces)
+        let namespaces = ontoindex_owl::namespaces_for_text(&text, &doc.namespaces);
+        let block_range = ontoindex_owl::entity_block_range(&text, entity, &namespaces)
             .ok_or_else(|| RefactorError::Invalid(format!("block not found for {iri}")))?;
         let block = text[block_range.start as usize..block_range.end as usize].to_string();
         blocks.push(block.clone());
 
         let replacement = if leave_stub {
+            let owl_type = owl_type_for_kind(entity.kind);
             format!(
-                "{} a owl:Class ;\n    owl:deprecated true ;\n    rdfs:comment \"Moved to {}\" .\n",
+                "{} a {owl_type} ;\n    owl:deprecated true ;\n    rdfs:comment \"Moved to {}\" .\n",
                 prefixed_curie(iri, &namespaces),
                 output_file.display()
             )
@@ -382,7 +429,9 @@ pub fn preview_extract_module(
     }
     for (path, mut path_removals) in removals_by_path {
         path_removals.sort_by_key(|b| std::cmp::Reverse(b.start));
-        let original = source_texts.remove(&path).expect("source text");
+        let original = source_texts.remove(&path).ok_or_else(|| {
+            RefactorError::Invalid(format!("missing source text for {}", path.display()))
+        })?;
         let mut preview = original.clone();
         let mut hunks = Vec::new();
         for removal in path_removals {

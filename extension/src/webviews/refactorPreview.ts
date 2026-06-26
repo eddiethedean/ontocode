@@ -58,7 +58,7 @@ export async function showEntityUsages(iri: string): Promise<void> {
 export async function renameEntityIri(
   extensionUri: vscode.Uri,
   iri?: string,
-  onApplied?: () => Promise<void>
+  onApplied?: (newIri?: string) => Promise<void>
 ): Promise<void> {
   const from =
     iri ??
@@ -82,7 +82,11 @@ export async function renameEntityIri(
       from_iri: from,
       to_iri: to,
     },
-    onApplied
+    async () => {
+      if (onApplied) {
+        await onApplied(to);
+      }
+    }
   );
 }
 
@@ -179,7 +183,9 @@ export class RefactorPreviewPanel {
   public static current: RefactorPreviewPanel | undefined;
   private host: PanelHost;
   private plan: RefactorPlan | undefined;
+  private request: RefactorRequest | undefined;
   private onApplied?: () => Promise<void>;
+  private applying = false;
 
   private constructor(host: PanelHost, onApplied?: () => Promise<void>) {
     this.host = host;
@@ -192,10 +198,13 @@ export class RefactorPreviewPanel {
   public static async show(
     extensionUri: vscode.Uri,
     plan: RefactorPlan,
+    request: RefactorRequest,
     onApplied?: () => Promise<void>
   ): Promise<RefactorPreviewPanel> {
     if (RefactorPreviewPanel.current) {
       RefactorPreviewPanel.current.plan = plan;
+      RefactorPreviewPanel.current.request = request;
+      RefactorPreviewPanel.current.onApplied = onApplied;
       RefactorPreviewPanel.current.host.postMessage({
         type: "loadRefactorPlan",
         plan,
@@ -217,15 +226,19 @@ export class RefactorPreviewPanel {
     });
     const instance = new RefactorPreviewPanel(host, onApplied);
     instance.plan = plan;
+    instance.request = request;
     RefactorPreviewPanel.current = instance;
     instance.host.postMessage({ type: "loadRefactorPlan", plan });
     return instance;
   }
 
   private async handleMessage(message: WebviewMessage): Promise<void> {
-    if (message.type === "applyRefactor" && this.plan) {
+    if (message.type === "applyRefactor" && this.plan && this.request && !this.applying) {
+      this.applying = true;
+      const planSnapshot = this.plan;
+      const requestSnapshot = this.request;
       try {
-        const result = await applyRefactor(this.plan, false);
+        const result = await applyRefactor(planSnapshot, requestSnapshot, false);
         if (result.reindex_warning) {
           void vscode.window.showWarningMessage(result.reindex_warning);
         }
@@ -239,6 +252,8 @@ export class RefactorPreviewPanel {
       } catch (err) {
         const msg = err instanceof Error ? err.message : String(err);
         void vscode.window.showErrorMessage(`OntoCode refactor failed: ${msg}`);
+      } finally {
+        this.applying = false;
       }
     }
     if (message.type === "cancelRefactor") {
@@ -263,5 +278,5 @@ async function runRefactorPreview(
     );
     return;
   }
-  await RefactorPreviewPanel.show(extensionUri, plan, onApplied);
+  await RefactorPreviewPanel.show(extensionUri, plan, request, onApplied);
 }

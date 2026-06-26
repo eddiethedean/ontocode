@@ -24,6 +24,7 @@ export class ManchesterEditorPanel {
   public static current: ManchesterEditorPanel | undefined;
   private host: PanelHost;
   private options: ManchesterEditorOptions;
+  private activeValidateSeq = 0;
 
   private constructor(host: PanelHost, options: ManchesterEditorOptions) {
     this.host = host;
@@ -106,7 +107,11 @@ export class ManchesterEditorPanel {
     axiomKind: string,
     seq: number
   ): Promise<void> {
+    this.activeValidateSeq = seq;
     if (axiomKind === "disjoint_class") {
+      if (seq !== this.activeValidateSeq) {
+        return;
+      }
       this.host.postMessage({
         type: "manchesterValidation",
         seq,
@@ -126,6 +131,9 @@ export class ManchesterEditorPanel {
         entity_iri: this.options.iri,
         document_uri: this.options.documentUri,
       });
+      if (seq !== this.activeValidateSeq) {
+        return;
+      }
       this.host.postMessage({
         type: "manchesterValidation",
         seq,
@@ -138,6 +146,9 @@ export class ManchesterEditorPanel {
       });
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
+      if (seq !== this.activeValidateSeq) {
+        return;
+      }
       this.host.postMessage({ type: "manchesterValidation", seq, error: msg });
     }
   }

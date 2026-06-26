@@ -109,7 +109,15 @@ fn prefix_for_namespace(ns: &str, namespaces: &BTreeMap<String, String>) -> Opti
     namespaces.iter().find(|(_, v)| normalize_iri(v) == normalize_iri(ns)).map(|(p, _)| p.clone())
 }
 
-fn is_safe_replacement_boundary(text: &str, start: usize, end: usize) -> bool {
+/// True when `needle` at `col` in `line` is a standalone Turtle token (not a substring).
+pub fn is_token_match_at(line: &str, needle: &str, col: usize) -> bool {
+    if !line[col..].starts_with(needle) {
+        return false;
+    }
+    is_safe_replacement_boundary(line, col, col + needle.len())
+}
+
+pub fn is_safe_replacement_boundary(text: &str, start: usize, end: usize) -> bool {
     let before = text.as_bytes().get(start.wrapping_sub(1)).copied();
     let after = text.as_bytes().get(end).copied();
     let ok_before = before.is_none_or(|b| !b.is_ascii_alphanumeric() && b != b':' && b != b'#');

@@ -144,7 +144,7 @@ export type WebviewMessage =
   | { type: "cancelRefactor" }
   | { type: "runQuery"; mode: "sql" | "sparql"; text: string; runId: number }
   | { type: "saveQuery"; name: string; mode: "sql" | "sparql"; text: string }
-  | { type: "exportQueryResult"; format: "csv" | "json" }
+  | { type: "exportQueryResult"; format: "csv" | "json"; runId?: number }
   | { type: "validateManchester"; expression: string; axiomKind: string; seq: number }
   | { type: "applyManchester"; expression: string; axiomKind: string; previewOnly: boolean };
 

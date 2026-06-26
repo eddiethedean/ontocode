@@ -148,6 +148,10 @@ impl ServerState {
         self.inner.read().ok().map(|g| g.open_documents.clone()).unwrap_or_default()
     }
 
+    pub fn open_document_overrides(&self) -> HashMap<PathBuf, String> {
+        self.open_documents_snapshot()
+    }
+
     pub fn with_catalog<T>(&self, f: impl FnOnce(&OntologyCatalog) -> T) -> Option<T> {
         let guard = match self.inner.read() {
             Ok(g) => g,

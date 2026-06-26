@@ -360,6 +360,7 @@ pub struct PreviewRefactorResult {
 #[derive(Debug, Deserialize)]
 pub struct ApplyRefactorParams {
     pub plan: ontoindex_refactor::RefactorPlan,
+    pub request: ontoindex_refactor::RefactorRequest,
     #[serde(default)]
     pub preview_only: bool,
 }

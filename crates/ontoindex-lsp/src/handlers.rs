@@ -26,7 +26,8 @@ use ontoindex_reasoner::{
     classify, explain, ExplanationRequest, ReasonerId, ReasonerSnapshot, WorkspaceInputLoader,
 };
 use ontoindex_refactor::{
-    apply_refactor_plan_checked, find_usages, preview_refactor, preview_rename_iri,
+    apply_refactor_plan_checked, find_usages_with_overrides, plans_equivalent, preview_refactor,
+    preview_rename_iri, validate_refactor_plan_paths,
 };
 use serde_json::Value;
 use std::path::Path;
@@ -663,9 +664,10 @@ pub fn handle_find_usages(
     state: &ServerState,
     params: FindUsagesParams,
 ) -> Result<FindUsagesResult, LspErrorPayload> {
+    let overrides = state.open_document_overrides();
     state
         .with_catalog(|catalog| {
-            let usages = find_usages(catalog, &params.iri);
+            let usages = find_usages_with_overrides(catalog, &params.iri, &overrides);
             Ok(FindUsagesResult { usages: usages.into_iter().map(usage_to_summary).collect() })
         })
         .ok_or_else(LspErrorPayload::not_indexed)?
@@ -675,9 +677,10 @@ pub fn handle_preview_refactor(
     state: &ServerState,
     params: PreviewRefactorParams,
 ) -> Result<PreviewRefactorResult, LspErrorPayload> {
+    let overrides = state.open_document_overrides();
     state
         .with_catalog(|catalog| {
-            let plan = preview_refactor(catalog, &params.request)
+            let plan = preview_refactor(catalog, &params.request, &overrides)
                 .map_err(|e| LspErrorPayload::refactor_failed(e.to_string()))?;
             Ok(PreviewRefactorResult { plan })
         })
@@ -689,11 +692,44 @@ pub fn handle_apply_refactor(
     index_worker: &IndexWorker,
     params: ApplyRefactorParams,
 ) -> Result<ApplyRefactorResult, LspErrorPayload> {
-    let files_written = apply_refactor_plan_checked(&params.plan, params.preview_only)
+    let workspace = state
+        .workspace_root()
+        .ok_or_else(|| LspErrorPayload::refactor_failed("workspace not initialized".to_string()))?;
+    let overrides = state.open_document_overrides();
+    let server_plan = state
+        .with_catalog(|catalog| {
+            preview_refactor(catalog, &params.request, &overrides)
+                .map_err(|e| LspErrorPayload::refactor_failed(e.to_string()))
+        })
+        .ok_or_else(LspErrorPayload::not_indexed)??;
+
+    if !plans_equivalent(&server_plan, &params.plan) {
+        return Err(LspErrorPayload::refactor_failed(
+            "submitted plan does not match server preview".to_string(),
+        ));
+    }
+
+    validate_refactor_plan_paths(&workspace, &server_plan)
         .map_err(|e| LspErrorPayload::refactor_failed(e.to_string()))?;
+
+    let files_written =
+        apply_refactor_plan_checked(&server_plan, params.preview_only, Some(workspace.as_path()))
+            .map_err(|e| LspErrorPayload::refactor_failed(e.to_string()))?;
+
     if params.preview_only {
         return Ok(ApplyRefactorResult { files_written: 0, reindex_warning: None });
     }
+
+    for change in &server_plan.changes {
+        if change.preview_text != change.original_text
+            && state.document_text(&change.path).is_some()
+        {
+            state
+                .set_document_text(change.path.clone(), change.preview_text.clone())
+                .map_err(LspErrorPayload::refactor_failed)?;
+        }
+    }
+
     let reindex_warning = match state.effective_index_root() {
         Some(root) => match index_worker.enqueue_sync(root) {
             Ok(_) => None,
@@ -709,8 +745,9 @@ pub fn handle_references(state: &ServerState, params: ReferenceParams) -> Option
     let position = params.text_document_position.position;
     let content = state.document_text(&path)?;
     let iri = iri_at_position(&content, position)?;
+    let overrides = state.open_document_overrides();
     state.with_catalog(|catalog| {
-        let locations: Vec<Location> = find_usages(catalog, &iri)
+        let locations: Vec<Location> = find_usages_with_overrides(catalog, &iri, &overrides)
             .into_iter()
             .filter_map(|u| usage_to_location(state, &u))
             .collect();
@@ -731,9 +768,10 @@ pub fn handle_rename(
     let from_iri = iri_at_position(&content, position)
         .ok_or_else(|| LspErrorPayload::not_found("no IRI at cursor"))?;
     let to_iri = derive_renamed_iri(&from_iri, &params.new_name, &content);
+    let overrides = state.open_document_overrides();
     let edit = state
         .with_catalog(|catalog| {
-            let plan = preview_rename_iri(catalog, &from_iri, &to_iri)
+            let plan = preview_rename_iri(catalog, &from_iri, &to_iri, &overrides)
                 .map_err(|e| LspErrorPayload::refactor_failed(e.to_string()))?;
             plan_to_workspace_edit(&plan).ok_or_else(|| {
                 LspErrorPayload::refactor_failed("rename produced no file changes".to_string())

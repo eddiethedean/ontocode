@@ -344,9 +344,9 @@ Build a refactor plan without writing files.
 
 ### `ontoindex/applyRefactor` (v0.8)
 
-Apply a previously previewed refactor plan, reindex, and return write summary.
+Apply a previously previewed refactor plan. The server re-previews from `request`, verifies the submitted `plan` matches, validates paths against the workspace jail, writes atomically, syncs open buffers, and reindexes.
 
-**Params:** `{ "plan": RefactorPlan, "preview_only"?: boolean }`
+**Params:** `{ "plan": RefactorPlan, "request": RefactorRequest, "preview_only"?: boolean }`
 
 **Result:** `{ "files_written": number, "reindex_warning"?: string }`
 

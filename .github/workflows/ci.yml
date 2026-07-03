@@ -204,11 +204,11 @@ jobs:
 
       - run: |
           set -euo pipefail
-          # Full crate graph is verified at release (publish in dependency order on tag).
+          # Only packages whose deps are already on crates.io can dry-run here.
+          # Full graph is published in dependency order on release tags.
           cargo publish -p ontocore-core --dry-run
-          cargo publish -p ontocore --dry-run
-          # Dependent crates cannot `publish --dry-run` until workspace deps exist on crates.io.
-          cargo build -p ontocore-diagnostics -p ontocore-owl -p ontocore-cli
+          # Workspace-internal crates cannot `publish --dry-run` until path deps exist on crates.io.
+          cargo build -p ontocore-diagnostics -p ontocore-owl -p ontocore-cli -p ontocore
 
   docs:
     name: mkdocs

@@ -5,7 +5,8 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
-VERSION="$(grep -E '^version = ' Cargo.toml | head -1 | sed -E 's/.*"([^"]+)".*/\1/')"
+# Prefer grep -m1 over `grep | head` — under pipefail, GNU grep exits 2 on SIGPIPE.
+VERSION="$(grep -m1 -E '^version = ' Cargo.toml | sed -E 's/.*"([^"]+)".*/\1/')"
 if [[ -z "$VERSION" ]]; then
   echo "error: could not read workspace version from Cargo.toml" >&2
   exit 1
@@ -31,7 +32,7 @@ check_file_contains "README.md" "v${VERSION}" "README header version"
 check_file_contains "docs/index.md" "v${VERSION}" "docs index hero version"
 check_file_contains "extension/README.md" "v${VERSION}" "extension README version"
 check_file_contains "extension/package.json" "\"version\": \"${VERSION}\"" "extension package.json version"
-EXT_LOCK_VERSION="$(grep -E '"version"' extension/package-lock.json | head -1 | sed -E 's/.*"([^"]+)".*/\1/')"
+EXT_LOCK_VERSION="$(grep -m1 -E '"version"' extension/package-lock.json | sed -E 's/.*"([^"]+)".*/\1/')"
 if [[ "$EXT_LOCK_VERSION" != "$VERSION" ]]; then
   echo "FAIL: extension/package-lock.json version ($EXT_LOCK_VERSION) != package.json ($VERSION)" >&2
   fail=1
@@ -139,8 +140,8 @@ else
   echo "ok: contributing docs OntoCore branding"
 fi
 
-WEBVIEW_PKG_VERSION="$(grep -E '"version"' extension/webview-ui/package.json | head -1 | sed -E 's/.*"([^"]+)".*/\1/')"
-WEBVIEW_LOCK_VERSION="$(grep -E '"version"' extension/webview-ui/package-lock.json | head -1 | sed -E 's/.*"([^"]+)".*/\1/')"
+WEBVIEW_PKG_VERSION="$(grep -m1 -E '"version"' extension/webview-ui/package.json | sed -E 's/.*"([^"]+)".*/\1/')"
+WEBVIEW_LOCK_VERSION="$(grep -m1 -E '"version"' extension/webview-ui/package-lock.json | sed -E 's/.*"([^"]+)".*/\1/')"
 if [[ "$WEBVIEW_PKG_VERSION" != "$WEBVIEW_LOCK_VERSION" ]]; then
   echo "FAIL: extension/webview-ui/package-lock.json version ($WEBVIEW_LOCK_VERSION) != package.json ($WEBVIEW_PKG_VERSION)" >&2
   fail=1

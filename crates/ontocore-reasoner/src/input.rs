@@ -101,6 +101,13 @@ fn paths_equal(a: &Path, b: &Path) -> bool {
 }
 
 fn load_ontology_from_temp(path: &Path, text: &str) -> Result<Ontology> {
+    use ontocore_core::MAX_FILE_BYTES;
+    if text.len() as u64 > MAX_FILE_BYTES {
+        return Err(ReasonerError::Load {
+            path: path.to_path_buf(),
+            message: format!("document exceeds maximum size of {MAX_FILE_BYTES} bytes"),
+        });
+    }
     let ext = path.extension().and_then(|e| e.to_str()).unwrap_or("ttl");
     let tmp = tempfile::Builder::new()
         .suffix(&format!(".{ext}"))

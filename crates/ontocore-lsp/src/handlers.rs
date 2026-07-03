@@ -333,7 +333,7 @@ pub fn handle_apply_axiom_patch(
                         return Err(LspErrorPayload::patch_invalid(e));
                     }
                 }
-                workspace_edit = full_document_workspace_edit(&document_path, text);
+                workspace_edit = full_document_workspace_edit(state, &document_path, text);
                 needs_reindex = true;
             }
         }
@@ -868,7 +868,7 @@ pub fn handle_apply_refactor(
         },
         None => Some("refactor applied but workspace root unknown".to_string()),
     };
-    let workspace_edit = plan_to_workspace_edit(&server_plan);
+    let workspace_edit = plan_to_workspace_edit(state, &server_plan);
     Ok(ApplyRefactorResult { files_written, reindex_warning, workspace_edit })
 }
 
@@ -899,15 +899,15 @@ pub fn handle_rename(
         .ok_or_else(|| LspErrorPayload::not_found("no IRI at cursor"))?;
     let to_iri = derive_renamed_iri(&from_iri, &params.new_name, &content);
     let overrides = state.open_document_overrides();
-    let edit = state
+    let plan = state
         .with_catalog(|catalog| {
-            let plan = preview_rename_iri(catalog, &from_iri, &to_iri, &overrides)
-                .map_err(|e| LspErrorPayload::refactor_failed(e.to_string()))?;
-            plan_to_workspace_edit(&plan).ok_or_else(|| {
-                LspErrorPayload::refactor_failed("rename produced no file changes".to_string())
-            })
+            preview_rename_iri(catalog, &from_iri, &to_iri, &overrides)
+                .map_err(|e| LspErrorPayload::refactor_failed(e.to_string()))
         })
         .ok_or_else(LspErrorPayload::not_indexed)??;
+    let edit = plan_to_workspace_edit(state, &plan).ok_or_else(|| {
+        LspErrorPayload::refactor_failed("rename produced no file changes".to_string())
+    })?;
     Ok(Some(edit))
 }
 
@@ -982,15 +982,17 @@ fn token_byte_range_at(line: &str, byte_col: usize) -> (usize, usize) {
     (start, end)
 }
 
-fn full_document_workspace_edit(path: &std::path::Path, new_text: &str) -> Option<WorkspaceEdit> {
+fn full_document_workspace_edit(
+    state: &ServerState,
+    path: &std::path::Path,
+    new_text: &str,
+) -> Option<WorkspaceEdit> {
     let uri = path_to_lsp_uri(path)?;
+    let version = state.document_version(path);
     Some(WorkspaceEdit {
         changes: None,
         document_changes: Some(DocumentChanges::Edits(vec![TextDocumentEdit {
-            text_document: lsp_types::OptionalVersionedTextDocumentIdentifier {
-                uri,
-                version: None,
-            },
+            text_document: lsp_types::OptionalVersionedTextDocumentIdentifier { uri, version },
             edits: vec![OneOf::Left(TextEdit {
                 range: Range {
                     start: Position { line: 0, character: 0 },
@@ -1003,18 +1005,19 @@ fn full_document_workspace_edit(path: &std::path::Path, new_text: &str) -> Optio
     })
 }
 
-fn plan_to_workspace_edit(plan: &ontocore_refactor::RefactorPlan) -> Option<WorkspaceEdit> {
+fn plan_to_workspace_edit(
+    state: &ServerState,
+    plan: &ontocore_refactor::RefactorPlan,
+) -> Option<WorkspaceEdit> {
     let mut document_changes = Vec::new();
     for change in &plan.changes {
         if change.preview_text == change.original_text {
             continue;
         }
         let uri = path_to_lsp_uri(&change.path)?;
+        let version = state.document_version(&change.path);
         document_changes.push(TextDocumentEdit {
-            text_document: lsp_types::OptionalVersionedTextDocumentIdentifier {
-                uri,
-                version: None,
-            },
+            text_document: lsp_types::OptionalVersionedTextDocumentIdentifier { uri, version },
             edits: vec![OneOf::Left(TextEdit {
                 range: Range {
                     start: Position { line: 0, character: 0 },
@@ -1333,6 +1336,9 @@ fn expand_iri_token(content: &str, token: &str) -> Option<String> {
         let prefix_line = content.lines().find(|l| l.contains(&format!("@prefix {prefix}:")))?;
         let start = prefix_line.find('<')? + 1;
         let end = prefix_line.find('>')?;
+        if end <= start {
+            return None;
+        }
         let ns = &prefix_line[start..end];
         return Some(format!("{ns}{local}"));
     }
@@ -1356,6 +1362,12 @@ mod tests {
         let content = "@prefix ex: <http://example.org/people#> .\nex:Person a owl:Class .";
         let iri = expand_iri_token(content, "ex:Person").expect("expanded");
         assert_eq!(iri, "http://example.org/people#Person");
+    }
+
+    #[test]
+    fn expand_iri_token_rejects_malformed_prefix_line() {
+        let content = "@prefix ex: >oops<http://example.org/people#> .\nex:Person a owl:Class .";
+        assert!(expand_iri_token(content, "ex:Person").is_none());
     }
 
     #[test]

@@ -117,7 +117,8 @@ pub fn parse_ontology_text(
         }
     }
 
-    if parse_status == ParseStatus::Error {
+    // Keep partial quads on error so a trailing syntax fault does not wipe the catalog.
+    if parse_status == ParseStatus::Error && quads.is_empty() {
         return Ok(empty_result(
             ontology_id,
             parse_status,
@@ -351,8 +352,8 @@ fn materialize_catalog_quads(
         let Some(s) = named_node(&ann.subject) else {
             continue;
         };
-        let pred = if ann.predicate.contains("://") { named_node(&ann.predicate) } else { None };
-        let Some(p) = pred else {
+        let pred_iri = expand_annotation_predicate(&ann.predicate);
+        let Some(p) = pred_iri.as_deref().and_then(named_node) else {
             continue;
         };
         if let Some(o) = named_node(&ann.object) {
@@ -371,6 +372,22 @@ fn materialize_catalog_quads(
 
 fn named_node(iri: &str) -> Option<NamedNode> {
     NamedNode::new(iri).ok()
+}
+
+/// Expand OBO-style annotation CURIEs used by the minimal OBO parser.
+fn expand_annotation_predicate(pred: &str) -> Option<String> {
+    if pred.contains("://") {
+        return Some(pred.to_string());
+    }
+    match pred {
+        "obo:hasExactSynonym" => {
+            Some("http://www.geneontology.org/formats/oboInOwl#hasExactSynonym".to_string())
+        }
+        "obo:hasDbXref" => {
+            Some("http://www.geneontology.org/formats/oboInOwl#hasDbXref".to_string())
+        }
+        _ => None,
+    }
 }
 
 fn empty_result(
@@ -842,5 +859,31 @@ ex:Person a owl:Class .
             parsed.namespaces.get("ex").map(String::as_str),
             Some("http://example.org/test#")
         );
+    }
+
+    #[test]
+    fn trailing_parse_error_keeps_prior_entities() {
+        let ttl = r#"@prefix ex: <http://example.org/test#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+ex:Person a owl:Class ;
+    rdfs:label "Person" .
+
+ex:Broken a owl:Class ; this is not valid turtle
+"#;
+        let parsed = parse_ontology_text(
+            Path::new("partial.ttl"),
+            OntologyFormat::Turtle,
+            "doc-1",
+            ttl,
+            ttl.as_bytes(),
+        )
+        .expect("partial parse");
+        assert_eq!(parsed.parse_status, ParseStatus::Error);
+        assert!(
+            parsed.entities.iter().any(|e| e.iri == "http://example.org/test#Person"),
+            "entities parsed before the fault must be retained"
+        );
+        assert!(!parsed.quads().is_empty());
     }
 }

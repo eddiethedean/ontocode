@@ -151,3 +151,33 @@ export function isWebviewMessage(data: unknown): data is WebviewMessage {
     typeof (data as WebviewMessage).type === "string"
   );
 }
+
+/** Validate applyPatch payload; reject missing previewOnly (must not default to write). */
+export function parseApplyPatchMessage(
+  message: WebviewMessage,
+  expectedEntityIri: string | undefined
+): { patches: PatchOp[]; previewOnly: boolean } | null {
+  if (message.type !== "applyPatch") {
+    return null;
+  }
+  if (typeof message.previewOnly !== "boolean") {
+    return null;
+  }
+  if (!Array.isArray(message.patches) || message.patches.length === 0) {
+    return null;
+  }
+  for (const patch of message.patches) {
+    if (!patch || typeof patch !== "object" || typeof patch.op !== "string") {
+      return null;
+    }
+    const entityIri = (patch as PatchOp).entity_iri;
+    if (
+      expectedEntityIri &&
+      typeof entityIri === "string" &&
+      entityIri !== expectedEntityIri
+    ) {
+      return null;
+    }
+  }
+  return { patches: message.patches, previewOnly: message.previewOnly };
+}

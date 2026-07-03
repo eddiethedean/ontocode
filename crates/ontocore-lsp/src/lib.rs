@@ -180,8 +180,12 @@ fn handle_notification(
                 serde_json::from_value::<lsp_types::DidOpenTextDocumentParams>(notif.params)
             {
                 if let Ok(path) = document_path_from_uri(state, &params.text_document.uri) {
-                    if let Err(err) = state.set_document_text(path, params.text_document.text) {
+                    if let Err(err) =
+                        state.set_document_text(path.clone(), params.text_document.text)
+                    {
                         eprintln!("ontocore-lsp: rejected open document: {err}");
+                    } else {
+                        state.set_document_version(path, params.text_document.version);
                     }
                 }
             }
@@ -195,14 +199,17 @@ fn handle_notification(
             {
                 if let Ok(path) = document_path_from_uri(state, &params.text_document.uri) {
                     if let Some(text) = merged_document_text(state, &path, &params) {
-                        if let Err(err) = state.set_document_text(path, text) {
+                        if let Err(err) = state.set_document_text(path.clone(), text) {
                             eprintln!("ontocore-lsp: rejected document change: {err}");
-                        } else if let Some(workspace) = state.effective_index_root() {
-                            schedule_reindex(
-                                pending_reindex,
-                                workspace,
-                                Duration::from_millis(750),
-                            );
+                        } else {
+                            state.set_document_version(path, params.text_document.version);
+                            if let Some(workspace) = state.effective_index_root() {
+                                schedule_reindex(
+                                    pending_reindex,
+                                    workspace,
+                                    Duration::from_millis(750),
+                                );
+                            }
                         }
                     } else {
                         eprintln!(

@@ -26,6 +26,8 @@ struct InnerState {
     indexed_at: Option<u64>,
     /// Open document text keyed by canonical file path (unsaved buffer overrides disk).
     open_documents: HashMap<PathBuf, String>,
+    /// LSP textDocument versions for open buffers (for versioned WorkspaceEdits).
+    document_versions: HashMap<PathBuf, i32>,
     reasoner_cache: ReasonerCacheStore,
     reasoner_snapshot: Option<ReasonerSnapshot>,
     /// URIs that received `publishDiagnostics` (for stale clears).
@@ -41,6 +43,7 @@ impl ServerState {
                 indexed_workspace: None,
                 indexed_at: None,
                 open_documents: HashMap::new(),
+                document_versions: HashMap::new(),
                 reasoner_cache: ReasonerCacheStore::new(),
                 reasoner_snapshot: None,
                 published_diagnostic_uris: BTreeSet::new(),
@@ -140,16 +143,6 @@ impl ServerState {
         guard.indexed_workspace.clone().or_else(|| guard.workspace.clone())
     }
 
-    pub fn published_diagnostic_uris(&self) -> BTreeSet<String> {
-        self.inner.read().ok().map(|g| g.published_diagnostic_uris.clone()).unwrap_or_default()
-    }
-
-    pub fn set_published_diagnostic_uris(&self, uris: BTreeSet<String>) {
-        if let Ok(mut guard) = self.inner.write() {
-            guard.published_diagnostic_uris = uris;
-        }
-    }
-
     fn open_documents_snapshot(&self) -> HashMap<PathBuf, String> {
         self.inner.read().ok().map(|g| g.open_documents.clone()).unwrap_or_default()
     }
@@ -197,9 +190,36 @@ impl ServerState {
         match self.inner.write() {
             Ok(mut guard) => {
                 guard.open_documents.remove(&path);
+                guard.document_versions.remove(&path);
             }
             Err(e) => eprintln!("ontocore-lsp: failed to remove open document: {e}"),
         }
+    }
+
+    pub fn set_document_version(&self, path: PathBuf, version: i32) {
+        let path = path.canonicalize().unwrap_or(path);
+        if let Ok(mut guard) = self.inner.write() {
+            guard.document_versions.insert(path, version);
+        }
+    }
+
+    pub fn document_version(&self, path: &Path) -> Option<i32> {
+        let guard = self.inner.read().ok()?;
+        if let Some(v) = guard.document_versions.get(path) {
+            return Some(*v);
+        }
+        path.canonicalize().ok().and_then(|c| guard.document_versions.get(&c).copied())
+    }
+
+    /// Atomically replace published diagnostic URIs and return URIs that are now stale.
+    pub fn replace_published_diagnostic_uris(&self, current: BTreeSet<String>) -> BTreeSet<String> {
+        let Ok(mut guard) = self.inner.write() else {
+            return BTreeSet::new();
+        };
+        let stale: BTreeSet<String> =
+            guard.published_diagnostic_uris.difference(&current).cloned().collect();
+        guard.published_diagnostic_uris = current;
+        stale
     }
 
     /// True when the path has an unsaved LSP buffer (not merely on disk).

@@ -108,7 +108,15 @@ export class EntityInspectorPanel {
       await vscode.commands.executeCommand("ontocode.jumpToSource", this.iri);
     }
     if (message.type === "applyPatch" && this.documentUri) {
-      await this.runPatch(message.patches as PatchOp[], message.previewOnly);
+      const { parseApplyPatchMessage } = await import("./messages");
+      const parsed = parseApplyPatchMessage(message, this.iri);
+      if (!parsed) {
+        void vscode.window.showErrorMessage(
+          "OntoCode: ignored invalid applyPatch message from webview"
+        );
+        return;
+      }
+      await this.runPatch(parsed.patches, parsed.previewOnly);
     }
     if (message.type === "openManchester" && this.iri && this.documentUri) {
       const axiomKind = message.axiom.kind;

@@ -89,7 +89,16 @@ export function registerCommands(
     vscode.commands.registerCommand(
       "ontocode.openDiagnostic",
       async (diagnostic: import("../lsp/protocol").DiagnosticSummary) => {
+        if (!diagnostic?.file || typeof diagnostic.file !== "string") {
+          return;
+        }
         const uri = vscode.Uri.file(diagnostic.file);
+        if (!vscode.workspace.getWorkspaceFolder(uri)) {
+          void vscode.window.showErrorMessage(
+            "OntoCode: diagnostic path is outside the workspace"
+          );
+          return;
+        }
         const doc = await vscode.workspace.openTextDocument(uri);
         const editor = await vscode.window.showTextDocument(doc);
         if (diagnostic.line != null) {

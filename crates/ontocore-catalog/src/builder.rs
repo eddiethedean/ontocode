@@ -102,7 +102,8 @@ impl IndexBuilder {
                 ))));
             }
 
-            if parsed.parse_status != ParseStatus::Error {
+            // Load quads even when parse_status is Error (partial recovery after a trailing fault).
+            if !parsed.quads().is_empty() {
                 load_quads_into_store(&store, parsed.quads(), triple_count)?;
             }
 
@@ -199,7 +200,8 @@ impl IndexBuilder {
                 ))));
             }
 
-            if parsed.parse_status != ParseStatus::Error {
+            // Load quads even when parse_status is Error (partial recovery after a trailing fault).
+            if !parsed.quads().is_empty() {
                 load_quads_into_store(&store, parsed.quads(), triple_count)?;
             }
 

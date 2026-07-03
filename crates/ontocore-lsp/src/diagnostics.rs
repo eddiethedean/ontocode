@@ -53,13 +53,7 @@ pub fn publish_catalog_diagnostics(
         send_publish(sender, &uri, diags, document_text);
     }
 
-    let stale: Vec<String> = {
-        let published = state.published_diagnostic_uris();
-        let stale: Vec<String> = published.difference(&current_uris).cloned().collect();
-        state.set_published_diagnostic_uris(current_uris);
-        stale
-    };
-
+    let stale = state.replace_published_diagnostic_uris(current_uris);
     for uri in stale {
         send_empty_publish(sender, &uri);
     }

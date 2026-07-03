@@ -20,6 +20,8 @@ pub struct InferredHierarchy {
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ClassificationResult {
     pub profile_used: String,
+    /// `true` when no **named class** is unsatisfiable (⊑ `owl:Nothing`).
+    /// Does not detect all ontology inconsistencies (e.g. some ABox clashes).
     pub consistent: bool,
     pub unsatisfiable: Vec<String>,
     pub inferred: InferredHierarchy,
@@ -32,6 +34,7 @@ pub struct ClassificationResult {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ConsistencyResult {
+    /// Class-level consistency only (see [`ClassificationResult::consistent`]).
     pub consistent: bool,
     pub unsatisfiable: Vec<String>,
 }

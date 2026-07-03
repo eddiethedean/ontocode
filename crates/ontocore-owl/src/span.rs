@@ -276,10 +276,19 @@ pub(crate) fn is_turtle_terminating_dot(bytes: &[u8], i: usize) -> bool {
     !(prev_name && next_name)
 }
 
+#[derive(Clone, Copy)]
+enum TurtleStringKind {
+    ShortDouble,
+    ShortSingle,
+    LongDouble,
+    LongSingle,
+}
+
 /// Walk from subject start to the terminating `.` of this statement.
 ///
-/// Tracks strings, IRIs (`<...>`), `#` line comments, brackets, and parens. Does not treat
-/// `.` inside IRIs, comments, or PN_LOCAL names (`ex:foo.bar`) as terminators.
+/// Tracks `"…"`, `'…'`, `"""…"""`, `'''…'''` strings, IRIs (`<...>`), `#` line comments,
+/// brackets, and parens. Does not treat `.` inside IRIs, comments, strings, or PN_LOCAL
+/// names (`ex:foo.bar`) as terminators.
 pub(crate) fn statement_end_byte(source_text: &str, start: usize) -> Option<usize> {
     let bytes = source_text.as_bytes();
     if start >= bytes.len() {
@@ -288,7 +297,7 @@ pub(crate) fn statement_end_byte(source_text: &str, start: usize) -> Option<usiz
     let mut i = start;
     let mut bracket_depth = 0i32;
     let mut paren_depth = 0i32;
-    let mut in_string = false;
+    let mut string_kind: Option<TurtleStringKind> = None;
     let mut in_iri = false;
     let mut in_comment = false;
     let mut escape = false;
@@ -302,16 +311,42 @@ pub(crate) fn statement_end_byte(source_text: &str, start: usize) -> Option<usiz
             i += 1;
             continue;
         }
-        if in_string {
-            if escape {
-                escape = false;
-            } else if b == b'\\' {
-                escape = true;
-            } else if b == b'"' {
-                in_string = false;
+        if let Some(kind) = string_kind {
+            match kind {
+                TurtleStringKind::ShortDouble | TurtleStringKind::ShortSingle => {
+                    let quote = match kind {
+                        TurtleStringKind::ShortDouble => b'"',
+                        _ => b'\'',
+                    };
+                    if escape {
+                        escape = false;
+                    } else if b == b'\\' {
+                        escape = true;
+                    } else if b == quote {
+                        string_kind = None;
+                    }
+                    i += 1;
+                    continue;
+                }
+                TurtleStringKind::LongDouble => {
+                    if bytes.get(i..i + 3) == Some(br#"""""#) {
+                        string_kind = None;
+                        i += 3;
+                        continue;
+                    }
+                    i += 1;
+                    continue;
+                }
+                TurtleStringKind::LongSingle => {
+                    if bytes.get(i..i + 3) == Some(br"'''") {
+                        string_kind = None;
+                        i += 3;
+                        continue;
+                    }
+                    i += 1;
+                    continue;
+                }
             }
-            i += 1;
-            continue;
         }
         if in_iri {
             if b == b'>' {
@@ -321,9 +356,21 @@ pub(crate) fn statement_end_byte(source_text: &str, start: usize) -> Option<usiz
             continue;
         }
 
+        if bytes.get(i..i + 3) == Some(br#"""""#) {
+            string_kind = Some(TurtleStringKind::LongDouble);
+            i += 3;
+            continue;
+        }
+        if bytes.get(i..i + 3) == Some(br"'''") {
+            string_kind = Some(TurtleStringKind::LongSingle);
+            i += 3;
+            continue;
+        }
+
         match b {
             b'#' => in_comment = true,
-            b'"' => in_string = true,
+            b'"' => string_kind = Some(TurtleStringKind::ShortDouble),
+            b'\'' => string_kind = Some(TurtleStringKind::ShortSingle),
             b'<' => in_iri = true,
             b'[' => bracket_depth += 1,
             b']' => bracket_depth = bracket_depth.saturating_sub(1),
@@ -522,5 +569,14 @@ mod tests {
         let ttl = "ex:foo.bar a owl:Class .\n";
         let end = statement_end_byte(ttl, 0).expect("end");
         assert_eq!(&ttl[..end], "ex:foo.bar a owl:Class .");
+    }
+
+    #[test]
+    fn statement_end_respects_dots_in_long_strings() {
+        let ttl = "ex:Person a owl:Class ;\n    rdfs:comment '''See Dr. Smith.''' .\n";
+        let end = statement_end_byte(ttl, 0).expect("end");
+        let block = &ttl[..end];
+        assert!(block.contains("Dr. Smith"));
+        assert!(block.trim_end().ends_with('.'));
     }
 }

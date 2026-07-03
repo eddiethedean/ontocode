@@ -108,21 +108,13 @@ impl ReasonerAdapter for AutoAdapter {
         input: &ReasonerInput,
         request: &ExplanationRequest,
     ) -> Result<ExplanationResult> {
-        // Prefer the profile Auto would use: try EL, then RL, then RDFS.
-        match explain_unsatisfiable_el(&input.ontology, &request.class_iri) {
-            Ok(result) => Ok(result),
-            Err(ReasonerError::ExplanationUnavailable(_))
-            | Err(ReasonerError::ClassNotFound(_)) => {
-                match explain_unsatisfiable_rl(&input.ontology, &request.class_iri) {
-                    Ok(result) => Ok(result),
-                    Err(ReasonerError::ExplanationUnavailable(_))
-                    | Err(ReasonerError::ClassNotFound(_)) => {
-                        explain_unsatisfiable_rdfs(&input.ontology, &request.class_iri)
-                    }
-                    Err(e) => Err(e),
-                }
-            }
-            Err(e) => Err(e),
+        // Match the profile Auto classification actually selected.
+        let classification = self.classify(input)?;
+        match classification.profile_used.as_str() {
+            "rdfs" => explain_unsatisfiable_rdfs(&input.ontology, &request.class_iri),
+            "rl" => explain_unsatisfiable_rl(&input.ontology, &request.class_iri),
+            // Taxonomy / EL / auto / unknown: EL explanations.
+            _ => explain_unsatisfiable_el(&input.ontology, &request.class_iri),
         }
     }
 }

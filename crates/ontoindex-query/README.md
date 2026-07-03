@@ -1,5 +1,7 @@
 # ontoindex-query
 
+> Part of **OntoCore** (semantic workspace engine). Crate name remains `ontoindex-query` for compatibility.
+
 SQL-like virtual tables and SPARQL query engine for [OntoIndex](https://github.com/eddiethedean/ontocode).
 
 ## Install

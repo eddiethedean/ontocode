@@ -1,5 +1,7 @@
 # ontoindex-owl
 
+> Part of **OntoCore** (semantic workspace engine). Crate name remains `ontoindex-owl` for compatibility.
+
 Horned-OWL facade for OWL axiom modeling, Turtle patch write-back, and Manchester syntax for [OntoIndex](https://github.com/eddiethedean/ontocode).
 
 ## Install

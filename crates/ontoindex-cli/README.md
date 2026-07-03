@@ -1,5 +1,7 @@
 # ontoindex-cli
 
+> Part of **OntoCore** (semantic workspace engine). Crate name remains `ontoindex-cli` for compatibility.
+
 Command-line interface for [OntoIndex](https://github.com/eddiethedean/ontocode) — index ontology workspaces, run SQL/SPARQL queries, validate, patch Turtle files, and classify with OntoLogos.
 
 ## Install

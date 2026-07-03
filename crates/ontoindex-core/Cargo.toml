@@ -1,6 +1,6 @@
 [package]
 name = "ontoindex-core"
-description = "Core types and workspace scanner for OntoIndex"
+description = "Core types and workspace scanner for OntoCore (ontoindex-*)"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

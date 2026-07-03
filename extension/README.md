@@ -1,12 +1,12 @@
 # OntoCode
 
-**Browse and edit OWL/RDF ontologies in VS Code** — index a workspace, explore classes and properties in the sidebar, inspect and edit entities in Turtle, and jump to source.
+**OntoCode** is the VS Code ontology IDE, powered by **OntoCore** (`ontoindex-lsp` language server).
 
 [![Documentation](https://readthedocs.org/projects/ontocode-vs/badge/?version=latest)](https://ontocode-vs.readthedocs.io/en/latest/guides/vscode-extension/)
-[![VS Code extension docs](https://img.shields.io/badge/docs-VS%20Code%20extension-blue)](https://ontocode-vs.readthedocs.io/en/latest/guides/vscode-extension/)
+[![VS Code extension docs](https://img.shields.io/badge/docs-VS%20Code%20extension-blue)](https://ontocode-vs.readthedocs.io/en/latest/ontocode/vscode-extension/)
 [![First success](https://img.shields.io/badge/docs-First%20success-blue)](https://ontocode-vs.readthedocs.io/en/latest/guides/first-success/)
 
-**Documentation:** [VS Code extension guide](https://ontocode-vs.readthedocs.io/en/latest/guides/vscode-extension/) — [First success in 10 minutes](https://ontocode-vs.readthedocs.io/en/latest/guides/first-success/) · [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) · [FAQ](https://ontocode-vs.readthedocs.io/en/latest/faq/)
+**Documentation:** [OntoCode extension](https://ontocode-vs.readthedocs.io/en/latest/ontocode/vscode-extension/) · [OntoCore](https://ontocode-vs.readthedocs.io/en/latest/ontocore/) — [First success in 10 minutes](https://ontocode-vs.readthedocs.io/en/latest/guides/first-success/) · [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) · [FAQ](https://ontocode-vs.readthedocs.io/en/latest/faq/)
 
 > **CLI or Rust crates?** See the [Rust & CLI documentation path](https://ontocode-vs.readthedocs.io/en/latest/guides/rust-crates/).
 
@@ -160,7 +160,7 @@ More detail: [Installation & troubleshooting](https://ontocode-vs.readthedocs.io
 
 ---
 
-## What's included in v0.8.0
+## What's included in v0.9.0
 
 **Shipped:** explorer; **React** entity inspector, graph panels, Query Workbench, Manchester editor, and Refactor Preview; workspace refactor (rename IRI, migrate namespace, move, extract); EL/RL/RDFS reasoner; OBO syntax highlighting and indexing (write-back: Turtle only); diagnostics; LSP navigation and refactoring.
 

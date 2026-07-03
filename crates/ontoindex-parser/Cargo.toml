@@ -1,6 +1,6 @@
 [package]
 name = "ontoindex-parser"
-description = "RDF and OWL parsers for OntoIndex"
+description = "RDF and OWL parsers for OntoCore (ontoindex-*)"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

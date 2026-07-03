@@ -1,6 +1,6 @@
 [package]
 name = "ontoindex-lsp"
-description = "Language server for OntoCode ontology browsing"
+description = "Language server for OntoCode (OntoCore LSP via ontoindex-lsp)"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

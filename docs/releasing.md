@@ -1,4 +1,4 @@
-# Releasing OntoCode / OntoIndex
+# Releasing OntoCode / OntoCore
 
 Maintainer checklist for publishing crates, binaries, and the VS Code extension.
 
@@ -48,8 +48,8 @@ Maintainer checklist for publishing crates, binaries, and the VS Code extension.
 Push a tag matching `[workspace.package].version` in `Cargo.toml`:
 
 ```bash
-git tag v0.8.0   # must match [workspace.package].version in Cargo.toml
-git push origin v0.8.0
+git tag v0.9.0   # must match [workspace.package].version in Cargo.toml
+git push origin v0.9.0
 ```
 
 The [release workflow on GitHub](https://github.com/eddiethedean/ontocode/blob/main/.github/workflows/release.yml):
@@ -65,7 +65,7 @@ Requires the `CARGO_REGISTRY_TOKEN` repository secret.
 
 ## Published crates (dependency order)
 
-`ontoindex-core` → `ontoindex-parser` → `ontoindex-owl` → `ontoindex-diagnostics` → `ontoindex-catalog` → `ontoindex-refactor` → `ontoindex-query` → `ontoindex-reasoner` → `ontoindex-robot` → `ontoindex-lsp` → `ontoindex-cli`
+`ontocore` → `ontoindex-core` → `ontoindex-parser` → `ontoindex-owl` → `ontoindex-diagnostics` → `ontoindex-catalog` → `ontoindex-refactor` → `ontoindex-query` → `ontoindex-reasoner` → `ontoindex-robot` → `ontoindex-lsp` → `ontoindex-cli`
 
 ## VS Code Marketplace
 

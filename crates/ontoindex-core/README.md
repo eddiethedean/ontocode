@@ -1,6 +1,8 @@
 # ontoindex-core
 
-Core types, workspace scanner, path sandboxing, and resource limits for [OntoIndex](https://github.com/eddiethedean/ontocode).
+> Part of **OntoCore** (semantic workspace engine). Crate name remains `ontoindex-core` for compatibility.
+
+Core types, workspace scanner, path sandboxing, and resource limits for [OntoCore](https://github.com/eddiethedean/ontocode) (`ontoindex-core`).
 
 ## Install
 

@@ -1,6 +1,6 @@
 [package]
 name = "ontoindex-owl"
-description = "Horned-OWL facade for OntoIndex axiom modeling and patch write-back"
+description = "Horned-OWL facade for OntoCore (ontoindex-*) axiom modeling and patch write-back"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

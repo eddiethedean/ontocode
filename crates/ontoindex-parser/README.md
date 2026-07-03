@@ -1,5 +1,7 @@
 # ontoindex-parser
 
+> Part of **OntoCore** (semantic workspace engine). Crate name remains `ontoindex-parser` for compatibility.
+
 RDF parsing and entity extraction for [OntoIndex](https://github.com/eddiethedean/ontocode), backed by [Oxigraph](https://crates.io/crates/oxigraph).
 
 ## Install

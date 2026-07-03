@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-07-03
+
+### Added
+
+- **`ontocore` crate** — public façade for OntoCore with `Workspace::open`, module re-exports, and `lsp` feature
+- **OntoCore documentation** — `docs/ontocore/` (architecture, crate map, workspace engine, SQL views, LSP, roadmap, plugin model)
+- **OntoCode documentation** — `docs/ontocode/` (VS Code extension, inspector, Query Workbench, graph view, Manchester editor)
+- **ADR-0018** — OntoCore platform identity decision
+- Example `ontocore_workspace` using `Workspace` API
+
+### Changed
+
+- Workspace and extension version **0.9.0**
+- **OntoCore** replaces **OntoIndex** as the platform brand in README and high-traffic docs
+- `ontoindex-*` crate names, `ontoindex` CLI, and `ontoindex-lsp` unchanged (compatibility)
+- ROADMAP v0.9 realigned to OntoCore Identity; former v0.9 workflow items moved to v0.10
+- MkDocs nav adds OntoCore and OntoCode sections; legacy guides redirect to new paths
+
+### Notes
+
+- No breaking API changes to `ontoindex-*` crates or LSP wire format in this release
+- `Workspace` API is experimental until v0.10
+
 ## [0.8.0] - 2026-06-26
 
 ### Added
@@ -47,6 +70,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SPARQL update guard bypass after `PREFIX` or comment lines
 - Capped file reads in parser, catalog semantics, and refactor preview/backup paths
 
+[0.9.0]: https://github.com/eddiethedean/ontocode/releases/tag/v0.9.0
 [0.8.0]: https://github.com/eddiethedean/ontocode/releases/tag/v0.8.0
 
 ## [0.7.0] - 2026-06-25

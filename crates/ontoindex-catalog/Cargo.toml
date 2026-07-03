@@ -1,6 +1,6 @@
 [package]
 name = "ontoindex-catalog"
-description = "Semantic catalog for OntoIndex"
+description = "Semantic catalog for OntoCore (ontoindex-*)"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

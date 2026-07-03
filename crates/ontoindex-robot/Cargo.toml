@@ -1,6 +1,6 @@
 [package]
 name = "ontoindex-robot"
-description = "ROBOT CLI wrappers for OntoIndex"
+description = "ROBOT CLI wrappers for OntoCore (ontoindex-*)"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

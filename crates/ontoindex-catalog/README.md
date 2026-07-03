@@ -1,5 +1,7 @@
 # ontoindex-catalog
 
+> Part of **OntoCore** (semantic workspace engine). Crate name remains `ontoindex-catalog` for compatibility.
+
 Semantic catalog and index builder for [OntoIndex](https://github.com/eddiethedean/ontocode).
 
 ## Install

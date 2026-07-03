@@ -2,7 +2,7 @@
 #   pip install -r docs/requirements.txt && mkdocs serve
 
 site_name: OntoCode
-site_description: Ontology-as-code for Git and VS Code — OntoIndex engine and OntoCode extension docs
+site_description: Ontology-as-code for Git and VS Code — OntoCore engine and OntoCode extension docs
 site_url: https://ontocode-vs.readthedocs.io/
 repo_url: https://github.com/eddiethedean/ontocode
 repo_name: eddiethedean/ontocode
@@ -68,6 +68,21 @@ markdown_extensions:
 
 nav:
   - Home: index.md
+  - OntoCore:
+      - Overview: ontocore/index.md
+      - Architecture: ontocore/architecture.md
+      - Crate map: ontocore/crate-map.md
+      - Workspace engine: ontocore/workspace-engine.md
+      - SQL views: ontocore/sql-views.md
+      - LSP: ontocore/lsp.md
+      - Roadmap: ontocore/roadmap.md
+      - Plugin model: ontocore/plugin-model.md
+  - OntoCode:
+      - VS Code extension: ontocode/vscode-extension.md
+      - Inspector: ontocode/inspector.md
+      - Query Workbench: ontocode/query-workbench.md
+      - Graph view: ontocode/graph-view.md
+      - Manchester editor: ontocode/manchester-editor.md
   - Get started:
       - First success (10 min): guides/first-success.md
       - Pick a task: guides/start-here.md
@@ -121,6 +136,7 @@ nav:
           - v0.5 → v0.6: migration/v0.6.md
           - v0.6 → v0.7: migration/v0.7.md
           - v0.7 → v0.8: migration/v0.8.md
+          - v0.8 → v0.9: migration/v0.9.md
       - Security: security.md
       - Release integrity: release-integrity.md
       - Errors: errors.md
@@ -168,6 +184,7 @@ nav:
               - "0015 OntoLogos": design/adr/0015-adopt-ontologos-reasoner.md
               - "0016 Dependency-first": design/adr/0016-dependency-first-implementation.md
               - "0017 React webviews": design/adr/0017-react-webview-ui.md
+              - "0018 OntoCore identity": design/adr/0018-ontocore-platform-identity.md
       - Maintainers:
           - Releasing: releasing.md
           - Marketplace publish: marketplace-publish.md

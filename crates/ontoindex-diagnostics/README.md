@@ -1,5 +1,7 @@
 # ontoindex-diagnostics
 
+> Part of **OntoCore** (semantic workspace engine). Crate name remains `ontoindex-diagnostics` for compatibility.
+
 Ontology lint rules and diagnostic collection for [OntoIndex](https://github.com/eddiethedean/ontocode).
 
 ## Install

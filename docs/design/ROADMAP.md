@@ -184,17 +184,33 @@ Exit criteria:
 
 **Dependencies:** `horned-owl`, `horned-functional`; in-house refactor orchestration; React webview UI ([ADR-0017](adr/0017-react-webview-ui.md)).
 
-## v0.9 — Workflow and documentation
+## v0.9 — OntoCore Identity
 
 Deliverables:
 
+- **OntoCore** platform branding and documentation (`docs/ontocore/`, `docs/ontocode/`)
+- `ontocore` façade crate with experimental `Workspace` API ([ADR-0018](adr/0018-ontocore-platform-identity.md))
+- Architecture diagram and responsibility split updates
+- `ontoindex-*` crate names unchanged; CLI remains `ontoindex`; LSP remains `ontoindex-lsp`
+
+Exit criteria:
+
+- Contributors and users can distinguish OntoCore (engine) from OntoCode (IDE).
+- Rust embedders can depend on `ontocore` as the public entry point.
+
+**Dependencies:** existing `ontoindex-*` crates; no breaking API changes.
+
+## v0.10 — OntoCore Public API + workflow
+
+Deliverables:
+
+- Stabilize `ontocore::Workspace` and ergonomic APIs; docs.rs for `ontocore`
+- `ontocore` CLI alias (alongside `ontoindex`)
 - semantic diff ([SEMANTIC_DIFF_SPEC.md](SEMANTIC_DIFF_SPEC.md))
-- Git branch comparison
-- breaking change report
+- Git branch comparison and breaking change report
 - **incremental workspace index** (required — [ARCHITECTURE.md](ARCHITECTURE.md))
 - evaluate `ontologos-watch` for file-change → reclassify hook ([ADR-0015](adr/0015-adopt-ontologos-reasoner.md))
-- Markdown/HTML docs export
-- PR summary generation
+- Markdown/HTML docs export; PR summary generation
 - **Reasoner + Explanation panels on React stack**; semantic diff panel in React
 
 Exit criteria:
@@ -231,5 +247,5 @@ Exit criteria:
 ## Implementation sequencing
 
 ```text
-v0.4a → v0.4b → v0.5 → v0.6 → v0.7a → v0.7 → v0.7b → v0.8 → v0.9 → v1.0
+v0.4a → v0.4b → v0.5 → v0.6 → v0.7a → v0.7 → v0.7b → v0.8 → v0.9 → v0.10 → v1.0
 ```

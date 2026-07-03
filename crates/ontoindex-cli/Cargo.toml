@@ -1,6 +1,6 @@
 [package]
 name = "ontoindex-cli"
-description = "CLI for OntoIndex ontology indexing and querying"
+description = "CLI for OntoCore (ontoindex-*) ontology indexing and querying"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

@@ -2,14 +2,14 @@
   "name": "ontocode",
   "displayName": "OntoCode",
   "description": "Browse OWL/RDF ontologies in VS Code with inline diagnostics: explore classes and properties, inspect entities, validate in CI, and jump to source.",
-  "version": "0.8.0",
+  "version": "0.9.0",
   "publisher": "ontocode",
   "license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/eddiethedean/ontocode.git"
   },
-  "homepage": "https://ontocode-vs.readthedocs.io/en/latest/guides/vscode-extension/",
+  "homepage": "https://ontocode-vs.readthedocs.io/en/latest/ontocode/vscode-extension/",
   "bugs": {
     "url": "https://github.com/eddiethedean/ontocode/issues"
   },

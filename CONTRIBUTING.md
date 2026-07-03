@@ -1,8 +1,8 @@
-# Contributing to OntoCode / OntoIndex
+# Contributing to OntoCode / OntoCore
 
 Thank you for contributing. This repository contains:
 
-- **OntoIndex** — Rust crates under `crates/` (`ontoindex` CLI, `ontoindex-lsp`)
+- **OntoCore** — Rust semantic workspace engine under `crates/` (`ontocore` façade, `ontoindex-*` implementation, `ontoindex` CLI, `ontoindex-lsp`)
 - **OntoCode** — VS Code extension under `extension/`
 - **Specs** — product and architecture docs under `docs/design/` ([DEPENDENCY_MATRIX.md](docs/design/DEPENDENCY_MATRIX.md) for external crates)
 - **User guides** — install, SQL, and LSP API under `docs/`

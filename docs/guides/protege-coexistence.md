@@ -1,10 +1,10 @@
 # Protégé coexistence
 
-Interim guide for teams using Protégé today and evaluating OntoCode **v0.8**. A full migration guide is a **v1.0 deliverable**.
+Interim guide for teams using Protégé today and evaluating OntoCode **v0.9**. A full migration guide is a **v1.0 deliverable**.
 
 Canonical capability matrix: [What ships today](../SHIPPED.md). Decision matrix: [Protégé vs OntoCode](protege-decision.md). Gap analysis: [Protégé parity matrix](../design/PROTEGE_PARITY.md).
 
-## Use OntoCode for (v0.8)
+## Use OntoCode for (v0.9)
 
 | Workflow | Status |
 |----------|--------|
@@ -24,7 +24,7 @@ Canonical capability matrix: [What ships today](../SHIPPED.md). Decision matrix:
 
 | Workflow | Why |
 |----------|-----|
-| Full OWL 2 DL reasoning (`dl` / `auto` profiles) | Requires OntoLogos 1.0 — not shipped in v0.8 |
+| Full OWL 2 DL reasoning (`dl` / `auto` profiles) | Requires OntoLogos 1.0 — not shipped in v0.9 |
 | Property chain **editing** | View-only in OntoCode axiom catalog until v1.0 |
 | Full OBO **write-back** in VS Code | OBO is indexed/read-only in inspector; Turtle write-back only |
 | Full OWL 2 DL axiom catalog | Partial Manchester + patches; see [Protégé parity](../design/PROTEGE_PARITY.md) |

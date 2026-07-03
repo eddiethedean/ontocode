@@ -23,6 +23,7 @@ Canonical ADRs live in this directory. The former `adrs/` folder was merged here
 | [0015](0015-adopt-ontologos-reasoner.md) | Adopt OntoLogos as reasoner backend | Accepted |
 | [0016](0016-dependency-first-implementation.md) | Dependency-first implementation | Accepted |
 | [0017](0017-react-webview-ui.md) | Adopt React for VS Code webview panels | Accepted (planned v0.7a+) |
+| [0018](0018-ontocore-platform-identity.md) | OntoCore platform identity | Accepted (v0.9) |
 
 ## Current stack
 

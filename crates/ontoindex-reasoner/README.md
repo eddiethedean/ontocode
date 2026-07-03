@@ -1,5 +1,7 @@
 # ontoindex-reasoner
 
+> Part of **OntoCore** (semantic workspace engine). Crate name remains `ontoindex-reasoner` for compatibility.
+
 Thin [OntoLogos](https://github.com/eddiethedean/ontologos) 0.9.0 facade for OntoIndex — EL, RL, and RDFS classification, hierarchy merge, and EL explanations.
 
 ## Usage

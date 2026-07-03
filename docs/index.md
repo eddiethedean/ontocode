@@ -6,12 +6,12 @@ hide:
 
 <div class="oc-hero" markdown>
 
-<p class="oc-hero-kicker">OntoCode documentation · v0.8.0</p>
+<p class="oc-hero-kicker">OntoCode documentation · v0.9.0</p>
 
 <p class="oc-hero-title">Ontology-as-code for Git and VS Code</p>
 
 <p class="oc-hero-lead">
-Browse OWL/RDF in VS Code, edit Turtle ontologies, run EL/RL/RDFS reasoning, query and validate in CI, and index workspaces locally with the Rust <strong>OntoIndex</strong> engine.
+OntoCode is a modern ontology IDE for VS Code, powered by <strong>OntoCore</strong> — the Rust semantic workspace engine for indexing, queries, diagnostics, and reasoning.
 </p>
 
 <div class="oc-hero-badges" markdown>
@@ -27,8 +27,9 @@ Browse OWL/RDF in VS Code, edit Turtle ontologies, run EL/RL/RDFS reasoning, que
 </div>
 
 <div class="oc-hero-actions" markdown>
-[VS Code extension](guides/vscode-extension.md){ .md-button .md-button--primary }
-[Rust & CLI](guides/rust-crates.md){ .md-button .md-button--primary }
+[OntoCore](ontocore/index.md){ .md-button .md-button--primary }
+[OntoCode extension](ontocode/vscode-extension.md){ .md-button .md-button--primary }
+[Rust & CLI](guides/rust-crates.md){ .md-button }
 [What ships today](SHIPPED.md){ .md-button }
 </div>
 
@@ -38,12 +39,12 @@ Browse OWL/RDF in VS Code, edit Turtle ontologies, run EL/RL/RDFS reasoning, que
 
 **Not sure where to begin?** Pick a path:
 
-- **[VS Code extension](guides/vscode-extension.md)** — Marketplace install, explorer, inspector, Query Workbench (no Rust required).
-- **[Rust & CLI](guides/rust-crates.md)** — `cargo install ontoindex-cli`, crates.io libraries, CI and embedding.
+- **[OntoCode extension](ontocode/vscode-extension.md)** — Marketplace install, explorer, inspector, Query Workbench (no Rust required).
+- **[OntoCore](ontocore/index.md)** — Rust engine, `ontocore` crate, `ontoindex` CLI, CI and embedding.
 
 You do **not** need to clone this repo to use the extension or `cargo install ontoindex-cli`.
 
-> **Naming:** **OntoCode** is the VS Code UI. **OntoIndex** is the engine (`ontoindex` CLI, `ontoindex-*` crates, `ontoindex-lsp`).
+> **Naming:** **OntoCode** is the VS Code IDE. **OntoCore** is the semantic workspace engine (`ontocore` crate, `ontoindex-*` implementation, `ontoindex` CLI, `ontoindex-lsp`).
 
 </div>
 
@@ -57,15 +58,15 @@ You do **not** need to clone this repo to use the extension or `cargo install on
 
     Browse, edit Turtle, run queries and the reasoner from the OntoCode activity bar.
 
-    [:octicons-arrow-right-24: VS Code extension docs](guides/vscode-extension.md)
+    [:octicons-arrow-right-24: OntoCode extension docs](ontocode/vscode-extension.md)
 
 -   :material-console:{ .lg .middle } **Rust & CLI**
 
     ---
 
-    `cargo install ontoindex-cli`, embed `ontoindex-*` crates, validate and classify in CI.
+    `cargo install ontoindex-cli`, embed `ontocore` / `ontoindex-*` crates, validate and classify in CI.
 
-    [:octicons-arrow-right-24: Rust & CLI docs](guides/rust-crates.md)
+    [:octicons-arrow-right-24: OntoCore docs](ontocore/index.md)
 
 -   :material-brain:{ .lg .middle } **Reasoner**
 
@@ -89,7 +90,7 @@ You do **not** need to clone this repo to use the extension or `cargo install on
 
     Run SQL and SPARQL against your indexed workspace from VS Code.
 
-    [:octicons-arrow-right-24: Query Workbench](guides/query-workbench.md)
+    [:octicons-arrow-right-24: Query Workbench](ontocode/query-workbench.md)
 
 -   :material-code-braces:{ .lg .middle } **Manchester editor**
 
@@ -97,7 +98,7 @@ You do **not** need to clone this repo to use the extension or `cargo install on
 
     Edit complex SubClassOf and EquivalentClasses axioms in Manchester syntax.
 
-    [:octicons-arrow-right-24: Manchester guide](guides/manchester-editor.md)
+    [:octicons-arrow-right-24: Manchester guide](ontocode/manchester-editor.md)
 
 -   :material-graph-outline:{ .lg .middle } **Graph visualization**
 
@@ -105,7 +106,7 @@ You do **not** need to clone this repo to use the extension or `cargo install on
 
     Open class, property, import, and neighborhood graphs from the explorer.
 
-    [:octicons-arrow-right-24: Graph guide](guides/graph-visualization.md)
+    [:octicons-arrow-right-24: Graph guide](ontocode/graph-view.md)
 
 -   :material-file-document-outline:{ .lg .middle } **OBO workflows**
 
@@ -125,7 +126,7 @@ You do **not** need to clone this repo to use the extension or `cargo install on
 
 </div>
 
-## What ships in v0.8.0
+## What ships today
 
 See the full matrix: **[What ships today](SHIPPED.md)**.
 
@@ -174,21 +175,22 @@ See the full matrix: **[What ships today](SHIPPED.md)**.
 
 | Topic | Link |
 |-------|------|
-| **VS Code extension (start here)** | [guides/vscode-extension.md](guides/vscode-extension.md) |
-| **Rust & CLI (start here)** | [guides/rust-crates.md](guides/rust-crates.md) |
+| **OntoCore (platform)** | [ontocore/index.md](ontocore/index.md) |
+| **OntoCode extension** | [ontocode/vscode-extension.md](ontocode/vscode-extension.md) |
+| **Rust & CLI** | [guides/rust-crates.md](guides/rust-crates.md) |
 | **What ships today (canonical)** | [SHIPPED.md](SHIPPED.md) |
 | Pick a task (all paths) | [guides/start-here.md](guides/start-here.md) |
 | First success tutorial | [guides/first-success.md](guides/first-success.md) |
 | Reasoner | [guides/reasoner.md](guides/reasoner.md) |
-| Query Workbench | [guides/query-workbench.md](guides/query-workbench.md) |
-| Manchester editor | [guides/manchester-editor.md](guides/manchester-editor.md) |
+| Query Workbench | [ontocode/query-workbench.md](ontocode/query-workbench.md) |
+| Manchester editor | [ontocode/manchester-editor.md](ontocode/manchester-editor.md) |
 | Install VS Code | [vscode-install.md](vscode-install.md) |
 | Getting started (CLI) | [getting-started.md](getting-started.md) |
 | CLI reference | [cli-reference.md](cli-reference.md) |
 | Troubleshooting | [troubleshooting.md](troubleshooting.md) |
 | SQL virtual tables | [sql-reference.md](sql-reference.md) |
 | SPARQL | [sparql-reference.md](sparql-reference.md) |
-| Graph visualization | [guides/graph-visualization.md](guides/graph-visualization.md) |
+| Graph visualization | [ontocode/graph-view.md](ontocode/graph-view.md) |
 | Refactoring | [guides/refactoring.md](guides/refactoring.md) |
 | OBO workflows | [guides/obo-workflow.md](guides/obo-workflow.md) |
 | ROBOT interop | [guides/robot-interop.md](guides/robot-interop.md) |

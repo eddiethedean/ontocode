@@ -1,15 +1,15 @@
-# What ships today (v0.8.0)
+# What ships today (v0.9.0)
 
 > **Canonical capability matrix.** Update this page on every release. Design specs under [Project](design/README.md) may describe future targets — check here for what is actually available.
 
-**Current release:** v0.8.0 · [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md)
+**Current release:** v0.9.0 · [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md)
 
 ## Products
 
 | Product | What it is |
 |---------|------------|
-| **OntoCode** | VS Code extension — explorer, React inspector, graphs, Query Workbench, Manchester editor, refactor preview, reasoner |
-| **OntoIndex** | Rust engine — `ontoindex` CLI, `ontoindex-*` crates, `ontoindex-lsp` |
+| **OntoCode** | VS Code IDE — explorer, React inspector, graphs, Query Workbench, Manchester editor, refactor preview, reasoner |
+| **OntoCore** | Rust semantic workspace engine — `ontocore` façade, `ontoindex-*` crates, `ontoindex` CLI, `ontoindex-lsp` |
 
 ## Capability matrix
 
@@ -42,7 +42,17 @@
 | Index / query | Yes | Yes | Yes |
 | Write-back (inspector, patches, refactor) | Yes | Read-only in VS Code | Read-only in VS Code |
 
-## Manchester scope (v0.8)
+## New in v0.9.0
+
+| Capability | Status |
+|------------|--------|
+| `ontocore` façade crate on crates.io | Yes |
+| `Workspace::open` experimental API | Yes |
+| OntoCore / OntoCode documentation trees | Yes |
+| `ontoindex-*` crate renames | Deferred to v1.0 |
+| `ontocore` CLI alias | Planned v0.10 |
+
+## Manchester scope (v0.8+)
 
 **Shipped:** named classes; `and` / `or`; `some` / `only`; `min` / `max` / `exact` cardinality; nested restrictions; `SubClassOf`, `EquivalentClasses`, and `DisjointClasses` via Manchester editor or patch JSON; domain/range and property chains in axiom catalog (chains view-only).
 

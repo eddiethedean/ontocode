@@ -1,5 +1,7 @@
 # ontoindex-lsp
 
+> Part of **OntoCore** (semantic workspace engine). Crate name remains `ontoindex-lsp` for compatibility.
+
 Language server for OntoCode and LSP integrators — stdio transport, custom `ontoindex/*` methods.
 
 ## Install

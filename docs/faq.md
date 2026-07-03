@@ -1,19 +1,19 @@
 # FAQ
 
-Common questions about OntoCode and OntoIndex. For step-by-step fixes, see [Troubleshooting](troubleshooting.md).
+Common questions about OntoCode and OntoCore. For step-by-step fixes, see [Troubleshooting](troubleshooting.md).
 
 ## Naming and products
 
-**What is the difference between OntoCode and OntoIndex?**
+**What is the difference between OntoCode and OntoCore?**
 
-- **OntoCode** — VS Code extension (explorer, inspector, Query Workbench, Manchester editor, diagnostics).
-- **OntoIndex** — Rust engine (`ontoindex` CLI, `ontoindex-*` crates, `ontoindex-lsp`).
+- **OntoCode** — VS Code IDE (explorer, inspector, Query Workbench, Manchester editor, diagnostics).
+- **OntoCore** — Rust semantic workspace engine (`ontocore` crate, `ontoindex-*` implementation, `ontoindex` CLI, `ontoindex-lsp`).
 
-This repository contains both.
+OntoCore was formerly referred to as **OntoIndex** in older documentation. This repository contains both products.
 
 **Is the API stable?**
 
-Pre-1.0. Published crates are at **0.8.x**. Library APIs, LSP JSON, and SQL table columns may change between minor releases until v1.0. Pin versions in CI with `cargo install ontoindex-cli --locked --version 0.8.0`. The `validate` and `classify` exit codes are documented in [workspace-limits.md](workspace-limits.md).
+Pre-1.0. Published crates are at **0.9.x**. Library APIs, LSP JSON, and SQL table columns may change between minor releases until v1.0. Pin versions in CI with `cargo install ontoindex-cli --locked --version 0.9.0`. The `validate` and `classify` exit codes are documented in [workspace-limits.md](workspace-limits.md).
 
 **What ships in the current release?**
 
@@ -110,7 +110,7 @@ Turtle (`.ttl`) only for write-back. All supported formats can be indexed and qu
 
 **Is ontology content uploaded anywhere?**
 
-No. OntoIndex and OntoCode are local-first by default. See [security.md](security.md).
+No. OntoCore and OntoCode are local-first by default. See [security.md](security.md).
 
 **What about LGPL (horned-owl)?**
 

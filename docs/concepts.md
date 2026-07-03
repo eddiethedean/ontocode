@@ -36,10 +36,10 @@ A text notation for OWL class expressions (e.g. `ex:hasRecord some ex:MedicalRec
 
 Run **OntoCode: Run Reasoner** before switching to inferred or combined mode.
 
-## OntoCode vs OntoIndex
+## OntoCode vs OntoCore
 
-- **OntoCode** — VS Code extension (UI)
-- **OntoIndex** — Rust engine (CLI, LSP, crates)
+- **OntoCode** — VS Code IDE (UI)
+- **OntoCore** — Rust semantic workspace engine (CLI, LSP, `ontocore` / `ontoindex-*` crates)
 
 ## Next steps
 

@@ -19,7 +19,7 @@ use std::path::{Path, PathBuf};
 #[command(
     name = "ontoindex",
     version,
-    about = "Local-first ontology index and query engine (OntoCode v0.8)"
+    about = "Local-first ontology index and query engine (OntoCode v0.9)"
 )]
 struct Cli {
     #[command(subcommand)]

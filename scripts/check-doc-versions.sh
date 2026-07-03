@@ -43,8 +43,8 @@ for file in docs/authoring.md docs/sql-reference.md docs/sparql-reference.md doc
   if grep -qE "^# .+ \(OntoIndex v0\.5\)" "$file"; then
     echo "FAIL: stale v0.5 title in $file" >&2
     fail=1
-  elif ! grep -qE "^# .+ \(OntoIndex v${VERSION%.*}\)" "$file"; then
-    echo "FAIL: reference title in $file should mention OntoIndex v${VERSION%.*}" >&2
+  elif ! grep -qE "^# .+ \(Onto(Index|Core) v${VERSION%.*}\)" "$file"; then
+    echo "FAIL: reference title in $file should mention OntoIndex or OntoCore v${VERSION%.*}" >&2
     fail=1
   else
     echo "ok: reference title $file"
@@ -98,7 +98,7 @@ else
 fi
 
 # v0.8 docs added in adoption review
-for file in docs/guides/refactoring.md docs/migration/v0.8.md docs/examples/refactoring.md; do
+for file in docs/guides/refactoring.md docs/migration/v0.8.md docs/migration/v0.9.md docs/examples/refactoring.md; do
   if [[ ! -f "$file" ]]; then
     echo "FAIL: missing required doc $file" >&2
     fail=1
@@ -107,7 +107,7 @@ for file in docs/guides/refactoring.md docs/migration/v0.8.md docs/examples/refa
   fi
 done
 
-check_file_contains "docs/faq.md" "0\.8\.x" "faq crate version"
+check_file_contains "docs/faq.md" "0\.9\.x" "faq crate version"
 check_file_contains "docs/guides/production-readiness.md" "v${VERSION}" "production-readiness version"
 
 # Stale protege-coexistence version banner
@@ -133,7 +133,7 @@ for file in \
   fi
 done
 
-check_file_contains "docs/guides/protege-coexistence.md" "v0\.8" "protege-coexistence v0.8"
+check_file_contains "docs/guides/protege-coexistence.md" "v0\.9" "protege-coexistence v0.9"
 check_file_contains "docs/guides/release-timeline.md" "non-commitment" "release-timeline disclaimer"
 if grep -qE 'OBO format \+ ROBOT interop.*Not shipped' docs/guides/enterprise-eval.md; then
   echo "FAIL: enterprise-eval.md contradicts SHIPPED.md on OBO/ROBOT" >&2
@@ -192,10 +192,10 @@ else
   echo "ok: RTD page URLs use /en/latest/"
 fi
 
-check_file_contains "extension/package.json" "guides/vscode-extension/" "extension homepage VS Code docs path"
-check_file_contains "extension/README.md" "guides/vscode-extension/" "extension README VS Code docs path"
-check_file_contains "docs/guides/vscode-extension.md" "rust-crates.md" "vscode hub cross-link"
-check_file_contains "docs/guides/rust-crates.md" "vscode-extension.md" "rust hub cross-link"
+check_file_contains "extension/package.json" "ontocode/vscode-extension/" "extension homepage VS Code docs path"
+check_file_contains "extension/README.md" "ontocode/vscode-extension/" "extension README VS Code docs path"
+check_file_contains "docs/guides/vscode-extension.md" "ontocode/vscode-extension" "vscode hub redirect"
+check_file_contains "docs/guides/rust-crates.md" "ontocode/vscode-extension" "rust hub cross-link"
 check_file_contains "crates/ontoindex-cli/src/main.rs" "OntoCode v${VERSION%.*}" "CLI about string version"
 check_file_contains "docs/changelog.md" "v${VERSION}" "docs changelog current release"
 

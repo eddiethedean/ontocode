@@ -1,5 +1,7 @@
 # ontoindex-refactor
 
+> Part of **OntoCore** (semantic workspace engine). Crate name remains `ontoindex-refactor` for compatibility.
+
 Workspace refactoring for OntoIndex — find usages, safe IRI rename, namespace migration, move entity, and extract module (v0.8).
 
 ## Usage

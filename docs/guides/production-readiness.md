@@ -1,6 +1,6 @@
 # Production readiness and pilot criteria
 
-This page states what OntoCode / OntoIndex **v0.8.0** is appropriate for in production-like environments. It is not legal advice and does not replace your organization's risk review.
+This page states what OntoCode / OntoCore **v0.9.0** is appropriate for in production-like environments. It is not legal advice and does not replace your organization's risk review.
 
 Canonical capability matrix: [What ships today](../SHIPPED.md).
 
@@ -53,7 +53,7 @@ Suggested pilot duration: **4–8 weeks** with 3–10 engineers on one ontology 
 | LSP `ontoindex/*` JSON | May change pre-1.0 |
 | Rust `ontoindex-*` crate APIs | May change pre-1.0 |
 
-Pin CLI version in CI: release binary with `VERSION=0.8.0` or `cargo install ontoindex-cli --locked --version 0.8.0`.
+Pin CLI version in CI: release binary with `VERSION=0.9.0` or `cargo install ontoindex-cli --locked --version 0.9.0`.
 
 ## Support and incident response
 

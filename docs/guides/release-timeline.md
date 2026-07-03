@@ -6,7 +6,8 @@ Planning ranges for OntoCode / OntoIndex. **These are product goals, not contrac
 
 | Version | Status | Date (changelog) |
 |---------|--------|------------------|
-| **0.8.0** | Current | 2026-06-26 |
+| **0.9.0** | Current | 2026-07-03 |
+| **0.8.0** | Previous | 2026-06-26 |
 
 Pre-1.0: minor releases may change library APIs, LSP JSON, and SQL virtual table columns — [README](https://github.com/eddiethedean/ontocode/blob/main/README.md).
 
@@ -38,7 +39,7 @@ Detailed engineering backlog: [v1.0 backlog](../design/v1.0_BACKLOG.md). Exit ba
 
 ## How to plan enterprise adoption without a v1.0 date
 
-1. **Now (v0.8):** CI gates + controlled IDE pilot — [production readiness](production-readiness.md)
+1. **Now (v0.9):** CI gates + controlled IDE pilot — [production readiness](production-readiness.md)
 2. **Run** [production evidence protocol](production-evidence.md) on your corpus
 3. **Re-evaluate** at each pinned minor bump using [migration index](../migration/README.md)
 4. **Do not** retire Protégé for DL/OBO workflows until parity matrix items you need are green in SHIPPED

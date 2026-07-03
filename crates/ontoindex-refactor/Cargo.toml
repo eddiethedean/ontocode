@@ -1,6 +1,6 @@
 [package]
 name = "ontoindex-refactor"
-description = "Workspace refactoring for OntoIndex (rename, migrate, move, extract)"
+description = "Workspace refactoring for OntoCore (ontoindex-*) (rename, migrate, move, extract)"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

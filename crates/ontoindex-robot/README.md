@@ -1,5 +1,7 @@
 # ontoindex-robot
 
+> Part of **OntoCore** (semantic workspace engine). Crate name remains `ontoindex-robot` for compatibility.
+
 Thin wrappers around the [ROBOT](https://github.com/ontodev/robot) CLI for OntoIndex.
 
 ## CLI

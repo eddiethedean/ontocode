@@ -1,6 +1,6 @@
 [package]
 name = "ontoindex-reasoner"
-description = "OntoLogos-backed reasoner facade for OntoIndex"
+description = "OntoLogos-backed reasoner facade for OntoCore (ontoindex-*)"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

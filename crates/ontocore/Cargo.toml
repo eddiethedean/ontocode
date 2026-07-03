@@ -1,0 +1,32 @@
+[package]
+name = "ontocore"
+description = "OntoCore — semantic workspace engine for ontology development"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+authors.workspace = true
+readme = "README.md"
+keywords.workspace = true
+categories.workspace = true
+include = ["src/**/*", "Cargo.toml", "README.md", "LICENSE-MIT", "LICENSE-APACHE-2.0"]
+
+[features]
+default = ["lsp"]
+lsp = ["dep:ontoindex-lsp"]
+
+[dependencies]
+ontoindex-catalog = { workspace = true }
+ontoindex-core = { workspace = true }
+ontoindex-diagnostics = { workspace = true }
+ontoindex-lsp = { workspace = true, optional = true }
+ontoindex-owl = { workspace = true }
+ontoindex-parser = { workspace = true }
+ontoindex-query = { workspace = true }
+ontoindex-reasoner = { workspace = true }
+ontoindex-refactor = { workspace = true }
+
+[dev-dependencies]
+tempfile = "3"

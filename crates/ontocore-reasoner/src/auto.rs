@@ -95,9 +95,9 @@ impl ReasonerAdapter for AutoAdapter {
                     inferred_axiom_count: report.inferred_total(),
                 })
             }
-            _ => Err(ReasonerError::Classify(
-                "unsupported auto classification outcome".to_string(),
-            )),
+            _ => {
+                Err(ReasonerError::Classify("unsupported auto classification outcome".to_string()))
+            }
         }
     }
 

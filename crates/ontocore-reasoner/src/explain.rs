@@ -37,8 +37,8 @@ pub fn explain_unsatisfiable_rl(ontology: &Ontology, class_iri: &str) -> Result<
         .saturate(&mut mutable)
         .map_err(|e| ReasonerError::Explain(e.to_string()))?
         .trace;
-    let graph = build_proof_graph(&mutable, &trace)
-        .map_err(|e| ReasonerError::Explain(e.to_string()))?;
+    let graph =
+        build_proof_graph(&mutable, &trace).map_err(|e| ReasonerError::Explain(e.to_string()))?;
     map_proof_graph(ontology, class_iri, graph)
 }
 
@@ -55,8 +55,8 @@ pub fn explain_unsatisfiable_rdfs(
         .materialize(&mut mutable)
         .map_err(|e| ReasonerError::Explain(e.to_string()))?
         .trace;
-    let graph = build_proof_graph(&mutable, &trace)
-        .map_err(|e| ReasonerError::Explain(e.to_string()))?;
+    let graph =
+        build_proof_graph(&mutable, &trace).map_err(|e| ReasonerError::Explain(e.to_string()))?;
     map_proof_graph(ontology, class_iri, graph)
 }
 
@@ -80,9 +80,9 @@ fn minimal_subsumption_trace(
         .steps
         .iter()
         .position(|s| conclusion_matches_subsumption(ontology, &s.conclusion, sub, sup))
-        .ok_or(ontologos_explain::Error::Core(ontologos_core::Error::Message(
-            format!("no inference step concludes {sub:?} ⊑ {sup:?}"),
-        )))?;
+        .ok_or(ontologos_explain::Error::Core(ontologos_core::Error::Message(format!(
+            "no inference step concludes {sub:?} ⊑ {sup:?}"
+        ))))?;
 
     Ok(InferenceTrace { steps: hst_prune(trace, step_idx) })
 }

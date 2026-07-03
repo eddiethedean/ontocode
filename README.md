@@ -23,6 +23,14 @@ OntoCode is a modern ontology IDE for VS Code, powered by **OntoCore**.
 
 Browse OWL/RDF in VS Code, edit Turtle ontologies, run OWL reasoning (EL/RL/RDFS/DL), query and validate in CI — without Protégé.
 
+| Product | Role |
+|---------|------|
+| **OntoCode** | VS Code IDE — explorer, inspector, Query Workbench, Manchester editor, reasoner |
+| **OntoCore** | Rust semantic workspace engine — index, query, diagnostics, refactoring, CLI, LSP, plugin host |
+| **Ontologos** | Rust reasoning engine — classification, consistency, explanations ([external project](https://github.com/eddiethedean/ontologos)) |
+
+**OntoCode 1.0** targets a production-ready **Protégé replacement** for Git-native OWL 2 DL and OBO workflows. **Post-1.0**, OntoCore plugins, AI/MCP, SDKs, and ecosystem integrations (including [owlmake](https://github.com/INCATools/owlmake), ROBOT, and ODK) modernize beyond desktop-only editing — as **external workflow plugins**, not core dependencies.
+
 ## OntoCore
 
 **OntoCore** is the Rust semantic workspace engine inside this repository. It indexes ontology workspaces and provides search, diagnostics, refactoring, SQL, SPARQL, reasoning integration, CLI tooling, and LSP services.
@@ -78,7 +86,36 @@ Full install and troubleshooting: [install guide](https://ontocode-vs.readthedoc
 
 ![OntoCode Explorer preview](docs/media/explorer-preview.png)
 
-## Two-layer architecture
+## Ecosystem architecture
+
+```text
+┌──────────────────────────────────────────────────────────────┐
+│  External plugins & integrations (not core dependencies)     │
+│  owlmake (reference workflow) · ROBOT CLI · ODK layouts      │
+└────────────────────────────┬─────────────────────────────────┘
+                             │ OntoCore plugin APIs
+┌────────────────────────────▼─────────────────────────────────┐
+│  OntoCode — VS Code IDE                                      │
+└────────────────────────────┬─────────────────────────────────┘
+                             │ ontocore-lsp (stdio)
+┌────────────────────────────▼─────────────────────────────────┐
+│  OntoCore — semantic workspace engine                         │
+│  ontocore façade · ontocore-* crates · CLI · LSP · plugins   │
+└──────────────┬─────────────────────────────┬───────────────────┘
+               │                             │
+               ▼                             ▼
+        ┌─────────────┐              ┌──────────────────┐
+        │  Ontologos  │              │  Oxigraph /      │
+        │  reasoning  │              │  Horned-OWL      │
+        └─────────────┘              └──────────────────┘
+               │
+               ▼
+        Your ontology repo (.ttl .owl .obo .rdf …)
+```
+
+OntoCore is useful on its own today (CLI, CI, local analysis, Rust library). The extension calls into the same engine via a language server rather than reimplementing ontology logic in TypeScript. Workflow automation ([owlmake](https://github.com/INCATools/owlmake), ROBOT, ODK) integrates through **OntoCore plugins** — see [PLUGIN_SPEC.md](docs/design/PLUGIN_SPEC.md) and [Platform architecture](ARCHITECTURE.md).
+
+## Two-layer architecture (products)
 
 OntoCode is designed as two products that ship together:
 
@@ -95,17 +132,18 @@ OntoCode is designed as two products that ship together:
                   │ ontocore-lsp (stdio)
 ┌─────────────────▼───────────────────┐
 │  OntoCore                           │
-│  ontocore façade + ontocore-* crates │
+│  ontocore façade + ontocore-* crates│
 │  index, catalog, query, CLI, LSP    │
 └─────────────────┬───────────────────┘
-                  │ Oxigraph / Horned-OWL / OntoLogos
+                  │ Ontologos (reasoning)
+                  │ Oxigraph / Horned-OWL (index/write-back)
 ┌─────────────────▼───────────────────┐
 │  Your ontology repo                 │
-│  .ttl .owl .rdf .jsonld …           │
+│  .ttl .owl .rdf .jsonld .obo …      │
 └─────────────────────────────────────┘
-```
 
-OntoCore is useful on its own today (CLI, CI, local analysis, Rust library). The extension calls into the same engine via a language server rather than reimplementing ontology logic in TypeScript.
+Plugins (owlmake, validators, exporters) integrate alongside OntoCore — not inside it.
+```
 
 ## What ships today
 
@@ -150,7 +188,7 @@ ontocore validate /path/to/ontologies
 
 ## Reasoning
 
-- EL / RL / RDFS classification via [OntoLogos](https://github.com/eddiethedean/ontologos) 0.9.0
+- EL / RL / RDFS / DL classification via [OntoLogos](https://github.com/eddiethedean/ontologos) 1.0.0
 - CLI: `ontocore classify`, `ontocore explain`
 - LSP: `ontocore/runReasoner`, `ontocore/getExplanation`
 - Explorer hierarchy mode: asserted / inferred / combined
@@ -185,6 +223,7 @@ OntoCore delegates to mature Rust libraries — see [dependency matrix](https://
 | Reasoning | [OntoLogos](https://github.com/eddiethedean/ontologos) | `ontocore-reasoner` |
 | OBO index | line-based parser in `ontocore-parser` | `ontocore-parser`, `ontocore-catalog` |
 | ROBOT interop | external `robot` CLI (Java) | `ontocore-robot`, `ontocore-cli` |
+| Workflow plugins | external (e.g. [owlmake](https://github.com/INCATools/owlmake)) | OntoCore plugin APIs (v1.0) — not core crates |
 | LSP | [lsp-server](https://crates.io/crates/lsp-server), [lsp-types](https://crates.io/crates/lsp-types) | `ontocore-lsp` |
 
 Policy: [ADR-0016](https://ontocode-vs.readthedocs.io/en/latest/design/adr/0016-dependency-first-implementation/). Third-party licenses (including LGPL for horned-owl): [LICENSES](https://ontocode-vs.readthedocs.io/en/latest/design/LICENSES/).

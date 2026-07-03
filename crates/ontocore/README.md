@@ -1,19 +1,18 @@
 # ontocore
 
-**OntoCore** is the semantic workspace engine for ontology development.
+**OntoCore** is the public façade API for the semantic workspace engine.
 
-This crate is the public façade for OntoCore. Implementation is currently provided by the `ontocore-*` crates; those names remain stable until the public API reaches 1.0.
+This crate re-exports the stable surface of OntoCore for Rust applications. Implementation lives in the `ontocore-*` crates (`ontocore-core`, `ontocore-catalog`, `ontocore-query`, etc.) — use those directly when you need lower-level control.
 
 ## Quick start
 
 ```rust
 use ontocore::workspace::Workspace;
 
-let ws = Workspace::open("./ontology")?;
-let stats = ws.catalog().data().stats();
-println!("{} classes indexed", stats.class_count);
+let workspace = Workspace::open(".")?;
+let diagnostics = workspace.diagnostics();
 
-let result = ws.query("SELECT short_name, labels FROM classes")?;
+let result = workspace.query("SELECT short_name, labels FROM classes")?;
 for row in &result.rows {
     println!("{:?}", row);
 }
@@ -33,9 +32,18 @@ for row in &result.rows {
 | `refactor` | Workspace refactoring |
 | `lsp` | LSP protocol types (feature `lsp`, enabled by default) |
 
-## Compatibility
+## Ecosystem
 
-- CLI: `ontocore` (OntoCore CLI alias planned for v0.10)
-- LSP: `ontocore-lsp` binary and `ontocore/*` methods
+| Component | Role |
+|-----------|------|
+| **OntoCore** (`ontocore`, `ontocore-*`) | Semantic workspace engine — this crate |
+| **OntoLogos** | Reasoning engine (classification, consistency, explanations) |
+| **OntoCode** | VS Code IDE powered by OntoCore |
+| **External plugins** (e.g. [owlmake](https://github.com/INCATools/owlmake)) | Workflow/build/release automation — integrate via OntoCore plugin APIs, not core dependencies |
+
+## Binaries
+
+- **CLI:** `ontocore` (`ontocore-cli` crate) — `cargo install ontocore-cli --locked`
+- **LSP:** `ontocore-lsp` — bundled in the OntoCode VS Code extension
 
 See [docs/ontocore/](https://github.com/eddiethedean/ontocode/tree/main/docs/ontocore) in the OntoCode repository.

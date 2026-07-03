@@ -107,12 +107,7 @@ fn lsp_run_reasoner_el_profile() {
     assert_eq!(dl_result.get("profile_used").and_then(|v| v.as_str()), Some("dl"));
     assert_eq!(dl_result.get("consistent").and_then(|v| v.as_bool()), Some(true));
 
-    send_request(
-        &mut stdin,
-        6,
-        "ontocore/runReasoner",
-        serde_json::json!({ "profile": "auto" }),
-    );
+    send_request(&mut stdin, 6, "ontocore/runReasoner", serde_json::json!({ "profile": "auto" }));
     let auto_resp =
         wait_for_id(&rx, 6, Duration::from_secs(30)).expect("auto runReasoner response");
     if auto_resp.get("error").is_some() {

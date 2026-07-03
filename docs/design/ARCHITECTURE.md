@@ -29,30 +29,33 @@ The architecture must support:
 ## 2. High-Level Architecture
 
 ```text
+External Workflow Plugins (not core)     owlmake · ROBOT/ODK adapters
+          │
+          ▼
 +---------------------------+
 |        OntoCode UI        |
 | VS Code trees + commands  |
 | React webviews (v0.7a+)   |
 +-------------+-------------+
-              |
+              | ontocore-lsp
               v
 +---------------------------+
-|   OntoCore Language      |
+|   OntoCore Language       |
 |        Server             |
 +-------------+-------------+
               |
               v
 +---------------------------+
-|       OntoCore Core      |
+|       OntoCore Core       |
 | catalog/query/diagnostics |
 | diff/docs/reasoner/robot  |
-+-------------+-------------+
-              |
-      +-------+-------+-------+
-      v       v               v
+| plugin platform (v1.0)    |
++------+--------+-----------+
+       |        |           |
+       v        v           v
 +-----------+ +-----------+ +------------------+
-| Oxigraph  | | HornedOWL | | OntoLogos        |
-| RDF/SPARQL| | OWL axioms| | reasoners 0.9/1.0|
+| Oxigraph  | | HornedOWL | | OntoLogos 1.0    |
+| RDF/SPARQL| | OWL axioms| | reasoning        |
 +-----+-----+ +-----+-----+ +--------+---------+
       |               |              |
       +───────┬───────┘              |
@@ -63,7 +66,9 @@ The architecture must support:
 +---------------------------+
 ```
 
-**Reasoning ([ADR-0015](adr/0015-adopt-ontologos-reasoner.md)):** `ontocore-reasoner` delegates to [OntoLogos](https://github.com/eddiethedean/ontologos) crates (`ontologos-el`, `ontologos-rl`, `ontologos-dl`, etc.). Pin **0.9.0** at v0.6; bump to **1.0.0** for DL parity at OntoCode v1.0.
+**Reasoning ([ADR-0015](adr/0015-adopt-ontologos-reasoner.md)):** `ontocore-reasoner` delegates to [OntoLogos](https://github.com/eddiethedean/ontologos) crates (`ontologos-el`, `ontologos-rl`, `ontologos-dl`, etc.). OntoLogos **1.0.0** ships in OntoCore v0.9 for DL/auto profiles.
+
+**Workflow plugins:** [owlmake](https://github.com/INCATools/owlmake) is the reference external workflow plugin — see [PLUGIN_SPEC.md](PLUGIN_SPEC.md), [OBO_ROBOT_SPEC.md](OBO_ROBOT_SPEC.md). OntoCore does not embed workflow engines.
 
 **Sync rule ([ADR-0013](adr/0013-dual-stack-oxigraph-horned-owl.md)):** Catalog entities/axioms for edit and diff come from Horned-OWL; triple counts and SPARQL from Oxigraph; CI consistency tests detect drift.
 

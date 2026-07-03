@@ -63,8 +63,7 @@ impl Workspace {
             .iter()
             .filter(|entity| entity_matches_term(entity, &needle))
             .filter_map(|entity| {
-                self.catalog
-                    .entity_detail_with_hierarchy(&entity.iri, &self.class_hierarchy)
+                self.catalog.entity_detail_with_hierarchy(&entity.iri, &self.class_hierarchy)
             })
             .collect();
 
@@ -81,11 +80,7 @@ fn entity_matches_term(entity: &ontocore_core::Entity, needle: &str) -> bool {
     if entity.short_name.to_ascii_lowercase().contains(needle) {
         return true;
     }
-    if entity
-        .obo_id
-        .as_ref()
-        .is_some_and(|id| id.to_ascii_lowercase().contains(needle))
-    {
+    if entity.obo_id.as_ref().is_some_and(|id| id.to_ascii_lowercase().contains(needle)) {
         return true;
     }
     entity.labels.iter().any(|label| label.to_ascii_lowercase().contains(needle))

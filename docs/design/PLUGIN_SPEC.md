@@ -2,46 +2,126 @@
 
 ## 1. Purpose
 
-The plugin system allows users and organizations to extend OntoCore/OntoCode without modifying the core project.
+The plugin system allows users and organizations to extend OntoCore and OntoCode **without modifying the core project**.
 
-## 2. Plugin Types
+**OntoCore hosts plugins; plugins are not part of OntoCore.** Build, release, workflow orchestration, and toolchain-specific validation live in external plugins that integrate through stable OntoCore APIs. OntoCore provides the semantic workspace (index, query, diagnostics, refactoring, LSP); plugins add domain-specific automation on top.
 
-### 2.1 Validator Plugins
-Add custom diagnostics.
+[owlmake](https://github.com/INCATools/owlmake) is the **reference external workflow plugin** — it demonstrates how ROBOT/ODK-style build, QC, and release pipelines integrate with OntoCore without becoming a core dependency.
+
+## 2. Architecture
+
+```text
+┌─────────────────────────────────────────────────────────────┐
+│  OntoCode (VS Code) — surfaces core + plugin workflows      │
+└────────────────────────────┬────────────────────────────────┘
+                             │ ontocore-lsp
+┌────────────────────────────▼────────────────────────────────┐
+│  OntoCore — workspace engine + plugin host                  │
+│  index · query · diagnostics · refactor · LSP               │
+└──────────────┬──────────────────────────────┬───────────────┘
+               │                              │
+               ▼                              ▼
+        ┌─────────────┐              ┌───────────────────────┐
+        │  Ontologos  │              │  External plugins     │
+        │  reasoning  │              │  owlmake (reference)  │
+        └─────────────┘              │  ROBOT/ODK adapters   │
+                                     │  validators, exporters │
+                                     └───────────────────────┘
+```
+
+See also [Platform architecture](../architecture.md) and [OBO & ROBOT interop](OBO_ROBOT_SPEC.md).
+
+## 3. Plugin categories
+
+### 3.1 Build plugins
+
+Compile, merge, and materialize ontologies. Invoke external or native build tools; write artifacts to workspace output directories.
+
+**Example capabilities:**
+
+- build ontology from source modules
+- generate import modules
+- merge release branches
+- materialize inferred axioms
+
+### 3.2 Release plugins
+
+Version, tag, and publish ontology artifacts for releases.
+
+**Example capabilities:**
+
+- generate release artifacts (`.owl`, `.obo`, JSON)
+- bump ontology version IRIs
+- produce release bundles for OBO Foundry or custom registries
+
+### 3.3 Workflow plugins
+
+Orchestrate multi-step pipelines (ROBOT/ODK-style). **owlmake** is the reference implementation.
+
+**Example capabilities:**
+
+- run end-to-end ODK release workflow
+- chain build → QC → report → publish
+- execute Makefile or GitHub Actions equivalents from the IDE/CLI
+
+### 3.4 Validation / QC plugins
+
+Add quality checks beyond built-in OntoCore diagnostics.
+
+**Example capabilities:**
+
+- run workflow-specific validation
+- enforce naming conventions
+- SHACL validation ([SHACL_SPEC.md](SHACL_SPEC.md))
+- OBO Foundry compliance checks
+
+### 3.5 Documentation plugins
+
+Generate human-readable documentation from workspace state.
+
+**Example capabilities:**
+
+- generate Markdown/HTML ontology docs
+- produce CSV/JSON catalog reports
+- emit custom documentation portals
+
+### 3.6 AI / MCP plugins
+
+Expose semantic workspace context to AI agents and MCP clients.
+
+**Example capabilities:**
+
+- MCP server over OntoCore catalog
+- ontology review and modeling suggestions
+- documentation generation with LLM assistance
+
+### 3.7 Validator plugins (built-in category)
+
+Add custom diagnostics surfaced in the Problems panel and `ontocore validate`.
 
 Examples:
 
 - require labels on every class
-- enforce naming conventions
 - forbid deprecated imports
 - validate organization-specific annotation properties
 
-### 2.2 Exporter Plugins
-Generate output formats.
+### 3.8 Exporter plugins
+
+Generate output formats from the indexed catalog.
 
 Examples:
 
-- Markdown
-- HTML
-- CSV reports
-- JSON catalogs
-- SHACL shapes
-- custom documentation portals
+- Markdown, HTML, CSV reports
+- JSON catalogs, SHACL shapes
 
-### 2.3 Reasoner Plugins
+### 3.9 Reasoner plugins
+
 Integrate **native** reasoners (Rust binary or WASM). JVM subprocess reasoners are **not supported** ([ADR-0014](adr/0014-rust-native-reasoners-only.md)).
-
-Examples:
-
-- custom Rust reasoner binary implementing the plugin protocol
-- WASM reasoner module (future)
-- organization-specific validation reasoners
 
 Built-in adapters (`el`, `dl`, `rl`, `rdfs`, `auto`) ship in `ontocore-reasoner` as thin wrappers over [OntoLogos](https://github.com/eddiethedean/ontologos) — see [REASONER_SPEC.md](REASONER_SPEC.md), [ADR-0015](adr/0015-adopt-ontologos-reasoner.md).
 
-Built-in SHACL adapter (P1) wraps [`rudof`](https://crates.io/crates/rudof) — see [SHACL_SPEC.md](SHACL_SPEC.md), [DEPENDENCY_MATRIX.md](DEPENDENCY_MATRIX.md).
+### 3.10 Query function plugins
 
-### 2.4 Query Function Plugins
 Add functions to the SQL-like query layer.
 
 Examples:
@@ -49,25 +129,44 @@ Examples:
 - `ontology_depth(iri)`
 - `descendants(iri)`
 - `ancestor_path(iri)`
-- `is_deprecated(iri)`
 
-### 2.5 UI Plugins
+### 3.11 UI plugins
+
 Future extension point for VS Code views or custom inspectors.
 
-## 3. Plugin Manifest
+## 4. Reference external workflow plugin: owlmake
+
+[owlmake](https://github.com/INCATools/owlmake) is **not** a core OntoCore dependency. It is the first reference plugin showing how external workflow tools integrate:
+
+| Integration point | How owlmake uses OntoCore |
+|-------------------|---------------------------|
+| Workspace index | Read catalog, imports, and entity metadata |
+| Diagnostics | Surface workflow errors as OntoCore diagnostics |
+| LSP / IDE | OntoCode runs workflow actions and shows build output |
+| CLI | Optional `ontocore` subcommand or sidecar binary |
+
+OntoCore does **not** reimplement owlmake, ROBOT, or ODK internally. Plugins call out to those tools (or Rust-native equivalents) and report results back through the plugin API.
+
+## 5. Plugin manifest
 
 ```toml
 [plugin]
-name = "example-validator"
+name = "example-workflow"
 version = "0.1.0"
-kind = "validator"
+kind = "workflow"
 
 [capabilities]
+build = true
+validate = true
+release = true
 diagnostics = true
-quick_fixes = true
 ```
 
-## 4. Validator Interface
+Kinds: `validator`, `exporter`, `build`, `release`, `workflow`, `documentation`, `reasoner`, `query`, `ui`, `ai`.
+
+## 6. Plugin interfaces
+
+### Validator
 
 ```rust
 pub trait ValidatorPlugin {
@@ -76,7 +175,7 @@ pub trait ValidatorPlugin {
 }
 ```
 
-## 5. Exporter Interface
+### Exporter
 
 ```rust
 pub trait ExporterPlugin {
@@ -85,13 +184,37 @@ pub trait ExporterPlugin {
 }
 ```
 
-## 6. Stability
+### Build plugin
+
+```rust
+pub trait BuildPlugin {
+    fn name(&self) -> &str;
+    /// Build ontology artifacts from the indexed workspace.
+    fn build(&self, workspace: &Workspace, options: BuildOptions) -> Result<BuildResult>;
+}
+```
+
+`BuildResult` includes output paths, logs, and diagnostics to surface in the IDE.
+
+### Workflow plugin
+
+```rust
+pub trait WorkflowPlugin {
+    fn name(&self) -> &str;
+    /// Run a named workflow step or full pipeline (e.g. ODK release).
+    fn run(&self, workspace: &Workspace, request: WorkflowRequest) -> Result<WorkflowResult>;
+}
+```
+
+`WorkflowRequest` may specify `step` (`build`, `qc`, `release`, `report`), config path, and dry-run flag. **owlmake** implements this trait as the reference external workflow plugin.
+
+## 7. Stability
 
 v1.0 plugin APIs should be semver-stable.
 
-Before v1.0, plugin APIs may change.
+Before v1.0, plugin APIs may change. See [ontocore/plugin-model.md](../ontocore/plugin-model.md).
 
-## 7. v1.0 reference plugins (P1)
+## 8. v1.0 reference plugins (P1)
 
 Ship with v1.0 as examples and optional builtins:
 
@@ -100,5 +223,6 @@ Ship with v1.0 as examples and optional builtins:
 | `naming-convention-validator` | Validator | Enforce IRI/label naming rules |
 | `markdown-docs-exporter` | Exporter | Markdown ontology docs |
 | `shacl-validator` | Validator | SHACL via adapter ([SHACL_SPEC.md](SHACL_SPEC.md)) |
+| **owlmake** (external) | Workflow | Reference ROBOT/ODK-style build, QC, release — not bundled in OntoCore |
 
 These demonstrate the plugin API; they do not replace Protégé's plugin catalog (P2 in [PROTEGE_PARITY.md](PROTEGE_PARITY.md)).

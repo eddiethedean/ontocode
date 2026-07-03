@@ -2,16 +2,35 @@
 
 > **Status:** Design target for v1.0. Not shipped in v0.9.
 
-The plugin system will allow users and organizations to extend **OntoCore** and **OntoCode** without modifying the core project.
+The plugin system allows users and organizations to extend **OntoCore** and **OntoCode** without modifying the core project. **Plugins integrate with OntoCore; they are not part of OntoCore.**
 
 Full specification: [PLUGIN_SPEC.md](../design/PLUGIN_SPEC.md).
 
-## Plugin types (planned)
+## Architecture
 
-| Type | Purpose | Examples |
-|------|---------|----------|
-| Validator | Custom diagnostics | Naming conventions, required labels |
-| Exporter | Output formats | Markdown, HTML, CSV, SHACL shapes |
+```text
+OntoCode (IDE)
+     │
+     ▼
+OntoCore (workspace engine + plugin host)
+     ├── Ontologos (reasoning — core integration, not a plugin)
+     └── External plugins (owlmake, validators, exporters, …)
+```
+
+[owlmake](https://github.com/INCATools/owlmake) is the **reference external workflow plugin** — ROBOT/ODK-style build, QC, and release automation without becoming a core dependency.
+
+## Plugin categories (planned)
+
+| Category | Purpose | Examples |
+|----------|---------|----------|
+| **Build** | Compile, merge, materialize | Generate import modules, build release `.owl` |
+| **Release** | Version and publish artifacts | OBO Foundry release bundles |
+| **Workflow** | Multi-step pipelines | ODK release via **owlmake** (reference) |
+| **Validation / QC** | Quality checks | SHACL, naming rules, OBO compliance |
+| **Documentation** | Human-readable output | Markdown/HTML ontology docs |
+| **AI / MCP** | Agent integration | MCP server, review assistants |
+| Validator | Custom diagnostics | Required labels, deprecated imports |
+| Exporter | Output formats | CSV, JSON catalogs |
 | Reasoner | Native reasoner integration | Custom Rust/WASM reasoners ([ADR-0014](../design/adr/0014-rust-native-reasoners-only.md)) |
 | Query function | SQL extensions | `descendants(iri)`, `ontology_depth(iri)` |
 | UI | VS Code views | Custom inspectors (OntoCode layer) |
@@ -22,24 +41,28 @@ Built-in reasoner adapters (`el`, `rl`, `rdfs`, `dl`, `auto`) ship in `ontocore-
 
 | Layer | Plugin scope |
 |-------|--------------|
-| **OntoCore** | Validators, exporters, reasoners, query functions — run in CLI/LSP/Rust library |
-| **OntoCode** | UI plugins — VS Code views, webview panels |
+| **OntoCore** | Build, release, workflow, validators, exporters, reasoners, query functions — run in CLI/LSP/Rust library |
+| **OntoCode** | UI plugins — VS Code views, webview panels, workflow action surfaces |
+
+## Reference interfaces (sketch)
+
+See [PLUGIN_SPEC.md](../design/PLUGIN_SPEC.md) for `BuildPlugin`, `WorkflowPlugin`, `ValidatorPlugin`, and `ExporterPlugin` trait sketches.
 
 ## Manifest (sketch)
 
 ```toml
 [plugin]
-id = "com.example.ontology-rules"
-name = "Acme Ontology Rules"
-version = "1.0.0"
+id = "org.incato.owlmake"
+name = "owlmake"
+version = "0.1.0"
 api_version = "1"
-kind = "validator"
-entry = "libacme_rules.so"
+kind = "workflow"
+entry = "libowlmake_plugin.so"
 ```
 
 ## Timeline
 
-- **v0.11:** Plugin/extension point design, MCP server design
-- **v1.0:** Stable plugin API + reference plugins
+- **v0.16:** Plugin platform — extension points, reference **owlmake** integration path
+- **v1.0:** Stable plugin API + reference plugins; OntoCode surfaces workflow actions in IDE
 
-See [OntoCore roadmap](roadmap.md).
+See [Platform roadmap](../roadmap.md) and [OBO & ROBOT interop](../design/OBO_ROBOT_SPEC.md).

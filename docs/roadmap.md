@@ -30,7 +30,7 @@ After 1.0, the roadmap shifts from parity to modernization.
 | v0.5–v0.6 | Manchester MVP, Query Workbench, OntoLogos EL/RL/RDFS reasoning |
 | v0.7 | React inspector + graphs, OBO index, ROBOT CLI wrappers |
 | v0.8 | Refactoring engine, full Manchester catalog, React Query Workbench + Manchester editor |
-| **v0.9** (current) | OntoCore identity — `ontocore-*` crate rename, `ontocore` façade, `ontocore` CLI, `ontocore-lsp`, `ontocore/*` LSP methods |
+| **v0.9** (current) | OntoCore identity — `ontocore-*` crate rename, `ontocore` façade, `ontocore` CLI, `ontocore-lsp`, `ontocore/*` LSP methods; OntoLogos 1.0 DL/auto classification |
 
 **Capability matrix:** [What ships today](SHIPPED.md) · **Engineering milestone detail:** [Milestones (shipped)](design/ROADMAP.md)
 

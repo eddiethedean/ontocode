@@ -39,3 +39,20 @@ fn dl_profile_classifies_el_fixture_workspace() {
     assert_eq!(result.profile_used, "dl");
     assert!(result.consistent);
 }
+
+#[test]
+fn auto_profile_classifies_el_fixture_workspace() {
+    let (_dir, workspace) = el_only_workspace();
+    let catalog =
+        ontocore_catalog::IndexBuilder::new().workspace(&workspace).build().expect("index");
+    let input =
+        WorkspaceInputLoader::new(&workspace).load(catalog.class_hierarchy()).expect("load");
+    let result = classify(ReasonerId::Auto, &input, false).expect("classify");
+
+    assert!(
+        matches!(result.profile_used.as_str(), "auto" | "el" | "dl" | "rl" | "rdfs"),
+        "unexpected profile_used: {}",
+        result.profile_used
+    );
+    assert!(result.consistent);
+}

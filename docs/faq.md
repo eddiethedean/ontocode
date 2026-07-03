@@ -136,7 +136,7 @@ Exits non-zero when unsatisfiable classes are found. See [CI integration](ci-int
 
 **Why does `dl` or `auto` fail?**
 
-Full OWL 2 DL (`dl`) and profile auto-routing (`auto`) ship via OntoLogos 1.0. Use `el`, `rl`, or `rdfs` for lighter-weight profiles.
+If classification fails, check that your ontology is within [workspace limits](workspace-limits.md) and that constructs are supported by OntoLogos 1.0.0 for the selected profile. Use `el`, `rl`, or `rdfs` for lighter-weight profiles when DL is not required.
 
 **Why is explanation empty for a class?**
 
@@ -146,11 +146,11 @@ Explanations require an unsatisfiable class and a prior reasoner run (or success
 
 **When did full DL reasoning ship?**
 
-EL/RL/RDFS shipped in **v0.6.0** (OntoLogos 0.9.0). Full OWL 2 DL (`dl` / `auto`) ships with **OntoLogos 1.0.0** (HermiT parity). See [Reasoner guide](guides/reasoner.md).
+EL/RL/RDFS shipped in **v0.6.0** (OntoLogos 0.9.0). Full OWL 2 DL classification (`dl` / `auto`) is **available in v0.9.0** via **OntoLogos 1.0.0** (HermiT parity). Explanations remain EL-first. See [Reasoner guide](guides/reasoner.md).
 
 **How does this compare to Protégé?**
 
-v0.8 ships Git + VS Code workflows: browse, lint, Turtle editing, SQL/SPARQL queries, Manchester (subclass/equivalent/disjoint IRI), **refactoring** (rename, usages, migrate, move, extract), **EL/RL/RDFS/DL reasoning**, **graph visualization**, **OBO index**, and **ROBOT CLI wrappers**. Full Protégé parity (full OBO write-back, semantic diff) is the v1.0 goal — see [design/PROTEGE_PARITY.md](design/PROTEGE_PARITY.md) and [SHIPPED.md](SHIPPED.md).
+v0.9 ships Git + VS Code workflows: browse, lint, Turtle editing, SQL/SPARQL queries, Manchester (subclass/equivalent/disjoint IRI), **refactoring** (rename, usages, migrate, move, extract), **EL/RL/RDFS/DL/auto reasoning**, **graph visualization**, **OBO index**, and **ROBOT CLI wrappers**. Full Protégé parity (full OBO write-back, property chain editing, semantic diff) is the v1.0 goal — see [design/PROTEGE_PARITY.md](design/PROTEGE_PARITY.md) and [SHIPPED.md](SHIPPED.md).
 
 ## OBO and graphs
 

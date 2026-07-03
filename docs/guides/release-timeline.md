@@ -15,7 +15,7 @@ Pre-1.0: minor releases may change library APIs, LSP JSON, and SQL virtual table
 
 | Target | Goal | Shipped in |
 |--------|------|------------|
-| **v0.9** | OntoCore identity — `ontocore` façade, branding, documentation | **Shipped** (2026-07-03) |
+| **v0.9** | OntoCore identity — `ontocore` façade, branding, documentation; OntoLogos 1.0 DL/auto classification | **Shipped** (2026-07-03) |
 | **v0.10** | Semantic workspace — incremental index, import graph, persistent cache | Planned |
 | **v1.0** | Protégé-competitive OWL + OBO in VS Code; OWL 2 DL via OntoLogos 1.0; full migration guide | Planned |
 
@@ -33,7 +33,7 @@ Canonical forward plan: [Platform roadmap](../roadmap.md). Engineering milestone
 
 ### v1.0 (planned)
 
-- OWL 2 DL classification (`dl` / `auto`) when OntoLogos 1.0 ships
+- Full OWL 2 DL axiom catalog, OBO write-back, and Protégé migration guide per parity matrix
 - Fuller OBO and axiom catalog goals per parity matrix
 - Formal performance benchmarks (currently v1.0 backlog — [performance sizing](performance-sizing.md))
 - Full Protégé migration guide (today: [Protégé coexistence](protege-coexistence.md) + [decision matrix](protege-decision.md))

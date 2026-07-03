@@ -8,7 +8,7 @@ Use this page to decide **when OntoCode fits**, **when to keep Protégé**, and 
 |----------------|----------------|
 | Git + VS Code + Turtle-primary ontologies | **Adopt OntoCode** (pilot IDE + CI) |
 | CI lint/consistency gates without desktop Protégé | **Adopt OntoCore CLI** (`ontocore validate` / `classify`) |
-| Full OWL 2 DL engineering with DL reasoner | **Keep Protégé** until v1.0 DL ships |
+| Full OWL 2 DL axiom catalog + property chain editing | **Split workflow** — use OntoCode for DL classification; keep Protégé for chains and full axiom editing until v1.0 |
 | OBO release pipelines with in-editor OBO write-back | **Keep Protégé** or external OBO tools; use OntoCode for index/ROBOT CI |
 | Enterprise requires vendor SLA / SOC 2 | **Defer** or run limited CI pilot — [Production readiness](production-readiness.md) |
 | Air-gapped VS Code + internal artifact mirror | **Pilot** — [Enterprise deployment](enterprise-deployment.md) |
@@ -17,7 +17,7 @@ Use this page to decide **when OntoCode fits**, **when to keep Protégé**, and 
 
 | Capability | Protégé | OntoCode v0.9 | Notes |
 |------------|---------|---------------|-------|
-| OWL 2 DL reasoning | Yes | EL / RL / RDFS only | `dl` / `auto` require OntoLogos 1.0 |
+| OWL 2 DL classification | Yes | Yes (`dl` / `auto` via OntoLogos 1.0) | Explanations EL-first; see [Reasoner guide](reasoner.md) |
 | Turtle authoring in Git | Manual / plugins | Native write-back | OntoCode inspector + patches |
 | RDF/XML in-place editing | Yes | Read-only index | Write-back Turtle only |
 | Manchester axiom editing | Full | MVP subset | Disjoint shipped; chains view-only |

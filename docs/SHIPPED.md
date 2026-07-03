@@ -27,6 +27,8 @@
 | Graph visualization (class, property, import, neighborhood) | Yes (React) | LSP `ontocore/getGraph` |
 | OWL EL classification (`el` profile) | Reasoner panel + hierarchy toggle | `ontocore classify` |
 | RL / RDFS classification | Reasoner panel | `ontocore classify --profile rl\|rdfs` |
+| OWL 2 DL classification (`dl` profile) | Reasoner panel + hierarchy toggle | `ontocore classify --profile dl` |
+| Auto profile routing (`auto`) | Reasoner panel | `ontocore classify --profile auto` |
 | EL explanations (where available) | Explanation panel | `ontocore explain` |
 | OBO format index + `obo_id` in explorer | Yes | `ontocore inspect` |
 | ROBOT interop | — | `ontocore robot validate\|merge\|report` |
@@ -49,6 +51,7 @@
 | `ontocore` façade crate on crates.io | Yes |
 | `Workspace::open` experimental API | Yes |
 | **`ontocore-*` crate rename** (from `ontoindex-*`) | Yes |
+| **OntoLogos 1.0 DL/auto classification** (`dl`, `auto` profiles) | Yes |
 | OntoCore / OntoCode documentation trees | Yes |
 
 ## Manchester scope (v0.8+)

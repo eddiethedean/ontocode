@@ -28,12 +28,13 @@ Canonical capability matrix: [What ships today](../SHIPPED.md).
 | CLI SQL/SPARQL queries and `validate` for CI | Shipped |
 | Inline diagnostics (Problems panel) | Shipped |
 | Query workbench + Manchester editor in VS Code | Shipped |
-| EL/RL/RDFS reasoning + inferred hierarchy | **Shipped** (OntoLogos 0.9.0) |
-| EL explanations (where OntoLogos supports) | **Shipped** (EL-first) |
+| EL/RL/RDFS/DL reasoning + inferred hierarchy | **Shipped** (OntoLogos 1.0.0) |
+| OWL 2 DL classification (`dl` / `auto` profiles) | **Shipped** (OntoLogos 1.0.0; HermiT parity) |
+| EL explanations (where OntoLogos supports) | **Shipped** (EL-first; DL clash traces partial) |
 | React entity inspector + graph visualization | **Shipped** |
 | OBO format index + `obo_id` in explorer | **Shipped** (write-back: Turtle only in VS Code) |
 | ROBOT CLI interop (`ontocore robot`, LSP `runRobot`) | **Shipped** (requires Java + `robot` on PATH) |
-| Full OWL 2 DL reasoning (`dl` / `auto` profiles) | **Not shipped** (OntoLogos 1.0 target) |
+| Full OWL 2 DL axiom catalog + property chain editing | **Not shipped** (v1.0 target) |
 | Full OBO write-back in VS Code | **Not shipped** (v1.0 target) |
 | Semantic Git diff | **Not shipped** (v0.10 target) |
 
@@ -69,7 +70,7 @@ Full gap analysis: [Protégé parity matrix](../design/PROTEGE_PARITY.md).
 |------------|--------|
 | **Multi-root VS Code workspaces** | Only the **first** folder is indexed |
 | **Write-back** | **Turtle only**; OWL/XML is read-only in the inspector |
-| **Reasoning** | EL/RL/RDFS via OntoLogos 0.9; **DL/auto** stubbed until OntoLogos 1.0; results may differ from Protégé on partial OWL mappings |
+| **Reasoning** | EL/RL/RDFS/DL/auto via OntoLogos 1.0.0; explanations EL-first; results may differ from Protégé on partial OWL mappings |
 | **CLI release binaries** | Linux x64 only; macOS/Windows use `cargo install` or bundled LSP in VSIX |
 | **Scale** | Workspaces above [workspace limits](../workspace-limits.md) may fail indexing — prefer CLI batch workflows for very large terminologies |
 | **ROBOT / Java** | `ontocore robot` and LSP `runRobot` spawn an external Java `robot` process — not JVM-free for that workflow |
@@ -80,8 +81,8 @@ A full migration guide is a **v1.0 deliverable**. Today:
 
 - [Protégé coexistence guide](protege-coexistence.md) — interim split workflow
 
-- Use OntoCode for **Git-native Turtle editing**, **CI validation**, **SQL/SPARQL queries**, **Manchester axioms** (including disjoint classes in v0.8), **workspace refactoring**, and **EL/RL/RDFS classification**
-- Keep Protégé for **OWL 2 DL reasoning** (`dl` / `auto` profiles), **full OBO write-back**, **property chain editing**, and axiom types not yet in the [Protégé parity matrix](../design/PROTEGE_PARITY.md) until v1.0
+- Use OntoCode for **Git-native Turtle editing**, **CI validation**, **SQL/SPARQL queries**, **Manchester axioms** (including disjoint classes in v0.8), **workspace refactoring**, and **EL/RL/RDFS/DL classification**
+- Keep Protégé for **full OWL 2 DL axiom editing**, **property chain editing**, **full OBO write-back**, and axiom types not yet in the [Protégé parity matrix](../design/PROTEGE_PARITY.md) until v1.0
 - See [Protégé parity matrix](../design/PROTEGE_PARITY.md) and [What ships today](../SHIPPED.md)
 
 ## Evaluation checklist

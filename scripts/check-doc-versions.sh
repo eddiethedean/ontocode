@@ -275,6 +275,31 @@ check_file_contains "docs/roadmap.md" "v1.2 — Ontology Toolchain Platform" "do
 check_file_contains "ROADMAP.md" "owlmake" "roadmap owlmake integration"
 check_file_contains "mkdocs.yml" "vision.md" "mkdocs Platform nav"
 
+# User-facing guides must not claim dl/auto are stubbed or not shipped
+DL_STUB_GUIDE_PATHS=(
+  docs/guides/enterprise-eval.md
+  docs/guides/protege-decision.md
+  docs/guides/protege-coexistence.md
+  docs/guides/production-readiness.md
+  docs/guides/release-timeline.md
+)
+for file in "${DL_STUB_GUIDE_PATHS[@]}"; do
+  if grep -qiE 'dl.*stub|auto.*stub|stubbed until OntoLogos 1\.0|Not shipped.*OntoLogos 1\.0|not shipped in v0\.9.*dl|not shipped in v0\.9.*auto' "$file" 2>/dev/null; then
+    echo "FAIL: stale dl/auto stub claim in $file" >&2
+    fail=1
+  fi
+done
+if [[ "$fail" -eq 0 ]]; then
+  echo "ok: no stale dl/auto stub claims in enterprise guides"
+fi
+
+if grep -qiE 'dl.*stub|auto.*stub' docs/workspace-limits.md 2>/dev/null; then
+  echo "FAIL: stale dl/auto stub claim in docs/workspace-limits.md" >&2
+  fail=1
+else
+  echo "ok: workspace-limits dl/auto status"
+fi
+
 if [[ "$fail" -ne 0 ]]; then
   echo "Documentation version check failed." >&2
   exit 1

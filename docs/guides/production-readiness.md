@@ -12,7 +12,7 @@ Canonical capability matrix: [What ships today](../SHIPPED.md).
 | **Stable CI gates** | 0.9.x | `ontocore validate` and `ontocore classify` exit codes are documented and intended for CI — see [workspace limits](../workspace-limits.md). |
 | **v1.0 target** | Planned | Protégé-competitive OWL 2 DL + OBO in VS Code per [Protégé parity](../design/PROTEGE_PARITY.md). |
 
-OntoCode v0.9 is **not** documented as a general-availability replacement for Protégé or full OWL 2 DL engineering.
+OntoCode v0.9 is **not** documented as a general-availability replacement for Protégé or full OWL 2 DL axiom engineering (property chains, full catalog, OBO write-back).
 
 ## Approved use cases (pilot or production)
 
@@ -20,12 +20,13 @@ OntoCode v0.9 is **not** documented as a general-availability replacement for Pr
 |----------|----------------|-------|
 | CI lint gate on ontology repos | **Suitable** | `ontocore validate` — [CI integration](../ci-integration.md) |
 | CI consistency gate (EL profile) | **Suitable** | `ontocore classify --profile el` — profile must match ontology |
+| CI consistency gate (DL profile) | **Pilot** | `ontocore classify --profile dl` or `auto` — OntoLogos 1.0.0; verify on your corpus |
 | Developer IDE for Turtle authoring | **Pilot** | Turtle write-back only; pre-1.0 extension APIs |
 | Workspace refactoring (rename, migrate, move, extract) | **Pilot** | Turtle only; preview before apply — [Refactoring guide](refactoring.md) |
 | Git-native ontology browse/query in VS Code | **Pilot** | Local-first; see [enterprise deployment](enterprise-deployment.md) |
 | Air-gapped VS Code install | **Pilot** | VSIX + SHA256 — [enterprise deployment](enterprise-deployment.md) |
 | OBO index + ROBOT CLI in CI | **Pilot** | Index `.obo`; `ontocore robot validate` — requires Java + `robot` on PATH — [ROBOT interop](robot-interop.md) |
-| Replace Protégé for OWL 2 DL | **Not supported** | Keep Protégé — [Protégé coexistence](protege-coexistence.md) |
+| Replace Protégé for full OWL 2 DL engineering | **Not supported** | DL classification shipped; full axiom catalog, chains, OBO write-back remain v1.0 — [Protégé coexistence](protege-coexistence.md) |
 | Full OBO write-back in VS Code | **Not supported** | OBO is read-only in inspector; Turtle write-back only |
 | Org-wide mandatory IDE standard | **Defer** | Complete pilot + legal review first |
 

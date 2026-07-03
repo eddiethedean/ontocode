@@ -15,7 +15,8 @@ Canonical capability matrix: [What ships today](../SHIPPED.md). Decision matrix:
 | SQL/SPARQL queries over workspace | Shipped |
 | Graph visualization (class, property, import, neighborhood) | Shipped |
 | CI lint (`ontocore validate`) | Shipped — suitable for production CI |
-| EL/RL/RDFS classification | Shipped |
+| EL/RL/RDFS/DL classification | Shipped |
+| OWL 2 DL classification (`dl` / `auto` profiles) | Shipped (OntoLogos 1.0.0) |
 | Inferred hierarchy toggle | Shipped (after reasoner run) |
 | OBO format index + `obo_id` in explorer | Shipped (write-back: Turtle only in VS Code) |
 | ROBOT CLI in CI (`ontocore robot`) | Shipped (requires Java + `robot` on PATH) |
@@ -24,7 +25,6 @@ Canonical capability matrix: [What ships today](../SHIPPED.md). Decision matrix:
 
 | Workflow | Why |
 |----------|-----|
-| Full OWL 2 DL reasoning (`dl` / `auto` profiles) | Requires OntoLogos 1.0 — not shipped in v0.9 |
 | Property chain **editing** | View-only in OntoCode axiom catalog until v1.0 |
 | Full OBO **write-back** in VS Code | OBO is indexed/read-only in inspector; Turtle write-back only |
 | Full OWL 2 DL axiom catalog | Partial Manchester + patches; see [Protégé parity](../design/PROTEGE_PARITY.md) |

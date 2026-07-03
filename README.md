@@ -21,7 +21,7 @@
 
 OntoCode is a modern ontology IDE for VS Code, powered by **OntoCore**.
 
-Browse OWL/RDF in VS Code, edit Turtle ontologies, run EL reasoning, query and validate in CI — without Protégé.
+Browse OWL/RDF in VS Code, edit Turtle ontologies, run OWL reasoning (EL/RL/RDFS/DL), query and validate in CI — without Protégé.
 
 ## OntoCore
 

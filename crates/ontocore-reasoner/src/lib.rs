@@ -1,4 +1,4 @@
-//! OntoLogos-backed reasoner facade for OntoCore (v0.7).
+//! OntoLogos-backed reasoner facade for OntoCore (v0.9).
 //!
 //! Published as [`ontocore-reasoner`](https://crates.io/crates/ontocore-reasoner).
 

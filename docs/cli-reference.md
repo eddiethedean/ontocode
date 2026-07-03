@@ -101,7 +101,7 @@ Optional `--robot-path` overrides the `robot` executable (same as VS Code `ontoc
 
 ### `classify`
 
-Run OWL classification via OntoLogos 0.9.0.
+Run OWL classification via OntoLogos 1.0.0.
 
 ```bash
 ontocore classify ./ontologies --profile el

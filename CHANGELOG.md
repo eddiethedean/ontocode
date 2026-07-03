@@ -16,6 +16,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Example `ontocore_workspace` using `Workspace` API
 - Diagnostic codes `owl_bridge_failed` and `io_read_error`
 - Release pipeline publishes `ontocore` façade; extended `check-doc-versions.sh`
+- **OntoLogos 1.0.0** integration — real `dl` and `auto` reasoner adapters (`ontocore-reasoner`)
+- DL/auto classification tests (library, CLI, LSP) and reasoner panel enablement in VS Code extension
 
 ### Changed
 
@@ -26,6 +28,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **OntoCore** platform branding across README, docs, extension output channel, and GitHub templates
 - `apply_refactor_plan` requires `workspace_root`; diagnostic engine surfaces IO read failures
 - Horned-OWL bridge failures emit catalog diagnostics instead of silent fallback
+- OntoLogos workspace dependencies bumped from 0.9.0 → **1.0.0**
+- Enterprise adoption docs reconciled with shipped DL/auto classification capability
 
 ### Notes
 

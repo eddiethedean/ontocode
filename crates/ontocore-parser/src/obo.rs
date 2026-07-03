@@ -9,9 +9,11 @@ use std::path::Path;
 
 use crate::rdf::{assemble_parsed_ontology, ParseError, ParsedOntology, Result};
 
+/// Default OBO PURL prefix (terms use `GO:0000001` → `…/obo/GO_0000001`).
+const DEFAULT_OBO_BASE: &str = "http://purl.obolibrary.org/obo/";
+
 pub fn parse_obo_text(path: &Path, ontology_id: &str, source_text: &str) -> Result<ParsedOntology> {
     let mut namespaces = BTreeMap::new();
-    let mut base_iri = String::from("http://purl.obolibrary.org/obo/");
     let mut entities = Vec::new();
     let mut annotations = Vec::new();
     let mut axioms = Vec::new();
@@ -25,11 +27,6 @@ pub fn parse_obo_text(path: &Path, ontology_id: &str, source_text: &str) -> Resu
     let mut deprecated = false;
 
     let flush_term = |entities: &mut Vec<Entity>,
-                      annotations: &mut Vec<Annotation>,
-                      axioms: &mut Vec<Axiom>,
-                      axiom_counter: &mut usize,
-                      ontology_id: &str,
-                      base_iri: &str,
                       current_id: &mut Option<String>,
                       current_iri: &mut Option<String>,
                       labels: &mut Vec<String>,
@@ -38,7 +35,7 @@ pub fn parse_obo_text(path: &Path, ontology_id: &str, source_text: &str) -> Resu
         if let (Some(obo_id), Some(iri)) = (current_id.take(), current_iri.take()) {
             let short_name = obo_id.split(':').next_back().unwrap_or(&obo_id).to_string();
             entities.push(Entity {
-                iri: iri.clone(),
+                iri,
                 short_name,
                 kind: EntityKind::Class,
                 ontology_id: ontology_id.to_string(),
@@ -49,10 +46,6 @@ pub fn parse_obo_text(path: &Path, ontology_id: &str, source_text: &str) -> Resu
                 obo_id: Some(obo_id),
             });
             *deprecated = false;
-            let _ = annotations;
-            let _ = axioms;
-            let _ = axiom_counter;
-            let _ = base_iri;
         }
     };
 
@@ -64,11 +57,6 @@ pub fn parse_obo_text(path: &Path, ontology_id: &str, source_text: &str) -> Resu
         if line.starts_with('[') && line.ends_with(']') {
             flush_term(
                 &mut entities,
-                &mut annotations,
-                &mut axioms,
-                &mut axiom_counter,
-                ontology_id,
-                &base_iri,
                 &mut current_id,
                 &mut current_iri,
                 &mut labels,
@@ -79,11 +67,7 @@ pub fn parse_obo_text(path: &Path, ontology_id: &str, source_text: &str) -> Resu
             continue;
         }
         if !in_term {
-            if let Some(value) = line.strip_prefix("ontology:") {
-                let ont_id = value.trim();
-                base_iri = format!("http://purl.obolibrary.org/obo/{ont_id}_");
-                namespaces.insert(String::new(), base_iri.clone());
-            }
+            // ontology: is metadata only — do not rewrite the term IRI base.
             if let Some(rest) = line.strip_prefix("idspace:") {
                 let mut parts = rest.split_whitespace();
                 if let (Some(prefix), Some(url)) = (parts.next(), parts.next()) {
@@ -96,11 +80,6 @@ pub fn parse_obo_text(path: &Path, ontology_id: &str, source_text: &str) -> Resu
         if let Some(value) = line.strip_prefix("id:") {
             flush_term(
                 &mut entities,
-                &mut annotations,
-                &mut axioms,
-                &mut axiom_counter,
-                ontology_id,
-                &base_iri,
                 &mut current_id,
                 &mut current_iri,
                 &mut labels,
@@ -108,7 +87,7 @@ pub fn parse_obo_text(path: &Path, ontology_id: &str, source_text: &str) -> Resu
                 &mut deprecated,
             );
             let obo_id = value.split('!').next().unwrap_or(value).trim().to_string();
-            current_iri = Some(obo_id_to_iri(&obo_id, &base_iri));
+            current_iri = Some(obo_id_to_iri(&obo_id, &namespaces));
             current_id = Some(obo_id);
             in_term = true;
             continue;
@@ -132,7 +111,7 @@ pub fn parse_obo_text(path: &Path, ontology_id: &str, source_text: &str) -> Resu
                 ontology_id: ontology_id.to_string(),
                 subject: iri.clone(),
                 predicate: "rdfs:subClassOf".to_string(),
-                object: obo_id_to_iri(&parent_id, &base_iri),
+                object: obo_id_to_iri(&parent_id, &namespaces),
                 axiom_kind: AXIOM_KIND_SUB_CLASS_OF.to_string(),
                 source_location: SourceLocation::default(),
             });
@@ -174,11 +153,6 @@ pub fn parse_obo_text(path: &Path, ontology_id: &str, source_text: &str) -> Resu
 
     flush_term(
         &mut entities,
-        &mut annotations,
-        &mut axioms,
-        &mut axiom_counter,
-        ontology_id,
-        &base_iri,
         &mut current_id,
         &mut current_iri,
         &mut labels,
@@ -194,9 +168,14 @@ pub fn parse_obo_text(path: &Path, ontology_id: &str, source_text: &str) -> Resu
         )));
     }
 
+    // Ensure default OBO namespace is visible for consumers.
+    if !namespaces.contains_key("") {
+        namespaces.insert(String::new(), DEFAULT_OBO_BASE.to_string());
+    }
+
     Ok(assemble_parsed_ontology(
         ontology_id,
-        Some(base_iri),
+        Some(DEFAULT_OBO_BASE.to_string()),
         namespaces,
         entities,
         annotations,
@@ -204,16 +183,20 @@ pub fn parse_obo_text(path: &Path, ontology_id: &str, source_text: &str) -> Resu
     ))
 }
 
-fn obo_id_to_iri(obo_id: &str, base: &str) -> String {
+/// Map an OBO ID to an IRI using `idspace:` expansions when present.
+///
+/// Default: `GO:0000001` → `http://purl.obolibrary.org/obo/GO_0000001`.
+fn obo_id_to_iri(obo_id: &str, namespaces: &BTreeMap<String, String>) -> String {
     if obo_id.starts_with("http://") || obo_id.starts_with("https://") {
         return obo_id.to_string();
     }
-    let normalized = obo_id.replace(':', "_");
-    if base.ends_with('_') {
-        format!("{base}{normalized}")
-    } else {
-        format!("{base}_{normalized}")
+    if let Some((prefix, local)) = obo_id.split_once(':') {
+        if let Some(ns) = namespaces.get(prefix) {
+            return format!("{ns}{local}");
+        }
     }
+    let normalized = obo_id.replace(':', "_");
+    format!("{DEFAULT_OBO_BASE}{normalized}")
 }
 
 pub fn parse_obo_file(
@@ -250,9 +233,29 @@ mod tests {
         let parsed = parse_obo_file(file.path(), "doc-1", "hash", 0).unwrap();
         assert_eq!(parsed.entities.len(), 1);
         assert_eq!(parsed.entities[0].obo_id.as_deref(), Some("TEST:0000001"));
+        assert_eq!(
+            parsed.entities[0].iri,
+            "http://purl.obolibrary.org/obo/TEST_0000001"
+        );
         assert_eq!(parsed.entities[0].labels, vec!["example term"]);
         assert_eq!(parsed.axioms.len(), 1);
+        assert_eq!(
+            parsed.axioms[0].object,
+            "http://purl.obolibrary.org/obo/TEST_0000002"
+        );
         assert!(parsed.triple_count > 0);
+        assert!(!parsed.quads().is_empty(), "OBO must materialize RDF quads");
+    }
+
+    #[test]
+    fn idspace_overrides_default_base() {
+        let text = "format-version: 1.2\n\
+idspace: GO http://purl.obolibrary.org/obo/GO_\n\n\
+[Term]\n\
+id: GO:0000001\n\
+name: mitochondrion\n";
+        let parsed = parse_obo_text(Path::new("go.obo"), "doc-1", text).unwrap();
+        assert_eq!(parsed.entities[0].iri, "http://purl.obolibrary.org/obo/GO_0000001");
     }
 
     #[test]

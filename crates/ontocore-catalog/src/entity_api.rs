@@ -84,10 +84,9 @@ impl OntologyCatalog {
             if axiom.axiom_kind != AXIOM_KIND_SUB_CLASS_OF {
                 continue;
             }
+            // Keep edges when the child is a known class, even if the parent is external
+            // (common for OBO is_a and imports).
             if !class_iris.contains(axiom.subject.as_str()) {
-                continue;
-            }
-            if !class_iris.contains(axiom.object.as_str()) {
                 continue;
             }
             let edge = SubclassEdge { child: axiom.subject.clone(), parent: axiom.object.clone() };

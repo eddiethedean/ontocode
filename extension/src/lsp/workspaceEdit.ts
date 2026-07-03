@@ -1,33 +1,94 @@
 import * as vscode from "vscode";
 import type { LspWorkspaceEdit } from "./protocol";
 
+type DocChange = {
+  textDocument?: { uri?: string; version?: number | null };
+  text_document?: { uri?: string; version?: number | null };
+  edits?: Array<{
+    range: {
+      start: { line: number; character: number };
+      end: { line: number; character: number };
+    };
+    newText?: string;
+    new_text?: string;
+  }>;
+};
+
+function documentChanges(
+  edit: LspWorkspaceEdit & { documentChanges?: DocChange[] }
+): DocChange[] {
+  const changes =
+    (edit as { documentChanges?: DocChange[] }).documentChanges ??
+    edit.document_changes ??
+    [];
+  return changes as DocChange[];
+}
+
+function isUriInWorkspace(uri: vscode.Uri): boolean {
+  if (uri.scheme !== "file") {
+    return false;
+  }
+  return vscode.workspace.getWorkspaceFolder(uri) !== undefined;
+}
+
 /** Apply a language-server `WorkspaceEdit` to open VS Code editors. */
 export async function applyLspWorkspaceEdit(
   edit: LspWorkspaceEdit | undefined
 ): Promise<boolean> {
-  if (!edit?.document_changes?.length) {
+  if (!edit) {
     return true;
   }
+  const changes = documentChanges(edit as LspWorkspaceEdit & { documentChanges?: DocChange[] });
+  if (!changes.length) {
+    // Present but unrecognizable shape — fail closed so callers can warn.
+    if (
+      (edit as { documentChanges?: unknown }).documentChanges != null ||
+      edit.document_changes != null
+    ) {
+      return false;
+    }
+    return true;
+  }
+
   const workspaceEdit = new vscode.WorkspaceEdit();
-  for (const docChange of edit.document_changes) {
-    const uri = vscode.Uri.parse(docChange.text_document.uri);
+  for (const docChange of changes) {
+    const textDoc = docChange.textDocument ?? docChange.text_document;
+    const uriString = textDoc?.uri;
+    if (!uriString) {
+      return false;
+    }
+    const uri = vscode.Uri.parse(uriString);
+    if (!isUriInWorkspace(uri)) {
+      void vscode.window.showErrorMessage(
+        `OntoCode: refusing to apply edit outside the workspace (${uriString})`
+      );
+      return false;
+    }
     const document = await vscode.workspace.openTextDocument(uri);
-    for (const rawEdit of docChange.edits) {
+    for (const rawEdit of docChange.edits ?? []) {
       const range = rawEdit.range;
+      if (!range?.start || !range?.end) {
+        return false;
+      }
       const endLine =
         range.end.line >= 0xfffffff0 ? document.lineCount : range.end.line;
       const endCharacter =
         range.end.line >= 0xfffffff0 ? 0 : range.end.character;
+      if (
+        !Number.isFinite(range.start.line) ||
+        !Number.isFinite(range.start.character) ||
+        !Number.isFinite(endLine) ||
+        !Number.isFinite(endCharacter)
+      ) {
+        return false;
+      }
       const vscodeRange = new vscode.Range(
         range.start.line,
         range.start.character,
         endLine,
         endCharacter
       );
-      const newText =
-        (rawEdit as { new_text?: string; newText?: string }).new_text ??
-        (rawEdit as { newText?: string }).newText ??
-        "";
+      const newText = rawEdit.newText ?? rawEdit.new_text ?? "";
       workspaceEdit.replace(uri, vscodeRange, newText);
     }
   }

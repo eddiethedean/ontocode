@@ -258,8 +258,31 @@ pub fn entity_primary_block_range(
     }
 }
 
-/// Walk from subject start to the terminating `.` of this statement (bracket/string aware).
-fn statement_end_byte(source_text: &str, start: usize) -> Option<usize> {
+/// True when `b` can appear inside a Turtle PN_LOCAL / prefixed-name token.
+pub(crate) fn is_turtle_name_char(b: u8) -> bool {
+    b.is_ascii_alphanumeric() || matches!(b, b'_' | b'-' | b':' | b'~' | b'%' | b'\\' | b'.')
+}
+
+/// True when `.` at `i` is a statement/object terminator, not part of PN_LOCAL or an IRI.
+///
+/// Turtle allows `.` inside local names (`ex:foo.bar`) and absolute IRIs (`<http://a.b/c>`).
+/// A terminating `.` is never both preceded and followed by name characters.
+pub(crate) fn is_turtle_terminating_dot(bytes: &[u8], i: usize) -> bool {
+    if bytes.get(i) != Some(&b'.') {
+        return false;
+    }
+    let prev_name = i > 0 && is_turtle_name_char(bytes[i - 1]) && bytes[i - 1] != b'.';
+    let next_name = bytes
+        .get(i + 1)
+        .is_some_and(|b| is_turtle_name_char(*b) && *b != b'.');
+    !(prev_name && next_name)
+}
+
+/// Walk from subject start to the terminating `.` of this statement.
+///
+/// Tracks strings, IRIs (`<...>`), `#` line comments, brackets, and parens. Does not treat
+/// `.` inside IRIs, comments, or PN_LOCAL names (`ex:foo.bar`) as terminators.
+pub(crate) fn statement_end_byte(source_text: &str, start: usize) -> Option<usize> {
     let bytes = source_text.as_bytes();
     if start >= bytes.len() {
         return None;
@@ -268,10 +291,19 @@ fn statement_end_byte(source_text: &str, start: usize) -> Option<usize> {
     let mut bracket_depth = 0i32;
     let mut paren_depth = 0i32;
     let mut in_string = false;
+    let mut in_iri = false;
+    let mut in_comment = false;
     let mut escape = false;
 
     while i < bytes.len() {
         let b = bytes[i];
+        if in_comment {
+            if b == b'\n' {
+                in_comment = false;
+            }
+            i += 1;
+            continue;
+        }
         if in_string {
             if escape {
                 escape = false;
@@ -283,14 +315,25 @@ fn statement_end_byte(source_text: &str, start: usize) -> Option<usize> {
             i += 1;
             continue;
         }
+        if in_iri {
+            if b == b'>' {
+                in_iri = false;
+            }
+            i += 1;
+            continue;
+        }
 
         match b {
+            b'#' => in_comment = true,
             b'"' => in_string = true,
+            b'<' => in_iri = true,
             b'[' => bracket_depth += 1,
             b']' => bracket_depth = bracket_depth.saturating_sub(1),
             b'(' => paren_depth += 1,
             b')' => paren_depth = paren_depth.saturating_sub(1),
-            b'.' if bracket_depth == 0 && paren_depth == 0 => return Some(i + 1),
+            b'.' if bracket_depth == 0 && paren_depth == 0 && is_turtle_terminating_dot(bytes, i) => {
+                return Some(i + 1);
+            }
             _ => {}
         }
         i += 1;
@@ -452,5 +495,31 @@ mod tests {
         if let Some(t) = trailing {
             assert!(human_pos < t, "label must be in class block, not trailing triple");
         }
+    }
+
+    #[test]
+    fn statement_end_respects_dots_in_absolute_iris() {
+        let ttl = "<http://example.org/people#Person> a owl:Class ;\n    rdfs:label \"Person\" .\n";
+        let end = statement_end_byte(ttl, 0).expect("end");
+        let block = &ttl[..end];
+        assert!(block.contains("rdfs:label"));
+        assert!(block.trim_end().ends_with('.'));
+        assert!(!block.ends_with("example."));
+    }
+
+    #[test]
+    fn statement_end_respects_dots_in_comments() {
+        let ttl = "ex:Person a owl:Class ; # see docs.\n    rdfs:label \"Person\" .\n";
+        let end = statement_end_byte(ttl, 0).expect("end");
+        let block = &ttl[..end];
+        assert!(block.contains("rdfs:label"));
+        assert!(block.contains("# see docs."));
+    }
+
+    #[test]
+    fn statement_end_respects_dots_in_local_names() {
+        let ttl = "ex:foo.bar a owl:Class .\n";
+        let end = statement_end_byte(ttl, 0).expect("end");
+        assert_eq!(&ttl[..end], "ex:foo.bar a owl:Class .");
     }
 }

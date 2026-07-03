@@ -160,12 +160,17 @@ pub fn is_token_match_at(line: &str, needle: &str, col: usize) -> bool {
     is_safe_replacement_boundary(line, col, col + needle.len())
 }
 
+/// True when a byte is a valid continuation of an IRI or Turtle PN_LOCAL token.
+fn is_iri_continuation(b: u8) -> bool {
+    b.is_ascii_alphanumeric()
+        || matches!(b, b'_' | b'-' | b'.' | b'~' | b':' | b'#' | b'/' | b'%' | b'?' | b'=' | b'&')
+}
+
 pub fn is_safe_replacement_boundary(text: &str, start: usize, end: usize) -> bool {
     let before = text.as_bytes().get(start.wrapping_sub(1)).copied();
     let after = text.as_bytes().get(end).copied();
-    let ok_before = before.is_none_or(|b| !b.is_ascii_alphanumeric() && b != b':' && b != b'#');
-    let ok_after =
-        after.is_none_or(|b| !b.is_ascii_alphanumeric() && b != b':' && b != b'#' && b != b'/');
+    let ok_before = before.is_none_or(|b| !is_iri_continuation(b));
+    let ok_after = after.is_none_or(|b| !is_iri_continuation(b));
     ok_before && ok_after
 }
 
@@ -194,6 +199,22 @@ mod tests {
             replace_iri_in_text(ttl, "http://example.org#Person", "http://example.org#Agent", &ns);
         assert!(out.contains("<http://example.org#Person/role>"));
         assert!(!out.contains("<http://example.org#Agent/role>"));
+    }
+
+    #[test]
+    fn replace_iri_does_not_corrupt_underscore_extended_iri() {
+        let ttl = "@prefix ex: <http://example.org#> .\n\
+                   ex:Person a owl:Class .\n\
+                   ex:Person_extra a owl:Class .\n\
+                   <http://example.org#Person-v2> a owl:Class .\n";
+        let ns = BTreeMap::from([("ex".to_string(), "http://example.org#".to_string())]);
+        let (out, _) =
+            replace_iri_in_text(ttl, "http://example.org#Person", "http://example.org#Agent", &ns);
+        assert!(out.contains("ex:Agent a owl:Class"));
+        assert!(out.contains("ex:Person_extra a owl:Class"));
+        assert!(out.contains("<http://example.org#Person-v2>"));
+        assert!(!out.contains("ex:Agent_extra"));
+        assert!(!out.contains("Agent-v2"));
     }
 
     #[test]

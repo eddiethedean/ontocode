@@ -264,57 +264,55 @@ fn merged_document_text(
     Some(text)
 }
 
-fn apply_text_change(text: &str, range: &lsp_types::Range, new_text: &str) -> Option<String> {
-    let lines: Vec<&str> = text.lines().collect();
-    let start_line = range.start.line as usize;
-    let end_line = range.end.line as usize;
-    if start_line >= lines.len() {
-        eprintln!(
-            "ontocore-lsp: text change start line {} out of range ({} lines)",
-            start_line,
-            lines.len()
-        );
-        return None;
-    }
-    let start_line_str = lines.get(start_line).copied().unwrap_or("");
-    let end_line_str = lines.get(end_line).copied().unwrap_or("");
-    let start_col = utf16_offset_to_byte(start_line_str, range.start.character);
-    let end_col = utf16_offset_to_byte(end_line_str, range.end.character);
-
-    if end_line >= lines.len() && end_line != start_line {
-        eprintln!(
-            "ontocore-lsp: text change end line {} out of range ({} lines)",
-            end_line,
-            lines.len()
-        );
-        return None;
-    }
-
-    let mut result = String::new();
-    for (i, line) in lines.iter().enumerate() {
-        if i < start_line {
-            result.push_str(line);
-            result.push('\n');
-        } else if i == start_line {
-            result.push_str(&line[..start_col.min(line.len())]);
-            result.push_str(new_text);
-            if i == end_line {
-                result.push_str(&line[end_col.min(line.len())..]);
+/// Map an LSP position to a byte offset, preserving `\n` / `\r\n` / `\r` line endings.
+fn position_to_byte(text: &str, pos: lsp_types::Position) -> Option<usize> {
+    let bytes = text.as_bytes();
+    let mut line = 0u32;
+    let mut i = 0usize;
+    while line < pos.line {
+        if i >= bytes.len() {
+            return None;
+        }
+        if bytes[i] == b'\n' {
+            line += 1;
+            i += 1;
+        } else if bytes[i] == b'\r' {
+            line += 1;
+            i += 1;
+            if i < bytes.len() && bytes[i] == b'\n' {
+                i += 1;
             }
-            result.push('\n');
-        } else if i > start_line && i < end_line {
-            continue;
-        } else if i == end_line && end_line != start_line {
-            result.push_str(&line[end_col.min(line.len())..]);
-            result.push('\n');
-        } else if i > end_line {
-            result.push_str(line);
-            result.push('\n');
+        } else {
+            i += 1;
         }
     }
-    if result.ends_with('\n') {
-        result.pop();
+    let line_start = i;
+    let mut line_end = i;
+    while line_end < bytes.len() && bytes[line_end] != b'\n' && bytes[line_end] != b'\r' {
+        line_end += 1;
     }
+    let line_str = text.get(line_start..line_end)?;
+    let col = utf16_offset_to_byte(line_str, pos.character).min(line_str.len());
+    let offset = line_start + col;
+    if !text.is_char_boundary(offset) {
+        return None;
+    }
+    Some(offset)
+}
+
+fn apply_text_change(text: &str, range: &lsp_types::Range, new_text: &str) -> Option<String> {
+    let start = position_to_byte(text, range.start)?;
+    let end = position_to_byte(text, range.end)?;
+    if start > end {
+        eprintln!(
+            "ontocore-lsp: text change range inverted (start={start}, end={end})"
+        );
+        return None;
+    }
+    let mut result = String::with_capacity(text.len() - (end - start) + new_text.len());
+    result.push_str(&text[..start]);
+    result.push_str(new_text);
+    result.push_str(&text[end..]);
     Some(result)
 }
 

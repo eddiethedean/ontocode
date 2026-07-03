@@ -96,18 +96,44 @@ pub fn atomic_write(path: &Path, contents: &str) -> Result<()> {
         path.parent().filter(|p| !p.as_os_str().is_empty()).unwrap_or_else(|| Path::new("."));
     fs::create_dir_all(parent)?;
     let nanos = SystemTime::now().duration_since(UNIX_EPOCH).map(|d| d.as_nanos()).unwrap_or(0);
-    let tmp_path = parent.join(format!(
-        ".ontocode-{}-{}.tmp",
-        path.file_name().and_then(|s| s.to_str()).unwrap_or("file"),
-        nanos
-    ));
+    let stem = path.file_name().and_then(|s| s.to_str()).unwrap_or("file");
+    let tmp_path = parent.join(format!(".ontocode-{stem}-{nanos}.tmp"));
     {
         let mut file = fs::File::create(&tmp_path)?;
         file.write_all(contents.as_bytes())?;
         file.sync_all()?;
     }
-    fs::rename(&tmp_path, path)?;
+    replace_file(&tmp_path, path)?;
     Ok(())
+}
+
+/// Replace `path` with `tmp_path` (tmp is consumed). Works on Windows where `rename` cannot
+/// overwrite an existing destination.
+fn replace_file(tmp_path: &Path, path: &Path) -> std::io::Result<()> {
+    match fs::rename(tmp_path, path) {
+        Ok(()) => Ok(()),
+        Err(_) if path.exists() => {
+            // Windows (and some network FS): rename refuses to replace. Move the existing
+            // file aside, then rename; restore on failure.
+            let bak_path = tmp_path.with_extension("bak");
+            fs::rename(path, &bak_path)?;
+            match fs::rename(tmp_path, path) {
+                Ok(()) => {
+                    let _ = fs::remove_file(&bak_path);
+                    Ok(())
+                }
+                Err(rename_err) => {
+                    let _ = fs::rename(&bak_path, path);
+                    let _ = fs::remove_file(tmp_path);
+                    Err(rename_err)
+                }
+            }
+        }
+        Err(e) => {
+            let _ = fs::remove_file(tmp_path);
+            Err(e)
+        }
+    }
 }
 
 /// Apply patches to in-memory Turtle text.
@@ -207,7 +233,7 @@ fn apply_one_patch(
             }
         }
         PatchOp::AddDisjointClass { entity_iri, other_iri } => {
-            let other = iri_to_turtle_term(other_iri, namespaces);
+            let other = iri_to_turtle_term(other_iri, namespaces)?;
             add_object_triple(text, entity_iri, "owl:disjointWith", &other, namespaces)
         }
         PatchOp::RemoveDisjointClass { entity_iri, other_iri } => {
@@ -225,7 +251,7 @@ fn create_entity(
     if text_contains_entity(text, entity_iri, namespaces) {
         return Err(OwlError::EntityExists(entity_iri.to_string()));
     }
-    let subject = iri_to_turtle_term(entity_iri, namespaces);
+    let subject = iri_to_turtle_term(entity_iri, namespaces)?;
     let type_term = match kind {
         PatchEntityKind::Class => "owl:Class",
         PatchEntityKind::ObjectProperty => "owl:ObjectProperty",
@@ -344,7 +370,7 @@ fn add_subclass_triple(
     parent_iri: &str,
     namespaces: &BTreeMap<String, String>,
 ) -> Result<()> {
-    let parent = iri_to_turtle_term(parent_iri, namespaces);
+    let parent = iri_to_turtle_term(parent_iri, namespaces)?;
     add_object_triple(text, entity_iri, "rdfs:subClassOf", &parent, namespaces)
 }
 
@@ -354,7 +380,7 @@ fn remove_subclass_triple(
     parent_iri: &str,
     namespaces: &BTreeMap<String, String>,
 ) -> Result<()> {
-    let parent = iri_to_turtle_term(parent_iri, namespaces);
+    let parent = iri_to_turtle_term(parent_iri, namespaces)?;
     remove_predicate_object_any_statement(text, entity_iri, "rdfs:subClassOf", &parent, namespaces)
 }
 
@@ -364,7 +390,7 @@ fn remove_disjoint_triple(
     other_iri: &str,
     namespaces: &BTreeMap<String, String>,
 ) -> Result<()> {
-    let other = iri_to_turtle_term(other_iri, namespaces);
+    let other = iri_to_turtle_term(other_iri, namespaces)?;
     remove_predicate_object_any_statement(text, entity_iri, "owl:disjointWith", &other, namespaces)
 }
 
@@ -503,10 +529,19 @@ fn bracket_end_index(text: &str, bracket_start: usize) -> Option<usize> {
     }
     let mut depth = 0i32;
     let mut in_string = false;
+    let mut in_iri = false;
+    let mut in_comment = false;
     let mut escape = false;
     let mut i = bracket_start;
     while i < bytes.len() {
         let b = bytes[i];
+        if in_comment {
+            if b == b'\n' {
+                in_comment = false;
+            }
+            i += 1;
+            continue;
+        }
         if in_string {
             if escape {
                 escape = false;
@@ -518,8 +553,17 @@ fn bracket_end_index(text: &str, bracket_start: usize) -> Option<usize> {
             i += 1;
             continue;
         }
+        if in_iri {
+            if b == b'>' {
+                in_iri = false;
+            }
+            i += 1;
+            continue;
+        }
         match b {
+            b'#' => in_comment = true,
             b'"' => in_string = true,
+            b'<' => in_iri = true,
             b'[' => depth += 1,
             b']' => {
                 depth -= 1;
@@ -594,7 +638,7 @@ fn remove_first_predicate_object(block: &str, predicate: &str) -> Option<String>
     Some(cleanup_block_separators(&out))
 }
 
-/// Find `predicate` as a Turtle token outside strings and brackets.
+/// Find `predicate` as a Turtle token outside strings, IRIs, comments, and brackets.
 fn find_predicate_token(block: &str, search_from: usize, predicate: &str) -> Option<usize> {
     let bytes = block.as_bytes();
     let pred_bytes = predicate.as_bytes();
@@ -603,10 +647,19 @@ fn find_predicate_token(block: &str, search_from: usize, predicate: &str) -> Opt
     }
     let mut i = search_from;
     let mut in_string = false;
+    let mut in_iri = false;
+    let mut in_comment = false;
     let mut escape = false;
     let mut bracket_depth = 0i32;
     while i + pred_bytes.len() <= bytes.len() {
         let b = bytes[i];
+        if in_comment {
+            if b == b'\n' {
+                in_comment = false;
+            }
+            i += 1;
+            continue;
+        }
         if in_string {
             if escape {
                 escape = false;
@@ -618,9 +671,26 @@ fn find_predicate_token(block: &str, search_from: usize, predicate: &str) -> Opt
             i += 1;
             continue;
         }
+        if in_iri {
+            if b == b'>' {
+                in_iri = false;
+            }
+            i += 1;
+            continue;
+        }
         match b {
+            b'#' => {
+                in_comment = true;
+                i += 1;
+                continue;
+            }
             b'"' => {
                 in_string = true;
+                i += 1;
+                continue;
+            }
+            b'<' => {
+                in_iri = true;
                 i += 1;
                 continue;
             }
@@ -657,9 +727,11 @@ fn find_predicate_token(block: &str, search_from: usize, predicate: &str) -> Opt
 }
 
 fn find_named_object_end(block: &str, obj_start: usize) -> Option<usize> {
+    use crate::span::is_turtle_terminating_dot;
     let bytes = block.as_bytes();
     let mut i = obj_start;
     let mut in_string = false;
+    let mut in_iri = false;
     let mut escape = false;
     while i < bytes.len() {
         let b = bytes[i];
@@ -674,9 +746,18 @@ fn find_named_object_end(block: &str, obj_start: usize) -> Option<usize> {
             i += 1;
             continue;
         }
+        if in_iri {
+            if b == b'>' {
+                in_iri = false;
+            }
+            i += 1;
+            continue;
+        }
         match b {
             b'"' => in_string = true,
-            b',' | b';' | b'.' => return Some(i),
+            b'<' => in_iri = true,
+            b',' | b';' => return Some(i),
+            b'.' if is_turtle_terminating_dot(bytes, i) => return Some(i),
             _ => {}
         }
         i += 1;
@@ -789,7 +870,7 @@ fn line_starts_with_subject(trimmed: &str, subject: &str) -> bool {
 }
 
 /// Reject IRIs that would break Turtle `<...>` terms or inject syntax.
-fn is_safe_iri(iri: &str) -> bool {
+pub(crate) fn is_safe_iri(iri: &str) -> bool {
     if iri.is_empty() {
         return false;
     }
@@ -810,14 +891,12 @@ fn is_valid_pn_local(local: &str) -> bool {
         && !local.ends_with('.')
 }
 
-fn iri_to_turtle_term(iri: &str, namespaces: &BTreeMap<String, String>) -> String {
-    let iri = if is_safe_iri(iri) {
-        iri
-    } else {
-        // Fall back to a quoted-safe form by percent-encoding is overkill; emit angle brackets
-        // only for safe IRIs, otherwise use a minimal escaped representation.
-        return format!("<{}>", iri.replace('>', "%3E").replace('<', "%3C").replace(' ', "%20"));
-    };
+fn iri_to_turtle_term(iri: &str, namespaces: &BTreeMap<String, String>) -> Result<String> {
+    if !is_safe_iri(iri) {
+        return Err(OwlError::PatchInvalid(format!(
+            "IRI contains characters that cannot be safely written to Turtle: {iri:?}"
+        )));
+    }
 
     // Longest namespace match wins.
     let mut best: Option<(&str, &str, usize)> = None;
@@ -833,10 +912,10 @@ fn iri_to_turtle_term(iri: &str, namespaces: &BTreeMap<String, String>) -> Strin
     if let Some((prefix, ns, _)) = best {
         let local = &iri[ns.len()..];
         if is_valid_pn_local(local) {
-            return format!("{prefix}:{local}");
+            return Ok(format!("{prefix}:{local}"));
         }
     }
-    format!("<{iri}>")
+    Ok(format!("<{iri}>"))
 }
 
 #[cfg(test)]
@@ -1018,7 +1097,7 @@ ex:Person a owl:Class ;
     }
 
     #[test]
-    fn iri_with_angle_bracket_is_escaped_not_injected() {
+    fn iri_with_angle_bracket_is_rejected_not_injected() {
         let ttl = "@prefix ex: <http://example.org/people#> .\n@prefix owl: <http://www.w3.org/2002/07/owl#> .\n\nex:Person a owl:Class .\n";
         let evil =
             "http://example.org/people#X> . ex:Pwned a owl:Class . <http://example.org/people#Y";
@@ -1027,9 +1106,23 @@ ex:Person a owl:Class ;
             kind: PatchEntityKind::Class,
         }];
         let result = apply_patches_to_text(ttl, &patches, true, &ex_ns()).expect("patch");
-        let preview = result.preview_text.expect("preview");
-        assert!(!preview.contains("ex:Pwned a owl:Class"), "must not inject Turtle via IRI");
-        assert!(preview.contains("%3E") || preview.contains("<http://example.org/people#X"));
+        assert!(!result.applied);
+        assert!(!result.diagnostics.is_empty());
+        assert_eq!(result.preview_text.as_deref(), Some(ttl));
+        assert!(!ttl.contains("ex:Pwned"));
+    }
+
+    #[test]
+    fn iri_with_newline_is_rejected() {
+        let ttl = "@prefix ex: <http://example.org/people#> .\n@prefix owl: <http://www.w3.org/2002/07/owl#> .\n\nex:Person a owl:Class .\n";
+        let evil = "http://example.org/people#X\n. ex:Injected a owl:Class .\n#";
+        let patches = vec![PatchOp::CreateEntity {
+            entity_iri: evil.to_string(),
+            kind: PatchEntityKind::Class,
+        }];
+        let result = apply_patches_to_text(ttl, &patches, true, &ex_ns()).expect("patch");
+        assert!(!result.applied);
+        assert_eq!(result.preview_text.as_deref(), Some(ttl));
     }
 
     #[test]
@@ -1038,14 +1131,14 @@ ex:Person a owl:Class ;
             ("ex".to_string(), "http://example.org/".to_string()),
             ("exfoo".to_string(), "http://example.org/foo/".to_string()),
         ]);
-        let term = iri_to_turtle_term("http://example.org/foo/Bar", &ns);
+        let term = iri_to_turtle_term("http://example.org/foo/Bar", &ns).expect("term");
         assert_eq!(term, "exfoo:Bar");
     }
 
     #[test]
     fn slash_in_local_name_uses_angle_brackets() {
         let ns = BTreeMap::from([("ex".to_string(), "http://example.org/".to_string())]);
-        let term = iri_to_turtle_term("http://example.org/foo/Bar", &ns);
+        let term = iri_to_turtle_term("http://example.org/foo/Bar", &ns).expect("term");
         assert_eq!(term, "<http://example.org/foo/Bar>");
     }
 

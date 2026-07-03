@@ -5,7 +5,7 @@ use ontocore_core::{
     ParseStatus, SourceLocation, AXIOM_KIND_SUB_CLASS_OF,
 };
 use oxigraph::io::{RdfFormat, RdfParseError, RdfParser};
-use oxigraph::model::{Quad, Subject, Term};
+use oxigraph::model::{GraphName, Literal, NamedNode, Quad, Subject, Term};
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 #[cfg(test)]
 use std::fs;
@@ -267,7 +267,8 @@ pub(crate) fn assemble_parsed_ontology(
             ontology_id: ontology_id.to_string(),
         })
         .collect();
-    let triple_count = entities.len() + annotations.len() + axioms.len();
+    let quads = materialize_catalog_quads(&entities, &annotations, &axioms);
+    let triple_count = quads.len().max(entities.len() + annotations.len() + axioms.len());
     ParsedOntology {
         ontology_id: ontology_id.to_string(),
         base_iri,
@@ -282,8 +283,103 @@ pub(crate) fn assemble_parsed_ontology(
         parse_message: None,
         parse_error_location: None,
         triple_count,
-        quads: Vec::new(),
+        quads,
     }
+}
+
+/// Build RDF quads from catalog entities/axioms so SPARQL sees OBO (and similar) content.
+fn materialize_catalog_quads(
+    entities: &[Entity],
+    annotations: &[Annotation],
+    axioms: &[Axiom],
+) -> Vec<Quad> {
+    let mut quads = Vec::new();
+    for entity in entities {
+        let Some(subject) = named_node(&entity.iri) else {
+            continue;
+        };
+        let type_iri = match entity.kind {
+            EntityKind::Class => OWL::class(),
+            EntityKind::ObjectProperty => OWL::object_property(),
+            EntityKind::DataProperty => OWL::datatype_property(),
+            EntityKind::AnnotationProperty => OWL::annotation_property(),
+            EntityKind::Individual => OWL::named_individual(),
+            EntityKind::Ontology => OWL::ontology(),
+            EntityKind::Other => continue,
+        };
+        quads.push(Quad::new(
+            subject.clone(),
+            Rdf::type_().into_owned(),
+            type_iri.into_owned(),
+            GraphName::DefaultGraph,
+        ));
+        for label in &entity.labels {
+            quads.push(Quad::new(
+                subject.clone(),
+                Rdfs::label().into_owned(),
+                Literal::new_simple_literal(label),
+                GraphName::DefaultGraph,
+            ));
+        }
+        for comment in &entity.comments {
+            quads.push(Quad::new(
+                subject.clone(),
+                Rdfs::comment().into_owned(),
+                Literal::new_simple_literal(comment),
+                GraphName::DefaultGraph,
+            ));
+        }
+        if entity.deprecated {
+            quads.push(Quad::new(
+                subject,
+                OWL::deprecated().into_owned(),
+                Literal::from(true),
+                GraphName::DefaultGraph,
+            ));
+        }
+    }
+    for axiom in axioms {
+        if axiom.axiom_kind != AXIOM_KIND_SUB_CLASS_OF {
+            continue;
+        }
+        let (Some(s), Some(o)) = (named_node(&axiom.subject), named_node(&axiom.object)) else {
+            continue;
+        };
+        quads.push(Quad::new(
+            s,
+            Rdfs::sub_class_of().into_owned(),
+            o,
+            GraphName::DefaultGraph,
+        ));
+    }
+    for ann in annotations {
+        let Some(s) = named_node(&ann.subject) else {
+            continue;
+        };
+        let pred = if ann.predicate.contains("://") {
+            named_node(&ann.predicate)
+        } else {
+            None
+        };
+        let Some(p) = pred else {
+            continue;
+        };
+        if let Some(o) = named_node(&ann.object) {
+            quads.push(Quad::new(s, p, o, GraphName::DefaultGraph));
+        } else {
+            quads.push(Quad::new(
+                s,
+                p,
+                Literal::new_simple_literal(&ann.object),
+                GraphName::DefaultGraph,
+            ));
+        }
+    }
+    quads
+}
+
+fn named_node(iri: &str) -> Option<NamedNode> {
+    NamedNode::new(iri).ok()
 }
 
 fn empty_result(

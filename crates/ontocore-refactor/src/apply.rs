@@ -39,18 +39,41 @@ fn atomic_write(path: &Path, contents: &str) -> std::io::Result<()> {
         path.parent().filter(|p| !p.as_os_str().is_empty()).unwrap_or_else(|| Path::new("."));
     fs::create_dir_all(parent)?;
     let nanos = SystemTime::now().duration_since(UNIX_EPOCH).map(|d| d.as_nanos()).unwrap_or(0);
-    let tmp_path = parent.join(format!(
-        ".ontocode-{}-{}.tmp",
-        path.file_name().and_then(|s| s.to_str()).unwrap_or("file"),
-        nanos
-    ));
+    let stem = path.file_name().and_then(|s| s.to_str()).unwrap_or("file");
+    let tmp_path = parent.join(format!(".ontocode-{stem}-{nanos}.tmp"));
     {
         let mut file = fs::File::create(&tmp_path)?;
         file.write_all(contents.as_bytes())?;
         file.sync_all()?;
     }
-    fs::rename(&tmp_path, path)?;
-    Ok(())
+    replace_file(&tmp_path, path)
+}
+
+/// Replace `path` with `tmp_path` (tmp is consumed). Works on Windows where `rename` cannot
+/// overwrite an existing destination.
+fn replace_file(tmp_path: &Path, path: &Path) -> std::io::Result<()> {
+    match fs::rename(tmp_path, path) {
+        Ok(()) => Ok(()),
+        Err(_) if path.exists() => {
+            let bak_path = tmp_path.with_extension("bak");
+            fs::rename(path, &bak_path)?;
+            match fs::rename(tmp_path, path) {
+                Ok(()) => {
+                    let _ = fs::remove_file(&bak_path);
+                    Ok(())
+                }
+                Err(rename_err) => {
+                    let _ = fs::rename(&bak_path, path);
+                    let _ = fs::remove_file(tmp_path);
+                    Err(rename_err)
+                }
+            }
+        }
+        Err(e) => {
+            let _ = fs::remove_file(tmp_path);
+            Err(e)
+        }
+    }
 }
 
 struct FileBackup {

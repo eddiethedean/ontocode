@@ -412,13 +412,19 @@ fn main() -> Result<()> {
             }
             RefactorCommands::Move { workspace, iri, to, preview, format } => {
                 let catalog = build_catalog(&workspace)?;
-                let plan = preview_move_entity(&catalog, &iri, &to, &HashMap::new())?;
+                let plan = preview_move_entity(&catalog, &iri, &to, &HashMap::new(), &workspace)?;
                 run_refactor_plan(&plan, preview, format, &workspace)?;
             }
             RefactorCommands::Extract { workspace, entities, out, leave_stub, preview, format } => {
                 let catalog = build_catalog(&workspace)?;
-                let plan =
-                    preview_extract_module(&catalog, &entities, &out, leave_stub, &HashMap::new())?;
+                let plan = preview_extract_module(
+                    &catalog,
+                    &entities,
+                    &out,
+                    leave_stub,
+                    &HashMap::new(),
+                    &workspace,
+                )?;
                 run_refactor_plan(&plan, preview, format, &workspace)?;
             }
         },

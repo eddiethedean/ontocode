@@ -167,9 +167,34 @@ fn move_entity_rejects_canonical_same_file() {
     std::fs::copy(fixture_dir().join("people.ttl"), ws.join("people.ttl")).unwrap();
     let catalog = build_catalog(ws);
     let same = ws.join("./people.ttl");
-    let err =
-        preview_move_entity(&catalog, "http://example.org/org#Agent", &same, &empty_overrides())
-            .unwrap_err();
+    let err = preview_move_entity(
+        &catalog,
+        "http://example.org/org#Agent",
+        &same,
+        &empty_overrides(),
+        ws,
+    )
+    .unwrap_err();
+    assert!(matches!(err, RefactorError::Invalid(_)));
+}
+
+#[test]
+fn move_entity_rejects_path_outside_workspace() {
+    let tmp = TempDir::new().unwrap();
+    let ws = tmp.path();
+    std::fs::create_dir_all(ws).unwrap();
+    std::fs::copy(fixture_dir().join("people.ttl"), ws.join("people.ttl")).unwrap();
+    let catalog = build_catalog(ws);
+    let outside = TempDir::new().unwrap();
+    let target = outside.path().join("secret.ttl");
+    let err = preview_move_entity(
+        &catalog,
+        "http://example.org/org#Agent",
+        &target,
+        &empty_overrides(),
+        ws,
+    )
+    .unwrap_err();
     assert!(matches!(err, RefactorError::Invalid(_)));
 }
 
@@ -187,6 +212,7 @@ fn extract_multiple_entities_same_file() {
         &out,
         false,
         &empty_overrides(),
+        ws,
     )
     .expect("plan");
     apply_refactor_plan(&plan, false, ws).expect("apply");
@@ -212,6 +238,7 @@ fn extract_module_leave_stub_uses_prefixed_curie() {
         &out,
         true,
         &empty_overrides(),
+        ws,
     )
     .expect("plan");
     let source_change =
@@ -234,6 +261,7 @@ fn move_entity_between_files() {
         "http://example.org/org#Agent",
         &ws.join("target.ttl"),
         &empty_overrides(),
+        ws,
     )
     .expect("plan");
     assert_eq!(plan.changes.len(), 2);
@@ -255,6 +283,7 @@ fn extract_module_validates_nonexistent_output_path() {
         &out,
         false,
         &empty_overrides(),
+        ws,
     )
     .expect("plan");
     validate_refactor_plan_paths(ws, &plan).expect("nonexistent output path is in workspace");

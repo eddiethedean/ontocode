@@ -482,12 +482,12 @@ pub(crate) fn class_expression_to_turtle_value(
     let pad = "    ".repeat(indent);
     let inner_pad = "    ".repeat(indent + 1);
     match expr {
-        ClassExpression::Class(c) => Ok(iri_to_turtle_term(&c.to_string(), namespaces)),
+        ClassExpression::Class(c) => iri_to_turtle_term(&c.to_string(), namespaces),
         ClassExpression::ObjectIntersectionOf(v) if v.len() == 1 => {
             class_expression_to_turtle_value(&v[0], namespaces, indent)
         }
         ClassExpression::ObjectSomeValuesFrom { ope, bce } => {
-            let prop = iri_to_turtle_term(&ope_to_iri(ope), namespaces);
+            let prop = iri_to_turtle_term(&ope_to_iri(ope), namespaces)?;
             let filler = class_expression_to_turtle_value(bce, namespaces, indent + 1)?;
             let mut out = String::new();
             writeln!(out, "[").ok();
@@ -498,7 +498,7 @@ pub(crate) fn class_expression_to_turtle_value(
             Ok(out)
         }
         ClassExpression::ObjectAllValuesFrom { ope, bce } => {
-            let prop = iri_to_turtle_term(&ope_to_iri(ope), namespaces);
+            let prop = iri_to_turtle_term(&ope_to_iri(ope), namespaces)?;
             let filler = class_expression_to_turtle_value(bce, namespaces, indent + 1)?;
             let mut out = String::new();
             writeln!(out, "[").ok();
@@ -544,10 +544,18 @@ pub(crate) fn class_expression_to_turtle_value(
             Ok(out)
         }
         ClassExpression::ObjectIntersectionOf(v) => {
-            class_expression_to_turtle_value(&v[0], namespaces, indent)
+            let Some(first) = v.first() else {
+                return Err(OwlError::ManchesterInvalid(
+                    "empty intersection expression".to_string(),
+                ));
+            };
+            class_expression_to_turtle_value(first, namespaces, indent)
         }
         ClassExpression::ObjectUnionOf(v) => {
-            class_expression_to_turtle_value(&v[0], namespaces, indent)
+            let Some(first) = v.first() else {
+                return Err(OwlError::ManchesterInvalid("empty union expression".to_string()));
+            };
+            class_expression_to_turtle_value(first, namespaces, indent)
         }
         other => Err(OwlError::ManchesterInvalid(format!(
             "unsupported expression for Turtle: {other:?}"
@@ -565,7 +573,7 @@ fn cardinality_turtle(
 ) -> Result<String> {
     let pad = "    ".repeat(indent);
     let inner_pad = "    ".repeat(indent + 1);
-    let prop = iri_to_turtle_term(&ope_to_iri(ope), namespaces);
+    let prop = iri_to_turtle_term(&ope_to_iri(ope), namespaces)?;
     let filler = class_expression_to_turtle_value(bce, namespaces, indent + 1)?;
     let mut out = String::new();
     writeln!(out, "[").ok();
@@ -587,6 +595,10 @@ fn ope_to_iri(ope: &ObjectPropertyExpression<RcStr>) -> String {
 }
 
 fn iri_to_manchester_term(iri: &str, namespaces: &BTreeMap<String, String>) -> String {
+    if !crate::patch::is_safe_iri(iri) {
+        // Display-only path: never emit angle brackets for unsafe IRIs.
+        return iri.chars().filter(|c| !c.is_control() && !c.is_whitespace()).collect();
+    }
     for (prefix, ns) in namespaces {
         if !prefix.is_empty() && iri.starts_with(ns) {
             let local = &iri[ns.len()..];
@@ -600,17 +612,22 @@ fn iri_to_manchester_term(iri: &str, namespaces: &BTreeMap<String, String>) -> S
     }
 }
 
-fn iri_to_turtle_term(iri: &str, namespaces: &BTreeMap<String, String>) -> String {
+fn iri_to_turtle_term(iri: &str, namespaces: &BTreeMap<String, String>) -> Result<String> {
+    if !crate::patch::is_safe_iri(iri) {
+        return Err(OwlError::ManchesterInvalid(format!(
+            "IRI contains characters that cannot be safely written to Turtle: {iri:?}"
+        )));
+    }
     if iri == "http://www.w3.org/2002/07/owl#Thing" {
-        return "owl:Thing".to_string();
+        return Ok("owl:Thing".to_string());
     }
     for (prefix, ns) in namespaces {
         if !prefix.is_empty() && iri.starts_with(ns) {
             let local = &iri[ns.len()..];
-            return format!("{prefix}:{local}");
+            return Ok(format!("{prefix}:{local}"));
         }
     }
-    format!("<{iri}>")
+    Ok(format!("<{iri}>"))
 }
 
 #[cfg(test)]

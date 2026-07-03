@@ -156,27 +156,48 @@ pub fn handle_run_robot(
     index_worker: &IndexWorker,
     params: RunRobotParams,
 ) -> Result<RunRobotResult, LspErrorPayload> {
+    let root = state
+        .workspace_root()
+        .ok_or_else(|| LspErrorPayload::robot_failed("workspace not initialized".to_string()))?;
     let mut args = vec![params.subcommand];
     args.extend(params.args);
-    if let Some(root) = state.workspace_root() {
-        jail_robot_path_args(&root, &args).map_err(LspErrorPayload::robot_failed)?;
-    }
+    jail_robot_path_args(&root, &args).map_err(LspErrorPayload::robot_failed)?;
     index_worker.run_robot_sync(params.robot_path, args).map_err(LspErrorPayload::robot_failed)
 }
 
 /// Reject ROBOT file operands that escape the workspace jail.
+///
+/// Handles separate `--input path`, `--input=path`, and attached short forms (`-i/path`).
 fn jail_robot_path_args(workspace_root: &std::path::Path, args: &[String]) -> Result<(), String> {
-    let path_flags = ["--input", "--output", "--report", "-i", "-o"];
+    let long_path_flags = ["--input", "--output", "--report"];
+    let short_path_flags = ["-i", "-o"];
     let mut expect_path = false;
     for arg in args.iter().skip(1) {
         if expect_path {
             expect_path = false;
-            let path = std::path::Path::new(arg);
-            ontocore_core::validate_workspace_scope(path, workspace_root)?;
+            ontocore_core::validate_workspace_scope(std::path::Path::new(arg), workspace_root)?;
             continue;
         }
-        if path_flags.contains(&arg.as_str()) {
+        if let Some((flag, value)) = arg.split_once('=') {
+            if long_path_flags.contains(&flag) {
+                ontocore_core::validate_workspace_scope(std::path::Path::new(value), workspace_root)?;
+                continue;
+            }
+        }
+        if long_path_flags.contains(&arg.as_str()) || short_path_flags.contains(&arg.as_str()) {
             expect_path = true;
+            continue;
+        }
+        let attached_short = short_path_flags.iter().find_map(|flag| {
+            if arg.starts_with(flag) && arg.len() > flag.len() && !arg[flag.len()..].starts_with('-')
+            {
+                Some(&arg[flag.len()..])
+            } else {
+                None
+            }
+        });
+        if let Some(value) = attached_short {
+            ontocore_core::validate_workspace_scope(std::path::Path::new(value), workspace_root)?;
             continue;
         }
         // Positional path-like args (contain / or end with ontology extensions).
@@ -187,9 +208,11 @@ fn jail_robot_path_args(workspace_root: &std::path::Path, args: &[String]) -> Re
             || arg.ends_with(".obo")
             || arg.ends_with(".rdf");
         if looks_like_path && !arg.starts_with('-') {
-            let path = std::path::Path::new(arg);
-            ontocore_core::validate_workspace_scope(path, workspace_root)?;
+            ontocore_core::validate_workspace_scope(std::path::Path::new(arg), workspace_root)?;
         }
+    }
+    if expect_path {
+        return Err("ROBOT path flag is missing a path argument".to_string());
     }
     Ok(())
 }
@@ -233,31 +256,6 @@ pub fn handle_apply_axiom_patch(
         )));
     }
 
-    let source = state
-        .document_text(&document_path)
-        .ok_or_else(|| LspErrorPayload::patch_invalid("cannot read document".to_string()))?;
-
-    let mut patch_result = ontocore_owl::apply_patches_to_text(
-        &source,
-        &params.patches,
-        params.preview_only,
-        &namespaces,
-    )
-    .map_err(|e| match e {
-        ontocore_owl::OwlError::UnsupportedFormat(m) => LspErrorPayload::unsupported_format(m),
-        _ => LspErrorPayload::patch_invalid(e.to_string()),
-    })?;
-    patch_result.document_path = Some(document_path.display().to_string());
-
-    if !patch_result.applied && !patch_result.diagnostics.is_empty() {
-        return Ok(ApplyAxiomPatchResult {
-            patch: patch_result,
-            entity_detail: None,
-            reindex_warning: None,
-            workspace_edit: None,
-        });
-    }
-
     let entity_iri = params.patches.first().map(|p| match p {
         ontocore_owl::PatchOp::CreateEntity { entity_iri, .. }
         | ontocore_owl::PatchOp::DeleteEntity { entity_iri }
@@ -279,21 +277,67 @@ pub fn handle_apply_axiom_patch(
         | ontocore_owl::PatchOp::RemoveDisjointClass { entity_iri, .. } => entity_iri.clone(),
     });
 
-    let mut workspace_edit = None;
-    let mut reindex_warning = None;
-    if patch_result.applied && !params.preview_only {
-        if let Some(text) = &patch_result.preview_text {
-            // Disk first so a failed write never leaves a divergent LSP buffer.
-            ontocore_owl::atomic_write(&document_path, text).map_err(|e| {
-                LspErrorPayload::patch_invalid(format!("failed to write document: {e}"))
-            })?;
-            if state.is_document_open(&document_path) {
-                state
-                    .set_document_text(document_path.clone(), text.clone())
-                    .map_err(LspErrorPayload::patch_invalid)?;
-            }
-            workspace_edit = full_document_workspace_edit(&document_path, text);
+    // Serialize applies without holding ops_lock across enqueue_sync (index worker needs it).
+    let (patch_result, workspace_edit, needs_reindex) = {
+        let ops_lock = state.ops_lock();
+        let _guard =
+            ops_lock.lock().map_err(|e| LspErrorPayload::patch_invalid(e.to_string()))?;
+
+        let source = state
+            .document_text(&document_path)
+            .ok_or_else(|| LspErrorPayload::patch_invalid("cannot read document".to_string()))?;
+
+        let mut patch_result = ontocore_owl::apply_patches_to_text(
+            &source,
+            &params.patches,
+            params.preview_only,
+            &namespaces,
+        )
+        .map_err(|e| match e {
+            ontocore_owl::OwlError::UnsupportedFormat(m) => LspErrorPayload::unsupported_format(m),
+            _ => LspErrorPayload::patch_invalid(e.to_string()),
+        })?;
+        patch_result.document_path = Some(document_path.display().to_string());
+
+        if !patch_result.applied && !patch_result.diagnostics.is_empty() {
+            return Ok(ApplyAxiomPatchResult {
+                patch: patch_result,
+                entity_detail: None,
+                reindex_warning: None,
+                workspace_edit: None,
+            });
         }
+
+        let mut workspace_edit = None;
+        let mut needs_reindex = false;
+        if patch_result.applied && !params.preview_only {
+            if let Some(text) = &patch_result.preview_text {
+                if text.len() as u64 > ontocore_core::MAX_FILE_BYTES {
+                    return Err(LspErrorPayload::patch_invalid(format!(
+                        "patched document exceeds maximum size of {} bytes",
+                        ontocore_core::MAX_FILE_BYTES
+                    )));
+                }
+                // Disk first so a failed write never leaves a divergent LSP buffer.
+                ontocore_owl::atomic_write(&document_path, text).map_err(|e| {
+                    LspErrorPayload::patch_invalid(format!("failed to write document: {e}"))
+                })?;
+                if state.is_document_open(&document_path) {
+                    if let Err(e) = state.set_document_text(document_path.clone(), text.clone()) {
+                        // Roll back disk so the client never sees a half-applied patch.
+                        let _ = ontocore_owl::atomic_write(&document_path, &source);
+                        return Err(LspErrorPayload::patch_invalid(e));
+                    }
+                }
+                workspace_edit = full_document_workspace_edit(&document_path, text);
+                needs_reindex = true;
+            }
+        }
+        (patch_result, workspace_edit, needs_reindex)
+    };
+
+    let mut reindex_warning = None;
+    if needs_reindex {
         let index_root = state.effective_index_root().unwrap_or_else(|| workspace_root.clone());
         if let Err(msg) = index_worker.enqueue_sync(index_root) {
             reindex_warning = Some(format!("patch applied but reindex failed: {msg}"));
@@ -624,29 +668,31 @@ pub fn handle_document_symbol(
     params: DocumentSymbolParams,
 ) -> Option<DocumentSymbolResponse> {
     let path = lsp_document_path(state, &params.text_document.uri)?;
-    state.with_catalog(|catalog| {
-        let entities = catalog.entities_in_document(&path);
-        if entities.is_empty() {
-            return None;
-        }
-        let symbols: Vec<DocumentSymbol> = entities
-            .into_iter()
-            .map(|e| {
-                let range = entity_source_range(state, &path, e);
-                DocumentSymbol {
-                    name: e.short_name.clone(),
-                    detail: Some(e.iri.clone()),
-                    kind: entity_kind_to_symbol_kind(e.kind),
-                    tags: None,
-                    deprecated: None,
-                    range,
-                    selection_range: range,
-                    children: None,
-                }
-            })
-            .collect();
-        Some(DocumentSymbolResponse::Nested(symbols))
-    })?
+    // Clone under catalog lock; never call document_text while holding it (non-reentrant RwLock).
+    let entities: Vec<ontocore_core::Entity> = state.with_catalog(|catalog| {
+        catalog.entities_in_document(&path).into_iter().cloned().collect()
+    })?;
+    if entities.is_empty() {
+        return None;
+    }
+    let doc_text = state.document_text(&path);
+    let symbols: Vec<DocumentSymbol> = entities
+        .into_iter()
+        .map(|e| {
+            let range = entity_source_range(doc_text.as_deref(), &e);
+            DocumentSymbol {
+                name: e.short_name.clone(),
+                detail: Some(e.iri.clone()),
+                kind: entity_kind_to_symbol_kind(e.kind),
+                tags: None,
+                deprecated: None,
+                range,
+                selection_range: range,
+                children: None,
+            }
+        })
+        .collect();
+    Some(DocumentSymbolResponse::Nested(symbols))
 }
 
 #[allow(deprecated)]
@@ -655,8 +701,8 @@ pub fn handle_workspace_symbol(
     params: WorkspaceSymbolParams,
 ) -> Option<WorkspaceSymbolResponse> {
     let query = params.query.to_ascii_lowercase();
-    state.with_catalog(|catalog| {
-        let symbols: Vec<SymbolInformation> = catalog
+    let entries: Vec<(ontocore_core::Entity, std::path::PathBuf)> = state.with_catalog(|catalog| {
+        catalog
             .data()
             .entities
             .iter()
@@ -668,20 +714,27 @@ pub fn handle_workspace_symbol(
             })
             .filter_map(|e| {
                 let doc = catalog.entity_document(&e.iri)?;
-                let uri = path_to_lsp_uri(&doc.path)?;
-                let range = entity_source_range(state, &doc.path, e);
-                Some(SymbolInformation {
-                    name: e.short_name.clone(),
-                    kind: entity_kind_to_symbol_kind(e.kind),
-                    tags: None,
-                    deprecated: None,
-                    location: Location { uri, range },
-                    container_name: None,
-                })
+                Some((e.clone(), doc.path.clone()))
             })
-            .collect();
-        Some(WorkspaceSymbolResponse::Flat(symbols))
-    })?
+            .collect()
+    })?;
+    let symbols: Vec<SymbolInformation> = entries
+        .into_iter()
+        .filter_map(|(e, path)| {
+            let uri = path_to_lsp_uri(&path)?;
+            let doc_text = state.document_text(&path);
+            let range = entity_source_range(doc_text.as_deref(), &e);
+            Some(SymbolInformation {
+                name: e.short_name.clone(),
+                kind: entity_kind_to_symbol_kind(e.kind),
+                tags: None,
+                deprecated: None,
+                location: Location { uri, range },
+                container_name: None,
+            })
+        })
+        .collect();
+    Some(WorkspaceSymbolResponse::Flat(symbols))
 }
 
 pub fn handle_goto_definition(
@@ -693,25 +746,23 @@ pub fn handle_goto_definition(
     let content = state.document_text(&path)?;
     let iri = iri_at_position(&content, position)?;
 
-    state.with_catalog(|catalog| {
-        let source = catalog.find_source_location(&iri)?;
-        let uri = path_to_lsp_uri(&source.path)?;
-        let line_text = state.document_text(&source.path).and_then(|text| {
-            text.lines().nth(source.line.saturating_sub(1) as usize).map(|s| s.to_string())
-        });
-        let character = line_text
-            .as_deref()
-            .map(|l| byte_col_to_utf16(l, source.column as usize))
-            .unwrap_or(source.column as u32);
-        let range = Range {
-            start: Position { line: (source.line.saturating_sub(1)) as u32, character },
-            end: Position {
-                line: (source.line.saturating_sub(1)) as u32,
-                character: character.saturating_add(1),
-            },
-        };
-        Some(GotoDefinitionResponse::Scalar(Location { uri, range }))
-    })?
+    let source = state.with_catalog(|catalog| catalog.find_source_location(&iri))??;
+    let uri = path_to_lsp_uri(&source.path)?;
+    let line_text = state.document_text(&source.path).and_then(|text| {
+        text.lines().nth(source.line.saturating_sub(1) as usize).map(|s| s.to_string())
+    });
+    let character = line_text
+        .as_deref()
+        .map(|l| byte_col_to_utf16(l, source.column as usize))
+        .unwrap_or(source.column as u32);
+    let range = Range {
+        start: Position { line: (source.line.saturating_sub(1)) as u32, character },
+        end: Position {
+            line: (source.line.saturating_sub(1)) as u32,
+            character: character.saturating_add(1),
+        },
+    };
+    Some(GotoDefinitionResponse::Scalar(Location { uri, range }))
 }
 
 pub fn handle_find_usages(
@@ -731,10 +782,13 @@ pub fn handle_preview_refactor(
     state: &ServerState,
     params: PreviewRefactorParams,
 ) -> Result<PreviewRefactorResult, LspErrorPayload> {
+    let workspace = state
+        .workspace_root()
+        .ok_or_else(|| LspErrorPayload::refactor_failed("workspace not initialized".to_string()))?;
     let overrides = state.open_document_overrides();
     state
         .with_catalog(|catalog| {
-            let plan = preview_refactor(catalog, &params.request, &overrides)
+            let plan = preview_refactor(catalog, &params.request, &overrides, &workspace)
                 .map_err(|e| LspErrorPayload::refactor_failed(e.to_string()))?;
             Ok(PreviewRefactorResult { plan })
         })
@@ -749,30 +803,48 @@ pub fn handle_apply_refactor(
     let workspace = state
         .workspace_root()
         .ok_or_else(|| LspErrorPayload::refactor_failed("workspace not initialized".to_string()))?;
-    let overrides = state.open_document_overrides();
-    let server_plan = state
-        .with_catalog(|catalog| {
-            preview_refactor(catalog, &params.request, &overrides)
-                .map_err(|e| LspErrorPayload::refactor_failed(e.to_string()))
-        })
-        .ok_or_else(LspErrorPayload::not_indexed)??;
 
-    if !plans_equivalent(&server_plan, &params.plan) {
-        return Err(LspErrorPayload::refactor_failed(
-            "submitted plan does not match server preview".to_string(),
-        ));
-    }
+    let (files_written, server_plan) = {
+        let ops_lock = state.ops_lock();
+        let _guard =
+            ops_lock.lock().map_err(|e| LspErrorPayload::refactor_failed(e.to_string()))?;
 
-    validate_refactor_plan_paths(&workspace, &server_plan)
+        let overrides = state.open_document_overrides();
+        let server_plan = state
+            .with_catalog(|catalog| {
+                preview_refactor(catalog, &params.request, &overrides, &workspace)
+                    .map_err(|e| LspErrorPayload::refactor_failed(e.to_string()))
+            })
+            .ok_or_else(LspErrorPayload::not_indexed)??;
+
+        if !plans_equivalent(&server_plan, &params.plan) {
+            return Err(LspErrorPayload::refactor_failed(
+                "submitted plan does not match server preview".to_string(),
+            ));
+        }
+
+        validate_refactor_plan_paths(&workspace, &server_plan)
+            .map_err(|e| LspErrorPayload::refactor_failed(e.to_string()))?;
+
+        let files_written = apply_refactor_plan_checked_with_overrides(
+            &server_plan,
+            params.preview_only,
+            Some(workspace.as_path()),
+            Some(&overrides),
+        )
         .map_err(|e| LspErrorPayload::refactor_failed(e.to_string()))?;
 
-    let files_written = apply_refactor_plan_checked_with_overrides(
-        &server_plan,
-        params.preview_only,
-        Some(workspace.as_path()),
-        Some(&overrides),
-    )
-    .map_err(|e| LspErrorPayload::refactor_failed(e.to_string()))?;
+        if !params.preview_only {
+            for change in &server_plan.changes {
+                if change.preview_text != change.original_text && state.is_document_open(&change.path)
+                {
+                    // Best-effort buffer sync; disk is already committed.
+                    let _ = state.set_document_text(change.path.clone(), change.preview_text.clone());
+                }
+            }
+        }
+        (files_written, server_plan)
+    };
 
     if params.preview_only {
         return Ok(ApplyRefactorResult {
@@ -780,13 +852,6 @@ pub fn handle_apply_refactor(
             reindex_warning: None,
             workspace_edit: None,
         });
-    }
-
-    for change in &server_plan.changes {
-        if change.preview_text != change.original_text && state.is_document_open(&change.path) {
-            // Best-effort buffer sync; disk is already committed.
-            let _ = state.set_document_text(change.path.clone(), change.preview_text.clone());
-        }
     }
 
     let reindex_warning = match state.effective_index_root() {
@@ -806,13 +871,11 @@ pub fn handle_references(state: &ServerState, params: ReferenceParams) -> Option
     let content = state.document_text(&path)?;
     let iri = iri_at_position(&content, position)?;
     let overrides = state.open_document_overrides();
-    state.with_catalog(|catalog| {
-        let locations: Vec<Location> = find_usages_with_overrides(catalog, &iri, &overrides)
-            .into_iter()
-            .filter_map(|u| usage_to_location(state, &u))
-            .collect();
-        Some(locations)
-    })?
+    let usages = state
+        .with_catalog(|catalog| find_usages_with_overrides(catalog, &iri, &overrides))?;
+    let locations: Vec<Location> =
+        usages.into_iter().filter_map(|u| usage_to_location(state, &u)).collect();
+    Some(locations)
 }
 
 pub fn handle_rename(
@@ -1157,12 +1220,13 @@ fn invalid_params(method: &str) -> ResponseError {
     ResponseError { code: -32602, message: format!("invalid params for {method}"), data: None }
 }
 
-fn entity_source_range(state: &ServerState, path: &Path, entity: &ontocore_core::Entity) -> Range {
+/// Build an LSP range from entity source metadata and optional document text.
+/// Callers must not hold the catalog `RwLock` when loading `doc_text`.
+fn entity_source_range(doc_text: Option<&str>, entity: &ontocore_core::Entity) -> Range {
     let line_idx = entity.source_location.line.unwrap_or(1).saturating_sub(1) as u32;
     let byte_col = entity.source_location.column.unwrap_or(0) as usize;
-    let line_text = state
-        .document_text(path)
-        .and_then(|text| text.lines().nth(line_idx as usize).map(|s| s.to_string()));
+    let line_text =
+        doc_text.and_then(|text| text.lines().nth(line_idx as usize).map(|s| s.to_string()));
     let character =
         line_text.as_deref().map(|l| byte_col_to_utf16(l, byte_col)).unwrap_or(byte_col as u32);
     Range {

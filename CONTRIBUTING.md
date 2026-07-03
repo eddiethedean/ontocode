@@ -77,15 +77,19 @@ Full extension packaging (bundles LSP for current platform):
 ./scripts/package-extension.sh
 ```
 
-### Golden snapshots
+### Golden and fixture snapshots
 
-Some tests compare query output to committed snapshots. To update:
+Some tests compare output to committed snapshots. To update:
 
 ```bash
+# SQL/query golden snapshots (tests/golden/snapshots/)
 ONTOINDEX_UPDATE_GOLDEN=1 cargo test golden_classes
+
+# Extension catalog fixture snapshot
+ONTOINDEX_UPDATE_FIXTURE_SNAPSHOT=1 cargo test -p ontocode --test fixture_snapshot
 ```
 
-Review the diff in `tests/golden/snapshots/` before committing.
+Review the diffs before committing.
 
 ### Examples
 

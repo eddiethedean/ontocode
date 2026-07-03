@@ -19,17 +19,25 @@
 [![downloads](https://img.shields.io/crates/d/ontocore-cli?label=downloads)](https://crates.io/crates/ontocore-cli)
 [![Docs](https://readthedocs.org/projects/ontocode-vs/badge/?version=latest)](https://ontocode-vs.readthedocs.io/en/latest/)
 
-OntoCode is a modern ontology IDE for VS Code, powered by **OntoCore**.
+**OntoCode** is a VS Code extension for browsing and editing ontologies in Git-native workflows. **OntoCore** is the Rust engine behind it (CLI + language server).
 
-Browse OWL/RDF in VS Code, edit Turtle ontologies, run OWL reasoning (EL/RL/RDFS/DL), query and validate in CI — without Protégé.
+Browse OWL/RDF in VS Code, edit Turtle ontologies, run OWL reasoning (EL/RL/RDFS/DL), and query or validate in CI — without Protégé.
+
+| Install | Command / link |
+|---------|----------------|
+| **VS Code extension** | [Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) or [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) VSIX |
+| **CLI** | `cargo install ontocore-cli --locked` then `ontocore query /path/to/ontologies "SELECT * FROM classes"` (SQL-like virtual tables — not full SQL) |
+| **What works today** | [SHIPPED capability matrix](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) |
+
+Release CLI tarballs are **Linux x64 only**; macOS/Windows use `cargo install` or the language server bundled in the VSIX.
 
 | Product | Role |
 |---------|------|
-| **OntoCode** | VS Code IDE — explorer, inspector, Query Workbench, Manchester editor, reasoner |
-| **OntoCore** | Rust semantic workspace engine — index, query, diagnostics, refactoring, CLI, LSP, plugin host |
+| **OntoCode** | VS Code extension — explorer, inspector, Query Workbench, Manchester editor, reasoner |
+| **OntoCore** | Rust semantic workspace engine — index, query, diagnostics, refactoring, CLI, LSP |
 | **Ontologos** | Rust reasoning engine — classification, consistency, explanations ([external project](https://github.com/eddiethedean/ontologos)) |
 
-**OntoCode 1.0** targets a production-ready **Protégé replacement** for Git-native OWL 2 DL and OBO workflows. **Post-1.0**, OntoCore plugins, AI/MCP, SDKs, and ecosystem integrations (including [owlmake](https://github.com/INCATools/owlmake), ROBOT, and ODK) modernize beyond desktop-only editing — as **external workflow plugins**, not core dependencies.
+**OntoCode 1.0** targets a production-ready **Protégé replacement** for Git-native OWL 2 DL and OBO workflows. Workflow plugins (e.g. [owlmake](https://github.com/INCATools/owlmake)), AI/MCP, and language SDKs are a **v1.0 design** — not installable in v0.9. ROBOT interop today is a CLI wrapper only.
 
 ## OntoCore
 
@@ -90,17 +98,17 @@ Full install and troubleshooting: [install guide](https://ontocode-vs.readthedoc
 
 ```text
 ┌──────────────────────────────────────────────────────────────┐
-│  External plugins & integrations (not core dependencies)     │
-│  owlmake (reference workflow) · ROBOT CLI · ODK layouts      │
+│  Planned v1.0: external workflow plugins (not shipped)       │
+│  owlmake (reference design) · ROBOT/ODK adapters             │
 └────────────────────────────┬─────────────────────────────────┘
-                             │ OntoCore plugin APIs
+                             │ plugin APIs (v1.0 target)
 ┌────────────────────────────▼─────────────────────────────────┐
-│  OntoCode — VS Code IDE                                      │
+│  OntoCode — VS Code extension                                │
 └────────────────────────────┬─────────────────────────────────┘
                              │ ontocore-lsp (stdio)
 ┌────────────────────────────▼─────────────────────────────────┐
-│  OntoCore — semantic workspace engine                         │
-│  ontocore façade · ontocore-* crates · CLI · LSP · plugins   │
+│  OntoCore — semantic workspace engine (ships today)          │
+│  ontocore façade · ontocore-* crates · CLI · LSP             │
 └──────────────┬─────────────────────────────┬───────────────────┘
                │                             │
                ▼                             ▼
@@ -113,7 +121,7 @@ Full install and troubleshooting: [install guide](https://ontocode-vs.readthedoc
         Your ontology repo (.ttl .owl .obo .rdf …)
 ```
 
-OntoCore is useful on its own today (CLI, CI, local analysis, Rust library). The extension calls into the same engine via a language server rather than reimplementing ontology logic in TypeScript. Workflow automation ([owlmake](https://github.com/INCATools/owlmake), ROBOT, ODK) integrates through **OntoCore plugins** — see [PLUGIN_SPEC.md](docs/design/PLUGIN_SPEC.md) and [Platform architecture](ARCHITECTURE.md).
+OntoCore is useful on its own today (CLI, CI, local analysis, Rust library). The extension calls into the same engine via a language server rather than reimplementing ontology logic in TypeScript. ROBOT interop today is `ontocore robot` (external Java CLI). A plugin host for tools like [owlmake](https://github.com/INCATools/owlmake) is **planned for v1.0** — see [plugin model](https://ontocode-vs.readthedocs.io/en/latest/ontocore/plugin-model/) and [Platform architecture](ARCHITECTURE.md).
 
 ## Two-layer architecture (products)
 

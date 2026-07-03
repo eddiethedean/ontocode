@@ -2,6 +2,17 @@
 
 > **Multi-root workspaces:** Only the **first** folder is indexed. Open your ontology project as a **single-root** folder, or put it first in a multi-root workspace.
 
+## Install matrix
+
+| Method | Linux | macOS | Windows | Needs Rust? |
+|--------|-------|-------|---------|-------------|
+| Marketplace extension (bundled language server) | Yes | Yes | Yes | No |
+| Release VSIX (bundled language server) | Yes | Yes | Yes | No |
+| `cargo install ontocore-lsp` + `ontocode.lspPath` | Yes | Yes | Yes | Yes (1.88+) |
+| Build from source (`package-extension.sh`) | Yes | Yes | Yes | Yes + Node 20 |
+
+CLI install options (separate from the extension): [getting started (CLI)](getting-started.md).
+
 ## Option A — VS Code Marketplace (recommended)
 
 1. Install [OntoCode from the Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) (v0.9.0+).

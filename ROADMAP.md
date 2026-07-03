@@ -164,7 +164,7 @@ OntoCode 1.0 integrates with the existing ontology toolchain through OntoCore �
 - **Import existing ROBOT/owlmake workflows** where practical — reuse Makefile, GitHub Actions, and owlmake configs
 - **Protégé migration support** — import projects, preserve IRIs, and guide users off desktop-only workflows
 
-Ontologos provides **reasoning** (classification, consistency, explanations). OntoCore provides the **workspace platform** (index, query, diagnostics, refactoring, plugin hosting). **owlmake** and similar tools provide **workflow automation** — OntoCode presents all three in one IDE.
+Ontologos provides **reasoning** (classification, consistency, explanations). OntoCore provides the **workspace platform** (index, query, diagnostics, refactoring) and, at v1.0, **plugin hosting**. **owlmake** and similar tools will provide **workflow automation** — OntoCode presents all three in one IDE.
 
 ### Success Criteria
 

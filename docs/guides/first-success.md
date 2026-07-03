@@ -7,7 +7,7 @@ This is the **canonical tutorial** for new OntoCode users. You do not need to cl
 ## What you will do
 
 1. Install OntoCode in VS Code
-2. Open a folder with Turtle ontology files (download samples below if needed)
+2. Open a folder with Turtle ontology files and **trust** the workspace
 3. Browse classes in the sidebar
 4. Edit an entity in the Entity Inspector
 5. (Optional) Query, Manchester editing, reasoner, and CLI validate
@@ -18,9 +18,9 @@ Install from the [VS Code Marketplace](https://marketplace.visualstudio.com/item
 
 For offline or air-gapped environments, use a release VSIX instead — see [Install VS Code](../vscode-install.md).
 
-## 2. Get sample ontology files (if you don't have any)
+## 2. Open a folder and trust the workspace
 
-Download a minimal tutorial pack:
+Download a minimal tutorial pack if you do not already have ontology files:
 
 ```bash
 mkdir ontocode-tutorial && cd ontocode-tutorial
@@ -28,19 +28,23 @@ curl -fsSLO https://raw.githubusercontent.com/eddiethedean/ontocode/main/fixture
 curl -fsSLO https://raw.githubusercontent.com/eddiethedean/ontocode/main/fixtures/complex-classes.ttl
 ```
 
-Then **File → Open Folder…** and select `ontocode-tutorial`.
+Then **File → Open Folder…** and select `ontocode-tutorial` (or your own ontology folder).
 
-If you already have `.ttl`, `.owl`, or other ontology files, open that folder instead.
+When VS Code asks, choose **Yes, I trust the authors** (or **Trust**). Restricted Mode blocks the language server and the explorer will stay empty.
 
 ## 3. Browse the explorer
 
-1. Click the **OntoCode** icon in the **Activity Bar** (left edge).
-2. Wait for indexing to finish (check **Output → OntoCore Language Server** if views stay empty).
+1. Click the **OntoCode** icon in the **Activity Bar** (left edge of the window).
+2. Wait for indexing to finish.
 3. Expand **Ontologies** to see indexed files and parse status.
 4. Expand **Classes**, **Properties**, or **Individuals** to browse entities.
 5. **Click an entity name** (e.g. `Person`) to open the **Entity Inspector**.
 
-If views are empty, run **OntoCode: Index Workspace** from the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`).
+If views stay empty:
+
+1. Confirm the workspace is **trusted** (step 2).
+2. Open **View → Output**, choose **OntoCore Language Server** in the dropdown (top-right of the Output panel), and look for errors.
+3. Run **OntoCode: Index Workspace** from the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`).
 
 ## 4. Edit a Turtle entity
 

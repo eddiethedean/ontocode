@@ -2,6 +2,19 @@
 
 Five-minute paths to success with OntoCore (CLI) and OntoCode (VS Code).
 
+## Install matrix (CLI)
+
+| Method | Linux x64 | macOS | Windows | Needs Rust? |
+|--------|-----------|-------|---------|-------------|
+| `cargo install ontocore-cli --locked` | Yes | Yes | Yes | Yes (1.88+) |
+| Release CLI tarball (`ontocore-v*-x86_64-unknown-linux-gnu`) | Yes | No | No | No |
+| Git clone + `cargo run --` | Yes | Yes | Yes | Yes (1.88+) |
+
+VS Code extension (bundled language server on Linux, macOS, and Windows): [vscode-install.md](vscode-install.md).
+
+!!! note "SQL-like queries"
+    `ontocore query` uses **SQL-like virtual tables** (single-table `SELECT`, limited `WHERE`). Not full SQL — see [SQL reference](sql-reference.md).
+
 ## Prerequisites
 
 | Path | Requires |
@@ -9,7 +22,7 @@ Five-minute paths to success with OntoCore (CLI) and OntoCode (VS Code).
 | Minimum VS Code | **1.85+** — see [platform compatibility guide](guides/platform-compatibility.md) |
 | `cargo install` CLI | Rust 1.88+ |
 | Git clone + `cargo run` | Rust 1.88+ |
-| Release binaries | No Rust (download from GitHub Releases) |
+| Release CLI binaries | No Rust; **Linux x64 only** (download from GitHub Releases) |
 
 ## Path A — VS Code (recommended for browsing and editing)
 

@@ -1,6 +1,10 @@
 # Query Workbench
 
-The **Query Workbench** is an OntoCode React panel for running **SQL** and **SPARQL** queries against your indexed workspace. Queries execute in **OntoCore** via LSP (`ontocore/query`, `ontocore/sparql`).
+The **Query Workbench** is an OntoCode React panel for running **SQL-like** catalog queries and **SPARQL** against your indexed workspace. Queries execute in **OntoCore** via LSP (`ontocore/query`, `ontocore/sparql`).
+
+!!! warning "SQL-like, not full SQL"
+    The SQL mode uses **virtual tables** with a small subset of SQL: single-table `SELECT`, limited `WHERE` (`=`, `!=`, `AND`/`OR`), no `JOIN`, `ORDER BY`, `GROUP BY`, `LIKE`, or functions.
+    Full details: [SQL reference](../sql-reference.md).
 
 ## Open the workbench
 

@@ -11,6 +11,15 @@ Pick one of two documentation paths, then follow the next step for your task.
 
 New to OWL/RDF vocabulary? Read [Ontology concepts](../concepts.md) first.
 
+## When not to use OntoCode (v0.9)
+
+- You need **full OBO write-back** in the IDE (OBO is index/browse only; edit Turtle or use ROBOT).
+- You rely on **multi-root** VS Code workspaces (only the **first** folder is indexed).
+- You need **full SQL** (JOINs, `ORDER BY`, `LIKE`) — use SQL-like virtual tables or SPARQL instead.
+- You need a **plugin host** or owlmake integration (planned v1.0; not installable yet).
+
+Canonical matrix: [What ships today](../SHIPPED.md).
+
 ---
 
 ## VS Code extension tasks

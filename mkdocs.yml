@@ -68,69 +68,58 @@ markdown_extensions:
 
 nav:
   - Home: index.md
-  - Platform:
-      - Vision: vision.md
-      - Architecture: architecture.md
-      - Roadmap: roadmap.md
-  - OntoCore:
-      - Overview: ontocore/index.md
-      - Architecture: ontocore/architecture.md
-      - Crate map: ontocore/crate-map.md
-      - Workspace engine: ontocore/workspace-engine.md
-      - SQL views: ontocore/sql-views.md
-      - LSP: ontocore/lsp.md
-      - Roadmap: ontocore/roadmap.md
-      - Plugin model: ontocore/plugin-model.md
-  - OntoCode:
-      - VS Code extension: ontocode/vscode-extension.md
-      - Inspector: ontocode/inspector.md
-      - Query Workbench: ontocode/query-workbench.md
-      - Graph view: ontocode/graph-view.md
-      - Manchester editor: ontocode/manchester-editor.md
   - Get started:
       - First success (10 min): guides/first-success.md
       - Pick a task: guides/start-here.md
       - What ships today: SHIPPED.md
+      - Install VS Code: vscode-install.md
+      - Install CLI: getting-started.md
       - Ontology concepts: concepts.md
-      - Getting started (CLI): getting-started.md
-  - VS Code Extension:
-      - Overview: guides/vscode-extension.md
-      - Install: vscode-install.md
+  - Use OntoCode:
+      - Overview: ontocode/vscode-extension.md
       - Authoring (Turtle): authoring.md
+      - Inspector: ontocode/inspector.md
+      - Query Workbench: ontocode/query-workbench.md
+      - Manchester editor: ontocode/manchester-editor.md
+      - Graph visualization: ontocode/graph-view.md
       - Refactoring: guides/refactoring.md
-      - Query Workbench: guides/query-workbench.md
-      - Manchester editor: guides/manchester-editor.md
-      - Graph visualization: guides/graph-visualization.md
-      - OBO workflows: guides/obo-workflow.md
       - Reasoner: guides/reasoner.md
+      - OBO workflows: guides/obo-workflow.md
       - Protégé coexistence: guides/protege-coexistence.md
       - Best practices: guides/best-practices.md
-      - Enterprise:
-          - Evaluation overview: guides/enterprise-eval.md
-          - Protégé vs OntoCode: guides/protege-decision.md
-          - Production readiness: guides/production-readiness.md
-          - Production evidence protocol: guides/production-evidence.md
-          - Enterprise deployment: guides/enterprise-deployment.md
-          - Platform compatibility: guides/platform-compatibility.md
-          - Performance and sizing: guides/performance-sizing.md
-          - Governance: guides/governance.md
-          - Release timeline: guides/release-timeline.md
-          - LGPL compliance: guides/lgpl-compliance.md
-  - Rust & CLI:
-      - Overview: guides/rust-crates.md
+  - Use OntoCore:
+      - Overview: ontocore/index.md
       - CLI reference: cli-reference.md
       - Rust library: guides/rust-library.md
+      - Rust & CLI guide: guides/rust-crates.md
       - CI integration: ci-integration.md
       - ROBOT interop: guides/robot-interop.md
-      - SQL virtual tables: sql-reference.md
+      - SQL-like virtual tables: sql-reference.md
       - SPARQL: sparql-reference.md
       - Patch JSON: patch-reference.md
       - LSP API: lsp-api.md
-      - Webview protocol: webview-protocol.md
+      - Crate map: ontocore/crate-map.md
+      - Workspace engine: ontocore/workspace-engine.md
       - Examples:
           - Query cookbook: examples/queries.md
           - Sample patches: examples/patches.md
           - Refactoring: examples/refactoring.md
+  - Evaluate:
+      - Vision: vision.md
+      - Architecture: architecture.md
+      - Roadmap: roadmap.md
+      - Enterprise evaluation: guides/enterprise-eval.md
+      - Protégé vs OntoCode: guides/protege-decision.md
+      - Production readiness: guides/production-readiness.md
+      - Production evidence protocol: guides/production-evidence.md
+      - Enterprise deployment: guides/enterprise-deployment.md
+      - Platform compatibility: guides/platform-compatibility.md
+      - Performance and sizing: guides/performance-sizing.md
+      - Governance: guides/governance.md
+      - Release timeline: guides/release-timeline.md
+      - LGPL compliance: guides/lgpl-compliance.md
+      - Security: security.md
+      - Workspace limits: workspace-limits.md
   - Help:
       - FAQ: faq.md
       - Troubleshooting: troubleshooting.md
@@ -141,57 +130,55 @@ nav:
           - v0.6 → v0.7: migration/v0.7.md
           - v0.7 → v0.8: migration/v0.8.md
           - v0.8 → v0.9: migration/v0.9.md
-      - Security: security.md
       - Release integrity: release-integrity.md
       - Errors: errors.md
-      - Workspace limits: workspace-limits.md
-  - Contributing:
+  - Contribute:
       - Guide: contributing.md
-      - Design (target specs):
-          - Overview: design/README.md
-          - "Milestones (shipped)": design/ROADMAP.md
-          - "Implementation architecture": design/ARCHITECTURE.md
-          - Protégé parity: design/PROTEGE_PARITY.md
-          - Dependency matrix: design/DEPENDENCY_MATRIX.md
-          - Licenses: design/LICENSES.md
-          - Specs:
-              - Product plan: design/PLAN.md
-              - Technical spec: design/SPEC.md
-              - LSP (target): design/LSP_SPEC.md
-              - OWL authoring: design/OWL_AUTHORING_SPEC.md
-              - Reasoner: design/REASONER_SPEC.md
-              - Semantic diff: design/SEMANTIC_DIFF_SPEC.md
-              - SHACL: design/SHACL_SPEC.md
-              - OBO / ROBOT: design/OBO_ROBOT_SPEC.md
-              - Plugins: design/PLUGIN_SPEC.md
-              - UI wireframes: design/UI_WIREFRAMES.md
-              - React UI plan: design/OntoCode_React_UI_Integration_Plan.md
-          - Backlogs:
-              - v1.0 backlog: design/v1.0_BACKLOG.md
-              - MVP backlog: design/MVP_BACKLOG.md
-          - ADRs:
-              - Index: design/adr/README.md
-              - "0001 Rust for OntoCore": design/adr/0001-use-rust-for-ontocore.md
-              - "0002 Horned-OWL": design/adr/0002-use-horned-owl.md
-              - "0003 Oxigraph": design/adr/0003-use-oxigraph.md
-              - "0004 DataFusion": design/adr/0004-use-datafusion-for-sql.md
-              - "0005 Local-first": design/adr/0005-local-first-by-default.md
-              - "0006 Patch write-back": design/adr/0006-patch-based-write-back.md
-              - "0007 LSP boundary": design/adr/0007-language-server-boundary.md
-              - "0008 Reasoner adapters": design/adr/0008-reasoner-adapters-not-built-in-reasoner.md
-              - "0009 Semantic diff": design/adr/0009-semantic-diff-as-core-feature.md
-              - "0010 AI opt-in": design/adr/0010-ai-features-opt-in.md
-              - "0011 sqlparser": design/adr/0011-use-sqlparser-for-sql.md
-              - "0012 LSP snake_case": design/adr/0012-lsp-json-snake-case-enums.md
-              - "0013 Dual stack": design/adr/0013-dual-stack-oxigraph-horned-owl.md
-              - "0014 Rust reasoners": design/adr/0014-rust-native-reasoners-only.md
-              - "0015 OntoLogos": design/adr/0015-adopt-ontologos-reasoner.md
-              - "0016 Dependency-first": design/adr/0016-dependency-first-implementation.md
-              - "0017 React webviews": design/adr/0017-react-webview-ui.md
-              - "0018 OntoCore identity": design/adr/0018-ontocore-platform-identity.md
-      - Maintainers:
-          - Releasing: releasing.md
-          - Marketplace publish: marketplace-publish.md
+      - Releasing: releasing.md
+      - Marketplace publish: marketplace-publish.md
+      - Internals (design targets): internals.md
+      - Design overview: design/README.md
+      - "Milestones (shipped)": design/ROADMAP.md
+      - "Implementation architecture": design/ARCHITECTURE.md
+      - Protégé parity: design/PROTEGE_PARITY.md
+      - Dependency matrix: design/DEPENDENCY_MATRIX.md
+      - Licenses: design/LICENSES.md
+      - Plugin model (v1.0 target): ontocore/plugin-model.md
+      - Specs:
+          - Product plan: design/PLAN.md
+          - Technical spec: design/SPEC.md
+          - LSP (target): design/LSP_SPEC.md
+          - OWL authoring: design/OWL_AUTHORING_SPEC.md
+          - Reasoner: design/REASONER_SPEC.md
+          - Semantic diff: design/SEMANTIC_DIFF_SPEC.md
+          - SHACL: design/SHACL_SPEC.md
+          - OBO / ROBOT: design/OBO_ROBOT_SPEC.md
+          - Plugins: design/PLUGIN_SPEC.md
+          - UI wireframes: design/UI_WIREFRAMES.md
+          - React UI plan: design/OntoCode_React_UI_Integration_Plan.md
+      - Backlogs:
+          - v1.0 backlog: design/v1.0_BACKLOG.md
+          - MVP backlog: design/MVP_BACKLOG.md
+      - ADRs:
+          - Index: design/adr/README.md
+          - "0001 Rust for OntoCore": design/adr/0001-use-rust-for-ontocore.md
+          - "0002 Horned-OWL": design/adr/0002-use-horned-owl.md
+          - "0003 Oxigraph": design/adr/0003-use-oxigraph.md
+          - "0004 DataFusion (superseded)": design/adr/0004-use-datafusion-for-sql.md
+          - "0005 Local-first": design/adr/0005-local-first-by-default.md
+          - "0006 Patch write-back": design/adr/0006-patch-based-write-back.md
+          - "0007 LSP boundary": design/adr/0007-language-server-boundary.md
+          - "0008 Reasoner adapters": design/adr/0008-reasoner-adapters-not-built-in-reasoner.md
+          - "0009 Semantic diff": design/adr/0009-semantic-diff-as-core-feature.md
+          - "0010 AI opt-in": design/adr/0010-ai-features-opt-in.md
+          - "0011 sqlparser": design/adr/0011-use-sqlparser-for-sql.md
+          - "0012 LSP snake_case": design/adr/0012-lsp-json-snake-case-enums.md
+          - "0013 Dual stack": design/adr/0013-dual-stack-oxigraph-horned-owl.md
+          - "0014 Rust reasoners": design/adr/0014-rust-native-reasoners-only.md
+          - "0015 OntoLogos": design/adr/0015-adopt-ontologos-reasoner.md
+          - "0016 Dependency-first": design/adr/0016-dependency-first-implementation.md
+          - "0017 React webviews": design/adr/0017-react-webview-ui.md
+          - "0018 OntoCore identity": design/adr/0018-ontocore-platform-identity.md
 
 extra:
   social:

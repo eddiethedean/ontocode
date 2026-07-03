@@ -9,7 +9,7 @@ Common questions about OntoCode and OntoCore. For step-by-step fixes, see [Troub
 - **OntoCode** — VS Code IDE (explorer, inspector, Query Workbench, Manchester editor, diagnostics).
 - **OntoCore** — Rust semantic workspace engine (`ontocore` crate, `ontocore-*` implementation, `ontocore` CLI, `ontocore-lsp`).
 
-OntoCore was formerly referred to as **OntoCore** in older documentation. This repository contains both products.
+OntoCore was previously branded **OntoIndex** (`ontoindex` CLI, `ontoindex-*` crates). As of v0.9 there is no compatibility alias — see [v0.9 migration](migration/v0.9.md). This repository contains both OntoCode and OntoCore.
 
 **Is the API stable?**
 

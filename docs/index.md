@@ -27,11 +27,11 @@ OntoCode is a modern ontology IDE for VS Code, powered by <strong>OntoCore</stro
 </div>
 
 <div class="oc-hero-actions" markdown>
-[Vision](vision.md){ .md-button .md-button--primary }
-[Roadmap](roadmap.md){ .md-button .md-button--primary }
-[OntoCore](ontocore/index.md){ .md-button }
-[OntoCode extension](ontocode/vscode-extension.md){ .md-button }
+[First success (10 min)](guides/first-success.md){ .md-button .md-button--primary }
+[Install VS Code](vscode-install.md){ .md-button .md-button--primary }
+[Install CLI](getting-started.md){ .md-button }
 [What ships today](SHIPPED.md){ .md-button }
+[Vision](vision.md){ .md-button }
 </div>
 
 </div>
@@ -40,12 +40,13 @@ OntoCode is a modern ontology IDE for VS Code, powered by <strong>OntoCore</stro
 
 **Not sure where to begin?** Pick a path:
 
-- **[OntoCode extension](ontocode/vscode-extension.md)** — Marketplace install, explorer, inspector, Query Workbench (no Rust required).
-- **[OntoCore](ontocore/index.md)** — Rust engine, `ontocore` crate, `ontocore` CLI, CI and embedding.
+- **[First success in 10 minutes](guides/first-success.md)** — install the extension, open sample ontologies, browse and edit.
+- **[VS Code extension](ontocode/vscode-extension.md)** — Marketplace install, explorer, inspector, Query Workbench (no Rust required).
+- **[CLI / Rust](ontocore/index.md)** — `ontocore` CLI, crates, CI and embedding.
 
 You do **not** need to clone this repo to use the extension or `cargo install ontocore-cli`.
 
-> **Naming:** **OntoCode** is the VS Code IDE. **OntoCore** is the semantic workspace engine (`ontocore` crate, `ontocore-*` implementation, `ontocore` CLI, `ontocore-lsp`).
+> **Names in 30 seconds:** **OntoCode** = VS Code extension. **OntoCore** = Rust engine (CLI + language server). **Ontologos** = external reasoner. Elsewhere, “extension”, “CLI”, and “language server” are enough.
 
 </div>
 

@@ -2,7 +2,7 @@
 
 Embed **OntoCore** in tools, pipelines, or custom CLIs via the [`ontocore`](https://crates.io/crates/ontocore) façade crate or individual `ontocore-*` implementation crates.
 
-> OntoCore (formerly referred to as **OntoCore** in older docs) is implemented by the `ontocore-*` crates.
+> OntoCore (previously branded **OntoIndex** / `ontoindex-*`) is implemented by the `ontocore-*` crates. See [v0.9 migration](../migration/v0.9.md).
 
 Pre-1.0: public APIs may change between minor releases until v1.0.
 
@@ -15,24 +15,31 @@ cargo run -p ontocode --example ontocore_workspace
 ```rust
 use ontocore::workspace::Workspace;
 
-let ws = Workspace::open("fixtures")?;
+// Point at any directory of ontology files (use your path, not a repo-only fixtures folder).
+let ws = Workspace::open(".")?;
 let result = ws.query("SELECT short_name, labels FROM classes")?;
 for row in &result.rows {
     println!("{} — {}", row["short_name"], row["labels"]);
 }
 ```
 
+In-repo examples use `fixtures/` only when you clone this repository:
+
+```bash
+cargo run -p ontocode --example ontocore_workspace
+```
+
 ## Lower-level: index and query
 
 ```bash
-cargo run -p ontocode --example index_and_query
+cargo run -p ontocode --example index_and_query   # clone only (uses fixtures/)
 ```
 
 ```rust
 use ontocore::catalog::IndexBuilder;
 use ontocore::query::query_catalog;
 
-let catalog = IndexBuilder::new().workspace("fixtures").build()?;
+let catalog = IndexBuilder::new().workspace(".").build()?;
 let result = query_catalog(&catalog, "SELECT short_name, labels FROM classes")?;
 ```
 
@@ -51,8 +58,8 @@ See [OntoCore crate map](../ontocore/crate-map.md) for the full table. Summary:
 use ontocore::catalog::IndexBuilder;
 use ontocore::reasoner::{classify, ReasonerId, WorkspaceInputLoader};
 
-let catalog = IndexBuilder::new().workspace("fixtures").build()?;
-let input = WorkspaceInputLoader::new("fixtures").load(catalog.class_hierarchy())?;
+let catalog = IndexBuilder::new().workspace(".").build()?;
+let input = WorkspaceInputLoader::new(".").load(catalog.class_hierarchy())?;
 let result = classify(ReasonerId::El, &input, false)?;
 println!("consistent: {}", result.consistent);
 ```

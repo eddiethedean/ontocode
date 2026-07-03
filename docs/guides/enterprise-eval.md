@@ -4,6 +4,15 @@ This page helps security, platform, and ontology teams decide whether OntoCode *
 
 Canonical capability matrix: [What ships today](../SHIPPED.md).
 
+## When not to use OntoCode (v0.9)
+
+Prefer Protégé or other tools (or wait for v1.0) if you need:
+
+- Full **OBO write-back** in the IDE
+- **Multi-root** workspace indexing (only the first folder is indexed)
+- Full **SQL** analytics (JOINs, aggregates) — only SQL-like virtual tables ship today
+- An installable **plugin host** / owlmake workflow integration (design only in v0.9)
+
 ## Enterprise documentation pack
 
 | Document | Audience |

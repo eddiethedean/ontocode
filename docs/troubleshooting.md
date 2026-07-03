@@ -26,11 +26,12 @@ For quick answers, see also [FAQ](faq.md).
 
 ## VS Code: patch or Manchester apply did not stick
 
-Patches apply to the **open editor buffer** first, then disk:
+Patches write the **`.ttl` file on disk** first, then update the language server’s open-buffer copy (and return a workspace edit for the editor):
 
-1. If you have **unsaved** edits, the patch merges into the buffer — save or review the buffer content.
-2. If re-index fails after a successful write, the LSP may return `APPLIED_NOT_INDEXED` — file/buffer updated but catalog stale. Run **Index Workspace**.
-3. Check **Output → OntoCore Language Server** and [errors reference](errors.md).
+1. If the editor still shows old text, accept or re-apply the workspace edit, or reload the file from disk.
+2. If you had **unsaved** local edits that conflicted, review the file on disk — the server applied against its buffer/disk snapshot.
+3. If re-index fails after a successful write, the catalog may be stale. Run **OntoCode: Index Workspace**.
+4. Check **View → Output → OntoCore Language Server** and [errors reference](errors.md).
 
 ## CLI: `ontocore query ./fixtures` fails
 

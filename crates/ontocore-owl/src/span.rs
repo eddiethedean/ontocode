@@ -272,9 +272,7 @@ pub(crate) fn is_turtle_terminating_dot(bytes: &[u8], i: usize) -> bool {
         return false;
     }
     let prev_name = i > 0 && is_turtle_name_char(bytes[i - 1]) && bytes[i - 1] != b'.';
-    let next_name = bytes
-        .get(i + 1)
-        .is_some_and(|b| is_turtle_name_char(*b) && *b != b'.');
+    let next_name = bytes.get(i + 1).is_some_and(|b| is_turtle_name_char(*b) && *b != b'.');
     !(prev_name && next_name)
 }
 
@@ -331,7 +329,10 @@ pub(crate) fn statement_end_byte(source_text: &str, start: usize) -> Option<usiz
             b']' => bracket_depth = bracket_depth.saturating_sub(1),
             b'(' => paren_depth += 1,
             b')' => paren_depth = paren_depth.saturating_sub(1),
-            b'.' if bracket_depth == 0 && paren_depth == 0 && is_turtle_terminating_dot(bytes, i) => {
+            b'.' if bracket_depth == 0
+                && paren_depth == 0
+                && is_turtle_terminating_dot(bytes, i) =>
+            {
                 return Some(i + 1);
             }
             _ => {}

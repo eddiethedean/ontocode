@@ -345,22 +345,13 @@ fn materialize_catalog_quads(
         let (Some(s), Some(o)) = (named_node(&axiom.subject), named_node(&axiom.object)) else {
             continue;
         };
-        quads.push(Quad::new(
-            s,
-            Rdfs::sub_class_of().into_owned(),
-            o,
-            GraphName::DefaultGraph,
-        ));
+        quads.push(Quad::new(s, Rdfs::sub_class_of().into_owned(), o, GraphName::DefaultGraph));
     }
     for ann in annotations {
         let Some(s) = named_node(&ann.subject) else {
             continue;
         };
-        let pred = if ann.predicate.contains("://") {
-            named_node(&ann.predicate)
-        } else {
-            None
-        };
+        let pred = if ann.predicate.contains("://") { named_node(&ann.predicate) } else { None };
         let Some(p) = pred else {
             continue;
         };

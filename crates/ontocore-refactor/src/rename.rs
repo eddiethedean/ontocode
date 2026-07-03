@@ -268,7 +268,13 @@ pub fn preview_refactor(
             preview_migrate_namespace(catalog, from_base, to_base, document_overrides)
         }
         crate::model::RefactorRequest::MoveEntity { entity_iri, target_file } => {
-            preview_move_entity(catalog, entity_iri, target_file, document_overrides, workspace_root)
+            preview_move_entity(
+                catalog,
+                entity_iri,
+                target_file,
+                document_overrides,
+                workspace_root,
+            )
         }
         crate::model::RefactorRequest::ExtractModule { entity_iris, output_file, leave_stub } => {
             preview_extract_module(
@@ -284,7 +290,8 @@ pub fn preview_refactor(
 }
 
 fn require_path_in_workspace(path: &Path, workspace_root: &Path) -> Result<()> {
-    ontocore_core::validate_workspace_scope(path, workspace_root).map_err(RefactorError::Invalid)?;
+    ontocore_core::validate_workspace_scope(path, workspace_root)
+        .map_err(RefactorError::Invalid)?;
     Ok(())
 }
 

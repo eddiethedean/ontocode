@@ -233,16 +233,10 @@ mod tests {
         let parsed = parse_obo_file(file.path(), "doc-1", "hash", 0).unwrap();
         assert_eq!(parsed.entities.len(), 1);
         assert_eq!(parsed.entities[0].obo_id.as_deref(), Some("TEST:0000001"));
-        assert_eq!(
-            parsed.entities[0].iri,
-            "http://purl.obolibrary.org/obo/TEST_0000001"
-        );
+        assert_eq!(parsed.entities[0].iri, "http://purl.obolibrary.org/obo/TEST_0000001");
         assert_eq!(parsed.entities[0].labels, vec!["example term"]);
         assert_eq!(parsed.axioms.len(), 1);
-        assert_eq!(
-            parsed.axioms[0].object,
-            "http://purl.obolibrary.org/obo/TEST_0000002"
-        );
+        assert_eq!(parsed.axioms[0].object, "http://purl.obolibrary.org/obo/TEST_0000002");
         assert!(parsed.triple_count > 0);
         assert!(!parsed.quads().is_empty(), "OBO must materialize RDF quads");
     }

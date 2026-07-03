@@ -180,7 +180,10 @@ fn jail_robot_path_args(workspace_root: &std::path::Path, args: &[String]) -> Re
         }
         if let Some((flag, value)) = arg.split_once('=') {
             if long_path_flags.contains(&flag) {
-                ontocore_core::validate_workspace_scope(std::path::Path::new(value), workspace_root)?;
+                ontocore_core::validate_workspace_scope(
+                    std::path::Path::new(value),
+                    workspace_root,
+                )?;
                 continue;
             }
         }
@@ -189,7 +192,9 @@ fn jail_robot_path_args(workspace_root: &std::path::Path, args: &[String]) -> Re
             continue;
         }
         let attached_short = short_path_flags.iter().find_map(|flag| {
-            if arg.starts_with(flag) && arg.len() > flag.len() && !arg[flag.len()..].starts_with('-')
+            if arg.starts_with(flag)
+                && arg.len() > flag.len()
+                && !arg[flag.len()..].starts_with('-')
             {
                 Some(&arg[flag.len()..])
             } else {
@@ -280,8 +285,7 @@ pub fn handle_apply_axiom_patch(
     // Serialize applies without holding ops_lock across enqueue_sync (index worker needs it).
     let (patch_result, workspace_edit, needs_reindex) = {
         let ops_lock = state.ops_lock();
-        let _guard =
-            ops_lock.lock().map_err(|e| LspErrorPayload::patch_invalid(e.to_string()))?;
+        let _guard = ops_lock.lock().map_err(|e| LspErrorPayload::patch_invalid(e.to_string()))?;
 
         let source = state
             .document_text(&document_path)
@@ -701,23 +705,24 @@ pub fn handle_workspace_symbol(
     params: WorkspaceSymbolParams,
 ) -> Option<WorkspaceSymbolResponse> {
     let query = params.query.to_ascii_lowercase();
-    let entries: Vec<(ontocore_core::Entity, std::path::PathBuf)> = state.with_catalog(|catalog| {
-        catalog
-            .data()
-            .entities
-            .iter()
-            .filter(|e| {
-                query.is_empty()
-                    || e.short_name.to_ascii_lowercase().contains(&query)
-                    || e.iri.to_ascii_lowercase().contains(&query)
-                    || e.labels.iter().any(|l| l.to_ascii_lowercase().contains(&query))
-            })
-            .filter_map(|e| {
-                let doc = catalog.entity_document(&e.iri)?;
-                Some((e.clone(), doc.path.clone()))
-            })
-            .collect()
-    })?;
+    let entries: Vec<(ontocore_core::Entity, std::path::PathBuf)> =
+        state.with_catalog(|catalog| {
+            catalog
+                .data()
+                .entities
+                .iter()
+                .filter(|e| {
+                    query.is_empty()
+                        || e.short_name.to_ascii_lowercase().contains(&query)
+                        || e.iri.to_ascii_lowercase().contains(&query)
+                        || e.labels.iter().any(|l| l.to_ascii_lowercase().contains(&query))
+                })
+                .filter_map(|e| {
+                    let doc = catalog.entity_document(&e.iri)?;
+                    Some((e.clone(), doc.path.clone()))
+                })
+                .collect()
+        })?;
     let symbols: Vec<SymbolInformation> = entries
         .into_iter()
         .filter_map(|(e, path)| {
@@ -836,10 +841,12 @@ pub fn handle_apply_refactor(
 
         if !params.preview_only {
             for change in &server_plan.changes {
-                if change.preview_text != change.original_text && state.is_document_open(&change.path)
+                if change.preview_text != change.original_text
+                    && state.is_document_open(&change.path)
                 {
                     // Best-effort buffer sync; disk is already committed.
-                    let _ = state.set_document_text(change.path.clone(), change.preview_text.clone());
+                    let _ =
+                        state.set_document_text(change.path.clone(), change.preview_text.clone());
                 }
             }
         }
@@ -871,8 +878,8 @@ pub fn handle_references(state: &ServerState, params: ReferenceParams) -> Option
     let content = state.document_text(&path)?;
     let iri = iri_at_position(&content, position)?;
     let overrides = state.open_document_overrides();
-    let usages = state
-        .with_catalog(|catalog| find_usages_with_overrides(catalog, &iri, &overrides))?;
+    let usages =
+        state.with_catalog(|catalog| find_usages_with_overrides(catalog, &iri, &overrides))?;
     let locations: Vec<Location> =
         usages.into_iter().filter_map(|u| usage_to_location(state, &u)).collect();
     Some(locations)

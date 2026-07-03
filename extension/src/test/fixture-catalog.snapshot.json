@@ -575,6 +575,9 @@
   ],
   "hierarchy": {
     "children": {
+      "ex:hasRecord some ex:MedicalRecord": [
+        "http://example.org/clinic#Patient"
+      ],
       "http://example.org/clinic#ClinicPerson": [
         "http://example.org/clinic#ClinicOrganization",
         "http://example.org/clinic#Employee",
@@ -600,6 +603,10 @@
       ],
       "http://example.org/reasoner-unsat#B": [
         "http://example.org/reasoner-unsat#Invalid"
+      ],
+      "http://www.w3.org/2002/07/owl#Thing": [
+        "http://example.org/org#Cat",
+        "http://example.org/org#Dog"
       ]
     },
     "edges": [
@@ -622,6 +629,18 @@
       {
         "child": "http://example.org/clinic#Staff",
         "parent": "http://example.org/clinic#ClinicPerson"
+      },
+      {
+        "child": "http://example.org/clinic#Patient",
+        "parent": "ex:hasRecord some ex:MedicalRecord"
+      },
+      {
+        "child": "http://example.org/org#Cat",
+        "parent": "http://www.w3.org/2002/07/owl#Thing"
+      },
+      {
+        "child": "http://example.org/org#Dog",
+        "parent": "http://www.w3.org/2002/07/owl#Thing"
       },
       {
         "child": "http://example.org/people#Organization",
@@ -663,13 +682,20 @@
         "http://example.org/clinic#ClinicPerson"
       ],
       "http://example.org/clinic#Patient": [
+        "ex:hasRecord some ex:MedicalRecord",
         "http://example.org/clinic#ClinicPerson"
       ],
       "http://example.org/clinic#Staff": [
         "http://example.org/clinic#ClinicPerson"
       ],
+      "http://example.org/org#Cat": [
+        "http://www.w3.org/2002/07/owl#Thing"
+      ],
       "http://example.org/org#Department": [
         "http://example.org/people#Organization"
+      ],
+      "http://example.org/org#Dog": [
+        "http://www.w3.org/2002/07/owl#Thing"
       ],
       "http://example.org/people#Organization": [
         "http://example.org/people#Thing"

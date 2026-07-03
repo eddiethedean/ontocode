@@ -304,9 +304,7 @@ fn apply_text_change(text: &str, range: &lsp_types::Range, new_text: &str) -> Op
     let start = position_to_byte(text, range.start)?;
     let end = position_to_byte(text, range.end)?;
     if start > end {
-        eprintln!(
-            "ontocore-lsp: text change range inverted (start={start}, end={end})"
-        );
+        eprintln!("ontocore-lsp: text change range inverted (start={start}, end={end})");
         return None;
     }
     let mut result = String::with_capacity(text.len() - (end - start) + new_text.len());

@@ -63,7 +63,7 @@ jobs:
 
       - uses: Swatinem/rust-cache@v2
 
-      - run: cargo build -p ontoindex-lsp -p ontoindex-cli --bins
+      - run: cargo build -p ontocore-lsp -p ontocore-cli --bins
 
       - run: cargo test --workspace
 
@@ -79,7 +79,7 @@ jobs:
         with:
           shared-key: msrv
 
-      - run: cargo build -p ontoindex-lsp -p ontoindex-cli --bins
+      - run: cargo build -p ontocore-lsp -p ontocore-cli --bins
 
       - run: cargo test --workspace
 
@@ -112,9 +112,9 @@ jobs:
         with:
           shared-key: release
 
-      - run: cargo build --release --locked -p ontoindex-cli -p ontoindex-lsp --bins
+      - run: cargo build --release --locked -p ontocore-cli -p ontocore-lsp --bins
 
-      - run: ./target/release/ontoindex inspect fixtures
+      - run: ./target/release/ontocore inspect fixtures
 
   lsp-build:
     name: LSP build
@@ -126,7 +126,7 @@ jobs:
 
       - uses: Swatinem/rust-cache@v2
 
-      - run: cargo build --locked -p ontoindex-lsp --bins
+      - run: cargo build --locked -p ontocore-lsp --bins
 
       - run: cargo test -p ontocode --test lsp_smoke
 
@@ -142,8 +142,8 @@ jobs:
 
       - uses: Swatinem/rust-cache@v2
 
-      - name: Build ontoindex-lsp for extension e2e tests
-        run: cargo build -p ontoindex-lsp --bins
+      - name: Build ontocore-lsp for extension e2e tests
+        run: cargo build -p ontocore-lsp --bins
 
       - uses: actions/setup-node@v4
         with:
@@ -161,15 +161,15 @@ jobs:
         run: npm test
         working-directory: extension
         env:
-          ONTOINDEX_LSP_BIN: ${{ github.workspace }}/target/debug/ontoindex-lsp
+          ONTOCORE_LSP_BIN: ${{ github.workspace }}/target/debug/ontocore-lsp
 
       - name: VSIX unpack spawn e2e (Marketplace chmod regression)
         run: |
           set -euo pipefail
           PLATFORM=linux-x64
           mkdir -p "extension/server/${PLATFORM}"
-          cp target/debug/ontoindex-lsp "extension/server/${PLATFORM}/ontoindex-lsp"
-          chmod +x "extension/server/${PLATFORM}/ontoindex-lsp"
+          cp target/debug/ontocore-lsp "extension/server/${PLATFORM}/ontocore-lsp"
+          chmod +x "extension/server/${PLATFORM}/ontocore-lsp"
           cd extension
           npx vsce package --no-dependencies -o /tmp/ontocode-ci.vsix
           rm -rf /tmp/ontocode-vsix-unpack
@@ -177,7 +177,7 @@ jobs:
           export ONTOCODE_E2E_EXTENSION_ROOT=/tmp/ontocode-vsix-unpack/extension
           npm test
         env:
-          ONTOINDEX_LSP_BIN: ${{ github.workspace }}/target/debug/ontoindex-lsp
+          ONTOCORE_LSP_BIN: ${{ github.workspace }}/target/debug/ontocore-lsp
 
   audit:
     name: cargo audit
@@ -205,9 +205,10 @@ jobs:
       - run: |
           set -euo pipefail
           # Full crate graph is verified at release (publish in dependency order on tag).
-          cargo publish -p ontoindex-core --dry-run
+          cargo publish -p ontocore-core --dry-run
+          cargo publish -p ontocore --dry-run
           # Dependent crates cannot `publish --dry-run` until workspace deps exist on crates.io.
-          cargo build -p ontoindex-diagnostics -p ontoindex-owl -p ontoindex-cli
+          cargo build -p ontocore-diagnostics -p ontocore-owl -p ontocore-cli
 
   docs:
     name: mkdocs

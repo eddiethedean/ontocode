@@ -1,3 +1,3 @@
 //! RDF and OBO parsing.
 
-pub use ontoindex_parser::*;
+pub use ontocore_parser::*;

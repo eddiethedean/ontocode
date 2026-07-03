@@ -1,6 +1,6 @@
 # Sample patch JSON
 
-Copy-paste example for `ontoindex patch`. Full reference: [patch-reference.md](../patch-reference.md).
+Copy-paste example for `ontocore patch`. Full reference: [patch-reference.md](../patch-reference.md).
 
 ```json
 [
@@ -23,8 +23,8 @@ Copy-paste example for `ontoindex patch`. Full reference: [patch-reference.md](.
 ```
 
 ```bash
-ontoindex patch ./people.ttl patches.json --preview
-ontoindex patch ./people.ttl patches.json
+ontocore patch ./people.ttl patches.json --preview
+ontocore patch ./people.ttl patches.json
 ```
 
 Download: [patches.json](patches.json)

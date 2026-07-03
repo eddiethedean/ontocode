@@ -1,10 +1,10 @@
 # CI integration
 
-Run OntoIndex validation in continuous integration to catch ontology lint and parse errors before merge.
+Run OntoCore validation in continuous integration to catch ontology lint and parse errors before merge.
 
 ## Exit codes
 
-`ontoindex validate` follows the rules in [workspace-limits.md](workspace-limits.md):
+`ontocore validate` follows the rules in [workspace-limits.md](workspace-limits.md):
 
 | Outcome | Exit code |
 |---------|-----------|
@@ -32,11 +32,11 @@ jobs:
       - name: Install Rust
         uses: dtolnay/rust-toolchain@stable
 
-      - name: Install ontoindex CLI
-        run: cargo install ontoindex-cli --locked
+      - name: Install ontocore CLI
+        run: cargo install ontocore-cli --locked
 
       - name: Validate ontology files
-        run: ontoindex validate .
+        run: ontocore validate .
 ```
 
 Adjust the path (`.` or `ontologies/`) to the directory containing your `.ttl`, `.owl`, etc.
@@ -46,11 +46,11 @@ Adjust the path (`.` or `ontologies/`) to the directory containing your `.ttl`, 
 Fail the job when EL classification finds unsatisfiable classes:
 
 ```yaml
-      - name: Install ontoindex CLI
-        run: cargo install ontoindex-cli --locked
+      - name: Install ontocore CLI
+        run: cargo install ontocore-cli --locked
 
       - name: Classify ontologies (EL)
-        run: ontoindex classify . --profile el --format json
+        run: ontocore classify . --profile el --format json
 ```
 
 `classify` exits **non-zero** when `consistent` is false. See [workspace-limits.md](workspace-limits.md) and [Reasoner guide](guides/reasoner.md).
@@ -62,9 +62,9 @@ For faster CI without compiling Rust dependencies:
 ```yaml
       - name: Download and validate ontology files
         run: |
-          VERSION=0.8.0
-          ASSET="ontoindex-v${VERSION}-x86_64-unknown-linux-gnu.tar.gz"
-          BIN="ontoindex-v${VERSION}-x86_64-unknown-linux-gnu"
+          VERSION=0.9.0
+          ASSET="ontocore-v${VERSION}-x86_64-unknown-linux-gnu.tar.gz"
+          BIN="ontocore-v${VERSION}-x86_64-unknown-linux-gnu"
           curl -fsSL -o "${ASSET}" \
             "https://github.com/eddiethedean/ontocode/releases/download/v${VERSION}/${ASSET}"
           tar xzf "${ASSET}"
@@ -77,7 +77,7 @@ Verify checksums per [release-integrity.md](release-integrity.md) in production 
 ## Query diagnostics in CI
 
 ```bash
-ontoindex query . "SELECT code, severity, message, file FROM diagnostics WHERE severity = 'error'"
+ontocore query . "SELECT code, severity, message, file FROM diagnostics WHERE severity = 'error'"
 ```
 
 Use `--format json` for machine-readable output.
@@ -87,15 +87,15 @@ Use `--format json` for machine-readable output.
 Apply Turtle patches in CI (preview first):
 
 ```bash
-ontoindex patch ./ontology.ttl patches.json --preview
-ontoindex patch ./ontology.ttl patches.json
-ontoindex validate .
+ontocore patch ./ontology.ttl patches.json --preview
+ontocore patch ./ontology.ttl patches.json
+ontocore validate .
 ```
 
 Patch format: [patch-reference.md](patch-reference.md).
 
 ## Tips
 
-- Index only the ontology subtree if the repo is large: `ontoindex validate ./src/ontologies`
+- Index only the ontology subtree if the repo is large: `ontocore validate ./src/ontologies`
 - Resource limits apply — see [workspace-limits.md](workspace-limits.md)
-- For VS Code-only workflows, the same rules apply via `ontoindex validate` in CI; the extension is not required in the pipeline
+- For VS Code-only workflows, the same rules apply via `ontocore validate` in CI; the extension is not required in the pipeline

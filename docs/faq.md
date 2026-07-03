@@ -7,13 +7,13 @@ Common questions about OntoCode and OntoCore. For step-by-step fixes, see [Troub
 **What is the difference between OntoCode and OntoCore?**
 
 - **OntoCode** — VS Code IDE (explorer, inspector, Query Workbench, Manchester editor, diagnostics).
-- **OntoCore** — Rust semantic workspace engine (`ontocore` crate, `ontoindex-*` implementation, `ontoindex` CLI, `ontoindex-lsp`).
+- **OntoCore** — Rust semantic workspace engine (`ontocore` crate, `ontocore-*` implementation, `ontocore` CLI, `ontocore-lsp`).
 
-OntoCore was formerly referred to as **OntoIndex** in older documentation. This repository contains both products.
+OntoCore was formerly referred to as **OntoCore** in older documentation. This repository contains both products.
 
 **Is the API stable?**
 
-Pre-1.0. Published crates are at **0.9.x**. Library APIs, LSP JSON, and SQL table columns may change between minor releases until v1.0. Pin versions in CI with `cargo install ontoindex-cli --locked --version 0.9.0`. The `validate` and `classify` exit codes are documented in [workspace-limits.md](workspace-limits.md).
+Pre-1.0. Published crates are at **0.9.x**. Library APIs, LSP JSON, and SQL table columns may change between minor releases until v1.0. Pin versions in CI with `cargo install ontocore-cli --locked --version 0.9.0`. The `validate` and `classify` exit codes are documented in [workspace-limits.md](workspace-limits.md).
 
 **What ships in the current release?**
 
@@ -21,12 +21,12 @@ See [What ships today](SHIPPED.md) for the canonical capability matrix.
 
 ## Installation
 
-**I ran `cargo install ontoindex-cli` and `ontoindex query ./fixtures` failed.**
+**I ran `cargo install ontocore-cli` and `ontocore query ./fixtures` failed.**
 
 The `fixtures/` directory exists only in a git clone. Use your own ontology path:
 
 ```bash
-ontoindex query /path/to/your/ontologies "SELECT * FROM classes"
+ontocore query /path/to/your/ontologies "SELECT * FROM classes"
 ```
 
 See [getting-started.md](getting-started.md).
@@ -44,7 +44,7 @@ Yes. Download release binaries and VSIX from [GitHub Releases](https://github.co
 **The explorer is empty.**
 
 1. Run **OntoCode: Index Workspace** from the Command Palette.
-2. Check **View → Output → OntoIndex Language Server** for errors.
+2. Check **View → Output → OntoCore Language Server** for errors.
 3. Confirm the folder contains supported files (`.ttl`, `.owl`, etc.).
 
 **How do I run SQL or SPARQL in VS Code?**
@@ -67,7 +67,7 @@ Known limitation: only the **first** workspace folder is indexed. Open the prima
 
 - Trust the workspace.
 - Uninstall duplicate OntoCode versions.
-- Set `ontocode.lspPath` to a local `ontoindex-lsp` binary (`cargo install ontoindex-lsp`).
+- Set `ontocode.lspPath` to a local `ontocore-lsp` binary (`cargo install ontocore-lsp`).
 - See [vscode-install.md](vscode-install.md) and [troubleshooting.md](troubleshooting.md).
 
 **Does `ontocode.autoIndexOnOpen` do anything?**
@@ -83,7 +83,7 @@ A subset: single-table `SELECT`, `FROM`, `WHERE` with `=`, `!=`, `AND`, `OR`, an
 **How do I run SPARQL?**
 
 ```bash
-ontoindex sparql /path/to/ontologies "SELECT ?s ?p ?o WHERE { ?s ?p ?o } LIMIT 10"
+ontocore sparql /path/to/ontologies "SELECT ?s ?p ?o WHERE { ?s ?p ?o } LIMIT 10"
 ```
 
 See [sparql-reference.md](sparql-reference.md).
@@ -92,7 +92,7 @@ See [sparql-reference.md](sparql-reference.md).
 
 Both SQL and SPARQL **truncate** at 100,000 rows (no error). LSP responses include `truncated: true` when the cap is hit. See [workspace-limits.md](workspace-limits.md).
 
-**What does `ontoindex validate` check?**
+**What does `ontocore validate` check?**
 
 Parse errors plus catalog lint rules: broken imports, undefined prefixes, duplicate/missing labels, orphan classes. See [sql-reference.md](sql-reference.md) (`diagnostics` table).
 
@@ -114,9 +114,9 @@ No. OntoCore and OntoCode are local-first by default. See [security.md](security
 
 **What about LGPL (horned-owl)?**
 
-`ontoindex-owl` links horned-owl (LGPL-3.0) for Turtle axiom modeling and write-back. See [design/LICENSES.md](design/LICENSES.md).
+`ontocore-owl` links horned-owl (LGPL-3.0) for Turtle axiom modeling and write-back. See [design/LICENSES.md](design/LICENSES.md).
 
-**Can I expose ontoindex-lsp on the network?**
+**Can I expose ontocore-lsp on the network?**
 
 No. The LSP has no authentication. Use stdio with a trusted editor only. See [security.md](security.md).
 
@@ -129,7 +129,7 @@ Run **OntoCode: Run Reasoner** from the Command Palette, then use **OntoCode: Se
 **How do I classify in CI?**
 
 ```bash
-ontoindex classify /path/to/ontologies --profile el --format json
+ontocore classify /path/to/ontologies --profile el --format json
 ```
 
 Exits non-zero when unsatisfiable classes are found. See [CI integration](ci-integration.md) and [workspace-limits.md](workspace-limits.md).
@@ -164,7 +164,7 @@ Use **OntoCode: Open Class Graph** (and related commands). See [Graph visualizat
 
 **Does ROBOT require Java?**
 
-Yes. `ontoindex robot` and LSP `runRobot` spawn the external `robot` CLI. See [ROBOT interop guide](guides/robot-interop.md).
+Yes. `ontocore robot` and LSP `runRobot` spawn the external `robot` CLI. See [ROBOT interop guide](guides/robot-interop.md).
 
 **Which panels use React vs legacy HTML?**
 

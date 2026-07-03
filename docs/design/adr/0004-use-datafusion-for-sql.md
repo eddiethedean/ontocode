@@ -6,7 +6,7 @@
 
 ## Context
 
-OntoIndex should expose ontology concepts as SQL-queryable virtual tables.
+OntoCore should expose ontology concepts as SQL-queryable virtual tables.
 
 ## Decision
 

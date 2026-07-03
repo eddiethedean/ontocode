@@ -22,7 +22,7 @@ fn patch_complex_subclass_manchester() {
     let patch_file = tmp.path().join("patch.json");
     fs::write(&patch_file, serde_json::to_string(&patch).unwrap()).unwrap();
 
-    let bin = support::ontoindex_binary();
+    let bin = support::ontocore_binary();
     let output = Command::new(&bin)
         .args(["patch", dst.to_str().unwrap(), patch_file.to_str().unwrap()])
         .output()

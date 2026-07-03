@@ -22,8 +22,8 @@ Settings:
 ## CLI / CI
 
 ```bash
-ontoindex classify ./my-ontologies --profile el --format json
-ontoindex explain ./my-ontologies --class 'http://example.org/onto#Invalid' --profile el
+ontocore classify ./my-ontologies --profile el --format json
+ontocore explain ./my-ontologies --class 'http://example.org/onto#Invalid' --profile el
 ```
 
 - `classify` exits non-zero when unsatisfiable classes are found — see [workspace-limits.md](../workspace-limits.md).
@@ -33,7 +33,7 @@ CI example: [ci-integration.md](../ci-integration.md).
 
 ## LSP
 
-Custom methods: `ontoindex/runReasoner`, `ontoindex/getExplanation`. See [LSP API](../lsp-api.md).
+Custom methods: `ontocore/runReasoner`, `ontocore/getExplanation`. See [LSP API](../lsp-api.md).
 
 ## Profiles
 
@@ -47,7 +47,7 @@ Custom methods: `ontoindex/runReasoner`, `ontoindex/getExplanation`. See [LSP AP
 
 ## Dual-stack note
 
-OntoIndex keeps **two in-memory models** in v0.6:
+OntoCore keeps **two in-memory models** in v0.6:
 
 - **Oxigraph + Horned-OWL** — authoritative for indexing, SPARQL/SQL, Turtle write-back, asserted hierarchy.
 - **OntoLogos** — loads workspace Turtle/RDF files separately for classification.

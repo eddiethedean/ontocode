@@ -15,7 +15,7 @@ fn lsp_indexes_fixture_workspace() {
         .stdout(Stdio::piped())
         .stderr(Stdio::null())
         .spawn()
-        .expect("spawn ontoindex-lsp");
+        .expect("spawn ontocore-lsp");
 
     let stdout = child.stdout.take().expect("stdout");
     let mut stdin = child.stdin.take().expect("stdin");
@@ -57,7 +57,7 @@ fn lsp_indexes_fixture_workspace() {
     send_request(
         &mut stdin,
         2,
-        "ontoindex/indexWorkspace",
+        "ontocore/indexWorkspace",
         serde_json::json!({ "workspaceUri": workspace_uri }),
     );
 
@@ -72,7 +72,7 @@ fn lsp_indexes_fixture_workspace() {
     assert_eq!(stats.get("individual_count").and_then(|v| v.as_u64()), Some(2));
     assert_eq!(stats.get("error_count").and_then(|v| v.as_u64()), Some(0));
 
-    send_request(&mut stdin, 3, "ontoindex/getCatalogSnapshot", serde_json::json!(null));
+    send_request(&mut stdin, 3, "ontocore/getCatalogSnapshot", serde_json::json!(null));
 
     let snapshot = wait_for_id(&rx, 3, Duration::from_secs(10)).expect("snapshot response");
     let entities = snapshot
@@ -113,7 +113,7 @@ fn lsp_indexes_fixture_workspace() {
     send_request(
         &mut stdin,
         4,
-        "ontoindex/getEntity",
+        "ontocore/getEntity",
         serde_json::json!({ "iri": "http://example.org/people#Person" }),
     );
 
@@ -132,7 +132,7 @@ fn lsp_indexes_fixture_workspace() {
     send_request(
         &mut stdin,
         5,
-        "ontoindex/query",
+        "ontocore/query",
         serde_json::json!({ "sql": "SELECT short_name FROM classes" }),
     );
     let query_resp = wait_for_id(&rx, 5, Duration::from_secs(10)).expect("query response");
@@ -207,7 +207,7 @@ fn write_lsp_message(stdin: &mut impl Write, body: &str) {
 }
 
 fn lsp_binary() -> PathBuf {
-    if let Ok(path) = std::env::var("CARGO_BIN_EXE_ontoindex-lsp") {
+    if let Ok(path) = std::env::var("CARGO_BIN_EXE_ontocore-lsp") {
         let candidate = PathBuf::from(path);
         if candidate.exists() {
             return candidate;
@@ -219,7 +219,7 @@ fn lsp_binary() -> PathBuf {
             .map(PathBuf::from)
             .unwrap_or_else(|_| Path::new(env!("CARGO_MANIFEST_DIR")).join("target"));
         panic!(
-            "ontoindex-lsp binary not found under {} (run `cargo build -p ontoindex-lsp` first)",
+            "ontocore-lsp binary not found under {} (run `cargo build -p ontocore-lsp` first)",
             target_dir.display()
         );
     })
@@ -231,7 +231,7 @@ fn find_lsp_binary_in_target() -> Option<PathBuf> {
         .unwrap_or_else(|_| Path::new(env!("CARGO_MANIFEST_DIR")).join("target"));
 
     for subdir in ["debug", "release"] {
-        let candidate = target_dir.join(subdir).join("ontoindex-lsp");
+        let candidate = target_dir.join(subdir).join("ontocore-lsp");
         if candidate.exists() {
             return Some(candidate);
         }

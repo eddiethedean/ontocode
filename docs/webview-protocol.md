@@ -1,4 +1,4 @@
-# Webview message protocol (v0.8)
+# Webview message protocol (v0.9)
 
 Typed messages between the VS Code extension host (`extension/src/webviews/`) and the React app (`extension/webview-ui/`).
 

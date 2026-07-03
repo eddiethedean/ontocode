@@ -1,6 +1,6 @@
 # Query Workbench
 
-The **Query Workbench** is an OntoCode React panel for running **SQL** and **SPARQL** queries against your indexed workspace. Queries execute in **OntoCore** via LSP (`ontoindex/query`, `ontoindex/sparql`).
+The **Query Workbench** is an OntoCode React panel for running **SQL** and **SPARQL** queries against your indexed workspace. Queries execute in **OntoCore** via LSP (`ontocore/query`, `ontocore/sparql`).
 
 ## Open the workbench
 
@@ -47,8 +47,8 @@ More examples: [SPARQL reference](../sparql-reference.md) · [Query cookbook](..
 ## CLI equivalent
 
 ```bash
-ontoindex query . "SELECT short_name, labels FROM classes"
-ontoindex sparql . "SELECT ?s ?p ?o WHERE { ?s ?p ?o } LIMIT 10"
+ontocore query . "SELECT short_name, labels FROM classes"
+ontocore sparql . "SELECT ?s ?p ?o WHERE { ?s ?p ?o } LIMIT 10"
 ```
 
 See [Rust & CLI guide](../guides/rust-crates.md).

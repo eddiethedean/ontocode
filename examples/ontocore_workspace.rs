@@ -27,7 +27,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         );
     }
 
-    let hits = ws.search("Person")?;
+    let hits = ws.search("Person");
     println!("\nSearch 'Person': {} hit(s)", hits.len());
     for hit in hits.iter().take(5) {
         println!("  {} ({})", hit.entity.short_name, hit.entity.iri);

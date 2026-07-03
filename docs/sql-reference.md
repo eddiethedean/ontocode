@@ -1,11 +1,11 @@
 # SQL query reference (OntoCore v0.9)
 
-> **Status:** Documents behavior in **OntoIndex v0.8.0**. Pre-1.0 APIs may change.
+> **Status:** Documents behavior in **OntoCore v0.9.0**. Pre-1.0 APIs may change.
 > Canonical feature list: [What ships today](SHIPPED.md).
 
-OntoIndex exposes indexed ontology data as **virtual tables** queried with a SQL-like `SELECT` syntax. The CLI (`ontoindex query`) and Rust API (`query_catalog`) use the same engine.
+OntoCore exposes indexed ontology data as **virtual tables** queried with a SQL-like `SELECT` syntax. The CLI (`ontocore query`) and Rust API (`query_catalog`) use the same engine.
 
-**Source of truth:** [`sql.rs` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/crates/ontoindex-query/src/sql.rs)
+**Source of truth:** [`sql.rs` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/crates/ontocore-query/src/sql.rs)
 
 ## Supported SQL subset
 
@@ -20,8 +20,8 @@ OntoIndex exposes indexed ontology data as **virtual tables** queried with a SQL
 Not supported: `JOIN`, subqueries, `GROUP BY`, `ORDER BY`, SQL functions, `LIKE`, `IN`, or multiple tables.
 
 ```bash
-ontoindex query /path/to/ontologies "SELECT short_name FROM classes WHERE short_name != 'Person'"
-ontoindex query /path/to/ontologies "SELECT short_name FROM classes WHERE deprecated = 'false' AND short_name = 'Person'"
+ontocore query /path/to/ontologies "SELECT short_name FROM classes WHERE short_name != 'Person'"
+ontocore query /path/to/ontologies "SELECT short_name FROM classes WHERE deprecated = 'false' AND short_name = 'Person'"
 ```
 
 From a git clone, replace `/path/to/ontologies` with `fixtures`.
@@ -115,8 +115,8 @@ Entity tables share these columns (`properties` is the union of all property kin
 See [query cookbook](examples/queries.md) for a copy-paste cookbook.
 
 ```bash
-ontoindex query ./fixtures "SELECT * FROM classes"
-ontoindex query ./fixtures "SELECT short_name, labels FROM classes WHERE short_name = 'Person'"
-ontoindex query ./fixtures "SELECT * FROM annotations" --format json
-ontoindex query ./fixtures "SELECT code, message FROM diagnostics WHERE severity = 'warning'"
+ontocore query ./fixtures "SELECT * FROM classes"
+ontocore query ./fixtures "SELECT short_name, labels FROM classes WHERE short_name = 'Person'"
+ontocore query ./fixtures "SELECT * FROM annotations" --format json
+ontocore query ./fixtures "SELECT code, message FROM diagnostics WHERE severity = 'warning'"
 ```

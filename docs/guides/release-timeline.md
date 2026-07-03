@@ -1,6 +1,6 @@
 # Release timeline (non-commitment)
 
-Planning ranges for OntoCode / OntoIndex. **These are product goals, not contractual delivery dates.** Shipped behavior is always defined by [What ships today](../SHIPPED.md) for the version you deploy.
+Planning ranges for OntoCode / OntoCore. **These are product goals, not contractual delivery dates.** Shipped behavior is always defined by [What ships today](../SHIPPED.md) for the version you deploy.
 
 ## Current release
 
@@ -15,7 +15,8 @@ Pre-1.0: minor releases may change library APIs, LSP JSON, and SQL virtual table
 
 | Target | Goal | Shipped in |
 |--------|------|------------|
-| **v0.9** | Reasoner/explanation React migration; semantic Git diff; `ontologos-watch` hook | Planned |
+| **v0.9** | OntoCore identity — `ontocore` façade, branding, documentation | **Shipped** (2026-07-03) |
+| **v0.10** | Reasoner/explanation React migration; semantic Git diff; `ontologos-watch` hook | Planned |
 | **v1.0** | Protégé-competitive OWL + OBO in VS Code; OWL 2 DL via OntoLogos 1.0; full migration guide | Planned |
 
 Detailed engineering backlog: [v1.0 backlog](../design/v1.0_BACKLOG.md). Exit bar: [Protégé parity P0](../design/PROTEGE_PARITY.md) all green.
@@ -24,7 +25,7 @@ Detailed engineering backlog: [v1.0 backlog](../design/v1.0_BACKLOG.md). Exit ba
 
 ## What each near-term milestone implies
 
-### v0.9 (planned)
+### v0.10 (planned)
 
 - Semantic diff for PR review workflows
 - React reasoner/explanation panels (legacy HTML removed)

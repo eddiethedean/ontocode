@@ -40,11 +40,11 @@ OntoCode is a modern ontology IDE for VS Code, powered by <strong>OntoCore</stro
 **Not sure where to begin?** Pick a path:
 
 - **[OntoCode extension](ontocode/vscode-extension.md)** — Marketplace install, explorer, inspector, Query Workbench (no Rust required).
-- **[OntoCore](ontocore/index.md)** — Rust engine, `ontocore` crate, `ontoindex` CLI, CI and embedding.
+- **[OntoCore](ontocore/index.md)** — Rust engine, `ontocore` crate, `ontocore` CLI, CI and embedding.
 
-You do **not** need to clone this repo to use the extension or `cargo install ontoindex-cli`.
+You do **not** need to clone this repo to use the extension or `cargo install ontocore-cli`.
 
-> **Naming:** **OntoCode** is the VS Code IDE. **OntoCore** is the semantic workspace engine (`ontocore` crate, `ontoindex-*` implementation, `ontoindex` CLI, `ontoindex-lsp`).
+> **Naming:** **OntoCode** is the VS Code IDE. **OntoCore** is the semantic workspace engine (`ontocore` crate, `ontocore-*` implementation, `ontocore` CLI, `ontocore-lsp`).
 
 </div>
 
@@ -64,7 +64,7 @@ You do **not** need to clone this repo to use the extension or `cargo install on
 
     ---
 
-    `cargo install ontoindex-cli`, embed `ontocore` / `ontoindex-*` crates, validate and classify in CI.
+    `cargo install ontocore-cli`, embed `ontocore` / `ontocore-*` crates, validate and classify in CI.
 
     [:octicons-arrow-right-24: OntoCore docs](ontocore/index.md)
 
@@ -133,19 +133,19 @@ See the full matrix: **[What ships today](SHIPPED.md)**.
 | Capability | VS Code | CLI |
 |------------|---------|-----|
 | Browse classes, properties, individuals | Yes | via SQL |
-| Edit labels, comments, parents (`.ttl`) | Yes | `ontoindex patch` |
-| Complex `SubClassOf` / `EquivalentClasses` (Manchester) | Yes | `ontoindex patch` |
-| Create / delete entities (`.ttl`) | Yes | `ontoindex patch` |
-| SQL-like queries | Query Workbench | `ontoindex query` |
-| SPARQL | Query Workbench | `ontoindex sparql` |
-| Graph visualization (class, property, import, neighborhood) | Yes (React) | LSP `ontoindex/getGraph` |
-| OBO format index + `obo_id` in explorer | Yes | `ontoindex inspect` |
-| ROBOT interop | — | `ontoindex robot validate\|merge\|report` |
+| Edit labels, comments, parents (`.ttl`) | Yes | `ontocore patch` |
+| Complex `SubClassOf` / `EquivalentClasses` (Manchester) | Yes | `ontocore patch` |
+| Create / delete entities (`.ttl`) | Yes | `ontocore patch` |
+| SQL-like queries | Query Workbench | `ontocore query` |
+| SPARQL | Query Workbench | `ontocore sparql` |
+| Graph visualization (class, property, import, neighborhood) | Yes (React) | LSP `ontocore/getGraph` |
+| OBO format index + `obo_id` in explorer | Yes | `ontocore inspect` |
+| ROBOT interop | — | `ontocore robot validate\|merge\|report` |
 | React webview UI | Inspector + graphs | — |
-| EL/RL/RDFS classification | Reasoner panel | `ontoindex classify` |
+| EL/RL/RDFS classification | Reasoner panel | `ontocore classify` |
 | Inferred hierarchy toggle | Explorer | via `classify` JSON |
-| EL explanations (where available) | Explanation panel | `ontoindex explain` |
-| Diagnostics / lint | Problems panel | `ontoindex validate` |
+| EL explanations (where available) | Explanation panel | `ontocore explain` |
+| Diagnostics / lint | Problems panel | `ontocore validate` |
 
 ## Quick start
 
@@ -158,9 +158,9 @@ See the full matrix: **[What ships today](SHIPPED.md)**.
 === "CLI (install)"
 
     ```bash
-    cargo install ontoindex-cli --locked
-    ontoindex query /path/to/ontologies "SELECT * FROM classes"
-    ontoindex validate /path/to/ontologies
+    cargo install ontocore-cli --locked
+    ontocore query /path/to/ontologies "SELECT * FROM classes"
+    ontocore validate /path/to/ontologies
     ```
 
 === "CLI (clone)"

@@ -1,12 +1,12 @@
 # OBO workflows
 
-OntoIndex v0.8.0 indexes **OBO Format** (`.obo`) files and exposes `obo_id` in the catalog and SQL virtual tables. Write-back in VS Code remains **Turtle only** — OBO files are read-only in the Entity Inspector.
+OntoCore v0.9.0 indexes **OBO Format** (`.obo`) files and exposes `obo_id` in the catalog and SQL virtual tables. Write-back in VS Code remains **Turtle only** — OBO files are read-only in the Entity Inspector.
 
 Canonical capability matrix: [What ships today](../SHIPPED.md).
 
 ## Prerequisites
 
-- OntoCode v0.8.0+ or `ontoindex-cli` 0.8.0+
+- OntoCode v0.9.0+ or `ontocore-cli` 0.9.0+
 - Workspace containing `.obo` files (or mixed `.obo` + RDF)
 
 ## Index and browse
@@ -20,14 +20,14 @@ Supported extensions: `.obo` (syntax highlighting included).
 ## Query `obo_id` from SQL
 
 ```bash
-ontoindex query /path/to/workspace "SELECT obo_id, short_name, labels FROM entities WHERE obo_id IS NOT NULL"
+ontocore query /path/to/workspace "SELECT obo_id, short_name, labels FROM entities WHERE obo_id IS NOT NULL"
 ```
 
 See [SQL reference](../sql-reference.md) for the `obo_id` column.
 
 ## Write-back policy
 
-| Format | Index / query | VS Code inspector edit | `ontoindex patch` |
+| Format | Index / query | VS Code inspector edit | `ontocore patch` |
 |--------|---------------|------------------------|-------------------|
 | `.obo` | Yes | Read-only | Not supported |
 | `.ttl` | Yes | Yes | Yes |
@@ -47,7 +47,7 @@ cargo run -- query examples/obo-workflow "SELECT obo_id, labels FROM entities"
 
 ## ROBOT validation
 
-OBO pipelines often use [ROBOT](http://robot.obolibrary.org/). See [ROBOT interop guide](robot-interop.md) for `ontoindex robot validate` and CI recipes.
+OBO pipelines often use [ROBOT](http://robot.obolibrary.org/). See [ROBOT interop guide](robot-interop.md) for `ontocore robot validate` and CI recipes.
 
 ## Limitations
 

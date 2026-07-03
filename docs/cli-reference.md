@@ -1,14 +1,14 @@
 # CLI reference (OntoCore v0.9)
 
-The `ontoindex` binary indexes ontology workspaces and exposes query, validation, patch, and reasoning commands.
+The `ontocore` binary indexes ontology workspaces and exposes query, validation, patch, and reasoning commands.
 
 Install:
 
 ```bash
-cargo install ontoindex-cli --locked
+cargo install ontocore-cli --locked
 ```
 
-From a git clone, use `cargo run --` instead of `ontoindex`.
+From a git clone, use `cargo run --` instead of `ontocore`.
 
 ## Global output formats
 
@@ -21,8 +21,8 @@ Several commands accept `--format text|json|csv` (where noted). Default is `text
 Scan and index ontology files in a workspace.
 
 ```bash
-ontoindex index [workspace]
-ontoindex index ./ontologies --format json
+ontocore index [workspace]
+ontocore index ./ontologies --format json
 ```
 
 Default workspace: `.` (current directory).
@@ -32,8 +32,8 @@ Default workspace: `.` (current directory).
 Print catalog statistics (same data as `index`, human-oriented output by default).
 
 ```bash
-ontoindex inspect fixtures
-ontoindex inspect /path/to/ontologies --format json
+ontocore inspect fixtures
+ontocore inspect /path/to/ontologies --format json
 ```
 
 ### `query`
@@ -41,8 +41,8 @@ ontoindex inspect /path/to/ontologies --format json
 Run a SQL-like query against virtual tables. See [SQL reference](sql-reference.md).
 
 ```bash
-ontoindex query fixtures "SELECT short_name, labels FROM classes"
-ontoindex query . "SELECT code, message FROM diagnostics WHERE severity = 'error'" --format json
+ontocore query fixtures "SELECT short_name, labels FROM classes"
+ontocore query . "SELECT code, message FROM diagnostics WHERE severity = 'error'" --format json
 ```
 
 **Exit:** 0 on success; non-zero on parse/unsupported SQL/I/O errors.
@@ -52,7 +52,7 @@ ontoindex query . "SELECT code, message FROM diagnostics WHERE severity = 'error
 Run SPARQL against indexed triples. See [SPARQL reference](sparql-reference.md).
 
 ```bash
-ontoindex sparql fixtures "SELECT ?s ?p ?o WHERE { ?s ?p ?o } LIMIT 10"
+ontocore sparql fixtures "SELECT ?s ?p ?o WHERE { ?s ?p ?o } LIMIT 10"
 ```
 
 **Exit:** 0 on success; non-zero on failure. Results truncate at 100,000 rows.
@@ -62,8 +62,8 @@ ontoindex sparql fixtures "SELECT ?s ?p ?o WHERE { ?s ?p ?o } LIMIT 10"
 Index workspace and fail if diagnostic **errors** exist (warnings allowed).
 
 ```bash
-ontoindex validate .
-ontoindex validate /path/to/ontologies
+ontocore validate .
+ontocore validate /path/to/ontologies
 ```
 
 **Exit:** 0 when no errors; non-zero otherwise. Stable for CI — [ci-integration.md](ci-integration.md).
@@ -73,8 +73,8 @@ ontoindex validate /path/to/ontologies
 Apply Turtle patch operations from a JSON file. See [patch reference](patch-reference.md).
 
 ```bash
-ontoindex patch ./ontology.ttl patches.json --preview
-ontoindex patch ./ontology.ttl patches.json
+ontocore patch ./ontology.ttl patches.json --preview
+ontocore patch ./ontology.ttl patches.json
 ```
 
 **Exit:** 0 on success; non-zero on invalid patch or unsupported format.
@@ -84,9 +84,9 @@ ontoindex patch ./ontology.ttl patches.json
 Run [ROBOT](http://robot.obolibrary.org/) CLI subcommands. Requires Java and `robot` on `PATH` (or `--robot-path`). See [ROBOT interop guide](guides/robot-interop.md).
 
 ```bash
-ontoindex robot validate path/to/ontology.owl
-ontoindex robot merge --inputs a.owl --inputs b.owl --output merged.owl
-ontoindex robot report path/to/ontology.owl --report report.tsv
+ontocore robot validate path/to/ontology.owl
+ontocore robot merge --inputs a.owl --inputs b.owl --output merged.owl
+ontocore robot report path/to/ontology.owl --report report.tsv
 ```
 
 | Subcommand | Description |
@@ -104,9 +104,9 @@ Optional `--robot-path` overrides the `robot` executable (same as VS Code `ontoc
 Run OWL classification via OntoLogos 0.9.0.
 
 ```bash
-ontoindex classify ./ontologies --profile el
-ontoindex classify . --profile rl --format json
-ontoindex classify . --profile el --no-auto-profile
+ontocore classify ./ontologies --profile el
+ontocore classify . --profile rl --format json
+ontocore classify . --profile el --no-auto-profile
 ```
 
 | Flag | Default | Description |
@@ -126,8 +126,8 @@ See [Reasoner guide](guides/reasoner.md) and [workspace-limits.md](workspace-lim
 Explain unsatisfiability for a class IRI (requires OntoLogos explain support).
 
 ```bash
-ontoindex explain ./ontologies --class 'http://example.org#Invalid' --profile el
-ontoindex explain . --class 'http://example.org#Invalid' --format json
+ontocore explain ./ontologies --class 'http://example.org#Invalid' --profile el
+ontocore explain . --class 'http://example.org#Invalid' --format json
 ```
 
 | Flag | Default | Description |
@@ -147,8 +147,8 @@ Workspace-wide Turtle refactoring. See [Refactoring guide](guides/refactoring.md
 List usages of an entity IRI across the workspace.
 
 ```bash
-ontoindex refactor usages fixtures 'http://example.org/people#Person'
-ontoindex refactor usages . 'http://example.org/people#Person' --format json
+ontocore refactor usages fixtures 'http://example.org/people#Person'
+ontocore refactor usages . 'http://example.org/people#Person' --format json
 ```
 
 **Exit:** 0 on success; non-zero on index failure.
@@ -158,12 +158,12 @@ ontoindex refactor usages . 'http://example.org/people#Person' --format json
 Rename an entity IRI in all Turtle files.
 
 ```bash
-ontoindex refactor rename fixtures \
+ontocore refactor rename fixtures \
   --from 'http://example.org/people#Person' \
   --to 'http://example.org/people#Human' \
   --preview
 
-ontoindex refactor rename fixtures \
+ontocore refactor rename fixtures \
   --from 'http://example.org/people#Person' \
   --to 'http://example.org/people#Human'
 ```
@@ -180,7 +180,7 @@ ontoindex refactor rename fixtures \
 Replace a namespace base IRI across Turtle files (`@prefix` and term IRIs).
 
 ```bash
-ontoindex refactor migrate-namespace fixtures \
+ontocore refactor migrate-namespace fixtures \
   --from 'http://example.org/people#' \
   --to 'http://example.org/v2/people#' \
   --preview
@@ -198,7 +198,7 @@ ontoindex refactor migrate-namespace fixtures \
 Move an entity block to another Turtle file.
 
 ```bash
-ontoindex refactor move fixtures 'http://example.org/people#Student' \
+ontocore refactor move fixtures 'http://example.org/people#Student' \
   --to ./students.ttl \
   --preview
 ```
@@ -214,7 +214,7 @@ ontoindex refactor move fixtures 'http://example.org/people#Student' \
 Extract selected entities into a new module file.
 
 ```bash
-ontoindex refactor extract fixtures \
+ontocore refactor extract fixtures \
   --entities 'http://example.org/people#Person,http://example.org/people#Student' \
   --out ./core.ttl \
   --leave-stub \

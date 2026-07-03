@@ -1,6 +1,6 @@
 # OntoCore crate map
 
-OntoCore is currently implemented by the `ontoindex-*` crates. The [`ontocore`](https://crates.io/crates/ontocore) crate is the public façade.
+OntoCore is currently implemented by the `ontocore-*` crates. The [`ontocore`](https://crates.io/crates/ontocore) crate is the public façade.
 
 ## Façade
 
@@ -22,33 +22,33 @@ use ontocore::catalog::IndexBuilder;  // lower-level
 
 | Crate | Role |
 |-------|------|
-| `ontoindex-core` | Types, workspace scanner, limits, path jail |
-| `ontoindex-parser` | RDF parsing (Oxigraph), OBO index |
-| `ontoindex-catalog` | Index builder, entity API, graph payloads |
-| `ontoindex-query` | SQL virtual tables, SPARQL |
-| `ontoindex-owl` | Horned-OWL facade, patches, Manchester |
-| `ontoindex-diagnostics` | Lint rules |
-| `ontoindex-reasoner` | OntoLogos classification facade |
-| `ontoindex-refactor` | Workspace refactoring |
-| `ontoindex-robot` | ROBOT CLI wrappers |
-| `ontoindex-lsp` | Language server binary + protocol types |
-| `ontoindex-cli` | `ontoindex` binary |
+| `ontocore-core` | Types, workspace scanner, limits, path jail |
+| `ontocore-parser` | RDF parsing (Oxigraph), OBO index |
+| `ontocore-catalog` | Index builder, entity API, graph payloads |
+| `ontocore-query` | SQL virtual tables, SPARQL |
+| `ontocore-owl` | Horned-OWL facade, patches, Manchester |
+| `ontocore-diagnostics` | Lint rules |
+| `ontocore-reasoner` | OntoLogos classification facade |
+| `ontocore-refactor` | Workspace refactoring |
+| `ontocore-robot` | ROBOT CLI wrappers |
+| `ontocore-lsp` | Language server binary + protocol types |
+| `ontocore-cli` | `ontocore` binary |
 
-`ontoindex-robot` is not re-exported by `ontocore` — use `ontoindex-robot` or the CLI directly for ROBOT interop.
+`ontocore-robot` is not re-exported by `ontocore` — use `ontocore-robot` or the CLI directly for ROBOT interop.
 
 ## Module map (`ontocore`)
 
 | `ontocore` module | Source crate |
 |-------------------|--------------|
-| `workspace` | Wraps `ontoindex-catalog` |
-| `catalog` | `ontoindex-catalog` |
-| `query` | `ontoindex-query` |
-| `diagnostics` | `ontoindex-diagnostics` |
-| `parser` | `ontoindex-parser` |
-| `owl` | `ontoindex-owl` |
-| `reasoner` | `ontoindex-reasoner` |
-| `refactor` | `ontoindex-refactor` |
-| `lsp` | `ontoindex-lsp` (feature `lsp`, default on) |
+| `workspace` | Wraps `ontocore-catalog` |
+| `catalog` | `ontocore-catalog` |
+| `query` | `ontocore-query` |
+| `diagnostics` | `ontocore-diagnostics` |
+| `parser` | `ontocore-parser` |
+| `owl` | `ontocore-owl` |
+| `reasoner` | `ontocore-reasoner` |
+| `refactor` | `ontocore-refactor` |
+| `lsp` | `ontocore-lsp` (feature `lsp`, default on) |
 
 ## Examples
 

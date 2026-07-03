@@ -1,8 +1,8 @@
 # OntoCode
 
-**OntoCode** is the VS Code ontology IDE, powered by **OntoCore** (`ontoindex-lsp` language server).
+**OntoCode** is the VS Code ontology IDE, powered by **OntoCore** (`ontocore-lsp` language server).
 
-[![Documentation](https://readthedocs.org/projects/ontocode-vs/badge/?version=latest)](https://ontocode-vs.readthedocs.io/en/latest/guides/vscode-extension/)
+[![Documentation](https://readthedocs.org/projects/ontocode-vs/badge/?version=latest)](https://ontocode-vs.readthedocs.io/en/latest/ontocode/vscode-extension/)
 [![VS Code extension docs](https://img.shields.io/badge/docs-VS%20Code%20extension-blue)](https://ontocode-vs.readthedocs.io/en/latest/ontocode/vscode-extension/)
 [![First success](https://img.shields.io/badge/docs-First%20success-blue)](https://ontocode-vs.readthedocs.io/en/latest/guides/first-success/)
 
@@ -133,7 +133,7 @@ Open **Settings** and search `ontocode`:
 
 | Setting | Default | Description |
 |---------|---------|-------------|
-| `ontocode.lspPath` | *(empty)* | Path to `ontoindex-lsp` binary. **Trusted workspaces only.** Leave empty to use the bundled server |
+| `ontocode.lspPath` | *(empty)* | Path to `ontocore-lsp` binary. **Trusted workspaces only.** Leave empty to use the bundled server |
 | `ontocode.queryHistoryLimit` | `20` | Max entries in Query Workbench history |
 | `ontocode.reasoner.default` | `el` | Default profile for Run Reasoner |
 | `ontocode.reasoner.autoProfile` | `true` | Profile-detection warnings |
@@ -149,8 +149,8 @@ Indexing is driven by the language server on startup; `ontocode.autoIndexOnOpen`
 |---------|-------------|
 | Sidebar says *“Index workspace to browse ontologies”* | Run **OntoCode: Index Workspace**; confirm the folder contains `.ttl`, `.owl`, etc. |
 | Extension never activates | Open a supported ontology file, or click **OntoCode → Ontologies** |
-| `failed to start language server` | Check **View → Output → OntoIndex Language Server**. Uninstall older OntoCode versions. Set `ontocode.lspPath` or `cargo install ontoindex-lsp` |
-| Empty **Classes** after indexing | **Output → OntoIndex Language Server** for errors; run **Index Workspace** again |
+| `failed to start language server` | Check **View → Output → OntoCore Language Server**. Uninstall older OntoCode versions. Set `ontocode.lspPath` or `cargo install ontocore-lsp` |
+| Empty **Classes** after indexing | **Output → OntoCore Language Server** for errors; run **Index Workspace** again |
 | No items under **Diagnostics** | Index must complete first; check **Problems** panel for the same issues |
 | Cannot edit in inspector | Write-back is **Turtle (`.ttl`) only**; other formats are read-only |
 | Workspace is Restricted | **Trust** the folder — `ontocode.lspPath` is ignored in Restricted Mode |
@@ -164,19 +164,19 @@ More detail: [Installation & troubleshooting](https://ontocode-vs.readthedocs.io
 
 **Shipped:** explorer; **React** entity inspector, graph panels, Query Workbench, Manchester editor, and Refactor Preview; workspace refactor (rename IRI, migrate namespace, move, extract); EL/RL/RDFS reasoner; OBO syntax highlighting and indexing (write-back: Turtle only); diagnostics; LSP navigation and refactoring.
 
-**Planned:** full DL reasoning (OntoLogos 1.0); semantic diff (v0.9).
+**Planned:** full DL reasoning (OntoLogos 1.0); semantic diff (v0.10).
 
 ---
 
 ## Platform support
 
-Release builds bundle `ontoindex-lsp` for Linux (x64, arm64), macOS (Apple Silicon, Intel), and Windows (x64). No extra install needed on those platforms.
+Release builds bundle `ontocore-lsp` for Linux (x64, arm64), macOS (Apple Silicon, Intel), and Windows (x64). No extra install needed on those platforms.
 
 ---
 
 ## Links
 
-- [VS Code extension documentation](https://ontocode-vs.readthedocs.io/en/latest/guides/vscode-extension/) — full extension guide on Read the Docs
+- [OntoCode extension documentation](https://ontocode-vs.readthedocs.io/en/latest/ontocode/vscode-extension/) — full extension guide on Read the Docs
 - **Getting started:** [First success](https://ontocode-vs.readthedocs.io/en/latest/guides/first-success/) · [VS Code install & troubleshooting](https://ontocode-vs.readthedocs.io/en/latest/vscode-install/)
 - **Guides:** [Reasoner](https://ontocode-vs.readthedocs.io/en/latest/guides/reasoner/) · [Query Workbench](https://ontocode-vs.readthedocs.io/en/latest/guides/query-workbench/) · [Manchester editor](https://ontocode-vs.readthedocs.io/en/latest/guides/manchester-editor/) · [Authoring & patches](https://ontocode-vs.readthedocs.io/en/latest/authoring/)
 - **Reference:** [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) · [Patch reference](https://ontocode-vs.readthedocs.io/en/latest/patch-reference/) · [SQL](https://ontocode-vs.readthedocs.io/en/latest/sql-reference/) · [SPARQL](https://ontocode-vs.readthedocs.io/en/latest/sparql-reference/) · [LSP API](https://ontocode-vs.readthedocs.io/en/latest/lsp-api/)

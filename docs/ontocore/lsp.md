@@ -1,31 +1,31 @@
 # OntoCore LSP
 
-**OntoCore LSP** is currently provided by the **`ontoindex-lsp`** binary and crate. The VS Code extension bundles this server and communicates over stdio.
+**OntoCore LSP** is currently provided by the **`ontocore-lsp`** binary and crate. The VS Code extension bundles this server and communicates over stdio.
 
 ## Binary
 
 | Platform artifact | Name |
 |-------------------|------|
-| Language server | `ontoindex-lsp` |
-| Bundled path (extension) | `extension/server/<platform>-<arch>/ontoindex-lsp` |
+| Language server | `ontocore-lsp` |
+| Bundled path (extension) | `extension/server/<platform>-<arch>/ontocore-lsp` |
 
 A rename to `ontocore-lsp` is planned after the public API stabilizes (v1.0 target).
 
 ## Custom methods
 
-OntoCore exposes workspace operations via `ontoindex/*` LSP methods:
+OntoCore exposes workspace operations via `ontocore/*` LSP methods:
 
 | Method | Purpose |
 |--------|---------|
-| `ontoindex/indexWorkspace` | Index workspace folder |
-| `ontoindex/getCatalogSnapshot` | Explorer tree data |
-| `ontoindex/getEntity` | Entity inspector payload |
-| `ontoindex/getGraph` | Graph visualization data |
-| `ontoindex/query` / `ontoindex/sparql` | Query workbench |
-| `ontoindex/applyAxiomPatch` | Turtle write-back |
-| `ontoindex/parseManchester` | Manchester editor |
-| `ontoindex/runReasoner` / `ontoindex/getExplanation` | Reasoning |
-| `ontoindex/findUsages` / `ontoindex/previewRefactor` / `ontoindex/applyRefactor` | Refactoring |
+| `ontocore/indexWorkspace` | Index workspace folder |
+| `ontocore/getCatalogSnapshot` | Explorer tree data |
+| `ontocore/getEntity` | Entity inspector payload |
+| `ontocore/getGraph` | Graph visualization data |
+| `ontocore/query` / `ontocore/sparql` | Query workbench |
+| `ontocore/applyAxiomPatch` | Turtle write-back |
+| `ontocore/parseManchester` | Manchester editor |
+| `ontocore/runReasoner` / `ontocore/getExplanation` | Reasoning |
+| `ontocore/findUsages` / `ontocore/previewRefactor` / `ontocore/applyRefactor` | Refactoring |
 
 Full wire format: **[LSP API reference](../lsp-api.md)**.
 
@@ -43,4 +43,4 @@ Protocol types: `ontocore::lsp::protocol`.
 
 ## Diagnostics
 
-LSP publishes diagnostics with `source: "ontoindex"`. This identifier is unchanged in v0.9 for compatibility.
+LSP publishes diagnostics with `source: "ontocore"`. This identifier is unchanged in v0.9 for compatibility.

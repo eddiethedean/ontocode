@@ -970,13 +970,13 @@ name = "ontocode"
 version = "0.9.0"
 dependencies = [
  "ontocore",
- "ontoindex-catalog",
- "ontoindex-core",
- "ontoindex-lsp",
- "ontoindex-owl",
- "ontoindex-parser",
- "ontoindex-query",
- "ontoindex-reasoner",
+ "ontocore-catalog",
+ "ontocore-core",
+ "ontocore-lsp",
+ "ontocore-owl",
+ "ontocore-parser",
+ "ontocore-query",
+ "ontocore-reasoner",
  "serde_json",
  "tempfile",
 ]
@@ -985,49 +985,49 @@ dependencies = [
 name = "ontocore"
 version = "0.9.0"
 dependencies = [
- "ontoindex-catalog",
- "ontoindex-core",
- "ontoindex-diagnostics",
- "ontoindex-lsp",
- "ontoindex-owl",
- "ontoindex-parser",
- "ontoindex-query",
- "ontoindex-reasoner",
- "ontoindex-refactor",
+ "ontocore-catalog",
+ "ontocore-core",
+ "ontocore-diagnostics",
+ "ontocore-lsp",
+ "ontocore-owl",
+ "ontocore-parser",
+ "ontocore-query",
+ "ontocore-reasoner",
+ "ontocore-refactor",
  "tempfile",
 ]
 
 [[package]]
-name = "ontoindex-catalog"
+name = "ontocore-catalog"
 version = "0.9.0"
 dependencies = [
- "ontoindex-core",
- "ontoindex-diagnostics",
- "ontoindex-owl",
- "ontoindex-parser",
+ "ontocore-core",
+ "ontocore-diagnostics",
+ "ontocore-owl",
+ "ontocore-parser",
  "oxigraph",
  "serde",
  "thiserror 2.0.18",
 ]
 
 [[package]]
-name = "ontoindex-cli"
+name = "ontocore-cli"
 version = "0.9.0"
 dependencies = [
  "anyhow",
  "clap 4.6.1",
- "ontoindex-catalog",
- "ontoindex-core",
- "ontoindex-owl",
- "ontoindex-query",
- "ontoindex-reasoner",
- "ontoindex-refactor",
- "ontoindex-robot",
+ "ontocore-catalog",
+ "ontocore-core",
+ "ontocore-owl",
+ "ontocore-query",
+ "ontocore-reasoner",
+ "ontocore-refactor",
+ "ontocore-robot",
  "serde_json",
 ]
 
 [[package]]
-name = "ontoindex-core"
+name = "ontocore-core"
 version = "0.9.0"
 dependencies = [
  "hex",
@@ -1040,27 +1040,27 @@ dependencies = [
 ]
 
 [[package]]
-name = "ontoindex-diagnostics"
+name = "ontocore-diagnostics"
 version = "0.9.0"
 dependencies = [
- "ontoindex-core",
+ "ontocore-core",
  "regex",
 ]
 
 [[package]]
-name = "ontoindex-lsp"
+name = "ontocore-lsp"
 version = "0.9.0"
 dependencies = [
  "crossbeam-channel",
  "lsp-server",
  "lsp-types",
- "ontoindex-catalog",
- "ontoindex-core",
- "ontoindex-owl",
- "ontoindex-query",
- "ontoindex-reasoner",
- "ontoindex-refactor",
- "ontoindex-robot",
+ "ontocore-catalog",
+ "ontocore-core",
+ "ontocore-owl",
+ "ontocore-query",
+ "ontocore-reasoner",
+ "ontocore-refactor",
+ "ontocore-robot",
  "serde",
  "serde_json",
  "tempfile",
@@ -1069,12 +1069,12 @@ dependencies = [
 ]
 
 [[package]]
-name = "ontoindex-owl"
+name = "ontocore-owl"
 version = "0.9.0"
 dependencies = [
  "horned-functional",
  "horned-owl 1.4.0",
- "ontoindex-core",
+ "ontocore-core",
  "oxigraph",
  "serde",
  "serde_json",
@@ -1083,10 +1083,10 @@ dependencies = [
 ]
 
 [[package]]
-name = "ontoindex-parser"
+name = "ontocore-parser"
 version = "0.9.0"
 dependencies = [
- "ontoindex-core",
+ "ontocore-core",
  "oxigraph",
  "regex",
  "serde",
@@ -1095,12 +1095,12 @@ dependencies = [
 ]
 
 [[package]]
-name = "ontoindex-query"
+name = "ontocore-query"
 version = "0.9.0"
 dependencies = [
  "csv",
- "ontoindex-catalog",
- "ontoindex-core",
+ "ontocore-catalog",
+ "ontocore-core",
  "oxigraph",
  "serde",
  "serde_json",
@@ -1109,12 +1109,12 @@ dependencies = [
 ]
 
 [[package]]
-name = "ontoindex-reasoner"
+name = "ontocore-reasoner"
 version = "0.9.0"
 dependencies = [
  "hex",
- "ontoindex-catalog",
- "ontoindex-core",
+ "ontocore-catalog",
+ "ontocore-core",
  "ontologos-bridge",
  "ontologos-core",
  "ontologos-el",
@@ -1132,19 +1132,19 @@ dependencies = [
 ]
 
 [[package]]
-name = "ontoindex-refactor"
+name = "ontocore-refactor"
 version = "0.9.0"
 dependencies = [
- "ontoindex-catalog",
- "ontoindex-core",
- "ontoindex-owl",
+ "ontocore-catalog",
+ "ontocore-core",
+ "ontocore-owl",
  "serde",
  "tempfile",
  "thiserror 2.0.18",
 ]
 
 [[package]]
-name = "ontoindex-robot"
+name = "ontocore-robot"
 version = "0.9.0"
 dependencies = [
  "thiserror 2.0.18",

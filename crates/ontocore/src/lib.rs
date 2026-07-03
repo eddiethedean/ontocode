@@ -3,8 +3,7 @@
 //! OntoCore indexes ontology workspaces and provides search, diagnostics, refactoring,
 //! SQL, SPARQL, reasoning integration, and LSP services.
 //!
-//! Implementation is currently provided by the `ontoindex-*` crates.
-//! Those crate names remain stable until the public API reaches 1.0.
+//! Implementation is provided by the `ontocore-*` crates.
 
 pub mod catalog;
 pub mod diagnostics;
@@ -18,4 +17,4 @@ pub mod workspace;
 #[cfg(feature = "lsp")]
 pub mod lsp;
 
-pub use ontoindex_core::{Diagnostic, Entity, OntoIndexError};
+pub use ontocore_core::{Diagnostic, Entity, OntoCoreError};

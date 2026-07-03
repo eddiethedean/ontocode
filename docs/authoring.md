@@ -1,6 +1,6 @@
 # Ontology authoring (OntoCore v0.9)
 
-> **Status:** Documents behavior in **OntoIndex v0.8.0**. Pre-1.0 APIs may change.
+> **Status:** Documents behavior in **OntoCore v0.9.0**. Pre-1.0 APIs may change.
 > Canonical feature list: [What ships today](SHIPPED.md).
 
 OntoCode provides **Turtle write-back** for simple and **Manchester** ontology edits without Protégé.
@@ -32,7 +32,7 @@ Full JSON reference: [patch-reference.md](patch-reference.md).
 1. Open a `.ttl` ontology and select an entity in the OntoCode explorer.
 2. Use the **Entity Inspector** edit section: add labels, comments, parents, or delete.
 3. Use context menu **Create Class/Property/Individual** on explorer views.
-4. Changes apply via `ontoindex/applyAxiomPatch` and trigger a workspace reindex.
+4. Changes apply via `ontocore/applyAxiomPatch` and trigger a workspace reindex.
 5. VS Code undo works on saved file changes.
 
 ## Manchester editor
@@ -88,16 +88,16 @@ Run **OntoCode: Open Query Workbench** from the Command Palette.
 ```
 
 ```bash
-ontoindex patch ./people.ttl patches.json --preview
-ontoindex patch ./people.ttl patches.json
-ontoindex validate .
+ontocore patch ./people.ttl patches.json --preview
+ontocore patch ./people.ttl patches.json
+ontocore validate .
 ```
 
 More examples: [patch-reference.md](patch-reference.md).
 
 ## Horned-OWL dual stack
 
-For Turtle files, catalog **entities and axioms** come from [Horned-OWL](https://github.com/phillord/horned-owl) via `ontoindex-owl`. Oxigraph remains authoritative for triple counts and SPARQL. CI runs `owl_oxigraph_consistency` tests on fixtures.
+For Turtle files, catalog **entities and axioms** come from [Horned-OWL](https://github.com/phillord/horned-owl) via `ontocore-owl`. Oxigraph remains authoritative for triple counts and SPARQL. CI runs `owl_oxigraph_consistency` tests on fixtures.
 
 ## Unsaved buffers
 

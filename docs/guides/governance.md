@@ -6,9 +6,9 @@ What enterprise evaluators can determine from **published documentation and repo
 
 | Aspect | Status |
 |--------|--------|
-| **Product** | Open-source OntoCode (VS Code) + OntoIndex (Rust engine) |
+| **Product** | Open-source OntoCode (VS Code IDE) + OntoCore (Rust engine) |
 | **License** | MIT OR Apache-2.0 (application crates); third-party licenses in [LICENSES.md](../design/LICENSES.md) |
-| **Distribution** | GitHub Releases (VSIX, CLI, LSP), VS Code Marketplace, [crates.io](https://crates.io/search?q=ontoindex) |
+| **Distribution** | GitHub Releases (VSIX, CLI, LSP), VS Code Marketplace, [crates.io](https://crates.io/search?q=ontocore) |
 | **Commercial support** | **Not offered** — community via [GitHub issues](https://github.com/eddiethedean/ontocode/issues) |
 | **Vendor / company** | Not documented as a separate legal entity |
 
@@ -20,6 +20,7 @@ Recent documented releases (see [changelog](../changelog.md)):
 
 | Version | Date (changelog) |
 |---------|------------------|
+| 0.9.0 | 2026-07-03 |
 | 0.8.0 | 2026-06-26 |
 | 0.7.0 | 2026-06-25 |
 | 0.6.0 | 2026-06-24 |
@@ -32,9 +33,9 @@ Maintainers follow [releasing.md](../releasing.md): version bump, CHANGELOG, SHI
 
 | Stream | Security support (documented) |
 |--------|-------------------------------|
-| **0.8.x** | Yes — [security policy](../security.md) |
-| **0.7.x** | Best effort |
-| **≤ 0.6.x** | No |
+| **0.9.x** | Yes — [security policy](../security.md) |
+| **0.8.x** | Best effort |
+| **≤ 0.7.x** | No |
 
 Pin versions in CI and desktop rollouts; do not assume automatic long-term backports.
 

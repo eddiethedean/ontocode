@@ -54,8 +54,8 @@ jobs:
         with:
           shared-key: vscode-e2e-${{ matrix.platform }}
 
-      - name: Build ontoindex-lsp
-        run: cargo build -p ontoindex-lsp --bins
+      - name: Build ontocore-lsp
+        run: cargo build -p ontocore-lsp --bins
 
       - name: Bundle LSP for extension platform
         shell: bash
@@ -64,7 +64,7 @@ jobs:
       - name: Simulate Marketplace stripping execute bit (Unix)
         if: runner.os != 'Windows'
         shell: bash
-        run: chmod -x "extension/server/${{ matrix.platform }}/ontoindex-lsp"
+        run: chmod -x "extension/server/${{ matrix.platform }}/ontocore-lsp"
 
       - uses: actions/setup-node@v4
         with:

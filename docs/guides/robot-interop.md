@@ -1,6 +1,6 @@
 # ROBOT interop
 
-OntoIndex v0.8.0 wraps the [ROBOT](http://robot.obolibrary.org/) CLI for validate, merge, and report workflows. ROBOT runs as an **external Java process** — OntoIndex does not embed a JVM.
+OntoCore v0.9.0 wraps the [ROBOT](http://robot.obolibrary.org/) CLI for validate, merge, and report workflows. ROBOT runs as an **external Java process** — OntoCore does not embed a JVM.
 
 Canonical capability matrix: [What ships today](../SHIPPED.md).
 
@@ -10,7 +10,7 @@ Canonical capability matrix: [What ships today](../SHIPPED.md).
 |-------------|-------|
 | **Java** | ROBOT requires a JRE on the agent or developer machine |
 | **`robot` on PATH** | Or set an explicit path (see below) |
-| **OntoIndex 0.8.0+** | `ontoindex robot` subcommand or LSP `ontoindex/runRobot` |
+| **OntoCore 0.9.0+** | `ontocore robot` subcommand or LSP `ontocore/runRobot` |
 
 Install ROBOT from [robot.obolibrary.org](http://robot.obolibrary.org/).
 
@@ -18,19 +18,19 @@ Install ROBOT from [robot.obolibrary.org](http://robot.obolibrary.org/).
 
 ```bash
 # Validate
-ontoindex robot validate path/to/ontology.owl
+ontocore robot validate path/to/ontology.owl
 
 # Merge
-ontoindex robot merge --inputs a.owl --inputs b.owl --output merged.owl
+ontocore robot merge --inputs a.owl --inputs b.owl --output merged.owl
 
 # Report
-ontoindex robot report path/to/ontology.owl --report report.tsv
+ontocore robot report path/to/ontology.owl --report report.tsv
 ```
 
 Override the executable:
 
 ```bash
-ontoindex robot validate demo.obo --robot-path /opt/robot/robot.jar
+ontocore robot validate demo.obo --robot-path /opt/robot/robot.jar
 ```
 
 Full flag reference: [CLI reference](../cli-reference.md#robot).
@@ -39,19 +39,19 @@ Full flag reference: [CLI reference](../cli-reference.md#robot).
 
 Set **`ontocode.robotPath`** in settings to the `robot` executable or JAR when it is not on `PATH`. Trusted workspaces only (ignored in Restricted Mode).
 
-LSP clients can call `ontoindex/runRobot` — see [LSP API](../lsp-api.md).
+LSP clients can call `ontocore/runRobot` — see [LSP API](../lsp-api.md).
 
 ## CI recipe
 
 ```yaml
-- name: Install OntoIndex
-  run: cargo install ontoindex-cli --locked --version 0.8.0
+- name: Install OntoCore
+  run: cargo install ontocore-cli --locked --version 0.9.0
 
-- name: OntoIndex validate
-  run: ontoindex validate ./ontologies
+- name: OntoCore validate
+  run: ontocore validate ./ontologies
 
 - name: ROBOT validate
-  run: ontoindex robot validate ./ontologies/core.owl
+  run: ontocore robot validate ./ontologies/core.owl
 ```
 
 Example with OBO fixtures: [`examples/obo-workflow/`](https://github.com/eddiethedean/ontocode/tree/main/examples/obo-workflow).

@@ -1,9 +1,9 @@
-# OntoIndex LSP API (v0.8)
+# OntoCore LSP API (v0.9)
 
-> **Status:** Documents behavior in **OntoIndex v0.8.0**. Pre-1.0 APIs may change.
+> **Status:** Documents behavior in **OntoCore v0.9.0**. Pre-1.0 APIs may change.
 > Canonical feature list: [What ships today](SHIPPED.md).
 
-This document describes **what ships today** in `ontoindex-lsp`. For the **v1.0 target** (including `runRobot`, graph APIs), see [LSP_SPEC.md](design/LSP_SPEC.md).
+This document describes **what ships today** in `ontocore-lsp`. For the **v1.0 target** (including `runRobot`, graph APIs), see [LSP_SPEC.md](design/LSP_SPEC.md).
 
 ## Wire format
 
@@ -11,9 +11,9 @@ LSP JSON uses **snake_case** for enums serialized from Rust (`EntityKind`, `Pars
 
 **Source of truth:**
 
-- Types: [`protocol.rs` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/crates/ontoindex-lsp/src/protocol.rs)
+- Types: [`protocol.rs` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/crates/ontocore-lsp/src/protocol.rs)
 - JSON Schema (v0.8): [`docs/lsp-protocol.schema.json`](lsp-protocol.schema.json) — core query/patch/reasoner/refactor types; `getGraph` payload types are documented in prose below until added to the schema.
-- Handlers: [`handlers.rs` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/crates/ontoindex-lsp/src/handlers.rs)
+- Handlers: [`handlers.rs` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/crates/ontocore-lsp/src/handlers.rs)
 - Extension client: [`client.ts` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/extension/src/lsp/client.ts)
 
 ## Transport
@@ -35,9 +35,9 @@ LSP JSON uses **snake_case** for enums serialized from Rust (`EntityKind`, `Pars
 
 ## Custom methods
 
-All custom methods use the `ontoindex/` prefix.
+All custom methods use the `ontocore/` prefix.
 
-### `ontoindex/indexWorkspace`
+### `ontocore/indexWorkspace`
 
 Rebuild the workspace catalog.
 
@@ -95,7 +95,7 @@ Rebuild the workspace catalog.
 }
 ```
 
-### `ontoindex/getCatalogSnapshot`
+### `ontocore/getCatalogSnapshot`
 
 Return documents, entities, and class hierarchy for the explorer UI.
 
@@ -115,7 +115,7 @@ Return documents, entities, and class hierarchy for the explorer UI.
 
 **Errors:** `NOT_INDEXED` if the workspace has not been indexed.
 
-### `ontoindex/getEntity`
+### `ontocore/getEntity`
 
 Return detailed entity information for the inspector.
 
@@ -149,7 +149,7 @@ Return detailed entity information for the inspector.
 
 **Errors:** `NOT_INDEXED`, `ENTITY_NOT_FOUND`
 
-### `ontoindex/query`
+### `ontocore/query`
 
 Run a SQL-like query against the indexed workspace catalog.
 
@@ -169,7 +169,7 @@ Run a SQL-like query against the indexed workspace catalog.
 
 **Errors:** `NOT_INDEXED`, `QUERY_FAILED`
 
-### `ontoindex/sparql`
+### `ontocore/sparql`
 
 Run SPARQL against the indexed catalog store.
 
@@ -179,11 +179,11 @@ Run SPARQL against the indexed catalog store.
 { "query": "SELECT ?s ?p ?o WHERE { ?s ?p ?o } LIMIT 10" }
 ```
 
-**Result:** `TabularQueryResult` (same shape as `ontoindex/query`).
+**Result:** `TabularQueryResult` (same shape as `ontocore/query`).
 
 **Errors:** `NOT_INDEXED`, `QUERY_FAILED`
 
-### `ontoindex/parseManchester`
+### `ontocore/parseManchester`
 
 Parse and validate a Manchester class expression; return normalized text, Turtle fragment, expression tree, diagnostics, and catalog-based completion lists.
 
@@ -210,7 +210,7 @@ Parse and validate a Manchester class expression; return normalized text, Turtle
 
 **Errors:** `NOT_INDEXED`, `MANCHESTER_INVALID`
 
-### `ontoindex/applyAxiomPatch`
+### `ontocore/applyAxiomPatch`
 
 Apply Turtle patch operations. See [authoring.md](authoring.md).
 
@@ -245,7 +245,7 @@ See [patch-reference.md](patch-reference.md) for CLI `ApplyPatchResult` examples
 
 **Errors:** `PATCH_INVALID`, `UNSUPPORTED_FORMAT`, `NOT_INDEXED`, `APPLIED_NOT_INDEXED`
 
-### `ontoindex/runReasoner`
+### `ontocore/runReasoner`
 
 Run OWL classification via OntoLogos 0.9.0 (`el`, `rl`, `rdfs`). `dl` and `auto` return an error until OntoLogos 1.0.
 
@@ -275,7 +275,7 @@ Run OWL classification via OntoLogos 0.9.0 (`el`, `rl`, `rdfs`). `dl` and `auto`
 
 **Errors:** `NOT_INDEXED`, `REASONER_FAILED`
 
-### `ontoindex/getExplanation`
+### `ontocore/getExplanation`
 
 Return an EL/RL/RDFS explanation for an unsatisfiable class (requires a prior reasoner run or loads ontology on demand).
 
@@ -295,7 +295,7 @@ Return an EL/RL/RDFS explanation for an unsatisfiable class (requires a prior re
 
 **Errors:** `NOT_INDEXED`, `EXPLANATION_FAILED`
 
-### `ontoindex/getGraph` (v0.7)
+### `ontocore/getGraph` (v0.7)
 
 Returns graph nodes and edges for visualization webviews.
 
@@ -311,7 +311,7 @@ Returns graph nodes and edges for visualization webviews.
 
 **Result:** `{ graph: { nodes, edges, truncated, graph_kind } }`
 
-### `ontoindex/runRobot` (v0.7)
+### `ontocore/runRobot` (v0.7)
 
 Runs a ROBOT CLI subcommand.
 
@@ -319,7 +319,7 @@ Runs a ROBOT CLI subcommand.
 
 **Result:** `{ exit_code, stdout, stderr }`
 
-### `ontoindex/findUsages` (v0.8)
+### `ontocore/findUsages` (v0.8)
 
 Return structured IRI usages across the workspace catalog and Turtle text spans.
 
@@ -327,7 +327,7 @@ Return structured IRI usages across the workspace catalog and Turtle text spans.
 
 **Result:** `{ "usages": UsageSummary[] }` — each usage has `iri`, `referenced_iri`, `file`, `line`, `column`, `kind`, `context` (byte ranges are not serialized on the wire).
 
-### `ontoindex/previewRefactor` (v0.8)
+### `ontocore/previewRefactor` (v0.8)
 
 Build a refactor plan without writing files.
 
@@ -342,7 +342,7 @@ Build a refactor plan without writing files.
 
 **Result:** `RefactorPlan` — `{ changes: FileChange[], warnings: string[] }` where each change has `path`, `preview_text`, `original_text`, and `hunks`.
 
-### `ontoindex/applyRefactor` (v0.8)
+### `ontocore/applyRefactor` (v0.8)
 
 Apply a previously previewed refactor plan. The server re-previews from `request`, verifies the submitted `plan` matches, validates paths against the workspace jail, writes atomically, syncs open buffers, and reindexes.
 
@@ -363,6 +363,6 @@ Custom method failures return `LspErrorPayload` in the JSON-RPC error `data` fie
 
 ## Not implemented yet (see LSP_SPEC)
 
-- `ontoindex/getSemanticDiff`
+- `ontocore/getSemanticDiff`
 
 Use the CLI or Rust crates for semantic diff until that LSP method lands.

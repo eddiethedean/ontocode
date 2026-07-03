@@ -1,13 +1,13 @@
 # Troubleshooting
 
-Common problems and fixes for OntoCode (VS Code) and OntoIndex (CLI/LSP).
+Common problems and fixes for OntoCode (VS Code) and OntoCore (CLI/LSP).
 
 For quick answers, see also [FAQ](faq.md).
 
 ## VS Code: explorer empty or stale
 
 1. Run **OntoCode: Index Workspace** from the Command Palette.
-2. Check **View → Output → OntoIndex Language Server** for errors.
+2. Check **View → Output → OntoCore Language Server** for errors.
 3. Confirm the folder contains supported files (`.ttl`, `.owl`, `.rdf`, `.jsonld`, `.nt`, `.nq`, `.trig`).
 4. **Multi-root workspace:** only the **first** folder is indexed — open the ontology project as a single-root folder or put it first.
 
@@ -15,8 +15,8 @@ For quick answers, see also [FAQ](faq.md).
 
 1. **Trust** the workspace (Restricted Mode blocks custom `ontocode.lspPath`).
 2. Uninstall duplicate OntoCode extension versions.
-3. Check **Output → OntoIndex Language Server** for the exact error.
-4. Set `ontocode.lspPath` to a local `ontoindex-lsp` binary (`cargo install ontoindex-lsp`) — trusted workspaces only.
+3. Check **Output → OntoCore Language Server** for the exact error.
+4. Set `ontocode.lspPath` to a local `ontocore-lsp` binary (`cargo install ontocore-lsp`) — trusted workspaces only.
 5. See [Install VS Code](vscode-install.md#troubleshooting).
 
 ## VS Code: cannot edit in inspector
@@ -30,14 +30,14 @@ Patches apply to the **open editor buffer** first, then disk:
 
 1. If you have **unsaved** edits, the patch merges into the buffer — save or review the buffer content.
 2. If re-index fails after a successful write, the LSP may return `APPLIED_NOT_INDEXED` — file/buffer updated but catalog stale. Run **Index Workspace**.
-3. Check **Output → OntoIndex Language Server** and [errors reference](errors.md).
+3. Check **Output → OntoCore Language Server** and [errors reference](errors.md).
 
-## CLI: `ontoindex query ./fixtures` fails
+## CLI: `ontocore query ./fixtures` fails
 
 The `fixtures/` directory exists only in a **git clone**, not after `cargo install`:
 
 ```bash
-ontoindex query /path/to/your/ontologies "SELECT * FROM classes"
+ontocore query /path/to/your/ontologies "SELECT * FROM classes"
 ```
 
 ## CLI: `validate` exits non-zero
@@ -45,14 +45,14 @@ ontoindex query /path/to/your/ontologies "SELECT * FROM classes"
 Exit code **0** only when there are no diagnostic **errors** (warnings are allowed). Query errors:
 
 ```bash
-ontoindex query /path/to/ontologies "SELECT code, severity, message FROM diagnostics WHERE severity = 'error'"
+ontocore query /path/to/ontologies "SELECT code, severity, message FROM diagnostics WHERE severity = 'error'"
 ```
 
 See [CI integration](ci-integration.md).
 
 ## Queries return no rows or wrong data
 
-1. Re-index: `ontoindex validate` or VS Code **Index Workspace**.
+1. Re-index: `ontocore validate` or VS Code **Index Workspace**.
 2. Confirm SQL table name and column names — [SQL reference](sql-reference.md).
 3. SPARQL runs over indexed triples — prefix declarations must be valid in source files.
 

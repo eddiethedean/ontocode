@@ -4,7 +4,7 @@
 >
 > **Dependencies:** [DEPENDENCY_MATRIX.md](DEPENDENCY_MATRIX.md) · [ADR-0016](adr/0016-dependency-first-implementation.md)
 
-## v0.1 — OntoIndex Foundation
+## v0.1 — OntoCore Foundation
 
 Deliverables:
 
@@ -20,7 +20,7 @@ Deliverables:
 
 Exit criteria:
 
-- User can run `ontoindex query ./repo "SELECT * FROM classes"`.
+- User can run `ontocore query ./repo "SELECT * FROM classes"`.
 
 **Dependencies:** `oxigraph`, `sqlparser`, `ignore`, `clap`.
 
@@ -40,7 +40,7 @@ Exit criteria:
 
 - User can browse an ontology repo in VS Code.
 
-**Dependencies:** `lsp-server`, `lsp-types`, OntoIndex crates above.
+**Dependencies:** `lsp-server`, `lsp-types`, OntoCore crates above.
 
 ## v0.3 — Diagnostics (shipped)
 
@@ -59,7 +59,7 @@ Exit criteria:
 
 - User gets useful ontology diagnostics inline.
 
-**Dependencies:** `oxigraph` (parse errors); in-house catalog lint rules in `ontoindex-diagnostics`. See [DEPENDENCY_MATRIX.md](DEPENDENCY_MATRIX.md).
+**Dependencies:** `oxigraph` (parse errors); in-house catalog lint rules in `ontocore-diagnostics`. See [DEPENDENCY_MATRIX.md](DEPENDENCY_MATRIX.md).
 
 ## v0.4 — Write-back + Horned-OWL (shipped as v0.4.0)
 
@@ -69,9 +69,9 @@ Deliverables:
 - edit labels/comments, simple `SubClassOf`, deprecated flag
 - delete entity
 - patch-based write-back for Turtle ([ADR-0006](adr/0006-patch-based-write-back.md))
-- `ontoindex-owl` crate — Horned-OWL catalog bridge ([ADR-0013](adr/0013-dual-stack-oxigraph-horned-owl.md))
+- `ontocore-owl` crate — Horned-OWL catalog bridge ([ADR-0013](adr/0013-dual-stack-oxigraph-horned-owl.md))
 - Oxigraph ↔ Horned-OWL consistency tests
-- LSP `ontoindex/applyAxiomPatch`, CLI `ontoindex patch`
+- LSP `ontocore/applyAxiomPatch`, CLI `ontocore patch`
 - Editable Entity Inspector in VS Code
 
 Exit criteria:
@@ -79,7 +79,7 @@ Exit criteria:
 - User can edit labels and simple subclass axioms in Turtle without Protégé.
 - Catalog axioms for Turtle editing come from Horned-OWL.
 
-**Dependencies:** `horned-owl`, `horned-functional` via `ontoindex-owl` ([ADR-0016](adr/0016-dependency-first-implementation.md)).
+**Dependencies:** `horned-owl`, `horned-functional` via `ontocore-owl` ([ADR-0016](adr/0016-dependency-first-implementation.md)).
 
 User docs: [docs/authoring.md](../authoring.md), [docs/patch-reference.md](../patch-reference.md).
 
@@ -96,13 +96,13 @@ Exit criteria:
 
 - User can query ontologies in VS Code and edit complex subclass/equivalent axioms via Manchester.
 
-**Dependencies:** `sqlparser`, `oxigraph`; Manchester parse/serialize in `ontoindex-owl` (catalog pickers for assist; `owl-ms-language-server` deferred).
+**Dependencies:** `sqlparser`, `oxigraph`; Manchester parse/serialize in `ontocore-owl` (catalog pickers for assist; `owl-ms-language-server` deferred).
 
 ## v0.6 — Reasoning
 
 Deliverables:
 
-- `ontoindex-reasoner` crate — thin facade over [OntoLogos](https://github.com/eddiethedean/ontologos) **0.9.0** ([REASONER_SPEC.md](REASONER_SPEC.md), [ADR-0014](adr/0014-rust-native-reasoners-only.md), [ADR-0015](adr/0015-adopt-ontologos-reasoner.md))
+- `ontocore-reasoner` crate — thin facade over [OntoLogos](https://github.com/eddiethedean/ontologos) **0.9.0** ([REASONER_SPEC.md](REASONER_SPEC.md), [ADR-0014](adr/0014-rust-native-reasoners-only.md), [ADR-0015](adr/0015-adopt-ontologos-reasoner.md))
 - `el` adapter → `ontologos-el` (OWL EL classification)
 - `rl` / `rdfs` adapters → `ontologos-rl` / `ontologos-rdfs` (P1)
 - profile detection via `ontologos-profile`
@@ -158,7 +158,7 @@ Exit criteria:
 Deliverables:
 
 - OBO format read/write ([OBO_ROBOT_SPEC.md](OBO_ROBOT_SPEC.md))
-- `ontoindex robot validate|merge|report` wrappers
+- `ontocore robot validate|merge|report` wrappers
 - OBO id rendering in explorer and Manchester autocomplete
 - `examples/obo-workflow/` fixture repo
 
@@ -166,7 +166,7 @@ Exit criteria:
 
 - Biomedical maintainer can edit OBO in VS Code and run ROBOT in CI alongside OntoCode.
 
-**Dependencies:** `fastobo`, `fastobo-owl`, `fastobo-validator`; [ROBOT](https://github.com/ontodev/robot) CLI via `ontoindex-robot`.
+**Dependencies:** `fastobo`, `fastobo-owl`, `fastobo-validator`; [ROBOT](https://github.com/ontodev/robot) CLI via `ontocore-robot`.
 
 ## v0.8 — Refactoring + full Manchester
 
@@ -184,29 +184,27 @@ Exit criteria:
 
 **Dependencies:** `horned-owl`, `horned-functional`; in-house refactor orchestration; React webview UI ([ADR-0017](adr/0017-react-webview-ui.md)).
 
-## v0.9 — OntoCore Identity
+## v0.9 — OntoCore identity
 
 Deliverables:
 
 - **OntoCore** platform branding and documentation (`docs/ontocore/`, `docs/ontocode/`)
+- Rename **`ontoindex-*` → `ontocore-*`**; CLI **`ontocore`**; LSP **`ontocore-lsp`**; methods **`ontocore/*`**
 - `ontocore` façade crate with experimental `Workspace` API ([ADR-0018](adr/0018-ontocore-platform-identity.md))
-- Architecture diagram and responsibility split updates
-- `ontoindex-*` crate names unchanged; CLI remains `ontoindex`; LSP remains `ontoindex-lsp`
 
 Exit criteria:
 
 - Contributors and users can distinguish OntoCore (engine) from OntoCode (IDE).
-- Rust embedders can depend on `ontocore` as the public entry point.
+- Rust embedders depend on `ontocore` / `ontocore-*` with a single naming scheme.
 
-**Dependencies:** existing `ontoindex-*` crates; no breaking API changes.
+**Dependencies:** existing engine crates (renamed); breaking release for v0.8 integrators.
 
-## v0.10 — OntoCore Public API + workflow
+## v0.10 — OntoCore public API + workflow
 
 Deliverables:
 
 - Stabilize `ontocore::Workspace` and ergonomic APIs; docs.rs for `ontocore`
-- `ontocore` CLI alias (alongside `ontoindex`)
-- semantic diff ([SEMANTIC_DIFF_SPEC.md](SEMANTIC_DIFF_SPEC.md))
+- Semantic diff ([SEMANTIC_DIFF_SPEC.md](SEMANTIC_DIFF_SPEC.md))
 - Git branch comparison and breaking change report
 - **incremental workspace index** (required — [ARCHITECTURE.md](ARCHITECTURE.md))
 - evaluate `ontologos-watch` for file-change → reclassify hook ([ADR-0015](adr/0015-adopt-ontologos-reasoner.md))

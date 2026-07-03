@@ -9,30 +9,30 @@
 | Product | What it is |
 |---------|------------|
 | **OntoCode** | VS Code IDE — explorer, React inspector, graphs, Query Workbench, Manchester editor, refactor preview, reasoner |
-| **OntoCore** | Rust semantic workspace engine — `ontocore` façade, `ontoindex-*` crates, `ontoindex` CLI, `ontoindex-lsp` |
+| **OntoCore** | Rust semantic workspace engine — `ontocore` façade, `ontocore-*` crates, `ontocore` CLI, `ontocore-lsp` |
 
 ## Capability matrix
 
 | Capability | VS Code | CLI |
 |------------|---------|-----|
 | Browse classes, properties, individuals | Yes | via SQL |
-| Edit labels, comments, parents (`.ttl` only; `.obo` read-only in inspector) | Yes (React inspector) | `ontoindex patch` (Turtle) |
-| Create / delete entities (`.ttl`) | Yes | `ontoindex patch` |
-| Complex `SubClassOf` / `EquivalentClasses` (Manchester) | Yes | `ontoindex patch` |
-| Disjoint classes (author + view) | Yes (inspector + Manchester) | `ontoindex patch` |
+| Edit labels, comments, parents (`.ttl` only; `.obo` read-only in inspector) | Yes (React inspector) | `ontocore patch` (Turtle) |
+| Create / delete entities (`.ttl`) | Yes | `ontocore patch` |
+| Complex `SubClassOf` / `EquivalentClasses` (Manchester) | Yes | `ontocore patch` |
+| Disjoint classes (author + view) | Yes (inspector + Manchester) | `ontocore patch` |
 | Domain / range / property chains (view) | Yes (axiom catalog) | via SQL / inspect |
-| Find usages / rename IRI / namespace migration / move / extract module | Yes (preview + apply) | `ontoindex refactor` |
-| SQL-like queries | Query Workbench (React) | `ontoindex query` |
-| SPARQL | Query Workbench (React) | `ontoindex sparql` |
-| Graph visualization (class, property, import, neighborhood) | Yes (React) | LSP `ontoindex/getGraph` |
-| OWL EL classification (`el` profile) | Reasoner panel + hierarchy toggle | `ontoindex classify` |
-| RL / RDFS classification | Reasoner panel | `ontoindex classify --profile rl\|rdfs` |
-| EL explanations (where available) | Explanation panel | `ontoindex explain` |
-| OBO format index + `obo_id` in explorer | Yes | `ontoindex inspect` |
-| ROBOT interop | — | `ontoindex robot validate\|merge\|report` |
-| Diagnostics / lint | Problems panel | `ontoindex validate` |
+| Find usages / rename IRI / namespace migration / move / extract module | Yes (preview + apply) | `ontocore refactor` |
+| SQL-like queries | Query Workbench (React) | `ontocore query` |
+| SPARQL | Query Workbench (React) | `ontocore sparql` |
+| Graph visualization (class, property, import, neighborhood) | Yes (React) | LSP `ontocore/getGraph` |
+| OWL EL classification (`el` profile) | Reasoner panel + hierarchy toggle | `ontocore classify` |
+| RL / RDFS classification | Reasoner panel | `ontocore classify --profile rl\|rdfs` |
+| EL explanations (where available) | Explanation panel | `ontocore explain` |
+| OBO format index + `obo_id` in explorer | Yes | `ontocore inspect` |
+| ROBOT interop | — | `ontocore robot validate\|merge\|report` |
+| Diagnostics / lint | Problems panel | `ontocore validate` |
 | Hover, go-to-definition, symbols, find references, rename | Yes | — |
-| Patch preview | Inspector / Manchester editor / refactor preview | `ontoindex patch --preview` |
+| Patch preview | Inspector / Manchester editor / refactor preview | `ontocore patch --preview` |
 | React webview UI | Inspector, graphs, Query Workbench, Manchester editor, refactor preview | — |
 
 ## Format support
@@ -48,9 +48,8 @@
 |------------|--------|
 | `ontocore` façade crate on crates.io | Yes |
 | `Workspace::open` experimental API | Yes |
+| **`ontocore-*` crate rename** (from `ontoindex-*`) | Yes |
 | OntoCore / OntoCode documentation trees | Yes |
-| `ontoindex-*` crate renames | Deferred to v1.0 |
-| `ontocore` CLI alias | Planned v0.10 |
 
 ## Manchester scope (v0.8+)
 

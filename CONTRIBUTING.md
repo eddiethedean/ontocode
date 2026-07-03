@@ -2,7 +2,7 @@
 
 Thank you for contributing. This repository contains:
 
-- **OntoCore** — Rust semantic workspace engine under `crates/` (`ontocore` façade, `ontoindex-*` implementation, `ontoindex` CLI, `ontoindex-lsp`)
+- **OntoCore** — Rust semantic workspace engine under `crates/` (`ontocore` façade, `ontocore-*` implementation, `ontocore` CLI, `ontocore-lsp`)
 - **OntoCode** — VS Code extension under `extension/`
 - **Specs** — product and architecture docs under `docs/design/` ([DEPENDENCY_MATRIX.md](docs/design/DEPENDENCY_MATRIX.md) for external crates)
 - **User guides** — install, SQL, and LSP API under `docs/`
@@ -29,7 +29,7 @@ cargo clippy --workspace --all-targets --all-features -- -D warnings
 Build the language server binary:
 
 ```bash
-cargo build -p ontoindex-lsp --bins
+cargo build -p ontocore-lsp --bins
 ```
 
 Run CLI smoke commands against fixtures:
@@ -39,7 +39,7 @@ cargo run -- query fixtures "SELECT * FROM classes"
 cargo run -- validate fixtures
 ```
 
-`cargo run --` uses the workspace default member `ontoindex-cli` (binary name: `ontoindex`).
+`cargo run --` uses the workspace default member `ontocore-cli` (binary name: `ontocore`).
 
 ### Extension
 
@@ -50,16 +50,16 @@ npm run compile
 npm test
 ```
 
-Extension tests expect a built `ontoindex-lsp` binary. From the repo root:
+Extension tests expect a built `ontocore-lsp` binary. From the repo root:
 
 ```bash
-cargo build -p ontoindex-lsp --bins
+cargo build -p ontocore-lsp --bins
 cd extension
-export ONTOINDEX_LSP_BIN="$(pwd)/../target/debug/ontoindex-lsp"
+export ONTOCORE_LSP_BIN="$(pwd)/../target/debug/ontocore-lsp"
 npm test
 ```
 
-**F5 / Run Extension:** Open the `extension/` folder in VS Code, build LSP (`cargo build -p ontoindex-lsp --bins`), optionally set `ontocode.lspPath` to your debug binary, then launch **Run Extension**.
+**F5 / Run Extension:** Open the `extension/` folder in VS Code, build LSP (`cargo build -p ontocore-lsp --bins`), optionally set `ontocode.lspPath` to your debug binary, then launch **Run Extension**.
 
 **LSP integration smoke test** (workspace crate):
 
@@ -125,7 +125,7 @@ Open http://127.0.0.1:8000. Configuration: [`mkdocs.yml`](mkdocs.yml), [`.readth
 Before adding a Rust crate dependency:
 
 1. Check [DEPENDENCY_MATRIX.md](docs/design/DEPENDENCY_MATRIX.md) — prefer listed crates over new alternatives.
-2. Follow [ADR-0016](docs/design/adr/0016-dependency-first-implementation.md) — `ontoindex-*` crates are facades, not reimplementations.
+2. Follow [ADR-0016](docs/design/adr/0016-dependency-first-implementation.md) — `ontocore-*` crates are facades, not reimplementations.
 3. Update DEPENDENCY_MATRIX and [LICENSES.md](docs/design/LICENSES.md) if the crate is new or uses a non-MIT/Apache license.
 4. Pin in workspace `[workspace.dependencies]` in root `Cargo.toml`.
 

@@ -1,6 +1,6 @@
 //! EL classification must detect unsatisfiable classes in the reasoner-unsat fixture.
 
-use ontoindex_reasoner::{classify, ReasonerId, WorkspaceInputLoader};
+use ontocore_reasoner::{classify, ReasonerId, WorkspaceInputLoader};
 use std::path::PathBuf;
 
 fn unsat_workspace() -> (tempfile::TempDir, PathBuf) {
@@ -18,7 +18,7 @@ fn unsat_workspace() -> (tempfile::TempDir, PathBuf) {
 fn el_classify_detects_unsatisfiable_fixture() {
     let (_dir, workspace) = unsat_workspace();
     let catalog =
-        ontoindex_catalog::IndexBuilder::new().workspace(&workspace).build().expect("index");
+        ontocore_catalog::IndexBuilder::new().workspace(&workspace).build().expect("index");
     let input =
         WorkspaceInputLoader::new(&workspace).load(catalog.class_hierarchy()).expect("load");
     let result = classify(ReasonerId::El, &input, false).expect("classify");

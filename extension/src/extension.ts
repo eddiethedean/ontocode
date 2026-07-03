@@ -66,7 +66,7 @@ export async function activate(
         const ours = event.uris.some((uri) =>
           vscode.languages
             .getDiagnostics(uri)
-            .some((d) => d.source === "ontoindex")
+            .some((d) => d.source === "ontocore")
         );
         if (!ours) {
           return;

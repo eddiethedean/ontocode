@@ -1,13 +1,13 @@
 # Release integrity
 
-How to verify OntoCode / OntoIndex release artifacts from [GitHub Releases](https://github.com/eddiethedean/ontocode/releases).
+How to verify OntoCode / OntoCore release artifacts from [GitHub Releases](https://github.com/eddiethedean/ontocode/releases).
 
 ## Checksums
 
 Each release includes `SHA256SUMS` with SHA-256 hashes of:
 
-- `ontoindex-v<version>-x86_64-unknown-linux-gnu.tar.gz` (CLI binary, Linux x64)
-- `ontoindex-lsp-v<version>-<platform>.tar.gz` / `.zip` (per-platform LSP)
+- `ontocore-v<version>-x86_64-unknown-linux-gnu.tar.gz` (CLI binary, Linux x64)
+- `ontocore-lsp-v<version>-<platform>.tar.gz` / `.zip` (per-platform LSP)
 - `ontocode-<version>.vsix` (VS Code extension)
 - `NOTICES` (third-party license summary)
 
@@ -24,11 +24,11 @@ On Linux you may use `sha256sum -c SHA256SUMS` instead.
 ```bash
 VERSION=0.9.0   # replace with the release tag you are verifying
 curl -fsSLO "https://github.com/eddiethedean/ontocode/releases/download/v${VERSION}/SHA256SUMS"
-curl -fsSLO "https://github.com/eddiethedean/ontocode/releases/download/v${VERSION}/ontoindex-v${VERSION}-x86_64-unknown-linux-gnu.tar.gz"
+curl -fsSLO "https://github.com/eddiethedean/ontocode/releases/download/v${VERSION}/ontocore-v${VERSION}-x86_64-unknown-linux-gnu.tar.gz"
 sha256sum -c SHA256SUMS
-tar xzf "ontoindex-v${VERSION}-x86_64-unknown-linux-gnu.tar.gz"
-chmod +x "ontoindex-v${VERSION}-x86_64-unknown-linux-gnu"
-./ontoindex-v${VERSION}-x86_64-unknown-linux-gnu --version
+tar xzf "ontocore-v${VERSION}-x86_64-unknown-linux-gnu.tar.gz"
+chmod +x "ontocore-v${VERSION}-x86_64-unknown-linux-gnu"
+./ontocore-v${VERSION}-x86_64-unknown-linux-gnu --version
 ```
 
 ## crates.io
@@ -36,14 +36,14 @@ chmod +x "ontoindex-v${VERSION}-x86_64-unknown-linux-gnu"
 Rust crates are published from CI using a restricted `CARGO_REGISTRY_TOKEN`. Install with:
 
 ```bash
-cargo install ontoindex-cli --locked
+cargo install ontocore-cli --locked
 ```
 
 Prefer `--locked` so dependency versions match the published crate.
 
 ## VS Code extension
 
-1. Download the `.vsix` from the release matching your platform (multi-platform VSIX bundles `ontoindex-lsp`).
+1. Download the `.vsix` from the release matching your platform (multi-platform VSIX bundles `ontocore-lsp`).
 2. Verify against `SHA256SUMS`.
 3. Install via **Extensions → Install from VSIX…**
 

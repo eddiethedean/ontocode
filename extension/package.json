@@ -182,10 +182,6 @@
         "title": "OntoCode: Open Graph"
       },
       {
-        "command": "ontocode.openSmokePanel",
-        "title": "OntoCode: Open React Smoke Panel"
-      },
-      {
         "command": "ontocode.findEntityUsages",
         "title": "OntoCode: Find Entity Usages"
       },
@@ -273,7 +269,7 @@
         "ontocode.lspPath": {
           "type": "string",
           "default": "",
-          "description": "Trusted workspaces only: path to the ontoindex-lsp binary. Ignored in Restricted Mode. When empty, the bundled server or PATH is used."
+          "description": "Trusted workspaces only: path to the ontocore-lsp binary. Ignored in Restricted Mode. When empty, the bundled server or PATH is used."
         },
         "ontocode.autoIndexOnOpen": {
           "type": "boolean",

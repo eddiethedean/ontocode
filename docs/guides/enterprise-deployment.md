@@ -1,13 +1,13 @@
 # Enterprise deployment runbook
 
-Deploy OntoCode (VS Code) and OntoIndex (CLI/LSP) in regulated, air-gapped, or centrally managed environments. Complements [enterprise evaluation](enterprise-eval.md) and [production readiness](production-readiness.md).
+Deploy OntoCode (VS Code) and OntoCore (CLI/LSP) in regulated, air-gapped, or centrally managed environments. Complements [enterprise evaluation](enterprise-eval.md) and [production readiness](production-readiness.md).
 
 ## Deployment patterns
 
 | Pattern | Components | Typical owner |
 |---------|------------|---------------|
 | **Developer desktop** | VS Code + Marketplace or VSIX | Engineering |
-| **CI validation** | `ontoindex` Linux x64 binary or `cargo install` | Platform / DevOps |
+| **CI validation** | `ontocore` Linux x64 binary or `cargo install` | Platform / DevOps |
 | **CI + desktop** | Both | Most common enterprise pilot |
 | **Air-gapped** | Internal VSIX + CLI mirror + `NOTICES` | IT security |
 
@@ -24,11 +24,11 @@ Ontology content stays **on disk** — no cloud upload by default ([security pol
 
 ### Option B — Offline / air-gapped (recommended for regulated envs)
 
-1. On a connected staging machine, download from [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) for version **v0.8.0** (or your pinned version):
+1. On a connected staging machine, download from [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) for version **v0.9.0** (or your pinned version):
    - `ontocode-<version>.vsix`
    - `SHA256SUMS`
    - `NOTICES`
-   - Optional: `ontoindex-lsp-v<version>-<platform>.tar.gz` per platform if not using bundled VSIX LSP
+   - Optional: `ontocore-lsp-v<version>-<platform>.tar.gz` per platform if not using bundled VSIX LSP
 2. Verify checksums:
 
 ```bash
@@ -73,9 +73,9 @@ Pre-1.0: expect **minor** release API changes — test CI and integrators before
 Download pinned release binary — fastest cold start:
 
 ```bash
-VERSION=0.8.0
-ASSET="ontoindex-v${VERSION}-x86_64-unknown-linux-gnu.tar.gz"
-BIN="ontoindex-v${VERSION}-x86_64-unknown-linux-gnu"
+VERSION=0.9.0
+ASSET="ontocore-v${VERSION}-x86_64-unknown-linux-gnu.tar.gz"
+BIN="ontocore-v${VERSION}-x86_64-unknown-linux-gnu"
 curl -fsSL -o "${ASSET}" \
   "https://github.com/eddiethedean/ontocode/releases/download/v${VERSION}/${ASSET}"
 tar xzf "${ASSET}"
@@ -90,7 +90,7 @@ Verify against `SHA256SUMS` in production pipelines ([ci-integration](../ci-inte
 | Platform | Release CLI binary | Alternatives |
 |----------|-------------------|--------------|
 | Linux x64 | **Yes** | — |
-| macOS | **No** | `cargo install ontoindex-cli --locked --version 0.8.0` (requires Rust on agent) |
+| macOS | **No** | `cargo install ontocore-cli --locked --version 0.9.0` (requires Rust on agent) |
 | Windows | **No** | Same, or WSL/Linux job for validate |
 
 Cache `~/.cargo` or an internal cargo registry mirror to reduce `cargo install` time.
@@ -117,7 +117,7 @@ Cache `~/.cargo` or an internal cargo registry mirror to reduce `cargo install` 
 Documentation does not certify these environments. Pilot checklist:
 
 1. Install VSIX on **remote** VS Code server if using Remote-SSH (extension runs remotely)
-2. Confirm bundled `ontoindex-lsp` matches remote OS/architecture (VSIX bundles Linux/macOS/Windows x64)
+2. Confirm bundled `ontocore-lsp` matches remote OS/architecture (VSIX bundles Linux/macOS/Windows x64)
 3. Open ontology folder on remote filesystem (indexing is local to LSP process)
 4. Re-run [first success](first-success.md) on the remote host
 
@@ -130,7 +130,7 @@ OntoCode does **not** ship centralized audit logging. For compliance:
 | Event | Suggested org control |
 |-------|----------------------|
 | Ontology edits | Git commit history (write-back modifies `.ttl` on disk) |
-| CI validation | Pipeline logs for `ontoindex validate` / `classify` exit codes |
+| CI validation | Pipeline logs for `ontocore validate` / `classify` exit codes |
 | Extension install | MDM/Marketplace audit logs |
 | Vulnerability response | Subscribe to GitHub Security Advisories for `eddiethedean/ontocode` |
 
@@ -145,8 +145,8 @@ flowchart LR
     Git[Git ontology repo]
   end
   Artifactory -->|VSIX NOTICES CLI| Dev
-  Artifactory -->|ontoindex binary| CI
-  Dev -->|stdio| LSP[ontoindex-lsp]
+  Artifactory -->|ontocore binary| CI
+  Dev -->|stdio| LSP[ontocore-lsp]
   LSP --> Git
   CI --> Git
 ```

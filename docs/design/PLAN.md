@@ -1,12 +1,12 @@
-# PLAN.md — OntoIndex and OntoCode
+# PLAN.md — OntoCore and OntoCode
 
 ## 1. Executive Summary
 
-OntoIndex and OntoCode form a two-layer product strategy for modern ontology engineering.
+OntoCore and OntoCode form a two-layer product strategy for modern ontology engineering.
 
-**OntoIndex** is the Rust backend: a local-first embedded ontology engine that scans a directory of OWL/RDF/Turtle/JSON-LD/OBO files, builds a semantic index, exposes ontology concepts as queryable tables, validates ontology repositories, performs semantic diffs, and powers editor integrations.
+**OntoCore** is the Rust backend: a local-first embedded ontology engine that scans a directory of OWL/RDF/Turtle/JSON-LD/OBO files, builds a semantic index, exposes ontology concepts as queryable tables, validates ontology repositories, performs semantic diffs, and powers editor integrations.
 
-**OntoCode** is the VS Code extension: a full ontology engineering workbench built on top of OntoIndex. Its long-term goal is to replace Protégé for developers, data engineers, knowledge graph engineers, semantic modelers, and organizations that prefer Git-native ontology-as-code workflows.
+**OntoCode** is the VS Code extension: a full ontology engineering workbench built on top of OntoCore. Its long-term goal is to replace Protégé for developers, data engineers, knowledge graph engineers, semantic modelers, and organizations that prefer Git-native ontology-as-code workflows.
 
 ## 2. Product Thesis
 
@@ -27,9 +27,9 @@ OntoCode should eventually provide the authoring depth of Protégé while adding
 
 ## 3. Products
 
-### 3.1 OntoIndex
+### 3.1 OntoCore
 
-OntoIndex is a Rust library and CLI.
+OntoCore is a Rust library and CLI.
 
 Primary capabilities:
 
@@ -135,14 +135,14 @@ Possible tagline:
 
 Short positioning:
 
-> OntoCode is a VS Code-native ontology workbench powered by OntoIndex, a Rust ontology index and query engine.
+> OntoCode is a VS Code-native ontology workbench powered by OntoCore, a Rust ontology index and query engine.
 
 ## 8. Roadmap Summary
 
-- v0.1: OntoIndex scanner, parser, catalog, CLI
+- v0.1: OntoCore scanner, parser, catalog, CLI
 - v0.2: OntoCode explorer and entity inspector
 - v0.3: diagnostics and validation
-- v0.4a–b: simple write-back + Horned-OWL (`ontoindex-owl`)
+- v0.4a–b: simple write-back + Horned-OWL (`ontocore-owl`)
 - v0.5: query workbench + Manchester MVP
 - v0.6: reasoners + real explanations
 - **v0.7a: React webview foundation** ([ADR-0017](adr/0017-react-webview-ui.md), [OntoCode_React_UI_Integration_Plan.md](OntoCode_React_UI_Integration_Plan.md))
@@ -166,24 +166,24 @@ Short positioning:
 
 ## 10. Strategic Implementation Guidance
 
-**Policy:** [ADR-0016](adr/0016-dependency-first-implementation.md) — delegate to mature crates; `ontoindex-*` crates are thin facades. Full inventory: [DEPENDENCY_MATRIX.md](DEPENDENCY_MATRIX.md).
+**Policy:** [ADR-0016](adr/0016-dependency-first-implementation.md) — delegate to mature crates; `ontocore-*` crates are thin facades. Full inventory: [DEPENDENCY_MATRIX.md](DEPENDENCY_MATRIX.md).
 
-| Layer | Dependency | OntoIndex facade | Phase |
+| Layer | Dependency | OntoCore facade | Phase |
 |-------|------------|------------------|-------|
-| RDF / SPARQL | `oxigraph` | `ontoindex-parser`, `ontoindex-query` | v0.2 |
-| SQL parse | `sqlparser` | `ontoindex-query` | v0.2 |
-| Workspace scan | `ignore` | `ontoindex-core` | v0.2 |
-| LSP wire | `lsp-server`, `lsp-types` | `ontoindex-lsp` | v0.2 |
-| Diagnostics | `oxigraph` + catalog rules | `ontoindex-diagnostics` | v0.3 |
-| OWL axioms / Manchester | `horned-owl`, `horned-functional` | `ontoindex-owl` | v0.4b+ |
-| Reasoning | OntoLogos `0.9`→`1.0` | `ontoindex-reasoner` | v0.6 / v1.0 |
+| RDF / SPARQL | `oxigraph` | `ontocore-parser`, `ontocore-query` | v0.2 |
+| SQL parse | `sqlparser` | `ontocore-query` | v0.2 |
+| Workspace scan | `ignore` | `ontocore-core` | v0.2 |
+| LSP wire | `lsp-server`, `lsp-types` | `ontocore-lsp` | v0.2 |
+| Diagnostics | `oxigraph` + catalog rules | `ontocore-diagnostics` | v0.3 |
+| OWL axioms / Manchester | `horned-owl`, `horned-functional` | `ontocore-owl` | v0.4b+ |
+| Reasoning | OntoLogos `0.9`→`1.0` | `ontocore-reasoner` | v0.6 / v1.0 |
 | Graph structure | `petgraph` | LSP graph export | v0.7 |
 | Webview UI | `react`, `vite` | `extension/webview-ui` | v0.7a+ ([ADR-0017](adr/0017-react-webview-ui.md)) |
-| OBO | `fastobo`, `fastobo-owl` | `ontoindex-parser` / `ontoindex-owl` | v0.7b |
-| ROBOT CI | ROBOT CLI | `ontoindex-robot` | v0.7b |
-| File watch | `notify` / `ontologos-watch` | `ontoindex-lsp` | v0.9 |
-| Git diff inputs | `git2` | `ontoindex-diff` | v0.9 |
-| Docs export | `pulldown-cmark`, `minijinja` | `ontoindex-docs` | v0.9 |
+| OBO | `fastobo`, `fastobo-owl` | `ontocore-parser` / `ontocore-owl` | v0.7b |
+| ROBOT CI | ROBOT CLI | `ontocore-robot` | v0.7b |
+| File watch | `notify` / `ontologos-watch` | `ontocore-lsp` | v0.9 |
+| Git diff inputs | `git2` | `ontocore-diff` | v0.9 |
+| Docs export | `pulldown-cmark`, `minijinja` | `ontocore-docs` | v0.9 |
 | SHACL (P1) | `rudof` | plugin / diagnostics | v1.0 P1 |
 
 Build on existing mature components — do not reimplement parsers, reasoners, triple stores, OBO parsers, or SHACL engines when a maintained Rust crate covers the profile.
@@ -193,4 +193,4 @@ Build on existing mature components — do not reimplement parsers, reasoners, t
 - Use **sqlparser** virtual tables for SQL; extend for v1.0 joins before considering DataFusion ([ADR-0011](adr/0011-use-sqlparser-for-sql.md)).
 - Use **OntoLogos** for all reasoning ([ADR-0015](adr/0015-adopt-ontologos-reasoner.md)).
 - Use **React + Vite** for VS Code webview panels ([ADR-0017](adr/0017-react-webview-ui.md)); TypeScript extension host for orchestration only.
-- Keep OntoIndex useful as a standalone CLI even without OntoCode.
+- Keep OntoCore useful as a standalone CLI even without OntoCode.

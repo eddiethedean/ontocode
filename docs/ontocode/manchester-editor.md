@@ -1,6 +1,6 @@
 # Manchester editor
 
-The **Manchester editor** is an OntoCode React panel for editing **complex class expressions** in Turtle ontologies — restrictions, intersections, unions, and cardinality. Parsing and patch application run in **OntoCore** (`ontoindex/parseManchester`, `ontoindex/applyAxiomPatch`).
+The **Manchester editor** is an OntoCode React panel for editing **complex class expressions** in Turtle ontologies — restrictions, intersections, unions, and cardinality. Parsing and patch application run in **OntoCore** (`ontocore/parseManchester`, `ontocore/applyAxiomPatch`).
 
 Requires a **`.ttl`** file.
 
@@ -45,6 +45,6 @@ Domain, range, and property chains appear in the axiom catalog (chains are view-
 
 ## CLI
 
-Manchester parsing is available via LSP only in v0.9. Use the VS Code panel or call `ontoindex/parseManchester` from an LSP client.
+Manchester parsing is available via LSP only in v0.9. Use the VS Code panel or call `ontocore/parseManchester` from an LSP client.
 
 See [Manchester editor guide](../guides/manchester-editor.md) for extended examples.

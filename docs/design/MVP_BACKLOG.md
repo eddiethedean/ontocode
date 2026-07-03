@@ -1,6 +1,6 @@
 # MVP_BACKLOG.md
 
-## v0.1 OntoIndex MVP Backlog
+## v0.1 OntoCore MVP Backlog
 
 ### Project Setup
 - [x] Create Rust workspace
@@ -42,10 +42,10 @@
 - [x] Implement JSON export
 
 ### CLI
-- [x] `ontoindex index`
-- [x] `ontoindex query`
-- [x] `ontoindex validate`
-- [x] `ontoindex inspect`
+- [x] `ontocore index`
+- [x] `ontocore query`
+- [x] `ontocore validate`
+- [x] `ontocore inspect`
 
 ## v0.2 OntoCode MVP Backlog
 
@@ -83,7 +83,7 @@
 ## v0.3 Diagnostics Backlog
 
 ### Engine
-- [x] `ontoindex-diagnostics` crate with catalog lint rules
+- [x] `ontocore-diagnostics` crate with catalog lint rules
 - [x] `diagnostics` SQL virtual table
 - [x] Parse error locations from Oxigraph
 - [x] Open-buffer parsing for unsaved edits
@@ -97,4 +97,4 @@
 - [x] Problems panel via LSP (no client wiring required)
 
 ### CLI
-- [x] `ontoindex validate` prints all diagnostics; non-zero exit on errors
+- [x] `ontocore validate` prints all diagnostics; non-zero exit on errors

@@ -1,11 +1,11 @@
 # Patch reference (OntoCore v0.9)
 
-> **Status:** Documents behavior in **OntoIndex v0.8.0**. Pre-1.0 APIs may change.
+> **Status:** Documents behavior in **OntoCore v0.9.0**. Pre-1.0 APIs may change.
 > Canonical feature list: [What ships today](SHIPPED.md).
 
-Turtle write-back uses a JSON array of patch operations. The CLI (`ontoindex patch`) and LSP (`ontoindex/applyAxiomPatch`) accept the same format.
+Turtle write-back uses a JSON array of patch operations. The CLI (`ontocore patch`) and LSP (`ontocore/applyAxiomPatch`) accept the same format.
 
-**Source of truth:** [`patch.rs` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/crates/ontoindex-owl/src/patch.rs)
+**Source of truth:** [`patch.rs` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/crates/ontocore-owl/src/patch.rs)
 
 ## Format
 
@@ -159,13 +159,13 @@ Turtle write-back uses a JSON array of patch operations. The CLI (`ontoindex pat
 
 ```bash
 # Preview changes (stdout JSON, no write)
-ontoindex patch ./ontology.ttl patches.json --preview
+ontocore patch ./ontology.ttl patches.json --preview
 
 # Apply patches
-ontoindex patch ./ontology.ttl patches.json
+ontocore patch ./ontology.ttl patches.json
 
 # Validate after apply
-ontoindex validate .
+ontocore validate .
 ```
 
 ### Response shape (`ApplyPatchResult`)
@@ -185,7 +185,7 @@ ontoindex validate .
 
 ## LSP usage
 
-Method: `ontoindex/applyAxiomPatch`
+Method: `ontocore/applyAxiomPatch`
 
 ```json
 {
@@ -199,7 +199,7 @@ Method: `ontoindex/applyAxiomPatch`
 
 See [lsp-api.md](lsp-api.md) and [authoring.md](authoring.md).
 
-## Limitations (v0.8)
+## Limitations (v0.9)
 
 - Turtle only; RDF/XML, OWL/XML, JSON-LD are read-only
 - Simple `add_sub_class_of` parent must be a **named class IRI**; use Manchester ops (`add_complex_sub_class_of`, `add_equivalent_class`, etc.) for class expressions

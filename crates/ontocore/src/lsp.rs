@@ -1,4 +1,4 @@
-//! LSP protocol types. OntoCore LSP is currently provided by the `ontoindex-lsp` binary.
+//! LSP protocol types. OntoCore LSP is currently provided by the `ontocore-lsp` binary.
 
-pub use ontoindex_lsp::catalog_snapshot_json;
-pub use ontoindex_lsp::protocol;
+pub use ontocore_lsp::catalog_snapshot_json;
+pub use ontocore_lsp::protocol;

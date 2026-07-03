@@ -1,6 +1,6 @@
 # Entity Inspector
 
-The **Entity Inspector** is the OntoCode React webview for viewing and editing ontology entities. It is powered by OntoCore via LSP (`ontoindex/getEntity`, `ontoindex/applyAxiomPatch`).
+The **Entity Inspector** is the OntoCode React webview for viewing and editing ontology entities. It is powered by OntoCore via LSP (`ontocore/getEntity`, `ontocore/applyAxiomPatch`).
 
 ## Open the inspector
 

@@ -1,6 +1,6 @@
 # OntoCore architecture
 
-> **Status:** OntoCore is the platform identity for the Rust engine shipped since v0.2. Implementation crates retain `ontoindex-*` names until v1.0. See [ADR-0018](../design/adr/0018-ontocore-platform-identity.md).
+> **Status:** OntoCore is the platform identity for the Rust engine shipped since v0.2. Implementation crates retain `ontocore-*` names until v1.0. See [ADR-0018](../design/adr/0018-ontocore-platform-identity.md).
 
 ## High-level diagram
 
@@ -14,7 +14,7 @@
               v
 +---------------------------+
 |   OntoCore LSP            |
-|   (ontoindex-lsp)         |
+|   (ontocore-lsp)         |
 +-------------+-------------+
               |
               v
@@ -53,16 +53,16 @@
 | Layer | Crates |
 |-------|--------|
 | Public façade | `ontocore` — re-exports and `Workspace` API |
-| Core types | `ontoindex-core` |
-| Parsing | `ontoindex-parser`, `ontoindex-owl` |
-| Catalog | `ontoindex-catalog` |
-| Query | `ontoindex-query` |
-| Diagnostics | `ontoindex-diagnostics` |
-| Reasoning | `ontoindex-reasoner` → OntoLogos |
-| Refactoring | `ontoindex-refactor` |
-| ROBOT | `ontoindex-robot` (external Java CLI) |
-| CLI | `ontoindex-cli` |
-| LSP | `ontoindex-lsp` |
+| Core types | `ontocore-core` |
+| Parsing | `ontocore-parser`, `ontocore-owl` |
+| Catalog | `ontocore-catalog` |
+| Query | `ontocore-query` |
+| Diagnostics | `ontocore-diagnostics` |
+| Reasoning | `ontocore-reasoner` → OntoLogos |
+| Refactoring | `ontocore-refactor` |
+| ROBOT | `ontocore-robot` (external Java CLI) |
+| CLI | `ontocore-cli` |
+| LSP | `ontocore-lsp` |
 
 See [crate map](crate-map.md) for details.
 

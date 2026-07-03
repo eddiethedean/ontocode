@@ -3,7 +3,7 @@ import * as fs from "fs";
 import * as path from "path";
 
 export function bundledServerFileName(platform: NodeJS.Platform = process.platform): string {
-  return platform === "win32" ? "ontoindex-lsp.exe" : "ontoindex-lsp";
+  return platform === "win32" ? "ontocore-lsp.exe" : "ontocore-lsp";
 }
 
 export function bundledServerRelativeDir(

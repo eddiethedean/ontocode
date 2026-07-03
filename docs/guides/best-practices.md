@@ -1,6 +1,6 @@
 # Best practices
 
-Patterns for using OntoCode and OntoIndex in daily ontology engineering.
+Patterns for using OntoCode and OntoCore in daily ontology engineering.
 
 ## Repository layout
 
@@ -12,8 +12,8 @@ Patterns for using OntoCode and OntoIndex in daily ontology engineering.
 
 | Tool | Best for |
 |------|----------|
-| **SQL** (`ontoindex query`) | Catalog tables — classes, properties, diagnostics, axioms metadata |
-| **SPARQL** (`ontoindex sparql`) | RDF graph patterns over indexed triples |
+| **SQL** (`ontocore query`) | Catalog tables — classes, properties, diagnostics, axioms metadata |
+| **SPARQL** (`ontocore sparql`) | RDF graph patterns over indexed triples |
 | **`validate`** | CI gate for parse errors and lint |
 | **`classify`** | CI gate for unsatisfiable classes (EL/RL/RDFS) |
 
@@ -23,9 +23,9 @@ SQL and SPARQL results truncate silently at 100,000 rows — narrow queries in C
 
 | Goal | Command |
 |------|---------|
-| Lint + parse | `ontoindex validate .` |
-| Unsatisfiable classes | `ontoindex classify . --profile el --format json` |
-| Inspect errors | `ontoindex query . "SELECT code, message FROM diagnostics WHERE severity = 'error'"` |
+| Lint + parse | `ontocore validate .` |
+| Unsatisfiable classes | `ontocore classify . --profile el --format json` |
+| Inspect errors | `ontocore query . "SELECT code, message FROM diagnostics WHERE severity = 'error'"` |
 
 Examples: [CI integration](../ci-integration.md)
 
@@ -43,7 +43,7 @@ Use OntoCode for Git-native Turtle editing, CI validation, and EL classification
 
 ## Rust embedding
 
-Embed OntoIndex in tools or pipelines via the published crates — see [Rust library guide](rust-library.md).
+Embed OntoCore in tools or pipelines via the published crates — see [Rust library guide](rust-library.md).
 
 ## Related
 

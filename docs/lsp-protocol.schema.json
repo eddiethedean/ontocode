@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/eddiethedean/ontocode/docs/lsp-protocol.schema.json",
-  "title": "OntoIndex LSP protocol (v0.8)",
-  "description": "JSON Schema for ontoindex/* custom LSP method payloads (v0.8). Method routing is documented in lsp-api.md; graph node/edge shapes are partial.",
+  "title": "OntoCore LSP protocol (v0.8)",
+  "description": "JSON Schema for ontocore/* custom LSP method payloads (v0.8). Method routing is documented in lsp-api.md; graph node/edge shapes are partial.",
   "definitions": {
     "EntityKind": {
       "type": "string",

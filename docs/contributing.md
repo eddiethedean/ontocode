@@ -1,8 +1,8 @@
-# Contributing to OntoCode / OntoIndex
+# Contributing to OntoCode / OntoCore
 
 Thank you for contributing. This repository contains:
 
-- **OntoIndex** — Rust crates under `crates/` (`ontoindex` CLI, `ontoindex-lsp`)
+- **OntoCore** — Rust semantic workspace engine under `crates/` (`ontocore` façade, `ontocore-*` implementation, `ontocore` CLI, `ontocore-lsp`)
 - **OntoCode** — VS Code extension under `extension/`
 - **Specs** — product and architecture docs under `docs/design/` ([DEPENDENCY_MATRIX.md](design/DEPENDENCY_MATRIX.md) for external crates)
 - **User guides** — install, SQL, and LSP API under `docs/`
@@ -29,7 +29,7 @@ cargo clippy --workspace --all-targets --all-features -- -D warnings
 Build the language server binary:
 
 ```bash
-cargo build -p ontoindex-lsp --bins
+cargo build -p ontocore-lsp --bins
 ```
 
 Run CLI smoke commands against fixtures:
@@ -39,7 +39,7 @@ cargo run -- query fixtures "SELECT * FROM classes"
 cargo run -- validate fixtures
 ```
 
-`cargo run --` uses the workspace default member `ontoindex-cli` (binary name: `ontoindex`).
+`cargo run --` uses the workspace default member `ontocore-cli` (binary name: `ontocore`).
 
 ### Extension
 
@@ -50,16 +50,16 @@ npm run compile
 npm test
 ```
 
-Extension tests expect a built `ontoindex-lsp` binary. From the repo root:
+Extension tests expect a built `ontocore-lsp` binary. From the repo root:
 
 ```bash
-cargo build -p ontoindex-lsp --bins
+cargo build -p ontocore-lsp --bins
 cd extension
-export ONTOINDEX_LSP_BIN="$(pwd)/../target/debug/ontoindex-lsp"
+export ONTOCORE_LSP_BIN="$(pwd)/../target/debug/ontocore-lsp"
 npm test
 ```
 
-**F5 / Run Extension:** Open the `extension/` folder in VS Code, build LSP (`cargo build -p ontoindex-lsp --bins`), optionally set `ontocode.lspPath` to your debug binary, then launch **Run Extension**.
+**F5 / Run Extension:** Open the `extension/` folder in VS Code, build LSP (`cargo build -p ontocore-lsp --bins`), optionally set `ontocode.lspPath` to your debug binary, then launch **Run Extension**.
 
 **LSP integration smoke test** (workspace crate):
 
@@ -90,6 +90,7 @@ Review the diff in `tests/golden/snapshots/` before committing.
 
 ```bash
 cargo run -p ontocode --example index_and_query
+cargo run -p ontocode --example ontocore_workspace
 ```
 
 ### Documentation site (MkDocs / Read the Docs)
@@ -101,15 +102,15 @@ mkdocs build --strict   # CI uses this; must pass with no warnings
 ./scripts/check-doc-versions.sh   # README / RTD / extension version sync
 ```
 
-Open http://127.0.0.1:8000. Configuration: [mkdocs.yml on GitHub](https://github.com/eddiethedean/ontocode/blob/main/mkdocs.yml), [.readthedocs.yaml on GitHub](https://github.com/eddiethedean/ontocode/blob/main/.readthedocs.yaml).
+Open http://127.0.0.1:8000. Configuration: [`mkdocs.yml`](../mkdocs.yml), [`.readthedocs.yaml`](../.readthedocs.yaml).
 
 ## Pull requests
 
 1. Fork and branch from `main`.
 2. Keep changes focused; match existing style and naming.
 3. Run Rust and extension tests locally (CI runs both).
-4. Update docs when behavior or public API changes (`README.md`, `docs/`, `CHANGELOG.md`, `docs/changelog.md` as appropriate). On release, follow the checklist in [releasing.md](releasing.md).
-5. For spec changes, label whether they describe **implemented** vs **planned** behavior (see `lsp-api.md` as a model).
+4. Update docs when behavior or public API changes (`README.md`, `docs/`, `CHANGELOG.md` as appropriate). On release, follow the checklist in [releasing.md](releasing.md).
+5. For spec changes, label whether they describe **implemented** vs **planned** behavior (see `docs/lsp-api.md` as a model).
 
 ## Documentation conventions
 
@@ -120,24 +121,12 @@ Open http://127.0.0.1:8000. Configuration: [mkdocs.yml on GitHub](https://github
 | Architecture decisions | `docs/design/adr/` only (do not add `adrs/`) |
 | Extension settings and commands | `extension/README.md` |
 
-### Read the Docs URLs
-
-Canonical base: `https://ontocode-vs.readthedocs.io/en/latest/` (project slug `ontocode-vs`).
-
-| Link type | Example |
-|-----------|---------|
-| VS Code extension path | `.../guides/vscode-extension/` |
-| Rust & CLI path | `.../guides/rust-crates/` |
-| Page path | Trailing slash, no `.md` — e.g. `.../guides/reasoner/` not `.../reasoner.md` |
-
-`mkdocs.yml` `site_url` stays at project root (`https://ontocode-vs.readthedocs.io/`); all user-facing links in READMEs use `/en/latest/`.
-
 ### Adding dependencies
 
 Before adding a Rust crate dependency:
 
 1. Check [DEPENDENCY_MATRIX.md](design/DEPENDENCY_MATRIX.md) — prefer listed crates over new alternatives.
-2. Follow [ADR-0016](design/adr/0016-dependency-first-implementation.md) — `ontoindex-*` crates are facades, not reimplementations.
+2. Follow [ADR-0016](design/adr/0016-dependency-first-implementation.md) — `ontocore-*` crates are facades, not reimplementations.
 3. Update DEPENDENCY_MATRIX and [LICENSES.md](design/LICENSES.md) if the crate is new or uses a non-MIT/Apache license.
 4. Pin in workspace `[workspace.dependencies]` in root `Cargo.toml`.
 

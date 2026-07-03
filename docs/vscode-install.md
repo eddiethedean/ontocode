@@ -4,7 +4,7 @@
 
 ## Option A — VS Code Marketplace (recommended)
 
-1. Install [OntoCode from the Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) (v0.8.0+).
+1. Install [OntoCode from the Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) (v0.9.0+).
 2. **File → Open Folder…** and choose a directory with ontology files.
 3. **Trust** the workspace when prompted.
 4. Open the **OntoCode** activity bar and browse ontologies, classes, properties, individuals, and **Diagnostics**.
@@ -20,7 +20,7 @@ For a full walkthrough, see [First success in 10 minutes](guides/first-success.m
 3. Verify against `SHA256SUMS` — see [release-integrity.md](release-integrity.md).
 4. Open a folder containing ontology files (`.ttl`, `.obo`, `.owl`, `.rdf`, `.jsonld`, `.nt`, `.nq`, `.trig`).
 
-Release VSIX packages bundle `ontoindex-lsp` for Linux, macOS, and Windows.
+Release VSIX packages bundle `ontocore-lsp` for Linux, macOS, and Windows.
 
 ## Option C — Build from source
 
@@ -40,10 +40,10 @@ Install the generated `.vsix` via **Install from VSIX…**, or press **F5** in V
 Use this only when the bundled server is missing or you are developing the LSP:
 
 ```bash
-cargo install ontoindex-lsp --locked
+cargo install ontocore-lsp --locked
 ```
 
-Set **OntoCode: Lsp Path** (`ontocode.lspPath`) to the absolute path of your `ontoindex-lsp` binary. **Trusted workspaces only** — ignored in Restricted Mode.
+Set **OntoCode: Lsp Path** (`ontocode.lspPath`) to the absolute path of your `ontocore-lsp` binary. **Trusted workspaces only** — ignored in Restricted Mode.
 
 ## Using the sidebar
 
@@ -67,7 +67,7 @@ Click an entity name to open the **Entity Inspector**. For `.ttl` files, use the
 
 | Setting | Default | Description |
 |---------|---------|-------------|
-| `ontocode.lspPath` | `""` | **Trusted workspaces only.** Path to `ontoindex-lsp`; ignored in Restricted Mode. Empty uses bundled binary |
+| `ontocode.lspPath` | `""` | **Trusted workspaces only.** Path to `ontocore-lsp`; ignored in Restricted Mode. Empty uses bundled binary |
 | `ontocode.queryHistoryLimit` | `20` | Max entries in Query Workbench history |
 | `ontocode.reasoner.default` | `el` | Default profile for Run Reasoner (`dl`/`auto` require OntoLogos 1.0) |
 | `ontocode.reasoner.autoProfile` | `true` | Profile-detection warnings when running reasoner |
@@ -86,7 +86,7 @@ Indexing runs on workspace open. `ontocode.autoIndexOnOpen` is a legacy setting 
 - **OntoCode: Set Hierarchy Mode** — asserted / inferred / combined class tree
 - **OntoCode: Open Class Graph** / **Property Graph** / **Import Graph** / **Neighborhood Graph** — visualization ([guide](guides/graph-visualization.md))
 - **OntoCode: Create Class / Property / Individual** — authoring in `.ttl` files
-- **Problems panel** — inline diagnostics from `ontoindex-lsp` after indexing
+- **Problems panel** — inline diagnostics from `ontocore-lsp` after indexing
 - **OntoCode: Show Entity Inspector** / **Jump to Source** — from explorer context menu
 
 ## Troubleshooting
@@ -94,10 +94,10 @@ Indexing runs on workspace open. `ontocode.autoIndexOnOpen` is a legacy setting 
 | Symptom | Fix |
 |---------|-----|
 | Extension does not activate | Open a supported ontology file or the **OntoCode → Ontologies** view |
-| `failed to start language server` | Run `./scripts/package-extension.sh`, set `ontocode.lspPath`, or `cargo install ontoindex-lsp` |
-| `spawn ... ontoindex-lsp EACCES` (macOS/Linux) | Upgrade to OntoCode ≥ 0.4.0. Manual: `chmod +x` on the bundled binary path from the error |
-| `couldn't create connection to server` | Check **Output → OntoIndex Language Server**. Uninstall older OntoCode versions. Try `cargo install ontoindex-lsp` and set `ontocode.lspPath` |
-| Empty explorer after open | Run **OntoCode: Index Workspace**; check **Output → OntoIndex Language Server** |
+| `failed to start language server` | Run `./scripts/package-extension.sh`, set `ontocode.lspPath`, or `cargo install ontocore-lsp` |
+| `spawn ... ontocore-lsp EACCES` (macOS/Linux) | Upgrade to OntoCode ≥ 0.4.0. Manual: `chmod +x` on the bundled binary path from the error |
+| `couldn't create connection to server` | Check **Output → OntoCore Language Server**. Uninstall older OntoCode versions. Try `cargo install ontocore-lsp` and set `ontocode.lspPath` |
+| Empty explorer after open | Run **OntoCode: Index Workspace**; check **Output → OntoCore Language Server** |
 | Inspector has no edit controls | Entity must be in a **Turtle (`.ttl`)** file; other formats are read-only |
 
 See also [troubleshooting.md](troubleshooting.md), [faq.md](faq.md), and [First success in 10 minutes](guides/first-success.md).

@@ -13,7 +13,7 @@ OntoCode must support classification, consistency checking, inferred hierarchy b
 
 ## 2. Reasoner Adapter Model
 
-Reasoners are Rust components behind a common OntoIndex trait. **`ontoindex-reasoner`** is a thin integration crate that wraps OntoLogos engines.
+Reasoners are Rust components behind a common OntoCore trait. **`ontocore-reasoner`** is a thin integration crate that wraps OntoLogos engines.
 
 ```rust
 pub trait ReasonerAdapter {
@@ -26,7 +26,7 @@ pub trait ReasonerAdapter {
 }
 ```
 
-Input is built from workspace ontology files via `ontologos-parser` (or bridged from `ontoindex-owl` per [ADR-0013](adr/0013-dual-stack-oxigraph-horned-owl.md)). Results are cached in the OntoIndex catalog for LSP and explorer inferred views.
+Input is built from workspace ontology files via `ontologos-parser` (or bridged from `ontocore-owl` per [ADR-0013](adr/0013-dual-stack-oxigraph-horned-owl.md)). Results are cached in the OntoCore catalog for LSP and explorer inferred views.
 
 ### Required adapters by v1.0 (P0)
 
@@ -48,7 +48,7 @@ Explanations use `ontologos-explain` (EL-first in 0.9.0; full DL clash traces wi
 ### Explicitly excluded
 
 - ELK, HermiT, Pellet, RDFox JVM builds — **non-goals** per ADR-0014.
-- Direct `whelk-rs` or `reasonable` dependencies in OntoIndex — use OntoLogos facades ([ADR-0015](adr/0015-adopt-ontologos-reasoner.md)).
+- Direct `whelk-rs` or `reasonable` dependencies in OntoCore — use OntoLogos facades ([ADR-0015](adr/0015-adopt-ontologos-reasoner.md)).
 - External Java subprocesses for reasoning.
 
 ## 3. Reasoner Operations
@@ -93,7 +93,7 @@ Explorer toggle:
 ```mermaid
 flowchart LR
     files[Workspace OWL files]
-  ontoindex[ontoindex-reasoner]
+  ontocore[ontocore-reasoner]
     ol_parser[ontologos-parser]
     ol_core[ontologos-core]
     profile[ontologos-profile]
@@ -103,15 +103,15 @@ flowchart LR
     dl[ontologos-dl 1.0]
     facade[ontologos-facade 1.0]
     explain[ontologos-explain]
-    catalog[OntoIndex catalog cache]
+    catalog[OntoCore catalog cache]
     files --> ol_parser --> ol_core
-    ol_core --> ontoindex
-    profile --> ontoindex
-    ontoindex --> el
-    ontoindex --> rl
-    ontoindex --> rdfs
-    ontoindex --> dl
-    ontoindex --> facade
+    ol_core --> ontocore
+    profile --> ontocore
+    ontocore --> el
+    ontocore --> rl
+    ontocore --> rdfs
+    ontocore --> dl
+    ontocore --> facade
     el --> explain
     dl --> explain
     explain --> catalog
@@ -120,7 +120,7 @@ flowchart LR
     dl --> catalog
 ```
 
-- **`ontoindex-reasoner`:** trait, input bridge, result cache, LSP JSON — **not** a reasoner implementation.
+- **`ontocore-reasoner`:** trait, input bridge, result cache, LSP JSON — **not** a reasoner implementation.
 - **`ontologos-el`:** in-house EL completion (v0.6+ with 0.9.0).
 - **`ontologos-rl` / `ontologos-rdfs`:** delegate to reasonable via `ontologos-bridge` (P1).
 - **`ontologos-dl`:** OWL 2 DL engine — **v1.0 blocker**; ships with OntoLogos 1.0.0 publish.
@@ -146,8 +146,8 @@ Provided by **`ontologos-explain`**, backed by `dl` for full DL clash traces at 
 |------------|-------------|-------------------|
 | Unsatisfiable class detection | P0 | 0.9.0 (`el`); 1.0.0 (`dl`) |
 | Clash-trace / justification chain | P0 | 1.0.0 (`dl` + `explain`) |
-| Jump from axiom in chain to source | P0 | OntoIndex LSP |
-| LSP `ontoindex/getExplanation` | P0 | OntoIndex maps `ontologos-explain` output |
+| Jump from axiom in chain to source | P0 | OntoCore LSP |
+| LSP `ontocore/getExplanation` | P0 | OntoCore maps `ontologos-explain` output |
 
 **Explanation panel** ([UI_WIREFRAMES.md](UI_WIREFRAMES.md) §7):
 
@@ -177,7 +177,7 @@ v0.9: evaluate `ontologos-watch` for invalidating cache on file change ([ADR-001
 
 ## 9. Testing
 
-- Shared fixtures in `fixtures/` exercised by both OntoIndex integration tests and OntoLogos conformance imports.
+- Shared fixtures in `fixtures/` exercised by both OntoCore integration tests and OntoLogos conformance imports.
 - Golden classification on Protégé-exported fixtures (compare inferred hierarchy).
 - Unsatisfiability + explanation fixtures in `examples/protege-roundtrip/`.
 - EL corpus via `ontologos-el`; RL via `ontologos-rl`.
@@ -192,7 +192,7 @@ v0.9: evaluate `ontologos-watch` for invalidating cache on file change ([ADR-001
 | Unsatisfiable class reporting | P0 | 0.9.0 (`el`); 1.0.0 (`dl`) |
 | Real unsatisfiability explanations (clash trace) | P0 | **1.0.0** |
 | Inferred hierarchy display | P0 | 0.9.0+ |
-| Reasoner errors in Problems panel | P0 | OntoIndex |
+| Reasoner errors in Problems panel | P0 | OntoCore |
 | `rl` / `rdfs` adapters | P1 | 0.9.0 |
 | `auto` profile routing | P1 | **1.0.0** |
 | Instance checking | P1 | 1.0.0 (`ontologos-abox`) |
@@ -208,10 +208,10 @@ Track OntoLogos progress: [github.com/eddiethedean/ontologos](https://github.com
 
 ## 12. Transitive dependencies (via OntoLogos — do not depend directly)
 
-| Crate | Role in OntoLogos | OntoIndex access |
+| Crate | Role in OntoLogos | OntoCore access |
 |-------|-------------------|------------------|
 | [`reasonable`](https://crates.io/crates/reasonable) | OWL RL + RDFS materialization | `ontologos-rl`, `ontologos-rdfs` |
-| [`horned-owl`](https://crates.io/crates/horned-owl) | OWL parse in `ontologos-parser` | `ontologos-parser` only (authoring uses direct horned-owl in `ontoindex-owl`) |
+| [`horned-owl`](https://crates.io/crates/horned-owl) | OWL parse in `ontologos-parser` | `ontologos-parser` only (authoring uses direct horned-owl in `ontocore-owl`) |
 | [`petgraph`](https://crates.io/crates/petgraph) | Taxonomy + proof graphs | `ontologos-query`, `ontologos-explain` |
 
 See [DEPENDENCY_MATRIX.md](DEPENDENCY_MATRIX.md) and [LICENSES.md](LICENSES.md) (BSD-3 `reasonable`, LGPL-3.0 `horned-owl`).

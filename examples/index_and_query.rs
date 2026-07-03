@@ -6,8 +6,8 @@
 //! cargo run -p ontocode --example index_and_query
 //! ```
 
-use ontoindex_catalog::IndexBuilder;
-use ontoindex_query::query_catalog;
+use ontocore_catalog::IndexBuilder;
+use ontocore_query::query_catalog;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let workspace = std::path::Path::new("fixtures");

@@ -2,24 +2,22 @@
 
 Platform evolution for OntoCore inside the OntoCode monorepo.
 
-## v0.9.0 — OntoCore Identity (current)
+## v0.9.0 — OntoCore identity (current)
 
-- OntoCore branding and documentation
-- `ontocore` façade crate with experimental `Workspace` API
-- Architecture diagrams and responsibility split
-- `ontoindex-*` crate names unchanged
-- CLI remains `ontoindex`; LSP remains `ontoindex-lsp`
+- **`ontocore-*` crate rename** — all implementation crates, CLI (`ontocore`), and LSP (`ontocore-lsp`)
+- **`ontocore` façade** on crates.io with experimental `Workspace` API
+- LSP custom methods under `ontocore/*`
+- OntoCore branding and documentation restructure
 
-## v0.10 — OntoCore Public API + workflow
+## v0.10 — Public API + workflow
 
 - Stabilize `ontocore::Workspace` and ergonomic search/query/diagnostics/refactor APIs
 - Examples and docs.rs documentation for `ontocore`
-- `ontocore` CLI alias (alongside `ontoindex`)
 - Semantic diff and Git branch comparison
 - Incremental workspace index
 - React migration for reasoner/explanation panels
 
-## v0.11 — OntoCore Platform Layer
+## v0.11 — Platform layer
 
 - Persistent workspace cache API
 - Richer semantic graph API
@@ -27,28 +25,17 @@ Platform evolution for OntoCore inside the OntoCode monorepo.
 - MCP server design
 - Python and TypeScript binding boundaries
 
-## v0.12 — Binding Prep
+## v0.12 — Binding prep
 
 - FFI-safe stable data models
 - JSON serialization contracts
 - API compatibility tests
 - Prepare `ontocore-python` and `@ontocore/node`
 
-## v1.0 — OntoCore-Powered OntoCode
+## v1.0 — OntoCore-powered OntoCode
 
 - OntoCode depends cleanly on OntoCore APIs
 - OntoCore documented as the platform; OntoCode as flagship IDE
-- `ontocore` CLI primary; `ontoindex` compatibility alias
-- Optional rename of `ontoindex-*` → `ontocore-*` crates
 - OWL 2 DL reasoning via OntoLogos 1.0
-
-## CLI branding timeline
-
-| Version | CLI |
-|---------|-----|
-| v0.9 | `ontoindex` primary |
-| v0.10 | `ontocore` alias added |
-| v0.11 | Docs switch to `ontocore` |
-| v1.0 | `ontocore` primary, `ontoindex` compatibility alias |
 
 See also [design roadmap](../design/ROADMAP.md) and [ADR-0018](../design/adr/0018-ontocore-platform-identity.md).

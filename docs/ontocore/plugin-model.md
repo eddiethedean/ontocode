@@ -16,7 +16,7 @@ Full specification: [PLUGIN_SPEC.md](../design/PLUGIN_SPEC.md).
 | Query function | SQL extensions | `descendants(iri)`, `ontology_depth(iri)` |
 | UI | VS Code views | Custom inspectors (OntoCode layer) |
 
-Built-in reasoner adapters (`el`, `rl`, `rdfs`, `dl`, `auto`) ship in `ontoindex-reasoner` as thin wrappers over [OntoLogos](https://github.com/eddiethedean/ontologos).
+Built-in reasoner adapters (`el`, `rl`, `rdfs`, `dl`, `auto`) ship in `ontocore-reasoner` as thin wrappers over [OntoLogos](https://github.com/eddiethedean/ontologos).
 
 ## OntoCore vs OntoCode plugins
 

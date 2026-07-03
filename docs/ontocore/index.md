@@ -12,7 +12,7 @@ OntoCore indexes ontology workspaces on disk and provides:
 - Refactoring (rename, migrate, move, extract)
 - Reasoning integration via [OntoLogos](https://github.com/eddiethedean/ontologos)
 - Patch write-back for Turtle
-- CLI (`ontoindex`) and LSP (`ontoindex-lsp`)
+- CLI (`ontocore`) and LSP (`ontocore-lsp`)
 
 ## Relationship to OntoCode and OntoLogos
 
@@ -22,7 +22,7 @@ OntoCore indexes ontology workspaces on disk and provides:
 | **OntoCode** | VS Code extension — explorer, inspector, webviews, marketplace |
 | **OntoLogos** | OWL reasoning — classification, consistency, explanations |
 
-OntoCode is the flagship IDE built on OntoCore. OntoLogos is a separate reasoning stack that OntoCore integrates through `ontoindex-reasoner`.
+OntoCode is the flagship IDE built on OntoCore. OntoLogos is a separate reasoning stack that OntoCore integrates through `ontocore-reasoner`.
 
 ## Public API
 
@@ -39,21 +39,19 @@ let hits = ws.search("Person")?;
 
 **Pre-1.0:** `Workspace` and related APIs are experimental until v0.10.
 
-Lower-level access remains available through `ontoindex-*` crates. See [crate map](crate-map.md).
+Lower-level access remains available through `ontocore-*` crates. See [crate map](crate-map.md).
 
-## Compatibility aliases
+## Compatibility (v0.9+)
 
-OntoCore identity is new in v0.9.0. These names remain unchanged for compatibility:
+All crates, binaries, and LSP methods use **`ontocore`** naming. Upgrading from v0.8? See [migration guide](../migration/v0.9.md).
 
-| Surface | Current name | Notes |
-|---------|--------------|-------|
-| Implementation crates | `ontoindex-*` | Stable until API reaches 1.0 |
-| CLI binary | `ontoindex` | `ontocore` alias planned v0.10 |
-| LSP binary | `ontoindex-lsp` | OntoCore LSP |
-| LSP methods | `ontoindex/*` | e.g. `ontoindex/indexWorkspace` |
-| Diagnostic source | `ontoindex` | VS Code Problems panel |
-
-OntoCore (formerly referred to as **OntoIndex** in older docs) is implemented by the `ontoindex-*` crates.
+| Surface | Name |
+|---------|------|
+| Implementation crates | `ontocore-*` |
+| CLI binary | `ontocore` |
+| LSP binary | `ontocore-lsp` |
+| LSP methods | `ontocore/*` |
+| Diagnostic source | `ontocore` |
 
 ## Next steps
 

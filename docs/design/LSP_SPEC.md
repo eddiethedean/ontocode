@@ -4,14 +4,14 @@
 >
 > For what ships today, read **[lsp-api.md](../lsp-api.md)** (authoritative for v0.6).
 > Implemented: hover, document/workspace symbols, go-to-definition, diagnostics publishing,
-> `ontoindex/indexWorkspace`, `ontoindex/getCatalogSnapshot`, `ontoindex/getEntity`, `ontoindex/applyAxiomPatch`,
-> `ontoindex/query`, `ontoindex/sparql`, `ontoindex/parseManchester`, `ontoindex/runReasoner`, `ontoindex/getExplanation`.
-> See [`handlers.rs` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/crates/ontoindex-lsp/src/handlers.rs) and
-> [`protocol.rs` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/crates/ontoindex-lsp/src/protocol.rs).
+> `ontocore/indexWorkspace`, `ontocore/getCatalogSnapshot`, `ontocore/getEntity`, `ontocore/applyAxiomPatch`,
+> `ontocore/query`, `ontocore/sparql`, `ontocore/parseManchester`, `ontocore/runReasoner`, `ontocore/getExplanation`.
+> See [`handlers.rs` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/crates/ontocore-lsp/src/handlers.rs) and
+> [`protocol.rs` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/crates/ontocore-lsp/src/protocol.rs).
 
 ## 1. Purpose
 
-The OntoIndex language server provides ontology-aware editor features to OntoCode and potentially other editors.
+The OntoCore language server provides ontology-aware editor features to OntoCode and potentially other editors.
 
 ## 2. Transport
 
@@ -38,8 +38,8 @@ Sections below describe the **target** capability set. Implementation status is 
 
 **Sources ([DEPENDENCY_MATRIX.md](DEPENDENCY_MATRIX.md)):**
 
-- **Parse errors** — [`oxigraph`](https://crates.io/crates/oxigraph) via `ontoindex-parser`
-- **Import / prefix / quality rules** — in-house `ontoindex-diagnostics` on catalog (duplicate labels, orphans, broken imports, undefined prefixes)
+- **Parse errors** — [`oxigraph`](https://crates.io/crates/oxigraph) via `ontocore-parser`
+- **Import / prefix / quality rules** — in-house `ontocore-diagnostics` on catalog (duplicate labels, orphans, broken imports, undefined prefixes)
 - **OBO (v0.7b)** — [`fastobo-validator`](https://crates.io/crates/fastobo-validator) violations mapped to LSP
 - **SHACL (v1.0 P1)** — [`rudof`](https://crates.io/crates/rudof) via plugin adapter
 
@@ -126,67 +126,67 @@ Global entity search.
 
 | Method | v0.3 status |
 |--------|-------------|
-| `ontoindex/indexWorkspace` | **Implemented** |
-| `ontoindex/getCatalogSnapshot` | **Implemented** (not listed in early drafts; used by explorer) |
-| `ontoindex/getEntity` | **Implemented** |
-| `ontoindex/query` | **Implemented** (v0.5) |
-| `ontoindex/sparql` | **Implemented** (v0.5) |
-| `ontoindex/getGraph` | **Implemented** (v0.7) — see [lsp-api.md](../lsp-api.md) |
-| `ontoindex/getSemanticDiff` | Planned |
-| `ontoindex/runReasoner` | **Implemented** (v0.6) — see [lsp-api.md](../lsp-api.md) |
-| `ontoindex/applyAxiomPatch` | **Implemented** (v0.4) |
-| `ontoindex/parseManchester` | **Implemented** (v0.5) |
-| `ontoindex/getExplanation` | **Implemented** (v0.6) — see [lsp-api.md](../lsp-api.md) |
-| `ontoindex/runRobot` | **Implemented** (v0.7) — see [lsp-api.md](../lsp-api.md) |
+| `ontocore/indexWorkspace` | **Implemented** |
+| `ontocore/getCatalogSnapshot` | **Implemented** (not listed in early drafts; used by explorer) |
+| `ontocore/getEntity` | **Implemented** |
+| `ontocore/query` | **Implemented** (v0.5) |
+| `ontocore/sparql` | **Implemented** (v0.5) |
+| `ontocore/getGraph` | **Implemented** (v0.7) — see [lsp-api.md](../lsp-api.md) |
+| `ontocore/getSemanticDiff` | Planned |
+| `ontocore/runReasoner` | **Implemented** (v0.6) — see [lsp-api.md](../lsp-api.md) |
+| `ontocore/applyAxiomPatch` | **Implemented** (v0.4) |
+| `ontocore/parseManchester` | **Implemented** (v0.5) |
+| `ontocore/getExplanation` | **Implemented** (v0.6) — see [lsp-api.md](../lsp-api.md) |
+| `ontocore/runRobot` | **Implemented** (v0.7) — see [lsp-api.md](../lsp-api.md) |
 
-### `ontoindex/indexWorkspace`
+### `ontocore/indexWorkspace`
 
 Indexes the workspace.
 
-### `ontoindex/getCatalogSnapshot`
+### `ontocore/getCatalogSnapshot`
 
 Returns documents, entities, class hierarchy, and diagnostics for UI clients.
 
-### `ontoindex/query`
+### `ontocore/query`
 
 Runs SQL-style query against the indexed workspace catalog (implemented v0.5).
 
-### `ontoindex/sparql`
+### `ontocore/sparql`
 
 Runs SPARQL query against the indexed catalog (implemented v0.5).
 
-### `ontoindex/getEntity`
+### `ontocore/getEntity`
 
 Returns entity details.
 
-### `ontoindex/getGraph`
+### `ontocore/getGraph`
 
 Returns graph data for visualization.
 
-### `ontoindex/getSemanticDiff`
+### `ontocore/getSemanticDiff`
 
 Returns semantic diff between two refs or catalogs.
 
-### `ontoindex/runReasoner`
+### `ontocore/runReasoner`
 
 Runs configured reasoner.
 
-### `ontoindex/applyAxiomPatch`
+### `ontocore/applyAxiomPatch`
 
 Apply a Horned-OWL axiom patch to a document. Used by quick forms and Manchester editor.
 See [OWL_AUTHORING_SPEC.md](OWL_AUTHORING_SPEC.md).
 
 **Params:** document URI, axiom patch (JSON), preview-only flag.
 
-### `ontoindex/parseManchester`
+### `ontocore/parseManchester`
 
 Parse Manchester OWL Syntax expression; return diagnostics and normalized form.
 
-### `ontoindex/getExplanation`
+### `ontocore/getExplanation`
 
 Return justification chain for unsatisfiable class. See [REASONER_SPEC.md](REASONER_SPEC.md).
 
-### `ontoindex/runRobot`
+### `ontocore/runRobot`
 
 Run ROBOT subcommand (`validate`, `merge`, `report`). See [OBO_ROBOT_SPEC.md](OBO_ROBOT_SPEC.md).
 

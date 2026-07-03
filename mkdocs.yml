@@ -167,7 +167,7 @@ nav:
               - MVP backlog: design/MVP_BACKLOG.md
           - ADRs:
               - Index: design/adr/README.md
-              - "0001 Rust for OntoIndex": design/adr/0001-use-rust-for-ontoindex.md
+              - "0001 Rust for OntoCore": design/adr/0001-use-rust-for-ontocore.md
               - "0002 Horned-OWL": design/adr/0002-use-horned-owl.md
               - "0003 Oxigraph": design/adr/0003-use-oxigraph.md
               - "0004 DataFusion": design/adr/0004-use-datafusion-for-sql.md
@@ -194,4 +194,4 @@ extra:
     - icon: fontawesome/brands/github
       link: https://github.com/eddiethedean/ontocode
     - icon: fontawesome/brands/rust
-      link: https://crates.io/search?q=ontoindex
+      link: https://crates.io/search?q=ontocore

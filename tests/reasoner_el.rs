@@ -1,6 +1,6 @@
 mod support;
 
-use ontoindex_reasoner::{classify, ReasonerId, WorkspaceInputLoader};
+use ontocore_reasoner::{classify, ReasonerId, WorkspaceInputLoader};
 use std::path::PathBuf;
 
 fn el_only_workspace() -> (tempfile::TempDir, PathBuf) {
@@ -18,7 +18,7 @@ fn el_only_workspace() -> (tempfile::TempDir, PathBuf) {
 fn el_classify_el_fixture_workspace() {
     let (_dir, workspace) = el_only_workspace();
     let catalog =
-        ontoindex_catalog::IndexBuilder::new().workspace(&workspace).build().expect("index");
+        ontocore_catalog::IndexBuilder::new().workspace(&workspace).build().expect("index");
     let input =
         WorkspaceInputLoader::new(&workspace).load(catalog.class_hierarchy()).expect("load");
     let result = classify(ReasonerId::El, &input, false).expect("classify");
@@ -31,7 +31,7 @@ fn el_classify_el_fixture_workspace() {
 fn dl_profile_requires_ontologos_1() {
     let workspace = support::fixture_workspace();
     let catalog =
-        ontoindex_catalog::IndexBuilder::new().workspace(&workspace).build().expect("index");
+        ontocore_catalog::IndexBuilder::new().workspace(&workspace).build().expect("index");
     let input =
         WorkspaceInputLoader::new(&workspace).load(catalog.class_hierarchy()).expect("load");
     let err = classify(ReasonerId::Dl, &input, false).unwrap_err();

@@ -5,7 +5,7 @@ OntoCore exposes ontology data as **SQL virtual tables** over the indexed catalo
 ## Quick example
 
 ```bash
-ontoindex query ./ontology "SELECT short_name, labels FROM classes"
+ontocore query ./ontology "SELECT short_name, labels FROM classes"
 ```
 
 ```rust

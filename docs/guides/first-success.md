@@ -35,7 +35,7 @@ If you already have `.ttl`, `.owl`, or other ontology files, open that folder in
 ## 3. Browse the explorer
 
 1. Click the **OntoCode** icon in the **Activity Bar** (left edge).
-2. Wait for indexing to finish (check **Output → OntoIndex Language Server** if views stay empty).
+2. Wait for indexing to finish (check **Output → OntoCore Language Server** if views stay empty).
 3. Expand **Ontologies** to see indexed files and parse status.
 4. Expand **Classes**, **Properties**, or **Individuals** to browse entities.
 5. **Click an entity name** (e.g. `Person`) to open the **Entity Inspector**.
@@ -101,8 +101,8 @@ Guide: [Graph visualization](../guides/graph-visualization.md).
 To catch lint and parse errors in CI or locally:
 
 ```bash
-cargo install ontoindex-cli --locked
-ontoindex validate /path/to/your/ontology/folder
+cargo install ontocore-cli --locked
+ontocore validate /path/to/your/ontology/folder
 ```
 
 Use the folder you opened in VS Code (e.g. `ontocode-tutorial`). Exit code **0** means no diagnostic **errors** (warnings are allowed). See [CI integration](../ci-integration.md).
@@ -114,7 +114,7 @@ Use the folder you opened in VS Code (e.g. `ontocode-tutorial`). Exit code **0**
 | Sidebar says to index workspace | Run **OntoCode: Index Workspace** |
 | No edit controls in inspector | Entity must be in a **`.ttl`** file |
 | Language server failed to start | See [Install VS Code](../vscode-install.md#troubleshooting) |
-| Empty **Classes** after indexing | Check **Output → OntoIndex Language Server**; re-run **Index Workspace** |
+| Empty **Classes** after indexing | Check **Output → OntoCore Language Server**; re-run **Index Workspace** |
 
 More help: [Troubleshooting](../troubleshooting.md) · [FAQ](../faq.md).
 

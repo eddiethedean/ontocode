@@ -1,13 +1,13 @@
-# ADR-0001 — Use Rust for OntoIndex
+# ADR-0001 — Use Rust for OntoCore
 
 ## Status
 Accepted
 
 ## Context
-OntoIndex needs high performance, safe concurrency, native binaries, good CLI ergonomics, and integration with VS Code through a language server.
+OntoCore needs high performance, safe concurrency, native binaries, good CLI ergonomics, and integration with VS Code through a language server.
 
 ## Decision
-Use Rust as the implementation language for OntoIndex.
+Use Rust as the implementation language for OntoCore.
 
 ## Consequences
 Positive:

@@ -2,7 +2,7 @@
 
 > **Document status: target architecture with v0.7 partial implementation**
 >
-> **Shipped in v0.7:** workspace scanner, Oxigraph parsing, in-memory catalog, SQL/SPARQL queries, diagnostics, CLI, LSP explorer + Problems panel, Turtle patch write-back, Query Workbench + Manchester editor (extension), Horned-OWL catalog bridge (`ontoindex-owl`), **EL/RL/RDFS reasoning** (`ontoindex-reasoner`), **React inspector + graphs**, **OBO index**, **ROBOT CLI wrappers**. See [What ships today](../SHIPPED.md).
+> **Shipped in v0.7:** workspace scanner, Oxigraph parsing, in-memory catalog, SQL/SPARQL queries, diagnostics, CLI, LSP explorer + Problems panel, Turtle patch write-back, Query Workbench + Manchester editor (extension), Horned-OWL catalog bridge (`ontocore-owl`), **EL/RL/RDFS reasoning** (`ontocore-reasoner`), **React inspector + graphs**, **OBO index**, **ROBOT CLI wrappers**. See [What ships today](../SHIPPED.md).
 >
 > **Planned:** full DL reasoning (OntoLogos 1.0), migrate remaining panels to React (v0.8+), semantic diff, full Manchester catalog, full OBO write-back. See [ROADMAP.md](ROADMAP.md).
 >
@@ -33,13 +33,13 @@ The architecture must support:
               |
               v
 +---------------------------+
-|   OntoIndex Language      |
+|   OntoCore Language      |
 |        Server             |
 +-------------+-------------+
               |
               v
 +---------------------------+
-|       OntoIndex Core      |
+|       OntoCore Core      |
 | catalog/query/diagnostics |
 | diff/docs/reasoner/robot  |
 +-------------+-------------+
@@ -59,30 +59,30 @@ The architecture must support:
 +---------------------------+
 ```
 
-**Reasoning ([ADR-0015](adr/0015-adopt-ontologos-reasoner.md)):** `ontoindex-reasoner` delegates to [OntoLogos](https://github.com/eddiethedean/ontologos) crates (`ontologos-el`, `ontologos-rl`, `ontologos-dl`, etc.). Pin **0.9.0** at v0.6; bump to **1.0.0** for DL parity at OntoCode v1.0.
+**Reasoning ([ADR-0015](adr/0015-adopt-ontologos-reasoner.md)):** `ontocore-reasoner` delegates to [OntoLogos](https://github.com/eddiethedean/ontologos) crates (`ontologos-el`, `ontologos-rl`, `ontologos-dl`, etc.). Pin **0.9.0** at v0.6; bump to **1.0.0** for DL parity at OntoCode v1.0.
 
 **Sync rule ([ADR-0013](adr/0013-dual-stack-oxigraph-horned-owl.md)):** Catalog entities/axioms for edit and diff come from Horned-OWL; triple counts and SPARQL from Oxigraph; CI consistency tests detect drift.
 
 **Dependency policy:** [ADR-0016](adr/0016-dependency-first-implementation.md), [DEPENDENCY_MATRIX.md](DEPENDENCY_MATRIX.md).
 
-## 3. OntoIndex Crate Layout
+## 3. OntoCore Crate Layout
 
 | Crate | Status | Role | External dependency |
 |-------|--------|------|---------------------|
-| `ontoindex-core` | v0.2 | Types, scanner, limits, path jail | `ignore` |
-| `ontoindex-parser` | v0.2 | RDF parse, entity extraction | `oxigraph` |
-| `ontoindex-owl` | v0.4 | OWL axiom facade, patch write-back | `horned-owl`, `horned-functional` |
-| `ontoindex-catalog` | v0.2 | Index builder, entity API | — |
-| `ontoindex-query` | v0.2 | SQL virtual tables, SPARQL | `sqlparser`, `oxigraph` |
-| `ontoindex-diagnostics` | v0.3 | Lint rules, LSP diagnostics | `regex` (+ `fastobo-validator` v0.7b) |
-| `ontoindex-diff` | planned v0.9 | Semantic diff, Git compare | `horned-owl`, `git2` |
-| `ontoindex-docs` | planned v0.9 | Markdown/HTML export | `pulldown-cmark`, `minijinja` |
-| `ontoindex-reasoner` | v0.6 | Reasoner facade | OntoLogos `0.9`→`1.0` |
-| `ontoindex-robot` | v0.7 | ROBOT CLI wrappers | ROBOT CLI (external) |
-| `ontoindex-lsp` | v0.4 | Language server + diagnostics + patch apply | `lsp-server`, `lsp-types` |
-| `ontoindex-cli` | v0.4 | `ontoindex` binary | composes above |
+| `ontocore-core` | v0.2 | Types, scanner, limits, path jail | `ignore` |
+| `ontocore-parser` | v0.2 | RDF parse, entity extraction | `oxigraph` |
+| `ontocore-owl` | v0.4 | OWL axiom facade, patch write-back | `horned-owl`, `horned-functional` |
+| `ontocore-catalog` | v0.2 | Index builder, entity API | — |
+| `ontocore-query` | v0.2 | SQL virtual tables, SPARQL | `sqlparser`, `oxigraph` |
+| `ontocore-diagnostics` | v0.3 | Lint rules, LSP diagnostics | `regex` (+ `fastobo-validator` v0.7b) |
+| `ontocore-diff` | planned v0.9 | Semantic diff, Git compare | `horned-owl`, `git2` |
+| `ontocore-docs` | planned v0.9 | Markdown/HTML export | `pulldown-cmark`, `minijinja` |
+| `ontocore-reasoner` | v0.6 | Reasoner facade | OntoLogos `0.9`→`1.0` |
+| `ontocore-robot` | v0.7 | ROBOT CLI wrappers | ROBOT CLI (external) |
+| `ontocore-lsp` | v0.4 | Language server + diagnostics + patch apply | `lsp-server`, `lsp-types` |
+| `ontocore-cli` | v0.4 | `ontocore` binary | composes above |
 
-## 4. OntoIndex Internal Modules
+## 4. OntoCore Internal Modules
 
 ### 4.1 Workspace Scanner
 - Recursive discovery, ignore rules, format detection, content hashing, dependency tracking, change detection
@@ -96,7 +96,7 @@ The architecture must support:
 - Ontologies, entities, axioms (from Horned-OWL), annotations, imports, diagnostics
 
 ### 4.4 Query Layer
-- **v0.2:** `ontoindex-query` — `sqlparser` virtual tables + Oxigraph SPARQL
+- **v0.2:** `ontocore-query` — `sqlparser` virtual tables + Oxigraph SPARQL
 - **v1.0:** joins/aggregations via extended virtual tables first; DataFusion if triggered ([ADR-0011](adr/0011-use-sqlparser-for-sql.md) amendment)
 
 ### 4.5 Diagnostics Layer (v0.3+)
@@ -109,7 +109,7 @@ The architecture must support:
 - `pulldown-cmark` + `minijinja` templates; entity pages
 
 ### 4.8 Reasoner Layer (v0.6+)
-- `ontoindex-reasoner` thin facade over OntoLogos — see [REASONER_SPEC.md](REASONER_SPEC.md), [ADR-0014](adr/0014-rust-native-reasoners-only.md), [ADR-0015](adr/0015-adopt-ontologos-reasoner.md)
+- `ontocore-reasoner` thin facade over OntoLogos — see [REASONER_SPEC.md](REASONER_SPEC.md), [ADR-0014](adr/0014-rust-native-reasoners-only.md), [ADR-0015](adr/0015-adopt-ontologos-reasoner.md)
 - v0.6: `ontologos-*` 0.9.0 (`el`, `rl`, `rdfs`, `explain`)
 - v1.0: `ontologos-*` 1.0.0 (`dl`, `facade`, full DL explanations)
 - v0.9: optional `ontologos-watch` for incremental reclassify

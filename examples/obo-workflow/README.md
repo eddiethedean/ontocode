@@ -1,6 +1,6 @@
 # OBO + ROBOT workflow example
 
-Mixed OBO workspace demonstrating OntoIndex indexing alongside ROBOT CI steps.
+Mixed OBO workspace demonstrating OntoCore indexing alongside ROBOT CI steps.
 
 ## Files
 
@@ -21,11 +21,11 @@ cargo run -- robot validate examples/obo-workflow/demo.obo
 ## CI recipe
 
 ```yaml
-- name: OntoIndex validate
-  run: cargo install ontoindex-cli --locked && ontoindex validate examples/obo-workflow
+- name: OntoCore validate
+  run: cargo install ontocore-cli --locked && ontocore validate examples/obo-workflow
 
 - name: ROBOT validate
-  run: ontoindex robot validate examples/obo-workflow/demo.obo
+  run: ontocore robot validate examples/obo-workflow/demo.obo
 ```
 
 See [OBO workflow guide](https://ontocode-vs.readthedocs.io/en/latest/guides/obo-workflow/).

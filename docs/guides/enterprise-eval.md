@@ -32,19 +32,19 @@ Canonical capability matrix: [What ships today](../SHIPPED.md).
 | EL explanations (where OntoLogos supports) | **Shipped** (EL-first) |
 | React entity inspector + graph visualization | **Shipped** |
 | OBO format index + `obo_id` in explorer | **Shipped** (write-back: Turtle only in VS Code) |
-| ROBOT CLI interop (`ontoindex robot`, LSP `runRobot`) | **Shipped** (requires Java + `robot` on PATH) |
+| ROBOT CLI interop (`ontocore robot`, LSP `runRobot`) | **Shipped** (requires Java + `robot` on PATH) |
 | Full OWL 2 DL reasoning (`dl` / `auto` profiles) | **Not shipped** (OntoLogos 1.0 target) |
 | Full OBO write-back in VS Code | **Not shipped** (v1.0 target) |
-| Semantic Git diff | **Not shipped** (v0.9 target) |
+| Semantic Git diff | **Not shipped** (v0.10 target) |
 
 Full gap analysis: [Protégé parity matrix](../design/PROTEGE_PARITY.md).
 
 ## Deployment model
 
-- **Local-first:** OntoIndex indexes files on disk. Ontology content is **not uploaded** to a cloud service by default.
-- **Language server:** `ontoindex-lsp` runs as a child process of VS Code over stdio. **Do not expose it to the network** without authentication — see [security policy](../security.md).
+- **Local-first:** OntoCore indexes files on disk. Ontology content is **not uploaded** to a cloud service by default.
+- **Language server:** `ontocore-lsp` runs as a child process of VS Code over stdio. **Do not expose it to the network** without authentication — see [security policy](../security.md).
 - **Offline install:** VSIX from [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) + `SHA256SUMS` verification ([release-integrity.md](../release-integrity.md)).
-- **CI-only usage:** Teams can run `ontoindex validate` and `ontoindex classify` in pipelines without installing the VS Code extension ([ci-integration.md](../ci-integration.md)).
+- **CI-only usage:** Teams can run `ontocore validate` and `ontocore classify` in pipelines without installing the VS Code extension ([ci-integration.md](../ci-integration.md)).
 
 ## Security and compliance
 
@@ -59,7 +59,7 @@ Full gap analysis: [Protégé parity matrix](../design/PROTEGE_PARITY.md).
 
 ## Licensing
 
-- OntoIndex/OntoCode crates: **MIT OR Apache-2.0**
+- OntoCore/OntoCode crates: **MIT OR Apache-2.0**
 - **LGPL:** [`horned-owl`](https://crates.io/crates/horned-owl) is used for OWL modeling and Turtle write-back — review LGPL obligations ([LGPL compliance](lgpl-compliance.md), [LICENSES.md](../design/LICENSES.md), [FAQ](../faq.md))
 - **NOTICES file:** Regenerate before releases per [LICENSES.md](../design/LICENSES.md); verify your release process includes third-party attribution
 
@@ -72,7 +72,7 @@ Full gap analysis: [Protégé parity matrix](../design/PROTEGE_PARITY.md).
 | **Reasoning** | EL/RL/RDFS via OntoLogos 0.9; **DL/auto** stubbed until OntoLogos 1.0; results may differ from Protégé on partial OWL mappings |
 | **CLI release binaries** | Linux x64 only; macOS/Windows use `cargo install` or bundled LSP in VSIX |
 | **Scale** | Workspaces above [workspace limits](../workspace-limits.md) may fail indexing — prefer CLI batch workflows for very large terminologies |
-| **ROBOT / Java** | `ontoindex robot` and LSP `runRobot` spawn an external Java `robot` process — not JVM-free for that workflow |
+| **ROBOT / Java** | `ontocore robot` and LSP `runRobot` spawn an external Java `robot` process — not JVM-free for that workflow |
 
 ## Protégé coexistence
 
@@ -89,7 +89,7 @@ A full migration guide is a **v1.0 deliverable**. Today:
 1. Install from [Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) or offline VSIX
 2. Complete [First success in 10 minutes](first-success.md) on a representative `.ttl` project
 3. Run the [production evidence protocol](production-evidence.md) on your corpus
-4. Run `ontoindex validate` and optionally `ontoindex classify --profile el` in a test CI job ([ci-integration.md](../ci-integration.md))
+4. Run `ontocore validate` and optionally `ontocore classify --profile el` in a test CI job ([ci-integration.md](../ci-integration.md))
 5. Review [Protégé decision matrix](protege-decision.md) and [platform compatibility](platform-compatibility.md)
 6. Review [security policy](../security.md) and [governance](governance.md) with your platform team
 7. Compare [Protégé parity matrix](../design/PROTEGE_PARITY.md) against your requirements; read [release timeline](release-timeline.md) for planning (no fixed v1.0 date)

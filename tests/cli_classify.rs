@@ -4,7 +4,7 @@ mod support;
 
 #[test]
 fn cli_classify_el_json() {
-    let bin = support::ontoindex_binary();
+    let bin = support::ontocore_binary();
     let dir = tempfile::tempdir().expect("tempdir");
     let workspace = dir.path().to_path_buf();
     std::fs::copy(
@@ -26,7 +26,7 @@ fn cli_classify_el_json() {
 
 #[test]
 fn cli_dl_profile_reports_error() {
-    let bin = support::ontoindex_binary();
+    let bin = support::ontocore_binary();
     let workspace = support::fixture_workspace();
     let output = Command::new(&bin)
         .args(["classify", workspace.to_str().unwrap(), "--profile", "dl"])

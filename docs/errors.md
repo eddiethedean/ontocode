@@ -1,18 +1,18 @@
 # Errors reference
 
-Unified catalog of error codes, exit behavior, and failure modes for OntoIndex **v0.8**.
+Unified catalog of error codes, exit behavior, and failure modes for OntoCore **v0.9**.
 
 ## CLI exit codes
 
 | Command | Exit 0 | Exit non-zero |
 |---------|--------|---------------|
-| `ontoindex validate` | No diagnostic **errors** (warnings/info allowed) | One or more diagnostic **errors** |
-| `ontoindex query` | Query succeeded | Parse error, unsupported SQL, I/O failure |
-| `ontoindex sparql` | Query succeeded (results may be truncated at row cap) | Parse error, I/O failure |
-| `ontoindex patch` | Patch applied or preview succeeded | Invalid patch, unsupported format, I/O failure |
-| `ontoindex classify` | Consistent ontology (no unsatisfiable classes) | Unsatisfiable classes, reasoner error, I/O failure |
-| `ontoindex explain` | Explanation produced | Class not found, explanation unavailable, reasoner error |
-| `ontoindex refactor` (subcommands) | Preview or apply succeeded | Invalid request, path outside workspace, I/O failure |
+| `ontocore validate` | No diagnostic **errors** (warnings/info allowed) | One or more diagnostic **errors** |
+| `ontocore query` | Query succeeded | Parse error, unsupported SQL, I/O failure |
+| `ontocore sparql` | Query succeeded (results may be truncated at row cap) | Parse error, I/O failure |
+| `ontocore patch` | Patch applied or preview succeeded | Invalid patch, unsupported format, I/O failure |
+| `ontocore classify` | Consistent ontology (no unsatisfiable classes) | Unsatisfiable classes, reasoner error, I/O failure |
+| `ontocore explain` | Explanation produced | Class not found, explanation unavailable, reasoner error |
+| `ontocore refactor` (subcommands) | Preview or apply succeeded | Invalid request, path outside workspace, I/O failure |
 
 `validate` and `classify` exit semantics are stable for CI — see [workspace-limits.md](workspace-limits.md) and [ci-integration.md](ci-integration.md).
 
@@ -20,7 +20,7 @@ Other CLI commands return non-zero on failure with a human-readable message on s
 
 ## LSP custom method errors (`LspErrorPayload`)
 
-Custom `ontoindex/*` method failures return JSON-RPC errors with `data` containing:
+Custom `ontocore/*` method failures return JSON-RPC errors with `data` containing:
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -68,7 +68,7 @@ Successful patch/refactor apply may include `reindex_warning` in the result when
 
 ## Patch diagnostics (`PatchDiagnostic`)
 
-When `ontoindex patch` or `ontoindex/applyAxiomPatch` fails validation, the result may include:
+When `ontocore patch` or `ontocore/applyAxiomPatch` fails validation, the result may include:
 
 ```json
 {
@@ -98,6 +98,8 @@ LSP `applyAxiomPatch` returns the same `ApplyPatchResult` fields (`applied`, `pr
 | `duplicate_label` | warning | Same label on multiple entities |
 | `missing_label` | info/warning | Entity has no rdfs:label |
 | `orphan_class` | info | Class with no declared parents |
+| `owl_bridge_failed` | warning | Horned-OWL bridge failed; catalog uses parser-only semantics for that file |
+| `io_read_error` | error | Diagnostic engine could not read file from disk |
 
 Query diagnostics: `SELECT code, severity, message, file FROM diagnostics WHERE severity = 'error'`
 
@@ -119,15 +121,15 @@ Full limits: [workspace-limits.md](workspace-limits.md).
 
 ## Rust library errors
 
-Integrators using `ontoindex-*` crates directly should handle:
+Integrators using `ontocore-*` crates directly should handle:
 
 | Crate | Error type | Common causes |
 |-------|------------|---------------|
-| `ontoindex-parser` | `ParseError` | Invalid RDF syntax |
-| `ontoindex-catalog` | `CatalogError` | Index build failure |
-| `ontoindex-query` | `QueryError` | Unsupported SQL, SPARQL parse error |
-| `ontoindex-owl` | `OwlError` | Patch apply failure |
-| `ontoindex-reasoner` | `ReasonerError` | Classify/explain failure, unsupported profile |
+| `ontocore-parser` | `ParseError` | Invalid RDF syntax |
+| `ontocore-catalog` | `CatalogError` | Index build failure |
+| `ontocore-query` | `QueryError` | Unsupported SQL, SPARQL parse error |
+| `ontocore-owl` | `OwlError` | Patch apply failure |
+| `ontocore-reasoner` | `ReasonerError` | Classify/explain failure, unsupported profile |
 
 Example: [`examples/error_handling.rs`](https://github.com/eddiethedean/ontocode/blob/main/examples/error_handling.rs) on GitHub.
 

@@ -11,24 +11,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **`ontocore` crate** — public façade for OntoCore with `Workspace::open`, module re-exports, and `lsp` feature
-- **OntoCore documentation** — `docs/ontocore/` (architecture, crate map, workspace engine, SQL views, LSP, roadmap, plugin model)
-- **OntoCode documentation** — `docs/ontocode/` (VS Code extension, inspector, Query Workbench, graph view, Manchester editor)
-- **ADR-0018** — OntoCore platform identity decision
+- **`ontocore` crate** — public façade with `Workspace::open`, module re-exports, and `lsp` feature
+- **OntoCore documentation** — `docs/ontocore/` and `docs/ontocode/` trees; ADR-0018
 - Example `ontocore_workspace` using `Workspace` API
+- Diagnostic codes `owl_bridge_failed` and `io_read_error`
+- Release pipeline publishes `ontocore` façade; extended `check-doc-versions.sh`
 
 ### Changed
 
-- Workspace and extension version **0.9.0**
-- **OntoCore** replaces **OntoIndex** as the platform brand in README and high-traffic docs
-- `ontoindex-*` crate names, `ontoindex` CLI, and `ontoindex-lsp` unchanged (compatibility)
-- ROADMAP v0.9 realigned to OntoCore Identity; former v0.9 workflow items moved to v0.10
-- MkDocs nav adds OntoCore and OntoCode sections; legacy guides redirect to new paths
+- **Breaking:** rename all `ontoindex-*` crates to **`ontocore-*`**
+- **Breaking:** CLI binary `ontoindex` → **`ontocore`** (`ontocore-cli` crate)
+- **Breaking:** LSP binary `ontoindex-lsp` → **`ontocore-lsp`**; custom methods `ontoindex/*` → **`ontocore/*`**
+- **Breaking:** `OntoIndexError` → **`OntoCoreError`**
+- **OntoCore** platform branding across README, docs, extension output channel, and GitHub templates
+- `apply_refactor_plan` requires `workspace_root`; diagnostic engine surfaces IO read failures
+- Horned-OWL bridge failures emit catalog diagnostics instead of silent fallback
 
 ### Notes
 
-- No breaking API changes to `ontoindex-*` crates or LSP wire format in this release
-- `Workspace` API is experimental until v0.10
+- See [migration/v0.9.md](docs/migration/v0.9.md) for upgrade steps from v0.8
+- `Workspace` API remains experimental until v0.10
 
 ## [0.8.0] - 2026-06-26
 
@@ -111,7 +113,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - **`ontoindex-reasoner` crate** — thin OntoLogos 0.9.0 facade (`el`, `rl`, `rdfs` adapters; `dl`/`auto` stubbed until OntoLogos 1.0)
-- CLI **`ontoindex classify`** and **`ontoindex explain`**
+- CLI **`ontocore classify`** and **`ontocore explain`**
 - LSP **`ontoindex/runReasoner`** and **`ontoindex/getExplanation`**
 - VS Code **Reasoner Results** panel, **Explanation** panel, hierarchy mode toggle (`asserted` / `inferred` / `combined`)
 - Settings: `ontocode.reasoner.default`, `ontocode.reasoner.autoProfile`, `ontocode.hierarchy.mode`
@@ -175,7 +177,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **Simple write-back (v0.4a):** create/edit/delete entities; labels, comments, simple `SubClassOf` in Turtle
 - New **`ontoindex-owl`** crate — Horned-OWL facade for axiom modeling and patch write-back
 - LSP **`ontoindex/applyAxiomPatch`** — preview and apply patch operations
-- CLI **`ontoindex patch`** — apply patches from JSON
+- CLI **`ontocore patch`** — apply patches from JSON
 - Editable **Entity Inspector** and explorer create/delete commands in VS Code
 - **`EntityDetail.editable`** and `document_path` for authoring UI
 - Oxigraph ↔ Horned-OWL **consistency tests** and `examples/protege-roundtrip/` fixtures
@@ -199,7 +201,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `diagnostics` SQL virtual table (`SELECT * FROM diagnostics`)
 - LSP `textDocument/publishDiagnostics` after workspace reindex (VS Code Problems panel)
 - Diagnostics explorer tree grouped by severity
-- `ontoindex validate` prints all diagnostics; non-zero exit on errors
+- `ontocore validate` prints all diagnostics; non-zero exit on errors
 - Open-buffer parsing for inline diagnostics on unsaved edits
 
 ### Fixed
@@ -279,7 +281,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- **OntoIndex foundation** — Rust workspace for local-first ontology indexing
+- **OntoCore foundation** — Rust workspace for local-first ontology indexing
 - `ontoindex-core` — workspace scanner, shared types, content hashing
 - `ontoindex-parser` — RDF/OWL parsing and entity extraction via Oxigraph
 - `ontoindex-catalog` — semantic catalog and triple store

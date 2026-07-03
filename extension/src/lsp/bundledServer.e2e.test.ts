@@ -48,7 +48,7 @@ async function assertSpawnAfterMarketplaceChmod(extensionRoot: string): Promise<
 }
 
 describe("bundledServer e2e", () => {
-  it("spawns ontoindex-lsp after Marketplace-style chmod 644 on bundled binary", async () => {
+  it("spawns ontocore-lsp after Marketplace-style chmod 644 on bundled binary", async () => {
     const lspSource = resolveLspBinaryForTests();
     const extensionRoot = fs.mkdtempSync(path.join(os.tmpdir(), "ontocode-e2e-ext-"));
     tempDirs.push(extensionRoot);

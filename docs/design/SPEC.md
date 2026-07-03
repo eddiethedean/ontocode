@@ -1,4 +1,4 @@
-# SPEC.md — OntoIndex and OntoCode Technical Specification
+# SPEC.md — OntoCore and OntoCode Technical Specification
 
 > **Related specs:** [PROTEGE_PARITY.md](PROTEGE_PARITY.md) (v1.0 exit bar),
 > [DEPENDENCY_MATRIX.md](DEPENDENCY_MATRIX.md) (external crates),
@@ -10,27 +10,27 @@
 The system consists of four major layers:
 
 1. **File layer** — ontology files in a local workspace.
-2. **OntoIndex layer** — Rust indexing, parsing, cataloging, diagnostics, query, diff, docs.
+2. **OntoCore layer** — Rust indexing, parsing, cataloging, diagnostics, query, diff, docs.
 3. **Language server layer** — editor protocol services.
 4. **VS Code extension layer** — UI panels, commands, graph views, editing workflows.
 
-## 2. OntoIndex Crate Layout
+## 2. OntoCore Crate Layout
 
 ```text
-ontoindex/
+ontocore/
 ├── crates/
-│   ├── ontoindex-core          # v0.2 — ignore
-│   ├── ontoindex-parser        # v0.2 — oxigraph (+ fastobo v0.7b)
-│   ├── ontoindex-owl           # v0.4b — horned-owl, horned-functional
-│   ├── ontoindex-catalog       # v0.2
-│   ├── ontoindex-query         # v0.2 — sqlparser, oxigraph SPARQL
-│   ├── ontoindex-diagnostics   # v0.3 — oxigraph + catalog lints
-│   ├── ontoindex-diff          # v0.9 — horned-owl, git2
-│   ├── ontoindex-docs          # v0.9 — pulldown-cmark, minijinja
-│   ├── ontoindex-reasoner      # v0.6 — OntoLogos 0.9→1.0
-│   ├── ontoindex-robot         # v0.7b — ROBOT CLI (external)
-│   ├── ontoindex-lsp           # v0.3 — lsp-server, lsp-types, diagnostics
-│   └── ontoindex-cli           # v0.3
+│   ├── ontocore-core          # v0.2 — ignore
+│   ├── ontocore-parser        # v0.2 — oxigraph (+ fastobo v0.7b)
+│   ├── ontocore-owl           # v0.4b — horned-owl, horned-functional
+│   ├── ontocore-catalog       # v0.2
+│   ├── ontocore-query         # v0.2 — sqlparser, oxigraph SPARQL
+│   ├── ontocore-diagnostics   # v0.3 — oxigraph + catalog lints
+│   ├── ontocore-diff          # v0.9 — horned-owl, git2
+│   ├── ontocore-docs          # v0.9 — pulldown-cmark, minijinja
+│   ├── ontocore-reasoner      # v0.6 — OntoLogos 0.9→1.0
+│   ├── ontocore-robot         # v0.7b — ROBOT CLI (external)
+│   ├── ontocore-lsp           # v0.3 — lsp-server, lsp-types, diagnostics
+│   └── ontocore-cli           # v0.3
 ├── examples/
 │   ├── protege-roundtrip/      # v1.0 — OWL round-trip fixtures
 │   └── obo-workflow/           # v0.7b — OBO + ROBOT demo
@@ -146,14 +146,14 @@ Required virtual tables:
 ### CLI
 
 ```bash
-ontoindex index .
-ontoindex query . "SELECT * FROM classes"
-ontoindex sparql . "SELECT ?s ?p ?o WHERE { ?s ?p ?o } LIMIT 10"
-ontoindex validate .
-ontoindex diff main..feature
-ontoindex docs . --format markdown --out docs/ontology
-ontoindex robot validate ./ontology
-ontoindex robot merge --inputs a.owl b.owl --output merged.owl
+ontocore index .
+ontocore query . "SELECT * FROM classes"
+ontocore sparql . "SELECT ?s ?p ?o WHERE { ?s ?p ?o } LIMIT 10"
+ontocore validate .
+ontocore diff main..feature
+ontocore docs . --format markdown --out docs/ontology
+ontocore robot validate ./ontology
+ontocore robot merge --inputs a.owl b.owl --output merged.owl
 ```
 
 ### Rust API
@@ -163,7 +163,7 @@ let catalog = IndexBuilder::new()
     .workspace("./ontology")
     .build()?;
 
-let rows = ontoindex_query::query_catalog(
+let rows = ontocore_query::query_catalog(
     &catalog,
     "SELECT * FROM classes WHERE deprecated = true",
 )?;

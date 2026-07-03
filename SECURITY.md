@@ -28,33 +28,33 @@ We aim to acknowledge reports within a few business days.
 
 ## Threat model
 
-OntoIndex and OntoCode are **local-first** tools: they index and parse files on disk and do not upload ontology content by default.
+OntoCore and OntoCode are **local-first** tools: they index and parse files on disk and do not upload ontology content by default.
 
 ### Intended deployment
 
-- `ontoindex` CLI run by the operator on paths they choose
-- `ontoindex-lsp` connected over **stdio** to a trusted editor (VS Code + OntoCode extension)
+- `ontocore` CLI run by the operator on paths they choose
+- `ontocore-lsp` connected over **stdio** to a trusted editor (VS Code + OntoCode extension)
 
 ### Do not expose raw LSP to the internet
 
-`ontoindex-lsp` has **no authentication, authorization, or rate limiting**. If the language server is reachable over a network (TCP proxy, shared container socket, misconfigured debug transport), an attacker can:
+`ontocore-lsp` has **no authentication, authorization, or rate limiting**. If the language server is reachable over a network (TCP proxy, shared container socket, misconfigured debug transport), an attacker can:
 
 - Request reads of arbitrary files via LSP document URIs (mitigated in v0.2+ by workspace jail when a workspace is indexed)
-- Trigger indexing of directories outside the intended project via `ontoindex/indexWorkspace` (mitigated by workspace scope validation)
+- Trigger indexing of directories outside the intended project via `ontocore/indexWorkspace` (mitigated by workspace scope validation)
 - Exhaust CPU/memory with large ontologies or expensive queries (partially mitigated by resource limits — see below)
 
-**Never bind `ontoindex-lsp` to a public interface without an authenticated reverse proxy and strict path sandboxing.**
+**Never bind `ontocore-lsp` to a public interface without an authenticated reverse proxy and strict path sandboxing.**
 
 ## Hardening in v0.2+ (extended in v0.3, v0.4 write-back)
 
 | Control | Where |
 |---------|--------|
-| Workspace path jail (LSP document reads) | `ontoindex-core::path_jail`, `ontoindex-lsp` handlers |
-| `indexWorkspace` scope validation | `ontoindex-lsp` state |
-| File size / file count / triple / entity limits | `ontoindex-core::limits`, scanner, parser, catalog |
-| SQL/SPARQL query size and result row caps | `ontoindex-query` |
-| Symlink skip + `follow_links(false)` in scanner | `ontoindex-core::scanner` |
-| Markdown escaping in LSP hover | `ontoindex-lsp` handlers |
+| Workspace path jail (LSP document reads) | `ontocore-core::path_jail`, `ontocore-lsp` handlers |
+| `indexWorkspace` scope validation | `ontocore-lsp` state |
+| File size / file count / triple / entity limits | `ontocore-core::limits`, scanner, parser, catalog |
+| SQL/SPARQL query size and result row caps | `ontocore-query` |
+| Symlink skip + `follow_links(false)` in scanner | `ontocore-core::scanner` |
+| Markdown escaping in LSP hover | `ontocore-lsp` handlers |
 | `ontocode.lspPath` ignored in VS Code Restricted Mode | OntoCode extension |
 
 See [docs/release-integrity.md](docs/release-integrity.md) for verifying release binaries.

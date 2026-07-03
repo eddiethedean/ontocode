@@ -3,15 +3,16 @@
 //! **Pre-1.0:** `Workspace` and its convenience methods are experimental and may change
 //! until v0.10 stabilizes the public API.
 
-use crate::catalog::{CatalogError, EntityDetail, IndexBuilder, OntologyCatalog};
+use crate::catalog::{CatalogError, ClassHierarchy, EntityDetail, IndexBuilder, OntologyCatalog};
 use crate::query::{query_catalog, sparql_catalog, QueryError, QueryResult, SparqlResult};
-use ontoindex_core::Diagnostic;
+use ontocore_core::Diagnostic;
 use std::path::{Path, PathBuf};
 
 /// An indexed ontology workspace.
 pub struct Workspace {
     root: PathBuf,
     catalog: OntologyCatalog,
+    class_hierarchy: ClassHierarchy,
 }
 
 impl Workspace {
@@ -19,7 +20,8 @@ impl Workspace {
     pub fn open(path: impl AsRef<Path>) -> Result<Self, CatalogError> {
         let root = path.as_ref().to_path_buf();
         let catalog = IndexBuilder::new().workspace(&root).build()?;
-        Ok(Self { root, catalog })
+        let class_hierarchy = catalog.class_hierarchy();
+        Ok(Self { root, catalog, class_hierarchy })
     }
 
     /// Workspace root path passed to [`Self::open`].
@@ -48,10 +50,10 @@ impl Workspace {
     }
 
     /// Search entities by IRI fragment, short name, or label (case-insensitive).
-    pub fn search(&self, term: &str) -> Result<Vec<EntityDetail>, CatalogError> {
+    pub fn search(&self, term: &str) -> Vec<EntityDetail> {
         let needle = term.to_ascii_lowercase();
         if needle.is_empty() {
-            return Ok(Vec::new());
+            return Vec::new();
         }
 
         let mut matches: Vec<EntityDetail> = self
@@ -60,16 +62,19 @@ impl Workspace {
             .entities
             .iter()
             .filter(|entity| entity_matches_term(entity, &needle))
-            .filter_map(|entity| self.catalog.entity_detail(&entity.iri))
+            .filter_map(|entity| {
+                self.catalog
+                    .entity_detail_with_hierarchy(&entity.iri, &self.class_hierarchy)
+            })
             .collect();
 
         matches.sort_by(|a, b| a.entity.short_name.cmp(&b.entity.short_name));
         matches.dedup_by(|a, b| a.entity.iri == b.entity.iri);
-        Ok(matches)
+        matches
     }
 }
 
-fn entity_matches_term(entity: &ontoindex_core::Entity, needle: &str) -> bool {
+fn entity_matches_term(entity: &ontocore_core::Entity, needle: &str) -> bool {
     if entity.iri.to_ascii_lowercase().contains(needle) {
         return true;
     }
@@ -110,7 +115,7 @@ mod tests {
     #[test]
     fn workspace_search_person() {
         let ws = Workspace::open(fixtures_path()).expect("open fixtures");
-        let hits = ws.search("Person").expect("search");
+        let hits = ws.search("Person");
         assert!(!hits.is_empty());
     }
 }

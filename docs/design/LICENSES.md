@@ -1,6 +1,6 @@
 # Third-Party Licenses
 
-OntoCode / OntoIndex is licensed under **MIT OR Apache-2.0** at your option (see repository root `LICENSE-MIT` and `LICENSE-APACHE-2.0`).
+OntoCode / OntoCore is licensed under **MIT OR Apache-2.0** at your option (see repository root `LICENSE-MIT` and `LICENSE-APACHE-2.0`).
 
 This document summarizes **third-party licenses** for dependencies named in [DEPENDENCY_MATRIX.md](DEPENDENCY_MATRIX.md). It is not legal advice. Regenerate NOTICES before releases when dependency sets change.
 
@@ -11,11 +11,11 @@ This document summarizes **third-party licenses** for dependencies named in [DEP
 | `oxigraph` | MIT OR Apache-2.0 | Compatible |
 | `sqlparser` | Apache-2.0 | Compatible |
 | `ignore` | Unlicense OR MIT | Compatible |
-| `regex` | MIT OR Apache-2.0 | Compatible (`ontoindex-diagnostics`) |
+| `regex` | MIT OR Apache-2.0 | Compatible (`ontocore-diagnostics`) |
 | `lsp-server` | MIT OR Apache-2.0 | Compatible |
 | `lsp-types` | MIT | Compatible |
-| `horned-owl` | **LGPL-3.0** | Rust crate link via `ontoindex-owl`. See [LGPL compliance guide](../guides/lgpl-compliance.md). Document LGPL in release artifacts; provide source offer per LGPL-3.0 if distributing binaries. |
-| `horned-functional` | MIT | Compatible (`ontoindex-owl`) |
+| `horned-owl` | **LGPL-3.0** | Rust crate link via `ontocore-owl`. See [LGPL compliance guide](../guides/lgpl-compliance.md). Document LGPL in release artifacts; provide source offer per LGPL-3.0 if distributing binaries. |
+| `horned-functional` | MIT | Compatible (`ontocore-owl`) |
 | `serde`, `clap`, `thiserror`, etc. | MIT OR Apache-2.0 | Compatible |
 
 ## Planned dependencies (v0.5+)

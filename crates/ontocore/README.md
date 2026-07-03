@@ -2,7 +2,7 @@
 
 **OntoCore** is the semantic workspace engine for ontology development.
 
-This crate is the public façade for OntoCore. Implementation is currently provided by the `ontoindex-*` crates; those names remain stable until the public API reaches 1.0.
+This crate is the public façade for OntoCore. Implementation is currently provided by the `ontocore-*` crates; those names remain stable until the public API reaches 1.0.
 
 ## Quick start
 
@@ -35,7 +35,7 @@ for row in &result.rows {
 
 ## Compatibility
 
-- CLI: `ontoindex` (OntoCore CLI alias planned for v0.10)
-- LSP: `ontoindex-lsp` binary and `ontoindex/*` methods
+- CLI: `ontocore` (OntoCore CLI alias planned for v0.10)
+- LSP: `ontocore-lsp` binary and `ontocore/*` methods
 
 See [docs/ontocore/](https://github.com/eddiethedean/ontocode/tree/main/docs/ontocore) in the OntoCode repository.

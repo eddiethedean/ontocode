@@ -40,11 +40,11 @@ check_file_contains "README.md" "readthedocs.org/projects/ontocode-vs/badge" "RT
 
 # Reference page titles must match current release
 for file in docs/authoring.md docs/sql-reference.md docs/sparql-reference.md docs/patch-reference.md docs/cli-reference.md; do
-  if grep -qE "^# .+ \(OntoIndex v0\.5\)" "$file"; then
+  if grep -qE "^# .+ \(OntoCore v0\.5\)" "$file"; then
     echo "FAIL: stale v0.5 title in $file" >&2
     fail=1
   elif ! grep -qE "^# .+ \(Onto(Index|Core) v${VERSION%.*}\)" "$file"; then
-    echo "FAIL: reference title in $file should mention OntoIndex or OntoCore v${VERSION%.*}" >&2
+    echo "FAIL: reference title in $file should mention OntoCore or OntoCore v${VERSION%.*}" >&2
     fail=1
   else
     echo "ok: reference title $file"
@@ -69,6 +69,14 @@ else
   echo "ok: no stale VERSION=0.7.0 install pins"
 fi
 
+if rg -q 'VERSION=0\.8\.0' "${STALE_PIN_PATHS[@]}" --glob '!**/changelog.md' --glob '!**/CHANGELOG.md' --glob '!**/migration/**' --glob '!**/design/**' 2>/dev/null; then
+  echo "FAIL: stale VERSION=0.8.0 found outside changelog/migration/design" >&2
+  rg -n 'VERSION=0\.8\.0' "${STALE_PIN_PATHS[@]}" --glob '!**/changelog.md' --glob '!**/CHANGELOG.md' --glob '!**/migration/**' --glob '!**/design/**' 2>/dev/null || true
+  fail=1
+else
+  echo "ok: no stale VERSION=0.8.0 install pins"
+fi
+
 # User-facing docs must not claim 0.7.x is the current release
 USER_FACING_DOCS=(
   docs/faq.md
@@ -80,13 +88,57 @@ USER_FACING_DOCS=(
   docs/security.md
 )
 for file in "${USER_FACING_DOCS[@]}"; do
-  if grep -qE '0\.7\.x \(current\)|ships in v0\.7\.0|OntoIndex v0\.7\.0|OntoCode v0\.7\.0|at \*\*0\.7\.x\*\*' "$file" 2>/dev/null; then
+  if grep -qE '0\.7\.x \(current\)|ships in v0\.7\.0|OntoCore v0\.7\.0|OntoCode v0\.7\.0|at \*\*0\.7\.x\*\*' "$file" 2>/dev/null; then
     echo "FAIL: stale 0.7.x current-release claim in $file" >&2
     fail=1
   fi
 done
 if [[ "$fail" -eq 0 ]]; then
   echo "ok: no stale 0.7.x current-release claims in user-facing docs"
+fi
+
+# User-facing docs must not claim 0.8.x is the current release
+for file in "${USER_FACING_DOCS[@]}" docs/guides/protege-decision.md docs/guides/production-evidence.md; do
+  if grep -qE '0\.8\.x \(current\)|ships in v0\.8\.0|OntoCore v0\.8\.0|OntoCode v0\.8\.0|at \*\*0\.8\.x\*\*' "$file" 2>/dev/null; then
+    echo "FAIL: stale 0.8.x current-release claim in $file" >&2
+    fail=1
+  fi
+done
+if [[ "$fail" -eq 0 ]]; then
+  echo "ok: no stale 0.8.x current-release claims in user-facing docs"
+fi
+
+# Reference status banners must not contradict OntoCore v{N} titles
+for file in docs/authoring.md docs/sql-reference.md docs/sparql-reference.md docs/patch-reference.md docs/lsp-api.md docs/errors.md docs/webview-protocol.md; do
+  if grep -qE 'OntoCore v0\.8' "$file" 2>/dev/null; then
+    echo "FAIL: stale OntoCore v0.8 status banner in $file" >&2
+    fail=1
+  fi
+done
+if [[ "$fail" -eq 0 ]]; then
+  echo "ok: reference pages have no OntoCore v0.8 banners"
+fi
+
+check_file_contains ".github/workflows/release.yml" "publish_with_pause ontocore" "release.yml publishes ontocore"
+
+# docs/contributing.md should track root CONTRIBUTING.md (OntoCore branding)
+if ! grep -q 'OntoCore' docs/contributing.md; then
+  echo "FAIL: docs/contributing.md missing OntoCore branding" >&2
+  fail=1
+elif ! grep -q 'OntoCore' CONTRIBUTING.md; then
+  echo "FAIL: CONTRIBUTING.md missing OntoCore branding" >&2
+  fail=1
+else
+  echo "ok: contributing docs OntoCore branding"
+fi
+
+WEBVIEW_PKG_VERSION="$(grep -E '"version"' extension/webview-ui/package.json | head -1 | sed -E 's/.*"([^"]+)".*/\1/')"
+WEBVIEW_LOCK_VERSION="$(grep -E '"version"' extension/webview-ui/package-lock.json | head -1 | sed -E 's/.*"([^"]+)".*/\1/')"
+if [[ "$WEBVIEW_PKG_VERSION" != "$WEBVIEW_LOCK_VERSION" ]]; then
+  echo "FAIL: extension/webview-ui/package-lock.json version ($WEBVIEW_LOCK_VERSION) != package.json ($WEBVIEW_PKG_VERSION)" >&2
+  fail=1
+else
+  echo "ok: webview-ui lockfile version matches package.json"
 fi
 
 # docs/security.md supported versions must match SECURITY.md for current minor
@@ -196,7 +248,7 @@ check_file_contains "extension/package.json" "ontocode/vscode-extension/" "exten
 check_file_contains "extension/README.md" "ontocode/vscode-extension/" "extension README VS Code docs path"
 check_file_contains "docs/guides/vscode-extension.md" "ontocode/vscode-extension" "vscode hub redirect"
 check_file_contains "docs/guides/rust-crates.md" "ontocode/vscode-extension" "rust hub cross-link"
-check_file_contains "crates/ontoindex-cli/src/main.rs" "OntoCode v${VERSION%.*}" "CLI about string version"
+check_file_contains "crates/ontocore-cli/src/main.rs" "OntoCode v${VERSION%.*}" "CLI about string version"
 check_file_contains "docs/changelog.md" "v${VERSION}" "docs changelog current release"
 
 if [[ "$fail" -ne 0 ]]; then

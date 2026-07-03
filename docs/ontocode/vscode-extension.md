@@ -2,7 +2,7 @@
 
 **OntoCode** is the VS Code ontology IDE powered by **OntoCore**. It provides the explorer sidebar, Entity Inspector, Query Workbench, Manchester editor, graph panels, reasoner views, and inline diagnostics.
 
-The extension talks to the bundled **OntoCore LSP** (`ontoindex-lsp`) — you do **not** need Rust installed for normal use.
+The extension talks to the bundled **OntoCore LSP** (`ontocore-lsp`) — you do **not** need Rust installed for normal use.
 
 > **Looking for the CLI or Rust library?** See [OntoCore overview](../ontocore/index.md) and [Rust & CLI guide](../guides/rust-crates.md).
 
@@ -41,9 +41,9 @@ The extension talks to the bundled **OntoCore LSP** (`ontoindex-lsp`) — you do
 ```text
 OntoCode (TypeScript + React webviews)
         │ stdio LSP
-OntoCore LSP (ontoindex-lsp)
+OntoCore LSP (ontocore-lsp)
         │
-OntoCore engine (ontocore / ontoindex-*)
+OntoCore engine (ontocore / ontocore-*)
 ```
 
 OntoCode owns UI and marketplace packaging. OntoCore owns indexing, queries, diagnostics, and write-back logic.

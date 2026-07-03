@@ -1,4 +1,4 @@
-//! Match structured errors from OntoIndex crates.
+//! Match structured errors from OntoCore crates.
 //!
 //! Run from the repository root:
 //!
@@ -6,16 +6,16 @@
 //! cargo run -p ontocode --example error_handling
 //! ```
 
-use ontoindex_catalog::{CatalogError, IndexBuilder};
-use ontoindex_core::OntoIndexError;
-use ontoindex_parser::{parse_ontology_file, ParseError};
-use ontoindex_query::{query_catalog, QueryError};
+use ontocore_catalog::{CatalogError, IndexBuilder};
+use ontocore_core::OntoCoreError;
+use ontocore_parser::{parse_ontology_file, ParseError};
+use ontocore_query::{query_catalog, QueryError};
 use std::path::Path;
 
 fn main() {
     let missing = Path::new("fixtures/does-not-exist.ttl");
     if let Err(err) =
-        parse_ontology_file(missing, ontoindex_core::OntologyFormat::Turtle, "doc-1", "h", 0)
+        parse_ontology_file(missing, ontocore_core::OntologyFormat::Turtle, "doc-1", "h", 0)
     {
         match err {
             ParseError::Io(_) => eprintln!("parse: file not found or unreadable"),
@@ -29,7 +29,7 @@ fn main() {
             CatalogError::Parse { path, message } => {
                 eprintln!("catalog parse error in {}: {message}", path.display());
             }
-            CatalogError::Core(OntoIndexError::Scanner(msg)) => eprintln!("catalog scanner: {msg}"),
+            CatalogError::Core(OntoCoreError::Scanner(msg)) => eprintln!("catalog scanner: {msg}"),
             CatalogError::Store(msg) => eprintln!("catalog store: {msg}"),
             CatalogError::Core(other) => eprintln!("catalog core: {other}"),
         }

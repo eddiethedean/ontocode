@@ -1,6 +1,6 @@
 # Getting started
 
-Five-minute paths to success with OntoIndex (CLI) and OntoCode (VS Code).
+Five-minute paths to success with OntoCore (CLI) and OntoCode (VS Code).
 
 ## Prerequisites
 
@@ -35,35 +35,35 @@ The `fixtures/` directory is included in the repository for examples and tests.
 ## Path C — `cargo install` (no clone)
 
 ```bash
-cargo install ontoindex-cli --locked
+cargo install ontocore-cli --locked
 ```
 
 Use **your own ontology directory** — there is no `fixtures/` folder outside a clone:
 
 ```bash
-ontoindex inspect /path/to/your/ontologies
-ontoindex query /path/to/your/ontologies "SELECT * FROM classes"
-ontoindex validate /path/to/your/ontologies
+ontocore inspect /path/to/your/ontologies
+ontocore query /path/to/your/ontologies "SELECT * FROM classes"
+ontocore validate /path/to/your/ontologies
 ```
 
 ## Path D — Release binaries (no Rust)
 
 1. Open [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) for the latest **v0.9.x** tag.
-2. Download the CLI tarball for your platform (Linux x64 example below) or `ontoindex-lsp-v0.9.0-<platform>.tar.gz` / `.zip` for LSP-only use.
+2. Download the CLI tarball for your platform (Linux x64 example below) or `ontocore-lsp-v0.9.0-<platform>.tar.gz` / `.zip` for LSP-only use.
 3. Verify with `SHA256SUMS` — see [release-integrity.md](release-integrity.md).
 4. Extract and run (replace `0.9.0` with your release tag):
 
 ```bash
 VERSION=0.9.0
-ASSET="ontoindex-v${VERSION}-x86_64-unknown-linux-gnu.tar.gz"
-BIN="ontoindex-v${VERSION}-x86_64-unknown-linux-gnu"
+ASSET="ontocore-v${VERSION}-x86_64-unknown-linux-gnu.tar.gz"
+BIN="ontocore-v${VERSION}-x86_64-unknown-linux-gnu"
 tar xzf "${ASSET}"
 chmod +x "${BIN}"
 ./"${BIN}" query /path/to/ontologies "SELECT * FROM classes"
 ./"${BIN}" validate /path/to/ontologies
 ```
 
-> **Note:** The extracted binary is versioned (not plain `ontoindex`). CLI release tarballs are **Linux x64 only**; macOS/Windows users should use `cargo install ontoindex-cli` or the bundled LSP inside the VSIX.
+> **Note:** The extracted binary is versioned (not plain `ontocore`). CLI release tarballs are **Linux x64 only**; macOS/Windows users should use `cargo install ontocore-cli` or the bundled LSP inside the VSIX.
 
 For VS Code, install the `ontocode-*.vsix` from the same release.
 

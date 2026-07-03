@@ -1,5 +1,5 @@
-use ontoindex_catalog::IndexBuilder;
-use ontoindex_lsp::catalog_snapshot_json;
+use ontocore_catalog::IndexBuilder;
+use ontocore_lsp::catalog_snapshot_json;
 use serde_json::Value;
 use std::fs;
 use std::path::{Path, PathBuf};

@@ -2,17 +2,25 @@ import { spawn } from "node:child_process";
 import * as fs from "node:fs";
 import * as path from "node:path";
 
-const REPO_ROOT = path.resolve(__dirname, "..", "..", "..");
+const REPO_ROOT = (() => {
+  for (const ups of [3, 4]) {
+    const root = path.resolve(__dirname, ...Array(ups).fill(".."));
+    if (fs.existsSync(path.join(root, "Cargo.toml"))) {
+      return root;
+    }
+  }
+  return path.resolve(__dirname, "..", "..", "..");
+})();
 
 export function resolveLspBinaryForTests(): string {
-  const fromEnv = process.env.ONTOINDEX_LSP_BIN?.trim();
+  const fromEnv = process.env.ONTOCORE_LSP_BIN?.trim();
   if (fromEnv && fs.existsSync(fromEnv)) {
     return fromEnv;
   }
 
   const candidates = [
-    path.join(REPO_ROOT, "target", "debug", "ontoindex-lsp"),
-    path.join(REPO_ROOT, "target", "release", "ontoindex-lsp"),
+    path.join(REPO_ROOT, "target", "debug", "ontocore-lsp"),
+    path.join(REPO_ROOT, "target", "release", "ontocore-lsp"),
   ];
   for (const candidate of candidates) {
     if (fs.existsSync(candidate)) {
@@ -21,7 +29,7 @@ export function resolveLspBinaryForTests(): string {
   }
 
   throw new Error(
-    "ontoindex-lsp binary not found; run `cargo build -p ontoindex-lsp --bins` or set ONTOINDEX_LSP_BIN"
+    "ontocore-lsp binary not found; run `cargo build -p ontocore-lsp --bins` or set ONTOCORE_LSP_BIN"
   );
 }
 
@@ -104,7 +112,7 @@ export async function smokeInitializeLsp(binaryPath: string): Promise<void> {
   child.kill();
 
   if (!response) {
-    throw new Error("no initialize response from ontoindex-lsp");
+    throw new Error("no initialize response from ontocore-lsp");
   }
   const parsed = JSON.parse(response) as { result?: unknown; error?: unknown };
   if (parsed.error) {

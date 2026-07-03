@@ -79,12 +79,12 @@ export async function startLanguageClient(
         "**/*.{ttl,owl,rdf,jsonld,json-ld,nt,nq,trig,obo}"
       ),
     },
-    outputChannelName: "OntoIndex Language Server",
+    outputChannelName: "OntoCore Language Server",
   };
 
   client = new LanguageClient(
-    "ontoindex-lsp",
-    "OntoIndex Language Server",
+    "ontocore-lsp",
+    "OntoCore Language Server",
     serverOptions,
     clientOptions
   );
@@ -102,7 +102,7 @@ export async function startLanguageClient(
     client = undefined;
     const detail = err instanceof Error ? err.message : String(err);
     throw new Error(
-      `${detail} (server: ${serverPath}). See Output → OntoIndex Language Server.`
+      `${detail} (server: ${serverPath}). See Output → OntoCore Language Server.`
     );
   }
 
@@ -146,7 +146,7 @@ function resolveServerPath(context: vscode.ExtensionContext): string {
   }
 
   throw new Error(
-    "Bundled ontoindex-lsp binary not found. Rebuild the extension (npm run compile) or set ontocode.lspPath to a local ontoindex-lsp binary."
+    "Bundled ontocore-lsp binary not found. Rebuild the extension (npm run compile) or set ontocode.lspPath to a local ontocore-lsp binary."
   );
 }
 
@@ -160,7 +160,7 @@ export async function indexWorkspace(
       "No workspace folder is open. Open a folder containing ontology files, then run Index Workspace."
     );
   }
-  const result = await c.sendRequest<unknown>("ontoindex/indexWorkspace", {
+  const result = await c.sendRequest<unknown>("ontocore/indexWorkspace", {
     workspace_uri: uri,
   });
   return assertIndexWorkspaceResult(result) as IndexWorkspaceResult;
@@ -183,7 +183,7 @@ async function pickWorkspaceFolderUri(): Promise<string | undefined> {
 export async function getCatalogSnapshot(): Promise<CatalogSnapshot> {
   const c = requireClient();
   const result = await c.sendRequest<unknown>(
-    "ontoindex/getCatalogSnapshot",
+    "ontocore/getCatalogSnapshot",
     null
   );
   return assertCatalogSnapshot(result);
@@ -191,7 +191,7 @@ export async function getCatalogSnapshot(): Promise<CatalogSnapshot> {
 
 export async function getEntity(iri: string): Promise<GetEntityResult> {
   const c = requireClient();
-  const result = await c.sendRequest<unknown>("ontoindex/getEntity", { iri });
+  const result = await c.sendRequest<unknown>("ontocore/getEntity", { iri });
   return assertGetEntityResult(result);
 }
 
@@ -200,7 +200,7 @@ export async function applyAxiomPatch(
 ): Promise<ApplyPatchResult> {
   const c = requireClient();
   const result = await c.sendRequest<unknown>(
-    "ontoindex/applyAxiomPatch",
+    "ontocore/applyAxiomPatch",
     params
   );
   return assertApplyPatchResult(result);
@@ -208,7 +208,7 @@ export async function applyAxiomPatch(
 
 export async function runSqlQuery(sql: string): Promise<TabularQueryResult> {
   const c = requireClient();
-  const result = await c.sendRequest<unknown>("ontoindex/query", { sql });
+  const result = await c.sendRequest<unknown>("ontocore/query", { sql });
   return assertTabularQueryResult(result);
 }
 
@@ -216,7 +216,7 @@ export async function runSparqlQuery(
   query: string
 ): Promise<TabularQueryResult> {
   const c = requireClient();
-  const result = await c.sendRequest<unknown>("ontoindex/sparql", { query });
+  const result = await c.sendRequest<unknown>("ontocore/sparql", { query });
   return assertTabularQueryResult(result);
 }
 
@@ -225,7 +225,7 @@ export async function parseManchester(
 ): Promise<ParseManchesterResult> {
   const c = requireClient();
   const result = await c.sendRequest<unknown>(
-    "ontoindex/parseManchester",
+    "ontocore/parseManchester",
     params
   );
   return assertParseManchesterResult(result);
@@ -235,7 +235,7 @@ export async function runReasoner(
   params: RunReasonerParams
 ): Promise<RunReasonerResult> {
   const c = requireClient();
-  const result = await c.sendRequest<unknown>("ontoindex/runReasoner", params);
+  const result = await c.sendRequest<unknown>("ontocore/runReasoner", params);
   return assertRunReasonerResult(result);
 }
 
@@ -244,7 +244,7 @@ export async function getExplanation(
 ): Promise<GetExplanationResult> {
   const c = requireClient();
   const result = await c.sendRequest<unknown>(
-    "ontoindex/getExplanation",
+    "ontocore/getExplanation",
     params
   );
   return assertGetExplanationResult(result);
@@ -252,7 +252,7 @@ export async function getExplanation(
 
 export async function getGraph(params: GetGraphParams): Promise<GetGraphResult> {
   const c = requireClient();
-  const result = await c.sendRequest<unknown>("ontoindex/getGraph", params);
+  const result = await c.sendRequest<unknown>("ontocore/getGraph", params);
   return assertGetGraphResult(result);
 }
 
@@ -261,7 +261,7 @@ export async function runRobot(params: RunRobotParams): Promise<RunRobotResult> 
   const robotPath =
     params.robot_path ??
     vscode.workspace.getConfiguration("ontocode").get<string>("robotPath");
-  const result = await c.sendRequest<unknown>("ontoindex/runRobot", {
+  const result = await c.sendRequest<unknown>("ontocore/runRobot", {
     ...params,
     robot_path: robotPath || undefined,
   });
@@ -270,7 +270,7 @@ export async function runRobot(params: RunRobotParams): Promise<RunRobotResult> 
 
 export async function findUsages(iri: string): Promise<FindUsagesResult> {
   const c = requireClient();
-  const result = await c.sendRequest<unknown>("ontoindex/findUsages", { iri });
+  const result = await c.sendRequest<unknown>("ontocore/findUsages", { iri });
   return assertFindUsagesResult(result);
 }
 
@@ -279,7 +279,7 @@ export async function previewRefactor(
 ): Promise<PreviewRefactorResult> {
   const c = requireClient();
   const result = await c.sendRequest<unknown>(
-    "ontoindex/previewRefactor",
+    "ontocore/previewRefactor",
     request
   );
   return assertPreviewRefactorResult(result);
@@ -291,7 +291,7 @@ export async function applyRefactor(
   previewOnly = false
 ): Promise<ApplyRefactorResult> {
   const c = requireClient();
-  const result = await c.sendRequest<unknown>("ontoindex/applyRefactor", {
+  const result = await c.sendRequest<unknown>("ontocore/applyRefactor", {
     plan,
     request,
     preview_only: previewOnly,
@@ -301,7 +301,7 @@ export async function applyRefactor(
 
 function requireClient(): LanguageClient {
   if (!client) {
-    throw new Error("OntoIndex language server is not running");
+    throw new Error("OntoCore language server is not running");
   }
   return client;
 }

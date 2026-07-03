@@ -2,7 +2,7 @@
 
 ## 1. Purpose
 
-The plugin system allows users and organizations to extend OntoIndex/OntoCode without modifying the core project.
+The plugin system allows users and organizations to extend OntoCore/OntoCode without modifying the core project.
 
 ## 2. Plugin Types
 
@@ -37,7 +37,7 @@ Examples:
 - WASM reasoner module (future)
 - organization-specific validation reasoners
 
-Built-in adapters (`el`, `dl`, `rl`, `rdfs`, `auto`) ship in `ontoindex-reasoner` as thin wrappers over [OntoLogos](https://github.com/eddiethedean/ontologos) — see [REASONER_SPEC.md](REASONER_SPEC.md), [ADR-0015](adr/0015-adopt-ontologos-reasoner.md).
+Built-in adapters (`el`, `dl`, `rl`, `rdfs`, `auto`) ship in `ontocore-reasoner` as thin wrappers over [OntoLogos](https://github.com/eddiethedean/ontologos) — see [REASONER_SPEC.md](REASONER_SPEC.md), [ADR-0015](adr/0015-adopt-ontologos-reasoner.md).
 
 Built-in SHACL adapter (P1) wraps [`rudof`](https://crates.io/crates/rudof) — see [SHACL_SPEC.md](SHACL_SPEC.md), [DEPENDENCY_MATRIX.md](DEPENDENCY_MATRIX.md).
 

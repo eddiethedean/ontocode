@@ -7,7 +7,7 @@ Pick one of two documentation paths, then follow the next step for your task.
 | Path | When to use | Start |
 |------|-------------|-------|
 | **VS Code extension** | Browse, edit Turtle, Query Workbench, reasoner panels — no Rust install | [VS Code extension docs](vscode-extension.md) |
-| **Rust & CLI** | `cargo install ontoindex-cli`, embed crates, CI validation | [Rust & CLI docs](rust-crates.md) |
+| **Rust & CLI** | `cargo install ontocore-cli`, embed crates, CI validation | [Rust & CLI docs](rust-crates.md) |
 
 New to OWL/RDF vocabulary? Read [Ontology concepts](../concepts.md) first.
 
@@ -21,7 +21,7 @@ New to OWL/RDF vocabulary? Read [Ontology concepts](../concepts.md) first.
 
 ## Rust & CLI tasks
 
-[CLI getting started](../getting-started.md) — `cargo install ontoindex-cli` or clone the repo.
+[CLI getting started](../getting-started.md) — `cargo install ontocore-cli` or clone the repo.
 
 **Then:** [CLI reference](../cli-reference.md) · [CI integration](../ci-integration.md) · [Rust library guide](rust-library.md)
 

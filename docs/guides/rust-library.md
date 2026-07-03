@@ -1,8 +1,8 @@
 # Using OntoCore as a Rust library
 
-Embed **OntoCore** in tools, pipelines, or custom CLIs via the [`ontocore`](https://crates.io/crates/ontocore) façade crate or individual `ontoindex-*` implementation crates.
+Embed **OntoCore** in tools, pipelines, or custom CLIs via the [`ontocore`](https://crates.io/crates/ontocore) façade crate or individual `ontocore-*` implementation crates.
 
-> OntoCore (formerly referred to as **OntoIndex** in older docs) is implemented by the `ontoindex-*` crates.
+> OntoCore (formerly referred to as **OntoCore** in older docs) is implemented by the `ontocore-*` crates.
 
 Pre-1.0: public APIs may change between minor releases until v1.0.
 
@@ -43,7 +43,7 @@ See [OntoCore crate map](../ontocore/crate-map.md) for the full table. Summary:
 | Crate | Role |
 |-------|------|
 | `ontocore` | Public façade — `Workspace`, module re-exports |
-| `ontoindex-*` | Implementation crates (stable names until v1.0) |
+| `ontocore-*` | Implementation crates (stable names until v1.0) |
 
 ## Classification example
 
@@ -63,7 +63,7 @@ println!("consistent: {}", result.consistent);
 cargo run -p ontocode --example error_handling
 ```
 
-Uses `OntoIndexError` from `ontoindex-core` (re-exported as `ontocore::OntoIndexError`).
+Uses `OntoCoreError` from `ontocore-core` (re-exported as `ontocore::OntoCoreError`).
 
 ## API stability
 

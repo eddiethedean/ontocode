@@ -4,7 +4,7 @@
 
 ## Component
 
-- [ ] OntoIndex (Rust crates / CLI / LSP)
+- [ ] OntoCore (Rust crates / CLI / LSP)
 - [ ] OntoCode (VS Code extension)
 - [ ] Documentation / specs
 - [ ] CI / release

@@ -2,22 +2,22 @@
 resolver = "2"
 members = [
     "crates/ontocore",
-    "crates/ontoindex-core",
-    "crates/ontoindex-parser",
-    "crates/ontoindex-owl",
-    "crates/ontoindex-catalog",
-    "crates/ontoindex-diagnostics",
-    "crates/ontoindex-query",
-    "crates/ontoindex-reasoner",
-    "crates/ontoindex-robot",
-    "crates/ontoindex-refactor",
-    "crates/ontoindex-cli",
-    "crates/ontoindex-lsp",
+    "crates/ontocore-core",
+    "crates/ontocore-parser",
+    "crates/ontocore-owl",
+    "crates/ontocore-catalog",
+    "crates/ontocore-diagnostics",
+    "crates/ontocore-query",
+    "crates/ontocore-reasoner",
+    "crates/ontocore-robot",
+    "crates/ontocore-refactor",
+    "crates/ontocore-cli",
+    "crates/ontocore-lsp",
 ]
-default-members = ["crates/ontoindex-cli"]
+default-members = ["crates/ontocore-cli"]
 
 # Unpublished workspace shell: integration tests and examples only.
-# `cargo run --` runs the `ontoindex` CLI (default-member), not this package as a library.
+# `cargo run --` runs the `ontocore` CLI (default-member), not this package as a library.
 [package]
 name = "ontocode"
 version = "0.9.0"
@@ -42,13 +42,13 @@ path = "examples/ontocore_workspace.rs"
 
 [dev-dependencies]
 ontocore = { workspace = true }
-ontoindex-catalog = { workspace = true }
-ontoindex-core = { workspace = true }
-ontoindex-parser = { workspace = true }
-ontoindex-query = { workspace = true }
-ontoindex-lsp = { workspace = true }
-ontoindex-reasoner = { workspace = true }
-ontoindex-owl = { workspace = true }
+ontocore-catalog = { workspace = true }
+ontocore-core = { workspace = true }
+ontocore-parser = { workspace = true }
+ontocore-query = { workspace = true }
+ontocore-lsp = { workspace = true }
+ontocore-reasoner = { workspace = true }
+ontocore-owl = { workspace = true }
 serde_json.workspace = true
 tempfile = "3"
 
@@ -65,16 +65,16 @@ categories = ["command-line-utilities", "science", "parser-implementations"]
 
 [workspace.dependencies]
 ontocore = { path = "crates/ontocore", version = "0.9.0" }
-ontoindex-core = { path = "crates/ontoindex-core", version = "0.9.0" }
-ontoindex-parser = { path = "crates/ontoindex-parser", version = "0.9.0" }
-ontoindex-owl = { path = "crates/ontoindex-owl", version = "0.9.0" }
-ontoindex-catalog = { path = "crates/ontoindex-catalog", version = "0.9.0" }
-ontoindex-diagnostics = { path = "crates/ontoindex-diagnostics", version = "0.9.0" }
-ontoindex-query = { path = "crates/ontoindex-query", version = "0.9.0" }
-ontoindex-lsp = { path = "crates/ontoindex-lsp", version = "0.9.0" }
-ontoindex-reasoner = { path = "crates/ontoindex-reasoner", version = "0.9.0" }
-ontoindex-robot = { path = "crates/ontoindex-robot", version = "0.9.0" }
-ontoindex-refactor = { path = "crates/ontoindex-refactor", version = "0.9.0" }
+ontocore-core = { path = "crates/ontocore-core", version = "0.9.0" }
+ontocore-parser = { path = "crates/ontocore-parser", version = "0.9.0" }
+ontocore-owl = { path = "crates/ontocore-owl", version = "0.9.0" }
+ontocore-catalog = { path = "crates/ontocore-catalog", version = "0.9.0" }
+ontocore-diagnostics = { path = "crates/ontocore-diagnostics", version = "0.9.0" }
+ontocore-query = { path = "crates/ontocore-query", version = "0.9.0" }
+ontocore-lsp = { path = "crates/ontocore-lsp", version = "0.9.0" }
+ontocore-reasoner = { path = "crates/ontocore-reasoner", version = "0.9.0" }
+ontocore-robot = { path = "crates/ontocore-robot", version = "0.9.0" }
+ontocore-refactor = { path = "crates/ontocore-refactor", version = "0.9.0" }
 
 ontologos-core = "0.9.0"
 ontologos-parser = "0.9.0"

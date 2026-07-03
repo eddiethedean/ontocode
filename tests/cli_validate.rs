@@ -3,32 +3,32 @@ use std::process::Command;
 
 mod support;
 
-pub fn ontoindex_binary() -> PathBuf {
-    if let Ok(path) = std::env::var("CARGO_BIN_EXE_ontoindex") {
+pub fn ontocore_binary() -> PathBuf {
+    if let Ok(path) = std::env::var("CARGO_BIN_EXE_ontocore") {
         let candidate = PathBuf::from(path);
         if candidate.exists() {
             return candidate;
         }
     }
 
-    find_ontoindex_binary_in_target().unwrap_or_else(|| {
+    find_ontocore_binary_in_target().unwrap_or_else(|| {
         let target_dir = std::env::var("CARGO_TARGET_DIR")
             .map(PathBuf::from)
             .unwrap_or_else(|_| Path::new(env!("CARGO_MANIFEST_DIR")).join("target"));
         panic!(
-            "ontoindex binary not found under {} (run `cargo build -p ontoindex-cli` first)",
+            "ontocore binary not found under {} (run `cargo build -p ontocore-cli` first)",
             target_dir.display()
         );
     })
 }
 
-fn find_ontoindex_binary_in_target() -> Option<PathBuf> {
+fn find_ontocore_binary_in_target() -> Option<PathBuf> {
     let target_dir = std::env::var("CARGO_TARGET_DIR")
         .map(PathBuf::from)
         .unwrap_or_else(|_| Path::new(env!("CARGO_MANIFEST_DIR")).join("target"));
 
     for subdir in ["debug", "release"] {
-        let candidate = target_dir.join(subdir).join("ontoindex");
+        let candidate = target_dir.join(subdir).join("ontocore");
         if candidate.exists() {
             return Some(candidate);
         }
@@ -40,10 +40,10 @@ fn find_ontoindex_binary_in_target() -> Option<PathBuf> {
 #[test]
 fn validate_exits_zero_on_clean_fixtures() {
     let fixtures = support::fixture_workspace();
-    let output = Command::new(ontoindex_binary())
+    let output = Command::new(ontocore_binary())
         .args(["validate", fixtures.to_str().expect("fixture path")])
         .output()
-        .expect("spawn ontoindex validate");
+        .expect("spawn ontocore validate");
 
     assert!(
         output.status.success(),
@@ -64,10 +64,10 @@ fn validate_exits_zero_when_only_warnings() {
     )
     .unwrap();
 
-    let output = Command::new(ontoindex_binary())
+    let output = Command::new(ontocore_binary())
         .args(["validate", dir.path().to_str().expect("temp path")])
         .output()
-        .expect("spawn ontoindex validate");
+        .expect("spawn ontocore validate");
 
     assert!(
         output.status.success(),
@@ -93,10 +93,10 @@ fn validate_exits_nonzero_on_diagnostic_errors() {
     )
     .unwrap();
 
-    let output = Command::new(ontoindex_binary())
+    let output = Command::new(ontocore_binary())
         .args(["validate", dir.path().to_str().expect("temp path")])
         .output()
-        .expect("spawn ontoindex validate");
+        .expect("spawn ontocore validate");
 
     assert!(!output.status.success(), "expected non-zero exit on broken import fixture");
     let stderr = String::from_utf8_lossy(&output.stderr);

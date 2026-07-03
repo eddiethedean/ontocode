@@ -19,7 +19,7 @@ pub trait ShaclValidatorAdapter {
 
 **Initial adapter:** [`rudof`](https://crates.io/crates/rudof) (MIT OR Apache-2.0) — RDF shapes implementation from [shapes-rs](https://github.com/weso/shapes-rs).
 
-OntoIndex owns: shape path configuration, data graph selection from catalog/Oxigraph, mapping violations to LSP diagnostics.
+OntoCore owns: shape path configuration, data graph selection from catalog/Oxigraph, mapping violations to LSP diagnostics.
 
 **Excluded:** JVM SHACL engines (TopBraid, Jena `shacl validate`) as default adapters — prefer Rust-native per [ADR-0016](adr/0016-dependency-first-implementation.md).
 

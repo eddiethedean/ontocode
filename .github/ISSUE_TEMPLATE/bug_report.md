@@ -1,6 +1,6 @@
 ---
 name: Bug report
-about: Report a problem with OntoCode or OntoIndex
+about: Report a problem with OntoCode or OntoCore
 title: ''
 labels: bug
 assignees: ''
@@ -8,16 +8,16 @@ assignees: ''
 
 ## Component
 
-- [ ] OntoIndex CLI (`ontoindex`)
-- [ ] OntoIndex library / crates
-- [ ] `ontoindex-lsp` language server
+- [ ] OntoCore CLI (`ontocore`)
+- [ ] OntoCore library (`ontocore` / `ontocore-*` crates)
+- [ ] OntoCore LSP (`ontocore-lsp`)
 - [ ] OntoCode VS Code extension
 - [ ] Documentation
 - [ ] Other
 
 ## Version
 
-- OntoIndex / OntoCode version (e.g. 0.3.0, git commit, or crates.io):
+- OntoCore / OntoCode version (e.g. 0.9.0, git commit, or crates.io):
 - OS and architecture:
 - Rust version (if building from source):
 - VS Code version (if extension):

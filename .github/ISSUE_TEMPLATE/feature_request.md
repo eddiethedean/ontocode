@@ -1,6 +1,6 @@
 ---
 name: Feature request
-about: Suggest an enhancement for OntoCode or OntoIndex
+about: Suggest an enhancement for OntoCode or OntoCore
 title: ''
 labels: enhancement
 assignees: ''
@@ -8,7 +8,7 @@ assignees: ''
 
 ## Component
 
-- [ ] OntoIndex CLI / library
+- [ ] OntoCore CLI / library
 - [ ] OntoCode VS Code extension
 - [ ] LSP / editor integration
 - [ ] Documentation

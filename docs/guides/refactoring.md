@@ -8,11 +8,11 @@ Canonical capability matrix: [What ships today](../SHIPPED.md).
 
 | Operation | VS Code | CLI |
 |-----------|---------|-----|
-| Find usages of an IRI | Entity Inspector, explorer context menu | `ontoindex refactor usages` |
-| Rename entity IRI | **Rename Entity IRI** command | `ontoindex refactor rename` |
-| Migrate namespace base | **Migrate Namespace** command | `ontoindex refactor migrate-namespace` |
-| Move entity to another file | **Move Entity** command | `ontoindex refactor move` |
-| Extract module (subset of entities) | **Extract Module** command | `ontoindex refactor extract` |
+| Find usages of an IRI | Entity Inspector, explorer context menu | `ontocore refactor usages` |
+| Rename entity IRI | **Rename Entity IRI** command | `ontocore refactor rename` |
+| Migrate namespace base | **Migrate Namespace** command | `ontocore refactor migrate-namespace` |
+| Move entity to another file | **Move Entity** command | `ontocore refactor move` |
+| Extract module (subset of entities) | **Extract Module** command | `ontocore refactor extract` |
 
 **Format policy:** refactoring applies to **Turtle (`.ttl`) only**. RDF/XML, OBO, and other formats are indexed but not modified.
 
@@ -50,19 +50,19 @@ Replace `fixtures` with your ontology root (or use `cargo run --` from a git clo
 ### Find usages
 
 ```bash
-ontoindex refactor usages fixtures 'http://example.org/people#Person'
-ontoindex refactor usages fixtures 'http://example.org/people#Person' --format json
+ontocore refactor usages fixtures 'http://example.org/people#Person'
+ontocore refactor usages fixtures 'http://example.org/people#Person' --format json
 ```
 
 ### Rename IRI (preview then apply)
 
 ```bash
-ontoindex refactor rename fixtures \
+ontocore refactor rename fixtures \
   --from 'http://example.org/people#Person' \
   --to 'http://example.org/people#Human' \
   --preview
 
-ontoindex refactor rename fixtures \
+ontocore refactor rename fixtures \
   --from 'http://example.org/people#Person' \
   --to 'http://example.org/people#Human'
 ```
@@ -70,7 +70,7 @@ ontoindex refactor rename fixtures \
 ### Migrate namespace
 
 ```bash
-ontoindex refactor migrate-namespace fixtures \
+ontocore refactor migrate-namespace fixtures \
   --from 'http://example.org/people#' \
   --to 'http://example.org/v2/people#' \
   --preview
@@ -79,7 +79,7 @@ ontoindex refactor migrate-namespace fixtures \
 ### Move entity
 
 ```bash
-ontoindex refactor move fixtures 'http://example.org/people#Student' \
+ontocore refactor move fixtures 'http://example.org/people#Student' \
   --to ./people/students.ttl \
   --preview
 ```
@@ -87,7 +87,7 @@ ontoindex refactor move fixtures 'http://example.org/people#Student' \
 ### Extract module
 
 ```bash
-ontoindex refactor extract fixtures \
+ontocore refactor extract fixtures \
   --entities 'http://example.org/people#Person,http://example.org/people#Student' \
   --out ./people/core.ttl \
   --leave-stub \
@@ -102,9 +102,9 @@ Full flag reference: [CLI reference](../cli-reference.md#refactor).
 
 | Method | Purpose |
 |--------|---------|
-| `ontoindex/findUsages` | List usages for an IRI |
-| `ontoindex/previewRefactor` | Build a `RefactorPlan` without writing |
-| `ontoindex/applyRefactor` | Apply a plan (re-previews and verifies match) |
+| `ontocore/findUsages` | List usages for an IRI |
+| `ontocore/previewRefactor` | Build a `RefactorPlan` without writing |
+| `ontocore/applyRefactor` | Apply a plan (re-previews and verifies match) |
 
 Refactor requests use a tagged `kind` field: `rename_iri`, `migrate_namespace`, `move_entity`, `extract_module`. See [LSP API](../lsp-api.md) and [lsp-protocol.schema.json](../lsp-protocol.schema.json).
 

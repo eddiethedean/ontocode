@@ -4,7 +4,7 @@
 Accepted
 
 ## Context
-OntoIndex needs robust RDF parsing/storage/query capabilities.
+OntoCore needs robust RDF parsing/storage/query capabilities.
 
 ## Decision
 Use Oxigraph for RDF/SPARQL infrastructure where appropriate.
@@ -16,4 +16,4 @@ Positive:
 - enables SPARQL support
 
 Negative:
-- OntoIndex must differentiate above the triplestore layer
+- OntoCore must differentiate above the triplestore layer

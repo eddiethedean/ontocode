@@ -6,7 +6,7 @@ Canonical ADRs live in this directory. The former `adrs/` folder was merged here
 
 | ADR | Title | Status |
 |-----|-------|--------|
-| [0001](0001-use-rust-for-ontoindex.md) | Use Rust for OntoIndex | Accepted |
+| [0001](0001-use-rust-for-ontocore.md) | Use Rust for OntoCore | Accepted |
 | [0002](0002-use-horned-owl.md) | Use Horned-OWL for OWL modeling | **Superseded by ADR-0013** (v0.4b+) |
 | [0003](0003-use-oxigraph.md) | Use Oxigraph | Accepted |
 | [0004](0004-use-datafusion-for-sql.md) | Use DataFusion for SQL | **Superseded** (v0.2 uses sqlparser virtual tables) |
@@ -36,14 +36,14 @@ Canonical ADRs live in this directory. The former `adrs/` folder was merged here
 
 ### v0.3 (shipped)
 
-- **Diagnostics:** in-house `ontoindex-diagnostics` + Oxigraph parse errors ([ADR-0016](0016-dependency-first-implementation.md), [DEPENDENCY_MATRIX.md](../DEPENDENCY_MATRIX.md))
+- **Diagnostics:** in-house `ontocore-diagnostics` + Oxigraph parse errors ([ADR-0016](0016-dependency-first-implementation.md), [DEPENDENCY_MATRIX.md](../DEPENDENCY_MATRIX.md))
 - **LSP:** `textDocument/publishDiagnostics` after reindex; `CatalogSnapshot.diagnostics`
 
 ### v1.0 target
 
 - **Dependency policy:** [DEPENDENCY_MATRIX.md](../DEPENDENCY_MATRIX.md), [ADR-0016](0016-dependency-first-implementation.md)
-- **OWL modeling / write-back:** `horned-owl` + `horned-functional` via `ontoindex-owl` ([ADR-0013](0013-dual-stack-oxigraph-horned-owl.md))
-- **Reasoning:** [OntoLogos](https://github.com/eddiethedean/ontologos) via `ontoindex-reasoner` — 0.9.0 at v0.6, 1.0.0 at v1.0 ([ADR-0014](0014-rust-native-reasoners-only.md), [ADR-0015](0015-adopt-ontologos-reasoner.md))
+- **OWL modeling / write-back:** `horned-owl` + `horned-functional` via `ontocore-owl` ([ADR-0013](0013-dual-stack-oxigraph-horned-owl.md))
+- **Reasoning:** [OntoLogos](https://github.com/eddiethedean/ontologos) via `ontocore-reasoner` — 0.9.0 at v0.6, 1.0.0 at v1.0 ([ADR-0014](0014-rust-native-reasoners-only.md), [ADR-0015](0015-adopt-ontologos-reasoner.md))
 - **Webview UI:** React + Vite in `extension/webview-ui` ([ADR-0017](0017-react-webview-ui.md))
 - **OBO:** `fastobo` / `fastobo-owl` ([DEPENDENCY_MATRIX.md](../DEPENDENCY_MATRIX.md))
 - **SHACL (P1):** `rudof` ([SHACL_SPEC.md](../SHACL_SPEC.md))

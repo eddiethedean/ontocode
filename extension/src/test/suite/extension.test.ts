@@ -50,7 +50,7 @@ suite("OntoCode in VS Code", () => {
     assert.ok(ext.isActive, "extension should be active after activate()");
   });
 
-  test("language client starts (bundled ontoindex-lsp)", () => {
+  test("language client starts (bundled ontocore-lsp)", () => {
     assert.ok(api.getClient(), "LSP client should be running");
     assert.ok(api.getClient()!.isRunning?.() ?? true, "client should report running");
   });

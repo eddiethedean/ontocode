@@ -29,12 +29,12 @@ Enable biomedical ontology maintainers to use OntoCode as a **primary IDE** alon
 
 ## 3. ROBOT interop (P0)
 
-Thin CLI wrappers in `ontoindex-robot` crate (or `ontoindex-cli` subcommand):
+Thin CLI wrappers in `ontocore-robot` crate (or `ontocore-cli` subcommand):
 
 ```bash
-ontoindex robot validate ./ontology
-ontoindex robot merge --inputs a.owl b.owl --output merged.owl
-ontoindex robot report ./ontology --report report.tsv
+ontocore robot validate ./ontology
+ontocore robot merge --inputs a.owl b.owl --output merged.owl
+ontocore robot report ./ontology --report report.tsv
 ```
 
 ### Requirements
@@ -53,8 +53,8 @@ ontoindex robot report ./ontology --report report.tsv
 `examples/obo-workflow/` — minimal mixed OBO + OWL repo demonstrating:
 
 - Edit in OntoCode
-- `ontoindex validate` + `ontoindex robot validate` in CI
-- `ontoindex robot merge` for release
+- `ontocore validate` + `ontocore robot validate` in CI
+- `ontocore robot merge` for release
 
 ## 5. Non-goals
 

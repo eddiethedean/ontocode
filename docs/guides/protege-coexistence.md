@@ -14,11 +14,11 @@ Canonical capability matrix: [What ships today](../SHIPPED.md). Decision matrix:
 | Workspace refactoring (rename, migrate namespace, move, extract) | Shipped (Turtle; preview + apply) |
 | SQL/SPARQL queries over workspace | Shipped |
 | Graph visualization (class, property, import, neighborhood) | Shipped |
-| CI lint (`ontoindex validate`) | Shipped — suitable for production CI |
+| CI lint (`ontocore validate`) | Shipped — suitable for production CI |
 | EL/RL/RDFS classification | Shipped |
 | Inferred hierarchy toggle | Shipped (after reasoner run) |
 | OBO format index + `obo_id` in explorer | Shipped (write-back: Turtle only in VS Code) |
-| ROBOT CLI in CI (`ontoindex robot`) | Shipped (requires Java + `robot` on PATH) |
+| ROBOT CLI in CI (`ontocore robot`) | Shipped (requires Java + `robot` on PATH) |
 
 ## Keep Protégé for (today)
 
@@ -34,7 +34,7 @@ Canonical capability matrix: [What ships today](../SHIPPED.md). Decision matrix:
 ## Practical split workflow
 
 1. **Author** routine Turtle changes in VS Code (inspector, Manchester editor, refactoring, patches)
-2. **Validate** in CI with `ontoindex validate` and optionally `ontoindex classify --profile el`
+2. **Validate** in CI with `ontocore validate` and optionally `ontocore classify --profile el`
 3. **Run ROBOT** in CI when needed — [ROBOT interop](robot-interop.md)
 4. **Review** DL-heavy axioms, property chains, or OBO-specific edits in Protégé when required
 5. **Commit** `.ttl` changes through Git pull requests
@@ -47,7 +47,7 @@ Canonical capability matrix: [What ships today](../SHIPPED.md). Decision matrix:
 
 ## Expectations on reasoning
 
-OntoIndex uses separate Oxigraph/Horned-OWL and OntoLogos models. Results **may differ from Protégé** on partial OWL mappings — check profile warnings in the Reasoner Results panel and run a pilot comparison on your corpus — [Production evidence protocol](production-evidence.md).
+OntoCore uses separate Oxigraph/Horned-OWL and OntoLogos models. Results **may differ from Protégé** on partial OWL mappings — check profile warnings in the Reasoner Results panel and run a pilot comparison on your corpus — [Production evidence protocol](production-evidence.md).
 
 ## Evaluation checklist
 

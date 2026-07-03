@@ -9,12 +9,12 @@ Canonical limits: [workspace limits](../workspace-limits.md). Pilot criteria: [p
 ## When to run this
 
 - Before expanding an IDE pilot beyond a single team
-- Before mandating `ontoindex validate` / `classify` on production branches
+- Before mandating `ontocore validate` / `classify` on production branches
 - Before retiring Protégé for any workflow OntoCode will own
 
 ## Prerequisites
 
-- Pin OntoIndex **0.8.0** — `cargo install ontoindex-cli --locked --version 0.8.0` or release binary with SHA256 verification — [release integrity](../release-integrity.md)
+- Pin OntoCore **0.9.0** — `cargo install ontocore-cli --locked --version 0.9.0` or release binary with SHA256 verification — [release integrity](../release-integrity.md)
 - A **representative clone** of your production ontology tree (not sanitized tutorial data)
 - Record host OS, CPU, RAM, and CI runner specs
 
@@ -22,7 +22,7 @@ Canonical limits: [workspace limits](../workspace-limits.md). Pilot criteria: [p
 
 ```bash
 ONTO=/path/to/your/ontologies
-ontoindex inspect "$ONTO" --format json
+ontocore inspect "$ONTO" --format json
 ```
 
 Record:
@@ -39,13 +39,13 @@ Record:
 ## Step 2 — CI latency budget
 
 ```bash
-time ontoindex validate "$ONTO"
+time ontocore validate "$ONTO"
 ```
 
 Optional:
 
 ```bash
-time ontoindex classify "$ONTO" --profile el --format json
+time ontocore classify "$ONTO" --profile el --format json
 ```
 
 **Suggested acceptance (adjust for your pipeline):**
@@ -55,14 +55,14 @@ time ontoindex classify "$ONTO" --profile el --format json
 | `validate` on `main` corpus | Completes within your CI stage budget (e.g. &lt; 5 min) |
 | `classify` (if used) | Completes within reasoner stage budget; profile matches ontology |
 
-**Fail:** Narrow path (`ontoindex validate ./src/ontologies`), shard by module, or run classify on a schedule instead of every PR.
+**Fail:** Narrow path (`ontocore validate ./src/ontologies`), shard by module, or run classify on a schedule instead of every PR.
 
 ## Step 3 — Reasoner comparison (if using Protégé today)
 
 On the same corpus:
 
 1. Run Protégé DL/EL classification (your current standard)
-2. Run `ontoindex classify "$ONTO" --profile el --format json`
+2. Run `ontocore classify "$ONTO" --profile el --format json`
 3. Compare `unsatisfiable` class lists and materialized edges
 
 **Document:** Matches, false positives, false negatives, and profile warnings. OntoCode docs state results **may differ** from Protégé — this step quantifies risk for your org.
@@ -72,7 +72,7 @@ On the same corpus:
 On 3–5 real edit tasks (label change, parent add, Manchester axiom, IRI rename):
 
 1. Perform in OntoCode on `.ttl` files
-2. Run `ontoindex validate` and review Git diff
+2. Run `ontocore validate` and review Git diff
 3. Optional: re-open in Protégé to confirm round-trip
 
 **Pass:** Edits persist, CI clean, team accepts diff quality. **Fail:** Keep Protégé for that workflow — [Protégé decision matrix](protege-decision.md).

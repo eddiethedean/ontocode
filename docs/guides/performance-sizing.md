@@ -1,6 +1,6 @@
 # Performance and sizing
 
-Guidance for sizing OntoIndex workspaces and planning pilots. **Formal benchmark suite is a v1.0 backlog item** — validate performance on your own corpora before production rollout.
+Guidance for sizing OntoCore workspaces and planning pilots. **Formal benchmark suite is a v1.0 backlog item** — validate performance on your own corpora before production rollout.
 
 Hard limits: [workspace limits](../workspace-limits.md). Pilot criteria: [production readiness](production-readiness.md).
 
@@ -18,7 +18,7 @@ Hard limits: [workspace limits](../workspace-limits.md). Pilot criteria: [produc
 
 ## Sizing tiers (qualitative)
 
-Use these tiers to choose pilot scope. **Run `ontoindex inspect` on your repo** to measure actual counts.
+Use these tiers to choose pilot scope. **Run `ontocore inspect` on your repo** to measure actual counts.
 
 | Tier | Files | Triples (order of magnitude) | Typical profile | v0.8 fit |
 |------|-------|------------------------------|-----------------|----------|
@@ -29,7 +29,7 @@ Use these tiers to choose pilot scope. **Run `ontoindex inspect` on your repo** 
 
 ## Reference measurement (tutorial fixtures)
 
-Measured with `ontoindex inspect fixtures --format json` on release **0.8.0** (repository tutorial corpus):
+Measured with `ontocore inspect fixtures --format json` on release **0.9.0** (repository tutorial corpus):
 
 | Metric | Value |
 |--------|-------|
@@ -47,16 +47,16 @@ Run on a **representative clone** of your production ontology tree:
 ```bash
 # Replace with your ontology root
 ONTO=/path/to/ontologies
-VERSION=0.8.0
+VERSION=0.9.0
 
 # Catalog stats
-time ./ontoindex-v${VERSION}-x86_64-unknown-linux-gnu inspect "$ONTO" --format json
+time ./ontocore-v${VERSION}-x86_64-unknown-linux-gnu inspect "$ONTO" --format json
 
 # Validation (full index + lint)
-time ./ontoindex-v${VERSION}-x86_64-unknown-linux-gnu validate "$ONTO"
+time ./ontocore-v${VERSION}-x86_64-unknown-linux-gnu validate "$ONTO"
 
 # Optional: classification
-time ./ontoindex-v${VERSION}-x86_64-unknown-linux-gnu classify "$ONTO" --profile el --format json
+time ./ontocore-v${VERSION}-x86_64-unknown-linux-gnu classify "$ONTO" --profile el --format json
 ```
 
 Record:
@@ -95,7 +95,7 @@ Running **reasoner + full index** uses more memory than `validate` alone. Size C
 For very large repos in CI, point commands at a **subdirectory**:
 
 ```bash
-ontoindex validate ./src/ontologies
+ontocore validate ./src/ontologies
 ```
 
 ## VS Code interactive use

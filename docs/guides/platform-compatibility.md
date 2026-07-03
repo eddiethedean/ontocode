@@ -1,6 +1,6 @@
 # Platform and VS Code compatibility
 
-Supported platforms and environments for OntoCode **v0.8.0**. This page states **what is documented and tested in project CI** — not a formal certification.
+Supported platforms and environments for OntoCode **v0.9.0**. This page states **what is documented and tested in project CI** — not a formal certification.
 
 Canonical matrix: [What ships today](../SHIPPED.md).
 
@@ -16,9 +16,9 @@ Canonical matrix: [What ships today](../SHIPPED.md).
 
 Extension CI runs VS Code E2E on **1.85.0** and stable across Linux, macOS, Windows (see repository `.github/workflows/extension-vscode-e2e.yml` — workflow name referenced in README badges).
 
-## Bundled language server (`ontoindex-lsp`)
+## Bundled language server (`ontocore-lsp`)
 
-Release VSIX bundles `ontoindex-lsp` for:
+Release VSIX bundles `ontocore-lsp` for:
 
 | OS | Architecture (documented) |
 |----|-------------------------|
@@ -30,14 +30,14 @@ No separate LSP install required for standard Marketplace/VSIX use.
 
 ## CLI release binaries
 
-| Platform | Pre-built `ontoindex` CLI on GitHub Releases |
+| Platform | Pre-built `ontocore` CLI on GitHub Releases |
 |----------|-----------------------------------------------|
 | Linux x64 | **Yes** |
 | Linux arm64 | **No** — use `cargo install` or VSIX-bundled LSP only |
-| macOS | **No** — use `cargo install ontoindex-cli --locked` |
+| macOS | **No** — use `cargo install ontocore-cli --locked` |
 | Windows | **No** — use `cargo install` or CI on Linux runners |
 
-Pin version: `VERSION=0.8.0` — [getting started](../getting-started.md).
+Pin version: `VERSION=0.9.0` — [getting started](../getting-started.md).
 
 ## `cargo install` prerequisites
 
@@ -59,7 +59,7 @@ Pin version: `VERSION=0.8.0` — [getting started](../getting-started.md).
 Pilot checklist for Remote-SSH:
 
 1. Install VSIX on the **remote** VS Code server
-2. Confirm bundled `ontoindex-lsp` matches remote OS/architecture
+2. Confirm bundled `ontocore-lsp` matches remote OS/architecture
 3. Open ontology folder on remote filesystem
 4. Re-run [First success](first-success.md)
 
@@ -75,8 +75,8 @@ Use single-root folders for ontology projects.
 
 | Tool | When required |
 |------|---------------|
-| Java + ROBOT | `ontoindex robot` and LSP `runRobot` — [ROBOT interop](robot-interop.md) |
-| Java | Not required for core OntoIndex/OntoCode paths |
+| Java + ROBOT | `ontocore robot` and LSP `runRobot` — [ROBOT interop](robot-interop.md) |
+| Java | Not required for core OntoCore/OntoCode paths |
 
 ## Related
 

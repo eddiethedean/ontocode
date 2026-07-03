@@ -1,9 +1,9 @@
 # Workspace resource limits
 
-OntoIndex enforces limits to keep local indexing predictable and to reduce DoS risk when
+OntoCore (`ontocore-*`) enforces limits to keep local indexing predictable and to reduce DoS risk when
 opening untrusted ontology repositories.
 
-Constants live in [`limits.rs` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/crates/ontoindex-core/src/limits.rs).
+Constants live in [`limits.rs` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/crates/ontocore-core/src/limits.rs).
 
 ## Recommended workspace size
 
@@ -29,9 +29,9 @@ indexing improvements.
 | SQL result rows | **100,000** — **silently truncated** (no error) |
 | SPARQL result rows | **100,000** — **silently truncated** (no error) |
 
-LSP `ontoindex/query` and `ontoindex/sparql` set `truncated: true` on `TabularQueryResult` when the cap is hit.
+LSP `ontocore/query` and `ontocore/sparql` set `truncated: true` on `TabularQueryResult` when the cap is hit.
 
-## `ontoindex validate` exit codes
+## `ontocore validate` exit codes
 
 | Outcome | Exit code |
 |---------|-----------|
@@ -40,7 +40,7 @@ LSP `ontoindex/query` and `ontoindex/sparql` set `truncated: true` on `TabularQu
 
 Warnings and info diagnostics are printed to stderr but do not fail CI.
 
-## `ontoindex classify` exit codes
+## `ontocore classify` exit codes
 
 | Outcome | Exit code |
 |---------|-----------|

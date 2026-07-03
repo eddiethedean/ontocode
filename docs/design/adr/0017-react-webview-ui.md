@@ -8,7 +8,7 @@ Accepted (planned v0.7a+)
 
 OntoCode v0.5–v0.6 ships webview panels (entity inspector, query workbench, Manchester editor, reasoner, explanation) as hand-written HTML/CSS/JavaScript in the TypeScript extension host. This works for MVP delivery but becomes harder to maintain as panels grow in complexity (graphs, semantic diff, refactoring previews, large result tables).
 
-The extension host must remain a thin orchestration layer per [ADR-0007](0007-language-server-boundary.md): ontology intelligence stays in Rust (`ontoindex-lsp`); TypeScript owns VS Code API integration only.
+The extension host must remain a thin orchestration layer per [ADR-0007](0007-language-server-boundary.md): ontology intelligence stays in Rust (`ontocore-lsp`); TypeScript owns VS Code API integration only.
 
 ## Decision
 

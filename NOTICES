@@ -1,6 +1,6 @@
-OntoCode / OntoIndex third-party notices (v0.5.0)
+OntoCode / OntoCore third-party notices (v0.5.0)
 
-This product includes software developed by third parties. OntoIndex and
+This product includes software developed by third parties. OntoCore and
 OntoCode are licensed under MIT OR Apache-2.0 at your option (see LICENSE-MIT
 and LICENSE-APACHE-2.0 in this repository).
 
@@ -10,7 +10,7 @@ Direct runtime dependencies (v0.5.0 workspace):
 - sqlparser (Apache-2.0) — https://github.com/sqlparser-rs/sqlparser-rs
 - ignore (Unlicense OR MIT) — https://github.com/BurntSushi/ripgrep/tree/master/crates/ignore
 - horned-owl (LGPL-3.0) — https://github.com/phillord/horned-owl
-  Linked via ontoindex-owl for OWL modeling and Turtle write-back. If you
+  Linked via ontocore-owl for OWL modeling and Turtle write-back. If you
   distribute binaries, comply with LGPL-3.0 (source offer, license text).
 - horned-functional (MIT) — https://github.com/phillord/horned-owl
 - lsp-server (MIT OR Apache-2.0) — https://github.com/gluon-lang/lsp-types

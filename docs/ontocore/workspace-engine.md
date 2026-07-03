@@ -44,7 +44,7 @@ LSP uses `document_overrides` on `IndexBuilder` for unsaved editor buffers.
 
 ## Indexing pipeline
 
-1. **Scan** — `WorkspaceScanner` (`ontoindex-core`) walks the workspace with ignore rules.
+1. **Scan** — `WorkspaceScanner` (`ontocore-core`) walks the workspace with ignore rules.
 2. **Parse** — RDF via Oxigraph; Turtle also bridged to Horned-OWL for axioms.
 3. **Catalog** — entities, axioms, annotations, imports, namespaces assembled in memory.
 4. **Diagnostics** — parse errors + lint rules collected during build.
@@ -58,8 +58,8 @@ Indexing enforces caps on file size, entity count, triple count, and query resul
 
 | Entry | Command / method |
 |-------|------------------|
-| CLI | `ontoindex query . "SELECT …"` |
-| CLI | `ontoindex validate .` |
-| LSP | `ontoindex/indexWorkspace` |
+| CLI | `ontocore query . "SELECT …"` |
+| CLI | `ontocore validate .` |
+| LSP | `ontocore/indexWorkspace` |
 
-OntoCore CLI is currently invoked as **`ontoindex`**. An `ontocore` alias is planned for v0.10.
+OntoCore CLI is currently invoked as **`ontocore`**. An `ontocore` alias is planned for v0.10.

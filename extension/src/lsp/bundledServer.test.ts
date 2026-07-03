@@ -33,7 +33,7 @@ function makeTempExtensionLayout(): string {
 describe("bundledServer", () => {
   it("bundledServerPath follows extension/server/<platform>-<arch>/ layout", () => {
     const p = bundledServerPath("/ext", "linux", "x64");
-    assert.match(p, /\/ext\/server\/linux-x64\/ontoindex-lsp$/);
+    assert.match(p, /\/ext\/server\/linux-x64\/ontocore-lsp$/);
   });
 
   it("ensureBundledServerExecutable restores execute bit after chmod 644", () => {

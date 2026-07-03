@@ -1,13 +1,13 @@
-# OntoIndex + OntoCode Documentation Package
+# OntoCore + OntoCode Documentation Package
 
-> **Note:** Documents in this folder describe **product vision, target architecture, and planned features**. They are **not** commitments. For **what ships in v0.8.0**, see [What ships today](../SHIPPED.md). For planning without fixed dates, see [Release timeline (non-commitment)](../guides/release-timeline.md).
+> **Note:** Documents in this folder describe **product vision, target architecture, and planned features**. They are **not** commitments. For **what ships in v0.9.0**, see [What ships today](../SHIPPED.md). For planning without fixed dates, see [Release timeline (non-commitment)](../guides/release-timeline.md).
 
 This package contains **product vision and specification** documents. For **user-facing guides**, pick a documentation path:
 
 | Path | Audience | Start |
 |------|----------|-------|
 | [VS Code extension](https://ontocode-vs.readthedocs.io/en/latest/guides/vscode-extension/) | Explorer, inspector, Query Workbench, reasoner panels | Marketplace install, no Rust required |
-| [Rust & CLI](https://ontocode-vs.readthedocs.io/en/latest/guides/rust-crates/) | `ontoindex` CLI, crates.io libraries, CI, LSP integrators | `cargo install ontoindex-cli` |
+| [Rust & CLI](https://ontocode-vs.readthedocs.io/en/latest/guides/rust-crates/) | `ontocore` CLI, crates.io libraries, CI, LSP integrators | `cargo install ontocore-cli` |
 
 [Documentation home](https://ontocode-vs.readthedocs.io/en/latest/) · [What ships today](../SHIPPED.md)
 
@@ -18,12 +18,12 @@ This package contains **product vision and specification** documents. For **user
 
 Two related products:
 
-1. **OntoIndex** — Rust ontology index/query engine (`ontoindex-*` crates).
+1. **OntoCore** — Rust ontology index/query engine (`ontocore-*` crates).
 2. **OntoCode** — VS Code extension (explorer, diagnostics, Turtle + Manchester authoring, Query Workbench, reasoner in v0.6).
 
 **Sibling project:** [OntoLogos](https://github.com/eddiethedean/ontologos) — Rust ontology reasoner. OntoCode delegates reasoning to OntoLogos per [ADR-0015](adr/0015-adopt-ontologos-reasoner.md).
 
-**Dependency policy:** [ADR-0016](adr/0016-dependency-first-implementation.md) — thin `ontoindex-*` facades over mature crates. Inventory: [DEPENDENCY_MATRIX.md](DEPENDENCY_MATRIX.md). Licenses: [LICENSES.md](LICENSES.md).
+**Dependency policy:** [ADR-0016](adr/0016-dependency-first-implementation.md) — thin `ontocore-*` facades over mature crates. Inventory: [DEPENDENCY_MATRIX.md](DEPENDENCY_MATRIX.md). Licenses: [LICENSES.md](LICENSES.md).
 
 ## v1.0 exit bar
 

@@ -1,5 +1,5 @@
-use ontoindex_catalog::IndexBuilder;
-use ontoindex_query::query_catalog;
+use ontocore_catalog::IndexBuilder;
+use ontocore_query::query_catalog;
 use std::fs;
 use std::path::Path;
 

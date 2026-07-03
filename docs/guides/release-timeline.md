@@ -16,10 +16,10 @@ Pre-1.0: minor releases may change library APIs, LSP JSON, and SQL virtual table
 | Target | Goal | Shipped in |
 |--------|------|------------|
 | **v0.9** | OntoCore identity — `ontocore` façade, branding, documentation | **Shipped** (2026-07-03) |
-| **v0.10** | Reasoner/explanation React migration; semantic Git diff; `ontologos-watch` hook | Planned |
+| **v0.10** | Semantic workspace — incremental index, import graph, persistent cache | Planned |
 | **v1.0** | Protégé-competitive OWL + OBO in VS Code; OWL 2 DL via OntoLogos 1.0; full migration guide | Planned |
 
-Detailed engineering backlog: [v1.0 backlog](../design/v1.0_BACKLOG.md). Exit bar: [Protégé parity P0](../design/PROTEGE_PARITY.md) all green.
+Canonical forward plan: [Platform roadmap](../roadmap.md). Engineering milestone history: [Milestones (shipped)](../design/ROADMAP.md).
 
 **There is no documented calendar date for v1.0.** Enterprise plans should not assume a quarter or year without maintainer confirmation outside these docs.
 

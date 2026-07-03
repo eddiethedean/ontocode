@@ -25,15 +25,23 @@ fn cli_classify_el_json() {
 }
 
 #[test]
-fn cli_dl_profile_reports_error() {
+fn cli_dl_profile_classifies_json() {
     let bin = support::ontocore_binary();
-    let workspace = support::fixture_workspace();
+    let dir = tempfile::tempdir().expect("tempdir");
+    let workspace = dir.path().to_path_buf();
+    std::fs::copy(
+        support::fixture_workspace().join("reasoner-el.ttl"),
+        workspace.join("reasoner-el.ttl"),
+    )
+    .expect("copy fixture");
     let output = Command::new(&bin)
-        .args(["classify", workspace.to_str().unwrap(), "--profile", "dl"])
+        .args(["classify", workspace.to_str().unwrap(), "--profile", "dl", "--format", "json"])
         .output()
         .expect("run classify");
 
-    assert!(!output.status.success());
-    let stderr = String::from_utf8_lossy(&output.stderr);
-    assert!(stderr.contains("OntoLogos") || stderr.contains("1.0"));
+    assert!(output.status.success(), "stderr: {}", String::from_utf8_lossy(&output.stderr));
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    let json: serde_json::Value = serde_json::from_str(stdout.trim()).expect("json output");
+    assert_eq!(json.get("profile_used").and_then(|v| v.as_str()), Some("dl"));
+    assert_eq!(json.get("consistent").and_then(|v| v.as_bool()), Some(true));
 }

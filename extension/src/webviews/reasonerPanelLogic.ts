@@ -11,18 +11,8 @@ export const AVAILABLE_PROFILES: Array<{
   { id: "el", label: "OWL EL", enabled: true },
   { id: "rl", label: "OWL RL", enabled: true },
   { id: "rdfs", label: "RDFS", enabled: true },
-  {
-    id: "dl",
-    label: "OWL DL",
-    enabled: false,
-    hint: "Requires OntoLogos 1.0",
-  },
-  {
-    id: "auto",
-    label: "Auto",
-    enabled: false,
-    hint: "Requires OntoLogos 1.0",
-  },
+  { id: "dl", label: "OWL DL", enabled: true },
+  { id: "auto", label: "Auto", enabled: true },
 ];
 
 export function formatInferenceLine(child: string, parent: string): string {

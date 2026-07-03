@@ -123,7 +123,7 @@ Protégé is strong for traditional ontology editing, but most engineering teams
 | Query Workbench (SQL + SPARQL, React) and graph visualization | Inline SQL/SPARQL autocomplete |
 | Manchester editor (subclass, equivalent, disjoint) | Property chain editing |
 | Safe IRI rename, find usages, namespace migration, move/extract module | Semantic Git diff |
-| EL/RL/RDFS reasoning + inferred hierarchy | OWL 2 DL reasoning (`dl` / `auto`) |
+| EL/RL/RDFS/DL reasoning + inferred hierarchy | Full OWL 2 axiom catalog |
 | OBO index + `obo_id` in explorer; ROBOT CLI wrappers | Full OBO write-back in VS Code |
 | Patch write-back for Turtle; `validate` / `classify` for CI | SHACL validation |
 
@@ -155,7 +155,7 @@ ontocore validate /path/to/ontologies
 - LSP: `ontocore/runReasoner`, `ontocore/getExplanation`
 - Explorer hierarchy mode: asserted / inferred / combined
 
-See [reasoner guide](https://ontocode-vs.readthedocs.io/en/latest/guides/reasoner/). DL and `auto` profiles require OntoLogos 1.0.
+See [reasoner guide](https://ontocode-vs.readthedocs.io/en/latest/guides/reasoner/). Profiles: `el`, `rl`, `rdfs`, `dl`, and `auto` (OntoLogos 1.0).
 
 ## UI architecture
 
@@ -163,17 +163,15 @@ The VS Code extension is a thin TypeScript shell over **OntoCore LSP** (`ontocor
 
 ## Roadmap
 
+**OntoCode 1.0** aims to be a production-ready replacement for Protégé. See [VISION.md](VISION.md) and [ROADMAP.md](ROADMAP.md).
+
 | Version | Deliverable |
 |---------|-------------|
-| v0.1–v0.4 | OntoCore foundation (`ontocore-*`), VS Code extension, diagnostics, Turtle write-back |
-| v0.6.0 | Reasoning — OntoLogos EL/RL/RDFS, inferred hierarchy, explanations |
-| **v0.7.0** | React inspector + graphs, OBO index, ROBOT CLI wrappers |
-| **v0.8.0** | Refactoring engine, full Manchester catalog, React Query Workbench + Manchester editor |
-| **v0.9.0** (current) | **OntoCore identity** — `ontocore` façade crate, branding, documentation restructure |
-| v0.10 | OntoCore public API stabilization; semantic diff; incremental index; CLI alias |
-| v1.0 | **Protégé-competitive OWL + OBO in VS Code** — DL via OntoLogos 1.0.0 ([parity checklist](https://ontocode-vs.readthedocs.io/en/latest/design/PROTEGE_PARITY/)) |
+| v0.1–v0.9 | **Shipped** — foundation through OntoCore identity ([SHIPPED](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/)) |
+| v0.10+ | Semantic workspace, navigation, plugins, bindings — [Platform roadmap](https://ontocode-vs.readthedocs.io/en/latest/roadmap/) |
+| **v1.0** | **Protégé-competitive OWL + OBO in VS Code** — [parity checklist](https://ontocode-vs.readthedocs.io/en/latest/design/PROTEGE_PARITY/) |
 
-See [OntoCore roadmap](https://ontocode-vs.readthedocs.io/en/latest/ontocore/roadmap/), [design roadmap](https://ontocode-vs.readthedocs.io/en/latest/design/ROADMAP/), and [Protégé parity checklist](https://ontocode-vs.readthedocs.io/en/latest/design/PROTEGE_PARITY/).
+Platform docs: [Vision](https://ontocode-vs.readthedocs.io/en/latest/vision/) · [Architecture](https://ontocode-vs.readthedocs.io/en/latest/architecture/) · [Roadmap](https://ontocode-vs.readthedocs.io/en/latest/roadmap/) · [Engineering milestones](https://ontocode-vs.readthedocs.io/en/latest/design/ROADMAP/)
 
 ## Built on
 

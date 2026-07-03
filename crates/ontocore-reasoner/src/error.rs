@@ -8,7 +8,7 @@ pub enum ReasonerError {
     #[error("load error in {path}: {message}")]
     Load { path: std::path::PathBuf, message: String },
 
-    #[error("profile {profile} requires OntoLogos 1.0.0 (not yet available on crates.io)")]
+    #[error("profile {profile} is not available in this build")]
     RequiresOntoLogos1 { profile: String },
 
     #[error("unsupported profile: {0}")]

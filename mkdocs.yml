@@ -68,6 +68,10 @@ markdown_extensions:
 
 nav:
   - Home: index.md
+  - Platform:
+      - Vision: vision.md
+      - Architecture: architecture.md
+      - Roadmap: roadmap.md
   - OntoCore:
       - Overview: ontocore/index.md
       - Architecture: ontocore/architecture.md
@@ -145,8 +149,8 @@ nav:
       - Guide: contributing.md
       - Design (target specs):
           - Overview: design/README.md
-          - Roadmap: design/ROADMAP.md
-          - Architecture: design/ARCHITECTURE.md
+          - "Milestones (shipped)": design/ROADMAP.md
+          - "Implementation architecture": design/ARCHITECTURE.md
           - Protégé parity: design/PROTEGE_PARITY.md
           - Dependency matrix: design/DEPENDENCY_MATRIX.md
           - Licenses: design/LICENSES.md

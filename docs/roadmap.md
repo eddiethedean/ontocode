@@ -8,7 +8,7 @@ Build the modern open-source platform for ontology engineering.
 
 **OntoCode** is the flagship IDE powered by OntoCore.
 
-Full mission and principles: [VISION.md](VISION.md). Ecosystem layers: [ARCHITECTURE.md](ARCHITECTURE.md).
+Full mission and principles: [Vision](vision.md). Ecosystem layers: [Architecture](architecture.md).
 
 ## Guiding Principle
 
@@ -32,7 +32,7 @@ After 1.0, the roadmap shifts from parity to modernization.
 | v0.8 | Refactoring engine, full Manchester catalog, React Query Workbench + Manchester editor |
 | **v0.9** (current) | OntoCore identity — `ontocore-*` crate rename, `ontocore` façade, `ontocore` CLI, `ontocore-lsp`, `ontocore/*` LSP methods |
 
-**Capability matrix:** [docs/SHIPPED.md](docs/SHIPPED.md) · **Engineering milestone detail:** [docs/design/ROADMAP.md](docs/design/ROADMAP.md)
+**Capability matrix:** [What ships today](SHIPPED.md) · **Engineering milestone detail:** [Milestones (shipped)](design/ROADMAP.md)
 
 ---
 
@@ -170,7 +170,7 @@ Ontologos provides **reasoning** (classification, consistency, explanations). On
 
 Teams can replace Protégé without losing essential workflows.
 
-**Exit bar:** [docs/design/PROTEGE_PARITY.md](docs/design/PROTEGE_PARITY.md)
+**Exit bar:** [Protégé parity matrix](design/PROTEGE_PARITY.md)
 
 ## v1.2 — Ontology Toolchain Platform
 

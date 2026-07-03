@@ -9,9 +9,11 @@ import {
 import { RunReasonerResult } from "../lsp/protocol";
 
 describe("reasonerPanelLogic", () => {
-  it("marks dl and auto as disabled", () => {
+  it("enables dl and auto profiles", () => {
     const dl = AVAILABLE_PROFILES.find((p) => p.id === "dl");
-    assert.equal(dl?.enabled, false);
+    assert.equal(dl?.enabled, true);
+    const auto = AVAILABLE_PROFILES.find((p) => p.id === "auto");
+    assert.equal(auto?.enabled, true);
   });
 
   it("shortens IRIs for display", () => {

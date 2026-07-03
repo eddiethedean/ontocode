@@ -69,7 +69,7 @@ Click an entity name to open the **Entity Inspector**. For `.ttl` files, use the
 |---------|---------|-------------|
 | `ontocode.lspPath` | `""` | **Trusted workspaces only.** Path to `ontocore-lsp`; ignored in Restricted Mode. Empty uses bundled binary |
 | `ontocode.queryHistoryLimit` | `20` | Max entries in Query Workbench history |
-| `ontocode.reasoner.default` | `el` | Default profile for Run Reasoner (`dl`/`auto` require OntoLogos 1.0) |
+| `ontocode.reasoner.default` | `el` | Default profile for Run Reasoner (`el`, `rl`, `rdfs`, `dl`, `auto`) |
 | `ontocode.reasoner.autoProfile` | `true` | Profile-detection warnings when running reasoner |
 | `ontocode.hierarchy.mode` | `asserted` | Explorer hierarchy: `asserted`, `inferred`, or `combined` |
 

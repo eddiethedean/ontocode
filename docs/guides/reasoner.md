@@ -1,6 +1,6 @@
 # Reasoner guide
 
-OntoCode ships **OWL EL classification** via [OntoLogos](https://github.com/eddiethedean/ontologos) 0.9.0, with optional **RL** and **RDFS** profiles (since v0.6.0).
+OntoCode ships OWL reasoning via [OntoLogos](https://github.com/eddiethedean/ontologos) **1.0.0** — **EL**, **RL**, **RDFS**, **DL** (HermiT parity), and **auto** profile routing.
 
 ## Run in VS Code
 
@@ -17,17 +17,18 @@ Settings:
 | `ontocode.reasoner.autoProfile` | `true` | Profile-detection warnings |
 | `ontocode.hierarchy.mode` | `asserted` | Explorer hierarchy display |
 
-**DL** and **auto** profiles are disabled until OntoLogos 1.0.0 ships on crates.io.
+Use **`dl`** for full OWL 2 DL classification or **`auto`** to let OntoLogos route by detected profile.
 
 ## CLI / CI
 
 ```bash
 ontocore classify ./my-ontologies --profile el --format json
+ontocore classify ./my-ontologies --profile dl --format json
+ontocore classify ./my-ontologies --profile auto --format json
 ontocore explain ./my-ontologies --class 'http://example.org/onto#Invalid' --profile el
 ```
 
 - `classify` exits non-zero when unsatisfiable classes are found — see [workspace-limits.md](../workspace-limits.md).
-- `dl` / `auto` return an error until OntoLogos 1.0.
 
 CI example: [ci-integration.md](../ci-integration.md).
 
@@ -41,9 +42,9 @@ Custom methods: `ontocore/runReasoner`, `ontocore/getExplanation`. See [LSP API]
 |---------|--------|-------------|
 | `el` | `ontologos-el` | OWL EL ontologies (default) |
 | `rl` | `ontologos-rl` | OWL RL materialization |
-| `rdfs` | `ontologos-rdfs` | RDFS entailment |
-| `dl` | stub | Requires OntoLogos 1.0 |
-| `auto` | stub | Requires OntoLogos 1.0 |
+| `rdfs` | `ontologos-rl` (RDFS) | RDFS entailment |
+| `dl` | `ontologos-dl` | Full OWL 2 DL (HermiT parity) |
+| `auto` | `ontologos-facade` | Profile auto-routing |
 
 ## Dual-stack note
 
@@ -58,18 +59,16 @@ Axiom counts and some constructs may differ from Protégé until the Horned-OWL 
 
 | Limitation | Notes |
 |------------|-------|
-| DL / auto | Stubbed with clear error until OntoLogos 1.0 |
-| Explanations | EL-first; require unsatisfiable class + prior classify |
+| Explanations | EL-first; full DL clash traces depend on `ontologos-explain` coverage |
 | Hierarchy toggle | **Inferred** / **combined** need a successful reasoner run first |
-| Parse coverage | OntoLogos 0.9 partial OWL mapping — see [Protégé parity](../design/PROTEGE_PARITY.md) |
+| Parse coverage | Partial OWL mapping — see [Protégé parity](../design/PROTEGE_PARITY.md) |
 
 ## Troubleshooting
 
 | Problem | What to try |
 |---------|-------------|
-| `dl` / `auto` error | Use `el`, `rl`, or `rdfs` |
 | Explorer unchanged after classify | Run **Set Hierarchy Mode** → inferred or combined |
-| Empty explanation | Class may not be unsatisfiable; run reasoner first |
+| Empty explanation | Class may not be unsatisfiable; run reasoner first; try `el` profile |
 | Results differ from Protégé | Expected for partial mappings; check profile warnings |
 
 More: [troubleshooting.md](../troubleshooting.md) · [FAQ](../faq.md).

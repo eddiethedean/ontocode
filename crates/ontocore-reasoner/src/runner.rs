@@ -1,17 +1,15 @@
 use crate::adapter::{ReasonerAdapter, ReasonerId};
+use crate::auto::AutoAdapter;
+use crate::dl::DlAdapter;
 use crate::el::ElAdapter;
 use crate::error::{ReasonerError, Result};
 use crate::input::ReasonerInput;
 use crate::rdfs::RdfsAdapter;
 use crate::result::{ClassificationResult, ExplanationRequest, ExplanationResult};
 use crate::rl::RlAdapter;
-use crate::stub::{AutoAdapter, DlAdapter};
 use ontologos_profile::scanner::scan_constructs;
 
 pub fn adapter_for(id: ReasonerId) -> Result<Box<dyn ReasonerAdapter>> {
-    if !id.is_available() {
-        return Err(ReasonerError::RequiresOntoLogos1 { profile: id.as_str().to_string() });
-    }
     let adapter: Box<dyn ReasonerAdapter> = match id {
         ReasonerId::El => Box::new(ElAdapter),
         ReasonerId::Rl => Box::new(RlAdapter),

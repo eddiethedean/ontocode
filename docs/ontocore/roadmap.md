@@ -1,41 +1,21 @@
 # OntoCore roadmap
 
-Platform evolution for OntoCore inside the OntoCode monorepo.
+Short pointer to platform planning docs.
 
-## v0.9.0 — OntoCore identity (current)
+## Forward plan (v0.10 → v1.0)
 
-- **`ontocore-*` crate rename** — all implementation crates, CLI (`ontocore`), and LSP (`ontocore-lsp`)
-- **`ontocore` façade** on crates.io with experimental `Workspace` API
-- LSP custom methods under `ontocore/*`
-- OntoCore branding and documentation restructure
+The canonical roadmap — including the Protégé 1.0 objective, ontology toolchain integration (owlmake, ROBOT/ODK), semantic workspace, plugins, bindings, and the v1.2 toolchain platform — lives in **[Platform roadmap](../roadmap.md)**.
 
-## v0.10 — Public API + workflow
+## Shipped milestones (v0.1–v0.9)
 
-- Stabilize `ontocore::Workspace` and ergonomic search/query/diagnostics/refactor APIs
-- Examples and docs.rs documentation for `ontocore`
-- Semantic diff and Git branch comparison
-- Incremental workspace index
-- React migration for reasoner/explanation panels
+Per-version engineering deliverables and exit criteria: **[Milestones (shipped)](../design/ROADMAP.md)**.
 
-## v0.11 — Platform layer
+## What ships today
 
-- Persistent workspace cache API
-- Richer semantic graph API
-- Plugin/extension point design
-- MCP server design
-- Python and TypeScript binding boundaries
+Capability matrix for the current release: **[What ships today](../SHIPPED.md)**.
 
-## v0.12 — Binding prep
+## Related
 
-- FFI-safe stable data models
-- JSON serialization contracts
-- API compatibility tests
-- Prepare `ontocore-python` and `@ontocore/node`
-
-## v1.0 — OntoCore-powered OntoCode
-
-- OntoCode depends cleanly on OntoCore APIs
-- OntoCore documented as the platform; OntoCode as flagship IDE
-- OWL 2 DL reasoning via OntoLogos 1.0
-
-See also [design roadmap](../design/ROADMAP.md) and [ADR-0018](../design/adr/0018-ontocore-platform-identity.md).
+- [Vision](../vision.md) — mission and guiding principles
+- [Architecture](../architecture.md) — Ontologos / OntoCore / OntoCode layers
+- [ADR-0018](../design/adr/0018-ontocore-platform-identity.md) — OntoCore platform identity

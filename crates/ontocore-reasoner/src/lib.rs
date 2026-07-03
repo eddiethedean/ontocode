@@ -3,7 +3,9 @@
 //! Published as [`ontocore-reasoner`](https://crates.io/crates/ontocore-reasoner).
 
 mod adapter;
+mod auto;
 mod cache;
+mod dl;
 mod el;
 mod error;
 mod explain;
@@ -13,7 +15,6 @@ mod rdfs;
 mod result;
 mod rl;
 mod runner;
-mod stub;
 
 pub use adapter::{ReasonerAdapter, ReasonerId, ReasonerProfile};
 pub use cache::{ReasonerCache, ReasonerCacheStore};

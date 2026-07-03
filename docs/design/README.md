@@ -1,25 +1,28 @@
 # OntoCore + OntoCode Documentation Package
 
-> **Note:** Documents in this folder describe **product vision, target architecture, and planned features**. They are **not** commitments. For **what ships in v0.9.0**, see [What ships today](../SHIPPED.md). For planning without fixed dates, see [Release timeline (non-commitment)](../guides/release-timeline.md).
+> **Note:** This folder contains **engineering specs, ADRs, and shipped milestone detail**. Canonical platform direction lives in **[Vision](../vision.md)**, **[Architecture](../architecture.md)**, and **[Roadmap](../roadmap.md)**. For **what ships in v0.9.0**, see [What ships today](../SHIPPED.md).
 
-This package contains **product vision and specification** documents. For **user-facing guides**, pick a documentation path:
+## Documentation layers
+
+| Layer | Where | Audience |
+|-------|-------|----------|
+| **Platform** | [vision.md](../vision.md), [architecture.md](../architecture.md), [roadmap.md](../roadmap.md) | Everyone — mission, ecosystem, forward plan |
+| **Shipped** | [SHIPPED.md](../SHIPPED.md), guides, reference | Users evaluating current capabilities |
+| **Engineering** | `docs/design/` (this folder) | Contributors — specs, ADRs, v0.1–v0.9 milestones |
+
+For **user-facing guides**, pick a path:
 
 | Path | Audience | Start |
 |------|----------|-------|
-| [VS Code extension](https://ontocode-vs.readthedocs.io/en/latest/guides/vscode-extension/) | Explorer, inspector, Query Workbench, reasoner panels | Marketplace install, no Rust required |
+| [VS Code extension](https://ontocode-vs.readthedocs.io/en/latest/ontocode/vscode-extension/) | Explorer, inspector, Query Workbench, reasoner panels | Marketplace install, no Rust required |
 | [Rust & CLI](https://ontocode-vs.readthedocs.io/en/latest/guides/rust-crates/) | `ontocore` CLI, crates.io libraries, CI, LSP integrators | `cargo install ontocore-cli` |
 
 [Documentation home](https://ontocode-vs.readthedocs.io/en/latest/) · [What ships today](../SHIPPED.md)
 
-| Package | Audience |
-|---------|----------|
-| User docs (paths above) | New users and integrators |
-| `docs/design/` (this folder) | Contributors and planners (roadmap, target architecture, ADRs) |
-
 Two related products:
 
-1. **OntoCore** — Rust ontology index/query engine (`ontocore-*` crates).
-2. **OntoCode** — VS Code extension (explorer, diagnostics, Turtle + Manchester authoring, Query Workbench, reasoner in v0.6).
+1. **OntoCore** — Rust semantic workspace engine (`ontocore-*` crates).
+2. **OntoCode** — VS Code extension (explorer, diagnostics, Turtle + Manchester authoring, Query Workbench, reasoner).
 
 **Sibling project:** [OntoLogos](https://github.com/eddiethedean/ontologos) — Rust ontology reasoner. OntoCode delegates reasoning to OntoLogos per [ADR-0015](adr/0015-adopt-ontologos-reasoner.md).
 
@@ -27,7 +30,7 @@ Two related products:
 
 ## v1.0 exit bar
 
-**[PROTEGE_PARITY.md](PROTEGE_PARITY.md)** — canonical P0/P1/P2 checklist for Protégé-competitive release.
+**[PROTEGE_PARITY.md](PROTEGE_PARITY.md)** — canonical P0/P1/P2 checklist for Protégé-competitive release. Forward plan: [Roadmap § OntoCode 1.0](../roadmap.md#ontocode-10-modern-protege-replacement).
 
 ## Document status
 
@@ -43,8 +46,8 @@ Many specs describe **target** behavior. Check the banner at the top of each doc
 
 ### Product & roadmap
 
-- [PLAN.md](PLAN.md) — combined product plan
-- [ROADMAP.md](ROADMAP.md) — milestone roadmap v0.1 → v1.0
+- [PLAN.md](PLAN.md) — tactical product plan (executive summary in [Vision](../vision.md))
+- [ROADMAP.md](ROADMAP.md) — **engineering milestones v0.1–v0.9 (shipped detail)**
 - [DEPENDENCY_MATRIX.md](DEPENDENCY_MATRIX.md) — **external crate inventory**
 - [LICENSES.md](LICENSES.md) — third-party license summary
 - [PROTEGE_PARITY.md](PROTEGE_PARITY.md) — **v1.0 compete checklist**
@@ -53,7 +56,7 @@ Many specs describe **target** behavior. Check the banner at the top of each doc
 ### Technical specs
 
 - [SPEC.md](SPEC.md) — combined technical specification
-- [ARCHITECTURE.md](ARCHITECTURE.md) — target architecture
+- [ARCHITECTURE.md](ARCHITECTURE.md) — **implementation architecture** (crate layout)
 - [OWL_AUTHORING_SPEC.md](OWL_AUTHORING_SPEC.md) — hybrid forms + Manchester authoring
 - [OBO_ROBOT_SPEC.md](OBO_ROBOT_SPEC.md) — OBO format + ROBOT interop
 - [REASONER_SPEC.md](REASONER_SPEC.md) — OntoLogos-backed reasoners (0.9.0 → 1.0.0)

@@ -1,50 +1,49 @@
 use crate::adapter::{ReasonerAdapter, ReasonerId, ReasonerProfile};
 use crate::error::{ReasonerError, Result};
-use crate::explain::explain_unsatisfiable_rdfs;
-use crate::hierarchy::subclass_edges_from_ontology;
+use crate::explain::explain_unsatisfiable_el;
 use crate::input::ReasonerInput;
 use crate::result::{
-    build_inferred_hierarchy, detect_unsatisfiable_classes, new_inferences, ClassificationResult,
-    ExplanationRequest, ExplanationResult,
+    build_inferred_hierarchy, new_inferences, taxonomy_to_iri_edges, unsatisfiable_iris,
+    ClassificationResult, ExplanationRequest, ExplanationResult,
 };
-use ontologos_rl::rdfs::RdfsEngine;
+use ontologos_dl::DlClassifier;
 use std::time::Instant;
 
-pub struct RdfsAdapter;
+pub struct DlAdapter;
 
-impl ReasonerAdapter for RdfsAdapter {
+impl ReasonerAdapter for DlAdapter {
     fn id(&self) -> ReasonerId {
-        ReasonerId::Rdfs
+        ReasonerId::Dl
     }
 
     fn profile(&self) -> ReasonerProfile {
-        ReasonerProfile::Rdfs
+        ReasonerProfile::OwlDl
     }
 
     fn classify(&self, input: &ReasonerInput) -> Result<ClassificationResult> {
         let started = Instant::now();
-        let mut ontology = input.ontology.clone();
-        let report = RdfsEngine::new()
-            .materialize(&mut ontology)
+        let taxonomy = DlClassifier::new()
+            .classify(&input.ontology)
             .map_err(|e| ReasonerError::Classify(e.to_string()))?;
 
-        let iri_edges = subclass_edges_from_ontology(&ontology, &input.asserted_hierarchy);
+        let iri_edges =
+            taxonomy_to_iri_edges(&input.ontology, &taxonomy).map_err(ReasonerError::Classify)?;
         let unsatisfiable =
-            detect_unsatisfiable_classes(&ontology).map_err(ReasonerError::Classify)?;
+            unsatisfiable_iris(&input.ontology, &taxonomy).map_err(ReasonerError::Classify)?;
         let inferred =
             build_inferred_hierarchy(&iri_edges, &unsatisfiable, &input.asserted_hierarchy);
         let new_inferences = new_inferences(&input.asserted_hierarchy, &inferred.edges);
 
         Ok(ClassificationResult {
-            profile_used: "rdfs".to_string(),
+            profile_used: "dl".to_string(),
             consistent: unsatisfiable.is_empty(),
-            unsatisfiable,
+            unsatisfiable: unsatisfiable.clone(),
             inferred,
             new_inferences,
             warnings: Vec::new(),
             duration_ms: started.elapsed().as_millis() as u64,
-            subsumption_count: iri_edges.len(),
-            inferred_axiom_count: report.inferred_total(),
+            subsumption_count: taxonomy.subsumption_count(),
+            inferred_axiom_count: taxonomy.subsumption_count(),
         })
     }
 
@@ -53,6 +52,7 @@ impl ReasonerAdapter for RdfsAdapter {
         input: &ReasonerInput,
         request: &ExplanationRequest,
     ) -> Result<ExplanationResult> {
-        explain_unsatisfiable_rdfs(&input.ontology, &request.class_iri)
+        // DL clash-trace explanations are EL-first in ontologos-explain 1.0.
+        explain_unsatisfiable_el(&input.ontology, &request.class_iri)
     }
 }

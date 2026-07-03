@@ -247,7 +247,7 @@ See [patch-reference.md](patch-reference.md) for CLI `ApplyPatchResult` examples
 
 ### `ontocore/runReasoner`
 
-Run OWL classification via OntoLogos 0.9.0 (`el`, `rl`, `rdfs`). `dl` and `auto` return an error until OntoLogos 1.0.
+Run OWL classification via OntoLogos 1.0.0 (`el`, `rl`, `rdfs`, `dl`, `auto`).
 
 **Params:** `RunReasonerParams`
 

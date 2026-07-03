@@ -28,12 +28,14 @@ fn el_classify_el_fixture_workspace() {
 }
 
 #[test]
-fn dl_profile_requires_ontologos_1() {
-    let workspace = support::fixture_workspace();
+fn dl_profile_classifies_el_fixture_workspace() {
+    let (_dir, workspace) = el_only_workspace();
     let catalog =
         ontocore_catalog::IndexBuilder::new().workspace(&workspace).build().expect("index");
     let input =
         WorkspaceInputLoader::new(&workspace).load(catalog.class_hierarchy()).expect("load");
-    let err = classify(ReasonerId::Dl, &input, false).unwrap_err();
-    assert!(err.to_string().contains("OntoLogos"));
+    let result = classify(ReasonerId::Dl, &input, false).expect("classify");
+
+    assert_eq!(result.profile_used, "dl");
+    assert!(result.consistent);
 }

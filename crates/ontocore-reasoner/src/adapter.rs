@@ -38,7 +38,7 @@ impl ReasonerId {
     }
 
     pub fn is_available(&self) -> bool {
-        !matches!(self, Self::Dl | Self::Auto)
+        true
     }
 }
 

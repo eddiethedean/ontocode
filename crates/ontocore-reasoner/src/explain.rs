@@ -1,11 +1,13 @@
 use crate::error::{ReasonerError, Result};
 use crate::result::{ExplanationResult, ExplanationStep};
-use ontologos_core::{Ontology, Profile};
-use ontologos_el::ElClassifier;
-use ontologos_explain::{
-    explain_rdfs, explain_rl, explain_unsatisfiable, find_bottom_subsumption, render_text,
-    ProofGraph,
+use ontologos_core::{
+    EntityId, EntityKind, InferenceTrace, Ontology, TraceConclusion, TracePremise, TraceStep,
 };
+use ontologos_el::ElClassifier;
+use ontologos_explain::{build_proof_graph, render_text, ProofGraph};
+use ontologos_rl::rdfs::RdfsEngine;
+use ontologos_rl::RlEngine;
+use std::collections::{HashSet, VecDeque};
 
 pub fn explain_unsatisfiable_el(ontology: &Ontology, class_iri: &str) -> Result<ExplanationResult> {
     let class_id = ontology
@@ -19,7 +21,7 @@ pub fn explain_unsatisfiable_el(ontology: &Ontology, class_iri: &str) -> Result<
     let bottom = find_bottom_subsumption(ontology, class_id, &report.trace)
         .ok_or_else(|| ReasonerError::ExplanationUnavailable(class_iri.to_string()))?;
 
-    let graph = explain_unsatisfiable(ontology, class_id, bottom, Profile::El, &report.trace)
+    let graph = explain_unsatisfiable_trace(ontology, class_id, bottom, &report.trace)
         .map_err(|e| ReasonerError::Explain(e.to_string()))?;
     map_proof_graph(ontology, class_iri, graph)
 }
@@ -29,7 +31,14 @@ pub fn explain_unsatisfiable_rl(ontology: &Ontology, class_iri: &str) -> Result<
         .lookup_entity(class_iri)
         .ok_or_else(|| ReasonerError::ClassNotFound(class_iri.to_string()))?;
     let mut mutable = ontology.clone();
-    let graph = explain_rl(&mut mutable).map_err(|e| ReasonerError::Explain(e.to_string()))?;
+    let trace = RlEngine::try_new(1)
+        .map_err(|e| ReasonerError::Explain(e.to_string()))?
+        .with_traces(true)
+        .saturate(&mut mutable)
+        .map_err(|e| ReasonerError::Explain(e.to_string()))?
+        .trace;
+    let graph = build_proof_graph(&mutable, &trace)
+        .map_err(|e| ReasonerError::Explain(e.to_string()))?;
     map_proof_graph(ontology, class_iri, graph)
 }
 
@@ -41,8 +50,123 @@ pub fn explain_unsatisfiable_rdfs(
         .lookup_entity(class_iri)
         .ok_or_else(|| ReasonerError::ClassNotFound(class_iri.to_string()))?;
     let mut mutable = ontology.clone();
-    let graph = explain_rdfs(&mut mutable).map_err(|e| ReasonerError::Explain(e.to_string()))?;
+    let trace = RdfsEngine::new()
+        .with_traces(true)
+        .materialize(&mut mutable)
+        .map_err(|e| ReasonerError::Explain(e.to_string()))?
+        .trace;
+    let graph = build_proof_graph(&mutable, &trace)
+        .map_err(|e| ReasonerError::Explain(e.to_string()))?;
     map_proof_graph(ontology, class_iri, graph)
+}
+
+fn explain_unsatisfiable_trace(
+    ontology: &Ontology,
+    class: EntityId,
+    bottom: EntityId,
+    trace: &InferenceTrace,
+) -> std::result::Result<ProofGraph, ontologos_explain::Error> {
+    let subgraph = minimal_subsumption_trace(ontology, trace, class, bottom)?;
+    build_proof_graph(ontology, &subgraph)
+}
+
+fn minimal_subsumption_trace(
+    ontology: &Ontology,
+    trace: &InferenceTrace,
+    sub: EntityId,
+    sup: EntityId,
+) -> std::result::Result<InferenceTrace, ontologos_explain::Error> {
+    let step_idx = trace
+        .steps
+        .iter()
+        .position(|s| conclusion_matches_subsumption(ontology, &s.conclusion, sub, sup))
+        .ok_or(ontologos_explain::Error::Core(ontologos_core::Error::Message(
+            format!("no inference step concludes {sub:?} ⊑ {sup:?}"),
+        )))?;
+
+    Ok(InferenceTrace { steps: hst_prune(trace, step_idx) })
+}
+
+fn hst_prune(trace: &InferenceTrace, target_idx: usize) -> Vec<TraceStep> {
+    let mut needed = HashSet::new();
+    let mut queue = VecDeque::from([target_idx]);
+
+    while let Some(idx) = queue.pop_front() {
+        if !needed.insert(idx) {
+            continue;
+        }
+        let step = &trace.steps[idx];
+        if step.premises.is_empty() {
+            continue;
+        }
+        if let Some(premise_idx) = find_premise_step(trace, &step.premises[0]) {
+            queue.push_back(premise_idx);
+        }
+        for premise in step.premises.iter().skip(1) {
+            if let Some(premise_idx) = find_premise_step(trace, premise) {
+                queue.push_back(premise_idx);
+            }
+        }
+    }
+
+    let mut ordered = needed.into_iter().collect::<Vec<_>>();
+    ordered.sort_unstable();
+    ordered.into_iter().map(|idx| trace.steps[idx].clone()).collect()
+}
+
+fn find_premise_step(trace: &InferenceTrace, premise: &TracePremise) -> Option<usize> {
+    trace.steps.iter().position(|step| match (&step.conclusion, premise) {
+        (
+            TraceConclusion::SubClassOf { sub, sup },
+            TracePremise::SubClassOf { sub: psub, sup: psup },
+        ) => sub == psub && sup == psup,
+        (TraceConclusion::Axiom { id }, TracePremise::Axiom { id: pid }) => id == pid,
+        _ => false,
+    })
+}
+
+fn conclusion_matches_subsumption(
+    ontology: &Ontology,
+    conclusion: &TraceConclusion,
+    sub: EntityId,
+    sup: EntityId,
+) -> bool {
+    match conclusion {
+        TraceConclusion::SubClassOf { sub: s, sup: p } => *s == sub && *p == sup,
+        TraceConclusion::Axiom { id } => ontology.axiom(*id).ok().is_some_and(|axiom| {
+            matches!(
+                axiom,
+                ontologos_core::Axiom::SubClassOf { subclass, superclass }
+                    if *subclass == sub && *superclass == sup
+            )
+        }),
+        _ => false,
+    }
+}
+
+fn find_bottom_subsumption(
+    ontology: &Ontology,
+    class: EntityId,
+    trace: &InferenceTrace,
+) -> Option<EntityId> {
+    trace.steps.iter().find_map(|step| {
+        let TraceConclusion::SubClassOf { sub, sup } = step.conclusion else {
+            return None;
+        };
+        if sub != class {
+            return None;
+        }
+        let record = ontology.entity(sup).ok()?;
+        if record.kind != EntityKind::Class {
+            return None;
+        }
+        let iri = ontology.resolve_iri(record.iri).ok()?;
+        if iri.contains("Nothing") || iri.ends_with("#Bottom") || iri.ends_with("/Nothing") {
+            Some(sup)
+        } else {
+            None
+        }
+    })
 }
 
 fn map_proof_graph(
@@ -91,7 +215,7 @@ fn format_node(
     (None, None, node.rule.clone())
 }
 
-fn entity_iri_opt(ontology: &Ontology, id: ontologos_core::EntityId) -> Option<String> {
+fn entity_iri_opt(ontology: &Ontology, id: EntityId) -> Option<String> {
     let entity = ontology.entity(id).ok()?;
     ontology.resolve_iri(entity.iri).ok().map(|s| s.to_string())
 }

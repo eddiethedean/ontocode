@@ -4,6 +4,7 @@ Thank you for contributing. This repository contains:
 
 - **OntoCore** — Rust semantic workspace engine under `crates/` (`ontocore` façade, `ontocore-*` implementation, `ontocore` CLI, `ontocore-lsp`)
 - **OntoCode** — VS Code extension under `extension/`
+- **Platform docs** — [VISION.md](https://github.com/eddiethedean/ontocode/blob/main/VISION.md), [ARCHITECTURE.md](https://github.com/eddiethedean/ontocode/blob/main/ARCHITECTURE.md), [ROADMAP.md](https://github.com/eddiethedean/ontocode/blob/main/ROADMAP.md) (mirrored as [vision.md](vision.md), [architecture.md](architecture.md), [roadmap.md](roadmap.md))
 - **Specs** — product and architecture docs under `docs/design/` ([DEPENDENCY_MATRIX.md](design/DEPENDENCY_MATRIX.md) for external crates)
 - **User guides** — install, SQL, and LSP API under `docs/`
 

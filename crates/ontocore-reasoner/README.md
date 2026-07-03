@@ -2,7 +2,7 @@
 
 > Part of **OntoCore** (semantic workspace engine). Crate name remains `ontocore-reasoner` for compatibility.
 
-Thin [OntoLogos](https://github.com/eddiethedean/ontologos) 0.9.0 facade for OntoCore — EL, RL, and RDFS classification, hierarchy merge, and EL explanations.
+Thin [OntoLogos](https://github.com/eddiethedean/ontologos) **1.0.0** facade for OntoCore — EL, RL, RDFS, DL, and auto-routed classification, hierarchy merge, and EL-first explanations.
 
 ## Usage
 
@@ -12,18 +12,17 @@ use ontocore_reasoner::{classify, ReasonerId, WorkspaceInputLoader};
 
 let catalog = IndexBuilder::new().workspace("fixtures").build()?;
 let input = WorkspaceInputLoader::new("fixtures").load(catalog.class_hierarchy())?;
-let result = classify(ReasonerId::El, &input, false)?;
+let result = classify(ReasonerId::Dl, &input, false)?;
 println!("consistent: {}", result.consistent);
 ```
 
-CLI equivalent: `ontocore classify <workspace> --profile el`.
+CLI equivalent: `ontocore classify <workspace> --profile dl`.
 
 ## Profiles
 
 | Profile | Status |
 |---------|--------|
-| `el`, `rl`, `rdfs` | Shipped (OntoLogos 0.9) |
-| `dl`, `auto` | Stubbed until OntoLogos 1.0 |
+| `el`, `rl`, `rdfs`, `dl`, `auto` | Shipped (OntoLogos 1.0) |
 
 ## Documentation
 

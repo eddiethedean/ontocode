@@ -136,7 +136,7 @@ Exits non-zero when unsatisfiable classes are found. See [CI integration](ci-int
 
 **Why does `dl` or `auto` fail?**
 
-Full OWL 2 DL profiles require OntoLogos 1.0. Use `el`, `rl`, or `rdfs` today.
+Full OWL 2 DL (`dl`) and profile auto-routing (`auto`) ship via OntoLogos 1.0. Use `el`, `rl`, or `rdfs` for lighter-weight profiles.
 
 **Why is explanation empty for a class?**
 
@@ -144,13 +144,13 @@ Explanations require an unsatisfiable class and a prior reasoner run (or success
 
 ## Roadmap
 
-**When will full DL reasoning ship?**
+**When did full DL reasoning ship?**
 
-EL/RL/RDFS shipped in **v0.6.0** via OntoLogos 0.9.0. Full OWL 2 DL (`dl` / `auto`) requires OntoLogos 1.0. See [Reasoner guide](guides/reasoner.md) and [design/ROADMAP.md](design/ROADMAP.md).
+EL/RL/RDFS shipped in **v0.6.0** (OntoLogos 0.9.0). Full OWL 2 DL (`dl` / `auto`) ships with **OntoLogos 1.0.0** (HermiT parity). See [Reasoner guide](guides/reasoner.md).
 
 **How does this compare to Protégé?**
 
-v0.8 ships Git + VS Code workflows: browse, lint, Turtle editing, SQL/SPARQL queries, Manchester (subclass/equivalent/disjoint IRI), **refactoring** (rename, usages, migrate, move, extract), **EL/RL/RDFS reasoning**, **graph visualization**, **OBO index**, and **ROBOT CLI wrappers**. Full Protégé parity (DL reasoning, full OBO write-back, semantic diff) is the v1.0 goal — see [design/PROTEGE_PARITY.md](design/PROTEGE_PARITY.md) and [SHIPPED.md](SHIPPED.md).
+v0.8 ships Git + VS Code workflows: browse, lint, Turtle editing, SQL/SPARQL queries, Manchester (subclass/equivalent/disjoint IRI), **refactoring** (rename, usages, migrate, move, extract), **EL/RL/RDFS/DL reasoning**, **graph visualization**, **OBO index**, and **ROBOT CLI wrappers**. Full Protégé parity (full OBO write-back, semantic diff) is the v1.0 goal — see [design/PROTEGE_PARITY.md](design/PROTEGE_PARITY.md) and [SHIPPED.md](SHIPPED.md).
 
 ## OBO and graphs
 

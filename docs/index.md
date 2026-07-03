@@ -27,9 +27,10 @@ OntoCode is a modern ontology IDE for VS Code, powered by <strong>OntoCore</stro
 </div>
 
 <div class="oc-hero-actions" markdown>
-[OntoCore](ontocore/index.md){ .md-button .md-button--primary }
-[OntoCode extension](ontocode/vscode-extension.md){ .md-button .md-button--primary }
-[Rust & CLI](guides/rust-crates.md){ .md-button }
+[Vision](vision.md){ .md-button .md-button--primary }
+[Roadmap](roadmap.md){ .md-button .md-button--primary }
+[OntoCore](ontocore/index.md){ .md-button }
+[OntoCode extension](ontocode/vscode-extension.md){ .md-button }
 [What ships today](SHIPPED.md){ .md-button }
 </div>
 
@@ -175,6 +176,9 @@ See the full matrix: **[What ships today](SHIPPED.md)**.
 
 | Topic | Link |
 |-------|------|
+| **Vision** | [vision.md](vision.md) |
+| **Architecture** | [architecture.md](architecture.md) |
+| **Roadmap** | [roadmap.md](roadmap.md) |
 | **OntoCore (platform)** | [ontocore/index.md](ontocore/index.md) |
 | **OntoCode extension** | [ontocode/vscode-extension.md](ontocode/vscode-extension.md) |
 | **Rust & CLI** | [guides/rust-crates.md](guides/rust-crates.md) |

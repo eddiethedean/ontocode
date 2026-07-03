@@ -1,6 +1,8 @@
 # OntoCore architecture
 
-> **Status:** OntoCore is the platform identity for the Rust engine shipped since v0.2. Implementation crates retain `ontocore-*` names until v1.0. See [ADR-0018](../design/adr/0018-ontocore-platform-identity.md).
+> **Ecosystem architecture (canonical):** [Platform architecture](../architecture.md) — Ontologos, OntoCore, and OntoCode responsibilities.
+>
+> **Status:** OntoCore is the platform identity for the Rust engine shipped since v0.2. See [ADR-0018](../design/adr/0018-ontocore-platform-identity.md).
 
 ## High-level diagram
 
@@ -44,9 +46,10 @@
 
 | Owner | Responsibilities |
 |-------|------------------|
-| **OntoCore** | Workspace discovery, indexing, RDF/OWL/OBO parsing, entity catalog, symbol graph, import graph, SQL/SPARQL, diagnostics, refactoring, reasoning integration, patch write-back, CLI, LSP, future Python/TypeScript bindings, future MCP server |
-| **OntoCode** | VS Code activity bar, explorer UI, React webviews, inspector, Query Workbench UI, Manchester editor UI, graph panels, extension commands, marketplace packaging, user onboarding |
+| **OntoCore** | Workspace discovery, indexing, RDF/OWL/OBO parsing, entity catalog, symbol graph, import graph, SQL/SPARQL, diagnostics, refactoring, reasoning integration, patch write-back, CLI, LSP, **plugin hosting** (build/validation/doc/workflow plugins), future Python/TypeScript bindings, future MCP server |
+| **OntoCode** | VS Code activity bar, explorer UI, React webviews, inspector, Query Workbench UI, Manchester editor UI, graph panels, extension commands, marketplace packaging, user onboarding, **toolchain workflow UI** (owlmake and plugin actions) |
 | **OntoLogos** | OWL reasoning, classification, consistency, explanations, inference profiles |
+| **External plugins (e.g. owlmake)** | ROBOT/ODK-style build, validation, release, and documentation workflows — integrate via OntoCore plugin APIs; not core dependencies |
 
 ## Façade and implementation
 
@@ -73,4 +76,4 @@ See [crate map](crate-map.md) for details.
 - **Local-first ([ADR-0005](../design/adr/0005-local-first-by-default.md)):** Indexing and queries run on the user's machine by default.
 - **LSP boundary ([ADR-0007](../design/adr/0007-language-server-boundary.md)):** OntoCode extension talks to OntoCore only via LSP — no Rust logic in TypeScript.
 
-Target architecture details: [design/ARCHITECTURE.md](../design/ARCHITECTURE.md).
+Implementation architecture (crate tables, dependency rules): [design/ARCHITECTURE.md](../design/ARCHITECTURE.md).

@@ -76,15 +76,15 @@ ontocore-reasoner = { path = "crates/ontocore-reasoner", version = "0.9.0" }
 ontocore-robot = { path = "crates/ontocore-robot", version = "0.9.0" }
 ontocore-refactor = { path = "crates/ontocore-refactor", version = "0.9.0" }
 
-ontologos-core = "0.9.0"
-ontologos-parser = "0.9.0"
-ontologos-profile = "0.9.0"
-ontologos-el = "0.9.0"
-ontologos-rl = "0.9.0"
-ontologos-rdfs = "0.9.0"
-ontologos-explain = "0.9.0"
-ontologos-query = "0.9.0"
-ontologos-bridge = "0.9.0"
+ontologos-core = "1.0.0"
+ontologos-parser = "1.0.0"
+ontologos-profile = "1.0.0"
+ontologos-el = "1.0.0"
+ontologos-rl = "1.0.0"
+ontologos-dl = "1.0.0"
+ontologos-facade = "1.0.0"
+ontologos-explain = "1.0.0"
+ontologos-bridge = "1.0.0"
 
 lsp-server = "0.7"
 lsp-types = "0.97"

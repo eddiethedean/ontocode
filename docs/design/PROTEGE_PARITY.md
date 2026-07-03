@@ -1,7 +1,7 @@
 # Protégé Parity Matrix (v1.0.0)
 
 > **Canonical exit bar for v1.0.0.** All **P0** items must be green before release.
-> See [ROADMAP.md](ROADMAP.md) v1.0 and [PLAN.md](PLAN.md) §4.
+> See [Platform roadmap § OntoCode 1.0](../roadmap.md#ontocode-10-modern-protege-replacement) and [PLAN.md](PLAN.md) §4.
 >
 > **Dependencies:** [DEPENDENCY_MATRIX.md](DEPENDENCY_MATRIX.md)
 
@@ -35,7 +35,7 @@
 |------|------|------------|------|
 | `el` adapter (OWL EL) | [REASONER_SPEC.md](REASONER_SPEC.md) | OntoLogos `ontologos-el` | Yes |
 | `rl` / `rdfs` adapters | [REASONER_SPEC.md](REASONER_SPEC.md) | OntoLogos `ontologos-rl`, `ontologos-rdfs` | Yes |
-| `dl` adapter (OWL 2 DL classification + consistency) | [REASONER_SPEC.md](REASONER_SPEC.md) | OntoLogos `ontologos-dl` 1.0.0 | No (stub) |
+| `dl` adapter (OWL 2 DL classification + consistency) | [REASONER_SPEC.md](REASONER_SPEC.md) | OntoLogos `ontologos-dl` 1.0.0 | Yes |
 | Unsatisfiable class reporting | [REASONER_SPEC.md](REASONER_SPEC.md) | OntoLogos | Yes |
 | **Real** unsatisfiability explanations (clash-trace justification) | [REASONER_SPEC.md](REASONER_SPEC.md) | `ontologos-explain` + `ontologos-dl` | Partial (EL-first) |
 | Asserted / inferred / combined hierarchy toggle | [REASONER_SPEC.md](REASONER_SPEC.md) | OntoLogos | Yes |

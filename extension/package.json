@@ -285,7 +285,7 @@
           "type": "string",
           "enum": ["el", "rl", "rdfs", "dl", "auto"],
           "default": "el",
-          "description": "Default reasoner profile for Run Reasoner (dl/auto require OntoLogos 1.0)."
+          "description": "Default reasoner profile for Run Reasoner (el, rl, rdfs, dl, auto)."
         },
         "ontocode.reasoner.autoProfile": {
           "type": "boolean",

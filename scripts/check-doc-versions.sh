@@ -251,6 +251,30 @@ check_file_contains "docs/guides/rust-crates.md" "ontocode/vscode-extension" "ru
 check_file_contains "crates/ontocore-cli/src/main.rs" "OntoCode v${VERSION%.*}" "CLI about string version"
 check_file_contains "docs/changelog.md" "v${VERSION}" "docs changelog current release"
 
+for pair in "VISION.md:docs/vision.md:Build the modern open-source platform" \
+              "ARCHITECTURE.md:docs/architecture.md:Ontologos thinks" \
+              "ROADMAP.md:docs/roadmap.md:v0.10 — Semantic Workspace"; do
+  root_file="${pair%%:*}"
+  rest="${pair#*:}"
+  doc_file="${rest%%:*}"
+  phrase="${rest#*:}"
+  if [[ ! -f "$root_file" ]] || [[ ! -f "$doc_file" ]]; then
+    echo "FAIL: missing platform doc $root_file or $doc_file" >&2
+    fail=1
+  elif ! grep -qF "$phrase" "$root_file" || ! grep -qF "$phrase" "$doc_file"; then
+    echo "FAIL: platform doc sync — expected '$phrase' in $root_file and $doc_file" >&2
+    fail=1
+  else
+    echo "ok: platform doc sync $root_file ↔ $doc_file"
+  fi
+done
+
+check_file_contains "docs/roadmap.md" "Shipped \\(v0.1–v0.9\\)" "docs roadmap shipped section"
+check_file_contains "ROADMAP.md" "v1.2 — Ontology Toolchain Platform" "roadmap v1.2 toolchain milestone"
+check_file_contains "docs/roadmap.md" "v1.2 — Ontology Toolchain Platform" "docs roadmap v1.2 milestone"
+check_file_contains "ROADMAP.md" "owlmake" "roadmap owlmake integration"
+check_file_contains "mkdocs.yml" "vision.md" "mkdocs Platform nav"
+
 if [[ "$fail" -ne 0 ]]; then
   echo "Documentation version check failed." >&2
   exit 1

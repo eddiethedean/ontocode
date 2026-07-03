@@ -164,7 +164,7 @@ More detail: [Installation & troubleshooting](https://ontocode-vs.readthedocs.io
 
 **Shipped:** explorer; **React** entity inspector, graph panels, Query Workbench, Manchester editor, and Refactor Preview; workspace refactor (rename IRI, migrate namespace, move, extract); EL/RL/RDFS reasoner; OBO syntax highlighting and indexing (write-back: Turtle only); diagnostics; LSP navigation and refactoring.
 
-**Planned:** full DL reasoning (OntoLogos 1.0); semantic diff (v0.10).
+**Planned:** semantic diff (v0.10). **Shipped:** full DL reasoning via OntoLogos 1.0 (`dl` / `auto` profiles).
 
 ---
 

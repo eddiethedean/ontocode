@@ -1,4 +1,6 @@
-# ROADMAP.md
+# Engineering milestones (v0.1–v0.9)
+
+> **Engineering milestones (v0.1–v0.9 shipped detail).** Canonical forward roadmap: [Platform roadmap](../roadmap.md). Ecosystem overview: [Architecture](../architecture.md) · [Vision](../vision.md).
 
 > v1.0 exit bar: [PROTEGE_PARITY.md](PROTEGE_PARITY.md) — all **P0** items green.
 >
@@ -200,6 +202,8 @@ Exit criteria:
 **Dependencies:** existing engine crates (renamed); breaking release for v0.8 integrators.
 
 ## v0.10 — OntoCore public API + workflow
+
+> **Superseded for forward planning** by [Platform roadmap](../roadmap.md) (v0.10+ renumbered). Retained here for PROTEGE_PARITY traceability and contributor history.
 
 Deliverables:
 

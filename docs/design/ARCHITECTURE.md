@@ -1,10 +1,14 @@
-# ARCHITECTURE.md
+# Implementation architecture
 
-> **Document status: target architecture with v0.7 partial implementation**
+> **Implementation architecture** — crate layout, diagrams, and dependency rules for contributors.
+>
+> **Ecosystem architecture (canonical):** [Platform architecture](../architecture.md).
+>
+> **Document status: target architecture with v0.9 partial implementation**
 >
 > **Shipped in v0.7:** workspace scanner, Oxigraph parsing, in-memory catalog, SQL/SPARQL queries, diagnostics, CLI, LSP explorer + Problems panel, Turtle patch write-back, Query Workbench + Manchester editor (extension), Horned-OWL catalog bridge (`ontocore-owl`), **EL/RL/RDFS reasoning** (`ontocore-reasoner`), **React inspector + graphs**, **OBO index**, **ROBOT CLI wrappers**. See [What ships today](../SHIPPED.md).
 >
-> **Planned:** full DL reasoning (OntoLogos 1.0), migrate remaining panels to React (v0.8+), semantic diff, full Manchester catalog, full OBO write-back. See [ROADMAP.md](ROADMAP.md).
+> **Planned:** see [Platform roadmap](../roadmap.md) for v0.10+ milestones. Full DL reasoning (OntoLogos 1.0), semantic diff, full OBO write-back.
 >
 > **Reference:** [lsp-api.md](../lsp-api.md), [adr/README.md](adr/README.md), [DEPENDENCY_MATRIX.md](DEPENDENCY_MATRIX.md).
 

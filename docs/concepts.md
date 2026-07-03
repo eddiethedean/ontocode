@@ -26,7 +26,7 @@ OntoCode v0.9 supports subclass, equivalent, and disjoint axioms via the Manches
 | **EL** | OWL EL ontologies (default in OntoCode v0.9) |
 | **RL** | OWL RL materialization |
 | **RDFS** | RDFS entailment |
-| **DL** | Full OWL 2 DL — requires OntoLogos 1.0 (not shipped in v0.9) |
+| **DL** | Full OWL 2 DL via OntoLogos 1.0 (`dl` profile) |
 
 ## Asserted vs inferred hierarchy
 

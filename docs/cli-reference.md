@@ -111,7 +111,7 @@ ontocore classify . --profile el --no-auto-profile
 
 | Flag | Default | Description |
 |------|---------|-------------|
-| `--profile` | `el` | `el`, `rl`, `rdfs` (`dl`/`auto` error until OntoLogos 1.0) |
+| `--profile` | `el` | `el`, `rl`, `rdfs`, `dl`, `auto` (OntoLogos 1.0) |
 | `--auto-profile` | `true` | Emit profile-detection warnings |
 | `--format` | `text` | `text` or `json` |
 

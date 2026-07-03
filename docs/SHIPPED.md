@@ -65,9 +65,13 @@
 | Write-back | **Turtle only** |
 | Refactoring | **Turtle only**; extract module uses direct-reference closure |
 | Class hierarchy tree | Named-parent edges; **inferred/combined** after reasoner run |
-| Reasoning | **EL / RL / RDFS** via OntoLogos 0.9; **DL/auto** stubbed until OntoLogos 1.0 |
+| Reasoning | **EL / RL / RDFS / DL / auto** via OntoLogos 1.0 (HermiT parity) |
 | CLI release binaries | Linux x64 only; macOS/Windows use `cargo install` or bundled LSP in VSIX |
 | Scale | See [workspace limits](workspace-limits.md) (includes walk entry cap) |
+
+## What's next
+
+Forward milestones (v0.10 semantic workspace → v1.0 Protégé replacement): **[Platform roadmap](roadmap.md)**.
 
 ## Where to learn more
 

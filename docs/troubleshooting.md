@@ -86,7 +86,7 @@ Indexing may fail above [workspace limits](workspace-limits.md) (file count, siz
 
 | Problem | What to try |
 |---------|-------------|
-| `dl` or `auto` profile fails | Full DL requires OntoLogos 1.0 — use `el`, `rl`, or `rdfs` |
+| `dl` or `auto` profile fails | Check ontology constructs and profile warnings; try `el` for EL-only ontologies |
 | Inferred hierarchy not visible | Run **OntoCode: Run Reasoner**, then **Set Hierarchy Mode** → inferred or combined |
 | Explanation panel empty | Explanations need an unsatisfiable class; run reasoner first |
 | Classify exits non-zero in CI | Ontology has unsatisfiable classes — inspect JSON `unsatisfiable` list |

@@ -84,7 +84,7 @@ enum Commands {
         /// Workspace directory
         #[arg(default_value = ".")]
         workspace: PathBuf,
-        /// Reasoner profile: el, rl, rdfs (dl/auto require OntoLogos 1.0)
+        /// Reasoner profile: el, rl, rdfs, dl, auto
         #[arg(long, default_value = "el")]
         profile: String,
         /// Emit profile-detection warnings

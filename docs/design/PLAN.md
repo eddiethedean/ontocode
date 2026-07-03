@@ -1,5 +1,7 @@
 # PLAN.md — OntoCore and OntoCode
 
+> **Executive summary superseded by** [Platform Vision](../vision.md) and [Platform Roadmap](../roadmap.md). This document retains tactical product planning detail for contributors.
+
 ## 1. Executive Summary
 
 OntoCore and OntoCode form a two-layer product strategy for modern ontology engineering.

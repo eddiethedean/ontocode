@@ -8,10 +8,17 @@ Migration guides: [Migration index](migration/README.md)
 
 ### Added
 
-- `ontocore` façade crate with `Workspace` API; OntoCore / OntoCode documentation; ADR-0018
+- `ontocore` façade crate with `Workspace` API; OntoCore / OntoCode documentation; ADR-0018; platform architecture docs
 - OntoLogos 1.0.0 DL/auto classification (`dl`, `auto` profiles) via `ontocore-reasoner`
+- Plugin platform design with owlmake as reference external workflow plugin
+- OBO/ROBOT spec owlmake integration path and ODK workflow goals
 
 ### Changed
 
 - **Breaking (v0.9.0):** `ontoindex-*` → `ontocore-*`; CLI `ontocore`; LSP `ontocore-lsp` and `ontocore/*` methods — see [v0.9 migration](migration/v0.9.md)
 - OntoLogos workspace dependencies 0.9.0 → 1.0.0; enterprise docs updated for shipped DL/auto classification
+- Extension marketplace metadata and `ontocore` crate README as public façade API
+
+### Fixed
+
+- LSP reasoner test for DL/auto profiles; MkDocs strict-mode link fixes

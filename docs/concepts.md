@@ -17,7 +17,7 @@ Short glossary for engineers new to OWL/RDF who are evaluating OntoCode.
 
 ## Manchester syntax
 
-OntoCode v0.9 supports subclass, equivalent, and disjoint axioms via the Manchester editor — see [Manchester editor](../ontocode/manchester-editor.md).
+OntoCode v0.9 supports subclass, equivalent, and disjoint axioms via the Manchester editor — see [Manchester editor](ontocode/manchester-editor.md).
 
 ## Reasoning profiles
 

@@ -59,7 +59,7 @@ Install resulting VSIX internally. Requires Rust + Node toolchains on build host
 
 | Practice | Recommendation |
 |----------|----------------|
-| Version pin | Standardize on one release tag (e.g. `v0.8.0`) across VSIX and CLI |
+| Version pin | Standardize on one release tag (e.g. `v0.9.0`) across VSIX and CLI |
 | Update cadence | Quarterly review of [changelog](../changelog.md) and [SECURITY.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/SECURITY.md) |
 | Staged rollout | Pilot group → department → org (see [production readiness](production-readiness.md)) |
 | Rollback | Keep previous VSIX + CLI tarball in internal registry |

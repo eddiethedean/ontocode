@@ -12,12 +12,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - **`ontocore` crate** — public façade with `Workspace::open`, module re-exports, and `lsp` feature
-- **OntoCore documentation** — `docs/ontocore/` and `docs/ontocode/` trees; ADR-0018
+- **OntoCore documentation** — `docs/ontocore/` and `docs/ontocode/` trees; ADR-0018; platform architecture (`VISION.md`, `ARCHITECTURE.md`, `ROADMAP.md`)
 - Example `ontocore_workspace` using `Workspace` API
 - Diagnostic codes `owl_bridge_failed` and `io_read_error`
 - Release pipeline publishes `ontocore` façade; extended `check-doc-versions.sh`
 - **OntoLogos 1.0.0** integration — real `dl` and `auto` reasoner adapters (`ontocore-reasoner`)
 - DL/auto classification tests (library, CLI, LSP) and reasoner panel enablement in VS Code extension
+- Plugin platform design — [PLUGIN_SPEC.md](docs/design/PLUGIN_SPEC.md) with build/workflow/release plugin categories; [owlmake](https://github.com/INCATools/owlmake) as reference external workflow plugin
+- OBO/ROBOT spec — owlmake integration path and ODK workflow goals ([OBO_ROBOT_SPEC.md](docs/design/OBO_ROBOT_SPEC.md))
 
 ### Changed
 
@@ -30,6 +32,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Horned-OWL bridge failures emit catalog diagnostics instead of silent fallback
 - OntoLogos workspace dependencies bumped from 0.9.0 → **1.0.0**
 - Enterprise adoption docs reconciled with shipped DL/auto classification capability
+- Extension marketplace metadata — OntoCore-powered description and expanded keywords
+- `ontocore` crate README repositioned as public façade API
+
+### Fixed
+
+- LSP reasoner integration test updated for shipped DL/auto profiles
+- MkDocs strict-mode documentation link fixes (ADR rename, concepts, contributing)
 
 ### Notes
 

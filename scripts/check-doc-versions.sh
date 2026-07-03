@@ -31,6 +31,13 @@ check_file_contains "README.md" "v${VERSION}" "README header version"
 check_file_contains "docs/index.md" "v${VERSION}" "docs index hero version"
 check_file_contains "extension/README.md" "v${VERSION}" "extension README version"
 check_file_contains "extension/package.json" "\"version\": \"${VERSION}\"" "extension package.json version"
+EXT_LOCK_VERSION="$(grep -E '"version"' extension/package-lock.json | head -1 | sed -E 's/.*"([^"]+)".*/\1/')"
+if [[ "$EXT_LOCK_VERSION" != "$VERSION" ]]; then
+  echo "FAIL: extension/package-lock.json version ($EXT_LOCK_VERSION) != package.json ($VERSION)" >&2
+  fail=1
+else
+  echo "ok: extension lockfile version matches package.json"
+fi
 check_file_contains "docs/guides/enterprise-eval.md" "v${VERSION}" "enterprise eval version"
 MINOR_VERSION="${VERSION%.*}"
 check_file_contains "SECURITY.md" "${MINOR_VERSION}\.x" "SECURITY.md supported versions"

@@ -20,7 +20,7 @@ OntoCode is a modern ontology IDE for VS Code, powered by <strong>OntoCore</stro
 <span class="oc-badge">Turtle write-back</span>
 <span class="oc-badge">Query Workbench</span>
 <span class="oc-badge">Manchester editor</span>
-<span class="oc-badge">Reasoner (EL)</span>
+<span class="oc-badge">Reasoner (EL/DL)</span>
 <span class="oc-badge">OBO index</span>
 <span class="oc-badge">Graph visualization</span>
 <span class="oc-badge">ROBOT CLI</span>

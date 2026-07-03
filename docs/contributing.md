@@ -103,7 +103,7 @@ mkdocs build --strict   # CI uses this; must pass with no warnings
 ./scripts/check-doc-versions.sh   # README / RTD / extension version sync
 ```
 
-Open http://127.0.0.1:8000. Configuration: [`mkdocs.yml`](../mkdocs.yml), [`.readthedocs.yaml`](../.readthedocs.yaml).
+Open http://127.0.0.1:8000. Configuration: [`mkdocs.yml` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/mkdocs.yml), [`.readthedocs.yaml` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/.readthedocs.yaml).
 
 ## Pull requests
 

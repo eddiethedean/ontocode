@@ -1,0 +1,19 @@
+# cargo-audit configuration (https://docs.rs/cargo-audit)
+# Located at `.cargo/audit.toml` (project root `audit.toml` is not loaded).
+#
+# Transitive `quick-xml` advisories cannot be fixed in-tree: dependents pin
+# incompatible 0.x lines (pretty_rdf/horned-owl → 0.31, reasonable → 0.36,
+# oxigraph → 0.37). Cargo `[patch]` cannot force a semver-incompatible upgrade
+# across those requirements. Revisit when upstream releases use quick-xml >=0.41.
+#
+# Review by: 2026-10-01
+
+[advisories]
+ignore = [
+    # RUSTSEC-2026-0194 — Quadratic attribute-name checks (DoS).
+    # Transitive via horned-owl / oxigraph / reasonable; unused XML APIs not exposed.
+    "RUSTSEC-2026-0194",
+    # RUSTSEC-2026-0195 — Unbounded namespace-declaration allocation (DoS).
+    # Same transitive path as above.
+    "RUSTSEC-2026-0195",
+]

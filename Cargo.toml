@@ -102,11 +102,11 @@ sha2 = "0.10"
 sqlparser = "0.53"
 thiserror = "2"
 horned-owl = "1.4"
-horned-functional = "0.4"
 fastobo = "0.15"
 fastobo-owl = "0.3"
 fastobo-validator = "0.4"
 petgraph = "0.8"
+
 [profile.release]
 lto = true
 codegen-units = 1

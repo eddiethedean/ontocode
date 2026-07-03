@@ -12,7 +12,6 @@ Direct runtime dependencies (v0.5.0 workspace):
 - horned-owl (LGPL-3.0) — https://github.com/phillord/horned-owl
   Linked via ontocore-owl for OWL modeling and Turtle write-back. If you
   distribute binaries, comply with LGPL-3.0 (source offer, license text).
-- horned-functional (MIT) — https://github.com/phillord/horned-owl
 - lsp-server (MIT OR Apache-2.0) — https://github.com/gluon-lang/lsp-types
 - lsp-types (MIT) — https://github.com/gluon-lang/lsp-types
 - serde, clap, thiserror, anyhow, csv, hex, sha2, url, regex, and other

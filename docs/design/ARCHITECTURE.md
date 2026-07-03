@@ -80,7 +80,7 @@ External Workflow Plugins (not core)     owlmake · ROBOT/ODK adapters
 |-------|--------|------|---------------------|
 | `ontocore-core` | v0.2 | Types, scanner, limits, path jail | `ignore` |
 | `ontocore-parser` | v0.2 | RDF parse, entity extraction | `oxigraph` |
-| `ontocore-owl` | v0.4 | OWL axiom facade, patch write-back | `horned-owl`, `horned-functional` |
+| `ontocore-owl` | v0.4 | OWL axiom facade, patch write-back | `horned-owl` |
 | `ontocore-catalog` | v0.2 | Index builder, entity API | — |
 | `ontocore-query` | v0.2 | SQL virtual tables, SPARQL | `sqlparser`, `oxigraph` |
 | `ontocore-diagnostics` | v0.3 | Lint rules, LSP diagnostics | `regex` (+ `fastobo-validator` v0.7b) |

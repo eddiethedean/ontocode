@@ -219,7 +219,7 @@ OntoCore delegates to mature Rust libraries — see [dependency matrix](https://
 |-------|--------|-------|
 | RDF / SPARQL | [Oxigraph](https://crates.io/crates/oxigraph) | `ontocore-parser`, `ontocore-query` |
 | SQL queries | [sqlparser](https://crates.io/crates/sqlparser) | `ontocore-query` |
-| OWL axioms / write-back | [horned-owl](https://crates.io/crates/horned-owl), [horned-functional](https://crates.io/crates/horned-functional) | `ontocore-owl` |
+| OWL axioms / write-back | [horned-owl](https://crates.io/crates/horned-owl) | `ontocore-owl` |
 | Reasoning | [OntoLogos](https://github.com/eddiethedean/ontologos) | `ontocore-reasoner` |
 | OBO index | line-based parser in `ontocore-parser` | `ontocore-parser`, `ontocore-catalog` |
 | ROBOT interop | external `robot` CLI (Java) | `ontocore-robot`, `ontocore-cli` |

@@ -39,7 +39,7 @@ The canonical policy (supported versions, scope, hardening table) is maintained 
 | Custom LSP binary | Set `ontocode.lspPath` only in **trusted** workspaces |
 | Release artifacts | Verify `SHA256SUMS` from official [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) — [release-integrity.md](release-integrity.md) |
 | CI validation | Use `ontocore validate` to gate merges — [ci-integration.md](ci-integration.md) |
-| Dependency audit | `cargo audit` runs in project CI |
+| Dependency audit | `cargo audit` runs in project CI (config: [`.cargo/audit.toml`](https://github.com/eddiethedean/ontocode/blob/main/.cargo/audit.toml)) |
 
 ## Enterprise evaluation
 

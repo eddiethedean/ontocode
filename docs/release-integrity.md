@@ -51,7 +51,7 @@ Prefer `--locked` so dependency versions match the published crate.
 
 ## Dependency auditing
 
-CI runs `cargo audit` on the Rust workspace. Report vulnerable dependencies via [security.md](security.md).
+CI runs `cargo audit` on the Rust workspace (see [`.cargo/audit.toml`](https://github.com/eddiethedean/ontocode/blob/main/.cargo/audit.toml) for documented ignores of transitive advisories that cannot be upgraded in-tree). Report vulnerable dependencies via [security.md](security.md).
 
 ## Future: signed artifacts
 

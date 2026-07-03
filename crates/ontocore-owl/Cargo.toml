@@ -16,7 +16,6 @@ include = ["src/**/*", "Cargo.toml", "LICENSE-MIT", "LICENSE-APACHE-2.0"]
 [dependencies]
 ontocore-core = { workspace = true }
 horned-owl.workspace = true
-horned-functional.workspace = true
 oxigraph.workspace = true
 serde = { workspace = true, features = ["derive"] }
 serde_json.workspace = true

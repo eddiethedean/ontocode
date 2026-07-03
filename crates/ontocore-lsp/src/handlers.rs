@@ -26,8 +26,8 @@ use ontocore_reasoner::{
     classify, explain, ExplanationRequest, ReasonerId, ReasonerSnapshot, WorkspaceInputLoader,
 };
 use ontocore_refactor::{
-    apply_refactor_plan_checked, find_usages_with_overrides, plans_equivalent, preview_refactor,
-    preview_rename_iri, validate_refactor_plan_paths,
+    apply_refactor_plan_checked_with_overrides, find_usages_with_overrides, plans_equivalent,
+    preview_refactor, preview_rename_iri, validate_refactor_plan_paths,
 };
 use serde_json::Value;
 use std::path::Path;
@@ -112,9 +112,10 @@ pub fn build_catalog_snapshot_with_reasoner(
 pub fn handle_get_catalog_snapshot(
     state: &ServerState,
 ) -> Result<CatalogSnapshot, LspErrorPayload> {
-    let reasoner = state.reasoner_snapshot();
     state
-        .with_catalog(|catalog| build_catalog_snapshot_with_reasoner(catalog, reasoner))
+        .with_catalog_and_reasoner(|catalog, reasoner| {
+            build_catalog_snapshot_with_reasoner(catalog, reasoner.cloned())
+        })
         .ok_or_else(LspErrorPayload::not_indexed)
 }
 
@@ -136,16 +137,13 @@ pub fn handle_get_graph(
     state: &ServerState,
     params: GraphRequest,
 ) -> Result<GetGraphResult, LspErrorPayload> {
-    let inferred_edges = if params.include_inferred {
-        state.reasoner_snapshot().map(|s| s.inferred.edges.clone())
-    } else {
-        None
-    };
     state
-        .with_catalog(|catalog| {
+        .with_catalog_and_reasoner(|catalog, reasoner| {
             let mut builder = GraphBuilder::new(catalog);
-            if let Some(ref edges) = inferred_edges {
-                builder = builder.with_inferred_edges(edges);
+            if params.include_inferred {
+                if let Some(snapshot) = reasoner {
+                    builder = builder.with_inferred_edges(&snapshot.inferred.edges);
+                }
             }
             let graph = builder.build(&params).map_err(LspErrorPayload::graph_failed)?;
             Ok(GetGraphResult { graph })
@@ -154,12 +152,46 @@ pub fn handle_get_graph(
 }
 
 pub fn handle_run_robot(
+    state: &ServerState,
     index_worker: &IndexWorker,
     params: RunRobotParams,
 ) -> Result<RunRobotResult, LspErrorPayload> {
     let mut args = vec![params.subcommand];
     args.extend(params.args);
+    if let Some(root) = state.workspace_root() {
+        jail_robot_path_args(&root, &args).map_err(LspErrorPayload::robot_failed)?;
+    }
     index_worker.run_robot_sync(params.robot_path, args).map_err(LspErrorPayload::robot_failed)
+}
+
+/// Reject ROBOT file operands that escape the workspace jail.
+fn jail_robot_path_args(workspace_root: &std::path::Path, args: &[String]) -> Result<(), String> {
+    let path_flags = ["--input", "--output", "--report", "-i", "-o"];
+    let mut expect_path = false;
+    for arg in args.iter().skip(1) {
+        if expect_path {
+            expect_path = false;
+            let path = std::path::Path::new(arg);
+            ontocore_core::validate_workspace_scope(path, workspace_root)?;
+            continue;
+        }
+        if path_flags.contains(&arg.as_str()) {
+            expect_path = true;
+            continue;
+        }
+        // Positional path-like args (contain / or end with ontology extensions).
+        let looks_like_path = arg.contains('/')
+            || arg.contains('\\')
+            || arg.ends_with(".ttl")
+            || arg.ends_with(".owl")
+            || arg.ends_with(".obo")
+            || arg.ends_with(".rdf");
+        if looks_like_path && !arg.starts_with('-') {
+            let path = std::path::Path::new(arg);
+            ontocore_core::validate_workspace_scope(path, workspace_root)?;
+        }
+    }
+    Ok(())
 }
 
 pub fn handle_apply_axiom_patch(
@@ -222,6 +254,7 @@ pub fn handle_apply_axiom_patch(
             patch: patch_result,
             entity_detail: None,
             reindex_warning: None,
+            workspace_edit: None,
         });
     }
 
@@ -246,18 +279,24 @@ pub fn handle_apply_axiom_patch(
         | ontocore_owl::PatchOp::RemoveDisjointClass { entity_iri, .. } => entity_iri.clone(),
     });
 
+    let mut workspace_edit = None;
+    let mut reindex_warning = None;
     if patch_result.applied && !params.preview_only {
         if let Some(text) = &patch_result.preview_text {
-            state
-                .set_document_text(document_path.clone(), text.clone())
-                .map_err(LspErrorPayload::patch_invalid)?;
+            // Disk first so a failed write never leaves a divergent LSP buffer.
             ontocore_owl::atomic_write(&document_path, text).map_err(|e| {
                 LspErrorPayload::patch_invalid(format!("failed to write document: {e}"))
             })?;
+            if state.is_document_open(&document_path) {
+                state
+                    .set_document_text(document_path.clone(), text.clone())
+                    .map_err(LspErrorPayload::patch_invalid)?;
+            }
+            workspace_edit = full_document_workspace_edit(&document_path, text);
         }
         let index_root = state.effective_index_root().unwrap_or_else(|| workspace_root.clone());
         if let Err(msg) = index_worker.enqueue_sync(index_root) {
-            return Err(LspErrorPayload::applied_not_indexed(msg));
+            reindex_warning = Some(format!("patch applied but reindex failed: {msg}"));
         }
     }
 
@@ -265,7 +304,12 @@ pub fn handle_apply_axiom_patch(
         .and_then(|iri| state.with_catalog(|catalog| catalog.entity_detail(&iri)))
         .flatten();
 
-    Ok(ApplyAxiomPatchResult { patch: patch_result, entity_detail, reindex_warning: None })
+    Ok(ApplyAxiomPatchResult {
+        patch: patch_result,
+        entity_detail,
+        reindex_warning,
+        workspace_edit,
+    })
 }
 
 pub fn handle_query(
@@ -722,9 +766,13 @@ pub fn handle_apply_refactor(
     validate_refactor_plan_paths(&workspace, &server_plan)
         .map_err(|e| LspErrorPayload::refactor_failed(e.to_string()))?;
 
-    let files_written =
-        apply_refactor_plan_checked(&server_plan, params.preview_only, Some(workspace.as_path()))
-            .map_err(|e| LspErrorPayload::refactor_failed(e.to_string()))?;
+    let files_written = apply_refactor_plan_checked_with_overrides(
+        &server_plan,
+        params.preview_only,
+        Some(workspace.as_path()),
+        Some(&overrides),
+    )
+    .map_err(|e| LspErrorPayload::refactor_failed(e.to_string()))?;
 
     if params.preview_only {
         return Ok(ApplyRefactorResult {
@@ -736,26 +784,17 @@ pub fn handle_apply_refactor(
 
     for change in &server_plan.changes {
         if change.preview_text != change.original_text && state.is_document_open(&change.path) {
-            state
-                .set_document_text(change.path.clone(), change.preview_text.clone())
-                .map_err(LspErrorPayload::refactor_failed)?;
+            // Best-effort buffer sync; disk is already committed.
+            let _ = state.set_document_text(change.path.clone(), change.preview_text.clone());
         }
     }
 
     let reindex_warning = match state.effective_index_root() {
         Some(root) => match index_worker.enqueue_sync(root) {
             Ok(_) => None,
-            Err(e) => {
-                return Err(LspErrorPayload::applied_not_indexed(format!(
-                    "refactor applied but reindex failed: {e}"
-                )));
-            }
+            Err(e) => Some(format!("refactor applied but reindex failed: {e}")),
         },
-        None => {
-            return Err(LspErrorPayload::applied_not_indexed(
-                "refactor applied but workspace root unknown".to_string(),
-            ));
-        }
+        None => Some("refactor applied but workspace root unknown".to_string()),
     };
     let workspace_edit = plan_to_workspace_edit(&server_plan);
     Ok(ApplyRefactorResult { files_written, reindex_warning, workspace_edit })
@@ -873,6 +912,27 @@ fn token_byte_range_at(line: &str, byte_col: usize) -> (usize, usize) {
     (start, end)
 }
 
+fn full_document_workspace_edit(path: &std::path::Path, new_text: &str) -> Option<WorkspaceEdit> {
+    let uri = path_to_lsp_uri(path)?;
+    Some(WorkspaceEdit {
+        changes: None,
+        document_changes: Some(DocumentChanges::Edits(vec![TextDocumentEdit {
+            text_document: lsp_types::OptionalVersionedTextDocumentIdentifier {
+                uri,
+                version: None,
+            },
+            edits: vec![OneOf::Left(TextEdit {
+                range: Range {
+                    start: Position { line: 0, character: 0 },
+                    end: Position { line: u32::MAX, character: 0 },
+                },
+                new_text: new_text.to_string(),
+            })],
+        }])),
+        change_annotations: None,
+    })
+}
+
 fn plan_to_workspace_edit(plan: &ontocore_refactor::RefactorPlan) -> Option<WorkspaceEdit> {
     let mut document_changes = Vec::new();
     for change in &plan.changes {
@@ -979,7 +1039,7 @@ pub fn handle_custom_request(
         "ontocore/runRobot" => {
             let params: RunRobotParams = serde_json::from_value(params.unwrap_or(Value::Null))
                 .map_err(|e| LspErrorPayload::invalid_params(format!("invalid params: {e}")))?;
-            let result = handle_run_robot(index_worker, params)?;
+            let result = handle_run_robot(state, index_worker, params)?;
             serde_json::to_value(result).map_err(|e| LspErrorPayload::robot_failed(e.to_string()))
         }
         "ontocore/findUsages" => {

@@ -431,29 +431,11 @@ fn insert_into_entity_block(
     let range = entity_primary_range(text, entity_iri, namespaces)?;
     let block = &text[range.start as usize..range.end as usize];
     let insertion_key = insertion.trim().trim_end_matches(';').trim();
-    if block.contains(insertion_key) {
+    if !insertion_key.is_empty() && block.contains(insertion_key) {
         return Ok(());
     }
-    let trimmed = block.trim_end();
-    let ends_with_dot = trimmed.ends_with('.');
-    let ends_with_semi = trimmed.ends_with(';');
-    let mut new_block = block.to_string();
-    if ends_with_dot {
-        if let Some(pos) = new_block.trim_end().rfind('.') {
-            let base = new_block[..pos].trim_end();
-            new_block =
-                format!("{base} ;\n{insertion}{}.", &new_block[pos..pos + 1].replace('.', ""));
-        }
-    } else if !ends_with_semi {
-        new_block = format!("{new_block} ;\n");
-    }
-    if let Some(pos) = new_block.rfind('.') {
-        new_block.insert_str(pos, &format!("\n{insertion}"));
-    } else {
-        new_block.push_str(insertion);
-    }
-    replace_range(text, range, &new_block);
-    Ok(())
+    // Same single-path insertion as multiline axioms (no double-insert).
+    insert_multiline_into_entity_block(text, entity_iri, insertion, namespaces)
 }
 
 fn replace_range(text: &mut String, range: ByteRange, replacement: &str) {
@@ -552,17 +534,28 @@ fn bracket_end_index(text: &str, bracket_start: usize) -> Option<usize> {
     None
 }
 
-fn extend_removal_span(block: &str, pred_start: usize, obj_end: usize) -> (usize, usize) {
-    let mut start = pred_start;
+/// Extend removal to cover the object, and the predicate when it would be left empty.
+fn extend_removal_span(
+    block: &str,
+    pred_pos: usize,
+    predicate: &str,
+    obj_start: usize,
+    obj_end: usize,
+) -> (usize, usize) {
+    let objects = objects_in_predicate_value(block, pred_pos, predicate);
+    let is_only_object = objects.len() == 1;
+
+    let mut start = if is_only_object { pred_pos } else { obj_start };
     while start > 0 && block.as_bytes()[start - 1].is_ascii_whitespace() {
         start -= 1;
     }
-    if start > 0 && block.as_bytes()[start - 1] == b',' {
+    if !is_only_object && start > 0 && block.as_bytes()[start - 1] == b',' {
         start -= 1;
         while start > 0 && block.as_bytes()[start - 1].is_ascii_whitespace() {
             start -= 1;
         }
     }
+
     let mut end = obj_end;
     while end < block.len() && block.as_bytes()[end].is_ascii_whitespace() {
         end += 1;
@@ -590,23 +583,101 @@ fn remove_all_predicate_objects(block: &str, predicate: &str) -> String {
 }
 
 fn remove_first_predicate_object(block: &str, predicate: &str) -> Option<String> {
-    let pred_pos = block.find(predicate)?;
+    let pred_pos = find_predicate_token(block, 0, predicate)?;
     let (obj_start, obj_end) =
         objects_in_predicate_value(block, pred_pos, predicate).first().copied()?;
-    let (remove_start, remove_end) = extend_removal_span(block, obj_start, obj_end);
+    let (remove_start, remove_end) =
+        extend_removal_span(block, pred_pos, predicate, obj_start, obj_end);
     let mut out = String::new();
     out.push_str(&block[..remove_start]);
     out.push_str(&block[remove_end..]);
     Some(cleanup_block_separators(&out))
 }
 
+/// Find `predicate` as a Turtle token outside strings and brackets.
+fn find_predicate_token(block: &str, search_from: usize, predicate: &str) -> Option<usize> {
+    let bytes = block.as_bytes();
+    let pred_bytes = predicate.as_bytes();
+    if pred_bytes.is_empty() || search_from >= bytes.len() {
+        return None;
+    }
+    let mut i = search_from;
+    let mut in_string = false;
+    let mut escape = false;
+    let mut bracket_depth = 0i32;
+    while i + pred_bytes.len() <= bytes.len() {
+        let b = bytes[i];
+        if in_string {
+            if escape {
+                escape = false;
+            } else if b == b'\\' {
+                escape = true;
+            } else if b == b'"' {
+                in_string = false;
+            }
+            i += 1;
+            continue;
+        }
+        match b {
+            b'"' => {
+                in_string = true;
+                i += 1;
+                continue;
+            }
+            b'[' => {
+                bracket_depth += 1;
+                i += 1;
+                continue;
+            }
+            b']' => {
+                bracket_depth = bracket_depth.saturating_sub(1);
+                i += 1;
+                continue;
+            }
+            _ => {}
+        }
+        if bracket_depth == 0 && bytes[i..].starts_with(pred_bytes) {
+            let after = i + pred_bytes.len();
+            let before_ok = i == 0
+                || !bytes[i - 1].is_ascii_alphanumeric()
+                    && bytes[i - 1] != b':'
+                    && bytes[i - 1] != b'_';
+            let after_ok = after >= bytes.len()
+                || bytes[after].is_ascii_whitespace()
+                || bytes[after] == b';'
+                || bytes[after] == b'.'
+                || bytes[after] == b',';
+            if before_ok && after_ok {
+                return Some(i);
+            }
+        }
+        i += 1;
+    }
+    None
+}
+
 fn find_named_object_end(block: &str, obj_start: usize) -> Option<usize> {
     let bytes = block.as_bytes();
     let mut i = obj_start;
+    let mut in_string = false;
+    let mut escape = false;
     while i < bytes.len() {
         let b = bytes[i];
-        if b == b',' || b == b';' || b == b'.' {
-            return Some(i);
+        if in_string {
+            if escape {
+                escape = false;
+            } else if b == b'\\' {
+                escape = true;
+            } else if b == b'"' {
+                in_string = false;
+            }
+            i += 1;
+            continue;
+        }
+        match b {
+            b'"' => in_string = true,
+            b',' | b';' | b'.' => return Some(i),
+            _ => {}
         }
         i += 1;
     }
@@ -673,12 +744,12 @@ fn remove_matching_predicate_object(
     let obj_trim = object_value.trim();
     let norm_obj = normalize_ws(obj_trim);
     let mut search_from = 0;
-    while let Some(rel) = block[search_from..].find(predicate) {
-        let pred_pos = search_from + rel;
+    while let Some(pred_pos) = find_predicate_token(block, search_from, predicate) {
         for (obj_start, obj_end) in objects_in_predicate_value(block, pred_pos, predicate) {
             let candidate = normalize_ws(block[obj_start..obj_end].trim());
             if candidate == norm_obj {
-                let (remove_start, remove_end) = extend_removal_span(block, obj_start, obj_end);
+                let (remove_start, remove_end) =
+                    extend_removal_span(block, pred_pos, predicate, obj_start, obj_end);
                 let mut out = String::new();
                 out.push_str(&block[..remove_start]);
                 out.push_str(&block[remove_end..]);
@@ -717,10 +788,51 @@ fn line_starts_with_subject(trimmed: &str, subject: &str) -> bool {
         || trimmed.starts_with(&format!("{subject}."))
 }
 
+/// Reject IRIs that would break Turtle `<...>` terms or inject syntax.
+fn is_safe_iri(iri: &str) -> bool {
+    if iri.is_empty() {
+        return false;
+    }
+    !iri.chars().any(|c| {
+        c.is_control()
+            || c.is_whitespace()
+            || matches!(c, '<' | '>' | '"' | '{' | '}' | '|' | '^' | '`' | '\\')
+    })
+}
+
+/// True when `local` is a valid Turtle PN_LOCAL (simplified).
+fn is_valid_pn_local(local: &str) -> bool {
+    if local.is_empty() {
+        return false;
+    }
+    local.chars().all(|c| c.is_ascii_alphanumeric() || matches!(c, '_' | '-' | '.' | '~'))
+        && !local.starts_with('.')
+        && !local.ends_with('.')
+}
+
 fn iri_to_turtle_term(iri: &str, namespaces: &BTreeMap<String, String>) -> String {
+    let iri = if is_safe_iri(iri) {
+        iri
+    } else {
+        // Fall back to a quoted-safe form by percent-encoding is overkill; emit angle brackets
+        // only for safe IRIs, otherwise use a minimal escaped representation.
+        return format!("<{}>", iri.replace('>', "%3E").replace('<', "%3C").replace(' ', "%20"));
+    };
+
+    // Longest namespace match wins.
+    let mut best: Option<(&str, &str, usize)> = None;
     for (prefix, ns) in namespaces {
-        if !prefix.is_empty() && iri.starts_with(ns) {
-            let local = &iri[ns.len()..];
+        if prefix.is_empty() || !iri.starts_with(ns.as_str()) {
+            continue;
+        }
+        let len = ns.len();
+        if best.as_ref().is_none_or(|(_, _, best_len)| len > *best_len) {
+            best = Some((prefix.as_str(), ns.as_str(), len));
+        }
+    }
+    if let Some((prefix, ns, _)) = best {
+        let local = &iri[ns.len()..];
+        if is_valid_pn_local(local) {
             return format!("{prefix}:{local}");
         }
     }
@@ -748,7 +860,65 @@ mod tests {
         }];
         let result = apply_patches_to_text(ttl, &patches, true, &ex_ns()).expect("patch");
         let preview = result.preview_text.expect("preview");
-        assert!(preview.contains("Human"));
+        assert_eq!(
+            preview.matches("rdfs:label \"Human\"").count(),
+            1,
+            "must insert label exactly once"
+        );
+    }
+
+    #[test]
+    fn remove_subclass_does_not_leave_orphaned_predicate() {
+        let ttl = include_str!("../../../fixtures/example.ttl");
+        let patches = vec![PatchOp::RemoveSubClassOf {
+            entity_iri: "http://example.org/people#Person".to_string(),
+            parent_iri: "http://example.org/people#Thing".to_string(),
+        }];
+        let result = apply_patches_to_text(ttl, &patches, true, &ex_ns()).expect("patch");
+        let preview = result.preview_text.expect("preview");
+        assert!(!preview.contains("rdfs:subClassOf."));
+        assert!(!preview.contains("rdfs:subClassOf ;"));
+        assert!(!preview.contains("ex:Person rdfs:subClassOf"));
+    }
+
+    #[test]
+    fn remove_comment_with_period_in_literal() {
+        let ttl = r#"@prefix ex: <http://example.org/people#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+ex:Person a owl:Class ;
+    rdfs:comment "A human being." .
+"#;
+        let patches = vec![PatchOp::RemoveComment {
+            entity_iri: "http://example.org/people#Person".to_string(),
+            value: "A human being.".to_string(),
+        }];
+        let result = apply_patches_to_text(ttl, &patches, true, &ex_ns()).expect("patch");
+        let preview = result.preview_text.expect("preview");
+        assert!(!preview.contains("A human being."));
+        assert!(!preview.contains("rdfs:comment"));
+        assert!(preview.contains("ex:Person a owl:Class"));
+    }
+
+    #[test]
+    fn remove_label_ignores_predicate_name_inside_comment() {
+        let ttl = r#"@prefix ex: <http://example.org/people#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+ex:Person a owl:Class ;
+    rdfs:comment "see rdfs:label usage" ;
+    rdfs:label "Name" .
+"#;
+        let patches = vec![PatchOp::RemoveLabel {
+            entity_iri: "http://example.org/people#Person".to_string(),
+            value: "Name".to_string(),
+        }];
+        let result = apply_patches_to_text(ttl, &patches, true, &ex_ns()).expect("patch");
+        let preview = result.preview_text.expect("preview");
+        assert!(preview.contains("see rdfs:label usage"));
+        assert!(!preview.contains("rdfs:label \"Name\""));
     }
 
     #[test]
@@ -845,6 +1015,38 @@ mod tests {
         let block = "ex:Foo rdfs:label \"a  b\" .";
         let cleaned = cleanup_block_separators(block);
         assert!(cleaned.contains("\"a  b\""));
+    }
+
+    #[test]
+    fn iri_with_angle_bracket_is_escaped_not_injected() {
+        let ttl = "@prefix ex: <http://example.org/people#> .\n@prefix owl: <http://www.w3.org/2002/07/owl#> .\n\nex:Person a owl:Class .\n";
+        let evil =
+            "http://example.org/people#X> . ex:Pwned a owl:Class . <http://example.org/people#Y";
+        let patches = vec![PatchOp::CreateEntity {
+            entity_iri: evil.to_string(),
+            kind: PatchEntityKind::Class,
+        }];
+        let result = apply_patches_to_text(ttl, &patches, true, &ex_ns()).expect("patch");
+        let preview = result.preview_text.expect("preview");
+        assert!(!preview.contains("ex:Pwned a owl:Class"), "must not inject Turtle via IRI");
+        assert!(preview.contains("%3E") || preview.contains("<http://example.org/people#X"));
+    }
+
+    #[test]
+    fn longest_namespace_prefix_wins() {
+        let ns = BTreeMap::from([
+            ("ex".to_string(), "http://example.org/".to_string()),
+            ("exfoo".to_string(), "http://example.org/foo/".to_string()),
+        ]);
+        let term = iri_to_turtle_term("http://example.org/foo/Bar", &ns);
+        assert_eq!(term, "exfoo:Bar");
+    }
+
+    #[test]
+    fn slash_in_local_name_uses_angle_brackets() {
+        let ns = BTreeMap::from([("ex".to_string(), "http://example.org/".to_string())]);
+        let term = iri_to_turtle_term("http://example.org/foo/Bar", &ns);
+        assert_eq!(term, "<http://example.org/foo/Bar>");
     }
 
     #[test]

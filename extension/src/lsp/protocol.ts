@@ -260,6 +260,7 @@ export interface ApplyPatchResult {
   document_path?: string;
   entity_detail?: EntityDetail;
   reindex_warning?: string;
+  workspace_edit?: LspWorkspaceEdit;
 }
 
 export interface ApplyAxiomPatchParams {

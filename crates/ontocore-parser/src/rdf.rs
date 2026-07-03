@@ -80,14 +80,14 @@ pub fn parse_ontology_text(
     source_text: &str,
     raw_bytes: &[u8],
 ) -> Result<ParsedOntology> {
-    if format == OntologyFormat::Obo {
-        return crate::obo::parse_obo_text(path, ontology_id, source_text);
-    }
-    if raw_bytes.len() as u64 > MAX_FILE_BYTES {
+    if source_text.len() as u64 > MAX_FILE_BYTES || raw_bytes.len() as u64 > MAX_FILE_BYTES {
         return Err(ParseError::LimitExceeded(format!(
             "source exceeds {MAX_FILE_BYTES} bytes: {}",
             path.display()
         )));
+    }
+    if format == OntologyFormat::Obo {
+        return crate::obo::parse_obo_text(path, ontology_id, source_text);
     }
     let rdf_format = to_rdf_format(format, path)?;
 
@@ -267,6 +267,7 @@ pub(crate) fn assemble_parsed_ontology(
             ontology_id: ontology_id.to_string(),
         })
         .collect();
+    let triple_count = entities.len() + annotations.len() + axioms.len();
     ParsedOntology {
         ontology_id: ontology_id.to_string(),
         base_iri,
@@ -280,7 +281,7 @@ pub(crate) fn assemble_parsed_ontology(
         parse_status: ParseStatus::Ok,
         parse_message: None,
         parse_error_location: None,
-        triple_count: 0,
+        triple_count,
         quads: Vec::new(),
     }
 }
@@ -613,13 +614,25 @@ fn find_entity_source_location(
         {
             continue;
         }
+        let prefix_kw_len = if trimmed.to_ascii_lowercase().starts_with("@prefix ") {
+            "@prefix ".len()
+        } else if trimmed.to_ascii_lowercase().starts_with("prefix ") {
+            "PREFIX ".len()
+        } else {
+            continue;
+        };
         if let Some(colon) = trimmed.find(':') {
-            let prefix = trimmed["@prefix ".len()..colon].trim();
+            if colon < prefix_kw_len {
+                continue;
+            }
+            let prefix = trimmed[prefix_kw_len..colon].trim();
             let prefix = prefix.trim_start_matches('@');
             if let (Some(start), Some(end)) = (line.find('<'), line.find('>')) {
-                let ns = &line[start + 1..end];
-                if iri.starts_with(ns) && !prefix.is_empty() {
-                    needles.push(format!("{prefix}:{short_name}"));
+                if start < end {
+                    let ns = &line[start + 1..end];
+                    if iri.starts_with(ns) && !prefix.is_empty() {
+                        needles.push(format!("{prefix}:{short_name}"));
+                    }
                 }
             }
         }

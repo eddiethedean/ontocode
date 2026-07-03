@@ -1,6 +1,8 @@
 use crate::adapter::{ReasonerAdapter, ReasonerId, ReasonerProfile};
 use crate::error::{ReasonerError, Result};
-use crate::explain::explain_unsatisfiable_el;
+use crate::explain::{
+    explain_unsatisfiable_el, explain_unsatisfiable_rdfs, explain_unsatisfiable_rl,
+};
 use crate::hierarchy::subclass_edges_from_ontology;
 use crate::input::ReasonerInput;
 use crate::result::{
@@ -106,6 +108,21 @@ impl ReasonerAdapter for AutoAdapter {
         input: &ReasonerInput,
         request: &ExplanationRequest,
     ) -> Result<ExplanationResult> {
-        explain_unsatisfiable_el(&input.ontology, &request.class_iri)
+        // Prefer the profile Auto would use: try EL, then RL, then RDFS.
+        match explain_unsatisfiable_el(&input.ontology, &request.class_iri) {
+            Ok(result) => Ok(result),
+            Err(ReasonerError::ExplanationUnavailable(_))
+            | Err(ReasonerError::ClassNotFound(_)) => {
+                match explain_unsatisfiable_rl(&input.ontology, &request.class_iri) {
+                    Ok(result) => Ok(result),
+                    Err(ReasonerError::ExplanationUnavailable(_))
+                    | Err(ReasonerError::ClassNotFound(_)) => {
+                        explain_unsatisfiable_rdfs(&input.ontology, &request.class_iri)
+                    }
+                    Err(e) => Err(e),
+                }
+            }
+            Err(e) => Err(e),
+        }
     }
 }

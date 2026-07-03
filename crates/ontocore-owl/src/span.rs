@@ -46,9 +46,15 @@ fn subject_needles(
     short_name: &str,
     namespaces: &BTreeMap<String, String>,
 ) -> Vec<String> {
-    let mut needles = vec![format!("<{iri}>"), format!(":{short_name}")];
+    let mut needles = vec![format!("<{iri}>")];
+    // Only match default-prefix form when the empty prefix is bound to this IRI's namespace.
+    if let Some(default_ns) = namespaces.get("") {
+        if iri.starts_with(default_ns.as_str()) {
+            needles.push(format!(":{short_name}"));
+        }
+    }
     for (prefix, ns) in namespaces {
-        if iri.starts_with(ns) && !prefix.is_empty() {
+        if iri.starts_with(ns.as_str()) && !prefix.is_empty() {
             needles.push(format!("{prefix}:{short_name}"));
         }
     }

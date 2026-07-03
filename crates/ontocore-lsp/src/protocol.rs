@@ -125,6 +125,9 @@ pub struct ApplyAxiomPatchResult {
     /// Set when the patch was written but workspace reindex failed.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub reindex_warning: Option<String>,
+    /// Full-document edit so the client can sync open editors with disk.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub workspace_edit: Option<lsp_types::WorkspaceEdit>,
 }
 
 /// LSP JSON error payload for custom `ontocore/*` methods (not [`ontocore_core::OntoCoreError`]).

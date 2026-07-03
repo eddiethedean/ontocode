@@ -11,8 +11,8 @@ mod text;
 mod usages;
 
 pub use apply::{
-    apply_refactor_plan, apply_refactor_plan_checked, plan_touches_path, plans_equivalent,
-    validate_refactor_plan_paths,
+    apply_refactor_plan, apply_refactor_plan_checked, apply_refactor_plan_checked_with_overrides,
+    plan_touches_path, plans_equivalent, validate_refactor_plan_paths,
 };
 pub use error::{RefactorError, Result};
 pub use model::{FileChange, Hunk, RefactorPlan, RefactorRequest, Usage, UsageKind};

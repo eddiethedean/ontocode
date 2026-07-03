@@ -240,14 +240,22 @@ fn resolve_term_iri(term: &str, namespaces: &BTreeMap<String, String>) -> Result
     }
     if let Some((prefix, local)) = term.split_once(':') {
         if prefix.is_empty() {
-            return Err(OwlError::ManchesterInvalid(format!("empty prefix in QName '{term}'")));
+            // Default prefix `:Local` only when bound.
+            if let Some(ns) = namespaces.get("") {
+                return Ok(format!("{ns}{local}"));
+            }
+            return Err(OwlError::ManchesterInvalid(format!(
+                "empty prefix in QName '{term}' (no default prefix declared)"
+            )));
         }
         if let Some(ns) = namespaces.get(prefix) {
             return Ok(format!("{ns}{local}"));
         }
         return Err(OwlError::ManchesterInvalid(format!("unknown prefix '{prefix}' in '{term}'")));
     }
-    Ok(term.to_string())
+    Err(OwlError::ManchesterInvalid(format!(
+        "bare name '{term}' is not an IRI; use prefix:local or <absolute-iri>"
+    )))
 }
 
 fn tokenize(input: &str) -> std::result::Result<Vec<Token>, String> {

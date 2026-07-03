@@ -289,7 +289,7 @@ pub fn preview_move_entity(
     target_file: &Path,
     document_overrides: &HashMap<PathBuf, String>,
 ) -> Result<RefactorPlan> {
-    let entity = catalog
+    catalog
         .find_entity(entity_iri)
         .ok_or_else(|| RefactorError::EntityNotFound(entity_iri.to_string()))?;
     let source_doc = catalog
@@ -309,14 +309,31 @@ pub fn preview_move_entity(
 
     let source_text = read_source_text(&source_doc.path, document_overrides)?;
     let namespaces = ontocore_owl::namespaces_for_text(&source_text, &source_doc.namespaces);
-    let block_range = ontocore_owl::entity_block_range(&source_text, entity, &namespaces)
-        .ok_or_else(|| {
-            RefactorError::Invalid(format!("entity block not found for {entity_iri}"))
-        })?;
+    let short = ontocore_owl::short_name_from_iri(entity_iri);
+    let mut ranges =
+        ontocore_owl::all_entity_statement_ranges(&source_text, entity_iri, &short, &namespaces);
+    if ranges.is_empty() {
+        return Err(RefactorError::Invalid(format!("entity block not found for {entity_iri}")));
+    }
+    ranges.sort_by_key(|r| r.start);
 
-    let block_text = source_text[block_range.start as usize..block_range.end as usize].to_string();
+    let mut block_parts = Vec::new();
+    let mut hunks = Vec::new();
+    for range in &ranges {
+        let part = source_text[range.start as usize..range.end as usize].to_string();
+        block_parts.push(part.clone());
+        hunks.push(Hunk {
+            start_byte: range.start,
+            end_byte: range.end,
+            old_text: part,
+            new_text: String::new(),
+        });
+    }
+    let block_text = block_parts.join("\n");
     let mut source_without = source_text.clone();
-    source_without.replace_range(block_range.start as usize..block_range.end as usize, "");
+    for range in ranges.into_iter().rev() {
+        source_without.replace_range(range.start as usize..range.end as usize, "");
+    }
 
     let target_original = if target_file.exists() {
         read_source_text(target_file, document_overrides)?
@@ -335,12 +352,7 @@ pub fn preview_move_entity(
                 path: source_doc.path.clone(),
                 preview_text: source_without,
                 original_text: source_text,
-                hunks: vec![Hunk {
-                    start_byte: block_range.start,
-                    end_byte: block_range.end,
-                    old_text: block_text.clone(),
-                    new_text: String::new(),
-                }],
+                hunks,
             },
             FileChange {
                 path: target_file.to_path_buf(),
@@ -396,27 +408,34 @@ pub fn preview_extract_module(
             }
         }
         let namespaces = ontocore_owl::namespaces_for_text(&text, &doc.namespaces);
-        let block_range = ontocore_owl::entity_block_range(&text, entity, &namespaces)
-            .ok_or_else(|| RefactorError::Invalid(format!("block not found for {iri}")))?;
-        let block = text[block_range.start as usize..block_range.end as usize].to_string();
-        blocks.push(block.clone());
-
-        let replacement = if leave_stub {
-            let owl_type = owl_type_for_kind(entity.kind);
-            format!(
-                "{} a {owl_type} ;\n    owl:deprecated true ;\n    rdfs:comment \"Moved to {}\" .\n",
-                prefixed_curie(iri, &namespaces),
-                output_file.display()
-            )
-        } else {
-            String::new()
-        };
-        removals.push(EntityRemoval {
-            path: doc.path.clone(),
-            start: block_range.start,
-            end: block_range.end,
-            replacement,
-        });
+        let short = ontocore_owl::short_name_from_iri(iri);
+        let mut ranges = ontocore_owl::all_entity_statement_ranges(&text, iri, &short, &namespaces);
+        if ranges.is_empty() {
+            return Err(RefactorError::Invalid(format!("block not found for {iri}")));
+        }
+        ranges.sort_by_key(|r| r.start);
+        let mut entity_blocks = Vec::new();
+        for (idx, range) in ranges.iter().enumerate() {
+            let block = text[range.start as usize..range.end as usize].to_string();
+            entity_blocks.push(block);
+            let replacement = if leave_stub && idx == 0 {
+                let owl_type = owl_type_for_kind(entity.kind);
+                format!(
+                    "{} a {owl_type} ;\n    owl:deprecated true ;\n    rdfs:comment \"Moved to {}\" .\n",
+                    prefixed_curie(iri, &namespaces),
+                    output_file.display()
+                )
+            } else {
+                String::new()
+            };
+            removals.push(EntityRemoval {
+                path: doc.path.clone(),
+                start: range.start,
+                end: range.end,
+                replacement,
+            });
+        }
+        blocks.push(entity_blocks.join("\n"));
     }
 
     let mut source_changes: BTreeMap<PathBuf, (String, String, Vec<Hunk>)> = BTreeMap::new();
@@ -467,10 +486,15 @@ pub fn preview_extract_module(
         })
         .collect();
 
+    let output_original = if output_file.exists() {
+        read_source_text(output_file, document_overrides)?
+    } else {
+        String::new()
+    };
     changes.push(FileChange {
         path: output_file.to_path_buf(),
         preview_text: module_text.clone(),
-        original_text: String::new(),
+        original_text: output_original,
         hunks: vec![Hunk {
             start_byte: 0,
             end_byte: 0,

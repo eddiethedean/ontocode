@@ -90,14 +90,20 @@ impl ServerState {
         Ok((stats, indexed_at))
     }
 
-    pub fn reasoner_snapshot(&self) -> Option<ReasonerSnapshot> {
-        self.inner.read().ok()?.reasoner_snapshot.clone()
-    }
-
     pub fn set_reasoner_snapshot(&self, snapshot: ReasonerSnapshot) {
         if let Ok(mut guard) = self.inner.write() {
             guard.reasoner_snapshot = Some(snapshot);
         }
+    }
+
+    /// Read catalog and reasoner snapshot under one lock (avoids TOCTOU mismatch).
+    pub fn with_catalog_and_reasoner<T>(
+        &self,
+        f: impl FnOnce(&OntologyCatalog, Option<&ReasonerSnapshot>) -> T,
+    ) -> Option<T> {
+        let guard = self.inner.read().ok()?;
+        let catalog = guard.catalog.as_ref()?;
+        Some(f(catalog, guard.reasoner_snapshot.as_ref()))
     }
 
     pub fn reasoner_cache_mut<R>(&self, f: impl FnOnce(&mut ReasonerCacheStore) -> R) -> Option<R> {
@@ -307,5 +313,11 @@ mod tests {
         let err =
             state.set_document_text(PathBuf::from("/tmp/extra.ttl"), "x".to_string()).unwrap_err();
         assert!(err.contains("open document limit"));
+    }
+
+    #[test]
+    fn catalog_and_reasoner_unavailable_before_index() {
+        let state = ServerState::new();
+        assert!(state.with_catalog_and_reasoner(|_, _| ()).is_none());
     }
 }

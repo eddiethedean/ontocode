@@ -95,6 +95,16 @@ pub fn apply_refactor_plan_checked(
     preview_only: bool,
     workspace_root: Option<&Path>,
 ) -> Result<usize> {
+    apply_refactor_plan_checked_with_overrides(plan, preview_only, workspace_root, None)
+}
+
+/// Apply plan with optional open-buffer overrides used for compare-and-swap.
+pub fn apply_refactor_plan_checked_with_overrides(
+    plan: &RefactorPlan,
+    preview_only: bool,
+    workspace_root: Option<&Path>,
+    document_overrides: Option<&std::collections::HashMap<PathBuf, String>>,
+) -> Result<usize> {
     if let Some(root) = workspace_root {
         validate_refactor_plan_paths(root, plan)?;
     }
@@ -108,6 +118,15 @@ pub fn apply_refactor_plan_checked(
             continue;
         }
         let backup = backup_file(&change.path)?;
+        // Compare-and-swap against the same source the preview used (buffer or disk).
+        let current = effective_current_text(&change.path, &backup, document_overrides);
+        if current != change.original_text {
+            rollback_backups(&backups)?;
+            return Err(RefactorError::Invalid(format!(
+                "file changed since preview: {}",
+                change.path.display()
+            )));
+        }
         if let Err(e) = atomic_write(&change.path, &change.preview_text) {
             rollback_backups(&backups)?;
             return Err(RefactorError::Io(e));
@@ -120,6 +139,24 @@ pub fn apply_refactor_plan_checked(
         return Err(RefactorError::Invalid("no files changed".to_string()));
     }
     Ok(written)
+}
+
+fn effective_current_text(
+    path: &Path,
+    backup: &FileBackup,
+    document_overrides: Option<&std::collections::HashMap<PathBuf, String>>,
+) -> String {
+    if let Some(overrides) = document_overrides {
+        if let Some(text) = overrides.get(path) {
+            return text.clone();
+        }
+        if let Ok(canonical) = path.canonicalize() {
+            if let Some(text) = overrides.get(&canonical) {
+                return text.clone();
+            }
+        }
+    }
+    backup.previous.clone().unwrap_or_default()
 }
 
 fn rollback_backups(backups: &[FileBackup]) -> Result<()> {

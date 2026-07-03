@@ -34,6 +34,8 @@ pub fn remap_iri(iri: &str, from_base: &str, to_base: &str) -> Option<String> {
 }
 
 /// Replace all occurrences of `old_iri` with `new_iri` in Turtle text, preserving prefix forms.
+///
+/// Skips matches inside `#` comments and `"..."` string literals.
 pub fn replace_iri_in_text(
     text: &str,
     old_iri: &str,
@@ -48,6 +50,8 @@ pub fn replace_iri_in_text(
 
     let mut replacements: Vec<(String, String)> =
         vec![(format!("<{old_iri}>"), format!("<{new_iri}>"))];
+    // Prefer angle-bracket and prefixed forms; bare IRI only when not inside comments/strings
+    // (enforced by `is_in_comment_or_string`).
     if old_iri != new_iri {
         replacements.push((old_iri.to_string(), new_iri.to_string()));
     }
@@ -79,7 +83,9 @@ pub fn replace_iri_in_text(
         while let Some(pos) = result[search_from..].find(old) {
             let start = search_from + pos;
             let end = start + old.len();
-            if !is_safe_replacement_boundary(&result, start, end) {
+            if is_in_comment_or_string(&result, start)
+                || !is_safe_replacement_boundary(&result, start, end)
+            {
                 search_from = end;
                 continue;
             }
@@ -90,6 +96,43 @@ pub fn replace_iri_in_text(
     }
 
     (result, hunks)
+}
+
+/// True when `byte_offset` lies inside a `#` line comment or a `"..."` string.
+fn is_in_comment_or_string(text: &str, byte_offset: usize) -> bool {
+    let bytes = text.as_bytes();
+    let mut i = 0usize;
+    let mut in_string = false;
+    let mut escape = false;
+    let mut line_comment = false;
+    while i < byte_offset && i < bytes.len() {
+        let b = bytes[i];
+        if line_comment {
+            if b == b'\n' {
+                line_comment = false;
+            }
+            i += 1;
+            continue;
+        }
+        if in_string {
+            if escape {
+                escape = false;
+            } else if b == b'\\' {
+                escape = true;
+            } else if b == b'"' {
+                in_string = false;
+            }
+            i += 1;
+            continue;
+        }
+        match b {
+            b'"' => in_string = true,
+            b'#' => line_comment = true,
+            _ => {}
+        }
+        i += 1;
+    }
+    in_string || line_comment
 }
 
 fn namespace_for_iri(iri: &str, namespaces: &BTreeMap<String, String>) -> Option<String> {
@@ -151,5 +194,20 @@ mod tests {
             replace_iri_in_text(ttl, "http://example.org#Person", "http://example.org#Agent", &ns);
         assert!(out.contains("<http://example.org#Person/role>"));
         assert!(!out.contains("<http://example.org#Agent/role>"));
+    }
+
+    #[test]
+    fn replace_iri_skips_comments_and_string_literals() {
+        let ttl = "@prefix ex: <http://example.org#> .\n\
+                   # see http://example.org#Person\n\
+                   ex:Person a owl:Class ;\n\
+                       rdfs:comment \"see http://example.org#Person\" .\n";
+        let ns = BTreeMap::from([("ex".to_string(), "http://example.org#".to_string())]);
+        let (out, _) =
+            replace_iri_in_text(ttl, "http://example.org#Person", "http://example.org#Agent", &ns);
+        assert!(out.contains("# see http://example.org#Person"));
+        assert!(out.contains("\"see http://example.org#Person\""));
+        assert!(out.contains("ex:Agent"));
+        assert!(!out.contains("ex:Person a"));
     }
 }

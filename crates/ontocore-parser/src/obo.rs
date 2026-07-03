@@ -164,6 +164,12 @@ pub fn parse_obo_text(path: &Path, ontology_id: &str, source_text: &str) -> Resu
                 });
             }
         }
+        if entities.len() + annotations.len() + axioms.len() > MAX_TRIPLES_PER_FILE {
+            return Err(ParseError::LimitExceeded(format!(
+                "OBO file exceeds entity/axiom limit: {}",
+                path.display()
+            )));
+        }
     }
 
     flush_term(
@@ -180,9 +186,10 @@ pub fn parse_obo_text(path: &Path, ontology_id: &str, source_text: &str) -> Resu
         &mut deprecated,
     );
 
-    if entities.len() > MAX_TRIPLES_PER_FILE {
+    let total = entities.len() + annotations.len() + axioms.len();
+    if entities.len() > MAX_TRIPLES_PER_FILE || total > MAX_TRIPLES_PER_FILE {
         return Err(ParseError::LimitExceeded(format!(
-            "OBO file exceeds entity limit: {}",
+            "OBO file exceeds entity/axiom limit: {}",
             path.display()
         )));
     }
@@ -245,5 +252,20 @@ mod tests {
         assert_eq!(parsed.entities[0].obo_id.as_deref(), Some("TEST:0000001"));
         assert_eq!(parsed.entities[0].labels, vec!["example term"]);
         assert_eq!(parsed.axioms.len(), 1);
+        assert!(parsed.triple_count > 0);
+    }
+
+    #[test]
+    fn rejects_oversized_obo_source_text() {
+        let huge = "x".repeat((ontocore_core::MAX_FILE_BYTES as usize) + 1);
+        let err = crate::rdf::parse_ontology_text(
+            Path::new("big.obo"),
+            ontocore_core::OntologyFormat::Obo,
+            "doc-1",
+            &huge,
+            huge.as_bytes(),
+        )
+        .unwrap_err();
+        assert!(err.to_string().contains("exceeds"));
     }
 }

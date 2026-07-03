@@ -309,6 +309,10 @@ fn main() -> Result<()> {
             let result = ontocore_owl::apply_patches(&document, &patches, preview, &namespaces)
                 .context("patch failed")?;
             println!("{}", serde_json::to_string_pretty(&result)?);
+            let has_errors = result.diagnostics.iter().any(|d| d.severity == "error");
+            if has_errors || (!preview && !patches.is_empty() && !result.applied) {
+                bail!("patch failed with {} diagnostic(s)", result.diagnostics.len().max(1));
+            }
             if !preview && result.applied {
                 println!("applied");
             }

@@ -1,12 +1,11 @@
 use crate::OntologyCatalog;
 use ontocore_core::{
-    document_matches_entity, Entity, EntityKind, AXIOM_KIND_DISJOINT_CLASS, AXIOM_KIND_DOMAIN,
-    AXIOM_KIND_EQUIVALENT_CLASS, AXIOM_KIND_PROPERTY_CHAIN, AXIOM_KIND_RANGE,
-    AXIOM_KIND_SUB_CLASS_OF,
+    document_matches_entity, read_to_string_capped, Entity, EntityKind, AXIOM_KIND_DISJOINT_CLASS,
+    AXIOM_KIND_DOMAIN, AXIOM_KIND_EQUIVALENT_CLASS, AXIOM_KIND_PROPERTY_CHAIN, AXIOM_KIND_RANGE,
+    AXIOM_KIND_SUB_CLASS_OF, MAX_FILE_BYTES,
 };
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
-use std::fs;
 use std::path::PathBuf;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -209,7 +208,10 @@ fn axiom_summary(a: &ontocore_core::Axiom, editable: bool) -> EntityAxiomSummary
 }
 
 fn scan_file_for_iri(path: &std::path::Path, iri: &str, short_name: &str) -> Option<SourceHint> {
-    let content = fs::read_to_string(path).ok()?;
+    if path.symlink_metadata().ok()?.file_type().is_symlink() {
+        return None;
+    }
+    let content = read_to_string_capped(path, MAX_FILE_BYTES).ok()?;
     let local_name = iri.rsplit(['#', '/']).next().unwrap_or(short_name);
 
     let needles = [iri.to_string(), format!("<{iri}>"), format!("{local_name}:")];

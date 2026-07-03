@@ -27,7 +27,7 @@ pub fn explain_unsatisfiable_el(ontology: &Ontology, class_iri: &str) -> Result<
 }
 
 pub fn explain_unsatisfiable_rl(ontology: &Ontology, class_iri: &str) -> Result<ExplanationResult> {
-    let _class_id = ontology
+    let class_id = ontology
         .lookup_entity(class_iri)
         .ok_or_else(|| ReasonerError::ClassNotFound(class_iri.to_string()))?;
     let mut mutable = ontology.clone();
@@ -37,8 +37,10 @@ pub fn explain_unsatisfiable_rl(ontology: &Ontology, class_iri: &str) -> Result<
         .saturate(&mut mutable)
         .map_err(|e| ReasonerError::Explain(e.to_string()))?
         .trace;
-    let graph =
-        build_proof_graph(&mutable, &trace).map_err(|e| ReasonerError::Explain(e.to_string()))?;
+    let bottom = find_bottom_subsumption(&mutable, class_id, &trace)
+        .ok_or_else(|| ReasonerError::ExplanationUnavailable(class_iri.to_string()))?;
+    let graph = explain_unsatisfiable_trace(&mutable, class_id, bottom, &trace)
+        .map_err(|e| ReasonerError::Explain(e.to_string()))?;
     map_proof_graph(ontology, class_iri, graph)
 }
 
@@ -46,7 +48,7 @@ pub fn explain_unsatisfiable_rdfs(
     ontology: &Ontology,
     class_iri: &str,
 ) -> Result<ExplanationResult> {
-    let _class_id = ontology
+    let class_id = ontology
         .lookup_entity(class_iri)
         .ok_or_else(|| ReasonerError::ClassNotFound(class_iri.to_string()))?;
     let mut mutable = ontology.clone();
@@ -55,8 +57,10 @@ pub fn explain_unsatisfiable_rdfs(
         .materialize(&mut mutable)
         .map_err(|e| ReasonerError::Explain(e.to_string()))?
         .trace;
-    let graph =
-        build_proof_graph(&mutable, &trace).map_err(|e| ReasonerError::Explain(e.to_string()))?;
+    let bottom = find_bottom_subsumption(&mutable, class_id, &trace)
+        .ok_or_else(|| ReasonerError::ExplanationUnavailable(class_iri.to_string()))?;
+    let graph = explain_unsatisfiable_trace(&mutable, class_id, bottom, &trace)
+        .map_err(|e| ReasonerError::Explain(e.to_string()))?;
     map_proof_graph(ontology, class_iri, graph)
 }
 
@@ -161,7 +165,7 @@ fn find_bottom_subsumption(
             return None;
         }
         let iri = ontology.resolve_iri(record.iri).ok()?;
-        if iri.contains("Nothing") || iri.ends_with("#Bottom") || iri.ends_with("/Nothing") {
+        if is_owl_nothing(iri) {
             Some(sup)
         } else {
             None
@@ -218,4 +222,9 @@ fn format_node(
 fn entity_iri_opt(ontology: &Ontology, id: EntityId) -> Option<String> {
     let entity = ontology.entity(id).ok()?;
     ontology.resolve_iri(entity.iri).ok().map(|s| s.to_string())
+}
+
+/// True for the OWL bottom class (`owl:Nothing`), not IRIs that merely contain "Nothing".
+fn is_owl_nothing(iri: &str) -> bool {
+    iri == "http://www.w3.org/2002/07/owl#Nothing" || iri == "owl:Nothing"
 }

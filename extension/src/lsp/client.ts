@@ -203,7 +203,17 @@ export async function applyAxiomPatch(
     "ontocore/applyAxiomPatch",
     params
   );
-  return assertApplyPatchResult(result);
+  const patch = assertApplyPatchResult(result);
+  if (patch.applied && patch.workspace_edit) {
+    const { applyLspWorkspaceEdit } = await import("./workspaceEdit");
+    const synced = await applyLspWorkspaceEdit(patch.workspace_edit);
+    if (!synced) {
+      void vscode.window.showWarningMessage(
+        "OntoCode: changes written to disk but editor sync was cancelled"
+      );
+    }
+  }
+  return patch;
 }
 
 export async function runSqlQuery(sql: string): Promise<TabularQueryResult> {
@@ -258,9 +268,15 @@ export async function getGraph(params: GetGraphParams): Promise<GetGraphResult> 
 
 export async function runRobot(params: RunRobotParams): Promise<RunRobotResult> {
   const c = requireClient();
-  const robotPath =
+  let robotPath =
     params.robot_path ??
     vscode.workspace.getConfiguration("ontocode").get<string>("robotPath");
+  if (robotPath && robotPath.trim().length > 0 && !vscode.workspace.isTrusted) {
+    void vscode.window.showWarningMessage(
+      "OntoCode: ontocode.robotPath is ignored in Restricted Mode; using robot on PATH."
+    );
+    robotPath = undefined;
+  }
   const result = await c.sendRequest<unknown>("ontocore/runRobot", {
     ...params,
     robot_path: robotPath || undefined,

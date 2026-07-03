@@ -77,28 +77,50 @@ fn run_worker(state: ServerState, job_rx: Receiver<WorkerJob>, lsp_sender: Sende
             }
             WorkerJob::Index(first_index) => {
                 let mut batch = vec![first_index];
-                while let Ok(WorkerJob::Index(next)) = job_rx.try_recv() {
-                    batch.push(next);
-                }
-                // Drain any robot jobs that arrived while batching index work.
                 let mut pending_robots = Vec::new();
-                while let Ok(WorkerJob::Robot(robot)) = job_rx.try_recv() {
-                    pending_robots.push(robot);
-                }
-
-                let workspace = batch.last().map(|j| j.workspace.clone()).unwrap_or_default();
-                let replies: Vec<Sender<Result<(CatalogStats, u64), String>>> =
-                    batch.into_iter().flat_map(|j| j.reply).collect();
-
-                let result = state.index_workspace(workspace);
-                match &result {
-                    Ok(_) => {
-                        publish_diagnostics_for_state(&lsp_sender, &state);
+                // Drain without dropping non-Index jobs (Robot must not be lost).
+                while let Ok(job) = job_rx.try_recv() {
+                    match job {
+                        WorkerJob::Index(next) => batch.push(next),
+                        WorkerJob::Robot(robot) => pending_robots.push(robot),
                     }
-                    Err(message) => notify_index_failure(&lsp_sender, message),
                 }
-                for reply in replies {
-                    let _ = reply.send(result.clone());
+
+                // Coalesce only silent debounce jobs that share a path. Sync callers
+                // (reply: Some) must get a result for their requested workspace.
+                let (silent, sync_jobs): (Vec<_>, Vec<_>) =
+                    batch.into_iter().partition(|j| j.reply.is_none());
+
+                if sync_jobs.is_empty() {
+                    // Pure debounce: latest path wins.
+                    if let Some(last) = silent.last() {
+                        run_index_job(&state, &lsp_sender, last.workspace.clone(), &[]);
+                    }
+                } else {
+                    // Run each distinct sync workspace once; attach silent jobs only when
+                    // they match that path.
+                    let mut seen = Vec::new();
+                    for job in &sync_jobs {
+                        let path = &job.workspace;
+                        if seen.iter().any(|p: &PathBuf| p == path) {
+                            continue;
+                        }
+                        seen.push(path.clone());
+                        let replies: Vec<_> = sync_jobs
+                            .iter()
+                            .filter(|j| &j.workspace == path)
+                            .filter_map(|j| j.reply.clone())
+                            .collect();
+                        run_index_job(&state, &lsp_sender, path.clone(), &replies);
+                    }
+                    // Silent jobs for paths not covered by a sync request.
+                    for job in silent {
+                        if !seen.iter().any(|p| p == &job.workspace) {
+                            let path = job.workspace.clone();
+                            run_index_job(&state, &lsp_sender, path.clone(), &[]);
+                            seen.push(path);
+                        }
+                    }
                 }
 
                 for robot in pending_robots {
@@ -107,6 +129,24 @@ fn run_worker(state: ServerState, job_rx: Receiver<WorkerJob>, lsp_sender: Sende
                 }
             }
         }
+    }
+}
+
+fn run_index_job(
+    state: &ServerState,
+    lsp_sender: &Sender<Message>,
+    workspace: PathBuf,
+    replies: &[Sender<Result<(CatalogStats, u64), String>>],
+) {
+    let result = state.index_workspace(workspace);
+    match &result {
+        Ok(_) => {
+            publish_diagnostics_for_state(lsp_sender, state);
+        }
+        Err(message) => notify_index_failure(lsp_sender, message),
+    }
+    for reply in replies {
+        let _ = reply.send(result.clone());
     }
 }
 

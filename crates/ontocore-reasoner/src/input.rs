@@ -40,10 +40,13 @@ impl WorkspaceInputLoader {
         let mut ontology = Ontology::new();
 
         for file in &files {
-            hasher.update(file.content_hash.as_bytes());
             let loaded = if let Some(text) = self.document_override_text(&file.path) {
+                // Hash override body so open-buffer edits invalidate the reasoner cache.
+                hasher.update(file.path.to_string_lossy().as_bytes());
+                hasher.update(text.as_bytes());
                 load_ontology_from_temp(&file.path, text)?
             } else {
+                hasher.update(file.content_hash.as_bytes());
                 load_ontology(&file.path).map_err(|e| ReasonerError::Load {
                     path: file.path.clone(),
                     message: e.to_string(),
@@ -72,9 +75,24 @@ impl WorkspaceInputLoader {
     }
 
     fn document_override_text(&self, path: &Path) -> Option<&String> {
-        self.document_overrides
-            .get(path)
-            .or_else(|| path.canonicalize().ok().and_then(|p| self.document_overrides.get(&p)))
+        if let Some(text) = self.document_overrides.get(path) {
+            return Some(text);
+        }
+        let canonical = path.canonicalize().ok();
+        if let Some(ref canon) = canonical {
+            if let Some(text) = self.document_overrides.get(canon) {
+                return Some(text);
+            }
+        }
+        // Match overrides stored under a different spelling of the same path
+        // (e.g. /var vs /private/var on macOS).
+        self.document_overrides.iter().find_map(|(key, text)| {
+            if paths_equal(key, path) {
+                Some(text)
+            } else {
+                None
+            }
+        })
     }
 }
 
@@ -100,4 +118,42 @@ fn merge_ontology(target: &mut Ontology, source: Ontology) -> Result<()> {
     merge_triples_into_ontology(target, &triples, &[])
         .map_err(|e| ReasonerError::Ontology(e.to_string()))?;
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use ontocore_catalog::ClassHierarchy;
+    use std::fs;
+
+    #[test]
+    fn content_hash_changes_when_override_differs_from_disk() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("ex.ttl");
+        fs::write(
+            &path,
+            "@prefix ex: <http://ex#> .\n@prefix owl: <http://www.w3.org/2002/07/owl#> .\nex:A a owl:Class .\n",
+        )
+        .unwrap();
+
+        let disk_input = WorkspaceInputLoader::new(dir.path())
+            .load(ClassHierarchy::default())
+            .expect("disk load");
+
+        let mut overrides = HashMap::new();
+        overrides.insert(
+            path.clone(),
+            "@prefix ex: <http://ex#> .\n@prefix owl: <http://www.w3.org/2002/07/owl#> .\nex:A a owl:Class .\nex:B a owl:Class .\n"
+                .to_string(),
+        );
+        let override_input = WorkspaceInputLoader::new(dir.path())
+            .document_overrides(overrides)
+            .load(ClassHierarchy::default())
+            .expect("override load");
+
+        assert_ne!(
+            disk_input.content_hash, override_input.content_hash,
+            "open-buffer overrides must change reasoner content_hash"
+        );
+    }
 }

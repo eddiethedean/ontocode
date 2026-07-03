@@ -10,6 +10,9 @@ pub enum RobotError {
 
     #[error("ROBOT exited with status {code}: {stderr}")]
     Failed { code: i32, stderr: String },
+
+    #[error("{0}")]
+    Run(String),
 }
 
 pub type Result<T> = std::result::Result<T, RobotError>;

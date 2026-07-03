@@ -371,12 +371,53 @@ fn apply_axiom_patch_uses_open_buffer_not_disk() {
     .expect("apply patch");
 
     assert!(result.patch.applied);
+    assert!(result.workspace_edit.is_some(), "patch must return workspace_edit for editor sync");
     let updated = state.document_text(&path).expect("buffer after patch");
     assert!(
         updated.contains(buffer_marker),
         "patch should apply to open buffer, not disk-only source"
     );
-    assert!(updated.contains("Human"));
+    assert_eq!(
+        updated.matches("rdfs:label \"Human\"").count(),
+        1,
+        "label must be inserted exactly once"
+    );
+}
+
+#[test]
+fn apply_axiom_patch_does_not_pin_closed_file_as_open_buffer() {
+    let dir = tempfile::tempdir().unwrap();
+    let path = dir.path().join("example.ttl");
+    std::fs::copy(fixture_workspace().join("example.ttl"), &path).unwrap();
+
+    let state = ServerState::new();
+    let ws = dir.path().to_path_buf();
+    state.set_workspace_root(ws.clone()).expect("set workspace");
+    state.index_workspace(ws.clone()).expect("index");
+
+    let (tx, _rx) = unbounded::<Message>();
+    let worker = IndexWorker::spawn(state.clone(), tx);
+    let uri = path_to_uri(&path);
+    handle_apply_axiom_patch(
+        &state,
+        &worker,
+        ApplyAxiomPatchParams {
+            document_uri: uri,
+            patches: vec![ontocore_owl::PatchOp::AddLabel {
+                entity_iri: "http://example.org/people#Person".into(),
+                value: "Human".into(),
+            }],
+            preview_only: false,
+        },
+    )
+    .expect("apply patch");
+
+    assert!(
+        state.open_document_overrides().is_empty(),
+        "closed files must not become phantom open_documents"
+    );
+    let disk = std::fs::read_to_string(&path).unwrap();
+    assert!(disk.contains("Human"));
 }
 
 fn refactor_fixture(path: &str) -> PathBuf {

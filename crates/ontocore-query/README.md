@@ -1,13 +1,13 @@
 # ontocore-query
 
-> Part of **OntoCore** (semantic workspace engine). Crate name remains `ontocore-query` for compatibility.
+> Part of **OntoCore** (semantic workspace engine).
 
 SQL-like virtual tables and SPARQL query engine for [OntoCore](https://github.com/eddiethedean/ontocode).
 
 ## Install
 
 ```toml
-ontocore-query = "0.6"
+ontocore-query = "0.9"
 ```
 
 ## Quick example

@@ -1,6 +1,6 @@
 # ontocore-robot
 
-> Part of **OntoCore** (semantic workspace engine). Crate name remains `ontocore-robot` for compatibility.
+> Part of **OntoCore** (semantic workspace engine).
 
 Thin wrappers around the [ROBOT](https://github.com/ontodev/robot) CLI for OntoCore.
 

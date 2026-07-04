@@ -4,7 +4,7 @@ OntoCode / OntoCore is licensed under **MIT OR Apache-2.0** at your option (see 
 
 This document summarizes **third-party licenses** for dependencies named in [DEPENDENCY_MATRIX.md](DEPENDENCY_MATRIX.md). It is not legal advice. Regenerate NOTICES before releases when dependency sets change.
 
-## Direct dependencies (shipped v0.5)
+## Direct dependencies (shipped v0.9)
 
 | Crate | License | Distribution notes |
 |-------|---------|-------------------|
@@ -15,19 +15,19 @@ This document summarizes **third-party licenses** for dependencies named in [DEP
 | `lsp-server` | MIT OR Apache-2.0 | Compatible |
 | `lsp-types` | MIT | Compatible |
 | `horned-owl` | **LGPL-3.0** | Rust crate link via `ontocore-owl`. See [LGPL compliance guide](../guides/lgpl-compliance.md). Document LGPL in release artifacts; provide source offer per LGPL-3.0 if distributing binaries. |
+| `ontologos-*` | MIT OR Apache-2.0 | Compatible (`ontocore-reasoner`) |
+| `reasonable` (transitive via OntoLogos) | **BSD-3-Clause** | Include BSD notice in NOTICES |
+| `fastobo`, `fastobo-owl`, `fastobo-validator` | MIT | Compatible |
+| `petgraph` | MIT OR Apache-2.0 | Compatible |
 | `serde`, `clap`, `thiserror`, etc. | MIT OR Apache-2.0 | Compatible |
 
-## Planned dependencies (v0.5+)
+## Planned dependencies (post-v0.9)
 
 | Crate | License | Distribution notes |
 |-------|---------|-------------------|
-| `ontologos-*` | MIT OR Apache-2.0 | Compatible |
-| `reasonable` (transitive via OntoLogos) | **BSD-3-Clause** | Include BSD notice in NOTICES |
-| `fastobo`, `fastobo-owl`, `fastobo-validator` | MIT | Compatible |
 | `rudof` | MIT OR Apache-2.0 | Compatible |
 | `git2` | MIT OR Apache-2.0 | Links `libgit2` (GPL-2.0 with linking exception) — review if static linking |
 | `notify` | CC0-1.0 | Compatible |
-| `petgraph` | MIT OR Apache-2.0 | Compatible |
 | `pulldown-cmark` | MIT | Compatible |
 | `minijinja` | Apache-2.0 | Compatible |
 | `datafusion` (if adopted) | Apache-2.0 | Compatible |

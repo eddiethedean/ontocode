@@ -22,3 +22,4 @@ Migration guides: [Migration index](migration/README.md)
 ### Fixed
 
 - LSP reasoner test for DL/auto profiles; MkDocs strict-mode link fixes
+- Release packaging for first `ontocore-*` crates.io publish (licenses, crate READMEs, leaf-crate dry-run)

@@ -1,6 +1,6 @@
 # ontocore-lsp
 
-> Part of **OntoCore** (semantic workspace engine). Crate name remains `ontocore-lsp` for compatibility.
+> Part of **OntoCore** (semantic workspace engine).
 
 Language server for OntoCode and LSP integrators — stdio transport, custom `ontocore/*` methods.
 

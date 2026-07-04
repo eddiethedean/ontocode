@@ -8,10 +8,10 @@ license.workspace = true
 repository.workspace = true
 homepage.workspace = true
 authors.workspace = true
-readme = "../../README.md"
+readme = "README.md"
 keywords.workspace = true
 categories.workspace = true
-include = ["src/**/*", "Cargo.toml", "LICENSE-MIT", "LICENSE-APACHE-2.0"]
+include = ["src/**/*", "Cargo.toml", "README.md", "LICENSE-MIT", "LICENSE-APACHE-2.0"]
 
 [lib]
 name = "ontocore_lsp"

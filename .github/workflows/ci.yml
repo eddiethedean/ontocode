@@ -204,10 +204,10 @@ jobs:
 
       - run: |
           set -euo pipefail
-          # Only packages whose deps are already on crates.io can dry-run here.
+          # Only leaf crates (no unpublished path deps) can dry-run here.
           # Full graph is published in dependency order on release tags.
           cargo publish -p ontocore-core --dry-run
-          # Workspace-internal crates cannot `publish --dry-run` until path deps exist on crates.io.
+          cargo publish -p ontocore-robot --dry-run
           cargo build -p ontocore-diagnostics -p ontocore-owl -p ontocore-cli -p ontocore
 
   docs:

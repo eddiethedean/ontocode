@@ -39,11 +39,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - LSP reasoner integration test updated for shipped DL/auto profiles
 - MkDocs strict-mode documentation link fixes (ADR rename, concepts, contributing)
+- Release packaging: license files for `ontocore` and `ontocore-robot`; crate READMEs and include lists for crates.io; release dry-run only on leaf crates
 
 ### Notes
 
 - See [migration/v0.9.md](docs/migration/v0.9.md) for upgrade steps from v0.8
 - `Workspace` API remains experimental until v0.10
+- First crates.io publish under `ontocore-*` names (prior releases used `ontoindex-*`)
 
 ## [0.8.0] - 2026-06-26
 

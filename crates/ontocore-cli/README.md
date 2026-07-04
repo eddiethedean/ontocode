@@ -1,6 +1,6 @@
 # ontocore-cli
 
-> Part of **OntoCore** (semantic workspace engine). Crate name remains `ontocore-cli` for compatibility.
+> Part of **OntoCore** (semantic workspace engine).
 
 Command-line interface for [OntoCore](https://github.com/eddiethedean/ontocode) — index ontology workspaces, run SQL/SPARQL queries, validate, patch Turtle files, and classify with OntoLogos.
 

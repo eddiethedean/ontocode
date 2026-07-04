@@ -1,13 +1,13 @@
 # ontocore-parser
 
-> Part of **OntoCore** (semantic workspace engine). Crate name remains `ontocore-parser` for compatibility.
+> Part of **OntoCore** (semantic workspace engine).
 
 RDF parsing and entity extraction for [OntoCore](https://github.com/eddiethedean/ontocode), backed by [Oxigraph](https://crates.io/crates/oxigraph).
 
 ## Install
 
 ```toml
-ontocore-parser = "0.6"
+ontocore-parser = "0.9"
 ```
 
 ## Documentation

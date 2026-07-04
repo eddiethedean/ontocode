@@ -96,8 +96,11 @@ jobs:
 
       - name: Verify crate metadata (dry-run publish)
         run: |
+          set -euo pipefail
+          # Only leaf crates (no unpublished path deps) can dry-run before the
+          # ordered publish below. Full graph is published in dependency order.
           cargo publish -p ontocore-core --dry-run
-          cargo publish -p ontocore --dry-run
+          cargo publish -p ontocore-robot --dry-run
 
       - uses: Swatinem/rust-cache@v2
         with:

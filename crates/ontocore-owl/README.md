@@ -1,13 +1,13 @@
 # ontocore-owl
 
-> Part of **OntoCore** (semantic workspace engine). Crate name remains `ontocore-owl` for compatibility.
+> Part of **OntoCore** (semantic workspace engine).
 
 Horned-OWL facade for OWL axiom modeling, Turtle patch write-back, and Manchester syntax for [OntoCore](https://github.com/eddiethedean/ontocode).
 
 ## Install
 
 ```toml
-ontocore-owl = "0.6"
+ontocore-owl = "0.9"
 ```
 
 ## Documentation

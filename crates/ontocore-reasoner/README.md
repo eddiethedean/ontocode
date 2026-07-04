@@ -1,6 +1,6 @@
 # ontocore-reasoner
 
-> Part of **OntoCore** (semantic workspace engine). Crate name remains `ontocore-reasoner` for compatibility.
+> Part of **OntoCore** (semantic workspace engine).
 
 Thin [OntoLogos](https://github.com/eddiethedean/ontologos) **1.0.0** facade for OntoCore — EL, RL, RDFS, DL, and auto-routed classification, hierarchy merge, and EL-first explanations.
 

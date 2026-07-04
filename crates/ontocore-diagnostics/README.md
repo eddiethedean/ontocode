@@ -1,13 +1,13 @@
 # ontocore-diagnostics
 
-> Part of **OntoCore** (semantic workspace engine). Crate name remains `ontocore-diagnostics` for compatibility.
+> Part of **OntoCore** (semantic workspace engine).
 
 Ontology lint rules and diagnostic collection for [OntoCore](https://github.com/eddiethedean/ontocode).
 
 ## Install
 
 ```toml
-ontocore-diagnostics = "0.6"
+ontocore-diagnostics = "0.9"
 ```
 
 ## Documentation

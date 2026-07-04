@@ -1,6 +1,6 @@
 # ontocore-refactor
 
-> Part of **OntoCore** (semantic workspace engine). Crate name remains `ontocore-refactor` for compatibility.
+> Part of **OntoCore** (semantic workspace engine).
 
 Workspace refactoring for OntoCore — find usages, safe IRI rename, namespace migration, move entity, and extract module (v0.8).
 

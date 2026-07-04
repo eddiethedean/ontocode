@@ -1,13 +1,13 @@
 # ontocore-catalog
 
-> Part of **OntoCore** (semantic workspace engine). Crate name remains `ontocore-catalog` for compatibility.
+> Part of **OntoCore** (semantic workspace engine).
 
 Semantic catalog and index builder for [OntoCore](https://github.com/eddiethedean/ontocode).
 
 ## Install
 
 ```toml
-ontocore-catalog = "0.6"
+ontocore-catalog = "0.9"
 ```
 
 ## Quick example

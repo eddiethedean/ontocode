@@ -1,13 +1,13 @@
 # ontocore-core
 
-> Part of **OntoCore** (semantic workspace engine). Crate name remains `ontocore-core` for compatibility.
+> Part of **OntoCore** (semantic workspace engine).
 
 Core types, workspace scanner, path sandboxing, and resource limits for [OntoCore](https://github.com/eddiethedean/ontocode) (`ontocore-core`).
 
 ## Install
 
 ```toml
-ontocore-core = "0.6"
+ontocore-core = "0.9"
 ```
 
 ## Documentation

@@ -1,6 +1,6 @@
 use crate::error::{ReasonerError, Result};
 use ontocore_catalog::ClassHierarchy;
-use ontocore_core::WorkspaceScanner;
+use ontocore_core::{OntologyFile, WorkspaceScanner};
 use ontologos_bridge::{core_to_triples_all, merge_triples_into_ontology};
 use ontologos_core::Ontology;
 use ontologos_parser::load_ontology;
@@ -19,12 +19,17 @@ pub struct ReasonerInput {
 
 pub struct WorkspaceInputLoader {
     workspace: PathBuf,
+    scan_roots: Vec<PathBuf>,
     document_overrides: HashMap<PathBuf, String>,
 }
 
 impl WorkspaceInputLoader {
     pub fn new(workspace: impl Into<PathBuf>) -> Self {
-        Self { workspace: workspace.into(), document_overrides: HashMap::new() }
+        Self {
+            workspace: workspace.into(),
+            scan_roots: Vec::new(),
+            document_overrides: HashMap::new(),
+        }
     }
 
     pub fn document_overrides(mut self, overrides: HashMap<PathBuf, String>) -> Self {
@@ -32,9 +37,27 @@ impl WorkspaceInputLoader {
         self
     }
 
+    /// Additional workspace roots to scan (multi-root), matching catalog `scan_roots`.
+    pub fn scan_roots(mut self, roots: Vec<PathBuf>) -> Self {
+        self.scan_roots = roots;
+        self
+    }
+
     pub fn load(&self, asserted_hierarchy: ClassHierarchy) -> Result<ReasonerInput> {
-        let scanner = WorkspaceScanner::new(&self.workspace);
-        let files = scanner.scan()?;
+        let scan_roots = if self.scan_roots.is_empty() {
+            vec![self.workspace.clone()]
+        } else {
+            self.scan_roots.clone()
+        };
+        let mut files: Vec<OntologyFile> = Vec::new();
+        for root in &scan_roots {
+            let scanner = WorkspaceScanner::new(root);
+            for file in scanner.scan()? {
+                if !files.iter().any(|f| paths_equal(&f.path, &file.path)) {
+                    files.push(file);
+                }
+            }
+        }
 
         let mut hasher = Sha256::new();
         let mut ontology = Ontology::new();

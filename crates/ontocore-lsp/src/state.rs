@@ -1,6 +1,6 @@
 use ontocore_catalog::{IndexBuilder, OntologyCatalog};
 use ontocore_core::{
-    canonical_workspace_root,
+    canonical_workspace_root, is_path_within_any,
     limits::{MAX_FILE_BYTES, MAX_OPEN_DOCUMENTS},
     validate_workspace_scope, validate_workspace_scope_any, Diagnostic, OntologyDocument,
 };
@@ -63,18 +63,43 @@ impl ServerState {
     }
 
     pub fn set_workspace_roots(&self, roots: Vec<PathBuf>) -> Result<(), String> {
+        let _ops = self.ops_lock.lock().map_err(|e| e.to_string())?;
         let mut canonical = Vec::new();
         for root in roots {
             canonical.push(canonical_workspace_root(&root)?);
         }
+        let mut guard = self.inner.write().map_err(|e| e.to_string())?;
         if canonical.is_empty() {
-            return Err("at least one workspace root is required".to_string());
+            clear_workspace_state_inner(&mut guard);
+            return Ok(());
         }
         let primary = canonical[0].clone();
-        let mut guard = self.inner.write().map_err(|e| e.to_string())?;
+        on_workspace_roots_changed_inner(&mut guard, &canonical);
         guard.workspace_roots = canonical;
         guard.workspace = Some(primary);
         Ok(())
+    }
+
+    /// Drop all indexed state and open buffers (e.g. when every workspace folder is removed).
+    pub fn clear_workspace_state(&self) {
+        let _ops = self.ops_lock.lock().ok();
+        if let Ok(mut guard) = self.inner.write() {
+            clear_workspace_state_inner(&mut guard);
+        }
+    }
+
+    /// Invalidate catalog/reasoner and prune buffers outside the current roots.
+    #[allow(dead_code)]
+    pub fn on_workspace_roots_changed(&self) {
+        let _ops = self.ops_lock.lock().ok();
+        if let Ok(mut guard) = self.inner.write() {
+            let roots = guard.workspace_roots.clone();
+            if roots.is_empty() {
+                clear_workspace_state_inner(&mut guard);
+            } else {
+                on_workspace_roots_changed_inner(&mut guard, &roots);
+            }
+        }
     }
 
     pub fn workspace_roots(&self) -> Vec<PathBuf> {
@@ -100,14 +125,14 @@ impl ServerState {
         }
         validate_workspace_scope_any(&workspace, &roots)?;
 
-        let overrides = self.open_documents_snapshot();
         let disk_cache = self.inner.read().map(|g| g.index_disk_cache).unwrap_or(false);
-        let builder = IndexBuilder::new()
-            .workspace(roots[0].clone())
-            .scan_roots(roots.clone())
-            .document_overrides(overrides)
-            .disk_cache(disk_cache);
         let catalog = {
+            let overrides = self.open_documents_snapshot();
+            let builder = IndexBuilder::new()
+                .workspace(roots[0].clone())
+                .scan_roots(roots.clone())
+                .document_overrides(overrides)
+                .disk_cache(disk_cache);
             let guard = self.inner.read().map_err(|e| e.to_string())?;
             if let Some(prev) = guard.catalog.as_ref() {
                 builder.build_incremental(prev).map_err(|e| e.to_string())?
@@ -146,6 +171,16 @@ impl ServerState {
         Some(f(catalog, guard.reasoner_snapshot.as_ref()))
     }
 
+    /// Read catalog and open-document overrides under one lock (avoids TOCTOU mismatch).
+    pub fn with_catalog_and_overrides<T>(
+        &self,
+        f: impl FnOnce(&OntologyCatalog, &HashMap<PathBuf, String>) -> T,
+    ) -> Option<T> {
+        let guard = self.inner.read().ok()?;
+        let catalog = guard.catalog.as_ref()?;
+        Some(f(catalog, &guard.open_documents))
+    }
+
     pub fn reasoner_cache_mut<R>(&self, f: impl FnOnce(&mut ReasonerCacheStore) -> R) -> Option<R> {
         let mut guard = self.inner.write().ok()?;
         Some(f(&mut guard.reasoner_cache))
@@ -177,7 +212,13 @@ impl ServerState {
     /// Directory used for reindex and reasoner input: last indexed path, else workspace root.
     pub fn effective_index_root(&self) -> Option<PathBuf> {
         let guard = self.inner.read().ok()?;
-        guard.indexed_workspace.clone().or_else(|| guard.workspace.clone())
+        let roots = &guard.workspace_roots;
+        if let Some(ref indexed) = guard.indexed_workspace {
+            if is_path_within_any(roots, indexed) {
+                return Some(indexed.clone());
+            }
+        }
+        guard.workspace.clone()
     }
 
     fn open_documents_snapshot(&self) -> HashMap<PathBuf, String> {
@@ -219,7 +260,11 @@ impl ServerState {
         if text.len() as u64 > MAX_FILE_BYTES {
             return Err(format!("document exceeds maximum size of {MAX_FILE_BYTES} bytes"));
         }
-        let path = path.canonicalize().unwrap_or(path);
+        let roots = self.workspace_roots();
+        if roots.is_empty() {
+            return Err("workspace not initialized".to_string());
+        }
+        let path = validate_workspace_scope_any(&path, &roots)?;
         let mut guard = self.inner.write().map_err(|e| e.to_string())?;
         if !guard.open_documents.contains_key(&path)
             && guard.open_documents.len() >= MAX_OPEN_DOCUMENTS
@@ -284,17 +329,50 @@ impl ServerState {
 
     /// Prefer unsaved LSP buffer text; fall back to disk.
     pub fn document_text(&self, path: &Path) -> Option<String> {
-        let guard = self.inner.read().ok()?;
-        if let Some(text) = guard.open_documents.get(path) {
-            return Some(text.clone());
-        }
-        if let Ok(canonical) = path.canonicalize() {
-            if let Some(text) = guard.open_documents.get(&canonical) {
+        let roots = {
+            let guard = self.inner.read().ok()?;
+            if let Some(text) = guard.open_documents.get(path) {
                 return Some(text.clone());
             }
+            if let Ok(canonical) = path.canonicalize() {
+                if let Some(text) = guard.open_documents.get(&canonical) {
+                    return Some(text.clone());
+                }
+            }
+            guard.workspace_roots.clone()
+        };
+        if roots.is_empty() {
+            return None;
         }
+        validate_workspace_scope_any(path, &roots).ok()?;
         ontocore_core::read_to_string_capped(path, MAX_FILE_BYTES).ok()
     }
+}
+
+fn clear_workspace_state_inner(guard: &mut InnerState) {
+    guard.catalog = None;
+    guard.workspace_roots.clear();
+    guard.workspace = None;
+    guard.indexed_workspace = None;
+    guard.indexed_at = None;
+    guard.open_documents.clear();
+    guard.document_versions.clear();
+    guard.reasoner_cache.invalidate();
+    guard.reasoner_snapshot = None;
+}
+
+fn on_workspace_roots_changed_inner(guard: &mut InnerState, new_roots: &[PathBuf]) {
+    guard.catalog = None;
+    guard.indexed_at = None;
+    guard.reasoner_cache.invalidate();
+    guard.reasoner_snapshot = None;
+    if let Some(ref indexed) = guard.indexed_workspace {
+        if !is_path_within_any(new_roots, indexed) {
+            guard.indexed_workspace = None;
+        }
+    }
+    guard.open_documents.retain(|path, _| is_path_within_any(new_roots, path));
+    guard.document_versions.retain(|path, _| is_path_within_any(new_roots, path));
 }
 
 /// Snapshot of catalog data needed to publish LSP diagnostics.
@@ -320,6 +398,22 @@ pub fn resolve_workspace_for_index(
     } else {
         Ok(path)
     }
+}
+
+/// Resolve a workspace folder URI for multi-root folder add/remove events.
+pub fn resolve_workspace_folder_uri(
+    uri: &str,
+    existing_roots: &[PathBuf],
+) -> Result<PathBuf, String> {
+    let path = ontocore_core::workspace_uri_to_path(uri)?;
+    if existing_roots.is_empty() {
+        return Ok(path);
+    }
+    validate_workspace_scope_any(&path, existing_roots).or(Ok(path))
+}
+
+pub(crate) fn canonical_roots_match(a: &Path, b: &Path) -> bool {
+    canonical_workspace_root(a).ok().as_ref() == canonical_workspace_root(b).ok().as_ref() || a == b
 }
 
 pub fn path_to_uri(path: &Path) -> String {
@@ -370,13 +464,15 @@ mod tests {
 
     #[test]
     fn rejects_when_open_document_limit_reached() {
+        let dir = tempfile::tempdir().unwrap();
+        let root = dir.path().canonicalize().unwrap();
         let state = ServerState::new();
+        state.set_workspace_roots(vec![root.clone()]).expect("set workspace");
         for i in 0..MAX_OPEN_DOCUMENTS {
-            let path = PathBuf::from(format!("/tmp/doc-{i}.ttl"));
+            let path = root.join(format!("doc-{i}.ttl"));
             state.set_document_text(path, "@prefix ex: <http://ex#> .".to_string()).unwrap();
         }
-        let err =
-            state.set_document_text(PathBuf::from("/tmp/extra.ttl"), "x".to_string()).unwrap_err();
+        let err = state.set_document_text(root.join("extra.ttl"), "x".to_string()).unwrap_err();
         assert!(err.contains("open document limit"));
     }
 

@@ -385,11 +385,13 @@ pub struct SemanticDiffParams {
     /// Optional right directory.
     #[serde(default)]
     pub right_path: Option<String>,
+    /// When true, enrich the diff with reasoner unsatisfiability changes.
+    #[serde(default)]
+    pub reasoner: bool,
 }
 
 #[derive(Debug, Serialize)]
 pub struct SemanticDiffResult {
-    #[serde(flatten)]
     pub diff: ontocore_diff::DiffResult,
 }
 

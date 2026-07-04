@@ -310,3 +310,128 @@ export function assertApplyRefactorResult(
   }
   return value as import("./protocol").ApplyRefactorResult;
 }
+
+function isDiffSummaryCounts(value: unknown): boolean {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+  const counts = value as Record<string, unknown>;
+  return (
+    typeof counts.entities === "number" &&
+    typeof counts.axioms === "number" &&
+    typeof counts.annotations === "number" &&
+    typeof counts.imports === "number" &&
+    typeof counts.inferences === "number" &&
+    typeof counts.breaking === "number"
+  );
+}
+
+function isEntityChangeSummary(value: unknown): boolean {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+  const change = value as Record<string, unknown>;
+  return typeof change.kind === "string" && typeof change.iri === "string";
+}
+
+function isAxiomChangeSummary(value: unknown): boolean {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+  const change = value as Record<string, unknown>;
+  return (
+    typeof change.change === "string" &&
+    typeof change.subject === "string" &&
+    typeof change.predicate === "string" &&
+    typeof change.object === "string" &&
+    typeof change.axiom_kind === "string"
+  );
+}
+
+function isAnnotationChangeSummary(value: unknown): boolean {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+  const change = value as Record<string, unknown>;
+  return (
+    typeof change.change === "string" &&
+    typeof change.subject === "string" &&
+    typeof change.predicate === "string" &&
+    typeof change.object === "string"
+  );
+}
+
+function isImportChangeSummary(value: unknown): boolean {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+  const change = value as Record<string, unknown>;
+  return (
+    typeof change.change === "string" &&
+    typeof change.ontology_id === "string" &&
+    typeof change.import_iri === "string"
+  );
+}
+
+function isInferenceChangeSummary(value: unknown): boolean {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+  const change = value as Record<string, unknown>;
+  return (
+    typeof change.class_iri === "string" &&
+    typeof change.change === "string" &&
+    typeof change.detail === "string"
+  );
+}
+
+function isBreakingChangeSummary(value: unknown): boolean {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+  const change = value as Record<string, unknown>;
+  return typeof change.reason === "string" && typeof change.message === "string";
+}
+
+export function isDiffPayload(value: unknown): value is import("./protocol").DiffPayload {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+  const diff = value as Record<string, unknown>;
+  const summaryOk =
+    diff.summary_counts === undefined || isDiffSummaryCounts(diff.summary_counts);
+  return (
+    summaryOk &&
+    Array.isArray(diff.entity_changes) &&
+    diff.entity_changes.every(isEntityChangeSummary) &&
+    Array.isArray(diff.axiom_changes) &&
+    diff.axiom_changes.every(isAxiomChangeSummary) &&
+    Array.isArray(diff.annotation_changes) &&
+    diff.annotation_changes.every(isAnnotationChangeSummary) &&
+    Array.isArray(diff.import_changes) &&
+    diff.import_changes.every(isImportChangeSummary) &&
+    Array.isArray(diff.inference_changes) &&
+    diff.inference_changes.every(isInferenceChangeSummary) &&
+    Array.isArray(diff.breaking_changes) &&
+    diff.breaking_changes.every(isBreakingChangeSummary)
+  );
+}
+
+export function assertSemanticDiffResult(
+  value: unknown
+): import("./protocol").SemanticDiffResult {
+  if (!value || typeof value !== "object") {
+    throw new Error("Invalid semantic diff result from language server");
+  }
+  const result = value as Record<string, unknown>;
+  if ("diff" in result) {
+    if (!isDiffPayload(result.diff)) {
+      throw new Error("Invalid semantic diff result: malformed diff payload");
+    }
+    return { diff: result.diff };
+  }
+  if (isDiffPayload(value)) {
+    return { diff: value };
+  }
+  throw new Error("Invalid semantic diff result from language server");
+}

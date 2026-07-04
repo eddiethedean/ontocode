@@ -35,9 +35,10 @@ pub use model::{
     AXIOM_KIND_PROPERTY_CHAIN, AXIOM_KIND_RANGE, AXIOM_KIND_SUB_CLASS_OF,
 };
 pub use path_jail::{
-    canonical_workspace_root, file_uri_to_path, is_path_within, is_path_within_any,
-    resolve_document_path, resolve_lsp_document_path, resolve_lsp_document_path_any,
-    validate_workspace_scope, validate_workspace_scope_any, workspace_uri_to_path,
+    canonical_workspace_root, discover_git_repo_root, ensure_extract_path_within, file_uri_to_path,
+    is_path_within, is_path_within_any, resolve_document_path, resolve_lsp_document_path,
+    resolve_lsp_document_path_any, validate_workspace_scope, validate_workspace_scope_any,
+    workspace_uri_to_path,
 };
 pub use rdf_literals::parse_boolean_literal;
 pub use scanner::{OntologyFile, WorkspaceScanner};

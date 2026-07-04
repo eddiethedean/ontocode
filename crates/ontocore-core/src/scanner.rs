@@ -91,6 +91,18 @@ impl WorkspaceScanner {
         Ok(files)
     }
 
+    /// Describe a single ontology file on disk (hash, format, mtime).
+    pub fn describe_path(&self, path: &Path) -> Result<OntologyFile> {
+        let canonical = path.canonicalize().map_err(|e| OntoCoreError::Scanner(e.to_string()))?;
+        if !canonical.starts_with(&self.canonical_root) {
+            return Err(OntoCoreError::Scanner(format!(
+                "path outside workspace: {}",
+                path.display()
+            )));
+        }
+        self.describe_file(&canonical)
+    }
+
     fn describe_file(&self, path: &Path) -> Result<OntologyFile> {
         let metadata = fs::metadata(path)?;
         let size_bytes = metadata.len();

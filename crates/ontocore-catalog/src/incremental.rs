@@ -2,7 +2,8 @@
 
 use ontocore_core::{Annotation, Axiom, Diagnostic, Entity, Import, Namespace, OntologyDocument};
 use oxigraph::model::Quad;
-use std::path::Path;
+use std::collections::HashMap;
+use std::path::{Path, PathBuf};
 
 /// Cached parse + semantics for one ontology file at a specific content hash.
 #[derive(Debug, Clone)]
@@ -23,32 +24,28 @@ impl DocumentSnapshot {
     pub fn with_doc_id(&self, doc_id: &str) -> Self {
         let mut snap = self.clone();
         snap.document.id = doc_id.to_string();
-        let old_id = self.document.id.clone();
         for entity in &mut snap.entities {
-            if entity.ontology_id == old_id {
-                entity.ontology_id = doc_id.to_string();
-            }
+            entity.ontology_id = doc_id.to_string();
         }
         for ann in &mut snap.annotations {
-            if ann.ontology_id == old_id {
-                ann.ontology_id = doc_id.to_string();
-            }
+            ann.ontology_id = doc_id.to_string();
         }
         for ax in &mut snap.axioms {
-            if ax.ontology_id == old_id {
-                ax.ontology_id = doc_id.to_string();
-            }
+            ax.ontology_id = doc_id.to_string();
         }
         for ns in &mut snap.namespace_rows {
-            if ns.ontology_id == old_id {
-                ns.ontology_id = doc_id.to_string();
-            }
+            ns.ontology_id = doc_id.to_string();
         }
         for imp in &mut snap.imports {
-            if imp.ontology_id == old_id {
-                imp.ontology_id = doc_id.to_string();
-            }
+            imp.ontology_id = doc_id.to_string();
         }
+        snap
+    }
+
+    pub fn with_reuse_context(&self, doc_id: &str, path: &Path, modified_time: u64) -> Self {
+        let mut snap = self.with_doc_id(doc_id);
+        snap.document.path = path.to_path_buf();
+        snap.document.modified_time = modified_time;
         snap
     }
 }
@@ -70,6 +67,30 @@ pub(crate) fn content_hash_text(text: &str) -> String {
 
 pub(crate) fn paths_equal(a: &Path, b: &Path) -> bool {
     a == b || a.canonicalize().ok().zip(b.canonicalize().ok()).is_some_and(|(x, y)| x == y)
+}
+
+/// Fingerprint of incremental-relevant builder config (scan roots, disk cache, override paths).
+pub(crate) fn config_fingerprint(
+    scan_roots: &[PathBuf],
+    disk_cache: bool,
+    document_overrides: &HashMap<PathBuf, String>,
+) -> String {
+    use sha2::{Digest, Sha256};
+    let mut hasher = Sha256::new();
+    hasher.update(b"v1\0scan_roots\0");
+    for root in scan_roots {
+        hasher.update(root.to_string_lossy().as_bytes());
+        hasher.update([0]);
+    }
+    hasher.update([if disk_cache { 1 } else { 0 }]);
+    hasher.update(b"\0overrides\0");
+    let mut keys: Vec<_> = document_overrides.keys().collect();
+    keys.sort_by(|a, b| a.as_os_str().cmp(b.as_os_str()));
+    for key in keys {
+        hasher.update(key.to_string_lossy().as_bytes());
+        hasher.update([0]);
+    }
+    hex::encode(hasher.finalize())
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

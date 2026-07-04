@@ -2,8 +2,9 @@ use anyhow::{bail, Context, Result};
 use clap::{Parser, Subcommand, ValueEnum};
 use ontocore_catalog::{CatalogStats, IndexBuilder, OntologyCatalog};
 use ontocore_diff::{
-    diff_directories, diff_git_refs, format_diff_json, format_diff_markdown, format_diff_text,
-    parse_git_range,
+    apply_unsat_diff, catalog_at_git_ref, catalog_at_worktree, diff_catalogs, diff_directories,
+    diff_git_refs, format_diff_json, format_diff_markdown, format_diff_text, parse_git_range,
+    DiffResult,
 };
 use ontocore_query::{
     query_catalog,
@@ -123,18 +124,21 @@ enum Commands {
     },
     /// Semantic diff between git refs, directories, or indexed snapshots
     Diff {
-        /// Git range (`main..feature`), single ref vs working tree, or omitted with `--left`/`--right`
+        /// Git range (`main..feature`), single ref vs working tree, or omitted with `--left-ref`/`--right-ref`
         #[arg(value_name = "GIT_RANGE")]
         git_range: Option<String>,
-        /// Left directory or git ref
+        /// Left git ref or directory path
         #[arg(long)]
-        left: Option<PathBuf>,
-        /// Right directory or git ref (`WORKTREE` for working tree)
+        left_ref: Option<String>,
+        /// Right git ref, directory path, or `WORKTREE` for working tree
         #[arg(long)]
-        right: Option<PathBuf>,
-        /// Git repository root (defaults to `--left` parent or current directory)
+        right_ref: Option<String>,
+        /// Git repository root (defaults to current directory)
         #[arg(long)]
         repo: Option<PathBuf>,
+        /// Enrich diff with reasoner unsatisfiability changes (requires resolvable workspace paths)
+        #[arg(long)]
+        reasoner: bool,
         #[arg(long, value_enum, default_value_t = DiffFormat::Text)]
         format: DiffFormat,
         #[arg(long)]
@@ -458,9 +462,22 @@ fn main() -> Result<()> {
                 run_refactor_plan(&plan, preview, format, &workspace)?;
             }
         },
-        Commands::Diff { git_range, left, right, repo, format, breaking_only } => {
-            let diff =
-                run_diff(git_range.as_deref(), left.as_deref(), right.as_deref(), repo.as_deref())?;
+        Commands::Diff {
+            git_range,
+            left_ref,
+            right_ref,
+            repo,
+            reasoner,
+            format,
+            breaking_only,
+        } => {
+            let diff = run_diff(
+                git_range.as_deref(),
+                left_ref.as_deref(),
+                right_ref.as_deref(),
+                repo.as_deref(),
+                reasoner,
+            )?;
             let output = match format {
                 DiffFormat::Json => format_diff_json(&diff),
                 DiffFormat::Markdown => format_diff_markdown(&diff, breaking_only),
@@ -498,29 +515,115 @@ fn run_refactor_plan(
 
 fn run_diff(
     git_range: Option<&str>,
-    left: Option<&Path>,
-    right: Option<&Path>,
+    left_ref: Option<&str>,
+    right_ref: Option<&str>,
     repo: Option<&Path>,
-) -> Result<ontocore_diff::DiffResult> {
-    if let Some(spec) = git_range {
-        let repo_root = repo
-            .map(Path::to_path_buf)
-            .or_else(|| std::env::current_dir().ok())
-            .context("could not determine git repository root")?;
-        let (left_ref, right_ref) = parse_git_range(spec).map_err(|e| anyhow::anyhow!(e))?;
-        return diff_git_refs(&repo_root, &left_ref, &right_ref).map_err(|e| anyhow::anyhow!(e));
+    reasoner: bool,
+) -> Result<DiffResult> {
+    let repo_root = repo
+        .map(Path::to_path_buf)
+        .or_else(|| std::env::current_dir().ok())
+        .context("could not determine git repository root")?;
+
+    let mut diff = if let Some(spec) = git_range {
+        let (left, right) = parse_git_range(spec).map_err(|e| anyhow::anyhow!(e))?;
+        diff_git_refs(&repo_root, &left, &right).map_err(|e| anyhow::anyhow!(e))?
+    } else {
+        let left = left_ref.context("provide --left-ref or a git range")?;
+        let right = right_ref.context("provide --right-ref or a git range")?;
+        diff_from_refs(left, right, &repo_root)?
+    };
+
+    if reasoner {
+        apply_reasoner_unsat(&mut diff, git_range, left_ref, right_ref, &repo_root)?;
     }
-    match (left, right) {
-        (Some(a), Some(b)) => diff_directories(a, b).map_err(|e| anyhow::anyhow!(e)),
-        (Some(a), None) => {
-            let (left_ref, right_ref) = parse_git_range("HEAD").map_err(|e| anyhow::anyhow!(e))?;
-            let repo_root = repo.unwrap_or(a);
-            diff_git_refs(repo_root, &left_ref, &right_ref).map_err(|e| anyhow::anyhow!(e))
+    Ok(diff)
+}
+
+fn diff_from_refs(left: &str, right: &str, repo: &Path) -> Result<DiffResult> {
+    let left = left.trim();
+    let right = right.trim();
+    if left.is_empty() || right.is_empty() {
+        bail!("empty --left-ref or --right-ref");
+    }
+    let left_path = Path::new(left);
+    let right_path = Path::new(right);
+    let left_is_dir = left_path.is_dir();
+    let right_is_dir = right_path.is_dir();
+    match (left_is_dir, right_is_dir) {
+        (true, true) => diff_directories(left_path, right_path).map_err(|e| anyhow::anyhow!(e)),
+        (false, false) => diff_git_refs(repo, left, right).map_err(|e| anyhow::anyhow!(e)),
+        (true, false) => {
+            let left_cat = build_catalog(&left_path.to_path_buf())?;
+            let right_cat = resolve_git_catalog(repo, right)?;
+            Ok(diff_catalogs(&left_cat, &right_cat))
         }
-        _ => bail!(
-            "provide a git range (`main..feature`), or both --left and --right directory paths"
-        ),
+        (false, true) => {
+            let left_cat = resolve_git_catalog(repo, left)?;
+            let right_cat = build_catalog(&right_path.to_path_buf())?;
+            Ok(diff_catalogs(&left_cat, &right_cat))
+        }
     }
+}
+
+fn resolve_git_catalog(repo: &Path, git_ref: &str) -> Result<OntologyCatalog> {
+    if git_ref.eq_ignore_ascii_case("WORKTREE") || git_ref.eq_ignore_ascii_case("WORKSPACE") {
+        catalog_at_worktree(repo).map_err(|e| anyhow::anyhow!(e))
+    } else {
+        catalog_at_git_ref(repo, git_ref).map_err(|e| anyhow::anyhow!(e))
+    }
+}
+
+fn workspace_for_ref(spec: &str, repo: &Path) -> Option<PathBuf> {
+    let trimmed = spec.trim();
+    if trimmed.is_empty() {
+        return None;
+    }
+    let path = Path::new(trimmed);
+    if path.is_dir() {
+        return Some(path.to_path_buf());
+    }
+    if trimmed.eq_ignore_ascii_case("WORKTREE") || trimmed.eq_ignore_ascii_case("WORKSPACE") {
+        return Some(repo.to_path_buf());
+    }
+    None
+}
+
+fn unsat_for_workspace(workspace: &Path) -> Result<Vec<String>> {
+    let result = run_classify(&workspace.to_path_buf(), "el", true)?;
+    Ok(result.unsatisfiable)
+}
+
+fn apply_reasoner_unsat(
+    diff: &mut DiffResult,
+    git_range: Option<&str>,
+    left_ref: Option<&str>,
+    right_ref: Option<&str>,
+    repo: &Path,
+) -> Result<()> {
+    let (base_ws, head_ws) = if let Some(spec) = git_range {
+        let (left, right) = parse_git_range(spec).map_err(|e| anyhow::anyhow!(e))?;
+        if right == "TRIPLE_DOT" || left.contains("...") {
+            (None, None)
+        } else {
+            (workspace_for_ref(&left, repo), workspace_for_ref(&right, repo))
+        }
+    } else {
+        (
+            left_ref.and_then(|left| workspace_for_ref(left, repo)),
+            right_ref.and_then(|right| workspace_for_ref(right, repo)),
+        )
+    };
+
+    let (Some(base_ws), Some(head_ws)) = (base_ws, head_ws) else {
+        eprintln!("WARN: --reasoner skipped (could not resolve workspace paths for both sides)");
+        return Ok(());
+    };
+
+    let base_unsat = unsat_for_workspace(&base_ws)?;
+    let head_unsat = unsat_for_workspace(&head_ws)?;
+    apply_unsat_diff(diff, &base_unsat, &head_unsat);
+    Ok(())
 }
 
 fn build_catalog(workspace: &PathBuf) -> Result<OntologyCatalog> {

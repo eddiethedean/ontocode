@@ -133,6 +133,102 @@ export interface DiffPayload {
   import_changes: Array<{ change: string; ontology_id: string; import_iri: string }>;
   inference_changes: Array<{ class_iri: string; change: string; detail: string }>;
   breaking_changes: Array<{ reason: string; message: string; entity_iri?: string }>;
+  summary_counts?: {
+    entities: number;
+    axioms: number;
+    annotations: number;
+    imports: number;
+    inferences: number;
+    breaking: number;
+  };
+}
+
+function isEntityChange(value: unknown): boolean {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+  const change = value as Record<string, unknown>;
+  return typeof change.kind === "string" && typeof change.iri === "string";
+}
+
+function isAxiomChange(value: unknown): boolean {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+  const change = value as Record<string, unknown>;
+  return (
+    typeof change.change === "string" &&
+    typeof change.subject === "string" &&
+    typeof change.predicate === "string" &&
+    typeof change.object === "string" &&
+    typeof change.axiom_kind === "string"
+  );
+}
+
+function isAnnotationChange(value: unknown): boolean {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+  const change = value as Record<string, unknown>;
+  return (
+    typeof change.change === "string" &&
+    typeof change.subject === "string" &&
+    typeof change.predicate === "string" &&
+    typeof change.object === "string"
+  );
+}
+
+function isImportChange(value: unknown): boolean {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+  const change = value as Record<string, unknown>;
+  return (
+    typeof change.change === "string" &&
+    typeof change.ontology_id === "string" &&
+    typeof change.import_iri === "string"
+  );
+}
+
+function isInferenceChange(value: unknown): boolean {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+  const change = value as Record<string, unknown>;
+  return (
+    typeof change.class_iri === "string" &&
+    typeof change.change === "string" &&
+    typeof change.detail === "string"
+  );
+}
+
+function isBreakingChange(value: unknown): boolean {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+  const change = value as Record<string, unknown>;
+  return typeof change.reason === "string" && typeof change.message === "string";
+}
+
+export function isDiffPayload(data: unknown): data is DiffPayload {
+  if (!data || typeof data !== "object") {
+    return false;
+  }
+  const diff = data as Record<string, unknown>;
+  return (
+    Array.isArray(diff.entity_changes) &&
+    diff.entity_changes.every(isEntityChange) &&
+    Array.isArray(diff.axiom_changes) &&
+    diff.axiom_changes.every(isAxiomChange) &&
+    Array.isArray(diff.annotation_changes) &&
+    diff.annotation_changes.every(isAnnotationChange) &&
+    Array.isArray(diff.import_changes) &&
+    diff.import_changes.every(isImportChange) &&
+    Array.isArray(diff.inference_changes) &&
+    diff.inference_changes.every(isInferenceChange) &&
+    Array.isArray(diff.breaking_changes) &&
+    diff.breaking_changes.every(isBreakingChange)
+  );
 }
 
 /** Host → React */
@@ -146,6 +242,7 @@ export type HostMessage =
   | { type: "queryResult"; runId: number; result?: TabularQueryResult; error?: string }
   | { type: "manchesterInit"; entityIri: string; axiomKind: string; expression: string; completions: ManchesterCompletions }
   | { type: "manchesterValidation"; seq: number; result?: ManchesterValidationResult; error?: string }
+  | { type: "loading" }
   | { type: "semanticDiffData"; diff: DiffPayload }
   | { type: "error"; message: string };
 
@@ -172,10 +269,18 @@ export type WebviewMessage =
   | { type: "copyMarkdown" };
 
 export function isHostMessage(data: unknown): data is HostMessage {
-  return (
-    typeof data === "object" &&
-    data !== null &&
-    "type" in data &&
-    typeof (data as HostMessage).type === "string"
-  );
+  if (typeof data !== "object" || data === null || !("type" in data)) {
+    return false;
+  }
+  const msg = data as HostMessage;
+  if (typeof msg.type !== "string") {
+    return false;
+  }
+  if (msg.type === "semanticDiffData") {
+    return isDiffPayload((data as { diff?: unknown }).diff);
+  }
+  if (msg.type === "error") {
+    return typeof (data as { message?: unknown }).message === "string";
+  }
+  return true;
 }

@@ -416,6 +416,8 @@ export interface SemanticDiffParams {
   right_ref?: string;
   left_path?: string;
   right_path?: string;
+  /** When true, merge unsatisfiable-class changes from reasoner classification. */
+  reasoner?: boolean;
 }
 
 export interface SemanticDiffResult {

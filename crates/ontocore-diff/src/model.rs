@@ -86,6 +86,7 @@ impl DiffResult {
             && self.annotation_changes.is_empty()
             && self.import_changes.is_empty()
             && self.inference_changes.is_empty()
+            && self.breaking_changes.is_empty()
     }
 
     pub fn summary_counts(&self) -> DiffSummaryCounts {

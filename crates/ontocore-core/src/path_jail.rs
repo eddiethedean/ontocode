@@ -217,6 +217,57 @@ pub fn path_has_parent_escape(path: &Path) -> bool {
     path.components().any(|c| matches!(c, Component::ParentDir))
 }
 
+/// Resolve a relative path for extraction under `extract_root` (e.g. git tree checkout).
+///
+/// Rejects `..`, absolute components, and paths that would escape `extract_root`.
+pub fn ensure_extract_path_within(extract_root: &Path, rel: &str) -> Result<PathBuf, String> {
+    if rel.is_empty() {
+        return Err("empty relative path".to_string());
+    }
+    let rel_path = Path::new(rel);
+    if path_has_parent_escape(rel_path) {
+        return Err("extract path escapes via ..".to_string());
+    }
+    for component in rel_path.components() {
+        match component {
+            Component::ParentDir | Component::RootDir | Component::Prefix(_) => {
+                return Err("invalid path component in extract".to_string());
+            }
+            _ => {}
+        }
+    }
+    let root = canonical_workspace_root(extract_root)?;
+    let candidate = normalize_lexical(&root.join(rel_path));
+    if !is_path_within_lexical(&root, &candidate) {
+        return Err("extract path outside extraction root".to_string());
+    }
+    Ok(candidate)
+}
+
+/// Discover a git repository root from any of the given workspace paths.
+pub fn discover_git_repo_root(paths: &[PathBuf]) -> Option<PathBuf> {
+    for path in paths {
+        let mut current = if path.is_dir() {
+            path.clone()
+        } else {
+            match path.parent() {
+                Some(p) => p.to_path_buf(),
+                None => continue,
+            }
+        };
+        loop {
+            if current.join(".git").exists() {
+                return current.canonicalize().ok().or_else(|| Some(current.clone()));
+            }
+            match current.parent() {
+                Some(p) => current = p.to_path_buf(),
+                None => break,
+            }
+        }
+    }
+    None
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

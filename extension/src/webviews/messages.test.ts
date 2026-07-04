@@ -12,12 +12,14 @@ describe("isWebviewMessage", () => {
       isWebviewMessage({ type: "applyPatch", patches: [], previewOnly: false }),
       true
     );
+    assert.equal(isWebviewMessage({ type: "copyMarkdown" }), true);
   });
 
   it("rejects invalid payloads", () => {
     assert.equal(isWebviewMessage(null), false);
     assert.equal(isWebviewMessage({}), false);
     assert.equal(isWebviewMessage({ type: 1 }), false);
+    assert.equal(isWebviewMessage({ type: "ready" }), false);
   });
 });
 

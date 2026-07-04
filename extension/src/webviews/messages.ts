@@ -128,6 +128,14 @@ export interface DiffPayload {
   import_changes: Array<{ change: string; ontology_id: string; import_iri: string }>;
   inference_changes: Array<{ class_iri: string; change: string; detail: string }>;
   breaking_changes: Array<{ reason: string; message: string; entity_iri?: string }>;
+  summary_counts?: {
+    entities: number;
+    axioms: number;
+    annotations: number;
+    imports: number;
+    inferences: number;
+    breaking: number;
+  };
 }
 
 /** Host → React */
@@ -141,6 +149,7 @@ export type HostMessage =
   | { type: "queryResult"; runId: number; result?: TabularQueryResult; error?: string }
   | { type: "manchesterInit"; entityIri: string; axiomKind: string; expression: string; completions: ManchesterCompletions }
   | { type: "manchesterValidation"; seq: number; result?: ManchesterValidationResult; error?: string }
+  | { type: "loading" }
   | { type: "semanticDiffData"; diff: DiffPayload }
   | { type: "error"; message: string };
 
@@ -167,12 +176,20 @@ export type WebviewMessage =
   | { type: "copyMarkdown" };
 
 export function isWebviewMessage(data: unknown): data is WebviewMessage {
-  return (
-    typeof data === "object" &&
-    data !== null &&
-    "type" in data &&
-    typeof (data as WebviewMessage).type === "string"
-  );
+  if (typeof data !== "object" || data === null || !("type" in data)) {
+    return false;
+  }
+  const msg = data as WebviewMessage;
+  if (typeof msg.type !== "string") {
+    return false;
+  }
+  if (msg.type === "ready") {
+    return typeof (data as { panel?: unknown }).panel === "string";
+  }
+  if (msg.type === "copyMarkdown") {
+    return true;
+  }
+  return true;
 }
 
 /** Validate applyPatch payload; reject missing previewOnly (must not default to write). */

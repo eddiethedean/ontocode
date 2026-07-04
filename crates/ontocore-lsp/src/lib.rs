@@ -43,7 +43,7 @@ use lsp_types::{
     InitializeParams,
 };
 use serde_json::Value;
-use state::{resolve_workspace_for_index, ServerState};
+use state::{canonical_roots_match, resolve_workspace_folder_uri, ServerState};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 use std::thread;
@@ -238,24 +238,19 @@ fn handle_notification(
             {
                 let mut roots = state.workspace_roots();
                 for removed in params.event.removed {
-                    if let Ok(path) = resolve_workspace_for_index(
-                        removed.uri.as_str(),
-                        state.workspace_root().as_deref(),
-                    ) {
-                        roots.retain(|r| r != &path);
+                    if let Ok(path) = resolve_workspace_folder_uri(removed.uri.as_str(), &roots) {
+                        roots.retain(|r| !canonical_roots_match(r, &path));
                     }
                 }
                 for added in params.event.added {
-                    if let Ok(path) = resolve_workspace_for_index(
-                        added.uri.as_str(),
-                        state.workspace_root().as_deref(),
-                    ) {
-                        if !roots.iter().any(|r| r == &path) {
+                    if let Ok(path) = resolve_workspace_folder_uri(added.uri.as_str(), &roots) {
+                        if !roots.iter().any(|r| canonical_roots_match(r, &path)) {
                             roots.push(path);
                         }
                     }
                 }
                 if roots.is_empty() {
+                    state.clear_workspace_state();
                     eprintln!("ontocore-lsp: all workspace folders removed");
                 } else if let Err(err) = state.set_workspace_roots(roots) {
                     eprintln!("ontocore-lsp: failed to update workspace roots: {err}");

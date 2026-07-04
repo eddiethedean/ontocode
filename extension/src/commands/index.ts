@@ -305,24 +305,37 @@ export function registerCommands(
       await panel.runWithDefaults();
     }),
     vscode.commands.registerCommand("ontocode.semanticDiff", async () => {
-      const leftRef = await vscode.window.showInputBox({
-        prompt: "Left git ref (or WORKSPACE)",
-        value: "HEAD",
-      });
-      if (leftRef === undefined) {
-        return;
+      try {
+        const leftRef = await vscode.window.showInputBox({
+          prompt: "Left git ref (or WORKSPACE)",
+          value: "HEAD",
+        });
+        if (leftRef === undefined) {
+          return;
+        }
+        const rightRef = await vscode.window.showInputBox({
+          prompt: "Right git ref (WORKTREE or WORKSPACE)",
+          value: "WORKSPACE",
+        });
+        if (rightRef === undefined) {
+          return;
+        }
+        const left = leftRef.trim();
+        const right = rightRef.trim();
+        if (!left || !right) {
+          void vscode.window.showErrorMessage(
+            "OntoCode: semantic diff requires non-empty left and right refs"
+          );
+          return;
+        }
+        await SemanticDiffPanel.show(context.extensionUri, {
+          leftRef: left,
+          rightRef: right,
+        });
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        void vscode.window.showErrorMessage(`OntoCode: semantic diff failed — ${message}`);
       }
-      const rightRef = await vscode.window.showInputBox({
-        prompt: "Right git ref (WORKTREE or WORKSPACE)",
-        value: "WORKSPACE",
-      });
-      if (rightRef === undefined) {
-        return;
-      }
-      await SemanticDiffPanel.show(context.extensionUri, {
-        leftRef,
-        rightRef,
-      });
     }),
     vscode.commands.registerCommand(
       "ontocode.showExplanation",

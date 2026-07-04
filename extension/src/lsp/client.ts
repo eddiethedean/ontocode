@@ -20,6 +20,7 @@ import {
   assertFindUsagesResult,
   assertPreviewRefactorResult,
   assertApplyRefactorResult,
+  assertSemanticDiffResult,
 } from "./protocolGuards";
 import {
   ApplyAxiomPatchParams,
@@ -326,14 +327,7 @@ export async function semanticDiff(
 ): Promise<SemanticDiffResult> {
   const c = requireClient();
   const result = await c.sendRequest<unknown>("ontocore/semanticDiff", params);
-  if (
-    typeof result !== "object" ||
-    result === null ||
-    !("diff" in result)
-  ) {
-    throw new Error("Invalid semantic diff response from language server");
-  }
-  return result as SemanticDiffResult;
+  return assertSemanticDiffResult(result);
 }
 
 function requireClient(): LanguageClient {

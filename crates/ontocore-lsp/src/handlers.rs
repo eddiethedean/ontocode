@@ -20,18 +20,21 @@ use lsp_types::{
     TextDocumentSyncKind, TextEdit, Uri, WorkspaceEdit, WorkspaceFoldersServerCapabilities,
     WorkspaceServerCapabilities, WorkspaceSymbolParams, WorkspaceSymbolResponse,
 };
-use ontocore_catalog::{GraphBuilder, GraphRequest};
-use ontocore_core::{EntityKind, OntologyFormat};
-use ontocore_diff::{diff_catalogs, diff_directories, diff_git_refs};
+use ontocore_catalog::{GraphBuilder, GraphRequest, IndexBuilder, OntologyCatalog};
+use ontocore_core::{validate_workspace_scope_any, EntityKind, OntologyFormat};
+use ontocore_diff::{
+    apply_unsat_diff, catalog_at_git_ref, diff_catalogs, diff_directories, diff_git_refs,
+    discover_repo_root, DiffResult,
+};
 use ontocore_reasoner::{
     classify, explain, ExplanationRequest, ReasonerId, ReasonerSnapshot, WorkspaceInputLoader,
 };
 use ontocore_refactor::{
     apply_refactor_plan_checked_with_overrides, find_usages_with_overrides, plans_equivalent,
-    preview_refactor, preview_rename_iri, validate_refactor_plan_paths,
+    preview_refactor, preview_rename_iri,
 };
 use serde_json::Value;
-use std::path::Path;
+use std::path::{Path, PathBuf};
 use std::str::FromStr;
 
 #[allow(deprecated)]
@@ -87,9 +90,16 @@ pub fn handle_index_workspace(
     index_worker: &IndexWorker,
     params: IndexWorkspaceParams,
 ) -> Result<IndexWorkspaceResult, LspErrorPayload> {
+    let roots = state.workspace_roots();
     let workspace = match params.workspace_uri.as_deref() {
-        Some(uri) => resolve_workspace_for_index(uri, state.workspace_root().as_deref())
-            .map_err(LspErrorPayload::index_failed)?,
+        Some(uri) => {
+            let path =
+                ontocore_core::workspace_uri_to_path(uri).map_err(LspErrorPayload::index_failed)?;
+            if roots.is_empty() {
+                return Err(LspErrorPayload::index_failed("workspace not initialized".to_string()));
+            }
+            validate_workspace_scope_any(&path, &roots).map_err(LspErrorPayload::index_failed)?
+        }
         None => state.effective_index_root().ok_or_else(|| {
             LspErrorPayload::index_failed("no workspace URI provided".to_string())
         })?,
@@ -169,48 +179,118 @@ pub fn handle_semantic_diff(
     params: SemanticDiffParams,
 ) -> Result<SemanticDiffResult, LspErrorPayload> {
     let roots = state.workspace_roots();
-    let repo_root = roots
-        .first()
-        .cloned()
-        .ok_or_else(|| LspErrorPayload::invalid_params("workspace not initialized".to_string()))?;
+    if roots.is_empty() {
+        return Err(LspErrorPayload::invalid_params("workspace not initialized".to_string()));
+    }
 
-    let diff = if let (Some(left), Some(right)) = (&params.left_path, &params.right_path) {
-        diff_directories(Path::new(left), Path::new(right))
+    let mut diff = if let (Some(left), Some(right)) = (&params.left_path, &params.right_path) {
+        let left = validate_workspace_scope_any(Path::new(left), &roots)
+            .map_err(LspErrorPayload::invalid_params)?;
+        let right = validate_workspace_scope_any(Path::new(right), &roots)
+            .map_err(LspErrorPayload::invalid_params)?;
+        diff_directories(&left, &right)
             .map_err(|e| LspErrorPayload::invalid_params(e.to_string()))?
     } else {
         let left_ref = params.left_ref.as_deref().unwrap_or("HEAD");
         let right_ref = params.right_ref.as_deref().unwrap_or("WORKTREE");
-        if left_ref.eq_ignore_ascii_case("WORKSPACE") {
-            let diff = state
+        let repo_root = discover_repo_root(&roots).ok_or_else(|| {
+            LspErrorPayload::invalid_params("no git repository found in workspace".to_string())
+        })?;
+        if left_ref.eq_ignore_ascii_case("WORKSPACE") && right_ref.eq_ignore_ascii_case("WORKTREE")
+        {
+            return state
                 .with_catalog(|head| {
-                    if right_ref.eq_ignore_ascii_case("WORKTREE")
-                        || right_ref.eq_ignore_ascii_case("WORKSPACE")
-                    {
+                    let worktree = build_lsp_worktree_catalog(state)?;
+                    let mut diff = diff_catalogs(head, &worktree);
+                    if params.reasoner {
+                        enrich_diff_with_reasoner(state, &mut diff, head, &worktree)?;
+                    }
+                    Ok(SemanticDiffResult { diff })
+                })
+                .ok_or_else(LspErrorPayload::not_indexed)?;
+        }
+        if left_ref.eq_ignore_ascii_case("WORKSPACE") {
+            state
+                .with_catalog(|head| {
+                    if right_ref.eq_ignore_ascii_case("WORKSPACE") {
                         Ok(diff_catalogs(head, head))
                     } else {
-                        let base = ontocore_diff::catalog_at_git_ref(&repo_root, right_ref)
+                        let base = catalog_at_git_ref(&repo_root, right_ref)
                             .map_err(|e| LspErrorPayload::invalid_params(e.to_string()))?;
                         Ok(diff_catalogs(&base, head))
                     }
                 })
-                .ok_or_else(LspErrorPayload::not_indexed)??;
-            return Ok(SemanticDiffResult { diff });
-        }
-        if right_ref.eq_ignore_ascii_case("WORKSPACE") {
-            let diff = state
+                .ok_or_else(LspErrorPayload::not_indexed)??
+        } else if right_ref.eq_ignore_ascii_case("WORKSPACE") {
+            state
                 .with_catalog(|head| {
-                    let base = ontocore_diff::catalog_at_git_ref(&repo_root, left_ref)
+                    let base = catalog_at_git_ref(&repo_root, left_ref)
                         .map_err(|e| LspErrorPayload::invalid_params(e.to_string()))?;
                     Ok(diff_catalogs(&base, head))
                 })
-                .ok_or_else(LspErrorPayload::not_indexed)??;
-            return Ok(SemanticDiffResult { diff });
+                .ok_or_else(LspErrorPayload::not_indexed)??
+        } else {
+            diff_git_refs(&repo_root, left_ref, right_ref)
+                .map_err(|e| LspErrorPayload::invalid_params(e.to_string()))?
         }
-        diff_git_refs(&repo_root, left_ref, right_ref)
-            .map_err(|e| LspErrorPayload::invalid_params(e.to_string()))?
     };
 
+    if params.reasoner {
+        if let Ok(worktree) = build_lsp_worktree_catalog(state) {
+            if let Some(result) = state
+                .with_catalog(|head| enrich_diff_with_reasoner(state, &mut diff, head, &worktree))
+            {
+                result?;
+            }
+        }
+    }
+
     Ok(SemanticDiffResult { diff })
+}
+
+fn build_lsp_worktree_catalog(state: &ServerState) -> Result<OntologyCatalog, LspErrorPayload> {
+    let roots = state.workspace_roots();
+    if roots.is_empty() {
+        return Err(LspErrorPayload::not_indexed());
+    }
+    let overrides = state.open_document_overrides();
+    IndexBuilder::new()
+        .workspace(roots[0].clone())
+        .scan_roots(roots)
+        .document_overrides(overrides)
+        .build()
+        .map_err(|e| LspErrorPayload::invalid_params(e.to_string()))
+}
+
+fn enrich_diff_with_reasoner(
+    state: &ServerState,
+    diff: &mut DiffResult,
+    _base_catalog: &OntologyCatalog,
+    head_catalog: &OntologyCatalog,
+) -> Result<(), LspErrorPayload> {
+    let roots = state.workspace_roots();
+    let workspace = state
+        .indexed_workspace()
+        .or_else(|| state.workspace_root())
+        .ok_or_else(LspErrorPayload::not_indexed)?;
+    let profile = ReasonerId::El;
+    let overrides = state.open_documents_for_reasoner();
+    let hierarchy = head_catalog.class_hierarchy();
+    let base_input = WorkspaceInputLoader::new(&workspace)
+        .scan_roots(roots.clone())
+        .load(hierarchy.clone())
+        .map_err(|e| LspErrorPayload::reasoner_failed(e.to_string()))?;
+    let head_input = WorkspaceInputLoader::new(&workspace)
+        .scan_roots(roots)
+        .document_overrides(overrides)
+        .load(hierarchy)
+        .map_err(|e| LspErrorPayload::reasoner_failed(e.to_string()))?;
+    let base_cls = classify(profile, &base_input, true)
+        .map_err(|e| LspErrorPayload::reasoner_failed(e.to_string()))?;
+    let head_cls = classify(profile, &head_input, true)
+        .map_err(|e| LspErrorPayload::reasoner_failed(e.to_string()))?;
+    apply_unsat_diff(diff, &base_cls.unsatisfiable, &head_cls.unsatisfiable);
+    Ok(())
 }
 
 pub fn handle_run_robot(
@@ -235,8 +315,17 @@ fn jail_robot_path_args(
     workspace_roots: &[std::path::PathBuf],
     args: &[String],
 ) -> Result<(), String> {
-    let long_path_flags = ["--input", "--output", "--report"];
-    let short_path_flags = ["-i", "-o"];
+    let long_path_flags = [
+        "--input",
+        "--output",
+        "--report",
+        "--catalog",
+        "--ontology",
+        "--left",
+        "--right",
+        "--merge-input",
+    ];
+    let short_path_flags = ["-i", "-o", "-c"];
     let mut expect_path = false;
     for arg in args.iter().skip(1) {
         if expect_path {
@@ -587,6 +676,10 @@ fn run_reasoner_result_from_classification(
 fn load_reasoner_input(
     state: &ServerState,
 ) -> Result<ontocore_reasoner::ReasonerInput, LspErrorPayload> {
+    let roots = state.workspace_roots();
+    if roots.is_empty() {
+        return Err(LspErrorPayload::not_indexed());
+    }
     let workspace = state
         .indexed_workspace()
         .or_else(|| state.workspace_root())
@@ -596,6 +689,7 @@ fn load_reasoner_input(
         .ok_or_else(LspErrorPayload::not_indexed)?;
     let overrides = state.open_documents_for_reasoner();
     WorkspaceInputLoader::new(&workspace)
+        .scan_roots(roots)
         .document_overrides(overrides)
         .load(asserted)
         .map_err(|e| LspErrorPayload::reasoner_failed(e.to_string()))
@@ -849,10 +943,9 @@ pub fn handle_find_usages(
     state: &ServerState,
     params: FindUsagesParams,
 ) -> Result<FindUsagesResult, LspErrorPayload> {
-    let overrides = state.open_document_overrides();
     state
-        .with_catalog(|catalog| {
-            let usages = find_usages_with_overrides(catalog, &params.iri, &overrides);
+        .with_catalog_and_overrides(|catalog, overrides| {
+            let usages = find_usages_with_overrides(catalog, &params.iri, overrides);
             Ok(FindUsagesResult { usages: usages.into_iter().map(usage_to_summary).collect() })
         })
         .ok_or_else(LspErrorPayload::not_indexed)?
@@ -862,14 +955,17 @@ pub fn handle_preview_refactor(
     state: &ServerState,
     params: PreviewRefactorParams,
 ) -> Result<PreviewRefactorResult, LspErrorPayload> {
-    let workspace = state
-        .workspace_root()
+    let roots = state.workspace_roots();
+    let workspace = roots
+        .first()
+        .cloned()
         .ok_or_else(|| LspErrorPayload::refactor_failed("workspace not initialized".to_string()))?;
-    let overrides = state.open_document_overrides();
     state
-        .with_catalog(|catalog| {
-            let plan = preview_refactor(catalog, &params.request, &overrides, &workspace)
+        .with_catalog_and_overrides(|catalog, overrides| {
+            let plan = preview_refactor(catalog, &params.request, overrides, &workspace)
                 .map_err(|e| LspErrorPayload::refactor_failed(e.to_string()))?;
+            validate_refactor_plan_any_roots(&roots, &plan)
+                .map_err(LspErrorPayload::refactor_failed)?;
             Ok(PreviewRefactorResult { plan })
         })
         .ok_or_else(LspErrorPayload::not_indexed)?
@@ -880,8 +976,10 @@ pub fn handle_apply_refactor(
     index_worker: &IndexWorker,
     params: ApplyRefactorParams,
 ) -> Result<ApplyRefactorResult, LspErrorPayload> {
-    let workspace = state
-        .workspace_root()
+    let roots = state.workspace_roots();
+    let workspace = roots
+        .first()
+        .cloned()
         .ok_or_else(|| LspErrorPayload::refactor_failed("workspace not initialized".to_string()))?;
 
     let (files_written, server_plan) = {
@@ -889,11 +987,13 @@ pub fn handle_apply_refactor(
         let _guard =
             ops_lock.lock().map_err(|e| LspErrorPayload::refactor_failed(e.to_string()))?;
 
-        let overrides = state.open_document_overrides();
         let server_plan = state
-            .with_catalog(|catalog| {
-                preview_refactor(catalog, &params.request, &overrides, &workspace)
-                    .map_err(|e| LspErrorPayload::refactor_failed(e.to_string()))
+            .with_catalog_and_overrides(|catalog, overrides| {
+                let plan = preview_refactor(catalog, &params.request, overrides, &workspace)
+                    .map_err(|e| LspErrorPayload::refactor_failed(e.to_string()))?;
+                validate_refactor_plan_any_roots(&roots, &plan)
+                    .map_err(LspErrorPayload::refactor_failed)?;
+                Ok(plan)
             })
             .ok_or_else(LspErrorPayload::not_indexed)??;
 
@@ -903,9 +1003,7 @@ pub fn handle_apply_refactor(
             ));
         }
 
-        validate_refactor_plan_paths(&workspace, &server_plan)
-            .map_err(|e| LspErrorPayload::refactor_failed(e.to_string()))?;
-
+        let overrides = state.open_document_overrides();
         let files_written = apply_refactor_plan_checked_with_overrides(
             &server_plan,
             params.preview_only,
@@ -919,9 +1017,19 @@ pub fn handle_apply_refactor(
                 if change.preview_text != change.original_text
                     && state.is_document_open(&change.path)
                 {
-                    // Best-effort buffer sync; disk is already committed.
-                    let _ =
-                        state.set_document_text(change.path.clone(), change.preview_text.clone());
+                    if let Err(e) =
+                        state.set_document_text(change.path.clone(), change.preview_text.clone())
+                    {
+                        for rollback in &server_plan.changes {
+                            if rollback.preview_text != rollback.original_text {
+                                let _ = ontocore_owl::atomic_write(
+                                    &rollback.path,
+                                    &rollback.original_text,
+                                );
+                            }
+                        }
+                        return Err(LspErrorPayload::refactor_failed(e));
+                    }
                 }
             }
         }
@@ -952,9 +1060,9 @@ pub fn handle_references(state: &ServerState, params: ReferenceParams) -> Option
     let position = params.text_document_position.position;
     let content = state.document_text(&path)?;
     let iri = iri_at_position(&content, position)?;
-    let overrides = state.open_document_overrides();
-    let usages =
-        state.with_catalog(|catalog| find_usages_with_overrides(catalog, &iri, &overrides))?;
+    let usages = state.with_catalog_and_overrides(|catalog, overrides| {
+        find_usages_with_overrides(catalog, &iri, overrides)
+    })?;
     let locations: Vec<Location> =
         usages.into_iter().filter_map(|u| usage_to_location(state, &u)).collect();
     Some(locations)
@@ -984,6 +1092,16 @@ pub fn handle_rename(
         LspErrorPayload::refactor_failed("rename produced no file changes".to_string())
     })?;
     Ok(Some(edit))
+}
+
+fn validate_refactor_plan_any_roots(
+    roots: &[PathBuf],
+    plan: &ontocore_refactor::RefactorPlan,
+) -> Result<(), String> {
+    for change in &plan.changes {
+        validate_workspace_scope_any(&change.path, roots)?;
+    }
+    Ok(())
 }
 
 fn usage_to_summary(u: ontocore_refactor::Usage) -> UsageSummary {

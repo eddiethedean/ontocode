@@ -1,6 +1,7 @@
 use crate::disk_cache::DiskCache;
 use crate::incremental::{
-    content_hash_text, effective_content_hash, paths_equal, DocumentSnapshot, IncrementalStats,
+    config_fingerprint, content_hash_text, effective_content_hash, paths_equal, DocumentSnapshot,
+    IncrementalStats,
 };
 use crate::OntologyCatalogData;
 use ontocore_core::{
@@ -14,7 +15,7 @@ use ontocore_owl::{load_turtle_text, supports_horned_load};
 use ontocore_parser::{parse_ontology_file, parse_ontology_text, ParsedOntology};
 use oxigraph::model::Quad;
 use oxigraph::store::Store;
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::path::{Path, PathBuf};
 use thiserror::Error;
 
@@ -37,6 +38,7 @@ pub struct IndexBuilder {
     scan_roots: Vec<PathBuf>,
     document_overrides: HashMap<PathBuf, String>,
     disk_cache: bool,
+    only_paths: Option<Vec<PathBuf>>,
 }
 
 impl IndexBuilder {
@@ -46,6 +48,7 @@ impl IndexBuilder {
             scan_roots: Vec::new(),
             document_overrides: HashMap::new(),
             disk_cache: false,
+            only_paths: None,
         }
     }
 
@@ -72,14 +75,29 @@ impl IndexBuilder {
         self
     }
 
+    /// Restrict scanning to these paths (e.g. git-tracked files for diff worktree side).
+    pub fn only_paths(mut self, paths: Vec<PathBuf>) -> Self {
+        self.only_paths = Some(paths);
+        self
+    }
+
     fn document_override_text(&self, path: &Path) -> Option<&String> {
         self.document_overrides
             .get(path)
             .or_else(|| path.canonicalize().ok().and_then(|p| self.document_overrides.get(&p)))
     }
 
+    fn config_fingerprint(&self) -> String {
+        let scan_roots = if self.scan_roots.is_empty() {
+            vec![self.workspace.clone()]
+        } else {
+            self.scan_roots.clone()
+        };
+        config_fingerprint(&scan_roots, self.disk_cache, &self.document_overrides)
+    }
+
     pub fn build(self) -> Result<OntologyCatalog> {
-        self.build_with_snapshots(None).map(|(catalog, _)| catalog)
+        self.build_with_snapshots(None, false).map(|(catalog, _)| catalog)
     }
 
     /// Rebuild the catalog reusing unchanged documents from `previous` when content hashes match.
@@ -87,12 +105,17 @@ impl IndexBuilder {
         if !paths_equal(&previous.workspace, &self.workspace) {
             return self.build();
         }
-        self.build_with_snapshots(Some(&previous.document_snapshots)).map(|(catalog, _)| catalog)
+        if previous.config_fingerprint != self.config_fingerprint() {
+            return self.build();
+        }
+        self.build_with_snapshots(Some(&previous.document_snapshots), true)
+            .map(|(catalog, _)| catalog)
     }
 
     fn build_with_snapshots(
         self,
         previous_snapshots: Option<&HashMap<PathBuf, DocumentSnapshot>>,
+        incremental: bool,
     ) -> Result<(OntologyCatalog, IncrementalStats)> {
         let scan_roots = if self.scan_roots.is_empty() {
             vec![self.workspace.clone()]
@@ -101,11 +124,23 @@ impl IndexBuilder {
         };
         let mut files = Vec::new();
         let mut seen = std::collections::HashSet::new();
-        for root in scan_roots {
-            for file in WorkspaceScanner::new(&root).scan()? {
-                let key = file.path.canonicalize().unwrap_or_else(|_| file.path.clone());
-                if seen.insert(key) {
-                    files.push(file);
+        if let Some(ref only) = self.only_paths {
+            for path in only {
+                if !path.is_file() {
+                    continue;
+                }
+                let key = path.canonicalize().unwrap_or_else(|_| path.clone());
+                if seen.insert(key.clone()) {
+                    files.push(WorkspaceScanner::new(&self.workspace).describe_path(&key)?);
+                }
+            }
+        } else {
+            for root in scan_roots {
+                for file in WorkspaceScanner::new(&root).scan()? {
+                    let key = file.path.canonicalize().unwrap_or_else(|_| file.path.clone());
+                    if seen.insert(key) {
+                        files.push(file);
+                    }
                 }
             }
         }
@@ -126,8 +161,8 @@ impl IndexBuilder {
         let mut document_snapshots = HashMap::new();
         let mut reused = 0usize;
         let mut reparsed = 0usize;
+        let mut loaded_content_hashes = HashSet::new();
 
-        let had_previous_catalog = previous_snapshots.is_some();
         let disk_cache = DiskCache::enabled(self.disk_cache, &self.workspace);
         let mut merged_previous = previous_snapshots.cloned().unwrap_or_default();
         if let Some(ref cache) = disk_cache {
@@ -136,7 +171,12 @@ impl IndexBuilder {
                 let effective_hash =
                     effective_content_hash(&file.content_hash, override_text.map(String::as_str));
                 let lookup_path = file.path.canonicalize().unwrap_or_else(|_| file.path.clone());
-                cache.hydrate_previous(&mut merged_previous, &lookup_path, &effective_hash);
+                cache.hydrate_previous(
+                    &mut merged_previous,
+                    &lookup_path,
+                    &effective_hash,
+                    file.modified_time,
+                );
             }
         }
         let previous_snapshots =
@@ -151,26 +191,34 @@ impl IndexBuilder {
 
             if let Some(prev) = previous_snapshots.and_then(|m| m.get(&lookup_path)) {
                 if prev.content_hash == effective_hash {
-                    let snap = prev.with_doc_id(&doc_id);
-                    apply_document_snapshot(
-                        &snap,
-                        &doc_id,
-                        &mut documents,
-                        &mut entities,
-                        &mut entity_index,
-                        &mut entity_to_document,
-                        &mut document_entity_iris,
-                        &mut annotations,
-                        &mut axioms,
-                        &mut namespaces,
-                        &mut imports,
-                        &mut triple_count,
-                        &store,
-                        &mut bridge_diagnostics,
-                    )?;
-                    document_snapshots.insert(lookup_path, snap);
-                    reused += 1;
-                    continue;
+                    if let Some((reuse_path, modified_time)) = verified_snapshot_source(
+                        &self.workspace,
+                        &file.path,
+                        override_text.map(String::as_str),
+                        &effective_hash,
+                    ) {
+                        let snap = prev.with_reuse_context(&doc_id, &reuse_path, modified_time);
+                        apply_document_snapshot(
+                            &snap,
+                            &doc_id,
+                            &mut documents,
+                            &mut entities,
+                            &mut entity_index,
+                            &mut entity_to_document,
+                            &mut document_entity_iris,
+                            &mut annotations,
+                            &mut axioms,
+                            &mut namespaces,
+                            &mut imports,
+                            &mut triple_count,
+                            &store,
+                            &mut bridge_diagnostics,
+                            &mut loaded_content_hashes,
+                        )?;
+                        document_snapshots.insert(lookup_path, snap);
+                        reused += 1;
+                        continue;
+                    }
                 }
             }
 
@@ -195,16 +243,15 @@ impl IndexBuilder {
                 })?
             };
 
-            triple_count += parsed.triple_count;
-            if triple_count > MAX_TOTAL_TRIPLES {
-                return Err(CatalogError::Core(ontocore_core::OntoCoreError::Scanner(format!(
-                    "workspace exceeds maximum of {MAX_TOTAL_TRIPLES} triples"
-                ))));
-            }
-
             // Load quads even when parse_status is Error (partial recovery after a trailing fault).
             if !parsed.quads().is_empty() {
-                load_quads_into_store(&store, parsed.quads(), triple_count)?;
+                load_quads_into_store(
+                    &store,
+                    parsed.quads(),
+                    &mut triple_count,
+                    &effective_hash,
+                    &mut loaded_content_hashes,
+                )?;
             }
 
             documents.push(OntologyDocument {
@@ -323,26 +370,34 @@ impl IndexBuilder {
 
             if let Some(prev) = previous_snapshots.and_then(|m| m.get(&lookup_path)) {
                 if prev.content_hash == effective_hash {
-                    let snap = prev.with_doc_id(&doc_id);
-                    apply_document_snapshot(
-                        &snap,
-                        &doc_id,
-                        &mut documents,
-                        &mut entities,
-                        &mut entity_index,
-                        &mut entity_to_document,
-                        &mut document_entity_iris,
-                        &mut annotations,
-                        &mut axioms,
-                        &mut namespaces,
-                        &mut imports,
-                        &mut triple_count,
-                        &store,
-                        &mut bridge_diagnostics,
-                    )?;
-                    document_snapshots.insert(lookup_path, snap);
-                    reused += 1;
-                    continue;
+                    if let Some((reuse_path, modified_time)) = verified_snapshot_source(
+                        &self.workspace,
+                        override_path,
+                        Some(override_text.as_str()),
+                        &effective_hash,
+                    ) {
+                        let snap = prev.with_reuse_context(&doc_id, &reuse_path, modified_time);
+                        apply_document_snapshot(
+                            &snap,
+                            &doc_id,
+                            &mut documents,
+                            &mut entities,
+                            &mut entity_index,
+                            &mut entity_to_document,
+                            &mut document_entity_iris,
+                            &mut annotations,
+                            &mut axioms,
+                            &mut namespaces,
+                            &mut imports,
+                            &mut triple_count,
+                            &store,
+                            &mut bridge_diagnostics,
+                            &mut loaded_content_hashes,
+                        )?;
+                        document_snapshots.insert(lookup_path, snap);
+                        reused += 1;
+                        continue;
+                    }
                 }
             }
 
@@ -359,16 +414,15 @@ impl IndexBuilder {
                 message: e.to_string(),
             })?;
 
-            triple_count += parsed.triple_count;
-            if triple_count > MAX_TOTAL_TRIPLES {
-                return Err(CatalogError::Core(ontocore_core::OntoCoreError::Scanner(format!(
-                    "workspace exceeds maximum of {MAX_TOTAL_TRIPLES} triples"
-                ))));
-            }
-
             // Load quads even when parse_status is Error (partial recovery after a trailing fault).
             if !parsed.quads().is_empty() {
-                load_quads_into_store(&store, parsed.quads(), triple_count)?;
+                load_quads_into_store(
+                    &store,
+                    parsed.quads(),
+                    &mut triple_count,
+                    &effective_hash,
+                    &mut loaded_content_hashes,
+                )?;
             }
 
             documents.push(OntologyDocument {
@@ -452,12 +506,13 @@ impl IndexBuilder {
             }
         }
 
-        let stats = if had_previous_catalog {
+        let stats = if incremental || reused > 0 || removed > 0 {
             IncrementalStats::Incremental { reused, reparsed, removed }
         } else {
             IncrementalStats::FullBuild
         };
 
+        let config_fingerprint = self.config_fingerprint();
         let mut data = OntologyCatalogData {
             documents,
             entities,
@@ -482,6 +537,7 @@ impl IndexBuilder {
         Ok((
             OntologyCatalog {
                 workspace: self.workspace,
+                config_fingerprint,
                 data,
                 store,
                 entity_to_document,
@@ -501,6 +557,7 @@ impl Default for IndexBuilder {
 
 pub struct OntologyCatalog {
     workspace: PathBuf,
+    pub(crate) config_fingerprint: String,
     data: OntologyCatalogData,
     store: Store,
     /// Entity IRI → index in [`OntologyCatalogData::documents`].
@@ -543,15 +600,21 @@ fn apply_document_snapshot(
     triple_count: &mut usize,
     store: &Store,
     bridge_diagnostics: &mut Vec<Diagnostic>,
+    loaded_content_hashes: &mut HashSet<String>,
 ) -> Result<()> {
-    *triple_count += snap.triple_count;
-    if *triple_count > MAX_TOTAL_TRIPLES {
-        return Err(CatalogError::Core(ontocore_core::OntoCoreError::Scanner(format!(
-            "workspace exceeds maximum of {MAX_TOTAL_TRIPLES} triples"
-        ))));
+    if snap.triple_count != snap.quads.len() {
+        return Err(CatalogError::Core(ontocore_core::OntoCoreError::Scanner(
+            "document snapshot triple_count does not match quads length".to_string(),
+        )));
     }
     if !snap.quads.is_empty() {
-        load_quads_into_store(store, &snap.quads, *triple_count)?;
+        load_quads_into_store(
+            store,
+            &snap.quads,
+            triple_count,
+            &snap.content_hash,
+            loaded_content_hashes,
+        )?;
     }
 
     documents.push(snap.document.clone());
@@ -680,7 +743,25 @@ fn semantics_for_document(
     }
 }
 
-fn load_quads_into_store(store: &Store, quads: &[Quad], triple_count_so_far: usize) -> Result<()> {
+fn load_quads_into_store(
+    store: &Store,
+    quads: &[Quad],
+    triple_count: &mut usize,
+    content_hash: &str,
+    loaded_hashes: &mut HashSet<String>,
+) -> Result<()> {
+    if !loaded_hashes.insert(content_hash.to_string()) {
+        for _ in quads {
+            *triple_count += 1;
+            if *triple_count > MAX_TOTAL_TRIPLES {
+                return Err(CatalogError::Core(ontocore_core::OntoCoreError::Scanner(format!(
+                    "workspace exceeds maximum of {MAX_TOTAL_TRIPLES} triples"
+                ))));
+            }
+        }
+        return Ok(());
+    }
+
     let mut file_triples = 0usize;
     for quad in quads {
         file_triples += 1;
@@ -689,7 +770,8 @@ fn load_quads_into_store(store: &Store, quads: &[Quad], triple_count_so_far: usi
                 "file exceeds {MAX_TRIPLES_PER_FILE} triples"
             ))));
         }
-        if triple_count_so_far > MAX_TOTAL_TRIPLES {
+        *triple_count += 1;
+        if *triple_count > MAX_TOTAL_TRIPLES {
             return Err(CatalogError::Core(ontocore_core::OntoCoreError::Scanner(format!(
                 "workspace exceeds maximum of {MAX_TOTAL_TRIPLES} triples"
             ))));
@@ -697,6 +779,35 @@ fn load_quads_into_store(store: &Store, quads: &[Quad], triple_count_so_far: usi
         store.insert(quad).map_err(|e| CatalogError::Store(e.to_string()))?;
     }
     Ok(())
+}
+
+fn verified_snapshot_source(
+    workspace: &Path,
+    path: &Path,
+    override_text: Option<&str>,
+    effective_hash: &str,
+) -> Option<(PathBuf, u64)> {
+    if let Some(text) = override_text {
+        if content_hash_text(text) != effective_hash {
+            return None;
+        }
+        let modified_time = std::fs::metadata(path)
+            .ok()
+            .and_then(|m| m.modified().ok())
+            .and_then(|t| t.duration_since(std::time::UNIX_EPOCH).ok())
+            .map(|d| d.as_secs())
+            .unwrap_or(0);
+        return Some((path.to_path_buf(), modified_time));
+    }
+    if !path.exists() {
+        return None;
+    }
+    let file = WorkspaceScanner::new(workspace).describe_path(path).ok()?;
+    if file.content_hash == effective_hash {
+        Some((file.path, file.modified_time))
+    } else {
+        None
+    }
 }
 
 #[cfg(test)]

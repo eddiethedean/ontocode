@@ -8,8 +8,16 @@ use lsp_types::{
     MessageType, ShowMessageParams,
 };
 use ontocore_catalog::CatalogStats;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use std::thread;
+
+fn paths_equal(a: &Path, b: &Path) -> bool {
+    a == b || a.canonicalize().ok().zip(b.canonicalize().ok()).is_some_and(|(x, y)| x == y)
+}
+
+fn seen_contains(seen: &[PathBuf], path: &Path) -> bool {
+    seen.iter().any(|p| paths_equal(p, path))
+}
 
 struct IndexJob {
     workspace: PathBuf,
@@ -102,20 +110,20 @@ fn run_worker(state: ServerState, job_rx: Receiver<WorkerJob>, lsp_sender: Sende
                     let mut seen = Vec::new();
                     for job in &sync_jobs {
                         let path = &job.workspace;
-                        if seen.iter().any(|p: &PathBuf| p == path) {
+                        if seen_contains(&seen, path) {
                             continue;
                         }
                         seen.push(path.clone());
                         let replies: Vec<_> = sync_jobs
                             .iter()
-                            .filter(|j| &j.workspace == path)
+                            .filter(|j| paths_equal(&j.workspace, path))
                             .filter_map(|j| j.reply.clone())
                             .collect();
                         run_index_job(&state, &lsp_sender, path.clone(), &replies);
                     }
                     // Silent jobs for paths not covered by a sync request.
                     for job in silent {
-                        if !seen.iter().any(|p| p == &job.workspace) {
+                        if !seen_contains(&seen, &job.workspace) {
                             let path = job.workspace.clone();
                             run_index_job(&state, &lsp_sender, path.clone(), &[]);
                             seen.push(path);

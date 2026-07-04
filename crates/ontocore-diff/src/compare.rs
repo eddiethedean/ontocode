@@ -3,7 +3,9 @@ use crate::model::{
     EntityChangeKind, ImportChange,
 };
 use ontocore_catalog::{IndexBuilder, OntologyCatalog};
-use ontocore_core::{Annotation, Axiom, Entity, Import};
+use ontocore_core::{
+    Annotation, Axiom, Entity, Import, AXIOM_KIND_DOMAIN, AXIOM_KIND_RANGE, AXIOM_KIND_SUB_CLASS_OF,
+};
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
 use thiserror::Error;
@@ -29,6 +31,7 @@ pub fn diff_catalogs(base: &OntologyCatalog, head: &OntologyCatalog) -> DiffResu
     let mut result = DiffResult::default();
     diff_entities(base, head, &mut result);
     diff_annotations(base, head, &mut result);
+    detect_renames(&mut result);
     diff_axioms(base, head, &mut result);
     diff_imports(base, head, &mut result);
     detect_breaking(&mut result);
@@ -65,7 +68,7 @@ fn diff_entities(base: &OntologyCatalog, head: &OntologyCatalog, result: &mut Di
 
     for (iri, head_entity) in &head_map {
         if let Some(base_entity) = base_map.get(iri) {
-            if !head_entity.deprecated && base_entity.deprecated {
+            if head_entity.deprecated && !base_entity.deprecated {
                 result.entity_changes.push(EntityChange {
                     kind: EntityChangeKind::Deprecated,
                     iri: iri.to_string(),
@@ -77,17 +80,66 @@ fn diff_entities(base: &OntologyCatalog, head: &OntologyCatalog, result: &mut Di
     }
 }
 
-fn annotation_key(a: &Annotation) -> String {
-    format!("{}|{}|{}", a.subject, a.predicate, a.object)
+fn detect_renames(result: &mut DiffResult) {
+    let added: Vec<EntityChange> = result
+        .entity_changes
+        .iter()
+        .filter(|c| c.kind == EntityChangeKind::Added)
+        .cloned()
+        .collect();
+    let removed: Vec<EntityChange> = result
+        .entity_changes
+        .iter()
+        .filter(|c| c.kind == EntityChangeKind::Removed)
+        .cloned()
+        .collect();
+    let mut drop_removed = BTreeSet::new();
+    let mut drop_added = BTreeSet::new();
+    for r in &removed {
+        for a in &added {
+            if drop_added.contains(&a.iri) {
+                continue;
+            }
+            let label_match = !r.labels.is_empty() && r.labels == a.labels;
+            let sameas = result.annotation_changes.iter().any(|ann| {
+                (ann.predicate.contains("sameAs") || ann.predicate.ends_with("#sameAs"))
+                    && ((ann.subject == r.iri && ann.object == a.iri)
+                        || (ann.subject == a.iri && ann.object == r.iri))
+            });
+            if sameas || label_match {
+                result.entity_changes.push(EntityChange {
+                    kind: EntityChangeKind::Renamed,
+                    iri: a.iri.clone(),
+                    previous_iri: Some(r.iri.clone()),
+                    labels: a.labels.clone(),
+                });
+                drop_removed.insert(r.iri.clone());
+                drop_added.insert(a.iri.clone());
+                break;
+            }
+        }
+    }
+    result.entity_changes.retain(|c| {
+        !((c.kind == EntityChangeKind::Removed && drop_removed.contains(&c.iri))
+            || (c.kind == EntityChangeKind::Added && drop_added.contains(&c.iri)))
+    });
+}
+
+#[derive(Eq, PartialEq, Ord, PartialOrd, Clone)]
+struct AnnotationKey(String, String, String);
+
+fn annotation_key(a: &Annotation) -> AnnotationKey {
+    AnnotationKey(a.subject.clone(), a.predicate.clone(), a.object.clone())
 }
 
 fn diff_annotations(base: &OntologyCatalog, head: &OntologyCatalog, result: &mut DiffResult) {
-    let base_set: BTreeSet<String> = base.data().annotations.iter().map(annotation_key).collect();
-    let head_set: BTreeSet<String> = head.data().annotations.iter().map(annotation_key).collect();
+    let base_set: BTreeSet<AnnotationKey> =
+        base.data().annotations.iter().map(annotation_key).collect();
+    let head_set: BTreeSet<AnnotationKey> =
+        head.data().annotations.iter().map(annotation_key).collect();
 
     for ann in &head.data().annotations {
-        let key = annotation_key(ann);
-        if !base_set.contains(&key) {
+        if !base_set.contains(&annotation_key(ann)) {
             result.annotation_changes.push(AnnotationChange {
                 change: "added".to_string(),
                 subject: ann.subject.clone(),
@@ -97,8 +149,7 @@ fn diff_annotations(base: &OntologyCatalog, head: &OntologyCatalog, result: &mut
         }
     }
     for ann in &base.data().annotations {
-        let key = annotation_key(ann);
-        if !head_set.contains(&key) {
+        if !head_set.contains(&annotation_key(ann)) {
             result.annotation_changes.push(AnnotationChange {
                 change: "removed".to_string(),
                 subject: ann.subject.clone(),
@@ -109,17 +160,19 @@ fn diff_annotations(base: &OntologyCatalog, head: &OntologyCatalog, result: &mut
     }
 }
 
-fn axiom_key(a: &Axiom) -> String {
-    format!("{}|{}|{}|{}", a.axiom_kind, a.subject, a.predicate, a.object)
+#[derive(Eq, PartialEq, Ord, PartialOrd, Clone)]
+struct AxiomKey(String, String, String, String);
+
+fn axiom_key(a: &Axiom) -> AxiomKey {
+    AxiomKey(a.axiom_kind.clone(), a.subject.clone(), a.predicate.clone(), a.object.clone())
 }
 
 fn diff_axioms(base: &OntologyCatalog, head: &OntologyCatalog, result: &mut DiffResult) {
-    let base_set: BTreeSet<String> = base.data().axioms.iter().map(axiom_key).collect();
-    let head_set: BTreeSet<String> = head.data().axioms.iter().map(axiom_key).collect();
+    let base_set: BTreeSet<AxiomKey> = base.data().axioms.iter().map(axiom_key).collect();
+    let head_set: BTreeSet<AxiomKey> = head.data().axioms.iter().map(axiom_key).collect();
 
     for ax in &head.data().axioms {
-        let key = axiom_key(ax);
-        if !base_set.contains(&key) {
+        if !base_set.contains(&axiom_key(ax)) {
             result.axiom_changes.push(AxiomChange {
                 change: "added".to_string(),
                 subject: ax.subject.clone(),
@@ -130,8 +183,7 @@ fn diff_axioms(base: &OntologyCatalog, head: &OntologyCatalog, result: &mut Diff
         }
     }
     for ax in &base.data().axioms {
-        let key = axiom_key(ax);
-        if !head_set.contains(&key) {
+        if !head_set.contains(&axiom_key(ax)) {
             result.axiom_changes.push(AxiomChange {
                 change: "removed".to_string(),
                 subject: ax.subject.clone(),
@@ -139,13 +191,20 @@ fn diff_axioms(base: &OntologyCatalog, head: &OntologyCatalog, result: &mut Diff
                 object: ax.object.clone(),
                 axiom_kind: ax.axiom_kind.clone(),
             });
-            if ax.axiom_kind == "SubClassOf" {
+            if ax.axiom_kind == AXIOM_KIND_SUB_CLASS_OF {
                 result.breaking_changes.push(BreakingChange {
                     reason: BreakingReason::RemovedSuperclass,
                     message: format!(
-                        "removed subclass axiom: {} SubClassOf {}",
+                        "removed subclass axiom: {} subClassOf {}",
                         ax.subject, ax.object
                     ),
+                    entity_iri: Some(ax.subject.clone()),
+                });
+            }
+            if ax.axiom_kind == AXIOM_KIND_DOMAIN || ax.axiom_kind == AXIOM_KIND_RANGE {
+                result.breaking_changes.push(BreakingChange {
+                    reason: BreakingReason::DomainRangeChange,
+                    message: format!("removed {} axiom on {}", ax.axiom_kind, ax.subject),
                     entity_iri: Some(ax.subject.clone()),
                 });
             }
@@ -153,13 +212,16 @@ fn diff_axioms(base: &OntologyCatalog, head: &OntologyCatalog, result: &mut Diff
     }
 }
 
-fn import_key(i: &Import) -> String {
-    format!("{}|{}", i.ontology_id, i.import_iri)
+#[derive(Eq, PartialEq, Ord, PartialOrd, Clone)]
+struct ImportKey(String, String);
+
+fn import_key(i: &Import) -> ImportKey {
+    ImportKey(i.ontology_id.clone(), i.import_iri.clone())
 }
 
 fn diff_imports(base: &OntologyCatalog, head: &OntologyCatalog, result: &mut DiffResult) {
-    let base_set: BTreeSet<String> = base.data().imports.iter().map(import_key).collect();
-    let head_set: BTreeSet<String> = head.data().imports.iter().map(import_key).collect();
+    let base_set: BTreeSet<ImportKey> = base.data().imports.iter().map(import_key).collect();
+    let head_set: BTreeSet<ImportKey> = head.data().imports.iter().map(import_key).collect();
 
     for imp in &head.data().imports {
         if !base_set.contains(&import_key(imp)) {
@@ -187,25 +249,32 @@ fn diff_imports(base: &OntologyCatalog, head: &OntologyCatalog, result: &mut Dif
 }
 
 fn detect_breaking(result: &mut DiffResult) {
+    let mut seen = BTreeSet::new();
     for change in &result.entity_changes {
         match change.kind {
             EntityChangeKind::Removed => {
-                result.breaking_changes.push(BreakingChange {
-                    reason: BreakingReason::RemovedEntity,
-                    message: format!("removed entity: {}", change.iri),
-                    entity_iri: Some(change.iri.clone()),
-                });
+                let key = format!("removed:{}", change.iri);
+                if seen.insert(key) {
+                    result.breaking_changes.push(BreakingChange {
+                        reason: BreakingReason::RemovedEntity,
+                        message: format!("removed entity: {}", change.iri),
+                        entity_iri: Some(change.iri.clone()),
+                    });
+                }
             }
             EntityChangeKind::Renamed => {
-                result.breaking_changes.push(BreakingChange {
-                    reason: BreakingReason::RenamedIri,
-                    message: format!(
-                        "renamed entity: {} -> {}",
-                        change.previous_iri.as_deref().unwrap_or("?"),
-                        change.iri
-                    ),
-                    entity_iri: Some(change.iri.clone()),
-                });
+                let key = format!("renamed:{}", change.iri);
+                if seen.insert(key) {
+                    result.breaking_changes.push(BreakingChange {
+                        reason: BreakingReason::RenamedIri,
+                        message: format!(
+                            "renamed entity: {} -> {}",
+                            change.previous_iri.as_deref().unwrap_or("?"),
+                            change.iri
+                        ),
+                        entity_iri: Some(change.iri.clone()),
+                    });
+                }
             }
             _ => {}
         }

@@ -63,15 +63,39 @@ impl DiskCache {
         if stored.content_hash != content_hash {
             return None;
         }
-        Some(stored.into())
+        if stored.triple_count != stored.quads.len() {
+            return None;
+        }
+        let quads: Vec<Quad> = stored.quads.iter().filter_map(restore_quad).collect();
+        if quads.len() != stored.quads.len() || quads.len() != stored.triple_count {
+            return None;
+        }
+        Some(DocumentSnapshot {
+            content_hash: stored.content_hash,
+            document: stored.document,
+            entities: stored.entities,
+            annotations: stored.annotations,
+            axioms: stored.axioms,
+            namespace_rows: stored.namespace_rows,
+            imports: stored.imports,
+            quads,
+            triple_count: stored.triple_count,
+            bridge_warning: stored.bridge_warning,
+        })
     }
 
     pub(crate) fn store(&self, snap: &DocumentSnapshot) -> std::io::Result<()> {
+        if snap.quads.iter().any(quad_has_quoted_triple) {
+            return Ok(());
+        }
         fs::create_dir_all(self.root.join(SNAPSHOTS_DIR))?;
         let stored = StoredSnapshot::from(snap);
         let bytes = serde_json::to_vec(&stored)
             .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e.to_string()))?;
-        fs::write(self.snapshot_path(&snap.content_hash).with_extension("json"), bytes)
+        let path = self.snapshot_path(&snap.content_hash).with_extension("json");
+        let temp_path = path.with_extension("json.tmp");
+        fs::write(&temp_path, bytes)?;
+        fs::rename(temp_path, path)
     }
 
     /// Merge disk hits into `previous` when scanner hash matches.
@@ -80,11 +104,14 @@ impl DiskCache {
         previous: &mut HashMap<PathBuf, DocumentSnapshot>,
         path: &Path,
         content_hash: &str,
+        modified_time: u64,
     ) {
         if previous.contains_key(path) {
             return;
         }
-        if let Some(snap) = self.load(content_hash) {
+        if let Some(mut snap) = self.load(content_hash) {
+            snap.document.path = path.to_path_buf();
+            snap.document.modified_time = modified_time;
             previous.insert(path.to_path_buf(), snap);
         }
     }
@@ -113,6 +140,7 @@ impl From<&DocumentSnapshot> for StoredSnapshot {
 
 impl From<StoredSnapshot> for DocumentSnapshot {
     fn from(stored: StoredSnapshot) -> Self {
+        let quads: Vec<Quad> = stored.quads.iter().filter_map(restore_quad).collect();
         Self {
             content_hash: stored.content_hash,
             document: stored.document,
@@ -121,11 +149,16 @@ impl From<StoredSnapshot> for DocumentSnapshot {
             axioms: stored.axioms,
             namespace_rows: stored.namespace_rows,
             imports: stored.imports,
-            quads: stored.quads.iter().filter_map(restore_quad).collect(),
+            quads,
             triple_count: stored.triple_count,
             bridge_warning: stored.bridge_warning,
         }
     }
+}
+
+fn quad_has_quoted_triple(quad: &Quad) -> bool {
+    matches!(quad.subject.as_ref(), SubjectRef::Triple(_))
+        || matches!(quad.object.as_ref(), TermRef::Triple(_))
 }
 
 fn stored_quad(quad: &Quad) -> StoredQuad {

@@ -21,12 +21,16 @@ lsp = ["dep:ontocore-lsp"]
 ontocore-catalog = { workspace = true }
 ontocore-core = { workspace = true }
 ontocore-diagnostics = { workspace = true }
+ontocore-diff = { workspace = true }
 ontocore-lsp = { workspace = true, optional = true }
 ontocore-owl = { workspace = true }
 ontocore-parser = { workspace = true }
 ontocore-query = { workspace = true }
 ontocore-reasoner = { workspace = true }
 ontocore-refactor = { workspace = true }
+
+[package.metadata.docs.rs]
+all-features = true
 
 [dev-dependencies]
 tempfile = "3"

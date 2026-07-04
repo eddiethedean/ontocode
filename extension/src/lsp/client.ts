@@ -43,6 +43,8 @@ import {
   PreviewRefactorResult,
   RefactorPlan,
   ApplyRefactorResult,
+  SemanticDiffParams,
+  SemanticDiffResult,
 } from "./protocol";
 import {
   bundledServerPath,
@@ -160,8 +162,12 @@ export async function indexWorkspace(
       "No workspace folder is open. Open a folder containing ontology files, then run Index Workspace."
     );
   }
+  const diskCache = vscode.workspace
+    .getConfiguration("ontocode")
+    .get<boolean>("indexCache", false);
   const result = await c.sendRequest<unknown>("ontocore/indexWorkspace", {
     workspace_uri: uri,
+    disk_cache: diskCache,
   });
   return assertIndexWorkspaceResult(result) as IndexWorkspaceResult;
 }
@@ -313,6 +319,21 @@ export async function applyRefactor(
     preview_only: previewOnly,
   });
   return assertApplyRefactorResult(result);
+}
+
+export async function semanticDiff(
+  params: SemanticDiffParams
+): Promise<SemanticDiffResult> {
+  const c = requireClient();
+  const result = await c.sendRequest<unknown>("ontocore/semanticDiff", params);
+  if (
+    typeof result !== "object" ||
+    result === null ||
+    !("diff" in result)
+  ) {
+    throw new Error("Invalid semantic diff response from language server");
+  }
+  return result as SemanticDiffResult;
 }
 
 function requireClient(): LanguageClient {

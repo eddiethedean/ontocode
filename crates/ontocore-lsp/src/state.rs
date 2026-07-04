@@ -2,7 +2,7 @@ use ontocore_catalog::{IndexBuilder, OntologyCatalog};
 use ontocore_core::{
     canonical_workspace_root,
     limits::{MAX_FILE_BYTES, MAX_OPEN_DOCUMENTS},
-    validate_workspace_scope, Diagnostic, OntologyDocument,
+    validate_workspace_scope, validate_workspace_scope_any, Diagnostic, OntologyDocument,
 };
 use ontocore_reasoner::{ReasonerCacheStore, ReasonerSnapshot};
 use std::collections::{BTreeSet, HashMap};
@@ -19,7 +19,9 @@ pub struct ServerState {
 
 struct InnerState {
     catalog: Option<OntologyCatalog>,
-    /// LSP workspace root for path jail (set at initialize).
+    /// All LSP workspace folder roots (multi-root).
+    workspace_roots: Vec<PathBuf>,
+    /// Primary workspace root (first folder) for backward-compatible APIs.
     workspace: Option<PathBuf>,
     /// Last successfully indexed directory (may be a subdirectory of [`InnerState::workspace`]).
     indexed_workspace: Option<PathBuf>,
@@ -32,6 +34,8 @@ struct InnerState {
     reasoner_snapshot: Option<ReasonerSnapshot>,
     /// URIs that received `publishDiagnostics` (for stale clears).
     published_diagnostic_uris: BTreeSet<String>,
+    /// Persist `.ontocore/cache/` during indexing when enabled via `ontocore/indexWorkspace`.
+    index_disk_cache: bool,
 }
 
 impl ServerState {
@@ -39,6 +43,7 @@ impl ServerState {
         Self {
             inner: Arc::new(RwLock::new(InnerState {
                 catalog: None,
+                workspace_roots: Vec::new(),
                 workspace: None,
                 indexed_workspace: None,
                 indexed_at: None,
@@ -47,6 +52,7 @@ impl ServerState {
                 reasoner_cache: ReasonerCacheStore::new(),
                 reasoner_snapshot: None,
                 published_diagnostic_uris: BTreeSet::new(),
+                index_disk_cache: false,
             })),
             ops_lock: Arc::new(Mutex::new(())),
         }
@@ -56,11 +62,29 @@ impl ServerState {
         Arc::clone(&self.ops_lock)
     }
 
-    pub fn set_workspace_root(&self, workspace: PathBuf) -> Result<(), String> {
-        let workspace = canonical_workspace_root(&workspace)?;
+    pub fn set_workspace_roots(&self, roots: Vec<PathBuf>) -> Result<(), String> {
+        let mut canonical = Vec::new();
+        for root in roots {
+            canonical.push(canonical_workspace_root(&root)?);
+        }
+        if canonical.is_empty() {
+            return Err("at least one workspace root is required".to_string());
+        }
+        let primary = canonical[0].clone();
         let mut guard = self.inner.write().map_err(|e| e.to_string())?;
-        guard.workspace = Some(workspace);
+        guard.workspace_roots = canonical;
+        guard.workspace = Some(primary);
         Ok(())
+    }
+
+    pub fn workspace_roots(&self) -> Vec<PathBuf> {
+        self.inner.read().ok().map(|g| g.workspace_roots.clone()).unwrap_or_default()
+    }
+
+    pub fn set_index_disk_cache(&self, enabled: bool) {
+        if let Ok(mut guard) = self.inner.write() {
+            guard.index_disk_cache = enabled;
+        }
     }
 
     pub fn index_workspace(
@@ -70,15 +94,28 @@ impl ServerState {
         let _guard = self.ops_lock.lock().map_err(|e| e.to_string())?;
         let workspace = canonical_workspace_root(&workspace)?;
 
-        let root = self.workspace_root().ok_or_else(|| "workspace not initialized".to_string())?;
-        validate_workspace_scope(&workspace, &root)?;
+        let roots = self.workspace_roots();
+        if roots.is_empty() {
+            return Err("workspace not initialized".to_string());
+        }
+        validate_workspace_scope_any(&workspace, &roots)?;
 
         let overrides = self.open_documents_snapshot();
-        let catalog = IndexBuilder::new()
-            .workspace(&workspace)
+        let disk_cache = self.inner.read().map(|g| g.index_disk_cache).unwrap_or(false);
+        let builder = IndexBuilder::new()
+            .workspace(roots[0].clone())
+            .scan_roots(roots.clone())
             .document_overrides(overrides)
-            .build()
-            .map_err(|e| e.to_string())?;
+            .disk_cache(disk_cache);
+        let catalog = {
+            let guard = self.inner.read().map_err(|e| e.to_string())?;
+            if let Some(prev) = guard.catalog.as_ref() {
+                builder.build_incremental(prev).map_err(|e| e.to_string())?
+            } else {
+                drop(guard);
+                builder.build().map_err(|e| e.to_string())?
+            }
+        };
 
         let stats = catalog.data().stats();
         let indexed_at = now_epoch_secs();
@@ -164,6 +201,14 @@ impl ServerState {
 
     pub fn workspace_root(&self) -> Option<PathBuf> {
         self.inner.read().ok()?.workspace.clone()
+    }
+
+    pub fn resolve_lsp_document_uri(&self, uri: &str) -> Result<PathBuf, String> {
+        let roots = self.workspace_roots();
+        if roots.is_empty() {
+            return Err("workspace not initialized".to_string());
+        }
+        ontocore_core::resolve_lsp_document_path_any(uri, &roots)
     }
 
     /// Store unsaved buffer text for a workspace document.
@@ -305,7 +350,7 @@ mod tests {
         let root = dir.path().canonicalize().unwrap();
 
         let state = ServerState::new();
-        state.set_workspace_root(root.clone()).expect("set workspace");
+        state.set_workspace_roots(vec![root.clone()]).expect("set workspace");
         state.index_workspace(sub.clone()).expect("index subdirectory");
 
         assert_eq!(state.workspace_root().as_deref(), Some(root.as_path()));

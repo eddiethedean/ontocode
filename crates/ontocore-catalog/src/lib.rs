@@ -8,14 +8,17 @@
 //! Use [`ontocore_query::sparql_catalog`] for SPARQL; do not depend on Oxigraph types.
 
 mod builder;
+mod disk_cache;
 mod entity_api;
 mod graph;
+mod incremental;
 
 pub use builder::{CatalogError, IndexBuilder, OntologyCatalog};
 pub use entity_api::{ClassHierarchy, EntityDetail, SourceHint, SubclassEdge};
 pub use graph::{
     GraphBuilder, GraphEdge, GraphFilters, GraphKind, GraphNode, GraphPayload, GraphRequest,
 };
+pub use incremental::IncrementalStats;
 
 use ontocore_core::{
     Annotation, Axiom, Diagnostic, Entity, Import, Namespace, OntologyDocument, ParseStatus,

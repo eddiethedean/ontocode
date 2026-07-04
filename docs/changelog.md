@@ -4,6 +4,10 @@ Canonical source: [CHANGELOG.md on GitHub](https://github.com/eddiethedean/ontoc
 
 Migration guides: [Migration index](migration/README.md)
 
+## [0.10.0] - 2026-07-04
+
+**v0.10.0** — Semantic Workspace release — incremental indexing, multi-root workspaces, stable `Workspace` API, semantic diff (CLI/LSP/panel), optional disk cache. See [CHANGELOG.md](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) and [migration/v0.10.md](migration/v0.10.md).
+
 ## [0.9.0] - 2026-07-03
 
 ### Added

@@ -29,15 +29,16 @@ OntoCode is the flagship IDE built on OntoCore. OntoLogos is a separate reasonin
 Use the [`ontocore`](https://crates.io/crates/ontocore) façade crate:
 
 ```rust
-use ontocore::workspace::Workspace;
+use ontocore::Workspace;
 
 let ws = Workspace::open("./ontology")?;
 let diagnostics = ws.diagnostics();
 let results = ws.query("SELECT short_name FROM classes")?;
 let hits = ws.search("Person")?;
+let graph = ws.import_graph();
 ```
 
-**Pre-1.0:** `Workspace` and related APIs are experimental until v0.10.
+**Stable since v0.10:** `Workspace`, `WorkspaceOptions`, and `ontocore::diff`. Other `ontocore-*` internals remain pre-1.0 until v1.0.
 
 Lower-level access remains available through `ontocore-*` crates. See [crate map](crate-map.md).
 

@@ -25,6 +25,7 @@ ontocore-query = { workspace = true }
 ontocore-reasoner = { workspace = true }
 ontocore-refactor = { workspace = true }
 ontocore-robot = { workspace = true }
+ontocore-diff = { workspace = true }
 anyhow.workspace = true
 clap.workspace = true
 serde_json.workspace = true

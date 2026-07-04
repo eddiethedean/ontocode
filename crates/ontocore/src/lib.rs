@@ -7,6 +7,7 @@
 
 pub mod catalog;
 pub mod diagnostics;
+pub mod diff;
 pub mod owl;
 pub mod parser;
 pub mod query;
@@ -18,3 +19,4 @@ pub mod workspace;
 pub mod lsp;
 
 pub use ontocore_core::{Diagnostic, Entity, OntoCoreError};
+pub use workspace::{Workspace, WorkspaceOptions};

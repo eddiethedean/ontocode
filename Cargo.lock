@@ -481,6 +481,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "git2"
+version = "0.20.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7b88256088d75a56f8ecfa070513a775dd9107f6530ef14919dac831af9cfe2b"
+dependencies = [
+ "bitflags 2.13.0",
+ "libc",
+ "libgit2-sys",
+ "log",
+ "openssl-probe",
+ "openssl-sys",
+ "url",
+]
+
+[[package]]
 name = "glob"
 version = "0.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -740,6 +755,20 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "68ab91017fe16c622486840e4c83c9a37afeff978bd239b5293d61ece587de66"
 
 [[package]]
+name = "libgit2-sys"
+version = "0.18.5+1.9.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "005d6ae6eac1912906073e069f7db60b1fa98e052a68227824afe3e3a1c59ca2"
+dependencies = [
+ "cc",
+ "libc",
+ "libssh2-sys",
+ "libz-sys",
+ "openssl-sys",
+ "pkg-config",
+]
+
+[[package]]
 name = "libloading"
 version = "0.8.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -747,6 +776,32 @@ checksum = "d7c4b02199fee7c5d21a5ae7d8cfa79a6ef5bb2fc834d6e9058e89c825efdc55"
 dependencies = [
  "cfg-if",
  "windows-link",
+]
+
+[[package]]
+name = "libssh2-sys"
+version = "0.3.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c04141a07bb0c0bc461cb657808764de571702a59bc5c726c400ac9a7625e3ab"
+dependencies = [
+ "cc",
+ "libc",
+ "libz-sys",
+ "openssl-sys",
+ "pkg-config",
+ "vcpkg",
+]
+
+[[package]]
+name = "libz-sys"
+version = "1.1.29"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "85bc9657773828b90eeb625adff10eeac83cc21bbfd8e23a03eaa8a33c9e28d9"
+dependencies = [
+ "cc",
+ "libc",
+ "pkg-config",
+ "vcpkg",
 ]
 
 [[package]]
@@ -858,7 +913,7 @@ checksum = "384b8ab6d37215f3c5301a95a4accb5d64aa607f1fcb26a11b5303878451b4fe"
 
 [[package]]
 name = "ontocode"
-version = "0.9.0"
+version = "0.10.0"
 dependencies = [
  "ontocore",
  "ontocore-catalog",
@@ -874,11 +929,12 @@ dependencies = [
 
 [[package]]
 name = "ontocore"
-version = "0.9.0"
+version = "0.10.0"
 dependencies = [
  "ontocore-catalog",
  "ontocore-core",
  "ontocore-diagnostics",
+ "ontocore-diff",
  "ontocore-lsp",
  "ontocore-owl",
  "ontocore-parser",
@@ -890,25 +946,30 @@ dependencies = [
 
 [[package]]
 name = "ontocore-catalog"
-version = "0.9.0"
+version = "0.10.0"
 dependencies = [
+ "hex",
  "ontocore-core",
  "ontocore-diagnostics",
  "ontocore-owl",
  "ontocore-parser",
  "oxigraph",
  "serde",
+ "serde_json",
+ "sha2",
+ "tempfile",
  "thiserror 2.0.18",
 ]
 
 [[package]]
 name = "ontocore-cli"
-version = "0.9.0"
+version = "0.10.0"
 dependencies = [
  "anyhow",
  "clap",
  "ontocore-catalog",
  "ontocore-core",
+ "ontocore-diff",
  "ontocore-owl",
  "ontocore-query",
  "ontocore-reasoner",
@@ -919,7 +980,7 @@ dependencies = [
 
 [[package]]
 name = "ontocore-core"
-version = "0.9.0"
+version = "0.10.0"
 dependencies = [
  "hex",
  "ignore",
@@ -932,21 +993,35 @@ dependencies = [
 
 [[package]]
 name = "ontocore-diagnostics"
-version = "0.9.0"
+version = "0.10.0"
 dependencies = [
  "ontocore-core",
  "regex",
 ]
 
 [[package]]
+name = "ontocore-diff"
+version = "0.10.0"
+dependencies = [
+ "git2",
+ "ontocore-catalog",
+ "ontocore-core",
+ "serde",
+ "serde_json",
+ "tempfile",
+ "thiserror 2.0.18",
+]
+
+[[package]]
 name = "ontocore-lsp"
-version = "0.9.0"
+version = "0.10.0"
 dependencies = [
  "crossbeam-channel",
  "lsp-server",
  "lsp-types",
  "ontocore-catalog",
  "ontocore-core",
+ "ontocore-diff",
  "ontocore-owl",
  "ontocore-query",
  "ontocore-reasoner",
@@ -961,7 +1036,7 @@ dependencies = [
 
 [[package]]
 name = "ontocore-owl"
-version = "0.9.0"
+version = "0.10.0"
 dependencies = [
  "horned-owl",
  "ontocore-core",
@@ -974,7 +1049,7 @@ dependencies = [
 
 [[package]]
 name = "ontocore-parser"
-version = "0.9.0"
+version = "0.10.0"
 dependencies = [
  "ontocore-core",
  "oxigraph",
@@ -986,7 +1061,7 @@ dependencies = [
 
 [[package]]
 name = "ontocore-query"
-version = "0.9.0"
+version = "0.10.0"
 dependencies = [
  "csv",
  "ontocore-catalog",
@@ -1000,7 +1075,7 @@ dependencies = [
 
 [[package]]
 name = "ontocore-reasoner"
-version = "0.9.0"
+version = "0.10.0"
 dependencies = [
  "hex",
  "ontocore-catalog",
@@ -1023,7 +1098,7 @@ dependencies = [
 
 [[package]]
 name = "ontocore-refactor"
-version = "0.9.0"
+version = "0.10.0"
 dependencies = [
  "ontocore-catalog",
  "ontocore-core",
@@ -1035,7 +1110,7 @@ dependencies = [
 
 [[package]]
 name = "ontocore-robot"
-version = "0.9.0"
+version = "0.10.0"
 dependencies = [
  "thiserror 2.0.18",
 ]
@@ -1205,6 +1280,24 @@ dependencies = [
  "ontologos-profile",
  "ontologos-rl",
  "thiserror 2.0.18",
+]
+
+[[package]]
+name = "openssl-probe"
+version = "0.1.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d05e27ee213611ffe7d6348b942e8f942b37114c00cc03cec254295a4a17852e"
+
+[[package]]
+name = "openssl-sys"
+version = "0.9.117"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b47e7e6bb2c38cd930d25a23b40fa52e068c10e85f3e03a7f5ba5aaca5713695"
+dependencies = [
+ "cc",
+ "libc",
+ "pkg-config",
+ "vcpkg",
 ]
 
 [[package]]
@@ -1497,6 +1590,12 @@ name = "pin-project-lite"
 version = "0.2.17"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a89322df9ebe1c1578d689c92318e070967d1042b512afbe49518723f4e6d5cd"
+
+[[package]]
+name = "pkg-config"
+version = "0.3.33"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "19f132c84eca552bf34cab8ec81f1c1dcc229b811638f9d283dceabe58c5569e"
 
 [[package]]
 name = "potential_utf"
@@ -2213,6 +2312,12 @@ name = "utf8parse"
 version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "06abde3611657adf66d383f00b093d7faecc7fa57071cce2578660c9f1010821"
+
+[[package]]
+name = "vcpkg"
+version = "0.2.15"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "accd4ea62f7bb7a82fe23066fb0957d48ef677f6eeb8215f372f52e48bb32426"
 
 [[package]]
 name = "version_check"

@@ -1,16 +1,44 @@
-//! High-level workspace API for OntoCore.
-//!
-//! **Pre-1.0:** `Workspace` and its convenience methods are experimental and may change
-//! until v0.10 stabilizes the public API.
+//! High-level workspace API for OntoCore (stable since v0.10).
 
-use crate::catalog::{CatalogError, ClassHierarchy, EntityDetail, IndexBuilder, OntologyCatalog};
+use crate::catalog::{
+    CatalogError, CatalogStats, ClassHierarchy, EntityDetail, GraphBuilder, GraphFilters,
+    GraphKind, GraphPayload, GraphRequest, IndexBuilder, OntologyCatalog,
+};
+use crate::diff::DiffResult;
 use crate::query::{query_catalog, sparql_catalog, QueryError, QueryResult, SparqlResult};
 use ontocore_core::Diagnostic;
 use std::path::{Path, PathBuf};
 
+/// Options for [`Workspace::open_with_options`].
+#[derive(Debug, Clone)]
+pub struct WorkspaceOptions {
+    /// Primary workspace root (indexed catalog workspace path).
+    pub root: PathBuf,
+    /// Additional roots merged into one catalog (multi-root).
+    pub scan_roots: Vec<PathBuf>,
+    /// Persist parse snapshots under `.ontocore/cache/`.
+    pub disk_cache: bool,
+}
+
+impl WorkspaceOptions {
+    pub fn single(root: impl Into<PathBuf>) -> Self {
+        Self { root: root.into(), scan_roots: Vec::new(), disk_cache: false }
+    }
+
+    pub fn with_disk_cache(mut self, enabled: bool) -> Self {
+        self.disk_cache = enabled;
+        self
+    }
+
+    pub fn with_scan_roots(mut self, roots: Vec<PathBuf>) -> Self {
+        self.scan_roots = roots;
+        self
+    }
+}
+
 /// An indexed ontology workspace.
 pub struct Workspace {
-    root: PathBuf,
+    options: WorkspaceOptions,
     catalog: OntologyCatalog,
     class_hierarchy: ClassHierarchy,
 }
@@ -18,20 +46,76 @@ pub struct Workspace {
 impl Workspace {
     /// Scan and index an ontology workspace on disk.
     pub fn open(path: impl AsRef<Path>) -> Result<Self, CatalogError> {
-        let root = path.as_ref().to_path_buf();
-        let catalog = IndexBuilder::new().workspace(&root).build()?;
-        let class_hierarchy = catalog.class_hierarchy();
-        Ok(Self { root, catalog, class_hierarchy })
+        Self::open_with_options(WorkspaceOptions::single(path.as_ref().to_path_buf()))
     }
 
-    /// Workspace root path passed to [`Self::open`].
+    /// Open with explicit roots and optional disk cache.
+    pub fn open_with_options(options: WorkspaceOptions) -> Result<Self, CatalogError> {
+        let mut builder =
+            IndexBuilder::new().workspace(options.root.clone()).disk_cache(options.disk_cache);
+        if !options.scan_roots.is_empty() {
+            builder = builder.scan_roots(options.scan_roots.clone());
+        }
+        let catalog = builder.build()?;
+        let class_hierarchy = catalog.class_hierarchy();
+        Ok(Self { options, catalog, class_hierarchy })
+    }
+
+    /// Full rebuild from disk.
+    pub fn reindex(&mut self) -> Result<CatalogStats, CatalogError> {
+        let catalog = self.build_fresh()?;
+        self.apply_catalog(catalog);
+        Ok(self.stats())
+    }
+
+    /// Rebuild reusing unchanged documents when content hashes match.
+    pub fn reindex_incremental(&mut self) -> Result<CatalogStats, CatalogError> {
+        let previous = &self.catalog;
+        let catalog = self.build_fresh_incremental(previous)?;
+        self.apply_catalog(catalog);
+        Ok(self.stats())
+    }
+
+    /// Primary workspace root.
     pub fn root(&self) -> &Path {
-        &self.root
+        &self.options.root
+    }
+
+    /// All scan roots (includes primary when none were configured).
+    pub fn scan_roots(&self) -> &[PathBuf] {
+        if self.options.scan_roots.is_empty() {
+            std::slice::from_ref(&self.options.root)
+        } else {
+            &self.options.scan_roots
+        }
     }
 
     /// Indexed catalog (SQL, SPARQL, entity API).
     pub fn catalog(&self) -> &OntologyCatalog {
         &self.catalog
+    }
+
+    /// Catalog statistics without reaching into internal data structures.
+    pub fn stats(&self) -> CatalogStats {
+        self.catalog.data().stats()
+    }
+
+    /// Import dependency graph for visualization and analysis.
+    pub fn import_graph(&self) -> GraphPayload {
+        GraphBuilder::new(&self.catalog)
+            .build(&GraphRequest {
+                graph_kind: GraphKind::Import.as_str().to_string(),
+                root_iri: None,
+                depth: 2,
+                include_inferred: false,
+                filters: GraphFilters::default(),
+            })
+            .unwrap_or(GraphPayload {
+                nodes: vec![],
+                edges: vec![],
+                truncated: false,
+                graph_kind: GraphKind::Import.as_str().to_string(),
+            })
     }
 
     /// Lint and parse diagnostics collected during indexing.
@@ -47,6 +131,17 @@ impl Workspace {
     /// Run SPARQL against the indexed triple store.
     pub fn sparql(&self, sparql: &str) -> Result<SparqlResult, QueryError> {
         sparql_catalog(&self.catalog, sparql)
+    }
+
+    /// Semantic diff against another indexed workspace.
+    pub fn diff(&self, other: &Workspace) -> DiffResult {
+        crate::diff::diff_catalogs(self.catalog(), other.catalog())
+    }
+
+    /// Index `other` on disk and diff against this workspace.
+    pub fn diff_against_path(&self, other: impl AsRef<Path>) -> Result<DiffResult, CatalogError> {
+        let other_ws = Workspace::open(other)?;
+        Ok(self.diff(&other_ws))
     }
 
     /// Search entities by IRI fragment, short name, or label (case-insensitive).
@@ -70,6 +165,34 @@ impl Workspace {
         matches.sort_by(|a, b| a.entity.short_name.cmp(&b.entity.short_name));
         matches.dedup_by(|a, b| a.entity.iri == b.entity.iri);
         matches
+    }
+
+    fn build_fresh(&self) -> Result<OntologyCatalog, CatalogError> {
+        let mut builder = IndexBuilder::new()
+            .workspace(self.options.root.clone())
+            .disk_cache(self.options.disk_cache);
+        if !self.options.scan_roots.is_empty() {
+            builder = builder.scan_roots(self.options.scan_roots.clone());
+        }
+        builder.build()
+    }
+
+    fn build_fresh_incremental(
+        &self,
+        previous: &OntologyCatalog,
+    ) -> Result<OntologyCatalog, CatalogError> {
+        let mut builder = IndexBuilder::new()
+            .workspace(self.options.root.clone())
+            .disk_cache(self.options.disk_cache);
+        if !self.options.scan_roots.is_empty() {
+            builder = builder.scan_roots(self.options.scan_roots.clone());
+        }
+        builder.build_incremental(previous)
+    }
+
+    fn apply_catalog(&mut self, catalog: OntologyCatalog) {
+        self.class_hierarchy = catalog.class_hierarchy();
+        self.catalog = catalog;
     }
 }
 
@@ -97,7 +220,7 @@ mod tests {
     #[test]
     fn workspace_open_fixtures() {
         let ws = Workspace::open(fixtures_path()).expect("open fixtures");
-        assert!(ws.catalog().data().stats().class_count > 0);
+        assert!(ws.stats().class_count > 0);
     }
 
     #[test]
@@ -112,5 +235,12 @@ mod tests {
         let ws = Workspace::open(fixtures_path()).expect("open fixtures");
         let hits = ws.search("Person");
         assert!(!hits.is_empty());
+    }
+
+    #[test]
+    fn workspace_import_graph_non_empty() {
+        let ws = Workspace::open(fixtures_path()).expect("open fixtures");
+        let graph = ws.import_graph();
+        assert!(!graph.nodes.is_empty());
     }
 }

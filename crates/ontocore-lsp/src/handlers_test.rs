@@ -29,7 +29,7 @@ fn fixture_workspace() -> PathBuf {
 fn indexed_state() -> ServerState {
     let state = ServerState::new();
     let ws = fixture_workspace();
-    state.set_workspace_root(ws.clone()).expect("set workspace");
+    state.set_workspace_roots(vec![ws.clone()]).expect("set workspace");
     state.index_workspace(ws).expect("index fixture workspace");
     state
 }
@@ -271,7 +271,7 @@ fn open_buffer_override_surfaces_undefined_prefix_in_snapshot() {
 
     let state = ServerState::new();
     let ws = dir.path().to_path_buf();
-    state.set_workspace_root(ws.clone()).expect("set workspace");
+    state.set_workspace_roots(vec![ws.clone()]).expect("set workspace");
     state.index_workspace(ws.clone()).expect("initial index");
 
     let doc_path = state
@@ -344,7 +344,7 @@ fn apply_axiom_patch_uses_open_buffer_not_disk() {
 
     let state = ServerState::new();
     let ws = dir.path().to_path_buf();
-    state.set_workspace_root(ws.clone()).expect("set workspace");
+    state.set_workspace_roots(vec![ws.clone()]).expect("set workspace");
     state.index_workspace(ws.clone()).expect("index");
 
     let buffer_marker = "# unsaved buffer marker\n";
@@ -392,7 +392,7 @@ fn apply_axiom_patch_does_not_pin_closed_file_as_open_buffer() {
 
     let state = ServerState::new();
     let ws = dir.path().to_path_buf();
-    state.set_workspace_root(ws.clone()).expect("set workspace");
+    state.set_workspace_roots(vec![ws.clone()]).expect("set workspace");
     state.index_workspace(ws.clone()).expect("index");
 
     let (tx, _rx) = unbounded::<Message>();
@@ -432,7 +432,7 @@ fn apply_refactor_tracks_only_open_buffers() {
 
     let state = ServerState::new();
     let ws = dir.path().to_path_buf();
-    state.set_workspace_root(ws.clone()).expect("set workspace");
+    state.set_workspace_roots(vec![ws.clone()]).expect("set workspace");
     state.index_workspace(ws.clone()).expect("index");
 
     let from = "http://example.org/org#Agent";

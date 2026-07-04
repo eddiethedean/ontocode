@@ -15,6 +15,7 @@ import {
 } from "../webviews/manchesterEditorReact";
 import { ReasonerPanel } from "../webviews/reasonerPanel";
 import { ExplanationPanel } from "../webviews/explanationPanel";
+import { SemanticDiffPanel } from "../webviews/semanticDiffPanel";
 import {
   extractModule,
   migrateNamespace,
@@ -302,6 +303,26 @@ export function registerCommands(
     vscode.commands.registerCommand("ontocode.runReasoner", async () => {
       const panel = ReasonerPanel.show();
       await panel.runWithDefaults();
+    }),
+    vscode.commands.registerCommand("ontocode.semanticDiff", async () => {
+      const leftRef = await vscode.window.showInputBox({
+        prompt: "Left git ref (or WORKSPACE)",
+        value: "HEAD",
+      });
+      if (leftRef === undefined) {
+        return;
+      }
+      const rightRef = await vscode.window.showInputBox({
+        prompt: "Right git ref (WORKTREE or WORKSPACE)",
+        value: "WORKSPACE",
+      });
+      if (rightRef === undefined) {
+        return;
+      }
+      await SemanticDiffPanel.show(context.extensionUri, {
+        leftRef,
+        rightRef,
+      });
     }),
     vscode.commands.registerCommand(
       "ontocode.showExplanation",

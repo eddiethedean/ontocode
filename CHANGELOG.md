@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.10.0] - 2026-07-04
+
+### Added
+
+- **Incremental workspace indexing** — content-hash reuse in `ontocore-catalog`; LSP debounced reindex avoids reparsing unchanged files
+- **Multi-root LSP workspaces** — all VS Code folders indexed; `path_jail` and `didChangeWorkspaceFolders` support
+- **Stable `ontocore::Workspace` API** — `open_with_options`, `reindex` / `reindex_incremental`, `import_graph`, `diff`, `stats`
+- **`ontocore-diff` crate** — catalog semantic diff, breaking-change heuristics, git ref compare
+- **`ontocore diff` CLI** — text/json/markdown output; directory and git range modes
+- **LSP `ontocore/semanticDiff`** and VS Code **Semantic Diff** React panel
+- **Optional disk cache** — `.ontocore/cache/` keyed by content hash (`ontocode.indexCache` / `WorkspaceOptions::disk_cache`)
+- Migration guide [docs/migration/v0.10.md](docs/migration/v0.10.md); example `semantic_diff`
+
+### Changed
+
+- Workspace package and all `ontocore-*` crates bumped to **0.10.0**
+- Extension marketplace version **0.10.0**
+
 ## [0.9.0] - 2026-07-03
 
 ### Added

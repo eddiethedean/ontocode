@@ -1,8 +1,8 @@
-# What ships today (v0.9.0)
+# What ships today (v0.10.0)
 
 > **Canonical capability matrix.** Update this page on every release. Design specs under [Project](design/README.md) may describe future targets — check here for what is actually available.
 
-**Current release:** v0.9.0 · [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md)
+**Current release:** v0.10.0 · [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md)
 
 ## Products
 
@@ -35,7 +35,8 @@
 | Diagnostics / lint | Problems panel | `ontocore validate` |
 | Hover, go-to-definition, symbols, find references, rename | Yes | — |
 | Patch preview | Inspector / Manchester editor / refactor preview | `ontocore patch --preview` |
-| React webview UI | Inspector, graphs, Query Workbench, Manchester editor, refactor preview | — |
+| Semantic diff (git / workspace compare) | Semantic Diff panel (React) | `ontocore diff` |
+| React webview UI | Inspector, graphs, Query Workbench, Manchester editor, refactor preview, semantic diff | — |
 
 ## Format support
 
@@ -43,6 +44,17 @@
 |-----------|-----------------|--------------|-----------------------------------|
 | Index / query | Yes | Yes | Yes |
 | Write-back (inspector, patches, refactor) | Yes | Read-only in VS Code | Read-only in VS Code |
+
+## New in v0.10.0
+
+| Capability | Status |
+|------------|--------|
+| Incremental workspace indexing (content-hash reuse) | Yes |
+| Multi-root VS Code / LSP workspaces | Yes |
+| Stable `ontocore::Workspace` API | Yes |
+| `ontocore-diff` + `ontocore diff` CLI | Yes |
+| LSP `ontocore/semanticDiff` + VS Code panel | Yes |
+| Optional `.ontocore/cache/` disk index cache | Yes |
 
 ## New in v0.9.0
 
@@ -74,7 +86,7 @@
 
 ## What's next
 
-Forward milestones (v0.10 semantic workspace → v1.0 Protégé replacement): **[Platform roadmap](roadmap.md)**.
+Forward milestones (v0.11 platform consolidation → v1.0 Protégé replacement): **[Platform roadmap](roadmap.md)**.
 
 ## Where to learn more
 

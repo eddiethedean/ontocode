@@ -2,7 +2,7 @@
   "name": "ontocode",
   "displayName": "OntoCode",
   "description": "A modern ontology IDE for VS Code powered by OntoCore. Browse, edit, query, reason over, and validate OWL/RDF/OBO ontologies with Protégé-competitive workflows in Git and CI.",
-  "version": "0.9.0",
+  "version": "0.10.0",
   "publisher": "ontocode",
   "license": "MIT",
   "repository": {
@@ -159,6 +159,10 @@
         "title": "OntoCode: Run Reasoner"
       },
       {
+        "command": "ontocode.semanticDiff",
+        "title": "OntoCode: Semantic Diff…"
+      },
+      {
         "command": "ontocode.showExplanation",
         "title": "OntoCode: Show Explanation"
       },
@@ -302,6 +306,11 @@
           "enum": ["asserted", "inferred", "combined"],
           "default": "asserted",
           "description": "Class hierarchy display mode in the explorer after classification."
+        },
+        "ontocode.indexCache": {
+          "type": "boolean",
+          "default": false,
+          "description": "Persist ontology parse snapshots under .ontocore/cache/ (recommended gitignore)."
         },
         "ontocode.robotPath": {
           "type": "string",

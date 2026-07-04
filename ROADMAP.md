@@ -30,33 +30,22 @@ After 1.0, the roadmap shifts from parity to modernization.
 | v0.5–v0.6 | Manchester MVP, Query Workbench, OntoLogos EL/RL/RDFS reasoning |
 | v0.7 | React inspector + graphs, OBO index, ROBOT CLI wrappers |
 | v0.8 | Refactoring engine, full Manchester catalog, React Query Workbench + Manchester editor |
-| **v0.9** (current) | OntoCore identity — `ontocore-*` crate rename, `ontocore` façade, `ontocore` CLI, `ontocore-lsp`, `ontocore/*` LSP methods; OntoLogos 1.0 DL/auto classification |
+| **v0.9** | OntoCore identity — `ontocore-*` crate rename, `ontocore` façade, `ontocore` CLI, `ontocore-lsp`, `ontocore/*` LSP methods; OntoLogos 1.0 DL/auto classification |
+| **v0.10** (current) | Semantic workspace — incremental index, multi-root, stable `Workspace` API, semantic diff, optional disk cache |
 
 **Capability matrix:** [docs/SHIPPED.md](docs/SHIPPED.md) · **Engineering milestone detail:** [docs/design/ROADMAP.md](docs/design/ROADMAP.md)
 
 ---
 
-## v0.10 — Semantic Workspace
+## v0.10 — Semantic Workspace (shipped)
 
 - Multi-root workspaces
 - Incremental indexing
-- Import graph
-- Namespace registry
-- Prefix resolution
-- Entity catalog
-- Symbol graph
-- Persistent cache
+- Stable `ontocore::Workspace` API
+- Semantic diff (CLI, LSP, VS Code panel)
+- Persistent optional cache (`.ontocore/cache/`)
 
-## v0.11 — Navigation & Search
-
-- Go to Definition
-- Find References
-- Rename
-- Hover
-- Workspace symbols
-- Semantic search
-- Annotation search
-- IRI search
+## v0.11 — Platform consolidation
 
 ## v0.12 — Diagnostics & Quality
 

@@ -35,6 +35,9 @@ pub struct IndexWorkspaceParams {
     /// Workspace root URI (`file://…`). Accepts legacy camelCase `workspaceUri` during migration.
     #[serde(alias = "workspaceUri", default)]
     pub workspace_uri: Option<String>,
+    /// Persist parse snapshots under `.ontocore/cache/`.
+    #[serde(default)]
+    pub disk_cache: bool,
 }
 
 #[derive(Debug, Serialize)]
@@ -366,6 +369,28 @@ pub struct ApplyRefactorParams {
     pub request: ontocore_refactor::RefactorRequest,
     #[serde(default)]
     pub preview_only: bool,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct SemanticDiffParams {
+    /// Git left ref (e.g. `main`) or `WORKSPACE` for indexed catalog.
+    #[serde(default)]
+    pub left_ref: Option<String>,
+    /// Git right ref or `WORKTREE` for working tree / indexed workspace.
+    #[serde(default)]
+    pub right_ref: Option<String>,
+    /// Optional left directory when comparing two paths on disk.
+    #[serde(default)]
+    pub left_path: Option<String>,
+    /// Optional right directory.
+    #[serde(default)]
+    pub right_path: Option<String>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct SemanticDiffResult {
+    #[serde(flatten)]
+    pub diff: ontocore_diff::DiffResult,
 }
 
 #[derive(Debug, Serialize)]

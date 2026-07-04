@@ -1,6 +1,6 @@
 # Production readiness and pilot criteria
 
-This page states what OntoCode / OntoCore **v0.9.0** is appropriate for in production-like environments. It is not legal advice and does not replace your organization's risk review.
+This page states what OntoCode / OntoCore **v0.10.0** is appropriate for in production-like environments. It is not legal advice and does not replace your organization's risk review.
 
 Canonical capability matrix: [What ships today](../SHIPPED.md).
 

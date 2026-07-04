@@ -13,7 +13,7 @@ OntoCore was previously branded **OntoIndex** (`ontoindex` CLI, `ontoindex-*` cr
 
 **Is the API stable?**
 
-Pre-1.0. Published crates are at **0.9.x**. Library APIs, LSP JSON, and SQL table columns may change between minor releases until v1.0. Pin versions in CI with `cargo install ontocore-cli --locked --version 0.9.0`. The `validate` and `classify` exit codes are documented in [workspace-limits.md](workspace-limits.md).
+Pre-1.0. Published crates are at **0.10.x**. Library APIs, LSP JSON, and SQL table columns may change between minor releases until v1.0. Pin versions in CI with `cargo install ontocore-cli --locked --version 0.10.0`. Upgrading from **0.9.x**? See [v0.10 migration](migration/v0.10.md). The `validate` and `classify` exit codes are documented in [workspace-limits.md](workspace-limits.md).
 
 **What ships in the current release?**
 

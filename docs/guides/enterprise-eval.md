@@ -1,6 +1,6 @@
 # Evaluating OntoCode for your organization
 
-This page helps security, platform, and ontology teams decide whether OntoCode **v0.9** fits your workflow. It is honest about **what ships today** vs the v1.0 Protégé-competitive target.
+This page helps security, platform, and ontology teams decide whether OntoCode **v0.10.0** fits your workflow. It is honest about **what ships today** vs the v1.0 Protégé-competitive target.
 
 Canonical capability matrix: [What ships today](../SHIPPED.md).
 
@@ -45,7 +45,7 @@ Prefer Protégé or other tools (or wait for v1.0) if you need:
 | ROBOT CLI interop (`ontocore robot`, LSP `runRobot`) | **Shipped** (requires Java + `robot` on PATH) |
 | Full OWL 2 DL axiom catalog + property chain editing | **Not shipped** (v1.0 target) |
 | Full OBO write-back in VS Code | **Not shipped** (v1.0 target) |
-| Semantic Git diff | **Not shipped** (v0.10 target) |
+| Semantic Git diff | **Shipped** (v0.10 — CLI, LSP, VS Code panel) |
 
 Full gap analysis: [Protégé parity matrix](../design/PROTEGE_PARITY.md).
 

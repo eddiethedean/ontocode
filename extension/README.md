@@ -160,7 +160,7 @@ More detail: [Installation & troubleshooting](https://ontocode-vs.readthedocs.io
 
 ---
 
-## What's included in v0.9.0
+## What's included in v0.10.0
 
 **Shipped:** explorer; **React** entity inspector, graph panels, Query Workbench, Manchester editor, and Refactor Preview; workspace refactor (rename IRI, migrate namespace, move, extract); EL/RL/RDFS/DL/auto reasoner (OntoLogos 1.0); OBO syntax highlighting and indexing (write-back: Turtle only); diagnostics; LSP navigation and refactoring.
 

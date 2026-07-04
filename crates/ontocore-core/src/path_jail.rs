@@ -5,6 +5,37 @@ pub fn canonical_workspace_root(path: &Path) -> Result<PathBuf, String> {
     path.canonicalize().map_err(|e| format!("workspace path invalid: {e}"))
 }
 
+/// Returns true if `path` is under any of the workspace roots.
+pub fn is_path_within_any(roots: &[PathBuf], path: &Path) -> bool {
+    roots.iter().any(|root| is_path_within(root, path))
+}
+
+/// Ensure `path` is under at least one workspace root.
+pub fn validate_workspace_scope_any(
+    requested: &Path,
+    workspace_roots: &[PathBuf],
+) -> Result<PathBuf, String> {
+    for root in workspace_roots {
+        if let Ok(resolved) = validate_workspace_scope(requested, root) {
+            return Ok(resolved);
+        }
+    }
+    Err("workspace URI is outside allowed workspace roots".to_string())
+}
+
+/// Resolve an LSP document URI under any registered workspace root.
+pub fn resolve_lsp_document_path_any(
+    uri: &str,
+    workspace_roots: &[PathBuf],
+) -> Result<PathBuf, String> {
+    for root in workspace_roots {
+        if let Ok(path) = resolve_lsp_document_path(uri, root) {
+            return Ok(path);
+        }
+    }
+    Err("document path is outside the indexed workspace".to_string())
+}
+
 /// Resolve a `file://` workspace URI to a canonical directory path.
 pub fn workspace_uri_to_path(uri: &str) -> Result<PathBuf, String> {
     file_uri_to_path(uri).and_then(|p| canonical_workspace_root(&p))
@@ -269,5 +300,19 @@ mod tests {
         let root = canonical_workspace_root(dir.path()).unwrap();
         let target = link.join("nested").join("pwn.ttl");
         assert!(validate_workspace_scope(&target, &root).is_err());
+    }
+
+    #[test]
+    fn validate_scope_any_accepts_paths_under_either_root() {
+        let a = tempfile::tempdir().unwrap();
+        let b = tempfile::tempdir().unwrap();
+        let root_a = canonical_workspace_root(a.path()).unwrap();
+        let root_b = canonical_workspace_root(b.path()).unwrap();
+        let file_in_b = b.path().join("module.ttl");
+        std::fs::write(&file_in_b, "@prefix ex: <http://ex/> .").unwrap();
+
+        let resolved = validate_workspace_scope_any(&file_in_b, &[root_a.clone(), root_b.clone()])
+            .expect("under second root");
+        assert!(is_path_within_any(&[root_a, root_b], &resolved));
     }
 }

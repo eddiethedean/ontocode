@@ -173,6 +173,7 @@ jobs:
           publish_with_pause ontocore-owl
           publish_with_pause ontocore-diagnostics
           publish_with_pause ontocore-catalog
+          publish_with_pause ontocore-diff
           publish_with_pause ontocore-refactor
           publish_with_pause ontocore-query
           publish_with_pause ontocore-reasoner

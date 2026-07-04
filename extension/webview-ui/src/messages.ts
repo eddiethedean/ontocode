@@ -5,7 +5,8 @@ export type PanelKind =
   | "graph"
   | "refactorPreview"
   | "queryWorkbench"
-  | "manchesterEditor";
+  | "manchesterEditor"
+  | "semanticDiff";
 
 /** Entity summary from LSP getEntity. */
 export interface EntitySummary {
@@ -114,6 +115,26 @@ export interface ManchesterValidationResult {
   diagnostics: Array<{ severity: string; message: string }>;
 }
 
+export interface DiffPayload {
+  entity_changes: Array<{ kind: string; iri: string; previous_iri?: string; labels?: string[] }>;
+  axiom_changes: Array<{
+    change: string;
+    subject: string;
+    predicate: string;
+    object: string;
+    axiom_kind: string;
+  }>;
+  annotation_changes: Array<{
+    change: string;
+    subject: string;
+    predicate: string;
+    object: string;
+  }>;
+  import_changes: Array<{ change: string; ontology_id: string; import_iri: string }>;
+  inference_changes: Array<{ class_iri: string; change: string; detail: string }>;
+  breaking_changes: Array<{ reason: string; message: string; entity_iri?: string }>;
+}
+
 /** Host → React */
 export type HostMessage =
   | { type: "init"; panel: PanelKind }
@@ -125,6 +146,7 @@ export type HostMessage =
   | { type: "queryResult"; runId: number; result?: TabularQueryResult; error?: string }
   | { type: "manchesterInit"; entityIri: string; axiomKind: string; expression: string; completions: ManchesterCompletions }
   | { type: "manchesterValidation"; seq: number; result?: ManchesterValidationResult; error?: string }
+  | { type: "semanticDiffData"; diff: DiffPayload }
   | { type: "error"; message: string };
 
 /** React → Host */
@@ -146,7 +168,8 @@ export type WebviewMessage =
   | { type: "saveQuery"; name: string; mode: "sql" | "sparql"; text: string }
   | { type: "exportQueryResult"; format: "csv" | "json"; runId?: number }
   | { type: "validateManchester"; expression: string; axiomKind: string; seq: number }
-  | { type: "applyManchester"; expression: string; axiomKind: string; previewOnly: boolean };
+  | { type: "applyManchester"; expression: string; axiomKind: string; previewOnly: boolean }
+  | { type: "copyMarkdown" };
 
 export function isHostMessage(data: unknown): data is HostMessage {
   return (

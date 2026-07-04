@@ -1,0 +1,271 @@
+//! Persistent per-document parse cache under `.ontocore/cache/`.
+
+use crate::incremental::DocumentSnapshot;
+use ontocore_core::Diagnostic;
+use oxigraph::model::vocab::xsd;
+use oxigraph::model::{
+    GraphName, GraphNameRef, Literal, LiteralRef, NamedNode, Quad, Subject, SubjectRef, Term,
+    TermRef,
+};
+use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
+use std::fs;
+use std::path::{Path, PathBuf};
+
+const CACHE_DIR: &str = ".ontocore/cache";
+const SNAPSHOTS_DIR: &str = "snapshots";
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct StoredQuad {
+    subject: String,
+    predicate: String,
+    object: String,
+    graph: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct StoredSnapshot {
+    content_hash: String,
+    document: ontocore_core::OntologyDocument,
+    entities: Vec<ontocore_core::Entity>,
+    annotations: Vec<ontocore_core::Annotation>,
+    axioms: Vec<ontocore_core::Axiom>,
+    namespace_rows: Vec<ontocore_core::Namespace>,
+    imports: Vec<ontocore_core::Import>,
+    quads: Vec<StoredQuad>,
+    triple_count: usize,
+    bridge_warning: Option<Diagnostic>,
+}
+
+/// On-disk cache keyed by content hash (optional workspace acceleration).
+#[derive(Debug, Clone)]
+pub(crate) struct DiskCache {
+    root: PathBuf,
+}
+
+impl DiskCache {
+    pub fn for_workspace(workspace: &Path) -> Self {
+        Self { root: workspace.join(CACHE_DIR) }
+    }
+
+    pub fn enabled(enabled: bool, workspace: &Path) -> Option<Self> {
+        if enabled {
+            Some(Self::for_workspace(workspace))
+        } else {
+            None
+        }
+    }
+
+    pub(crate) fn load(&self, content_hash: &str) -> Option<DocumentSnapshot> {
+        let path = self.snapshot_path(content_hash).with_extension("json");
+        let bytes = fs::read(path).ok()?;
+        let stored: StoredSnapshot = serde_json::from_slice(&bytes).ok()?;
+        if stored.content_hash != content_hash {
+            return None;
+        }
+        Some(stored.into())
+    }
+
+    pub(crate) fn store(&self, snap: &DocumentSnapshot) -> std::io::Result<()> {
+        fs::create_dir_all(self.root.join(SNAPSHOTS_DIR))?;
+        let stored = StoredSnapshot::from(snap);
+        let bytes = serde_json::to_vec(&stored)
+            .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e.to_string()))?;
+        fs::write(self.snapshot_path(&snap.content_hash).with_extension("json"), bytes)
+    }
+
+    /// Merge disk hits into `previous` when scanner hash matches.
+    pub(crate) fn hydrate_previous(
+        &self,
+        previous: &mut HashMap<PathBuf, DocumentSnapshot>,
+        path: &Path,
+        content_hash: &str,
+    ) {
+        if previous.contains_key(path) {
+            return;
+        }
+        if let Some(snap) = self.load(content_hash) {
+            previous.insert(path.to_path_buf(), snap);
+        }
+    }
+
+    fn snapshot_path(&self, content_hash: &str) -> PathBuf {
+        self.root.join(SNAPSHOTS_DIR).join(content_hash)
+    }
+}
+
+impl From<&DocumentSnapshot> for StoredSnapshot {
+    fn from(snap: &DocumentSnapshot) -> Self {
+        Self {
+            content_hash: snap.content_hash.clone(),
+            document: snap.document.clone(),
+            entities: snap.entities.clone(),
+            annotations: snap.annotations.clone(),
+            axioms: snap.axioms.clone(),
+            namespace_rows: snap.namespace_rows.clone(),
+            imports: snap.imports.clone(),
+            quads: snap.quads.iter().map(stored_quad).collect(),
+            triple_count: snap.triple_count,
+            bridge_warning: snap.bridge_warning.clone(),
+        }
+    }
+}
+
+impl From<StoredSnapshot> for DocumentSnapshot {
+    fn from(stored: StoredSnapshot) -> Self {
+        Self {
+            content_hash: stored.content_hash,
+            document: stored.document,
+            entities: stored.entities,
+            annotations: stored.annotations,
+            axioms: stored.axioms,
+            namespace_rows: stored.namespace_rows,
+            imports: stored.imports,
+            quads: stored.quads.iter().filter_map(restore_quad).collect(),
+            triple_count: stored.triple_count,
+            bridge_warning: stored.bridge_warning,
+        }
+    }
+}
+
+fn stored_quad(quad: &Quad) -> StoredQuad {
+    StoredQuad {
+        subject: subject_to_string(quad.subject.as_ref()),
+        predicate: quad.predicate.as_str().to_string(),
+        object: term_to_string(quad.object.as_ref()),
+        graph: match quad.graph_name.as_ref() {
+            GraphNameRef::DefaultGraph => None,
+            GraphNameRef::NamedNode(n) => Some(n.as_str().to_string()),
+            GraphNameRef::BlankNode(b) => Some(format!("_:{b}")),
+        },
+    }
+}
+
+fn restore_quad(stored: &StoredQuad) -> Option<Quad> {
+    let subject = parse_subject(&stored.subject)?;
+    let predicate = NamedNode::new(stored.predicate.as_str()).ok()?;
+    let object = parse_term(&stored.object)?;
+    let graph = match stored.graph.as_deref() {
+        None | Some("") => GraphName::DefaultGraph,
+        Some(g) if g.starts_with("_:") => {
+            GraphName::BlankNode(oxigraph::model::BlankNode::new_unchecked(&g[2..]))
+        }
+        Some(g) => GraphName::NamedNode(NamedNode::new(g).ok()?),
+    };
+    Some(Quad { subject, predicate, object, graph_name: graph })
+}
+
+fn subject_to_string(subject: SubjectRef<'_>) -> String {
+    match subject {
+        SubjectRef::NamedNode(n) => format!("<{}>", n.as_str()),
+        SubjectRef::BlankNode(b) => format!("_:{b}"),
+        SubjectRef::Triple(_) => "\"<<triple>>\"".to_string(),
+    }
+}
+
+fn term_to_string(term: TermRef<'_>) -> String {
+    match term {
+        TermRef::NamedNode(n) => format!("<{}>", n.as_str()),
+        TermRef::BlankNode(b) => format!("_:{b}"),
+        TermRef::Literal(l) => literal_to_string(l),
+        TermRef::Triple(_) => "\"<<triple>>\"".to_string(),
+    }
+}
+
+fn literal_to_string(l: LiteralRef<'_>) -> String {
+    if let Some(lang) = l.language() {
+        format!("\"{}\"@{}", l.value(), lang)
+    } else if l.datatype() == xsd::STRING {
+        format!("\"{}\"", l.value())
+    } else {
+        format!("\"{}\"^<{}>", l.value(), l.datatype().as_str())
+    }
+}
+
+fn parse_subject(raw: &str) -> Option<Subject> {
+    if raw.starts_with("<") && raw.ends_with('>') {
+        return NamedNode::new(&raw[1..raw.len() - 1]).ok().map(Subject::NamedNode);
+    }
+    if let Some(stripped) = raw.strip_prefix("_:") {
+        return Some(Subject::BlankNode(oxigraph::model::BlankNode::new_unchecked(stripped)));
+    }
+    NamedNode::new(raw).ok().map(Subject::NamedNode)
+}
+
+fn parse_term(raw: &str) -> Option<Term> {
+    if raw.starts_with("<") && raw.ends_with('>') {
+        return NamedNode::new(&raw[1..raw.len() - 1]).ok().map(Term::NamedNode);
+    }
+    if let Some(stripped) = raw.strip_prefix("_:") {
+        return Some(Term::BlankNode(oxigraph::model::BlankNode::new_unchecked(stripped)));
+    }
+    if raw.starts_with('"') {
+        if let Some(at) = raw.rfind('"') {
+            let inner = &raw[1..at];
+            let tail = &raw[at + 1..];
+            if let Some(lang) = tail.strip_prefix('@') {
+                return Some(Term::Literal(Literal::new_language_tagged_literal_unchecked(
+                    inner, lang,
+                )));
+            }
+            if let Some(dt) = tail.strip_prefix("^^<").and_then(|s| s.strip_suffix('>')) {
+                return NamedNode::new(dt)
+                    .ok()
+                    .map(|dt| Term::Literal(Literal::new_typed_literal(inner, dt)));
+            }
+            return Some(Term::Literal(Literal::new_simple_literal(inner)));
+        }
+    }
+    None
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use ontocore_core::{
+        Entity, EntityKind, OntologyDocument, OntologyFormat, ParseStatus, SourceLocation,
+    };
+
+    #[test]
+    fn roundtrip_snapshot_through_disk_cache() {
+        let dir = tempfile::tempdir().unwrap();
+        let cache = DiskCache::for_workspace(dir.path());
+        let snap = DocumentSnapshot {
+            content_hash: "deadbeef".to_string(),
+            document: OntologyDocument {
+                id: "doc-1".to_string(),
+                path: dir.path().join("a.ttl"),
+                format: OntologyFormat::Turtle,
+                base_iri: None,
+                imports: vec![],
+                namespaces: Default::default(),
+                parse_status: ParseStatus::Ok,
+                content_hash: "deadbeef".to_string(),
+                modified_time: 0,
+                parse_message: None,
+                parse_error_location: None,
+            },
+            entities: vec![Entity {
+                iri: "http://ex#A".to_string(),
+                kind: EntityKind::Class,
+                short_name: "A".to_string(),
+                ontology_id: "doc-1".to_string(),
+                source_location: SourceLocation::default(),
+                labels: vec![],
+                comments: vec![],
+                deprecated: false,
+                obo_id: None,
+            }],
+            annotations: vec![],
+            axioms: vec![],
+            namespace_rows: vec![],
+            imports: vec![],
+            quads: vec![],
+            triple_count: 0,
+            bridge_warning: None,
+        };
+        cache.store(&snap).expect("store");
+        let loaded = cache.load("deadbeef").expect("load");
+        assert_eq!(loaded.entities[0].iri, "http://ex#A");
+    }
+}

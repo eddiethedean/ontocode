@@ -1,6 +1,10 @@
 use anyhow::{bail, Context, Result};
 use clap::{Parser, Subcommand, ValueEnum};
 use ontocore_catalog::{CatalogStats, IndexBuilder, OntologyCatalog};
+use ontocore_diff::{
+    diff_directories, diff_git_refs, format_diff_json, format_diff_markdown, format_diff_text,
+    parse_git_range,
+};
 use ontocore_query::{
     query_catalog,
     sparql::to_json as sparql_to_json,
@@ -19,7 +23,7 @@ use std::path::{Path, PathBuf};
 #[command(
     name = "ontocore",
     version,
-    about = "Local-first ontology index and query engine (OntoCode v0.9)"
+    about = "Local-first ontology index and query engine (OntoCode v0.10)"
 )]
 struct Cli {
     #[command(subcommand)]
@@ -117,6 +121,25 @@ enum Commands {
         #[command(subcommand)]
         command: RefactorCommands,
     },
+    /// Semantic diff between git refs, directories, or indexed snapshots
+    Diff {
+        /// Git range (`main..feature`), single ref vs working tree, or omitted with `--left`/`--right`
+        #[arg(value_name = "GIT_RANGE")]
+        git_range: Option<String>,
+        /// Left directory or git ref
+        #[arg(long)]
+        left: Option<PathBuf>,
+        /// Right directory or git ref (`WORKTREE` for working tree)
+        #[arg(long)]
+        right: Option<PathBuf>,
+        /// Git repository root (defaults to `--left` parent or current directory)
+        #[arg(long)]
+        repo: Option<PathBuf>,
+        #[arg(long, value_enum, default_value_t = DiffFormat::Text)]
+        format: DiffFormat,
+        #[arg(long)]
+        breaking_only: bool,
+    },
 }
 
 #[derive(Subcommand)]
@@ -206,6 +229,13 @@ enum RobotCommands {
         #[arg(long)]
         robot_path: Option<String>,
     },
+}
+
+#[derive(Clone, Copy, ValueEnum)]
+enum DiffFormat {
+    Text,
+    Json,
+    Markdown,
 }
 
 #[derive(Clone, Copy, ValueEnum)]
@@ -428,6 +458,16 @@ fn main() -> Result<()> {
                 run_refactor_plan(&plan, preview, format, &workspace)?;
             }
         },
+        Commands::Diff { git_range, left, right, repo, format, breaking_only } => {
+            let diff =
+                run_diff(git_range.as_deref(), left.as_deref(), right.as_deref(), repo.as_deref())?;
+            let output = match format {
+                DiffFormat::Json => format_diff_json(&diff),
+                DiffFormat::Markdown => format_diff_markdown(&diff, breaking_only),
+                DiffFormat::Text => format_diff_text(&diff, breaking_only),
+            };
+            println!("{output}");
+        }
     }
     Ok(())
 }
@@ -454,6 +494,33 @@ fn run_refactor_plan(
         println!("applied {files_written} file(s)");
     }
     Ok(())
+}
+
+fn run_diff(
+    git_range: Option<&str>,
+    left: Option<&Path>,
+    right: Option<&Path>,
+    repo: Option<&Path>,
+) -> Result<ontocore_diff::DiffResult> {
+    if let Some(spec) = git_range {
+        let repo_root = repo
+            .map(Path::to_path_buf)
+            .or_else(|| std::env::current_dir().ok())
+            .context("could not determine git repository root")?;
+        let (left_ref, right_ref) = parse_git_range(spec).map_err(|e| anyhow::anyhow!(e))?;
+        return diff_git_refs(&repo_root, &left_ref, &right_ref).map_err(|e| anyhow::anyhow!(e));
+    }
+    match (left, right) {
+        (Some(a), Some(b)) => diff_directories(a, b).map_err(|e| anyhow::anyhow!(e)),
+        (Some(a), None) => {
+            let (left_ref, right_ref) = parse_git_range("HEAD").map_err(|e| anyhow::anyhow!(e))?;
+            let repo_root = repo.unwrap_or(a);
+            diff_git_refs(repo_root, &left_ref, &right_ref).map_err(|e| anyhow::anyhow!(e))
+        }
+        _ => bail!(
+            "provide a git range (`main..feature`), or both --left and --right directory paths"
+        ),
+    }
 }
 
 fn build_catalog(workspace: &PathBuf) -> Result<OntologyCatalog> {

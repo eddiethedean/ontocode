@@ -1,4 +1,4 @@
-# Ontology authoring (OntoCore v0.9)
+# Ontology authoring (OntoCore v0.10)
 
 > **Status:** Documents behavior in **OntoCore v0.9.0**. Pre-1.0 APIs may change.
 > Canonical feature list: [What ships today](SHIPPED.md).

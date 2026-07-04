@@ -358,6 +358,70 @@ export interface ApplyRefactorResult {
   workspace_edit?: LspWorkspaceEdit;
 }
 
+export interface DiffSummaryCounts {
+  entities: number;
+  axioms: number;
+  annotations: number;
+  imports: number;
+  inferences: number;
+  breaking: number;
+}
+
+export interface BreakingChangeSummary {
+  reason: string;
+  message: string;
+  entity_iri?: string;
+}
+
+export interface EntityChangeSummary {
+  kind: string;
+  iri: string;
+  previous_iri?: string;
+  labels?: string[];
+}
+
+export interface AxiomChangeSummary {
+  change: string;
+  subject: string;
+  predicate: string;
+  object: string;
+  axiom_kind: string;
+}
+
+export interface DiffPayload {
+  entity_changes: EntityChangeSummary[];
+  axiom_changes: AxiomChangeSummary[];
+  annotation_changes: Array<{
+    change: string;
+    subject: string;
+    predicate: string;
+    object: string;
+  }>;
+  import_changes: Array<{
+    change: string;
+    ontology_id: string;
+    import_iri: string;
+  }>;
+  inference_changes: Array<{
+    class_iri: string;
+    change: string;
+    detail: string;
+  }>;
+  breaking_changes: BreakingChangeSummary[];
+  summary_counts?: DiffSummaryCounts;
+}
+
+export interface SemanticDiffParams {
+  left_ref?: string;
+  right_ref?: string;
+  left_path?: string;
+  right_path?: string;
+}
+
+export interface SemanticDiffResult {
+  diff: DiffPayload;
+}
+
 export interface LspPosition {
   line: number;
   character: number;

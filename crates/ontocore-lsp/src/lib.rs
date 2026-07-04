@@ -43,7 +43,7 @@ use lsp_types::{
     InitializeParams,
 };
 use serde_json::Value;
-use state::ServerState;
+use state::{resolve_workspace_for_index, ServerState};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 use std::thread;
@@ -232,6 +232,38 @@ fn handle_notification(
                 schedule_reindex(pending_reindex, workspace, Duration::from_millis(750));
             }
         }
+        "workspace/didChangeWorkspaceFolders" => {
+            if let Ok(params) =
+                serde_json::from_value::<lsp_types::DidChangeWorkspaceFoldersParams>(notif.params)
+            {
+                let mut roots = state.workspace_roots();
+                for removed in params.event.removed {
+                    if let Ok(path) = resolve_workspace_for_index(
+                        removed.uri.as_str(),
+                        state.workspace_root().as_deref(),
+                    ) {
+                        roots.retain(|r| r != &path);
+                    }
+                }
+                for added in params.event.added {
+                    if let Ok(path) = resolve_workspace_for_index(
+                        added.uri.as_str(),
+                        state.workspace_root().as_deref(),
+                    ) {
+                        if !roots.iter().any(|r| r == &path) {
+                            roots.push(path);
+                        }
+                    }
+                }
+                if roots.is_empty() {
+                    eprintln!("ontocore-lsp: all workspace folders removed");
+                } else if let Err(err) = state.set_workspace_roots(roots) {
+                    eprintln!("ontocore-lsp: failed to update workspace roots: {err}");
+                } else if let Some(workspace) = state.effective_index_root() {
+                    schedule_reindex(pending_reindex, workspace, Duration::from_millis(500));
+                }
+            }
+        }
         _ => {}
     }
 }
@@ -251,8 +283,7 @@ fn document_path_from_uri(
     state: &ServerState,
     uri: &lsp_types::Uri,
 ) -> Result<std::path::PathBuf, String> {
-    let root = state.workspace_root().ok_or_else(|| "workspace not initialized".to_string())?;
-    ontocore_core::resolve_lsp_document_path(uri.as_str(), &root)
+    state.resolve_lsp_document_uri(uri.as_str())
 }
 
 fn merged_document_text(

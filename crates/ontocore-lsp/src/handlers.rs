@@ -7,7 +7,7 @@ use crate::protocol::{
     IndexWorkspaceParams, IndexWorkspaceResult, LspErrorPayload, ManchesterCompletions,
     ParseManchesterParams, ParseManchesterResult, PreviewRefactorParams, PreviewRefactorResult,
     QueryParams, RunReasonerParams, RunReasonerResult, RunRobotParams, RunRobotResult,
-    SparqlParams, TabularQueryResult, UsageSummary,
+    SemanticDiffParams, SemanticDiffResult, SparqlParams, TabularQueryResult, UsageSummary,
 };
 use crate::state::{path_to_uri, resolve_workspace_for_index, ServerState};
 use lsp_server::ResponseError;
@@ -17,11 +17,12 @@ use lsp_types::{
     HoverProviderCapability, InitializeParams, InitializeResult, Location, MarkupContent,
     MarkupKind, OneOf, Position, Range, ReferenceParams, RenameParams, ServerCapabilities,
     SymbolInformation, SymbolKind, TextDocumentEdit, TextDocumentSyncCapability,
-    TextDocumentSyncKind, TextEdit, Uri, WorkspaceEdit, WorkspaceSymbolParams,
-    WorkspaceSymbolResponse,
+    TextDocumentSyncKind, TextEdit, Uri, WorkspaceEdit, WorkspaceFoldersServerCapabilities,
+    WorkspaceServerCapabilities, WorkspaceSymbolParams, WorkspaceSymbolResponse,
 };
 use ontocore_catalog::{GraphBuilder, GraphRequest};
-use ontocore_core::{resolve_document_path, EntityKind, OntologyFormat};
+use ontocore_core::{EntityKind, OntologyFormat};
+use ontocore_diff::{diff_catalogs, diff_directories, diff_git_refs};
 use ontocore_reasoner::{
     classify, explain, ExplanationRequest, ReasonerId, ReasonerSnapshot, WorkspaceInputLoader,
 };
@@ -35,21 +36,24 @@ use std::str::FromStr;
 
 #[allow(deprecated)]
 pub fn handle_initialize(state: &ServerState, params: InitializeParams) -> InitializeResult {
-    let workspace_uri = params
-        .workspace_folders
-        .and_then(|folders| folders.into_iter().next().map(|f| f.uri))
-        .or(params.root_uri);
-
-    if let Some(uri) = workspace_uri {
+    let mut roots: Vec<std::path::PathBuf> = Vec::new();
+    if let Some(folders) = params.workspace_folders {
+        for folder in folders {
+            match resolve_workspace_for_index(folder.uri.as_str(), None) {
+                Ok(path) => roots.push(path),
+                Err(err) => eprintln!("ontocore-lsp: failed to resolve workspace folder: {err}"),
+            }
+        }
+    } else if let Some(uri) = params.root_uri {
         match resolve_workspace_for_index(uri.as_str(), None) {
-            Ok(path) => {
-                if let Err(err) = state.set_workspace_root(path) {
-                    eprintln!("ontocore-lsp: failed to set workspace root: {err}");
-                }
-            }
-            Err(err) => {
-                eprintln!("ontocore-lsp: failed to resolve workspace folder: {err}");
-            }
+            Ok(path) => roots.push(path),
+            Err(err) => eprintln!("ontocore-lsp: failed to resolve workspace root: {err}"),
+        }
+    }
+
+    if !roots.is_empty() {
+        if let Err(err) = state.set_workspace_roots(roots) {
+            eprintln!("ontocore-lsp: failed to set workspace roots: {err}");
         }
     }
 
@@ -62,6 +66,13 @@ pub fn handle_initialize(state: &ServerState, params: InitializeParams) -> Initi
             references_provider: Some(OneOf::Left(true)),
             rename_provider: Some(OneOf::Left(true)),
             text_document_sync: Some(TextDocumentSyncCapability::Kind(TextDocumentSyncKind::FULL)),
+            workspace: Some(WorkspaceServerCapabilities {
+                workspace_folders: Some(WorkspaceFoldersServerCapabilities {
+                    supported: Some(true),
+                    change_notifications: Some(OneOf::Left(true)),
+                }),
+                ..Default::default()
+            }),
             ..Default::default()
         },
         server_info: Some(lsp_types::ServerInfo {
@@ -83,6 +94,8 @@ pub fn handle_index_workspace(
             LspErrorPayload::index_failed("no workspace URI provided".to_string())
         })?,
     };
+
+    state.set_index_disk_cache(params.disk_cache);
 
     let (stats, indexed_at) =
         index_worker.enqueue_sync(workspace).map_err(LspErrorPayload::index_failed)?;
@@ -151,38 +164,94 @@ pub fn handle_get_graph(
         .ok_or_else(LspErrorPayload::not_indexed)?
 }
 
+pub fn handle_semantic_diff(
+    state: &ServerState,
+    params: SemanticDiffParams,
+) -> Result<SemanticDiffResult, LspErrorPayload> {
+    let roots = state.workspace_roots();
+    let repo_root = roots
+        .first()
+        .cloned()
+        .ok_or_else(|| LspErrorPayload::invalid_params("workspace not initialized".to_string()))?;
+
+    let diff = if let (Some(left), Some(right)) = (&params.left_path, &params.right_path) {
+        diff_directories(Path::new(left), Path::new(right))
+            .map_err(|e| LspErrorPayload::invalid_params(e.to_string()))?
+    } else {
+        let left_ref = params.left_ref.as_deref().unwrap_or("HEAD");
+        let right_ref = params.right_ref.as_deref().unwrap_or("WORKTREE");
+        if left_ref.eq_ignore_ascii_case("WORKSPACE") {
+            let diff = state
+                .with_catalog(|head| {
+                    if right_ref.eq_ignore_ascii_case("WORKTREE")
+                        || right_ref.eq_ignore_ascii_case("WORKSPACE")
+                    {
+                        Ok(diff_catalogs(head, head))
+                    } else {
+                        let base = ontocore_diff::catalog_at_git_ref(&repo_root, right_ref)
+                            .map_err(|e| LspErrorPayload::invalid_params(e.to_string()))?;
+                        Ok(diff_catalogs(&base, head))
+                    }
+                })
+                .ok_or_else(LspErrorPayload::not_indexed)??;
+            return Ok(SemanticDiffResult { diff });
+        }
+        if right_ref.eq_ignore_ascii_case("WORKSPACE") {
+            let diff = state
+                .with_catalog(|head| {
+                    let base = ontocore_diff::catalog_at_git_ref(&repo_root, left_ref)
+                        .map_err(|e| LspErrorPayload::invalid_params(e.to_string()))?;
+                    Ok(diff_catalogs(&base, head))
+                })
+                .ok_or_else(LspErrorPayload::not_indexed)??;
+            return Ok(SemanticDiffResult { diff });
+        }
+        diff_git_refs(&repo_root, left_ref, right_ref)
+            .map_err(|e| LspErrorPayload::invalid_params(e.to_string()))?
+    };
+
+    Ok(SemanticDiffResult { diff })
+}
+
 pub fn handle_run_robot(
     state: &ServerState,
     index_worker: &IndexWorker,
     params: RunRobotParams,
 ) -> Result<RunRobotResult, LspErrorPayload> {
-    let root = state
-        .workspace_root()
-        .ok_or_else(|| LspErrorPayload::robot_failed("workspace not initialized".to_string()))?;
+    let roots = state.workspace_roots();
+    if roots.is_empty() {
+        return Err(LspErrorPayload::robot_failed("workspace not initialized".to_string()));
+    }
     let mut args = vec![params.subcommand];
     args.extend(params.args);
-    jail_robot_path_args(&root, &args).map_err(LspErrorPayload::robot_failed)?;
+    jail_robot_path_args(&roots, &args).map_err(LspErrorPayload::robot_failed)?;
     index_worker.run_robot_sync(params.robot_path, args).map_err(LspErrorPayload::robot_failed)
 }
 
 /// Reject ROBOT file operands that escape the workspace jail.
 ///
 /// Handles separate `--input path`, `--input=path`, and attached short forms (`-i/path`).
-fn jail_robot_path_args(workspace_root: &std::path::Path, args: &[String]) -> Result<(), String> {
+fn jail_robot_path_args(
+    workspace_roots: &[std::path::PathBuf],
+    args: &[String],
+) -> Result<(), String> {
     let long_path_flags = ["--input", "--output", "--report"];
     let short_path_flags = ["-i", "-o"];
     let mut expect_path = false;
     for arg in args.iter().skip(1) {
         if expect_path {
             expect_path = false;
-            ontocore_core::validate_workspace_scope(std::path::Path::new(arg), workspace_root)?;
+            ontocore_core::validate_workspace_scope_any(
+                std::path::Path::new(arg),
+                workspace_roots,
+            )?;
             continue;
         }
         if let Some((flag, value)) = arg.split_once('=') {
             if long_path_flags.contains(&flag) {
-                ontocore_core::validate_workspace_scope(
+                ontocore_core::validate_workspace_scope_any(
                     std::path::Path::new(value),
-                    workspace_root,
+                    workspace_roots,
                 )?;
                 continue;
             }
@@ -202,7 +271,10 @@ fn jail_robot_path_args(workspace_root: &std::path::Path, args: &[String]) -> Re
             }
         });
         if let Some(value) = attached_short {
-            ontocore_core::validate_workspace_scope(std::path::Path::new(value), workspace_root)?;
+            ontocore_core::validate_workspace_scope_any(
+                std::path::Path::new(value),
+                workspace_roots,
+            )?;
             continue;
         }
         // Positional path-like args (contain / or end with ontology extensions).
@@ -213,7 +285,10 @@ fn jail_robot_path_args(workspace_root: &std::path::Path, args: &[String]) -> Re
             || arg.ends_with(".obo")
             || arg.ends_with(".rdf");
         if looks_like_path && !arg.starts_with('-') {
-            ontocore_core::validate_workspace_scope(std::path::Path::new(arg), workspace_root)?;
+            ontocore_core::validate_workspace_scope_any(
+                std::path::Path::new(arg),
+                workspace_roots,
+            )?;
         }
     }
     if expect_path {
@@ -227,13 +302,13 @@ pub fn handle_apply_axiom_patch(
     index_worker: &IndexWorker,
     params: ApplyAxiomPatchParams,
 ) -> Result<ApplyAxiomPatchResult, LspErrorPayload> {
+    state.with_catalog(|_| ()).ok_or_else(LspErrorPayload::not_indexed)?;
     let workspace_root = state
         .workspace_root()
         .ok_or_else(|| LspErrorPayload::patch_invalid("workspace not initialized".to_string()))?;
-    state.with_catalog(|_| ()).ok_or_else(LspErrorPayload::not_indexed)?;
-    let document_path =
-        ontocore_core::resolve_lsp_document_path(&params.document_uri, &workspace_root)
-            .map_err(|e| LspErrorPayload::patch_invalid(e.to_string()))?;
+    let document_path = state
+        .resolve_lsp_document_uri(&params.document_uri)
+        .map_err(|e| LspErrorPayload::patch_invalid(e.to_string()))?;
 
     let namespaces = state
         .with_catalog(|catalog| {
@@ -531,8 +606,8 @@ fn resolve_namespaces_for_manchester(
     params: &ParseManchesterParams,
 ) -> Result<std::collections::BTreeMap<String, String>, LspErrorPayload> {
     if let Some(uri) = &params.document_uri {
-        let workspace = state.workspace_root().ok_or_else(LspErrorPayload::not_indexed)?;
-        let path = ontocore_core::resolve_lsp_document_path(uri, &workspace)
+        let path = state
+            .resolve_lsp_document_uri(uri)
             .map_err(|e| LspErrorPayload::manchester_invalid(e.to_string()))?;
         if let Some(ns) = state
             .with_catalog(|catalog| {
@@ -1137,6 +1212,12 @@ pub fn handle_custom_request(
             serde_json::to_value(result)
                 .map_err(|e| LspErrorPayload::refactor_failed(e.to_string()))
         }
+        "ontocore/semanticDiff" | "ontocore/getSemanticDiff" => {
+            let params: SemanticDiffParams = serde_json::from_value(params.unwrap_or(Value::Null))
+                .map_err(|e| LspErrorPayload::invalid_params(format!("invalid params: {e}")))?;
+            let result = handle_semantic_diff(state, params)?;
+            serde_json::to_value(result).map_err(|e| LspErrorPayload::invalid_params(e.to_string()))
+        }
         _ => Err(LspErrorPayload::invalid_params(format!("unknown method: {method}"))),
     }
 }
@@ -1246,8 +1327,7 @@ fn entity_source_range(doc_text: Option<&str>, entity: &ontocore_core::Entity) -
 }
 
 fn lsp_document_path(state: &ServerState, uri: &Uri) -> Option<std::path::PathBuf> {
-    let root = state.workspace_root()?;
-    resolve_document_path(uri.as_str(), &root).ok()
+    state.resolve_lsp_document_uri(uri.as_str()).ok()
 }
 
 fn path_to_lsp_uri(path: &Path) -> Option<Uri> {

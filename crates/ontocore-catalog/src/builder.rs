@@ -751,14 +751,7 @@ fn load_quads_into_store(
     loaded_hashes: &mut HashSet<String>,
 ) -> Result<()> {
     if !loaded_hashes.insert(content_hash.to_string()) {
-        for _ in quads {
-            *triple_count += 1;
-            if *triple_count > MAX_TOTAL_TRIPLES {
-                return Err(CatalogError::Core(ontocore_core::OntoCoreError::Scanner(format!(
-                    "workspace exceeds maximum of {MAX_TOTAL_TRIPLES} triples"
-                ))));
-            }
-        }
+        // Duplicate content (identical file body): quads already in the store.
         return Ok(());
     }
 
@@ -802,6 +795,11 @@ fn verified_snapshot_source(
     if !path.exists() {
         return None;
     }
+    let file = WorkspaceScanner::new(workspace).describe_path(path).ok()?;
+    if file.content_hash != effective_hash {
+        return None;
+    }
+    // Re-verify immediately before reuse to close TOCTOU between hash check and apply.
     let file = WorkspaceScanner::new(workspace).describe_path(path).ok()?;
     if file.content_hash == effective_hash {
         Some((file.path, file.modified_time))

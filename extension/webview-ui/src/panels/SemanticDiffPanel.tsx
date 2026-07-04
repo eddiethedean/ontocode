@@ -1,4 +1,13 @@
 import { useEffect, useState } from "react";
+import {
+  Callout,
+  ChangeList,
+  EmptyState,
+  LoadingState,
+  PanelHeader,
+  StatGrid,
+  StickyActions,
+} from "../components/ui";
 import { getVsCodeApi } from "../vscodeApi";
 import { DiffPayload, HostMessage, isHostMessage } from "../messages";
 
@@ -9,7 +18,7 @@ function renderTruncationBanner(shown: number, total: number, label: string): JS
     return null;
   }
   return (
-    <p className="muted">
+    <p className="oc-muted">
       Showing {shown} of {total} {label}.
     </p>
   );
@@ -48,13 +57,25 @@ export function SemanticDiffPanel(): JSX.Element {
   }, []);
 
   if (loading) {
-    return <p className="muted">Computing semantic diff…</p>;
+    return (
+      <div className="semantic-diff">
+        <LoadingState label="Computing semantic diff…" />
+      </div>
+    );
   }
   if (error) {
-    return <p className="error">{error}</p>;
+    return (
+      <div className="semantic-diff">
+        <Callout variant="error">{error}</Callout>
+      </div>
+    );
   }
   if (!diff) {
-    return <p className="muted">No diff data.</p>;
+    return (
+      <div className="semantic-diff">
+        <EmptyState title="No diff data" />
+      </div>
+    );
   }
 
   const counts = diff.summary_counts ?? {
@@ -75,57 +96,68 @@ export function SemanticDiffPanel(): JSX.Element {
 
   return (
     <div className="semantic-diff">
-      <h2>Semantic diff</h2>
+      <PanelHeader title="Semantic diff" />
+
       <section>
         <h3>Summary</h3>
-        <ul>
-          <li>Entities: {counts.entities}</li>
-          <li>Axioms: {counts.axioms}</li>
-          <li>Annotations: {counts.annotations}</li>
-          <li>Imports: {counts.imports}</li>
-          <li>Inferences: {counts.inferences}</li>
-          <li>Breaking: {counts.breaking}</li>
-        </ul>
+        <StatGrid
+          items={[
+            { label: "Entities", value: counts.entities },
+            { label: "Axioms", value: counts.axioms },
+            { label: "Annotations", value: counts.annotations },
+            { label: "Imports", value: counts.imports },
+            { label: "Inferences", value: counts.inferences },
+            {
+              label: "Breaking",
+              value: counts.breaking,
+              variant: counts.breaking > 0 ? "danger" : "default",
+            },
+          ]}
+        />
       </section>
+
       {diff.breaking_changes.length > 0 && (
-        <section>
+        <section className="oc-section--breaking">
           <h3>Breaking changes</h3>
           {renderTruncationBanner(breakingShown.length, diff.breaking_changes.length, "breaking changes")}
-          <ul>
-            {breakingShown.map((b, i) => (
-              <li key={i}>
-                <strong>{b.reason}</strong>: {b.message}
-              </li>
-            ))}
-          </ul>
+          <ChangeList
+            items={breakingShown.map((b, i) => ({
+              key: `breaking-${i}`,
+              badge: b.reason,
+              primary: b.message,
+            }))}
+          />
         </section>
       )}
+
       {diff.entity_changes.length > 0 && (
         <section>
           <h3>Entity changes</h3>
           {renderTruncationBanner(entityShown.length, diff.entity_changes.length, "entity changes")}
-          <ul>
-            {entityShown.map((e, i) => (
-              <li key={i}>
-                {e.kind}: {e.iri}
-              </li>
-            ))}
-          </ul>
+          <ChangeList
+            items={entityShown.map((e, i) => ({
+              key: `entity-${i}`,
+              badge: e.kind,
+              primary: e.iri,
+            }))}
+          />
         </section>
       )}
+
       {diff.axiom_changes.length > 0 && (
         <section>
           <h3>Axiom changes</h3>
           {renderTruncationBanner(axiomShown.length, diff.axiom_changes.length, "axiom changes")}
-          <ul>
-            {axiomShown.map((a, i) => (
-              <li key={i}>
-                {a.change} {a.axiom_kind} {a.subject}
-              </li>
-            ))}
-          </ul>
+          <ChangeList
+            items={axiomShown.map((a, i) => ({
+              key: `axiom-${i}`,
+              badge: a.change,
+              primary: `${a.axiom_kind} · ${a.subject}`,
+            }))}
+          />
         </section>
       )}
+
       {diff.annotation_changes.length > 0 && (
         <section>
           <h3>Annotation changes</h3>
@@ -134,28 +166,31 @@ export function SemanticDiffPanel(): JSX.Element {
             diff.annotation_changes.length,
             "annotation changes"
           )}
-          <ul>
-            {annotationShown.map((a, i) => (
-              <li key={i}>
-                {a.change} {a.predicate} on {a.subject}
-              </li>
-            ))}
-          </ul>
+          <ChangeList
+            items={annotationShown.map((a, i) => ({
+              key: `annotation-${i}`,
+              badge: a.change,
+              primary: `${a.predicate} on ${a.subject}`,
+            }))}
+          />
         </section>
       )}
+
       {diff.import_changes.length > 0 && (
         <section>
           <h3>Import changes</h3>
           {renderTruncationBanner(importShown.length, diff.import_changes.length, "import changes")}
-          <ul>
-            {importShown.map((imp, i) => (
-              <li key={i}>
-                {imp.change} {imp.import_iri} in {imp.ontology_id}
-              </li>
-            ))}
-          </ul>
+          <ChangeList
+            items={importShown.map((imp, i) => ({
+              key: `import-${i}`,
+              badge: imp.change,
+              primary: imp.import_iri,
+              secondary: imp.ontology_id,
+            }))}
+          />
         </section>
       )}
+
       {diff.inference_changes.length > 0 && (
         <section>
           <h3>Inference changes</h3>
@@ -164,21 +199,25 @@ export function SemanticDiffPanel(): JSX.Element {
             diff.inference_changes.length,
             "inference changes"
           )}
-          <ul>
-            {inferenceShown.map((inf, i) => (
-              <li key={i}>
-                {inf.change} {inf.class_iri}: {inf.detail}
-              </li>
-            ))}
-          </ul>
+          <ChangeList
+            items={inferenceShown.map((inf, i) => ({
+              key: `inference-${i}`,
+              badge: inf.change,
+              primary: inf.class_iri,
+              secondary: inf.detail,
+            }))}
+          />
         </section>
       )}
-      <button
-        type="button"
-        onClick={() => getVsCodeApi().postMessage({ type: "copyMarkdown" })}
-      >
-        Copy Markdown summary
-      </button>
+
+      <StickyActions>
+        <button
+          type="button"
+          onClick={() => getVsCodeApi().postMessage({ type: "copyMarkdown" })}
+        >
+          Copy Markdown summary
+        </button>
+      </StickyActions>
     </div>
   );
 }

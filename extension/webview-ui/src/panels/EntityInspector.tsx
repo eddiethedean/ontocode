@@ -1,4 +1,21 @@
 import { useCallback, useEffect, useState } from "react";
+import {
+  Badge,
+  ButtonBar,
+  Callout,
+  FormField,
+  IriList,
+  InlineCode,
+  Input,
+  kindLabel,
+  LoadingState,
+  Panel,
+  PanelHeader,
+  Section,
+  Select,
+  shortLabel,
+  StickyActions,
+} from "../components/ui";
 import { getVsCodeApi } from "../vscodeApi";
 import {
   EntityDetailPayload,
@@ -6,50 +23,6 @@ import {
   isHostMessage,
   PatchOp,
 } from "../messages";
-
-function shortLabel(iri: string): string {
-  const hash = iri.lastIndexOf("#");
-  const slash = iri.lastIndexOf("/");
-  const idx = Math.max(hash, slash);
-  return idx >= 0 ? iri.slice(idx + 1) : iri;
-}
-
-function kindLabel(kind: string): string {
-  return kind.replace(/_/g, " ");
-}
-
-function EntityList({
-  items,
-  onSelect,
-}: {
-  items: string[];
-  onSelect?: (iri: string) => void;
-}): JSX.Element {
-  if (items.length === 0) {
-    return <p className="muted">None</p>;
-  }
-  return (
-    <ul>
-      {items.map((i) => (
-        <li key={i}>
-          {onSelect ? (
-            <button
-              type="button"
-              className="secondary"
-              style={{ padding: "2px 6px", marginRight: 6 }}
-              onClick={() => onSelect(i)}
-            >
-              <code>{shortLabel(i)}</code>
-            </button>
-          ) : (
-            <code>{shortLabel(i)}</code>
-          )}{" "}
-          <span className="muted">{i}</span>
-        </li>
-      ))}
-    </ul>
-  );
-}
 
 export function EntityInspectorPanel(): JSX.Element {
   const [detail, setDetail] = useState<EntityDetailPayload | null>(null);
@@ -91,9 +64,9 @@ export function EntityInspectorPanel(): JSX.Element {
 
   if (!detail) {
     return (
-      <div style={{ padding: 16 }}>
-        <p className="muted">Loading entity…</p>
-      </div>
+      <Panel>
+        <LoadingState label="Loading entity…" />
+      </Panel>
     );
   }
 
@@ -126,140 +99,160 @@ export function EntityInspectorPanel(): JSX.Element {
   const parentOptions = classOptions.filter((c) => c !== entity.iri);
 
   return (
-    <div style={{ padding: 16 }}>
-      <h1>{entity.labels[0] ?? entity.short_name}</h1>
-      <p className="muted">
-        {kindLabel(entity.kind)}
-        {entity.obo_id ? ` · ${entity.obo_id}` : ""}
-        {entity.deprecated ? (
-          <span className="deprecated"> (deprecated)</span>
-        ) : null}
-      </p>
+    <Panel>
+      <PanelHeader
+        title={entity.labels[0] ?? entity.short_name}
+        subtitle={
+          <>
+            {kindLabel(entity.kind)}
+            {entity.obo_id ? ` · ${entity.obo_id}` : ""}
+            {entity.deprecated ? (
+              <span className="deprecated"> · deprecated</span>
+            ) : null}
+          </>
+        }
+        badges={
+          <>
+            <Badge variant="kind">{kindLabel(entity.kind)}</Badge>
+            {entity.deprecated ? <Badge variant="danger">Deprecated</Badge> : null}
+          </>
+        }
+      />
 
-      <h2>IRI</h2>
-      <p style={{ wordBreak: "break-all" }}>
-        <code>{entity.iri}</code>
-      </p>
+      <Section title="IRI" card>
+        <InlineCode>{entity.iri}</InlineCode>
+      </Section>
 
-      <h2>Labels</h2>
-      <EntityList items={entity.labels} />
+      <Section title="Labels" card>
+        <IriList items={entity.labels} />
+      </Section>
 
-      <h2>Comments</h2>
-      <EntityList items={entity.comments} />
+      <Section title="Comments" card>
+        <IriList items={entity.comments} />
+      </Section>
 
-      <h2>Parents</h2>
-      <EntityList items={parents} onSelect={openEntity} />
+      <Section title="Parents" card>
+        <IriList items={parents} onSelect={openEntity} />
+      </Section>
 
-      <h2>Children</h2>
-      <EntityList items={children} onSelect={openEntity} />
+      <Section title="Children" card>
+        <IriList items={children} onSelect={openEntity} />
+      </Section>
 
-      <h2>Axioms</h2>
-      {axioms.length > 0 ? (
-        <div>
-          {Object.entries(axiomsByKind).map(([kind, items]) => (
-            <section key={kind}>
-              <h3>{kindTitle(kind)}</h3>
-              <ul>
-                {items.map((a, idx) => (
-                  <li key={`${kind}-${idx}`}>
-                    <code>{a.display}</code>{" "}
-                        {editable &&
-                        entity.kind === "class" &&
-                        a.editable &&
-                        kind !== "property_chain" ? (
-                      <button
-                        type="button"
-                        className="secondary"
-                        onClick={() =>
-                          getVsCodeApi().postMessage({
-                            type: "openManchester",
-                            axiom: {
-                              kind: a.kind,
-                              manchester: a.manchester,
-                              other_iri: a.other_iri,
-                            },
-                          })
-                        }
-                      >
-                        {kind === "disjoint_class"
-                          ? "Edit disjoint"
-                          : "Edit in Manchester"}
-                      </button>
-                    ) : null}
-                  </li>
-                ))}
-              </ul>
-            </section>
-          ))}
-        </div>
-      ) : (
-        <p className="muted">None</p>
-      )}
-      {editable && entity.kind === "class" ? (
-        <button
-          type="button"
-          className="secondary"
-          onClick={() =>
-            getVsCodeApi().postMessage({ type: "addManchesterAxiom" })
-          }
-        >
-          Add Manchester axiom
-        </button>
-      ) : null}
+      <Section
+        title="Axioms"
+        card
+        action={
+          editable && entity.kind === "class" ? (
+            <button
+              type="button"
+              className="secondary"
+              onClick={() =>
+                getVsCodeApi().postMessage({ type: "addManchesterAxiom" })
+              }
+            >
+              Add Manchester axiom
+            </button>
+          ) : undefined
+        }
+      >
+        {axioms.length > 0 ? (
+          <div>
+            {Object.entries(axiomsByKind).map(([kind, items]) => (
+              <div key={kind} className="oc-section oc-section--nested">
+                <h3>{kindTitle(kind)}</h3>
+                <ul className="oc-axiom-list">
+                  {items.map((a, idx) => (
+                    <li key={`${kind}-${idx}`} className="oc-axiom-item">
+                      <InlineCode>{a.display}</InlineCode>
+                      {editable &&
+                      entity.kind === "class" &&
+                      a.editable &&
+                      kind !== "property_chain" ? (
+                        <button
+                          type="button"
+                          className="secondary"
+                          onClick={() =>
+                            getVsCodeApi().postMessage({
+                              type: "openManchester",
+                              axiom: {
+                                kind: a.kind,
+                                manchester: a.manchester,
+                                other_iri: a.other_iri,
+                              },
+                            })
+                          }
+                        >
+                          {kind === "disjoint_class"
+                            ? "Edit disjoint"
+                            : "Edit in Manchester"}
+                        </button>
+                      ) : null}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <p className="oc-muted">None</p>
+        )}
+      </Section>
 
       {editable ? (
-        <>
-          <h2>Edit</h2>
-          <div className="form">
-            <label>
-              Add label
-              <input
+        <Section title="Edit" card>
+            <FormField label="Add label">
+              <Input
                 value={newLabel}
                 onChange={(e) => setNewLabel(e.target.value)}
               />
-            </label>
-            <button
-              type="button"
-              onClick={() => {
-                if (!newLabel.trim()) return;
-                apply(
-                  [{ op: "add_label", entity_iri: entity.iri, value: newLabel.trim() }],
-                  false
-                );
-                setNewLabel("");
-              }}
-            >
-              Add Label
-            </button>
-            <label>
-              Add comment
-              <input
+            </FormField>
+            <ButtonBar>
+              <button
+                type="button"
+                onClick={() => {
+                  if (!newLabel.trim()) return;
+                  apply(
+                    [{ op: "add_label", entity_iri: entity.iri, value: newLabel.trim() }],
+                    false
+                  );
+                  setNewLabel("");
+                }}
+              >
+                Add Label
+              </button>
+            </ButtonBar>
+
+            <FormField label="Add comment">
+              <Input
                 value={newComment}
                 onChange={(e) => setNewComment(e.target.value)}
               />
-            </label>
-            <button
-              type="button"
-              onClick={() => {
-                if (!newComment.trim()) return;
-                apply(
-                  [
-                    {
-                      op: "add_comment",
-                      entity_iri: entity.iri,
-                      value: newComment.trim(),
-                    },
-                  ],
-                  false
-                );
-                setNewComment("");
-              }}
-            >
-              Add Comment
-            </button>
-            <label>
-              Add parent
-              <select
+            </FormField>
+            <ButtonBar>
+              <button
+                type="button"
+                onClick={() => {
+                  if (!newComment.trim()) return;
+                  apply(
+                    [
+                      {
+                        op: "add_comment",
+                        entity_iri: entity.iri,
+                        value: newComment.trim(),
+                      },
+                    ],
+                    false
+                  );
+                  setNewComment("");
+                }}
+              >
+                Add Comment
+              </button>
+            </ButtonBar>
+
+            <FormField label="Add parent">
+              <Select
                 value={parentPick}
                 onChange={(e) => setParentPick(e.target.value)}
               >
@@ -269,101 +262,109 @@ export function EntityInspectorPanel(): JSX.Element {
                     {shortLabel(c)}
                   </option>
                 ))}
-              </select>
-            </label>
-            <button
-              type="button"
-              onClick={() => {
-                if (!parentPick) return;
-                apply(
-                  [
-                    {
-                      op: "add_sub_class_of",
-                      entity_iri: entity.iri,
-                      parent_iri: parentPick,
-                    },
-                  ],
-                  false
-                );
-                setParentPick("");
-              }}
-            >
-              Add Parent (SubClassOf)
-            </button>
-            <button
-              type="button"
-              className="secondary"
-              onClick={() => {
-                if (!newLabel.trim()) return;
-                apply(
-                  [{ op: "add_label", entity_iri: entity.iri, value: newLabel.trim() }],
-                  true
-                );
-              }}
-            >
-              Preview
-            </button>
-            <button
-              type="button"
-              className="danger"
-              onClick={() => {
-                if (
-                  window.confirm(
-                    "Delete this entity from the ontology file?"
-                  )
-                ) {
+              </Select>
+            </FormField>
+            <ButtonBar>
+              <button
+                type="button"
+                onClick={() => {
+                  if (!parentPick) return;
                   apply(
-                    [{ op: "delete_entity", entity_iri: entity.iri }],
+                    [
+                      {
+                        op: "add_sub_class_of",
+                        entity_iri: entity.iri,
+                        parent_iri: parentPick,
+                      },
+                    ],
                     false
                   );
-                }
-              }}
-            >
-              Delete Entity
-            </button>
+                  setParentPick("");
+                }}
+              >
+                Add Parent (SubClassOf)
+              </button>
+              <button
+                type="button"
+                className="secondary"
+                onClick={() => {
+                  if (!newLabel.trim()) return;
+                  apply(
+                    [{ op: "add_label", entity_iri: entity.iri, value: newLabel.trim() }],
+                    true
+                  );
+                }}
+              >
+                Preview
+              </button>
+              <button
+                type="button"
+                className="danger"
+                onClick={() => {
+                  if (
+                    window.confirm(
+                      "Delete this entity from the ontology file?"
+                    )
+                  ) {
+                    apply(
+                      [{ op: "delete_entity", entity_iri: entity.iri }],
+                      false
+                    );
+                  }
+                }}
+              >
+                Delete Entity
+              </button>
+            </ButtonBar>
+
             {preview ? (
-              <pre className="preview muted">{preview}</pre>
+              preview.startsWith("Error:") ? (
+                <Callout variant="error">{preview}</Callout>
+              ) : (
+                <pre className="preview oc-muted">{preview}</pre>
+              )
             ) : null}
-          </div>
-        </>
+        </Section>
       ) : (
-        <p className="muted">
+        <Callout variant="info">
           Editing is available for Turtle (.ttl) documents only.
-        </p>
+        </Callout>
       )}
 
-      <button
-        type="button"
-        onClick={() => getVsCodeApi().postMessage({ type: "jumpToSource" })}
-      >
-        Jump to Source
-      </button>
-      <button
-        type="button"
-        className="secondary"
-        onClick={() => getVsCodeApi().postMessage({ type: "findUsages" })}
-      >
-        Find Usages
-      </button>
-      <button
-        type="button"
-        className="secondary"
-        onClick={() => getVsCodeApi().postMessage({ type: "renameIri" })}
-      >
-        Rename IRI
-      </button>
-      <button
-        type="button"
-        className="secondary"
-        onClick={() =>
-          getVsCodeApi().postMessage({
-            type: "openGraph",
-            rootIri: entity.iri,
-          })
-        }
-      >
-        Open Graph
-      </button>
-    </div>
+      <StickyActions>
+        <button
+          type="button"
+          onClick={() => getVsCodeApi().postMessage({ type: "jumpToSource" })}
+        >
+          Jump to Source
+        </button>
+        <button
+          type="button"
+          className="secondary"
+          onClick={() => getVsCodeApi().postMessage({ type: "findUsages" })}
+        >
+          Find Usages
+        </button>
+        <button
+          type="button"
+          className="secondary"
+          onClick={() => getVsCodeApi().postMessage({ type: "renameIri" })}
+        >
+          Rename IRI
+        </button>
+        <button
+          type="button"
+          className="secondary"
+          onClick={() =>
+            getVsCodeApi().postMessage({
+              type: "openGraph",
+              rootIri: entity.iri,
+            })
+          }
+        >
+          Open Graph
+        </button>
+      </StickyActions>
+    </Panel>
   );
 }

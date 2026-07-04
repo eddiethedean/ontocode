@@ -49,11 +49,14 @@ export class OntologyTreeItem extends vscode.TreeItem {
       };
     }
     if (nodeKind === "document" && filePath) {
-      this.command = {
-        command: "vscode.open",
-        title: "Open File",
-        arguments: [vscode.Uri.file(filePath)],
-      };
+      const uri = vscode.Uri.file(filePath);
+      if (vscode.workspace.getWorkspaceFolder(uri)) {
+        this.command = {
+          command: "vscode.open",
+          title: "Open File",
+          arguments: [uri],
+        };
+      }
     }
     if (nodeKind === "diagnostic" && diagnostic) {
       this.tooltip = diagnostic.message;

@@ -28,7 +28,7 @@ pub fn document_matches_entity(entity: &Entity, doc: &OntologyDocument) -> bool 
             return true;
         }
     }
-    doc.path.to_string_lossy().contains(&entity.ontology_id)
+    false
 }
 
 /// Whether an import ontology id matches a document.

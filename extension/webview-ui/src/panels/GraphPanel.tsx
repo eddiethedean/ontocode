@@ -10,6 +10,17 @@ import {
   type Edge,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
+import {
+  Badge,
+  ButtonBar,
+  Callout,
+  Card,
+  CheckboxRow,
+  EmptyState,
+  InlineCode,
+  RangeField,
+  Section,
+} from "../components/ui";
 import { getVsCodeApi } from "../vscodeApi";
 import {
   GraphPayload,
@@ -34,14 +45,7 @@ function layoutNodes(graph: GraphPayload): Node[] {
       id: n.id,
       position: { x: (i % 8) * 180, y: row * 100 + (n.kind === "ontology" ? 0 : 40) },
       data: { label: n.label || n.id },
-      style: {
-        background: "var(--vscode-editor-background)",
-        color: "var(--vscode-foreground)",
-        border: "1px solid var(--vscode-panel-border)",
-        fontSize: 12,
-        padding: 8,
-        maxWidth: 160,
-      },
+      className: "oc-graph-node",
     };
   });
 }
@@ -55,9 +59,7 @@ function toFlowEdges(graph: GraphPayload, showInferred: boolean): Edge[] {
       target: e.target,
       label: e.kind,
       animated: e.inferred,
-      style: e.inferred
-        ? { stroke: "var(--vscode-charts-orange)" }
-        : undefined,
+      className: e.inferred ? "oc-graph-edge oc-graph-edge--inferred" : "oc-graph-edge",
     }));
 }
 
@@ -149,77 +151,80 @@ export function GraphPanel(): JSX.Element {
             <MiniMap />
           </ReactFlow>
         ) : (
-          <div style={{ padding: 16 }}>
-            <p className="muted">
-              {error || "No graph data. Adjust filters or index the workspace."}
-            </p>
-          </div>
+          <EmptyState
+            title={error ? "Graph error" : "No graph data"}
+            detail={
+              error ||
+              "Adjust filters or index the workspace, then refresh."
+            }
+          />
         )}
       </div>
       <aside className="graph-sidebar">
-        <h2>Graph</h2>
-        <p className="muted">Kind: {graphKind}</p>
-        {graph?.truncated ? (
-          <p className="muted">Graph truncated (size limit).</p>
-        ) : null}
-        <label>
-          Depth
-          <input
-            type="range"
+        <Section title="Overview" card>
+          <div className="oc-badge-row">
+            <Badge variant="kind">{graphKind}</Badge>
+            {graph?.truncated ? (
+              <Badge variant="warning">Truncated</Badge>
+            ) : null}
+          </div>
+        </Section>
+
+        <Section title="Controls" card>
+          <RangeField
+            label="Depth"
+            value={depth}
             min={1}
             max={5}
-            value={depth}
-            onChange={(e) => setDepth(Number(e.target.value))}
+            onChange={setDepth}
           />
-          {depth}
-        </label>
-        <label>
-          <input
-            type="checkbox"
+          <CheckboxRow
+            label="Include inferred (reasoner)"
             checked={includeInferred}
-            onChange={(e) => setIncludeInferred(e.target.checked)}
-          />{" "}
-          Include inferred (reasoner)
-        </label>
-        <label>
-          <input
-            type="checkbox"
+            onChange={setIncludeInferred}
+          />
+          <CheckboxRow
+            label="Show inferred edges"
             checked={showInferred}
-            onChange={(e) => setShowInferred(e.target.checked)}
-          />{" "}
-          Show inferred edges
-        </label>
-        <label>
-          <input
-            type="checkbox"
+            onChange={setShowInferred}
+          />
+          <CheckboxRow
+            label="Hide deprecated"
             checked={hideDeprecated}
-            onChange={(e) => setHideDeprecated(e.target.checked)}
-          />{" "}
-          Hide deprecated
-        </label>
-        <button type="button" onClick={requestGraph}>
-          Refresh
-        </button>
-        {selectedNode ? (
-          <>
-            <h2>Selected</h2>
-            <p>
-              <code>{selectedNode.label}</code>
-            </p>
-            <p className="muted">{selectedNode.id}</p>
-            <button
-              type="button"
-              onClick={() =>
-                getVsCodeApi().postMessage({
-                  type: "selectNode",
-                  iri: selectedNode.id,
-                })
-              }
-            >
-              Inspect
+            onChange={setHideDeprecated}
+          />
+          <ButtonBar>
+            <button type="button" onClick={requestGraph}>
+              Refresh graph
             </button>
-          </>
-        ) : null}
+          </ButtonBar>
+        </Section>
+
+        {selectedNode ? (
+          <Section title="Selected node" card>
+            <Card variant="inset">
+              <p>
+                <InlineCode>{selectedNode.label}</InlineCode>
+              </p>
+              <p className="oc-muted">{selectedNode.id}</p>
+            </Card>
+            <ButtonBar>
+              <button
+                type="button"
+                onClick={() =>
+                  getVsCodeApi().postMessage({
+                    type: "selectNode",
+                    iri: selectedNode.id,
+                  })
+                }
+              >
+                Inspect entity
+              </button>
+            </ButtonBar>
+          </Section>
+        ) : (
+          <Callout variant="info">Click a node on the canvas to inspect it.</Callout>
+        )}
       </aside>
     </div>
   );

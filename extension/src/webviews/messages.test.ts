@@ -9,10 +9,21 @@ describe("isWebviewMessage", () => {
       true
     );
     assert.equal(
-      isWebviewMessage({ type: "applyPatch", patches: [], previewOnly: false }),
+      isWebviewMessage({
+        type: "applyPatch",
+        patches: [{ op: "add_label", entity_iri: "http://ex/P", value: "X" }],
+        previewOnly: false,
+      }),
       true
     );
     assert.equal(isWebviewMessage({ type: "copyMarkdown" }), true);
+  });
+
+  it("rejects applyPatch with empty patches", () => {
+    assert.equal(
+      isWebviewMessage({ type: "applyPatch", patches: [], previewOnly: false }),
+      false
+    );
   });
 
   it("rejects invalid payloads", () => {
@@ -31,6 +42,20 @@ describe("parseApplyPatchMessage", () => {
     assert.equal(
       parseApplyPatchMessage(
         { type: "applyPatch", patches: [patch] } as never,
+        entity
+      ),
+      null
+    );
+  });
+
+  it("rejects patches missing entity_iri when expected", () => {
+    assert.equal(
+      parseApplyPatchMessage(
+        {
+          type: "applyPatch",
+          patches: [{ op: "add_label", value: "X" }],
+          previewOnly: false,
+        },
         entity
       ),
       null

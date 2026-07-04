@@ -265,25 +265,28 @@ fn build_lsp_worktree_catalog(state: &ServerState) -> Result<OntologyCatalog, Ls
 fn enrich_diff_with_reasoner(
     state: &ServerState,
     diff: &mut DiffResult,
-    _base_catalog: &OntologyCatalog,
+    base_catalog: &OntologyCatalog,
     head_catalog: &OntologyCatalog,
 ) -> Result<(), LspErrorPayload> {
     let roots = state.workspace_roots();
-    let workspace = state
-        .indexed_workspace()
-        .or_else(|| state.workspace_root())
-        .ok_or_else(LspErrorPayload::not_indexed)?;
     let profile = ReasonerId::El;
-    let overrides = state.open_documents_for_reasoner();
-    let hierarchy = head_catalog.class_hierarchy();
-    let base_input = WorkspaceInputLoader::new(&workspace)
-        .scan_roots(roots.clone())
-        .load(hierarchy.clone())
+
+    let mut base_loader = WorkspaceInputLoader::new(base_catalog.workspace());
+    if catalog_is_live_workspace(base_catalog, &roots) && !roots.is_empty() {
+        base_loader = base_loader.scan_roots(roots.clone());
+    }
+
+    let mut head_loader = WorkspaceInputLoader::new(head_catalog.workspace());
+    if catalog_is_live_workspace(head_catalog, &roots) && !roots.is_empty() {
+        head_loader =
+            head_loader.scan_roots(roots).document_overrides(state.open_documents_for_reasoner());
+    }
+
+    let base_input = base_loader
+        .load(base_catalog.class_hierarchy())
         .map_err(|e| LspErrorPayload::reasoner_failed(e.to_string()))?;
-    let head_input = WorkspaceInputLoader::new(&workspace)
-        .scan_roots(roots)
-        .document_overrides(overrides)
-        .load(hierarchy)
+    let head_input = head_loader
+        .load(head_catalog.class_hierarchy())
         .map_err(|e| LspErrorPayload::reasoner_failed(e.to_string()))?;
     let base_cls = classify(profile, &base_input, true)
         .map_err(|e| LspErrorPayload::reasoner_failed(e.to_string()))?;
@@ -291,6 +294,24 @@ fn enrich_diff_with_reasoner(
         .map_err(|e| LspErrorPayload::reasoner_failed(e.to_string()))?;
     apply_unsat_diff(diff, &base_cls.unsatisfiable, &head_cls.unsatisfiable);
     Ok(())
+}
+
+/// True when `catalog` was built from the live workspace (not a git checkout tempdir).
+fn catalog_is_live_workspace(catalog: &OntologyCatalog, roots: &[std::path::PathBuf]) -> bool {
+    if roots.is_empty() {
+        return false;
+    }
+    let ws = catalog.workspace();
+    roots.iter().any(|root| {
+        root == ws
+            || ws.starts_with(root)
+            || root.starts_with(ws)
+            || root
+                .canonicalize()
+                .ok()
+                .zip(ws.canonicalize().ok())
+                .is_some_and(|(a, b)| a == b || b.starts_with(&a) || a.starts_with(&b))
+    })
 }
 
 pub fn handle_run_robot(
@@ -1013,6 +1034,16 @@ pub fn handle_apply_refactor(
         .map_err(|e| LspErrorPayload::refactor_failed(e.to_string()))?;
 
         if !params.preview_only {
+            let mut buffer_snapshots: Vec<(std::path::PathBuf, String)> = Vec::new();
+            for change in &server_plan.changes {
+                if change.preview_text != change.original_text
+                    && state.is_document_open(&change.path)
+                {
+                    if let Some(text) = state.document_text(&change.path) {
+                        buffer_snapshots.push((change.path.clone(), text));
+                    }
+                }
+            }
             for change in &server_plan.changes {
                 if change.preview_text != change.original_text
                     && state.is_document_open(&change.path)
@@ -1027,6 +1058,9 @@ pub fn handle_apply_refactor(
                                     &rollback.original_text,
                                 );
                             }
+                        }
+                        for (path, text) in buffer_snapshots {
+                            let _ = state.set_document_text(path, text);
                         }
                         return Err(LspErrorPayload::refactor_failed(e));
                     }
@@ -1531,13 +1565,9 @@ fn expand_iri_token(content: &str, token: &str) -> Option<String> {
     }
 
     if let Some((prefix, local)) = token.split_once(':') {
-        let prefix_line = content.lines().find(|l| l.contains(&format!("@prefix {prefix}:")))?;
-        let start = prefix_line.find('<')? + 1;
-        let end = prefix_line.find('>')?;
-        if end <= start {
-            return None;
-        }
-        let ns = &prefix_line[start..end];
+        let namespaces =
+            ontocore_owl::namespaces_for_text(content, &std::collections::BTreeMap::new());
+        let ns = namespaces.get(prefix)?;
         return Some(format!("{ns}{local}"));
     }
 
@@ -1558,6 +1588,13 @@ mod tests {
     #[test]
     fn expand_prefixed_iri() {
         let content = "@prefix ex: <http://example.org/people#> .\nex:Person a owl:Class .";
+        let iri = expand_iri_token(content, "ex:Person").expect("expanded");
+        assert_eq!(iri, "http://example.org/people#Person");
+    }
+
+    #[test]
+    fn expand_iri_token_ignores_prefix_in_comment() {
+        let content = "# @prefix ex: <http://evil/> .\n@prefix ex: <http://example.org/people#> .\nex:Person a owl:Class .";
         let iri = expand_iri_token(content, "ex:Person").expect("expanded");
         assert_eq!(iri, "http://example.org/people#Person");
     }

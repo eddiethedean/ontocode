@@ -20,6 +20,9 @@ export class ReasonerPanel {
       ReasonerPanel.current = undefined;
     });
     this.panel.webview.onDidReceiveMessage(async (msg) => {
+      if (!msg || typeof msg !== "object" || typeof msg.command !== "string") {
+        return;
+      }
       if (msg.command === "ready") {
         this.webviewReady = true;
         this.flushPending();
@@ -28,7 +31,9 @@ export class ReasonerPanel {
       if (msg.command === "run") {
         const runId =
           typeof msg.runId === "number" ? msg.runId : ++this.runId;
-        await this.run(msg.profile as string, msg.autoDetect !== false, runId);
+        const profile = typeof msg.profile === "string" ? msg.profile : "el";
+        const autoDetect = msg.autoDetect !== false;
+        await this.run(profile, autoDetect, runId);
       }
       if (msg.command === "explain" && typeof msg.classIri === "string") {
         await vscode.commands.executeCommand(
@@ -122,6 +127,7 @@ export class ReasonerPanel {
     ).join("");
     return `<!DOCTYPE html>
 <html><head><meta charset="UTF-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline';" />
 <style>
 body { font-family: var(--vscode-font-family); padding: 12px; color: var(--vscode-foreground); }
 button { margin: 4px 4px 4px 0; }

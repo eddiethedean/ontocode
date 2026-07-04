@@ -225,6 +225,34 @@ fn extract_multiple_entities_same_file() {
 }
 
 #[test]
+fn extract_module_preserves_existing_output_content() {
+    let tmp = TempDir::new().unwrap();
+    let ws = tmp.path();
+    std::fs::create_dir_all(ws).unwrap();
+    std::fs::copy(fixture_dir().join("people.ttl"), ws.join("people.ttl")).unwrap();
+    let out = ws.join("module.ttl");
+    std::fs::write(&out, "@prefix ex: <http://example.org/org#> .\nex:Existing a owl:Class .\n")
+        .unwrap();
+    let catalog = build_catalog(ws);
+    let plan = preview_extract_module(
+        &catalog,
+        &["http://example.org/org#Person".to_string()],
+        &out,
+        false,
+        &empty_overrides(),
+        ws,
+    )
+    .expect("plan");
+    let out_change = plan.changes.iter().find(|c| c.path == out).expect("output change");
+    assert!(out_change.preview_text.contains("ex:Existing"));
+    assert!(out_change.preview_text.contains("ex:Person"));
+    apply_refactor_plan(&plan, false, ws).expect("apply");
+    let written = std::fs::read_to_string(&out).unwrap();
+    assert!(written.contains("ex:Existing"));
+    assert!(written.contains("ex:Person"));
+}
+
+#[test]
 fn extract_module_leave_stub_uses_prefixed_curie() {
     let tmp = TempDir::new().unwrap();
     let ws = tmp.path();

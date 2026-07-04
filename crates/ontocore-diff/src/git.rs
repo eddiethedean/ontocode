@@ -7,7 +7,7 @@ use ontocore_core::{
     limits::MAX_SCAN_FILES, path_jail::path_has_parent_escape,
 };
 use std::path::{Path, PathBuf};
-use std::sync::Mutex;
+use std::sync::{Arc, Mutex};
 
 const ONTOLOGY_EXTENSIONS: &[&str] =
     &["ttl", "rdf", "owl", "jsonld", "json-ld", "nt", "nq", "trig", "obo"];
@@ -24,7 +24,8 @@ pub struct GitDiffSpec {
 struct CachedCheckout {
     key: String,
     root: PathBuf,
-    _temp: tempfile::TempDir,
+    /// Keeps the temp directory alive while any caller indexes from `root`.
+    _temp: Arc<tempfile::TempDir>,
 }
 
 static CHECKOUT_CACHE: Mutex<Vec<CachedCheckout>> = Mutex::new(Vec::new());
@@ -59,6 +60,15 @@ pub fn discover_repo_root(paths: &[PathBuf]) -> Option<PathBuf> {
 }
 
 pub fn diff_git_refs(repo_path: &Path, left_ref: &str, right_ref: &str) -> Result<DiffResult> {
+    Ok(diff_git_refs_with_catalogs(repo_path, left_ref, right_ref)?.0)
+}
+
+/// Like [`diff_git_refs`], but also returns the left and right catalogs used for the diff.
+pub fn diff_git_refs_with_catalogs(
+    repo_path: &Path,
+    left_ref: &str,
+    right_ref: &str,
+) -> Result<(DiffResult, OntologyCatalog, OntologyCatalog)> {
     if right_ref == "TRIPLE_DOT" || left_ref.contains("...") {
         let (left, right) = parse_merge_base_refs(left_ref)?;
         let repo = Repository::open(repo_path)
@@ -74,7 +84,8 @@ pub fn diff_git_refs(repo_path: &Path, left_ref: &str, right_ref: &str) -> Resul
             .map_err(|e| DiffError::Message(format!("git merge-base: {e}")))?;
         let base = checkout_catalog_at_oid(&repo, merge_base)?;
         let head = catalog_at_git_ref(repo_path, &right)?;
-        return Ok(diff_catalogs(&base, &head));
+        let diff = diff_catalogs(&base, &head);
+        return Ok((diff, base, head));
     }
     let left = catalog_at_git_ref(repo_path, left_ref)?;
     let right = if right_ref == "WORKTREE" || right_ref.is_empty() {
@@ -82,7 +93,7 @@ pub fn diff_git_refs(repo_path: &Path, left_ref: &str, right_ref: &str) -> Resul
     } else {
         catalog_at_git_ref(repo_path, right_ref)?
     };
-    Ok(diff_catalogs(&left, &right))
+    Ok((diff_catalogs(&left, &right), left, right))
 }
 
 fn parse_merge_base_refs(spec: &str) -> Result<(String, String)> {
@@ -152,7 +163,7 @@ fn checkout_catalog_at_oid(repo: &Repository, oid: Oid) -> Result<OntologyCatalo
     let repo_path =
         repo.path().parent().map(|p| p.to_path_buf()).unwrap_or_else(|| PathBuf::from("."));
     let key = format!("{}:{oid}", repo_path.display());
-    if let Some(root) = cache_get(&key) {
+    if let Some((root, _keepalive)) = cache_get(&key) {
         return IndexBuilder::new().workspace(&root).build().map_err(DiffError::from);
     }
 
@@ -164,7 +175,8 @@ fn checkout_catalog_at_oid(repo: &Repository, oid: Oid) -> Result<OntologyCatalo
         .prefix("ontocore-diff-")
         .tempdir()
         .map_err(|e| DiffError::Message(e.to_string()))?;
-    let root = tmp.path().to_path_buf();
+    let temp = Arc::new(tmp);
+    let root = temp.path().to_path_buf();
     let mut walk_error: Option<String> = None;
     let mut file_count = 0usize;
 
@@ -224,16 +236,16 @@ fn checkout_catalog_at_oid(repo: &Repository, oid: Oid) -> Result<OntologyCatalo
         return Err(DiffError::Message(msg));
     }
 
-    cache_insert(key, root.clone(), tmp);
+    cache_insert(key, root.clone(), temp);
     IndexBuilder::new().workspace(&root).build().map_err(DiffError::from)
 }
 
-fn cache_get(key: &str) -> Option<PathBuf> {
+fn cache_get(key: &str) -> Option<(PathBuf, Arc<tempfile::TempDir>)> {
     let guard = CHECKOUT_CACHE.lock().ok()?;
-    guard.iter().find(|e| e.key == key).map(|e| e.root.clone())
+    guard.iter().find(|e| e.key == key).map(|e| (e.root.clone(), Arc::clone(&e._temp)))
 }
 
-fn cache_insert(key: String, root: PathBuf, temp: tempfile::TempDir) {
+fn cache_insert(key: String, root: PathBuf, temp: Arc<tempfile::TempDir>) {
     if let Ok(mut guard) = CHECKOUT_CACHE.lock() {
         if guard.iter().any(|e| e.key == key) {
             return;

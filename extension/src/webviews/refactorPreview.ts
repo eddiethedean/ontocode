@@ -4,6 +4,7 @@ import { applyLspWorkspaceEdit } from "../lsp/workspaceEdit";
 import { RefactorPlan, RefactorRequest } from "../lsp/protocol";
 import { PanelHost } from "./panelHost";
 import type { WebviewMessage } from "./messages";
+import { openWorkspaceTextDocument } from "../utils/workspacePath";
 
 function byteColToUtf16Position(
   doc: vscode.TextDocument,
@@ -45,9 +46,10 @@ export async function showEntityUsages(iri: string): Promise<void> {
   if (!picked) {
     return;
   }
-  const doc = await vscode.workspace.openTextDocument(
-    vscode.Uri.file(picked.usage.file)
-  );
+  const doc = await openWorkspaceTextDocument(picked.usage.file);
+  if (!doc) {
+    return;
+  }
   const editor = await vscode.window.showTextDocument(doc, vscode.ViewColumn.One);
   const line = Math.max(0, (picked.usage.line ?? 1) - 1);
   const byteCol = picked.usage.column ?? 0;
@@ -241,7 +243,9 @@ export class RefactorPreviewPanel {
       try {
         const result = await applyRefactor(planSnapshot, requestSnapshot, false);
         if (result.workspace_edit) {
-          const applied = await applyLspWorkspaceEdit(result.workspace_edit);
+          const applied = await applyLspWorkspaceEdit(result.workspace_edit, {
+            expectChanges: true,
+          });
           if (!applied) {
             void vscode.window.showWarningMessage(
               "OntoCode: refactor wrote to disk but editor sync was cancelled"

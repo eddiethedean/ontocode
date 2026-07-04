@@ -4,6 +4,10 @@ import { SavedQuery, TabularQueryResult } from "../lsp/protocol";
 import { PanelHost } from "./panelHost";
 import type { WebviewMessage } from "./messages";
 import {
+  parseRunQueryMessage,
+  parseSaveQueryMessage,
+} from "./messages";
+import {
   SQL_TABLES,
   exportResultCsv,
   exportResultJson,
@@ -71,10 +75,18 @@ export class QueryWorkbenchPanel {
 
   private async handleMessage(message: WebviewMessage): Promise<void> {
     if (message.type === "runQuery") {
-      await this.runQuery(message.mode, message.text, message.runId);
+      const parsed = parseRunQueryMessage(message);
+      if (!parsed) {
+        return;
+      }
+      await this.runQuery(parsed.mode, parsed.text, parsed.runId);
     }
     if (message.type === "saveQuery") {
-      await this.saveQuery(message.mode, message.text, message.name);
+      const parsed = parseSaveQueryMessage(message);
+      if (!parsed) {
+        return;
+      }
+      await this.saveQuery(parsed.mode, parsed.text, parsed.name);
     }
     if (message.type === "exportQueryResult") {
       await this.exportResult(message.format, message.runId);

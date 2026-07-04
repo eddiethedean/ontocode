@@ -11,25 +11,41 @@ pub fn short_name_from_iri(iri: &str) -> String {
     iri.to_string()
 }
 
-/// Parse `@prefix` declarations from Turtle source.
+/// Parse `@prefix` declarations from Turtle source (skips `#` comments; requires `<iri>` form).
 pub fn prefixes_from_turtle(source_text: &str) -> BTreeMap<String, String> {
     let mut map = BTreeMap::new();
     for line in source_text.lines() {
         let trimmed = line.trim();
+        if trimmed.is_empty() || trimmed.starts_with('#') {
+            continue;
+        }
         if let Some(rest) = trimmed.strip_prefix("@prefix ") {
             let mut parts = rest.split_whitespace();
             let Some(prefix_raw) = parts.next() else { continue };
             let Some(uri_raw) = parts.next() else { continue };
             let prefix = prefix_raw.trim_end_matches(':').to_string();
-            let uri = uri_raw.trim_matches(|c: char| c == '<' || c == '>' || c == '.');
-            if !prefix.is_empty() && !uri.is_empty() {
-                map.insert(prefix, uri.to_string());
+            if let Some(uri) = parse_turtle_prefix_iri(uri_raw) {
+                if !prefix.is_empty() {
+                    map.insert(prefix, uri);
+                }
             }
-        } else if !trimmed.is_empty() && !trimmed.starts_with('#') && !trimmed.starts_with('@') {
+        } else if !trimmed.starts_with('@') {
             break;
         }
     }
     map
+}
+
+fn parse_turtle_prefix_iri(token: &str) -> Option<String> {
+    let token = token.trim_end_matches('.');
+    if !token.starts_with('<') || !token.ends_with('>') {
+        return None;
+    }
+    let inner = &token[1..token.len() - 1];
+    if inner.is_empty() || inner.contains('<') || inner.contains('>') {
+        return None;
+    }
+    Some(inner.to_string())
 }
 
 pub fn namespaces_for_text(

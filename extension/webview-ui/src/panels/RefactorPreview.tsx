@@ -1,4 +1,14 @@
 import { useEffect, useState } from "react";
+import {
+  Callout,
+  DiffColumns,
+  FormField,
+  LoadingState,
+  Panel,
+  PanelHeader,
+  Select,
+  StickyActions,
+} from "../components/ui";
 import { getVsCodeApi } from "../vscodeApi";
 import { HostMessage, isHostMessage, RefactorPlanPayload } from "../messages";
 
@@ -28,14 +38,22 @@ export function RefactorPreviewPanel(): JSX.Element {
   }, []);
 
   if (!plan) {
-    return <p className="muted">Loading refactor preview…</p>;
+    return (
+      <Panel>
+        <LoadingState label="Loading refactor preview…" />
+      </Panel>
+    );
   }
 
   const change = plan.changes[selected];
 
   return (
-    <div className="panel">
-      <h2>Refactor preview</h2>
+    <Panel>
+      <PanelHeader
+        title="Refactor preview"
+        subtitle={`${plan.changes.length} file${plan.changes.length === 1 ? "" : "s"} affected`}
+      />
+
       {plan.warnings?.length ? (
         <ul className="warnings">
           {plan.warnings.map((w, i) => (
@@ -43,39 +61,30 @@ export function RefactorPreviewPanel(): JSX.Element {
           ))}
         </ul>
       ) : null}
-      <div className="row">
-        <label>
-          File
-          <select
-            value={selected}
-            onChange={(e) => setSelected(Number(e.target.value))}
-          >
-            {plan.changes.map((c, i) => (
-              <option key={c.path} value={i}>
-                {fileName(c.path)}
-              </option>
-            ))}
-          </select>
-        </label>
-      </div>
+
+      <FormField label="File">
+        <Select
+          value={selected}
+          onChange={(e) => setSelected(Number(e.target.value))}
+        >
+          {plan.changes.map((c, i) => (
+            <option key={c.path} value={i}>
+              {fileName(c.path)}
+            </option>
+          ))}
+        </Select>
+      </FormField>
+
       {change ? (
-        <div className="diff">
-          <section>
-            <h3>Before</h3>
-            <pre>{change.original_text}</pre>
-          </section>
-          <section>
-            <h3>After</h3>
-            <pre>{change.preview_text}</pre>
-          </section>
-        </div>
+        <DiffColumns before={change.original_text} after={change.preview_text} />
       ) : null}
-      <div className="actions">
+
+      <StickyActions>
         <button
           type="button"
           onClick={() => getVsCodeApi().postMessage({ type: "applyRefactor" })}
         >
-          Apply
+          Apply changes
         </button>
         <button
           type="button"
@@ -84,7 +93,7 @@ export function RefactorPreviewPanel(): JSX.Element {
         >
           Cancel
         </button>
-      </div>
-    </div>
+      </StickyActions>
+    </Panel>
   );
 }

@@ -12,3 +12,8 @@ export function getVsCodeApi(): ReturnType<typeof acquireVsCodeApi> {
   }
   return api;
 }
+
+/** Clears cached API instance (tests only). */
+export function resetVsCodeApiForTests(): void {
+  api = undefined;
+}

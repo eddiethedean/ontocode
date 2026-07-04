@@ -1,4 +1,18 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  Callout,
+  CodeBlock,
+  CodeEditor,
+  FormField,
+  InlineCode,
+  Panel,
+  PanelHeader,
+  Section,
+  Select,
+  StickyActions,
+  Toolbar,
+  ToolbarGroup,
+} from "../components/ui";
 import { getVsCodeApi } from "../vscodeApi";
 import {
   HostMessage,
@@ -104,108 +118,115 @@ export function ManchesterEditorPanel(): JSX.Element {
     setExpression((prev) => (prev ? `${prev} ${formatted}` : formatted));
   };
 
+  const turtlePreview = preview || validation?.turtle_fragment || "—";
+
   return (
-    <div className="panel">
-      <h2>Manchester Axiom Editor</h2>
-      <p>
-        <code>{entityIri}</code>
-      </p>
-      <label>
-        Axiom type{" "}
-        <select
+    <Panel>
+      <PanelHeader
+        title="Manchester Axiom Editor"
+        subtitle={<InlineCode>{entityIri || "—"}</InlineCode>}
+      />
+
+      <FormField label="Axiom type">
+        <Select
           value={axiomKind}
           onChange={(e) => setAxiomKind(e.target.value)}
         >
           <option value="sub_class_of">SubClassOf</option>
           <option value="equivalent_class">EquivalentClasses</option>
           <option value="disjoint_class">DisjointClasses</option>
-        </select>
-      </label>
-      <h3>{axiomKind === "disjoint_class" ? "Other class IRI" : "Expression"}</h3>
-      <textarea
-        value={expression}
-        onChange={(e) => setExpression(e.target.value)}
-        rows={6}
-        style={{ width: "100%", fontFamily: "var(--vscode-editor-font-family)" }}
-        placeholder={
-          axiomKind === "disjoint_class"
-            ? "http://example.org#OtherClass or ex:OtherClass"
-            : "ex:hasPart some ex:Component"
-        }
-      />
+        </Select>
+      </FormField>
+
+      <FormField
+        label={axiomKind === "disjoint_class" ? "Other class IRI" : "Expression"}
+      >
+        <CodeEditor
+          value={expression}
+          onChange={(e) => setExpression(e.target.value)}
+          rows={6}
+          placeholder={
+            axiomKind === "disjoint_class"
+              ? "http://example.org#OtherClass or ex:OtherClass"
+              : "ex:hasPart some ex:Component"
+          }
+        />
+      </FormField>
+
       {axiomKind !== "disjoint_class" ? (
-        <div className="toolbar">
-          <label>
-            Class{" "}
-            <select
-              onChange={(e) => {
-                if (e.target.value) {
-                  insertTerm(e.target.value);
-                }
-              }}
-            >
-              <option value="">—</option>
-              {completions.classes.slice(0, 40).map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            Object prop{" "}
-            <select
-              onChange={(e) => {
-                if (e.target.value) {
-                  insertTerm(e.target.value);
-                }
-              }}
-            >
-              <option value="">—</option>
-              {completions.object_properties.slice(0, 40).map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            Data prop{" "}
-            <select
-              onChange={(e) => {
-                if (e.target.value) {
-                  insertTerm(e.target.value);
-                }
-              }}
-            >
-              <option value="">—</option>
-              {completions.data_properties.slice(0, 40).map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
-          </label>
-          <label>
-            Datatype{" "}
-            <select
-              onChange={(e) => {
-                if (e.target.value) {
-                  insertTerm(e.target.value);
-                }
-              }}
-            >
-              <option value="">—</option>
-              {completions.datatypes.slice(0, 40).map((c) => (
-                <option key={c} value={c}>
-                  {c}
-                </option>
-              ))}
-            </select>
-          </label>
-        </div>
+        <Toolbar>
+          <ToolbarGroup>
+            <FormField label="Class">
+              <Select
+                onChange={(e) => {
+                  if (e.target.value) {
+                    insertTerm(e.target.value);
+                  }
+                }}
+              >
+                <option value="">—</option>
+                {completions.classes.slice(0, 40).map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </Select>
+            </FormField>
+            <FormField label="Object prop">
+              <Select
+                onChange={(e) => {
+                  if (e.target.value) {
+                    insertTerm(e.target.value);
+                  }
+                }}
+              >
+                <option value="">—</option>
+                {completions.object_properties.slice(0, 40).map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </Select>
+            </FormField>
+          </ToolbarGroup>
+          <ToolbarGroup>
+            <FormField label="Data prop">
+              <Select
+                onChange={(e) => {
+                  if (e.target.value) {
+                    insertTerm(e.target.value);
+                  }
+                }}
+              >
+                <option value="">—</option>
+                {completions.data_properties.slice(0, 40).map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </Select>
+            </FormField>
+            <FormField label="Datatype">
+              <Select
+                onChange={(e) => {
+                  if (e.target.value) {
+                    insertTerm(e.target.value);
+                  }
+                }}
+              >
+                <option value="">—</option>
+                {completions.datatypes.slice(0, 40).map((c) => (
+                  <option key={c} value={c}>
+                    {c}
+                  </option>
+                ))}
+              </Select>
+            </FormField>
+          </ToolbarGroup>
+        </Toolbar>
       ) : null}
-      <div className="actions">
+
+      <StickyActions>
         <button
           type="button"
           onClick={() => {
@@ -244,8 +265,9 @@ export function ManchesterEditorPanel(): JSX.Element {
         >
           Apply
         </button>
-      </div>
-      {error ? <p className="error">{error}</p> : null}
+      </StickyActions>
+
+      {error ? <Callout variant="error">{error}</Callout> : null}
       {validation?.diagnostics?.length ? (
         <ul className="warnings">
           {validation.diagnostics.map((d, i) => (
@@ -253,14 +275,16 @@ export function ManchesterEditorPanel(): JSX.Element {
           ))}
         </ul>
       ) : null}
-      <h3>Expression tree</h3>
-      <pre className="muted">
-        {validation?.tree ? JSON.stringify(validation.tree, null, 2) : "—"}
-      </pre>
-      <h3>Turtle preview</h3>
-      <pre className="preview muted">
-        {preview || validation?.turtle_fragment || "—"}
-      </pre>
-    </div>
+
+      <Section title="Expression tree">
+        <CodeBlock>
+          {validation?.tree ? JSON.stringify(validation.tree, null, 2) : "—"}
+        </CodeBlock>
+      </Section>
+
+      <Section title="Turtle preview">
+        <CodeBlock>{turtlePreview}</CodeBlock>
+      </Section>
+    </Panel>
   );
 }

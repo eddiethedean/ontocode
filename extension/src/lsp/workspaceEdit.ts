@@ -33,18 +33,21 @@ function isUriInWorkspace(uri: vscode.Uri): boolean {
 
 /** Apply a language-server `WorkspaceEdit` to open VS Code editors. */
 export async function applyLspWorkspaceEdit(
-  edit: LspWorkspaceEdit | undefined
+  edit: LspWorkspaceEdit | undefined,
+  options?: { expectChanges?: boolean }
 ): Promise<boolean> {
   if (!edit) {
     return true;
   }
   const changes = documentChanges(edit as LspWorkspaceEdit & { documentChanges?: DocChange[] });
   if (!changes.length) {
-    // Present but unrecognizable shape — fail closed so callers can warn.
     if (
       (edit as { documentChanges?: unknown }).documentChanges != null ||
       edit.document_changes != null
     ) {
+      return false;
+    }
+    if (options?.expectChanges) {
       return false;
     }
     return true;

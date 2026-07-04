@@ -98,7 +98,18 @@ export class ManchesterEditorPanel {
       await this.validate(message.expression, message.axiomKind, message.seq);
     }
     if (message.type === "applyManchester") {
-      await this.apply(message.expression, message.axiomKind, message.previewOnly);
+      const parsed = (await import("./messages")).parseApplyManchesterMessage(message);
+      if (!parsed) {
+        void vscode.window.showErrorMessage(
+          "OntoCode: ignored invalid applyManchester message from webview"
+        );
+        return;
+      }
+      await this.apply(
+        parsed.expression,
+        parsed.axiomKind,
+        parsed.previewOnly
+      );
     }
   }
 

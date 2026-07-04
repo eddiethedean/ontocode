@@ -3,7 +3,10 @@ use crate::rules::{
     broken_imports, duplicate_labels, missing_labels, orphan_classes, parse_errors,
     undefined_prefixes,
 };
-use ontocore_core::{Diagnostic, DiagnosticCode, DiagnosticSeverity, SourceLocation};
+use ontocore_core::{
+    read_to_string_capped, Diagnostic, DiagnosticCode, DiagnosticSeverity, SourceLocation,
+    MAX_FILE_BYTES,
+};
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::path::PathBuf;
@@ -34,7 +37,7 @@ pub fn collect_diagnostics_with_sources(
                 return text.clone();
             }
         }
-        match std::fs::read_to_string(path) {
+        match read_to_string_capped(path, MAX_FILE_BYTES) {
             Ok(text) => text,
             Err(err) => {
                 io_failures.borrow_mut().push(Diagnostic {

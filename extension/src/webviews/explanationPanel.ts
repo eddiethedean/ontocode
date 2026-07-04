@@ -11,6 +11,9 @@ export class ExplanationPanel {
       ExplanationPanel.current = undefined;
     });
     this.panel.webview.onDidReceiveMessage(async (msg) => {
+      if (!msg || typeof msg !== "object" || typeof msg.command !== "string") {
+        return;
+      }
       if (msg.command === "copy" && typeof msg.text === "string") {
         await vscode.env.clipboard.writeText(msg.text);
       }
@@ -52,6 +55,7 @@ export class ExplanationPanel {
       .join("");
     this.panel.webview.html = `<!DOCTYPE html>
 <html><head><meta charset="UTF-8" />
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline';" />
 <style>
 body { font-family: var(--vscode-font-family); padding: 12px; }
 pre { white-space: pre-wrap; background: var(--vscode-textBlockQuote-background); padding: 8px; }

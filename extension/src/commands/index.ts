@@ -26,6 +26,7 @@ import {
 import { ExplorerTreeProvider } from "../treeviews/explorer";
 import { resolveEntityIri } from "../utils/resolveEntityIri";
 import { byteColToUtf16 } from "../utils/positions";
+import { openWorkspaceTextDocument } from "../utils/workspacePath";
 
 export function registerCommands(
   context: vscode.ExtensionContext,
@@ -133,9 +134,10 @@ export function registerCommands(
             );
             return;
           }
-          const doc = await vscode.workspace.openTextDocument(
-            vscode.Uri.file(detail.source.path)
-          );
+          const doc = await openWorkspaceTextDocument(detail.source.path);
+          if (!doc) {
+            return;
+          }
           const editor = await vscode.window.showTextDocument(doc);
           const lineText = doc.lineAt(
             Math.max(0, detail.source.line - 1)

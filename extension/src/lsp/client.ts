@@ -53,6 +53,7 @@ import {
 } from "./bundledServer";
 
 let client: LanguageClient | undefined;
+let starting: Promise<LanguageClient> | undefined;
 
 export function getClient(): LanguageClient | undefined {
   return client;
@@ -64,7 +65,11 @@ export async function startLanguageClient(
   if (client) {
     return client;
   }
+  if (starting) {
+    return starting;
+  }
 
+  starting = (async () => {
   const serverPath = resolveServerPath(context);
   const serverOptions: ServerOptions = {
     run: { command: serverPath, transport: TransportKind.stdio },
@@ -110,9 +115,17 @@ export async function startLanguageClient(
   }
 
   return client;
+  })();
+
+  try {
+    return await starting;
+  } finally {
+    starting = undefined;
+  }
 }
 
 export async function stopLanguageClient(): Promise<void> {
+  starting = undefined;
   if (client) {
     await client.stop();
     client = undefined;

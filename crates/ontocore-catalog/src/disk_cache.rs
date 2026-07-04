@@ -94,7 +94,12 @@ impl DiskCache {
             .map_err(|e| std::io::Error::new(std::io::ErrorKind::InvalidData, e.to_string()))?;
         let path = self.snapshot_path(&snap.content_hash).with_extension("json");
         let temp_path = path.with_extension("json.tmp");
-        fs::write(&temp_path, bytes)?;
+        {
+            use std::io::Write;
+            let mut file = fs::File::create(&temp_path)?;
+            file.write_all(&bytes)?;
+            file.sync_all()?;
+        }
         fs::rename(temp_path, path)
     }
 

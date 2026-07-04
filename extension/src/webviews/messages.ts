@@ -183,13 +183,111 @@ export function isWebviewMessage(data: unknown): data is WebviewMessage {
   if (typeof msg.type !== "string") {
     return false;
   }
-  if (msg.type === "ready") {
-    return typeof (data as { panel?: unknown }).panel === "string";
+  switch (msg.type) {
+    case "ready":
+      return typeof (data as { panel?: unknown }).panel === "string";
+    case "applyPatch":
+      return parseApplyPatchMessage(msg, undefined) !== null;
+    case "applyManchester":
+      return parseApplyManchesterMessage(msg) !== null;
+    case "runQuery":
+      return parseRunQueryMessage(msg) !== null;
+    case "saveQuery":
+      return parseSaveQueryMessage(msg) !== null;
+    case "validateManchester":
+      return (
+        typeof msg.expression === "string" &&
+        typeof msg.axiomKind === "string" &&
+        typeof msg.seq === "number"
+      );
+    case "openManchester": {
+      const axiom = (data as { axiom?: unknown }).axiom;
+      return (
+        typeof axiom === "object" &&
+        axiom !== null &&
+        typeof (axiom as { kind?: unknown }).kind === "string"
+      );
+    }
+    case "requestGraph":
+      return typeof msg.graphKind === "string";
+    case "selectNode":
+    case "openEntity":
+      return typeof msg.iri === "string";
+    case "exportQueryResult":
+      return (
+        (msg.format === "csv" || msg.format === "json") &&
+        (msg.runId === undefined || typeof msg.runId === "number")
+      );
+    case "copyMarkdown":
+    case "jumpToSource":
+    case "addManchesterAxiom":
+    case "openGraph":
+    case "findUsages":
+    case "renameIri":
+    case "applyRefactor":
+    case "cancelRefactor":
+      return true;
+    default:
+      return false;
   }
-  if (msg.type === "copyMarkdown") {
-    return true;
+}
+
+const MAX_QUERY_TEXT_BYTES = 1_048_576;
+
+/** Validate applyManchester payload; reject missing previewOnly (must not default to write). */
+export function parseApplyManchesterMessage(
+  message: WebviewMessage
+): { expression: string; axiomKind: string; previewOnly: boolean } | null {
+  if (message.type !== "applyManchester") {
+    return null;
   }
-  return true;
+  if (typeof message.previewOnly !== "boolean") {
+    return null;
+  }
+  if (typeof message.expression !== "string" || typeof message.axiomKind !== "string") {
+    return null;
+  }
+  return {
+    expression: message.expression,
+    axiomKind: message.axiomKind,
+    previewOnly: message.previewOnly,
+  };
+}
+
+export function parseRunQueryMessage(
+  message: WebviewMessage
+): { mode: "sql" | "sparql"; text: string; runId: number } | null {
+  if (message.type !== "runQuery") {
+    return null;
+  }
+  if (message.mode !== "sql" && message.mode !== "sparql") {
+    return null;
+  }
+  if (typeof message.text !== "string" || typeof message.runId !== "number") {
+    return null;
+  }
+  if (message.text.length > MAX_QUERY_TEXT_BYTES) {
+    return null;
+  }
+  return { mode: message.mode, text: message.text, runId: message.runId };
+}
+
+export function parseSaveQueryMessage(
+  message: WebviewMessage
+): { name: string; mode: "sql" | "sparql"; text: string } | null {
+  if (message.type !== "saveQuery") {
+    return null;
+  }
+  if (message.mode !== "sql" && message.mode !== "sparql") {
+    return null;
+  }
+  if (typeof message.name !== "string" || typeof message.text !== "string") {
+    return null;
+  }
+  if (!message.name.trim() || message.text.length > MAX_QUERY_TEXT_BYTES) {
+    return null;
+  }
+  return { name: message.name.trim(), mode: message.mode, text: message.text };
 }
 
 /** Validate applyPatch payload; reject missing previewOnly (must not default to write). */
@@ -211,12 +309,10 @@ export function parseApplyPatchMessage(
       return null;
     }
     const entityIri = (patch as PatchOp).entity_iri;
-    if (
-      expectedEntityIri &&
-      typeof entityIri === "string" &&
-      entityIri !== expectedEntityIri
-    ) {
-      return null;
+    if (expectedEntityIri) {
+      if (typeof entityIri !== "string" || entityIri !== expectedEntityIri) {
+        return null;
+      }
     }
   }
   return { patches: message.patches, previewOnly: message.previewOnly };

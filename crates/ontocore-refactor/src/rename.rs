@@ -513,9 +513,14 @@ pub fn preview_extract_module(
     } else {
         String::new()
     };
+    let output_preview = if output_original.is_empty() {
+        module_text.clone()
+    } else {
+        format!("{output_original}\n\n{module_text}")
+    };
     changes.push(FileChange {
         path: output_file.to_path_buf(),
-        preview_text: module_text.clone(),
+        preview_text: output_preview,
         original_text: output_original,
         hunks: vec![Hunk {
             start_byte: 0,

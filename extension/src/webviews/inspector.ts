@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import { applyAxiomPatch, getEntity } from "../lsp/client";
 import { EntityDetail, PatchOp } from "../lsp/protocol";
 import { entityKindLabel } from "../utils/iri";
+import { documentUriInWorkspace } from "../utils/workspacePath";
 import { PanelHost } from "./panelHost";
 import type { EntityDetailPayload, WebviewMessage } from "./messages";
 import { GraphPanel } from "./graphPanel";
@@ -93,7 +94,7 @@ export class EntityInspectorPanel {
     this.iri = detail.entity.iri;
     this.classOptions = classOptions;
     this.documentUri = detail.document_path
-      ? vscode.Uri.file(detail.document_path).toString()
+      ? documentUriInWorkspace(detail.document_path)
       : undefined;
     this.host.panel.title = panelTitle(detail);
     this.host.postMessage({

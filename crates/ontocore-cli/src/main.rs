@@ -2,9 +2,9 @@ use anyhow::{bail, Context, Result};
 use clap::{Parser, Subcommand, ValueEnum};
 use ontocore_catalog::{CatalogStats, IndexBuilder, OntologyCatalog};
 use ontocore_diff::{
-    apply_unsat_diff, catalog_at_git_ref, catalog_at_worktree, diff_catalogs, diff_directories,
-    diff_git_refs, format_diff_json, format_diff_markdown, format_diff_text, parse_git_range,
-    DiffResult,
+    apply_unsat_diff, catalog_at_git_ref, catalog_at_worktree, diff_catalogs,
+    diff_git_refs_with_catalogs, format_diff_json, format_diff_markdown, format_diff_text,
+    parse_git_range, DiffResult,
 };
 use ontocore_query::{
     query_catalog,
@@ -525,22 +525,32 @@ fn run_diff(
         .or_else(|| std::env::current_dir().ok())
         .context("could not determine git repository root")?;
 
-    let mut diff = if let Some(spec) = git_range {
+    let (mut diff, base_cat, head_cat) = if let Some(spec) = git_range {
         let (left, right) = parse_git_range(spec).map_err(|e| anyhow::anyhow!(e))?;
-        diff_git_refs(&repo_root, &left, &right).map_err(|e| anyhow::anyhow!(e))?
+        let (diff, base, head) = diff_git_refs_with_catalogs(&repo_root, &left, &right)
+            .map_err(|e| anyhow::anyhow!(e))?;
+        (diff, Some(base), Some(head))
     } else {
         let left = left_ref.context("provide --left-ref or a git range")?;
         let right = right_ref.context("provide --right-ref or a git range")?;
-        diff_from_refs(left, right, &repo_root)?
+        diff_from_refs_with_catalogs(left, right, &repo_root)?
     };
 
     if reasoner {
-        apply_reasoner_unsat(&mut diff, git_range, left_ref, right_ref, &repo_root)?;
+        if let (Some(base), Some(head)) = (base_cat, head_cat) {
+            apply_reasoner_unsat_catalogs(&mut diff, &base, &head)?;
+        } else {
+            eprintln!("WARN: --reasoner skipped (could not resolve catalogs for both sides)");
+        }
     }
     Ok(diff)
 }
 
-fn diff_from_refs(left: &str, right: &str, repo: &Path) -> Result<DiffResult> {
+fn diff_from_refs_with_catalogs(
+    left: &str,
+    right: &str,
+    repo: &Path,
+) -> Result<(DiffResult, Option<OntologyCatalog>, Option<OntologyCatalog>)> {
     let left = left.trim();
     let right = right.trim();
     if left.is_empty() || right.is_empty() {
@@ -551,17 +561,25 @@ fn diff_from_refs(left: &str, right: &str, repo: &Path) -> Result<DiffResult> {
     let left_is_dir = left_path.is_dir();
     let right_is_dir = right_path.is_dir();
     match (left_is_dir, right_is_dir) {
-        (true, true) => diff_directories(left_path, right_path).map_err(|e| anyhow::anyhow!(e)),
-        (false, false) => diff_git_refs(repo, left, right).map_err(|e| anyhow::anyhow!(e)),
+        (true, true) => {
+            let left_cat = build_catalog(&left_path.to_path_buf())?;
+            let right_cat = build_catalog(&right_path.to_path_buf())?;
+            Ok((diff_catalogs(&left_cat, &right_cat), Some(left_cat), Some(right_cat)))
+        }
+        (false, false) => {
+            let (diff, base, head) =
+                diff_git_refs_with_catalogs(repo, left, right).map_err(|e| anyhow::anyhow!(e))?;
+            Ok((diff, Some(base), Some(head)))
+        }
         (true, false) => {
             let left_cat = build_catalog(&left_path.to_path_buf())?;
             let right_cat = resolve_git_catalog(repo, right)?;
-            Ok(diff_catalogs(&left_cat, &right_cat))
+            Ok((diff_catalogs(&left_cat, &right_cat), Some(left_cat), Some(right_cat)))
         }
         (false, true) => {
             let left_cat = resolve_git_catalog(repo, left)?;
             let right_cat = build_catalog(&right_path.to_path_buf())?;
-            Ok(diff_catalogs(&left_cat, &right_cat))
+            Ok((diff_catalogs(&left_cat, &right_cat), Some(left_cat), Some(right_cat)))
         }
     }
 }
@@ -574,55 +592,21 @@ fn resolve_git_catalog(repo: &Path, git_ref: &str) -> Result<OntologyCatalog> {
     }
 }
 
-fn workspace_for_ref(spec: &str, repo: &Path) -> Option<PathBuf> {
-    let trimmed = spec.trim();
-    if trimmed.is_empty() {
-        return None;
-    }
-    let path = Path::new(trimmed);
-    if path.is_dir() {
-        return Some(path.to_path_buf());
-    }
-    if trimmed.eq_ignore_ascii_case("WORKTREE") || trimmed.eq_ignore_ascii_case("WORKSPACE") {
-        return Some(repo.to_path_buf());
-    }
-    None
-}
-
-fn unsat_for_workspace(workspace: &Path) -> Result<Vec<String>> {
-    let result = run_classify(&workspace.to_path_buf(), "el", true)?;
-    Ok(result.unsatisfiable)
-}
-
-fn apply_reasoner_unsat(
+fn apply_reasoner_unsat_catalogs(
     diff: &mut DiffResult,
-    git_range: Option<&str>,
-    left_ref: Option<&str>,
-    right_ref: Option<&str>,
-    repo: &Path,
+    base: &OntologyCatalog,
+    head: &OntologyCatalog,
 ) -> Result<()> {
-    let (base_ws, head_ws) = if let Some(spec) = git_range {
-        let (left, right) = parse_git_range(spec).map_err(|e| anyhow::anyhow!(e))?;
-        if right == "TRIPLE_DOT" || left.contains("...") {
-            (None, None)
-        } else {
-            (workspace_for_ref(&left, repo), workspace_for_ref(&right, repo))
-        }
-    } else {
-        (
-            left_ref.and_then(|left| workspace_for_ref(left, repo)),
-            right_ref.and_then(|right| workspace_for_ref(right, repo)),
-        )
-    };
-
-    let (Some(base_ws), Some(head_ws)) = (base_ws, head_ws) else {
-        eprintln!("WARN: --reasoner skipped (could not resolve workspace paths for both sides)");
-        return Ok(());
-    };
-
-    let base_unsat = unsat_for_workspace(&base_ws)?;
-    let head_unsat = unsat_for_workspace(&head_ws)?;
-    apply_unsat_diff(diff, &base_unsat, &head_unsat);
+    let profile = ReasonerId::El;
+    let base_input = WorkspaceInputLoader::new(base.workspace())
+        .load(base.class_hierarchy())
+        .map_err(|e| anyhow::anyhow!(e))?;
+    let head_input = WorkspaceInputLoader::new(head.workspace())
+        .load(head.class_hierarchy())
+        .map_err(|e| anyhow::anyhow!(e))?;
+    let base_cls = classify(profile, &base_input, true).map_err(|e| anyhow::anyhow!(e))?;
+    let head_cls = classify(profile, &head_input, true).map_err(|e| anyhow::anyhow!(e))?;
+    apply_unsat_diff(diff, &base_cls.unsatisfiable, &head_cls.unsatisfiable);
     Ok(())
 }
 

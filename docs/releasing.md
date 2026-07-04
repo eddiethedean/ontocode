@@ -5,7 +5,7 @@ Maintainer checklist for publishing crates, binaries, and the VS Code extension.
 ## Version bump
 
 1. Update `[workspace.package].version` in root [Cargo.toml on GitHub](https://github.com/eddiethedean/ontocode/blob/main/Cargo.toml)
-2. Update `extension/package.json` `version`
+2. Update `extension/package.json` and `extension/webview-ui/package.json` `version`
 3. Update [CHANGELOG.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) and [docs/changelog.md](changelog.md)
 4. Regenerate [NOTICES on GitHub](https://github.com/eddiethedean/ontocode/blob/main/NOTICES) if dependencies changed (`cargo license` recommended)
 5. Sync user-facing docs (see checklist below)
@@ -21,7 +21,7 @@ Maintainer checklist for publishing crates, binaries, and the VS Code extension.
 - [ ] [docs/faq.md](faq.md) — API version, Protégé comparison
 - [ ] [docs/errors.md](errors.md) / [docs/workspace-limits.md](workspace-limits.md) — behavior changes
 - [ ] [docs/guides/enterprise-eval.md](guides/enterprise-eval.md) — shipped capabilities
-- [ ] [docs/guides/protege-coexistence.md](guides/protege-coexistence.md) — v0.9 coexistence (must match SHIPPED)
+- [ ] [docs/guides/protege-coexistence.md](guides/protege-coexistence.md) — v0.10 coexistence (must match SHIPPED)
 - [ ] [docs/guides/protege-decision.md](guides/protege-decision.md) — decision matrix
 - [ ] [docs/guides/production-evidence.md](guides/production-evidence.md) — self-benchmark protocol
 - [ ] [docs/guides/governance.md](guides/governance.md) — sustainability / support policy
@@ -67,7 +67,7 @@ Requires the `CARGO_REGISTRY_TOKEN` repository secret.
 
 ## Published crates (dependency order)
 
-`ontocore-core` → `ontocore-parser` → `ontocore-owl` → `ontocore-diagnostics` → `ontocore-catalog` → `ontocore-refactor` → `ontocore-query` → `ontocore-reasoner` → `ontocore-robot` → `ontocore-lsp` → `ontocore` → `ontocore-cli`
+`ontocore-core` → `ontocore-parser` → `ontocore-owl` → `ontocore-diagnostics` → `ontocore-catalog` → `ontocore-diff` → `ontocore-refactor` → `ontocore-query` → `ontocore-reasoner` → `ontocore-robot` → `ontocore-lsp` → `ontocore` → `ontocore-cli`
 
 ## VS Code Marketplace
 

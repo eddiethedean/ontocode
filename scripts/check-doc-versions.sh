@@ -93,6 +93,14 @@ else
   echo "ok: no stale VERSION=0.9.0 install pins"
 fi
 
+if rg -q '--version 0\.9\.0' "${STALE_PIN_PATHS[@]}" --glob '!**/changelog.md' --glob '!**/CHANGELOG.md' --glob '!**/migration/**' --glob '!**/design/**' 2>/dev/null; then
+  echo "FAIL: stale --version 0.9.0 install pin found outside changelog/migration/design" >&2
+  rg -n '--version 0\.9\.0' "${STALE_PIN_PATHS[@]}" --glob '!**/changelog.md' --glob '!**/CHANGELOG.md' --glob '!**/migration/**' --glob '!**/design/**' 2>/dev/null || true
+  fail=1
+else
+  echo "ok: no stale --version 0.9.0 install pins"
+fi
+
 # User-facing docs must not claim 0.7.x is the current release
 USER_FACING_DOCS=(
   docs/faq.md
@@ -125,7 +133,7 @@ if [[ "$fail" -eq 0 ]]; then
 fi
 
 # User-facing docs must not claim 0.9.x is the current release
-for file in "${USER_FACING_DOCS[@]}" docs/guides/protege-decision.md docs/guides/production-evidence.md docs/guides/release-timeline.md docs/guides/platform-compatibility.md; do
+for file in "${USER_FACING_DOCS[@]}" docs/guides/protege-decision.md docs/guides/production-evidence.md docs/guides/release-timeline.md docs/guides/platform-compatibility.md docs/guides/obo-workflow.md docs/guides/lgpl-compliance.md docs/authoring.md docs/patch-reference.md; do
   if grep -qE '0\.9\.x \(current\)|0\.9\.0 \| Current|ships in v0\.9\.0|OntoCore v0\.9\.0|OntoCode v0\.9\.0|at \*\*0\.9\.x\*\*|for OntoCode \*\*v0\.9\.0\*\*|OntoCore \*\*v0\.9\.0\*\*' "$file" 2>/dev/null; then
     echo "FAIL: stale 0.9.x current-release claim in $file" >&2
     fail=1
@@ -141,9 +149,13 @@ for file in docs/authoring.md docs/sql-reference.md docs/sparql-reference.md doc
     echo "FAIL: stale OntoCore v0.8 status banner in $file" >&2
     fail=1
   fi
+  if grep -qE 'OntoCore v0\.9' "$file" 2>/dev/null; then
+    echo "FAIL: stale OntoCore v0.9 status banner in $file" >&2
+    fail=1
+  fi
 done
 if [[ "$fail" -eq 0 ]]; then
-  echo "ok: reference pages have no OntoCore v0.8 banners"
+  echo "ok: reference pages have no OntoCore v0.8/v0.9 banners"
 fi
 
 check_file_contains ".github/workflows/release.yml" "publish_with_pause ontocore" "release.yml publishes ontocore"
@@ -164,8 +176,11 @@ WEBVIEW_LOCK_VERSION="$(grep -m1 -E '"version"' extension/webview-ui/package-loc
 if [[ "$WEBVIEW_PKG_VERSION" != "$WEBVIEW_LOCK_VERSION" ]]; then
   echo "FAIL: extension/webview-ui/package-lock.json version ($WEBVIEW_LOCK_VERSION) != package.json ($WEBVIEW_PKG_VERSION)" >&2
   fail=1
+elif [[ "$WEBVIEW_PKG_VERSION" != "$VERSION" ]]; then
+  echo "FAIL: extension/webview-ui version ($WEBVIEW_PKG_VERSION) != extension/workspace ($VERSION)" >&2
+  fail=1
 else
-  echo "ok: webview-ui lockfile version matches package.json"
+  echo "ok: webview-ui version matches extension and lockfile"
 fi
 
 # docs/security.md supported versions must match SECURITY.md for current minor
@@ -239,7 +254,9 @@ for file in \
   fi
 done
 
-check_file_contains "docs/guides/protege-coexistence.md" "v0\.9" "protege-coexistence v0.9"
+check_file_contains "NOTICES" "v${VERSION}" "NOTICES release version"
+
+check_file_contains "docs/guides/protege-coexistence.md" "v0\.10" "protege-coexistence v0.10"
 check_file_contains "docs/guides/release-timeline.md" "non-commitment" "release-timeline disclaimer"
 if grep -qE 'OBO format \+ ROBOT interop.*Not shipped' docs/guides/enterprise-eval.md; then
   echo "FAIL: enterprise-eval.md contradicts SHIPPED.md on OBO/ROBOT" >&2

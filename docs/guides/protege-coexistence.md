@@ -1,10 +1,10 @@
 # Protégé coexistence
 
-Interim guide for teams using Protégé today and evaluating OntoCode **v0.9**. A full migration guide is a **v1.0 deliverable**.
+Interim guide for teams using Protégé today and evaluating OntoCode **v0.10**. A full migration guide is a **v1.0 deliverable**.
 
 Canonical capability matrix: [What ships today](../SHIPPED.md). Decision matrix: [Protégé vs OntoCode](protege-decision.md). Gap analysis: [Protégé parity matrix](../design/PROTEGE_PARITY.md).
 
-## Use OntoCode for (v0.9)
+## Use OntoCode for (v0.10)
 
 | Workflow | Status |
 |----------|--------|
@@ -20,6 +20,8 @@ Canonical capability matrix: [What ships today](../SHIPPED.md). Decision matrix:
 | Inferred hierarchy toggle | Shipped (after reasoner run) |
 | OBO format index + `obo_id` in explorer | Shipped (write-back: Turtle only in VS Code) |
 | ROBOT CLI in CI (`ontocore robot`) | Shipped (requires Java + `robot` on PATH) |
+| Multi-root VS Code workspaces | Shipped (all folders indexed) |
+| Semantic diff (CLI / LSP / panel) | Shipped |
 
 ## Keep Protégé for (today)
 

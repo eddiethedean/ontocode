@@ -124,6 +124,7 @@ Open a `.ttl` (or other supported) file and use standard VS Code navigation:
 | **OntoCode: Migrate Namespace** | Replace a namespace base IRI workspace-wide |
 | **OntoCode: Move Entity** | Move an entity block to another `.ttl` file |
 | **OntoCode: Extract Module** | Extract entities into a new module file |
+| **OntoCode: Semantic Diff…** | Compare git refs or workspace snapshots (breaking-change heuristics) |
 
 ---
 
@@ -138,6 +139,7 @@ Open **Settings** and search `ontocode`:
 | `ontocode.reasoner.default` | `el` | Default profile for Run Reasoner |
 | `ontocode.reasoner.autoProfile` | `true` | Profile-detection warnings |
 | `ontocode.hierarchy.mode` | `asserted` | Class tree: asserted / inferred / combined |
+| `ontocode.indexCache` | `false` | Persist parse snapshots under `.ontocore/cache/` (add to `.gitignore`) |
 
 Indexing is driven by the language server on startup; `ontocode.autoIndexOnOpen` is a legacy no-op kept for compatibility.
 
@@ -154,7 +156,7 @@ Indexing is driven by the language server on startup; `ontocode.autoIndexOnOpen`
 | No items under **Diagnostics** | Index must complete first; check **Problems** panel for the same issues |
 | Cannot edit in inspector | Write-back is **Turtle (`.ttl`) only**; other formats are read-only |
 | Workspace is Restricted | **Trust** the folder — `ontocode.lspPath` is ignored in Restricted Mode |
-| Multi-root workspace | Only the **first** folder is indexed — use a single-root folder or open the primary ontology project |
+| Multi-root workspace | All workspace folders are indexed; use **Index Workspace** after adding folders |
 
 More detail: [Installation & troubleshooting](https://ontocode-vs.readthedocs.io/en/latest/vscode-install/) · [FAQ](https://ontocode-vs.readthedocs.io/en/latest/faq/)
 
@@ -162,9 +164,9 @@ More detail: [Installation & troubleshooting](https://ontocode-vs.readthedocs.io
 
 ## What's included in v0.10.0
 
-**Shipped:** explorer; **React** entity inspector, graph panels, Query Workbench, Manchester editor, and Refactor Preview; workspace refactor (rename IRI, migrate namespace, move, extract); EL/RL/RDFS/DL/auto reasoner (OntoLogos 1.0); OBO syntax highlighting and indexing (write-back: Turtle only); diagnostics; LSP navigation and refactoring.
+**Shipped:** explorer; **React** entity inspector, graph panels, Query Workbench, Manchester editor, Refactor Preview, and **Semantic Diff** panel; workspace refactor (rename IRI, migrate namespace, move, extract); EL/RL/RDFS/DL/auto reasoner (OntoLogos 1.0); OBO syntax highlighting and indexing (write-back: Turtle only); diagnostics; LSP navigation and refactoring; multi-root workspaces; optional index disk cache.
 
-**Planned:** semantic diff (v0.10); owlmake workflow plugin integration (v1.0).
+**Planned:** owlmake workflow plugin integration (v1.0).
 
 ---
 

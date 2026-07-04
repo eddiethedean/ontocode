@@ -17,7 +17,11 @@ ontocore inspect /path/to/ontologies
 ontocore query /path/to/ontologies "SELECT short_name FROM classes"
 ontocore validate /path/to/ontologies
 ontocore classify /path/to/ontologies --profile el --format json
+ontocore diff /path/to/repo HEAD..WORKTREE
+ontocore diff --left-ref main --right-ref feature --format markdown --breaking-only
 ```
+
+Semantic diff compares indexed catalogs (directories, git refs, or two `Workspace` snapshots). See [migration v0.10](https://github.com/eddiethedean/ontocode/blob/main/docs/migration/v0.10.md).
 
 ## Documentation
 

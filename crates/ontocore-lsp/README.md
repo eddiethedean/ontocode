@@ -4,6 +4,8 @@
 
 Language server for OntoCode and LSP integrators — stdio transport, custom `ontocore/*` methods.
 
+**v0.10:** multi-root workspace indexing, incremental reindex, semantic diff (`ontocore/semanticDiff`), optional disk cache via `ontocore/indexWorkspace`.
+
 ## Install
 
 ```bash

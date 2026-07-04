@@ -9,16 +9,17 @@
 [![Rust edition](https://img.shields.io/badge/edition-2021-red)](https://www.rust-lang.org)
 [![Docs](https://readthedocs.org/projects/ontocode-vs/badge/?version=latest)](https://ontocode-vs.readthedocs.io/en/latest/)
 
-[![crates.io](https://img.shields.io/badge/crates.io-0.9.0-orange?logo=rust)](https://crates.io/search?q=ontocore)
-[![ontocore](https://img.shields.io/badge/ontocore-0.9.0-blue)](https://crates.io/crates/ontocore)
-[![core](https://img.shields.io/badge/core-0.9.0-blue)](https://crates.io/crates/ontocore-core)
-[![parser](https://img.shields.io/badge/parser-0.9.0-blue)](https://crates.io/crates/ontocore-parser)
-[![catalog](https://img.shields.io/badge/catalog-0.9.0-blue)](https://crates.io/crates/ontocore-catalog)
-[![query](https://img.shields.io/badge/query-0.9.0-blue)](https://crates.io/crates/ontocore-query)
-[![cli](https://img.shields.io/badge/cli-0.9.0-blue)](https://crates.io/crates/ontocore-cli)
-[![lsp](https://img.shields.io/badge/lsp-0.9.0-blue)](https://crates.io/crates/ontocore-lsp)
-[![owl](https://img.shields.io/badge/owl-0.9.0-blue)](https://crates.io/crates/ontocore-owl)
-[![reasoner](https://img.shields.io/badge/reasoner-0.9.0-blue)](https://crates.io/crates/ontocore-reasoner)
+[![crates.io](https://img.shields.io/badge/crates.io-0.10.0-orange?logo=rust)](https://crates.io/search?q=ontocore)
+[![ontocore](https://img.shields.io/badge/ontocore-0.10.0-blue)](https://crates.io/crates/ontocore)
+[![core](https://img.shields.io/badge/core-0.10.0-blue)](https://crates.io/crates/ontocore-core)
+[![parser](https://img.shields.io/badge/parser-0.10.0-blue)](https://crates.io/crates/ontocore-parser)
+[![catalog](https://img.shields.io/badge/catalog-0.10.0-blue)](https://crates.io/crates/ontocore-catalog)
+[![query](https://img.shields.io/badge/query-0.10.0-blue)](https://crates.io/crates/ontocore-query)
+[![cli](https://img.shields.io/badge/cli-0.10.0-blue)](https://crates.io/crates/ontocore-cli)
+[![lsp](https://img.shields.io/badge/lsp-0.10.0-blue)](https://crates.io/crates/ontocore-lsp)
+[![owl](https://img.shields.io/badge/owl-0.10.0-blue)](https://crates.io/crates/ontocore-owl)
+[![reasoner](https://img.shields.io/badge/reasoner-0.10.0-blue)](https://crates.io/crates/ontocore-reasoner)
+[![diff](https://img.shields.io/badge/diff-0.10.0-blue)](https://crates.io/crates/ontocore-diff)
 
 **OntoCode** is a VS Code extension for browsing and editing ontologies in Git-native workflows. **OntoCore** is the Rust engine behind it (CLI + language server).
 
@@ -38,7 +39,7 @@ Release CLI tarballs are **Linux x64 only**; macOS/Windows use `cargo install` o
 | **OntoCore** | Rust semantic workspace engine — index, query, diagnostics, refactoring, CLI, LSP |
 | **Ontologos** | Rust reasoning engine — classification, consistency, explanations ([external project](https://github.com/eddiethedean/ontologos)) |
 
-**OntoCode 1.0** targets a production-ready **Protégé replacement** for Git-native OWL 2 DL and OBO workflows. Workflow plugins (e.g. [owlmake](https://github.com/INCATools/owlmake)), AI/MCP, and language SDKs are a **v1.0 design** — not installable in v0.9. ROBOT interop today is a CLI wrapper only.
+**OntoCode 1.0** targets a production-ready **Protégé replacement** for Git-native OWL 2 DL and OBO workflows. Workflow plugins (e.g. [owlmake](https://github.com/INCATools/owlmake)), AI/MCP, and language SDKs are a **v1.0 design** — not installable in v0.10. ROBOT interop today is a CLI wrapper only.
 
 ## OntoCore
 
@@ -47,11 +48,14 @@ Release CLI tarballs are **Linux x64 only**; macOS/Windows use `cargo install` o
 OntoCore is implemented by the `ontocore-*` crates and exposed through the [`ontocore`](https://crates.io/crates/ontocore) façade crate. The CLI binary is `ontocore`.
 
 ```rust
-use ontocore::workspace::Workspace;
+use ontocore::Workspace;
 
 let ws = Workspace::open("./ontology")?;
 let results = ws.query("SELECT short_name FROM classes")?;
+let diff = ws.diff_against_path("./other")?;
 ```
+
+Semantic diff (catalog, git refs, breaking-change heuristics): `ontocore diff HEAD..WORKTREE` or `Workspace::diff` — see [migration v0.10](docs/migration/v0.10.md).
 
 ## OntoCode
 
@@ -164,15 +168,17 @@ Earlier releases: [Changelog](https://ontocode-vs.readthedocs.io/en/latest/chang
 
 Protégé is strong for traditional ontology editing, but most engineering teams live in Git, pull requests, and VS Code. OntoCode targets that workflow:
 
-| Shipped in v0.9.0 | Planned (v1.0 target) |
-|-------------------|------------------------|
+| Shipped in v0.10.0 | Planned (v1.0 target) |
+|--------------------|------------------------|
 | Browse and edit Turtle in VS Code (React inspector) | Full OWL 2 DL axiom catalog |
 | Query Workbench (SQL + SPARQL, React) and graph visualization | Inline SQL/SPARQL autocomplete |
 | Manchester editor (subclass, equivalent, disjoint) | Property chain editing |
-| Safe IRI rename, find usages, namespace migration, move/extract module | Semantic Git diff |
-| EL/RL/RDFS/DL reasoning + inferred hierarchy | Full OWL 2 axiom catalog |
-| OBO index + `obo_id` in explorer; ROBOT CLI wrappers | Full OBO write-back in VS Code |
-| Patch write-back for Turtle; `validate` / `classify` for CI | SHACL validation |
+| Safe IRI rename, find usages, namespace migration, move/extract module | |
+| **Semantic diff** (CLI, LSP, VS Code panel; git refs + breaking heuristics) | SHACL validation |
+| Incremental indexing, multi-root workspaces, optional `.ontocore/cache` | owlmake workflow plugin integration |
+| EL/RL/RDFS/DL reasoning + inferred hierarchy | Full OBO write-back in VS Code |
+| OBO index + `obo_id` in explorer; ROBOT CLI wrappers | |
+| Patch write-back for Turtle; `validate` / `classify` for CI | |
 
 Long-term goal: **Protégé-competitive OWL 2 DL + OBO maintenance in VS Code** — see [Protégé parity checklist](https://ontocode-vs.readthedocs.io/en/latest/design/PROTEGE_PARITY/).
 
@@ -193,6 +199,7 @@ cargo run -- validate fixtures
 cargo install ontocore-cli --locked
 ontocore query /path/to/ontologies "SELECT * FROM classes"
 ontocore validate /path/to/ontologies
+ontocore diff /path/to/repo --left-ref HEAD --right-ref WORKTREE
 ```
 
 ## Reasoning
@@ -215,8 +222,8 @@ The VS Code extension is a thin TypeScript shell over **OntoCore LSP** (`ontocor
 | Version | Deliverable |
 |---------|-------------|
 | v0.1–v0.9 | **Shipped** — foundation through OntoCore identity ([SHIPPED](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/)) |
-| v0.10+ | Semantic workspace, navigation, plugins, bindings — [Platform roadmap](https://ontocode-vs.readthedocs.io/en/latest/roadmap/) |
-| **v1.0** | **Protégé-competitive OWL + OBO in VS Code** — [parity checklist](https://ontocode-vs.readthedocs.io/en/latest/design/PROTEGE_PARITY/) |
+| **v0.10** | **Shipped** — semantic workspace: incremental index, multi-root, semantic diff, stable `Workspace` API ([migration v0.10](docs/migration/v0.10.md)) |
+| v1.0 | **Protégé-competitive OWL + OBO in VS Code** — [parity checklist](https://ontocode-vs.readthedocs.io/en/latest/design/PROTEGE_PARITY/) |
 
 Platform docs: [Vision](https://ontocode-vs.readthedocs.io/en/latest/vision/) · [Architecture](https://ontocode-vs.readthedocs.io/en/latest/architecture/) · [Roadmap](https://ontocode-vs.readthedocs.io/en/latest/roadmap/) · [Engineering milestones](https://ontocode-vs.readthedocs.io/en/latest/design/ROADMAP/)
 
@@ -250,6 +257,7 @@ crates/
 ├── ontocore-query     # SQL-like and SPARQL engines
 ├── ontocore-reasoner  # OntoLogos EL/RL/RDFS classification
 ├── ontocore-refactor  # workspace refactoring (rename, migrate, move, extract)
+├── ontocore-diff      # semantic catalog diff, git refs, breaking-change heuristics
 ├── ontocore-robot     # ROBOT CLI wrappers
 ├── ontocore-cli       # `ontocore` binary (OntoCore CLI)
 └── ontocore-lsp       # language server (OntoCore LSP)
@@ -286,7 +294,7 @@ Column schemas: [SQL reference](https://ontocode-vs.readthedocs.io/en/latest/sql
 
 ## API stability (pre-1.0)
 
-Published `ontocore` and `ontocore-*` crates are at **0.9.x**. Library APIs, LSP wire JSON, and SQL virtual
+Published `ontocore` and `ontocore-*` crates are at **0.10.x**. Library APIs, LSP wire JSON, and SQL virtual
 table columns may change between minor releases until [v1.0 stable core](https://ontocode-vs.readthedocs.io/en/latest/design/v1.0_BACKLOG/)
 is complete. The CLI `validate` and `classify` exit codes are documented in
 [workspace limits](https://ontocode-vs.readthedocs.io/en/latest/workspace-limits/).
@@ -319,7 +327,7 @@ Pre-built artifacts on [GitHub Releases](https://github.com/eddiethedean/ontocod
 
 Verify downloads: [release integrity](https://ontocode-vs.readthedocs.io/en/latest/release-integrity/). Maintainer release process: [releasing guide](https://ontocode-vs.readthedocs.io/en/latest/releasing/).
 
-Workspace crates **publish to [crates.io](https://crates.io/) on each release tag**: `ontocore`, `ontocore-core`, `ontocore-parser`, `ontocore-owl`, `ontocore-diagnostics`, `ontocore-catalog`, `ontocore-query`, `ontocore-reasoner`, `ontocore-robot`, `ontocore-refactor`, `ontocore-lsp`, `ontocore-cli`.
+Workspace crates **publish to [crates.io](https://crates.io/) on each release tag**: `ontocore`, `ontocore-core`, `ontocore-parser`, `ontocore-owl`, `ontocore-diagnostics`, `ontocore-catalog`, `ontocore-query`, `ontocore-reasoner`, `ontocore-robot`, `ontocore-refactor`, `ontocore-diff`, `ontocore-lsp`, `ontocore-cli`.
 
 See [CHANGELOG.md](CHANGELOG.md) for release notes. Security: [security policy](https://ontocode-vs.readthedocs.io/en/latest/security/).
 

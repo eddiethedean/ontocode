@@ -7,7 +7,7 @@ Horned-OWL facade for OWL axiom modeling, Turtle patch write-back, and Mancheste
 ## Install
 
 ```toml
-ontocore-owl = "0.9"
+ontocore-owl = "0.10"
 ```
 
 ## Documentation

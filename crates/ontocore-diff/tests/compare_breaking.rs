@@ -29,9 +29,7 @@ fn removed_subclass_emits_breaking() {
         .expect("head");
     let diff = diff_catalogs(&base, &head);
     assert!(
-        diff.breaking_changes
-            .iter()
-            .any(|b| matches!(b.reason, BreakingReason::RemovedSuperclass))
+        diff.breaking_changes.iter().any(|b| matches!(b.reason, BreakingReason::RemovedSuperclass))
             || diff.axiom_changes.iter().any(|a| a.axiom_kind == AXIOM_KIND_SUB_CLASS_OF),
         "expected subclass removal in diff"
     );

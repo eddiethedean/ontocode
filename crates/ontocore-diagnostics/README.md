@@ -7,7 +7,7 @@ Ontology lint rules and diagnostic collection for [OntoCore](https://github.com/
 ## Install
 
 ```toml
-ontocore-diagnostics = "0.9"
+ontocore-diagnostics = "0.10"
 ```
 
 ## Documentation

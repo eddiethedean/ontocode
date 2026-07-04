@@ -7,7 +7,7 @@ RDF parsing and entity extraction for [OntoCore](https://github.com/eddiethedean
 ## Install
 
 ```toml
-ontocore-parser = "0.9"
+ontocore-parser = "0.10"
 ```
 
 ## Documentation

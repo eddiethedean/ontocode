@@ -7,7 +7,7 @@ This crate re-exports the stable surface of OntoCore for Rust applications. Impl
 ## Quick start
 
 ```rust
-use ontocore::workspace::Workspace;
+use ontocore::Workspace;
 
 let workspace = Workspace::open(".")?;
 let diagnostics = workspace.diagnostics();
@@ -22,7 +22,8 @@ for row in &result.rows {
 
 | Module | Role |
 |--------|------|
-| `workspace` | High-level `Workspace::open` API (experimental pre-1.0) |
+| `workspace` | High-level `Workspace::open` API — incremental index, diff, import graph |
+| `diff` | Semantic catalog diff, git refs, breaking-change heuristics |
 | `catalog` | Index builder and entity catalog |
 | `query` | SQL virtual tables and SPARQL |
 | `diagnostics` | Lint rule collection |

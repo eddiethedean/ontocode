@@ -2,7 +2,7 @@
 
 > Part of **OntoCore** (semantic workspace engine).
 
-Workspace refactoring for OntoCore — find usages, safe IRI rename, namespace migration, move entity, and extract module (v0.8).
+Workspace refactoring for OntoCore — find usages, safe IRI rename, namespace migration, move entity, and extract module.
 
 ## Usage
 

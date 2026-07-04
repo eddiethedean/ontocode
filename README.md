@@ -2,22 +2,21 @@
 
 [![CI](https://github.com/eddiethedean/ontocode/actions/workflows/ci.yml/badge.svg)](https://github.com/eddiethedean/ontocode/actions/workflows/ci.yml)
 [![Extension VS Code E2E](https://github.com/eddiethedean/ontocode/actions/workflows/extension-vscode-e2e.yml/badge.svg)](https://github.com/eddiethedean/ontocode/actions/workflows/extension-vscode-e2e.yml)
-[![License](https://img.shields.io/crates/l/ontocore-core)](https://github.com/eddiethedean/ontocode/blob/main/LICENSE-MIT)
+[![License](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue)](https://github.com/eddiethedean/ontocode/blob/main/LICENSE-MIT)
 [![MSRV](https://img.shields.io/badge/MSRV-1.88+-orange)](https://github.com/eddiethedean/ontocode/blob/main/Cargo.toml)
 [![Rust edition](https://img.shields.io/badge/edition-2021-red)](https://www.rust-lang.org)
-
-[![crates](https://img.shields.io/badge/crates-lightgrey?style=flat-square&logo=rust)](https://crates.io/search?q=ontocore)
-[![ontocore](https://img.shields.io/crates/v/ontocore?label=ontocore)](https://crates.io/crates/ontocore)
-[![core](https://img.shields.io/crates/v/ontocore-core?label=core)](https://crates.io/crates/ontocore-core)
-[![parser](https://img.shields.io/crates/v/ontocore-parser?label=parser)](https://crates.io/crates/ontocore-parser)
-[![catalog](https://img.shields.io/crates/v/ontocore-catalog?label=catalog)](https://crates.io/crates/ontocore-catalog)
-[![query](https://img.shields.io/crates/v/ontocore-query?label=query)](https://crates.io/crates/ontocore-query)
-[![cli](https://img.shields.io/crates/v/ontocore-cli?label=cli)](https://crates.io/crates/ontocore-cli)
-[![lsp](https://img.shields.io/crates/v/ontocore-lsp?label=lsp)](https://crates.io/crates/ontocore-lsp)
-[![owl](https://img.shields.io/crates/v/ontocore-owl?label=owl)](https://crates.io/crates/ontocore-owl)
-[![reasoner](https://img.shields.io/crates/v/ontocore-reasoner?label=reasoner)](https://crates.io/crates/ontocore-reasoner)
-[![downloads](https://img.shields.io/crates/d/ontocore-cli?label=downloads)](https://crates.io/crates/ontocore-cli)
 [![Docs](https://readthedocs.org/projects/ontocode-vs/badge/?version=latest)](https://ontocode-vs.readthedocs.io/en/latest/)
+
+[![crates.io](https://img.shields.io/badge/crates.io-0.9.0-orange?logo=rust)](https://crates.io/search?q=ontocore)
+[![ontocore](https://img.shields.io/badge/ontocore-0.9.0-blue)](https://crates.io/crates/ontocore)
+[![core](https://img.shields.io/badge/core-0.9.0-blue)](https://crates.io/crates/ontocore-core)
+[![parser](https://img.shields.io/badge/parser-0.9.0-blue)](https://crates.io/crates/ontocore-parser)
+[![catalog](https://img.shields.io/badge/catalog-0.9.0-blue)](https://crates.io/crates/ontocore-catalog)
+[![query](https://img.shields.io/badge/query-0.9.0-blue)](https://crates.io/crates/ontocore-query)
+[![cli](https://img.shields.io/badge/cli-0.9.0-blue)](https://crates.io/crates/ontocore-cli)
+[![lsp](https://img.shields.io/badge/lsp-0.9.0-blue)](https://crates.io/crates/ontocore-lsp)
+[![owl](https://img.shields.io/badge/owl-0.9.0-blue)](https://crates.io/crates/ontocore-owl)
+[![reasoner](https://img.shields.io/badge/reasoner-0.9.0-blue)](https://crates.io/crates/ontocore-reasoner)
 
 **OntoCode** is a VS Code extension for browsing and editing ontologies in Git-native workflows. **OntoCore** is the Rust engine behind it (CLI + language server).
 

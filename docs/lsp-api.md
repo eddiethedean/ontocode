@@ -1,6 +1,6 @@
-# OntoCore LSP API (v0.9)
+# OntoCore LSP API (v0.10)
 
-> **Status:** Documents behavior in **OntoCore v0.9.0**. Pre-1.0 APIs may change.
+> **Status:** Documents behavior in **OntoCore v0.10.0**. Pre-1.0 APIs may change.
 > Canonical feature list: [What ships today](SHIPPED.md).
 
 This document describes **what ships today** in `ontocore-lsp`. For the **v1.0 target** (including `runRobot`, graph APIs), see [LSP_SPEC.md](design/LSP_SPEC.md).
@@ -350,6 +350,24 @@ Apply a previously previewed refactor plan. The server re-previews from `request
 
 **Result:** `{ "files_written": number, "reindex_warning"?: string }`
 
+### `ontocore/semanticDiff` (v0.10)
+
+Compare semantic catalogs between git refs, directories, or indexed workspace snapshots. Alias: `ontocore/getSemanticDiff`.
+
+**Params:** `SemanticDiffParams`
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `left_ref` | string? | Git left ref (default `HEAD`) or `WORKSPACE` for indexed catalog |
+| `right_ref` | string? | Git right ref (default `WORKTREE`) or `WORKSPACE` |
+| `left_path` | string? | Left directory when comparing two paths on disk |
+| `right_path` | string? | Right directory |
+| `reasoner` | boolean? | Enrich diff with reasoner unsatisfiability changes |
+
+When both `left_path` and `right_path` are set, git refs are ignored and directories are compared directly (paths must resolve within workspace roots).
+
+**Result:** `{ "diff": DiffResult }` — axiom-level changes, entity additions/removals, breaking-change flags. See [Semantic diff guide](ontocode/semantic-diff.md).
+
 ## Structured errors
 
 Custom method failures return `LspErrorPayload` in the JSON-RPC error `data` field. Full catalog: [errors.md](errors.md).
@@ -363,6 +381,4 @@ Custom method failures return `LspErrorPayload` in the JSON-RPC error `data` fie
 
 ## Not implemented yet (see LSP_SPEC)
 
-- `ontocore/getSemanticDiff`
-
-Use the CLI or Rust crates for semantic diff until that LSP method lands.
+Completion, `prepareRename`, and other items marked planned in [LSP_SPEC.md](design/LSP_SPEC.md). For semantic diff UX in VS Code, see [Semantic diff guide](ontocode/semantic-diff.md).

@@ -35,9 +35,10 @@ Maintainer checklist for publishing crates, binaries, and the VS Code extension.
 - [ ] [docs/changelog.md](changelog.md) — mirror recent releases from CHANGELOG.md
 - [ ] [docs/lsp-api.md](lsp-api.md) — new methods or error codes
 - [ ] [docs/webview-protocol.md](webview-protocol.md) — React panel message protocol
-- [ ] [docs/guides/graph-visualization.md](guides/graph-visualization.md), [obo-workflow.md](guides/obo-workflow.md), [robot-interop.md](guides/robot-interop.md)
-- [ ] [docs/migration/v0.7.md](migration/v0.7.md) — upgrade notes when applicable
+- [ ] [docs/ontocode/graph-view.md](ontocode/graph-view.md), [docs/ontocode/semantic-diff.md](ontocode/semantic-diff.md), [obo-workflow.md](guides/obo-workflow.md), [robot-interop.md](guides/robot-interop.md)
+- [ ] [docs/migration/v0.8.md](migration/v0.8.md) — upgrade notes when applicable
 - [ ] [docs/migration/v0.9.md](migration/v0.9.md) — OntoCore identity upgrade notes when applicable
+- [ ] [docs/migration/v0.10.md](migration/v0.10.md) — semantic workspace upgrade notes when applicable
 - [ ] [docs/design/PROTEGE_PARITY.md](design/PROTEGE_PARITY.md) — status columns if features shipped
 - [ ] [docs/design/ARCHITECTURE.md](design/ARCHITECTURE.md) / [OWL_AUTHORING_SPEC.md](design/OWL_AUTHORING_SPEC.md) — shipped vs target banners
 - [ ] [docs/design/LICENSES.md](design/LICENSES.md) — dependency sections

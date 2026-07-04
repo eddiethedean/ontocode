@@ -62,7 +62,7 @@ For faster CI without compiling Rust dependencies:
 ```yaml
       - name: Download and validate ontology files
         run: |
-          VERSION=0.9.0
+          VERSION=0.10.0
           ASSET="ontocore-v${VERSION}-x86_64-unknown-linux-gnu.tar.gz"
           BIN="ontocore-v${VERSION}-x86_64-unknown-linux-gnu"
           curl -fsSL -o "${ASSET}" \
@@ -93,6 +93,20 @@ ontocore validate .
 ```
 
 Patch format: [patch-reference.md](patch-reference.md).
+
+## Semantic diff in CI
+
+Compare git refs in pull requests (requires a git checkout with history):
+
+```yaml
+      - name: Install ontocore CLI
+        run: cargo install ontocore-cli --locked --version 0.10.0
+
+      - name: Semantic diff (breaking changes only)
+        run: ontocore diff --format markdown --breaking-only HEAD..WORKTREE
+```
+
+See [Semantic diff guide](ontocode/semantic-diff.md) for ref syntax and VS Code panel usage.
 
 ## Tips
 

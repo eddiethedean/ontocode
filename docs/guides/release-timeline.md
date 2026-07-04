@@ -6,8 +6,8 @@ Planning ranges for OntoCode / OntoCore. **These are product goals, not contract
 
 | Version | Status | Date (changelog) |
 |---------|--------|------------------|
-| **0.9.0** | Current | 2026-07-03 |
-| **0.8.0** | Previous | 2026-06-26 |
+| **0.10.0** | Current | 2026-07-04 |
+| **0.9.0** | Previous | 2026-07-03 |
 
 Pre-1.0: minor releases may change library APIs, LSP JSON, and SQL virtual table columns — [README](https://github.com/eddiethedean/ontocode/blob/main/README.md).
 
@@ -16,8 +16,8 @@ Pre-1.0: minor releases may change library APIs, LSP JSON, and SQL virtual table
 | Target | Goal | Shipped in |
 |--------|------|------------|
 | **v0.9** | OntoCore identity — `ontocore` façade, branding, documentation; OntoLogos 1.0 DL/auto classification | **Shipped** (2026-07-03) |
-| **v0.10** | Semantic workspace — incremental index, import graph, persistent cache | Planned |
-| **v1.0** | Protégé-competitive OWL + OBO in VS Code; OWL 2 DL via OntoLogos 1.0; full migration guide | Planned |
+| **v0.10** | Semantic workspace — incremental index, multi-root, stable `Workspace` API, semantic diff, optional disk cache | **Shipped** (2026-07-04) |
+| **v1.0** | Protégé-competitive OWL + OBO in VS Code; full axiom catalog; plugin host | Planned |
 
 Canonical forward plan: [Platform roadmap](../roadmap.md). Engineering milestone history: [Milestones (shipped)](../design/ROADMAP.md).
 
@@ -25,22 +25,23 @@ Canonical forward plan: [Platform roadmap](../roadmap.md). Engineering milestone
 
 ## What each near-term milestone implies
 
-### v0.10 (planned)
+### v0.10 (shipped)
 
-- Semantic diff for PR review workflows
-- React reasoner/explanation panels (legacy HTML removed)
-- Does **not** by itself complete Protégé parity or DL reasoning
+- Semantic diff for PR review workflows (CLI, LSP, VS Code panel)
+- Incremental indexing, multi-root workspaces, optional `.ontocore/cache`
+- Stable `ontocore::Workspace` API
+- Does **not** by itself complete Protégé parity or full OBO write-back
 
 ### v1.0 (planned)
 
 - Full OWL 2 DL axiom catalog, OBO write-back, and Protégé migration guide per parity matrix
-- Fuller OBO and axiom catalog goals per parity matrix
+- Installable plugin host / owlmake-style workflow integration
 - Formal performance benchmarks (currently v1.0 backlog — [performance sizing](performance-sizing.md))
 - Full Protégé migration guide (today: [Protégé coexistence](protege-coexistence.md) + [decision matrix](protege-decision.md))
 
 ## How to plan enterprise adoption without a v1.0 date
 
-1. **Now (v0.9):** CI gates + controlled IDE pilot — [production readiness](production-readiness.md)
+1. **Now (v0.10):** CI gates + controlled IDE pilot — [production readiness](production-readiness.md)
 2. **Run** [production evidence protocol](production-evidence.md) on your corpus
 3. **Re-evaluate** at each pinned minor bump using [migration index](../migration/README.md)
 4. **Do not** retire Protégé for DL/OBO workflows until parity matrix items you need are green in SHIPPED

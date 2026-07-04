@@ -114,7 +114,7 @@ Refactor requests use a tagged `kind` field: `rename_iri`, `migrate_namespace`, 
 |-------|-------|
 | Preview | Always preview multi-file changes before apply in production repos |
 | Open buffers | LSP applies to open editor buffers first, then disk (same as patches) |
-| Multi-root workspace | Only the **first** folder is indexed and refactored |
+| Multi-root workspace | All folders indexed (v0.10+); refactor applies across indexed Turtle in every root |
 | Non-Turtle files | Skipped — no write-back on `.owl`, `.obo`, etc. |
 | Extract module | Direct-reference closure; may not capture all indirect imports |
 | Git | Review diffs before commit; no semantic diff yet (v0.9 target) |

@@ -4,14 +4,13 @@ This page helps security, platform, and ontology teams decide whether OntoCode *
 
 Canonical capability matrix: [What ships today](../SHIPPED.md).
 
-## When not to use OntoCode (v0.9)
+## When not to use OntoCode (v0.10)
 
 Prefer Protégé or other tools (or wait for v1.0) if you need:
 
 - Full **OBO write-back** in the IDE
-- **Multi-root** workspace indexing (only the first folder is indexed)
 - Full **SQL** analytics (JOINs, aggregates) — only SQL-like virtual tables ship today
-- An installable **plugin host** / owlmake workflow integration (design only in v0.9)
+- An installable **plugin host** / owlmake workflow integration (design only until v1.0)
 
 ## Enterprise documentation pack
 
@@ -28,7 +27,7 @@ Prefer Protégé or other tools (or wait for v1.0) if you need:
 | [LGPL compliance](lgpl-compliance.md) | Legal — horned-owl obligations |
 | [Protégé coexistence](protege-coexistence.md) | Ontology teams — split workflow with Protégé |
 
-## What v0.9.0 delivers
+## What v0.10.0 delivers
 
 | Capability | Status |
 |------------|--------|
@@ -46,6 +45,8 @@ Prefer Protégé or other tools (or wait for v1.0) if you need:
 | Full OWL 2 DL axiom catalog + property chain editing | **Not shipped** (v1.0 target) |
 | Full OBO write-back in VS Code | **Not shipped** (v1.0 target) |
 | Semantic Git diff | **Shipped** (v0.10 — CLI, LSP, VS Code panel) |
+| Incremental indexing + multi-root workspaces | **Shipped** (v0.10) |
+| Optional disk index cache (`.ontocore/cache`) | **Shipped** (v0.10) |
 
 Full gap analysis: [Protégé parity matrix](../design/PROTEGE_PARITY.md).
 
@@ -77,7 +78,7 @@ Full gap analysis: [Protégé parity matrix](../design/PROTEGE_PARITY.md).
 
 | Limitation | Impact |
 |------------|--------|
-| **Multi-root VS Code workspaces** | Only the **first** folder is indexed |
+| **Multi-root VS Code workspaces** | **All folders indexed** (v0.10+) |
 | **Write-back** | **Turtle only**; OWL/XML is read-only in the inspector |
 | **Reasoning** | EL/RL/RDFS/DL/auto via OntoLogos 1.0.0; explanations EL-first; results may differ from Protégé on partial OWL mappings |
 | **CLI release binaries** | Linux x64 only; macOS/Windows use `cargo install` or bundled LSP in VSIX |

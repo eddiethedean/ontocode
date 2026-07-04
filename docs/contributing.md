@@ -51,6 +51,14 @@ npm run compile
 npm test
 ```
 
+### Webview UI (React panels)
+
+```bash
+cd extension/webview-ui
+npm ci
+npm test
+```
+
 Extension tests expect a built `ontocore-lsp` binary. From the repo root:
 
 ```bash

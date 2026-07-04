@@ -1,6 +1,6 @@
 # Platform and VS Code compatibility
 
-Supported platforms and environments for OntoCode **v0.9.0**. This page states **what is documented and tested in project CI** — not a formal certification.
+Supported platforms and environments for OntoCode **v0.10.0**. This page states **what is documented and tested in project CI** — not a formal certification.
 
 Canonical matrix: [What ships today](../SHIPPED.md).
 
@@ -37,7 +37,7 @@ No separate LSP install required for standard Marketplace/VSIX use.
 | macOS | **No** — use `cargo install ontocore-cli --locked` |
 | Windows | **No** — use `cargo install` or CI on Linux runners |
 
-Pin version: `VERSION=0.9.0` — [getting started](../getting-started.md).
+Pin version: `VERSION=0.10.0` — [getting started](../getting-started.md).
 
 ## `cargo install` prerequisites
 
@@ -67,9 +67,10 @@ Pilot checklist for Remote-SSH:
 
 | Feature | Behavior |
 |---------|----------|
-| Multi-root VS Code workspace | Only the **first** folder is indexed |
+| Multi-root VS Code workspace | **All folders indexed** (v0.10+); language server registers every root on open |
+| Manual **Index Workspace** | May prompt to pick a folder when multiple roots are open |
 
-Use single-root folders for ontology projects.
+Ensure each workspace root contains ontology files you expect in the explorer.
 
 ## Optional external tools
 

@@ -1,11 +1,11 @@
 # Ecosystem Architecture
 
-> **v0.9 ships today:** OntoCode (VS Code), OntoCore (CLI/LSP/library), Ontologos reasoning, ROBOT CLI wrappers.
+> **v0.10 ships today:** OntoCode (VS Code), OntoCore (CLI/LSP/library), semantic diff, incremental indexing, Ontologos reasoning, ROBOT CLI wrappers.
 > **Planned v1.0 (not installable yet):** plugin host, language SDKs, MCP server, owlmake-style workflow plugins.
 > Canonical capability matrix: [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/).
 
 ```
-External Workflow Plugins (v1.0 target)  ← not shipped in v0.9
+External Workflow Plugins (v1.0 target)  ← not shipped in v0.10
 ├── owlmake (reference design)
 ├── ROBOT / ODK workflow adapters
 └── Future build, validation, doc plugins
@@ -56,7 +56,7 @@ Reasoning algorithms and semantic inference. OntoCore delegates classification, 
 
 ### OntoCore
 
-Reusable semantic workspace platform: index, query, diagnostics, and refactoring. Consumed by the VS Code extension, CLI, and Rust library. **Plugin hosting is a v1.0 design** — not available in v0.9. OntoCore is **not** a workflow engine; build, release, and QC automation will live in external plugins when the host ships.
+Reusable semantic workspace platform: index, query, diagnostics, refactoring, and semantic diff. Consumed by the VS Code extension, CLI, and Rust library. **Plugin hosting is a v1.0 design** — not installable yet. OntoCore is **not** a workflow engine; build, release, and QC automation will live in external plugins when the host ships.
 
 ### External workflow plugins (e.g. owlmake)
 

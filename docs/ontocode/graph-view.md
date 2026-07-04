@@ -39,5 +39,3 @@ There is no standalone `ontocore graph` CLI command; use the VS Code panel or LS
 | Empty graph | Re-index workspace; check ontology has relevant axioms |
 | Truncation notice | Narrow filter or open neighborhood graph from a specific class |
 | Panel won't open | Check Output → OntoCode for LSP errors |
-
-See [Graph visualization guide](../guides/graph-visualization.md) for additional notes.

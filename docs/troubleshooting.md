@@ -9,7 +9,7 @@ For quick answers, see also [FAQ](faq.md).
 1. Run **OntoCode: Index Workspace** from the Command Palette.
 2. Check **View → Output → OntoCore Language Server** for errors.
 3. Confirm the folder contains supported files (`.ttl`, `.owl`, `.rdf`, `.jsonld`, `.nt`, `.nq`, `.trig`).
-4. **Multi-root workspace:** only the **first** folder is indexed — open the ontology project as a single-root folder or put it first.
+4. **Multi-root workspace:** since v0.10 all folders are indexed — confirm each root contains ontology files and check **Output → OntoCore Language Server** for per-root errors.
 
 ## VS Code: language server failed to start
 
@@ -75,11 +75,14 @@ See [workspace limits](workspace-limits.md).
 
 Indexing may fail above [workspace limits](workspace-limits.md) (file count, size, triple caps). For very large terminologies, use CLI batch workflows on a subset.
 
-## Graphs, OBO, and ROBOT
+## Graphs, OBO, ROBOT, and semantic diff
 
 | Problem | What to try |
 |---------|-------------|
-| Graph commands missing | Run **Index Workspace** first — [Graph guide](guides/graph-visualization.md) |
+| Semantic diff: `no git repository` | Open a git checkout; or use CLI `ontocore diff --left ./a --right ./b` |
+| Semantic diff panel empty | Trust workspace; run **Index Workspace**; see [Semantic diff](ontocode/semantic-diff.md) |
+|---------|-------------|
+| Graph commands missing | Run **Index Workspace** first — [Graph view](ontocode/graph-view.md) |
 | Cannot edit `.obo` in inspector | OBO is read-only in VS Code; use Turtle write-back or external tools — [OBO guide](guides/obo-workflow.md) |
 | `robot` not found | Install Java + ROBOT; set `ontocode.robotPath` — [ROBOT guide](guides/robot-interop.md) |
 

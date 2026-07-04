@@ -82,7 +82,9 @@ nav:
       - Query Workbench: ontocode/query-workbench.md
       - Manchester editor: ontocode/manchester-editor.md
       - Graph visualization: ontocode/graph-view.md
+      - Webview protocol: webview-protocol.md
       - Refactoring: guides/refactoring.md
+      - Semantic diff: ontocode/semantic-diff.md
       - Reasoner: guides/reasoner.md
       - OBO workflows: guides/obo-workflow.md
       - Protégé coexistence: guides/protege-coexistence.md
@@ -130,6 +132,7 @@ nav:
           - v0.6 → v0.7: migration/v0.7.md
           - v0.7 → v0.8: migration/v0.8.md
           - v0.8 → v0.9: migration/v0.9.md
+          - v0.9 → v0.10: migration/v0.10.md
       - Release integrity: release-integrity.md
       - Errors: errors.md
   - Contribute:

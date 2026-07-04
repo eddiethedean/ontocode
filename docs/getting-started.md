@@ -61,13 +61,13 @@ ontocore validate /path/to/your/ontologies
 
 ## Path D — Release binaries (no Rust)
 
-1. Open [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) for the latest **v0.9.x** tag.
-2. Download the CLI tarball for your platform (Linux x64 example below) or `ontocore-lsp-v0.9.0-<platform>.tar.gz` / `.zip` for LSP-only use.
+1. Open [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) for the latest **v0.10.x** tag.
+2. Download the CLI tarball for your platform (Linux x64 example below) or `ontocore-lsp-v0.10.0-<platform>.tar.gz` / `.zip` for LSP-only use.
 3. Verify with `SHA256SUMS` — see [release-integrity.md](release-integrity.md).
-4. Extract and run (replace `0.9.0` with your release tag):
+4. Extract and run (replace `0.10.0` with your release tag):
 
 ```bash
-VERSION=0.9.0
+VERSION=0.10.0
 ASSET="ontocore-v${VERSION}-x86_64-unknown-linux-gnu.tar.gz"
 BIN="ontocore-v${VERSION}-x86_64-unknown-linux-gnu"
 tar xzf "${ASSET}"
@@ -85,8 +85,8 @@ For VS Code, install the `ontocode-*.vsix` from the same release.
 | Goal | Document |
 |------|----------|
 | What ships today | [SHIPPED.md](SHIPPED.md) |
-| Query Workbench (VS Code) | [guides/query-workbench.md](guides/query-workbench.md) |
-| Manchester editor | [guides/manchester-editor.md](guides/manchester-editor.md) |
+| Query Workbench (VS Code) | [ontocode/query-workbench.md](ontocode/query-workbench.md) |
+| Manchester editor | [ontocode/manchester-editor.md](ontocode/manchester-editor.md) |
 | Reasoner | [guides/reasoner.md](guides/reasoner.md) |
 | SQL queries | [sql-reference.md](sql-reference.md) · [query cookbook](examples/queries.md) |
 | SPARQL | [sparql-reference.md](sparql-reference.md) |

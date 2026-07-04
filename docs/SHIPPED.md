@@ -76,7 +76,7 @@
 
 | Limitation | Notes |
 |------------|-------|
-| Multi-root VS Code workspaces | Only the **first** folder is indexed |
+| Multi-root VS Code workspaces | **All folders indexed** (v0.10+). Manual **Index Workspace** may prompt when multiple roots are open |
 | Write-back | **Turtle only** |
 | Refactoring | **Turtle only**; extract module uses direct-reference closure |
 | Class hierarchy tree | Named-parent edges; **inferred/combined** after reasoner run |
@@ -93,12 +93,13 @@ Forward milestones (v0.11 platform consolidation → v1.0 Protégé replacement)
 | Topic | Guide |
 |-------|-------|
 | VS Code onboarding | [First success in 10 minutes](guides/first-success.md) |
-| Query Workbench | [Query Workbench guide](guides/query-workbench.md) |
+| Query workbench | [Query Workbench](ontocode/query-workbench.md) |
 | Reasoner | [Reasoner guide](guides/reasoner.md) |
-| Manchester editor | [Manchester editor guide](guides/manchester-editor.md) |
+| Manchester editor | [Manchester editor](ontocode/manchester-editor.md) |
+| Semantic diff | [Semantic diff guide](ontocode/semantic-diff.md) |
 | Turtle editing & patches | [Authoring](authoring.md) · [Patch reference](patch-reference.md) · [Refactoring](guides/refactoring.md) |
 | CLI & CI | [Getting started](getting-started.md) · [CI integration](ci-integration.md) |
-| Graph visualization | [Graph visualization guide](guides/graph-visualization.md) |
+| Graph visualization | [Graph view](ontocode/graph-view.md) |
 | OBO workflows | [OBO workflow guide](guides/obo-workflow.md) |
 | ROBOT interop | [ROBOT interop guide](guides/robot-interop.md) |
 | LSP integrators | [LSP API](lsp-api.md) · [Webview protocol](webview-protocol.md) |

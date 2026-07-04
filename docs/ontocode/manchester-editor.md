@@ -45,6 +45,4 @@ Domain, range, and property chains appear in the axiom catalog (chains are view-
 
 ## CLI
 
-Manchester parsing is available via LSP only in v0.9. Use the VS Code panel or call `ontocore/parseManchester` from an LSP client.
-
-See [Manchester editor guide](../guides/manchester-editor.md) for extended examples.
+Manchester parsing is available via LSP. Use the VS Code panel or call `ontocore/parseManchester` from an LSP client — see [LSP API](../lsp-api.md).

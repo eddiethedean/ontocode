@@ -53,7 +53,7 @@ OBO pipelines often use [ROBOT](http://robot.obolibrary.org/). See [ROBOT intero
 
 - **Minimal OBO parser** — line-based indexing for common term headers and relationships; not full fastobo parity.
 - **No OBO write-back** in v0.8 — planned for v1.0.
-- **Multi-root workspaces** — only the first folder is indexed.
+- **Multi-root workspaces** — all folders indexed since v0.10; ensure each root contains ontology files
 
 ## Related
 

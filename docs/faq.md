@@ -49,19 +49,19 @@ Yes. Download release binaries and VSIX from [GitHub Releases](https://github.co
 
 **How do I run SQL or SPARQL in VS Code?**
 
-Command Palette → **OntoCode: Open Query Workbench**. See [Query Workbench guide](guides/query-workbench.md).
+Command Palette → **OntoCode: Open Query Workbench**. See [Query Workbench](ontocode/query-workbench.md).
 
 **How do I edit complex axioms?**
 
-Select a class in a `.ttl` file → Entity Inspector → **Edit in Manchester** or **Add Manchester axiom**. See [Manchester editor guide](guides/manchester-editor.md).
+Select a class in a `.ttl` file → Entity Inspector → **Edit in Manchester** or **Add Manchester axiom**. See [Manchester editor](ontocode/manchester-editor.md).
 
 **I cannot edit in the Entity Inspector.**
 
 Write-back is **Turtle (`.ttl`) only**. RDF/XML, OWL XML, and JSON-LD files are read-only in the inspector.
 
-**Only one folder in my multi-root workspace is indexed.**
+**How do multi-root VS Code workspaces work?**
 
-Known limitation: only the **first** workspace folder is indexed. Open the primary ontology project as a single-root folder, or as the first folder in a multi-root workspace.
+Since **v0.10**, the language server indexes **all workspace folders** on open. If you run **OntoCode: Index Workspace** with multiple roots, VS Code may prompt you to pick a folder — automatic indexing still uses every registered root.
 
 **`failed to start language server`**
 
@@ -160,7 +160,7 @@ No — OBO is indexed and syntax-highlighted, but write-back is **Turtle only**.
 
 **How do I open ontology graphs?**
 
-Use **OntoCode: Open Class Graph** (and related commands). See [Graph visualization guide](guides/graph-visualization.md).
+Use **OntoCode: Open Class Graph** (and related commands). See [Graph view](ontocode/graph-view.md).
 
 **Does ROBOT require Java?**
 

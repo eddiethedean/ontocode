@@ -6,15 +6,15 @@ Pick one of two documentation paths, then follow the next step for your task.
 
 | Path | When to use | Start |
 |------|-------------|-------|
-| **VS Code extension** | Browse, edit Turtle, Query Workbench, reasoner panels — no Rust install | [VS Code extension docs](vscode-extension.md) |
+| **VS Code extension** | Browse, edit Turtle, Query Workbench, reasoner panels — no Rust install | [VS Code extension docs](../ontocode/vscode-extension.md) |
 | **Rust & CLI** | `cargo install ontocore-cli`, embed crates, CI validation | [Rust & CLI docs](rust-crates.md) |
 
 New to OWL/RDF vocabulary? Read [Ontology concepts](../concepts.md) first.
 
-## When not to use OntoCode (v0.9)
+## When not to use OntoCode (v0.10)
 
 - You need **full OBO write-back** in the IDE (OBO is index/browse only; edit Turtle or use ROBOT).
-- You rely on **multi-root** VS Code workspaces (only the **first** folder is indexed).
+- Multi-root VS Code workspaces are supported (v0.10+) — all folders are indexed.
 - You need **full SQL** (JOINs, `ORDER BY`, `LIKE`) — use SQL-like virtual tables or SPARQL instead.
 - You need a **plugin host** or owlmake integration (planned v1.0; not installable yet).
 
@@ -26,7 +26,7 @@ Canonical matrix: [What ships today](../SHIPPED.md).
 
 [First success in 10 minutes](first-success.md) — install, sample ontologies, browse, edit `.ttl`.
 
-**Then:** [Install options](../vscode-install.md) · [Authoring guide](../authoring.md) · [Query Workbench](query-workbench.md) · [Reasoner](reasoner.md)
+**Then:** [Install options](../vscode-install.md) · [Authoring guide](../authoring.md) · [Query Workbench](../ontocode/query-workbench.md) · [Reasoner](reasoner.md)
 
 ## Rust & CLI tasks
 
@@ -38,7 +38,7 @@ Canonical matrix: [What ships today](../SHIPPED.md).
 
 | Topic | Link |
 |-------|------|
-| Complex axioms (Manchester) | [Manchester editor guide](manchester-editor.md) |
+| Complex axioms (Manchester) | [Manchester editor](../ontocode/manchester-editor.md) |
 | Workspace refactoring | [Refactoring guide](refactoring.md) |
 | Reasoning (EL / RL / RDFS) | [Reasoner guide](reasoner.md) |
 | Patch JSON | [Patch reference](../patch-reference.md) |

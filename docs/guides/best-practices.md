@@ -6,7 +6,7 @@ Patterns for using OntoCode and OntoCore in daily ontology engineering.
 
 - Keep ontology source files in a dedicated directory (e.g. `ontologies/` or `src/ontology/`)
 - Prefer **Turtle (`.ttl`)** for files you edit in VS Code — write-back is Turtle-only
-- Use a single-root VS Code workspace for the ontology project (multi-root indexes only the **first** folder)
+- Use a single-root VS Code workspace when you want the simplest onboarding (multi-root is supported since v0.10 — all folders are indexed)
 
 ## When to use SQL vs SPARQL vs classify
 

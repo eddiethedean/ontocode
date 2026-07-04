@@ -64,6 +64,27 @@ let result = classify(ReasonerId::El, &input, false)?;
 println!("consistent: {}", result.consistent);
 ```
 
+## Workspace options (v0.10)
+
+```rust
+use ontocore::{Workspace, WorkspaceOptions};
+
+let ws = Workspace::open_with_options(
+    WorkspaceOptions::single("./ontology")
+        .with_disk_cache(true),
+)?;
+ws.reindex_incremental()?;
+let diff = ws.diff_against_path("./baseline")?;
+```
+
+| Option | Purpose |
+|--------|---------|
+| `WorkspaceOptions::single(path)` | Primary workspace root |
+| `with_disk_cache(true)` | Persist parse cache under `.ontocore/cache/` |
+| `reindex_incremental()` | Reuse unchanged documents by content hash |
+
+Semantic diff: `ws.diff()`, `ws.diff_against_path()`, or `ontocore::diff::diff_git_refs` — see [Semantic diff](../ontocode/semantic-diff.md).
+
 ## Error handling
 
 ```bash
@@ -74,8 +95,8 @@ Uses `OntoCoreError` from `ontocore-core` (re-exported as `ontocore::OntoCoreErr
 
 ## API stability
 
-- Crates are at **0.9.x** on crates.io
-- `Workspace` API is experimental until v0.10
+- Crates are at **0.10.x** on crates.io
+- `Workspace` and `WorkspaceOptions` are **stable since v0.10** (pre-1.0 policy still applies to other crates)
 - LSP wire JSON: [LSP API](../lsp-api.md)
 - SQL tables: [SQL reference](../sql-reference.md)
 

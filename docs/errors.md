@@ -1,6 +1,6 @@
 # Errors reference
 
-Unified catalog of error codes, exit behavior, and failure modes for OntoCore **v0.9**.
+Unified catalog of error codes, exit behavior, and failure modes for OntoCore **v0.10**.
 
 ## CLI exit codes
 
@@ -39,7 +39,7 @@ Custom `ontocore/*` method failures return JSON-RPC errors with `data` containin
 | `UNSUPPORTED_FORMAT` | Write-back on non-Turtle file | Save as Turtle (.ttl) for write-back |
 | `INDEX_FAILED` | Indexing failed (parse, limits, I/O) | Check ontology files for parse errors |
 | `QUERY_FAILED` | SQL or SPARQL query failed | Check query syntax and [sql-reference](sql-reference.md) |
-| `MANCHESTER_INVALID` | Manchester expression parse failed | Fix expression; see [Manchester guide](guides/manchester-editor.md) |
+| `MANCHESTER_INVALID` | Manchester expression parse failed | Fix expression; see [Manchester editor](ontocode/manchester-editor.md) |
 | `APPLIED_NOT_INDEXED` | Patch written to buffer/disk but reindex failed | Run Index Workspace; file may already be updated (`recoverable: true`) |
 | `REASONER_FAILED` | `runReasoner` failed (profile, parse, OntoLogos error) | Try another profile or fix ontology axioms |
 | `EXPLANATION_FAILED` | `getExplanation` failed | Run reasoner first or choose another class |

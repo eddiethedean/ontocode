@@ -231,6 +231,29 @@ ontocore refactor extract fixtures \
 
 **Exit (rename / migrate / move / extract):** 0 on success; non-zero on invalid request, path jail violation, or I/O failure. With `--preview`, files are not written.
 
+### `diff`
+
+Semantic catalog diff between git refs, directories, or indexed snapshots. See [Semantic diff guide](ontocode/semantic-diff.md).
+
+```bash
+ontocore diff HEAD..WORKTREE
+ontocore diff --left-ref main --right-ref feature --format markdown
+ontocore diff --left-ref HEAD --right-ref WORKTREE --breaking-only
+ontocore diff --left ./baseline --right ./candidate
+```
+
+| Flag | Description |
+|------|-------------|
+| `GIT_RANGE` | Optional positional range (`main..feature`) |
+| `--left-ref` | Left git ref, directory path, or `WORKSPACE` |
+| `--right-ref` | Right git ref, directory path, or `WORKTREE` |
+| `--repo` | Git repository root (default: current directory) |
+| `--reasoner` | Include reasoner unsatisfiability changes |
+| `--format` | `text` (default), `json`, or `markdown` |
+| `--breaking-only` | Filter to likely breaking changes |
+
+**Exit:** 0 on success; non-zero on git/parse/I/O errors.
+
 ## Related
 
 - [Refactoring guide](guides/refactoring.md)

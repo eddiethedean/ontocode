@@ -2,6 +2,20 @@
 
 **OntoCore** is the semantic workspace engine for ontology development. It lives in the [OntoCode repository](https://github.com/eddiethedean/ontocode) and powers the OntoCode VS Code IDE.
 
+**Current release: v0.10.0** · [crates.io search](https://crates.io/search?q=ontocore)
+
+[![ontocore](https://img.shields.io/badge/ontocore-0.10.0-blue)](https://crates.io/crates/ontocore)
+[![core](https://img.shields.io/badge/core-0.10.0-blue)](https://crates.io/crates/ontocore-core)
+[![parser](https://img.shields.io/badge/parser-0.10.0-blue)](https://crates.io/crates/ontocore-parser)
+[![catalog](https://img.shields.io/badge/catalog-0.10.0-blue)](https://crates.io/crates/ontocore-catalog)
+[![query](https://img.shields.io/badge/query-0.10.0-blue)](https://crates.io/crates/ontocore-query)
+[![cli](https://img.shields.io/badge/cli-0.10.0-blue)](https://crates.io/crates/ontocore-cli)
+[![lsp](https://img.shields.io/badge/lsp-0.10.0-blue)](https://crates.io/crates/ontocore-lsp)
+[![owl](https://img.shields.io/badge/owl-0.10.0-blue)](https://crates.io/crates/ontocore-owl)
+[![reasoner](https://img.shields.io/badge/reasoner-0.10.0-blue)](https://crates.io/crates/ontocore-reasoner)
+[![diff](https://img.shields.io/badge/diff-0.10.0-blue)](https://crates.io/crates/ontocore-diff)
+[![refactor](https://img.shields.io/badge/refactor-0.10.0-blue)](https://crates.io/crates/ontocore-refactor)
+
 OntoCore indexes ontology workspaces on disk and provides:
 
 - Workspace discovery and indexing
@@ -12,6 +26,7 @@ OntoCore indexes ontology workspaces on disk and provides:
 - Refactoring (rename, migrate, move, extract)
 - Reasoning integration via [OntoLogos](https://github.com/eddiethedean/ontologos)
 - Patch write-back for Turtle
+- Semantic diff (git refs, directories, breaking-change heuristics)
 - CLI (`ontocore`) and LSP (`ontocore-lsp`)
 
 ## Relationship to OntoCode and OntoLogos
@@ -36,13 +51,23 @@ let diagnostics = ws.diagnostics();
 let results = ws.query("SELECT short_name FROM classes")?;
 let hits = ws.search("Person")?;
 let graph = ws.import_graph();
+let diff = ws.diff_against_path("./other")?;
 ```
 
 **Stable since v0.10:** `Workspace`, `WorkspaceOptions`, and `ontocore::diff`. Other `ontocore-*` internals remain pre-1.0 until v1.0.
 
+```rust
+use ontocore::{Workspace, WorkspaceOptions};
+
+let ws = Workspace::open_with_options(
+    WorkspaceOptions::single("./ontology").with_disk_cache(true),
+)?;
+ws.reindex_incremental()?;
+```
+
 Lower-level access remains available through `ontocore-*` crates. See [crate map](crate-map.md).
 
-## Compatibility (v0.9+)
+## Compatibility (v0.10+)
 
 All crates, binaries, and LSP methods use **`ontocore`** naming. Upgrading from v0.8? See [migration guide](../migration/v0.9.md).
 

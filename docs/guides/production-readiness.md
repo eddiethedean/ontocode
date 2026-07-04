@@ -8,22 +8,23 @@ Canonical capability matrix: [What ships today](../SHIPPED.md).
 
 | Level | Version | Meaning |
 |-------|---------|---------|
-| **Pre-1.0** | **0.9.x (current)** | Active development. Library APIs, LSP JSON, and SQL virtual table columns may change between minor releases until [v1.0](../design/v1.0_BACKLOG.md). |
-| **Stable CI gates** | 0.9.x | `ontocore validate` and `ontocore classify` exit codes are documented and intended for CI — see [workspace limits](../workspace-limits.md). |
+| **Pre-1.0** | **0.10.x (current)** | Active development. Library APIs, LSP JSON, and SQL virtual table columns may change between minor releases until [v1.0](../design/v1.0_BACKLOG.md). |
+| **Stable CI gates** | 0.10.x | `ontocore validate`, `ontocore classify`, and `ontocore diff` are documented for CI — see [workspace limits](../workspace-limits.md). |
 | **v1.0 target** | Planned | Protégé-competitive OWL 2 DL + OBO in VS Code per [Protégé parity](../design/PROTEGE_PARITY.md). |
 
-OntoCode v0.9 is **not** documented as a general-availability replacement for Protégé or full OWL 2 DL axiom engineering (property chains, full catalog, OBO write-back).
+OntoCode v0.10 is **not** documented as a general-availability replacement for Protégé or full OWL 2 DL axiom engineering (property chains, full catalog, OBO write-back).
 
 ## Approved use cases (pilot or production)
 
-| Use case | v0.9 readiness | Notes |
+| Use case | v0.10 readiness | Notes |
 |----------|----------------|-------|
 | CI lint gate on ontology repos | **Suitable** | `ontocore validate` — [CI integration](../ci-integration.md) |
 | CI consistency gate (EL profile) | **Suitable** | `ontocore classify --profile el` — profile must match ontology |
 | CI consistency gate (DL profile) | **Pilot** | `ontocore classify --profile dl` or `auto` — OntoLogos 1.0.0; verify on your corpus |
 | Developer IDE for Turtle authoring | **Pilot** | Turtle write-back only; pre-1.0 extension APIs |
 | Workspace refactoring (rename, migrate, move, extract) | **Pilot** | Turtle only; preview before apply — [Refactoring guide](refactoring.md) |
-| Git-native ontology browse/query in VS Code | **Pilot** | Local-first; see [enterprise deployment](enterprise-deployment.md) |
+| Semantic diff in PR review | **Pilot** | `ontocore diff` + VS Code panel — [Semantic diff](../ontocode/semantic-diff.md) |
+| Git-native ontology browse/query in VS Code | **Pilot** | Local-first; multi-root supported — [enterprise deployment](enterprise-deployment.md) |
 | Air-gapped VS Code install | **Pilot** | VSIX + SHA256 — [enterprise deployment](enterprise-deployment.md) |
 | OBO index + ROBOT CLI in CI | **Pilot** | Index `.obo`; `ontocore robot validate` — requires Java + `robot` on PATH — [ROBOT interop](robot-interop.md) |
 | Replace Protégé for full OWL 2 DL engineering | **Not supported** | DL classification shipped; full axiom catalog, chains, OBO write-back remain v1.0 — [Protégé coexistence](protege-coexistence.md) |
@@ -46,15 +47,17 @@ Suggested pilot duration: **4–8 weeks** with 3–10 engineers on one ontology 
 
 ## What is stable enough for automation
 
-| Surface | Stability (v0.9) |
-|---------|------------------|
+| Surface | Stability (v0.10) |
+|---------|-------------------|
 | `ontocore validate` exit codes | Documented for CI |
 | `ontocore classify` exit codes | Documented for CI |
+| `ontocore diff` output | Documented for CI; pre-1.0 field names may evolve |
+| `ontocore::Workspace` API | Stable since v0.10; other crates pre-1.0 |
 | SQL virtual table column names | May change pre-1.0 |
 | LSP `ontocore/*` JSON | May change pre-1.0 |
 | Rust `ontocore-*` crate APIs | May change pre-1.0 |
 
-Pin CLI version in CI: release binary with `VERSION=0.9.0` or `cargo install ontocore-cli --locked --version 0.9.0`.
+Pin CLI version in CI: release binary with `VERSION=0.10.0` or `cargo install ontocore-cli --locked --version 0.10.0`.
 
 ## Support and incident response
 
@@ -64,7 +67,7 @@ Pin CLI version in CI: release binary with `VERSION=0.9.0` or `cargo install ont
 | Security reports | [GitHub Security Advisories](https://github.com/eddiethedean/ontocode/security/advisories/new) — not public issues |
 | Acknowledgment target | Within a few business days ([SECURITY.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/SECURITY.md)) |
 | Patch SLA | **No committed SLA** — track [GitHub Security Advisories](https://github.com/eddiethedean/ontocode/security/advisories) for your version |
-| Supported versions | 0.9.x ([security policy](../security.md)) |
+| Supported versions | 0.10.x ([security policy](../security.md)) |
 
 Enterprises requiring contractual SLAs should treat OntoCode as **internal OSS adoption** with your own escalation path to maintainers via GitHub.
 

@@ -85,6 +85,14 @@ else
   echo "ok: no stale VERSION=0.8.0 install pins"
 fi
 
+if rg -q 'VERSION=0\.9\.0' "${STALE_PIN_PATHS[@]}" --glob '!**/changelog.md' --glob '!**/CHANGELOG.md' --glob '!**/migration/**' --glob '!**/design/**' 2>/dev/null; then
+  echo "FAIL: stale VERSION=0.9.0 found outside changelog/migration/design" >&2
+  rg -n 'VERSION=0\.9\.0' "${STALE_PIN_PATHS[@]}" --glob '!**/changelog.md' --glob '!**/CHANGELOG.md' --glob '!**/migration/**' --glob '!**/design/**' 2>/dev/null || true
+  fail=1
+else
+  echo "ok: no stale VERSION=0.9.0 install pins"
+fi
+
 # User-facing docs must not claim 0.7.x is the current release
 USER_FACING_DOCS=(
   docs/faq.md
@@ -114,6 +122,17 @@ for file in "${USER_FACING_DOCS[@]}" docs/guides/protege-decision.md docs/guides
 done
 if [[ "$fail" -eq 0 ]]; then
   echo "ok: no stale 0.8.x current-release claims in user-facing docs"
+fi
+
+# User-facing docs must not claim 0.9.x is the current release
+for file in "${USER_FACING_DOCS[@]}" docs/guides/protege-decision.md docs/guides/production-evidence.md docs/guides/release-timeline.md docs/guides/platform-compatibility.md; do
+  if grep -qE '0\.9\.x \(current\)|0\.9\.0 \| Current|ships in v0\.9\.0|OntoCore v0\.9\.0|OntoCode v0\.9\.0|at \*\*0\.9\.x\*\*|for OntoCode \*\*v0\.9\.0\*\*|OntoCore \*\*v0\.9\.0\*\*' "$file" 2>/dev/null; then
+    echo "FAIL: stale 0.9.x current-release claim in $file" >&2
+    fail=1
+  fi
+done
+if [[ "$fail" -eq 0 ]]; then
+  echo "ok: no stale 0.9.x current-release claims in user-facing docs"
 fi
 
 # Reference status banners must not contradict OntoCore v{N} titles
@@ -158,7 +177,7 @@ else
 fi
 
 # v0.8 docs added in adoption review
-for file in docs/guides/refactoring.md docs/migration/v0.8.md docs/migration/v0.9.md docs/examples/refactoring.md; do
+for file in docs/guides/refactoring.md docs/migration/v0.8.md docs/migration/v0.9.md docs/migration/v0.10.md docs/examples/refactoring.md docs/ontocode/semantic-diff.md; do
   if [[ ! -f "$file" ]]; then
     echo "FAIL: missing required doc $file" >&2
     fail=1
@@ -167,7 +186,34 @@ for file in docs/guides/refactoring.md docs/migration/v0.8.md docs/migration/v0.
   fi
 done
 
-check_file_contains "docs/faq.md" "0\.9\.x" "faq crate version"
+check_file_contains "docs/faq.md" "0\.10\.x" "faq crate version"
+check_file_contains "docs/guides/release-timeline.md" "0\.10\.0.*Current" "release-timeline current version"
+check_file_contains "docs/guides/release-timeline.md" "v0\.10.*Shipped" "release-timeline v0.10 shipped"
+
+# Stale multi-root limitation (v0.10 indexes all folders)
+MULTIROOT_STALE_PATHS=(docs/SHIPPED.md docs/faq.md docs/vscode-install.md docs/guides/first-success.md docs/troubleshooting.md)
+for file in "${MULTIROOT_STALE_PATHS[@]}"; do
+  if grep -qE 'only the \*\*first\*\* folder is indexed|Only the \*\*first\*\* folder is indexed' "$file" 2>/dev/null; then
+    echo "FAIL: stale first-folder-only multi-root claim in $file" >&2
+    fail=1
+  fi
+done
+if [[ "$fail" -eq 0 ]]; then
+  echo "ok: no stale first-folder-only multi-root claims"
+fi
+
+# LSP API must document shipped semanticDiff (not list as unimplemented)
+if grep -q 'getSemanticDiff.*Not implemented\|not implemented yet.*getSemanticDiff\|until that LSP method lands' docs/lsp-api.md 2>/dev/null; then
+  echo "FAIL: docs/lsp-api.md still claims semanticDiff is not implemented" >&2
+  fail=1
+else
+  echo "ok: lsp-api semanticDiff documented"
+fi
+if ! grep -q 'ontocore/semanticDiff' docs/lsp-api.md; then
+  echo "FAIL: docs/lsp-api.md missing ontocore/semanticDiff section" >&2
+  fail=1
+fi
+
 check_file_contains "docs/guides/production-readiness.md" "v${VERSION}" "production-readiness version"
 
 # Stale protege-coexistence version banner

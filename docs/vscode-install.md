@@ -1,6 +1,6 @@
 # Installing OntoCode in VS Code
 
-> **Multi-root workspaces:** Only the **first** folder is indexed. Open your ontology project as a **single-root** folder, or put it first in a multi-root workspace.
+> **Multi-root workspaces (v0.10+):** All workspace folders are indexed on open. **OntoCode: Index Workspace** may prompt you to pick a folder when multiple roots are open.
 
 ## Install matrix
 
@@ -15,14 +15,14 @@ CLI install options (separate from the extension): [getting started (CLI)](getti
 
 ## Option A — VS Code Marketplace (recommended)
 
-1. Install [OntoCode from the Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) (v0.9.0+).
+1. Install [OntoCode from the Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) (v0.10.0+).
 2. **File → Open Folder…** and choose a directory with ontology files.
 3. **Trust** the workspace when prompted.
 4. Open the **OntoCode** activity bar and browse ontologies, classes, properties, individuals, and **Diagnostics**.
 
 For a full walkthrough, see [First success in 10 minutes](guides/first-success.md).
 
-> **Multi-root workspaces:** Only the **first** workspace folder is indexed. Use a single-root folder or open the primary ontology project as the first folder.
+> **Multi-root workspaces (v0.10+):** All workspace folders are indexed on open. **OntoCode: Index Workspace** may prompt you to pick a folder when multiple roots are open.
 
 ## Option B — GitHub Release VSIX (offline / air-gapped)
 
@@ -90,12 +90,12 @@ Indexing runs on workspace open. `ontocode.autoIndexOnOpen` is a legacy setting 
 
 - **OntoCode: Index Workspace** — rebuild catalog
 - **OntoCode: Refresh Explorer** — refresh tree views (including diagnostics)
-- **OntoCode: Open Query Workbench** — SQL and SPARQL against indexed workspace ([guide](guides/query-workbench.md))
-- **OntoCode: Open Manchester Editor** / **Add Manchester Axiom** — complex class expressions ([guide](guides/manchester-editor.md))
+- **OntoCode: Open Query Workbench** — SQL and SPARQL against indexed workspace ([guide](ontocode/query-workbench.md))
+- **OntoCode: Open Manchester Editor** / **Add Manchester Axiom** — complex class expressions ([guide](ontocode/manchester-editor.md))
 - **OntoCode: Run Reasoner** — EL/RL/RDFS classification ([guide](guides/reasoner.md))
 - **OntoCode: Show Explanation** — justification for unsatisfiable class
 - **OntoCode: Set Hierarchy Mode** — asserted / inferred / combined class tree
-- **OntoCode: Open Class Graph** / **Property Graph** / **Import Graph** / **Neighborhood Graph** — visualization ([guide](guides/graph-visualization.md))
+- **OntoCode: Open Class Graph** / **Property Graph** / **Import Graph** / **Neighborhood Graph** — visualization ([guide](ontocode/graph-view.md))
 - **OntoCode: Create Class / Property / Individual** — authoring in `.ttl` files
 - **Problems panel** — inline diagnostics from `ontocore-lsp` after indexing
 - **OntoCode: Show Entity Inspector** / **Jump to Source** — from explorer context menu

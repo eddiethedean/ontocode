@@ -33,7 +33,8 @@ The extension talks to the bundled **OntoCore LSP** (`ontocore-lsp`) — you do 
 | SQL and SPARQL | [Query Workbench](query-workbench.md) |
 | Complex axioms (Manchester) | [Manchester editor](manchester-editor.md) |
 | Class/property/import graphs | [Graph view](graph-view.md) |
-| EL / RL / RDFS classification | [Reasoner](../guides/reasoner.md) |
+| Semantic diff (git / workspace) | [Semantic diff](semantic-diff.md) |
+| EL / RL / RDFS / DL classification | [Reasoner](../guides/reasoner.md) |
 | Working alongside Protégé | [Protégé coexistence](../guides/protege-coexistence.md) |
 
 ## Architecture

@@ -2,7 +2,7 @@
 
 This is the **canonical tutorial** for new OntoCode users. You do not need to clone this repository.
 
-> **Multi-root workspaces:** Only the **first** folder is indexed. Open your ontology project as a **single-root** folder, or put it first in a multi-root workspace.
+> **Multi-root workspaces (v0.10+):** All workspace folders are indexed on open. **OntoCode: Index Workspace** may prompt you to pick a folder when multiple roots are open.
 
 ## What you will do
 
@@ -98,7 +98,7 @@ Guide: [Refactoring](../guides/refactoring.md).
 1. Run **OntoCode: Open Class Graph** from the Command Palette.
 2. Click a node to open the Entity Inspector for that class.
 
-Guide: [Graph visualization](../guides/graph-visualization.md).
+Guide: [Graph view](../ontocode/graph-view.md).
 
 ## 10. (Optional) Validate from the CLI
 
@@ -110,6 +110,14 @@ ontocore validate /path/to/your/ontology/folder
 ```
 
 Use the folder you opened in VS Code (e.g. `ontocode-tutorial`). Exit code **0** means no diagnostic **errors** (warnings are allowed). See [CI integration](../ci-integration.md).
+
+## 11. (Optional) Semantic diff
+
+1. Run **OntoCode: Semantic Diff…** from the Command Palette.
+2. Compare `HEAD` vs `WORKTREE` (or your branch refs).
+3. Review added, removed, and breaking changes in the panel.
+
+Guide: [Semantic diff](../ontocode/semantic-diff.md).
 
 ## Troubleshooting
 
@@ -127,11 +135,12 @@ More help: [Troubleshooting](../troubleshooting.md) · [FAQ](../faq.md).
 | Goal | Document |
 |------|----------|
 | Install options (VSIX, offline) | [vscode-install.md](../vscode-install.md) |
-| Query workbench | [guides/query-workbench.md](../guides/query-workbench.md) |
-| Graph visualization | [guides/graph-visualization.md](../guides/graph-visualization.md) |
+| Query workbench | [ontocode/query-workbench.md](../ontocode/query-workbench.md) |
+| Graph visualization | [ontocode/graph-view.md](../ontocode/graph-view.md) |
 | OBO workflows | [guides/obo-workflow.md](../guides/obo-workflow.md) |
 | Reasoner | [guides/reasoner.md](../guides/reasoner.md) |
-| Manchester editor | [guides/manchester-editor.md](../guides/manchester-editor.md) |
+| Manchester editor | [ontocode/manchester-editor.md](../ontocode/manchester-editor.md) |
+| Semantic diff | [ontocode/semantic-diff.md](../ontocode/semantic-diff.md) |
 | Refactoring | [guides/refactoring.md](../guides/refactoring.md) |
 | Patch JSON automation | [patch-reference.md](../patch-reference.md) |
 | SQL / SPARQL reference | [sql-reference.md](../sql-reference.md) · [sparql-reference.md](../sparql-reference.md) |

@@ -250,6 +250,7 @@ export class RefactorPreviewPanel {
             void vscode.window.showWarningMessage(
               "OntoCode: refactor wrote to disk but editor sync was cancelled"
             );
+            return;
           }
         }
         if (result.reindex_warning) {

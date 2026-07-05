@@ -5,6 +5,7 @@ import {
   getEntity,
   indexWorkspace,
 } from "../lsp/client";
+import { patchFailureMessage } from "../lsp/patchFeedback";
 import { PatchEntityKind, PatchOp } from "../lsp/protocol";
 import { EntityInspectorPanel } from "../webviews/inspector";
 import { GraphPanel } from "../webviews/graphPanel";
@@ -197,11 +198,15 @@ export function registerCommands(
           void vscode.window.showErrorMessage("Entity is not in an editable Turtle file");
           return;
         }
-        await applyAxiomPatch({
+        const result = await applyAxiomPatch({
           document_uri: vscode.Uri.file(detail.document_path).toString(),
           patches: [{ op: "delete_entity", entity_iri: iri }],
           preview_only: false,
         });
+        if (!result.applied) {
+          void vscode.window.showErrorMessage(patchFailureMessage(result));
+          return;
+        }
         await refreshExplorer(providers);
         void vscode.window.showInformationMessage("Entity deleted");
       } catch (err) {
@@ -559,11 +564,15 @@ async function createEntity(
     { op: "add_label", entity_iri, value: localName.trim() },
   ];
   try {
-    await applyAxiomPatch({
+    const result = await applyAxiomPatch({
       document_uri: vscode.Uri.file(docPick.path).toString(),
       patches,
       preview_only: false,
     });
+    if (!result.applied) {
+      void vscode.window.showErrorMessage(patchFailureMessage(result));
+      return;
+    }
     await refreshExplorer(providers);
     await openInspector(
       context.extensionUri,

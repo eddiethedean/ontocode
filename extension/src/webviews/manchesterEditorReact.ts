@@ -4,6 +4,10 @@ import {
   getEntity,
   parseManchester,
 } from "../lsp/client";
+import {
+  hasPatchFailureDiagnostics,
+  patchFailureMessage,
+} from "../lsp/patchFeedback";
 import { PanelHost } from "./panelHost";
 import type { WebviewMessage } from "./messages";
 import {
@@ -194,23 +198,27 @@ export class ManchesterEditorPanel {
         patches,
         preview_only: previewOnly,
       });
-      if (previewOnly && result.preview_text) {
-        this.host.postMessage({ type: "preview", text: result.preview_text });
+      if (previewOnly) {
+        if (hasPatchFailureDiagnostics(result)) {
+          void vscode.window.showErrorMessage(patchFailureMessage(result));
+          return;
+        }
+        if (result.preview_text) {
+          this.host.postMessage({ type: "preview", text: result.preview_text });
+        }
         return;
       }
-      if (!previewOnly && result.applied) {
-        if (this.options.onRefresh) {
-          await this.options.onRefresh();
-        }
-        this.options.initialExpression = expression;
-        void vscode.window.showInformationMessage(
-          "OntoCode: Manchester axiom applied"
-        );
-      } else if (!previewOnly && !result.applied) {
-        void vscode.window.showWarningMessage(
-          "OntoCode: Manchester patch was not applied (see diagnostics)"
-        );
+      if (!result.applied) {
+        void vscode.window.showErrorMessage(patchFailureMessage(result));
+        return;
       }
+      if (this.options.onRefresh) {
+        await this.options.onRefresh();
+      }
+      this.options.initialExpression = expression;
+      void vscode.window.showInformationMessage(
+        "OntoCode: Manchester axiom applied"
+      );
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       void vscode.window.showErrorMessage(`OntoCode: ${message}`);

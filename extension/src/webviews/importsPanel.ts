@@ -1,6 +1,10 @@
 import * as path from "path";
 import * as vscode from "vscode";
 import { applyAxiomPatch, getCatalogSnapshot } from "../lsp/client";
+import {
+  hasPatchFailureDiagnostics,
+  patchFailureMessage,
+} from "../lsp/patchFeedback";
 import { OntologyDocument, PatchOp } from "../lsp/protocol";
 import { documentUriInWorkspace } from "../utils/workspacePath";
 import { PanelHost } from "./panelHost";
@@ -135,28 +139,36 @@ export class ImportsPanel {
         patches,
         preview_only: previewOnly,
       });
-      if (previewOnly && result.preview_text) {
-        this.host.postMessage({ type: "preview", text: result.preview_text });
+      if (previewOnly) {
+        if (hasPatchFailureDiagnostics(result)) {
+          void vscode.window.showErrorMessage(patchFailureMessage(result));
+          return;
+        }
+        if (result.preview_text) {
+          this.host.postMessage({ type: "preview", text: result.preview_text });
+        }
         return;
       }
-      if (!previewOnly) {
-        if (result.reindex_warning) {
-          void vscode.window.showWarningMessage(
-            `OntoCode: changes saved but reindex failed — ${result.reindex_warning}`
-          );
-        }
-        void vscode.window.showInformationMessage("OntoCode: imports updated");
-        if (this.onRefresh) {
-          await this.onRefresh();
-        }
-        const snapshot = await getCatalogSnapshot();
-        const doc = snapshot.documents.find((d) => d.path === this.filePath);
-        if (doc) {
-          this.host.postMessage({
-            type: "loadImports",
-            payload: buildPayload(doc, snapshot.documents),
-          });
-        }
+      if (!result.applied) {
+        void vscode.window.showErrorMessage(patchFailureMessage(result));
+        return;
+      }
+      if (result.reindex_warning) {
+        void vscode.window.showWarningMessage(
+          `OntoCode: changes saved but reindex failed — ${result.reindex_warning}`
+        );
+      }
+      void vscode.window.showInformationMessage("OntoCode: imports updated");
+      if (this.onRefresh) {
+        await this.onRefresh();
+      }
+      const snapshot = await getCatalogSnapshot();
+      const doc = snapshot.documents.find((d) => d.path === this.filePath);
+      if (doc) {
+        this.host.postMessage({
+          type: "loadImports",
+          payload: buildPayload(doc, snapshot.documents),
+        });
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);

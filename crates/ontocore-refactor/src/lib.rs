@@ -13,6 +13,7 @@ mod usages;
 pub use apply::{
     apply_refactor_plan, apply_refactor_plan_checked, apply_refactor_plan_checked_with_overrides,
     plan_touches_path, plans_equivalent, validate_refactor_plan_paths,
+    validate_refactor_plan_paths_any,
 };
 pub use error::{RefactorError, Result};
 pub use model::{FileChange, Hunk, RefactorPlan, RefactorRequest, Usage, UsageKind};

@@ -1,20 +1,29 @@
 use crate::error::{RefactorError, Result};
 use crate::model::{FileChange, RefactorPlan};
 use ontocore_core::{
-    canonical_workspace_root, read_to_string_capped, validate_workspace_scope, MAX_FILE_BYTES,
+    canonical_workspace_root, read_to_string_capped, validate_workspace_scope_any, MAX_FILE_BYTES,
 };
 use std::fs;
 use std::io::Write;
 use std::path::{Path, PathBuf};
 use std::time::{SystemTime, UNIX_EPOCH};
 
+/// Validate every path in a refactor plan is within at least one workspace root.
+pub fn validate_refactor_plan_paths_any(
+    workspace_roots: &[PathBuf],
+    plan: &RefactorPlan,
+) -> Result<()> {
+    for change in &plan.changes {
+        validate_workspace_scope_any(&change.path, workspace_roots)
+            .map_err(RefactorError::Invalid)?;
+    }
+    Ok(())
+}
+
 /// Validate every path in a refactor plan is within the workspace jail.
 pub fn validate_refactor_plan_paths(workspace_root: &Path, plan: &RefactorPlan) -> Result<()> {
     let root = canonical_workspace_root(workspace_root).map_err(RefactorError::Invalid)?;
-    for change in &plan.changes {
-        validate_workspace_scope(&change.path, &root).map_err(RefactorError::Invalid)?;
-    }
-    Ok(())
+    validate_refactor_plan_paths_any(std::slice::from_ref(&root), plan)
 }
 
 /// Returns true when client-submitted plan matches a server re-preview byte-for-byte.
@@ -109,27 +118,28 @@ pub fn apply_refactor_plan(
     preview_only: bool,
     workspace_root: &Path,
 ) -> Result<()> {
-    apply_refactor_plan_checked(plan, preview_only, Some(workspace_root)).map(|_| ())
+    let root = canonical_workspace_root(workspace_root).map_err(RefactorError::Invalid)?;
+    apply_refactor_plan_checked(plan, preview_only, Some(std::slice::from_ref(&root))).map(|_| ())
 }
 
 /// Apply plan and return count of files written.
 pub fn apply_refactor_plan_checked(
     plan: &RefactorPlan,
     preview_only: bool,
-    workspace_root: Option<&Path>,
+    workspace_roots: Option<&[PathBuf]>,
 ) -> Result<usize> {
-    apply_refactor_plan_checked_with_overrides(plan, preview_only, workspace_root, None)
+    apply_refactor_plan_checked_with_overrides(plan, preview_only, workspace_roots, None)
 }
 
 /// Apply plan with optional open-buffer overrides used for compare-and-swap.
 pub fn apply_refactor_plan_checked_with_overrides(
     plan: &RefactorPlan,
     preview_only: bool,
-    workspace_root: Option<&Path>,
+    workspace_roots: Option<&[PathBuf]>,
     document_overrides: Option<&std::collections::HashMap<PathBuf, String>>,
 ) -> Result<usize> {
-    if let Some(root) = workspace_root {
-        validate_refactor_plan_paths(root, plan)?;
+    if let Some(roots) = workspace_roots {
+        validate_refactor_plan_paths_any(roots, plan)?;
     }
     if preview_only {
         return Ok(0);

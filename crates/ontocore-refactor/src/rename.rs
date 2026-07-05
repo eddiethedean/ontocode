@@ -3,7 +3,7 @@ use crate::model::{FileChange, Hunk, RefactorPlan};
 use crate::source::read_source_text;
 use crate::text::{normalize_namespace_base, remap_iri, replace_iri_in_text};
 use ontocore_catalog::OntologyCatalog;
-use ontocore_core::{EntityKind, OntologyFormat, ParseStatus};
+use ontocore_core::{validate_workspace_scope_any, EntityKind, OntologyFormat, ParseStatus};
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 use std::path::{Path, PathBuf};
 
@@ -253,12 +253,12 @@ struct EntityRemoval {
 }
 
 /// Preview a refactor. Client-supplied paths (`target_file` / `output_file`) are jailed under
-/// `workspace_root` **before** any filesystem read.
+/// `workspace_roots` **before** any filesystem read.
 pub fn preview_refactor(
     catalog: &OntologyCatalog,
     request: &crate::model::RefactorRequest,
     document_overrides: &HashMap<PathBuf, String>,
-    workspace_root: &Path,
+    workspace_roots: &[PathBuf],
 ) -> Result<RefactorPlan> {
     match request {
         crate::model::RefactorRequest::RenameIri { from_iri, to_iri } => {
@@ -273,7 +273,7 @@ pub fn preview_refactor(
                 entity_iri,
                 target_file,
                 document_overrides,
-                workspace_root,
+                workspace_roots,
             )
         }
         crate::model::RefactorRequest::ExtractModule { entity_iris, output_file, leave_stub } => {
@@ -283,15 +283,14 @@ pub fn preview_refactor(
                 output_file,
                 *leave_stub,
                 document_overrides,
-                workspace_root,
+                workspace_roots,
             )
         }
     }
 }
 
-fn require_path_in_workspace(path: &Path, workspace_root: &Path) -> Result<()> {
-    ontocore_core::validate_workspace_scope(path, workspace_root)
-        .map_err(RefactorError::Invalid)?;
+fn require_path_in_workspace(path: &Path, workspace_roots: &[PathBuf]) -> Result<()> {
+    validate_workspace_scope_any(path, workspace_roots).map_err(RefactorError::Invalid)?;
     Ok(())
 }
 
@@ -304,10 +303,10 @@ pub fn preview_move_entity(
     entity_iri: &str,
     target_file: &Path,
     document_overrides: &HashMap<PathBuf, String>,
-    workspace_root: &Path,
+    workspace_roots: &[PathBuf],
 ) -> Result<RefactorPlan> {
     // Jail before any filesystem read of the client-supplied path.
-    require_path_in_workspace(target_file, workspace_root)?;
+    require_path_in_workspace(target_file, workspace_roots)?;
     catalog
         .find_entity(entity_iri)
         .ok_or_else(|| RefactorError::EntityNotFound(entity_iri.to_string()))?;
@@ -395,10 +394,10 @@ pub fn preview_extract_module(
     output_file: &Path,
     leave_stub: bool,
     document_overrides: &HashMap<PathBuf, String>,
-    workspace_root: &Path,
+    workspace_roots: &[PathBuf],
 ) -> Result<RefactorPlan> {
     // Jail before any filesystem read of the client-supplied path.
-    require_path_in_workspace(output_file, workspace_root)?;
+    require_path_in_workspace(output_file, workspace_roots)?;
     if entity_iris.is_empty() {
         return Err(RefactorError::Invalid("no entities selected".to_string()));
     }

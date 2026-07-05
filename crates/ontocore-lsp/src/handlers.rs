@@ -985,13 +985,12 @@ pub fn handle_preview_refactor(
     params: PreviewRefactorParams,
 ) -> Result<PreviewRefactorResult, LspErrorPayload> {
     let roots = state.workspace_roots();
-    let workspace = roots
-        .first()
-        .cloned()
-        .ok_or_else(|| LspErrorPayload::refactor_failed("workspace not initialized".to_string()))?;
+    if roots.is_empty() {
+        return Err(LspErrorPayload::refactor_failed("workspace not initialized".to_string()));
+    }
     state
         .with_catalog_and_overrides(|catalog, overrides| {
-            let plan = preview_refactor(catalog, &params.request, overrides, &workspace)
+            let plan = preview_refactor(catalog, &params.request, overrides, &roots)
                 .map_err(|e| LspErrorPayload::refactor_failed(e.to_string()))?;
             validate_refactor_plan_any_roots(&roots, &plan)
                 .map_err(LspErrorPayload::refactor_failed)?;
@@ -1006,10 +1005,9 @@ pub fn handle_apply_refactor(
     params: ApplyRefactorParams,
 ) -> Result<ApplyRefactorResult, LspErrorPayload> {
     let roots = state.workspace_roots();
-    let workspace = roots
-        .first()
-        .cloned()
-        .ok_or_else(|| LspErrorPayload::refactor_failed("workspace not initialized".to_string()))?;
+    if roots.is_empty() {
+        return Err(LspErrorPayload::refactor_failed("workspace not initialized".to_string()));
+    }
 
     let (files_written, server_plan) = {
         let ops_lock = state.ops_lock();
@@ -1018,7 +1016,7 @@ pub fn handle_apply_refactor(
 
         let server_plan = state
             .with_catalog_and_overrides(|catalog, overrides| {
-                let plan = preview_refactor(catalog, &params.request, overrides, &workspace)
+                let plan = preview_refactor(catalog, &params.request, overrides, &roots)
                     .map_err(|e| LspErrorPayload::refactor_failed(e.to_string()))?;
                 validate_refactor_plan_any_roots(&roots, &plan)
                     .map_err(LspErrorPayload::refactor_failed)?;
@@ -1036,7 +1034,7 @@ pub fn handle_apply_refactor(
         let files_written = apply_refactor_plan_checked_with_overrides(
             &server_plan,
             params.preview_only,
-            Some(workspace.as_path()),
+            Some(&roots),
             Some(&overrides),
         )
         .map_err(|e| LspErrorPayload::refactor_failed(e.to_string()))?;

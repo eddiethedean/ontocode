@@ -1,7 +1,8 @@
 //! Documentation export for indexed ontology workspaces.
 
-use minijinja::{context, Environment};
+use minijinja::{context, AutoEscape, Environment};
 use ontocore_catalog::OntologyCatalog;
+use ontocore_core::{document_matches_entity, document_matches_ontology_id};
 use std::collections::BTreeMap;
 use std::fs;
 use std::path::PathBuf;
@@ -71,13 +72,13 @@ pub fn export_workspace(catalog: &OntologyCatalog, options: ExportOptions) -> Re
 
     for doc in &catalog.data().documents {
         if let Some(filter) = &options.ontology_id {
-            if &doc.id != filter && doc.base_iri.as_deref() != Some(filter.as_str()) {
+            if !document_matches_ontology_id(filter, doc) {
                 continue;
             }
         }
         let mut entities = Vec::new();
         for entity in &catalog.data().entities {
-            if entity.ontology_id != doc.id {
+            if !document_matches_entity(entity, doc) {
                 continue;
             }
             let parents = hierarchy.parents.get(&entity.iri).cloned().unwrap_or_default();
@@ -191,6 +192,13 @@ fn render_ontology(ont: &OntologyDoc, format: ExportFormat) -> Result<String> {
 
 fn html_env() -> Result<Environment<'static>> {
     let mut env = Environment::new();
+    env.set_auto_escape_callback(|name| {
+        if name.ends_with(".html") {
+            AutoEscape::Html
+        } else {
+            AutoEscape::None
+        }
+    });
     env.add_template(
         "index.html",
         r#"<!DOCTYPE html>
@@ -242,5 +250,68 @@ mod tests {
         let dir = tempfile::tempdir().unwrap();
         export_workspace(&catalog, ExportOptions::markdown(dir.path())).expect("export");
         assert!(dir.path().join("index.md").exists());
+    }
+
+    #[test]
+    fn exports_entities_for_owl_ontology_declarations() {
+        let fixtures = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../fixtures");
+        let catalog = IndexBuilder::new().workspace(&fixtures).build().expect("index");
+        let example = catalog
+            .data()
+            .documents
+            .iter()
+            .find(|d| d.path.file_name().and_then(|n| n.to_str()) == Some("example.ttl"))
+            .expect("example.ttl indexed");
+        let entity_count = catalog
+            .data()
+            .entities
+            .iter()
+            .filter(|e| document_matches_entity(e, example))
+            .count();
+        assert!(
+            entity_count > 0,
+            "fixture entities should match example.ttl via ontology IRI"
+        );
+
+        let dir = tempfile::tempdir().unwrap();
+        export_workspace(&catalog, ExportOptions::markdown(dir.path())).expect("export");
+        let index = fs::read_to_string(dir.path().join("index.md")).expect("index.md");
+        let doc_slug = slugify(&example.id);
+        let detail_path = dir.path().join(format!("{doc_slug}.md"));
+        assert!(detail_path.exists(), "expected per-ontology export file");
+        let detail = fs::read_to_string(detail_path).expect("ontology markdown");
+        assert!(
+            detail.contains("## Entities"),
+            "ontology page should list entities"
+        );
+        assert!(
+            !detail.contains("## Entities\n\n\n#"),
+            "entity section should not be empty"
+        );
+        assert!(
+            index.contains(&format!("{entity_count} entities")),
+            "index should report exported entity count for example.ttl"
+        );
+    }
+
+    #[test]
+    fn html_export_escapes_entity_labels() {
+        let ont = OntologyDoc {
+            id: "http://example.org/ex".to_string(),
+            slug: "ex".to_string(),
+            path: "evil.ttl".to_string(),
+            imports: vec![],
+            entities: vec![EntityDoc {
+                iri: "http://example.org/ex#Evil".to_string(),
+                short_name: "Evil".to_string(),
+                kind: "class".to_string(),
+                labels: vec!["<img src=x onerror=alert(1)>".to_string()],
+                comments: vec![],
+                parents: vec![],
+            }],
+        };
+        let html = render_ontology(&ont, ExportFormat::Html).expect("render html");
+        assert!(html.contains("&lt;img"));
+        assert!(!html.contains("<img src=x onerror=alert(1)>"));
     }
 }

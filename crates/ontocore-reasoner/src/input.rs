@@ -68,7 +68,7 @@ impl WorkspaceInputLoader {
                 // Hash override body so open-buffer edits invalidate the reasoner cache.
                 hasher.update(file.path.to_string_lossy().as_bytes());
                 hasher.update(text.as_bytes());
-                load_workspace_file(&file.path, file.format, Some(text), &file)?
+                load_workspace_file(&file.path, file.format, Some(text), file)?
             } else {
                 hasher.update(file.content_hash.as_bytes());
                 load_workspace_file(&file.path, file.format, None, file)?
@@ -143,10 +143,8 @@ fn load_workspace_file(
     if let Some(text) = override_text {
         return load_ontology_from_temp(path, text);
     }
-    load_ontology(path).map_err(|e| ReasonerError::Load {
-        path: path.to_path_buf(),
-        message: e.to_string(),
-    })
+    load_ontology(path)
+        .map_err(|e| ReasonerError::Load { path: path.to_path_buf(), message: e.to_string() })
 }
 
 fn load_obo_as_ontology(
@@ -174,10 +172,8 @@ fn load_obo_as_ontology(
         });
     }
 
-    let turtle = serialize_quads_turtle(parsed.quads()).map_err(|e| ReasonerError::Load {
-        path: path.to_path_buf(),
-        message: e.to_string(),
-    })?;
+    let turtle = serialize_quads_turtle(parsed.quads())
+        .map_err(|e| ReasonerError::Load { path: path.to_path_buf(), message: e.to_string() })?;
     load_ontology_from_temp_with_suffix(path, &turtle, "ttl")
 }
 

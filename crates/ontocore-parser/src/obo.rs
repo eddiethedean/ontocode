@@ -170,9 +170,8 @@ pub fn parse_obo_file(
     _content_hash: &str,
     _modified_time: u64,
 ) -> Result<ParsedOntology> {
-    let content = read_to_string_capped(path, MAX_FILE_BYTES).map_err(|e| {
-        ParseError::LimitExceeded(format!("{}: {e}", path.display()))
-    })?;
+    let content = read_to_string_capped(path, MAX_FILE_BYTES)
+        .map_err(|e| ParseError::LimitExceeded(format!("{}: {e}", path.display())))?;
     parse_obo_text(path, ontology_id, &content)
 }
 
@@ -212,15 +211,16 @@ synonym: \"narrow syn\" NARROW []\n\
 synonym: \"related syn\" RELATED []\n\
 def: \"A definition.\" []\n";
         let parsed = parse_obo_text(Path::new("syn.obo"), "doc-1", text).unwrap();
-        let predicates: std::collections::BTreeSet<_> = parsed
-            .quads()
-            .iter()
-            .map(|q| q.predicate.as_str().to_string())
-            .collect();
+        let predicates: std::collections::BTreeSet<_> =
+            parsed.quads().iter().map(|q| q.predicate.as_str().to_string()).collect();
         assert!(predicates.contains("http://www.geneontology.org/formats/oboInOwl#hasExactSynonym"));
         assert!(predicates.contains("http://www.geneontology.org/formats/oboInOwl#hasBroadSynonym"));
-        assert!(predicates.contains("http://www.geneontology.org/formats/oboInOwl#hasNarrowSynonym"));
-        assert!(predicates.contains("http://www.geneontology.org/formats/oboInOwl#hasRelatedSynonym"));
+        assert!(
+            predicates.contains("http://www.geneontology.org/formats/oboInOwl#hasNarrowSynonym")
+        );
+        assert!(
+            predicates.contains("http://www.geneontology.org/formats/oboInOwl#hasRelatedSynonym")
+        );
         assert!(predicates.contains("http://purl.obolibrary.org/obo/IAO_0000115"));
     }
 

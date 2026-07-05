@@ -11,5 +11,7 @@ mod rdf;
 mod vocab;
 
 pub use obo::{parse_obo_file, parse_obo_text};
-pub use rdf::{parse_ontology_file, parse_ontology_text, serialize_quads_turtle, ParseError, ParsedOntology};
+pub use rdf::{
+    parse_ontology_file, parse_ontology_text, serialize_quads_turtle, ParseError, ParsedOntology,
+};
 pub use vocab::OWL;

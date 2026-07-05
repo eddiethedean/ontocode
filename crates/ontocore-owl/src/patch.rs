@@ -410,11 +410,17 @@ fn remove_predicate_triples(
     predicate: &str,
     namespaces: &BTreeMap<String, String>,
 ) -> Result<()> {
-    let range = entity_primary_range(text, entity_iri, namespaces)?;
-    let block = &text[range.start as usize..range.end as usize];
-    let new_block = remove_all_predicate_objects(block, predicate);
-    replace_range(text, range, &new_block);
-    Ok(())
+    remove_all_predicate_any_statement(text, entity_iri, predicate, namespaces)
+}
+
+fn remove_predicate_object(
+    text: &mut String,
+    entity_iri: &str,
+    predicate: &str,
+    object_value: &str,
+    namespaces: &BTreeMap<String, String>,
+) -> Result<()> {
+    remove_predicate_object_any_statement(text, entity_iri, predicate, object_value, namespaces)
 }
 
 fn remove_matching_predicate_any(
@@ -464,14 +470,28 @@ fn insert_into_entity_block(
     insertion: &str,
     namespaces: &BTreeMap<String, String>,
 ) -> Result<()> {
-    let range = entity_primary_range(text, entity_iri, namespaces)?;
-    let block = &text[range.start as usize..range.end as usize];
     let insertion_key = insertion.trim().trim_end_matches(';').trim();
-    if !insertion_key.is_empty() && block.contains(insertion_key) {
+    if !insertion_key.is_empty()
+        && entity_any_block_contains(text, entity_iri, insertion_key, namespaces)
+    {
         return Ok(());
     }
     // Same single-path insertion as multiline axioms (no double-insert).
     insert_multiline_into_entity_block(text, entity_iri, insertion, namespaces)
+}
+
+fn entity_any_block_contains(
+    text: &str,
+    entity_iri: &str,
+    needle: &str,
+    namespaces: &BTreeMap<String, String>,
+) -> bool {
+    let ns = crate::span::namespaces_for_text(text, namespaces);
+    let short = short_name_from_iri(entity_iri);
+    all_entity_statement_ranges(text, entity_iri, &short, &ns).into_iter().any(|range| {
+        let block = &text[range.start as usize..range.end as usize];
+        block.contains(needle)
+    })
 }
 
 fn replace_range(text: &mut String, range: ByteRange, replacement: &str) {
@@ -775,21 +795,6 @@ fn find_named_object_end(block: &str, obj_start: usize) -> Option<usize> {
     Some(block.len())
 }
 
-fn remove_predicate_object(
-    text: &mut String,
-    entity_iri: &str,
-    predicate: &str,
-    object_value: &str,
-    namespaces: &BTreeMap<String, String>,
-) -> Result<()> {
-    let range = entity_primary_range(text, entity_iri, namespaces)?;
-    let block = &text[range.start as usize..range.end as usize];
-    let new_block = remove_matching_predicate_object(block, predicate, object_value)
-        .ok_or_else(|| OwlError::ManchesterInvalid(format!("no matching {predicate} axiom")))?;
-    replace_range(text, range, &new_block);
-    Ok(())
-}
-
 fn objects_in_predicate_value(
     block: &str,
     pred_pos: usize,
@@ -1004,6 +1009,64 @@ mod tests {
         assert!(!preview.contains("rdfs:subClassOf."));
         assert!(!preview.contains("rdfs:subClassOf ;"));
         assert!(!preview.contains("ex:Person rdfs:subClassOf"));
+    }
+
+    #[test]
+    fn add_subclass_of_no_duplicate_when_trailing_triple_exists() {
+        let ttl = include_str!("../../../fixtures/example.ttl");
+        let patches = vec![PatchOp::AddSubClassOf {
+            entity_iri: "http://example.org/people#Person".to_string(),
+            parent_iri: "http://example.org/people#Thing".to_string(),
+        }];
+        let result = apply_patches_to_text(ttl, &patches, true, &ex_ns()).expect("patch");
+        assert!(
+            result.preview_text.is_none(),
+            "must not duplicate subclass axiom already present as trailing triple"
+        );
+    }
+
+    #[test]
+    fn remove_import_from_trailing_triple() {
+        let ttl = r#"@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+<http://example.org/people> a owl:Ontology .
+<http://example.org/people> owl:imports <http://example.org/other> .
+"#;
+        let ns = ex_ns();
+        let result = apply_patches_to_text(
+            ttl,
+            &[PatchOp::RemoveImport {
+                ontology_iri: "http://example.org/people".to_string(),
+                import_iri: "http://example.org/other".to_string(),
+            }],
+            true,
+            &ns,
+        )
+        .expect("remove trailing import");
+        let preview = result.preview_text.expect("preview");
+        assert!(!preview.contains("owl:imports"));
+    }
+
+    #[test]
+    fn set_deprecated_false_removes_trailing_flag() {
+        let ttl = r#"@prefix ex: <http://example.org/people#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+ex:Person a owl:Class .
+ex:Person owl:deprecated true .
+"#;
+        let result = apply_patches_to_text(
+            ttl,
+            &[PatchOp::SetDeprecated {
+                entity_iri: "http://example.org/people#Person".to_string(),
+                value: false,
+            }],
+            true,
+            &ex_ns(),
+        )
+        .expect("clear deprecated");
+        let preview = result.preview_text.expect("preview");
+        assert!(!preview.contains("owl:deprecated"));
     }
 
     #[test]

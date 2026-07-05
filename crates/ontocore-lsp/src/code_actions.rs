@@ -1,6 +1,6 @@
 //! `textDocument/codeAction` from diagnostic quick fixes.
 
-use crate::state::ServerState;
+use crate::state::{path_to_uri, ServerState};
 use lsp_types::{
     CodeAction, CodeActionKind, CodeActionOrCommand, CodeActionParams, Range, TextEdit, Uri,
     WorkspaceEdit,
@@ -95,6 +95,9 @@ fn quick_fix_to_action(
             }
             let doc_path = PathBuf::from(document_path);
             let result = apply_patches_to_text(content, &patch_ops, true, namespaces).ok()?;
+            if !result.diagnostics.is_empty() {
+                return None;
+            }
             let new_text = result.preview_text?;
             Some(code_action_with_edit(
                 label,
@@ -119,15 +122,13 @@ fn full_document_edit(old: &str, new_text: &str) -> TextEdit {
 }
 
 fn code_action_with_edit(label: &str, path: &Path, edits: Vec<TextEdit>) -> CodeAction {
+    let uri = Uri::from_str(&path_to_uri(path))
+        .unwrap_or_else(|_| Uri::from_str("file:///").expect("file uri"));
     CodeAction {
         title: label.to_string(),
         kind: Some(CodeActionKind::QUICKFIX),
         edit: Some(WorkspaceEdit {
-            changes: Some(std::collections::HashMap::from([(
-                Uri::from_str(&format!("file://{}", path.display()))
-                    .unwrap_or_else(|_| Uri::from_str("file:///").expect("file uri")),
-                edits,
-            )])),
+            changes: Some(std::collections::HashMap::from([(uri, edits)])),
             ..Default::default()
         }),
         ..Default::default()
@@ -137,6 +138,7 @@ fn code_action_with_edit(label: &str, path: &Path, edits: Vec<TextEdit>) -> Code
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::state::path_to_uri;
     use ontocore_core::QuickFix;
     use std::collections::BTreeMap;
     use std::path::PathBuf;
@@ -154,5 +156,49 @@ mod tests {
         let action = quick_fix_to_action(&fix, &path, content, &BTreeMap::new()).expect("action");
         assert_eq!(action.title, "Declare @prefix ex:");
         assert!(action.edit.is_some());
+    }
+
+    #[test]
+    fn code_action_uri_uses_path_to_uri() {
+        let path = PathBuf::from("/tmp/my ontologies/live.ttl");
+        let content = "ex:Bad a owl:Class .\n";
+        let fix = QuickFix::InsertText {
+            label: "fix".to_string(),
+            line: 1,
+            column: 1,
+            text: "@prefix ex: <http://example.org/ex#> .\n".to_string(),
+        };
+        let action = quick_fix_to_action(&fix, &path, content, &BTreeMap::new()).expect("action");
+        let uri = action
+            .edit
+            .expect("edit")
+            .changes
+            .expect("changes")
+            .keys()
+            .next()
+            .expect("uri")
+            .to_string();
+        assert_eq!(uri, path_to_uri(&path));
+    }
+
+    #[test]
+    fn apply_patch_quick_fix_skipped_when_patch_has_diagnostics() {
+        let path = PathBuf::from("/tmp/live.ttl");
+        let content = "@prefix ex: <http://example.org/ex#> .\n\nex:Bad a owl:Class .\n";
+        let fix = QuickFix::ApplyPatch {
+            label: "Add rdfs:label \"Ghost\"".to_string(),
+            document_path: path.display().to_string(),
+            patches: vec![serde_json::json!({
+                "op": "add_label",
+                "entity_iri": "http://example.org/ex#Ghost",
+                "value": "Ghost",
+            })],
+        };
+        let mut namespaces = BTreeMap::new();
+        namespaces.insert("ex".to_string(), "http://example.org/ex#".to_string());
+        assert!(
+            quick_fix_to_action(&fix, &path, content, &namespaces).is_none(),
+            "missing entity patch must not produce a no-op code action"
+        );
     }
 }

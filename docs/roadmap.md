@@ -46,7 +46,14 @@ After 1.0, the roadmap shifts from parity to modernization.
 - Stable `ontocore::Workspace` API
 - Semantic diff (CLI, LSP, VS Code panel)
 
-## v0.11 — Platform consolidation
+## v0.11 — Editor depth & distribution
+
+- Open VSX publishing (Cursor marketplace)
+- LSP `textDocument/completion` for Turtle
+- Diagnostic quick fixes via `textDocument/codeAction`
+- `ontocore docs` documentation export (Markdown / HTML)
+- Turtle imports management UI + `add_import` / `remove_import` patch ops
+- OBO `fastobo` read path + ADR for v1.0 write-back
 
 ## v0.12 — Diagnostics & Quality
 

@@ -7,6 +7,7 @@
 | Method | Linux | macOS | Windows | Needs Rust? |
 |--------|-------|-------|---------|-------------|
 | Marketplace extension (bundled language server) | Yes | Yes | Yes | No |
+| Open VSX / Cursor marketplace (v0.11+) | Yes | Yes | Yes | No |
 | Release VSIX (bundled language server) | Yes | Yes | Yes | No |
 | `cargo install ontocore-lsp` + `ontocode.lspPath` | Yes | Yes | Yes | Yes (1.88+) |
 | Build from source (`package-extension.sh`) | Yes | Yes | Yes | Yes + Node 20 |
@@ -55,6 +56,21 @@ cargo install ontocore-lsp --locked
 ```
 
 Set **OntoCode: Lsp Path** (`ontocode.lspPath`) to the absolute path of your `ontocore-lsp` binary. **Trusted workspaces only** — ignored in Restricted Mode.
+
+## Option E — Cursor / Open VSX (v0.11+)
+
+[Cursor](https://cursor.com/) uses the [Open VSX](https://open-vsx.org/) registry instead of the Microsoft VS Code Marketplace.
+
+1. Open **Extensions** in Cursor and search for **OntoCode** (publisher `ontocode`).
+2. Install **OntoCode** (`ontocode.ontocode`).
+3. Open a folder with ontology files and **Trust** the workspace.
+
+If OntoCode does not appear in search (before v0.11 or if Open VSX sync is delayed):
+
+1. Download `ontocode-*.vsix` from [GitHub Releases](https://github.com/eddiethedean/ontocode/releases).
+2. **Cmd+Shift+P** / **Ctrl+Shift+P** → **Extensions: Install from VSIX…**
+
+Release tags from v0.11.0 onward publish automatically to Open VSX.
 
 ## Using the sidebar
 

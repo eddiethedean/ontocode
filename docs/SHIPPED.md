@@ -1,8 +1,8 @@
-# What ships today (v0.10.0)
+# What ships today (v0.11.0)
 
 > **Canonical capability matrix.** Update this page on every release. Design specs under [Project](design/README.md) may describe future targets — check here for what is actually available.
 
-**Current release:** v0.10.0 · [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md)
+**Current release:** v0.11.0 · [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md)
 
 ## Products
 
@@ -34,9 +34,13 @@
 | ROBOT interop | — | `ontocore robot validate\|merge\|report` |
 | Diagnostics / lint | Problems panel | `ontocore validate` |
 | Hover, go-to-definition, symbols, find references, rename | Yes | — |
-| Patch preview | Inspector / Manchester editor / refactor preview | `ontocore patch --preview` |
+| Turtle completion (prefix, QName, IRI) | Yes (LSP) | — |
+| Diagnostic quick fixes (code actions) | Yes | — |
+| Turtle imports add/remove | Yes (Manage Imports panel) | `ontocore patch` (`add_import`, `remove_import`) |
+| Documentation export (Markdown / HTML) | — | `ontocore docs` |
+| Patch preview | Inspector / Manchester editor / refactor preview / imports panel | `ontocore patch --preview` |
 | Semantic diff (git / workspace compare) | Semantic Diff panel (React) | `ontocore diff` |
-| React webview UI | Inspector, graphs, Query Workbench, Manchester editor, refactor preview, semantic diff | — |
+| React webview UI | Inspector, graphs, Query Workbench, Manchester editor, refactor preview, semantic diff, imports | — |
 
 ## Format support
 
@@ -44,6 +48,19 @@
 |-----------|-----------------|--------------|-----------------------------------|
 | Index / query | Yes | Yes | Yes |
 | Write-back (inspector, patches, refactor) | Yes | Read-only in VS Code | Read-only in VS Code |
+| Rich OBO metadata (synonyms, defs, xrefs) | — | Yes (fastobo read) | — |
+
+## New in v0.11.0
+
+| Capability | Status |
+|------------|--------|
+| Open VSX publish (Cursor marketplace) | Yes |
+| LSP `textDocument/completion` (Turtle) | Yes |
+| LSP `textDocument/codeAction` (diagnostic quick fixes) | Yes |
+| `ontocore docs` + `ontocore-docs` crate | Yes |
+| Import patch ops + Manage Imports UI | Yes |
+| OBO indexed via `fastobo` (read path) | Yes |
+| OBO write-back | Documented (ADR-0019); Turtle-only in editor |
 
 ## New in v0.10.0
 

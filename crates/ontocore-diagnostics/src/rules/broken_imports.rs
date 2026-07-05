@@ -2,7 +2,7 @@ use crate::input::DiagnosticInput;
 use crate::location::find_in_source;
 use ontocore_core::{
     document_for_ontology_id, file_uri_for_path, normalize_iri, Diagnostic, DiagnosticCode,
-    DiagnosticSeverity,
+    DiagnosticSeverity, QuickFix,
 };
 use std::collections::BTreeSet;
 use std::path::Path;
@@ -31,6 +31,14 @@ pub fn broken_imports(
         let range =
             find_in_source(&text, &[imp.import_iri.clone(), format!("<{}>", imp.import_iri)]);
 
+        let quick_fix = range.line.and_then(|line| {
+            QuickFix::RemoveLine {
+                label: format!("Remove broken import <{}>", imp.import_iri),
+                line: line as usize,
+            }
+            .encode()
+        });
+
         diagnostics.push(Diagnostic {
             code: DiagnosticCode::BrokenImport,
             severity: DiagnosticSeverity::Error,
@@ -38,7 +46,7 @@ pub fn broken_imports(
             file,
             range,
             entity_iri: Some(imp.import_iri.clone()),
-            quick_fix: None,
+            quick_fix,
         });
     }
     diagnostics

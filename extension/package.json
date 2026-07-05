@@ -2,7 +2,7 @@
   "name": "ontocode",
   "displayName": "OntoCode",
   "description": "Git-native ontology IDE for VS Code powered by OntoCore. Browse, edit Turtle, query, reason (EL–DL), validate, and diff OWL/RDF/OBO ontologies in Git and CI.",
-  "version": "0.10.0",
+  "version": "0.11.0",
   "publisher": "ontocode",
   "license": "MIT",
   "repository": {
@@ -47,7 +47,8 @@
     "linter",
     "validate",
     "reasoner",
-    "manchester"
+    "manchester",
+    "cursor"
   ],
   "activationEvents": [
     "workspaceContains:**/*.ttl",
@@ -195,6 +196,10 @@
         "title": "OntoCode: Open Import Graph"
       },
       {
+        "command": "ontocode.manageImports",
+        "title": "OntoCode: Manage Imports"
+      },
+      {
         "command": "ontocode.openNeighborhoodGraph",
         "title": "OntoCode: Open Neighborhood Graph"
       },
@@ -265,6 +270,11 @@
         {
           "command": "ontocode.deleteEntity",
           "when": "view =~ /^ontocode\\.explorer\\./ && viewItem == ontocodeEntity",
+          "group": "2_edit"
+        },
+        {
+          "command": "ontocode.manageImports",
+          "when": "view == ontocode.explorer.ontologies && viewItem == ontocodeTurtleDocument",
           "group": "2_edit"
         },
         {

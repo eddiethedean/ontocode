@@ -7,6 +7,8 @@
 //! The LSP wire format and custom `ontocore/*` methods are **pre-1.0** and may change
 //! between minor releases. See the repository README for semver policy.
 
+pub(crate) mod code_actions;
+pub(crate) mod completion;
 pub(crate) mod diagnostics;
 pub(crate) mod handlers;
 pub(crate) mod index_worker;

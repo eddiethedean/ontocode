@@ -15,6 +15,7 @@ include = ["src/**/*", "Cargo.toml", "README.md", "LICENSE-MIT", "LICENSE-APACHE
 
 [dependencies]
 ontocore-core = { workspace = true }
+fastobo.workspace = true
 oxigraph.workspace = true
 regex = "1"
 serde.workspace = true

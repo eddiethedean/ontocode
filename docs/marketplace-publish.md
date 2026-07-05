@@ -43,3 +43,26 @@ npx vsce package --no-dependencies
 ## Token handling
 
 Store `VSCE_PAT` or `AZURE_DEVOPS_EXT_PAT` in CI secrets only; never commit tokens.
+
+## Open VSX (Cursor and other Open VSX clients)
+
+From v0.11.0, the [release workflow on GitHub](https://github.com/eddiethedean/ontocode/blob/main/.github/workflows/release.yml) publishes the same VSIX to [Open VSX](https://open-vsx.org/) after packaging.
+
+### Prerequisites
+
+- [Open VSX publisher](https://open-vsx.org/user-settings/publisher) namespace `ontocode` (claim before first release)
+- Personal Access Token from Open VSX user settings
+- Repository secret `OVSX_PAT` with publish scope
+
+### Manual publish (emergency)
+
+```bash
+npm install -g ovsx
+ovsx publish dist/ontocode-v0.11.0.vsix -p "$OVSX_PAT"
+```
+
+### After Open VSX publish
+
+1. Verify listing at `https://open-vsx.org/extension/ontocode/ontocode`
+2. Confirm Cursor Extensions search finds **OntoCode**
+3. Document Cursor install path in [vscode-install.md](vscode-install.md) Option E

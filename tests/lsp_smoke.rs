@@ -138,6 +138,31 @@ fn lsp_indexes_fixture_workspace() {
     let query_resp = wait_for_id(&rx, 5, Duration::from_secs(10)).expect("query response");
     assert!(query_resp.get("result").and_then(|r| r.get("rows")).is_some());
 
+    let example_path = workspace.join("example.ttl");
+    let doc_uri = format!("file://{}", example_path.canonicalize().unwrap().display());
+    send_request(
+        &mut stdin,
+        7,
+        "textDocument/completion",
+        serde_json::json!({
+            "textDocument": { "uri": doc_uri },
+            "position": { "line": 11, "character": 3 },
+        }),
+    );
+    let completion_resp =
+        wait_for_id(&rx, 7, Duration::from_secs(10)).expect("completion response");
+    if completion_resp.get("error").is_some() {
+        panic!("completion error: {completion_resp}");
+    }
+    let items =
+        completion_resp.get("result").and_then(|r| r.as_array()).expect("completion items array");
+    let labels: Vec<&str> =
+        items.iter().filter_map(|i| i.get("label").and_then(|v| v.as_str())).collect();
+    assert!(
+        labels.iter().any(|l| l.contains("Person") || l.contains("Thing")),
+        "expected catalog class completions, got: {labels:?}"
+    );
+
     send_request(&mut stdin, 6, "shutdown", serde_json::json!(null));
     let _ = wait_for_id(&rx, 6, Duration::from_secs(5));
     send_notification(&mut stdin, "exit", serde_json::Value::Null);

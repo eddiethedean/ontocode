@@ -119,6 +119,7 @@ fn to_lsp_diagnostic(
         code: Some(NumberOrString::String(diag.code.as_str().to_string())),
         source: Some("ontocore".to_string()),
         message: diag.message.clone(),
+        data: diag.quick_fix.as_ref().map(|s| serde_json::Value::String(s.clone())),
         ..Default::default()
     }
 }

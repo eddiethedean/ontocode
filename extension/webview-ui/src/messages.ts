@@ -6,7 +6,8 @@ export type PanelKind =
   | "refactorPreview"
   | "queryWorkbench"
   | "manchesterEditor"
-  | "semanticDiff";
+  | "semanticDiff"
+  | "imports";
 
 /** Entity summary from LSP getEntity. */
 export interface EntitySummary {
@@ -231,6 +232,19 @@ export function isDiffPayload(data: unknown): data is DiffPayload {
   );
 }
 
+export interface ImportsOntologyOption {
+  iri: string;
+  path: string;
+  label: string;
+}
+
+export interface ImportsDocumentPayload {
+  path: string;
+  ontology_iri: string;
+  imports: string[];
+  options: ImportsOntologyOption[];
+}
+
 /** Host → React */
 export type HostMessage =
   | { type: "init"; panel: PanelKind }
@@ -244,6 +258,7 @@ export type HostMessage =
   | { type: "manchesterValidation"; seq: number; result?: ManchesterValidationResult; error?: string }
   | { type: "loading" }
   | { type: "semanticDiffData"; diff: DiffPayload }
+  | { type: "loadImports"; payload: ImportsDocumentPayload }
   | { type: "error"; message: string };
 
 /** React → Host */

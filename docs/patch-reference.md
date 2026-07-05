@@ -1,6 +1,6 @@
-# Patch reference (OntoCore v0.10)
+# Patch reference (OntoCore v0.11)
 
-> **Status:** Documents behavior in **OntoCore v0.10.0**. Pre-1.0 APIs may change.
+> **Status:** Documents behavior in **OntoCore v0.11.0**. Pre-1.0 APIs may change.
 > Canonical feature list: [What ships today](SHIPPED.md).
 
 Turtle write-back uses a JSON array of patch operations. The CLI (`ontocore patch`) and LSP (`ontocore/applyAxiomPatch`) accept the same format.
@@ -35,6 +35,8 @@ Turtle write-back uses a JSON array of patch operations. The CLI (`ontocore patc
 | `add_disjoint_class` | `entity_iri`, `other_iri` | Add `owl:disjointWith` to another named class |
 | `remove_disjoint_class` | `entity_iri`, `other_iri` | Remove a `disjointWith` axiom |
 | `set_deprecated` | `entity_iri`, `value` | Set `owl:deprecated` (`true` or `false`) |
+| `add_import` | `ontology_iri`, `import_iri` | Add `owl:imports` to ontology header |
+| `remove_import` | `ontology_iri`, `import_iri` | Remove matching `owl:imports` triple |
 
 ### `kind` values for `create_entity`
 

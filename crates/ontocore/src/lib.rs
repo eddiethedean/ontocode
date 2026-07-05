@@ -8,6 +8,7 @@
 pub mod catalog;
 pub mod diagnostics;
 pub mod diff;
+pub mod docs;
 pub mod owl;
 pub mod parser;
 pub mod query;

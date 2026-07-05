@@ -1,5 +1,6 @@
-//! Minimal OBO Format 1.4 parser → OntoCore catalog model.
+//! OBO Format 1.4 parser via [`fastobo`] → OntoCore catalog model.
 
+use fastobo::ast::{HeaderClause, TermClause};
 use ontocore_core::{
     limits::MAX_TRIPLES_PER_FILE, Annotation, Axiom, Entity, EntityKind, SourceLocation,
     AXIOM_KIND_SUB_CLASS_OF,
@@ -13,136 +14,105 @@ use crate::rdf::{assemble_parsed_ontology, ParseError, ParsedOntology, Result};
 const DEFAULT_OBO_BASE: &str = "http://purl.obolibrary.org/obo/";
 
 pub fn parse_obo_text(path: &Path, ontology_id: &str, source_text: &str) -> Result<ParsedOntology> {
+    let doc = fastobo::from_str(source_text)
+        .map_err(|e| ParseError::Rdf(format!("OBO parse error in {}: {e}", path.display())))?;
+
     let mut namespaces = BTreeMap::new();
+    for clause in doc.header().iter() {
+        if let HeaderClause::Idspace(prefix, url, _) = clause {
+            namespaces.insert(prefix.to_string(), url.to_string());
+        }
+    }
+
     let mut entities = Vec::new();
     let mut annotations = Vec::new();
     let mut axioms = Vec::new();
     let mut axiom_counter = 0usize;
 
-    let mut in_term = false;
-    let mut current_id: Option<String> = None;
-    let mut current_iri: Option<String> = None;
-    let mut labels = Vec::new();
-    let mut comments = Vec::new();
-    let mut deprecated = false;
-
-    let flush_term = |entities: &mut Vec<Entity>,
-                      current_id: &mut Option<String>,
-                      current_iri: &mut Option<String>,
-                      labels: &mut Vec<String>,
-                      comments: &mut Vec<String>,
-                      deprecated: &mut bool| {
-        if let (Some(obo_id), Some(iri)) = (current_id.take(), current_iri.take()) {
-            let short_name = obo_id.split(':').next_back().unwrap_or(&obo_id).to_string();
-            entities.push(Entity {
-                iri,
-                short_name,
-                kind: EntityKind::Class,
-                ontology_id: ontology_id.to_string(),
-                source_location: SourceLocation::default(),
-                labels: std::mem::take(labels),
-                comments: std::mem::take(comments),
-                deprecated: *deprecated,
-                obo_id: Some(obo_id),
-            });
-            *deprecated = false;
-        }
-    };
-
-    for line in source_text.lines() {
-        let line = line.trim();
-        if line.is_empty() || line.starts_with('!') {
-            continue;
-        }
-        if line.starts_with('[') && line.ends_with(']') {
-            flush_term(
-                &mut entities,
-                &mut current_id,
-                &mut current_iri,
-                &mut labels,
-                &mut comments,
-                &mut deprecated,
-            );
-            in_term = line == "[Term]";
-            continue;
-        }
-        if !in_term {
-            // ontology: is metadata only — do not rewrite the term IRI base.
-            if let Some(rest) = line.strip_prefix("idspace:") {
-                let mut parts = rest.split_whitespace();
-                if let (Some(prefix), Some(url)) = (parts.next(), parts.next()) {
-                    namespaces.insert(prefix.to_string(), url.to_string());
-                }
-            }
-            continue;
-        }
-
-        if let Some(value) = line.strip_prefix("id:") {
-            flush_term(
-                &mut entities,
-                &mut current_id,
-                &mut current_iri,
-                &mut labels,
-                &mut comments,
-                &mut deprecated,
-            );
-            let obo_id = value.split('!').next().unwrap_or(value).trim().to_string();
-            current_iri = Some(obo_id_to_iri(&obo_id, &namespaces));
-            current_id = Some(obo_id);
-            in_term = true;
-            continue;
-        }
-
-        let Some(iri) = current_iri.clone() else {
+    for entity in doc.entities() {
+        let Some(term) = entity.as_term() else {
             continue;
         };
+        let obo_id = ident_to_string(term.id().as_inner());
+        let iri = obo_id_to_iri(&obo_id, &namespaces);
+        let short_name = obo_id.split(':').next_back().unwrap_or(&obo_id).to_string();
 
-        if let Some(value) = line.strip_prefix("name:") {
-            labels.push(value.trim().to_string());
-        } else if let Some(value) = line.strip_prefix("comment:") {
-            comments.push(value.trim().to_string());
-        } else if line == "is_obsolete: true" {
-            deprecated = true;
-        } else if let Some(value) = line.strip_prefix("is_a:") {
-            let parent_id = value.split('!').next().unwrap_or(value).trim().to_string();
-            axiom_counter += 1;
-            axioms.push(Axiom {
-                id: format!("{ontology_id}#axiom-{axiom_counter}"),
-                ontology_id: ontology_id.to_string(),
-                subject: iri.clone(),
-                predicate: "rdfs:subClassOf".to_string(),
-                object: obo_id_to_iri(&parent_id, &namespaces),
-                axiom_kind: AXIOM_KIND_SUB_CLASS_OF.to_string(),
-                source_location: SourceLocation::default(),
-            });
-        } else if let Some(value) = line.strip_prefix("synonym:") {
-            annotations.push(Annotation {
-                subject: iri.clone(),
-                predicate: "obo:hasExactSynonym".to_string(),
-                object: value.trim().trim_matches('"').to_string(),
-                ontology_id: ontology_id.to_string(),
-                source_location: SourceLocation::default(),
-            });
-        } else if let Some(value) = line.strip_prefix("xref:") {
-            annotations.push(Annotation {
-                subject: iri.clone(),
-                predicate: "obo:hasDbXref".to_string(),
-                object: value.trim().to_string(),
-                ontology_id: ontology_id.to_string(),
-                source_location: SourceLocation::default(),
-            });
-        } else if let Some(value) = line.strip_prefix("property_value:") {
-            let mut parts = value.split_whitespace();
-            if let (Some(prop), Some(val)) = (parts.next(), parts.next()) {
-                annotations.push(Annotation {
-                    subject: iri,
-                    predicate: prop.to_string(),
-                    object: val.to_string(),
-                    ontology_id: ontology_id.to_string(),
-                    source_location: SourceLocation::default(),
-                });
+        let mut labels = Vec::new();
+        let mut comments = Vec::new();
+        let mut deprecated = false;
+
+        for clause in term.clauses() {
+            match clause.as_inner() {
+                TermClause::Name(name) => labels.push(name.to_string()),
+                TermClause::Comment(comment) => comments.push(comment.to_string()),
+                TermClause::Def(def) => {
+                    let def_text = def.text().to_string();
+                    comments.push(def_text.clone());
+                    annotations.push(Annotation {
+                        subject: iri.clone(),
+                        predicate: "obo:IAO_0000115".to_string(),
+                        object: def_text,
+                        ontology_id: ontology_id.to_string(),
+                        source_location: SourceLocation::default(),
+                    });
+                }
+                TermClause::IsObsolete(true) => deprecated = true,
+                TermClause::IsA(parent) => {
+                    axiom_counter += 1;
+                    let parent_id = ident_to_string(parent.as_ref());
+                    axioms.push(Axiom {
+                        id: format!("{ontology_id}#axiom-{axiom_counter}"),
+                        ontology_id: ontology_id.to_string(),
+                        subject: iri.clone(),
+                        predicate: "rdfs:subClassOf".to_string(),
+                        object: obo_id_to_iri(&parent_id, &namespaces),
+                        axiom_kind: AXIOM_KIND_SUB_CLASS_OF.to_string(),
+                        source_location: SourceLocation::default(),
+                    });
+                }
+                TermClause::Synonym(syn) => {
+                    annotations.push(Annotation {
+                        subject: iri.clone(),
+                        predicate: format!("obo:has{}Synonym", scope_label(syn.scope())),
+                        object: syn.description().to_string(),
+                        ontology_id: ontology_id.to_string(),
+                        source_location: SourceLocation::default(),
+                    });
+                }
+                TermClause::Xref(xref) => {
+                    annotations.push(Annotation {
+                        subject: iri.clone(),
+                        predicate: "obo:hasDbXref".to_string(),
+                        object: xref.as_ref().to_string(),
+                        ontology_id: ontology_id.to_string(),
+                        source_location: SourceLocation::default(),
+                    });
+                }
+                TermClause::PropertyValue(pv) => {
+                    annotations.push(Annotation {
+                        subject: iri.clone(),
+                        predicate: pv.property().to_string(),
+                        object: pv.to_string(),
+                        ontology_id: ontology_id.to_string(),
+                        source_location: SourceLocation::default(),
+                    });
+                }
+                _ => {}
             }
         }
+
+        entities.push(Entity {
+            iri,
+            short_name,
+            kind: EntityKind::Class,
+            ontology_id: ontology_id.to_string(),
+            source_location: SourceLocation::default(),
+            labels,
+            comments,
+            deprecated,
+            obo_id: Some(obo_id),
+        });
+
         if entities.len() + annotations.len() + axioms.len() > MAX_TRIPLES_PER_FILE {
             return Err(ParseError::LimitExceeded(format!(
                 "OBO file exceeds entity/axiom limit: {}",
@@ -151,24 +121,6 @@ pub fn parse_obo_text(path: &Path, ontology_id: &str, source_text: &str) -> Resu
         }
     }
 
-    flush_term(
-        &mut entities,
-        &mut current_id,
-        &mut current_iri,
-        &mut labels,
-        &mut comments,
-        &mut deprecated,
-    );
-
-    let total = entities.len() + annotations.len() + axioms.len();
-    if entities.len() > MAX_TRIPLES_PER_FILE || total > MAX_TRIPLES_PER_FILE {
-        return Err(ParseError::LimitExceeded(format!(
-            "OBO file exceeds entity/axiom limit: {}",
-            path.display()
-        )));
-    }
-
-    // Ensure default OBO namespace is visible for consumers.
     if !namespaces.contains_key("") {
         namespaces.insert(String::new(), DEFAULT_OBO_BASE.to_string());
     }
@@ -183,9 +135,21 @@ pub fn parse_obo_text(path: &Path, ontology_id: &str, source_text: &str) -> Resu
     ))
 }
 
+fn ident_to_string<T: std::fmt::Display>(ident: &T) -> String {
+    ident.to_string()
+}
+
+fn scope_label(scope: &fastobo::ast::SynonymScope) -> &'static str {
+    use fastobo::ast::SynonymScope;
+    match scope {
+        SynonymScope::Exact => "Exact",
+        SynonymScope::Broad => "Broad",
+        SynonymScope::Narrow => "Narrow",
+        SynonymScope::Related => "Related",
+    }
+}
+
 /// Map an OBO ID to an IRI using `idspace:` expansions when present.
-///
-/// Default: `GO:0000001` → `http://purl.obolibrary.org/obo/GO_0000001`.
 fn obo_id_to_iri(obo_id: &str, namespaces: &BTreeMap<String, String>) -> String {
     if obo_id.starts_with("http://") || obo_id.starts_with("https://") {
         return obo_id.to_string();
@@ -239,6 +203,18 @@ mod tests {
         assert_eq!(parsed.axioms[0].object, "http://purl.obolibrary.org/obo/TEST_0000002");
         assert!(parsed.triple_count > 0);
         assert!(!parsed.quads().is_empty(), "OBO must materialize RDF quads");
+    }
+
+    #[test]
+    fn parses_def_and_synonym_via_fastobo() {
+        let text = "format-version: 1.2\nontology: test\n\n[Term]\n\
+id: TEST:0000001\n\
+name: example\n\
+def: \"A definition.\" []\n\
+synonym: \"alt label\" EXACT []\n";
+        let parsed = parse_obo_text(Path::new("t.obo"), "doc-1", text).unwrap();
+        assert!(parsed.entities[0].comments.iter().any(|c| c.contains("definition")));
+        assert!(parsed.annotations.iter().any(|a| a.predicate.contains("Synonym")));
     }
 
     #[test]

@@ -1,6 +1,8 @@
 use crate::input::DiagnosticInput;
 use crate::location::find_prefix_in_source;
-use ontocore_core::{Diagnostic, DiagnosticCode, DiagnosticSeverity, OntologyFormat, ParseStatus};
+use ontocore_core::{
+    Diagnostic, DiagnosticCode, DiagnosticSeverity, OntologyFormat, ParseStatus, QuickFix,
+};
 use std::collections::BTreeSet;
 use std::path::Path;
 
@@ -52,6 +54,13 @@ pub fn undefined_prefixes(
             }) {
                 continue;
             }
+            let quick_fix = QuickFix::InsertText {
+                label: format!("Declare @prefix {prefix}:"),
+                line: 1,
+                column: 1,
+                text: format!("@prefix {prefix}: <http://example.org/{prefix}#> .\n"),
+            }
+            .encode();
             diagnostics.push(Diagnostic {
                 code: DiagnosticCode::UndefinedPrefix,
                 severity: DiagnosticSeverity::Error,
@@ -59,7 +68,7 @@ pub fn undefined_prefixes(
                 file: doc.path.clone(),
                 range,
                 entity_iri: None,
-                quick_fix: None,
+                quick_fix,
             });
         }
     }
@@ -174,6 +183,7 @@ mod tests {
         assert_eq!(diags[0].code, DiagnosticCode::UndefinedPrefix);
         assert_eq!(diags[0].severity, DiagnosticSeverity::Error);
         assert!(diags[0].message.contains("un:"));
+        assert!(diags[0].quick_fix.is_some(), "undefined prefix should offer quick fix");
     }
 
     #[test]

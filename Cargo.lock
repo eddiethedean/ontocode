@@ -118,6 +118,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b4388bee8683e3d04af747c73422af53102d2bd24d9eadb6cbc100baef4b43f8"
 
 [[package]]
+name = "blanket"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "56791e4bd64c99fc361e01008f45c984baa93f12a0957d1b3c51dd2c6baab453"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "block-buffer"
 version = "0.10.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -313,6 +324,41 @@ dependencies = [
 ]
 
 [[package]]
+name = "darling"
+version = "0.21.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9cdf337090841a411e2a7f3deb9187445851f91b309c0c0a29e05f74a00a48c0"
+dependencies = [
+ "darling_core",
+ "darling_macro",
+]
+
+[[package]]
+name = "darling_core"
+version = "0.21.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1247195ecd7e3c85f83c8d2a366e4210d588e802133e1e355180a9870b517ea4"
+dependencies = [
+ "fnv",
+ "ident_case",
+ "proc-macro2",
+ "quote",
+ "strsim",
+ "syn",
+]
+
+[[package]]
+name = "darling_macro"
+version = "0.21.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d38308df82d1080de0afee5d069fa14b0326a88c14f15c5ccda35b4a6c414c81"
+dependencies = [
+ "darling_core",
+ "quote",
+ "syn",
+]
+
+[[package]]
 name = "dashmap"
 version = "6.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -391,6 +437,46 @@ dependencies = [
 ]
 
 [[package]]
+name = "fastobo"
+version = "0.15.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dad538fd8068b0e4b960bfbcfc20b2d70635f2a21af388b54b7caf892180e696"
+dependencies = [
+ "blanket",
+ "crossbeam-channel",
+ "fastobo-derive-internal",
+ "fastobo-syntax",
+ "lazy_static",
+ "memchr",
+ "num_cpus",
+ "ordered-float",
+ "smartstring",
+ "thiserror 2.0.18",
+]
+
+[[package]]
+name = "fastobo-derive-internal"
+version = "0.15.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0295fd39b48e8181ac3be2ad455bb0b5d1891af6397466a2b28943dcc8cdb019"
+dependencies = [
+ "darling",
+ "heck",
+ "quote",
+ "syn",
+]
+
+[[package]]
+name = "fastobo-syntax"
+version = "0.8.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8720da4edf8bccc1d7972d5e585ef32d84f9b5ee4aee681802453da5ec1bf331"
+dependencies = [
+ "pest",
+ "pest_derive",
+]
+
+[[package]]
 name = "fastrand"
 version = "2.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -426,6 +512,12 @@ checksum = "17c704e9dbe1ddd863da1e6ff3567795087b1eb201ce80d8fa81162e1516500d"
 dependencies = [
  "bitflags 1.3.2",
 ]
+
+[[package]]
+name = "fnv"
+version = "1.0.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3f9eec918d3f24069decb9af1554cad7c880e2da24a9afd88aca000531ab82c1"
 
 [[package]]
 name = "form_urlencoded"
@@ -539,6 +631,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2304e00983f87ffb38b55b444b5e3b60a884b5d30c0fca7d82fe33449bbe55ea"
 
 [[package]]
+name = "hermit-abi"
+version = "0.5.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fc0fef456e4baa96da950455cd02c081ca953b141298e41db3fc7e36b1da849c"
+
+[[package]]
 name = "hex"
 version = "0.4.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -647,6 +745,12 @@ dependencies = [
  "zerotrie",
  "zerovec",
 ]
+
+[[package]]
+name = "ident_case"
+version = "1.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b9e0384b61958566e926dc50660321d12159025e767c18e043daf26b70104c39"
 
 [[package]]
 name = "idna"
@@ -874,6 +978,22 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "88904434abc2901f197fe8cc55f0445e7ded921dba5911dad2e2b39b48e663c4"
 
 [[package]]
+name = "memo-map"
+version = "0.3.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "38d1115007560874e373613744c6fba374c17688327a71c1476d1a5954cc857b"
+
+[[package]]
+name = "minijinja"
+version = "2.21.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cb3d648e68cea56d9858d535ee28f9538404e2dd8cb08ed0bd05dca379477f39"
+dependencies = [
+ "memo-map",
+ "serde",
+]
+
+[[package]]
 name = "minimal-lexical"
 version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -900,6 +1020,25 @@ dependencies = [
 ]
 
 [[package]]
+name = "num-traits"
+version = "0.2.19"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "071dfc062690e90b734c0b2273ce72ad0ffa95f0c74596bc250dcfd960262841"
+dependencies = [
+ "autocfg",
+]
+
+[[package]]
+name = "num_cpus"
+version = "1.17.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "91df4bbde75afed763b708b7eee1e8e7651e02d97f6d5dd763e89367e957b23b"
+dependencies = [
+ "hermit-abi",
+ "libc",
+]
+
+[[package]]
 name = "once_cell"
 version = "1.21.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -913,7 +1052,7 @@ checksum = "384b8ab6d37215f3c5301a95a4accb5d64aa607f1fcb26a11b5303878451b4fe"
 
 [[package]]
 name = "ontocode"
-version = "0.10.0"
+version = "0.11.0"
 dependencies = [
  "ontocore",
  "ontocore-catalog",
@@ -929,12 +1068,13 @@ dependencies = [
 
 [[package]]
 name = "ontocore"
-version = "0.10.0"
+version = "0.11.0"
 dependencies = [
  "ontocore-catalog",
  "ontocore-core",
  "ontocore-diagnostics",
  "ontocore-diff",
+ "ontocore-docs",
  "ontocore-lsp",
  "ontocore-owl",
  "ontocore-parser",
@@ -946,7 +1086,7 @@ dependencies = [
 
 [[package]]
 name = "ontocore-catalog"
-version = "0.10.0"
+version = "0.11.0"
 dependencies = [
  "hex",
  "ontocore-core",
@@ -963,13 +1103,14 @@ dependencies = [
 
 [[package]]
 name = "ontocore-cli"
-version = "0.10.0"
+version = "0.11.0"
 dependencies = [
  "anyhow",
  "clap",
  "ontocore-catalog",
  "ontocore-core",
  "ontocore-diff",
+ "ontocore-docs",
  "ontocore-owl",
  "ontocore-query",
  "ontocore-reasoner",
@@ -980,11 +1121,12 @@ dependencies = [
 
 [[package]]
 name = "ontocore-core"
-version = "0.10.0"
+version = "0.11.0"
 dependencies = [
  "hex",
  "ignore",
  "serde",
+ "serde_json",
  "sha2",
  "tempfile",
  "thiserror 2.0.18",
@@ -993,15 +1135,16 @@ dependencies = [
 
 [[package]]
 name = "ontocore-diagnostics"
-version = "0.10.0"
+version = "0.11.0"
 dependencies = [
  "ontocore-core",
  "regex",
+ "serde_json",
 ]
 
 [[package]]
 name = "ontocore-diff"
-version = "0.10.0"
+version = "0.11.0"
 dependencies = [
  "git2",
  "ontocore-catalog",
@@ -1013,8 +1156,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "ontocore-docs"
+version = "0.11.0"
+dependencies = [
+ "minijinja",
+ "ontocore-catalog",
+ "ontocore-core",
+ "serde",
+ "tempfile",
+ "thiserror 2.0.18",
+]
+
+[[package]]
 name = "ontocore-lsp"
-version = "0.10.0"
+version = "0.11.0"
 dependencies = [
  "crossbeam-channel",
  "lsp-server",
@@ -1036,7 +1191,7 @@ dependencies = [
 
 [[package]]
 name = "ontocore-owl"
-version = "0.10.0"
+version = "0.11.0"
 dependencies = [
  "horned-owl",
  "ontocore-core",
@@ -1049,8 +1204,9 @@ dependencies = [
 
 [[package]]
 name = "ontocore-parser"
-version = "0.10.0"
+version = "0.11.0"
 dependencies = [
+ "fastobo",
  "ontocore-core",
  "oxigraph",
  "regex",
@@ -1061,7 +1217,7 @@ dependencies = [
 
 [[package]]
 name = "ontocore-query"
-version = "0.10.0"
+version = "0.11.0"
 dependencies = [
  "csv",
  "ontocore-catalog",
@@ -1075,7 +1231,7 @@ dependencies = [
 
 [[package]]
 name = "ontocore-reasoner"
-version = "0.10.0"
+version = "0.11.0"
 dependencies = [
  "hex",
  "ontocore-catalog",
@@ -1098,7 +1254,7 @@ dependencies = [
 
 [[package]]
 name = "ontocore-refactor"
-version = "0.10.0"
+version = "0.11.0"
 dependencies = [
  "ontocore-catalog",
  "ontocore-core",
@@ -1110,7 +1266,7 @@ dependencies = [
 
 [[package]]
 name = "ontocore-robot"
-version = "0.10.0"
+version = "0.11.0"
 dependencies = [
  "thiserror 2.0.18",
 ]
@@ -1308,6 +1464,15 @@ dependencies = [
  "openssl-src",
  "pkg-config",
  "vcpkg",
+]
+
+[[package]]
+name = "ordered-float"
+version = "5.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b7d950ca161dc355eaf28f82b11345ed76c6e1f6eb1f4f4479e0323b9e2fbd0e"
+dependencies = [
+ "num-traits",
 ]
 
 [[package]]
@@ -2056,6 +2221,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8ed6a63f02c8539c91a8685a86f4099661ba3da017932f6ebbea6de3f0fa7c90"
 
 [[package]]
+name = "smartstring"
+version = "1.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3fb72c633efbaa2dd666986505016c32c3044395ceaf881518399d2f4127ee29"
+dependencies = [
+ "autocfg",
+ "static_assertions",
+ "version_check",
+]
+
+[[package]]
 name = "sparesults"
 version = "0.2.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2130,6 +2306,12 @@ name = "stable_deref_trait"
 version = "1.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6ce2be8dc25455e1f91df71bfa12ad37d7af1092ae736f3a6cd0e37bc7810596"
+
+[[package]]
+name = "static_assertions"
+version = "1.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a2eb9349b6444b326872e140eb1cf5e7c522154d69e7a0ffb0fb81c06b37543f"
 
 [[package]]
 name = "strsim"

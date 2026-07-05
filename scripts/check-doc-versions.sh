@@ -201,8 +201,8 @@ for file in docs/guides/refactoring.md docs/migration/v0.8.md docs/migration/v0.
   fi
 done
 
-check_file_contains "docs/faq.md" "0\.10\.x" "faq crate version"
-check_file_contains "docs/guides/release-timeline.md" "0\.10\.0.*Current" "release-timeline current version"
+check_file_contains "docs/faq.md" "0\.11\.x" "faq crate version"
+check_file_contains "docs/guides/release-timeline.md" "0\.11\.0.*Current" "release-timeline current version"
 check_file_contains "docs/guides/release-timeline.md" "v0\.10.*Shipped" "release-timeline v0.10 shipped"
 
 # Stale multi-root limitation (v0.10 indexes all folders)
@@ -234,7 +234,7 @@ check_file_contains "mkdocs.yml" "ontocore/rust-api.md" "mkdocs Rust API referen
 check_file_contains "mkdocs.yml" "guides/protege-migration.md" "mkdocs Protégé migration guide"
 check_file_contains "mkdocs.yml" "ontocode/feature-tour.md" "mkdocs feature tour"
 check_file_contains "mkdocs.yml" "Reference:" "mkdocs Reference tab"
-check_file_contains "docs/guides/rust-crates.md" 'ontocore = "0.10"' "rust-crates version pin"
+check_file_contains "docs/guides/rust-crates.md" 'ontocore = "0.11"' "rust-crates version pin"
 
 # Stale protege-coexistence version banner
 if grep -qE 'evaluating OntoCode \*\*v0\.6\*\*|v0\.6 support' docs/guides/protege-coexistence.md; then
@@ -330,7 +330,7 @@ check_file_contains "docs/changelog.md" "v${VERSION}" "docs changelog current re
 
 for pair in "VISION.md:docs/vision.md:Build the modern open-source platform" \
               "ARCHITECTURE.md:docs/architecture.md:Ontologos thinks" \
-              "ROADMAP.md:docs/roadmap.md:v0.10 — Semantic Workspace"; do
+              "ROADMAP.md:docs/roadmap.md:v0.11 — Editor depth & distribution"; do
   root_file="${pair%%:*}"
   rest="${pair#*:}"
   doc_file="${rest%%:*}"

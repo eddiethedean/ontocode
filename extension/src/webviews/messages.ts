@@ -7,7 +7,8 @@ export type PanelKind =
   | "refactorPreview"
   | "queryWorkbench"
   | "manchesterEditor"
-  | "semanticDiff";
+  | "semanticDiff"
+  | "imports";
 
 export interface PatchOp {
   op: string;
@@ -110,6 +111,19 @@ export interface ManchesterValidationResult {
   diagnostics: Array<{ severity: string; message: string }>;
 }
 
+export interface ImportsOntologyOption {
+  iri: string;
+  path: string;
+  label: string;
+}
+
+export interface ImportsDocumentPayload {
+  path: string;
+  ontology_iri: string;
+  imports: string[];
+  options: ImportsOntologyOption[];
+}
+
 export interface DiffPayload {
   entity_changes: Array<{ kind: string; iri: string; previous_iri?: string; labels?: string[] }>;
   axiom_changes: Array<{
@@ -151,6 +165,7 @@ export type HostMessage =
   | { type: "manchesterValidation"; seq: number; result?: ManchesterValidationResult; error?: string }
   | { type: "loading" }
   | { type: "semanticDiffData"; diff: DiffPayload }
+  | { type: "loadImports"; payload: ImportsDocumentPayload }
   | { type: "error"; message: string };
 
 /** React → Host */

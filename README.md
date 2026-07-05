@@ -4,7 +4,7 @@
 
 **OntoCode** is a VS Code extension for browsing and editing ontologies in Git-native workflows. **OntoCore** is the Rust semantic workspace engine behind it (CLI + language server). Browse OWL/RDF in VS Code, edit Turtle, run reasoning (EL/RL/RDFS/DL), query or validate in CI — without Protégé.
 
-**Current release: v0.10.0** · [Changelog](CHANGELOG.md) · [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) · [Migration v0.10](docs/migration/v0.10.md)
+**Current release: v0.11.0** · [Changelog](CHANGELOG.md) · [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) · [Migration v0.11](docs/migration/v0.11.md)
 
 [![CI](https://github.com/eddiethedean/ontocode/actions/workflows/ci.yml/badge.svg)](https://github.com/eddiethedean/ontocode/actions/workflows/ci.yml)
 [![Extension VS Code E2E](https://github.com/eddiethedean/ontocode/actions/workflows/extension-vscode-e2e.yml/badge.svg)](https://github.com/eddiethedean/ontocode/actions/workflows/extension-vscode-e2e.yml)

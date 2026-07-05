@@ -6,8 +6,8 @@ Planning ranges for OntoCode / OntoCore. **These are product goals, not contract
 
 | Version | Status | Date (changelog) |
 |---------|--------|------------------|
-| **0.10.0** | Current | 2026-07-04 |
-| **0.9.0** | Previous | 2026-07-03 |
+| **0.11.0** | Current | 2026-07-05 |
+| **0.10.0** | Previous | 2026-07-04 |
 
 Pre-1.0: minor releases may change library APIs, LSP JSON, and SQL virtual table columns — [README](https://github.com/eddiethedean/ontocode/blob/main/README.md).
 
@@ -17,6 +17,7 @@ Pre-1.0: minor releases may change library APIs, LSP JSON, and SQL virtual table
 |--------|------|------------|
 | **v0.9** | OntoCore identity — `ontocore` façade, branding, documentation; OntoLogos 1.0 DL/auto classification | **Shipped** (2026-07-03) |
 | **v0.10** | Semantic workspace — incremental index, multi-root, stable `Workspace` API, semantic diff, optional disk cache | **Shipped** (2026-07-04) |
+| **v0.11** | Editor depth & distribution — LSP completion, code actions, docs export, imports UI, Open VSX, OBO fastobo read | **Shipped** (2026-07-05) |
 | **v1.0** | Protégé-competitive OWL + OBO in VS Code; full axiom catalog; plugin host | Planned |
 
 Canonical forward plan: [Platform roadmap](../roadmap.md). Engineering milestone history: [Milestones (shipped)](../design/ROADMAP.md).

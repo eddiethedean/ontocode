@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-07-05
+
+### Added
+
+- **Open VSX publishing** — release workflow publishes VSIX to Open VSX for Cursor marketplace discoverability (`OVSX_PAT` secret)
+- **LSP `textDocument/completion`** — Turtle prefix, QName, and IRI bracket completions from indexed catalog
+- **Diagnostic quick fixes** — `undefined_prefix`, `missing_label`, and `broken_import` rules populate `quick_fix`; LSP `textDocument/codeAction` applies edits
+- **`ontocore-docs` crate** — Markdown and HTML documentation export from indexed workspaces
+- **`ontocore docs` CLI** — `--output`, `--format markdown|html`, optional `--ontology-id` filter
+- **Import patch ops** — `add_import` and `remove_import` for Turtle `owl:imports`
+- **Imports management UI** — Ontologies tree context menu **Manage Imports** with React panel and patch preview
+- **OBO read path via `fastobo`** — richer synonyms, definitions, and property values in catalog; ADR-0019 documents v1.0 OBO write-back patch schema
+- Migration guide [docs/migration/v0.11.md](docs/migration/v0.11.md); user guide [docs/guides/docs-export.md](docs/guides/docs-export.md)
+
+### Changed
+
+- Workspace package and all `ontocore-*` crates bumped to **0.11.0**
+- Extension marketplace version **0.11.0** (VS Code Marketplace + Open VSX)
+
 ## [0.10.0] - 2026-07-04
 
 ### Added

@@ -6,6 +6,7 @@ import { RefactorPreviewPanel } from "./panels/RefactorPreview";
 import { QueryWorkbenchPanel } from "./panels/QueryWorkbench";
 import { ManchesterEditorPanel } from "./panels/ManchesterEditor";
 import { SemanticDiffPanel } from "./panels/SemanticDiffPanel";
+import { ImportsPanel } from "./panels/ImportsPanel";
 
 function panelFromQuery(): PanelKind {
   const params = new URLSearchParams(window.location.search);
@@ -17,7 +18,8 @@ function panelFromQuery(): PanelKind {
     panel === "refactorPreview" ||
     panel === "queryWorkbench" ||
     panel === "manchesterEditor" ||
-    panel === "semanticDiff"
+    panel === "semanticDiff" ||
+    panel === "imports"
   ) {
     return panel;
   }
@@ -39,6 +41,8 @@ export default function App(): JSX.Element {
       return <ManchesterEditorPanel />;
     case "semanticDiff":
       return <SemanticDiffPanel />;
+    case "imports":
+      return <ImportsPanel />;
     default:
       return <SmokePanel />;
   }

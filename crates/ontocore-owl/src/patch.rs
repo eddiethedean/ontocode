@@ -33,6 +33,8 @@ pub enum PatchOp {
     SetDeprecated { entity_iri: String, value: bool },
     AddDisjointClass { entity_iri: String, other_iri: String },
     RemoveDisjointClass { entity_iri: String, other_iri: String },
+    AddImport { ontology_iri: String, import_iri: String },
+    RemoveImport { ontology_iri: String, import_iri: String },
 }
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
@@ -238,6 +240,14 @@ fn apply_one_patch(
         }
         PatchOp::RemoveDisjointClass { entity_iri, other_iri } => {
             remove_disjoint_triple(text, entity_iri, other_iri, namespaces)
+        }
+        PatchOp::AddImport { ontology_iri, import_iri } => {
+            let import_term = iri_to_turtle_term(import_iri, namespaces)?;
+            add_object_triple(text, ontology_iri, "owl:imports", &import_term, namespaces)
+        }
+        PatchOp::RemoveImport { ontology_iri, import_iri } => {
+            let import_term = iri_to_turtle_term(import_iri, namespaces)?;
+            remove_predicate_object(text, ontology_iri, "owl:imports", &import_term, namespaces)
         }
     }
 }
@@ -928,6 +938,42 @@ mod tests {
             ("owl".to_string(), "http://www.w3.org/2002/07/owl#".to_string()),
             ("rdfs".to_string(), "http://www.w3.org/2000/01/rdf-schema#".to_string()),
         ])
+    }
+
+    #[test]
+    fn add_and_remove_import() {
+        let ttl = r#"@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+<http://example.org/people> a owl:Ontology ;
+    rdfs:label "People" .
+"#;
+        let ns = ex_ns();
+        let add = apply_patches_to_text(
+            ttl,
+            &[PatchOp::AddImport {
+                ontology_iri: "http://example.org/people".to_string(),
+                import_iri: "http://example.org/org".to_string(),
+            }],
+            true,
+            &ns,
+        )
+        .expect("add import");
+        let with_import = add.preview_text.expect("preview");
+        assert!(with_import.contains("owl:imports <http://example.org/org>"));
+
+        let remove = apply_patches_to_text(
+            &with_import,
+            &[PatchOp::RemoveImport {
+                ontology_iri: "http://example.org/people".to_string(),
+                import_iri: "http://example.org/org".to_string(),
+            }],
+            true,
+            &ns,
+        )
+        .expect("remove import");
+        let cleaned = remove.preview_text.expect("preview");
+        assert!(!cleaned.contains("owl:imports"));
     }
 
     #[test]

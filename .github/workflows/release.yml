@@ -174,6 +174,7 @@ jobs:
           publish_with_pause ontocore-diagnostics
           publish_with_pause ontocore-catalog
           publish_with_pause ontocore-diff
+          publish_with_pause ontocore-docs
           publish_with_pause ontocore-refactor
           publish_with_pause ontocore-query
           publish_with_pause ontocore-reasoner
@@ -230,6 +231,18 @@ jobs:
           npm ci
           npm run compile
           npx vsce package --no-dependencies -o "../dist/ontocode-${GITHUB_REF_NAME}.vsix"
+
+      - name: Publish to Open VSX
+        env:
+          OVSX_PAT: ${{ secrets.OVSX_PAT }}
+        run: |
+          set -euo pipefail
+          if [ -z "${OVSX_PAT:-}" ]; then
+            echo "OVSX_PAT secret is not set; skipping Open VSX publish"
+            exit 1
+          fi
+          npm install -g ovsx
+          ovsx publish "dist/ontocode-${GITHUB_REF_NAME}.vsix" -p "${OVSX_PAT}"
 
       - name: Generate SHA256SUMS
         run: |

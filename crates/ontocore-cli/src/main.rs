@@ -6,6 +6,7 @@ use ontocore_diff::{
     diff_git_refs_with_catalogs, format_diff_json, format_diff_markdown, format_diff_text,
     parse_git_range, DiffResult,
 };
+use ontocore_docs::{export_workspace, ExportFormat, ExportOptions};
 use ontocore_query::{
     query_catalog,
     sparql::to_json as sparql_to_json,
@@ -24,7 +25,7 @@ use std::path::{Path, PathBuf};
 #[command(
     name = "ontocore",
     version,
-    about = "Local-first ontology index and query engine (OntoCode v0.10)"
+    about = "Local-first ontology index and query engine (OntoCode v0.11)"
 )]
 struct Cli {
     #[command(subcommand)]
@@ -121,6 +122,20 @@ enum Commands {
     Refactor {
         #[command(subcommand)]
         command: RefactorCommands,
+    },
+    /// Export Markdown or HTML documentation for a workspace
+    Docs {
+        /// Workspace directory
+        #[arg(default_value = ".")]
+        workspace: PathBuf,
+        /// Output directory
+        #[arg(long, short = 'o')]
+        output: PathBuf,
+        #[arg(long, value_enum, default_value = "markdown")]
+        format: DocsFormat,
+        /// Limit export to a single ontology id / base IRI
+        #[arg(long)]
+        ontology_id: Option<String>,
     },
     /// Semantic diff between git refs, directories, or indexed snapshots
     Diff {
@@ -233,6 +248,12 @@ enum RobotCommands {
         #[arg(long)]
         robot_path: Option<String>,
     },
+}
+
+#[derive(Clone, Copy, ValueEnum)]
+enum DocsFormat {
+    Markdown,
+    Html,
 }
 
 #[derive(Clone, Copy, ValueEnum)]
@@ -462,6 +483,20 @@ fn main() -> Result<()> {
                 run_refactor_plan(&plan, preview, format, &workspace)?;
             }
         },
+        Commands::Docs { workspace, output, format, ontology_id } => {
+            let catalog = build_catalog(&workspace)?;
+            let export_format = match format {
+                DocsFormat::Markdown => ExportFormat::Markdown,
+                DocsFormat::Html => ExportFormat::Html,
+            };
+            let mut options =
+                ExportOptions { output_dir: output, format: export_format, ontology_id: None };
+            if let Some(id) = ontology_id {
+                options = options.with_ontology_id(id);
+            }
+            export_workspace(&catalog, options.clone()).context("docs export failed")?;
+            println!("Wrote documentation to {}", options.output_dir.display());
+        }
         Commands::Diff {
             git_range,
             left_ref,

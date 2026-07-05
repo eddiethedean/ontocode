@@ -133,6 +133,9 @@ export class ExplorerTreeProvider implements vscode.TreeDataProvider<OntologyTre
             doc.path
           );
           item.description = doc.base_iri;
+          if (doc.format === "turtle") {
+            item.contextValue = "ontocodeTurtleDocument";
+          }
           return item;
         });
       case "classes":

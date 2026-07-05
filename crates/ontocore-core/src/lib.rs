@@ -14,6 +14,7 @@ pub mod io;
 pub mod limits;
 pub mod model;
 pub mod path_jail;
+pub mod quick_fix;
 pub mod rdf_literals;
 pub mod scanner;
 
@@ -40,5 +41,6 @@ pub use path_jail::{
     resolve_lsp_document_path_any, validate_workspace_scope, validate_workspace_scope_any,
     workspace_uri_to_path,
 };
+pub use quick_fix::QuickFix;
 pub use rdf_literals::parse_boolean_literal;
 pub use scanner::{OntologyFile, WorkspaceScanner};

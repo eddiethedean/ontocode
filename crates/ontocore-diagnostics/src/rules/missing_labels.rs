@@ -1,7 +1,7 @@
 use crate::input::DiagnosticInput;
 use crate::location::{entity_needles, find_in_source};
 use ontocore_core::{
-    document_for_entity, Diagnostic, DiagnosticCode, DiagnosticSeverity, EntityKind,
+    document_for_entity, Diagnostic, DiagnosticCode, DiagnosticSeverity, EntityKind, QuickFix,
 };
 use std::path::Path;
 
@@ -26,6 +26,17 @@ pub fn missing_labels(
         let text = source(&file);
         let needles = entity_needles(&entity.iri, &entity.short_name, &namespaces);
         let range = find_in_source(&text, &needles);
+        let label_value = entity.short_name.clone();
+        let quick_fix = QuickFix::ApplyPatch {
+            label: format!("Add rdfs:label \"{label_value}\""),
+            document_path: file.display().to_string(),
+            patches: vec![serde_json::json!({
+                "op": "add_label",
+                "entity_iri": entity.iri,
+                "value": label_value,
+            })],
+        }
+        .encode();
         diagnostics.push(Diagnostic {
             code: DiagnosticCode::MissingLabel,
             severity: DiagnosticSeverity::Warning,
@@ -33,7 +44,7 @@ pub fn missing_labels(
             file,
             range,
             entity_iri: Some(entity.iri.clone()),
-            quick_fix: None,
+            quick_fix,
         });
     }
     diagnostics

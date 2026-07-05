@@ -16,6 +16,7 @@ import {
 import { ReasonerPanel } from "../webviews/reasonerPanel";
 import { ExplanationPanel } from "../webviews/explanationPanel";
 import { SemanticDiffPanel } from "../webviews/semanticDiffPanel";
+import { ImportsPanel } from "../webviews/importsPanel";
 import {
   extractModule,
   migrateNamespace,
@@ -390,6 +391,30 @@ export function registerCommands(
     vscode.commands.registerCommand("ontocode.openImportGraph", async () => {
       await GraphPanel.show(context.extensionUri, { graphKind: "import" }, "Import Graph");
     }),
+    vscode.commands.registerCommand(
+      "ontocode.manageImports",
+      async (item?: OntologyTreeItem) => {
+        const filePath = item?.filePath;
+        if (!filePath) {
+          void vscode.window.showErrorMessage(
+            "OntoCode: select a Turtle ontology in the Ontologies tree"
+          );
+          return;
+        }
+        try {
+          await ImportsPanel.show(
+            context.extensionUri,
+            filePath,
+            async () => refreshExplorer(providers)
+          );
+        } catch (err) {
+          const message = err instanceof Error ? err.message : String(err);
+          void vscode.window.showErrorMessage(
+            `OntoCode: could not open imports panel — ${message}`
+          );
+        }
+      }
+    ),
     vscode.commands.registerCommand(
       "ontocode.openNeighborhoodGraph",
       async (arg?: unknown) => {

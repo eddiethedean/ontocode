@@ -9,6 +9,7 @@ Upgrade notes between OntoCode / OntoCore releases.
 | v0.7 → v0.8 | [Migration v0.7 → v0.8](v0.8.md) — refactoring, React Query/Manchester panels, disjoint axioms |
 | v0.8 → v0.9 | [Migration v0.8 → v0.9](v0.9.md) — OntoCore identity, `ontocore` façade crate (no API breaks) |
 | v0.9 → v0.10 | [Migration v0.9 → v0.10](v0.10.md) — semantic workspace, incremental index, multi-root, semantic diff |
+| v0.10 → v0.11 | [Migration v0.10 → v0.11](v0.11.md) — completion, code actions, docs export, imports UI, Open VSX |
 
 Pre-1.0: library APIs, LSP JSON, and SQL virtual table columns may change between minor releases. See [API stability](../index.md) and [workspace limits](../workspace-limits.md).
 

@@ -12,13 +12,14 @@ use crate::protocol::{
 use crate::state::{path_to_uri, resolve_workspace_for_index, ServerState};
 use lsp_server::ResponseError;
 use lsp_types::{
-    DocumentChanges, DocumentSymbol, DocumentSymbolParams, DocumentSymbolResponse,
-    GotoDefinitionParams, GotoDefinitionResponse, Hover, HoverContents, HoverParams,
-    HoverProviderCapability, InitializeParams, InitializeResult, Location, MarkupContent,
-    MarkupKind, OneOf, Position, Range, ReferenceParams, RenameParams, ServerCapabilities,
-    SymbolInformation, SymbolKind, TextDocumentEdit, TextDocumentSyncCapability,
-    TextDocumentSyncKind, TextEdit, Uri, WorkspaceEdit, WorkspaceFoldersServerCapabilities,
-    WorkspaceServerCapabilities, WorkspaceSymbolParams, WorkspaceSymbolResponse,
+    CodeActionProviderCapability, CompletionOptions, DocumentChanges, DocumentSymbol,
+    DocumentSymbolParams, DocumentSymbolResponse, GotoDefinitionParams, GotoDefinitionResponse,
+    Hover, HoverContents, HoverParams, HoverProviderCapability, InitializeParams, InitializeResult,
+    Location, MarkupContent, MarkupKind, OneOf, Position, Range, ReferenceParams, RenameParams,
+    ServerCapabilities, SymbolInformation, SymbolKind, TextDocumentEdit,
+    TextDocumentSyncCapability, TextDocumentSyncKind, TextEdit, Uri, WorkspaceEdit,
+    WorkspaceFoldersServerCapabilities, WorkspaceServerCapabilities, WorkspaceSymbolParams,
+    WorkspaceSymbolResponse,
 };
 use ontocore_catalog::{GraphBuilder, GraphRequest, IndexBuilder, OntologyCatalog};
 use ontocore_core::{validate_workspace_scope_any, EntityKind, OntologyFormat};
@@ -68,6 +69,11 @@ pub fn handle_initialize(state: &ServerState, params: InitializeParams) -> Initi
             workspace_symbol_provider: Some(OneOf::Left(true)),
             references_provider: Some(OneOf::Left(true)),
             rename_provider: Some(OneOf::Left(true)),
+            completion_provider: Some(CompletionOptions {
+                trigger_characters: Some(vec![":".to_string(), "<".to_string(), "@".to_string()]),
+                ..Default::default()
+            }),
+            code_action_provider: Some(CodeActionProviderCapability::Simple(true)),
             text_document_sync: Some(TextDocumentSyncCapability::Kind(TextDocumentSyncKind::FULL)),
             workspace: Some(WorkspaceServerCapabilities {
                 workspace_folders: Some(WorkspaceFoldersServerCapabilities {
@@ -465,6 +471,8 @@ pub fn handle_apply_axiom_patch(
         | ontocore_owl::PatchOp::SetDeprecated { entity_iri, .. }
         | ontocore_owl::PatchOp::AddDisjointClass { entity_iri, .. }
         | ontocore_owl::PatchOp::RemoveDisjointClass { entity_iri, .. } => entity_iri.clone(),
+        ontocore_owl::PatchOp::AddImport { ontology_iri, .. }
+        | ontocore_owl::PatchOp::RemoveImport { ontology_iri, .. } => ontology_iri.clone(),
     });
 
     // Serialize applies without holding ops_lock across enqueue_sync (index worker needs it).
@@ -1453,6 +1461,28 @@ pub fn handle_standard_request(
                     .unwrap_or(StandardRequestOutcome::Ok(Value::Null)),
                 Ok(None) => StandardRequestOutcome::Ok(Value::Null),
                 Err(err) => StandardRequestOutcome::LspError(err),
+            }
+        }
+        "textDocument/completion" => {
+            let Ok(params) = serde_json::from_value(params.unwrap_or(Value::Null)) else {
+                return StandardRequestOutcome::InvalidParams(invalid_params("completion"));
+            };
+            match crate::completion::handle_completion(state, params) {
+                Some(list) => serde_json::to_value(list)
+                    .map(StandardRequestOutcome::Ok)
+                    .unwrap_or(StandardRequestOutcome::Ok(Value::Null)),
+                None => StandardRequestOutcome::Ok(Value::Array(vec![])),
+            }
+        }
+        "textDocument/codeAction" => {
+            let Ok(params) = serde_json::from_value(params.unwrap_or(Value::Null)) else {
+                return StandardRequestOutcome::InvalidParams(invalid_params("codeAction"));
+            };
+            match crate::code_actions::handle_code_action(state, params) {
+                Some(actions) => serde_json::to_value(actions)
+                    .map(StandardRequestOutcome::Ok)
+                    .unwrap_or(StandardRequestOutcome::Ok(Value::Array(vec![]))),
+                None => StandardRequestOutcome::Ok(Value::Array(vec![])),
             }
         }
         _ => StandardRequestOutcome::MethodNotFound,

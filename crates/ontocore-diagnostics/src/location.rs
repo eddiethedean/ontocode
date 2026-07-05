@@ -27,11 +27,40 @@ pub fn entity_needles(
     short_name: &str,
     namespaces: &BTreeMap<String, String>,
 ) -> Vec<String> {
-    let mut needles = vec![iri.to_string(), format!("<{iri}>"), format!(":{short_name}")];
+    let mut needles = vec![iri.to_string(), format!("<{iri}>")];
     for (prefix, ns) in namespaces {
         if iri.starts_with(ns) && !prefix.is_empty() {
             needles.push(format!("{prefix}:{short_name}"));
         }
     }
+    // Bare `:LocalName` last — it is a substring of `{prefix}:{short_name}`.
+    needles.push(format!(":{short_name}"));
     needles
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use std::collections::BTreeMap;
+
+    #[test]
+    fn entity_needles_prefixed_match_before_bare_local() {
+        let mut namespaces = BTreeMap::new();
+        namespaces.insert("ex".to_string(), "http://example.org/ex#".to_string());
+        let needles = entity_needles("http://example.org/ex#Person", "Person", &namespaces);
+        let line = "ex:Person a owl:Class .";
+        let loc = find_in_source(line, &needles);
+        assert_eq!(loc.line, Some(1));
+        assert_eq!(loc.column, Some(0));
+    }
+
+    #[test]
+    fn entity_needles_bare_local_still_matches_default_prefix() {
+        let namespaces = BTreeMap::new();
+        let needles = entity_needles("http://example.org/ex#Person", "Person", &namespaces);
+        let line = ":Person a owl:Class .";
+        let loc = find_in_source(line, &needles);
+        assert_eq!(loc.line, Some(1));
+        assert_eq!(loc.column, Some(0));
+    }
 }

@@ -105,4 +105,51 @@ mod tests {
         assert_eq!(diags[0].severity, DiagnosticSeverity::Warning);
         assert!(diags[0].message.contains("rdfs:label"));
     }
+
+    #[test]
+    fn missing_label_column_at_prefixed_entity_start() {
+        let source_text = concat!(
+            "@prefix ex: <http://example.org/ex#> .\n",
+            "@prefix owl: <http://www.w3.org/2002/07/owl#> .\n\n",
+            "ex:Unlabeled a owl:Class .\n"
+        );
+        let mut namespaces = BTreeMap::new();
+        namespaces.insert("ex".to_string(), "http://example.org/ex#".to_string());
+        let documents = vec![OntologyDocument {
+            id: "doc-1".to_string(),
+            path: Path::new("test.ttl").to_path_buf(),
+            format: OntologyFormat::Turtle,
+            base_iri: Some("http://example.org/ex#".to_string()),
+            imports: vec![],
+            namespaces: namespaces.clone(),
+            parse_status: ParseStatus::Ok,
+            content_hash: "h".to_string(),
+            modified_time: 0,
+            parse_message: None,
+            parse_error_location: None,
+        }];
+        let entities = vec![Entity {
+            iri: "http://example.org/ex#Unlabeled".to_string(),
+            short_name: "Unlabeled".to_string(),
+            kind: EntityKind::Class,
+            ontology_id: "http://example.org/ex#".to_string(),
+            source_location: Default::default(),
+            labels: vec![],
+            comments: vec![],
+            deprecated: false,
+            obo_id: None,
+        }];
+        let input = DiagnosticInput {
+            documents: &documents,
+            entities: &entities,
+            annotations: &[],
+            axioms: &[],
+            namespaces: &[],
+            imports: &[],
+        };
+        let diags = missing_labels(&input, &|_| source_text.to_string());
+        assert_eq!(diags.len(), 1);
+        assert_eq!(diags[0].range.line, Some(4));
+        assert_eq!(diags[0].range.column, Some(0));
+    }
 }

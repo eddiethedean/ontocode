@@ -1,6 +1,7 @@
 use crate::error::{ReasonerError, Result};
 use ontocore_catalog::ClassHierarchy;
-use ontocore_core::{OntologyFile, WorkspaceScanner};
+use ontocore_core::{OntologyFile, OntologyFormat, WorkspaceScanner};
+use ontocore_parser::{parse_ontology_file, parse_ontology_text, serialize_quads_turtle};
 use ontologos_bridge::{core_to_triples_all, merge_triples_into_ontology};
 use ontologos_core::Ontology;
 use ontologos_parser::load_ontology;
@@ -67,13 +68,10 @@ impl WorkspaceInputLoader {
                 // Hash override body so open-buffer edits invalidate the reasoner cache.
                 hasher.update(file.path.to_string_lossy().as_bytes());
                 hasher.update(text.as_bytes());
-                load_ontology_from_temp(&file.path, text)?
+                load_workspace_file(&file.path, file.format, Some(text), &file)?
             } else {
                 hasher.update(file.content_hash.as_bytes());
-                load_ontology(&file.path).map_err(|e| ReasonerError::Load {
-                    path: file.path.clone(),
-                    message: e.to_string(),
-                })?
+                load_workspace_file(&file.path, file.format, None, file)?
             };
             merge_ontology(&mut ontology, loaded)?;
         }
@@ -84,7 +82,17 @@ impl WorkspaceInputLoader {
             }
             hasher.update(path.to_string_lossy().as_bytes());
             hasher.update(text.as_bytes());
-            let loaded = load_ontology_from_temp(path, text)?;
+            let format = OntologyFormat::from_extension(
+                path.extension().and_then(|e| e.to_str()).unwrap_or("ttl"),
+            );
+            let file_stub = OntologyFile {
+                path: path.clone(),
+                format,
+                content_hash: String::new(),
+                modified_time: 0,
+                size_bytes: text.len() as u64,
+            };
+            let loaded = load_workspace_file(path, format, Some(text), &file_stub)?;
             merge_ontology(&mut ontology, loaded)?;
         }
 
@@ -123,7 +131,62 @@ fn paths_equal(a: &Path, b: &Path) -> bool {
     a == b || a.canonicalize().ok().zip(b.canonicalize().ok()).is_some_and(|(x, y)| x == y)
 }
 
+fn load_workspace_file(
+    path: &Path,
+    format: OntologyFormat,
+    override_text: Option<&str>,
+    file: &OntologyFile,
+) -> Result<Ontology> {
+    if format == OntologyFormat::Obo {
+        return load_obo_as_ontology(path, override_text, file);
+    }
+    if let Some(text) = override_text {
+        return load_ontology_from_temp(path, text);
+    }
+    load_ontology(path).map_err(|e| ReasonerError::Load {
+        path: path.to_path_buf(),
+        message: e.to_string(),
+    })
+}
+
+fn load_obo_as_ontology(
+    path: &Path,
+    override_text: Option<&str>,
+    file: &OntologyFile,
+) -> Result<Ontology> {
+    let parsed = if let Some(text) = override_text {
+        parse_ontology_text(path, OntologyFormat::Obo, "reasoner", text, text.as_bytes())
+    } else {
+        parse_ontology_file(
+            path,
+            OntologyFormat::Obo,
+            "reasoner",
+            &file.content_hash,
+            file.modified_time,
+        )
+    }
+    .map_err(|e| ReasonerError::Load { path: path.to_path_buf(), message: e.to_string() })?;
+
+    if parsed.quads().is_empty() {
+        return Err(ReasonerError::Load {
+            path: path.to_path_buf(),
+            message: "OBO file produced no RDF quads".to_string(),
+        });
+    }
+
+    let turtle = serialize_quads_turtle(parsed.quads()).map_err(|e| ReasonerError::Load {
+        path: path.to_path_buf(),
+        message: e.to_string(),
+    })?;
+    load_ontology_from_temp_with_suffix(path, &turtle, "ttl")
+}
+
 fn load_ontology_from_temp(path: &Path, text: &str) -> Result<Ontology> {
+    let ext = path.extension().and_then(|e| e.to_str()).unwrap_or("ttl");
+    load_ontology_from_temp_with_suffix(path, text, ext)
+}
+
+fn load_ontology_from_temp_with_suffix(path: &Path, text: &str, ext: &str) -> Result<Ontology> {
     use ontocore_core::MAX_FILE_BYTES;
     if text.len() as u64 > MAX_FILE_BYTES {
         return Err(ReasonerError::Load {
@@ -131,7 +194,6 @@ fn load_ontology_from_temp(path: &Path, text: &str) -> Result<Ontology> {
             message: format!("document exceeds maximum size of {MAX_FILE_BYTES} bytes"),
         });
     }
-    let ext = path.extension().and_then(|e| e.to_str()).unwrap_or("ttl");
     let tmp = tempfile::Builder::new()
         .suffix(&format!(".{ext}"))
         .tempfile()
@@ -185,5 +247,29 @@ mod tests {
             disk_input.content_hash, override_input.content_hash,
             "open-buffer overrides must change reasoner content_hash"
         );
+    }
+
+    #[test]
+    fn loads_minimal_obo_workspace() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("test.obo");
+        fs::write(
+            &path,
+            "format-version: 1.2\nontology: test\n\n\
+[Term]\n\
+id: TEST:0000001\n\
+name: child\n\
+is_a: TEST:0000002 ! parent\n\n\
+[Term]\n\
+id: TEST:0000002\n\
+name: parent\n",
+        )
+        .unwrap();
+
+        let input = WorkspaceInputLoader::new(dir.path())
+            .load(ClassHierarchy::default())
+            .expect("OBO workspace should load for reasoner");
+        let triples = core_to_triples_all(&input.ontology).expect("triples");
+        assert!(!triples.is_empty(), "OBO-derived ontology should contain triples");
     }
 }

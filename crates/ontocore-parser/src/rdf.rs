@@ -4,7 +4,7 @@ use ontocore_core::{
     read_file_capped, Annotation, Axiom, Entity, EntityKind, Import, Namespace, OntologyFormat,
     ParseStatus, SourceLocation, AXIOM_KIND_SUB_CLASS_OF,
 };
-use oxigraph::io::{RdfFormat, RdfParseError, RdfParser};
+use oxigraph::io::{RdfFormat, RdfParseError, RdfParser, RdfSerializer};
 use oxigraph::model::{GraphName, Literal, NamedNode, Quad, Subject, Term};
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 #[cfg(test)]
@@ -374,20 +374,39 @@ fn named_node(iri: &str) -> Option<NamedNode> {
     NamedNode::new(iri).ok()
 }
 
-/// Expand OBO-style annotation CURIEs used by the minimal OBO parser.
+const OBO_INOWL_NS: &str = "http://www.geneontology.org/formats/oboInOwl#";
+const OBO_PURL_NS: &str = "http://purl.obolibrary.org/obo/";
+
+/// Expand OBO-style annotation CURIEs used by the OBO parser.
 fn expand_annotation_predicate(pred: &str) -> Option<String> {
     if pred.contains("://") {
         return Some(pred.to_string());
     }
-    match pred {
-        "obo:hasExactSynonym" => {
-            Some("http://www.geneontology.org/formats/oboInOwl#hasExactSynonym".to_string())
-        }
-        "obo:hasDbXref" => {
-            Some("http://www.geneontology.org/formats/oboInOwl#hasDbXref".to_string())
-        }
+    let (prefix, local) = pred.split_once(':')?;
+    match prefix {
+        "obo" => Some(expand_obo_curie(local)),
         _ => None,
     }
+}
+
+fn expand_obo_curie(local: &str) -> String {
+    match local {
+        "hasExactSynonym" | "hasBroadSynonym" | "hasNarrowSynonym" | "hasRelatedSynonym"
+        | "hasDbXref" => format!("{OBO_INOWL_NS}{local}"),
+        // OBO term IDs (e.g. IAO_0000115) use the PURL namespace.
+        _ if local.contains('_') => format!("{OBO_PURL_NS}{local}"),
+        _ => format!("{OBO_INOWL_NS}{local}"),
+    }
+}
+
+/// Serialize RDF quads as Turtle (used to bridge OBO catalog quads into OntoLogos).
+pub fn serialize_quads_turtle(quads: &[Quad]) -> Result<String> {
+    let mut serializer = RdfSerializer::from_format(RdfFormat::Turtle).for_writer(Vec::new());
+    for quad in quads {
+        serializer.serialize_quad(quad).map_err(|e| ParseError::Rdf(e.to_string()))?;
+    }
+    let bytes = serializer.finish().map_err(|e| ParseError::Rdf(e.to_string()))?;
+    String::from_utf8(bytes).map_err(|e| ParseError::Rdf(e.to_string()))
 }
 
 fn empty_result(

@@ -1,12 +1,8 @@
 # OntoCode
 
-**OntoCode** is the VS Code ontology IDE, powered by **OntoCore** (`ontocore-lsp` language server).
+**Git-native ontology IDE for VS Code** — powered by **OntoCore** (`ontocore-lsp` language server).
 
-[![Documentation](https://readthedocs.org/projects/ontocode-vs/badge/?version=latest)](https://ontocode-vs.readthedocs.io/en/latest/ontocode/vscode-extension/)
-[![VS Code extension docs](https://img.shields.io/badge/docs-VS%20Code%20extension-blue)](https://ontocode-vs.readthedocs.io/en/latest/ontocode/vscode-extension/)
-[![First success](https://img.shields.io/badge/docs-First%20success-blue)](https://ontocode-vs.readthedocs.io/en/latest/guides/first-success/)
-
-**Documentation:** [OntoCode extension](https://ontocode-vs.readthedocs.io/en/latest/ontocode/vscode-extension/) · [OntoCore](https://ontocode-vs.readthedocs.io/en/latest/ontocore/) — [First success in 10 minutes](https://ontocode-vs.readthedocs.io/en/latest/guides/first-success/) · [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) · [FAQ](https://ontocode-vs.readthedocs.io/en/latest/faq/)
+> **New here?** [First success (~10 min)](https://ontocode-vs.readthedocs.io/en/latest/guides/first-success/) · [Migrating from Protégé?](https://ontocode-vs.readthedocs.io/en/latest/guides/protege-migration/) · [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) · [Full extension docs](https://ontocode-vs.readthedocs.io/en/latest/ontocode/vscode-extension/) · [FAQ](https://ontocode-vs.readthedocs.io/en/latest/faq/)
 
 > **CLI or Rust crates?** See the [Rust & CLI documentation path](https://ontocode-vs.readthedocs.io/en/latest/guides/rust-crates/).
 
@@ -72,7 +68,7 @@ To inspect a class, property, or individual:
 1. Expand **Classes** (or **Properties** / **Individuals**).
 2. **Click the entity name** (e.g. `Person`).
 
-The **Entity Inspector** panel opens with:
+The Entity Inspector panel opens with:
 
 - IRI and kind (class, object property, individual, …)
 - Labels and comments
@@ -116,7 +112,7 @@ Open a `.ttl` (or other supported) file and use standard VS Code navigation:
 | **OntoCode: Create Class** | Create a new class in a Turtle file |
 | **OntoCode: Create Property** | Create a new property in a Turtle file |
 | **OntoCode: Create Individual** | Create a new individual in a Turtle file |
-| **OntoCode: Run Reasoner** | Classify workspace (EL/RL/RDFS) and open Results panel |
+| **OntoCode: Run Reasoner** | Classify workspace (EL/RL/RDFS/DL/auto) and open Results panel |
 | **OntoCode: Show Explanation** | Open explanation for an unsatisfiable class |
 | **OntoCode: Set Hierarchy Mode** | Toggle asserted / inferred / combined class tree |
 | **OntoCode: Find Entity Usages** | List all references to an entity IRI |
@@ -166,7 +162,7 @@ More detail: [Installation & troubleshooting](https://ontocode-vs.readthedocs.io
 
 **Shipped:** explorer; **React** entity inspector, graph panels, Query Workbench, Manchester editor, Refactor Preview, and **Semantic Diff** panel; workspace refactor (rename IRI, migrate namespace, move, extract); EL/RL/RDFS/DL/auto reasoner (OntoLogos 1.0); OBO syntax highlighting and indexing (write-back: Turtle only); diagnostics; LSP navigation and refactoring; multi-root workspaces; optional index disk cache.
 
-**Planned:** owlmake workflow plugin integration (v1.0).
+**Planned:** owlmake workflow plugin integration (v1.0). Full Protégé parity (OBO write-back in IDE, property chain editing) is a **v1.0** goal — see [Protégé parity matrix](https://ontocode-vs.readthedocs.io/en/latest/design/PROTEGE_PARITY/).
 
 ---
 
@@ -179,7 +175,7 @@ Release builds bundle `ontocore-lsp` for Linux (x64, arm64), macOS (Apple Silico
 ## Links
 
 - [OntoCode extension documentation](https://ontocode-vs.readthedocs.io/en/latest/ontocode/vscode-extension/) — full extension guide on Read the Docs
-- **Getting started:** [First success](https://ontocode-vs.readthedocs.io/en/latest/guides/first-success/) · [VS Code install & troubleshooting](https://ontocode-vs.readthedocs.io/en/latest/vscode-install/)
+- **Getting started:** [First success](https://ontocode-vs.readthedocs.io/en/latest/guides/first-success/) · [VS Code install & troubleshooting](https://ontocode-vs.readthedocs.io/en/latest/vscode-install/) · [Feature tour](https://ontocode-vs.readthedocs.io/en/latest/ontocode/feature-tour/)
 - **Guides:** [Reasoner](https://ontocode-vs.readthedocs.io/en/latest/guides/reasoner/) · [Query Workbench](https://ontocode-vs.readthedocs.io/en/latest/ontocode/query-workbench/) · [Manchester editor](https://ontocode-vs.readthedocs.io/en/latest/ontocode/manchester-editor/) · [Authoring & patches](https://ontocode-vs.readthedocs.io/en/latest/authoring/)
 - **Reference:** [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) · [Patch reference](https://ontocode-vs.readthedocs.io/en/latest/patch-reference/) · [SQL](https://ontocode-vs.readthedocs.io/en/latest/sql-reference/) · [SPARQL](https://ontocode-vs.readthedocs.io/en/latest/sparql-reference/) · [LSP API](https://ontocode-vs.readthedocs.io/en/latest/lsp-api/)
 - **Enterprise:** [Evaluation guide](https://ontocode-vs.readthedocs.io/en/latest/guides/enterprise-eval/) · [Production readiness](https://ontocode-vs.readthedocs.io/en/latest/guides/production-readiness/)

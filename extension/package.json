@@ -1,7 +1,7 @@
 {
   "name": "ontocode",
   "displayName": "OntoCode",
-  "description": "A modern ontology IDE for VS Code powered by OntoCore. Browse, edit, query, reason over, and validate OWL/RDF/OBO ontologies with Protégé-competitive workflows in Git and CI.",
+  "description": "Git-native ontology IDE for VS Code powered by OntoCore. Browse, edit Turtle, query, reason (EL–DL), validate, and diff OWL/RDF/OBO ontologies in Git and CI.",
   "version": "0.10.0",
   "publisher": "ontocode",
   "license": "MIT",
@@ -9,7 +9,7 @@
     "type": "git",
     "url": "https://github.com/eddiethedean/ontocode.git"
   },
-  "homepage": "https://ontocode-vs.readthedocs.io/en/latest/ontocode/vscode-extension/",
+  "homepage": "https://ontocode-vs.readthedocs.io/en/latest/guides/first-success/",
   "bugs": {
     "url": "https://github.com/eddiethedean/ontocode/issues"
   },
@@ -17,9 +17,16 @@
     "vscode": "^1.85.0"
   },
   "categories": [
+    "Visualization",
     "Other"
   ],
   "icon": "media/icon.png",
+  "screenshots": [
+    {
+      "path": "media/explorer-preview.png",
+      "caption": "OntoCode explorer, Entity Inspector, and diagnostics sidebar"
+    }
+  ],
   "galleryBanner": {
     "color": "#0078D4",
     "theme": "dark"

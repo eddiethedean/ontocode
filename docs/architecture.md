@@ -1,8 +1,12 @@
 # Ecosystem Architecture
 
+> **Audience:** Evaluators, adopters, and new contributors — **canonical user-facing architecture**.
+>
+> **Contributor crate layout:** [Implementation architecture](design/ARCHITECTURE.md) (internal modules only).
+>
 > **v0.10 ships today:** OntoCode (VS Code), OntoCore (CLI/LSP/library), semantic diff, incremental indexing, Ontologos reasoning, ROBOT CLI wrappers.
 > **Planned v1.0 (not installable yet):** plugin host, language SDKs, MCP server, owlmake-style workflow plugins.
-> Canonical capability matrix: [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/).
+> Canonical capability matrix: [What ships today](SHIPPED.md).
 
 ```
 External Workflow Plugins (v1.0 target)  ← not shipped in v0.10

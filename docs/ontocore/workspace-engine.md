@@ -25,7 +25,7 @@ for d in ws.diagnostics() {
 }
 ```
 
-**Pre-1.0:** `Workspace` may change until v0.10. For stable embedding today, use `IndexBuilder` directly.
+**Stable since v0.10:** `Workspace` is the recommended high-level API. Lower-level `IndexBuilder` remains available for custom pipelines.
 
 ## Lower-level indexing
 
@@ -62,4 +62,4 @@ Indexing enforces caps on file size, entity count, triple count, and query resul
 | CLI | `ontocore validate .` |
 | LSP | `ontocore/indexWorkspace` |
 
-OntoCore CLI is currently invoked as **`ontocore`**. An `ontocore` alias is planned for v0.10.
+The CLI binary is **`ontocore`** (`ontocore-cli` crate). Install with `cargo install ontocore-cli --locked`.

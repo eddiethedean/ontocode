@@ -1,4 +1,21 @@
 //! High-level workspace API for OntoCore (stable since v0.10).
+//!
+//! Prefer [`Workspace`] for embedding OntoCore in applications. Use
+//! [`crate::catalog::IndexBuilder`] when you need buffer overrides or custom
+//! incremental rebuild logic.
+//!
+//! # Example
+//!
+//! ```
+//! use ontocore::Workspace;
+//!
+//! # fn demo() -> Result<(), Box<dyn std::error::Error>> {
+//! let ws = Workspace::open(".")?;
+//! let stats = ws.stats();
+//! assert!(stats.class_count >= 0);
+//! # Ok(())
+//! # }
+//! ```
 
 use crate::catalog::{
     CatalogError, CatalogStats, ClassHierarchy, EntityDetail, GraphBuilder, GraphFilters,
@@ -10,6 +27,9 @@ use ontocore_core::Diagnostic;
 use std::path::{Path, PathBuf};
 
 /// Options for [`Workspace::open_with_options`].
+///
+/// Use [`WorkspaceOptions::single`] for a single root, or add scan roots for
+/// multi-folder workspaces (same behavior as v0.10 LSP multi-root indexing).
 #[derive(Debug, Clone)]
 pub struct WorkspaceOptions {
     /// Primary workspace root (indexed catalog workspace path).
@@ -37,6 +57,9 @@ impl WorkspaceOptions {
 }
 
 /// An indexed ontology workspace.
+///
+/// Open with [`Workspace::open`] or [`Workspace::open_with_options`], then query
+/// via [`Self::query`], [`Self::sparql`], or inspect via [`Self::catalog`].
 pub struct Workspace {
     options: WorkspaceOptions,
     catalog: OntologyCatalog,

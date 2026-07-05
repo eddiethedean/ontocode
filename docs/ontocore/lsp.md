@@ -9,7 +9,7 @@
 | Language server | `ontocore-lsp` |
 | Bundled path (extension) | `extension/server/<platform>-<arch>/ontocore-lsp` |
 
-A rename to `ontocore-lsp` is planned after the public API stabilizes (v1.0 target).
+The binary has been named **`ontocore-lsp`** since the v0.9 OntoCore identity rename. Wire format may change until v1.0 — see [LSP API reference](../lsp-api.md).
 
 ## Custom methods
 
@@ -26,6 +26,7 @@ OntoCore exposes workspace operations via `ontocore/*` LSP methods:
 | `ontocore/parseManchester` | Manchester editor |
 | `ontocore/runReasoner` / `ontocore/getExplanation` | Reasoning |
 | `ontocore/findUsages` / `ontocore/previewRefactor` / `ontocore/applyRefactor` | Refactoring |
+| `ontocore/semanticDiff` | Semantic diff between git refs or directories |
 
 Full wire format: **[LSP API reference](../lsp-api.md)**.
 

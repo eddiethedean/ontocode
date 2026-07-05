@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/eddiethedean/ontocode/docs/lsp-protocol.schema.json",
-  "title": "OntoCore LSP protocol (v0.8)",
-  "description": "JSON Schema for ontocore/* custom LSP method payloads (v0.8). Method routing is documented in lsp-api.md; graph node/edge shapes are partial.",
+  "title": "OntoCore LSP protocol (v0.10)",
+  "description": "JSON Schema for ontocore/* custom LSP method payloads (v0.10). Method routing is documented in lsp-api.md.",
   "definitions": {
     "EntityKind": {
       "type": "string",
@@ -438,16 +438,87 @@
     },
     "GetGraphParams": {
       "type": "object",
-      "required": ["kind"],
+      "required": ["graph_kind"],
       "properties": {
-        "kind": {
+        "graph_kind": {
           "type": "string",
           "enum": ["class", "property", "import", "neighborhood"]
         },
         "root_iri": { "type": ["string", "null"] },
-        "ontology_iri": { "type": ["string", "null"] },
+        "depth": { "type": "integer", "default": 2 },
         "include_inferred": { "type": "boolean", "default": false },
-        "hide_deprecated": { "type": "boolean", "default": false }
+        "filters": {
+          "type": "object",
+          "properties": {
+            "hide_deprecated": { "type": "boolean", "default": false }
+          },
+          "additionalProperties": true
+        }
+      },
+      "additionalProperties": false
+    },
+    "GraphNode": {
+      "type": "object",
+      "required": ["id", "label", "kind"],
+      "properties": {
+        "id": { "type": "string" },
+        "label": { "type": "string" },
+        "kind": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "GraphEdge": {
+      "type": "object",
+      "required": ["source", "target", "kind", "inferred"],
+      "properties": {
+        "source": { "type": "string" },
+        "target": { "type": "string" },
+        "kind": { "type": "string" },
+        "inferred": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "GraphPayload": {
+      "type": "object",
+      "required": ["nodes", "edges", "truncated", "graph_kind"],
+      "properties": {
+        "nodes": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/GraphNode" }
+        },
+        "edges": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/GraphEdge" }
+        },
+        "truncated": { "type": "boolean" },
+        "graph_kind": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "GetGraphResult": {
+      "type": "object",
+      "required": ["graph"],
+      "properties": {
+        "graph": { "$ref": "#/definitions/GraphPayload" }
+      },
+      "additionalProperties": false
+    },
+    "SemanticDiffParams": {
+      "type": "object",
+      "properties": {
+        "left_ref": { "type": ["string", "null"] },
+        "right_ref": { "type": ["string", "null"] },
+        "left_path": { "type": ["string", "null"] },
+        "right_path": { "type": ["string", "null"] },
+        "reasoner": { "type": "boolean", "default": false }
+      },
+      "additionalProperties": false
+    },
+    "SemanticDiffResult": {
+      "type": "object",
+      "required": ["diff"],
+      "properties": {
+        "diff": { "type": "object", "additionalProperties": true }
       },
       "additionalProperties": false
     },

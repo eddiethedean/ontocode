@@ -1,14 +1,14 @@
 # Implementation architecture
 
-> **Implementation architecture** — crate layout, diagrams, and dependency rules for contributors.
+> **Audience:** Contributors only — crate layout, dependency rules, and internal diagrams.
 >
-> **Ecosystem architecture (canonical):** [Platform architecture](../architecture.md).
+> **Do not use this page to evaluate shipped product features.** See [What ships today](../SHIPPED.md) and [Platform architecture](../architecture.md).
 >
-> **Document status: target architecture with v0.9 partial implementation**
+> **Ecosystem architecture (canonical for users):** [Platform architecture](../architecture.md).
 >
-> **Shipped in v0.7:** workspace scanner, Oxigraph parsing, in-memory catalog, SQL/SPARQL queries, diagnostics, CLI, LSP explorer + Problems panel, Turtle patch write-back, Query Workbench + Manchester editor (extension), Horned-OWL catalog bridge (`ontocore-owl`), **EL/RL/RDFS reasoning** (`ontocore-reasoner`), **React inspector + graphs**, **OBO index**, **ROBOT CLI wrappers**. See [What ships today](../SHIPPED.md).
+> **Shipped through v0.10:** workspace scanner, incremental indexing, multi-root workspaces, SQL/SPARQL queries, diagnostics, CLI, LSP, Turtle write-back, Query Workbench + Manchester editor, React webviews (inspector, graphs, workbench, refactor preview, semantic diff, reasoner), EL–DL reasoning (OntoLogos 1.0), OBO index, ROBOT CLI wrappers, semantic diff. See [What ships today](../SHIPPED.md).
 >
-> **Planned:** see [Platform roadmap](../roadmap.md) for v0.10+ milestones. Full DL reasoning (OntoLogos 1.0), semantic diff, full OBO write-back.
+> **Planned v1.0:** plugin host, full OBO write-back in IDE, property chain editing. See [Platform roadmap](../roadmap.md).
 >
 > **Reference:** [lsp-api.md](../lsp-api.md), [adr/README.md](adr/README.md), [DEPENDENCY_MATRIX.md](DEPENDENCY_MATRIX.md).
 

@@ -1,5 +1,9 @@
 # Ecosystem Architecture
 
+> **Audience:** Evaluators, adopters, and contributors — high-level product architecture.
+>
+> **Contributor crate layout:** [Implementation architecture](docs/design/ARCHITECTURE.md) (internal modules, not a user capability list).
+>
 > **v0.10 ships today:** OntoCode (VS Code), OntoCore (CLI/LSP/library), semantic diff, incremental indexing, Ontologos reasoning, ROBOT CLI wrappers.
 > **Planned v1.0 (not installable yet):** plugin host, language SDKs, MCP server, owlmake-style workflow plugins.
 > Canonical capability matrix: [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/).

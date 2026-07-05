@@ -81,6 +81,7 @@ All crates, binaries, and LSP methods use **`ontocore`** naming. Upgrading from 
 
 ## Next steps
 
+- [Rust API reference](rust-api.md)
 - [Architecture](architecture.md)
 - [Crate map](crate-map.md)
 - [Workspace engine](workspace-engine.md)

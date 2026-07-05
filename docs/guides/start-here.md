@@ -14,17 +14,20 @@ New to OWL/RDF vocabulary? Read [Ontology concepts](../concepts.md) first.
 ## When not to use OntoCode (v0.10)
 
 - You need **full OBO write-back** in the IDE (OBO is index/browse only; edit Turtle or use ROBOT).
-- Multi-root VS Code workspaces are supported (v0.10+) — all folders are indexed.
 - You need **full SQL** (JOINs, `ORDER BY`, `LIKE`) — use SQL-like virtual tables or SPARQL instead.
 - You need a **plugin host** or owlmake integration (planned v1.0; not installable yet).
 
 Canonical matrix: [What ships today](../SHIPPED.md).
 
+## Supported in v0.10
+
+- **Multi-root workspaces:** All workspace folders are indexed on open. Manual **Index Workspace** may prompt you to pick a folder when multiple roots are open.
+
 ---
 
 ## VS Code extension tasks
 
-[First success in 10 minutes](first-success.md) — install, sample ontologies, browse, edit `.ttl`.
+[First success (~10 min core path)](first-success.md) — install, sample ontologies, browse, edit `.ttl`.
 
 **Then:** [Install options](../vscode-install.md) · [Authoring guide](../authoring.md) · [Query Workbench](../ontocode/query-workbench.md) · [Reasoner](reasoner.md)
 

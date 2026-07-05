@@ -7,6 +7,7 @@ site_url: https://ontocode-vs.readthedocs.io/
 repo_url: https://github.com/eddiethedean/ontocode
 repo_name: eddiethedean/ontocode
 edit_uri: edit/main/docs/
+copyright: OntoCode documentation · <a href="SHIPPED/">What ships today</a> (canonical capability matrix)
 
 docs_dir: docs
 strict: true
@@ -69,20 +70,21 @@ markdown_extensions:
 nav:
   - Home: index.md
   - Get started:
-      - First success (10 min): guides/first-success.md
+      - "First success (~10 min core path)": guides/first-success.md
       - Pick a task: guides/start-here.md
       - What ships today: SHIPPED.md
       - Install VS Code: vscode-install.md
       - Install CLI: getting-started.md
       - Ontology concepts: concepts.md
+      - Migrating from Protégé: guides/protege-migration.md
   - Use OntoCode:
+      - Feature tour: ontocode/feature-tour.md
       - Overview: ontocode/vscode-extension.md
       - Authoring (Turtle): authoring.md
       - Inspector: ontocode/inspector.md
       - Query Workbench: ontocode/query-workbench.md
       - Manchester editor: ontocode/manchester-editor.md
       - Graph visualization: ontocode/graph-view.md
-      - Webview protocol: webview-protocol.md
       - Refactoring: guides/refactoring.md
       - Semantic diff: ontocode/semantic-diff.md
       - Reasoner: guides/reasoner.md
@@ -91,21 +93,29 @@ nav:
       - Best practices: guides/best-practices.md
   - Use OntoCore:
       - Overview: ontocore/index.md
-      - CLI reference: cli-reference.md
       - Rust library: guides/rust-library.md
       - Rust & CLI guide: guides/rust-crates.md
       - CI integration: ci-integration.md
       - ROBOT interop: guides/robot-interop.md
-      - SQL-like virtual tables: sql-reference.md
-      - SPARQL: sparql-reference.md
-      - Patch JSON: patch-reference.md
-      - LSP API: lsp-api.md
       - Crate map: ontocore/crate-map.md
       - Workspace engine: ontocore/workspace-engine.md
       - Examples:
           - Query cookbook: examples/queries.md
           - Sample patches: examples/patches.md
           - Refactoring: examples/refactoring.md
+  - Reference:
+      - CLI reference: cli-reference.md
+      - Rust API: ontocore/rust-api.md
+      - SQL virtual tables: sql-reference.md
+      - SPARQL: sparql-reference.md
+      - Patch JSON: patch-reference.md
+      - LSP API: lsp-api.md
+      - LSP JSON Schema: lsp-protocol.schema.json
+      - Webview protocol: webview-protocol.md
+      - Errors: errors.md
+      - Workspace limits: workspace-limits.md
+      - OntoCore SQL views: ontocore/sql-views.md
+      - OntoCore LSP overview: ontocore/lsp.md
   - Evaluate:
       - Vision: vision.md
       - Architecture: architecture.md
@@ -121,7 +131,6 @@ nav:
       - Release timeline: guides/release-timeline.md
       - LGPL compliance: guides/lgpl-compliance.md
       - Security: security.md
-      - Workspace limits: workspace-limits.md
   - Help:
       - FAQ: faq.md
       - Troubleshooting: troubleshooting.md
@@ -134,12 +143,12 @@ nav:
           - v0.8 → v0.9: migration/v0.9.md
           - v0.9 → v0.10: migration/v0.10.md
       - Release integrity: release-integrity.md
-      - Errors: errors.md
   - Contribute:
       - Guide: contributing.md
       - Releasing: releasing.md
       - Marketplace publish: marketplace-publish.md
       - Internals (design targets): internals.md
+  - Developer design:
       - Design overview: design/README.md
       - "Milestones (shipped)": design/ROADMAP.md
       - "Implementation architecture": design/ARCHITECTURE.md
@@ -147,7 +156,7 @@ nav:
       - Dependency matrix: design/DEPENDENCY_MATRIX.md
       - Licenses: design/LICENSES.md
       - Plugin model (v1.0 target): ontocore/plugin-model.md
-      - Specs:
+      - Specs (planned features):
           - Product plan: design/PLAN.md
           - Technical spec: design/SPEC.md
           - LSP (target): design/LSP_SPEC.md

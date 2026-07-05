@@ -2,8 +2,6 @@
 
 **OntoCore** is the Rust semantic workspace engine behind OntoCode: the `ontocore` CLI (OntoCore CLI), published `ontocore` and `ontocore-*` crates on [crates.io](https://crates.io/search?q=ontocore), and the `ontocore-lsp` language server (OntoCore LSP, bundled in the VS Code extension).
 
-> OntoCore is currently invoked as **`ontocore`** on the command line. An `ontocore` alias is planned for v0.10.
-
 > **Looking for the VS Code extension only?** See [OntoCode VS Code extension](../ontocode/vscode-extension.md).
 
 ## Quick start
@@ -35,10 +33,10 @@ No clone required. Release binaries: [release integrity](../release-integrity.md
 | Topic | Guide |
 |-------|-------|
 | OntoCore overview | [ontocore/index.md](../ontocore/index.md) |
-| Crate map, examples | [Rust library guide](rust-library.md) |
+| Crate map, examples | [Rust library guide](rust-library.md) · [Rust API reference](../ontocore/rust-api.md) |
 | `Workspace` API | [`examples/ontocore_workspace.rs`](https://github.com/eddiethedean/ontocode/blob/main/examples/ontocore_workspace.rs) |
 
-Primary dependency: `ontocore = "0.9"`. Implementation crates remain `ontocore-*` for compatibility.
+Primary dependency: `ontocore = "0.10"`. Pin an exact patch in CI: `cargo install ontocore-cli --locked --version 0.10.0`. See [Rust API reference](../ontocore/rust-api.md).
 
 ## LSP integration
 

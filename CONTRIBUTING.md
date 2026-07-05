@@ -87,7 +87,7 @@ Full extension packaging (bundles LSP for current platform):
 
 ### Golden and fixture snapshots
 
-Some tests compare output to committed snapshots. To update:
+Some tests compare output to committed snapshots. To update (env var names retain the legacy `ONTOINDEX_*` prefix):
 
 ```bash
 # SQL/query golden snapshots (tests/golden/snapshots/)

@@ -1,5 +1,7 @@
 # Modernizing the Ontology Ecosystem
 
+> **Long-term vision.** For what ships in **v0.10**, see [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/). Plugin hosting and owlmake integration are **v1.0 targets** — not installable yet.
+
 ## Mission
 
 Build the modern open-source platform for ontology engineering.

@@ -3,7 +3,7 @@
 > **Status:** Documents behavior in **OntoCore v0.10.0**. Pre-1.0 APIs may change.
 > Canonical feature list: [What ships today](SHIPPED.md).
 
-This document describes **what ships today** in `ontocore-lsp`. For the **v1.0 target** (including `runRobot`, graph APIs), see [LSP_SPEC.md](design/LSP_SPEC.md).
+This document describes **what ships today** in `ontocore-lsp`. For the **v1.0 target** (extended plugin methods), see [LSP_SPEC.md](design/LSP_SPEC.md).
 
 ## Wire format
 
@@ -12,7 +12,7 @@ LSP JSON uses **snake_case** for enums serialized from Rust (`EntityKind`, `Pars
 **Source of truth:**
 
 - Types: [`protocol.rs` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/crates/ontocore-lsp/src/protocol.rs)
-- JSON Schema (v0.8): [`docs/lsp-protocol.schema.json`](lsp-protocol.schema.json) — core query/patch/reasoner/refactor types; `getGraph` payload types are documented in prose below until added to the schema.
+- JSON Schema (v0.10): [`docs/lsp-protocol.schema.json`](lsp-protocol.schema.json) — query, patch, reasoner, refactor, graph, and semantic diff payloads.
 - Handlers: [`handlers.rs` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/crates/ontocore-lsp/src/handlers.rs)
 - Extension client: [`client.ts` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/extension/src/lsp/client.ts)
 

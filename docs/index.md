@@ -27,7 +27,7 @@ OntoCode is a modern ontology IDE for VS Code, powered by <strong>OntoCore</stro
 </div>
 
 <div class="oc-hero-actions" markdown>
-[First success (10 min)](guides/first-success.md){ .md-button .md-button--primary }
+[First success (~10 min core path)](guides/first-success.md){ .md-button .md-button--primary }
 [Install VS Code](vscode-install.md){ .md-button .md-button--primary }
 [Install CLI](getting-started.md){ .md-button }
 [What ships today](SHIPPED.md){ .md-button }
@@ -40,7 +40,8 @@ OntoCode is a modern ontology IDE for VS Code, powered by <strong>OntoCore</stro
 
 **Not sure where to begin?** Pick a path:
 
-- **[First success in 10 minutes](guides/first-success.md)** — install the extension, open sample ontologies, browse and edit.
+- **[First success (~10 min core path)](guides/first-success.md)** — install the extension, open sample ontologies, browse and edit.
+- **[Feature tour](ontocode/feature-tour.md)** — visual overview of explorer, inspector, and React panels.
 - **[VS Code extension](ontocode/vscode-extension.md)** — Marketplace install, explorer, inspector, Query Workbench (no Rust required).
 - **[CLI / Rust](ontocore/index.md)** — `ontocore` CLI, crates, CI and embedding.
 
@@ -186,6 +187,9 @@ See the full matrix: **[What ships today](SHIPPED.md)**.
 | **What ships today (canonical)** | [SHIPPED.md](SHIPPED.md) |
 | Pick a task (all paths) | [guides/start-here.md](guides/start-here.md) |
 | First success tutorial | [guides/first-success.md](guides/first-success.md) |
+| Feature tour | [ontocode/feature-tour.md](ontocode/feature-tour.md) |
+| Migrating from Protégé | [guides/protege-migration.md](guides/protege-migration.md) |
+| Rust API reference | [ontocore/rust-api.md](ontocore/rust-api.md) |
 | Reasoner | [guides/reasoner.md](guides/reasoner.md) |
 | Query Workbench | [ontocode/query-workbench.md](ontocode/query-workbench.md) |
 | Manchester editor | [ontocode/manchester-editor.md](ontocode/manchester-editor.md) |

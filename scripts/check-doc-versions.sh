@@ -192,7 +192,7 @@ else
 fi
 
 # v0.8 docs added in adoption review
-for file in docs/guides/refactoring.md docs/migration/v0.8.md docs/migration/v0.9.md docs/migration/v0.10.md docs/examples/refactoring.md docs/ontocode/semantic-diff.md; do
+for file in docs/guides/refactoring.md docs/migration/v0.8.md docs/migration/v0.9.md docs/migration/v0.10.md docs/examples/refactoring.md docs/ontocode/semantic-diff.md docs/ontocore/rust-api.md docs/guides/protege-migration.md docs/ontocode/feature-tour.md; do
   if [[ ! -f "$file" ]]; then
     echo "FAIL: missing required doc $file" >&2
     fail=1
@@ -230,6 +230,11 @@ if ! grep -q 'ontocore/semanticDiff' docs/lsp-api.md; then
 fi
 
 check_file_contains "docs/guides/production-readiness.md" "v${VERSION}" "production-readiness version"
+check_file_contains "mkdocs.yml" "ontocore/rust-api.md" "mkdocs Rust API reference"
+check_file_contains "mkdocs.yml" "guides/protege-migration.md" "mkdocs Protégé migration guide"
+check_file_contains "mkdocs.yml" "ontocode/feature-tour.md" "mkdocs feature tour"
+check_file_contains "mkdocs.yml" "Reference:" "mkdocs Reference tab"
+check_file_contains "docs/guides/rust-crates.md" 'ontocore = "0.10"' "rust-crates version pin"
 
 # Stale protege-coexistence version banner
 if grep -qE 'evaluating OntoCode \*\*v0\.6\*\*|v0\.6 support' docs/guides/protege-coexistence.md; then
@@ -369,6 +374,41 @@ if grep -qiE 'dl.*stub|auto.*stub' docs/workspace-limits.md 2>/dev/null; then
   fail=1
 else
   echo "ok: workspace-limits dl/auto status"
+fi
+
+# User-facing crate pins must not reference a previous minor release
+CRATE_PIN_PATHS=(docs README.md extension crates CONTRIBUTING.md)
+if rg -q 'ontocore = "0\.9"' "${CRATE_PIN_PATHS[@]}" --glob '!**/migration/**' --glob '!**/design/**' --glob '!**/changelog.md' 2>/dev/null; then
+  echo "FAIL: stale ontocore = \"0.9\" pin found outside migration/design/changelog" >&2
+  rg -n 'ontocore = "0\.9"' "${CRATE_PIN_PATHS[@]}" --glob '!**/migration/**' --glob '!**/design/**' --glob '!**/changelog.md' 2>/dev/null || true
+  fail=1
+else
+  echo "ok: no stale ontocore = \"0.9\" user-facing pins"
+fi
+
+# FAQ must not list semantic diff as v1.0-only when SHIPPED documents it
+if grep -qE 'semantic diff\) is the v1\.0 goal|Full Protégé parity \(.*semantic diff\)' docs/faq.md 2>/dev/null; then
+  echo "FAIL: docs/faq.md contradicts SHIPPED on semantic diff" >&2
+  fail=1
+else
+  echo "ok: faq semantic diff status"
+fi
+
+# start-here must not list multi-root support under 'When not to use'
+if grep -A20 'When not to use OntoCode' docs/guides/start-here.md | grep -qE 'Multi-root VS Code workspaces are supported'; then
+  echo "FAIL: docs/guides/start-here.md lists multi-root under 'When not to use'" >&2
+  fail=1
+else
+  echo "ok: start-here multi-root placement"
+fi
+
+# Stale CLI alias notes
+if rg -q 'ontocore alias is planned' docs --glob '!**/migration/**' --glob '!**/design/**' 2>/dev/null; then
+  echo "FAIL: stale 'ontocore alias is planned' note in docs" >&2
+  rg -n 'ontocore alias is planned' docs --glob '!**/migration/**' --glob '!**/design/**' 2>/dev/null || true
+  fail=1
+else
+  echo "ok: no stale ontocore alias notes"
 fi
 
 if [[ "$fail" -ne 0 ]]; then

@@ -19,9 +19,10 @@ ontocore validate /path/to/ontologies
 ontocore classify /path/to/ontologies --profile el --format json
 ontocore diff /path/to/repo HEAD..WORKTREE
 ontocore diff --left-ref main --right-ref feature --format markdown --breaking-only
+ontocore docs /path/to/ontologies --format markdown --output ./docs-out
 ```
 
-Semantic diff compares indexed catalogs (directories, git refs, or two `Workspace` snapshots). See [migration v0.10](https://github.com/eddiethedean/ontocode/blob/main/docs/migration/v0.10.md).
+Semantic diff compares indexed catalogs (directories, git refs, or two `Workspace` snapshots). See [migration v0.10](https://github.com/eddiethedean/ontocode/blob/main/docs/migration/v0.10.md) and [migration v0.11](https://github.com/eddiethedean/ontocode/blob/main/docs/migration/v0.11.md) for docs export and import patch ops.
 
 ## Documentation
 
@@ -29,6 +30,8 @@ Semantic diff compares indexed catalogs (directories, git refs, or two `Workspac
 - [CLI reference](https://ontocode-vs.readthedocs.io/en/latest/cli-reference/)
 - [Getting started](https://ontocode-vs.readthedocs.io/en/latest/getting-started/)
 - [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/)
+
+**Current version: 0.11.0**
 
 ## License
 

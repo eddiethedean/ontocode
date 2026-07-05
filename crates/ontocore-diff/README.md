@@ -7,7 +7,7 @@ Semantic ontology diff for [OntoCore](https://github.com/eddiethedean/ontocode) 
 ## Install
 
 ```toml
-ontocore-diff = "0.10"
+ontocore-diff = "0.11"
 ```
 
 ## Quick example
@@ -27,6 +27,7 @@ Re-exported from `ontocore::diff` and `Workspace::diff` / `diff_against_path`.
 ## Documentation
 
 - [Migration v0.9 → v0.10](https://github.com/eddiethedean/ontocode/blob/main/docs/migration/v0.10.md)
+- [Migration v0.10 → v0.11](https://github.com/eddiethedean/ontocode/blob/main/docs/migration/v0.11.md)
 - [Semantic diff spec](https://github.com/eddiethedean/ontocode/blob/main/docs/design/SEMANTIC_DIFF_SPEC.md)
 - [Rust & CLI docs](https://ontocode-vs.readthedocs.io/en/latest/guides/rust-crates/)
 

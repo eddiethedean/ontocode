@@ -2,12 +2,12 @@
 
 > Part of **OntoCore** (semantic workspace engine).
 
-Horned-OWL facade for OWL axiom modeling, Turtle patch write-back, and Manchester syntax for [OntoCore](https://github.com/eddiethedean/ontocode).
+Horned-OWL facade for OWL axiom modeling, Turtle patch write-back (including `add_import` / `remove_import`), and Manchester syntax for [OntoCore](https://github.com/eddiethedean/ontocode).
 
 ## Install
 
 ```toml
-ontocore-owl = "0.10"
+ontocore-owl = "0.11"
 ```
 
 ## Documentation

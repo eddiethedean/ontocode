@@ -31,11 +31,21 @@ After 1.0, the roadmap shifts from parity to modernization.
 | v0.7 | React inspector + graphs, OBO index, ROBOT CLI wrappers |
 | v0.8 | Refactoring engine, full Manchester catalog, React Query Workbench + Manchester editor |
 | **v0.9** | OntoCore identity — `ontocore-*` crate rename, `ontocore` façade, `ontocore` CLI, `ontocore-lsp`, `ontocore/*` LSP methods; OntoLogos 1.0 DL/auto classification |
-| **v0.10** (current) | Semantic workspace — incremental index, multi-root, stable `Workspace` API, semantic diff, optional disk cache |
+| **v0.10** | Semantic workspace — incremental index, multi-root, stable `Workspace` API, semantic diff, optional disk cache |
+| **v0.11** (current) | Editor depth — Turtle completion, diagnostic quick fixes, `ontocore docs`, Manage Imports, Open VSX, OBO `fastobo` read |
 
 **Capability matrix:** [docs/SHIPPED.md](docs/SHIPPED.md) · **Engineering milestone detail:** [docs/design/ROADMAP.md](docs/design/ROADMAP.md)
 
 ---
+
+## v0.11 — Editor depth & distribution (shipped)
+
+- Open VSX publishing (Cursor marketplace)
+- LSP `textDocument/completion` for Turtle
+- Diagnostic quick fixes via `textDocument/codeAction`
+- `ontocore docs` documentation export (Markdown / HTML)
+- Turtle imports management UI + `add_import` / `remove_import` patch ops
+- OBO `fastobo` read path + ADR for v1.0 write-back
 
 ## v0.10 — Semantic Workspace (shipped)
 
@@ -44,15 +54,6 @@ After 1.0, the roadmap shifts from parity to modernization.
 - Stable `ontocore::Workspace` API
 - Semantic diff (CLI, LSP, VS Code panel)
 - Persistent optional cache (`.ontocore/cache/`)
-
-## v0.11 — Editor depth & distribution
-
-- Open VSX publishing (Cursor marketplace)
-- LSP `textDocument/completion` for Turtle
-- Diagnostic quick fixes via `textDocument/codeAction`
-- `ontocore docs` documentation export (Markdown / HTML)
-- Turtle imports management UI + `add_import` / `remove_import` patch ops
-- OBO `fastobo` read path + ADR for v1.0 write-back
 
 ## v0.12 — Diagnostics & Quality
 

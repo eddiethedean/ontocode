@@ -18,6 +18,17 @@ apply_refactor_plan(&plan, false, workspace_root)?;
 
 CLI: `ontocore refactor usages|rename|migrate-namespace|move|extract`.
 
+## Install
+
+```toml
+ontocore-refactor = "0.11"
+```
+
+## Documentation
+
+- [Refactoring guide](https://ontocode-vs.readthedocs.io/en/latest/guides/refactoring/)
+- [Rust & CLI docs](https://ontocode-vs.readthedocs.io/en/latest/guides/rust-crates/)
+
 ## License
 
 MIT OR Apache-2.0

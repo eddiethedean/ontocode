@@ -19,6 +19,12 @@ println!("consistent: {}", result.consistent);
 
 CLI equivalent: `ontocore classify <workspace> --profile dl`.
 
+## Install
+
+```toml
+ontocore-reasoner = "0.11"
+```
+
 ## Profiles
 
 | Profile | Status |

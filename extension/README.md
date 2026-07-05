@@ -2,7 +2,7 @@
 
 **Git-native ontology IDE for VS Code** — powered by **OntoCore** (`ontocore-lsp` language server).
 
-> **New here?** [First success (~10 min)](https://ontocode-vs.readthedocs.io/en/latest/guides/first-success/) · [Migrating from Protégé?](https://ontocode-vs.readthedocs.io/en/latest/guides/protege-migration/) · [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) · [Full extension docs](https://ontocode-vs.readthedocs.io/en/latest/ontocode/vscode-extension/) · [FAQ](https://ontocode-vs.readthedocs.io/en/latest/faq/)
+> **New here?** [First success (~10 min)](https://ontocode-vs.readthedocs.io/en/latest/guides/first-success/) · [Migrating from Protégé?](https://ontocode-vs.readthedocs.io/en/latest/guides/protege-migration/) · [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) · [Migration v0.11](https://ontocode-vs.readthedocs.io/en/latest/migration/v0.11/) · [Full extension docs](https://ontocode-vs.readthedocs.io/en/latest/ontocode/vscode-extension/) · [FAQ](https://ontocode-vs.readthedocs.io/en/latest/faq/)
 
 > **CLI or Rust crates?** See the [Rust & CLI documentation path](https://ontocode-vs.readthedocs.io/en/latest/guides/rust-crates/).
 
@@ -12,7 +12,7 @@
 
 ## Quick start
 
-1. **Install** OntoCode from the Marketplace (you are here).
+1. **Install** OntoCode from the [Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) or [Open VSX](https://open-vsx.org/extension/ontocode/ontocode) (Cursor).
 2. **File → Open Folder…** and choose a project that contains ontology files.
 3. If VS Code asks, **Trust** the workspace (required for the bundled language server).
 4. Click the **OntoCode** icon in the **Activity Bar** (left edge of the window).
@@ -93,6 +93,10 @@ Open a `.ttl` (or other supported) file and use standard VS Code navigation:
 |--------|------------------|--------------------------|
 | Hover summary on an IRI | hover | hover |
 | Go to definition | `F12` | `F12` |
+| Rename symbol | `F2` | `F2` |
+| Find references | `Shift+F12` | `Shift+F12` |
+| Turtle completion (prefix, QName, IRI) | `Ctrl+Space` | `Ctrl+Space` |
+| Diagnostic quick fixes | lightbulb / `Ctrl+.` | lightbulb / `Cmd+.` |
 | Document outline (symbols) | `Cmd+Shift+O` | `Ctrl+Shift+O` |
 | Workspace symbol search | `Cmd+T` | `Ctrl+T` |
 
@@ -112,6 +116,11 @@ Open a `.ttl` (or other supported) file and use standard VS Code navigation:
 | **OntoCode: Create Class** | Create a new class in a Turtle file |
 | **OntoCode: Create Property** | Create a new property in a Turtle file |
 | **OntoCode: Create Individual** | Create a new individual in a Turtle file |
+| **OntoCode: Manage Imports** | Add or remove `owl:imports` in a Turtle file |
+| **OntoCode: Open Class Graph** | Class hierarchy visualization |
+| **OntoCode: Open Property Graph** | Property relationship graph |
+| **OntoCode: Open Import Graph** | Ontology import dependencies |
+| **OntoCode: Open Neighborhood Graph** | Entity neighborhood graph |
 | **OntoCode: Run Reasoner** | Classify workspace (EL/RL/RDFS/DL/auto) and open Results panel |
 | **OntoCode: Show Explanation** | Open explanation for an unsatisfiable class |
 | **OntoCode: Set Hierarchy Mode** | Toggle asserted / inferred / combined class tree |
@@ -160,7 +169,7 @@ More detail: [Installation & troubleshooting](https://ontocode-vs.readthedocs.io
 
 ## What's included in v0.11.0
 
-**Shipped:** explorer; **React** entity inspector, graph panels, Query Workbench, Manchester editor, Refactor Preview, and **Semantic Diff** panel; workspace refactor (rename IRI, migrate namespace, move, extract); EL/RL/RDFS/DL/auto reasoner (OntoLogos 1.0); OBO syntax highlighting and indexing (write-back: Turtle only); diagnostics; LSP navigation and refactoring; multi-root workspaces; optional index disk cache.
+**Shipped:** explorer; **React** entity inspector, graph panels, Query Workbench, Manchester editor, Refactor Preview, **Manage Imports**, and **Semantic Diff** panel; workspace refactor (rename IRI, migrate namespace, move, extract); EL/RL/RDFS/DL/auto reasoner (OntoLogos 1.0); OBO syntax highlighting and indexing (write-back: Turtle only); diagnostics with **quick fixes**; Turtle **completion**; LSP navigation (hover, go-to-definition, find references, rename); multi-root workspaces; optional index disk cache; [Open VSX](https://open-vsx.org/extension/ontocode/ontocode) for Cursor.
 
 **Planned:** owlmake workflow plugin integration (v1.0). Full Protégé parity (OBO write-back in IDE, property chain editing) is a **v1.0** goal — see [Protégé parity matrix](https://ontocode-vs.readthedocs.io/en/latest/design/PROTEGE_PARITY/).
 

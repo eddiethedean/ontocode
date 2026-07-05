@@ -12,6 +12,13 @@ copyright: OntoCode documentation · <a href="SHIPPED/">What ships today</a> (ca
 docs_dir: docs
 strict: true
 
+validation:
+  nav:
+    omitted_files: warn
+  links:
+    not_found: warn
+    unrecognized_links: warn
+
 theme:
   name: material
   logo: assets/logo.svg
@@ -97,8 +104,10 @@ nav:
       - Rust & CLI guide: guides/rust-crates.md
       - CI integration: ci-integration.md
       - ROBOT interop: guides/robot-interop.md
+      - Documentation export: guides/docs-export.md
       - Crate map: ontocore/crate-map.md
       - Workspace engine: ontocore/workspace-engine.md
+      - OntoCore architecture: ontocore/architecture.md
       - Examples:
           - Query cookbook: examples/queries.md
           - Sample patches: examples/patches.md
@@ -120,6 +129,7 @@ nav:
       - Vision: vision.md
       - Architecture: architecture.md
       - Roadmap: roadmap.md
+      - OntoCore roadmap (pointer): ontocore/roadmap.md
       - Enterprise evaluation: guides/enterprise-eval.md
       - Protégé vs OntoCode: guides/protege-decision.md
       - Production readiness: guides/production-readiness.md
@@ -142,6 +152,12 @@ nav:
           - v0.7 → v0.8: migration/v0.8.md
           - v0.8 → v0.9: migration/v0.9.md
           - v0.9 → v0.10: migration/v0.10.md
+          - v0.10 → v0.11: migration/v0.11.md
+      - Legacy guide URLs:
+          - VS Code extension: guides/vscode-extension.md
+          - Manchester editor: guides/manchester-editor.md
+          - Query Workbench: guides/query-workbench.md
+          - Graph visualization: guides/graph-visualization.md
       - Release integrity: release-integrity.md
   - Contribute:
       - Guide: contributing.md
@@ -191,6 +207,7 @@ nav:
           - "0016 Dependency-first": design/adr/0016-dependency-first-implementation.md
           - "0017 React webviews": design/adr/0017-react-webview-ui.md
           - "0018 OntoCore identity": design/adr/0018-ontocore-platform-identity.md
+          - "0019 OBO write-back": design/adr/0019-obo-write-back.md
 
 extra:
   social:

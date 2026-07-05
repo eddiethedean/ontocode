@@ -233,6 +233,9 @@ check_file_contains "docs/guides/production-readiness.md" "v${VERSION}" "product
 check_file_contains "mkdocs.yml" "ontocore/rust-api.md" "mkdocs Rust API reference"
 check_file_contains "mkdocs.yml" "guides/protege-migration.md" "mkdocs Protégé migration guide"
 check_file_contains "mkdocs.yml" "ontocode/feature-tour.md" "mkdocs feature tour"
+check_file_contains "mkdocs.yml" "migration/v0.11.md" "mkdocs v0.11 migration guide"
+check_file_contains "mkdocs.yml" "guides/docs-export.md" "mkdocs docs export guide"
+check_file_contains "mkdocs.yml" "design/adr/0019-obo-write-back.md" "mkdocs ADR-0019"
 check_file_contains "mkdocs.yml" "Reference:" "mkdocs Reference tab"
 check_file_contains "docs/guides/rust-crates.md" 'ontocore = "0.11"' "rust-crates version pin"
 

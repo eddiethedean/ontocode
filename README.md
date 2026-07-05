@@ -26,7 +26,7 @@ Full documentation: **[Read the Docs](https://ontocode-vs.readthedocs.io/en/late
 
 | Install | Command / link |
 |---------|----------------|
-| **VS Code extension** | [Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) or [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) VSIX |
+| **VS Code extension** | [Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode), [Open VSX](https://open-vsx.org/extension/ontocode/ontocode) (Cursor), or [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) VSIX |
 | **CLI** | `cargo install ontocore-cli --locked` then `ontocore validate /path/to/ontologies` |
 | **Crates** | [`ontocore`](https://crates.io/crates/ontocore) and `ontocore-*` on [crates.io](https://crates.io/search?q=ontocore) — see [OntoCore overview](https://ontocode-vs.readthedocs.io/en/latest/ontocore/) |
 
@@ -34,8 +34,8 @@ Release CLI tarballs are **Linux x64 only**; macOS/Windows use `cargo install` o
 
 | Product | Role |
 |---------|------|
-| **OntoCode** | VS Code IDE — explorer, inspector, Query Workbench, Manchester editor, semantic diff, reasoner |
-| **OntoCore** | Rust engine — index, query, diagnostics, refactoring, diff, CLI, LSP |
+| **OntoCode** | VS Code IDE — explorer, inspector, Query Workbench, Manchester editor, Manage Imports, semantic diff, reasoner |
+| **OntoCore** | Rust engine — index, query, diagnostics, refactoring, diff, docs export, CLI, LSP |
 | **Ontologos** | External reasoner — classification, consistency, explanations |
 
 > **Naming:** **OntoCode** = VS Code extension. **OntoCore** = `ontocore` crate, `ontocore-*` crates, `ontocore` CLI, `ontocore-lsp`. This repo contains both.
@@ -51,6 +51,7 @@ cargo install ontocore-cli --locked
 ontocore query /path/to/ontologies "SELECT * FROM classes"
 ontocore validate /path/to/ontologies
 ontocore diff HEAD..WORKTREE
+ontocore docs /path/to/ontologies --format markdown --output ./docs-out
 ```
 
 **CLI (clone):**
@@ -89,7 +90,7 @@ cargo run -- validate fixtures
 
 Platform docs: [Vision](https://ontocode-vs.readthedocs.io/en/latest/vision/) · [Architecture](ARCHITECTURE.md) · [Roadmap](ROADMAP.md) · [Protégé parity](https://ontocode-vs.readthedocs.io/en/latest/design/PROTEGE_PARITY/)
 
-**OntoCode 1.0** targets a Protégé-competitive Git-native OWL + OBO IDE. v0.10 ships Turtle editing, semantic diff, multi-root indexing, and EL/DL reasoning — see [SHIPPED matrix](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/).
+**OntoCode 1.0** targets a Protégé-competitive Git-native OWL + OBO IDE. **v0.11** ships Turtle completion, diagnostic quick fixes, Manage Imports, `ontocore docs` export, and Open VSX — on top of v0.10 semantic diff, multi-root indexing, and EL/DL reasoning. See [SHIPPED matrix](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/).
 
 ## Development
 

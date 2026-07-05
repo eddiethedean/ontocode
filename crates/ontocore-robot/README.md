@@ -4,6 +4,12 @@
 
 Thin wrappers around the [ROBOT](https://github.com/ontodev/robot) CLI for OntoCore.
 
+## Install
+
+```toml
+ontocore-robot = "0.11"
+```
+
 ## CLI
 
 ```bash

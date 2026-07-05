@@ -103,7 +103,7 @@
 
 ## What's next
 
-Forward milestones (v0.11 platform consolidation → v1.0 Protégé replacement): **[Platform roadmap](roadmap.md)**.
+Forward milestones (v0.12 diagnostics & quality → v1.0 Protégé replacement): **[Platform roadmap](roadmap.md)**.
 
 ## Where to learn more
 

@@ -2,12 +2,12 @@
 
 > Part of **OntoCore** (semantic workspace engine).
 
-RDF parsing and entity extraction for [OntoCore](https://github.com/eddiethedean/ontocode), backed by [Oxigraph](https://crates.io/crates/oxigraph).
+RDF and OBO parsing and entity extraction for [OntoCore](https://github.com/eddiethedean/ontocode), backed by [Oxigraph](https://crates.io/crates/oxigraph) and [fastobo](https://crates.io/crates/fastobo) (OBO read path, v0.11+).
 
 ## Install
 
 ```toml
-ontocore-parser = "0.10"
+ontocore-parser = "0.11"
 ```
 
 ## Documentation

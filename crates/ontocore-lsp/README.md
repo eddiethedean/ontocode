@@ -6,6 +6,8 @@ Language server for OntoCode and LSP integrators — stdio transport, custom `on
 
 **v0.10:** multi-root workspace indexing, incremental reindex, semantic diff (`ontocore/semanticDiff`), optional disk cache via `ontocore/indexWorkspace`.
 
+**v0.11:** Turtle `textDocument/completion` (prefix, QName, IRI); diagnostic quick fixes via `textDocument/codeAction`; import patch ops (`add_import`, `remove_import`).
+
 ## Install
 
 ```bash
@@ -19,6 +21,8 @@ cargo install ontocore-lsp --locked
 - [LSP API](https://ontocode-vs.readthedocs.io/en/latest/lsp-api/)
 - [Install VS Code](https://ontocode-vs.readthedocs.io/en/latest/vscode-install/)
 - [docs.rs](https://docs.rs/ontocore-lsp)
+
+**Current version: 0.11.0**
 
 ## License
 

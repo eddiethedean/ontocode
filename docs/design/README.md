@@ -1,6 +1,6 @@
 # OntoCore + OntoCode Documentation Package
 
-> **Note:** This folder contains **engineering specs, ADRs, and shipped milestone detail**. Canonical platform direction lives in **[Vision](../vision.md)**, **[Architecture](../architecture.md)**, and **[Roadmap](../roadmap.md)**. For **what ships in v0.10.0**, see [What ships today](../SHIPPED.md).
+> **Note:** This folder contains **engineering specs, ADRs, and shipped milestone detail**. Canonical platform direction lives in **[Vision](../vision.md)**, **[Architecture](../architecture.md)**, and **[Roadmap](../roadmap.md)**. For **what ships in v0.11.0**, see [What ships today](../SHIPPED.md).
 
 ## Documentation layers
 
@@ -8,7 +8,7 @@
 |-------|-------|----------|
 | **Platform** | [vision.md](../vision.md), [architecture.md](../architecture.md), [roadmap.md](../roadmap.md) | Everyone — mission, ecosystem, forward plan |
 | **Shipped** | [SHIPPED.md](../SHIPPED.md), guides, reference | Users evaluating current capabilities |
-| **Engineering** | `docs/design/` (this folder) | Contributors — specs, ADRs, v0.1–v0.10 milestones |
+| **Engineering** | `docs/design/` (this folder) | Contributors — specs, ADRs, v0.1–v0.11 milestones |
 
 For **user-facing guides**, pick a path:
 
@@ -47,7 +47,7 @@ Many specs describe **target** behavior. Check the banner at the top of each doc
 ### Product & roadmap
 
 - [PLAN.md](PLAN.md) — tactical product plan (executive summary in [Vision](../vision.md))
-- [ROADMAP.md](ROADMAP.md) — **engineering milestones v0.1–v0.10 (shipped detail)**
+- [ROADMAP.md](ROADMAP.md) — **engineering milestones v0.1–v0.11 (shipped detail)**
 - [DEPENDENCY_MATRIX.md](DEPENDENCY_MATRIX.md) — **external crate inventory**
 - [LICENSES.md](LICENSES.md) — third-party license summary
 - [PROTEGE_PARITY.md](PROTEGE_PARITY.md) — **v1.0 compete checklist**

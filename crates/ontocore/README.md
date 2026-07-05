@@ -31,6 +31,7 @@ for row in &result.rows {
 | `owl` | Horned-OWL bridge, patches, Manchester |
 | `reasoner` | OntoLogos classification facade |
 | `refactor` | Workspace refactoring |
+| `docs` | Markdown/HTML documentation export |
 | `lsp` | LSP protocol types (feature `lsp`, enabled by default) |
 
 ## Ecosystem
@@ -47,4 +48,10 @@ for row in &result.rows {
 - **CLI:** `ontocore` (`ontocore-cli` crate) — `cargo install ontocore-cli --locked`
 - **LSP:** `ontocore-lsp` — bundled in the OntoCode VS Code extension
 
-See [docs/ontocore/](https://github.com/eddiethedean/ontocode/tree/main/docs/ontocore) in the OntoCode repository.
+## Documentation
+
+- [docs.rs](https://docs.rs/ontocore)
+- [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) · [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md)
+- [docs/ontocore/](https://github.com/eddiethedean/ontocode/tree/main/docs/ontocore) in this repository
+
+**Current version: 0.11.0**

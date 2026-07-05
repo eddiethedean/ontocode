@@ -599,11 +599,9 @@ fn iri_to_manchester_term(iri: &str, namespaces: &BTreeMap<String, String>) -> S
         // Display-only path: never emit angle brackets for unsafe IRIs.
         return iri.chars().filter(|c| !c.is_control() && !c.is_whitespace()).collect();
     }
-    for (prefix, ns) in namespaces {
-        if !prefix.is_empty() && iri.starts_with(ns) {
-            let local = &iri[ns.len()..];
-            return format!("{prefix}:{local}");
-        }
+    if let Some((prefix, ns)) = crate::patch::best_namespace_match(iri, namespaces) {
+        let local = &iri[ns.len()..];
+        return format!("{prefix}:{local}");
     }
     if iri.starts_with("http://") || iri.starts_with("https://") {
         format!("<{iri}>")
@@ -613,21 +611,8 @@ fn iri_to_manchester_term(iri: &str, namespaces: &BTreeMap<String, String>) -> S
 }
 
 fn iri_to_turtle_term(iri: &str, namespaces: &BTreeMap<String, String>) -> Result<String> {
-    if !crate::patch::is_safe_iri(iri) {
-        return Err(OwlError::ManchesterInvalid(format!(
-            "IRI contains characters that cannot be safely written to Turtle: {iri:?}"
-        )));
-    }
-    if iri == "http://www.w3.org/2002/07/owl#Thing" {
-        return Ok("owl:Thing".to_string());
-    }
-    for (prefix, ns) in namespaces {
-        if !prefix.is_empty() && iri.starts_with(ns) {
-            let local = &iri[ns.len()..];
-            return Ok(format!("{prefix}:{local}"));
-        }
-    }
-    Ok(format!("<{iri}>"))
+    crate::patch::iri_to_turtle_term_impl(iri, namespaces)
+        .map_err(|e| OwlError::ManchesterInvalid(e.to_string()))
 }
 
 #[cfg(test)]
@@ -681,5 +666,19 @@ mod tests {
         assert!(turtle.contains("ex:Person"));
         assert!(turtle.contains("ex:Organization"));
         assert!(turtle.contains("owl:intersectionOf"));
+    }
+
+    #[test]
+    fn turtle_term_longest_namespace_prefix_wins() {
+        let ns = BTreeMap::from([
+            ("ex".to_string(), "http://example.org/".to_string()),
+            ("exfoo".to_string(), "http://example.org/foo/".to_string()),
+            ("owl".to_string(), "http://www.w3.org/2002/07/owl#".to_string()),
+        ]);
+        let out = parse_class_expression("exfoo:Bar", &ns).expect("parse");
+        let turtle = class_expression_to_turtle_fragment(&out.expression, "rdfs:subClassOf", &ns)
+            .expect("turtle");
+        assert!(turtle.contains("exfoo:Bar"));
+        assert!(!turtle.contains("ex:foo/Bar"));
     }
 }

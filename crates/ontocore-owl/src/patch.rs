@@ -307,7 +307,7 @@ fn add_annotation_triple(
     }
     let escaped = escape_turtle_string(value);
     let triple = format!("    {predicate} \"{escaped}\" ;\n");
-    insert_into_entity_block(text, entity_iri, &triple, namespaces)
+    insert_into_entity_block(text, entity_iri, &triple, namespaces, true)
 }
 
 fn add_object_triple(
@@ -321,7 +321,7 @@ fn add_object_triple(
         return Err(OwlError::EntityNotFound(entity_iri.to_string()));
     }
     let triple = format!("    {predicate} {object} ;\n");
-    insert_into_entity_block(text, entity_iri, &triple, namespaces)
+    insert_into_entity_block(text, entity_iri, &triple, namespaces, false)
 }
 
 fn add_complex_axiom(
@@ -469,29 +469,50 @@ fn insert_into_entity_block(
     entity_iri: &str,
     insertion: &str,
     namespaces: &BTreeMap<String, String>,
+    duplicate_is_error: bool,
 ) -> Result<()> {
-    let insertion_key = insertion.trim().trim_end_matches(';').trim();
-    if !insertion_key.is_empty()
-        && entity_any_block_contains(text, entity_iri, insertion_key, namespaces)
-    {
-        return Ok(());
+    if let Some((predicate, object)) = parse_simple_insertion(insertion) {
+        if entity_has_predicate_object(text, entity_iri, &predicate, &object, namespaces) {
+            if duplicate_is_error {
+                return Err(OwlError::PatchInvalid(format!(
+                    "duplicate {predicate} axiom already present: {object}"
+                )));
+            }
+            return Ok(());
+        }
     }
     // Same single-path insertion as multiline axioms (no double-insert).
     insert_multiline_into_entity_block(text, entity_iri, insertion, namespaces)
 }
 
-fn entity_any_block_contains(
+fn parse_simple_insertion(insertion: &str) -> Option<(String, String)> {
+    let line = insertion.lines().next()?.trim().trim_end_matches(';').trim();
+    let mut parts = line.splitn(2, char::is_whitespace);
+    let predicate = parts.next()?.to_string();
+    let object = parts.next()?.trim().to_string();
+    if predicate.is_empty() || object.is_empty() {
+        return None;
+    }
+    Some((predicate, object))
+}
+
+fn entity_has_predicate_object(
     text: &str,
     entity_iri: &str,
-    needle: &str,
+    predicate: &str,
+    object_value: &str,
     namespaces: &BTreeMap<String, String>,
 ) -> bool {
     let ns = crate::span::namespaces_for_text(text, namespaces);
     let short = short_name_from_iri(entity_iri);
     all_entity_statement_ranges(text, entity_iri, &short, &ns).into_iter().any(|range| {
         let block = &text[range.start as usize..range.end as usize];
-        block.contains(needle)
+        block_has_matching_predicate_object(block, predicate, object_value)
     })
+}
+
+fn block_has_matching_predicate_object(block: &str, predicate: &str, object_value: &str) -> bool {
+    remove_matching_predicate_object(block, predicate, object_value).is_some()
 }
 
 fn replace_range(text: &mut String, range: ByteRange, replacement: &str) {
@@ -907,13 +928,35 @@ fn is_valid_pn_local(local: &str) -> bool {
 }
 
 fn iri_to_turtle_term(iri: &str, namespaces: &BTreeMap<String, String>) -> Result<String> {
+    iri_to_turtle_term_impl(iri, namespaces)
+}
+
+pub(crate) fn iri_to_turtle_term_impl(
+    iri: &str,
+    namespaces: &BTreeMap<String, String>,
+) -> Result<String> {
     if !is_safe_iri(iri) {
         return Err(OwlError::PatchInvalid(format!(
             "IRI contains characters that cannot be safely written to Turtle: {iri:?}"
         )));
     }
+    if iri == "http://www.w3.org/2002/07/owl#Thing" {
+        return Ok("owl:Thing".to_string());
+    }
 
-    // Longest namespace match wins.
+    if let Some((prefix, ns)) = best_namespace_match(iri, namespaces) {
+        let local = &iri[ns.len()..];
+        if is_valid_pn_local(local) {
+            return Ok(format!("{prefix}:{local}"));
+        }
+    }
+    Ok(format!("<{iri}>"))
+}
+
+pub(crate) fn best_namespace_match<'a>(
+    iri: &str,
+    namespaces: &'a BTreeMap<String, String>,
+) -> Option<(&'a str, &'a str)> {
     let mut best: Option<(&str, &str, usize)> = None;
     for (prefix, ns) in namespaces {
         if prefix.is_empty() || !iri.starts_with(ns.as_str()) {
@@ -924,13 +967,7 @@ fn iri_to_turtle_term(iri: &str, namespaces: &BTreeMap<String, String>) -> Resul
             best = Some((prefix.as_str(), ns.as_str(), len));
         }
     }
-    if let Some((prefix, ns, _)) = best {
-        let local = &iri[ns.len()..];
-        if is_valid_pn_local(local) {
-            return Ok(format!("{prefix}:{local}"));
-        }
-    }
-    Ok(format!("<{iri}>"))
+    best.map(|(prefix, ns, _)| (prefix, ns))
 }
 
 #[cfg(test)]
@@ -995,6 +1032,52 @@ mod tests {
             1,
             "must insert label exactly once"
         );
+    }
+
+    #[test]
+    fn add_label_not_blocked_by_label_text_in_long_comment() {
+        let ttl = r#"@prefix ex: <http://example.org/ex#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+ex:Foo a owl:Class ;
+    rdfs:comment """Documentation mentions rdfs:label \"Bar\" syntax.""" .
+"#;
+        let ns = BTreeMap::from([
+            ("ex".to_string(), "http://example.org/ex#".to_string()),
+            ("owl".to_string(), "http://www.w3.org/2002/07/owl#".to_string()),
+            ("rdfs".to_string(), "http://www.w3.org/2000/01/rdf-schema#".to_string()),
+        ]);
+        let patches = vec![PatchOp::AddLabel {
+            entity_iri: "http://example.org/ex#Foo".to_string(),
+            value: "Bar".to_string(),
+        }];
+        let result = apply_patches_to_text(ttl, &patches, true, &ns).expect("patch");
+        let preview = result.preview_text.expect("preview");
+        assert!(preview.contains("rdfs:label \"Bar\""));
+    }
+
+    #[test]
+    fn add_label_duplicate_returns_error() {
+        let ttl = r#"@prefix ex: <http://example.org/ex#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+ex:Foo a owl:Class ;
+    rdfs:label "Bar" .
+"#;
+        let ns = BTreeMap::from([
+            ("ex".to_string(), "http://example.org/ex#".to_string()),
+            ("owl".to_string(), "http://www.w3.org/2002/07/owl#".to_string()),
+            ("rdfs".to_string(), "http://www.w3.org/2000/01/rdf-schema#".to_string()),
+        ]);
+        let patches = vec![PatchOp::AddLabel {
+            entity_iri: "http://example.org/ex#Foo".to_string(),
+            value: "Bar".to_string(),
+        }];
+        let result = apply_patches_to_text(ttl, &patches, true, &ns).expect("patch");
+        assert!(!result.applied);
+        assert!(result.diagnostics.iter().any(|d| d.message.contains("duplicate")));
     }
 
     #[test]

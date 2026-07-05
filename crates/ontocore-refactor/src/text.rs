@@ -56,6 +56,17 @@ pub fn replace_iri_in_text(
         replacements.push((old_iri.to_string(), new_iri.to_string()));
     }
 
+    // Default-prefix `:LocalName` when the empty prefix binds to this IRI's namespace.
+    if let Some(default_ns) = namespaces.get("") {
+        if old_iri.starts_with(default_ns.as_str()) {
+            let old_token = format!(":{old_short}");
+            let new_token = format!(":{new_short}");
+            if old_token != new_token {
+                replacements.push((old_token, new_token));
+            }
+        }
+    }
+
     for (prefix, ns) in &namespaces {
         if old_iri.starts_with(ns) && !prefix.is_empty() {
             let old_token = format!("{prefix}:{old_short}");
@@ -230,5 +241,24 @@ mod tests {
         assert!(out.contains("\"see http://example.org#Person\""));
         assert!(out.contains("ex:Agent"));
         assert!(!out.contains("ex:Person a"));
+    }
+
+    #[test]
+    fn replace_iri_renames_default_prefix_curie() {
+        let ttl = concat!(
+            "@prefix : <http://example.org/org#> .\n",
+            "@prefix owl: <http://www.w3.org/2002/07/owl#> .\n",
+            ":Person a owl:Class .\n"
+        );
+        let ns = BTreeMap::from([("".to_string(), "http://example.org/org#".to_string())]);
+        let (out, hunks) = replace_iri_in_text(
+            ttl,
+            "http://example.org/org#Person",
+            "http://example.org/org#Human",
+            &ns,
+        );
+        assert!(!hunks.is_empty());
+        assert!(out.contains(":Human a owl:Class"));
+        assert!(!out.contains(":Person a owl:Class"));
     }
 }

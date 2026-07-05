@@ -467,18 +467,20 @@ fn main() -> Result<()> {
             }
             RefactorCommands::Move { workspace, iri, to, preview, format } => {
                 let catalog = build_catalog(&workspace)?;
-                let plan = preview_move_entity(&catalog, &iri, &to, &HashMap::new(), &workspace)?;
+                let roots = vec![workspace.clone()];
+                let plan = preview_move_entity(&catalog, &iri, &to, &HashMap::new(), &roots)?;
                 run_refactor_plan(&plan, preview, format, &workspace)?;
             }
             RefactorCommands::Extract { workspace, entities, out, leave_stub, preview, format } => {
                 let catalog = build_catalog(&workspace)?;
+                let roots = vec![workspace.clone()];
                 let plan = preview_extract_module(
                     &catalog,
                     &entities,
                     &out,
                     leave_stub,
                     &HashMap::new(),
-                    &workspace,
+                    &roots,
                 )?;
                 run_refactor_plan(&plan, preview, format, &workspace)?;
             }
@@ -541,7 +543,9 @@ fn run_refactor_plan(
             }
         }
     }
-    let files_written = apply_refactor_plan_checked(plan, preview, Some(workspace))?;
+    let root = workspace.canonicalize().unwrap_or_else(|_| workspace.to_path_buf());
+    let files_written =
+        apply_refactor_plan_checked(plan, preview, Some(std::slice::from_ref(&root)))?;
     if !preview {
         println!("applied {files_written} file(s)");
     }

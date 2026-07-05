@@ -5,7 +5,7 @@ use ontocore_refactor::{
     validate_refactor_plan_paths, RefactorError,
 };
 use std::collections::HashMap;
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 use tempfile::TempDir;
 
 fn fixture_dir() -> PathBuf {
@@ -17,6 +17,10 @@ fn fixture_dir() -> PathBuf {
 
 fn empty_overrides() -> HashMap<PathBuf, String> {
     HashMap::new()
+}
+
+fn workspace_roots(path: &Path) -> Vec<PathBuf> {
+    vec![path.canonicalize().unwrap_or_else(|_| path.to_path_buf())]
 }
 
 fn build_catalog(dir: &std::path::Path) -> ontocore_catalog::OntologyCatalog {
@@ -172,7 +176,7 @@ fn move_entity_rejects_canonical_same_file() {
         "http://example.org/org#Agent",
         &same,
         &empty_overrides(),
-        ws,
+        &workspace_roots(ws),
     )
     .unwrap_err();
     assert!(matches!(err, RefactorError::Invalid(_)));
@@ -192,7 +196,7 @@ fn move_entity_rejects_path_outside_workspace() {
         "http://example.org/org#Agent",
         &target,
         &empty_overrides(),
-        ws,
+        &workspace_roots(ws),
     )
     .unwrap_err();
     assert!(matches!(err, RefactorError::Invalid(_)));
@@ -212,7 +216,7 @@ fn extract_multiple_entities_same_file() {
         &out,
         false,
         &empty_overrides(),
-        ws,
+        &workspace_roots(ws),
     )
     .expect("plan");
     apply_refactor_plan(&plan, false, ws).expect("apply");
@@ -240,7 +244,7 @@ fn extract_module_preserves_existing_output_content() {
         &out,
         false,
         &empty_overrides(),
-        ws,
+        &workspace_roots(ws),
     )
     .expect("plan");
     let out_change = plan.changes.iter().find(|c| c.path == out).expect("output change");
@@ -266,7 +270,7 @@ fn extract_module_leave_stub_uses_prefixed_curie() {
         &out,
         true,
         &empty_overrides(),
-        ws,
+        &workspace_roots(ws),
     )
     .expect("plan");
     let source_change =
@@ -289,7 +293,7 @@ fn move_entity_between_files() {
         "http://example.org/org#Agent",
         &ws.join("target.ttl"),
         &empty_overrides(),
-        ws,
+        &workspace_roots(ws),
     )
     .expect("plan");
     assert_eq!(plan.changes.len(), 2);
@@ -311,10 +315,70 @@ fn extract_module_validates_nonexistent_output_path() {
         &out,
         false,
         &empty_overrides(),
-        ws,
+        &workspace_roots(ws),
     )
     .expect("plan");
     validate_refactor_plan_paths(ws, &plan).expect("nonexistent output path is in workspace");
-    apply_refactor_plan_checked(&plan, false, Some(ws)).expect("apply with validation");
+    let roots = workspace_roots(ws);
+    apply_refactor_plan_checked(&plan, false, Some(&roots)).expect("apply with validation");
     assert!(out.exists());
+}
+
+#[test]
+fn rename_iri_renames_default_prefix_curie() {
+    let tmp = TempDir::new().unwrap();
+    let ws = tmp.path();
+    std::fs::write(
+        ws.join("default.ttl"),
+        concat!(
+            "@prefix : <http://example.org/org#> .\n",
+            "@prefix owl: <http://www.w3.org/2002/07/owl#> .\n",
+            ":Person a owl:Class .\n"
+        ),
+    )
+    .unwrap();
+    let catalog = build_catalog(ws);
+    let plan = preview_rename_iri(
+        &catalog,
+        "http://example.org/org#Person",
+        "http://example.org/org#Human",
+        &empty_overrides(),
+    )
+    .expect("plan");
+    assert!(!plan.changes.is_empty());
+    apply_refactor_plan(&plan, false, ws).expect("apply");
+    let text = std::fs::read_to_string(ws.join("default.ttl")).unwrap();
+    assert!(text.contains(":Human a owl:Class"));
+    assert!(!text.contains(":Person a owl:Class"));
+}
+
+#[test]
+fn move_entity_across_multi_root_workspace() {
+    let tmp = TempDir::new().unwrap();
+    let root_a = tmp.path().join("folder-a");
+    let root_b = tmp.path().join("folder-b");
+    std::fs::create_dir_all(&root_a).unwrap();
+    std::fs::create_dir_all(&root_b).unwrap();
+    std::fs::copy(fixture_dir().join("people.ttl"), root_a.join("people.ttl")).unwrap();
+    let roots =
+        vec![root_a.canonicalize().expect("root a"), root_b.canonicalize().expect("root b")];
+    let catalog = IndexBuilder::new()
+        .workspace(roots[0].clone())
+        .scan_roots(roots.clone())
+        .build()
+        .expect("index");
+    let target = roots[1].join("moved.ttl");
+    let plan = preview_move_entity(
+        &catalog,
+        "http://example.org/org#Person",
+        &target,
+        &empty_overrides(),
+        &roots,
+    )
+    .expect("plan across secondary root");
+    apply_refactor_plan_checked(&plan, false, Some(&roots)).expect("apply");
+    let moved = std::fs::read_to_string(&target).expect("target file");
+    assert!(moved.contains("ex:Person"));
+    let source = std::fs::read_to_string(root_a.join("people.ttl")).unwrap();
+    assert!(!source.contains("ex:Person"));
 }

@@ -82,6 +82,15 @@ jobs:
           npm run compile
           npm run compile:vscode-test
 
+      - name: Cache VS Code test download
+        uses: actions/cache@v4
+        with:
+          path: extension/.vscode-test
+          key: vscode-test-${{ matrix.platform }}-${{ matrix.vscode }}-${{ hashFiles('extension/package-lock.json') }}
+          restore-keys: |
+            vscode-test-${{ matrix.platform }}-${{ matrix.vscode }}-
+            vscode-test-${{ matrix.platform }}-
+
       - name: Install Xvfb (Linux)
         if: runner.os == 'Linux'
         run: sudo apt-get update && sudo apt-get install -y xvfb
@@ -93,8 +102,21 @@ jobs:
           VSCODE_VERSION: ${{ matrix.vscode }}
         run: |
           set -euo pipefail
-          if [ "${{ runner.os }}" = "Linux" ]; then
-            xvfb-run -a npm run test:vscode
-          else
-            npm run test:vscode
-          fi
+          run_e2e() {
+            if [ "${{ runner.os }}" = "Linux" ]; then
+              xvfb-run -a npm run test:vscode
+            else
+              npm run test:vscode
+            fi
+          }
+          for attempt in 1 2 3; do
+            echo "VS Code e2e attempt ${attempt}/3..."
+            if run_e2e; then
+              exit 0
+            fi
+            if [ "${attempt}" -lt 3 ]; then
+              echo "Retrying after transient failure (often VS Code download)..."
+              sleep 30
+            fi
+          done
+          exit 1

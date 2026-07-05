@@ -2,7 +2,8 @@
 
 use fastobo::ast::{HeaderClause, TermClause};
 use ontocore_core::{
-    limits::MAX_TRIPLES_PER_FILE, Annotation, Axiom, Entity, EntityKind, SourceLocation,
+    limits::{MAX_FILE_BYTES, MAX_TRIPLES_PER_FILE},
+    read_to_string_capped, Annotation, Axiom, Entity, EntityKind, SourceLocation,
     AXIOM_KIND_SUB_CLASS_OF,
 };
 use std::collections::BTreeMap;
@@ -169,14 +170,8 @@ pub fn parse_obo_file(
     _content_hash: &str,
     _modified_time: u64,
 ) -> Result<ParsedOntology> {
-    let metadata = std::fs::metadata(path).map_err(ParseError::Io)?;
-    if metadata.len() > ontocore_core::MAX_FILE_BYTES {
-        return Err(ParseError::Io(std::io::Error::new(
-            std::io::ErrorKind::InvalidData,
-            format!("file exceeds maximum size of {} bytes", ontocore_core::MAX_FILE_BYTES),
-        )));
-    }
-    let content = std::fs::read_to_string(path).map_err(ParseError::Io)?;
+    let content = read_to_string_capped(path, MAX_FILE_BYTES)
+        .map_err(|e| ParseError::LimitExceeded(format!("{}: {e}", path.display())))?;
     parse_obo_text(path, ontology_id, &content)
 }
 
@@ -203,6 +198,30 @@ mod tests {
         assert_eq!(parsed.axioms[0].object, "http://purl.obolibrary.org/obo/TEST_0000002");
         assert!(parsed.triple_count > 0);
         assert!(!parsed.quads().is_empty(), "OBO must materialize RDF quads");
+    }
+
+    #[test]
+    fn materializes_all_synonym_scopes_and_definition_in_sparql_quads() {
+        let text = "format-version: 1.2\nontology: test\n\n[Term]\n\
+id: TEST:0000001\n\
+name: test term\n\
+synonym: \"exact syn\" EXACT []\n\
+synonym: \"broad syn\" BROAD []\n\
+synonym: \"narrow syn\" NARROW []\n\
+synonym: \"related syn\" RELATED []\n\
+def: \"A definition.\" []\n";
+        let parsed = parse_obo_text(Path::new("syn.obo"), "doc-1", text).unwrap();
+        let predicates: std::collections::BTreeSet<_> =
+            parsed.quads().iter().map(|q| q.predicate.as_str().to_string()).collect();
+        assert!(predicates.contains("http://www.geneontology.org/formats/oboInOwl#hasExactSynonym"));
+        assert!(predicates.contains("http://www.geneontology.org/formats/oboInOwl#hasBroadSynonym"));
+        assert!(
+            predicates.contains("http://www.geneontology.org/formats/oboInOwl#hasNarrowSynonym")
+        );
+        assert!(
+            predicates.contains("http://www.geneontology.org/formats/oboInOwl#hasRelatedSynonym")
+        );
+        assert!(predicates.contains("http://purl.obolibrary.org/obo/IAO_0000115"));
     }
 
     #[test]

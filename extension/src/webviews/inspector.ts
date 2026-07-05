@@ -1,5 +1,9 @@
 import * as vscode from "vscode";
 import { applyAxiomPatch, getEntity } from "../lsp/client";
+import {
+  hasPatchFailureDiagnostics,
+  patchFailureMessage,
+} from "../lsp/patchFeedback";
 import { EntityDetail, PatchOp } from "../lsp/protocol";
 import { entityKindLabel } from "../utils/iri";
 import { documentUriInWorkspace } from "../utils/workspacePath";
@@ -197,26 +201,34 @@ export class EntityInspectorPanel {
       if (iriAtStart !== this.iri) {
         return;
       }
-      if (previewOnly && result.preview_text) {
-        this.host.postMessage({ type: "preview", text: result.preview_text });
-        return;
-      }
-      if (!previewOnly) {
-        const deleted = patches.some((p) => p.op === "delete_entity");
-        if (deleted && result.applied) {
-          this.host.panel.dispose();
-          EntityInspectorPanel.currentPanel = undefined;
-          if (this.onRefresh) {
-            await this.onRefresh();
-          }
-          void vscode.window.showInformationMessage("OntoCode: entity deleted");
+      if (previewOnly) {
+        if (hasPatchFailureDiagnostics(result)) {
+          void vscode.window.showErrorMessage(patchFailureMessage(result));
           return;
         }
-        if (result.reindex_warning) {
-          void vscode.window.showWarningMessage(
-            `OntoCode: changes saved but reindex failed — ${result.reindex_warning}`
-          );
+        if (result.preview_text) {
+          this.host.postMessage({ type: "preview", text: result.preview_text });
         }
+        return;
+      }
+      if (!result.applied) {
+        void vscode.window.showErrorMessage(patchFailureMessage(result));
+        return;
+      }
+      const deleted = patches.some((p) => p.op === "delete_entity");
+      if (deleted) {
+        this.host.panel.dispose();
+        EntityInspectorPanel.currentPanel = undefined;
+        if (this.onRefresh) {
+          await this.onRefresh();
+        }
+        void vscode.window.showInformationMessage("OntoCode: entity deleted");
+        return;
+      }
+      if (result.reindex_warning) {
+        void vscode.window.showWarningMessage(
+          `OntoCode: changes saved but reindex failed — ${result.reindex_warning}`
+        );
       }
       if (result.entity_detail) {
         if (result.entity_detail.entity.iri !== this.iri) {
@@ -233,9 +245,7 @@ export class EntityInspectorPanel {
       if (this.onRefresh) {
         await this.onRefresh();
       }
-      if (!previewOnly) {
-        void vscode.window.showInformationMessage("OntoCode: changes applied");
-      }
+      void vscode.window.showInformationMessage("OntoCode: changes applied");
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       void vscode.window.showErrorMessage(`OntoCode: patch failed — ${msg}`);

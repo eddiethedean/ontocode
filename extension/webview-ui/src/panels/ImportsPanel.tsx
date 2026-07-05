@@ -58,7 +58,23 @@ export function ImportsPanel(): JSX.Element {
     );
   }
 
+  if (!payload.imports_editable) {
+    return (
+      <Panel>
+        <PanelHeader title="Manage Imports" subtitle={payload.path} />
+        {payload.error ? (
+          <Callout variant="warning">{payload.error}</Callout>
+        ) : (
+          <Callout>Imports cannot be edited for this file.</Callout>
+        )}
+      </Panel>
+    );
+  }
+
   const removeImport = (importIri: string): void => {
+    if (!payload.ontology_iri) {
+      return;
+    }
     apply(
       [
         {
@@ -85,7 +101,7 @@ export function ImportsPanel(): JSX.Element {
   };
 
   const addImport = (previewOnly: boolean): void => {
-    if (!addTarget) {
+    if (!addTarget || !payload.ontology_iri) {
       return;
     }
     apply(
@@ -107,8 +123,10 @@ export function ImportsPanel(): JSX.Element {
         subtitle={payload.path}
       />
       <Section title="Ontology">
-        <InlineCode>{payload.ontology_iri}</InlineCode>
+        <InlineCode>{payload.ontology_iri ?? "—"}</InlineCode>
       </Section>
+
+      {payload.error ? <Callout variant="warning">{payload.error}</Callout> : null}
 
       <Section title="Current imports">
         {payload.imports.length === 0 ? (

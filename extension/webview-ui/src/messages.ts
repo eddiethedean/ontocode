@@ -240,7 +240,9 @@ export interface ImportsOntologyOption {
 
 export interface ImportsDocumentPayload {
   path: string;
-  ontology_iri: string;
+  ontology_iri?: string;
+  imports_editable: boolean;
+  error?: string;
   imports: string[];
   options: ImportsOntologyOption[];
 }

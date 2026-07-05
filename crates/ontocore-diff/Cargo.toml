@@ -16,7 +16,7 @@ include = ["src/**/*", "Cargo.toml", "LICENSE-MIT", "LICENSE-APACHE-2.0"]
 [dependencies]
 ontocore-catalog = { workspace = true }
 ontocore-core = { workspace = true }
-git2 = "0.20"
+git2 = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 thiserror = { workspace = true }

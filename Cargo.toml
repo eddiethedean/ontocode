@@ -82,7 +82,7 @@ ontocore-robot = { path = "crates/ontocore-robot", version = "0.10.0" }
 ontocore-refactor = { path = "crates/ontocore-refactor", version = "0.10.0" }
 ontocore-diff = { path = "crates/ontocore-diff", version = "0.10.0" }
 
-git2 = "0.20"
+git2 = { version = "0.20", features = ["vendored-openssl"] }
 
 ontologos-core = "1.0.0"
 ontologos-parser = "1.0.0"

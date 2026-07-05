@@ -4,6 +4,7 @@ use ontocore_core::{
     AXIOM_KIND_DOMAIN, AXIOM_KIND_EQUIVALENT_CLASS, AXIOM_KIND_PROPERTY_CHAIN, AXIOM_KIND_RANGE,
     AXIOM_KIND_SUB_CLASS_OF, MAX_FILE_BYTES,
 };
+use ontocore_diagnostics::{entity_needles, find_in_source};
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::PathBuf;
@@ -149,7 +150,7 @@ impl OntologyCatalog {
             });
         }
 
-        scan_file_for_iri(&doc.path, iri, &entity.short_name)
+        scan_file_for_iri(&doc.path, iri, &entity.short_name, &doc.namespaces)
     }
 
     pub fn entities_in_document(&self, doc_path: &std::path::Path) -> Vec<&Entity> {
@@ -206,28 +207,22 @@ fn axiom_summary(a: &ontocore_core::Axiom, editable: bool) -> EntityAxiomSummary
     }
 }
 
-fn scan_file_for_iri(path: &std::path::Path, iri: &str, short_name: &str) -> Option<SourceHint> {
+fn scan_file_for_iri(
+    path: &std::path::Path,
+    iri: &str,
+    short_name: &str,
+    namespaces: &BTreeMap<String, String>,
+) -> Option<SourceHint> {
     if path.symlink_metadata().ok()?.file_type().is_symlink() {
         return None;
     }
     let content = read_to_string_capped(path, MAX_FILE_BYTES).ok()?;
-    let local_name = iri.rsplit(['#', '/']).next().unwrap_or(short_name);
-
-    let needles = [iri.to_string(), format!("<{iri}>"), format!("{local_name}:")];
-
-    for (line_idx, line) in content.lines().enumerate() {
-        for needle in &needles {
-            if let Some(col) = line.find(needle) {
-                return Some(SourceHint {
-                    path: path.to_path_buf(),
-                    line: (line_idx + 1) as u64,
-                    column: col as u64,
-                });
-            }
-        }
-    }
-
-    None
+    let loc = find_in_source(&content, &entity_needles(iri, short_name, namespaces));
+    loc.line.map(|line| SourceHint {
+        path: path.to_path_buf(),
+        line,
+        column: loc.column.unwrap_or(0),
+    })
 }
 
 #[cfg(test)]
@@ -289,5 +284,32 @@ mod tests {
         let doc_path = fixture_workspace().join("example.ttl");
         let entities = catalog.entities_in_document(&doc_path);
         assert!(entities.iter().any(|e| e.short_name == "Person"));
+    }
+
+    #[test]
+    fn find_source_location_skips_person_colon_in_comments() {
+        let dir = tempfile::tempdir().expect("tempdir");
+        let ttl_path = dir.path().join("test.ttl");
+        std::fs::write(
+            &ttl_path,
+            concat!(
+                "@prefix ex: <http://ex#> .\n",
+                "@prefix owl: <http://www.w3.org/2002/07/owl#> .\n\n",
+                "# Note: Person: see documentation\n\n",
+                "ex:Person a owl:Class .\n"
+            ),
+        )
+        .expect("write ttl");
+
+        let catalog = IndexBuilder::new().workspace(dir.path()).build().expect("build catalog");
+        let source = catalog.find_source_location("http://ex#Person").expect("source location");
+        let entity_line = std::fs::read_to_string(&ttl_path)
+            .expect("read ttl")
+            .lines()
+            .position(|line| line.contains("ex:Person"))
+            .expect("entity line")
+            + 1;
+        assert_eq!(source.line, entity_line as u64);
+        assert_eq!(source.column, 0);
     }
 }

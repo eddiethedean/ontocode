@@ -12,3 +12,4 @@ mod rules;
 
 pub use engine::{collect_diagnostics, collect_diagnostics_with_sources};
 pub use input::DiagnosticInput;
+pub use location::{entity_needles, find_in_source};

@@ -262,16 +262,9 @@ mod tests {
             .iter()
             .find(|d| d.path.file_name().and_then(|n| n.to_str()) == Some("example.ttl"))
             .expect("example.ttl indexed");
-        let entity_count = catalog
-            .data()
-            .entities
-            .iter()
-            .filter(|e| document_matches_entity(e, example))
-            .count();
-        assert!(
-            entity_count > 0,
-            "fixture entities should match example.ttl via ontology IRI"
-        );
+        let entity_count =
+            catalog.data().entities.iter().filter(|e| document_matches_entity(e, example)).count();
+        assert!(entity_count > 0, "fixture entities should match example.ttl via ontology IRI");
 
         let dir = tempfile::tempdir().unwrap();
         export_workspace(&catalog, ExportOptions::markdown(dir.path())).expect("export");
@@ -280,14 +273,8 @@ mod tests {
         let detail_path = dir.path().join(format!("{doc_slug}.md"));
         assert!(detail_path.exists(), "expected per-ontology export file");
         let detail = fs::read_to_string(detail_path).expect("ontology markdown");
-        assert!(
-            detail.contains("## Entities"),
-            "ontology page should list entities"
-        );
-        assert!(
-            !detail.contains("## Entities\n\n\n#"),
-            "entity section should not be empty"
-        );
+        assert!(detail.contains("## Entities"), "ontology page should list entities");
+        assert!(!detail.contains("## Entities\n\n\n#"), "entity section should not be empty");
         assert!(
             index.contains(&format!("{entity_count} entities")),
             "index should report exported entity count for example.ttl"

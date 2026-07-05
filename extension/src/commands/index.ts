@@ -28,7 +28,7 @@ import {
 import { ExplorerTreeProvider } from "../treeviews/explorer";
 import { resolveEntityIri } from "../utils/resolveEntityIri";
 import { byteColToUtf16 } from "../utils/positions";
-import { openWorkspaceTextDocument } from "../utils/workspacePath";
+import { documentUriInWorkspace, openWorkspaceTextDocument } from "../utils/workspacePath";
 
 export function registerCommands(
   context: vscode.ExtensionContext,
@@ -198,8 +198,15 @@ export function registerCommands(
           void vscode.window.showErrorMessage("Entity is not in an editable Turtle file");
           return;
         }
+        const documentUri = documentUriInWorkspace(detail.document_path);
+        if (!documentUri) {
+          void vscode.window.showErrorMessage(
+            "OntoCode: entity document path is outside the workspace"
+          );
+          return;
+        }
         const result = await applyAxiomPatch({
-          document_uri: vscode.Uri.file(detail.document_path).toString(),
+          document_uri: documentUri,
           patches: [{ op: "delete_entity", entity_iri: iri }],
           preview_only: false,
         });

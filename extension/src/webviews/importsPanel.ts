@@ -5,37 +5,57 @@ import {
   hasPatchFailureDiagnostics,
   patchFailureMessage,
 } from "../lsp/patchFeedback";
-import { OntologyDocument, PatchOp } from "../lsp/protocol";
+import { Entity, OntologyDocument, PatchOp } from "../lsp/protocol";
 import { documentUriInWorkspace } from "../utils/workspacePath";
+import {
+  MISSING_ONTOLOGY_HEADER_MESSAGE,
+  resolveOntologyIri,
+} from "./importsOntology";
 import { PanelHost } from "./panelHost";
 import type { ImportsDocumentPayload, WebviewMessage } from "./messages";
 
 type RefreshFn = () => Promise<void>;
 
-function ontologyIri(doc: OntologyDocument): string {
-  return doc.base_iri ?? doc.id;
-}
-
 function buildPayload(
   doc: OntologyDocument,
-  allDocs: OntologyDocument[]
+  allDocs: OntologyDocument[],
+  entities: Entity[]
 ): ImportsDocumentPayload {
-  const selfIri = ontologyIri(doc);
+  const selfIri = resolveOntologyIri(doc, entities);
   const imported = new Set(doc.imports ?? []);
   const options = allDocs
     .filter((d) => d.format === "turtle" && d.path !== doc.path)
-    .map((d) => ({
-      iri: ontologyIri(d),
-      path: d.path,
-      label: path.basename(d.path),
-    }))
+    .map((d) => {
+      const iri = resolveOntologyIri(d, entities);
+      if (!iri) {
+        return undefined;
+      }
+      return {
+        iri,
+        path: d.path,
+        label: path.basename(d.path),
+      };
+    })
+    .filter((o): o is NonNullable<typeof o> => o !== undefined)
     .filter((o) => o.iri !== selfIri && !imported.has(o.iri));
 
   return {
     path: doc.path,
     ontology_iri: selfIri,
+    imports_editable: selfIri !== undefined,
+    error: selfIri ? undefined : MISSING_ONTOLOGY_HEADER_MESSAGE,
     imports: doc.imports ?? [],
     options,
+  };
+}
+
+function errorPayload(filePath: string, message: string): ImportsDocumentPayload {
+  return {
+    path: filePath,
+    imports_editable: false,
+    error: message,
+    imports: [],
+    options: [],
   };
 }
 
@@ -44,7 +64,9 @@ export class ImportsPanel {
 
   private documentUri: string | undefined;
   private ontologyIri: string | undefined;
+  private importsEditable = false;
   private filePath: string | undefined;
+  private loadGeneration = 0;
 
   private constructor(
     private readonly host: PanelHost,
@@ -86,33 +108,70 @@ export class ImportsPanel {
   }
 
   private async load(filePath: string): Promise<void> {
+    const generation = ++this.loadGeneration;
     this.filePath = filePath;
+
     const snapshot = await getCatalogSnapshot();
+    if (generation !== this.loadGeneration) {
+      return;
+    }
+
     const doc = snapshot.documents.find((d) => d.path === filePath);
     if (!doc) {
+      this.clearEditableState();
       void vscode.window.showErrorMessage(
         `OntoCode: no indexed Turtle document at ${filePath}`
       );
+      this.host.postMessage({
+        type: "loadImports",
+        payload: errorPayload(
+          filePath,
+          `No indexed Turtle document at ${filePath}`
+        ),
+      });
       return;
     }
     if (doc.format !== "turtle") {
+      this.clearEditableState();
       void vscode.window.showErrorMessage(
         "OntoCode: imports management is only available for Turtle (.ttl) files"
       );
+      this.host.postMessage({
+        type: "loadImports",
+        payload: errorPayload(
+          filePath,
+          "Imports management is only available for Turtle (.ttl) files"
+        ),
+      });
       return;
     }
 
+    const payload = buildPayload(doc, snapshot.documents, snapshot.entities);
     this.documentUri = documentUriInWorkspace(doc.path);
-    this.ontologyIri = ontologyIri(doc);
+    this.ontologyIri = payload.ontology_iri;
+    this.importsEditable = payload.imports_editable;
+
+    if (generation !== this.loadGeneration) {
+      return;
+    }
+
     this.host.panel.title = `Imports: ${path.basename(doc.path)}`;
-    this.host.postMessage({
-      type: "loadImports",
-      payload: buildPayload(doc, snapshot.documents),
-    });
+    this.host.postMessage({ type: "loadImports", payload });
+  }
+
+  private clearEditableState(): void {
+    this.documentUri = undefined;
+    this.ontologyIri = undefined;
+    this.importsEditable = false;
   }
 
   private async handleMessage(message: WebviewMessage): Promise<void> {
-    if (message.type !== "applyPatch" || !this.documentUri || !this.ontologyIri) {
+    if (
+      message.type !== "applyPatch" ||
+      !this.documentUri ||
+      !this.ontologyIri ||
+      !this.importsEditable
+    ) {
       return;
     }
     const { parseApplyPatchMessage } = await import("./messages");
@@ -167,7 +226,7 @@ export class ImportsPanel {
       if (doc) {
         this.host.postMessage({
           type: "loadImports",
-          payload: buildPayload(doc, snapshot.documents),
+          payload: buildPayload(doc, snapshot.documents, snapshot.entities),
         });
       }
     } catch (err) {

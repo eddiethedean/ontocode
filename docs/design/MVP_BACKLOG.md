@@ -78,8 +78,6 @@
 ### Packaging
 - [x] Build extension locally
 - [x] Add README
-- [ ] Add screenshots
-
 ## v0.3 Diagnostics Backlog
 
 ### Engine

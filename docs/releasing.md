@@ -45,7 +45,6 @@ Maintainer checklist for publishing crates, binaries, and the VS Code extension.
 - [ ] [docs/design/LICENSES.md](design/LICENSES.md) — dependency sections
 - [ ] Run `mkdocs build --strict` locally before tagging
 - [ ] Run `./scripts/check-doc-versions.sh` (also enforced in CI)
-- [ ] After editing `docs/media/explorer-preview.svg`, run `./scripts/render-explorer-preview.sh` (syncs marketplace screenshot)
 
 ## Tag and publish
 
@@ -72,6 +71,9 @@ Requires the `CARGO_REGISTRY_TOKEN` repository secret. For Open VSX (Cursor), se
 `ontocore-core` → `ontocore-parser` → `ontocore-owl` → `ontocore-diagnostics` → `ontocore-catalog` → `ontocore-diff` → `ontocore-docs` → `ontocore-refactor` → `ontocore-query` → `ontocore-reasoner` → `ontocore-robot` → `ontocore-lsp` → `ontocore` → `ontocore-cli`
 
 ## VS Code Marketplace and Open VSX
+
+!!! warning "P0 — manual Marketplace publish"
+    The [release workflow](https://github.com/eddiethedean/ontocode/blob/main/.github/workflows/release.yml) publishes crates.io, GitHub Release assets, and **Open VSX** automatically. **VS Code Marketplace publish is manual** — run `npx vsce publish` after the tag (see [marketplace-publish.md](marketplace-publish.md)).
 
 See [marketplace-publish.md](marketplace-publish.md). Open VSX listing: [open-vsx.org/extension/ontocode/ontocode](https://open-vsx.org/extension/ontocode/ontocode).
 

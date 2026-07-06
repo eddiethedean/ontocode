@@ -6,7 +6,7 @@ Pick one of two documentation paths, then follow the next step for your task.
 
 | Path | When to use | Start |
 |------|-------------|-------|
-| **VS Code extension** | Browse, edit Turtle, Query Workbench, reasoner panels — no Rust install | [VS Code extension docs](../ontocode/vscode-extension.md) |
+| **VS Code extension** | Browse, edit Turtle, Query Workbench, reasoner panels — no Rust install | [First success (~10 min)](first-success.md) |
 | **Rust & CLI** | `cargo install ontocore-cli`, embed crates, CI validation | [Rust & CLI docs](rust-crates.md) |
 
 New to OWL/RDF vocabulary? Read [Ontology concepts](../concepts.md) first.

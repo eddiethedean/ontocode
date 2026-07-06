@@ -21,7 +21,7 @@ Available in **v0.10+** via:
 The panel uses the same React webview stack as the Query Workbench — see [Webview protocol](../webview-protocol.md).
 
 !!! tip "No version control?"
-    Compare two directories on disk with the CLI: `ontocore diff --left ./a --right ./b`.
+    Compare two directories on disk with the CLI: `ontocore diff --left-ref ./a --right-ref ./b`.
 
 ## CLI quick start
 
@@ -37,7 +37,7 @@ Installed CLI (your ontology repo):
 ```bash
 ontocore diff HEAD..WORKTREE
 ontocore diff --left-ref main --right-ref WORKTREE --format json
-ontocore diff --left ./baseline --right ./candidate
+ontocore diff --left-ref ./baseline --right-ref ./candidate
 ```
 
 ### Common ref pairs
@@ -69,7 +69,7 @@ See [CI integration](../ci-integration.md).
 
 | Problem | What to try |
 |---------|-------------|
-| `no git repository found` | Run from a git checkout; use `--left` / `--right` directory compare instead |
+| `no git repository found` | Run from a git checkout; use `--left-ref` / `--right-ref` directory compare instead |
 | Empty diff unexpectedly | Confirm refs exist; re-index with `ontocore validate` or **Index Workspace** |
 | Panel shows no data | Trust workspace; check **Output → OntoCore Language Server** |
 | Ref compare slow on large repos | Compare feature branch tip only; use `--breaking-only` in CI |

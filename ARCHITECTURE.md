@@ -2,6 +2,14 @@
 
 > **Audience:** Evaluators, adopters, and contributors — high-level product architecture.
 >
+> **Which architecture doc?**
+>
+> | Read this | When |
+> |-----------|------|
+> | **This page** (`ARCHITECTURE.md`) | Product/ecosystem overview — Ontologos, OntoCore, OntoCode |
+> | [Implementation architecture](docs/design/ARCHITECTURE.md) | Contributor crate layout and internal modules |
+> | [OntoCore architecture](docs/ontocore/architecture.md) | Short OntoCore stack summary (links to design doc for detail) |
+>
 > **Contributor crate layout:** [Implementation architecture](docs/design/ARCHITECTURE.md) (internal modules, not a user capability list).
 >
 > **v0.11 ships today:** OntoCode (VS Code), OntoCore (CLI/LSP/library), Turtle completion, diagnostic quick fixes, Manage Imports, `ontocore docs`, semantic diff, incremental indexing, Ontologos reasoning, ROBOT CLI wrappers.

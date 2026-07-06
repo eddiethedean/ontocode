@@ -62,8 +62,6 @@ cargo run -- query fixtures "SELECT * FROM classes"
 cargo run -- validate fixtures
 ```
 
-![OntoCode Explorer — Ontologies tree and React Entity Inspector for Person](docs/media/explorer-preview.png)
-
 ## Architecture
 
 ```text

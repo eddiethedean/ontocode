@@ -23,15 +23,27 @@ For offline or air-gapped environments, use a release VSIX instead — see [Inst
 
 Download a minimal tutorial pack if you do not already have ontology files:
 
-```bash
-mkdir ontocode-tutorial && cd ontocode-tutorial
-curl -fsSLO https://raw.githubusercontent.com/eddiethedean/ontocode/main/fixtures/example.ttl
-curl -fsSLO https://raw.githubusercontent.com/eddiethedean/ontocode/main/fixtures/complex-classes.ttl
-```
+=== "macOS / Linux"
+
+    ```bash
+    mkdir ontocode-tutorial && cd ontocode-tutorial
+    curl -fsSLO https://raw.githubusercontent.com/eddiethedean/ontocode/main/fixtures/example.ttl
+    curl -fsSLO https://raw.githubusercontent.com/eddiethedean/ontocode/main/fixtures/complex-classes.ttl
+    ```
+
+=== "Windows (PowerShell)"
+
+    ```powershell
+    mkdir ontocode-tutorial; cd ontocode-tutorial
+    Invoke-WebRequest -Uri https://raw.githubusercontent.com/eddiethedean/ontocode/main/fixtures/example.ttl -OutFile example.ttl
+    Invoke-WebRequest -Uri https://raw.githubusercontent.com/eddiethedean/ontocode/main/fixtures/complex-classes.ttl -OutFile complex-classes.ttl
+    ```
+
+Or download the two files from [fixtures/](https://github.com/eddiethedean/ontocode/tree/main/fixtures) in your browser.
 
 Then **File → Open Folder…** and select `ontocode-tutorial` (or your own ontology folder).
 
-When VS Code asks, choose **Yes, I trust the authors** (or **Trust**). Restricted Mode blocks the language server and the explorer will stay empty.
+When VS Code asks, choose **Trust** the workspace. OntoCode uses its **bundled** `ontocore-lsp` binary in both trusted and Restricted Mode. In **Restricted Mode**, custom settings such as `ontocode.lspPath` and `ontocode.robotPath` are ignored. If the explorer stays empty after 30 seconds, trust the folder and run **OntoCode: Index Workspace**.
 
 ### 3. Browse the explorer
 

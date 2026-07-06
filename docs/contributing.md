@@ -18,10 +18,10 @@ The root Cargo package `ontocode` is unpublished and hosts workspace integration
 
 ## Optional dependencies
 
-- **Java 11+** and **[ROBOT](http://robot.obolibrary.org/)** on `PATH` — required for `ontocore robot` tests and ROBOT interop development
+- **Java 11+** and **[ROBOT](http://robot.obolibrary.org/)** on `PATH` — optional; needed only for manual `ontocore robot` / ROBOT interop development (not required for `cargo test --workspace`)
 - **Python 3.12** — for MkDocs doc site (`pip install -r docs/requirements.txt`)
 
-> **Canonical copy:** This page is the source for Read the Docs. Keep [`CONTRIBUTING.md` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/CONTRIBUTING.md) in sync when you edit this file.
+> **Canonical copy:** Root [`CONTRIBUTING.md` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/CONTRIBUTING.md) is the source of truth. Keep this page in sync when you edit contributor docs.
 
 ## Build and test
 
@@ -84,7 +84,14 @@ cargo test -p ontocode --test lsp_smoke
 cargo test -p ontocode --test lsp_reasoner
 ```
 
-**VS Code E2E matrix** (separate workflow): see `.github/workflows/extension-vscode-e2e.yml`. Run locally with `@vscode/test-electron` after packaging the extension.
+**VS Code E2E matrix** (separate workflow): see `.github/workflows/extension-vscode-e2e.yml`. Run locally:
+
+```bash
+cargo build -p ontocore-lsp --bins
+cd extension && npm ci && npm run compile && npm run test:vscode
+```
+
+See [Debugging guide](debugging.md) for LSP, extension host, and webview workflows.
 
 Full extension packaging (bundles LSP for current platform):
 

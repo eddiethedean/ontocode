@@ -9,8 +9,6 @@
 
 > **CLI or Rust crates?** See the [Rust & CLI documentation path](https://ontocode-vs.readthedocs.io/en/latest/guides/rust-crates/).
 
-![OntoCode Explorer — sidebar views, Diagnostics, and React Entity Inspector](media/explorer-preview.png)
-
 ---
 
 ## Quick start

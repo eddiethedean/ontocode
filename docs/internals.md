@@ -9,6 +9,7 @@ Design documents, ADRs, and backlogs live under [design/](design/README.md). The
 ## Start here for contributors
 
 - [Contributing guide](contributing.md)
+- [Debugging guide](debugging.md)
 - [Design overview](design/README.md)
 - [Implementation architecture](design/ARCHITECTURE.md)
 - [ADR index](design/adr/README.md)

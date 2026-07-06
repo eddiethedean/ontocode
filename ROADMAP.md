@@ -55,71 +55,33 @@ After 1.0, the roadmap shifts from parity to modernization.
 - Semantic diff (CLI, LSP, VS Code panel)
 - Persistent optional cache (`.ontocore/cache/`)
 
-## v0.12 — Diagnostics & Quality
+## v0.12–v0.18 — superseded milestone labels
 
-- Broken imports
-- Circular imports
-- Missing labels/comments
-- Deprecated usage
-- Ontology smells
-- Metrics
-- HTML / Markdown / JSON reports
+Earlier roadmap drafts used v0.12–v0.15 for capabilities that **shipped in v0.3–v0.11** (diagnostics, SQL virtual tables, refactoring, OntoLogos reasoning, semantic diff, docs export). Do **not** treat those labels as unshipped work.
 
-## v0.13 — SQL Workspace Engine
+**Canonical capability truth:** [docs/SHIPPED.md](docs/SHIPPED.md)
 
-DuckDB-style ontology analytics.
+**Forward engineering milestones:** [docs/design/ROADMAP.md](docs/design/ROADMAP.md)
 
-Virtual tables:
+## v1.0 — Plugin platform & toolchain (planned)
 
-- ontology.classes
-- ontology.properties
-- ontology.individuals
-- ontology.annotations
-- ontology.imports
-- ontology.axioms
-- ontology.restrictions
-- ontology.metrics
-- ontology.diagnostics
+OntoCore will host **external** plugins through stable APIs — it does not embed workflow engines. Reference integrations (such as [owlmake](https://github.com/INCATools/owlmake)) demonstrate how ontology build, validation, and release tools plug in without becoming core dependencies.
 
-## v0.14 — Refactoring
-
-- Rename
-- Namespace migration
-- Merge ontology
-- Extract ontology
-- Safe delete
-- Batch updates
-
-## v0.15 — Ontologos Integration
-
-- Classification
-- Consistency
-- Explanations
-- Incremental reasoning
-- Inferred hierarchy
-- Reasoning-aware diagnostics
-
-## v0.16 — Plugin Platform
-
-OntoCore hosts **external** plugins through stable APIs — it does not embed workflow engines. The platform exposes extension points; reference integrations (such as [owlmake](https://github.com/INCATools/owlmake)) demonstrate how ontology build, validation, and release tools plug in without becoming core dependencies.
-
-- Diagnostics plugins
-- Query plugins
-- Refactoring plugins
-- Visualization plugins
-- **Build plugins** — compile, merge, and materialize ontologies via external tools
-- **Validation plugins** — SHACL, profile checks, and custom QC rules
-- **Documentation plugins** — generate human-readable ontology docs and reports
-- **Workflow plugins** — orchestrate multi-step ROBOT/ODK-style pipelines
-- **owlmake** as the first reference workflow plugin — shows how external ontology workflow tools integrate with OntoCore workspace, index, and diagnostics APIs
+- Plugin host and stable extension APIs
+- Diagnostics, query, refactoring, and visualization plugins
+- **Build / validation / workflow plugins** — ROBOT/ODK-style pipelines via external tools
+- **owlmake** as the first reference workflow plugin
+- Full OBO write-back in the IDE
+- Property chain editing
+- Python / TypeScript SDKs and MCP server (exploration)
 
 ## v0.17 — Language Bindings
 
-- Python
-- TypeScript
-- Stable APIs
+Moved to v1.0+ exploration — see plugin platform section above.
 
 ## v0.18 — AI Platform
+
+Moved to v1.0+ exploration:
 
 - MCP server
 - Semantic context

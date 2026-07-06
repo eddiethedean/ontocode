@@ -123,13 +123,24 @@ Indexing runs on workspace open. `ontocode.autoIndexOnOpen` is a legacy setting 
 
 ## Troubleshooting
 
+### End users (Marketplace / Open VSX install)
+
 | Symptom | Fix |
 |---------|-----|
 | Extension does not activate | Open a supported ontology file or the **OntoCode → Ontologies** view |
-| `failed to start language server` | Run `./scripts/package-extension.sh`, set `ontocode.lspPath`, or `cargo install ontocore-lsp` |
+| `failed to start language server` | **Trust** the workspace; check **Output → OntoCore Language Server**; uninstall duplicate OntoCode versions |
 | `spawn ... ontocore-lsp EACCES` (macOS/Linux) | Upgrade to OntoCode ≥ 0.4.0. Manual: `chmod +x` on the bundled binary path from the error |
-| `couldn't create connection to server` | Check **Output → OntoCore Language Server**. Uninstall older OntoCode versions. Try `cargo install ontocore-lsp` and set `ontocode.lspPath` |
-| Empty explorer after open | Run **OntoCode: Index Workspace**; check **Output → OntoCore Language Server** |
+| `couldn't create connection to server` | Check **Output → OntoCore Language Server**. Reinstall the extension or download a fresh VSIX from [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) |
+| Empty explorer after open | **Trust** the workspace; run **OntoCode: Index Workspace**; check **Output → OntoCore Language Server** |
 | Inspector has no edit controls | Entity must be in a **Turtle (`.ttl`)** file; other formats are read-only |
+
+### Developers (building from source)
+
+| Symptom | Fix |
+|---------|-----|
+| Bundled LSP missing in dev host | `cargo build -p ontocore-lsp --bins` then set `ontocode.lspPath` or run `./scripts/package-extension.sh` |
+| Extension tests fail to spawn LSP | `export ONTOCORE_LSP_BIN="$(pwd)/target/debug/ontocore-lsp"` before `npm test` |
+
+See [Debugging guide](debugging.md) for F5, webview-ui, and E2E workflows.
 
 See also [troubleshooting.md](troubleshooting.md), [faq.md](faq.md), and [First success in 10 minutes](guides/first-success.md).

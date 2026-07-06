@@ -13,18 +13,22 @@ OntoCore exposes indexed ontology data as **virtual tables** queried with a SQL-
 - `FROM table_name` (one table only)
 - `WHERE` with comparisons and boolean combinations:
   - `column = 'value'` or `column != 'value'` (string literals)
-  - `column` or `NOT column` (boolean column identifiers, e.g. `deprecated`)
-  - Combine with `AND` / `OR` (no parentheses)
+  - **Boolean column:** `deprecated = 'true'` or `deprecated = 'false'` (values are strings in the virtual table)
+  - **Boolean shorthand:** bare `deprecated` is true when the column value is the string `"true"`
+  - Combine with `AND` / `OR` only — **no parentheses**, no `NOT`, no `LIKE`, no `IN`
 - Output formats: text (default), JSON (`--format json`), CSV (`--format csv`)
 
-Not supported: `JOIN`, subqueries, `GROUP BY`, `ORDER BY`, SQL functions, `LIKE`, `IN`, or multiple tables.
+Not supported: `JOIN`, subqueries, `GROUP BY`, `ORDER BY`, SQL functions, `NOT`, parentheses, `LIKE`, `IN`, or multiple tables.
 
 ```bash
-ontocore query /path/to/ontologies "SELECT short_name FROM classes WHERE short_name != 'Person'"
-ontocore query /path/to/ontologies "SELECT short_name FROM classes WHERE deprecated = 'false' AND short_name = 'Person'"
+ontocore query fixtures "SELECT short_name FROM classes WHERE short_name = 'Person'"
+ontocore query fixtures "SELECT short_name FROM classes WHERE deprecated = 'false' AND short_name = 'Person'"
+
+# Fails at parse/eval time
+ontocore query fixtures "SELECT short_name FROM classes WHERE NOT deprecated"
 ```
 
-From a git clone, replace `/path/to/ontologies` with `fixtures`.
+**Expected output (text):** tab-separated header plus one row for `Person` when run on `fixtures/`.
 
 SPARQL over indexed triples: [sparql-reference.md](sparql-reference.md).
 

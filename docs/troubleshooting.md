@@ -79,7 +79,7 @@ Indexing may fail above [workspace limits](workspace-limits.md) (file count, siz
 
 | Problem | What to try |
 |---------|-------------|
-| Semantic diff: `no git repository` | Open a git checkout; or use CLI `ontocore diff --left ./a --right ./b` |
+| Semantic diff: `no git repository` | Open a git checkout; or use CLI `ontocore diff --left-ref ./a --right-ref ./b` |
 | Semantic diff panel empty | Trust workspace; run **Index Workspace**; see [Semantic diff](ontocode/semantic-diff.md) |
 | Graph commands missing | Run **Index Workspace** first — [Graph view](ontocode/graph-view.md) |
 | Cannot edit `.obo` in inspector | OBO is read-only in VS Code; use Turtle write-back or external tools — [OBO guide](guides/obo-workflow.md) |

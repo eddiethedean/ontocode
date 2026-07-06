@@ -2,6 +2,16 @@
 
 OntoCode is on the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode). This checklist is for maintainers publishing new versions.
 
+!!! warning "CI does not publish to VS Code Marketplace"
+    The [release workflow](https://github.com/eddiethedean/ontocode/blob/main/.github/workflows/release.yml) publishes **Open VSX** automatically when `OVSX_PAT` is set. **VS Code Marketplace** requires a **manual** `vsce publish` step **after** the release tag and automated artifacts are complete.
+
+## Release order
+
+1. **Pre-tag:** version bump, CHANGELOG, doc sync ([releasing.md](releasing.md)), tests green on `main`
+2. **Tag:** `git tag vX.Y.Z && git push origin vX.Y.Z` — triggers crates.io, GitHub Release, VSIX build, Open VSX
+3. **Post-tag (manual):** publish to VS Code Marketplace (`vsce publish` below)
+4. **Verify:** Marketplace and Open VSX badges, install smoke test
+
 ## Prerequisites
 
 - [Visual Studio Marketplace publisher](https://marketplace.visualstudio.com/manage) account (`ontocode` publisher id in `extension/package.json`)
@@ -16,9 +26,7 @@ OntoCode is on the [VS Code Marketplace](https://marketplace.visualstudio.com/it
 3. [extension/README.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/extension/README.md) and [docs/vscode-install.md](vscode-install.md) mention Marketplace install and current version
 4. User docs synced per [releasing.md](releasing.md) checklist
 5. `npm test` and `cargo test --workspace` pass
-6. **Marketplace visuals:** run `./scripts/render-explorer-preview.sh` after editing `docs/media/explorer-preview.svg` (syncs to `extension/media/explorer-preview.png`); `package.json` includes a `screenshots` entry
-7. `extension/README.md` hero image uses `media/explorer-preview.png` (not a docs-only path)
-8. Short description avoids overstating Protégé parity — point to [Protégé migration guide](guides/protege-migration.md) instead
+6. Short description avoids overstating Protégé parity — point to [Protégé migration guide](guides/protege-migration.md) instead
 
 ## Publish command
 
@@ -38,7 +46,7 @@ npx vsce package --no-dependencies
 
 1. Update root README **Choose your path → VS Code** to link Marketplace and Open VSX listings first, VSIX as fallback
 2. Verify Open VSX and Marketplace badges on README and [docs/index.md](index.md) (Marketplace: `https://vsmarketplacebadges.dev/version/ontocode.ontocode.svg` — shields.io `visual-studio-marketplace` badges are retired)
-3. Tag release and attach VSIX for users who prefer offline install
+3. Confirm the release tag and GitHub Release VSIX are already attached (tag **before** publish — do not tag after manual Marketplace publish)
 
 ## Token handling
 

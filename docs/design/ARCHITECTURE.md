@@ -2,6 +2,14 @@
 
 > **Audience:** Contributors only — crate layout, dependency rules, and internal diagrams.
 >
+> **Which architecture doc?**
+>
+> | Read this | When |
+> |-----------|------|
+> | [Platform architecture](../architecture.md) | Evaluators and adopters — ecosystem responsibilities |
+> | **This page** (`design/ARCHITECTURE.md`) | Crate layout, internal modules, dependency rules |
+> | [OntoCore architecture](../ontocore/architecture.md) | Short stack summary (links here for crate detail) |
+>
 > **Do not use this page to evaluate shipped product features.** See [What ships today](../SHIPPED.md) and [Platform architecture](../architecture.md).
 >
 > **Ecosystem architecture (canonical for users):** [Platform architecture](../architecture.md).
@@ -76,20 +84,24 @@ External Workflow Plugins (not core)     owlmake · ROBOT/ODK adapters
 
 ## 3. OntoCore Crate Layout
 
-| Crate | Status | Role | External dependency |
-|-------|--------|------|---------------------|
-| `ontocore-core` | v0.2 | Types, scanner, limits, path jail | `ignore` |
-| `ontocore-parser` | v0.2 | RDF parse, entity extraction | `oxigraph` |
-| `ontocore-owl` | v0.4 | OWL axiom facade, patch write-back | `horned-owl` |
-| `ontocore-catalog` | v0.2 | Index builder, entity API | — |
-| `ontocore-query` | v0.2 | SQL virtual tables, SPARQL | `sqlparser`, `oxigraph` |
-| `ontocore-diagnostics` | v0.3 | Lint rules, LSP diagnostics | `regex` (+ `fastobo-validator` v0.7b) |
-| `ontocore-diff` | v0.10 | Semantic diff, Git compare | `horned-owl`, `git2` |
-| `ontocore-docs` | v0.11 | Markdown/HTML export | `pulldown-cmark`, `minijinja` |
-| `ontocore-reasoner` | v0.6 | Reasoner facade | OntoLogos 1.0.0 |
-| `ontocore-robot` | v0.7 | ROBOT CLI wrappers | ROBOT CLI (external) |
-| `ontocore-lsp` | v0.4 | Language server + diagnostics + patch apply | `lsp-server`, `lsp-types` |
-| `ontocore-cli` | v0.4 | `ontocore` binary | composes above |
+Full crate map with dependency edges: [crate-map.md](../ontocore/crate-map.md).
+
+| Crate | Role | External dependency |
+|-------|------|---------------------|
+| `ontocore` | Public façade API (`Workspace`, module re-exports) | composes below |
+| `ontocore-core` | Types, scanner, limits, path jail | `ignore` |
+| `ontocore-parser` | RDF parse, entity extraction | `oxigraph` |
+| `ontocore-owl` | OWL axiom facade, patch write-back | `horned-owl` |
+| `ontocore-catalog` | Index builder, entity API | — |
+| `ontocore-query` | SQL virtual tables, SPARQL | `sqlparser`, `oxigraph` |
+| `ontocore-diagnostics` | Lint rules, LSP diagnostics | `regex`, `fastobo-validator` |
+| `ontocore-diff` | Semantic diff, Git compare | `horned-owl`, `git2` |
+| `ontocore-docs` | Markdown/HTML export | `pulldown-cmark`, `minijinja` |
+| `ontocore-reasoner` | Reasoner facade | OntoLogos 1.0.0 |
+| `ontocore-refactor` | Workspace refactoring | — |
+| `ontocore-robot` | ROBOT CLI wrappers | ROBOT CLI (external) |
+| `ontocore-lsp` | Language server + diagnostics + patch apply | `lsp-server`, `lsp-types` |
+| `ontocore-cli` | `ontocore` binary | composes above |
 
 ## 4. OntoCore Internal Modules
 

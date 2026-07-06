@@ -21,12 +21,6 @@
     "Other"
   ],
   "icon": "media/icon.png",
-  "screenshots": [
-    {
-      "path": "media/explorer-preview.png",
-      "caption": "OntoCode explorer, Entity Inspector, and diagnostics sidebar"
-    }
-  ],
   "galleryBanner": {
     "color": "#0078D4",
     "theme": "dark"

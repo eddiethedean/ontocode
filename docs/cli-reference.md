@@ -36,6 +36,8 @@ ontocore inspect fixtures
 ontocore inspect /path/to/ontologies --format json
 ```
 
+**Expected output (text, `fixtures/`):** ontology/class/property counts (e.g. multiple classes including `Person`).
+
 ### `query`
 
 Run a SQL-like query against virtual tables. See [SQL reference](sql-reference.md).
@@ -44,6 +46,8 @@ Run a SQL-like query against virtual tables. See [SQL reference](sql-reference.m
 ontocore query fixtures "SELECT short_name, labels FROM classes"
 ontocore query . "SELECT code, message FROM diagnostics WHERE severity = 'error'" --format json
 ```
+
+**Expected output (text, `fixtures/`):** tab-separated columns plus rows (e.g. `Person` in `short_name`).
 
 **Exit:** 0 on success; non-zero on parse/unsupported SQL/I/O errors.
 
@@ -65,6 +69,8 @@ Index workspace and fail if diagnostic **errors** exist (warnings allowed).
 ontocore validate .
 ontocore validate /path/to/ontologies
 ```
+
+**Expected output (text, clean workspace):** diagnostic summary with **exit code 0** (warnings allowed).
 
 **Exit:** 0 when no errors; non-zero otherwise. Stable for CI — [ci-integration.md](ci-integration.md).
 
@@ -108,6 +114,8 @@ ontocore classify ./ontologies --profile el
 ontocore classify . --profile rl --format json
 ontocore classify . --profile el --no-auto-profile
 ```
+
+**Expected output (json):** `consistent: true`, `unsatisfiable: []`, `profile_used`, `duration_ms` when ontology is consistent.
 
 | Flag | Default | Description |
 |------|---------|-------------|
@@ -239,7 +247,7 @@ Semantic catalog diff between git refs, directories, or indexed snapshots. See [
 ontocore diff HEAD..WORKTREE
 ontocore diff --left-ref main --right-ref feature --format markdown
 ontocore diff --left-ref HEAD --right-ref WORKTREE --breaking-only
-ontocore diff --left ./baseline --right ./candidate
+ontocore diff --left-ref ./baseline --right-ref ./candidate
 ```
 
 | Flag | Description |
@@ -253,6 +261,8 @@ ontocore diff --left ./baseline --right ./candidate
 | `--breaking-only` | Filter to likely breaking changes |
 
 **Exit:** 0 on success; non-zero on git/parse/I/O errors.
+
+**Troubleshooting:** If you see `provide --left-ref or a git range`, pass a range or both refs. Do **not** use `--left` / `--right` — those flags do not exist.
 
 ### `docs`
 

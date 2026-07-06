@@ -64,10 +64,13 @@ ontocore validate /path/to/your/ontologies
 
 ## Path D — Release binaries (no Rust)
 
+**CLI pre-builds are Linux x64 only.** On macOS or Windows, use Path C (`cargo install ontocore-cli`) or install the VS Code extension (bundled LSP).
+
 1. Open [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) for the latest **v0.11.x** tag.
-2. Download the CLI tarball for your platform (Linux x64 example below) or `ontocore-lsp-v0.11.1-<platform>.tar.gz` / `.zip` for LSP-only use.
-3. Verify with `SHA256SUMS` — see [release-integrity.md](release-integrity.md).
-4. Extract and run (replace `0.11.1` with your release tag):
+2. **For CLI on Linux x64:** download `ontocore-v<version>-x86_64-unknown-linux-gnu.tar.gz`.
+3. **For VS Code (any supported OS):** download `ontocode-<version>.vsix` — see [vscode-install.md](vscode-install.md).
+4. Verify with `SHA256SUMS` — see [release-integrity.md](release-integrity.md).
+5. Extract and run (Linux example; replace `0.11.1` with your tag):
 
 ```bash
 VERSION=0.11.1

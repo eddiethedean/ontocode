@@ -164,6 +164,7 @@ nav:
       - Release integrity: release-integrity.md
   - Contribute:
       - Guide: contributing.md
+      - Debugging: debugging.md
       - Releasing: releasing.md
       - Marketplace publish: marketplace-publish.md
       - Internals (design targets): internals.md

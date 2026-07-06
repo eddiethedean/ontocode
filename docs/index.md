@@ -16,7 +16,7 @@ OntoCode is a modern ontology IDE for VS Code, powered by <strong>OntoCore</stro
 
 <div class="oc-hero-actions" markdown>
 [First success (~10 min core path)](guides/first-success.md){ .md-button .md-button--primary }
-[Install VS Code](vscode-install.md){ .md-button .md-button--primary }
+[Install the extension](vscode-install.md){ .md-button }
 [Install CLI](getting-started.md){ .md-button }
 [What ships today](SHIPPED.md){ .md-button }
 [Vision](vision.md){ .md-button }
@@ -51,7 +51,7 @@ You do **not** need to clone this repo to use the extension or `cargo install on
 
     Browse, edit Turtle, run queries and the reasoner from the OntoCode activity bar.
 
-    [:octicons-arrow-right-24: OntoCode extension docs](ontocode/vscode-extension.md)
+    [:octicons-arrow-right-24: First success tutorial](guides/first-success.md)
 
 -   :material-console:{ .lg .middle } **Rust & CLI**
 
@@ -129,9 +129,10 @@ Full matrix: **[What ships today](SHIPPED.md)** (canonical — do not rely on th
 
 === "VS Code"
 
-    1. Install OntoCode from the [Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) or [Open VSX](https://open-vsx.org/extension/ontocode/ontocode) (Cursor)
-    2. Open a folder with `.ttl`, `.owl`, `.obo`, or other ontology files
-    3. Open the **OntoCode** activity bar → browse **Classes** → click an entity
+    1. Install **OntoCode** from the [Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) or [Open VSX](https://open-vsx.org/extension/ontocode/ontocode) (Cursor) — not the VS Code editor itself
+    2. **File → Open Folder…** with `.ttl`, `.owl`, `.obo`, or other ontology files
+    3. When prompted, **Trust** the workspace (required for indexing)
+    4. Open the **OntoCode** activity bar → browse **Classes** → click an entity
 
 === "CLI (install)"
 

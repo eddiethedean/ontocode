@@ -6,7 +6,7 @@ Migration guides: [Migration index](migration/README.md)
 
 ## [0.11.1] - 2026-07-06
 
-**v0.11.1** — Patch — fixes React webview panel routing (Entity Inspector and other panels); adds webview regression tests; updates explorer preview screenshot; docs badge and Open VSX updates. See [CHANGELOG.md](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md).
+**v0.11.1** — Patch — fixes React webview panel routing (Entity Inspector and other panels); adds webview regression tests; docs badge and Open VSX updates. See [CHANGELOG.md](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md).
 
 ## [0.11.0] - 2026-07-05
 

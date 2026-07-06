@@ -18,6 +18,8 @@ ontocore query /path/to/ontologies "SELECT * FROM individuals"
 ontocore query /path/to/ontologies "SELECT * FROM entities"
 ```
 
+**Expected (`fixtures/`, filtered query):** 1 row with `short_name` = `Person`.
+
 ## Properties
 
 ```bash
@@ -52,8 +54,10 @@ ontocore validate /path/to/ontologies
 
 ```bash
 ontocore sparql /path/to/ontologies "SELECT ?s ?p ?o WHERE { ?s ?p ?o } LIMIT 5"
-ontocore sparql /path/to/ontologies "PREFIX ex: <http://example.org/> SELECT ?label WHERE { ex:Person rdfs:label ?label }"
+ontocore sparql fixtures "PREFIX ex: <http://example.org/people#> PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> SELECT ?label WHERE { ex:Person rdfs:label ?label }"
 ```
+
+**Expected (fixtures):** the second query returns **1 row** with a label for `Person` (e.g. `"Person"`).
 
 ## Export formats
 
@@ -67,5 +71,7 @@ ontocore query /path/to/ontologies "SELECT * FROM classes" --format csv
 ```bash
 ontocore validate /path/to/ontologies   # exit 0 when no diagnostic errors
 ```
+
+**Expected (`fixtures/`):** exit code **0** (warnings may be present; errors fail validation).
 
 Full column reference: [sql-reference.md](../sql-reference.md). SPARQL: [sparql-reference.md](../sparql-reference.md). Errors: [errors.md](../errors.md).

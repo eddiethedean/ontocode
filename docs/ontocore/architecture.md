@@ -1,6 +1,12 @@
 # OntoCore architecture
 
-> **Ecosystem architecture (canonical):** [Platform architecture](../architecture.md) — Ontologos, OntoCore, and OntoCode responsibilities.
+> **Which architecture doc?**
+>
+> | Read this | When |
+> |-----------|------|
+> | [Platform architecture](../architecture.md) | **Canonical** ecosystem overview for evaluators |
+> | [Implementation architecture](../design/ARCHITECTURE.md) | Crate layout and internal modules for contributors |
+> | **This page** | Short OntoCore stack summary only |
 >
 > **Status:** OntoCore is the platform identity for the Rust engine shipped since v0.2. See [ADR-0018](../design/adr/0018-ontocore-platform-identity.md).
 

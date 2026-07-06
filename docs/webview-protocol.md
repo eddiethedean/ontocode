@@ -54,12 +54,48 @@ Host loads diff via LSP `ontocore/semanticDiff` on panel open. See [Semantic dif
 
 ### Manage Imports (v0.11+)
 
-| type | payload |
-|------|---------|
-| `loadImports` | `{ path, ontology_iri?, imports_editable, error?, imports[], options[] }` |
-| `preview` | `{ text }` — Turtle preview after import patch |
+Host → React:
 
-`options` lists workspace ontologies available to add as `owl:imports`. Import changes use `applyPatch` with `add_import` / `remove_import` ops.
+| type | payload shape |
+|------|----------------|
+| `loadImports` | `{ payload: ImportsDocumentPayload }` |
+| `preview` | `{ text: string }` — Turtle preview after import patch |
+
+`ImportsDocumentPayload`:
+
+| field | type | description |
+|-------|------|-------------|
+| `path` | string | Indexed `.ttl` path |
+| `ontology_iri` | string? | Ontology header IRI when known |
+| `imports_editable` | boolean | `false` for non-Turtle or read-only docs |
+| `error` | string? | Load failure message (panel still renders) |
+| `imports` | string[] | Current `owl:imports` IRIs |
+| `options` | `{ iri, path, label }[]` | Workspace ontologies available to add |
+
+React → Host: `applyPatch` with `add_import` / `remove_import` ops and explicit `previewOnly: boolean` (required; host rejects messages without it).
+
+Example host message:
+
+```json
+{
+  "type": "loadImports",
+  "payload": {
+    "path": "/workspace/fixtures/example.ttl",
+    "ontology_iri": "http://example.org/people",
+    "imports_editable": true,
+    "imports": [],
+    "options": [
+      {
+        "iri": "http://example.org/org",
+        "path": "/workspace/fixtures/organization.owl",
+        "label": "organization.owl"
+      }
+    ]
+  }
+}
+```
+
+See [Manage Imports guide](ontocode/manage-imports.md).
 
 ## React → Host
 

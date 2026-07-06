@@ -408,7 +408,6 @@ else
 fi
 
 check_file_contains "extension/package.json" "guides/first-success/" "extension homepage first-success tutorial"
-check_file_contains "extension/package.json" "media/explorer-preview.png" "extension marketplace screenshot"
 check_file_contains "extension/README.md" "ontocode/vscode-extension/" "extension README VS Code docs path"
 check_file_contains "docs/guides/vscode-extension.md" "ontocode/vscode-extension" "vscode hub redirect"
 check_file_contains "docs/guides/rust-crates.md" "ontocode/vscode-extension" "rust hub cross-link"

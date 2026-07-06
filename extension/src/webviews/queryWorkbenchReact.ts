@@ -162,4 +162,19 @@ export class QueryWorkbenchPanel {
       `OntoCode: ${format.toUpperCase()} copied to clipboard`
     );
   }
+
+  /** @internal VS Code integration tests */
+  getWebviewHtmlForTests(): string {
+    return this.host.getWebviewHtml();
+  }
+
+  isWebviewReadyForTests(): boolean {
+    return this.host.isWebviewReady();
+  }
+
+  disposeForTests(): void {
+    if (!this.host.isDisposed) {
+      this.host.panel.dispose();
+    }
+  }
 }

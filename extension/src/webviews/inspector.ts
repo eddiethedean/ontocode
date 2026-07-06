@@ -251,6 +251,21 @@ export class EntityInspectorPanel {
       void vscode.window.showErrorMessage(`OntoCode: patch failed — ${msg}`);
     }
   }
+
+  /** @internal VS Code integration tests */
+  getWebviewHtmlForTests(): string {
+    return this.host.getWebviewHtml();
+  }
+
+  isWebviewReadyForTests(): boolean {
+    return this.host.isWebviewReady();
+  }
+
+  disposeForTests(): void {
+    if (!this.host.isDisposed) {
+      this.host.panel.dispose();
+    }
+  }
 }
 
 function panelTitle(detail: EntityDetail): string {

@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.11.1] - 2026-07-06
+
+### Fixed
+
+- **React webview panel routing** — Entity Inspector and other panels showed the SmokePanel fallback because `?panel=` was on the script URL instead of the page location; host HTML now bootstraps `window.location.search` before React loads
+
+### Added
+
+- **Webview regression tests** — `webviewBootstrap` unit tests, React App bootstrap routing test, VS Code E2E hooks for inspector and Query Workbench HTML/ready checks
+
+### Changed
+
+- Workspace package and all `ontocore-*` crates bumped to **0.11.1**
+- Extension marketplace version **0.11.1** (VS Code Marketplace + Open VSX)
+- VS Code Marketplace badges use [vsmarketplacebadges.dev](https://vsmarketplacebadges.dev/) (shields.io `visual-studio-marketplace` endpoints retired)
+- Explorer preview screenshot and marketplace hero image updated to match the React Entity Inspector UI (`./scripts/render-explorer-preview.sh`)
+- User-facing docs: Open VSX install paths and badges; remove "Git-native" wording
+
 ## [0.11.0] - 2026-07-05
 
 ### Added

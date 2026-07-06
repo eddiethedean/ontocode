@@ -2,6 +2,10 @@ import * as fs from "fs";
 import * as path from "path";
 import * as vscode from "vscode";
 import type { PanelKind } from "./messages";
+import {
+  formatWebviewQuery,
+  webviewLocationBootstrapScript,
+} from "./webviewBootstrap";
 
 export interface WebviewAssetManifest {
   scriptUri: vscode.Uri;
@@ -52,7 +56,7 @@ export function getWebviewHtml(
 ): string {
   const nonce = getNonce();
   const { scriptUri, styleUri } = getWebviewAssets(webview, extensionUri);
-  const params = new URLSearchParams({ panel, ...extraQuery });
+  const query = formatWebviewQuery(panel, extraQuery);
   const csp = [
     `default-src 'none'`,
     `style-src ${webview.cspSource} 'unsafe-inline'`,
@@ -76,7 +80,10 @@ export function getWebviewHtml(
 </head>
 <body>
   <div id="root"></div>
-  <script type="module" nonce="${nonce}" src="${scriptUri}?${params.toString()}"></script>
+  <script nonce="${nonce}">
+    ${webviewLocationBootstrapScript(query)}
+  </script>
+  <script type="module" nonce="${nonce}" src="${scriptUri}"></script>
 </body>
 </html>`;
 }

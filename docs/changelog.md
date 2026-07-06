@@ -4,6 +4,10 @@ Canonical source: [CHANGELOG.md on GitHub](https://github.com/eddiethedean/ontoc
 
 Migration guides: [Migration index](migration/README.md)
 
+## [0.11.1] - 2026-07-06
+
+**v0.11.1** — Patch — fixes React webview panel routing (Entity Inspector and other panels); adds webview regression tests; updates explorer preview screenshot; docs badge and Open VSX updates. See [CHANGELOG.md](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md).
+
 ## [0.11.0] - 2026-07-05
 
 **v0.11.0** — Editor depth & distribution — LSP completion and code actions, `ontocore docs`, imports UI, OBO `fastobo` read path, Open VSX. See [CHANGELOG.md](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) and [migration/v0.11.md](migration/v0.11.md).

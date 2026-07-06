@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 import { OntoCodeApi } from "./api";
 import { registerCommands, refreshExplorer } from "./commands";
+import { createOntoCodeTestHooks } from "./testApi";
 import {
   getCatalogSnapshot,
   getClient,
@@ -114,6 +115,9 @@ export async function activate(
           entity_iri: entityIri,
           document_uri: documentUri,
         }),
+      ...(process.env.ONTOCODE_TEST_FIXTURES
+        ? { __test: createOntoCodeTestHooks() }
+        : {}),
     };
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);

@@ -45,14 +45,15 @@ Maintainer checklist for publishing crates, binaries, and the VS Code extension.
 - [ ] [docs/design/LICENSES.md](design/LICENSES.md) — dependency sections
 - [ ] Run `mkdocs build --strict` locally before tagging
 - [ ] Run `./scripts/check-doc-versions.sh` (also enforced in CI)
+- [ ] After editing `docs/media/explorer-preview.svg`, run `./scripts/render-explorer-preview.sh` (syncs marketplace screenshot)
 
 ## Tag and publish
 
 Push a tag matching `[workspace.package].version` in `Cargo.toml`:
 
 ```bash
-git tag v0.11.0   # must match [workspace.package].version in Cargo.toml
-git push origin v0.11.0
+git tag v0.11.1   # must match [workspace.package].version in Cargo.toml
+git push origin v0.11.1
 ```
 
 The [release workflow on GitHub](https://github.com/eddiethedean/ontocode/blob/main/.github/workflows/release.yml):

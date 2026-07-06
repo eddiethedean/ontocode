@@ -31,6 +31,15 @@ export class PanelHost {
     return this.disposed;
   }
 
+  /** True after the webview posted `{ type: "ready", panel: … }`. */
+  isWebviewReady(): boolean {
+    return this.webviewReady;
+  }
+
+  getWebviewHtml(): string {
+    return this.panel.webview.html;
+  }
+
   /** Post a host message; buffers until the webview sends `ready`. */
   postMessage(message: HostMessage): void {
     if (this.disposed) {

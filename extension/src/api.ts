@@ -6,6 +6,21 @@ import {
   ParseManchesterResult,
   TabularQueryResult,
 } from "./lsp/protocol";
+import type { PanelKind } from "./webviews/messages";
+
+/** VS Code integration test hooks (only when ONTOCODE_TEST_FIXTURES is set). */
+export interface OntoCodeTestHooks {
+  openEntityInspector(iri: string): Promise<void>;
+  getInspectorWebviewHtml(): string | undefined;
+  assertInspectorHtmlRoutesPanel(): void;
+  waitForInspectorReady(timeoutMs?: number): Promise<void>;
+  openQueryWorkbench(): Promise<void>;
+  getQueryWorkbenchWebviewHtml(): string | undefined;
+  assertQueryWorkbenchHtmlRoutesPanel(): void;
+  waitForQueryWorkbenchReady(timeoutMs?: number): Promise<void>;
+  disposeAllPanels(): Promise<void>;
+  assertWebviewHtmlRoutesPanel(html: string, panel: PanelKind): void;
+}
 
 /** Extension activation API (used by VS Code integration tests). */
 export interface OntoCodeApi {
@@ -21,4 +36,6 @@ export interface OntoCodeApi {
     entityIri?: string,
     documentUri?: string
   ): Promise<ParseManchesterResult>;
+  /** Present when ONTOCODE_TEST_FIXTURES is set. */
+  __test?: OntoCodeTestHooks;
 }

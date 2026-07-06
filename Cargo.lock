@@ -1052,7 +1052,7 @@ checksum = "384b8ab6d37215f3c5301a95a4accb5d64aa607f1fcb26a11b5303878451b4fe"
 
 [[package]]
 name = "ontocode"
-version = "0.11.0"
+version = "0.11.1"
 dependencies = [
  "ontocore",
  "ontocore-catalog",
@@ -1068,7 +1068,7 @@ dependencies = [
 
 [[package]]
 name = "ontocore"
-version = "0.11.0"
+version = "0.11.1"
 dependencies = [
  "ontocore-catalog",
  "ontocore-core",
@@ -1086,7 +1086,7 @@ dependencies = [
 
 [[package]]
 name = "ontocore-catalog"
-version = "0.11.0"
+version = "0.11.1"
 dependencies = [
  "hex",
  "ontocore-core",
@@ -1103,7 +1103,7 @@ dependencies = [
 
 [[package]]
 name = "ontocore-cli"
-version = "0.11.0"
+version = "0.11.1"
 dependencies = [
  "anyhow",
  "clap",
@@ -1121,7 +1121,7 @@ dependencies = [
 
 [[package]]
 name = "ontocore-core"
-version = "0.11.0"
+version = "0.11.1"
 dependencies = [
  "hex",
  "ignore",
@@ -1135,7 +1135,7 @@ dependencies = [
 
 [[package]]
 name = "ontocore-diagnostics"
-version = "0.11.0"
+version = "0.11.1"
 dependencies = [
  "ontocore-core",
  "regex",
@@ -1144,7 +1144,7 @@ dependencies = [
 
 [[package]]
 name = "ontocore-diff"
-version = "0.11.0"
+version = "0.11.1"
 dependencies = [
  "git2",
  "ontocore-catalog",
@@ -1157,7 +1157,7 @@ dependencies = [
 
 [[package]]
 name = "ontocore-docs"
-version = "0.11.0"
+version = "0.11.1"
 dependencies = [
  "minijinja",
  "ontocore-catalog",
@@ -1169,7 +1169,7 @@ dependencies = [
 
 [[package]]
 name = "ontocore-lsp"
-version = "0.11.0"
+version = "0.11.1"
 dependencies = [
  "crossbeam-channel",
  "lsp-server",
@@ -1191,7 +1191,7 @@ dependencies = [
 
 [[package]]
 name = "ontocore-owl"
-version = "0.11.0"
+version = "0.11.1"
 dependencies = [
  "horned-owl",
  "ontocore-core",
@@ -1204,7 +1204,7 @@ dependencies = [
 
 [[package]]
 name = "ontocore-parser"
-version = "0.11.0"
+version = "0.11.1"
 dependencies = [
  "fastobo",
  "ontocore-core",
@@ -1217,7 +1217,7 @@ dependencies = [
 
 [[package]]
 name = "ontocore-query"
-version = "0.11.0"
+version = "0.11.1"
 dependencies = [
  "csv",
  "ontocore-catalog",
@@ -1231,7 +1231,7 @@ dependencies = [
 
 [[package]]
 name = "ontocore-reasoner"
-version = "0.11.0"
+version = "0.11.1"
 dependencies = [
  "hex",
  "ontocore-catalog",
@@ -1255,7 +1255,7 @@ dependencies = [
 
 [[package]]
 name = "ontocore-refactor"
-version = "0.11.0"
+version = "0.11.1"
 dependencies = [
  "ontocore-catalog",
  "ontocore-core",
@@ -1267,7 +1267,7 @@ dependencies = [
 
 [[package]]
 name = "ontocore-robot"
-version = "0.11.0"
+version = "0.11.1"
 dependencies = [
  "thiserror 2.0.18",
 ]

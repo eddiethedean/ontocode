@@ -1,6 +1,6 @@
 # SQL query reference (OntoCore v0.11)
 
-> **Status:** Documents behavior in **OntoCore v0.11.0**. Pre-1.0 APIs may change.
+> **Status:** Documents behavior in **OntoCore v0.11.1**. Pre-1.0 APIs may change.
 > Canonical feature list: [What ships today](SHIPPED.md).
 
 OntoCore exposes indexed ontology data as **virtual tables** queried with a SQL-like `SELECT` syntax. The CLI (`ontocore query`) and Rust API (`query_catalog`) use the same engine.

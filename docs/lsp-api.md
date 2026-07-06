@@ -1,6 +1,6 @@
 # OntoCore LSP API (v0.11)
 
-> **Status:** Documents behavior in **OntoCore v0.11.0**. Pre-1.0 APIs may change.
+> **Status:** Documents behavior in **OntoCore v0.11.1**. Pre-1.0 APIs may change.
 > Canonical feature list: [What ships today](SHIPPED.md).
 
 This document describes **what ships today** in `ontocore-lsp`. For the **v1.0 target** (extended plugin methods), see [LSP_SPEC.md](design/LSP_SPEC.md).

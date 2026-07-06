@@ -1,8 +1,8 @@
-# What ships today (v0.11.0)
+# What ships today (v0.11.1)
 
 > **Canonical capability matrix.** Update this page on every release. Design specs under [Project](design/README.md) may describe future targets — check here for what is actually available.
 
-**Current release:** v0.11.0 · [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md)
+**Current release:** v0.11.1 · [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md)
 
 ## Products
 
@@ -49,6 +49,12 @@
 | Index / query | Yes | Yes | Yes |
 | Write-back (inspector, patches, refactor) | Yes | Read-only in VS Code | Read-only in VS Code |
 | Rich OBO metadata (synonyms, defs, xrefs) | — | Yes (fastobo read) | — |
+
+## New in v0.11.1
+
+| Capability | Status |
+|------------|--------|
+| React webview panel routing (Entity Inspector, Query Workbench, etc.) | Yes |
 
 ## New in v0.11.0
 

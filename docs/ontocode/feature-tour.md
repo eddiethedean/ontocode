@@ -18,7 +18,7 @@ The **OntoCode** activity bar hosts five tree views:
 
 ![OntoCode explorer and Entity Inspector](../media/explorer-preview.png)
 
-*Explorer sidebar with Ontologies, Classes, Properties, Individuals, Diagnostics, and the Entity Inspector panel.*
+*Explorer sidebar (Ontologies, Classes, Properties, Individuals, Diagnostics) and the React Entity Inspector for `ex:Person` from `example.ttl`.*
 
 **Typical flow:** expand **Classes** → click an entity name → **Entity Inspector** opens on the right.
 

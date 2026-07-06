@@ -55,4 +55,16 @@ describe("App", () => {
     render(<App />);
     expect(screen.getByRole("heading", { name: "OntoCode React" })).toBeInTheDocument();
   });
+
+  it("routes to inspector after host location bootstrap (VS Code webview)", () => {
+    window.history.replaceState({}, "", "/");
+    expect(window.location.search).toBe("");
+    // Host inline script sets page query before React loads (see getWebviewHtml.ts).
+    history.replaceState(null, "", "?panel=inspector");
+    render(<App />);
+    expect(screen.getByRole("status")).toHaveTextContent("Loading entity…");
+    expect(
+      screen.queryByText("Webview foundation is active.")
+    ).not.toBeInTheDocument();
+  });
 });

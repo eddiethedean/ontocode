@@ -65,12 +65,12 @@ ontocore validate /path/to/your/ontologies
 ## Path D — Release binaries (no Rust)
 
 1. Open [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) for the latest **v0.11.x** tag.
-2. Download the CLI tarball for your platform (Linux x64 example below) or `ontocore-lsp-v0.11.0-<platform>.tar.gz` / `.zip` for LSP-only use.
+2. Download the CLI tarball for your platform (Linux x64 example below) or `ontocore-lsp-v0.11.1-<platform>.tar.gz` / `.zip` for LSP-only use.
 3. Verify with `SHA256SUMS` — see [release-integrity.md](release-integrity.md).
-4. Extract and run (replace `0.11.0` with your release tag):
+4. Extract and run (replace `0.11.1` with your release tag):
 
 ```bash
-VERSION=0.11.0
+VERSION=0.11.1
 ASSET="ontocore-v${VERSION}-x86_64-unknown-linux-gnu.tar.gz"
 BIN="ontocore-v${VERSION}-x86_64-unknown-linux-gnu"
 tar xzf "${ASSET}"

@@ -117,6 +117,22 @@ else
   echo "ok: no stale --version 0.10.0 install pins"
 fi
 
+if rg -q 'VERSION=0\.11\.0' "${STALE_PIN_PATHS[@]}" --glob '!**/changelog.md' --glob '!**/CHANGELOG.md' --glob '!**/migration/**' --glob '!**/design/**' 2>/dev/null; then
+  echo "FAIL: stale VERSION=0.11.0 found outside changelog/migration/design" >&2
+  rg -n 'VERSION=0\.11\.0' "${STALE_PIN_PATHS[@]}" --glob '!**/changelog.md' --glob '!**/CHANGELOG.md' --glob '!**/migration/**' --glob '!**/design/**' 2>/dev/null || true
+  fail=1
+else
+  echo "ok: no stale VERSION=0.11.0 install pins"
+fi
+
+if rg -q '--version 0\.11\.0' "${STALE_PIN_PATHS[@]}" --glob '!**/changelog.md' --glob '!**/CHANGELOG.md' --glob '!**/migration/**' --glob '!**/design/**' 2>/dev/null; then
+  echo "FAIL: stale --version 0.11.0 install pin found outside changelog/migration/design" >&2
+  rg -n '--version 0\.11\.0' "${STALE_PIN_PATHS[@]}" --glob '!**/changelog.md' --glob '!**/CHANGELOG.md' --glob '!**/migration/**' --glob '!**/design/**' 2>/dev/null || true
+  fail=1
+else
+  echo "ok: no stale --version 0.11.0 install pins"
+fi
+
 # User-facing docs must not claim 0.7.x is the current release
 USER_FACING_DOCS=(
   docs/faq.md
@@ -170,6 +186,17 @@ if [[ "$fail" -eq 0 ]]; then
   echo "ok: no stale 0.10.x current-release claims in user-facing docs"
 fi
 
+# User-facing docs must not claim 0.11.0 is the current release (0.11.1+)
+for file in "${USER_FACING_DOCS[@]}" docs/guides/protege-decision.md docs/guides/production-evidence.md docs/guides/release-timeline.md docs/guides/platform-compatibility.md docs/guides/obo-workflow.md docs/guides/lgpl-compliance.md docs/authoring.md docs/patch-reference.md docs/guides/enterprise-eval.md docs/guides/protege-migration.md docs/guides/protege-coexistence.md docs/ontocore/index.md docs/ontocore/rust-api.md docs/ontocode/feature-tour.md docs/architecture.md docs/vision.md docs/lsp-api.md docs/errors.md docs/webview-protocol.md docs/guides/robot-interop.md docs/guides/enterprise-deployment.md docs/guides/performance-sizing.md docs/ci-integration.md docs/guides/first-success.md docs/ontocode/semantic-diff.md docs/SHIPPED.md docs/index.md README.md extension/README.md; do
+  if grep -qE '0\.11\.0 \| Current|Current release: v0\.11\.0|What ships today \(v0\.11\.0\)|ships in v0\.11\.0|OntoCore v0\.11\.0|OntoCode v0\.11\.0|for OntoCode \*\*v0\.11\.0\*\*|OntoCore \*\*v0\.11\.0\*\*|documentation · v0\.11\.0' "$file" 2>/dev/null; then
+    echo "FAIL: stale 0.11.0 current-release claim in $file" >&2
+    fail=1
+  fi
+done
+if [[ "$fail" -eq 0 ]]; then
+  echo "ok: no stale 0.11.0 current-release claims in user-facing docs"
+fi
+
 # Reference status banners must not contradict OntoCore v{N} titles
 for file in docs/authoring.md docs/sql-reference.md docs/sparql-reference.md docs/patch-reference.md docs/lsp-api.md docs/errors.md docs/webview-protocol.md; do
   if grep -qE 'OntoCore v0\.8' "$file" 2>/dev/null; then
@@ -182,6 +209,10 @@ for file in docs/authoring.md docs/sql-reference.md docs/sparql-reference.md doc
   fi
   if grep -qE 'OntoCore v0\.10' "$file" 2>/dev/null; then
     echo "FAIL: stale OntoCore v0.10 status banner in $file" >&2
+    fail=1
+  fi
+  if grep -qE 'OntoCore v0\.11\.0' "$file" 2>/dev/null; then
+    echo "FAIL: stale OntoCore v0.11.0 status banner in $file" >&2
     fail=1
   fi
 done
@@ -233,8 +264,8 @@ for file in docs/guides/refactoring.md docs/migration/v0.8.md docs/migration/v0.
 done
 
 check_file_contains "docs/faq.md" "0\.11\.x" "faq crate version"
-check_file_contains "docs/guides/release-timeline.md" "0\.11\.0.*Current" "release-timeline current version"
-check_file_contains "docs/guides/release-timeline.md" "v0\.10.*Shipped" "release-timeline v0.10 shipped"
+check_file_contains "docs/guides/release-timeline.md" "${VERSION}.*Current" "release-timeline current version"
+check_file_contains "docs/guides/release-timeline.md" "v0\.11.*Shipped" "release-timeline v0.11 shipped"
 
 # Stale multi-root limitation (v0.10 indexes all folders)
 MULTIROOT_STALE_PATHS=(docs/SHIPPED.md docs/faq.md docs/vscode-install.md docs/guides/first-success.md docs/troubleshooting.md)

@@ -1,47 +1,127 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 920 520" role="img" aria-label="OntoCode Explorer preview">
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 560" role="img" aria-label="OntoCode Explorer and Entity Inspector preview">
   <defs>
     <style>
       .bg { fill: #1e1e1e; }
+      .activity { fill: #333333; }
       .sidebar { fill: #252526; }
-      .panel { fill: #2d2d2d; }
+      .editor { fill: #1e1e1e; }
+      .card { fill: #252526; stroke: #3c3c3c; stroke-width: 1; }
       .border { stroke: #3c3c3c; stroke-width: 1; fill: none; }
-      .title { fill: #cccccc; font-family: system-ui, sans-serif; font-size: 13px; font-weight: 600; }
-      .text { fill: #9cdcfe; font-family: system-ui, sans-serif; font-size: 12px; }
-      .muted { fill: #858585; font-family: system-ui, sans-serif; font-size: 11px; }
-      .accent { fill: #4ec9b0; }
-      .highlight { fill: #264f78; }
+      .title { fill: #cccccc; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 11px; font-weight: 600; letter-spacing: 0.04em; }
+      .tree-title { fill: #bbbbbb; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 11px; font-weight: 600; }
+      .tree-item { fill: #cccccc; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 12px; }
+      .tree-link { fill: #3794ff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 12px; }
+      .panel-title { fill: #ffffff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 22px; font-weight: 650; }
+      .panel-sub { fill: #9d9d9d; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 12px; }
+      .section { fill: #cccccc; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 11px; font-weight: 600; }
+      .code { fill: #ce9178; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 11px; }
+      .text { fill: #cccccc; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 12px; }
+      .muted { fill: #858585; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 11px; }
+      .badge { fill: #264f78; stroke: #3794ff; stroke-width: 1; }
+      .badge-text { fill: #cccccc; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 10px; font-weight: 600; }
+      .btn { fill: #0e639c; }
+      .btn-text { fill: #ffffff; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 11px; font-weight: 500; }
+      .btn-secondary { fill: #3a3d41; stroke: #3c3c3c; stroke-width: 1; }
+      .accent-line { stroke: url(#accentGrad); stroke-width: 1; }
+      .highlight { fill: #094771; }
+      .accent-bar { fill: #007acc; }
     </style>
+    <linearGradient id="accentGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#3794ff" stop-opacity="0.45"/>
+      <stop offset="40%" stop-color="#3c3c3c" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#3c3c3c" stop-opacity="0"/>
+    </linearGradient>
   </defs>
-  <rect class="bg" width="920" height="520"/>
-  <rect class="sidebar" x="0" y="0" width="56" height="520"/>
-  <rect class="highlight" x="0" y="88" width="56" height="40"/>
-  <text class="muted" x="14" y="112">OC</text>
-  <rect class="panel" x="56" y="0" width="220" height="520"/>
-  <rect class="border" x="56" y="0" width="220" height="520"/>
-  <text class="title" x="68" y="28">ONTOCODE</text>
-  <text class="title" x="68" y="56">Ontologies</text>
-  <text class="text" x="80" y="78">example.ttl</text>
-  <text class="title" x="68" y="108">Classes</text>
-  <text class="text" x="80" y="130">Person</text>
-  <text class="text" x="80" y="150">Organization</text>
-  <text class="title" x="68" y="182">Properties</text>
-  <text class="text" x="80" y="204">worksFor</text>
-  <text class="text" x="80" y="224">age</text>
-  <text class="title" x="68" y="256">Individuals</text>
-  <text class="text" x="80" y="278">alice</text>
-  <rect class="panel" x="276" y="0" width="644" height="520"/>
-  <text class="title" x="292" y="28">Entity Inspector  ex:Person</text>
-  <text class="muted" x="292" y="56">IRI</text>
-  <text class="text" x="292" y="76">http://example.org/people#Person</text>
-  <text class="muted" x="292" y="108">Label</text>
-  <text class="text" x="292" y="128">Person</text>
-  <text class="muted" x="292" y="160">Comment</text>
-  <text class="text" x="292" y="180">A human being.</text>
-  <text class="muted" x="292" y="212">Parents</text>
-  <text class="text" x="292" y="232">owl:Thing</text>
-  <text class="muted" x="292" y="264">Axioms</text>
-  <text class="text" x="292" y="284">rdfs:subClassOf owl:Thing</text>
-  <text class="muted" x="292" y="316">Source</text>
-  <text class="accent" x="292" y="336">fixtures/example.ttl:10</text>
-  <text class="muted" x="292" y="480">OntoCode  browse, inspect, jump to source</text>
+
+  <rect class="bg" width="960" height="560"/>
+
+  <!-- Activity bar -->
+  <rect class="activity" x="0" y="0" width="48" height="560"/>
+  <rect class="highlight" x="0" y="72" width="48" height="40" rx="0"/>
+  <text class="muted" x="13" y="97" font-size="11px" font-weight="700" fill="#ffffff">OC</text>
+
+  <!-- Sidebar -->
+  <rect class="sidebar" x="48" y="0" width="248" height="560"/>
+  <line class="border" x1="296" y1="0" x2="296" y2="560"/>
+  <text class="title" x="64" y="28">ONTOCODE</text>
+
+  <text class="tree-title" x="64" y="58">Ontologies</text>
+  <text class="tree-link" x="76" y="78">example.ttl</text>
+
+  <text class="tree-title" x="64" y="108">Classes</text>
+  <text class="tree-link" x="76" y="128">Person</text>
+  <text class="tree-item" x="76" y="148">Organization</text>
+  <text class="tree-item" x="76" y="168">Thing</text>
+
+  <text class="tree-title" x="64" y="198">Properties</text>
+  <text class="tree-item" x="76" y="218">worksFor</text>
+  <text class="tree-item" x="76" y="238">age</text>
+
+  <text class="tree-title" x="64" y="268">Individuals</text>
+  <text class="tree-item" x="76" y="288">alice</text>
+  <text class="tree-item" x="76" y="308">acme</text>
+
+  <text class="tree-title" x="64" y="338">Diagnostics</text>
+  <text class="muted" x="76" y="358">No issues</text>
+
+  <!-- Editor / Entity Inspector -->
+  <rect class="editor" x="296" y="0" width="664" height="560"/>
+
+  <!-- Panel header -->
+  <text class="panel-title" x="320" y="44">Person</text>
+  <text class="panel-sub" x="320" y="64">class</text>
+  <rect class="badge" x="820" y="22" width="44" height="22" rx="11"/>
+  <text class="badge-text" x="832" y="37">Class</text>
+  <line class="accent-line" x1="320" y1="82" x2="936" y2="82"/>
+
+  <!-- IRI card -->
+  <rect class="card" x="320" y="98" width="616" height="54" rx="10"/>
+  <rect class="accent-bar" x="332" y="112" width="3" height="12" rx="1"/>
+  <text class="section" x="342" y="120">IRI</text>
+  <text class="code" x="332" y="140">http://example.org/people#Person</text>
+
+  <!-- Labels + Comments -->
+  <rect class="card" x="320" y="164" width="300" height="70" rx="10"/>
+  <rect class="accent-bar" x="332" y="178" width="3" height="12" rx="1"/>
+  <text class="section" x="342" y="186">Labels</text>
+  <text class="text" x="332" y="210">Person</text>
+
+  <rect class="card" x="636" y="164" width="300" height="70" rx="10"/>
+  <rect class="accent-bar" x="648" y="178" width="3" height="12" rx="1"/>
+  <text class="section" x="658" y="186">Comments</text>
+  <text class="text" x="648" y="210">A human being.</text>
+
+  <!-- Parents + Children -->
+  <rect class="card" x="320" y="246" width="300" height="70" rx="10"/>
+  <rect class="accent-bar" x="332" y="260" width="3" height="12" rx="1"/>
+  <text class="section" x="342" y="268">Parents</text>
+  <text class="tree-link" x="332" y="292">Thing</text>
+
+  <rect class="card" x="636" y="246" width="300" height="70" rx="10"/>
+  <rect class="accent-bar" x="648" y="260" width="3" height="12" rx="1"/>
+  <text class="section" x="658" y="268">Children</text>
+  <text class="muted" x="648" y="292">None</text>
+
+  <!-- Axioms -->
+  <rect class="card" x="320" y="328" width="616" height="88" rx="10"/>
+  <rect class="accent-bar" x="332" y="342" width="3" height="12" rx="1"/>
+  <text class="section" x="342" y="350">Axioms</text>
+  <text class="muted" x="332" y="372">SubClassOf</text>
+  <text class="code" x="332" y="392">SubClassOf Thing</text>
+
+  <!-- Edit (compact) -->
+  <rect class="card" x="320" y="428" width="616" height="56" rx="10"/>
+  <rect class="accent-bar" x="332" y="442" width="3" height="12" rx="1"/>
+  <text class="section" x="342" y="450">Edit</text>
+  <text class="muted" x="332" y="472">Add label, comment, parent, or Manchester axiom</text>
+
+  <!-- Sticky actions -->
+  <rect class="btn" x="320" y="500" width="108" height="28" rx="6"/>
+  <text class="btn-text" x="344" y="518">Jump to Source</text>
+  <rect class="btn-secondary" x="436" y="500" width="96" height="28" rx="6"/>
+  <text class="btn-text" x="452" y="518" fill="#cccccc">Find Usages</text>
+  <rect class="btn-secondary" x="540" y="500" width="88" height="28" rx="6"/>
+  <text class="btn-text" x="554" y="518" fill="#cccccc">Rename IRI</text>
+  <rect class="btn-secondary" x="636" y="500" width="88" height="28" rx="6"/>
+  <text class="btn-text" x="654" y="518" fill="#cccccc">Open Graph</text>
 </svg>

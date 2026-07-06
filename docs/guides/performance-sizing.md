@@ -47,7 +47,7 @@ Run on a **representative clone** of your production ontology tree:
 ```bash
 # Replace with your ontology root
 ONTO=/path/to/ontologies
-VERSION=0.11.0
+VERSION=0.11.1
 
 # Catalog stats
 time ./ontocore-v${VERSION}-x86_64-unknown-linux-gnu inspect "$ONTO" --format json

@@ -116,7 +116,7 @@ Guide: [Graph view](../ontocode/graph-view.md).
 To catch lint and parse errors in CI or locally:
 
 ```bash
-cargo install ontocore-cli --locked --version 0.11.0
+cargo install ontocore-cli --locked --version 0.11.1
 ontocore validate /path/to/your/ontology/folder
 ```
 

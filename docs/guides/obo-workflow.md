@@ -1,12 +1,12 @@
 # OBO workflows
 
-OntoCore v0.11.0 indexes **OBO Format** (`.obo`) files via `fastobo` and exposes `obo_id` in the catalog and SQL virtual tables. Write-back in VS Code remains **Turtle only** — OBO files are read-only in the Entity Inspector.
+OntoCore v0.11.1 indexes **OBO Format** (`.obo`) files via `fastobo` and exposes `obo_id` in the catalog and SQL virtual tables. Write-back in VS Code remains **Turtle only** — OBO files are read-only in the Entity Inspector.
 
 Canonical capability matrix: [What ships today](../SHIPPED.md).
 
 ## Prerequisites
 
-- OntoCode v0.11.0+ or `ontocore-cli` 0.11.0+
+- OntoCode v0.11.1+ or `ontocore-cli` 0.11.1+
 - Workspace containing `.obo` files (or mixed `.obo` + RDF)
 
 ## Index and browse

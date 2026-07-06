@@ -16,7 +16,7 @@ OntoCode is on the [VS Code Marketplace](https://marketplace.visualstudio.com/it
 3. [extension/README.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/extension/README.md) and [docs/vscode-install.md](vscode-install.md) mention Marketplace install and current version
 4. User docs synced per [releasing.md](releasing.md) checklist
 5. `npm test` and `cargo test --workspace` pass
-6. **Marketplace visuals:** `extension/media/explorer-preview.png` exists (sync from `docs/media/explorer-preview.png` when the docs image changes) and `package.json` includes a `screenshots` entry
+6. **Marketplace visuals:** run `./scripts/render-explorer-preview.sh` after editing `docs/media/explorer-preview.svg` (syncs to `extension/media/explorer-preview.png`); `package.json` includes a `screenshots` entry
 7. `extension/README.md` hero image uses `media/explorer-preview.png` (not a docs-only path)
 8. Short description avoids overstating Protégé parity — point to [Protégé migration guide](guides/protege-migration.md) instead
 
@@ -46,7 +46,7 @@ Store `VSCE_PAT` or `AZURE_DEVOPS_EXT_PAT` in CI secrets only; never commit toke
 
 ## Open VSX (Cursor and other Open VSX clients)
 
-From v0.11.0, the [release workflow on GitHub](https://github.com/eddiethedean/ontocode/blob/main/.github/workflows/release.yml) publishes the same VSIX to [Open VSX](https://open-vsx.org/) after packaging.
+From v0.11.1, the [release workflow on GitHub](https://github.com/eddiethedean/ontocode/blob/main/.github/workflows/release.yml) publishes the same VSIX to [Open VSX](https://open-vsx.org/) after packaging.
 
 ### Prerequisites
 
@@ -58,7 +58,7 @@ From v0.11.0, the [release workflow on GitHub](https://github.com/eddiethedean/o
 
 ```bash
 npm install -g ovsx
-ovsx publish dist/ontocode-v0.11.0.vsix -p "$OVSX_PAT"
+ovsx publish dist/ontocode-v0.11.1.vsix -p "$OVSX_PAT"
 ```
 
 ### After Open VSX publish

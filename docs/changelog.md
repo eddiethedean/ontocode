@@ -4,6 +4,10 @@ Canonical source: [CHANGELOG.md on GitHub](https://github.com/eddiethedean/ontoc
 
 Migration guides: [Migration index](migration/README.md)
 
+## [0.12.0] - 2026-07-06
+
+**v0.12.0** — Authoring parity — Turtle domain/range/chains/annotations, OBO write-back, OWL/XML read-only catalog, DL explanations, Protégé round-trip tests. See [CHANGELOG.md](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) and [migration/v0.12.md](migration/v0.12.md).
+
 ## [0.11.3] - 2026-07-06
 
 **v0.11.3** — Patch — fixes Entity Inspector navigation when switching entities with a panel already open; adds VS Code e2e tests for inspector switching and workspace commands. See [CHANGELOG.md](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md).

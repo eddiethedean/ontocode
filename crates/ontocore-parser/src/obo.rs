@@ -112,6 +112,7 @@ pub fn parse_obo_text(path: &Path, ontology_id: &str, source_text: &str) -> Resu
             comments,
             deprecated,
             obo_id: Some(obo_id),
+            characteristics: Default::default(),
         });
 
         if entities.len() + annotations.len() + axioms.len() > MAX_TRIPLES_PER_FILE {

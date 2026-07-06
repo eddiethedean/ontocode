@@ -1,6 +1,6 @@
-# Patch reference (OntoCore v0.11)
+# Patch reference (OntoCore v0.12)
 
-> **Status:** Documents behavior in **OntoCore v0.11.3**. Pre-1.0 APIs may change.
+> **Status:** Documents behavior in **OntoCore v0.12.0**. Pre-1.0 APIs may change.
 > Canonical feature list: [What ships today](SHIPPED.md).
 
 Turtle write-back uses a JSON array of patch operations. The CLI (`ontocore patch`) and LSP (`ontocore/applyAxiomPatch`) accept the same format.
@@ -11,9 +11,9 @@ Turtle write-back uses a JSON array of patch operations. The CLI (`ontocore patc
 
 - JSON **array** of operation objects
 - Each object has an `"op"` field (snake_case)
-- Turtle (`.ttl`) documents only
+- Turtle (`.ttl`) and OBO (`.obo`) documents (dispatch by extension)
 
-## Operations
+## Turtle operations
 
 | `op` | Required fields | Description |
 |------|-----------------|-------------|
@@ -37,6 +37,45 @@ Turtle write-back uses a JSON array of patch operations. The CLI (`ontocore patc
 | `set_deprecated` | `entity_iri`, `value` | Set `owl:deprecated` (`true` or `false`) |
 | `add_import` | `ontology_iri`, `import_iri` | Add `owl:imports` to ontology header |
 | `remove_import` | `ontology_iri`, `import_iri` | Remove matching `owl:imports` triple |
+| `add_domain` | `entity_iri`, `class_iri` | Add `rdfs:domain` for object/data property |
+| `remove_domain` | `entity_iri`, `class_iri` | Remove matching domain axiom |
+| `add_range` | `entity_iri`, `range_iri` | Add `rdfs:range` (class or datatype IRI) |
+| `remove_range` | `entity_iri`, `range_iri` | Remove matching range axiom |
+| `set_functional` | `entity_iri`, `value` | Toggle `owl:FunctionalProperty` |
+| `set_inverse_functional` | `entity_iri`, `value` | Toggle `owl:InverseFunctionalProperty` |
+| `set_transitive` | `entity_iri`, `value` | Toggle `owl:TransitiveProperty` |
+| `set_symmetric` | `entity_iri`, `value` | Toggle `owl:SymmetricProperty` |
+| `set_asymmetric` | `entity_iri`, `value` | Toggle `owl:AsymmetricProperty` |
+| `set_reflexive` | `entity_iri`, `value` | Toggle `owl:ReflexiveProperty` |
+| `set_irreflexive` | `entity_iri`, `value` | Toggle `owl:IrreflexiveProperty` |
+| `add_property_chain` | `entity_iri`, `properties` | Add `owl:propertyChainAxiom` (ordered IRI array) |
+| `remove_property_chain` | `entity_iri`, `properties` | Remove matching property chain |
+| `add_class_assertion` | `entity_iri`, `class_iri` | Add individual `rdf:type` |
+| `remove_class_assertion` | `entity_iri`, `class_iri` | Remove class assertion |
+| `add_object_property_assertion` | `entity_iri`, `property_iri`, `target_iri` | Add object property assertion |
+| `remove_object_property_assertion` | `entity_iri`, `property_iri`, `target_iri` | Remove object property assertion |
+| `add_data_property_assertion` | `entity_iri`, `property_iri`, `value` | Add data property assertion with literal |
+| `remove_data_property_assertion` | `entity_iri`, `property_iri`, `value` | Remove data property assertion |
+| `add_annotation` | `entity_iri`, `predicate`, `value` | Add generic annotation assertion |
+| `remove_annotation` | `entity_iri`, `predicate`, `value` | Remove generic annotation assertion |
+
+## OBO operations (`.obo`)
+
+See [ADR-0019](design/adr/0019-obo-write-back.md). Ops use `term_id` (OBO id, e.g. `GO:0008150`).
+
+| `op` | Required fields | Description |
+|------|-----------------|-------------|
+| `set_name` | `term_id`, `value` | Set term name |
+| `add_synonym` | `term_id`, `value`, `scope` | Add synonym (`exact`, `related`, …) |
+| `remove_synonym` | `term_id`, `value` | Remove synonym |
+| `add_def` | `term_id`, `value` | Add definition |
+| `remove_def` | `term_id` | Remove definition |
+| `add_xref` | `term_id`, `xref` | Add xref |
+| `remove_xref` | `term_id`, `xref` | Remove xref |
+| `set_namespace` | `term_id`, `namespace` | Set namespace |
+| `set_deprecated` | `term_id`, `value` | Set `is_obsolete` |
+| `add_is_a` | `term_id`, `parent_id` | Add `is_a` parent |
+| `remove_is_a` | `term_id`, `parent_id` | Remove `is_a` parent |
 
 ### `kind` values for `create_entity`
 

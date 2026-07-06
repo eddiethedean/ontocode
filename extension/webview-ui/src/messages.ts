@@ -29,11 +29,29 @@ export interface EntityAxiomSummary {
   editable: boolean;
 }
 
+export interface EntityAnnotationSummary {
+  predicate: string;
+  value: string;
+  editable: boolean;
+}
+
+export interface PropertyCharacteristics {
+  functional?: boolean;
+  inverse_functional?: boolean;
+  transitive?: boolean;
+  symmetric?: boolean;
+  asymmetric?: boolean;
+  reflexive?: boolean;
+  irreflexive?: boolean;
+}
+
 export interface EntityDetailPayload {
   entity: EntitySummary;
   parents: string[];
   children: string[];
   axioms: EntityAxiomSummary[];
+  annotations?: EntityAnnotationSummary[];
+  characteristics?: PropertyCharacteristics;
   editable: boolean;
   document_path?: string;
 }

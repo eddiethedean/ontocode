@@ -35,6 +35,27 @@ pub enum PatchOp {
     RemoveDisjointClass { entity_iri: String, other_iri: String },
     AddImport { ontology_iri: String, import_iri: String },
     RemoveImport { ontology_iri: String, import_iri: String },
+    AddDomain { entity_iri: String, class_iri: String },
+    RemoveDomain { entity_iri: String, class_iri: String },
+    AddRange { entity_iri: String, range_iri: String },
+    RemoveRange { entity_iri: String, range_iri: String },
+    SetFunctional { entity_iri: String, value: bool },
+    SetInverseFunctional { entity_iri: String, value: bool },
+    SetTransitive { entity_iri: String, value: bool },
+    SetSymmetric { entity_iri: String, value: bool },
+    SetAsymmetric { entity_iri: String, value: bool },
+    SetReflexive { entity_iri: String, value: bool },
+    SetIrreflexive { entity_iri: String, value: bool },
+    AddPropertyChain { entity_iri: String, properties: Vec<String> },
+    RemovePropertyChain { entity_iri: String, properties: Vec<String> },
+    AddClassAssertion { entity_iri: String, class_iri: String },
+    RemoveClassAssertion { entity_iri: String, class_iri: String },
+    AddObjectPropertyAssertion { entity_iri: String, property_iri: String, target_iri: String },
+    RemoveObjectPropertyAssertion { entity_iri: String, property_iri: String, target_iri: String },
+    AddDataPropertyAssertion { entity_iri: String, property_iri: String, value: String },
+    RemoveDataPropertyAssertion { entity_iri: String, property_iri: String, value: String },
+    AddAnnotation { entity_iri: String, predicate: String, value: String },
+    RemoveAnnotation { entity_iri: String, predicate: String, value: String },
 }
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
@@ -249,6 +270,145 @@ fn apply_one_patch(
             let import_term = iri_to_turtle_term(import_iri, namespaces)?;
             remove_predicate_object(text, ontology_iri, "owl:imports", &import_term, namespaces)
         }
+        PatchOp::AddDomain { entity_iri, class_iri } => {
+            let class = iri_to_turtle_term(class_iri, namespaces)?;
+            add_object_triple(text, entity_iri, "rdfs:domain", &class, namespaces)
+        }
+        PatchOp::RemoveDomain { entity_iri, class_iri } => {
+            let class = iri_to_turtle_term(class_iri, namespaces)?;
+            remove_predicate_object_any_statement(
+                text,
+                entity_iri,
+                "rdfs:domain",
+                &class,
+                namespaces,
+            )
+        }
+        PatchOp::AddRange { entity_iri, range_iri } => {
+            let range = iri_to_turtle_term(range_iri, namespaces)?;
+            add_object_triple(text, entity_iri, "rdfs:range", &range, namespaces)
+        }
+        PatchOp::RemoveRange { entity_iri, range_iri } => {
+            let range = iri_to_turtle_term(range_iri, namespaces)?;
+            remove_predicate_object_any_statement(
+                text,
+                entity_iri,
+                "rdfs:range",
+                &range,
+                namespaces,
+            )
+        }
+        PatchOp::SetFunctional { entity_iri, value } => set_property_characteristic(
+            text,
+            entity_iri,
+            "owl:FunctionalProperty",
+            *value,
+            namespaces,
+        ),
+        PatchOp::SetInverseFunctional { entity_iri, value } => set_property_characteristic(
+            text,
+            entity_iri,
+            "owl:InverseFunctionalProperty",
+            *value,
+            namespaces,
+        ),
+        PatchOp::SetTransitive { entity_iri, value } => set_property_characteristic(
+            text,
+            entity_iri,
+            "owl:TransitiveProperty",
+            *value,
+            namespaces,
+        ),
+        PatchOp::SetSymmetric { entity_iri, value } => set_property_characteristic(
+            text,
+            entity_iri,
+            "owl:SymmetricProperty",
+            *value,
+            namespaces,
+        ),
+        PatchOp::SetAsymmetric { entity_iri, value } => set_property_characteristic(
+            text,
+            entity_iri,
+            "owl:AsymmetricProperty",
+            *value,
+            namespaces,
+        ),
+        PatchOp::SetReflexive { entity_iri, value } => set_property_characteristic(
+            text,
+            entity_iri,
+            "owl:ReflexiveProperty",
+            *value,
+            namespaces,
+        ),
+        PatchOp::SetIrreflexive { entity_iri, value } => set_property_characteristic(
+            text,
+            entity_iri,
+            "owl:IrreflexiveProperty",
+            *value,
+            namespaces,
+        ),
+        PatchOp::AddPropertyChain { entity_iri, properties } => {
+            add_property_chain(text, entity_iri, properties, namespaces)
+        }
+        PatchOp::RemovePropertyChain { entity_iri, properties } => {
+            remove_property_chain(text, entity_iri, properties, namespaces)
+        }
+        PatchOp::AddClassAssertion { entity_iri, class_iri } => {
+            let class = iri_to_turtle_term(class_iri, namespaces)?;
+            add_type_triple(text, entity_iri, &class, namespaces)
+        }
+        PatchOp::RemoveClassAssertion { entity_iri, class_iri } => {
+            let class = iri_to_turtle_term(class_iri, namespaces)?;
+            remove_type_triple(text, entity_iri, &class, namespaces)
+        }
+        PatchOp::AddObjectPropertyAssertion { entity_iri, property_iri, target_iri } => {
+            let prop = iri_to_turtle_term(property_iri, namespaces)?;
+            let target = iri_to_turtle_term(target_iri, namespaces)?;
+            add_property_assertion_triple(text, entity_iri, &prop, &target, namespaces)
+        }
+        PatchOp::RemoveObjectPropertyAssertion { entity_iri, property_iri, target_iri } => {
+            let prop = iri_to_turtle_term(property_iri, namespaces)?;
+            let target = iri_to_turtle_term(target_iri, namespaces)?;
+            remove_predicate_object_any_statement(text, entity_iri, &prop, &target, namespaces)
+        }
+        PatchOp::AddDataPropertyAssertion { entity_iri, property_iri, value } => {
+            let prop = iri_to_turtle_term(property_iri, namespaces)?;
+            add_data_property_assertion(text, entity_iri, &prop, value, namespaces)
+        }
+        PatchOp::RemoveDataPropertyAssertion { entity_iri, property_iri, value } => {
+            let prop = iri_to_turtle_term(property_iri, namespaces)?;
+            let escaped = escape_turtle_string(value);
+            let object = format!("\"{escaped}\"");
+            remove_predicate_object_any_statement(text, entity_iri, &prop, &object, namespaces)
+        }
+        PatchOp::AddAnnotation { entity_iri, predicate, value } => {
+            if predicate == "rdfs:label" || predicate.ends_with("#label") {
+                add_annotation_triple(text, entity_iri, "rdfs:label", value, namespaces)
+            } else if predicate == "rdfs:comment" || predicate.ends_with("#comment") {
+                add_annotation_triple(text, entity_iri, "rdfs:comment", value, namespaces)
+            } else if value.starts_with("http://") || value.starts_with("https://") {
+                let pred = predicate_to_term(predicate, namespaces)?;
+                let obj = iri_to_turtle_term(value, namespaces)?;
+                add_object_triple(text, entity_iri, &pred, &obj, namespaces)
+            } else {
+                let pred = predicate_to_term(predicate, namespaces)?;
+                add_annotation_triple(text, entity_iri, &pred, value, namespaces)
+            }
+        }
+        PatchOp::RemoveAnnotation { entity_iri, predicate, value } => {
+            if predicate == "rdfs:label" || predicate.ends_with("#label") {
+                remove_matching_predicate_any(text, entity_iri, "rdfs:label", value, namespaces)
+            } else if predicate == "rdfs:comment" || predicate.ends_with("#comment") {
+                remove_matching_predicate_any(text, entity_iri, "rdfs:comment", value, namespaces)
+            } else if value.starts_with("http://") || value.starts_with("https://") {
+                let pred = predicate_to_term(predicate, namespaces)?;
+                let obj = iri_to_turtle_term(value, namespaces)?;
+                remove_predicate_object_any_statement(text, entity_iri, &pred, &obj, namespaces)
+            } else {
+                let pred = predicate_to_term(predicate, namespaces)?;
+                remove_matching_predicate_any(text, entity_iri, &pred, value, namespaces)
+            }
+        }
     }
 }
 
@@ -402,6 +562,132 @@ fn remove_disjoint_triple(
 ) -> Result<()> {
     let other = iri_to_turtle_term(other_iri, namespaces)?;
     remove_predicate_object_any_statement(text, entity_iri, "owl:disjointWith", &other, namespaces)
+}
+
+fn predicate_to_term(predicate: &str, namespaces: &BTreeMap<String, String>) -> Result<String> {
+    if predicate.contains(':') && !predicate.starts_with("http") {
+        Ok(predicate.to_string())
+    } else {
+        iri_to_turtle_term(predicate, namespaces)
+    }
+}
+
+fn set_property_characteristic(
+    text: &mut String,
+    entity_iri: &str,
+    characteristic: &str,
+    value: bool,
+    namespaces: &BTreeMap<String, String>,
+) -> Result<()> {
+    if value {
+        add_type_triple(text, entity_iri, characteristic, namespaces)
+    } else {
+        remove_type_triple(text, entity_iri, characteristic, namespaces)
+    }
+}
+
+fn add_type_triple(
+    text: &mut String,
+    entity_iri: &str,
+    type_term: &str,
+    namespaces: &BTreeMap<String, String>,
+) -> Result<()> {
+    if !text_contains_entity(text, entity_iri, namespaces) {
+        return Err(OwlError::EntityNotFound(entity_iri.to_string()));
+    }
+    let subject = iri_to_turtle_term(entity_iri, namespaces)?;
+    let ns = crate::span::namespaces_for_text(text, namespaces);
+    if let Some(range) = entity_primary_block_range(text, entity_iri, &ns) {
+        let block = &text[range.start as usize..range.end as usize];
+        if block.contains(&format!("a {type_term}"))
+            || block.contains(&format!("a owl:NamedIndividual, {type_term}"))
+            || block.contains(&format!(", {type_term}"))
+        {
+            return Ok(());
+        }
+        let insertion = format!("    a {type_term} ;\n");
+        return insert_into_entity_block(text, entity_iri, &insertion, namespaces, false);
+    }
+    // Trailing `subject a type .` form
+    let triple = format!("\n{subject} a {type_term} .\n");
+    if !text.ends_with('\n') {
+        text.push('\n');
+    }
+    text.push_str(&triple);
+    Ok(())
+}
+
+fn remove_type_triple(
+    text: &mut String,
+    entity_iri: &str,
+    type_term: &str,
+    namespaces: &BTreeMap<String, String>,
+) -> Result<()> {
+    remove_predicate_object_any_statement(text, entity_iri, "a", type_term, namespaces)
+}
+
+fn add_property_assertion_triple(
+    text: &mut String,
+    entity_iri: &str,
+    property_term: &str,
+    target_term: &str,
+    namespaces: &BTreeMap<String, String>,
+) -> Result<()> {
+    if !text_contains_entity(text, entity_iri, namespaces) {
+        return Err(OwlError::EntityNotFound(entity_iri.to_string()));
+    }
+    let triple = format!("    {property_term} {target_term} ;\n");
+    insert_into_entity_block(text, entity_iri, &triple, namespaces, false)
+}
+
+fn add_data_property_assertion(
+    text: &mut String,
+    entity_iri: &str,
+    property_term: &str,
+    value: &str,
+    namespaces: &BTreeMap<String, String>,
+) -> Result<()> {
+    if !text_contains_entity(text, entity_iri, namespaces) {
+        return Err(OwlError::EntityNotFound(entity_iri.to_string()));
+    }
+    let escaped = escape_turtle_string(value);
+    let triple = format!("    {property_term} \"{escaped}\" ;\n");
+    insert_into_entity_block(text, entity_iri, &triple, namespaces, false)
+}
+
+fn add_property_chain(
+    text: &mut String,
+    entity_iri: &str,
+    properties: &[String],
+    namespaces: &BTreeMap<String, String>,
+) -> Result<()> {
+    if properties.is_empty() {
+        return Err(OwlError::PatchInvalid(
+            "property chain must have at least one property".into(),
+        ));
+    }
+    let terms: Vec<String> =
+        properties.iter().map(|p| iri_to_turtle_term(p, namespaces)).collect::<Result<Vec<_>>>()?;
+    let chain_obj = format!("( {} )", terms.join(" "));
+    add_object_triple(text, entity_iri, "owl:propertyChainAxiom", &chain_obj, namespaces)
+}
+
+fn remove_property_chain(
+    text: &mut String,
+    entity_iri: &str,
+    properties: &[String],
+    namespaces: &BTreeMap<String, String>,
+) -> Result<()> {
+    let terms: Vec<String> =
+        properties.iter().map(|p| iri_to_turtle_term(p, namespaces)).collect::<Result<Vec<_>>>()?;
+    let chain_obj = format!("( {} )", terms.join(" "));
+    remove_predicate_object_any_statement(
+        text,
+        entity_iri,
+        "owl:propertyChainAxiom",
+        &chain_obj,
+        namespaces,
+    )
 }
 
 fn remove_predicate_triples(
@@ -1350,5 +1636,133 @@ ex:Person a owl:Class ;
         let result = apply_patches_to_text(ttl, &patches, true, &ns).expect("patch");
         let preview = result.preview_text.as_deref().unwrap_or(ttl);
         assert_eq!(before, preview.matches("owl:disjointWith").count());
+    }
+
+    fn org_ns() -> BTreeMap<String, String> {
+        BTreeMap::from([
+            ("ex".to_string(), "http://example.org/org#".to_string()),
+            ("owl".to_string(), "http://www.w3.org/2002/07/owl#".to_string()),
+            ("rdfs".to_string(), "http://www.w3.org/2000/01/rdf-schema#".to_string()),
+        ])
+    }
+
+    #[test]
+    fn add_and_remove_domain() {
+        let ttl = include_str!("../../../fixtures/disjoint-classes.ttl");
+        let ns = org_ns();
+        let add = apply_patches_to_text(
+            ttl,
+            &[PatchOp::AddDomain {
+                entity_iri: "http://example.org/org#chases".to_string(),
+                class_iri: "http://example.org/org#Cat".to_string(),
+            }],
+            true,
+            &ns,
+        )
+        .expect("add domain");
+        let with_domain = add.preview_text.expect("preview");
+        assert!(with_domain.contains("rdfs:domain"));
+
+        let remove = apply_patches_to_text(
+            &with_domain,
+            &[PatchOp::RemoveDomain {
+                entity_iri: "http://example.org/org#chases".to_string(),
+                class_iri: "http://example.org/org#Dog".to_string(),
+            }],
+            true,
+            &ns,
+        )
+        .expect("remove domain");
+        let preview = remove.preview_text.expect("preview");
+        assert!(!preview.contains("rdfs:domain ex:Dog"));
+        assert!(preview.contains("rdfs:domain ex:Cat"));
+    }
+
+    #[test]
+    fn add_property_chain() {
+        let ttl = include_str!("../../../fixtures/disjoint-classes.ttl");
+        let ns = org_ns();
+        let result = apply_patches_to_text(
+            ttl,
+            &[PatchOp::AddPropertyChain {
+                entity_iri: "http://example.org/org#chases".to_string(),
+                properties: vec![
+                    "http://example.org/org#chases".to_string(),
+                    "http://example.org/org#composed".to_string(),
+                ],
+            }],
+            true,
+            &ns,
+        )
+        .expect("add chain");
+        let preview = result.preview_text.expect("preview");
+        assert!(preview.contains("owl:propertyChainAxiom"));
+    }
+
+    #[test]
+    fn add_class_assertion_to_individual() {
+        let ttl = r#"@prefix ex: <http://example.org/org#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+ex:Alice a owl:NamedIndividual .
+ex:Person a owl:Class .
+"#;
+        let ns = org_ns();
+        let result = apply_patches_to_text(
+            ttl,
+            &[PatchOp::AddClassAssertion {
+                entity_iri: "http://example.org/org#Alice".to_string(),
+                class_iri: "http://example.org/org#Person".to_string(),
+            }],
+            true,
+            &ns,
+        )
+        .expect("add class assertion");
+        let preview = result.preview_text.expect("preview");
+        assert!(preview.contains("ex:Person"));
+    }
+
+    #[test]
+    fn add_generic_annotation() {
+        let ttl = r#"@prefix ex: <http://example.org/org#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+ex:Cat a owl:Class .
+"#;
+        let ns = org_ns();
+        let mut ns = ns;
+        ns.insert("skos".to_string(), "http://www.w3.org/2004/02/skos/core#".to_string());
+        let result = apply_patches_to_text(
+            ttl,
+            &[PatchOp::AddAnnotation {
+                entity_iri: "http://example.org/org#Cat".to_string(),
+                predicate: "skos:definition".to_string(),
+                value: "A feline animal".to_string(),
+            }],
+            true,
+            &ns,
+        )
+        .expect("add annotation");
+        let preview = result.preview_text.expect("preview");
+        assert!(preview.contains("skos:definition \"A feline animal\""));
+    }
+
+    #[test]
+    fn set_functional_property() {
+        let ttl = include_str!("../../../fixtures/disjoint-classes.ttl");
+        let ns = org_ns();
+        let result = apply_patches_to_text(
+            ttl,
+            &[PatchOp::SetFunctional {
+                entity_iri: "http://example.org/org#chases".to_string(),
+                value: true,
+            }],
+            true,
+            &ns,
+        )
+        .expect("set functional");
+        let preview = result.preview_text.expect("preview");
+        assert!(preview.contains("owl:FunctionalProperty"));
     }
 }

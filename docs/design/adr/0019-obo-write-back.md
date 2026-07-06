@@ -1,7 +1,7 @@
 # ADR-0019 — OBO Write-Back via fastobo
 
 ## Status
-Accepted (v0.11 groundwork; full write-back targeted v1.0)
+Shipped (v0.12.0)
 
 ## Context
 

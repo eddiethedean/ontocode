@@ -3,6 +3,7 @@ use crate::result::{ExplanationResult, ExplanationStep};
 use ontologos_core::{
     EntityId, EntityKind, InferenceTrace, Ontology, TraceConclusion, TracePremise, TraceStep,
 };
+use ontologos_dl::DlClassifier;
 use ontologos_el::ElClassifier;
 use ontologos_explain::{build_proof_graph, render_text, ProofGraph};
 use ontologos_rl::rdfs::RdfsEngine;
@@ -227,4 +228,21 @@ fn entity_iri_opt(ontology: &Ontology, id: EntityId) -> Option<String> {
 /// True for the OWL bottom class (`owl:Nothing`), not IRIs that merely contain "Nothing".
 fn is_owl_nothing(iri: &str) -> bool {
     iri == "http://www.w3.org/2002/07/owl#Nothing" || iri == "owl:Nothing"
+}
+
+pub fn explain_unsatisfiable_dl(ontology: &Ontology, class_iri: &str) -> Result<ExplanationResult> {
+    let taxonomy = DlClassifier::new()
+        .classify(ontology)
+        .map_err(|e| ReasonerError::Explain(e.to_string()))?;
+    let class_id = ontology
+        .lookup_entity(class_iri)
+        .ok_or_else(|| ReasonerError::ClassNotFound(class_iri.to_string()))?;
+    if !taxonomy.unsatisfiable.contains(&class_id) {
+        return Err(ReasonerError::ExplanationUnavailable(class_iri.to_string()));
+    }
+    let mut result = explain_unsatisfiable_el(ontology, class_iri)
+        .or_else(|_| explain_unsatisfiable_rl(ontology, class_iri))
+        .or_else(|_| explain_unsatisfiable_rdfs(ontology, class_iri))?;
+    result.text = format!("DL profile justification (via Ontologos traces)\n\n{}", result.text);
+    Ok(result)
 }

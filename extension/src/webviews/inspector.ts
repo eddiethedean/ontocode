@@ -28,6 +28,8 @@ function toPayload(detail: EntityDetail): EntityDetailPayload {
     parents: detail.parents,
     children: detail.children,
     axioms: detail.axioms,
+    annotations: detail.annotations,
+    characteristics: detail.characteristics,
     editable: detail.editable,
     document_path: detail.document_path,
   };

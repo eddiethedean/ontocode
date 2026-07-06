@@ -25,7 +25,7 @@ use std::path::{Path, PathBuf};
 #[command(
     name = "ontocore",
     version,
-    about = "Local-first ontology index and query engine (OntoCode v0.11)"
+    about = "Local-first ontology index and query engine (OntoCode v0.12)"
 )]
 struct Cli {
     #[command(subcommand)]
@@ -345,9 +345,9 @@ fn main() -> Result<()> {
             print_stats(&catalog.data().stats(), format)?;
         }
         Commands::Patch { document, patch_file, preview } => {
-            let patches: Vec<ontocore_owl::PatchOp> =
-                serde_json::from_slice(&std::fs::read(&patch_file)?)
-                    .context("failed to parse patch JSON")?;
+            let patch_bytes = std::fs::read(&patch_file)?;
+            let ext =
+                document.extension().and_then(|e| e.to_str()).unwrap_or("").to_ascii_lowercase();
             let catalog = IndexBuilder::new()
                 .workspace(document.parent().unwrap_or(std::path::Path::new(".")))
                 .build()
@@ -361,15 +361,34 @@ fn main() -> Result<()> {
                 })
                 .map(|d| d.namespaces.clone())
                 .unwrap_or_default();
-            let result = ontocore_owl::apply_patches(&document, &patches, preview, &namespaces)
-                .context("patch failed")?;
-            println!("{}", serde_json::to_string_pretty(&result)?);
-            let has_errors = result.diagnostics.iter().any(|d| d.severity == "error");
-            if has_errors || (!preview && !patches.is_empty() && !result.applied) {
-                bail!("patch failed with {} diagnostic(s)", result.diagnostics.len().max(1));
-            }
-            if !preview && result.applied {
-                println!("applied");
+            if ext == "obo" {
+                let patches: Vec<ontocore_obo::OboPatchOp> =
+                    serde_json::from_slice(&patch_bytes).context("failed to parse patch JSON")?;
+                let result = ontocore_obo::apply_patches(&document, &patches, preview)
+                    .context("patch failed")?;
+                println!("{}", serde_json::to_string_pretty(&result)?);
+                let has_errors = result.diagnostics.iter().any(|d| d.severity == "error");
+                if has_errors || (!preview && !patches.is_empty() && !result.applied) {
+                    bail!("patch failed with {} diagnostic(s)", result.diagnostics.len().max(1));
+                }
+                if !preview && result.applied {
+                    println!("applied");
+                }
+            } else if ext == "ttl" {
+                let patches: Vec<ontocore_owl::PatchOp> =
+                    serde_json::from_slice(&patch_bytes).context("failed to parse patch JSON")?;
+                let result = ontocore_owl::apply_patches(&document, &patches, preview, &namespaces)
+                    .context("patch failed")?;
+                println!("{}", serde_json::to_string_pretty(&result)?);
+                let has_errors = result.diagnostics.iter().any(|d| d.severity == "error");
+                if has_errors || (!preview && !patches.is_empty() && !result.applied) {
+                    bail!("patch failed with {} diagnostic(s)", result.diagnostics.len().max(1));
+                }
+                if !preview && result.applied {
+                    println!("applied");
+                }
+            } else {
+                bail!("patch write-back supports .ttl and .obo documents only");
             }
         }
         Commands::Classify { workspace, profile, auto_profile, format } => {

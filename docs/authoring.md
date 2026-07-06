@@ -1,6 +1,6 @@
-# Ontology authoring (OntoCore v0.11)
+# Ontology authoring (OntoCore v0.12)
 
-> **Status:** Documents behavior in **OntoCore v0.11.3**. Pre-1.0 APIs may change.
+> **Status:** Documents behavior in **OntoCore v0.12.0**. Pre-1.0 APIs may change.
 > Canonical feature list: [What ships today](SHIPPED.md).
 
 OntoCode provides **Turtle write-back** for simple and **Manchester** ontology edits without Protégé.
@@ -18,15 +18,20 @@ OntoCode provides **Turtle write-back** for simple and **Manchester** ontology e
 | Add / remove / set equivalent class (Manchester) | `add_equivalent_class`, `remove_equivalent_class`, `set_equivalent_class` |
 | Add / remove disjoint class (named IRI) | `add_disjoint_class`, `remove_disjoint_class` |
 | Add / remove ontology import | `add_import`, `remove_import` |
+| Add / remove domain and range | `add_domain`, `remove_domain`, `add_range`, `remove_range` |
+| Property characteristics (functional, transitive, …) | `set_functional`, `set_transitive`, … |
+| Property chains | `add_property_chain`, `remove_property_chain` |
+| Individual assertions | `add_class_assertion`, `add_object_property_assertion`, `add_data_property_assertion` |
+| Generic annotations | `add_annotation`, `remove_annotation` |
 | Set deprecated flag | `set_deprecated` |
 
 Full JSON reference: [patch-reference.md](patch-reference.md).
 
 ## Format policy
 
-- **Write-back:** Turtle (`.ttl`) only
-- **Read/index:** all supported RDF/OWL formats (unchanged)
-- Non-Turtle files are read-only in the explorer inspector (`editable: false`)
+- **Write-back:** Turtle (`.ttl`) and OBO (`.obo`)
+- **Read/index:** Turtle, OBO, RDF/XML (`.owl`), OWL/XML (`.owx`), JSON-LD, N-Triples, TriG
+- OWL/XML and RDF/XML are read-only in the Entity Inspector (`editable: false`); edit as Turtle or OBO
 
 ## VS Code workflow (simple edits)
 

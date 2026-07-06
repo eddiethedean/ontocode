@@ -6,7 +6,7 @@ hide:
 
 <div class="oc-hero" markdown>
 
-<p class="oc-hero-kicker">OntoCode documentation · v0.11.3</p>
+<p class="oc-hero-kicker">OntoCode documentation · v0.12.0</p>
 
 <p class="oc-hero-title">Ontology IDE for VS Code</p>
 

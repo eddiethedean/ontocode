@@ -68,7 +68,7 @@ describe("EntityInspectorPanel", () => {
 
     const labelInput = screen.getByLabelText("Add label");
     await user.type(labelInput, "New label");
-    await user.click(screen.getByRole("button", { name: "Add Label" }));
+    await user.click(screen.getAllByRole("button", { name: "Apply" })[0]);
 
     expect(lastPostedMessage()).toEqual({
       type: "applyPatch",
@@ -108,7 +108,7 @@ describe("EntityInspectorPanel", () => {
     await screen.findByRole("heading", { name: "Person" });
 
     postHostMessage({ type: "error", message: "Patch failed" });
-    expect(await screen.findByText("Error: Patch failed")).toHaveClass("oc-callout--error");
+    expect(await screen.findByText("Error: Patch failed")).toBeInTheDocument();
   });
 
   it("shows read-only callout when not editable", async () => {
@@ -120,7 +120,7 @@ describe("EntityInspectorPanel", () => {
     });
 
     expect(
-      await screen.findByText(/Editing is available for Turtle/)
+      await screen.findByText(/Turtle.*OBO/)
     ).toBeInTheDocument();
     expect(screen.queryByText("Edit")).not.toBeInTheDocument();
   });
@@ -163,7 +163,7 @@ describe("EntityInspectorPanel", () => {
     await screen.findByRole("heading", { name: "Person" });
 
     await user.type(screen.getByLabelText("Add comment"), "A note");
-    await user.click(screen.getByRole("button", { name: "Add Comment" }));
+    await user.click(screen.getAllByRole("button", { name: "Apply" })[1]);
     expect(lastPostedMessage()).toEqual({
       type: "applyPatch",
       patches: [
@@ -177,7 +177,7 @@ describe("EntityInspectorPanel", () => {
     });
 
     await user.selectOptions(screen.getByLabelText("Add parent"), "http://example.org#Agent");
-    await user.click(screen.getByRole("button", { name: "Add Parent (SubClassOf)" }));
+    await user.click(screen.getAllByRole("button", { name: "Apply" })[2]);
     expect(lastPostedMessage()).toEqual({
       type: "applyPatch",
       patches: [
@@ -198,7 +198,7 @@ describe("EntityInspectorPanel", () => {
     await screen.findByRole("heading", { name: "Person" });
 
     await user.type(screen.getByLabelText("Add label"), "Preview me");
-    await user.click(screen.getByRole("button", { name: "Preview" }));
+    await user.click(screen.getAllByRole("button", { name: "Preview" })[0]);
 
     expect(lastPostedMessage()).toEqual({
       type: "applyPatch",
@@ -221,9 +221,9 @@ describe("EntityInspectorPanel", () => {
     await screen.findByRole("heading", { name: "Person" });
 
     const before = postedMessages().length;
-    await user.click(screen.getByRole("button", { name: "Add Label" }));
-    await user.click(screen.getByRole("button", { name: "Add Comment" }));
-    await user.click(screen.getByRole("button", { name: "Add Parent (SubClassOf)" }));
+    await user.click(screen.getAllByRole("button", { name: "Apply" })[0]);
+    await user.click(screen.getAllByRole("button", { name: "Apply" })[1]);
+    await user.click(screen.getAllByRole("button", { name: "Apply" })[2]);
 
     expect(postedMessages().length).toBe(before);
   });

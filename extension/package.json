@@ -2,7 +2,7 @@
   "name": "ontocode",
   "displayName": "OntoCode",
   "description": "Ontology IDE for VS Code powered by OntoCore. Browse, edit Turtle, query, reason (EL–DL), validate, and diff OWL/RDF/OBO ontologies from the IDE or CI.",
-  "version": "0.11.3",
+  "version": "0.12.0",
   "publisher": "ontocode",
   "license": "MIT",
   "repository": {
@@ -61,8 +61,13 @@
     "languages": [
       {
         "id": "obo",
-        "aliases": ["OBO", "obo"],
-        "extensions": [".obo"],
+        "aliases": [
+          "OBO",
+          "obo"
+        ],
+        "extensions": [
+          ".obo"
+        ],
         "configuration": "./language-configuration.json"
       }
     ],
@@ -308,7 +313,13 @@
         },
         "ontocode.reasoner.default": {
           "type": "string",
-          "enum": ["el", "rl", "rdfs", "dl", "auto"],
+          "enum": [
+            "el",
+            "rl",
+            "rdfs",
+            "dl",
+            "auto"
+          ],
           "default": "el",
           "description": "Default reasoner profile for Run Reasoner (el, rl, rdfs, dl, auto)."
         },
@@ -319,7 +330,11 @@
         },
         "ontocode.hierarchy.mode": {
           "type": "string",
-          "enum": ["asserted", "inferred", "combined"],
+          "enum": [
+            "asserted",
+            "inferred",
+            "combined"
+          ],
           "default": "asserted",
           "description": "Class hierarchy display mode in the explorer after classification."
         },

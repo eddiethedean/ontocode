@@ -1,0 +1,17 @@
+@prefix ex: <http://example.org/people#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+ex:Person a owl:Class ;
+    rdfs:label "Person" .
+
+ex:knows a owl:ObjectProperty ;
+    rdfs:label "knows" .
+
+ex:Alice a owl:NamedIndividual ;
+    rdfs:label "Alice" ;
+    a ex:Person ;
+    ex:knows ex:Bob .
+
+ex:Bob a owl:NamedIndividual ;
+    rdfs:label "Bob" .

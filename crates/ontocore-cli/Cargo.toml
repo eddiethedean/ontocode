@@ -21,6 +21,7 @@ path = "src/main.rs"
 ontocore-catalog = { workspace = true }
 ontocore-core = { workspace = true }
 ontocore-owl = { workspace = true }
+ontocore-obo = { workspace = true }
 ontocore-query = { workspace = true }
 ontocore-reasoner = { workspace = true }
 ontocore-refactor = { workspace = true }

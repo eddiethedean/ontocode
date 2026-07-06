@@ -2,9 +2,9 @@
 
 Short pointer to platform planning docs.
 
-## Forward plan (v0.10 → v1.0)
+## Forward plan (v0.12 → v1.2+)
 
-The canonical roadmap — including the Protégé 1.0 objective, ontology toolchain integration (owlmake, ROBOT/ODK), semantic workspace, plugins, bindings, and the v1.2 toolchain platform — lives in **[Platform roadmap](../roadmap.md)**.
+The canonical roadmap — all release phases from v0.1 through post-1.2, including v0.12 authoring parity, v0.13 platform hardening, v0.14 plugin host, the Protégé 1.0 objective, ontology toolchain integration (owlmake, ROBOT/ODK), language bindings, and the v1.2 toolchain platform — lives in **[Platform roadmap](../roadmap.md)**.
 
 ## Shipped milestones (v0.1–v0.9)
 

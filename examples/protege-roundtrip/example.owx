@@ -1,0 +1,18 @@
+<?xml version="1.0"?>
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+     ontologyIRI="http://example.org/org">
+    <Prefix name="ex" IRI="http://example.org/org#"/>
+    <Prefix name="rdfs" IRI="http://www.w3.org/2000/01/rdf-schema#"/>
+    <Declaration>
+        <Class IRI="http://example.org/org#Department"/>
+    </Declaration>
+    <SubClassOf>
+        <Class IRI="http://example.org/org#Department"/>
+        <Class IRI="http://example.org/people#Organization"/>
+    </SubClassOf>
+    <AnnotationAssertion>
+        <AnnotationProperty abbreviatedIRI="rdfs:label"/>
+        <IRI>http://example.org/org#Department</IRI>
+        <Literal>Department</Literal>
+    </AnnotationAssertion>
+</Ontology>

@@ -1,8 +1,8 @@
-# What ships today (v0.11.3)
+# What ships today (v0.12.0)
 
 > **Canonical capability matrix.** Update this page on every release. Design specs under [Project](design/README.md) may describe future targets — check here for what is actually available.
 
-**Current release:** v0.11.3 · [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md)
+**Current release:** v0.12.0 · [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md)
 
 ## Products
 
@@ -16,11 +16,14 @@
 | Capability | VS Code | CLI |
 |------------|---------|-----|
 | Browse classes, properties, individuals | Yes | via SQL |
-| Edit labels, comments, parents (`.ttl` only; `.obo` read-only in inspector) | Yes (React inspector) | `ontocore patch` (Turtle) |
+| Edit labels, comments, parents (`.ttl` and `.obo`) | Yes (React inspector) | `ontocore patch` |
 | Create / delete entities (`.ttl`) | Yes | `ontocore patch` |
 | Complex `SubClassOf` / `EquivalentClasses` (Manchester) | Yes | `ontocore patch` |
 | Disjoint classes (author + view) | Yes (inspector + Manchester) | `ontocore patch` |
-| Domain / range / property chains (view) | Yes (axiom catalog) | via SQL / inspect |
+| Domain / range / characteristics / property chains | Yes (inspector + patch) | `ontocore patch` |
+| Individual assertions (class/object/data) | Yes (Turtle) | `ontocore patch` |
+| Generic annotation assertions | Yes (Turtle) | `ontocore patch` |
+| OBO term edit (name, synonym, def, is_a, …) | Yes (inspector) | `ontocore patch` |
 | Find usages / rename IRI / namespace migration / move / extract module | Yes (preview + apply) | `ontocore refactor` |
 | SQL-like queries | Query Workbench (React) | `ontocore query` |
 | SPARQL | Query Workbench (React) | `ontocore sparql` |
@@ -29,7 +32,7 @@
 | RL / RDFS classification | Reasoner panel | `ontocore classify --profile rl\|rdfs` |
 | OWL 2 DL classification (`dl` profile) | Reasoner panel + hierarchy toggle | `ontocore classify --profile dl` |
 | Auto profile routing (`auto`) | Reasoner panel | `ontocore classify --profile auto` |
-| EL explanations (where available) | Explanation panel | `ontocore explain` |
+| EL / DL explanations (where available) | Explanation panel | `ontocore explain` |
 | OBO format index + `obo_id` in explorer | Yes | `ontocore inspect` |
 | ROBOT interop | — | `ontocore robot validate\|merge\|report` |
 | Diagnostics / lint | Problems panel | `ontocore validate` |
@@ -44,11 +47,22 @@
 
 ## Format support
 
-| Operation | Turtle (`.ttl`) | OBO (`.obo`) | RDF/XML, JSON-LD, N-Triples, TriG |
-|-----------|-----------------|--------------|-----------------------------------|
-| Index / query | Yes | Yes | Yes |
-| Write-back (inspector, patches, refactor) | Yes | Read-only in VS Code | Read-only in VS Code |
-| Rich OBO metadata (synonyms, defs, xrefs) | — | Yes (fastobo read) | — |
+| Operation | Turtle (`.ttl`) | OBO (`.obo`) | RDF/XML (`.owl`), OWL/XML (`.owx`) | JSON-LD, N-Triples, TriG |
+|-----------|-----------------|--------------|-------------------------------------|---------------------------|
+| Index / query | Yes | Yes | Yes (Horned catalog) | Yes |
+| Write-back (inspector, patches, refactor) | Yes | Yes | Read-only | Read-only |
+| Rich OBO metadata (synonyms, defs, xrefs) | — | Yes | — | — |
+
+## New in v0.12.0
+
+| Capability | Status |
+|------------|--------|
+| Turtle domain/range/characteristics/chain/annotation patch ops | Yes |
+| OBO write-back (`ontocore-obo`) | Yes |
+| OWL/XML (`.owx`) and RDF/XML Horned catalog | Yes (read-only inspector) |
+| DL unsatisfiability explanations | Yes (with EL/RL fallback) |
+| Protégé round-trip golden tests | Yes (`cargo test protege_roundtrip`) |
+| PreviewApplyBar on all inspector edits | Yes |
 
 ## New in v0.11.3
 

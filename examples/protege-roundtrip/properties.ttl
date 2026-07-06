@@ -1,0 +1,19 @@
+@prefix ex: <http://example.org/props#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+ex:Person a owl:Class ;
+    rdfs:label "Person" .
+
+ex:hasAge a owl:DatatypeProperty ;
+    rdfs:label "has age" ;
+    rdfs:domain ex:Person ;
+    rdfs:range xsd:integer ;
+    a owl:FunctionalProperty .
+
+ex:knows a owl:ObjectProperty ;
+    rdfs:label "knows" ;
+    rdfs:domain ex:Person ;
+    rdfs:range ex:Person ;
+    a owl:SymmetricProperty .

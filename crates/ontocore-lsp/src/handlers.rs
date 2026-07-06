@@ -445,35 +445,84 @@ pub fn handle_apply_axiom_patch(
     let format = OntologyFormat::from_extension(
         document_path.extension().and_then(|e| e.to_str()).unwrap_or(""),
     );
-    if format != OntologyFormat::Turtle {
-        return Err(LspErrorPayload::unsupported_format(format!(
-            "write-back supports Turtle only, got {}",
-            format.as_str()
-        )));
+
+    if matches!(format, OntologyFormat::Owl | OntologyFormat::RdfXml) {
+        return Err(LspErrorPayload::unsupported_format(
+            "read-only format — edit as Turtle (.ttl) or OBO (.obo)".to_string(),
+        ));
     }
 
-    let entity_iri = params.patches.first().map(|p| match p {
-        ontocore_owl::PatchOp::CreateEntity { entity_iri, .. }
-        | ontocore_owl::PatchOp::DeleteEntity { entity_iri }
-        | ontocore_owl::PatchOp::SetLabel { entity_iri, .. }
-        | ontocore_owl::PatchOp::AddLabel { entity_iri, .. }
-        | ontocore_owl::PatchOp::RemoveLabel { entity_iri, .. }
-        | ontocore_owl::PatchOp::SetComment { entity_iri, .. }
-        | ontocore_owl::PatchOp::AddComment { entity_iri, .. }
-        | ontocore_owl::PatchOp::RemoveComment { entity_iri, .. }
-        | ontocore_owl::PatchOp::AddSubClassOf { entity_iri, .. }
-        | ontocore_owl::PatchOp::RemoveSubClassOf { entity_iri, .. }
-        | ontocore_owl::PatchOp::AddComplexSubClassOf { entity_iri, .. }
-        | ontocore_owl::PatchOp::RemoveComplexSubClassOf { entity_iri, .. }
-        | ontocore_owl::PatchOp::AddEquivalentClass { entity_iri, .. }
-        | ontocore_owl::PatchOp::RemoveEquivalentClass { entity_iri, .. }
-        | ontocore_owl::PatchOp::SetEquivalentClass { entity_iri, .. }
-        | ontocore_owl::PatchOp::SetDeprecated { entity_iri, .. }
-        | ontocore_owl::PatchOp::AddDisjointClass { entity_iri, .. }
-        | ontocore_owl::PatchOp::RemoveDisjointClass { entity_iri, .. } => entity_iri.clone(),
-        ontocore_owl::PatchOp::AddImport { ontology_iri, .. }
-        | ontocore_owl::PatchOp::RemoveImport { ontology_iri, .. } => ontology_iri.clone(),
-    });
+    let entity_iri = if format == OntologyFormat::Obo {
+        serde_json::from_value::<Vec<ontocore_obo::OboPatchOp>>(params.patches.clone())
+            .ok()
+            .and_then(|p| {
+                p.first().map(|op| match op {
+                    ontocore_obo::OboPatchOp::SetName { term_id, .. }
+                    | ontocore_obo::OboPatchOp::AddSynonym { term_id, .. }
+                    | ontocore_obo::OboPatchOp::RemoveSynonym { term_id, .. }
+                    | ontocore_obo::OboPatchOp::AddDef { term_id, .. }
+                    | ontocore_obo::OboPatchOp::RemoveDef { term_id }
+                    | ontocore_obo::OboPatchOp::AddXref { term_id, .. }
+                    | ontocore_obo::OboPatchOp::RemoveXref { term_id, .. }
+                    | ontocore_obo::OboPatchOp::SetNamespace { term_id, .. }
+                    | ontocore_obo::OboPatchOp::SetDeprecated { term_id, .. }
+                    | ontocore_obo::OboPatchOp::AddIsA { term_id, .. }
+                    | ontocore_obo::OboPatchOp::RemoveIsA { term_id, .. } => term_id.clone(),
+                })
+            })
+    } else {
+        serde_json::from_value::<Vec<ontocore_owl::PatchOp>>(params.patches.clone()).ok().and_then(
+            |patches| {
+                patches.first().map(|p| match p {
+                    ontocore_owl::PatchOp::CreateEntity { entity_iri, .. }
+                    | ontocore_owl::PatchOp::DeleteEntity { entity_iri }
+                    | ontocore_owl::PatchOp::SetLabel { entity_iri, .. }
+                    | ontocore_owl::PatchOp::AddLabel { entity_iri, .. }
+                    | ontocore_owl::PatchOp::RemoveLabel { entity_iri, .. }
+                    | ontocore_owl::PatchOp::SetComment { entity_iri, .. }
+                    | ontocore_owl::PatchOp::AddComment { entity_iri, .. }
+                    | ontocore_owl::PatchOp::RemoveComment { entity_iri, .. }
+                    | ontocore_owl::PatchOp::AddSubClassOf { entity_iri, .. }
+                    | ontocore_owl::PatchOp::RemoveSubClassOf { entity_iri, .. }
+                    | ontocore_owl::PatchOp::AddComplexSubClassOf { entity_iri, .. }
+                    | ontocore_owl::PatchOp::RemoveComplexSubClassOf { entity_iri, .. }
+                    | ontocore_owl::PatchOp::AddEquivalentClass { entity_iri, .. }
+                    | ontocore_owl::PatchOp::RemoveEquivalentClass { entity_iri, .. }
+                    | ontocore_owl::PatchOp::SetEquivalentClass { entity_iri, .. }
+                    | ontocore_owl::PatchOp::SetDeprecated { entity_iri, .. }
+                    | ontocore_owl::PatchOp::AddDisjointClass { entity_iri, .. }
+                    | ontocore_owl::PatchOp::RemoveDisjointClass { entity_iri, .. }
+                    | ontocore_owl::PatchOp::AddDomain { entity_iri, .. }
+                    | ontocore_owl::PatchOp::RemoveDomain { entity_iri, .. }
+                    | ontocore_owl::PatchOp::AddRange { entity_iri, .. }
+                    | ontocore_owl::PatchOp::RemoveRange { entity_iri, .. }
+                    | ontocore_owl::PatchOp::SetFunctional { entity_iri, .. }
+                    | ontocore_owl::PatchOp::SetInverseFunctional { entity_iri, .. }
+                    | ontocore_owl::PatchOp::SetTransitive { entity_iri, .. }
+                    | ontocore_owl::PatchOp::SetSymmetric { entity_iri, .. }
+                    | ontocore_owl::PatchOp::SetAsymmetric { entity_iri, .. }
+                    | ontocore_owl::PatchOp::SetReflexive { entity_iri, .. }
+                    | ontocore_owl::PatchOp::SetIrreflexive { entity_iri, .. }
+                    | ontocore_owl::PatchOp::AddPropertyChain { entity_iri, .. }
+                    | ontocore_owl::PatchOp::RemovePropertyChain { entity_iri, .. }
+                    | ontocore_owl::PatchOp::AddClassAssertion { entity_iri, .. }
+                    | ontocore_owl::PatchOp::RemoveClassAssertion { entity_iri, .. }
+                    | ontocore_owl::PatchOp::AddObjectPropertyAssertion { entity_iri, .. }
+                    | ontocore_owl::PatchOp::RemoveObjectPropertyAssertion { entity_iri, .. }
+                    | ontocore_owl::PatchOp::AddDataPropertyAssertion { entity_iri, .. }
+                    | ontocore_owl::PatchOp::RemoveDataPropertyAssertion { entity_iri, .. }
+                    | ontocore_owl::PatchOp::AddAnnotation { entity_iri, .. }
+                    | ontocore_owl::PatchOp::RemoveAnnotation { entity_iri, .. } => {
+                        entity_iri.clone()
+                    }
+                    ontocore_owl::PatchOp::AddImport { ontology_iri, .. }
+                    | ontocore_owl::PatchOp::RemoveImport { ontology_iri, .. } => {
+                        ontology_iri.clone()
+                    }
+                })
+            },
+        )
+    };
 
     // Serialize applies without holding ops_lock across enqueue_sync (index worker needs it).
     let (patch_result, workspace_edit, needs_reindex) = {
@@ -484,17 +533,51 @@ pub fn handle_apply_axiom_patch(
             .document_text(&document_path)
             .ok_or_else(|| LspErrorPayload::patch_invalid("cannot read document".to_string()))?;
 
-        let mut patch_result = ontocore_owl::apply_patches_to_text(
-            &source,
-            &params.patches,
-            params.preview_only,
-            &namespaces,
-        )
-        .map_err(|e| match e {
-            ontocore_owl::OwlError::UnsupportedFormat(m) => LspErrorPayload::unsupported_format(m),
-            _ => LspErrorPayload::patch_invalid(e.to_string()),
-        })?;
-        patch_result.document_path = Some(document_path.display().to_string());
+        let (patch_applied, patch_preview, patch_diagnostics) = if format == OntologyFormat::Obo {
+            let patches: Vec<ontocore_obo::OboPatchOp> = serde_json::from_value(params.patches)
+                .map_err(|e| {
+                    LspErrorPayload::patch_invalid(format!("invalid OBO patch JSON: {e}"))
+                })?;
+            let result =
+                ontocore_obo::apply_patches_to_text(&source, &patches, params.preview_only)
+                    .map_err(|e| LspErrorPayload::patch_invalid(e.to_string()))?;
+            let diagnostics = result
+                .diagnostics
+                .into_iter()
+                .map(|d| ontocore_owl::PatchDiagnostic { severity: d.severity, message: d.message })
+                .collect::<Vec<_>>();
+            (result.applied, result.preview_text, diagnostics)
+        } else if format == OntologyFormat::Turtle {
+            let patches: Vec<ontocore_owl::PatchOp> = serde_json::from_value(params.patches)
+                .map_err(|e| {
+                    LspErrorPayload::patch_invalid(format!("invalid Turtle patch JSON: {e}"))
+                })?;
+            let result = ontocore_owl::apply_patches_to_text(
+                &source,
+                &patches,
+                params.preview_only,
+                &namespaces,
+            )
+            .map_err(|e| match e {
+                ontocore_owl::OwlError::UnsupportedFormat(m) => {
+                    LspErrorPayload::unsupported_format(m)
+                }
+                _ => LspErrorPayload::patch_invalid(e.to_string()),
+            })?;
+            (result.applied, result.preview_text, result.diagnostics)
+        } else {
+            return Err(LspErrorPayload::unsupported_format(format!(
+                "write-back supports Turtle and OBO only, got {}",
+                format.as_str()
+            )));
+        };
+
+        let patch_result = ontocore_owl::ApplyPatchResult {
+            applied: patch_applied,
+            preview_text: patch_preview.clone(),
+            diagnostics: patch_diagnostics,
+            document_path: Some(document_path.display().to_string()),
+        };
 
         if !patch_result.applied && !patch_result.diagnostics.is_empty() {
             return Ok(ApplyAxiomPatchResult {
@@ -516,13 +599,20 @@ pub fn handle_apply_axiom_patch(
                     )));
                 }
                 // Disk first so a failed write never leaves a divergent LSP buffer.
-                ontocore_owl::atomic_write(&document_path, text).map_err(|e| {
-                    LspErrorPayload::patch_invalid(format!("failed to write document: {e}"))
-                })?;
+                if format == OntologyFormat::Obo {
+                    ontocore_obo::atomic_write(&document_path, text)
+                        .map_err(|e| LspErrorPayload::patch_invalid(e.to_string()))?;
+                } else {
+                    ontocore_owl::atomic_write(&document_path, text)
+                        .map_err(|e| LspErrorPayload::patch_invalid(e.to_string()))?;
+                }
                 if state.is_document_open(&document_path) {
                     if let Err(e) = state.set_document_text(document_path.clone(), text.clone()) {
-                        // Roll back disk so the client never sees a half-applied patch.
-                        let _ = ontocore_owl::atomic_write(&document_path, &source);
+                        if format == OntologyFormat::Obo {
+                            let _ = ontocore_obo::atomic_write(&document_path, &source);
+                        } else {
+                            let _ = ontocore_owl::atomic_write(&document_path, &source);
+                        }
                         return Err(LspErrorPayload::patch_invalid(e));
                     }
                 }

@@ -1,8 +1,9 @@
 use crate::OntologyCatalog;
 use ontocore_core::{
-    document_matches_entity, read_to_string_capped, Entity, EntityKind, AXIOM_KIND_DISJOINT_CLASS,
-    AXIOM_KIND_DOMAIN, AXIOM_KIND_EQUIVALENT_CLASS, AXIOM_KIND_PROPERTY_CHAIN, AXIOM_KIND_RANGE,
-    AXIOM_KIND_SUB_CLASS_OF, MAX_FILE_BYTES,
+    document_matches_entity, read_to_string_capped, Entity, EntityKind, PropertyCharacteristics,
+    AXIOM_KIND_CLASS_ASSERTION, AXIOM_KIND_DATA_PROPERTY_ASSERTION, AXIOM_KIND_DISJOINT_CLASS,
+    AXIOM_KIND_DOMAIN, AXIOM_KIND_EQUIVALENT_CLASS, AXIOM_KIND_OBJECT_PROPERTY_ASSERTION,
+    AXIOM_KIND_PROPERTY_CHAIN, AXIOM_KIND_RANGE, AXIOM_KIND_SUB_CLASS_OF, MAX_FILE_BYTES,
 };
 use ontocore_diagnostics::{entity_needles, find_in_source};
 use serde::{Deserialize, Serialize};
@@ -43,11 +44,21 @@ pub struct EntityAxiomSummary {
 }
 
 #[derive(Debug, Clone, Serialize)]
+pub struct EntityAnnotationSummary {
+    pub predicate: String,
+    pub value: String,
+    pub editable: bool,
+}
+
+#[derive(Debug, Clone, Serialize)]
 pub struct EntityDetail {
     pub entity: Entity,
     pub parents: Vec<String>,
     pub children: Vec<String>,
     pub axioms: Vec<EntityAxiomSummary>,
+    pub annotations: Vec<EntityAnnotationSummary>,
+    #[serde(skip_serializing_if = "PropertyCharacteristics::is_empty")]
+    pub characteristics: PropertyCharacteristics,
     pub source: Option<SourceHint>,
     pub editable: bool,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -122,6 +133,12 @@ impl OntologyCatalog {
         let source = self.find_source_location(iri);
         let doc = self.entity_document(iri);
         let editable = doc.is_some_and(|d| {
+            matches!(
+                d.format,
+                ontocore_core::OntologyFormat::Turtle | ontocore_core::OntologyFormat::Obo
+            ) && d.parse_status == ontocore_core::ParseStatus::Ok
+        });
+        let turtle_axioms = doc.is_some_and(|d| {
             d.format == ontocore_core::OntologyFormat::Turtle
                 && d.parse_status == ontocore_core::ParseStatus::Ok
         });
@@ -132,10 +149,37 @@ impl OntologyCatalog {
             .axioms
             .iter()
             .filter(|a| a.subject == iri)
-            .map(|a| axiom_summary(a, editable))
+            .map(|a| axiom_summary(a, turtle_axioms))
             .collect();
 
-        Some(EntityDetail { entity, parents, children, axioms, source, editable, document_path })
+        const PROMOTED: &[&str] = &[
+            "http://www.w3.org/2000/01/rdf-schema#label",
+            "http://www.w3.org/2000/01/rdf-schema#comment",
+            "http://www.w3.org/2002/07/owl#deprecated",
+        ];
+        let annotations: Vec<EntityAnnotationSummary> = self
+            .data()
+            .annotations
+            .iter()
+            .filter(|a| a.subject == iri && !PROMOTED.contains(&a.predicate.as_str()))
+            .map(|a| EntityAnnotationSummary {
+                predicate: a.predicate.clone(),
+                value: a.object.clone(),
+                editable,
+            })
+            .collect();
+
+        Some(EntityDetail {
+            entity: entity.clone(),
+            parents,
+            children,
+            axioms,
+            annotations,
+            characteristics: entity.characteristics.clone(),
+            source,
+            editable,
+            document_path,
+        })
     }
 
     pub fn find_source_location(&self, iri: &str) -> Option<SourceHint> {
@@ -191,12 +235,12 @@ fn axiom_summary(a: &ontocore_core::Axiom, editable: bool) -> EntityAxiomSummary
         AXIOM_KIND_DOMAIN => "Domain",
         AXIOM_KIND_RANGE => "Range",
         AXIOM_KIND_PROPERTY_CHAIN => "PropertyChain",
+        AXIOM_KIND_CLASS_ASSERTION => "ClassAssertion",
+        AXIOM_KIND_OBJECT_PROPERTY_ASSERTION => "ObjectPropertyAssertion",
+        AXIOM_KIND_DATA_PROPERTY_ASSERTION => "DataPropertyAssertion",
         _ => "SubClassOf",
     };
-    let axiom_editable = editable
-        && a.axiom_kind != AXIOM_KIND_PROPERTY_CHAIN
-        && a.axiom_kind != AXIOM_KIND_DOMAIN
-        && a.axiom_kind != AXIOM_KIND_RANGE;
+    let axiom_editable = editable;
     EntityAxiomSummary {
         kind: a.axiom_kind.clone(),
         display: format!("{} {}", kind_label, a.object),

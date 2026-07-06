@@ -65,6 +65,12 @@ pub fn parse_ontology_file(
     if format == OntologyFormat::Obo {
         return crate::obo::parse_obo_file(path, ontology_id, content_hash, modified_time);
     }
+    if format == OntologyFormat::OwlXml {
+        let content = read_file_capped(path, MAX_FILE_BYTES)
+            .map_err(|e| ParseError::LimitExceeded(e.to_string()))?;
+        let _source_text = String::from_utf8_lossy(&content).into_owned();
+        return Ok(empty_parsed_ontology(ontology_id));
+    }
     let _ = (content_hash, modified_time);
     let content = read_file_capped(path, MAX_FILE_BYTES)
         .map_err(|e| ParseError::LimitExceeded(e.to_string()))?;
@@ -88,6 +94,9 @@ pub fn parse_ontology_text(
     }
     if format == OntologyFormat::Obo {
         return crate::obo::parse_obo_text(path, ontology_id, source_text);
+    }
+    if format == OntologyFormat::OwlXml {
+        return Ok(empty_parsed_ontology(ontology_id));
     }
     let rdf_format = to_rdf_format(format, path)?;
 
@@ -142,6 +151,25 @@ pub fn parse_ontology_text(
     builder.finish(parse_status, parse_message, parse_error_location, source_text, quads)
 }
 
+fn empty_parsed_ontology(ontology_id: &str) -> ParsedOntology {
+    ParsedOntology {
+        ontology_id: ontology_id.to_string(),
+        base_iri: None,
+        imports: Vec::new(),
+        namespaces: BTreeMap::new(),
+        entities: Vec::new(),
+        annotations: Vec::new(),
+        axioms: Vec::new(),
+        namespace_rows: Vec::new(),
+        import_rows: Vec::new(),
+        parse_status: ParseStatus::Ok,
+        parse_message: None,
+        parse_error_location: None,
+        triple_count: 0,
+        quads: Vec::new(),
+    }
+}
+
 fn to_rdf_format(format: OntologyFormat, path: &Path) -> Result<RdfFormat> {
     match format {
         OntologyFormat::Turtle => Ok(RdfFormat::Turtle),
@@ -152,6 +180,9 @@ fn to_rdf_format(format: OntologyFormat, path: &Path) -> Result<RdfFormat> {
         OntologyFormat::TriG => Ok(RdfFormat::TriG),
         OntologyFormat::Obo => {
             Err(ParseError::UnsupportedFormat("OBO format must use parse_obo_text".to_string()))
+        }
+        OntologyFormat::OwlXml => {
+            Err(ParseError::UnsupportedFormat("OWL/XML must use parse_ontology_text".to_string()))
         }
         OntologyFormat::Unknown => Err(ParseError::UnsupportedFormat(path.display().to_string())),
     }
@@ -623,6 +654,7 @@ impl OntologyBuilder {
                 comments: state.comments.clone(),
                 deprecated: state.deprecated,
                 obo_id: None,
+                characteristics: Default::default(),
             });
         }
         entities.sort_by(|a, b| a.iri.cmp(&b.iri));

@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.12.0] - 2026-07-06
+
+### Added
+
+- **Turtle authoring parity** — patch ops for domain, range, property characteristics, property chains, individual assertions, and generic annotations
+- **`ontocore-obo` crate** — OBO Format 1.4 patch write-back (`set_name`, synonyms, definitions, xrefs, `is_a`, deprecated) per ADR-0019
+- **OBO Entity Inspector** — edit forms with preview-before-apply for `.obo` documents
+- **OWL/XML read path** — Horned-OWL catalog for `.owl` RDF/XML and native `.owx` parsing; read-only inspector for non-Turtle OWL formats
+- **DL unsatisfiability explanations** — `explain_unsatisfiable_dl` with profile label in explanation panel
+- **Protégé round-trip fixtures** — `examples/protege-roundtrip/` corpus and `cargo test protege_roundtrip` CI gate
+- **`PreviewApplyBar`** — reusable preview-then-apply component for all Turtle/OBO inspector edits
+- **Property chain editor** — ordered property list with patch preview in Entity Inspector
+
+### Changed
+
+- LSP and CLI `patch` dispatch by file extension: `.ttl` → `ontocore-owl`, `.obo` → `ontocore-obo`
+- Entity Inspector shows domain/range/characteristics, annotations, and property chains for Turtle entities
+- Workspace package and all `ontocore-*` crates bumped to **0.12.0**
+- Extension marketplace version **0.12.0**
+
 ## [0.11.3] - 2026-07-06
 
 ### Fixed

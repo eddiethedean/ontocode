@@ -31,9 +31,11 @@ pub use limits::{
 };
 pub use model::{
     Annotation, Axiom, Diagnostic, DiagnosticCode, DiagnosticSeverity, Entity, EntityKind, Import,
-    Namespace, OntologyDocument, OntologyFormat, ParseStatus, SourceLocation,
+    Namespace, OntologyDocument, OntologyFormat, ParseStatus, PropertyCharacteristics,
+    SourceLocation, AXIOM_KIND_CLASS_ASSERTION, AXIOM_KIND_DATA_PROPERTY_ASSERTION,
     AXIOM_KIND_DISJOINT_CLASS, AXIOM_KIND_DOMAIN, AXIOM_KIND_EQUIVALENT_CLASS,
-    AXIOM_KIND_PROPERTY_CHAIN, AXIOM_KIND_RANGE, AXIOM_KIND_SUB_CLASS_OF,
+    AXIOM_KIND_OBJECT_PROPERTY_ASSERTION, AXIOM_KIND_PROPERTY_CHAIN, AXIOM_KIND_RANGE,
+    AXIOM_KIND_SUB_CLASS_OF,
 };
 pub use path_jail::{
     canonical_workspace_root, discover_git_repo_root, ensure_extract_path_within, file_uri_to_path,

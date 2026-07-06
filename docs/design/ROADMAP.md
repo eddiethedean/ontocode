@@ -1,6 +1,6 @@
-# Engineering milestones (v0.1–v0.9)
+# Engineering milestones (v0.1–v0.11 shipped detail)
 
-> **Engineering milestones (v0.1–v0.9 shipped detail).** Canonical forward roadmap: [Platform roadmap](../roadmap.md). Ecosystem overview: [Architecture](../architecture.md) · [Vision](../vision.md).
+> **Per-crate engineering detail for shipped milestones.** Canonical full release phase plan (v0.1–post-1.2): [Platform roadmap](../roadmap.md). Ecosystem overview: [Architecture](../architecture.md) · [Vision](../vision.md).
 
 > v1.0 exit bar: [PROTEGE_PARITY.md](PROTEGE_PARITY.md) — all **P0** items green.
 >
@@ -222,6 +222,24 @@ Exit criteria:
 
 **Dependencies:** `git2`, `horned-owl`, `notify` or `ontologos-watch`, `pulldown-cmark`, `minijinja`; React webview UI ([ADR-0017](adr/0017-react-webview-ui.md)).
 
+## v0.11 — Editor depth & distribution (shipped)
+
+Deliverables:
+
+- LSP `textDocument/completion` for Turtle (prefix, QName, IRI)
+- Diagnostic quick fixes — `undefined_prefix`, `missing_label`, `broken_import` via `textDocument/codeAction`
+- `ontocore-docs` crate — Markdown and HTML export; CLI `ontocore docs`
+- Import patch ops — `add_import`, `remove_import`; Manage Imports React panel
+- OBO read path via `fastobo` (synonyms, definitions, xrefs); ADR-0019 for v1.0 OBO write-back
+- Open VSX publishing (Cursor marketplace)
+
+Exit criteria:
+
+- Daily Turtle editing, import management, and docs export work without leaving VS Code.
+- Extension available on VS Code Marketplace and Open VSX.
+
+**Dependencies:** `fastobo`, `minijinja`, `pulldown-cmark`.
+
 ## v1.0.0 — Protégé-competitive release
 
 Deliverables:
@@ -249,5 +267,7 @@ Exit criteria:
 ## Implementation sequencing
 
 ```text
-v0.4a → v0.4b → v0.5 → v0.6 → v0.7a → v0.7 → v0.7b → v0.8 → v0.9 → v0.10 → v1.0
+v0.4a → v0.4b → v0.5 → v0.6 → v0.7a → v0.7 → v0.7b → v0.8 → v0.9 → v0.10 → v0.11 → v0.12 → v0.13 → v0.14 → v1.0
 ```
+
+Forward phases (v0.12–v1.2+): [Platform roadmap](../roadmap.md).

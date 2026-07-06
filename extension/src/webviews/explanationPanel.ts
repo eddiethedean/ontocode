@@ -62,6 +62,7 @@ pre { white-space: pre-wrap; background: var(--vscode-textBlockQuote-background)
 </style></head><body>
 <h2>Explanation</h2>
 <p><code>${escapeHtml(classIri)}</code></p>
+${text.startsWith("DL profile") ? '<p class="profile"><strong>DL justification</strong> (EL/RL trace fallback)</p>' : text.startsWith("EL ") ? '<p class="profile"><strong>EL justification</strong></p>' : ""}
 <ol>${stepLines}</ol>
 <pre id="text">${escapeHtml(text)}</pre>
 <button id="copy">Copy</button>

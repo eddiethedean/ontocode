@@ -69,7 +69,8 @@ pub struct GetEntityResult {
 #[derive(Debug, Deserialize)]
 pub struct ApplyAxiomPatchParams {
     pub document_uri: String,
-    pub patches: Vec<ontocore_owl::PatchOp>,
+    /// JSON array of patch operations (Turtle [`ontocore_owl::PatchOp`] or OBO [`ontocore_obo::OboPatchOp`]).
+    pub patches: serde_json::Value,
     #[serde(default)]
     pub preview_only: bool,
 }

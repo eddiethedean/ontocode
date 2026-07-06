@@ -1,6 +1,6 @@
 use crate::adapter::{ReasonerAdapter, ReasonerId, ReasonerProfile};
 use crate::error::{ReasonerError, Result};
-use crate::explain::explain_unsatisfiable_el;
+use crate::explain::explain_unsatisfiable_dl;
 use crate::input::ReasonerInput;
 use crate::result::{
     build_inferred_hierarchy, new_inferences, taxonomy_to_iri_edges, unsatisfiable_iris,
@@ -52,7 +52,6 @@ impl ReasonerAdapter for DlAdapter {
         input: &ReasonerInput,
         request: &ExplanationRequest,
     ) -> Result<ExplanationResult> {
-        // DL clash-trace explanations are EL-first in ontologos-explain 1.0.
-        explain_unsatisfiable_el(&input.ontology, &request.class_iri)
+        explain_unsatisfiable_dl(&input.ontology, &request.class_iri)
     }
 }

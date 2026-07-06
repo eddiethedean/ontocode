@@ -293,6 +293,7 @@ mod tests {
                 comments: vec![],
                 deprecated: false,
                 obo_id: None,
+                characteristics: Default::default(),
             }],
             annotations: vec![],
             axioms: vec![],

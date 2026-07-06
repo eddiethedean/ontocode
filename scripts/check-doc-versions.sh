@@ -367,7 +367,7 @@ else
   echo "ok: lsp-api codeAction documented"
 fi
 
-check_file_contains "docs/guides/production-readiness.md" "0\.11\.x \(current\)" "production-readiness current minor"
+check_file_contains "docs/guides/production-readiness.md" "${MINOR_VERSION}\.x \\(current\\)" "production-readiness current minor"
 check_file_contains "docs/ontocore/index.md" "v${VERSION}" "ontocore index version"
 check_file_contains "docs/ontocore/rust-api.md" 'ontocore = "0.11"' "rust-api version pin"
 check_file_contains "docs/ontocore/crate-map.md" 'ontocore = "0.11"' "crate-map version pin"

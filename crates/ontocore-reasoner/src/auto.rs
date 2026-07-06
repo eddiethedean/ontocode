@@ -1,7 +1,8 @@
 use crate::adapter::{ReasonerAdapter, ReasonerId, ReasonerProfile};
 use crate::error::{ReasonerError, Result};
 use crate::explain::{
-    explain_unsatisfiable_el, explain_unsatisfiable_rdfs, explain_unsatisfiable_rl,
+    explain_unsatisfiable_dl, explain_unsatisfiable_el, explain_unsatisfiable_rdfs,
+    explain_unsatisfiable_rl,
 };
 use crate::hierarchy::subclass_edges_from_ontology;
 use crate::input::ReasonerInput;
@@ -111,9 +112,9 @@ impl ReasonerAdapter for AutoAdapter {
         // Match the profile Auto classification actually selected.
         let classification = self.classify(input)?;
         match classification.profile_used.as_str() {
+            "dl" => explain_unsatisfiable_dl(&input.ontology, &request.class_iri),
             "rdfs" => explain_unsatisfiable_rdfs(&input.ontology, &request.class_iri),
             "rl" => explain_unsatisfiable_rl(&input.ontology, &request.class_iri),
-            // Taxonomy / EL / auto / unknown: EL explanations.
             _ => explain_unsatisfiable_el(&input.ontology, &request.class_iri),
         }
     }

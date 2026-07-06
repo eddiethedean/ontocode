@@ -534,6 +534,7 @@ mod tests {
             comments: vec![],
             deprecated: false,
             obo_id: None,
+            ..Default::default()
         };
         let range = entity_block_range(ttl, &entity, &clinic_ns()).expect("block");
         let block = &ttl[range.start as usize..range.end as usize];

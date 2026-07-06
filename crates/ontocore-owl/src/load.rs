@@ -2,6 +2,9 @@ use crate::bridge::bridge_ontology;
 use crate::error::{OwlError, Result};
 use crate::OwlBridgeResult;
 use horned_owl::io::rdf::reader::read;
+use horned_owl::model::{RcAnnotatedComponent, RcStr};
+use horned_owl::ontology::component_mapped::ComponentMappedOntology;
+use horned_owl::ontology::set::SetOntology;
 use ontocore_core::OntologyFormat;
 use oxigraph::io::{RdfFormat, RdfSerializer};
 use oxigraph::model::Quad;
@@ -68,9 +71,32 @@ fn quads_to_rdf_xml(quads: &[Quad]) -> std::result::Result<Vec<u8>, String> {
     serializer.finish().map_err(|e| e.to_string())
 }
 
-/// Whether Horned-OWL loading is supported for this format (v0.4: Turtle only).
+/// Load OWL/XML (`.owx`) source via Horned-OWL.
+pub fn load_owx_text(
+    path: &Path,
+    ontology_id: &str,
+    source_text: &str,
+    namespaces: &BTreeMap<String, String>,
+) -> Result<OwlLoadResult> {
+    let _ = path;
+    use horned_owl::io::owx::reader::read as read_owx;
+    let mut cursor = Cursor::new(source_text.as_bytes());
+    let (set_ont, _mapping): (SetOntology<RcStr>, _) = read_owx(&mut cursor, Default::default())
+        .map_err(|e| OwlError::LoadFailed(e.to_string()))?;
+    let mapped: ComponentMappedOntology<RcStr, RcAnnotatedComponent> = set_ont.into();
+    let bridge = bridge_ontology(mapped, ontology_id, source_text, namespaces);
+    Ok(OwlLoadResult { bridge, incomplete: false, load_warning: None })
+}
+
+/// Whether Horned-OWL loading is supported for this format.
 pub fn supports_horned_load(format: OntologyFormat) -> bool {
-    matches!(format, OntologyFormat::Turtle)
+    matches!(
+        format,
+        OntologyFormat::Turtle
+            | OntologyFormat::Owl
+            | OntologyFormat::RdfXml
+            | OntologyFormat::OwlXml
+    )
 }
 
 #[cfg(test)]

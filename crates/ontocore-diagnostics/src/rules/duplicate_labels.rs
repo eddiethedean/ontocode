@@ -90,6 +90,7 @@ mod tests {
                 comments: vec![],
                 deprecated: false,
                 obo_id: None,
+                characteristics: Default::default(),
             },
             Entity {
                 iri: "http://example.org/dup#Beta".to_string(),
@@ -101,6 +102,7 @@ mod tests {
                 comments: vec![],
                 deprecated: false,
                 obo_id: None,
+                characteristics: Default::default(),
             },
         ];
         let input = DiagnosticInput {

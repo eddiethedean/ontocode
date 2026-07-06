@@ -1,14 +1,14 @@
 use crate::manchester::class_expression_to_manchester;
 use crate::span::{annotate_spans, find_entity_block, short_name_from_iri};
-use horned_owl::io::rdf::reader::ConcreteRDFOntology;
 use horned_owl::model::{
-    AnnotationSubject, AnnotationValue, ClassExpression, RcAnnotatedComponent, RcStr,
+    AnnotationSubject, AnnotationValue, ClassExpression, Individual, RcAnnotatedComponent, RcStr,
 };
 use horned_owl::model::{ObjectPropertyExpression, SubObjectPropertyExpression};
 use horned_owl::ontology::component_mapped::{ComponentMappedIndex, ComponentMappedOntology};
 use ontocore_core::{
     Annotation, Axiom, Entity, EntityKind, Import, Namespace, SourceLocation,
-    AXIOM_KIND_DISJOINT_CLASS, AXIOM_KIND_DOMAIN, AXIOM_KIND_EQUIVALENT_CLASS,
+    AXIOM_KIND_CLASS_ASSERTION, AXIOM_KIND_DATA_PROPERTY_ASSERTION, AXIOM_KIND_DISJOINT_CLASS,
+    AXIOM_KIND_DOMAIN, AXIOM_KIND_EQUIVALENT_CLASS, AXIOM_KIND_OBJECT_PROPERTY_ASSERTION,
     AXIOM_KIND_PROPERTY_CHAIN, AXIOM_KIND_RANGE, AXIOM_KIND_SUB_CLASS_OF,
 };
 use std::collections::BTreeMap;
@@ -30,12 +30,12 @@ pub struct OwlBridgeResult {
 }
 
 pub fn bridge_ontology(
-    ontology: ConcreteRDFOntology<RcStr, RcAnnotatedComponent>,
+    ontology: impl Into<ComponentMappedOntology<RcStr, RcAnnotatedComponent>>,
     ontology_id: &str,
     source_text: &str,
     namespaces: &BTreeMap<String, String>,
 ) -> OwlBridgeResult {
-    let mapped = ComponentMappedOntology::<RcStr, RcAnnotatedComponent>::from(ontology);
+    let mapped = ontology.into();
     let idx: &ComponentMappedIndex<RcStr, RcAnnotatedComponent> = mapped.i();
 
     let mut result = OwlBridgeResult::default();
@@ -234,6 +234,56 @@ pub fn bridge_ontology(
         }
     }
 
+    for ca in idx.class_assertion() {
+        if let ClassExpression::Class(cls) = &ca.ce {
+            let individual = individual_to_iri(&ca.i);
+            axiom_counter += 1;
+            result.axioms.push(Axiom {
+                id: format!("{ontology_id}#axiom-{axiom_counter}"),
+                ontology_id: ont_id.clone(),
+                subject: individual,
+                predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type".to_string(),
+                object: cls.to_string(),
+                axiom_kind: AXIOM_KIND_CLASS_ASSERTION.to_string(),
+                source_location: SourceLocation::default(),
+            });
+        }
+    }
+
+    for opa in idx.object_property_assertion() {
+        let subject = individual_to_iri(&opa.from);
+        let predicate = ope_to_iri(&opa.ope);
+        let object = individual_to_iri(&opa.to);
+        axiom_counter += 1;
+        result.axioms.push(Axiom {
+            id: format!("{ontology_id}#axiom-{axiom_counter}"),
+            ontology_id: ont_id.clone(),
+            subject,
+            predicate,
+            object,
+            axiom_kind: AXIOM_KIND_OBJECT_PROPERTY_ASSERTION.to_string(),
+            source_location: SourceLocation::default(),
+        });
+    }
+
+    for dpa in idx.data_property_assertion() {
+        let subject = individual_to_iri(&dpa.from);
+        let predicate = dpa.dp.to_string();
+        let object = dpa.to.literal().clone();
+        axiom_counter += 1;
+        result.axioms.push(Axiom {
+            id: format!("{ontology_id}#axiom-{axiom_counter}"),
+            ontology_id: ont_id.clone(),
+            subject,
+            predicate,
+            object,
+            axiom_kind: AXIOM_KIND_DATA_PROPERTY_ASSERTION.to_string(),
+            source_location: SourceLocation::default(),
+        });
+    }
+
+    mark_functional_properties(&mut entity_map, idx);
+
     for imp in idx.import() {
         result.imports.push(Import { ontology_id: ont_id.clone(), import_iri: imp.0.to_string() });
     }
@@ -272,7 +322,66 @@ fn insert_entity(
         comments: Vec::new(),
         deprecated: false,
         obo_id: None,
+        characteristics: ontocore_core::PropertyCharacteristics::default(),
     });
+}
+
+fn individual_to_iri(individual: &Individual<RcStr>) -> String {
+    individual.to_string()
+}
+
+fn mark_functional_properties(
+    entity_map: &mut BTreeMap<String, Entity>,
+    idx: &ComponentMappedIndex<RcStr, RcAnnotatedComponent>,
+) {
+    for f in idx.functional_object_property() {
+        let iri = ope_to_iri(&f.0);
+        if let Some(e) = entity_map.get_mut(&iri) {
+            e.characteristics.functional = true;
+        }
+    }
+    for f in idx.inverse_functional_object_property() {
+        let iri = ope_to_iri(&f.0);
+        if let Some(e) = entity_map.get_mut(&iri) {
+            e.characteristics.inverse_functional = true;
+        }
+    }
+    for f in idx.transitive_object_property() {
+        let iri = ope_to_iri(&f.0);
+        if let Some(e) = entity_map.get_mut(&iri) {
+            e.characteristics.transitive = true;
+        }
+    }
+    for f in idx.symmetric_object_property() {
+        let iri = ope_to_iri(&f.0);
+        if let Some(e) = entity_map.get_mut(&iri) {
+            e.characteristics.symmetric = true;
+        }
+    }
+    for f in idx.asymmetric_object_property() {
+        let iri = ope_to_iri(&f.0);
+        if let Some(e) = entity_map.get_mut(&iri) {
+            e.characteristics.asymmetric = true;
+        }
+    }
+    for f in idx.reflexive_object_property() {
+        let iri = ope_to_iri(&f.0);
+        if let Some(e) = entity_map.get_mut(&iri) {
+            e.characteristics.reflexive = true;
+        }
+    }
+    for f in idx.irreflexive_object_property() {
+        let iri = ope_to_iri(&f.0);
+        if let Some(e) = entity_map.get_mut(&iri) {
+            e.characteristics.irreflexive = true;
+        }
+    }
+    for f in idx.functional_data_property() {
+        let iri = f.0.to_string();
+        if let Some(e) = entity_map.get_mut(&iri) {
+            e.characteristics.functional = true;
+        }
+    }
 }
 
 fn class_expr_display(

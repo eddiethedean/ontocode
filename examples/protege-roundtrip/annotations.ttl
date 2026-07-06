@@ -1,0 +1,11 @@
+@prefix ex: <http://example.org/ann#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+ex:Concept a owl:Class ;
+    rdfs:label "Concept" ;
+    skos:definition "An annotated example class" ;
+    ex:seeAlso <http://example.org/docs> .
+
+ex:seeAlso a owl:AnnotationProperty .

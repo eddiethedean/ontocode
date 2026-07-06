@@ -11,7 +11,7 @@ mod span;
 
 pub use bridge::{bridge_ontology, OwlBridgeResult};
 pub use error::{OwlError, Result};
-pub use load::{load_from_quads, load_turtle_text, supports_horned_load};
+pub use load::{load_from_quads, load_owx_text, load_turtle_text, supports_horned_load};
 pub use manchester::{
     class_expression_to_manchester, class_expression_to_turtle_fragment, expression_tree_json,
     parse_class_expression, ManchesterDiagnostic, ManchesterParseOutput,

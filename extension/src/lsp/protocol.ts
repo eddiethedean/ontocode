@@ -149,11 +149,29 @@ export interface EntityAxiomSummary {
   editable: boolean;
 }
 
+export interface EntityAnnotationSummary {
+  predicate: string;
+  value: string;
+  editable: boolean;
+}
+
+export interface PropertyCharacteristics {
+  functional?: boolean;
+  inverse_functional?: boolean;
+  transitive?: boolean;
+  symmetric?: boolean;
+  asymmetric?: boolean;
+  reflexive?: boolean;
+  irreflexive?: boolean;
+}
+
 export interface EntityDetail {
   entity: Entity;
   parents: string[];
   children: string[];
   axioms: EntityAxiomSummary[];
+  annotations?: EntityAnnotationSummary[];
+  characteristics?: PropertyCharacteristics;
   source?: SourceHint;
   editable: boolean;
   document_path?: string;
@@ -239,7 +257,40 @@ export type PatchOp =
   | { op: "set_equivalent_class"; entity_iri: string; manchester: string }
   | { op: "set_deprecated"; entity_iri: string; value: boolean }
   | { op: "add_disjoint_class"; entity_iri: string; other_iri: string }
-  | { op: "remove_disjoint_class"; entity_iri: string; other_iri: string };
+  | { op: "remove_disjoint_class"; entity_iri: string; other_iri: string }
+  | { op: "add_import"; ontology_iri: string; import_iri: string }
+  | { op: "remove_import"; ontology_iri: string; import_iri: string }
+  | { op: "add_domain"; entity_iri: string; class_iri: string }
+  | { op: "remove_domain"; entity_iri: string; class_iri: string }
+  | { op: "add_range"; entity_iri: string; range_iri: string }
+  | { op: "remove_range"; entity_iri: string; range_iri: string }
+  | { op: "set_functional"; entity_iri: string; value: boolean }
+  | { op: "set_inverse_functional"; entity_iri: string; value: boolean }
+  | { op: "set_transitive"; entity_iri: string; value: boolean }
+  | { op: "set_symmetric"; entity_iri: string; value: boolean }
+  | { op: "set_asymmetric"; entity_iri: string; value: boolean }
+  | { op: "set_reflexive"; entity_iri: string; value: boolean }
+  | { op: "set_irreflexive"; entity_iri: string; value: boolean }
+  | { op: "add_property_chain"; entity_iri: string; properties: string[] }
+  | { op: "remove_property_chain"; entity_iri: string; properties: string[] }
+  | { op: "add_class_assertion"; entity_iri: string; class_iri: string }
+  | { op: "remove_class_assertion"; entity_iri: string; class_iri: string }
+  | { op: "add_object_property_assertion"; entity_iri: string; property_iri: string; target_iri: string }
+  | { op: "remove_object_property_assertion"; entity_iri: string; property_iri: string; target_iri: string }
+  | { op: "add_data_property_assertion"; entity_iri: string; property_iri: string; value: string }
+  | { op: "remove_data_property_assertion"; entity_iri: string; property_iri: string; value: string }
+  | { op: "add_annotation"; entity_iri: string; predicate: string; value: string }
+  | { op: "remove_annotation"; entity_iri: string; predicate: string; value: string }
+  | { op: "set_name"; term_id: string; value: string }
+  | { op: "add_synonym"; term_id: string; value: string; scope: string }
+  | { op: "remove_synonym"; term_id: string; value: string }
+  | { op: "add_def"; term_id: string; value: string }
+  | { op: "remove_def"; term_id: string }
+  | { op: "add_xref"; term_id: string; xref: string }
+  | { op: "remove_xref"; term_id: string; xref: string }
+  | { op: "set_namespace"; term_id: string; namespace: string }
+  | { op: "add_is_a"; term_id: string; parent_id: string }
+  | { op: "remove_is_a"; term_id: string; parent_id: string };
 
 export type PatchEntityKind =
   | "class"

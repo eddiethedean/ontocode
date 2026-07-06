@@ -11,7 +11,7 @@ use ontocore_core::{
     WorkspaceScanner, MAX_FILE_BYTES,
 };
 use ontocore_diagnostics::{collect_diagnostics_with_sources, DiagnosticInput};
-use ontocore_owl::{load_turtle_text, supports_horned_load};
+use ontocore_owl::{load_owx_text, load_turtle_text, supports_horned_load};
 use ontocore_parser::{parse_ontology_file, parse_ontology_text, ParsedOntology};
 use oxigraph::model::Quad;
 use oxigraph::store::Store;
@@ -706,6 +706,33 @@ fn semantics_for_document(
     } else {
         read_to_string_capped(path, MAX_FILE_BYTES).map_err(CatalogError::Core)?
     };
+
+    if format == OntologyFormat::OwlXml {
+        return match load_owx_text(path, doc_id, &source_text, &parsed.namespaces) {
+            Ok(owl) => Ok(DocumentSemantics {
+                entities: owl.bridge.entities,
+                annotations: owl.bridge.annotations,
+                axioms: owl.bridge.axioms,
+                namespace_rows: owl.bridge.namespace_rows,
+                imports: owl.bridge.imports,
+                bridge_warning: None,
+            }),
+            Err(e) => {
+                eprintln!(
+                    "ontocore-catalog: Horned-OWL OWX load failed for {}: {e}; using parser entities",
+                    path.display()
+                );
+                Ok(DocumentSemantics {
+                    entities: parsed.entities.clone(),
+                    annotations: parsed.annotations.clone(),
+                    axioms: parsed.axioms.clone(),
+                    namespace_rows: parsed.namespace_rows.clone(),
+                    imports: parsed.import_rows.clone(),
+                    bridge_warning: None,
+                })
+            }
+        };
+    }
 
     match load_turtle_text(path, doc_id, &source_text, parsed.quads(), &parsed.namespaces) {
         Ok(owl) => Ok(DocumentSemantics {

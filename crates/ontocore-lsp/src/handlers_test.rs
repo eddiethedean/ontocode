@@ -361,10 +361,11 @@ fn apply_axiom_patch_uses_open_buffer_not_disk() {
         &worker,
         ApplyAxiomPatchParams {
             document_uri: uri,
-            patches: vec![ontocore_owl::PatchOp::AddLabel {
+            patches: serde_json::to_value(vec![ontocore_owl::PatchOp::AddLabel {
                 entity_iri: "http://example.org/people#Person".into(),
                 value: "Human".into(),
-            }],
+            }])
+            .expect("patch json"),
             preview_only: false,
         },
     )
@@ -403,10 +404,11 @@ fn apply_axiom_patch_does_not_pin_closed_file_as_open_buffer() {
         &worker,
         ApplyAxiomPatchParams {
             document_uri: uri,
-            patches: vec![ontocore_owl::PatchOp::AddLabel {
+            patches: serde_json::to_value(vec![ontocore_owl::PatchOp::AddLabel {
                 entity_iri: "http://example.org/people#Person".into(),
                 value: "Human".into(),
-            }],
+            }])
+            .expect("patch json"),
             preview_only: false,
         },
     )

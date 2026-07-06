@@ -9,6 +9,7 @@ pub enum OntologyFormat {
     Turtle,
     RdfXml,
     Owl,
+    OwlXml,
     JsonLd,
     NTriples,
     NQuads,
@@ -23,6 +24,7 @@ impl OntologyFormat {
             "ttl" => Self::Turtle,
             "rdf" => Self::RdfXml,
             "owl" => Self::Owl,
+            "owx" => Self::OwlXml,
             "jsonld" | "json-ld" => Self::JsonLd,
             "nt" => Self::NTriples,
             "nq" => Self::NQuads,
@@ -37,6 +39,7 @@ impl OntologyFormat {
             Self::Turtle => "turtle",
             Self::RdfXml => "rdf_xml",
             Self::Owl => "owl",
+            Self::OwlXml => "owl_xml",
             Self::JsonLd => "json_ld",
             Self::NTriples => "n_triples",
             Self::NQuads => "n_quads",
@@ -200,6 +203,48 @@ pub struct Entity {
     pub deprecated: bool,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub obo_id: Option<String>,
+    #[serde(default, skip_serializing_if = "PropertyCharacteristics::is_empty")]
+    pub characteristics: PropertyCharacteristics,
+}
+
+#[derive(Debug, Clone, Default, Serialize, Deserialize, PartialEq, Eq)]
+pub struct PropertyCharacteristics {
+    pub functional: bool,
+    pub inverse_functional: bool,
+    pub transitive: bool,
+    pub symmetric: bool,
+    pub asymmetric: bool,
+    pub reflexive: bool,
+    pub irreflexive: bool,
+}
+
+impl PropertyCharacteristics {
+    pub fn is_empty(&self) -> bool {
+        !self.functional
+            && !self.inverse_functional
+            && !self.transitive
+            && !self.symmetric
+            && !self.asymmetric
+            && !self.reflexive
+            && !self.irreflexive
+    }
+}
+
+impl Default for Entity {
+    fn default() -> Self {
+        Self {
+            iri: String::new(),
+            short_name: String::new(),
+            kind: EntityKind::Class,
+            ontology_id: String::new(),
+            source_location: SourceLocation::default(),
+            labels: Vec::new(),
+            comments: Vec::new(),
+            deprecated: false,
+            obo_id: None,
+            characteristics: PropertyCharacteristics::default(),
+        }
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -244,6 +289,9 @@ pub const AXIOM_KIND_DISJOINT_CLASS: &str = "disjoint_class";
 pub const AXIOM_KIND_DOMAIN: &str = "domain";
 pub const AXIOM_KIND_RANGE: &str = "range";
 pub const AXIOM_KIND_PROPERTY_CHAIN: &str = "property_chain";
+pub const AXIOM_KIND_CLASS_ASSERTION: &str = "class_assertion";
+pub const AXIOM_KIND_OBJECT_PROPERTY_ASSERTION: &str = "object_property_assertion";
+pub const AXIOM_KIND_DATA_PROPERTY_ASSERTION: &str = "data_property_assertion";
 
 #[cfg(test)]
 mod tests {

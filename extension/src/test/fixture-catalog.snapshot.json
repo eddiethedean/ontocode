@@ -443,21 +443,6 @@
     {
       "comments": [],
       "deprecated": false,
-      "iri": "http://example.org/org",
-      "kind": "ontology",
-      "labels": [
-        "Organization extension"
-      ],
-      "ontology_id": "http://example.org/org",
-      "short_name": "org",
-      "source_location": {
-        "column": 16,
-        "line": 2
-      }
-    },
-    {
-      "comments": [],
-      "deprecated": false,
       "iri": "http://example.org/org#Department",
       "kind": "class",
       "labels": [
@@ -466,8 +451,8 @@
       "ontology_id": "http://example.org/org",
       "short_name": "Department",
       "source_location": {
-        "column": 26,
-        "line": 14
+        "column": null,
+        "line": null
       }
     },
     {

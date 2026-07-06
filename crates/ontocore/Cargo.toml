@@ -25,6 +25,7 @@ ontocore-diff = { workspace = true }
 ontocore-docs = { workspace = true }
 ontocore-lsp = { workspace = true, optional = true }
 ontocore-owl = { workspace = true }
+ontocore-obo = { workspace = true }
 ontocore-parser = { workspace = true }
 ontocore-query = { workspace = true }
 ontocore-reasoner = { workspace = true }

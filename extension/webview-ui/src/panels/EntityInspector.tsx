@@ -215,6 +215,30 @@ export function EntityInspectorPanel(): JSX.Element {
                             : "Edit in Manchester"}
                         </button>
                       ) : null}
+                      {editable &&
+                      entity.kind === "individual" &&
+                      a.kind === "class_assertion" &&
+                      a.editable &&
+                      a.parent_iri ? (
+                        <button
+                          type="button"
+                          className="secondary"
+                          onClick={() =>
+                            apply(
+                              [
+                                {
+                                  op: "remove_class_assertion",
+                                  entity_iri: entity.iri,
+                                  class_iri: a.parent_iri!,
+                                },
+                              ],
+                              false
+                            )
+                          }
+                        >
+                          Remove
+                        </button>
+                      ) : null}
                     </li>
                   ))}
                 </ul>
@@ -597,16 +621,49 @@ export function EntityInspectorPanel(): JSX.Element {
             )}
 
             {entity.kind === "individual" && (
-              <FormField label="Add type (class assertion)">
-                <Select value={parentPick} onChange={(e) => setParentPick(e.target.value)}>
-                  <option value="">—</option>
-                  {parentOptions.map((c) => (
-                    <option key={c} value={c}>
-                      {shortLabel(c)}
-                    </option>
-                  ))}
-                </Select>
-              </FormField>
+              <>
+                <FormField label="Add type (class assertion)">
+                  <Select value={parentPick} onChange={(e) => setParentPick(e.target.value)}>
+                    <option value="">—</option>
+                    {parentOptions.map((c) => (
+                      <option key={c} value={c}>
+                        {shortLabel(c)}
+                      </option>
+                    ))}
+                  </Select>
+                </FormField>
+                <PreviewApplyBar
+                  preview={editPreview}
+                  disabled={!parentPick}
+                  onPreview={() => {
+                    if (!parentPick) return;
+                    apply(
+                      [
+                        {
+                          op: "add_class_assertion",
+                          entity_iri: entity.iri,
+                          class_iri: parentPick,
+                        },
+                      ],
+                      true
+                    );
+                  }}
+                  onApply={() => {
+                    if (!parentPick) return;
+                    apply(
+                      [
+                        {
+                          op: "add_class_assertion",
+                          entity_iri: entity.iri,
+                          class_iri: parentPick,
+                        },
+                      ],
+                      false
+                    );
+                    setParentPick("");
+                  }}
+                />
+              </>
             )}
 
             <FormField label="Annotation predicate IRI">

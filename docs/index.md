@@ -14,18 +14,6 @@ hide:
 OntoCode is a modern ontology IDE for VS Code, powered by <strong>OntoCore</strong> — the Rust semantic workspace engine for indexing, queries, diagnostics, and reasoning.
 </p>
 
-<div class="oc-hero-badges" markdown>
-<span class="oc-badge oc-badge--accent">VS Code extension</span>
-<span class="oc-badge oc-badge--accent">Rust CLI</span>
-<span class="oc-badge">Turtle write-back</span>
-<span class="oc-badge">Query Workbench</span>
-<span class="oc-badge">Manchester editor</span>
-<span class="oc-badge">Reasoner (EL/DL)</span>
-<span class="oc-badge">OBO index</span>
-<span class="oc-badge">Graph visualization</span>
-<span class="oc-badge">ROBOT CLI</span>
-</div>
-
 <div class="oc-hero-actions" markdown>
 [First success (~10 min core path)](guides/first-success.md){ .md-button .md-button--primary }
 [Install VS Code](vscode-install.md){ .md-button .md-button--primary }
@@ -33,11 +21,6 @@ OntoCode is a modern ontology IDE for VS Code, powered by <strong>OntoCore</stro
 [What ships today](SHIPPED.md){ .md-button }
 [Vision](vision.md){ .md-button }
 </div>
-
-<p markdown="1" style="text-align: center; margin-top: 1rem;">
-[![Open VSX](https://img.shields.io/open-vsx/v/ontocode/ontocode)](https://open-vsx.org/extension/ontocode/ontocode)
-[![VS Code Marketplace](https://vsmarketplacebadges.dev/version/ontocode.ontocode.svg?label=VS%20Code%20Marketplace)](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode)
-</p>
 
 </div>
 
@@ -160,9 +143,6 @@ See the full matrix: **[What ships today](SHIPPED.md)**.
 ## Quick start
 
 === "VS Code"
-
-    [![Open VSX](https://img.shields.io/open-vsx/v/ontocode/ontocode)](https://open-vsx.org/extension/ontocode/ontocode)
-    [![VS Code Marketplace](https://vsmarketplacebadges.dev/version/ontocode.ontocode.svg?label=marketplace)](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode)
 
     1. Install OntoCode from the [Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) or [Open VSX](https://open-vsx.org/extension/ontocode/ontocode) (Cursor)
     2. Open a folder with `.ttl`, `.owl`, `.obo`, or other ontology files

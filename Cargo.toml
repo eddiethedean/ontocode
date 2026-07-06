@@ -90,15 +90,15 @@ ontocore-docs = { path = "crates/ontocore-docs", version = "0.12.0" }
 
 git2 = { version = "0.20", features = ["vendored-openssl"] }
 
-ontologos-core = "1.0.0"
-ontologos-parser = "1.0.0"
-ontologos-profile = "1.0.0"
-ontologos-el = "1.0.0"
-ontologos-rl = "1.0.0"
-ontologos-dl = "1.0.0"
-ontologos-facade = "1.0.0"
-ontologos-explain = "1.0.0"
-ontologos-bridge = "1.0.0"
+ontologos-core = "1.1.1"
+ontologos-parser = "1.1.1"
+ontologos-profile = "1.1.1"
+ontologos-el = "1.1.1"
+ontologos-rl = "1.1.1"
+ontologos-dl = "1.1.1"
+ontologos-facade = "1.1.1"
+ontologos-explain = "1.1.1"
+ontologos-bridge = "1.1.1"
 
 lsp-server = "0.7"
 lsp-types = "0.97"

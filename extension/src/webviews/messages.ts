@@ -13,6 +13,8 @@ export type PanelKind =
 export interface PatchOp {
   op: string;
   entity_iri?: string;
+  term_id?: string;
+  ontology_iri?: string;
   value?: string;
   parent_iri?: string;
   manchester?: string;
@@ -310,7 +312,8 @@ export function parseSaveQueryMessage(
 /** Validate applyPatch payload; reject missing previewOnly (must not default to write). */
 export function parseApplyPatchMessage(
   message: WebviewMessage,
-  expectedEntityIri: string | undefined
+  expectedEntityIri: string | undefined,
+  expectedOboId?: string
 ): { patches: PatchOp[]; previewOnly: boolean } | null {
   if (message.type !== "applyPatch") {
     return null;
@@ -325,11 +328,33 @@ export function parseApplyPatchMessage(
     if (!patch || typeof patch !== "object" || typeof patch.op !== "string") {
       return null;
     }
-    const entityIri = (patch as PatchOp).entity_iri;
-    if (expectedEntityIri) {
-      if (typeof entityIri !== "string" || entityIri !== expectedEntityIri) {
+    const entityIri = patch.entity_iri;
+    const termId = patch.term_id;
+    const ontologyIri = patch.ontology_iri;
+
+    if (typeof termId === "string") {
+      if (expectedOboId !== undefined && termId !== expectedOboId) {
         return null;
       }
+      if (expectedEntityIri !== undefined && expectedOboId === undefined) {
+        return null;
+      }
+      continue;
+    }
+
+    if (typeof entityIri === "string") {
+      if (expectedEntityIri !== undefined && entityIri !== expectedEntityIri) {
+        return null;
+      }
+      continue;
+    }
+
+    if (typeof ontologyIri === "string") {
+      continue;
+    }
+
+    if (expectedEntityIri !== undefined || expectedOboId !== undefined) {
+      return null;
     }
   }
   return { patches: message.patches, previewOnly: message.previewOnly };

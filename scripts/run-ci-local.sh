@@ -3,6 +3,7 @@
 set -uo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
+export ROOT
 cd "$ROOT"
 
 # Use workspace target/ (avoids sandbox temp cargo dirs when run from IDE agents).

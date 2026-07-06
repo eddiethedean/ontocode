@@ -16,7 +16,7 @@ Three foundational projects work together:
 - **OntoCore** — Semantic workspace engine and reusable platform.
 - **OntoCode** — Flagship VS Code IDE powered by OntoCore.
 
-Together they enable modern workflows including AI-assisted development, CI/CD, Git-native collaboration, Python and TypeScript integration, and high-performance local tooling.
+Together they enable modern workflows including AI-assisted development, CI/CD, Git-based collaboration, Python and TypeScript integration, and high-performance local tooling.
 
 ## Ecosystem Collaboration
 

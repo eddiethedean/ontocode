@@ -94,7 +94,7 @@ A full migration guide is a **v1.0 deliverable**. Today:
 
 - [Protégé coexistence guide](protege-coexistence.md) — interim split workflow
 
-- Use OntoCode for **Git-native Turtle editing**, **CI validation**, **SQL/SPARQL queries**, **Manchester axioms** (including disjoint classes in v0.8), **workspace refactoring**, and **EL/RL/RDFS/DL classification**
+- Use OntoCode for **Turtle editing in Git**, **CI validation**, **SQL/SPARQL queries**, **Manchester axioms** (including disjoint classes in v0.8), **workspace refactoring**, and **EL/RL/RDFS/DL classification**
 - Keep Protégé for **full OWL 2 DL axiom editing**, **property chain editing**, **full OBO write-back**, and axiom types not yet in the [Protégé parity matrix](../design/PROTEGE_PARITY.md) until v1.0
 - See [Protégé parity matrix](../design/PROTEGE_PARITY.md) and [What ships today](../SHIPPED.md)
 

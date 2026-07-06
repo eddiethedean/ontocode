@@ -26,7 +26,7 @@ Use this page to decide **when OntoCode fits**, **when to keep Protégé**, and 
 | OBO format | Native | Index + syntax highlight | No OBO write-back in VS Code |
 | ROBOT integration | Common | CLI wrapper | Java + `robot` required |
 | SQL/SPARQL over repo | Plugins / external | Built-in workbench + CLI | |
-| Git-native PR workflow | Weak default | Strong default | Semantic diff v0.10 target |
+| Git-based PR workflow | Weak default | Strong default | Semantic diff v0.10 target |
 | Workspace refactoring | Limited | Rename, migrate, move, extract | Turtle only; preview + apply |
 | CI automation | External scripts | `ontocore validate` / `classify` | Documented exit codes |
 | Local-first / no telemetry | Desktop app | Yes | No cloud upload by default |

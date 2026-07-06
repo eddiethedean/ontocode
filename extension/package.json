@@ -1,7 +1,7 @@
 {
   "name": "ontocode",
   "displayName": "OntoCode",
-  "description": "Git-native ontology IDE for VS Code powered by OntoCore. Browse, edit Turtle, query, reason (EL–DL), validate, and diff OWL/RDF/OBO ontologies in Git and CI.",
+  "description": "Ontology IDE for VS Code powered by OntoCore. Browse, edit Turtle, query, reason (EL–DL), validate, and diff OWL/RDF/OBO ontologies in Git and CI.",
   "version": "0.11.0",
   "publisher": "ontocode",
   "license": "MIT",

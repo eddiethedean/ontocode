@@ -197,7 +197,7 @@ Post-1.0 milestone to mature external workflow integration beyond the reference 
 
 - AI-assisted ontology engineering
 - Live collaboration
-- Git-native ontology review
+- Ontology review in Git
 - Advanced visualization
 
 ### Ecosystem

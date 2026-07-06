@@ -2,7 +2,7 @@
 
 **Ontology editing in VS Code, powered by a Rust engine.**
 
-**OntoCode** is a VS Code extension for browsing and editing ontologies in Git-native workflows. **OntoCore** is the Rust semantic workspace engine behind it (CLI + language server). Browse OWL/RDF in VS Code, edit Turtle, run reasoning (EL/RL/RDFS/DL), query or validate in CI — without Protégé.
+**OntoCode** is a VS Code extension for browsing and editing ontologies in Git-based workflows. **OntoCore** is the Rust semantic workspace engine behind it (CLI + language server). Browse OWL/RDF in VS Code, edit Turtle, run reasoning (EL/RL/RDFS/DL), query or validate in CI — without Protégé.
 
 **Current release: v0.11.0** · [Changelog](CHANGELOG.md) · [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) · [Migration v0.11](docs/migration/v0.11.md)
 
@@ -90,7 +90,7 @@ cargo run -- validate fixtures
 
 Platform docs: [Vision](https://ontocode-vs.readthedocs.io/en/latest/vision/) · [Architecture](ARCHITECTURE.md) · [Roadmap](ROADMAP.md) · [Protégé parity](https://ontocode-vs.readthedocs.io/en/latest/design/PROTEGE_PARITY/)
 
-**OntoCode 1.0** targets a Protégé-competitive Git-native OWL + OBO IDE. **v0.11** ships Turtle completion, diagnostic quick fixes, Manage Imports, `ontocore docs` export, and Open VSX — on top of v0.10 semantic diff, multi-root indexing, and EL/DL reasoning. See [SHIPPED matrix](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/).
+**OntoCode 1.0** targets a Protégé-competitive OWL + OBO IDE for Git and CI. **v0.11** ships Turtle completion, diagnostic quick fixes, Manage Imports, `ontocore docs` export, and Open VSX — on top of v0.10 semantic diff, multi-root indexing, and EL/DL reasoning. See [SHIPPED matrix](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/).
 
 ## Development
 

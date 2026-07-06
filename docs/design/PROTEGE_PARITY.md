@@ -103,7 +103,7 @@
 
 **“Compete with Protégé” at v1.0 means:**
 
-- Primary IDE for **Git-native ontology engineering** (general OWL 2 DL + OBO maintenance).
+- Primary IDE for **ontology engineering in Git** (general OWL 2 DL + OBO maintenance).
 - **Hybrid authoring** (forms + Manchester) and **real reasoning** match Protégé’s core loop.
 - **Git semantic diff, CI, and VS Code integration** exceed Protégé.
 

@@ -16,7 +16,7 @@ This guide helps ontology teams adopt OntoCode **v0.11** alongside or instead of
 - **Property chain editing** or a full DL axiom catalog UI
 - Desktop-only workflows with no Git/CI requirement
 
-Many teams use **both**: Protégé for heavy axiom authoring, OntoCode for Git-native browse, lint, diff, and CI. See [Protégé coexistence](protege-coexistence.md).
+Many teams use **both**: Protégé for heavy axiom authoring, OntoCode for browse, lint, diff, and CI in Git. See [Protégé coexistence](protege-coexistence.md).
 
 ## Day 1 — Install and open your project
 

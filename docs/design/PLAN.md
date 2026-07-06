@@ -8,7 +8,7 @@ OntoCore and OntoCode form a two-layer product strategy for modern ontology engi
 
 **OntoCore** is the Rust backend: a local-first embedded ontology engine that scans a directory of OWL/RDF/Turtle/JSON-LD/OBO files, builds a semantic index, exposes ontology concepts as queryable tables, validates ontology repositories, performs semantic diffs, and powers editor integrations.
 
-**OntoCode** is the VS Code extension: a full ontology engineering workbench built on top of OntoCore. Its long-term goal is to replace Protégé for developers, data engineers, knowledge graph engineers, semantic modelers, and organizations that prefer Git-native ontology-as-code workflows.
+**OntoCode** is the VS Code extension: a full ontology engineering workbench built on top of OntoCore. Its long-term goal is to replace Protégé for developers, data engineers, knowledge graph engineers, semantic modelers, and organizations that prefer ontology-as-code workflows in Git.
 
 ## 2. Product Thesis
 
@@ -115,7 +115,7 @@ OntoCode should not merely copy Protégé. It should beat Protégé in developer
 
 Key differentiators:
 
-- Git-native semantic diffs
+- Semantic diffs in Git
 - CI-friendly validation
 - VS Code-native editing
 - **Hybrid authoring without leaving VS Code** (forms + Manchester)

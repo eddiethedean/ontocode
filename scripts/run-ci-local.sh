@@ -5,6 +5,10 @@ set -uo pipefail
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 cd "$ROOT"
 
+# Use workspace target/ (avoids sandbox temp cargo dirs when run from IDE agents).
+export CARGO_TARGET_DIR="${CARGO_TARGET_DIR:-$ROOT/target}"
+export CARGO_HOME="${CARGO_HOME:-$HOME/.cargo}"
+
 PLATFORM="$(uname -s | tr '[:upper:]' '[:lower:]')"
 case "$(uname -m)" in
   x86_64) ARCH="x64" ;;

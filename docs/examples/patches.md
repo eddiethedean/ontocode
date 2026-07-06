@@ -23,8 +23,9 @@ Copy-paste example for `ontocore patch`. Full reference: [patch-reference.md](..
 ```
 
 ```bash
-ontocore patch ./people.ttl patches.json --preview
-ontocore patch ./people.ttl patches.json
+# From a folder containing example.ttl (e.g. ontocode-tutorial from first-success)
+ontocore patch ./example.ttl patches.json --preview
+ontocore patch ./example.ttl patches.json
 ```
 
 Download: [patches.json](patches.json)

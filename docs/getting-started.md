@@ -1,6 +1,6 @@
 # Getting started
 
-Five-minute paths to success with OntoCore (CLI) and OntoCode (VS Code).
+Five-minute paths to success with OntoCore (CLI) and OntoCode (VS Code). VS Code tutorial: ~10 minutes — see [First success](guides/first-success.md).
 
 ## Install matrix (CLI)
 

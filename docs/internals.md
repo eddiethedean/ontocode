@@ -4,7 +4,7 @@
 >
 > For product capabilities, use **[What ships today](SHIPPED.md)**. For a 10-minute tutorial, use **[First success](guides/first-success.md)**.
 
-Design documents, ADRs, and backlogs live under [design/](design/README.md). They may mention features that are **planned** (plugins, SHACL, semantic diff, SDKs). Always cross-check [SHIPPED.md](SHIPPED.md).
+Design documents, ADRs, and backlogs live under [design/](design/README.md). They may mention features that are **planned** (plugins, SHACL, Python/TypeScript SDKs, MCP server). Always cross-check [SHIPPED.md](SHIPPED.md).
 
 ## Start here for contributors
 

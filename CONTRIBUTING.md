@@ -16,6 +16,13 @@ The root Cargo package `ontocode` is unpublished and hosts workspace integration
 - Node.js **20** (extension CI)
 - `npm` (extension build)
 
+## Optional dependencies
+
+- **Java 11+** and **[ROBOT](http://robot.obolibrary.org/)** on `PATH` — required for `ontocore robot` tests and ROBOT interop development (`cargo test` in `ontocore-robot`, integration tests that invoke ROBOT)
+- **Python 3.12** — for MkDocs doc site (`pip install -r docs/requirements.txt`)
+
+> **Canonical copy:** This file is mirrored on Read the Docs. When editing contributor docs, update [`docs/contributing.md`](docs/contributing.md) and keep this file in sync.
+
 ## Build and test
 
 ### Rust (full workspace)
@@ -103,7 +110,11 @@ Review the diffs before committing.
 
 ```bash
 cargo run -p ontocode --example index_and_query
+cargo run -p ontocode --example ontocore_workspace
+cargo run -p ontocode --example semantic_diff
 ```
+
+See [Examples index](docs/examples/index.md) for all runnable assets.
 
 ### Documentation site (MkDocs / Read the Docs)
 

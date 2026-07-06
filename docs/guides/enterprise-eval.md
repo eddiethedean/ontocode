@@ -90,9 +90,9 @@ Full gap analysis: [Protégé parity matrix](../design/PROTEGE_PARITY.md).
 
 ## Protégé coexistence
 
-A full migration guide is a **v1.0 deliverable**. Today:
+A [first-week Protégé migration guide](protege-migration.md) ships today. Round-trip workflows (Protégé export → OntoCode edit → Protégé verify) and OWL/XML-heavy migration playbooks are **v1.0 targets**. Today:
 
-- [Protégé coexistence guide](protege-coexistence.md) — interim split workflow
+- [Protégé coexistence guide](protege-coexistence.md) — split workflow when keeping Protégé for specific features
 
 - Use OntoCode for **Turtle editing in VS Code**, **CI validation**, **SQL/SPARQL queries**, **Manchester axioms** (including disjoint classes in v0.8), **workspace refactoring**, and **EL/RL/RDFS/DL classification**
 - Keep Protégé for **full OWL 2 DL axiom editing**, **property chain editing**, **full OBO write-back**, and axiom types not yet in the [Protégé parity matrix](../design/PROTEGE_PARITY.md) until v1.0

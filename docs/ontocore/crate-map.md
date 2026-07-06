@@ -30,6 +30,8 @@ use ontocore::catalog::IndexBuilder;  // lower-level
 | `ontocore-diagnostics` | Lint rules |
 | `ontocore-reasoner` | OntoLogos classification facade |
 | `ontocore-refactor` | Workspace refactoring |
+| `ontocore-diff` | Semantic catalog diff, git compare |
+| `ontocore-docs` | Markdown/HTML documentation export |
 | `ontocore-robot` | ROBOT CLI wrappers |
 | `ontocore-lsp` | Language server binary + protocol types |
 | `ontocore-cli` | `ontocore` binary |
@@ -48,6 +50,8 @@ use ontocore::catalog::IndexBuilder;  // lower-level
 | `owl` | `ontocore-owl` |
 | `reasoner` | `ontocore-reasoner` |
 | `refactor` | `ontocore-refactor` |
+| `diff` | `ontocore-diff` |
+| `docs` | `ontocore-docs` |
 | `lsp` | `ontocore-lsp` (feature `lsp`, default on) |
 
 ## Examples

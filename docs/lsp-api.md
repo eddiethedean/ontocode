@@ -72,8 +72,13 @@ Rebuild the workspace catalog.
 **Params:** `IndexWorkspaceParams`
 
 ```json
-{ "workspace_uri": "file:///path/to/workspace" }
+{ "workspace_uri": "file:///path/to/workspace", "disk_cache": true }
 ```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `workspace_uri` | string? | Workspace folder URI; omitted uses initialized workspace |
+| `disk_cache` | boolean | When `true`, persist parse snapshots under `.ontocore/cache/` (v0.10+) |
 
 `workspace_uri` is optional; the server uses the initialized workspace folder when omitted. Legacy clients may send `workspaceUri` (camelCase); prefer `workspace_uri` for new integrations.
 
@@ -269,6 +274,8 @@ Apply Turtle patch operations. See [authoring.md](authoring.md).
 
 **`EntityAxiomSummary` kinds:** `sub_class_of`, `equivalent_class`, `disjoint_class`, `domain`, `range`, `property_chain` (property chains are view-only).
 
+**Import ops (v0.11):** `add_import` and `remove_import` — see [patch-reference.md](patch-reference.md) and [Manage Imports](ontocode/manage-imports.md).
+
 See [patch-reference.md](patch-reference.md) for CLI `ApplyPatchResult` examples and [errors.md](errors.md) for failure codes.
 
 **Errors:** `PATCH_INVALID`, `UNSUPPORTED_FORMAT`, `NOT_INDEXED`, `APPLIED_NOT_INDEXED`
@@ -409,4 +416,4 @@ Custom method failures return `LspErrorPayload` in the JSON-RPC error `data` fie
 
 ## Not implemented yet (see LSP_SPEC)
 
-Completion, `prepareRename`, and other items marked planned in [LSP_SPEC.md](design/LSP_SPEC.md). For semantic diff UX in VS Code, see [Semantic diff guide](ontocode/semantic-diff.md).
+`prepareRename` and additional LSP features remain planned — see [LSP_SPEC.md](design/LSP_SPEC.md). `textDocument/completion` for Turtle shipped in v0.11. For semantic diff UX in VS Code, see [Semantic diff guide](ontocode/semantic-diff.md).

@@ -111,6 +111,7 @@ nav:
       - Workspace engine: ontocore/workspace-engine.md
       - OntoCore architecture: ontocore/architecture.md
       - Examples:
+          - Overview: examples/index.md
           - Query cookbook: examples/queries.md
           - Sample patches: examples/patches.md
           - Refactoring: examples/refactoring.md

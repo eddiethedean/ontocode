@@ -32,6 +32,9 @@ Generated API documentation is published on [docs.rs](https://docs.rs/ontocore):
 | `ontocore-query` | [docs.rs/ontocore-query](https://docs.rs/ontocore-query) |
 | `ontocore-owl` | [docs.rs/ontocore-owl](https://docs.rs/ontocore-owl) |
 | `ontocore-lsp` | [docs.rs/ontocore-lsp](https://docs.rs/ontocore-lsp) |
+| `ontocore-diff` | [docs.rs/ontocore-diff](https://docs.rs/ontocore-diff) |
+| `ontocore-docs` | [docs.rs/ontocore-docs](https://docs.rs/ontocore-docs) |
+| `ontocore-refactor` | [docs.rs/ontocore-refactor](https://docs.rs/ontocore-refactor) |
 
 Search all crates: [crates.io search?q=ontocore](https://crates.io/search?q=ontocore).
 
@@ -95,12 +98,30 @@ let result = query_catalog(&catalog, "SELECT * FROM classes")?;
 
 See [Workspace engine](workspace-engine.md) for the indexing pipeline and [crate map](crate-map.md) for module boundaries.
 
+## Documentation export (`docs` module)
+
+```rust
+use ontocore::{Workspace, docs::{export_workspace, ExportOptions}};
+
+let ws = Workspace::open("./fixtures")?;
+export_workspace(
+    ws.catalog(),
+    ExportOptions::markdown("/tmp/onto-docs"),
+)?;
+```
+
+See [Documentation export guide](../guides/docs-export.md).
+
 ## Examples in this repository
 
 ```bash
 cargo run -p ontocode --example ontocore_workspace   # Workspace API
-cargo run -p ontocode --example index_and_query        # IndexBuilder + query (uses fixtures/)
+cargo run -p ontocode --example index_and_query      # IndexBuilder + query (uses fixtures/)
+cargo run -p ontocode --example error_handling        # Error handling patterns
+cargo run -p ontocode --example semantic_diff         # Git/workspace semantic diff (requires git repo)
 ```
+
+See [Examples index](../examples/index.md) for CLI cookbooks and fixture workflows.
 
 ## Related guides
 

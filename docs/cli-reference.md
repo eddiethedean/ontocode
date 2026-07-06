@@ -254,8 +254,28 @@ ontocore diff --left ./baseline --right ./candidate
 
 **Exit:** 0 on success; non-zero on git/parse/I/O errors.
 
+### `docs`
+
+Export Markdown or HTML documentation from an indexed workspace. See [Documentation export guide](guides/docs-export.md).
+
+```bash
+ontocore docs ./fixtures --format markdown --output /tmp/onto-docs
+ontocore docs . --format html --output ./docs-out \
+  --ontology-id http://example.org/people
+```
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `workspace` | `.` | Workspace directory to index |
+| `--output` / `-o` | *(required)* | Output directory |
+| `--format` | `markdown` | `markdown` or `html` |
+| `--ontology-id` | — | Limit export to one ontology IRI or document id |
+
+**Exit:** 0 on success; non-zero on index or I/O failure.
+
 ## Related
 
+- [Documentation export guide](guides/docs-export.md)
 - [Refactoring guide](guides/refactoring.md)
 - [Examples: refactoring](examples/refactoring.md)
 - [Getting started](getting-started.md)

@@ -2,6 +2,8 @@
 
 This is the **canonical tutorial** for new OntoCode users. You do not need to clone this repository.
 
+New to OWL/RDF? Skim [Ontology concepts](../concepts.md) first (IRIs, Turtle, classes).
+
 > **Multi-root workspaces (v0.10+):** All workspace folders are indexed on open. **OntoCode: Index Workspace** may prompt you to pick a folder when multiple roots are open.
 
 ## Core path (~10 minutes)
@@ -34,7 +36,7 @@ When VS Code asks, choose **Yes, I trust the authors** (or **Trust**). Restricte
 ### 3. Browse the explorer
 
 1. Click the **OntoCode** icon in the **Activity Bar** (left edge of the window).
-2. Wait for indexing to finish.
+2. Wait for indexing to finish — indexing is complete when **Classes** lists entities (e.g. `Person`) and **Ontologies** shows your `.ttl` files without parse errors. For the tutorial pack (~2 files), this usually takes a few seconds. To confirm progress, open **View → Output**, select **OntoCore Language Server**, and look for index completion messages. If trees stay empty after 30 seconds, run **OntoCode: Index Workspace** and confirm the workspace is trusted.
 3. Expand **Ontologies** to see indexed files and parse status.
 4. Expand **Classes**, **Properties**, or **Individuals** to browse entities.
 5. **Click an entity name** (e.g. `Person`) to open the **Entity Inspector**.

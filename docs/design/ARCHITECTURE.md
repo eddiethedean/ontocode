@@ -6,7 +6,7 @@
 >
 > **Ecosystem architecture (canonical for users):** [Platform architecture](../architecture.md).
 >
-> **Shipped through v0.10:** workspace scanner, incremental indexing, multi-root workspaces, SQL/SPARQL queries, diagnostics, CLI, LSP, Turtle write-back, Query Workbench + Manchester editor, React webviews (inspector, graphs, workbench, refactor preview, semantic diff, reasoner), EL–DL reasoning (OntoLogos 1.0), OBO index, ROBOT CLI wrappers, semantic diff. See [What ships today](../SHIPPED.md).
+> **Shipped through v0.11:** workspace scanner, incremental indexing, multi-root workspaces, SQL/SPARQL queries, diagnostics, CLI, LSP, Turtle write-back, Query Workbench + Manchester editor, React webviews (inspector, graphs, workbench, refactor preview, semantic diff, imports), EL–DL reasoning (OntoLogos 1.0), OBO index, ROBOT CLI wrappers, semantic diff, `ontocore docs` export, Turtle completion, diagnostic quick fixes. See [What ships today](../SHIPPED.md).
 >
 > **Planned v1.0:** plugin host, full OBO write-back in IDE, property chain editing. See [Platform roadmap](../roadmap.md).
 >
@@ -84,9 +84,9 @@ External Workflow Plugins (not core)     owlmake · ROBOT/ODK adapters
 | `ontocore-catalog` | v0.2 | Index builder, entity API | — |
 | `ontocore-query` | v0.2 | SQL virtual tables, SPARQL | `sqlparser`, `oxigraph` |
 | `ontocore-diagnostics` | v0.3 | Lint rules, LSP diagnostics | `regex` (+ `fastobo-validator` v0.7b) |
-| `ontocore-diff` | planned v0.9 | Semantic diff, Git compare | `horned-owl`, `git2` |
-| `ontocore-docs` | planned v0.9 | Markdown/HTML export | `pulldown-cmark`, `minijinja` |
-| `ontocore-reasoner` | v0.6 | Reasoner facade | OntoLogos `0.9`→`1.0` |
+| `ontocore-diff` | v0.10 | Semantic diff, Git compare | `horned-owl`, `git2` |
+| `ontocore-docs` | v0.11 | Markdown/HTML export | `pulldown-cmark`, `minijinja` |
+| `ontocore-reasoner` | v0.6 | Reasoner facade | OntoLogos 1.0.0 |
 | `ontocore-robot` | v0.7 | ROBOT CLI wrappers | ROBOT CLI (external) |
 | `ontocore-lsp` | v0.4 | Language server + diagnostics + patch apply | `lsp-server`, `lsp-types` |
 | `ontocore-cli` | v0.4 | `ontocore` binary | composes above |
@@ -161,10 +161,11 @@ Explorer (asserted/inferred toggle), diagnostics, query history.
 | Entity inspector | **Shipped** (v0.4) | Legacy HTML → **React** (v0.7) |
 | Query workbench | **Shipped** (v0.5) | Legacy HTML → **React** (v0.8) |
 | Manchester axiom editor | **Shipped** (v0.5 MVP) | Legacy HTML → **React** (v0.8) |
-| Reasoner panel | **Shipped** (v0.6) | Legacy HTML → **React** (v0.9) |
-| Explanation panel | **Shipped** (v0.6 EL) | Legacy HTML → **React** (v0.9) |
+| Reasoner panel | **Shipped** (v0.6) | Legacy HTML (React migration planned) |
+| Explanation panel | **Shipped** (v0.6 EL) | Legacy HTML (React migration planned) |
 | Graph visualization | **Shipped** (v0.7 React) | Extend filters / layout |
-| Semantic diff | Planned (v0.9) | **React** (new) |
+| Semantic diff | **Shipped** (v0.10) | **React** |
+| Manage Imports | **Shipped** (v0.11) | **React** |
 
 ### 5.5 Language Client
 

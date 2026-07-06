@@ -1,6 +1,6 @@
 # Protégé coexistence
 
-Interim guide for teams using Protégé today and evaluating OntoCode **v0.11**. A full migration guide is a **v1.0 deliverable**.
+Guide for teams using Protégé today and evaluating OntoCode **v0.11**. A [first-week migration guide](protege-migration.md) ships today; round-trip and OWL/XML-heavy playbooks are **v1.0 targets**.
 
 Canonical capability matrix: [What ships today](../SHIPPED.md). Decision matrix: [Protégé vs OntoCode](protege-decision.md). Gap analysis: [Protégé parity matrix](../design/PROTEGE_PARITY.md).
 

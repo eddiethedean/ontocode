@@ -6,7 +6,7 @@ Typed messages between the VS Code extension host (`extension/src/webviews/`) an
 
 Webviews load `webview-ui/dist` with query param `?panel=`:
 
-`inspector` | `graph` | `smoke` | `refactorPreview` | `queryWorkbench` | `manchesterEditor`
+`inspector` | `graph` | `smoke` | `refactorPreview` | `queryWorkbench` | `manchesterEditor` | `semanticDiff` | `imports`
 
 ## Host → React (shared)
 
@@ -43,6 +43,24 @@ Webviews load `webview-ui/dist` with query param `?panel=`:
 |------|---------|
 | `loadRefactorPlan` | `{ plan }` |
 
+### Semantic diff (v0.10+)
+
+| type | payload |
+|------|---------|
+| `loading` | — |
+| `semanticDiffData` | `{ diff }` — axiom/entity changes, breaking-change flags |
+
+Host loads diff via LSP `ontocore/semanticDiff` on panel open. See [Semantic diff guide](ontocode/semantic-diff.md).
+
+### Manage Imports (v0.11+)
+
+| type | payload |
+|------|---------|
+| `loadImports` | `{ path, ontology_iri?, imports_editable, error?, imports[], options[] }` |
+| `preview` | `{ text }` — Turtle preview after import patch |
+
+`options` lists workspace ontologies available to add as `owl:imports`. Import changes use `applyPatch` with `add_import` / `remove_import` ops.
+
 ## React → Host
 
 | type | payload |
@@ -64,5 +82,6 @@ Webviews load `webview-ui/dist` with query param `?panel=`:
 | `applyManchester` | `{ expression, axiomKind, previewOnly }` |
 | `applyRefactor` | — |
 | `cancelRefactor` | — |
+| `copyMarkdown` | — (semantic diff panel — copies breaking changes to clipboard) |
 
 Ontology operations use LSP from the host only ([ADR-0007](design/adr/0007-language-server-boundary.md)).

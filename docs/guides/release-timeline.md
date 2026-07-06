@@ -35,10 +35,10 @@ Canonical forward plan: [Platform roadmap](../roadmap.md). Engineering milestone
 
 ### v1.0 (planned)
 
-- Full OWL 2 DL axiom catalog, OBO write-back, and Protégé migration guide per parity matrix
+- Full OWL 2 DL axiom catalog, OBO write-back, and extended Protégé round-trip playbooks per parity matrix
 - Installable plugin host / owlmake-style workflow integration
 - Formal performance benchmarks (currently v1.0 backlog — [performance sizing](performance-sizing.md))
-- Full Protégé migration guide (today: [Protégé coexistence](protege-coexistence.md) + [decision matrix](protege-decision.md))
+- Extended Protégé migration playbooks (today: [first-week guide](protege-migration.md), [coexistence](protege-coexistence.md), [decision matrix](protege-decision.md))
 
 ## How to plan enterprise adoption without a v1.0 date
 

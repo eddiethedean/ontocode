@@ -1,6 +1,6 @@
 # Protégé vs OntoCode decision matrix
 
-Use this page to decide **when OntoCode fits**, **when to keep Protégé**, and **when to run both**. It reflects **v0.11.1** — see [What ships today](../SHIPPED.md). A full Protégé migration guide is planned for **v1.0**.
+Use this page to decide **when OntoCode fits**, **when to keep Protégé**, and **when to run both**. It reflects **v0.11.1** — see [What ships today](../SHIPPED.md). A [first-week migration guide](protege-migration.md) ships today; extended round-trip playbooks are planned for **v1.0**.
 
 ## Quick decision
 

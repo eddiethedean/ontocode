@@ -18,7 +18,7 @@ Try:
 ```bash
 cargo run -- inspect fixtures
 cargo run -- query fixtures "SELECT * FROM classes"
-cargo run -- docs --output /tmp/docs-out fixtures
+cargo run -- docs fixtures --output /tmp/docs-out
 ```
 
-More queries: [examples/queries.md](../examples/queries.md).
+More queries: [query cookbook](../docs/examples/queries.md). Full index: [examples index](../docs/examples/index.md).

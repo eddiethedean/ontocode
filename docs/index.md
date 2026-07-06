@@ -121,24 +121,9 @@ You do **not** need to clone this repo to use the extension or `cargo install on
 
 ## What ships today
 
-See the full matrix: **[What ships today](SHIPPED.md)**.
+**v0.11.1 highlights:** Turtle completion, diagnostic quick fixes, Manage Imports, semantic diff (v0.10+), `ontocore docs` export, EL–DL reasoning (`dl` / `auto` profiles), multi-root indexing.
 
-| Capability | VS Code | CLI |
-|------------|---------|-----|
-| Browse classes, properties, individuals | Yes | via SQL |
-| Edit labels, comments, parents (`.ttl`) | Yes | `ontocore patch` |
-| Complex `SubClassOf` / `EquivalentClasses` (Manchester) | Yes | `ontocore patch` |
-| Create / delete entities (`.ttl`) | Yes | `ontocore patch` |
-| SQL-like queries | Query Workbench | `ontocore query` |
-| SPARQL | Query Workbench | `ontocore sparql` |
-| Graph visualization (class, property, import, neighborhood) | Yes (React) | LSP `ontocore/getGraph` |
-| OBO format index + `obo_id` in explorer | Yes | `ontocore inspect` |
-| ROBOT interop | — | `ontocore robot validate\|merge\|report` |
-| React webview UI | Inspector + graphs | — |
-| EL/RL/RDFS classification | Reasoner panel | `ontocore classify` |
-| Inferred hierarchy toggle | Explorer | via `classify` JSON |
-| EL explanations (where available) | Explanation panel | `ontocore explain` |
-| Diagnostics / lint | Problems panel | `ontocore validate` |
+Full matrix: **[What ships today](SHIPPED.md)** (canonical — do not rely on this summary alone).
 
 ## Quick start
 

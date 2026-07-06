@@ -51,7 +51,7 @@ ontocore sparql fixtures "SELECT (COUNT(?c) AS ?count) WHERE { ?c a owl:Class }"
 ontocore sparql fixtures "SELECT ?s ?p ?o WHERE { ?s ?p ?o } LIMIT 3" --format json
 ```
 
-More examples: [query cookbook on GitHub](https://github.com/eddiethedean/ontocode/blob/main/examples/queries.md).
+More examples: [query cookbook](examples/queries.md).
 
 ## Limits
 
@@ -69,4 +69,4 @@ SPARQL is available via the CLI, Rust API, LSP (`ontocore/sparql`), and the VS C
 ## Related
 
 - SQL-like catalog queries: [sql-reference.md](sql-reference.md)
-- Query cookbook: [query cookbook on GitHub](https://github.com/eddiethedean/ontocode/blob/main/examples/queries.md)
+- Query cookbook: [query cookbook](examples/queries.md)

@@ -20,6 +20,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - **`PreviewApplyBar`** — reusable preview-then-apply component for all Turtle/OBO inspector edits
 - **Property chain editor** — ordered property list with patch preview in Entity Inspector
 
+### Fixed
+
+- **OBO Entity Inspector** — `parseApplyPatchMessage` now accepts `term_id`-based OBO patches (fixes non-functional OBO edit UI)
+- **Individual class assertions** — Entity Inspector wires Preview/Apply for `add_class_assertion` and Remove for existing types
+
 ### Changed
 
 - LSP and CLI `patch` dispatch by file extension: `.ttl` → `ontocore-owl`, `.obo` → `ontocore-obo`

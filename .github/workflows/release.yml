@@ -179,6 +179,7 @@ jobs:
           publish_with_pause ontocore-core
           publish_with_pause ontocore-parser
           publish_with_pause ontocore-owl
+          publish_with_pause ontocore-obo
           publish_with_pause ontocore-diagnostics
           publish_with_pause ontocore-catalog
           publish_with_pause ontocore-diff

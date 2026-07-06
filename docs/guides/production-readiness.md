@@ -12,7 +12,7 @@ Canonical capability matrix: [What ships today](../SHIPPED.md).
 | **Stable CI gates** | 0.12.x | `ontocore validate`, `ontocore classify`, and `ontocore diff` are documented for CI — see [workspace limits](../workspace-limits.md). |
 | **v1.0 target** | Planned | Protégé-competitive OWL 2 DL + OBO in VS Code per [Protégé parity](../design/PROTEGE_PARITY.md). |
 
-OntoCode v0.11 is **not** documented as a general-availability replacement for Protégé or full OWL 2 DL axiom engineering (property chains, full catalog, OBO write-back).
+OntoCode v0.12 is **not** documented as a general-availability replacement for Protégé for every advanced OWL 2 DL workflow (e.g. full Manchester axiom coverage for all formats, OWL/XML write-back).
 
 ## Approved use cases (pilot or production)
 
@@ -57,7 +57,7 @@ Suggested pilot duration: **4–8 weeks** with 3–10 engineers on one ontology 
 | LSP `ontocore/*` JSON | May change pre-1.0 |
 | Rust `ontocore-*` crate APIs | May change pre-1.0 |
 
-Pin CLI version in CI: release binary with `VERSION=0.11.3` or `cargo install ontocore-cli --locked --version 0.11.3`.
+Pin CLI version in CI: release binary with `VERSION=0.12.0` or `cargo install ontocore-cli --locked --version 0.12.0`.
 
 ## Support and incident response
 

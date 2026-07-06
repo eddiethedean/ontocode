@@ -1,12 +1,12 @@
 # OBO workflows
 
-OntoCore v0.11.3 indexes **OBO Format** (`.obo`) files via `fastobo` and exposes `obo_id` in the catalog and SQL virtual tables. Write-back in VS Code remains **Turtle only** — OBO files are read-only in the Entity Inspector.
+OntoCore **v0.12.0** indexes **OBO Format** (`.obo`) files via `fastobo` and exposes `obo_id` in the catalog and SQL virtual tables. **OBO write-back** ships in v0.12 via the `ontocore-obo` crate — Entity Inspector forms and `ontocore patch` for `.obo` files.
 
 Canonical capability matrix: [What ships today](../SHIPPED.md).
 
 ## Prerequisites
 
-- OntoCode v0.11.3+ or `ontocore-cli` 0.11.3+
+- OntoCode **v0.12.0+** or `ontocore-cli` **0.12.0+**
 - Workspace containing `.obo` files (or mixed `.obo` + RDF)
 
 ## Index and browse
@@ -16,6 +16,20 @@ Canonical capability matrix: [What ships today](../SHIPPED.md).
 3. Browse **Classes** — entities from OBO terms appear with labels; explorer may show `obo_id` when present.
 
 Supported extensions: `.obo` (syntax highlighting included).
+
+## Edit in VS Code (v0.12+)
+
+1. Open an OBO term in the **Entity Inspector**.
+2. Edit name, synonym, definition, `is_a` parent, namespace, or deprecated flag.
+3. Use **Preview** then **Apply** (same preview-before-apply flow as Turtle).
+
+Patch ops use `term_id` (not `entity_iri`). See [patch reference](../patch-reference.md) and [migration/v0.12.md](../migration/v0.12.md).
+
+## CLI patch
+
+```bash
+ontocore patch path/to/terms.obo --preview '[{"op":"set_name","term_id":"EX:001","value":"renamed"}]'
+```
 
 ## Query `obo_id` from SQL
 
@@ -28,11 +42,10 @@ See [SQL reference](../sql-reference.md) for the `obo_id` column.
 ## Write-back policy
 
 | Format | Index / query | VS Code inspector edit | `ontocore patch` |
-|--------|---------------|------------------------|-------------------|
-| `.obo` | Yes | Read-only | Not supported |
+|--------|---------------|------------------------|------------------|
+| `.obo` | Yes | Yes (v0.12+) | Yes (v0.12+) |
 | `.ttl` | Yes | Yes | Yes |
-
-Edit OBO content with external tools or convert to Turtle for OntoCode write-back.
+| `.owl` / `.owx` / `.rdf` | Yes (read-only catalog) | Read-only | Not supported |
 
 ## Example workspace
 
@@ -51,12 +64,12 @@ OBO pipelines often use [ROBOT](http://robot.obolibrary.org/). See [ROBOT intero
 
 ## Limitations
 
-- **Minimal OBO parser** — line-based indexing for common term headers and relationships; not full fastobo parity.
-- **No OBO write-back** in v0.8 — planned for v1.0.
+- **OBO patch scope** — v0.12 covers common term headers (`name`, synonyms, `def`, `xref`, `is_a`, namespace, deprecated); not every OBO construct.
 - **Multi-root workspaces** — all folders indexed since v0.10; ensure each root contains ontology files
 
 ## Related
 
 - [ROBOT interop](robot-interop.md)
-- [Authoring](../authoring.md) (Turtle write-back)
+- [Authoring](../authoring.md)
 - [FAQ](../faq.md)
+- [v0.12 migration](../migration/v0.12.md)

@@ -10,7 +10,7 @@ OntoCore is currently implemented by the `ontocore-*` crates. The [`ontocore`](h
 
 ```toml
 [dependencies]
-ontocore = "0.11"
+ontocore = "0.12"
 ```
 
 ```rust
@@ -27,6 +27,7 @@ use ontocore::catalog::IndexBuilder;  // lower-level
 | `ontocore-catalog` | Index builder, entity API, graph payloads |
 | `ontocore-query` | SQL virtual tables, SPARQL |
 | `ontocore-owl` | Horned-OWL facade, patches, Manchester |
+| `ontocore-obo` | OBO Format 1.4 patch write-back |
 | `ontocore-diagnostics` | Lint rules |
 | `ontocore-reasoner` | OntoLogos classification facade |
 | `ontocore-refactor` | Workspace refactoring |
@@ -48,6 +49,7 @@ use ontocore::catalog::IndexBuilder;  // lower-level
 | `diagnostics` | `ontocore-diagnostics` |
 | `parser` | `ontocore-parser` |
 | `owl` | `ontocore-owl` |
+| `obo` | `ontocore-obo` |
 | `reasoner` | `ontocore-reasoner` |
 | `refactor` | `ontocore-refactor` |
 | `diff` | `ontocore-diff` |

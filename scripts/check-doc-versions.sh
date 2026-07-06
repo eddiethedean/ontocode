@@ -282,6 +282,7 @@ if [[ "$fail" -eq 0 ]]; then
   echo "ok: reference pages have no OntoCore v0.8/v0.9/v0.10/v0.11.0/v0.11.1/v0.11.2 banners"
 fi
 
+check_file_contains ".github/workflows/release.yml" "publish_with_pause ontocore-obo" "release.yml publishes ontocore-obo"
 check_file_contains ".github/workflows/release.yml" "publish_with_pause ontocore" "release.yml publishes ontocore"
 
 # docs/contributing.md should track root CONTRIBUTING.md (OntoCore branding)
@@ -325,7 +326,7 @@ for file in docs/guides/refactoring.md docs/migration/v0.8.md docs/migration/v0.
   fi
 done
 
-check_file_contains "docs/faq.md" "0\.11\.x" "faq crate version"
+check_file_contains "docs/faq.md" "0\.12\.x" "faq crate version"
 check_file_contains "docs/guides/release-timeline.md" "${VERSION}.*Current" "release-timeline current version"
 check_file_contains "docs/guides/release-timeline.md" "v0\.11.*Shipped" "release-timeline v0.11 shipped"
 
@@ -369,8 +370,8 @@ fi
 
 check_file_contains "docs/guides/production-readiness.md" "${MINOR_VERSION}\.x \\(current\\)" "production-readiness current minor"
 check_file_contains "docs/ontocore/index.md" "v${VERSION}" "ontocore index version"
-check_file_contains "docs/ontocore/rust-api.md" 'ontocore = "0.11"' "rust-api version pin"
-check_file_contains "docs/ontocore/crate-map.md" 'ontocore = "0.11"' "crate-map version pin"
+check_file_contains "docs/ontocore/rust-api.md" 'ontocore = "0.12"' "rust-api version pin"
+check_file_contains "docs/ontocore/crate-map.md" 'ontocore = "0.12"' "crate-map version pin"
 check_file_contains "docs/ontocode/manage-imports.md" "Manage Imports" "manage-imports guide"
 check_file_contains "mkdocs.yml" "ontocode/manage-imports.md" "mkdocs manage-imports guide"
 check_file_contains "mkdocs.yml" "migration/v0.11.md" "mkdocs whats-new migration link"
@@ -383,7 +384,7 @@ check_file_contains "mkdocs.yml" "migration/v0.11.md" "mkdocs v0.11 migration gu
 check_file_contains "mkdocs.yml" "guides/docs-export.md" "mkdocs docs export guide"
 check_file_contains "mkdocs.yml" "design/adr/README.md" "mkdocs ADR index"
 check_file_contains "mkdocs.yml" "Reference:" "mkdocs Reference tab"
-check_file_contains "docs/guides/rust-crates.md" 'ontocore = "0.11"' "rust-crates version pin"
+check_file_contains "docs/guides/rust-crates.md" 'ontocore = "0.12"' "rust-crates version pin"
 
 # Stale protege-coexistence version banner
 if grep -qE 'evaluating OntoCode \*\*v0\.6\*\*|v0\.6 support' docs/guides/protege-coexistence.md; then
@@ -410,6 +411,13 @@ done
 
 check_file_contains "NOTICES" "v${VERSION}" "NOTICES release version"
 
+check_file_contains "docs/guides/obo-workflow.md" "OBO write-back" "obo-workflow documents OBO write-back"
+if grep -qE 'read-only in the Entity Inspector|Write-back in VS Code remains \*\*Turtle only\*\*' docs/guides/obo-workflow.md; then
+  echo "FAIL: docs/guides/obo-workflow.md still claims OBO inspector is read-only" >&2
+  fail=1
+else
+  echo "ok: obo-workflow OBO edit status"
+fi
 check_file_contains "docs/guides/protege-coexistence.md" "v0\.11" "protege-coexistence v0.11"
 check_file_contains "docs/guides/release-timeline.md" "non-commitment" "release-timeline disclaimer"
 if grep -qE 'OBO format \+ ROBOT interop.*Not shipped' docs/guides/enterprise-eval.md; then

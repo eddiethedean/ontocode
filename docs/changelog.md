@@ -6,7 +6,7 @@ Migration guides: [Migration index](migration/README.md)
 
 ## [0.12.0] - 2026-07-06
 
-**v0.12.0** — Authoring parity — Turtle domain/range/chains/annotations, OBO write-back, OWL/XML read-only catalog, DL explanations, Protégé round-trip tests. See [CHANGELOG.md](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) and [migration/v0.12.md](migration/v0.12.md).
+**v0.12.0** — Authoring parity — Turtle domain/range/chains/annotations, OBO write-back, OWL/XML read-only catalog, DL explanations, Protégé round-trip tests; fixes OBO inspector patch validation and individual class assertion UI. See [CHANGELOG.md](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) and [migration/v0.12.md](migration/v0.12.md).
 
 ## [0.11.3] - 2026-07-06
 

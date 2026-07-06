@@ -8,7 +8,6 @@ Canonical capability matrix: [What ships today](../SHIPPED.md).
 
 Prefer Protégé or other tools (or wait for v1.0) if you need:
 
-- Full **OBO write-back** in the IDE
 - Full **SQL** analytics (JOINs, aggregates) — only SQL-like virtual tables ship today
 - An installable **plugin host** / owlmake workflow integration (design only until v1.0)
 
@@ -27,7 +26,7 @@ Prefer Protégé or other tools (or wait for v1.0) if you need:
 | [LGPL compliance](lgpl-compliance.md) | Legal — horned-owl obligations |
 | [Protégé coexistence](protege-coexistence.md) | Ontology teams — split workflow with Protégé |
 
-## What ships today (v0.11.3)
+## What ships today (v0.12.0)
 
 | Capability | Status |
 |------------|--------|
@@ -40,10 +39,12 @@ Prefer Protégé or other tools (or wait for v1.0) if you need:
 | OWL 2 DL classification (`dl` / `auto` profiles) | **Shipped** (OntoLogos 1.0.0; HermiT parity) |
 | EL explanations (where OntoLogos supports) | **Shipped** (EL-first; DL clash traces partial) |
 | React entity inspector + graph visualization | **Shipped** |
-| OBO format index + `obo_id` in explorer | **Shipped** (write-back: Turtle only in VS Code) |
+| OBO format index + `obo_id` in explorer | **Shipped** |
+| OBO write-back in VS Code + CLI (`ontocore-obo`) | **Shipped** (v0.12) |
+| Turtle domain/range/chains/individual assertions | **Shipped** (v0.12) |
+| OWL/XML read-only catalog (`.owl`, `.owx`) | **Shipped** (v0.12) |
 | ROBOT CLI interop (`ontocore robot`, LSP `runRobot`) | **Shipped** (requires Java + `robot` on PATH) |
-| Full OWL 2 DL axiom catalog + property chain editing | **Not shipped** (v1.0 target) |
-| Full OBO write-back in VS Code | **Not shipped** (v1.0 target) |
+| Full OWL 2 DL axiom catalog (all axiom kinds editable) | **Partial** (Turtle + OBO; Horned formats read-only) |
 | Semantic diff | **Shipped** (v0.10 — CLI, LSP, VS Code panel) |
 | Incremental indexing + multi-root workspaces | **Shipped** (v0.10) |
 | Turtle completion + diagnostic quick fixes | **Shipped** (v0.11) |

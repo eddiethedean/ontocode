@@ -82,6 +82,19 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      - name: Free disk space
+        run: |
+          set -euo pipefail
+          echo "Disk before cleanup:"
+          df -h
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+          sudo docker image prune --all --force || true
+          echo "Disk after cleanup:"
+          df -h
+
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@stable
 
@@ -94,22 +107,13 @@ jobs:
             exit 1
           fi
 
-      - name: Verify crate metadata (dry-run publish)
-        run: |
-          set -euo pipefail
-          # Only leaf crates (no unpublished path deps) can dry-run before the
-          # ordered publish below. Full graph is published in dependency order.
-          cargo publish -p ontocore-core --dry-run
-          cargo publish -p ontocore-robot --dry-run
-
       - uses: Swatinem/rust-cache@v2
         with:
           shared-key: release
 
-      - name: cargo test
-        run: |
-          cargo build -p ontocore-lsp -p ontocore-cli --bins
-          cargo test --workspace
+      # Full workspace tests run on main in CI; release stays lean to avoid runner disk exhaustion.
+      - name: Verify release binaries build
+        run: cargo build --release --locked -p ontocore-cli -p ontocore --bins
 
       - name: Publish crates to crates.io
         env:
@@ -119,6 +123,8 @@ jobs:
           RATE_LIMIT_RETRY_SECONDS: 180
         run: |
           set -euo pipefail
+          echo "Disk before crate publish:"
+          df -h
 
           wait_between_crates() {
             echo "Waiting ${PUBLISH_PAUSE_SECONDS}s before next crate (crates.io new-crate rate limit)..."
@@ -134,12 +140,14 @@ jobs:
                 echo "${output}"
                 echo "Published ${crate}"
                 echo "new" > "/tmp/publish-${crate}"
+                rm -rf target/package
                 return 0
               fi
               echo "${output}"
               if echo "${output}" | grep -qE 'already exists on crates.io index'; then
                 echo "Skipping ${crate}: version already published"
                 echo "skip" > "/tmp/publish-${crate}"
+                rm -rf target/package
                 return 0
               fi
               if echo "${output}" | grep -qE 'status 400 Bad Request|expected at most'; then
@@ -183,8 +191,12 @@ jobs:
           publish_with_pause ontocore
           publish_crate ontocore-cli
 
+          cargo clean
+          echo "Disk after crate publish:"
+          df -h
+
       - name: Build CLI binary
-        run: cargo build --release -p ontocore-cli
+        run: cargo build --release --locked -p ontocore-cli
 
       - name: Download multi-platform LSP binaries
         uses: actions/download-artifact@v4
@@ -226,11 +238,16 @@ jobs:
       - name: Build multi-platform VSIX
         run: |
           set -euo pipefail
+          echo "Disk before VSIX packaging:"
+          df -h
           ls -la extension/server/
           cd extension
           npm ci
           npm run compile
           npx vsce package --no-dependencies -o "../dist/ontocode-${GITHUB_REF_NAME}.vsix"
+          rm -rf node_modules webview-ui/node_modules
+          echo "Disk after VSIX packaging:"
+          df -h
 
       - name: Publish to Open VSX
         env:

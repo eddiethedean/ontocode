@@ -4,6 +4,8 @@ src/**
 out/**
 dist-test/**
 node_modules/**
+webview-ui/node_modules/**
+webview-ui/src/**
 **/*.ts
 **/*.map
 esbuild.mjs

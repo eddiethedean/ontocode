@@ -45,6 +45,7 @@ Maintainer checklist for publishing crates, binaries, and the VS Code extension.
 - [ ] [docs/design/LICENSES.md](design/LICENSES.md) — dependency sections
 - [ ] Run `mkdocs build --strict` locally before tagging
 - [ ] Run `./scripts/check-doc-versions.sh` (also enforced in CI)
+- [ ] Ensure **CI is green on the release commit** before tagging (the release workflow does not re-run the full test suite)
 
 ## Tag and publish
 
@@ -57,9 +58,10 @@ git push origin v0.11.3
 
 The [release workflow on GitHub](https://github.com/eddiethedean/ontocode/blob/main/.github/workflows/release.yml):
 
-1. Verifies packages and runs tests
-2. Publishes workspace crates to [crates.io](https://crates.io/) in dependency order
-3. Creates a GitHub Release with:
+1. Builds multi-platform `ontocore-lsp` binaries (matrix job)
+2. Verifies the tag matches `Cargo.toml` and release binaries build
+3. Publishes workspace crates to [crates.io](https://crates.io/) in dependency order
+4. Creates a GitHub Release with:
    - `ontocore` Linux x64 binary
    - `ontocore-lsp` per-platform archives
    - Multi-platform `ontocode-*.vsix`

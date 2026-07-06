@@ -44,7 +44,7 @@ Prefer Protégé or other tools (or wait for v1.0) if you need:
 | ROBOT CLI interop (`ontocore robot`, LSP `runRobot`) | **Shipped** (requires Java + `robot` on PATH) |
 | Full OWL 2 DL axiom catalog + property chain editing | **Not shipped** (v1.0 target) |
 | Full OBO write-back in VS Code | **Not shipped** (v1.0 target) |
-| Semantic Git diff | **Shipped** (v0.10 — CLI, LSP, VS Code panel) |
+| Semantic diff | **Shipped** (v0.10 — CLI, LSP, VS Code panel) |
 | Incremental indexing + multi-root workspaces | **Shipped** (v0.10) |
 | Turtle completion + diagnostic quick fixes | **Shipped** (v0.11) |
 | Manage Imports UI + import patch ops | **Shipped** (v0.11) |
@@ -94,7 +94,7 @@ A full migration guide is a **v1.0 deliverable**. Today:
 
 - [Protégé coexistence guide](protege-coexistence.md) — interim split workflow
 
-- Use OntoCode for **Turtle editing in Git**, **CI validation**, **SQL/SPARQL queries**, **Manchester axioms** (including disjoint classes in v0.8), **workspace refactoring**, and **EL/RL/RDFS/DL classification**
+- Use OntoCode for **Turtle editing in VS Code**, **CI validation**, **SQL/SPARQL queries**, **Manchester axioms** (including disjoint classes in v0.8), **workspace refactoring**, and **EL/RL/RDFS/DL classification**
 - Keep Protégé for **full OWL 2 DL axiom editing**, **property chain editing**, **full OBO write-back**, and axiom types not yet in the [Protégé parity matrix](../design/PROTEGE_PARITY.md) until v1.0
 - See [Protégé parity matrix](../design/PROTEGE_PARITY.md) and [What ships today](../SHIPPED.md)
 

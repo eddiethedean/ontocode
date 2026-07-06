@@ -60,7 +60,7 @@
 |------|------|------|
 | Imports management UI | [SPEC.md](SPEC.md) | No |
 | SQL + SPARQL query workbench | [SPEC.md](SPEC.md) | VS Code + CLI (v0.5+) |
-| Semantic diff + Git branch compare | [SEMANTIC_DIFF_SPEC.md](SEMANTIC_DIFF_SPEC.md) | Yes |
+| Semantic diff + branch/version compare | [SEMANTIC_DIFF_SPEC.md](SEMANTIC_DIFF_SPEC.md) | Yes |
 | Safe IRI rename across workspace | [ROADMAP.md](ROADMAP.md) v0.8 | Yes |
 | Graph visualization (class, property, import, neighborhood) | [ROADMAP.md](ROADMAP.md) v0.7 | Yes |
 | Documentation export (Markdown + HTML) | [ROADMAP.md](ROADMAP.md) v0.9 | No |
@@ -103,9 +103,9 @@
 
 **“Compete with Protégé” at v1.0 means:**
 
-- Primary IDE for **ontology engineering in Git** (general OWL 2 DL + OBO maintenance).
+- Primary IDE for **ontology engineering in VS Code** (general OWL 2 DL + OBO maintenance).
 - **Hybrid authoring** (forms + Manchester) and **real reasoning** match Protégé’s core loop.
-- **Git semantic diff, CI, and VS Code integration** exceed Protégé.
+- **Semantic diff, CI, and VS Code integration** exceed Protégé.
 
 **It does not mean:**
 

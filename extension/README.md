@@ -132,7 +132,7 @@ Open a `.ttl` (or other supported) file and use standard VS Code navigation:
 | **OntoCode: Migrate Namespace** | Replace a namespace base IRI workspace-wide |
 | **OntoCode: Move Entity** | Move an entity block to another `.ttl` file |
 | **OntoCode: Extract Module** | Extract entities into a new module file |
-| **OntoCode: Semantic Diff…** | Compare git refs or workspace snapshots (breaking-change heuristics) |
+| **OntoCode: Semantic Diff…** | Compare versions, directories, or workspace snapshots (breaking-change heuristics) |
 
 ---
 

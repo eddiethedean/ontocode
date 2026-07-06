@@ -6,7 +6,7 @@ Use this page to decide **when OntoCode fits**, **when to keep Protégé**, and 
 
 | Your situation | Recommendation |
 |----------------|----------------|
-| Git + VS Code + Turtle-primary ontologies | **Adopt OntoCode** (pilot IDE + CI) |
+| VS Code + Turtle-primary ontologies | **Adopt OntoCode** (pilot IDE + CI) |
 | CI lint/consistency gates without desktop Protégé | **Adopt OntoCore CLI** (`ontocore validate` / `classify`) |
 | Full OWL 2 DL axiom catalog + property chain editing | **Split workflow** — use OntoCode for DL classification; keep Protégé for chains and full axiom editing until v1.0 |
 | OBO release pipelines with in-editor OBO write-back | **Keep Protégé** or external OBO tools; use OntoCode for index/ROBOT CI |
@@ -18,7 +18,7 @@ Use this page to decide **when OntoCode fits**, **when to keep Protégé**, and 
 | Capability | Protégé | OntoCode v0.11 | Notes |
 |------------|---------|---------------|-------|
 | OWL 2 DL classification | Yes | Yes (`dl` / `auto` via OntoLogos 1.0) | Explanations EL-first; see [Reasoner guide](reasoner.md) |
-| Turtle authoring in Git | Manual / plugins | Native write-back | OntoCode inspector + patches |
+| Turtle authoring | Manual / plugins | Native write-back | OntoCode inspector + patches |
 | RDF/XML in-place editing | Yes | Read-only index | Write-back Turtle only |
 | Manchester axiom editing | Full | MVP subset | Disjoint shipped; chains view-only |
 | Disjoint classes | Yes | Yes (v0.9) | Via Manchester / patch JSON |
@@ -26,7 +26,7 @@ Use this page to decide **when OntoCode fits**, **when to keep Protégé**, and 
 | OBO format | Native | Index + syntax highlight | No OBO write-back in VS Code |
 | ROBOT integration | Common | CLI wrapper | Java + `robot` required |
 | SQL/SPARQL over repo | Plugins / external | Built-in workbench + CLI | |
-| Git-based PR workflow | Weak default | Strong default | Semantic diff v0.10 target |
+| Semantic diff in pull requests | Weak default | Strong default | Shipped v0.10 |
 | Workspace refactoring | Limited | Rename, migrate, move, extract | Turtle only; preview + apply |
 | CI automation | External scripts | `ontocore validate` / `classify` | Documented exit codes |
 | Local-first / no telemetry | Desktop app | Yes | No cloud upload by default |
@@ -47,7 +47,7 @@ Docs: [CI integration](../ci-integration.md) · [Production evidence protocol](p
 
 1. Author `.ttl` in OntoCode; validate in CI
 2. Use Protégé for DL review, property chains, or OBO edits that OntoCode does not support
-3. Standardize on Turtle in Git where possible
+3. Standardize on Turtle for shared authoring where possible
 4. Run 4–8 week pilot — [Production readiness](production-readiness.md)
 
 Docs: [Protégé coexistence](protege-coexistence.md)

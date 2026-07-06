@@ -8,7 +8,7 @@ hide:
 
 <p class="oc-hero-kicker">OntoCode documentation · v0.11.1</p>
 
-<p class="oc-hero-title">Ontology-as-code for Git and VS Code</p>
+<p class="oc-hero-title">Ontology IDE for VS Code</p>
 
 <p class="oc-hero-lead">
 OntoCode is a modern ontology IDE for VS Code, powered by <strong>OntoCore</strong> — the Rust semantic workspace engine for indexing, queries, diagnostics, and reasoning.

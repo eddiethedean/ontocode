@@ -2,7 +2,7 @@
 
 > Part of **OntoCore** (semantic workspace engine).
 
-Semantic ontology diff for [OntoCore](https://github.com/eddiethedean/ontocode) — compare indexed catalogs, git refs, or directories with breaking-change heuristics.
+Semantic ontology diff for [OntoCore](https://github.com/eddiethedean/ontocode) — compare indexed catalogs, version refs, or directories with breaking-change heuristics.
 
 ## Install
 

@@ -22,7 +22,7 @@ ontocore diff --left-ref main --right-ref feature --format markdown --breaking-o
 ontocore docs /path/to/ontologies --format markdown --output ./docs-out
 ```
 
-Semantic diff compares indexed catalogs (directories, git refs, or two `Workspace` snapshots). See [migration v0.10](https://github.com/eddiethedean/ontocode/blob/main/docs/migration/v0.10.md) and [migration v0.11](https://github.com/eddiethedean/ontocode/blob/main/docs/migration/v0.11.md) for docs export and import patch ops.
+Semantic diff compares indexed catalogs (directories, version refs, or two `Workspace` snapshots). See [migration v0.10](https://github.com/eddiethedean/ontocode/blob/main/docs/migration/v0.10.md) and [migration v0.11](https://github.com/eddiethedean/ontocode/blob/main/docs/migration/v0.11.md) for docs export and import patch ops.
 
 ## Documentation
 

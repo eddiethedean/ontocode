@@ -13,14 +13,14 @@ Available in **v0.10+** via:
 
 ## VS Code
 
-1. Open a **trusted** workspace with ontology files in a **git repository** (for ref-based diffs).
+1. Open a **trusted** workspace with ontology files.
 2. Run **OntoCode: Semantic Diff…** from the Command Palette.
-3. Choose left/right refs (e.g. `HEAD` vs `WORKTREE`, or `main` vs current branch).
+3. Choose left/right refs (e.g. `HEAD` vs `WORKTREE`, or `main` vs current branch) when your workspace is version-controlled; otherwise compare directories on disk via the CLI.
 4. Review added, removed, and changed entities in the panel. Breaking changes are highlighted when heuristics apply.
 
 The panel uses the same React webview stack as the Query Workbench — see [Webview protocol](../webview-protocol.md).
 
-!!! tip "Not a git repo?"
+!!! tip "No version control?"
     Compare two directories on disk with the CLI: `ontocore diff --left ./a --right ./b`.
 
 ## CLI quick start

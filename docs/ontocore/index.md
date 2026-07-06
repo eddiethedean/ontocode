@@ -27,7 +27,7 @@ OntoCore indexes ontology workspaces on disk and provides:
 - Refactoring (rename, migrate, move, extract)
 - Reasoning integration via [OntoLogos](https://github.com/eddiethedean/ontologos)
 - Patch write-back for Turtle
-- Semantic diff (git refs, directories, breaking-change heuristics)
+- Semantic diff (version refs, directories, breaking-change heuristics)
 - Documentation export (`ontocore docs`)
 - CLI (`ontocore`) and LSP (`ontocore-lsp`)
 

@@ -24,7 +24,7 @@ OntoCode v0.11 is **not** documented as a general-availability replacement for P
 | Developer IDE for Turtle authoring | **Pilot** | Turtle write-back only; pre-1.0 extension APIs |
 | Workspace refactoring (rename, migrate, move, extract) | **Pilot** | Turtle only; preview before apply — [Refactoring guide](refactoring.md) |
 | Semantic diff in PR review | **Pilot** | `ontocore diff` + VS Code panel — [Semantic diff](../ontocode/semantic-diff.md) |
-| Ontology browse/query in VS Code with Git | **Pilot** | Local-first; multi-root supported — [enterprise deployment](enterprise-deployment.md) |
+| Ontology browse/query in VS Code | **Pilot** | Local-first; multi-root supported — [enterprise deployment](enterprise-deployment.md) |
 | Air-gapped VS Code install | **Pilot** | VSIX + SHA256 — [enterprise deployment](enterprise-deployment.md) |
 | OBO index + ROBOT CLI in CI | **Pilot** | Index `.obo`; `ontocore robot validate` — requires Java + `robot` on PATH — [ROBOT interop](robot-interop.md) |
 | Replace Protégé for full OWL 2 DL engineering | **Not supported** | DL classification shipped; full axiom catalog, chains, OBO write-back remain v1.0 — [Protégé coexistence](protege-coexistence.md) |
@@ -90,7 +90,7 @@ Developers (VS Code + OntoCode VSIX)
   ontocore-lsp (stdio, local)
         │
         ▼
-  Git repo (.ttl primary, .obo index, .owl read-only)
+  Ontology workspace (.ttl primary, .obo index, .owl read-only)
         │
         ▼
   CI pipeline (ontocore validate / classify / robot)

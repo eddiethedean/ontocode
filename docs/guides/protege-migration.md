@@ -6,7 +6,7 @@ This guide helps ontology teams adopt OntoCode **v0.11** alongside or instead of
 
 **OntoCode fits well when you:**
 
-- Store ontologies in Git (Turtle, OWL, OBO)
+- Version-control ontology files (Turtle, OWL, OBO) when your team uses shared repositories
 - Want VS Code editing, CI validation, and semantic diff
 - Can edit **Turtle (`.ttl`)** for write-back (other formats are read-only in the inspector)
 
@@ -16,7 +16,7 @@ This guide helps ontology teams adopt OntoCode **v0.11** alongside or instead of
 - **Property chain editing** or a full DL axiom catalog UI
 - Desktop-only workflows with no Git/CI requirement
 
-Many teams use **both**: Protégé for heavy axiom authoring, OntoCode for browse, lint, diff, and CI in Git. See [Protégé coexistence](protege-coexistence.md).
+Many teams use **both**: Protégé for heavy axiom authoring, OntoCode for browse, lint, diff, and CI validation. See [Protégé coexistence](protege-coexistence.md).
 
 ## Day 1 — Install and open your project
 

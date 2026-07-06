@@ -130,7 +130,7 @@ OntoCode does **not** ship centralized audit logging. For compliance:
 
 | Event | Suggested org control |
 |-------|----------------------|
-| Ontology edits | Git commit history (write-back modifies `.ttl` on disk) |
+| Ontology edits | File change history on disk (write-back modifies `.ttl`); use version control if your team requires audit trails |
 | CI validation | Pipeline logs for `ontocore validate` / `classify` exit codes |
 | Extension install | MDM/Marketplace audit logs |
 | Vulnerability response | Subscribe to GitHub Security Advisories for `eddiethedean/ontocode` |
@@ -143,13 +143,13 @@ flowchart LR
     Artifactory[Internal artifact mirror]
     Dev[Developer VS Code]
     CI[CI runner Linux x64]
-    Git[Git ontology repo]
+    Ontology[Ontology project]
   end
   Artifactory -->|VSIX NOTICES CLI| Dev
   Artifactory -->|ontocore binary| CI
   Dev -->|stdio| LSP[ontocore-lsp]
-  LSP --> Git
-  CI --> Git
+  LSP --> Ontology
+  CI --> Ontology
 ```
 
 ## Related

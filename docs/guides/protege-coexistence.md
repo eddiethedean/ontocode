@@ -39,12 +39,12 @@ Canonical capability matrix: [What ships today](../SHIPPED.md). Decision matrix:
 2. **Validate** in CI with `ontocore validate` and optionally `ontocore classify --profile el`
 3. **Run ROBOT** in CI when needed — [ROBOT interop](robot-interop.md)
 4. **Review** DL-heavy axioms, property chains, or OBO-specific edits in Protégé when required
-5. **Commit** `.ttl` changes through Git pull requests
+5. **Share** `.ttl` changes through pull requests when your team uses version control
 
 ## File format notes
 
 - OntoCode indexes RDF/XML, JSON-LD, OBO, and N-Triples but **writes Turtle only**
-- Prefer Turtle in Git for shared authoring; use Protégé round-trip when teams still maintain OWL/XML
+- Prefer Turtle for shared authoring; use Protégé round-trip when teams still maintain OWL/XML
 - Example round-trip fixtures: `examples/protege-roundtrip/` in the repository
 
 ## Expectations on reasoning

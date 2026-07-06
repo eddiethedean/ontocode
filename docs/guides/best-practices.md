@@ -39,7 +39,7 @@ Examples: [CI integration](../ci-integration.md)
 
 ## Protégé teams
 
-Use OntoCode for Turtle editing in Git, CI validation, and EL classification. Keep Protégé for full DL editing until v1.0 — see [Protégé coexistence](protege-coexistence.md).
+Use OntoCode for Turtle editing in VS Code, CI validation, and EL classification. Keep Protégé for full DL editing until v1.0 — see [Protégé coexistence](protege-coexistence.md).
 
 ## Rust embedding
 

@@ -80,7 +80,7 @@ Guide: [Reasoner](../guides/reasoner.md)
 | Panel | Purpose |
 |-------|---------|
 | **Refactor Preview** | Diff before rename, migrate, move, or extract module |
-| **Semantic Diff** | Compare git refs or directories — axiom-level changes and breaking-change flags |
+| **Semantic Diff** | Compare versions, directories, or workspace snapshots — axiom-level changes and breaking-change flags |
 
 Guides: [Refactoring](../guides/refactoring.md) · [Semantic diff](semantic-diff.md)
 

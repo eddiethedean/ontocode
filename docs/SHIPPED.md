@@ -39,7 +39,7 @@
 | Turtle imports add/remove | Yes (Manage Imports panel) | `ontocore patch` (`add_import`, `remove_import`) |
 | Documentation export (Markdown / HTML) | — | `ontocore docs` |
 | Patch preview | Inspector / Manchester editor / refactor preview / imports panel | `ontocore patch --preview` |
-| Semantic diff (git / workspace compare) | Semantic Diff panel (React) | `ontocore diff` |
+| Semantic diff (versions / workspace compare) | Semantic Diff panel (React) | `ontocore diff` |
 | React webview UI | Inspector, graphs, Query Workbench, Manchester editor, refactor preview, semantic diff, imports | — |
 
 ## Format support

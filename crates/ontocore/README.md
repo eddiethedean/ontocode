@@ -23,7 +23,7 @@ for row in &result.rows {
 | Module | Role |
 |--------|------|
 | `workspace` | High-level `Workspace::open` API — incremental index, diff, import graph |
-| `diff` | Semantic catalog diff, git refs, breaking-change heuristics |
+| `diff` | Semantic catalog diff, version refs, breaking-change heuristics |
 | `catalog` | Index builder and entity catalog |
 | `query` | SQL virtual tables and SPARQL |
 | `diagnostics` | Lint rule collection |

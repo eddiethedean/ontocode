@@ -80,6 +80,36 @@ export function createOntoCodeTestHooks(): OntoCodeTestHooks {
       );
     },
 
+    async openEntity(iri: string): Promise<void> {
+      await vscode.commands.executeCommand("ontocode.openEntity", iri);
+    },
+
+    getInspectorLoadedIri(): string | undefined {
+      return EntityInspectorPanel.currentPanel?.getLoadedIriForTests();
+    },
+
+    getInspectorPanelTitle(): string | undefined {
+      return EntityInspectorPanel.currentPanel?.getPanelTitleForTests();
+    },
+
+    async waitForInspectorIri(iri: string, timeoutMs = 20_000): Promise<void> {
+      const deadline = Date.now() + timeoutMs;
+      while (Date.now() < deadline) {
+        if (EntityInspectorPanel.currentPanel?.getLoadedIriForTests() === iri) {
+          return;
+        }
+        await sleep(100);
+      }
+      const loaded = EntityInspectorPanel.currentPanel?.getLoadedIriForTests();
+      throw new Error(
+        `inspector did not load ${iri} before timeout (last IRI: ${loaded ?? "none"})`
+      );
+    },
+
+    getInspectorPanelRef(): object | undefined {
+      return EntityInspectorPanel.currentPanel;
+    },
+
     async disposeAllPanels(): Promise<void> {
       EntityInspectorPanel.currentPanel?.disposeForTests();
       QueryWorkbenchPanel.current?.disposeForTests();

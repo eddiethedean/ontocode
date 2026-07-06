@@ -1,15 +1,7 @@
 import * as assert from "assert";
-import * as path from "path";
 import * as vscode from "vscode";
 import { LanguageClient } from "vscode-languageclient/node";
-
-function fixturesWorkspaceUri(): string {
-  const fromEnv = process.env.ONTOCODE_TEST_FIXTURES;
-  if (fromEnv) {
-    return vscode.Uri.file(fromEnv).toString();
-  }
-  return vscode.Uri.file(path.resolve(__dirname, "..", "..", "..", "..", "fixtures")).toString();
-}
+import { FIXTURE_IRIS, fixturesWorkspaceUri } from "./helpers";
 
 interface OntoCodeApi {
   getClient(): LanguageClient | undefined;
@@ -65,7 +57,7 @@ suite("OntoCode in VS Code", () => {
 
     const snapshot = await api.getCatalogSnapshot();
     const person = snapshot.entities.find(
-      (e) => e.iri === "http://example.org/people#Person"
+      (e) => e.iri === FIXTURE_IRIS.person
     );
     assert.ok(person, "Person class should be in catalog");
     assert.equal(person?.kind, "class");

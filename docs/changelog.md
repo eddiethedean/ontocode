@@ -4,6 +4,10 @@ Canonical source: [CHANGELOG.md on GitHub](https://github.com/eddiethedean/ontoc
 
 Migration guides: [Migration index](migration/README.md)
 
+## [0.11.3] - 2026-07-06
+
+**v0.11.3** — Patch — fixes Entity Inspector navigation when switching entities with a panel already open; adds VS Code e2e tests for inspector switching and workspace commands. See [CHANGELOG.md](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md).
+
 ## [0.11.2] - 2026-07-06
 
 **v0.11.2** — Patch — fixes React webview panel routing when VS Code pre-populates `location.search` (Entity Inspector no longer stuck on Smoke panel); documentation adoption audit. See [CHANGELOG.md](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md).

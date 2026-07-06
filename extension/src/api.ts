@@ -20,6 +20,11 @@ export interface OntoCodeTestHooks {
   waitForQueryWorkbenchReady(timeoutMs?: number): Promise<void>;
   disposeAllPanels(): Promise<void>;
   assertWebviewHtmlRoutesPanel(html: string, panel: PanelKind): void;
+  openEntity(iri: string): Promise<void>;
+  getInspectorLoadedIri(): string | undefined;
+  getInspectorPanelTitle(): string | undefined;
+  waitForInspectorIri(iri: string, timeoutMs?: number): Promise<void>;
+  getInspectorPanelRef(): object | undefined;
 }
 
 /** Extension activation API (used by VS Code integration tests). */

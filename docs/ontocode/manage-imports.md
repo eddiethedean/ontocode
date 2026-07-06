@@ -2,7 +2,7 @@
 
 The **Manage Imports** panel lets you add and remove `owl:imports` declarations in **Turtle (`.ttl`)** ontology headers without hand-editing import lines.
 
-Requires OntoCode **v0.11.2+** and a trusted workspace.
+Requires OntoCode **v0.11.3+** and a trusted workspace.
 
 ## Open the panel
 

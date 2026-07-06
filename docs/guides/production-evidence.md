@@ -14,7 +14,7 @@ Canonical limits: [workspace limits](../workspace-limits.md). Pilot criteria: [p
 
 ## Prerequisites
 
-- Pin OntoCore **0.11.2** — `cargo install ontocore-cli --locked --version 0.11.2` or release binary with SHA256 verification — [release integrity](../release-integrity.md)
+- Pin OntoCore **0.11.3** — `cargo install ontocore-cli --locked --version 0.11.3` or release binary with SHA256 verification — [release integrity](../release-integrity.md)
 - A **representative clone** of your production ontology tree (not sanitized tutorial data)
 - Record host OS, CPU, RAM, and CI runner specs
 

@@ -17,6 +17,7 @@
     "src/treeviews/explorerLogic.ts",
     "src/webviews/webviewBootstrap.ts",
     "src/webviews/webviewBootstrap.test.ts",
+    "src/webviews/inspectorReveal.ts",
     "src/webviews/messages.ts",
     "src/test/fixtureSnapshot.ts",
     "src/test/fixture-catalog.snapshot.json"

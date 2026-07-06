@@ -1,21 +1,15 @@
 import * as assert from "assert";
-import * as path from "path";
 import * as vscode from "vscode";
 import { LanguageClient } from "vscode-languageclient/node";
-
-function fixturesWorkspaceUri(): string {
-  const fromEnv = process.env.ONTOCODE_TEST_FIXTURES;
-  if (fromEnv) {
-    return vscode.Uri.file(fromEnv).toString();
-  }
-  return vscode.Uri.file(path.resolve(__dirname, "..", "..", "..", "..", "fixtures")).toString();
-}
+import { FIXTURE_IRIS, fixturesWorkspaceUri } from "./helpers";
 
 interface OntoCodeTestHooks {
   openEntityInspector(iri: string): Promise<void>;
+  openEntity(iri: string): Promise<void>;
   getInspectorWebviewHtml(): string | undefined;
   assertInspectorHtmlRoutesPanel(): void;
   waitForInspectorReady(timeoutMs?: number): Promise<void>;
+  waitForInspectorIri(iri: string, timeoutMs?: number): Promise<void>;
   openQueryWorkbench(): Promise<void>;
   getQueryWorkbenchWebviewHtml(): string | undefined;
   assertQueryWorkbenchHtmlRoutesPanel(): void;
@@ -50,7 +44,7 @@ suite("OntoCode React webviews", () => {
   test("entity inspector HTML routes React to inspector panel", async function () {
     this.timeout(60_000);
     const workspaceUri = fixturesWorkspaceUri();
-    const personIri = "http://example.org/people#Person";
+    const personIri = FIXTURE_IRIS.person;
 
     await api.indexWorkspace(workspaceUri);
     await api.__test.openEntityInspector(personIri);
@@ -69,7 +63,7 @@ suite("OntoCode React webviews", () => {
   test("entity inspector webview reports ready for inspector panel", async function () {
     this.timeout(60_000);
     const workspaceUri = fixturesWorkspaceUri();
-    const personIri = "http://example.org/people#Person";
+    const personIri = FIXTURE_IRIS.person;
 
     await api.indexWorkspace(workspaceUri);
     await api.__test.disposeAllPanels();
@@ -92,5 +86,25 @@ suite("OntoCode React webviews", () => {
     await api.__test.disposeAllPanels();
     await api.__test.openQueryWorkbench();
     await api.__test.waitForQueryWorkbenchReady();
+  });
+
+  test("second entity navigation keeps inspector panel routing", async function () {
+    this.timeout(60_000);
+    const workspaceUri = fixturesWorkspaceUri();
+
+    await api.indexWorkspace(workspaceUri);
+    await api.__test.openEntityInspector(FIXTURE_IRIS.person);
+    await api.__test.waitForInspectorReady();
+    await api.__test.openEntity(FIXTURE_IRIS.organization);
+    await api.__test.waitForInspectorIri(FIXTURE_IRIS.organization);
+
+    api.__test.assertInspectorHtmlRoutesPanel();
+    const html = api.__test.getInspectorWebviewHtml();
+    assert.ok(html);
+    assert.doesNotMatch(
+      html!,
+      /SmokePanel|webview foundation is active/i,
+      "inspector must not fall back to smoke panel after entity switch"
+    );
   });
 });

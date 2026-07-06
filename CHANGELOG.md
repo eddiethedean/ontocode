@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.11.3] - 2026-07-06
+
+### Fixed
+
+- **Entity Inspector navigation** — opening a new entity while an inspector is already open now reuses the panel and loads the new entity (stale `requestId` guard no longer blocks newer navigation)
+
+### Added
+
+- **VS Code e2e tests** — inspector entity switching, workspace index/refresh commands, and smoke-panel regression coverage
+
+### Changed
+
+- Workspace package and all `ontocore-*` crates bumped to **0.11.3**
+- Extension marketplace version **0.11.3** (VS Code Marketplace + Open VSX)
+
 ## [0.11.2] - 2026-07-06
 
 ### Fixed

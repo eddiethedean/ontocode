@@ -6,7 +6,7 @@ hide:
 
 <div class="oc-hero" markdown>
 
-<p class="oc-hero-kicker">OntoCode documentation · v0.11.2</p>
+<p class="oc-hero-kicker">OntoCode documentation · v0.11.3</p>
 
 <p class="oc-hero-title">Ontology IDE for VS Code</p>
 
@@ -121,7 +121,7 @@ You do **not** need to clone this repo to use the extension or `cargo install on
 
 ## What ships today
 
-**v0.11.2 highlights:** Turtle completion, diagnostic quick fixes, Manage Imports, semantic diff (v0.10+), `ontocore docs` export, EL–DL reasoning (`dl` / `auto` profiles), multi-root indexing.
+**v0.11.3 highlights:** Turtle completion, diagnostic quick fixes, Manage Imports, semantic diff (v0.10+), `ontocore docs` export, EL–DL reasoning (`dl` / `auto` profiles), multi-root indexing.
 
 Full matrix: **[What ships today](SHIPPED.md)** (canonical — do not rely on this summary alone).
 

@@ -1,6 +1,6 @@
 # Patch reference (OntoCore v0.11)
 
-> **Status:** Documents behavior in **OntoCore v0.11.2**. Pre-1.0 APIs may change.
+> **Status:** Documents behavior in **OntoCore v0.11.3**. Pre-1.0 APIs may change.
 > Canonical feature list: [What ships today](SHIPPED.md).
 
 Turtle write-back uses a JSON array of patch operations. The CLI (`ontocore patch`) and LSP (`ontocore/applyAxiomPatch`) accept the same format.

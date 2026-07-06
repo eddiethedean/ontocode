@@ -10,6 +10,7 @@ import { documentUriInWorkspace } from "../utils/workspacePath";
 import { PanelHost } from "./panelHost";
 import type { EntityDetailPayload, WebviewMessage } from "./messages";
 import { GraphPanel } from "./graphPanel";
+import { acceptInspectorRevealRequest } from "./inspectorReveal";
 
 type RefreshFn = () => Promise<void>;
 
@@ -67,6 +68,7 @@ export class EntityInspectorPanel {
         EntityInspectorPanel.currentPanel = undefined;
       } else {
         existing.reveal(detail, classOptions, requestId);
+        existing.host.panel.reveal();
         return existing;
       }
     }
@@ -95,7 +97,7 @@ export class EntityInspectorPanel {
     classOptions: string[] = [],
     requestId?: number
   ): void {
-    if (requestId !== undefined && requestId !== this.activeRequestId && this.activeRequestId !== 0) {
+    if (!acceptInspectorRevealRequest(this.activeRequestId, requestId)) {
       return;
     }
     if (requestId !== undefined) {
@@ -271,10 +273,20 @@ export class EntityInspectorPanel {
     return this.host.isWebviewReady();
   }
 
-  disposeForTests(): void {
+    disposeForTests(): void {
     if (!this.host.isDisposed) {
       this.host.panel.dispose();
     }
+  }
+
+  /** @internal VS Code integration tests */
+  getLoadedIriForTests(): string | undefined {
+    return this.iri;
+  }
+
+  /** @internal VS Code integration tests */
+  getPanelTitleForTests(): string {
+    return this.host.panel.title;
   }
 }
 

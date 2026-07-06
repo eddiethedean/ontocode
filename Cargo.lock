@@ -1052,7 +1052,7 @@ checksum = "384b8ab6d37215f3c5301a95a4accb5d64aa607f1fcb26a11b5303878451b4fe"
 
 [[package]]
 name = "ontocode"
-version = "0.11.2"
+version = "0.11.3"
 dependencies = [
  "ontocore",
  "ontocore-catalog",
@@ -1068,7 +1068,7 @@ dependencies = [
 
 [[package]]
 name = "ontocore"
-version = "0.11.2"
+version = "0.11.3"
 dependencies = [
  "ontocore-catalog",
  "ontocore-core",
@@ -1086,7 +1086,7 @@ dependencies = [
 
 [[package]]
 name = "ontocore-catalog"
-version = "0.11.2"
+version = "0.11.3"
 dependencies = [
  "hex",
  "ontocore-core",
@@ -1103,7 +1103,7 @@ dependencies = [
 
 [[package]]
 name = "ontocore-cli"
-version = "0.11.2"
+version = "0.11.3"
 dependencies = [
  "anyhow",
  "clap",
@@ -1121,7 +1121,7 @@ dependencies = [
 
 [[package]]
 name = "ontocore-core"
-version = "0.11.2"
+version = "0.11.3"
 dependencies = [
  "hex",
  "ignore",
@@ -1135,7 +1135,7 @@ dependencies = [
 
 [[package]]
 name = "ontocore-diagnostics"
-version = "0.11.2"
+version = "0.11.3"
 dependencies = [
  "ontocore-core",
  "regex",
@@ -1144,7 +1144,7 @@ dependencies = [
 
 [[package]]
 name = "ontocore-diff"
-version = "0.11.2"
+version = "0.11.3"
 dependencies = [
  "git2",
  "ontocore-catalog",
@@ -1157,7 +1157,7 @@ dependencies = [
 
 [[package]]
 name = "ontocore-docs"
-version = "0.11.2"
+version = "0.11.3"
 dependencies = [
  "minijinja",
  "ontocore-catalog",
@@ -1169,7 +1169,7 @@ dependencies = [
 
 [[package]]
 name = "ontocore-lsp"
-version = "0.11.2"
+version = "0.11.3"
 dependencies = [
  "crossbeam-channel",
  "lsp-server",
@@ -1191,7 +1191,7 @@ dependencies = [
 
 [[package]]
 name = "ontocore-owl"
-version = "0.11.2"
+version = "0.11.3"
 dependencies = [
  "horned-owl",
  "ontocore-core",
@@ -1204,7 +1204,7 @@ dependencies = [
 
 [[package]]
 name = "ontocore-parser"
-version = "0.11.2"
+version = "0.11.3"
 dependencies = [
  "fastobo",
  "ontocore-core",
@@ -1217,7 +1217,7 @@ dependencies = [
 
 [[package]]
 name = "ontocore-query"
-version = "0.11.2"
+version = "0.11.3"
 dependencies = [
  "csv",
  "ontocore-catalog",
@@ -1231,7 +1231,7 @@ dependencies = [
 
 [[package]]
 name = "ontocore-reasoner"
-version = "0.11.2"
+version = "0.11.3"
 dependencies = [
  "hex",
  "ontocore-catalog",
@@ -1255,7 +1255,7 @@ dependencies = [
 
 [[package]]
 name = "ontocore-refactor"
-version = "0.11.2"
+version = "0.11.3"
 dependencies = [
  "ontocore-catalog",
  "ontocore-core",
@@ -1267,7 +1267,7 @@ dependencies = [
 
 [[package]]
 name = "ontocore-robot"
-version = "0.11.2"
+version = "0.11.3"
 dependencies = [
  "thiserror 2.0.18",
 ]
@@ -2696,18 +2696,18 @@ dependencies = [
 
 [[package]]
 name = "zerocopy"
-version = "0.8.52"
+version = "0.8.53"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ce1022995ff5ff5d841ad7d994facc23098cd40152f2c1d11cd607c6f530653f"
+checksum = "75726053136156d419e285b9b7eddaaea9e3fea6ce32eed44a89901f0bd98de1"
 dependencies = [
  "zerocopy-derive",
 ]
 
 [[package]]
 name = "zerocopy-derive"
-version = "0.8.52"
+version = "0.8.53"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1ae7f38b72ec2a254e2b87ef277cf2cd4fb97cbebf944faa6f33354da0867930"
+checksum = "4714fd92cf900833d49538023a9b3915155210801d1c1169eba513b2addefd71"
 dependencies = [
  "proc-macro2",
  "quote",

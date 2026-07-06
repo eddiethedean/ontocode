@@ -1,6 +1,6 @@
 # ROBOT interop
 
-OntoCore v0.11.2 wraps the [ROBOT](http://robot.obolibrary.org/) CLI for validate, merge, and report workflows. ROBOT runs as an **external Java process** — OntoCore does not embed a JVM.
+OntoCore v0.11.3 wraps the [ROBOT](http://robot.obolibrary.org/) CLI for validate, merge, and report workflows. ROBOT runs as an **external Java process** — OntoCore does not embed a JVM.
 
 Canonical capability matrix: [What ships today](../SHIPPED.md).
 
@@ -10,7 +10,7 @@ Canonical capability matrix: [What ships today](../SHIPPED.md).
 |-------------|-------|
 | **Java** | ROBOT requires a JRE on the agent or developer machine |
 | **`robot` on PATH** | Or set an explicit path (see below) |
-| **OntoCore 0.11.2+** | `ontocore robot` subcommand or LSP `ontocore/runRobot` |
+| **OntoCore 0.11.3+** | `ontocore robot` subcommand or LSP `ontocore/runRobot` |
 
 Install ROBOT from [robot.obolibrary.org](http://robot.obolibrary.org/).
 
@@ -45,7 +45,7 @@ LSP clients can call `ontocore/runRobot` — see [LSP API](../lsp-api.md).
 
 ```yaml
 - name: Install OntoCore
-  run: cargo install ontocore-cli --locked --version 0.11.2
+  run: cargo install ontocore-cli --locked --version 0.11.3
 
 - name: OntoCore validate
   run: ontocore validate ./ontologies

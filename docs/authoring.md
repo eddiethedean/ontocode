@@ -17,6 +17,7 @@ OntoCode provides **Turtle write-back** for simple and **Manchester** ontology e
 | Add / remove complex `SubClassOf` (Manchester) | `add_complex_sub_class_of`, `remove_complex_sub_class_of` |
 | Add / remove / set equivalent class (Manchester) | `add_equivalent_class`, `remove_equivalent_class`, `set_equivalent_class` |
 | Add / remove disjoint class (named IRI) | `add_disjoint_class`, `remove_disjoint_class` |
+| Add / remove ontology import | `add_import`, `remove_import` |
 | Set deprecated flag | `set_deprecated` |
 
 Full JSON reference: [patch-reference.md](patch-reference.md).
@@ -48,6 +49,24 @@ For complex class expressions (restrictions, `and`/`or`, cardinality):
 7. **Preview** shows the Turtle fragment; **Apply** writes the patch.
 
 Manchester scope: named classes, `and`/`or`, `some`/`only`, `min`/`max`/`exact` cardinality, nesting, and **DisjointClasses** via IRI patch ops. Domain, range, and property chains appear in the axiom catalog (chains are view-only).
+
+## Manage Imports (v0.11)
+
+Add or remove `owl:imports` in Turtle ontology headers:
+
+1. **Ontologies** view → right-click a `.ttl` file → **Manage Imports**
+2. Add an import IRI or remove an existing one; preview and apply
+
+Guide: [Manage Imports](ontocode/manage-imports.md)
+
+## Editor completion and quick fixes (v0.11)
+
+In `.ttl` files, OntoCode offers:
+
+- **Completion** — triggered on `:`, `<`, and `@` for prefixes, QNames, and IRIs
+- **Quick fixes** — lightbulb actions for `undefined_prefix`, `missing_label`, and `broken_import` diagnostics
+
+See [LSP API](lsp-api.md#textdocumentcompletion-v011) and [Troubleshooting](troubleshooting.md).
 
 ## Workspace refactoring
 

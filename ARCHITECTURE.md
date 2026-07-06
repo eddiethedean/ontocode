@@ -4,12 +4,12 @@
 >
 > **Contributor crate layout:** [Implementation architecture](docs/design/ARCHITECTURE.md) (internal modules, not a user capability list).
 >
-> **v0.10 ships today:** OntoCode (VS Code), OntoCore (CLI/LSP/library), semantic diff, incremental indexing, Ontologos reasoning, ROBOT CLI wrappers.
+> **v0.11 ships today:** OntoCode (VS Code), OntoCore (CLI/LSP/library), Turtle completion, diagnostic quick fixes, Manage Imports, `ontocore docs`, semantic diff, incremental indexing, Ontologos reasoning, ROBOT CLI wrappers.
 > **Planned v1.0 (not installable yet):** plugin host, language SDKs, MCP server, owlmake-style workflow plugins.
 > Canonical capability matrix: [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/).
 
 ```
-External Workflow Plugins (v1.0 target)  ← not shipped in v0.10
+External Workflow Plugins (v1.0 target)  ← not shipped in v0.11
 ├── owlmake (reference design)
 ├── ROBOT / ODK workflow adapters
 └── Future build, validation, doc plugins

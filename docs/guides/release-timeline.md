@@ -42,7 +42,7 @@ Canonical forward plan: [Platform roadmap](../roadmap.md). Engineering milestone
 
 ## How to plan enterprise adoption without a v1.0 date
 
-1. **Now (v0.10):** CI gates + controlled IDE pilot — [production readiness](production-readiness.md)
+1. **Now (v0.11):** CI gates + controlled IDE pilot — [production readiness](production-readiness.md)
 2. **Run** [production evidence protocol](production-evidence.md) on your corpus
 3. **Re-evaluate** at each pinned minor bump using [migration index](../migration/README.md)
 4. **Do not** retire Protégé for DL/OBO workflows until parity matrix items you need are green in SHIPPED

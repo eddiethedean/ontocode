@@ -16,4 +16,4 @@ Design documents, ADRs, and backlogs live under [design/](design/README.md). The
 
 ## Plugin model
 
-The plugin host is a **v1.0 design** and is **not installable in v0.9**. See [plugin model](ontocore/plugin-model.md) and [PLUGIN_SPEC.md](design/PLUGIN_SPEC.md).
+The plugin host is a **v1.0 design** and is **not installable in v0.11**. See [plugin model](ontocore/plugin-model.md) and [PLUGIN_SPEC.md](design/PLUGIN_SPEC.md).

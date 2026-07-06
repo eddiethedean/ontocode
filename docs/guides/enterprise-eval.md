@@ -4,7 +4,7 @@ This page helps security, platform, and ontology teams decide whether OntoCode *
 
 Canonical capability matrix: [What ships today](../SHIPPED.md).
 
-## When not to use OntoCode (v0.10)
+## When not to use OntoCode (today)
 
 Prefer Protégé or other tools (or wait for v1.0) if you need:
 
@@ -27,7 +27,7 @@ Prefer Protégé or other tools (or wait for v1.0) if you need:
 | [LGPL compliance](lgpl-compliance.md) | Legal — horned-owl obligations |
 | [Protégé coexistence](protege-coexistence.md) | Ontology teams — split workflow with Protégé |
 
-## What v0.10.0 delivers
+## What ships today (v0.11.0)
 
 | Capability | Status |
 |------------|--------|
@@ -46,7 +46,10 @@ Prefer Protégé or other tools (or wait for v1.0) if you need:
 | Full OBO write-back in VS Code | **Not shipped** (v1.0 target) |
 | Semantic Git diff | **Shipped** (v0.10 — CLI, LSP, VS Code panel) |
 | Incremental indexing + multi-root workspaces | **Shipped** (v0.10) |
-| Optional disk index cache (`.ontocore/cache`) | **Shipped** (v0.10) |
+| Turtle completion + diagnostic quick fixes | **Shipped** (v0.11) |
+| Manage Imports UI + import patch ops | **Shipped** (v0.11) |
+| `ontocore docs` export | **Shipped** (v0.11) |
+| Open VSX / Cursor marketplace | **Shipped** (v0.11) |
 
 Full gap analysis: [Protégé parity matrix](../design/PROTEGE_PARITY.md).
 

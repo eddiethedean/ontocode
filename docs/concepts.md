@@ -17,13 +17,13 @@ Short glossary for engineers new to OWL/RDF who are evaluating OntoCode.
 
 ## Manchester syntax
 
-OntoCode v0.10 supports subclass, equivalent, and disjoint axioms via the Manchester editor — see [Manchester editor](ontocode/manchester-editor.md).
+OntoCode supports subclass, equivalent, and disjoint axioms via the Manchester editor — see [Manchester editor](ontocode/manchester-editor.md).
 
 ## Reasoning profiles
 
 | Profile | Typical use |
 |---------|-------------|
-| **EL** | OWL EL ontologies (default in OntoCode v0.10) |
+| **EL** | OWL EL ontologies (default in OntoCode) |
 | **RL** | OWL RL materialization |
 | **RDFS** | RDFS entailment |
 | **DL** | Full OWL 2 DL via OntoLogos 1.0 (`dl` profile) |

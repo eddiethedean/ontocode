@@ -38,6 +38,8 @@ OntoCode is a modern ontology IDE for VS Code, powered by <strong>OntoCore</stro
 
 <div class="oc-callout" markdown>
 
+**What's new in v0.11?** Turtle completion, diagnostic quick fixes, **Manage Imports**, `ontocore docs` export, Open VSX for Cursor — [Migration v0.10 → v0.11](migration/v0.11.md).
+
 **Not sure where to begin?** Pick a path:
 
 - **[First success (~10 min core path)](guides/first-success.md)** — install the extension, open sample ontologies, browse and edit.
@@ -193,6 +195,7 @@ See the full matrix: **[What ships today](SHIPPED.md)**.
 | Reasoner | [guides/reasoner.md](guides/reasoner.md) |
 | Query Workbench | [ontocode/query-workbench.md](ontocode/query-workbench.md) |
 | Manchester editor | [ontocode/manchester-editor.md](ontocode/manchester-editor.md) |
+| Manage Imports | [ontocode/manage-imports.md](ontocode/manage-imports.md) |
 | Install VS Code | [vscode-install.md](vscode-install.md) |
 | Getting started (CLI) | [getting-started.md](getting-started.md) |
 | CLI reference | [cli-reference.md](cli-reference.md) |

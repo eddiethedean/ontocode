@@ -150,7 +150,7 @@ EL/RL/RDFS shipped in **v0.6.0** (OntoLogos 0.9.0). Full OWL 2 DL classification
 
 **How does this compare to Protégé?**
 
-OntoCode v0.10 targets Git-native OWL/OBO workflows in VS Code: browse and edit Turtle, SQL/SPARQL queries, EL–DL reasoning, refactoring, graph views, and **semantic diff** (CLI, LSP, and VS Code panel). Gaps vs Protégé today include **full OBO write-back in the IDE**, **property chain editing**, and a **plugin host** — see the [Protégé parity matrix](design/PROTEGE_PARITY.md) and [What ships today](SHIPPED.md). For a first-week adoption path, see [Migrating from Protégé](guides/protege-migration.md).
+OntoCode targets Git-native OWL/OBO workflows in VS Code: browse and edit Turtle, SQL/SPARQL queries, EL–DL reasoning, refactoring, graph views, Turtle completion, diagnostic quick fixes, Manage Imports, and **semantic diff** (CLI, LSP, and VS Code panel). Gaps vs Protégé today include **full OBO write-back in the IDE**, **property chain editing**, and a **plugin host** — see the [Protégé parity matrix](design/PROTEGE_PARITY.md) and [What ships today](SHIPPED.md). For a first-week adoption path, see [Migrating from Protégé](guides/protege-migration.md).
 
 ## OBO and graphs
 

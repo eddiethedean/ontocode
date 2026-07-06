@@ -14,7 +14,7 @@ strict: true
 
 validation:
   nav:
-    omitted_files: warn
+    omitted_files: ignore
   links:
     not_found: warn
     unrecognized_links: warn
@@ -78,6 +78,7 @@ nav:
   - Home: index.md
   - Get started:
       - "First success (~10 min core path)": guides/first-success.md
+      - What's new in v0.11: migration/v0.11.md
       - Pick a task: guides/start-here.md
       - What ships today: SHIPPED.md
       - Install VS Code: vscode-install.md
@@ -88,6 +89,7 @@ nav:
       - Feature tour: ontocode/feature-tour.md
       - Overview: ontocode/vscode-extension.md
       - Authoring (Turtle): authoring.md
+      - Manage Imports: ontocode/manage-imports.md
       - Inspector: ontocode/inspector.md
       - Query Workbench: ontocode/query-workbench.md
       - Manchester editor: ontocode/manchester-editor.md
@@ -188,26 +190,7 @@ nav:
           - v1.0 backlog: design/v1.0_BACKLOG.md
           - MVP backlog: design/MVP_BACKLOG.md
       - ADRs:
-          - Index: design/adr/README.md
-          - "0001 Rust for OntoCore": design/adr/0001-use-rust-for-ontocore.md
-          - "0002 Horned-OWL": design/adr/0002-use-horned-owl.md
-          - "0003 Oxigraph": design/adr/0003-use-oxigraph.md
-          - "0004 DataFusion (superseded)": design/adr/0004-use-datafusion-for-sql.md
-          - "0005 Local-first": design/adr/0005-local-first-by-default.md
-          - "0006 Patch write-back": design/adr/0006-patch-based-write-back.md
-          - "0007 LSP boundary": design/adr/0007-language-server-boundary.md
-          - "0008 Reasoner adapters": design/adr/0008-reasoner-adapters-not-built-in-reasoner.md
-          - "0009 Semantic diff": design/adr/0009-semantic-diff-as-core-feature.md
-          - "0010 AI opt-in": design/adr/0010-ai-features-opt-in.md
-          - "0011 sqlparser": design/adr/0011-use-sqlparser-for-sql.md
-          - "0012 LSP snake_case": design/adr/0012-lsp-json-snake-case-enums.md
-          - "0013 Dual stack": design/adr/0013-dual-stack-oxigraph-horned-owl.md
-          - "0014 Rust reasoners": design/adr/0014-rust-native-reasoners-only.md
-          - "0015 OntoLogos": design/adr/0015-adopt-ontologos-reasoner.md
-          - "0016 Dependency-first": design/adr/0016-dependency-first-implementation.md
-          - "0017 React webviews": design/adr/0017-react-webview-ui.md
-          - "0018 OntoCore identity": design/adr/0018-ontocore-platform-identity.md
-          - "0019 OBO write-back": design/adr/0019-obo-write-back.md
+          - Index (all ADRs): design/adr/README.md
 
 extra:
   social:

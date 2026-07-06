@@ -101,6 +101,22 @@ else
   echo "ok: no stale --version 0.9.0 install pins"
 fi
 
+if rg -q 'VERSION=0\.10\.0' "${STALE_PIN_PATHS[@]}" --glob '!**/changelog.md' --glob '!**/CHANGELOG.md' --glob '!**/migration/**' --glob '!**/design/**' 2>/dev/null; then
+  echo "FAIL: stale VERSION=0.10.0 found outside changelog/migration/design" >&2
+  rg -n 'VERSION=0\.10\.0' "${STALE_PIN_PATHS[@]}" --glob '!**/changelog.md' --glob '!**/CHANGELOG.md' --glob '!**/migration/**' --glob '!**/design/**' 2>/dev/null || true
+  fail=1
+else
+  echo "ok: no stale VERSION=0.10.0 install pins"
+fi
+
+if rg -q '--version 0\.10\.0' "${STALE_PIN_PATHS[@]}" --glob '!**/changelog.md' --glob '!**/CHANGELOG.md' --glob '!**/migration/**' --glob '!**/design/**' 2>/dev/null; then
+  echo "FAIL: stale --version 0.10.0 install pin found outside changelog/migration/design" >&2
+  rg -n '--version 0\.10\.0' "${STALE_PIN_PATHS[@]}" --glob '!**/changelog.md' --glob '!**/CHANGELOG.md' --glob '!**/migration/**' --glob '!**/design/**' 2>/dev/null || true
+  fail=1
+else
+  echo "ok: no stale --version 0.10.0 install pins"
+fi
+
 # User-facing docs must not claim 0.7.x is the current release
 USER_FACING_DOCS=(
   docs/faq.md
@@ -143,6 +159,17 @@ if [[ "$fail" -eq 0 ]]; then
   echo "ok: no stale 0.9.x current-release claims in user-facing docs"
 fi
 
+# User-facing docs must not claim 0.10.x is the current release
+for file in "${USER_FACING_DOCS[@]}" docs/guides/protege-decision.md docs/guides/production-evidence.md docs/guides/release-timeline.md docs/guides/platform-compatibility.md docs/guides/obo-workflow.md docs/guides/lgpl-compliance.md docs/authoring.md docs/patch-reference.md docs/guides/enterprise-eval.md docs/guides/protege-migration.md docs/guides/protege-coexistence.md docs/ontocore/index.md docs/ontocore/rust-api.md docs/ontocode/feature-tour.md docs/architecture.md docs/vision.md docs/lsp-api.md docs/errors.md docs/webview-protocol.md docs/guides/robot-interop.md docs/guides/enterprise-deployment.md docs/guides/performance-sizing.md docs/ci-integration.md docs/guides/first-success.md docs/ontocode/semantic-diff.md; do
+  if grep -qE '0\.10\.x \(current\)|0\.10\.0 \| Current|ships in v0\.10\.0|OntoCore v0\.10\.0|OntoCode v0\.10\.0|at \*\*0\.10\.x\*\*|for OntoCode \*\*v0\.10\.0\*\*|OntoCore \*\*v0\.10\.0\*\*|Current release: v0\.10\.0|What v0\.10\.0 delivers|OntoCode v0\.10 is|OntoCode v0\.10 targets|OntoCode v0\.10 supports|evaluating OntoCode \*\*v0\.10\*\*|OntoCode \*\*v0\.10\*\*|OntoCore v0\.10\.0|OntoCode v0\.10\.0\+' "$file" 2>/dev/null; then
+    echo "FAIL: stale 0.10.x current-release claim in $file" >&2
+    fail=1
+  fi
+done
+if [[ "$fail" -eq 0 ]]; then
+  echo "ok: no stale 0.10.x current-release claims in user-facing docs"
+fi
+
 # Reference status banners must not contradict OntoCore v{N} titles
 for file in docs/authoring.md docs/sql-reference.md docs/sparql-reference.md docs/patch-reference.md docs/lsp-api.md docs/errors.md docs/webview-protocol.md; do
   if grep -qE 'OntoCore v0\.8' "$file" 2>/dev/null; then
@@ -153,9 +180,13 @@ for file in docs/authoring.md docs/sql-reference.md docs/sparql-reference.md doc
     echo "FAIL: stale OntoCore v0.9 status banner in $file" >&2
     fail=1
   fi
+  if grep -qE 'OntoCore v0\.10' "$file" 2>/dev/null; then
+    echo "FAIL: stale OntoCore v0.10 status banner in $file" >&2
+    fail=1
+  fi
 done
 if [[ "$fail" -eq 0 ]]; then
-  echo "ok: reference pages have no OntoCore v0.8/v0.9 banners"
+  echo "ok: reference pages have no OntoCore v0.8/v0.9/v0.10 banners"
 fi
 
 check_file_contains ".github/workflows/release.yml" "publish_with_pause ontocore" "release.yml publishes ontocore"
@@ -229,13 +260,35 @@ if ! grep -q 'ontocore/semanticDiff' docs/lsp-api.md; then
   fail=1
 fi
 
+# LSP API must document shipped completion and codeAction (v0.11)
+if grep -qE 'Completion \| Planned' docs/lsp-api.md 2>/dev/null; then
+  echo "FAIL: docs/lsp-api.md still lists completion as Planned" >&2
+  fail=1
+else
+  echo "ok: lsp-api completion documented as implemented"
+fi
+if ! grep -q 'textDocument/codeAction' docs/lsp-api.md; then
+  echo "FAIL: docs/lsp-api.md missing textDocument/codeAction section" >&2
+  fail=1
+else
+  echo "ok: lsp-api codeAction documented"
+fi
+
+check_file_contains "docs/guides/production-readiness.md" "0\.11\.x \(current\)" "production-readiness current minor"
+check_file_contains "docs/ontocore/index.md" "v${VERSION}" "ontocore index version"
+check_file_contains "docs/ontocore/rust-api.md" 'ontocore = "0.11"' "rust-api version pin"
+check_file_contains "docs/ontocore/crate-map.md" 'ontocore = "0.11"' "crate-map version pin"
+check_file_contains "docs/ontocode/manage-imports.md" "Manage Imports" "manage-imports guide"
+check_file_contains "mkdocs.yml" "ontocode/manage-imports.md" "mkdocs manage-imports guide"
+check_file_contains "mkdocs.yml" "migration/v0.11.md" "mkdocs whats-new migration link"
+
 check_file_contains "docs/guides/production-readiness.md" "v${VERSION}" "production-readiness version"
 check_file_contains "mkdocs.yml" "ontocore/rust-api.md" "mkdocs Rust API reference"
 check_file_contains "mkdocs.yml" "guides/protege-migration.md" "mkdocs Protégé migration guide"
 check_file_contains "mkdocs.yml" "ontocode/feature-tour.md" "mkdocs feature tour"
 check_file_contains "mkdocs.yml" "migration/v0.11.md" "mkdocs v0.11 migration guide"
 check_file_contains "mkdocs.yml" "guides/docs-export.md" "mkdocs docs export guide"
-check_file_contains "mkdocs.yml" "design/adr/0019-obo-write-back.md" "mkdocs ADR-0019"
+check_file_contains "mkdocs.yml" "design/adr/README.md" "mkdocs ADR index"
 check_file_contains "mkdocs.yml" "Reference:" "mkdocs Reference tab"
 check_file_contains "docs/guides/rust-crates.md" 'ontocore = "0.11"' "rust-crates version pin"
 
@@ -264,7 +317,7 @@ done
 
 check_file_contains "NOTICES" "v${VERSION}" "NOTICES release version"
 
-check_file_contains "docs/guides/protege-coexistence.md" "v0\.10" "protege-coexistence v0.10"
+check_file_contains "docs/guides/protege-coexistence.md" "v0\.11" "protege-coexistence v0.11"
 check_file_contains "docs/guides/release-timeline.md" "non-commitment" "release-timeline disclaimer"
 if grep -qE 'OBO format \+ ROBOT interop.*Not shipped' docs/guides/enterprise-eval.md; then
   echo "FAIL: enterprise-eval.md contradicts SHIPPED.md on OBO/ROBOT" >&2
@@ -388,6 +441,14 @@ if rg -q 'ontocore = "0\.9"' "${CRATE_PIN_PATHS[@]}" --glob '!**/migration/**' -
   fail=1
 else
   echo "ok: no stale ontocore = \"0.9\" user-facing pins"
+fi
+
+if rg -q 'ontocore = "0\.10"' "${CRATE_PIN_PATHS[@]}" --glob '!**/migration/**' --glob '!**/design/**' --glob '!**/changelog.md' 2>/dev/null; then
+  echo "FAIL: stale ontocore = \"0.10\" pin found outside migration/design/changelog" >&2
+  rg -n 'ontocore = "0\.10"' "${CRATE_PIN_PATHS[@]}" --glob '!**/migration/**' --glob '!**/design/**' --glob '!**/changelog.md' 2>/dev/null || true
+  fail=1
+else
+  echo "ok: no stale ontocore = \"0.10\" user-facing pins"
 fi
 
 # FAQ must not list semantic diff as v1.0-only when SHIPPED documents it

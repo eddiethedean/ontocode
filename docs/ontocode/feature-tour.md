@@ -1,8 +1,8 @@
 # OntoCode feature tour
 
-A visual and structural overview of the OntoCode VS Code IDE (**v0.10**). For hands-on setup, start with [First success (~10 min core path)](../guides/first-success.md).
+A visual and structural overview of the OntoCode VS Code IDE (**v0.11**). For hands-on setup, start with [First success (~10 min core path)](../guides/first-success.md).
 
-Canonical capability list: [What ships today](../SHIPPED.md).
+Canonical capability list: [What ships today](../SHIPPED.md). **New in v0.11:** [Migration guide](../migration/v0.11.md).
 
 ## Activity bar and explorer
 
@@ -83,6 +83,21 @@ Guide: [Reasoner](../guides/reasoner.md)
 | **Semantic Diff** | Compare git refs or directories — axiom-level changes and breaking-change flags |
 
 Guides: [Refactoring](../guides/refactoring.md) · [Semantic diff](semantic-diff.md)
+
+## Manage Imports (v0.11)
+
+Right-click a `.ttl` file in **Ontologies** → **Manage Imports** to add or remove `owl:imports` declarations with preview and apply.
+
+Guide: [Manage Imports](manage-imports.md)
+
+## Turtle completion and quick fixes (v0.11)
+
+In `.ttl` editors:
+
+- **Completion** on `:`, `<`, `@` — prefixes, QNames, catalog IRIs
+- **Quick fixes** (lightbulb) for undefined prefix, missing label, and broken import diagnostics
+
+Guide: [Authoring](../authoring.md) · [LSP API](../lsp-api.md)
 
 ## Editor integration
 

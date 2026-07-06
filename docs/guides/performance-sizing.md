@@ -29,7 +29,7 @@ Use these tiers to choose pilot scope. **Run `ontocore inspect` on your repo** t
 
 ## Reference measurement (tutorial fixtures)
 
-Measured with `ontocore inspect fixtures --format json` on release **0.10.0** (repository tutorial corpus):
+Measured with `ontocore inspect fixtures --format json` on release **0.11.0** (repository tutorial corpus):
 
 | Metric | Value |
 |--------|-------|
@@ -47,7 +47,7 @@ Run on a **representative clone** of your production ontology tree:
 ```bash
 # Replace with your ontology root
 ONTO=/path/to/ontologies
-VERSION=0.10.0
+VERSION=0.11.0
 
 # Catalog stats
 time ./ontocore-v${VERSION}-x86_64-unknown-linux-gnu inspect "$ONTO" --format json

@@ -59,7 +59,7 @@ Full flags: [CLI reference](../cli-reference.md#diff) · [migration v0.10](../mi
 Fail or annotate PRs when breaking ontology changes appear:
 
 ```yaml
-- run: cargo install ontocore-cli --locked --version 0.10.0
+- run: cargo install ontocore-cli --locked --version 0.11.0
 - run: ontocore diff --format markdown --breaking-only HEAD..WORKTREE
 ```
 

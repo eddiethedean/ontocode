@@ -1,4 +1,4 @@
-# OntoCore LSP API (v0.10)
+# OntoCore LSP API (v0.11)
 
 > **Status:** Documents behavior in **OntoCore v0.11.0**. Pre-1.0 APIs may change.
 > Canonical feature list: [What ships today](SHIPPED.md).
@@ -12,7 +12,7 @@ LSP JSON uses **snake_case** for enums serialized from Rust (`EntityKind`, `Pars
 **Source of truth:**
 
 - Types: [`protocol.rs` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/crates/ontocore-lsp/src/protocol.rs)
-- JSON Schema (v0.10): [`docs/lsp-protocol.schema.json`](lsp-protocol.schema.json) — query, patch, reasoner, refactor, graph, and semantic diff payloads.
+- JSON Schema (v0.11): [`docs/lsp-protocol.schema.json`](lsp-protocol.schema.json) — query, patch, reasoner, refactor, graph, and semantic diff payloads.
 - Handlers: [`handlers.rs` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/crates/ontocore-lsp/src/handlers.rs)
 - Extension client: [`client.ts` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/extension/src/lsp/client.ts)
 
@@ -29,9 +29,37 @@ LSP JSON uses **snake_case** for enums serialized from Rust (`EntityKind`, `Pars
 | `workspace/symbol` | Implemented |
 | `textDocument/definition` | Implemented |
 | Diagnostics | **Implemented** — server pushes `textDocument/publishDiagnostics` after each reindex |
-| Completion | Planned |
+| `textDocument/completion` | **Implemented (v0.11)** — Turtle prefix, QName, and IRI contexts |
+| `textDocument/codeAction` | **Implemented (v0.11)** — diagnostic quick fixes |
 | Rename | **Implemented** — `textDocument/rename` (no `prepareRename` yet) |
 | Find references | **Implemented** — `textDocument/references` |
+
+### `textDocument/completion` (v0.11)
+
+Advertised with trigger characters `:`, `<`, and `@`. Applies to **Turtle (`.ttl`)** files only.
+
+| Context | When | Items |
+|---------|------|-------|
+| Prefix declaration | After `@prefix` / `@base` | Namespace IRIs from the indexed catalog |
+| QName prefix | Before `:` in a QName | Declared `@prefix` names |
+| QName local | After `prefix:` | Entity short names matching the prefix (classes, properties, individuals) |
+| IRI bracket | Inside `<` … | Full IRIs from the catalog (capped at 100 items) |
+
+Results are capped at **100 items** per request.
+
+### `textDocument/codeAction` (v0.11)
+
+Quick fixes are offered when a diagnostic includes encoded `QuickFix` data in `Diagnostic.data`. The client shows a lightbulb on supported codes:
+
+| Diagnostic code | Quick fix behavior |
+|-----------------|-------------------|
+| `undefined_prefix` | Insert `@prefix` declaration for the missing prefix |
+| `missing_label` | Apply patch to add a default label |
+| `broken_import` | Remove the broken `owl:imports` line |
+
+Other diagnostic codes (`parse_error`, `duplicate_label`, `orphan_class`, …) publish diagnostics but do not ship quick fixes in v0.11.
+
+Code actions use kind `quickfix` and return workspace edits (insert text, remove line, or apply Turtle patch).
 
 ## Custom methods
 
@@ -350,7 +378,7 @@ Apply a previously previewed refactor plan. The server re-previews from `request
 
 **Result:** `{ "files_written": number, "reindex_warning"?: string }`
 
-### `ontocore/semanticDiff` (v0.10)
+### `ontocore/semanticDiff` (v0.10+)
 
 Compare semantic catalogs between git refs, directories, or indexed workspace snapshots. Alias: `ontocore/getSemanticDiff`.
 

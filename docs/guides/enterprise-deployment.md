@@ -24,7 +24,7 @@ Ontology content stays **on disk** — no cloud upload by default ([security pol
 
 ### Option B — Offline / air-gapped (recommended for regulated envs)
 
-1. On a connected staging machine, download from [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) for version **v0.10.0** (or your pinned version):
+1. On a connected staging machine, download from [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) for version **v0.11.0** (or your pinned version):
    - `ontocode-<version>.vsix`
    - `SHA256SUMS`
    - `NOTICES`
@@ -59,7 +59,7 @@ Install resulting VSIX internally. Requires Rust + Node toolchains on build host
 
 | Practice | Recommendation |
 |----------|----------------|
-| Version pin | Standardize on one release tag (e.g. `v0.10.0`) across VSIX and CLI |
+| Version pin | Standardize on one release tag (e.g. `v0.11.0`) across VSIX and CLI |
 | Update cadence | Quarterly review of [changelog](../changelog.md) and [SECURITY.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/SECURITY.md) |
 | Staged rollout | Pilot group → department → org (see [production readiness](production-readiness.md)) |
 | Rollback | Keep previous VSIX + CLI tarball in internal registry |
@@ -73,7 +73,7 @@ Pre-1.0: expect **minor** release API changes — test CI and integrators before
 Download pinned release binary — fastest cold start:
 
 ```bash
-VERSION=0.10.0
+VERSION=0.11.0
 ASSET="ontocore-v${VERSION}-x86_64-unknown-linux-gnu.tar.gz"
 BIN="ontocore-v${VERSION}-x86_64-unknown-linux-gnu"
 curl -fsSL -o "${ASSET}" \
@@ -90,7 +90,7 @@ Verify against `SHA256SUMS` in production pipelines ([ci-integration](../ci-inte
 | Platform | Release CLI binary | Alternatives |
 |----------|-------------------|--------------|
 | Linux x64 | **Yes** | — |
-| macOS | **No** | `cargo install ontocore-cli --locked --version 0.10.0` (requires Rust on agent) |
+| macOS | **No** | `cargo install ontocore-cli --locked --version 0.11.0` (requires Rust on agent) |
 | Windows | **No** | Same, or WSL/Linux job for validate |
 
 Cache `~/.cargo` or an internal cargo registry mirror to reduce `cargo install` time.

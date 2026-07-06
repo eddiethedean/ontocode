@@ -11,7 +11,7 @@ Pick one of two documentation paths, then follow the next step for your task.
 
 New to OWL/RDF vocabulary? Read [Ontology concepts](../concepts.md) first.
 
-## When not to use OntoCode (v0.10)
+## When not to use OntoCode (today)
 
 - You need **full OBO write-back** in the IDE (OBO is index/browse only; edit Turtle or use ROBOT).
 - You need **full SQL** (JOINs, `ORDER BY`, `LIKE`) — use SQL-like virtual tables or SPARQL instead.
@@ -19,7 +19,7 @@ New to OWL/RDF vocabulary? Read [Ontology concepts](../concepts.md) first.
 
 Canonical matrix: [What ships today](../SHIPPED.md).
 
-## Supported in v0.10
+## Supported since v0.10+
 
 - **Multi-root workspaces:** All workspace folders are indexed on open. Manual **Index Workspace** may prompt you to pick a folder when multiple roots are open.
 

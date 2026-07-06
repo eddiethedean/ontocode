@@ -64,7 +64,7 @@ let result = classify(ReasonerId::El, &input, false)?;
 println!("consistent: {}", result.consistent);
 ```
 
-## Workspace options (v0.10)
+## Workspace options (v0.10+)
 
 ```rust
 use ontocore::{Workspace, WorkspaceOptions};
@@ -95,7 +95,7 @@ Uses `OntoCoreError` from `ontocore-core` (re-exported as `ontocore::OntoCoreErr
 
 ## API stability
 
-- Crates are at **0.10.x** on crates.io
+- Crates are at **0.11.x** on crates.io
 - `Workspace` and `WorkspaceOptions` are **stable since v0.10** (pre-1.0 policy still applies to other crates)
 - LSP wire JSON: [LSP API](../lsp-api.md)
 - SQL tables: [SQL reference](../sql-reference.md)

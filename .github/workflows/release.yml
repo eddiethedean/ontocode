@@ -238,8 +238,8 @@ jobs:
         run: |
           set -euo pipefail
           if [ -z "${OVSX_PAT:-}" ]; then
-            echo "OVSX_PAT secret is not set; skipping Open VSX publish"
-            exit 1
+            echo "::warning::OVSX_PAT secret is not set; skipping Open VSX publish"
+            exit 0
           fi
           npm install -g ovsx
           ovsx publish "dist/ontocode-${GITHUB_REF_NAME}.vsix" -p "${OVSX_PAT}"

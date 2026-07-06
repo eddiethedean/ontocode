@@ -39,6 +39,7 @@ Maintainer checklist for publishing crates, binaries, and the VS Code extension.
 - [ ] [docs/migration/v0.8.md](migration/v0.8.md) — upgrade notes when applicable
 - [ ] [docs/migration/v0.9.md](migration/v0.9.md) — OntoCore identity upgrade notes when applicable
 - [ ] [docs/migration/v0.10.md](migration/v0.10.md) — semantic workspace upgrade notes when applicable
+- [ ] [docs/migration/v0.11.md](migration/v0.11.md) — editor depth upgrade notes when applicable
 - [ ] [docs/design/PROTEGE_PARITY.md](design/PROTEGE_PARITY.md) — status columns if features shipped
 - [ ] [docs/design/ARCHITECTURE.md](design/ARCHITECTURE.md) / [OWL_AUTHORING_SPEC.md](design/OWL_AUTHORING_SPEC.md) — shipped vs target banners
 - [ ] [docs/design/LICENSES.md](design/LICENSES.md) — dependency sections
@@ -63,11 +64,11 @@ The [release workflow on GitHub](https://github.com/eddiethedean/ontocode/blob/m
    - `ontocore-lsp` per-platform archives
    - Multi-platform `ontocode-*.vsix`
 
-Requires the `CARGO_REGISTRY_TOKEN` repository secret.
+Requires the `CARGO_REGISTRY_TOKEN` repository secret. For Open VSX (Cursor), set `OVSX_PAT` — see [marketplace-publish.md](marketplace-publish.md).
 
 ## Published crates (dependency order)
 
-`ontocore-core` → `ontocore-parser` → `ontocore-owl` → `ontocore-diagnostics` → `ontocore-catalog` → `ontocore-diff` → `ontocore-refactor` → `ontocore-query` → `ontocore-reasoner` → `ontocore-robot` → `ontocore-lsp` → `ontocore` → `ontocore-cli`
+`ontocore-core` → `ontocore-parser` → `ontocore-owl` → `ontocore-diagnostics` → `ontocore-catalog` → `ontocore-diff` → `ontocore-docs` → `ontocore-refactor` → `ontocore-query` → `ontocore-reasoner` → `ontocore-robot` → `ontocore-lsp` → `ontocore` → `ontocore-cli`
 
 ## VS Code Marketplace
 

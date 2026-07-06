@@ -54,4 +54,4 @@ for row in &result.rows {
 - [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) · [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md)
 - [docs/ontocore/](https://github.com/eddiethedean/ontocode/tree/main/docs/ontocore) in this repository
 
-**Current version: 0.11.1**
+**Current version: 0.11.2**

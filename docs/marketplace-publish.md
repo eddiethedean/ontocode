@@ -54,7 +54,7 @@ Store `VSCE_PAT` or `AZURE_DEVOPS_EXT_PAT` in CI secrets only; never commit toke
 
 ## Open VSX (Cursor and other Open VSX clients)
 
-From v0.11.1, the [release workflow on GitHub](https://github.com/eddiethedean/ontocode/blob/main/.github/workflows/release.yml) publishes the same VSIX to [Open VSX](https://open-vsx.org/) after packaging.
+From v0.11.2, the [release workflow on GitHub](https://github.com/eddiethedean/ontocode/blob/main/.github/workflows/release.yml) publishes the same VSIX to [Open VSX](https://open-vsx.org/) after packaging.
 
 ### Prerequisites
 
@@ -66,7 +66,7 @@ From v0.11.1, the [release workflow on GitHub](https://github.com/eddiethedean/o
 
 ```bash
 npm install -g ovsx
-ovsx publish dist/ontocode-v0.11.1.vsix -p "$OVSX_PAT"
+ovsx publish dist/ontocode-v0.11.2.vsix -p "$OVSX_PAT"
 ```
 
 ### After Open VSX publish

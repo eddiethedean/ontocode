@@ -1,6 +1,6 @@
 # Production readiness and pilot criteria
 
-This page states what OntoCode / OntoCore **v0.11.1** is appropriate for in production-like environments. It is not legal advice and does not replace your organization's risk review.
+This page states what OntoCode / OntoCore **v0.11.2** is appropriate for in production-like environments. It is not legal advice and does not replace your organization's risk review.
 
 Canonical capability matrix: [What ships today](../SHIPPED.md).
 
@@ -57,7 +57,7 @@ Suggested pilot duration: **4–8 weeks** with 3–10 engineers on one ontology 
 | LSP `ontocore/*` JSON | May change pre-1.0 |
 | Rust `ontocore-*` crate APIs | May change pre-1.0 |
 
-Pin CLI version in CI: release binary with `VERSION=0.11.1` or `cargo install ontocore-cli --locked --version 0.11.1`.
+Pin CLI version in CI: release binary with `VERSION=0.11.2` or `cargo install ontocore-cli --locked --version 0.11.2`.
 
 ## Support and incident response
 

@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.11.2] - 2026-07-06
+
+### Fixed
+
+- **React webview panel routing (follow-up)** — bootstrap now merges `panel=` into existing `window.location.search` (VS Code/Cursor webviews that already have query params no longer fall back to the Smoke panel); Entity Inspector recreates the panel if the webview never reported ready
+
+### Changed
+
+- Workspace package and all `ontocore-*` crates bumped to **0.11.2**
+- Extension marketplace version **0.11.2** (VS Code Marketplace + Open VSX)
+- Documentation adoption audit fixes (CLI examples, onboarding, contributor debugging guide)
+- Remove explorer preview screenshots from docs and extension marketplace metadata
+
 ## [0.11.1] - 2026-07-06
 
 ### Fixed

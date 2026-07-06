@@ -19,7 +19,7 @@ CLI install options (separate from the extension): [getting started (CLI)](getti
 
 ## Option A — VS Code Marketplace (recommended)
 
-1. Install [OntoCode from the Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) (v0.11.1+).
+1. Install [OntoCode from the Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) (v0.11.2+).
 2. **File → Open Folder…** and choose a directory with ontology files.
 3. **Trust** the workspace when prompted.
 4. Open the **OntoCode** activity bar and browse ontologies, classes, properties, individuals, and **Diagnostics**.
@@ -75,7 +75,7 @@ If OntoCode does not appear in search (before v0.11 or if Open VSX sync is delay
 1. Download `ontocode-*.vsix` from [GitHub Releases](https://github.com/eddiethedean/ontocode/releases).
 2. **Cmd+Shift+P** / **Ctrl+Shift+P** → **Extensions: Install from VSIX…**
 
-Release tags from v0.11.1 onward publish automatically to Open VSX.
+Release tags from v0.11.2 onward publish automatically to Open VSX.
 
 ## Using the sidebar
 

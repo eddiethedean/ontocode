@@ -61,8 +61,14 @@ export class EntityInspectorPanel {
     requestId?: number
   ): EntityInspectorPanel {
     if (EntityInspectorPanel.currentPanel) {
-      EntityInspectorPanel.currentPanel.reveal(detail, classOptions, requestId);
-      return EntityInspectorPanel.currentPanel;
+      const existing = EntityInspectorPanel.currentPanel;
+      if (!existing.isWebviewReady()) {
+        existing.disposeForTests();
+        EntityInspectorPanel.currentPanel = undefined;
+      } else {
+        existing.reveal(detail, classOptions, requestId);
+        return existing;
+      }
     }
 
     const host = PanelHost.create(extensionUri, {
@@ -250,6 +256,10 @@ export class EntityInspectorPanel {
       const msg = err instanceof Error ? err.message : String(err);
       void vscode.window.showErrorMessage(`OntoCode: patch failed — ${msg}`);
     }
+  }
+
+  isWebviewReady(): boolean {
+    return this.host.isWebviewReady();
   }
 
   /** @internal VS Code integration tests */

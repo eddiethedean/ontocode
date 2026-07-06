@@ -133,6 +133,22 @@ else
   echo "ok: no stale --version 0.11.0 install pins"
 fi
 
+if rg -q 'VERSION=0\.11\.1' "${STALE_PIN_PATHS[@]}" --glob '!**/changelog.md' --glob '!**/CHANGELOG.md' --glob '!**/migration/**' --glob '!**/design/**' 2>/dev/null; then
+  echo "FAIL: stale VERSION=0.11.1 found outside changelog/migration/design" >&2
+  rg -n 'VERSION=0\.11\.1' "${STALE_PIN_PATHS[@]}" --glob '!**/changelog.md' --glob '!**/CHANGELOG.md' --glob '!**/migration/**' --glob '!**/design/**' 2>/dev/null || true
+  fail=1
+else
+  echo "ok: no stale VERSION=0.11.1 install pins"
+fi
+
+if rg -q '--version 0\.11\.1' "${STALE_PIN_PATHS[@]}" --glob '!**/changelog.md' --glob '!**/CHANGELOG.md' --glob '!**/migration/**' --glob '!**/design/**' 2>/dev/null; then
+  echo "FAIL: stale --version 0.11.1 install pin found outside changelog/migration/design" >&2
+  rg -n '--version 0\.11\.1' "${STALE_PIN_PATHS[@]}" --glob '!**/changelog.md' --glob '!**/CHANGELOG.md' --glob '!**/migration/**' --glob '!**/design/**' 2>/dev/null || true
+  fail=1
+else
+  echo "ok: no stale --version 0.11.1 install pins"
+fi
+
 # User-facing docs must not claim 0.7.x is the current release
 USER_FACING_DOCS=(
   docs/faq.md
@@ -186,7 +202,7 @@ if [[ "$fail" -eq 0 ]]; then
   echo "ok: no stale 0.10.x current-release claims in user-facing docs"
 fi
 
-# User-facing docs must not claim 0.11.0 is the current release (0.11.1+)
+# User-facing docs must not claim 0.11.0 is the current release (0.11.2+)
 for file in "${USER_FACING_DOCS[@]}" docs/guides/protege-decision.md docs/guides/production-evidence.md docs/guides/release-timeline.md docs/guides/platform-compatibility.md docs/guides/obo-workflow.md docs/guides/lgpl-compliance.md docs/authoring.md docs/patch-reference.md docs/guides/enterprise-eval.md docs/guides/protege-migration.md docs/guides/protege-coexistence.md docs/ontocore/index.md docs/ontocore/rust-api.md docs/ontocode/feature-tour.md docs/architecture.md docs/vision.md docs/lsp-api.md docs/errors.md docs/webview-protocol.md docs/guides/robot-interop.md docs/guides/enterprise-deployment.md docs/guides/performance-sizing.md docs/ci-integration.md docs/guides/first-success.md docs/ontocode/semantic-diff.md docs/SHIPPED.md docs/index.md README.md extension/README.md; do
   if grep -qE '0\.11\.0 \| Current|Current release: v0\.11\.0|What ships today \(v0\.11\.0\)|ships in v0\.11\.0|OntoCore v0\.11\.0|OntoCode v0\.11\.0|for OntoCode \*\*v0\.11\.0\*\*|OntoCore \*\*v0\.11\.0\*\*|documentation · v0\.11\.0' "$file" 2>/dev/null; then
     echo "FAIL: stale 0.11.0 current-release claim in $file" >&2
@@ -195,6 +211,17 @@ for file in "${USER_FACING_DOCS[@]}" docs/guides/protege-decision.md docs/guides
 done
 if [[ "$fail" -eq 0 ]]; then
   echo "ok: no stale 0.11.0 current-release claims in user-facing docs"
+fi
+
+# User-facing docs must not claim 0.11.1 is the current release (0.11.2+)
+for file in "${USER_FACING_DOCS[@]}" docs/guides/protege-decision.md docs/guides/production-evidence.md docs/guides/release-timeline.md docs/guides/platform-compatibility.md docs/guides/obo-workflow.md docs/guides/lgpl-compliance.md docs/authoring.md docs/patch-reference.md docs/guides/enterprise-eval.md docs/guides/protege-migration.md docs/guides/protege-coexistence.md docs/ontocore/index.md docs/ontocore/rust-api.md docs/ontocode/feature-tour.md docs/architecture.md docs/vision.md docs/lsp-api.md docs/errors.md docs/webview-protocol.md docs/guides/robot-interop.md docs/guides/enterprise-deployment.md docs/guides/performance-sizing.md docs/ci-integration.md docs/guides/first-success.md docs/ontocode/semantic-diff.md docs/SHIPPED.md docs/index.md README.md extension/README.md; do
+  if grep -qE '0\.11\.1 \| Current|Current release: v0\.11\.1|What ships today \(v0\.11\.1\)|ships in v0\.11\.1|OntoCore v0\.11\.1|OntoCode v0\.11\.1|for OntoCode \*\*v0\.11\.1\*\*|OntoCore \*\*v0\.11\.1\*\*|documentation · v0\.11\.1|What.s included in v0\.11\.1' "$file" 2>/dev/null; then
+    echo "FAIL: stale 0.11.1 current-release claim in $file" >&2
+    fail=1
+  fi
+done
+if [[ "$fail" -eq 0 ]]; then
+  echo "ok: no stale 0.11.1 current-release claims in user-facing docs"
 fi
 
 # Reference status banners must not contradict OntoCore v{N} titles
@@ -215,9 +242,13 @@ for file in docs/authoring.md docs/sql-reference.md docs/sparql-reference.md doc
     echo "FAIL: stale OntoCore v0.11.0 status banner in $file" >&2
     fail=1
   fi
+  if grep -qE 'OntoCore v0\.11\.1' "$file" 2>/dev/null; then
+    echo "FAIL: stale OntoCore v0.11.1 status banner in $file" >&2
+    fail=1
+  fi
 done
 if [[ "$fail" -eq 0 ]]; then
-  echo "ok: reference pages have no OntoCore v0.8/v0.9/v0.10 banners"
+  echo "ok: reference pages have no OntoCore v0.8/v0.9/v0.10/v0.11.0/v0.11.1 banners"
 fi
 
 check_file_contains ".github/workflows/release.yml" "publish_with_pause ontocore" "release.yml publishes ontocore"

@@ -17,7 +17,7 @@ assignees: ''
 
 ## Version
 
-- OntoCore / OntoCode version (e.g. 0.11.1, git commit, or crates.io):
+- OntoCore / OntoCode version (e.g. 0.11.2, git commit, or crates.io):
 - OS and architecture:
 - Rust version (if building from source):
 - VS Code version (if extension):

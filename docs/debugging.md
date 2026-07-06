@@ -99,7 +99,7 @@ npm run compile   # builds webview-ui then extension host
 
 Extension host ↔ React messages: [Webview protocol](webview-protocol.md) · types in `extension/src/webviews/messages.ts`.
 
-If a panel shows the Smoke fallback, check `?panel=` is on `window.location.search` before React boots (see v0.11.1 panel routing fix in [changelog](changelog.md)).
+If a panel shows the Smoke fallback, check `?panel=` is on `window.location.search` before React boots (see v0.11.2 panel routing fix in [changelog](changelog.md)).
 
 ## Rust workspace
 

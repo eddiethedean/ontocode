@@ -14,10 +14,11 @@ describe("webviewBootstrap", () => {
     assert.ok(q.includes("root=ex%3AA") || q.includes("root=ex:A"));
   });
 
-  it("bootstrap script sets location.search when empty", () => {
+  it("bootstrap script merges panel into existing location.search", () => {
     const script = webviewLocationBootstrapScript("panel=inspector");
     assert.match(script, /history\.replaceState/);
     assert.match(script, /panel=inspector/);
+    assert.doesNotMatch(script, /!window\.location\.search/);
   });
 
   it("accepts HTML with location bootstrap for inspector", () => {

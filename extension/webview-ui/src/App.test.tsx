@@ -67,4 +67,17 @@ describe("App", () => {
       screen.queryByText("Webview foundation is active.")
     ).not.toBeInTheDocument();
   });
+
+  it("routes to inspector when VS Code pre-populates unrelated query params", () => {
+    window.history.replaceState({}, "", "/?vscodeWebviewId=abc");
+    // Bootstrap merges panel=inspector into existing search (getWebviewHtml.ts).
+    const merged = new URLSearchParams(window.location.search);
+    merged.set("panel", "inspector");
+    history.replaceState(null, "", `?${merged.toString()}`);
+    render(<App />);
+    expect(screen.getByRole("status")).toHaveTextContent("Loading entity…");
+    expect(
+      screen.queryByText("Webview foundation is active.")
+    ).not.toBeInTheDocument();
+  });
 });

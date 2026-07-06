@@ -15,9 +15,14 @@ export function formatWebviewQuery(
 export function webviewLocationBootstrapScript(query: string): string {
   return `(function () {
       var q = ${JSON.stringify(query)};
-      if (q && !window.location.search) {
-        history.replaceState(null, "", "?" + q);
-      }
+      if (!q) return;
+      var target = new URLSearchParams(q);
+      var current = new URLSearchParams(window.location.search);
+      target.forEach(function (value, key) {
+        current.set(key, value);
+      });
+      var next = current.toString();
+      history.replaceState(null, "", next ? "?" + next : "");
     })();`;
 }
 

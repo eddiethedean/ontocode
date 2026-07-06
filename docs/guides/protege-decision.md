@@ -1,6 +1,6 @@
 # Protégé vs OntoCode decision matrix
 
-Use this page to decide **when OntoCode fits**, **when to keep Protégé**, and **when to run both**. It reflects **v0.11.1** — see [What ships today](../SHIPPED.md). A [first-week migration guide](protege-migration.md) ships today; extended round-trip playbooks are planned for **v1.0**.
+Use this page to decide **when OntoCode fits**, **when to keep Protégé**, and **when to run both**. It reflects **v0.11.2** — see [What ships today](../SHIPPED.md). A [first-week migration guide](protege-migration.md) ships today; extended round-trip playbooks are planned for **v1.0**.
 
 ## Quick decision
 
@@ -36,7 +36,7 @@ Use this page to decide **when OntoCode fits**, **when to keep Protégé**, and 
 
 ### Path A — CI only (lowest risk)
 
-1. Pin `ontocore-cli` **0.11.1** in Linux CI
+1. Pin `ontocore-cli` **0.11.2** in Linux CI
 2. Gate merges with `ontocore validate`
 3. Optional: `ontocore classify --profile el` when ontology is EL
 4. Keep Protégé on engineer desktops unchanged

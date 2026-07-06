@@ -22,7 +22,7 @@ default-members = ["crates/ontocore-cli"]
 # `cargo run --` runs the `ontocore` CLI (default-member), not this package as a library.
 [package]
 name = "ontocode"
-version = "0.11.1"
+version = "0.11.2"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 publish = false
@@ -59,7 +59,7 @@ serde_json.workspace = true
 tempfile = "3"
 
 [workspace.package]
-version = "0.11.1"
+version = "0.11.2"
 edition = "2021"
 rust-version = "1.88"
 license = "MIT OR Apache-2.0"
@@ -70,19 +70,19 @@ keywords = ["ontology", "owl", "rdf", "sparql", "turtle"]
 categories = ["command-line-utilities", "science", "parser-implementations"]
 
 [workspace.dependencies]
-ontocore = { path = "crates/ontocore", version = "0.11.1" }
-ontocore-core = { path = "crates/ontocore-core", version = "0.11.1" }
-ontocore-parser = { path = "crates/ontocore-parser", version = "0.11.1" }
-ontocore-owl = { path = "crates/ontocore-owl", version = "0.11.1" }
-ontocore-catalog = { path = "crates/ontocore-catalog", version = "0.11.1" }
-ontocore-diagnostics = { path = "crates/ontocore-diagnostics", version = "0.11.1" }
-ontocore-query = { path = "crates/ontocore-query", version = "0.11.1" }
-ontocore-lsp = { path = "crates/ontocore-lsp", version = "0.11.1" }
-ontocore-reasoner = { path = "crates/ontocore-reasoner", version = "0.11.1" }
-ontocore-robot = { path = "crates/ontocore-robot", version = "0.11.1" }
-ontocore-refactor = { path = "crates/ontocore-refactor", version = "0.11.1" }
-ontocore-diff = { path = "crates/ontocore-diff", version = "0.11.1" }
-ontocore-docs = { path = "crates/ontocore-docs", version = "0.11.1" }
+ontocore = { path = "crates/ontocore", version = "0.11.2" }
+ontocore-core = { path = "crates/ontocore-core", version = "0.11.2" }
+ontocore-parser = { path = "crates/ontocore-parser", version = "0.11.2" }
+ontocore-owl = { path = "crates/ontocore-owl", version = "0.11.2" }
+ontocore-catalog = { path = "crates/ontocore-catalog", version = "0.11.2" }
+ontocore-diagnostics = { path = "crates/ontocore-diagnostics", version = "0.11.2" }
+ontocore-query = { path = "crates/ontocore-query", version = "0.11.2" }
+ontocore-lsp = { path = "crates/ontocore-lsp", version = "0.11.2" }
+ontocore-reasoner = { path = "crates/ontocore-reasoner", version = "0.11.2" }
+ontocore-robot = { path = "crates/ontocore-robot", version = "0.11.2" }
+ontocore-refactor = { path = "crates/ontocore-refactor", version = "0.11.2" }
+ontocore-diff = { path = "crates/ontocore-diff", version = "0.11.2" }
+ontocore-docs = { path = "crates/ontocore-docs", version = "0.11.2" }
 
 git2 = { version = "0.20", features = ["vendored-openssl"] }
 

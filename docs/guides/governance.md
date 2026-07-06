@@ -8,7 +8,7 @@ What enterprise evaluators can determine from **published documentation and repo
 |--------|--------|
 | **Product** | Open-source OntoCode (VS Code IDE) + OntoCore (Rust engine) |
 | **License** | MIT OR Apache-2.0 (application crates); third-party licenses in [LICENSES.md](../design/LICENSES.md) |
-| **Distribution** | GitHub Releases (VSIX, CLI, LSP), VS Code Marketplace, [crates.io](https://crates.io/search?q=ontocore) |
+| **Distribution** | GitHub Releases (VSIX, CLI, LSP), [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode), [Open VSX](https://open-vsx.org/extension/ontocode/ontocode), [crates.io](https://crates.io/search?q=ontocore) |
 | **Commercial support** | **Not offered** — community via [GitHub issues](https://github.com/eddiethedean/ontocode/issues) |
 | **Vendor / company** | Not documented as a separate legal entity |
 

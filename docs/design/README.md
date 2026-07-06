@@ -14,7 +14,7 @@ For **user-facing guides**, pick a path:
 
 | Path | Audience | Start |
 |------|----------|-------|
-| [VS Code extension](https://ontocode-vs.readthedocs.io/en/latest/ontocode/vscode-extension/) | Explorer, inspector, Query Workbench, reasoner panels | Marketplace install, no Rust required |
+| [VS Code extension](https://ontocode-vs.readthedocs.io/en/latest/ontocode/vscode-extension/) | Explorer, inspector, Query Workbench, reasoner panels | [Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode), [Open VSX](https://open-vsx.org/extension/ontocode/ontocode) (Cursor), or VSIX — no Rust required |
 | [Rust & CLI](https://ontocode-vs.readthedocs.io/en/latest/guides/rust-crates/) | `ontocore` CLI, crates.io libraries, CI, LSP integrators | `cargo install ontocore-cli` |
 
 [Documentation home](https://ontocode-vs.readthedocs.io/en/latest/) · [What ships today](../SHIPPED.md)

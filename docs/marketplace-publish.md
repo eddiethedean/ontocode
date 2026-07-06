@@ -36,8 +36,8 @@ npx vsce package --no-dependencies
 
 ## After publish
 
-1. Update root README **Choose your path → VS Code** to link Marketplace listing first, VSIX as fallback
-2. Add Marketplace badge to README
+1. Update root README **Choose your path → VS Code** to link Marketplace and Open VSX listings first, VSIX as fallback
+2. Verify Open VSX and Marketplace badges on README and [docs/index.md](index.md)
 3. Tag release and attach VSIX for users who prefer offline install
 
 ## Token handling
@@ -63,6 +63,6 @@ ovsx publish dist/ontocode-v0.11.0.vsix -p "$OVSX_PAT"
 
 ### After Open VSX publish
 
-1. Verify listing at `https://open-vsx.org/extension/ontocode/ontocode`
+1. Verify listing at [open-vsx.org/extension/ontocode/ontocode](https://open-vsx.org/extension/ontocode/ontocode) (badge: `https://img.shields.io/open-vsx/v/ontocode/ontocode`)
 2. Confirm Cursor Extensions search finds **OntoCode**
 3. Document Cursor install path in [vscode-install.md](vscode-install.md) Option E

@@ -11,10 +11,11 @@ Canonical matrix: [What ships today](../SHIPPED.md).
 | Minimum VS Code | **1.85+** — [enterprise deployment](enterprise-deployment.md), [vscode-install](../vscode-install.md) |
 | Maximum VS Code tested | **Not documented** — test your target VS Code version in pilot |
 | Marketplace ID | `ontocode.ontocode` |
+| Open VSX ID | `ontocode.ontocode` — [open-vsx.org/extension/ontocode/ontocode](https://open-vsx.org/extension/ontocode/ontocode) (Cursor, v0.11+) |
 | Offline install | Release VSIX + SHA256 — [release integrity](../release-integrity.md) |
 | Workspace trust | **Required** for custom `ontocode.lspPath`; Restricted Mode uses bundled LSP |
 
-Extension CI runs VS Code E2E on **1.85.0** and stable across Linux, macOS, Windows (see repository `.github/workflows/extension-vscode-e2e.yml` — workflow name referenced in README badges).
+Extension CI runs VS Code E2E on **1.85.0** and stable across Linux, macOS, Windows (see `.github/workflows/extension-vscode-e2e.yml`).
 
 ## Bundled language server (`ontocore-lsp`)
 
@@ -26,7 +27,7 @@ Release VSIX bundles `ontocore-lsp` for:
 | macOS | Apple Silicon, Intel |
 | Windows | x64 |
 
-No separate LSP install required for standard Marketplace/VSIX use.
+No separate LSP install required for standard Marketplace, Open VSX, or VSIX use.
 
 ## CLI release binaries
 

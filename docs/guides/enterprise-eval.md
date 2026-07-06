@@ -100,7 +100,7 @@ A full migration guide is a **v1.0 deliverable**. Today:
 
 ## Evaluation checklist
 
-1. Install from [Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) or offline VSIX
+1. Install from [Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode), [Open VSX](https://open-vsx.org/extension/ontocode/ontocode) (Cursor), or offline VSIX
 2. Complete [First success in 10 minutes](first-success.md) on a representative `.ttl` project
 3. Run the [production evidence protocol](production-evidence.md) on your corpus
 4. Run `ontocore validate` and optionally `ontocore classify --profile el` in a test CI job ([ci-integration.md](../ci-integration.md))

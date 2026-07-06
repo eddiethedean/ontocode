@@ -1,5 +1,8 @@
 # OntoCode VS Code extension
 
+[![Open VSX](https://img.shields.io/open-vsx/v/ontocode/ontocode)](https://open-vsx.org/extension/ontocode/ontocode)
+[![VS Code Marketplace](https://img.shields.io/visual-studio-marketplace/v/ontocode.ontocode?label=VS%20Code%20Marketplace)](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode)
+
 **OntoCode** is the VS Code ontology IDE powered by **OntoCore**. It provides the explorer sidebar, Entity Inspector, Query Workbench, Manchester editor, graph panels, reasoner views, and inline diagnostics.
 
 The extension talks to the bundled **OntoCore LSP** (`ontocore-lsp`) — you do **not** need Rust installed for normal use.
@@ -8,7 +11,7 @@ The extension talks to the bundled **OntoCore LSP** (`ontocore-lsp`) — you do 
 
 ## Quick start
 
-1. Install [OntoCode from the Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode).
+1. Install OntoCode from the [Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) or [Open VSX](https://open-vsx.org/extension/ontocode/ontocode) (Cursor).
 2. Open a folder with `.ttl`, `.owl`, or other ontology files and **Trust** the workspace.
 3. Open the **OntoCode** activity bar → **Classes** → click an entity.
 

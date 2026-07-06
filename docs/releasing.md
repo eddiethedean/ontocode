@@ -70,9 +70,9 @@ Requires the `CARGO_REGISTRY_TOKEN` repository secret. For Open VSX (Cursor), se
 
 `ontocore-core` → `ontocore-parser` → `ontocore-owl` → `ontocore-diagnostics` → `ontocore-catalog` → `ontocore-diff` → `ontocore-docs` → `ontocore-refactor` → `ontocore-query` → `ontocore-reasoner` → `ontocore-robot` → `ontocore-lsp` → `ontocore` → `ontocore-cli`
 
-## VS Code Marketplace
+## VS Code Marketplace and Open VSX
 
-See [marketplace-publish.md](marketplace-publish.md).
+See [marketplace-publish.md](marketplace-publish.md). Open VSX listing: [open-vsx.org/extension/ontocode/ontocode](https://open-vsx.org/extension/ontocode/ontocode).
 
 ## Verify artifacts
 

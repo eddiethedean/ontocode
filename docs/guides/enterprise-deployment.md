@@ -6,7 +6,7 @@ Deploy OntoCode (VS Code) and OntoCore (CLI/LSP) in regulated, air-gapped, or ce
 
 | Pattern | Components | Typical owner |
 |---------|------------|---------------|
-| **Developer desktop** | VS Code + Marketplace or VSIX | Engineering |
+| **Developer desktop** | VS Code + Marketplace, Open VSX (Cursor), or VSIX | Engineering |
 | **CI validation** | `ontocore` Linux x64 binary or `cargo install` | Platform / DevOps |
 | **CI + desktop** | Both | Most common enterprise pilot |
 | **Air-gapped** | Internal VSIX + CLI mirror + `NOTICES` | IT security |
@@ -15,12 +15,13 @@ Ontology content stays **on disk** — no cloud upload by default ([security pol
 
 ## VS Code extension rollout
 
-### Option A — Marketplace (internet-connected)
+### Option A — Marketplace or Open VSX (internet-connected)
 
 1. Allowlist extension publisher **`ontocode`** and extension **`ontocode.ontocode`**
-2. Pin minimum VS Code **1.85+** ([vscode-install](../vscode-install.md))
-3. Document **Trust workspace** requirement (Restricted Mode blocks custom LSP path)
-4. Communicate **multi-root** behavior — all folders are indexed since v0.10 ([FAQ](../faq.md))
+2. **Cursor / Open VSX clients:** allowlist [open-vsx.org/extension/ontocode/ontocode](https://open-vsx.org/extension/ontocode/ontocode) (v0.11+)
+3. Pin minimum VS Code **1.85+** ([vscode-install](../vscode-install.md))
+4. Document **Trust workspace** requirement (Restricted Mode blocks custom LSP path)
+5. Communicate **multi-root** behavior — all folders are indexed since v0.10 ([FAQ](../faq.md))
 
 ### Option B — Offline / air-gapped (recommended for regulated envs)
 

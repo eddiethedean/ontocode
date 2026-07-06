@@ -20,7 +20,7 @@ Many teams use **both**: Protégé for heavy axiom authoring, OntoCode for Git-n
 
 ## Day 1 — Install and open your project
 
-1. Install [OntoCode from the Marketplace](../vscode-install.md).
+1. Install [OntoCode from the Marketplace](../vscode-install.md) or [Open VSX](https://open-vsx.org/extension/ontocode/ontocode).
 2. **File → Open Folder…** and select your ontology repository (not a single file).
 3. **Trust** the workspace when prompted.
 4. Open the **OntoCode** activity bar and confirm **Ontologies** lists your `.ttl` / `.owl` files.

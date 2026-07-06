@@ -12,6 +12,9 @@ Five-minute paths to success with OntoCore (CLI) and OntoCode (VS Code).
 
 VS Code extension (bundled language server on Linux, macOS, and Windows): [vscode-install.md](vscode-install.md).
 
+[![Open VSX](https://img.shields.io/open-vsx/v/ontocode/ontocode)](https://open-vsx.org/extension/ontocode/ontocode)
+[![VS Code Marketplace](https://img.shields.io/visual-studio-marketplace/v/ontocode.ontocode?label=marketplace)](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode)
+
 !!! note "SQL-like queries"
     `ontocore query` uses **SQL-like virtual tables** (single-table `SELECT`, limited `WHERE`). Not full SQL — see [SQL reference](sql-reference.md).
 
@@ -26,7 +29,7 @@ VS Code extension (bundled language server on Linux, macOS, and Windows): [vscod
 
 ## Path A — VS Code (recommended for browsing and editing)
 
-Follow [First success in 10 minutes](guides/first-success.md) — Marketplace install, browse the explorer, edit `.ttl` in the Entity Inspector.
+Follow [First success in 10 minutes](guides/first-success.md) — [Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) or [Open VSX](https://open-vsx.org/extension/ontocode/ontocode) install, browse the explorer, edit `.ttl` in the Entity Inspector.
 
 Details: [vscode-install.md](vscode-install.md) · [authoring.md](authoring.md)
 

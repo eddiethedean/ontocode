@@ -33,7 +33,7 @@ See [getting-started.md](getting-started.md).
 
 **Do I need Rust to use VS Code?**
 
-No. Install the extension from the Marketplace or a release VSIX. The language server is bundled.
+No. Install the extension from the [Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode), [Open VSX](https://open-vsx.org/extension/ontocode/ontocode) (Cursor), or a release VSIX. The language server is bundled.
 
 **Can I install without cargo?**
 

@@ -1,5 +1,8 @@
 # Installing OntoCode in VS Code
 
+[![Open VSX](https://img.shields.io/open-vsx/v/ontocode/ontocode)](https://open-vsx.org/extension/ontocode/ontocode)
+[![VS Code Marketplace](https://img.shields.io/visual-studio-marketplace/v/ontocode.ontocode?label=VS%20Code%20Marketplace)](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode)
+
 > **Multi-root workspaces (v0.10+):** All workspace folders are indexed on open. **OntoCode: Index Workspace** may prompt you to pick a folder when multiple roots are open.
 
 ## Install matrix
@@ -58,6 +61,8 @@ cargo install ontocore-lsp --locked
 Set **OntoCode: Lsp Path** (`ontocode.lspPath`) to the absolute path of your `ontocore-lsp` binary. **Trusted workspaces only** — ignored in Restricted Mode.
 
 ## Option E — Cursor / Open VSX (v0.11+)
+
+[![Open VSX](https://img.shields.io/open-vsx/v/ontocode/ontocode)](https://open-vsx.org/extension/ontocode/ontocode)
 
 [Cursor](https://cursor.com/) uses the [Open VSX](https://open-vsx.org/) registry instead of the Microsoft VS Code Marketplace.
 

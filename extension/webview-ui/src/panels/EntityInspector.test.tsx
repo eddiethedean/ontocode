@@ -371,4 +371,83 @@ describe("EntityInspectorPanel", () => {
     postHostMessage(null as never);
     expect(screen.getByRole("heading", { name: "Person" })).toBeInTheDocument();
   });
+
+  it("adds class assertion for individuals via applyPatch", async () => {
+    const user = userEvent.setup();
+    const individualDetail = {
+      ...entityDetail,
+      entity: {
+        ...entityDetail.entity,
+        iri: "http://example.org#Alice",
+        short_name: "Alice",
+        kind: "individual",
+        labels: ["Alice"],
+      },
+      parents: [],
+      children: [],
+      axioms: [],
+    };
+    render(<EntityInspectorPanel />);
+    postHostMessage({ type: "loadEntity", detail: individualDetail, classOptions });
+    await screen.findByRole("heading", { name: "Alice" });
+
+    await user.selectOptions(
+      screen.getByLabelText("Add type (class assertion)"),
+      "http://example.org#Person"
+    );
+    await user.click(screen.getAllByRole("button", { name: "Apply" })[2]);
+
+    expect(lastPostedMessage()).toEqual({
+      type: "applyPatch",
+      patches: [
+        {
+          op: "add_class_assertion",
+          entity_iri: "http://example.org#Alice",
+          class_iri: "http://example.org#Person",
+        },
+      ],
+      previewOnly: false,
+    });
+  });
+
+  it("removes class assertion for individuals via applyPatch", async () => {
+    const user = userEvent.setup();
+    const individualDetail = {
+      ...entityDetail,
+      entity: {
+        ...entityDetail.entity,
+        iri: "http://example.org#Alice",
+        short_name: "Alice",
+        kind: "individual",
+        labels: ["Alice"],
+      },
+      parents: [],
+      children: [],
+      axioms: [
+        {
+          kind: "class_assertion",
+          display: "ClassAssertion http://example.org#Person",
+          parent_iri: "http://example.org#Person",
+          editable: true,
+        },
+      ],
+    };
+    render(<EntityInspectorPanel />);
+    postHostMessage({ type: "loadEntity", detail: individualDetail, classOptions });
+    await screen.findByRole("heading", { name: "Alice" });
+
+    await user.click(screen.getByRole("button", { name: "Remove" }));
+
+    expect(lastPostedMessage()).toEqual({
+      type: "applyPatch",
+      patches: [
+        {
+          op: "remove_class_assertion",
+          entity_iri: "http://example.org#Alice",
+          class_iri: "http://example.org#Person",
+        },
+      ],
+      previewOnly: false,
+    });
+  });
 });

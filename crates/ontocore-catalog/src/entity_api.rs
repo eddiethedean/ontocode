@@ -219,7 +219,10 @@ impl OntologyCatalog {
 fn axiom_summary(a: &ontocore_core::Axiom, editable: bool) -> EntityAxiomSummary {
     let is_named_iri = a.object.starts_with("http://") || a.object.starts_with("https://");
     let manchester = if is_named_iri { None } else { Some(a.object.clone()) };
-    let parent_iri = if a.axiom_kind == AXIOM_KIND_SUB_CLASS_OF && is_named_iri {
+    let parent_iri = if (a.axiom_kind == AXIOM_KIND_SUB_CLASS_OF
+        || a.axiom_kind == AXIOM_KIND_CLASS_ASSERTION)
+        && is_named_iri
+    {
         Some(a.object.clone())
     } else {
         None

@@ -1,7 +1,7 @@
 # OntoCode VS Code extension
 
 [![Open VSX](https://img.shields.io/open-vsx/v/ontocode/ontocode)](https://open-vsx.org/extension/ontocode/ontocode)
-[![VS Code Marketplace](https://img.shields.io/visual-studio-marketplace/v/ontocode.ontocode?label=VS%20Code%20Marketplace)](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode)
+[![VS Code Marketplace](https://vsmarketplacebadges.dev/version/ontocode.ontocode.svg?label=VS%20Code%20Marketplace)](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode)
 
 **OntoCode** is the VS Code ontology IDE powered by **OntoCore**. It provides the explorer sidebar, Entity Inspector, Query Workbench, Manchester editor, graph panels, reasoner views, and inline diagnostics.
 

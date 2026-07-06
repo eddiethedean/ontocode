@@ -37,7 +37,7 @@ npx vsce package --no-dependencies
 ## After publish
 
 1. Update root README **Choose your path → VS Code** to link Marketplace and Open VSX listings first, VSIX as fallback
-2. Verify Open VSX and Marketplace badges on README and [docs/index.md](index.md)
+2. Verify Open VSX and Marketplace badges on README and [docs/index.md](index.md) (Marketplace: `https://vsmarketplacebadges.dev/version/ontocode.ontocode.svg` — shields.io `visual-studio-marketplace` badges are retired)
 3. Tag release and attach VSIX for users who prefer offline install
 
 ## Token handling

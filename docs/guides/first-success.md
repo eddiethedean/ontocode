@@ -13,7 +13,7 @@ Complete these four steps before exploring optional features below.
 Install from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) or [Open VSX](https://open-vsx.org/extension/ontocode/ontocode) (Cursor):
 
 [![Open VSX](https://img.shields.io/open-vsx/v/ontocode/ontocode)](https://open-vsx.org/extension/ontocode/ontocode)
-[![VS Code Marketplace](https://img.shields.io/visual-studio-marketplace/v/ontocode.ontocode?label=marketplace)](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode)
+[![VS Code Marketplace](https://vsmarketplacebadges.dev/version/ontocode.ontocode.svg?label=marketplace)](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode)
 
 For offline or air-gapped environments, use a release VSIX instead — see [Install VS Code](../vscode-install.md).
 

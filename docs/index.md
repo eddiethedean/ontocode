@@ -36,7 +36,7 @@ OntoCode is a modern ontology IDE for VS Code, powered by <strong>OntoCore</stro
 
 <p markdown="1" style="text-align: center; margin-top: 1rem;">
 [![Open VSX](https://img.shields.io/open-vsx/v/ontocode/ontocode)](https://open-vsx.org/extension/ontocode/ontocode)
-[![VS Code Marketplace](https://img.shields.io/visual-studio-marketplace/v/ontocode.ontocode?label=VS%20Code%20Marketplace)](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode)
+[![VS Code Marketplace](https://vsmarketplacebadges.dev/version/ontocode.ontocode.svg?label=VS%20Code%20Marketplace)](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode)
 </p>
 
 </div>
@@ -162,7 +162,7 @@ See the full matrix: **[What ships today](SHIPPED.md)**.
 === "VS Code"
 
     [![Open VSX](https://img.shields.io/open-vsx/v/ontocode/ontocode)](https://open-vsx.org/extension/ontocode/ontocode)
-    [![VS Code Marketplace](https://img.shields.io/visual-studio-marketplace/v/ontocode.ontocode?label=marketplace)](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode)
+    [![VS Code Marketplace](https://vsmarketplacebadges.dev/version/ontocode.ontocode.svg?label=marketplace)](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode)
 
     1. Install OntoCode from the [Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) or [Open VSX](https://open-vsx.org/extension/ontocode/ontocode) (Cursor)
     2. Open a folder with `.ttl`, `.owl`, `.obo`, or other ontology files

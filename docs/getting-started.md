@@ -13,7 +13,7 @@ Five-minute paths to success with OntoCore (CLI) and OntoCode (VS Code).
 VS Code extension (bundled language server on Linux, macOS, and Windows): [vscode-install.md](vscode-install.md).
 
 [![Open VSX](https://img.shields.io/open-vsx/v/ontocode/ontocode)](https://open-vsx.org/extension/ontocode/ontocode)
-[![VS Code Marketplace](https://img.shields.io/visual-studio-marketplace/v/ontocode.ontocode?label=marketplace)](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode)
+[![VS Code Marketplace](https://vsmarketplacebadges.dev/version/ontocode.ontocode.svg?label=marketplace)](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode)
 
 !!! note "SQL-like queries"
     `ontocore query` uses **SQL-like virtual tables** (single-table `SELECT`, limited `WHERE`). Not full SQL — see [SQL reference](sql-reference.md).

@@ -40,6 +40,7 @@ export class EntityInspectorPanel {
   private host: PanelHost;
   private readonly extensionUri: vscode.Uri;
   private iri: string | undefined;
+  private oboId: string | undefined;
   private documentUri: string | undefined;
   private classOptions: string[] = [];
   private activeRequestId = 0;
@@ -106,6 +107,7 @@ export class EntityInspectorPanel {
       this.activeRequestId = requestId;
     }
     this.iri = detail.entity.iri;
+    this.oboId = detail.entity.obo_id;
     this.classOptions = classOptions;
     this.documentUri = detail.document_path
       ? documentUriInWorkspace(detail.document_path)
@@ -124,7 +126,7 @@ export class EntityInspectorPanel {
     }
     if (message.type === "applyPatch" && this.documentUri) {
       const { parseApplyPatchMessage } = await import("./messages");
-      const parsed = parseApplyPatchMessage(message, this.iri);
+      const parsed = parseApplyPatchMessage(message, this.iri, this.oboId);
       if (!parsed) {
         void vscode.window.showErrorMessage(
           "OntoCode: ignored invalid applyPatch message from webview"

@@ -84,4 +84,51 @@ describe("parseApplyPatchMessage", () => {
     assert.ok(parsed);
     assert.equal(parsed?.previewOnly, true);
   });
+
+  it("accepts OBO patches when term_id matches expectedOboId", () => {
+    const oboPatch = { op: "set_name", term_id: "EX:001", value: "renamed" };
+    const parsed = parseApplyPatchMessage(
+      { type: "applyPatch", patches: [oboPatch], previewOnly: false },
+      "http://example.org/EX_001",
+      "EX:001"
+    );
+    assert.ok(parsed);
+    assert.equal(parsed?.patches[0]?.term_id, "EX:001");
+  });
+
+  it("rejects OBO patches when term_id does not match expectedOboId", () => {
+    const oboPatch = { op: "set_name", term_id: "EX:002", value: "renamed" };
+    const parsed = parseApplyPatchMessage(
+      { type: "applyPatch", patches: [oboPatch], previewOnly: false },
+      "http://example.org/EX_001",
+      "EX:001"
+    );
+    assert.equal(parsed, null);
+  });
+
+  it("rejects OBO patches in entity context without expectedOboId", () => {
+    const oboPatch = { op: "add_synonym", term_id: "EX:001", value: "alias", scope: "EXACT" };
+    const parsed = parseApplyPatchMessage(
+      { type: "applyPatch", patches: [oboPatch], previewOnly: false },
+      entity
+    );
+    assert.equal(parsed, null);
+  });
+
+  it("accepts OBO patches without entity context when no expected ids", () => {
+    const oboPatch = { op: "set_name", term_id: "EX:001", value: "renamed" };
+    assert.equal(
+      isWebviewMessage({
+        type: "applyPatch",
+        patches: [oboPatch],
+        previewOnly: true,
+      }),
+      true
+    );
+    const parsed = parseApplyPatchMessage(
+      { type: "applyPatch", patches: [oboPatch], previewOnly: true },
+      undefined
+    );
+    assert.ok(parsed);
+  });
 });

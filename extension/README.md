@@ -1,5 +1,6 @@
 # OntoCode
 
+[![VS Code Marketplace](https://img.shields.io/visual-studio-marketplace/v/ontocode.ontocode?label=VS%20Code%20Marketplace)](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode)
 [![Open VSX](https://img.shields.io/open-vsx/v/ontocode/ontocode)](https://open-vsx.org/extension/ontocode/ontocode)
 
 **Git-native ontology IDE for VS Code** — powered by **OntoCore** (`ontocore-lsp` language server).

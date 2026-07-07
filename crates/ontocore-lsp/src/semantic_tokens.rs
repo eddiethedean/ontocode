@@ -3,7 +3,6 @@
 use lsp_types::{
     SemanticToken, SemanticTokens, SemanticTokensLegend, SemanticTokensParams, SemanticTokensResult,
 };
-use serde_json::Value;
 
 const TOKEN_NAMESPACE: u32 = 0;
 const TOKEN_IRI: u32 = 1;
@@ -33,15 +32,6 @@ pub fn handle_semantic_tokens_full(
     let is_obo = uri.ends_with(".obo");
     let tokens = if is_obo { tokenize_obo(&text) } else { tokenize_turtle(&text) };
     Some(SemanticTokensResult::Tokens(SemanticTokens { result_id: None, data: tokens }))
-}
-
-pub fn handle_semantic_tokens_full_from_value(
-    params: Value,
-    doc_text: Option<String>,
-) -> Option<Value> {
-    let params: SemanticTokensParams = serde_json::from_value(params).ok()?;
-    handle_semantic_tokens_full(params, doc_text)
-        .and_then(|r| serde_json::to_value(r).ok())
 }
 
 fn tokenize_turtle(text: &str) -> Vec<SemanticToken> {
@@ -149,7 +139,8 @@ fn tokenize_obo(text: &str) -> Vec<SemanticToken> {
             }
             if i < bytes.len() && bytes[i] == b':' {
                 i += 1;
-                while i < bytes.len() && bytes[i] != b' ' && bytes[i] != b'\t' && bytes[i] != b'\n' {
+                while i < bytes.len() && bytes[i] != b' ' && bytes[i] != b'\t' && bytes[i] != b'\n'
+                {
                     i += 1;
                 }
                 push_token(&mut out, line, col, (i - start) as u32, TOKEN_KEYWORD);

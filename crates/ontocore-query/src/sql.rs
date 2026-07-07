@@ -1,10 +1,8 @@
 use crate::QueryError;
 use ontocore_catalog::OntologyCatalog;
 use ontocore_core::{
-    limits::MAX_QUERY_BYTES,
-    limits::MAX_SQL_RESULT_ROWS,
-    EntityKind, AXIOM_KIND_DISJOINT_CLASS, AXIOM_KIND_DOMAIN, AXIOM_KIND_EQUIVALENT_CLASS,
-    AXIOM_KIND_RANGE, AXIOM_KIND_SUB_CLASS_OF,
+    limits::MAX_QUERY_BYTES, limits::MAX_SQL_RESULT_ROWS, EntityKind, AXIOM_KIND_DISJOINT_CLASS,
+    AXIOM_KIND_DOMAIN, AXIOM_KIND_EQUIVALENT_CLASS, AXIOM_KIND_RANGE, AXIOM_KIND_SUB_CLASS_OF,
 };
 use serde::Serialize;
 use sqlparser::ast::{
@@ -175,8 +173,12 @@ fn table_row_iter<'a>(
             row.insert("entity_iri".into(), d.entity_iri.clone().unwrap_or_default());
             row
         }))),
-        "equivalent_class_axioms" => axiom_kind_rows(catalog, AXIOM_KIND_EQUIVALENT_CLASS, "class_iri", "expression"),
-        "disjoint_class_axioms" => axiom_kind_rows(catalog, AXIOM_KIND_DISJOINT_CLASS, "class_iri", "disjoint_with"),
+        "equivalent_class_axioms" => {
+            axiom_kind_rows(catalog, AXIOM_KIND_EQUIVALENT_CLASS, "class_iri", "expression")
+        }
+        "disjoint_class_axioms" => {
+            axiom_kind_rows(catalog, AXIOM_KIND_DISJOINT_CLASS, "class_iri", "disjoint_with")
+        }
         "domain_axioms" => axiom_kind_rows(catalog, AXIOM_KIND_DOMAIN, "property_iri", "domain"),
         "range_axioms" => axiom_kind_rows(catalog, AXIOM_KIND_RANGE, "property_iri", "range"),
         "restrictions" => restriction_rows(catalog),
@@ -212,17 +214,17 @@ fn axiom_kind_rows<'a>(
     let col_a = col_a.to_string();
     let col_b = col_b.to_string();
     let kind = kind.to_string();
-    Ok(Box::new(catalog.data().axioms.iter().filter(move |a| a.axiom_kind == kind).map(
-        move |a| {
-            let mut row = BTreeMap::new();
-            row.insert(col_a.clone(), a.subject.clone());
-            row.insert(col_b.clone(), a.object.clone());
-            row
-        },
-    )))
+    Ok(Box::new(catalog.data().axioms.iter().filter(move |a| a.axiom_kind == kind).map(move |a| {
+        let mut row = BTreeMap::new();
+        row.insert(col_a.clone(), a.subject.clone());
+        row.insert(col_b.clone(), a.object.clone());
+        row
+    })))
 }
 
-fn restriction_rows<'a>(catalog: &'a OntologyCatalog) -> Result<Box<dyn Iterator<Item = Row> + 'a>> {
+fn restriction_rows<'a>(
+    catalog: &'a OntologyCatalog,
+) -> Result<Box<dyn Iterator<Item = Row> + 'a>> {
     Ok(Box::new(
         catalog
             .data()
@@ -260,12 +262,8 @@ fn parse_restriction_header(expr: &str) -> (String, String) {
             return (property, kind.to_string());
         }
         if trimmed.to_ascii_lowercase().ends_with(kind) && kind == "self" {
-            let property = trimmed
-                .trim_end_matches("self")
-                .trim()
-                .trim_end_matches("and")
-                .trim()
-                .to_string();
+            let property =
+                trimmed.trim_end_matches("self").trim().trim_end_matches("and").trim().to_string();
             return (property, kind.to_string());
         }
     }

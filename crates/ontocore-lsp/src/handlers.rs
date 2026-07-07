@@ -17,10 +17,9 @@ use lsp_types::{
     Hover, HoverContents, HoverParams, HoverProviderCapability, InitializeParams, InitializeResult,
     Location, MarkupContent, MarkupKind, OneOf, Position, Range, ReferenceParams, RenameParams,
     SemanticTokensParams, SemanticTokensServerCapabilities, ServerCapabilities, SymbolInformation,
-    SymbolKind, TextDocumentEdit,
-    TextDocumentSyncCapability, TextDocumentSyncKind, TextEdit, Uri, WorkspaceEdit,
-    WorkspaceFoldersServerCapabilities, WorkspaceServerCapabilities, WorkspaceSymbolParams,
-    WorkspaceSymbolResponse,
+    SymbolKind, TextDocumentEdit, TextDocumentSyncCapability, TextDocumentSyncKind, TextEdit, Uri,
+    WorkspaceEdit, WorkspaceFoldersServerCapabilities, WorkspaceServerCapabilities,
+    WorkspaceSymbolParams, WorkspaceSymbolResponse,
 };
 use ontocore_catalog::{GraphBuilder, GraphRequest, IndexBuilder, OntologyCatalog};
 use ontocore_core::{validate_workspace_scope_any, EntityKind, OntologyFormat};
@@ -77,11 +76,13 @@ pub fn handle_initialize(state: &ServerState, params: InitializeParams) -> Initi
             code_action_provider: Some(CodeActionProviderCapability::Simple(true)),
             text_document_sync: Some(TextDocumentSyncCapability::Kind(TextDocumentSyncKind::FULL)),
             semantic_tokens_provider: Some(
-                SemanticTokensServerCapabilities::SemanticTokensOptions(lsp_types::SemanticTokensOptions {
-                    legend: crate::semantic_tokens::legend(),
-                    full: Some(lsp_types::SemanticTokensFullOptions::Bool(true)),
-                    ..Default::default()
-                }),
+                SemanticTokensServerCapabilities::SemanticTokensOptions(
+                    lsp_types::SemanticTokensOptions {
+                        legend: crate::semantic_tokens::legend(),
+                        full: Some(lsp_types::SemanticTokensFullOptions::Bool(true)),
+                        ..Default::default()
+                    },
+                ),
             ),
             workspace: Some(WorkspaceServerCapabilities {
                 workspace_folders: Some(WorkspaceFoldersServerCapabilities {
@@ -676,9 +677,7 @@ pub fn handle_query(
 pub fn handle_list_sql_schema(
     state: &ServerState,
 ) -> Result<Vec<ontocore_query::SqlTableSchema>, LspErrorPayload> {
-    state
-        .with_catalog(|catalog| ontocore_query::list_sql_schema(catalog))
-        .ok_or_else(LspErrorPayload::not_indexed)
+    state.with_catalog(ontocore_query::list_sql_schema).ok_or_else(LspErrorPayload::not_indexed)
 }
 
 pub fn handle_sparql(
@@ -1604,11 +1603,14 @@ pub fn handle_standard_request(
             let Ok(st_params) =
                 serde_json::from_value::<SemanticTokensParams>(params.unwrap_or(Value::Null))
             else {
-                return StandardRequestOutcome::InvalidParams(invalid_params("semanticTokens/full"));
+                return StandardRequestOutcome::InvalidParams(invalid_params(
+                    "semanticTokens/full",
+                ));
             };
-            let doc_text = ontocore_core::workspace_uri_to_path(st_params.text_document.uri.as_str())
-                .ok()
-                .and_then(|path| state.document_text(&path));
+            let doc_text =
+                ontocore_core::workspace_uri_to_path(st_params.text_document.uri.as_str())
+                    .ok()
+                    .and_then(|path| state.document_text(&path));
             match crate::semantic_tokens::handle_semantic_tokens_full(st_params, doc_text) {
                 Some(tokens) => serde_json::to_value(tokens)
                     .map(StandardRequestOutcome::Ok)

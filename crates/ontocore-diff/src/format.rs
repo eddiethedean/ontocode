@@ -106,7 +106,10 @@ pub fn format_diff_pr_summary(diff: &DiffResult) -> String {
             out.push_str(&format!("- `{:?}` {}\n", e.kind, e.iri));
         }
         if diff.entity_changes.len() > 50 {
-            out.push_str(&format!("\n_…and {} more entity changes_\n", diff.entity_changes.len() - 50));
+            out.push_str(&format!(
+                "\n_…and {} more entity changes_\n",
+                diff.entity_changes.len() - 50
+            ));
         }
         out.push('\n');
     }
@@ -119,7 +122,10 @@ pub fn format_diff_pr_summary(diff: &DiffResult) -> String {
             ));
         }
         if diff.axiom_changes.len() > 30 {
-            out.push_str(&format!("\n_…and {} more axiom changes_\n", diff.axiom_changes.len() - 30));
+            out.push_str(&format!(
+                "\n_…and {} more axiom changes_\n",
+                diff.axiom_changes.len() - 30
+            ));
         }
         out.push('\n');
     }

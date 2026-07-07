@@ -171,13 +171,7 @@ pub fn render_class_hierarchy(
         .parents
         .keys()
         .map(|s| s.as_str())
-        .filter(|iri| {
-            hierarchy
-                .parents
-                .get(*iri)
-                .map(|p| p.is_empty())
-                .unwrap_or(true)
-        })
+        .filter(|iri| hierarchy.parents.get(*iri).map(|p| p.is_empty()).unwrap_or(true))
         .collect();
     roots.sort();
     let mut out = String::new();

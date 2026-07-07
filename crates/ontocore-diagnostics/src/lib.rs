@@ -12,6 +12,8 @@ mod location;
 mod rules;
 
 pub use config::{find_config, DiagnosticConfig, RuleConfig};
-pub use engine::{collect_diagnostics, collect_diagnostics_with_config, collect_diagnostics_with_sources};
+pub use engine::{
+    collect_diagnostics, collect_diagnostics_with_config, collect_diagnostics_with_sources,
+};
 pub use input::DiagnosticInput;
 pub use location::{entity_needles, find_in_source};

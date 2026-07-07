@@ -21,10 +21,7 @@ fn bench_index_smoke() {
     let query_start = Instant::now();
     let result = query_catalog(&catalog, "SELECT short_name FROM classes").expect("query classes");
     let query_ms = query_start.elapsed().as_millis();
-    eprintln!(
-        "bench_index_smoke: query classes -> {} rows in {query_ms}ms",
-        result.rows.len()
-    );
+    eprintln!("bench_index_smoke: query classes -> {} rows in {query_ms}ms", result.rows.len());
     assert!(!result.rows.is_empty());
     assert!(query_ms < 5_000);
 }

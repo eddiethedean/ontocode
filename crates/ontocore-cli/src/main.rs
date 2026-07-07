@@ -4,8 +4,7 @@ use ontocore_catalog::{CatalogStats, IndexBuilder, OntologyCatalog};
 use ontocore_diff::{
     apply_unsat_diff, catalog_at_git_ref, catalog_at_worktree, diff_catalogs,
     diff_git_refs_with_catalogs, format_diff_json, format_diff_markdown, format_diff_pr_summary,
-    format_diff_text,
-    parse_git_range, DiffResult,
+    format_diff_text, parse_git_range, DiffResult,
 };
 use ontocore_docs::{export_workspace, ExportFormat, ExportOptions};
 use ontocore_query::{

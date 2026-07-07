@@ -19,14 +19,101 @@ pub struct SqlTableSchema {
 /// Static table definitions (columns are stable for v0.13).
 pub fn list_sql_tables() -> Vec<SqlTableSchema> {
     vec![
-        table("ontologies", &["id", "path", "format", "base_iri", "parse_status", "content_hash", "modified_time"]),
-        table("classes", &["iri", "short_name", "kind", "ontology_id", "labels", "comments", "deprecated", "obo_id"]),
-        table("object_properties", &["iri", "short_name", "kind", "ontology_id", "labels", "comments", "deprecated", "obo_id"]),
-        table("data_properties", &["iri", "short_name", "kind", "ontology_id", "labels", "comments", "deprecated", "obo_id"]),
-        table("annotation_properties", &["iri", "short_name", "kind", "ontology_id", "labels", "comments", "deprecated", "obo_id"]),
-        table("individuals", &["iri", "short_name", "kind", "ontology_id", "labels", "comments", "deprecated", "obo_id"]),
-        table("entities", &["iri", "short_name", "kind", "ontology_id", "labels", "comments", "deprecated", "obo_id"]),
-        table("properties", &["iri", "short_name", "kind", "ontology_id", "labels", "comments", "deprecated", "obo_id"]),
+        table(
+            "ontologies",
+            &["id", "path", "format", "base_iri", "parse_status", "content_hash", "modified_time"],
+        ),
+        table(
+            "classes",
+            &[
+                "iri",
+                "short_name",
+                "kind",
+                "ontology_id",
+                "labels",
+                "comments",
+                "deprecated",
+                "obo_id",
+            ],
+        ),
+        table(
+            "object_properties",
+            &[
+                "iri",
+                "short_name",
+                "kind",
+                "ontology_id",
+                "labels",
+                "comments",
+                "deprecated",
+                "obo_id",
+            ],
+        ),
+        table(
+            "data_properties",
+            &[
+                "iri",
+                "short_name",
+                "kind",
+                "ontology_id",
+                "labels",
+                "comments",
+                "deprecated",
+                "obo_id",
+            ],
+        ),
+        table(
+            "annotation_properties",
+            &[
+                "iri",
+                "short_name",
+                "kind",
+                "ontology_id",
+                "labels",
+                "comments",
+                "deprecated",
+                "obo_id",
+            ],
+        ),
+        table(
+            "individuals",
+            &[
+                "iri",
+                "short_name",
+                "kind",
+                "ontology_id",
+                "labels",
+                "comments",
+                "deprecated",
+                "obo_id",
+            ],
+        ),
+        table(
+            "entities",
+            &[
+                "iri",
+                "short_name",
+                "kind",
+                "ontology_id",
+                "labels",
+                "comments",
+                "deprecated",
+                "obo_id",
+            ],
+        ),
+        table(
+            "properties",
+            &[
+                "iri",
+                "short_name",
+                "kind",
+                "ontology_id",
+                "labels",
+                "comments",
+                "deprecated",
+                "obo_id",
+            ],
+        ),
         table("annotations", &["subject", "predicate", "object", "ontology_id"]),
         table("axioms", &["id", "ontology_id", "subject", "predicate", "object", "axiom_kind"]),
         table("restrictions", &["class_iri", "property_iri", "restriction_kind", "filler"]),
@@ -36,7 +123,10 @@ pub fn list_sql_tables() -> Vec<SqlTableSchema> {
         table("range_axioms", &["property_iri", "range"]),
         table("namespaces", &["prefix", "iri", "ontology_id"]),
         table("imports", &["ontology_id", "import_iri"]),
-        table("diagnostics", &["code", "severity", "message", "file", "line", "column", "entity_iri"]),
+        table(
+            "diagnostics",
+            &["code", "severity", "message", "file", "line", "column", "entity_iri"],
+        ),
     ]
 }
 
@@ -45,10 +135,7 @@ fn table(name: &str, columns: &[&str]) -> SqlTableSchema {
         name: name.to_string(),
         columns: columns
             .iter()
-            .map(|c| SqlColumnSchema {
-                name: (*c).to_string(),
-                column_type: "string".to_string(),
-            })
+            .map(|c| SqlColumnSchema { name: (*c).to_string(), column_type: "string".to_string() })
             .collect(),
     }
 }

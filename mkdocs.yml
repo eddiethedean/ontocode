@@ -81,7 +81,8 @@ nav:
       - Glossary: glossary.md
       - "First success (~10 min core path)": guides/first-success.md
       - Which artifact do I need?: guides/which-artifact.md
-      - What's new in v0.12: migration/v0.12.md
+      - "What's new in v0.13": migration/v0.13.md
+      - "What's new in v0.12": migration/v0.12.md
       - What's new in v0.11: migration/v0.11.md
       - Pick a task: guides/start-here.md
       - What ships today: SHIPPED.md
@@ -165,6 +166,7 @@ nav:
           - v0.9 → v0.10: migration/v0.10.md
           - v0.10 → v0.11: migration/v0.11.md
           - v0.11 → v0.12: migration/v0.12.md
+          - v0.12 → v0.13: migration/v0.13.md
       - Legacy guide URLs: guides/legacy-guide-urls.md
       - Release integrity: release-integrity.md
   - Contribute:
@@ -238,6 +240,7 @@ nav:
       - Documentation index: documentation-index.md
       - Glossary: glossary.md
       - Platform overview: platform/OVERVIEW.md
+      - UX audit (v0.13): ui/UX_AUDIT_v0.13.md
       - OntoUI: platform/ONTOUI.md
       - Workspace runtime: platform/WORKSPACE_RUNTIME.md
       - Capability providers: platform/CAPABILITY_PROVIDERS.md

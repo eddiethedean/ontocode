@@ -26,6 +26,7 @@ jobs:
       - name: Activate Read the Docs version
         env:
           READTHEDOCS_API_TOKEN: ${{ secrets.READTHEDOCS_API_TOKEN }}
+          RTD_ACTIVATION_REQUIRED: ${{ github.event_name == 'workflow_dispatch' && '1' || '0' }}
         run: |
           REF="${{ github.event.inputs.ref || github.ref_name }}"
           chmod +x scripts/readthedocs-activate-version.sh

@@ -23,8 +23,13 @@ if [[ -z "$REF" ]]; then
 fi
 
 if [[ -z "$TOKEN" ]]; then
-  echo "error: set READTHEDOCS_API_TOKEN (Read the Docs account API token)" >&2
-  exit 1
+  if [[ "${RTD_ACTIVATION_REQUIRED:-}" == "1" ]]; then
+    echo "error: set READTHEDOCS_API_TOKEN (Read the Docs account API token)" >&2
+    exit 1
+  fi
+  echo "warning: READTHEDOCS_API_TOKEN not set; skipping RTD version activation" >&2
+  echo "One-time setup: docs/releasing.md § Read the Docs" >&2
+  exit 0
 fi
 
 # release/v0.13.0 → release-v0.13.0; v0.13.0 is unchanged.

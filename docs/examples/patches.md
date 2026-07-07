@@ -30,6 +30,36 @@ ontocore patch ./example.ttl patches.json
 
 Download: [patches.json](patches.json)
 
+## OBO patches (v0.12)
+
+```json
+[
+  {
+    "op": "set_name",
+    "term_id": "EX:001",
+    "value": "example class"
+  },
+  {
+    "op": "add_synonym",
+    "term_id": "EX:001",
+    "value": "example",
+    "scope": "EXACT"
+  },
+  {
+    "op": "add_is_a",
+    "term_id": "EX:001",
+    "parent_id": "EX:000"
+  }
+]
+```
+
+```bash
+ontocore patch ./terms.obo patches-obo.json --preview
+ontocore patch ./terms.obo patches-obo.json
+```
+
+See [OBO authoring](../ontocode/obo-authoring.md).
+
 ## Complex axioms (v0.5)
 
 ```json

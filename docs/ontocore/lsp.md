@@ -22,7 +22,7 @@ OntoCore exposes workspace operations via `ontocore/*` LSP methods:
 | `ontocore/getEntity` | Entity inspector payload |
 | `ontocore/getGraph` | Graph visualization data |
 | `ontocore/query` / `ontocore/sparql` | Query workbench |
-| `ontocore/applyAxiomPatch` | Turtle write-back |
+| `ontocore/applyAxiomPatch` | Turtle and OBO write-back (format dispatch by extension) |
 | `ontocore/parseManchester` | Manchester editor |
 | `ontocore/runReasoner` / `ontocore/getExplanation` | Reasoning |
 | `ontocore/findUsages` / `ontocore/previewRefactor` / `ontocore/applyRefactor` | Refactoring |

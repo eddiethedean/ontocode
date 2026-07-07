@@ -1,5 +1,8 @@
 # Product Roadmap 2.0
 
+> **Document type:** Product design specification (target state). **Not a shipped feature list.** See [ROADMAP_MAPPING.md](ROADMAP_MAPPING.md) for release mapping and [SHIPPED.md](../SHIPPED.md) for what works today.
+
+
 ## Phase 0 — Stabilize Current Extension
 
 - Audit existing VS Code extension.

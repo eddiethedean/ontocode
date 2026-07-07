@@ -4,7 +4,7 @@
 >
 > For product capabilities, use **[What ships today](SHIPPED.md)**. For a 10-minute tutorial, use **[First success](guides/first-success.md)**.
 
-Design documents, ADRs, and backlogs live under [design/](design/README.md). Product design and UX specs live under [ui/](ui/README.md) — mapped to releases in [ROADMAP_MAPPING.md](ui/ROADMAP_MAPPING.md). They may mention features that are **planned** (plugins, SHACL, Python/TypeScript SDKs, MCP server, OntoStudio). Always cross-check [SHIPPED.md](SHIPPED.md).
+Design documents, ADRs, and backlogs live under [design/](design/README.md). Product design and UX specs live under [ui/README.md](ui/README.md) — mapped to releases in [ROADMAP_MAPPING.md](ui/ROADMAP_MAPPING.md). They may mention features that are **planned** (plugins, SHACL, Python/TypeScript SDKs, MCP server, OntoStudio). Always cross-check [SHIPPED.md](SHIPPED.md). See also [Roadmap hub](roadmap-hub.md).
 
 ## Start here for contributors
 
@@ -19,4 +19,4 @@ Design documents, ADRs, and backlogs live under [design/](design/README.md). Pro
 
 ## Plugin model
 
-The plugin host is a **v1.0 design** and is **not installable in v0.11**. See [plugin model](ontocore/plugin-model.md) and [PLUGIN_SPEC.md](design/PLUGIN_SPEC.md).
+The plugin host is a **v1.0 design** and is **not installable in the current release (v0.12)**. See [plugin model](ontocore/plugin-model.md) and [PLUGIN_SPEC.md](design/PLUGIN_SPEC.md).

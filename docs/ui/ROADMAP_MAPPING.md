@@ -1,5 +1,8 @@
 # UI roadmap mapping
 
+> **Document type:** Release mapping for UI design specs. For shipped product capabilities, see [SHIPPED.md](../SHIPPED.md).
+
+
 > **Purpose:** Connect the [Product Roadmap 2.0](PRODUCT_ROADMAP_2.0.md) UX phases to **shipped** OntoCore/OntoCode releases and **planned** platform milestones.
 >
 > **Canonical shipped matrix:** [What ships today](../SHIPPED.md) · **Platform roadmap:** [roadmap.md](../roadmap.md) · **v1.0 checklist:** [v1.0_BACKLOG.md](../design/v1.0_BACKLOG.md)

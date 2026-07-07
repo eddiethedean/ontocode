@@ -1,0 +1,43 @@
+# Roadmap hub
+
+OntoCode and OntoCore publish several roadmap documents. **Use this page to pick the right one** — they serve different audiences and must not be read as a single capability list.
+
+## Which document should I read?
+
+| I want to… | Read this |
+|------------|-----------|
+| See **what ships today** | [What ships today](SHIPPED.md) — canonical capability matrix |
+| Understand **platform direction** (releases v0.13 → v1.2) | [Platform roadmap](roadmap.md) · [ROADMAP.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/ROADMAP.md) |
+| Map **UI design specs** to release phases | [UI roadmap mapping](ui/ROADMAP_MAPPING.md) — master checklist |
+| See **UI product vision** (OntoStudio, AI, plugins) | [Product Roadmap 2.0](ui/PRODUCT_ROADMAP_2.0.md) — design targets |
+| Review **shipped engineering milestones** (v0.1–v0.11 detail) | [Design milestones](design/ROADMAP.md) |
+| Track **v1.0 exit criteria** (contributor backlog) | [v1.0 backlog](design/v1.0_BACKLOG.md) — not a shipped feature list |
+
+## How they relate
+
+```mermaid
+flowchart TB
+  SHIPPED[SHIPPED.md — truth for evaluators]
+  Platform[roadmap.md — platform releases]
+  UIMap[ui/ROADMAP_MAPPING.md — UI items to releases]
+  UIVis[ui/PRODUCT_ROADMAP_2.0.md — UX vision]
+  DesignM[design/ROADMAP.md — shipped milestones]
+  Backlog[design/v1.0_BACKLOG.md — exit checklist]
+
+  SHIPPED --> Platform
+  Platform --> UIMap
+  UIMap --> UIVis
+  Platform --> DesignM
+  Backlog --> SHIPPED
+```
+
+## Rules of thumb
+
+1. **Evaluators and new users:** start at [SHIPPED.md](SHIPPED.md), not a roadmap or UI spec.
+2. **UI specs under `docs/ui/`** describe target UX — many items are planned for v0.13+ or v1.0+. Cross-check [ROADMAP_MAPPING.md](ui/ROADMAP_MAPPING.md).
+3. **Unchecked boxes** in [v1.0 backlog](design/v1.0_BACKLOG.md) mean "v1.0 exit bar" — not "missing today."
+4. **Release timeline** for procurement: [Release timeline](guides/release-timeline.md) (non-commitment disclaimer applies).
+
+## Current release
+
+**v0.12.0** — see [Migration v0.11 → v0.12](migration/v0.12.md) and [Changelog](changelog.md).

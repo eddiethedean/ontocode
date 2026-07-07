@@ -643,6 +643,59 @@ else
   echo "ok: no stale ontocore alias notes"
 fi
 
+# MkDocs strict: markdown links must not point at directories (use README.md)
+if rg -q '\]\(\.\./ui/\)|\]\(ui/\)[^R]' docs --glob '*.md' 2>/dev/null; then
+  echo "FAIL: directory-only markdown link (use ui/README.md not ui/)" >&2
+  rg -n '\]\(\.\./ui/\)|\]\(ui/\)[^R]' docs --glob '*.md' 2>/dev/null || true
+  fail=1
+else
+  echo "ok: no directory-only ui/ markdown links"
+fi
+
+# design/ARCHITECTURE.md must not freeze shipped banner at v0.11
+if grep -qE 'Shipped through v0\.11:' docs/design/ARCHITECTURE.md 2>/dev/null; then
+  echo "FAIL: docs/design/ARCHITECTURE.md shipped banner still says through v0.11" >&2
+  fail=1
+else
+  echo "ok: design ARCHITECTURE shipped banner"
+fi
+
+# LSP API must document OBO write-back alongside Turtle
+for file in docs/lsp-api.md docs/ontocore/lsp.md; do
+  if grep -qE 'applyAxiomPatch.*Turtle write-back|Turtle write-back only|true` for Turtle write-back' "$file" 2>/dev/null; then
+    echo "FAIL: $file still implies Turtle-only applyAxiomPatch" >&2
+    fail=1
+  fi
+done
+if [[ "$fail" -eq 0 ]]; then
+  echo "ok: LSP docs mention Turtle+OBO write-back"
+fi
+
+# patch-reference intro must mention OBO
+if grep -qE '^Turtle write-back uses a JSON array' docs/patch-reference.md 2>/dev/null; then
+  echo "FAIL: docs/patch-reference.md intro still says Turtle write-back only" >&2
+  fail=1
+else
+  echo "ok: patch-reference intro covers Turtle+OBO"
+fi
+
+# FAQ inspector edit must not contradict OBO write-back (v0.12)
+if grep -A2 'I cannot edit in the Entity Inspector' docs/faq.md | grep -qE 'Turtle \(\`\.ttl\`\) only' 2>/dev/null; then
+  echo "FAIL: docs/faq.md inspector edit answer still says Turtle-only" >&2
+  fail=1
+else
+  echo "ok: faq inspector edit answer"
+fi
+
+check_file_contains "docs/roadmap-hub.md" "Roadmap hub" "roadmap hub page"
+check_file_contains "docs/guides/api-stability.md" "API stability" "api stability page"
+check_file_contains "docs/guides/legacy-guide-urls.md" "Legacy guide URLs" "legacy guide redirects page"
+check_file_contains "docs/ontocode/obo-authoring.md" "OBO authoring" "obo authoring guide"
+check_file_contains "mkdocs.yml" "roadmap-hub.md" "mkdocs roadmap hub"
+check_file_contains "mkdocs.yml" "guides/api-stability.md" "mkdocs api stability"
+check_file_contains "mkdocs.yml" "guides/legacy-guide-urls.md" "mkdocs legacy redirects"
+check_file_contains "mkdocs.yml" "ontocode/obo-authoring.md" "mkdocs obo authoring"
+
 if [[ "$fail" -ne 0 ]]; then
   echo "Documentation version check failed." >&2
   exit 1

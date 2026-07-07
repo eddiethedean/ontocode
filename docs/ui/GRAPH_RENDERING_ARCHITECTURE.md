@@ -1,5 +1,8 @@
 # Graph Rendering Architecture
 
+> **Document type:** Product design specification (target state). **Not a shipped feature list.** See [ROADMAP_MAPPING.md](ROADMAP_MAPPING.md) for release mapping and [SHIPPED.md](../SHIPPED.md) for what works today.
+
+
 ## 1. Purpose
 
 The Graph Workspace requires high-performance rendering for large semantic graphs.

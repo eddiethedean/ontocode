@@ -1,5 +1,7 @@
 # OntoCore & OntoCode Roadmap
 
+> **Multiple roadmap documents?** See [Roadmap hub](roadmap-hub.md) to pick the right page. For **what ships today**, use [SHIPPED.md](SHIPPED.md).
+
 ## Vision
 
 Build the modern open-source platform for ontology engineering.

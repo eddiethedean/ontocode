@@ -1,7 +1,8 @@
 # ADR-0019 — OBO Write-Back via fastobo
 
 ## Status
-Shipped (v0.12.0)
+
+Accepted — **implemented in v0.12.0** (read path v0.11, write-back v0.12)
 
 ## Context
 
@@ -9,21 +10,27 @@ OntoCore indexes OBO Format 1.4 (`.obo`) for biomedical workflows. v0.7 shipped 
 
 The canonical Rust stack for OBO is [`fastobo`](https://crates.io/crates/fastobo) + [`fastobo-owl`](https://crates.io/crates/fastobo-owl) per [OBO_ROBOT_SPEC.md](../OBO_ROBOT_SPEC.md).
 
-## Decision
+## Decision (original)
 
-### v0.11 (this release)
+### v0.11
 
 1. **Read path:** Replace the minimal OBO line parser with `fastobo::from_str` → existing `ParsedOntology` / catalog model. Surface synonyms, definitions, and property values in catalog annotations and entity detail.
-2. **Write-back:** Document patch schema below; **do not** ship OBO inspector editing or `fastobo` serialize-to-disk in v0.11. Turtle remains the only editable format in VS Code.
-3. **Boundaries:** Turtle patches (`ontocore-owl::patch`) continue to own Turtle write-back. OBO patches are a separate op namespace applied by a future `ontocore-obo` layer (v1.0).
+2. **Write-back:** Document patch schema; defer OBO inspector editing and disk serialize to v0.12.
+3. **Boundaries:** Turtle patches (`ontocore-owl::patch`) own Turtle write-back. OBO patches use a separate op namespace in `ontocore-obo`.
 
-### v1.0 (planned)
+### v1.0 (remaining)
 
-- `fastobo` + `fastobo-owl` for round-trip OBO read/write
-- Inspector and LSP `applyAxiomPatch` on `.obo` files
 - Optional `fastobo-validator` in CI / `ontocore validate`
+- Richer OBO metadata round-trip parity with Protégé / ROBOT
 
-## OBO patch op schema (v1.0 target)
+## Current implementation (v0.12)
+
+- **`ontocore-obo`** crate applies OBO patch ops to `.obo` files on disk
+- **Entity Inspector** and **`ontocore/applyAxiomPatch`** dispatch by file extension (`.ttl` vs `.obo`)
+- **CLI:** `ontocore patch path/to/terms.obo patches.json`
+- **Documented ops:** [patch-reference.md](../../patch-reference.md) · [OBO authoring](../../ontocode/obo-authoring.md)
+
+## OBO patch op schema
 
 JSON array; each object has `"op"` (snake_case). Term subject is always an OBO id (e.g. `GO:0008150`) or resolved IRI.
 
@@ -63,26 +70,28 @@ Example:
 
 | Concern | Turtle | OBO |
 |---------|--------|-----|
-| Patch crate | `ontocore-owl` | Future `ontocore-obo` (v1.0) |
-| LSP apply | `ontocore/applyAxiomPatch` on `.ttl` | Same method, format dispatch (v1.0) |
-| Imports | `owl:imports` patch ops (`add_import`, `remove_import`) | N/A (OBO uses separate files / ontology headers) |
-| Manchester | Yes | No (OBO uses structural clauses) |
+| Patch crate | `ontocore-owl` | `ontocore-obo` |
+| LSP apply | `ontocore/applyAxiomPatch` on `.ttl` | Same method, `.obo` dispatch |
+| Subject key | `entity_iri` | `term_id` |
+| Manchester | Yes | No (structural OBO clauses) |
+| Imports | `owl:imports` patch ops | N/A (separate ontology files) |
 
 ## Consequences
 
 **Positive:**
 
 - Single canonical OBO parser (`fastobo`) reduces drift from Protégé / ROBOT
-- Patch schema is documented before v1.0 implementation
-- v0.11 enriches explorer/inspector metadata without risky write path
+- Patch schema documented before implementation; shipped in v0.12
+- Biomedical workflows can edit OBO in VS Code without Protégé
 
 **Negative:**
 
-- Two patch vocabularies until v1.0 unifies LSP dispatch
-- Golden snapshots may change when migrating parser (mitigated by CI golden tests)
+- Two patch vocabularies (Turtle vs OBO ops) — unified LSP envelope only
+- Full Protégé OBO feature parity (all xref types, logical definitions) remains v1.0 work
 
 ## References
 
 - [OBO_ROBOT_SPEC.md](../OBO_ROBOT_SPEC.md)
 - [PROTEGE_PARITY.md](../PROTEGE_PARITY.md)
 - [patch-reference.md](../../patch-reference.md)
+- [OBO authoring guide](../../ontocode/obo-authoring.md)

@@ -1,5 +1,8 @@
 # Product Design Specification
 
+> **Document type:** Product design specification (target state). **Not a shipped feature list.** See [ROADMAP_MAPPING.md](ROADMAP_MAPPING.md) for release mapping and [SHIPPED.md](../SHIPPED.md) for what works today.
+
+
 ## 1. Product Vision
 
 OntoCode is a semantic engineering environment for ontology and knowledge graph development. It should feel like a modern IDE, not a legacy ontology editor.

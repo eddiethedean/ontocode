@@ -167,7 +167,7 @@ Return detailed entity information for the inspector.
 | `children` | Child class IRIs |
 | `axioms` | `EntityAxiomSummary[]` — structured axiom rows for inspector and Manchester editor |
 | `source` | Optional `{ path, line, column }` |
-| `editable` | `true` for Turtle write-back |
+| `editable` | `true` when the entity's declaring file supports patch write-back (`.ttl` or `.obo` per v0.12); see [Patch reference](patch-reference.md) |
 | `document_path` | Filesystem path to declaring file |
 
 **`EntityAxiomSummary` fields:**
@@ -245,7 +245,7 @@ Parse and validate a Manchester class expression; return normalized text, Turtle
 
 ### `ontocore/applyAxiomPatch`
 
-Apply Turtle patch operations. See [authoring.md](authoring.md).
+Apply patch operations to Turtle (`.ttl`) or OBO (`.obo`) documents. See [authoring.md](authoring.md) and [OBO authoring](ontocode/obo-authoring.md).
 
 **Buffer-first (VS Code):** Reads the open document buffer when available, applies patches in memory, updates the buffer, writes disk, then reindexes. See [errors.md](errors.md) for `APPLIED_NOT_INDEXED`.
 
@@ -266,7 +266,7 @@ Apply Turtle patch operations. See [authoring.md](authoring.md).
 | Field | Description |
 |-------|-------------|
 | `applied` | `true` if patches were written (false for preview-only or validation failure) |
-| `preview_text` | Turtle preview when `preview_only: true` |
+| `preview_text` | Updated file preview when `preview_only: true` (Turtle or OBO text) |
 | `diagnostics` | `PatchDiagnostic[]` on failure (`severity`, `message`) |
 | `document_path` | Path to modified file |
 | `entity_detail` | Updated `EntityDetail` after successful apply (LSP only) |

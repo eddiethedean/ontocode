@@ -14,9 +14,9 @@
 >
 > **Ecosystem architecture (canonical for users):** [Platform architecture](../architecture.md).
 >
-> **Shipped through v0.11:** workspace scanner, incremental indexing, multi-root workspaces, SQL/SPARQL queries, diagnostics, CLI, LSP, Turtle write-back, Query Workbench + Manchester editor, React webviews (inspector, graphs, workbench, refactor preview, semantic diff, imports), EL–DL reasoning (OntoLogos 1.0), OBO index, ROBOT CLI wrappers, semantic diff, `ontocore docs` export, Turtle completion, diagnostic quick fixes. See [What ships today](../SHIPPED.md).
+> **Shipped through v0.12:** workspace scanner, incremental indexing, multi-root workspaces, SQL/SPARQL queries, diagnostics, CLI, LSP, Turtle and OBO write-back, Query Workbench + Manchester editor, React webviews (inspector, graphs, workbench, refactor preview, semantic diff, imports), EL–DL reasoning (OntoLogos 1.0), OBO index + OBO write-back, OWL/XML read-only catalog, ROBOT CLI wrappers, semantic diff, `ontocore docs` export, Turtle completion, diagnostic quick fixes, property chain editing, DL unsatisfiability explanations. See [What ships today](../SHIPPED.md).
 >
-> **Planned v1.0:** plugin host, full OBO write-back in IDE, property chain editing. See [Platform roadmap](../roadmap.md).
+> **Planned v1.0:** plugin host, OWL/XML write-back, full DL axiom catalog for all formats. See [Platform roadmap](../roadmap.md).
 >
 > **Reference:** [lsp-api.md](../lsp-api.md), [adr/README.md](adr/README.md), [DEPENDENCY_MATRIX.md](DEPENDENCY_MATRIX.md).
 

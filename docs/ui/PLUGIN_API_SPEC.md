@@ -1,5 +1,8 @@
 # Plugin API Specification
 
+> **Document type:** Product design specification (target state). **Not a shipped feature list.** See [ROADMAP_MAPPING.md](ROADMAP_MAPPING.md) for release mapping and [SHIPPED.md](../SHIPPED.md) for what works today.
+
+
 ## 1. Purpose
 
 The plugin API allows third-party developers to extend OntoCode while preserving performance, security, and UX consistency.

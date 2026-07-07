@@ -49,7 +49,7 @@ You do **not** need to clone this repo to use the extension or `cargo install on
 
     ---
 
-    Browse, edit Turtle, run queries and the reasoner from the OntoCode activity bar.
+    Browse, edit Turtle and OBO, run queries and the reasoner from the OntoCode activity bar.
 
     [:octicons-arrow-right-24: First success tutorial](guides/first-success.md)
 

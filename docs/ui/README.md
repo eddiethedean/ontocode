@@ -1,5 +1,8 @@
 # OntoCode Product Design Specification
 
+> **Document type:** Product design specification pack (target state). **Not a shipped feature list.** See [ROADMAP_MAPPING.md](ROADMAP_MAPPING.md) for release mapping and [SHIPPED.md](../SHIPPED.md) for what works today.
+
+
 This specification pack defines the product, UX, technical architecture, design system, state model, plugin platform, AI experience, and implementation roadmap for OntoCode and the broader Ontologos semantic engineering platform.
 
 > **Integrated with repo plans:** [ROADMAP_MAPPING.md](ROADMAP_MAPPING.md) — **master checklist** for every Product Roadmap 2.0 item mapped to releases. For **what ships today**, see [SHIPPED.md](../SHIPPED.md).

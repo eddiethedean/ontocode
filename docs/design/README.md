@@ -8,7 +8,7 @@
 |-------|-------|----------|
 | **Platform** | [vision.md](../vision.md), [architecture.md](../architecture.md), [roadmap.md](../roadmap.md) | Everyone — mission, ecosystem, forward plan |
 | **Shipped** | [SHIPPED.md](../SHIPPED.md), guides, reference | Users evaluating current capabilities |
-| **Product design (UI)** | [ui/](../ui/) — [ROADMAP_MAPPING.md](../ui/ROADMAP_MAPPING.md) | Designers, frontend contributors — UX specs mapped to releases |
+| **Product design (UI)** | [ui/README.md](../ui/README.md) — [ROADMAP_MAPPING.md](../ui/ROADMAP_MAPPING.md) | Designers, frontend contributors — UX specs mapped to releases |
 | **Engineering** | `docs/design/` (this folder) | Contributors — specs, ADRs, v0.1–v0.11 milestones |
 
 For **user-facing guides**, pick a path:

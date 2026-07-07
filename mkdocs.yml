@@ -91,6 +91,7 @@ nav:
       - Feature tour: ontocode/feature-tour.md
       - Overview: ontocode/vscode-extension.md
       - Authoring (Turtle): authoring.md
+      - OBO authoring: ontocode/obo-authoring.md
       - Manage Imports: ontocode/manage-imports.md
       - Inspector: ontocode/inspector.md
       - Query Workbench: ontocode/query-workbench.md
@@ -133,8 +134,10 @@ nav:
   - Evaluate:
       - Vision: vision.md
       - Architecture: architecture.md
-      - Roadmap: roadmap.md
+      - Roadmap hub: roadmap-hub.md
+      - Platform roadmap: roadmap.md
       - OntoCore roadmap (pointer): ontocore/roadmap.md
+      - API stability (pre-1.0): guides/api-stability.md
       - Enterprise evaluation: guides/enterprise-eval.md
       - Protégé vs OntoCode: guides/protege-decision.md
       - Production readiness: guides/production-readiness.md
@@ -159,11 +162,7 @@ nav:
           - v0.9 → v0.10: migration/v0.10.md
           - v0.10 → v0.11: migration/v0.11.md
           - v0.11 → v0.12: migration/v0.12.md
-      - Legacy guide URLs:
-          - VS Code extension: guides/vscode-extension.md
-          - Manchester editor: guides/manchester-editor.md
-          - Query Workbench: guides/query-workbench.md
-          - Graph visualization: guides/graph-visualization.md
+      - Legacy guide URLs: guides/legacy-guide-urls.md
       - Release integrity: release-integrity.md
   - Contribute:
       - Guide: contributing.md
@@ -184,22 +183,36 @@ nav:
           - UI roadmap mapping: ui/ROADMAP_MAPPING.md
           - Product Roadmap 2.0: ui/PRODUCT_ROADMAP_2.0.md
           - Product design spec: ui/PRODUCT_DESIGN_SPECIFICATION.md
+          - Platform architecture (UI): ui/PLATFORM_ARCHITECTURE.md
           - Design philosophy: ui/DESIGN_PHILOSOPHY.md
+          - Visual design system: ui/VISUAL_DESIGN_SYSTEM.md
+          - Human interface guidelines: ui/HUMAN_INTERFACE_GUIDELINES.md
+          - Interaction principles: ui/INTERACTION_PRINCIPLES.md
           - Information architecture: ui/INFORMATION_ARCHITECTURE.md
+          - Workspace model: ui/WORKSPACE_MODEL.md
           - State management: ui/STATE_MANAGEMENT.md
+          - UX patterns: ui/UX_PATTERNS.md
           - Component library: ui/COMPONENT_LIBRARY.md
+          - Component interfaces: ui/COMPONENT_INTERFACES.md
           - Design tokens: ui/DESIGN_TOKENS.md
           - Workspace wireframes: ui/WORKSPACE_WIREFRAMES.md
           - Entity editor: ui/ENTITY_EDITOR_SPEC.md
           - Query workbench UX: ui/QUERY_WORKBENCH.md
           - Graph workspace: ui/GRAPH_WORKSPACE.md
+          - Graph rendering: ui/GRAPH_RENDERING_ARCHITECTURE.md
           - Reasoning experience: ui/REASONING_EXPERIENCE.md
           - Semantic refactoring UX: ui/SEMANTIC_REFACTORING.md
+          - Collaboration: ui/COLLABORATION.md
           - AI experience: ui/AI_EXPERIENCE.md
+          - AI orchestration: ui/AI_ORCHESTRATION_ARCHITECTURE.md
           - Plugin platform UX: ui/PLUGIN_PLATFORM.md
+          - Plugin API spec: ui/PLUGIN_API_SPEC.md
           - OntoStudio desktop: ui/ONTOSTUDIO_DESKTOP.md
+          - Event sequences: ui/EVENT_SEQUENCE_DIAGRAMS.md
+          - Keyboard shortcuts: ui/KEYBOARD_SHORTCUTS.md
           - Accessibility: ui/ACCESSIBILITY_SPEC.md
           - Testing strategy: ui/TESTING_STRATEGY.md
+          - Telemetry: ui/TELEMETRY_ANALYTICS.md
       - Specs (planned features):
           - Product plan: design/PLAN.md
           - Technical spec: design/SPEC.md

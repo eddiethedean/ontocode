@@ -21,12 +21,13 @@ For quick answers, see also [FAQ](faq.md).
 
 ## VS Code: cannot edit in inspector
 
-- Write-back is **Turtle (`.ttl`) only**. RDF/XML, OWL XML, and JSON-LD are read-only in the inspector.
-- Entity must be declared in an indexed `.ttl` file in the workspace.
+- Write-back applies to **Turtle (`.ttl`) and OBO (`.obo`)** (v0.12+). RDF/XML, OWL/XML, and JSON-LD are read-only.
+- Entity must be declared in an indexed `.ttl` or `.obo` file in the workspace.
+- See [OBO authoring](ontocode/obo-authoring.md).
 
 ## VS Code: patch or Manchester apply did not stick
 
-Patches write the **`.ttl` file on disk** first, then update the language server’s open-buffer copy (and return a workspace edit for the editor):
+Patches write the **source file on disk** first (`.ttl` or `.obo`), then update the language server’s open-buffer copy:
 
 1. If the editor still shows old text, accept or re-apply the workspace edit, or reload the file from disk.
 2. If you had **unsaved** local edits that conflicted, review the file on disk — the server applied against its buffer/disk snapshot.
@@ -68,7 +69,7 @@ See [workspace limits](workspace-limits.md).
 | Symptom | Likely cause |
 |---------|--------------|
 | `entity not found` | Wrong IRI or entity not in target `.ttl` file; check `@prefix` declarations |
-| `unsupported format` | Patch target is not Turtle (`.ttl`) |
+| `unsupported format` | Patch target is not Turtle (`.ttl`) or OBO (`.obo`); use format-specific ops |
 | `applied: false` with diagnostics | Invalid patch op or Manchester expression — see [patch reference](patch-reference.md) |
 
 ## Workspace too large
@@ -89,10 +90,13 @@ Indexing may fail above [workspace limits](workspace-limits.md) (file count, siz
 
 | Problem | What to try |
 |---------|-------------|
-| `dl` or `auto` profile fails | Check ontology constructs and profile warnings; try `el` for EL-only ontologies |
-| Inferred hierarchy not visible | Run **OntoCode: Run Reasoner**, then **Set Hierarchy Mode** → inferred or combined |
-| Explanation panel empty | Explanations need an unsatisfiable class; run reasoner first |
+| Reasoner command missing or greyed out | Trust workspace; run **Index Workspace** first |
+| `OntoLogos` / classify errors | Confirm ontology fits [workspace limits](workspace-limits.md); try lighter profile (`el`, `rl`, `rdfs`) |
+| `dl` or `auto` profile fails | DL requires supported constructs; check Output panel; try `el` for EL-only ontologies; see [Reasoner guide](guides/reasoner.md) |
+| Reasoner runs but no inferred edges | Run **OntoCode: Run Reasoner**, then **Set Hierarchy Mode** → inferred or combined |
+| Explanation panel empty | Explanations need an unsatisfiable class; run reasoner first; DL explanations require v0.12+ |
 | Classify exits non-zero in CI | Ontology has unsatisfiable classes — inspect JSON `unsatisfiable` list |
+| Reasoner timeout / hang | Large ontologies may exceed memory caps — subset or use `el` profile; see [Performance and sizing](guides/performance-sizing.md) |
 
 See [Reasoner guide](guides/reasoner.md).
 

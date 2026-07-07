@@ -3,7 +3,7 @@
 > **Status:** Documents behavior in **OntoCore v0.12.0**. Pre-1.0 APIs may change.
 > Canonical feature list: [What ships today](SHIPPED.md).
 
-Turtle write-back uses a JSON array of patch operations. The CLI (`ontocore patch`) and LSP (`ontocore/applyAxiomPatch`) accept the same format.
+Patch write-back (Turtle and OBO) uses a JSON array of patch operations. The CLI (`ontocore patch`) and LSP (`ontocore/applyAxiomPatch`) accept the same envelope; operation sets differ by file extension.
 
 **Source of truth:** [`patch.rs` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/crates/ontocore-owl/src/patch.rs)
 

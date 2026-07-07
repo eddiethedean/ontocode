@@ -1,5 +1,8 @@
 # Design Tokens
 
+> **Document type:** Product design specification (target state). **Not a shipped feature list.** See [ROADMAP_MAPPING.md](ROADMAP_MAPPING.md) for release mapping and [SHIPPED.md](../SHIPPED.md) for what works today.
+
+
 ## 1. Purpose
 
 Design tokens are the canonical source of truth for visual styling.

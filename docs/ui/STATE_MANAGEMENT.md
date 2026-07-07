@@ -1,5 +1,8 @@
 # State Management Specification
 
+> **Document type:** Product design specification (target state). **Not a shipped feature list.** See [ROADMAP_MAPPING.md](ROADMAP_MAPPING.md) for release mapping and [SHIPPED.md](../SHIPPED.md) for what works today.
+
+
 ## 1. Purpose
 
 The UI must behave as one coherent semantic workspace. This requires a formal state model.

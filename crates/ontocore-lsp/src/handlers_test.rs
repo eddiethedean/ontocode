@@ -504,10 +504,10 @@ fn apply_refactor_tracks_only_open_buffers() {
 fn list_sql_schema_returns_axiom_tables() {
     let state = indexed_state();
     let schema = crate::handlers::handle_list_sql_schema(&state).expect("listSqlSchema");
-    let names: Vec<_> = schema.iter().map(|t| t.name.as_str()).collect();
+    let names: Vec<_> = schema.tables.iter().map(|t| t.name.as_str()).collect();
     assert!(names.contains(&"domain_axioms"));
     assert!(names.contains(&"restrictions"));
-    let restrictions = schema.iter().find(|t| t.name == "restrictions").unwrap();
+    let restrictions = schema.tables.iter().find(|t| t.name == "restrictions").unwrap();
     assert_eq!(restrictions.columns.len(), 4);
 }
 

@@ -26,7 +26,7 @@ What would you like to see?
 
 ## Roadmap alignment
 
-If you know the target milestone (v0.3 diagnostics, v0.4 editing, etc.), note it here. See [ROADMAP.md](../../docs/design/ROADMAP.md).
+If you know the target milestone (e.g. v0.14 plugin host, v1.0 Protégé parity), note it here. See [Roadmap hub](../../docs/roadmap-hub.md) and [Platform roadmap](../../ROADMAP.md).
 
 ## Additional context
 

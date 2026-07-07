@@ -6,6 +6,8 @@ Unified catalog of error codes, exit behavior, and failure modes for OntoCore **
 
 | Command | Exit 0 | Exit non-zero |
 |---------|--------|---------------|
+| `ontocore index` | Index succeeded | Index/parse/I/O failure |
+| `ontocore inspect` | Index succeeded | Index/parse/I/O failure |
 | `ontocore validate` | No diagnostic **errors** (warnings/info allowed) | One or more diagnostic **errors** |
 | `ontocore query` | Query succeeded | Parse error, unsupported SQL, I/O failure |
 | `ontocore sparql` | Query succeeded (results may be truncated at row cap) | Parse error, I/O failure |
@@ -13,10 +15,22 @@ Unified catalog of error codes, exit behavior, and failure modes for OntoCore **
 | `ontocore classify` | Consistent ontology (no unsatisfiable classes) | Unsatisfiable classes, reasoner error, I/O failure |
 | `ontocore explain` | Explanation produced | Class not found, explanation unavailable, reasoner error |
 | `ontocore refactor` (subcommands) | Preview or apply succeeded | Invalid request, path outside workspace, I/O failure |
+| `ontocore diff` | Diff succeeded | Git/parse/I/O failure, invalid ref token |
+| `ontocore docs` | Export succeeded | Index or I/O failure |
+| `ontocore robot` | ROBOT subprocess exit 0 | ROBOT non-zero exit or spawn failure |
 
 `validate` and `classify` exit semantics are stable for CI — see [workspace-limits.md](workspace-limits.md) and [ci-integration.md](ci-integration.md).
 
 Other CLI commands return non-zero on failure with a human-readable message on stderr.
+
+### `classify` (CLI) vs `runReasoner` (LSP)
+
+| Surface | Unsatisfiable classes | Use in CI |
+|---------|----------------------|-----------|
+| `ontocore classify` | **Non-zero exit** | Fail the job when the ontology is inconsistent |
+| `ontocore/runReasoner` | **Success** with `{ "consistent": false, ... }` | Inspect `consistent` in the JSON result; do not rely on JSON-RPC error |
+
+IDE flows should use `runReasoner` and show unsatisfiability in the UI. Pipelines that gate merges should prefer `ontocore classify`.
 
 ## LSP custom method errors (`LspErrorPayload`)
 
@@ -33,6 +47,7 @@ Custom `ontocore/*` method failures return JSON-RPC errors with `data` containin
 
 | Code | When | Typical `user_action` |
 |------|------|------------------------|
+| `INVALID_PARAMS` | Malformed or unknown method parameters | Fix request JSON; see [lsp-api.md](lsp-api.md) |
 | `NOT_INDEXED` | Catalog methods called before first index | Run OntoCode: Index Workspace |
 | `ENTITY_NOT_FOUND` | `getEntity` IRI not in catalog | Check IRI spelling / re-index |
 | `PATCH_INVALID` | Patch JSON invalid or entity missing | Check patch parameters and entity IRIs |
@@ -125,11 +140,14 @@ Integrators using `ontocore-*` crates directly should handle:
 
 | Crate | Error type | Common causes |
 |-------|------------|---------------|
+| `ontocore` (façade) | `ontocore::Error` | Unified enum over catalog, query, graph, reasoner, export, owl, obo |
 | `ontocore-parser` | `ParseError` | Invalid RDF syntax |
-| `ontocore-catalog` | `CatalogError` | Index build failure |
+| `ontocore-catalog` | `CatalogError`, `GraphError` | Index build failure, invalid graph request |
 | `ontocore-query` | `QueryError` | Unsupported SQL, SPARQL parse error |
 | `ontocore-owl` | `OwlError` | Patch apply failure |
 | `ontocore-reasoner` | `ReasonerError` | Classify/explain failure, unsupported profile |
+
+Use `apply_owl_patches` / `apply_obo_patches` when importing both OWL and OBO patch helpers from the façade.
 
 Example: [`examples/error_handling.rs`](https://github.com/eddiethedean/ontocode/blob/main/examples/error_handling.rs) on GitHub.
 

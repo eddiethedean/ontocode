@@ -4,6 +4,7 @@ mod compare;
 mod format;
 mod git;
 mod model;
+mod refs;
 
 pub use compare::{apply_unsat_diff, diff_catalogs, diff_directories, DiffError, Result};
 pub use format::{
@@ -17,3 +18,4 @@ pub use model::{
     AnnotationChange, AxiomChange, BreakingChange, BreakingReason, DiffResult, DiffSummaryCounts,
     EntityChange, EntityChangeKind, ImportChange, InferenceChange,
 };
+pub use refs::{is_indexed_catalog_ref, is_worktree_ref};

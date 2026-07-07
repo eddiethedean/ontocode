@@ -16,6 +16,7 @@ cargo run -p ontocode --example index_and_query
 |------|-------------|
 | `index_and_query.rs` | IndexBuilder + SQL |
 | `ontocore_workspace.rs` | `Workspace` API |
+| `workspace_operations.rs` | Classify, import graph, docs export |
 | `error_handling.rs` | Error handling |
 | `semantic_diff.rs` | Semantic diff |
 | `obo-workflow/` | OBO smoke workspace |

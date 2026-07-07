@@ -393,8 +393,8 @@ Compare semantic catalogs between git refs, directories, or indexed workspace sn
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `left_ref` | string? | Git left ref (default `HEAD`) or `WORKSPACE` for indexed catalog |
-| `right_ref` | string? | Git right ref (default `WORKTREE`) or `WORKSPACE` |
+| `left_ref` | string? | Git left ref (default `HEAD`) or `INDEXED` / `CATALOG` for indexed catalog (legacy alias: `WORKSPACE`) |
+| `right_ref` | string? | Git right ref (default `WORKTREE`) or `INDEXED` / `CATALOG` for indexed catalog (legacy alias: `WORKSPACE`) |
 | `left_path` | string? | Left directory when comparing two paths on disk |
 | `right_path` | string? | Right directory |
 | `reasoner` | boolean? | Enrich diff with reasoner unsatisfiability changes |
@@ -428,7 +428,7 @@ Custom method failures return `LspErrorPayload` in the JSON-RPC error `data` fie
 
 | Field | Description |
 |-------|-------------|
-| `code` | Machine-readable code (`NOT_INDEXED`, `ENTITY_NOT_FOUND`, `PATCH_INVALID`, `UNSUPPORTED_FORMAT`, `INDEX_FAILED`, `QUERY_FAILED`, `MANCHESTER_INVALID`, `APPLIED_NOT_INDEXED`, `REASONER_FAILED`, `EXPLANATION_FAILED`, …) |
+| `code` | Machine-readable code (`NOT_INDEXED`, `INVALID_PARAMS`, `ENTITY_NOT_FOUND`, `PATCH_INVALID`, `UNSUPPORTED_FORMAT`, `INDEX_FAILED`, `QUERY_FAILED`, `MANCHESTER_INVALID`, `APPLIED_NOT_INDEXED`, `REASONER_FAILED`, `EXPLANATION_FAILED`, …) |
 | `message` | Human-readable message |
 | `recoverable` | Whether the client can retry |
 | `user_action` | Suggested user action (optional) |

@@ -323,15 +323,15 @@ export function registerCommands(
     vscode.commands.registerCommand("ontocode.semanticDiff", async () => {
       try {
         const leftRef = await vscode.window.showInputBox({
-          prompt: "Left git ref (or WORKSPACE)",
+          prompt: "Left git ref (or INDEXED / CATALOG for indexed catalog)",
           value: "HEAD",
         });
         if (leftRef === undefined) {
           return;
         }
         const rightRef = await vscode.window.showInputBox({
-          prompt: "Right git ref (WORKTREE or WORKSPACE)",
-          value: "WORKSPACE",
+          prompt: "Right git ref (WORKTREE, INDEXED, or CATALOG)",
+          value: "WORKTREE",
         });
         if (rightRef === undefined) {
           return;

@@ -402,6 +402,11 @@ pub struct SemanticDiffResult {
 }
 
 #[derive(Debug, Serialize)]
+pub struct ListSqlSchemaResult {
+    pub tables: Vec<ontocore_query::SqlTableSchema>,
+}
+
+#[derive(Debug, Serialize)]
 pub struct ApplyRefactorResult {
     pub files_written: usize,
     #[serde(skip_serializing_if = "Option::is_none")]

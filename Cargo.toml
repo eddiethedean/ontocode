@@ -48,6 +48,10 @@ path = "examples/ontocore_workspace.rs"
 name = "semantic_diff"
 path = "examples/semantic_diff.rs"
 
+[[example]]
+name = "workspace_operations"
+path = "examples/workspace_operations.rs"
+
 [dev-dependencies]
 ontocore = { workspace = true }
 ontocore-catalog = { workspace = true }

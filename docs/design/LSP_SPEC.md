@@ -1,8 +1,8 @@
 # LSP_SPEC.md
 
-> **Document status: target design (v0.6 partial implementation)**
+> **Document status: future target design**
 >
-> For what ships today, read **[lsp-api.md](../lsp-api.md)** (authoritative for v0.6).
+> **Do not use this page for integration.** For what ships today, read **[lsp-api.md](../lsp-api.md)** (authoritative for **v0.13**).
 > Implemented: hover, document/workspace symbols, go-to-definition, diagnostics publishing,
 > `ontocore/indexWorkspace`, `ontocore/getCatalogSnapshot`, `ontocore/getEntity`, `ontocore/applyAxiomPatch`,
 > `ontocore/query`, `ontocore/sparql`, `ontocore/parseManchester`, `ontocore/runReasoner`, `ontocore/getExplanation`.

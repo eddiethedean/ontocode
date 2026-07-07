@@ -1086,6 +1086,7 @@ dependencies = [
  "ontocore-reasoner",
  "ontocore-refactor",
  "tempfile",
+ "thiserror 2.0.18",
 ]
 
 [[package]]

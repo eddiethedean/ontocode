@@ -74,7 +74,7 @@ export class SemanticDiffPanel {
     try {
       const result = await semanticDiff({
         left_ref: params.leftRef ?? "HEAD",
-        right_ref: params.rightRef ?? "WORKSPACE",
+        right_ref: params.rightRef ?? "WORKTREE",
         reasoner: params.reasoner,
       });
       if (generation !== this.refreshGeneration) {

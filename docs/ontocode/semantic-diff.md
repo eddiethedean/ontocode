@@ -44,9 +44,11 @@ ontocore diff --left-ref ./baseline --right-ref ./candidate
 
 | Left | Right | Meaning |
 |------|-------|---------|
-| `HEAD` | `WORKTREE` | Last commit vs working tree |
+| `HEAD` | `WORKTREE` | Last commit vs working tree (CLI and LSP) |
 | `main` | `feature` | Branch compare (git range syntax) |
-| `WORKSPACE` | `WORKTREE` | Indexed catalog vs working tree (LSP default pattern) |
+| `INDEXED` or `CATALOG` | `WORKTREE` | Indexed catalog vs working tree (LSP / VS Code; legacy alias `WORKSPACE` for left) |
+
+The CLI does **not** resolve `INDEXED` / `CATALOG` / `WORKSPACE` — use the LSP or extension for indexed-catalog compares. The CLI accepts git refs, directory paths, and `WORKTREE`.
 
 Output formats: `text` (default), `json`, `markdown`, `pr-summary` (v0.13+). Use `--breaking-only` to filter to likely breaking changes.
 

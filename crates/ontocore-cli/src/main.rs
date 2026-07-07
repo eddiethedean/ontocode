@@ -264,6 +264,8 @@ enum DiffFormat {
     Text,
     Json,
     Markdown,
+    #[value(name = "pr-summary")]
+    PrSummary,
 }
 
 #[derive(Clone, Copy, ValueEnum)]
@@ -346,6 +348,35 @@ fn main() -> Result<()> {
         Commands::Inspect { workspace, format } => {
             let catalog = build_catalog(&workspace)?;
             print_stats(&catalog.data().stats(), format)?;
+            let data = catalog.data();
+            let mut errors = 0usize;
+            let mut warnings = 0usize;
+            for diag in &data.diagnostics {
+                match diag.severity {
+                    ontocore_core::DiagnosticSeverity::Error => errors += 1,
+                    ontocore_core::DiagnosticSeverity::Warning => warnings += 1,
+                    _ => {}
+                }
+            }
+            if errors > 0 || warnings > 0 {
+                println!("\nDiagnostics: {errors} error(s), {warnings} warning(s)");
+                for diag in data.diagnostics.iter().take(10) {
+                    println!(
+                        "  [{}] {} — {}",
+                        diag.code.as_str(),
+                        diag.severity.as_str(),
+                        diag.message
+                    );
+                }
+                if data.diagnostics.len() > 10 {
+                    println!(
+                        "  … and {} more (run `ontocore validate` for full list)",
+                        data.diagnostics.len() - 10
+                    );
+                }
+            } else {
+                println!("\nNo diagnostics.");
+            }
         }
         Commands::Patch { document, patch_file, preview } => {
             let patch_bytes = std::fs::read(&patch_file)?;
@@ -538,13 +569,15 @@ fn main() -> Result<()> {
                 repo.as_deref(),
                 reasoner,
             )?;
-            let output = if pr_summary {
+            let output = if pr_summary || matches!(format, DiffFormat::PrSummary) {
                 format_diff_pr_summary(&diff)
             } else {
                 match format {
                     DiffFormat::Json => format_diff_json(&diff),
                     DiffFormat::Markdown => format_diff_markdown(&diff, breaking_only),
-                    DiffFormat::Text => format_diff_text(&diff, breaking_only),
+                    DiffFormat::Text | DiffFormat::PrSummary => {
+                        format_diff_text(&diff, breaking_only)
+                    }
                 }
             };
             println!("{output}");
@@ -651,7 +684,13 @@ fn diff_from_refs_with_catalogs(
 }
 
 fn resolve_git_catalog(repo: &Path, git_ref: &str) -> Result<OntologyCatalog> {
-    if git_ref.eq_ignore_ascii_case("WORKTREE") || git_ref.eq_ignore_ascii_case("WORKSPACE") {
+    if ontocore_diff::is_indexed_catalog_ref(git_ref) {
+        anyhow::bail!(
+            "ref {git_ref}: indexed catalog (INDEXED) is only available via LSP semantic diff; \
+             use WORKTREE or a git commit ref in the CLI"
+        );
+    }
+    if ontocore_diff::is_worktree_ref(git_ref) {
         catalog_at_worktree(repo).map_err(|e| anyhow::anyhow!(e))
     } else {
         catalog_at_git_ref(repo, git_ref).map_err(|e| anyhow::anyhow!(e))

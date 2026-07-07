@@ -5,6 +5,11 @@
 
 > **Multi-root workspaces (v0.10+):** All workspace folders are indexed on open. **OntoCode: Index Workspace** may prompt you to pick a folder when multiple roots are open.
 
+## Prerequisites
+
+- **VS Code 1.85+** (see [platform compatibility](guides/platform-compatibility.md))
+- **Trust** the workspace folder when prompted (required for bundled language server and custom `ontocode.lspPath`)
+
 ## Install matrix
 
 | Method | Linux | macOS | Windows | Needs Rust? |

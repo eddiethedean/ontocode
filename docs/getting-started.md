@@ -54,6 +54,8 @@ The `fixtures/` directory is included in the repository for examples and tests.
 cargo install ontocore-cli --locked
 ```
 
+**Version pinning:** Use `--locked` for reproducible installs from crates.io (recommended). Pin an exact release in CI with `cargo install ontocore-cli --locked --version 0.13.0` — see [API stability](guides/api-stability.md) and [release integrity](release-integrity.md).
+
 Use **your own ontology directory** — there is no `fixtures/` folder outside a clone:
 
 ```bash

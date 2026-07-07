@@ -4,10 +4,11 @@ use crate::protocol::{
     ApplyAxiomPatchParams, ApplyAxiomPatchResult, ApplyRefactorParams, ApplyRefactorResult,
     CatalogSnapshot, DiagnosticSummary, FindUsagesParams, FindUsagesResult, GetEntityParams,
     GetEntityResult, GetExplanationParams, GetExplanationResult, GetGraphResult,
-    IndexWorkspaceParams, IndexWorkspaceResult, LspErrorPayload, ManchesterCompletions,
-    ParseManchesterParams, ParseManchesterResult, PreviewRefactorParams, PreviewRefactorResult,
-    QueryParams, RunReasonerParams, RunReasonerResult, RunRobotParams, RunRobotResult,
-    SemanticDiffParams, SemanticDiffResult, SparqlParams, TabularQueryResult, UsageSummary,
+    IndexWorkspaceParams, IndexWorkspaceResult, ListSqlSchemaResult, LspErrorPayload,
+    ManchesterCompletions, ParseManchesterParams, ParseManchesterResult, PreviewRefactorParams,
+    PreviewRefactorResult, QueryParams, RunReasonerParams, RunReasonerResult, RunRobotParams,
+    RunRobotResult, SemanticDiffParams, SemanticDiffResult, SparqlParams, TabularQueryResult,
+    UsageSummary,
 };
 use crate::state::{path_to_uri, resolve_workspace_for_index, ServerState};
 use lsp_server::ResponseError;
@@ -183,7 +184,8 @@ pub fn handle_get_graph(
                     builder = builder.with_inferred_edges(&snapshot.inferred.edges);
                 }
             }
-            let graph = builder.build(&params).map_err(LspErrorPayload::graph_failed)?;
+            let graph =
+                builder.build(&params).map_err(|e| LspErrorPayload::graph_failed(e.to_string()))?;
             Ok(GetGraphResult { graph })
         })
         .ok_or_else(LspErrorPayload::not_indexed)?
@@ -211,7 +213,8 @@ pub fn handle_semantic_diff(
         let repo_root = discover_repo_root(&roots).ok_or_else(|| {
             LspErrorPayload::invalid_params("no git repository found in workspace".to_string())
         })?;
-        if left_ref.eq_ignore_ascii_case("WORKSPACE") && right_ref.eq_ignore_ascii_case("WORKTREE")
+        if ontocore_diff::is_indexed_catalog_ref(left_ref)
+            && ontocore_diff::is_worktree_ref(right_ref)
         {
             return state
                 .with_catalog(|head| {
@@ -224,10 +227,10 @@ pub fn handle_semantic_diff(
                 })
                 .ok_or_else(LspErrorPayload::not_indexed)?;
         }
-        if left_ref.eq_ignore_ascii_case("WORKSPACE") {
+        if ontocore_diff::is_indexed_catalog_ref(left_ref) {
             state
                 .with_catalog(|head| {
-                    if right_ref.eq_ignore_ascii_case("WORKSPACE") {
+                    if ontocore_diff::is_indexed_catalog_ref(right_ref) {
                         Ok(diff_catalogs(head, head))
                     } else {
                         let base = catalog_at_git_ref(&repo_root, right_ref)
@@ -236,7 +239,7 @@ pub fn handle_semantic_diff(
                     }
                 })
                 .ok_or_else(LspErrorPayload::not_indexed)??
-        } else if right_ref.eq_ignore_ascii_case("WORKSPACE") {
+        } else if ontocore_diff::is_indexed_catalog_ref(right_ref) {
             state
                 .with_catalog(|head| {
                     let base = catalog_at_git_ref(&repo_root, left_ref)
@@ -674,10 +677,11 @@ pub fn handle_query(
         .ok_or_else(LspErrorPayload::not_indexed)?
 }
 
-pub fn handle_list_sql_schema(
-    state: &ServerState,
-) -> Result<Vec<ontocore_query::SqlTableSchema>, LspErrorPayload> {
-    state.with_catalog(ontocore_query::list_sql_schema).ok_or_else(LspErrorPayload::not_indexed)
+pub fn handle_list_sql_schema(state: &ServerState) -> Result<ListSqlSchemaResult, LspErrorPayload> {
+    let tables = state
+        .with_catalog(ontocore_query::list_sql_schema)
+        .ok_or_else(LspErrorPayload::not_indexed)?;
+    Ok(ListSqlSchemaResult { tables })
 }
 
 pub fn handle_sparql(
@@ -1382,6 +1386,13 @@ fn plan_to_workspace_edit(
     })
 }
 
+fn parse_custom_params<T: serde::de::DeserializeOwned>(
+    params: Option<Value>,
+) -> Result<T, LspErrorPayload> {
+    serde_json::from_value(params.unwrap_or(Value::Null))
+        .map_err(|e| LspErrorPayload::invalid_params(format!("invalid params: {e}")))
+}
+
 pub fn handle_custom_request(
     state: &ServerState,
     index_worker: &IndexWorker,
@@ -1390,9 +1401,7 @@ pub fn handle_custom_request(
 ) -> Result<Value, LspErrorPayload> {
     match method {
         "ontocore/indexWorkspace" => {
-            let params: IndexWorkspaceParams =
-                serde_json::from_value(params.unwrap_or(Value::Null))
-                    .map_err(|e| LspErrorPayload::index_failed(format!("invalid params: {e}")))?;
+            let params: IndexWorkspaceParams = parse_custom_params(params)?;
             let result = handle_index_workspace(state, index_worker, params)?;
             serde_json::to_value(result).map_err(|e| LspErrorPayload::index_failed(e.to_string()))
         }
@@ -1401,27 +1410,22 @@ pub fn handle_custom_request(
             serde_json::to_value(result).map_err(|e| LspErrorPayload::index_failed(e.to_string()))
         }
         "ontocore/getEntity" => {
-            let params: GetEntityParams = serde_json::from_value(params.unwrap_or(Value::Null))
-                .map_err(|e| LspErrorPayload::index_failed(format!("invalid params: {e}")))?;
+            let params: GetEntityParams = parse_custom_params(params)?;
             let result = handle_get_entity(state, params)?;
             serde_json::to_value(result).map_err(|e| LspErrorPayload::index_failed(e.to_string()))
         }
         "ontocore/getGraph" => {
-            let params: GraphRequest = serde_json::from_value(params.unwrap_or(Value::Null))
-                .map_err(|e| LspErrorPayload::index_failed(format!("invalid params: {e}")))?;
+            let params: GraphRequest = parse_custom_params(params)?;
             let result = handle_get_graph(state, params)?;
             serde_json::to_value(result).map_err(|e| LspErrorPayload::index_failed(e.to_string()))
         }
         "ontocore/applyAxiomPatch" => {
-            let params: ApplyAxiomPatchParams =
-                serde_json::from_value(params.unwrap_or(Value::Null))
-                    .map_err(|e| LspErrorPayload::index_failed(format!("invalid params: {e}")))?;
+            let params: ApplyAxiomPatchParams = parse_custom_params(params)?;
             let result = handle_apply_axiom_patch(state, index_worker, params)?;
             serde_json::to_value(result).map_err(|e| LspErrorPayload::index_failed(e.to_string()))
         }
         "ontocore/query" => {
-            let params: QueryParams = serde_json::from_value(params.unwrap_or(Value::Null))
-                .map_err(|e| LspErrorPayload::index_failed(format!("invalid params: {e}")))?;
+            let params: QueryParams = parse_custom_params(params)?;
             let result = handle_query(state, params)?;
             serde_json::to_value(result).map_err(|e| LspErrorPayload::index_failed(e.to_string()))
         }
@@ -1430,65 +1434,52 @@ pub fn handle_custom_request(
             serde_json::to_value(result).map_err(|e| LspErrorPayload::index_failed(e.to_string()))
         }
         "ontocore/sparql" => {
-            let params: SparqlParams = serde_json::from_value(params.unwrap_or(Value::Null))
-                .map_err(|e| LspErrorPayload::index_failed(format!("invalid params: {e}")))?;
+            let params: SparqlParams = parse_custom_params(params)?;
             let result = handle_sparql(state, params)?;
             serde_json::to_value(result).map_err(|e| LspErrorPayload::index_failed(e.to_string()))
         }
         "ontocore/parseManchester" => {
-            let params: ParseManchesterParams =
-                serde_json::from_value(params.unwrap_or(Value::Null))
-                    .map_err(|e| LspErrorPayload::index_failed(format!("invalid params: {e}")))?;
+            let params: ParseManchesterParams = parse_custom_params(params)?;
             let result = handle_parse_manchester(state, params)?;
             serde_json::to_value(result).map_err(|e| LspErrorPayload::index_failed(e.to_string()))
         }
         "ontocore/runReasoner" => {
-            let params: RunReasonerParams =
-                serde_json::from_value(params.unwrap_or(Value::Null))
-                    .map_err(|e| LspErrorPayload::index_failed(format!("invalid params: {e}")))?;
+            let params: RunReasonerParams = parse_custom_params(params)?;
             let result = handle_run_reasoner(state, params)?;
             serde_json::to_value(result)
                 .map_err(|e| LspErrorPayload::reasoner_failed(e.to_string()))
         }
         "ontocore/getExplanation" => {
-            let params: GetExplanationParams =
-                serde_json::from_value(params.unwrap_or(Value::Null))
-                    .map_err(|e| LspErrorPayload::index_failed(format!("invalid params: {e}")))?;
+            let params: GetExplanationParams = parse_custom_params(params)?;
             let result = handle_get_explanation(state, params)?;
             serde_json::to_value(result)
                 .map_err(|e| LspErrorPayload::explanation_failed(e.to_string()))
         }
         "ontocore/runRobot" => {
-            let params: RunRobotParams = serde_json::from_value(params.unwrap_or(Value::Null))
-                .map_err(|e| LspErrorPayload::invalid_params(format!("invalid params: {e}")))?;
+            let params: RunRobotParams = parse_custom_params(params)?;
             let result = handle_run_robot(state, index_worker, params)?;
             serde_json::to_value(result).map_err(|e| LspErrorPayload::robot_failed(e.to_string()))
         }
         "ontocore/findUsages" => {
-            let params: FindUsagesParams = serde_json::from_value(params.unwrap_or(Value::Null))
-                .map_err(|e| LspErrorPayload::invalid_params(format!("invalid params: {e}")))?;
+            let params: FindUsagesParams = parse_custom_params(params)?;
             let result = handle_find_usages(state, params)?;
             serde_json::to_value(result)
                 .map_err(|e| LspErrorPayload::refactor_failed(e.to_string()))
         }
         "ontocore/previewRefactor" => {
-            let params: PreviewRefactorParams =
-                serde_json::from_value(params.unwrap_or(Value::Null))
-                    .map_err(|e| LspErrorPayload::invalid_params(format!("invalid params: {e}")))?;
+            let params: PreviewRefactorParams = parse_custom_params(params)?;
             let result = handle_preview_refactor(state, params)?;
             serde_json::to_value(result)
                 .map_err(|e| LspErrorPayload::refactor_failed(e.to_string()))
         }
         "ontocore/applyRefactor" => {
-            let params: ApplyRefactorParams = serde_json::from_value(params.unwrap_or(Value::Null))
-                .map_err(|e| LspErrorPayload::invalid_params(format!("invalid params: {e}")))?;
+            let params: ApplyRefactorParams = parse_custom_params(params)?;
             let result = handle_apply_refactor(state, index_worker, params)?;
             serde_json::to_value(result)
                 .map_err(|e| LspErrorPayload::refactor_failed(e.to_string()))
         }
         "ontocore/semanticDiff" | "ontocore/getSemanticDiff" => {
-            let params: SemanticDiffParams = serde_json::from_value(params.unwrap_or(Value::Null))
-                .map_err(|e| LspErrorPayload::invalid_params(format!("invalid params: {e}")))?;
+            let params: SemanticDiffParams = parse_custom_params(params)?;
             let result = handle_semantic_diff(state, params)?;
             serde_json::to_value(result).map_err(|e| LspErrorPayload::invalid_params(e.to_string()))
         }

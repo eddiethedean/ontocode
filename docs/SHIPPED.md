@@ -110,7 +110,7 @@
 | `ontocore docs` + `ontocore-docs` crate | Yes |
 | Import patch ops + Manage Imports UI | Yes |
 | OBO indexed via `fastobo` (read path) | Yes |
-| OBO write-back | v0.11 read-only in editor; **shipped v0.12** — [OBO authoring](ontocode/obo-authoring.md) |
+| OBO write-back (CLI/LSP patches) | v0.11 read-only in editor; **engine shipped v0.12**; **inspector write-back v0.13** — [OBO authoring](ontocode/obo-authoring.md) |
 
 ## New in v0.10.0
 
@@ -130,7 +130,7 @@
 | `ontocore` façade crate on crates.io | Yes |
 | `Workspace::open` experimental API | Yes |
 | **`ontocore-*` crate rename** (from `ontoindex-*`) | Yes |
-| **OntoLogos 1.0 DL/auto classification** (`dl`, `auto` profiles) | Yes |
+| **Ontologos 1.0 DL/auto classification** (`dl`, `auto` profiles) | Yes |
 | OntoCore / OntoCode documentation trees | Yes |
 
 ## Manchester scope (v0.8+)
@@ -147,7 +147,7 @@
 | Write-back | **Turtle (`.ttl`) and OBO (`.obo`)**; RDF/XML, OWL/XML, JSON-LD, N-Triples read-only |
 | Refactoring | **Turtle (`.ttl`) only**; extract module uses direct-reference closure |
 | Class hierarchy tree | Named-parent edges; **inferred/combined** after reasoner run |
-| Reasoning | **EL / RL / RDFS / DL / auto** via OntoLogos 1.0 (HermiT parity) |
+| Reasoning | **EL / RL / RDFS / DL / auto** via Ontologos 1.0 (HermiT parity) |
 | CLI release binaries | Linux x64 only; macOS/Windows use `cargo install` or bundled LSP in VSIX |
 | Scale | See [workspace limits](workspace-limits.md) (includes walk entry cap) |
 

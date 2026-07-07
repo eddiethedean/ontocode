@@ -1,0 +1,63 @@
+# Extension development
+
+Guide for contributors working on the **OntoCode** VS Code extension (`extension/`). End-user extension docs: [VS Code extension overview](../ontocode/vscode-extension.md).
+
+## Repository layout
+
+| Path | Role |
+|------|------|
+| `extension/src/` | Extension host — activation, commands, tree views, LSP client |
+| `extension/webview-ui/` | **OntoUI** React app (Vite) — inspector, graph, query workbench, etc. |
+| `extension/server/<platform>/` | Bundled `ontocore-lsp` binary (populated by build scripts) |
+| `crates/ontocore-lsp/` | Language server implementation (Rust) |
+
+Design specs live under `docs/design/` and `docs/ui/` (not at repo root).
+
+## Prerequisites
+
+- Rust **1.88+**, Node **20**, npm
+- VS Code **1.85+** for F5 debugging
+
+See [Contributing](../contributing.md) for full workspace setup.
+
+## Build and test
+
+```bash
+# Rust LSP binary
+cargo build -p ontocore-lsp --bins
+
+# Extension + webviews
+cd extension
+npm ci
+npm run compile          # builds webview-ui + esbuild bundle
+ONTOCORE_LSP_BIN="../target/debug/ontocore-lsp" npm test
+```
+
+Press **F5** in VS Code with the `extension/` folder open (or use **Run Extension** launch config) after `npm run compile`.
+
+## Key docs
+
+| Topic | Doc |
+|-------|-----|
+| Contributor workflow | [contributing.md](../contributing.md) |
+| LSP / webview debugging | [debugging.md](../debugging.md) |
+| Host ↔ React messages | [webview-protocol.md](../webview-protocol.md) |
+| Custom LSP methods | [lsp-api.md](../lsp-api.md) |
+| OntoUI platform | [platform/OVERVIEW.md](../platform/OVERVIEW.md) |
+| UI specs | [ui/README.md](../ui/README.md) |
+
+## Pre-PR checks
+
+Run extension-related CI locally:
+
+```bash
+cd extension/webview-ui && npm ci && npm test
+cd extension && npm ci && npm run compile && npm test
+```
+
+For full CI parity (Rust, docs, packaging, VS Code e2e): `./scripts/run-ci-local.sh` — see [Contributing](../contributing.md).
+
+## Related
+
+- [LSP hello world](lsp-hello-world.md) — minimal stdio client
+- [Internals](../internals.md) — contributor hub and role-based paths

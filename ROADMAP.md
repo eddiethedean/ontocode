@@ -111,7 +111,7 @@ OntoUI work uses **UI phases 0–12** from [Product Roadmap 2.0](docs/ui/PRODUCT
 | **11** | Ecosystem & docs | v0.11+ (guides); v1.2 (registry, templates) |
 | **12** | Semantic engineering platform | Post-1.2 (browser, cloud, team workspaces) |
 
-> **Note on v0.12–v0.18 (retired labels):** Earlier drafts used v0.12–v0.18 for capabilities that **shipped in v0.3–v0.11** (diagnostics, SQL virtual tables, refactoring, Ontologos reasoning, semantic diff, docs export). Those labels are retired. Forward work from v0.12 onward is defined in the phases below.
+> **Note on v0.13–v0.18 (retired labels):** Earlier drafts used v0.13–v0.18 for capabilities that **shipped in v0.3–v0.11** (diagnostics, SQL virtual tables, refactoring, Ontologos reasoning, semantic diff, docs export). Those labels are retired. Forward work from v0.13 onward is defined in the phases below.
 
 ---
 

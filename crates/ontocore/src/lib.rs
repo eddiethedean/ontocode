@@ -9,6 +9,7 @@ pub mod catalog;
 pub mod diagnostics;
 pub mod diff;
 pub mod docs;
+pub mod error;
 pub mod obo;
 pub mod owl;
 pub mod parser;
@@ -23,5 +24,6 @@ pub mod lsp;
 #[cfg(feature = "plugins")]
 pub mod plugin;
 
+pub use error::Error;
 pub use ontocore_core::{Diagnostic, Entity, OntoCoreError};
 pub use workspace::{Workspace, WorkspaceOptions};

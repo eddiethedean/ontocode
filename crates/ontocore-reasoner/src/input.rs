@@ -45,11 +45,8 @@ impl WorkspaceInputLoader {
     }
 
     pub fn load(&self, asserted_hierarchy: ClassHierarchy) -> Result<ReasonerInput> {
-        let scan_roots = if self.scan_roots.is_empty() {
-            vec![self.workspace.clone()]
-        } else {
-            self.scan_roots.clone()
-        };
+        let scan_roots =
+            ontocore_catalog::IndexBuilder::effective_scan_roots(&self.workspace, &self.scan_roots);
         let mut files: Vec<OntologyFile> = Vec::new();
         for root in &scan_roots {
             let scanner = WorkspaceScanner::new(root);

@@ -37,9 +37,14 @@ Release CLI tarballs are **Linux x64 only**; macOS/Windows use `cargo install` o
 |---------|------|
 | **OntoCode** | VS Code IDE — explorer, inspector, Query Workbench, Manchester editor, Manage Imports, semantic diff, reasoner |
 | **OntoCore** | Rust engine — index, query, diagnostics, refactoring, diff, docs export, CLI, LSP |
+| **OntoUI** | Shared React UI in `extension/webview-ui/` — design tokens, WorkspaceStore, focus relay (powers OntoCode webviews) |
 | **Ontologos** | External reasoner — classification, consistency, explanations |
 
-> **Naming:** **OntoCode** = VS Code extension. **OntoCore** = `ontocore` crate, `ontocore-*` crates, `ontocore` CLI, `ontocore-lsp`. This repo contains both.
+> **Naming:** **OntoCode** = VS Code extension. **OntoCore** = `ontocore` crate, `ontocore-*` crates, `ontocore` CLI, `ontocore-lsp`. This repo is named `ontocode` on GitHub — install the CLI with **`cargo install ontocore-cli`**, not `ontocode`.
+
+## See it in action
+
+[Feature tour](https://ontocode-vs.readthedocs.io/en/latest/ontocode/feature-tour/) (panel walkthrough) · [First success tutorial](https://ontocode-vs.readthedocs.io/en/latest/guides/first-success/) (~10 min, no clone required)
 
 ## Quick start
 
@@ -89,7 +94,7 @@ cargo run -- validate fixtures
 
 Platform docs: [Vision](https://ontocode-vs.readthedocs.io/en/latest/vision/) · [Architecture](ARCHITECTURE.md) · [Roadmap](ROADMAP.md) · [Protégé parity](https://ontocode-vs.readthedocs.io/en/latest/design/PROTEGE_PARITY/)
 
-**OntoCode 1.0** targets a Protégé-competitive OWL + OBO IDE in VS Code, with CLI gates for CI. **v0.11** ships Turtle completion, diagnostic quick fixes, Manage Imports, `ontocore docs` export, and Open VSX — on top of v0.10 semantic diff, multi-root indexing, and EL/DL reasoning. See [SHIPPED matrix](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/).
+**OntoCode 1.0** targets a Protégé-competitive OWL + OBO IDE in VS Code, with CLI gates for CI. **v0.13** ships WorkspaceStore + focus relay, Query Workbench schema browser, semantic tokens, PR-summary diffs, and Turtle/OBO inspector write-back — on top of v0.11–v0.12 editor depth, semantic diff, multi-root indexing, and EL/DL reasoning. See [SHIPPED matrix](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/).
 
 ## Development
 
@@ -100,6 +105,12 @@ cargo test --workspace
 cd extension && npm ci && npm test
 cd extension/webview-ui && npm ci && npm test
 cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings
+```
+
+**Full CI parity** (rustfmt, doc versions, MSRV, mkdocs strict, cargo audit, extension e2e):
+
+```bash
+./scripts/run-ci-local.sh
 ```
 
 ## License

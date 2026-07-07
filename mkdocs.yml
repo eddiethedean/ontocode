@@ -87,7 +87,7 @@ nav:
       - Pick a task: guides/start-here.md
       - What ships today: SHIPPED.md
       - Install VS Code: vscode-install.md
-      - Install CLI: getting-started.md
+      - "Getting started (all paths)": getting-started.md
       - Ontology concepts: concepts.md
       - Migrating from Protégé: guides/protege-migration.md
   - Use OntoCode:
@@ -135,6 +135,7 @@ nav:
       - Workspace limits: workspace-limits.md
       - OntoCore SQL views: ontocore/sql-views.md
       - OntoCore LSP overview: ontocore/lsp.md
+      - LSP hello world: guides/lsp-hello-world.md
   - Evaluate:
       - Vision: vision.md
       - Architecture: architecture.md
@@ -171,6 +172,7 @@ nav:
       - Release integrity: release-integrity.md
   - Contribute:
       - Guide: contributing.md
+      - Extension development: guides/extension-development.md
       - Debugging: debugging.md
       - Releasing: releasing.md
       - Marketplace publish: marketplace-publish.md
@@ -236,9 +238,6 @@ nav:
           - ADRs:
               - Index (all ADRs): design/adr/README.md
   - "Platform planning (v0.13+)":
-      - What ships today (not planned): SHIPPED.md
-      - Documentation index: documentation-index.md
-      - Glossary: glossary.md
       - Platform overview: platform/OVERVIEW.md
       - UX audit (v0.13): ui/UX_AUDIT_v0.13.md
       - OntoUI: platform/ONTOUI.md

@@ -18,6 +18,7 @@ From a git clone, prefix commands with `cargo run --` (e.g. `cargo run -- query 
 |---------|-----|-------------|
 | `index_and_query` | `cargo run -p ontocode --example index_and_query` | `IndexBuilder` + SQL query on `fixtures/` |
 | `ontocore_workspace` | `cargo run -p ontocode --example ontocore_workspace` | High-level `Workspace` API |
+| `workspace_operations` | `cargo run -p ontocode --example workspace_operations` | Classify, import graph, docs export |
 | `error_handling` | `cargo run -p ontocode --example error_handling` | Error handling patterns |
 | `semantic_diff` | `cargo run -p ontocode --example semantic_diff` | Git/workspace semantic diff (optional git repo) |
 

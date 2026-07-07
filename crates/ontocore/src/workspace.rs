@@ -18,8 +18,8 @@
 //! ```
 
 use crate::catalog::{
-    CatalogError, CatalogStats, ClassHierarchy, EntityDetail, GraphBuilder, GraphFilters,
-    GraphKind, GraphPayload, GraphRequest, IndexBuilder, OntologyCatalog,
+    CatalogError, CatalogStats, ClassHierarchy, EntityDetail, GraphBuilder, GraphError,
+    GraphFilters, GraphKind, GraphPayload, GraphRequest, IndexBuilder, OntologyCatalog,
 };
 use crate::diff::DiffResult;
 use crate::docs::{export_workspace, ExportError, ExportOptions};
@@ -39,7 +39,7 @@ use std::path::{Path, PathBuf};
 pub struct WorkspaceOptions {
     /// Primary workspace root (indexed catalog workspace path).
     pub root: PathBuf,
-    /// Additional roots merged into one catalog (multi-root).
+    /// Additional roots merged into one catalog (multi-root). Primary [`WorkspaceOptions::root`] is always scanned.
     pub scan_roots: Vec<PathBuf>,
     /// Persist parse snapshots under `.ontocore/cache/`.
     pub disk_cache: bool,
@@ -69,6 +69,8 @@ pub struct Workspace {
     options: WorkspaceOptions,
     catalog: OntologyCatalog,
     class_hierarchy: ClassHierarchy,
+    /// Cached scan roots (primary + additional) used for indexing.
+    effective_scan_roots: Vec<PathBuf>,
 }
 
 impl Workspace {
@@ -79,6 +81,8 @@ impl Workspace {
 
     /// Open with explicit roots and optional disk cache.
     pub fn open_with_options(options: WorkspaceOptions) -> Result<Self, CatalogError> {
+        let effective_scan_roots =
+            IndexBuilder::effective_scan_roots(&options.root, &options.scan_roots);
         let mut builder =
             IndexBuilder::new().workspace(options.root.clone()).disk_cache(options.disk_cache);
         if !options.scan_roots.is_empty() {
@@ -86,7 +90,7 @@ impl Workspace {
         }
         let catalog = builder.build()?;
         let class_hierarchy = catalog.class_hierarchy();
-        Ok(Self { options, catalog, class_hierarchy })
+        Ok(Self { options, catalog, class_hierarchy, effective_scan_roots })
     }
 
     /// Full rebuild from disk.
@@ -109,13 +113,9 @@ impl Workspace {
         &self.options.root
     }
 
-    /// All scan roots (includes primary when none were configured).
+    /// All scan roots (primary plus any configured additional roots).
     pub fn scan_roots(&self) -> &[PathBuf] {
-        if self.options.scan_roots.is_empty() {
-            std::slice::from_ref(&self.options.root)
-        } else {
-            &self.options.scan_roots
-        }
+        &self.effective_scan_roots
     }
 
     /// Indexed catalog (SQL, SPARQL, entity API).
@@ -128,15 +128,20 @@ impl Workspace {
         self.catalog.data().stats()
     }
 
-    /// Import dependency graph for visualization and analysis.
-    pub fn import_graph(&self) -> Result<GraphPayload, String> {
-        GraphBuilder::new(&self.catalog).build(&GraphRequest {
+    /// Import dependency graph (default: import kind, depth 2).
+    pub fn import_graph(&self) -> Result<GraphPayload, GraphError> {
+        self.import_graph_with(&GraphRequest {
             graph_kind: GraphKind::Import.as_str().to_string(),
             root_iri: None,
             depth: 2,
             include_inferred: false,
             filters: GraphFilters::default(),
         })
+    }
+
+    /// Import or other graph export with explicit [`GraphRequest`] parameters.
+    pub fn import_graph_with(&self, request: &GraphRequest) -> Result<GraphPayload, GraphError> {
+        GraphBuilder::new(&self.catalog).build(request)
     }
 
     /// Lint and parse diagnostics collected during indexing.

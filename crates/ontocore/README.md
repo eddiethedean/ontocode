@@ -29,7 +29,7 @@ for row in &result.rows {
 | `diagnostics` | Lint rule collection |
 | `parser` | RDF/OBO parsing |
 | `owl` | Horned-OWL bridge, patches, Manchester |
-| `reasoner` | OntoLogos classification facade |
+| `reasoner` | Ontologos classification facade |
 | `refactor` | Workspace refactoring |
 | `docs` | Markdown/HTML documentation export |
 | `lsp` | LSP protocol types (feature `lsp`, enabled by default in docs.rs via `all-features`) |
@@ -39,7 +39,7 @@ for row in &result.rows {
 | Component | Role |
 |-----------|------|
 | **OntoCore** (`ontocore`, `ontocore-*`) | Semantic workspace engine — this crate |
-| **OntoLogos** | Reasoning engine (classification, consistency, explanations) |
+| **Ontologos** | Reasoning engine (classification, consistency, explanations) |
 | **OntoCode** | VS Code IDE powered by OntoCore |
 | **External plugins** (e.g. [owlmake](https://github.com/INCATools/owlmake)) | Workflow/build/release automation — integrate via OntoCore plugin APIs, not core dependencies |
 

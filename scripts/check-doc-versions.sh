@@ -730,16 +730,39 @@ check_file_contains "docs/ontocore/rust-api.md" "Book ↔ docs.rs crosswalk" "ru
 check_file_contains "docs/troubleshooting.md" "Where to start" "troubleshooting decision tree"
 check_file_contains "docs/platform/OVERVIEW.md" "v0.13 foundation shipped" "platform overview shipped banner"
 
-# vision.md must not claim v0.11 is current shipped release
+# vision.md must reference current shipped release (not v0.11 or v0.12)
 for file in docs/vision.md VISION.md; do
-  if grep -qE 'what ships in \*\*v0\.11\*\*|ships in \*\*v0\.11\*\*' "$file" 2>/dev/null; then
-    echo "FAIL: $file still says what ships in v0.11" >&2
+  if grep -qE 'what ships in \*\*v0\.11\*\*|what ships in \*\*v0\.12\*\*|ships in \*\*v0\.11\*\*|ships in \*\*v0\.12\*\*' "$file" 2>/dev/null; then
+    echo "FAIL: $file vision banner references stale release (expected v${VERSION%.*})" >&2
     fail=1
   fi
 done
-if [[ "$fail" -eq 0 ]]; then
-  echo "ok: vision docs reference v0.12 not v0.11"
+if ! grep -qF "what ships in **v${VERSION%.*}**" docs/vision.md 2>/dev/null || \
+   ! grep -qF "what ships in **v${VERSION%.*}**" VISION.md 2>/dev/null; then
+  echo "FAIL: docs/vision.md and VISION.md must say what ships in v${VERSION%.*}" >&2
+  fail=1
+else
+  echo "ok: vision banner sync v${VERSION%.*}"
 fi
+
+check_file_contains "docs/glossary.md" "\\*\\*Implemented\\*\\* \\(v${VERSION%.*}\\)" "glossary OntoCore/OntoCode version"
+check_file_contains "docs/glossary.md" "\\*\\*Shipped\\*\\* \\(v${VERSION%.*}\\)" "glossary WorkspaceStore shipped"
+check_file_contains "docs/vscode-install.md" "1.85" "vscode-install minimum VS Code version"
+check_file_contains "docs/documentation-index.md" "Shipped v${VERSION%.*}" "documentation-index OntoUI shipped"
+if grep -q 'Turtle (`.ttl`) only' extension/README.md 2>/dev/null; then
+  echo "FAIL: extension/README.md troubleshooting still says Turtle-only inspector" >&2
+  fail=1
+else
+  echo "ok: extension README inspector write-back"
+fi
+check_file_contains "CONTRIBUTING.md" "run-ci-local.sh" "contributing documents local CI script"
+check_file_contains "docs/internals.md" "Extension-only" "internals extension-only path"
+check_file_contains "docs/guides/lsp-hello-world.md" "ontocore-lsp" "lsp hello-world guide"
+check_file_contains "mkdocs.yml" "guides/extension-development.md" "mkdocs extension development guide"
+check_file_contains "mkdocs.yml" "guides/lsp-hello-world.md" "mkdocs lsp hello-world guide"
+check_file_contains "docs/guides/extension-development.md" "extension/" "extension development guide"
+check_file_contains "crates/ontocore-plugin/README.md" "Experimental" "plugin README experimental banner"
+check_file_contains "crates/ontocore-obo/README.md" "ontocore-obo" "ontocore-obo README"
 
 # errors.md must reference current release
 check_file_contains "docs/errors.md" "v${VERSION}" "errors reference version"

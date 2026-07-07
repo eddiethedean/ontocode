@@ -160,7 +160,7 @@ Indexing is driven by the language server on startup; `ontocode.autoIndexOnOpen`
 | `failed to start language server` | Check **View → Output → OntoCore Language Server**. Uninstall older OntoCode versions. Set `ontocode.lspPath` or `cargo install ontocore-lsp` |
 | Empty **Classes** after indexing | **Output → OntoCore Language Server** for errors; run **Index Workspace** again |
 | No items under **Diagnostics** | Index must complete first; check **Problems** panel for the same issues |
-| Cannot edit in inspector | Write-back is **Turtle (`.ttl`) only**; other formats are read-only |
+| Cannot edit in inspector | Write-back is **Turtle (`.ttl`) and OBO (`.obo`)**; OWL/XML and RDF/XML are read-only in the inspector |
 | Workspace is Restricted | **Trust** the folder — `ontocode.lspPath` is ignored in Restricted Mode |
 | Multi-root workspace | All workspace folders are indexed; use **Index Workspace** after adding folders |
 
@@ -170,7 +170,7 @@ More detail: [Installation & troubleshooting](https://ontocode-vs.readthedocs.io
 
 ## What's included in v0.13.0
 
-**Shipped:** explorer; **React** entity inspector (panel routing fix), graph panels, Query Workbench, Manchester editor, Refactor Preview, **Manage Imports**, and **Semantic Diff** panel; workspace refactor (rename IRI, migrate namespace, move, extract); EL/RL/RDFS/DL/auto reasoner (OntoLogos 1.0); **Turtle and OBO write-back** (v0.13); diagnostics with **quick fixes**; Turtle **completion**; LSP navigation (hover, go-to-definition, find references, rename); multi-root workspaces; optional index disk cache; [Open VSX](https://open-vsx.org/extension/ontocode/ontocode) for Cursor.
+**Shipped:** explorer; **React** entity inspector (panel routing fix), graph panels, Query Workbench, Manchester editor, Refactor Preview, **Manage Imports**, and **Semantic Diff** panel; workspace refactor (rename IRI, migrate namespace, move, extract); EL/RL/RDFS/DL/auto reasoner (Ontologos 1.0); **Turtle and OBO write-back** (v0.13); diagnostics with **quick fixes**; Turtle **completion**; LSP navigation (hover, go-to-definition, find references, rename); multi-root workspaces; optional index disk cache; [Open VSX](https://open-vsx.org/extension/ontocode/ontocode) for Cursor.
 
 **Planned:** owlmake workflow plugin integration (v1.0). Full Protégé parity (OWL/XML write-back, plugin host) is a **v1.0** goal — see [Protégé parity matrix](https://ontocode-vs.readthedocs.io/en/latest/design/PROTEGE_PARITY/).
 

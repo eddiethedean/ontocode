@@ -6,20 +6,19 @@
 //! cargo run -p ontocode --example index_and_query
 //! ```
 
-use ontocore_catalog::IndexBuilder;
-use ontocore_query::query_catalog;
+use ontocore::Workspace;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let workspace = std::path::Path::new("fixtures");
-    let catalog = IndexBuilder::new().workspace(workspace).build()?;
+    let workspace = std::path::Path::new(env!("CARGO_MANIFEST_DIR")).join("fixtures");
+    let ws = Workspace::open(&workspace)?;
 
-    let stats = catalog.data().stats();
+    let stats = ws.stats();
     println!(
         "Indexed {} ontologies, {} classes, {} triples",
         stats.ontology_count, stats.class_count, stats.triple_count
     );
 
-    let result = query_catalog(&catalog, "SELECT short_name, labels FROM classes")?;
+    let result = ws.query("SELECT short_name, labels FROM classes")?;
     for row in &result.rows {
         println!(
             "{} — {}",

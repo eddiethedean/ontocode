@@ -270,6 +270,7 @@ Apply patch operations to Turtle (`.ttl`) or OBO (`.obo`) documents. See [author
 | `diagnostics` | `PatchDiagnostic[]` on failure (`severity`, `message`) |
 | `document_path` | Path to modified file |
 | `entity_detail` | Updated `EntityDetail` after successful apply (LSP only) |
+| `workspace_edit` | Optional LSP `WorkspaceEdit` for buffer sync (VS Code client applies this) |
 | `reindex_warning` | Present when apply succeeded but reindex failed |
 
 **`EntityAxiomSummary` kinds:** `sub_class_of`, `equivalent_class`, `disjoint_class`, `domain`, `range`, `property_chain` (property chains editable via patch ops since v0.12).
@@ -404,6 +405,8 @@ When both `left_path` and `right_path` are set, git refs are ignored and directo
 
 **Result:** `{ "diff": DiffResult }` — axiom-level changes, entity additions/removals, breaking-change flags. With `format: "pr-summary"`, also includes `formatted` Markdown string. See [Semantic diff guide](ontocode/semantic-diff.md).
 
+**Errors:** `INVALID_PARAMS` (bad refs, paths outside workspace, git errors), `NOT_INDEXED` (indexed-catalog ref before first index), `REASONER_FAILED` (when `reasoner: true` enrichment fails)
+
 ### `ontocore/listSqlSchema` (v0.13+)
 
 Returns SQL virtual table metadata for the Query Workbench schema browser.
@@ -413,6 +416,8 @@ Returns SQL virtual table metadata for the Query Workbench schema browser.
 **Result:** `{ "tables": [{ "name": string, "columns": [{ "name": string, "type": string }] }] }`
 
 Includes core tables (`classes`, `properties`, …) and Horned-OWL axiom projections. See [sql-reference.md](sql-reference.md).
+
+**Errors:** `NOT_INDEXED`
 
 ### `textDocument/semanticTokens/full` (v0.13+)
 

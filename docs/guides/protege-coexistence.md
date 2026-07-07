@@ -10,15 +10,15 @@ Canonical capability matrix: [What ships today](../SHIPPED.md). Decision matrix:
 |----------|--------|
 | Browse ontologies in VS Code | Shipped |
 | Edit labels, comments, parents in Turtle | Shipped |
-| Edit OBO terms (name, synonyms, defs, is_a, …) | Shipped (v0.13) |
+| Edit OBO terms (name, synonyms, defs, is_a, …) | Shipped (engine v0.12; inspector v0.13) |
 | Complex `SubClassOf` / `EquivalentClasses` / disjoint (Manchester) | Shipped |
-| Property chain editing | Shipped (v0.13) |
+| Property chain editing | Shipped (v0.12) |
 | Workspace refactoring (rename, migrate namespace, move, extract) | Shipped (Turtle; preview + apply) |
 | SQL/SPARQL queries over workspace | Shipped |
 | Graph visualization (class, property, import, neighborhood) | Shipped |
 | CI lint (`ontocore validate`) | Shipped — suitable for production CI |
 | EL/RL/RDFS/DL classification | Shipped |
-| OWL 2 DL classification (`dl` / `auto` profiles) | Shipped (OntoLogos 1.0.0) |
+| OWL 2 DL classification (`dl` / `auto` profiles) | Shipped (OntoLogos 1.x) |
 | Inferred hierarchy toggle | Shipped (after reasoner run) |
 | OBO format index + `obo_id` in explorer | Shipped |
 | ROBOT CLI in CI (`ontocore robot`) | Shipped (requires Java + `robot` on PATH) |

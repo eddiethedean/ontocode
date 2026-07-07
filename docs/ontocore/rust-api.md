@@ -40,7 +40,7 @@ Generated API documentation is published on [docs.rs](https://docs.rs/ontocore):
 | `ontocore-diff` | [docs.rs/ontocore-diff](https://docs.rs/ontocore-diff) |
 | `ontocore-docs` | [docs.rs/ontocore-docs](https://docs.rs/ontocore-docs) |
 | `ontocore-refactor` | [docs.rs/ontocore-refactor](https://docs.rs/ontocore-refactor) |
-| `ontocore-plugin` | [docs.rs/ontocore-plugin](https://docs.rs/ontocore-plugin) (experimental v0.14 foundation) |
+| `ontocore-plugin` | [docs.rs/ontocore-plugin](https://docs.rs/ontocore-plugin) (experimental; Tier D in v0.13) |
 | `ontocore-cli` | [docs.rs/ontocore-cli](https://docs.rs/ontocore-cli) |
 
 Search all crates: [crates.io search?q=ontocore](https://crates.io/search?q=ontocore).
@@ -107,8 +107,26 @@ let diff = ws.diff_against_path("./baseline")?;
 | Option | Purpose |
 |--------|---------|
 | `single(path)` | Primary workspace root |
-| `with_scan_roots(vec![...])` | Multi-root indexing (mirrors v0.10 LSP behavior) |
+| `with_scan_roots(vec![...])` | Additional scan roots (primary root is always included) |
 | `with_disk_cache(true)` | Persist parse snapshots under `.ontocore/cache/` |
+
+### Additional `Workspace` methods
+
+| Method | Purpose |
+|--------|---------|
+| `reindex()` / `reindex_incremental()` | Full or incremental catalog rebuild |
+| `root()` / `scan_roots()` | Primary path and effective scan roots |
+| `catalog()` | Direct `OntologyCatalog` access (advanced) |
+| `import_graph()` / `import_graph_with(request)` | Graph export for visualization (import, class, property, neighborhood) |
+| `classify(profile)` / `explain(profile, request)` | Reasoner integration |
+| `reasoner_input()` | Build reasoner snapshot from workspace |
+| `export_docs(options)` | Markdown/HTML documentation export |
+| `discover_plugins()` | Experimental plugin manifest discovery (`plugins` feature) |
+| `diff(other)` / `diff_against_path(path)` | Semantic catalog comparison |
+
+Use `apply_owl_patches` / `apply_obo_patches` from `ontocore::owl` and `ontocore::obo` when importing both patch helpers. Unified errors: [`ontocore::Error`](https://docs.rs/ontocore/latest/ontocore/enum.Error.html) — see `examples/error_handling.rs`.
+
+Refactoring helpers live in [`ontocore::refactor`](https://docs.rs/ontocore/latest/ontocore/refactor/index.html) (`preview_rename_iri`, `apply_refactor_plan_checked`, …). Pass `workspace_root` from `Workspace::root()`.
 
 ## Lower-level API
 
@@ -143,8 +161,8 @@ See [Documentation export guide](../guides/docs-export.md).
 ```bash
 cargo run -p ontocode --example ontocore_workspace   # Workspace API
 cargo run -p ontocode --example workspace_operations # classify, graph, docs export
-cargo run -p ontocode --example index_and_query      # IndexBuilder + query (uses fixtures/)
-cargo run -p ontocode --example error_handling        # Error handling patterns
+cargo run -p ontocode --example index_and_query      # Workspace + SQL query (fixtures/)
+cargo run -p ontocode --example error_handling        # ontocore::Error handling
 cargo run -p ontocode --example semantic_diff         # Git/workspace semantic diff (requires git repo)
 ```
 

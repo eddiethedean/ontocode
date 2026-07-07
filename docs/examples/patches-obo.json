@@ -1,0 +1,18 @@
+[
+  {
+    "op": "set_name",
+    "term_id": "EX:001",
+    "value": "example class"
+  },
+  {
+    "op": "add_synonym",
+    "term_id": "EX:001",
+    "value": "example",
+    "scope": "EXACT"
+  },
+  {
+    "op": "add_is_a",
+    "term_id": "EX:001",
+    "parent_id": "EX:000"
+  }
+]

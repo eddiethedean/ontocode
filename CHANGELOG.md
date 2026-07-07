@@ -215,6 +215,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SPARQL update guard bypass after `PREFIX` or comment lines
 - Capped file reads in parser, catalog semantics, and refactor preview/backup paths
 
+[0.13.0]: https://github.com/eddiethedean/ontocode/releases/tag/v0.13.0
+[0.12.0]: https://github.com/eddiethedean/ontocode/releases/tag/v0.12.0
+[0.11.3]: https://github.com/eddiethedean/ontocode/releases/tag/v0.11.3
+[0.11.2]: https://github.com/eddiethedean/ontocode/releases/tag/v0.11.2
+[0.11.1]: https://github.com/eddiethedean/ontocode/releases/tag/v0.11.1
+[0.11.0]: https://github.com/eddiethedean/ontocode/releases/tag/v0.11.0
 [0.10.0]: https://github.com/eddiethedean/ontocode/releases/tag/v0.10.0
 [0.9.0]: https://github.com/eddiethedean/ontocode/releases/tag/v0.9.0
 [0.8.0]: https://github.com/eddiethedean/ontocode/releases/tag/v0.8.0

@@ -16,7 +16,7 @@
 >
 > **Shipped through v0.13:** workspace scanner, incremental indexing, multi-root workspaces, SQL/SPARQL queries (including Horned-OWL axiom virtual tables), diagnostics (`.ontocore/diagnostics.toml`), CLI, LSP (semantic tokens, `listSqlSchema`), Turtle and OBO write-back, Query Workbench + schema browser, Manchester editor, React webviews with WorkspaceStore + focus relay (inspector, graphs, workbench, refactor preview, semantic diff, imports), EL–DL reasoning (OntoLogos 1.0), OBO index + OBO write-back, OWL/XML read-only catalog, ROBOT CLI wrappers, semantic diff (`--pr-summary`), `ontocore docs` export (hierarchy + property index), Turtle completion, diagnostic quick fixes, property chain editing, DL unsatisfiability explanations. See [What ships today](../SHIPPED.md).
 >
-> **Planned v1.0:** plugin host, OWL/XML write-back, full DL axiom catalog for all formats. See [Platform roadmap](../roadmap.md).
+> **Planned v0.14:** plugin host MVP. **Planned v1.0:** full workflow plugin integration, OWL/XML write-back, full DL axiom catalog for all formats. See [Platform roadmap](../roadmap.md).
 >
 > **Reference:** [lsp-api.md](../lsp-api.md), [adr/README.md](adr/README.md), [DEPENDENCY_MATRIX.md](DEPENDENCY_MATRIX.md).
 
@@ -32,7 +32,7 @@ The architecture must support:
 - Reasoner integration
 - Safe write-back to source files
 - Semantic diffing
-- Plugin ecosystem (v1.0 API + reference plugins)
+- Plugin ecosystem (v0.14 MVP; full workflow integration v1.0)
 
 ## 2. High-Level Architecture
 
@@ -57,7 +57,7 @@ External Workflow Plugins (not core)     owlmake · ROBOT/ODK adapters
 |       OntoCore Core       |
 | catalog/query/diagnostics |
 | diff/docs/reasoner/robot  |
-| plugin platform (v1.0)    |
+| plugin platform (v0.14 MVP) |
 +------+--------+-----------+
        |        |           |
        v        v           v

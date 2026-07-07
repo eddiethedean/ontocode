@@ -49,7 +49,7 @@ Release VSIX packages bundle `ontocore-lsp` for Linux, macOS, and Windows.
 From the repository root:
 
 ```bash
-./scripts/package-extension.sh
+./scripts/package-extension.sh   # builds LSP + compiles extension (does not emit VSIX)
 cd extension && npx vsce package --no-dependencies
 ```
 
@@ -98,19 +98,22 @@ After indexing, the **OntoCode** activity bar shows five views:
 
 **Re-index** — run **OntoCode: Index Workspace** after adding or changing ontology files.
 
-Click an entity name to open the **Entity Inspector**. For `.ttl` files, use the edit section to change labels, parents, or delete entities. See [authoring.md](authoring.md).
+Click an entity name to open the **Entity Inspector**. For `.ttl` and `.obo` files, use the edit section to change labels, parents, or delete entities. See [authoring.md](authoring.md).
 
 ## Settings
 
 | Setting | Default | Description |
 |---------|---------|-------------|
 | `ontocode.lspPath` | `""` | **Trusted workspaces only.** Path to `ontocore-lsp`; ignored in Restricted Mode. Empty uses bundled binary |
+| `ontocode.robotPath` | `""` | **Trusted workspaces only.** Path to ROBOT JAR or launcher; ignored in Restricted Mode |
+| `ontocode.indexCache` | `false` | Persist parse snapshots under `.ontocore/cache/` (add to `.gitignore`) |
 | `ontocode.queryHistoryLimit` | `20` | Max entries in Query Workbench history |
 | `ontocode.reasoner.default` | `el` | Default profile for Run Reasoner (`el`, `rl`, `rdfs`, `dl`, `auto`) |
 | `ontocode.reasoner.autoProfile` | `true` | Profile-detection warnings when running reasoner |
 | `ontocode.hierarchy.mode` | `asserted` | Explorer hierarchy: `asserted`, `inferred`, or `combined` |
+| `ontocode.diagnostics.rules` | `{}` | Per-rule severity overrides (see [diagnostics config](workspace-limits.md)) |
 
-Indexing runs on workspace open. `ontocode.autoIndexOnOpen` is a legacy setting (no-op).
+Indexing runs on workspace open. `ontocode.autoIndexOnOpen` is a legacy setting (no-op); kept for compatibility.
 
 ## Commands
 
@@ -137,7 +140,7 @@ Indexing runs on workspace open. `ontocode.autoIndexOnOpen` is a legacy setting 
 | `spawn ... ontocore-lsp EACCES` (macOS/Linux) | Upgrade to OntoCode ≥ 0.4.0. Manual: `chmod +x` on the bundled binary path from the error |
 | `couldn't create connection to server` | Check **Output → OntoCore Language Server**. Reinstall the extension or download a fresh VSIX from [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) |
 | Empty explorer after open | **Trust** the workspace; run **OntoCode: Index Workspace**; check **Output → OntoCore Language Server** |
-| Inspector has no edit controls | Entity must be in a **Turtle (`.ttl`)** file; other formats are read-only |
+| Inspector has no edit controls | Entity must be in a **Turtle (`.ttl`) or OBO (`.obo`)** file; RDF/XML, OWL/XML, and JSON-LD are read-only in the inspector |
 
 ### Developers (building from source)
 

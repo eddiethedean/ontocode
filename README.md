@@ -56,6 +56,7 @@ Release CLI tarballs are **Linux x64 only**; macOS/Windows use `cargo install` o
 cargo install ontocore-cli --locked
 ontocore query /path/to/ontologies "SELECT * FROM classes"
 ontocore validate /path/to/ontologies
+# Requires a git repository (run from your ontology repo root):
 ontocore diff HEAD..WORKTREE
 ontocore docs /path/to/ontologies --format markdown --output ./docs-out
 ```
@@ -102,7 +103,8 @@ See [CONTRIBUTING.md](CONTRIBUTING.md). Quick checks:
 
 ```bash
 cargo test --workspace
-cd extension && npm ci && npm test
+cargo build -p ontocore-lsp --bins
+cd extension && npm ci && ONTOCORE_LSP_BIN=../target/debug/ontocore-lsp npm test
 cd extension/webview-ui && npm ci && npm test
 cargo fmt --all && cargo clippy --workspace --all-targets --all-features -- -D warnings
 ```

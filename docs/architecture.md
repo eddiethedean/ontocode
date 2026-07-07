@@ -9,13 +9,13 @@
 > | **This page** (`architecture.md`) | Product/ecosystem overview — Ontologos, OntoCore, OntoCode |
 > | [Implementation architecture](design/ARCHITECTURE.md) | Contributor crate layout and internal modules |
 > | [Product design / UI platform](ui/PLATFORM_ARCHITECTURE.md) | Shared **OntoUI**, OntoStudio target, design system |
-| [Platform architecture (implementation)](platform/OVERVIEW.md) | OntoUI, WorkspaceStore, focus relay — **shipped v0.13** |
+> | [Platform architecture (implementation)](platform/OVERVIEW.md) | OntoUI, WorkspaceStore, focus relay — **shipped v0.13** |
 > | [OntoCore architecture](ontocore/architecture.md) | Short OntoCore stack summary (links here for detail) |
 >
 > **Contributor crate layout:** [Implementation architecture](design/ARCHITECTURE.md) (internal modules only).
 >
 > **v0.13 ships today:** OntoCode (VS Code), OntoCore (CLI/LSP/library), Turtle + OBO write-back, property chain editing, OWL/XML read-only catalog, DL explanations, semantic diff (`--pr-summary`), incremental indexing, Ontologos reasoning, ROBOT CLI wrappers, **WorkspaceStore + cross-panel focus sync**, **Query Workbench schema browser**, **configurable diagnostics**, **LSP semantic tokens** (Turtle/OBO).
-> **Planned v1.0 (not installable yet):** plugin host, language SDKs, MCP server, owlmake-style workflow plugins.
+> **Planned v0.14:** plugin host MVP. **Planned v1.0:** full workflow plugin integration, language SDKs, MCP server. See [Platform roadmap](roadmap.md).
 > **Planned post-1.0:** OntoStudio desktop, AI-native workflows — [UI roadmap mapping](ui/ROADMAP_MAPPING.md).
 > Canonical capability matrix: [What ships today](SHIPPED.md).
 

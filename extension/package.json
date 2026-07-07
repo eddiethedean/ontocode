@@ -304,7 +304,7 @@
         "ontocode.autoIndexOnOpen": {
           "type": "boolean",
           "default": true,
-          "description": "Automatically index the workspace when OntoCode activates."
+          "description": "Legacy no-op. Indexing is driven by the language server on workspace open; kept for compatibility with older settings."
         },
         "ontocode.queryHistoryLimit": {
           "type": "number",

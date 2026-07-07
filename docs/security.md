@@ -7,13 +7,10 @@ OntoCore and OntoCode are **local-first** tools: they index and parse files on d
 | Version | Supported |
 |---------|-----------|
 | 0.13.x   | Yes       |
-| 0.11.x   | No        |
-| 0.10.x   | Best effort |
-| 0.6.x   | No        |
-| 0.5.x   | No        |
-| 0.4.x   | No        |
-| 0.3.x   | No        |
-| < 0.3   | No        |
+| 0.12.x  | Best effort |
+| 0.11.x  | No        |
+| 0.10.x  | Best effort |
+| ≤ 0.9.x | No        |
 
 Full policy: **[SECURITY.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/SECURITY.md)**
 

@@ -170,9 +170,9 @@ More detail: [Installation & troubleshooting](https://ontocode-vs.readthedocs.io
 
 ## What's included in v0.13.0
 
-**Shipped:** explorer; **React** entity inspector (panel routing fix), graph panels, Query Workbench, Manchester editor, Refactor Preview, **Manage Imports**, and **Semantic Diff** panel; workspace refactor (rename IRI, migrate namespace, move, extract); EL/RL/RDFS/DL/auto reasoner (Ontologos 1.0); **Turtle and OBO write-back** (v0.13); diagnostics with **quick fixes**; Turtle **completion**; LSP navigation (hover, go-to-definition, find references, rename); multi-root workspaces; optional index disk cache; [Open VSX](https://open-vsx.org/extension/ontocode/ontocode) for Cursor.
+**Shipped:** explorer; **React** entity inspector (panel routing fix), graph panels, Query Workbench, Manchester editor, Refactor Preview, **Manage Imports**, and **Semantic Diff** panel; workspace refactor (rename IRI, migrate namespace, move, extract); EL/RL/RDFS/DL/auto reasoner (OntoLogos 1.x); **Turtle and OBO write-back** (engine v0.12; inspector v0.13); diagnostics with **quick fixes**; Turtle **completion**; LSP navigation (hover, go-to-definition, find references, rename); multi-root workspaces; optional index disk cache; [Open VSX](https://open-vsx.org/extension/ontocode/ontocode) for Cursor.
 
-**Planned:** owlmake workflow plugin integration (v1.0). Full Protégé parity (OWL/XML write-back, plugin host) is a **v1.0** goal — see [Protégé parity matrix](https://ontocode-vs.readthedocs.io/en/latest/design/PROTEGE_PARITY/).
+**Planned:** owlmake workflow plugin integration (plugin host MVP **v0.14**). Full Protégé parity (OWL/XML write-back, installable plugin ecosystem) is a **v1.0** goal — see [Protégé parity matrix](https://ontocode-vs.readthedocs.io/en/latest/design/PROTEGE_PARITY/).
 
 ---
 

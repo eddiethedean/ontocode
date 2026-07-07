@@ -78,7 +78,7 @@ ontocore validate /path/to/ontologies
 
 ### `patch`
 
-Apply Turtle patch operations from a JSON file. See [patch reference](patch-reference.md).
+Apply **Turtle (`.ttl`) and OBO (`.obo`)** patch operations from a JSON file. See [patch reference](patch-reference.md) and [patch examples](examples/patches.md).
 
 ```bash
 ontocore patch ./ontology.ttl patches.json --preview

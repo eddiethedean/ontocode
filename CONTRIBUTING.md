@@ -25,6 +25,23 @@ Root `VISION.md`, `ARCHITECTURE.md`, and `ROADMAP.md` are mirrored under `docs/`
 
 The root Cargo package `ontocode` is unpublished and hosts workspace integration tests (`tests/`).
 
+**New contributors:** start with [internals.md](docs/internals.md) for role-based paths (Rust, extension, docs, LSP).
+
+## Before opening a PR
+
+**Minimum checks (most changes):**
+
+```bash
+cargo fmt --all --check
+cargo test --workspace
+cargo build -p ontocore-lsp --bins
+cd extension && ONTOCORE_LSP_BIN=../target/debug/ontocore-lsp npm test
+```
+
+**Full CI parity (release branches or broad changes):** `./scripts/run-ci-local.sh` (~30+ minutes).
+
+Open an issue or discussion before large features. Follow existing commit message style in `git log`.
+
 ## Prerequisites
 
 - Rust **1.88+** (see `rust-version` in `Cargo.toml`)

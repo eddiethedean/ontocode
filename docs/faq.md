@@ -63,7 +63,7 @@ Select a class in a `.ttl` file → Entity Inspector → **Edit in Manchester** 
 
 **I cannot edit in the Entity Inspector.**
 
-Write-back applies to **Turtle (`.ttl`) and OBO (`.obo`)** files (v0.13+). RDF/XML, OWL/XML, and JSON-LD are read-only in the inspector. See [OBO authoring](ontocode/obo-authoring.md).
+Write-back applies to **Turtle (`.ttl`) and OBO (`.obo`)** files (engine v0.12; inspector write-back v0.13). RDF/XML, OWL/XML, and JSON-LD are read-only in the inspector. See [OBO authoring](ontocode/obo-authoring.md).
 
 **How do multi-root VS Code workspaces work?**
 
@@ -142,7 +142,7 @@ Exits non-zero when unsatisfiable classes are found. See [CI integration](ci-int
 
 **Why does `dl` or `auto` fail?**
 
-If classification fails, check that your ontology is within [workspace limits](workspace-limits.md) and that constructs are supported by OntoLogos 1.0.0 for the selected profile. Use `el`, `rl`, or `rdfs` for lighter-weight profiles when DL is not required.
+If classification fails, check that your ontology is within [workspace limits](workspace-limits.md) and that constructs are supported by OntoLogos 1.x for the selected profile. Use `el`, `rl`, or `rdfs` for lighter-weight profiles when DL is not required.
 
 **Why is explanation empty for a class?**
 
@@ -152,7 +152,7 @@ Explanations require an unsatisfiable class and a prior reasoner run (or success
 
 **When did full DL reasoning ship?**
 
-EL/RL/RDFS shipped in **v0.6.0** (OntoLogos 0.9.0). Full OWL 2 DL classification (`dl` / `auto`) is **available in v0.9.0** via **OntoLogos 1.0.0** (HermiT parity). Explanations remain EL-first. See [Reasoner guide](guides/reasoner.md).
+EL/RL/RDFS shipped in **v0.6.0** (OntoLogos 0.9.0). Full OWL 2 DL classification (`dl` / `auto`) is **available in v0.9.0+** via **OntoLogos 1.x** (HermiT parity). Explanations remain EL-first. See [Reasoner guide](guides/reasoner.md).
 
 **How does this compare to Protégé?**
 

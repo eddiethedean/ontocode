@@ -21,7 +21,7 @@ Maintainer checklist for publishing crates, binaries, and the VS Code extension.
 - [ ] [docs/faq.md](faq.md) — API version, Protégé comparison
 - [ ] [docs/errors.md](errors.md) / [docs/workspace-limits.md](workspace-limits.md) — behavior changes
 - [ ] [docs/guides/enterprise-eval.md](guides/enterprise-eval.md) — shipped capabilities
-- [ ] [docs/guides/protege-coexistence.md](guides/protege-coexistence.md) — v0.11 coexistence (must match SHIPPED)
+- [ ] [docs/guides/protege-coexistence.md](guides/protege-coexistence.md) — must match SHIPPED
 - [ ] [docs/guides/protege-decision.md](guides/protege-decision.md) — decision matrix
 - [ ] [docs/guides/production-evidence.md](guides/production-evidence.md) — self-benchmark protocol
 - [ ] [docs/guides/governance.md](guides/governance.md) — sustainability / support policy
@@ -40,6 +40,8 @@ Maintainer checklist for publishing crates, binaries, and the VS Code extension.
 - [ ] [docs/migration/v0.9.md](migration/v0.9.md) — OntoCore identity upgrade notes when applicable
 - [ ] [docs/migration/v0.10.md](migration/v0.10.md) — semantic workspace upgrade notes when applicable
 - [ ] [docs/migration/v0.11.md](migration/v0.11.md) — editor depth upgrade notes when applicable
+- [ ] [docs/migration/v0.12.md](migration/v0.12.md) — authoring parity upgrade notes when applicable
+- [ ] [docs/migration/v0.13.md](migration/v0.13.md) — OntoUI platform upgrade notes when applicable
 - [ ] [docs/design/PROTEGE_PARITY.md](design/PROTEGE_PARITY.md) — status columns if features shipped
 - [ ] [docs/design/ARCHITECTURE.md](design/ARCHITECTURE.md) / [OWL_AUTHORING_SPEC.md](design/OWL_AUTHORING_SPEC.md) — shipped vs target banners
 - [ ] [docs/design/LICENSES.md](design/LICENSES.md) — dependency sections

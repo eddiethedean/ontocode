@@ -20,12 +20,12 @@ Hard limits: [workspace limits](../workspace-limits.md). Pilot criteria: [produc
 
 Use these tiers to choose pilot scope. **Run `ontocore inspect` on your repo** to measure actual counts.
 
-| Tier | Files | Triples (order of magnitude) | Typical profile | v0.8 fit |
-|------|-------|------------------------------|-----------------|----------|
+| Tier | Files | Triples (order of magnitude) | Typical profile | Current fit |
+|------|-------|------------------------------|-----------------|-------------|
 | **Small** | 1–20 | &lt; 100k | Single-domain Turtle, EL | Excellent |
 | **Medium** | 20–500 | 100k–5M | Multi-file imports, mixed formats | Good — monitor index time |
 | **Large** | 500–10k | 5M–20M | Enterprise taxonomy, heavy imports | Pilot required — approach caps |
-| **Extra-large** | &gt; 10k files or &gt; 20M triples | — | Full OBO, massive SKOS | **Not supported** — split workspace or wait for incremental indexing |
+| **Extra-large** | &gt; 10k files or &gt; 20M triples | — | Full OBO, massive SKOS | **Not supported** — split workspace |
 
 ## v0.13 smoke benchmarks (CI)
 
@@ -89,7 +89,7 @@ Record:
 
 **Acceptance suggestion:** CI `validate` completes within your pipeline stage budget (e.g. &lt; 5 minutes) on `main` branch corpora.
 
-## Memory model (v0.8)
+## Memory model (current)
 
 Documentation and architecture specs describe **multiple in-memory representations**:
 
@@ -137,7 +137,6 @@ Consider splitting when:
 ## Future work
 
 - v1.0: formal performance benchmarks document ([Protégé parity P1](../design/PROTEGE_PARITY.md))
-- v0.10: incremental indexing, multi-root, semantic diff ([roadmap](../roadmap.md))
 
 ## Related
 

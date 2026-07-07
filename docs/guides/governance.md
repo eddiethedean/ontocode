@@ -40,11 +40,13 @@ Maintainers follow [releasing.md](../releasing.md): version bump, CHANGELOG, SHI
 
 | Stream | Security support (documented) |
 |--------|-------------------------------|
-| **0.9.x** | Yes — [security policy](../security.md) |
-| **0.8.x** | Best effort |
-| **≤ 0.7.x** | No |
+| **0.13.x** | Yes — current release |
+| **0.12.x** | Best effort |
+| **0.11.x** | No |
+| **0.10.x** | Best effort |
+| **≤ 0.9.x** | No |
 
-Pin versions in CI and desktop rollouts; do not assume automatic long-term backports.
+Pin versions in CI and desktop rollouts; do not assume automatic long-term backports. Canonical table: [security policy](../security.md).
 
 ## Security response
 

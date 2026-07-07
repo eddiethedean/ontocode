@@ -34,7 +34,7 @@ Record:
 | `class_count` | | |
 | `diagnostic_error_count` | | |
 
-**Pass:** Counts within [workspace limits](../workspace-limits.md). **Fail:** Split workspace or defer until incremental indexing ships — [release timeline](release-timeline.md).
+**Pass:** Counts within [workspace limits](../workspace-limits.md). **Fail:** Split workspace or shard by module — incremental indexing shipped in v0.10 ([release timeline](release-timeline.md)).
 
 ## Step 2 — CI latency budget
 

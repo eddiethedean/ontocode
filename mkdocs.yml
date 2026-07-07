@@ -77,19 +77,17 @@ markdown_extensions:
 nav:
   - Home: index.md
   - Get started:
-      - Documentation index: documentation-index.md
-      - Glossary: glossary.md
       - "First success (~10 min core path)": guides/first-success.md
       - Which artifact do I need?: guides/which-artifact.md
-      - "What's new in v0.13": migration/v0.13.md
-      - "What's new in v0.12": migration/v0.12.md
-      - What's new in v0.11: migration/v0.11.md
-      - Pick a task: guides/start-here.md
-      - What ships today: SHIPPED.md
-      - Install VS Code: vscode-install.md
       - "Getting started (all paths)": getting-started.md
+      - Install VS Code: vscode-install.md
+      - What ships today: SHIPPED.md
+      - Glossary: glossary.md
+      - "What's new in v0.13": migration/v0.13.md
+      - Pick a task: guides/start-here.md
       - Ontology concepts: concepts.md
       - Migrating from Protégé: guides/protege-migration.md
+      - Documentation index: documentation-index.md
   - Use OntoCode:
       - Feature tour: ontocode/feature-tour.md
       - Overview: ontocode/vscode-extension.md
@@ -122,6 +120,10 @@ nav:
           - Query cookbook: examples/queries.md
           - Sample patches: examples/patches.md
           - Refactoring: examples/refactoring.md
+          - Classify: examples/classify.md
+          - Semantic diff: examples/diff.md
+          - Docs export: examples/docs-export.md
+          - Index vs inspect: examples/inspect.md
   - Reference:
       - CLI reference: cli-reference.md
       - Rust API: ontocore/rust-api.md

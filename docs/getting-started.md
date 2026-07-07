@@ -23,9 +23,17 @@ VS Code extension (bundled language server on Linux, macOS, and Windows): [vscod
 | Path | Requires |
 |------|----------|
 | Minimum VS Code | **1.85+** — see [platform compatibility guide](guides/platform-compatibility.md) |
-| `cargo install` CLI | Rust 1.88+ |
+| `cargo install` CLI | Rust 1.88+; `~/.cargo/bin` on your `PATH` |
 | Git clone + `cargo run` | Rust 1.88+ |
 | Release CLI binaries | No Rust; **Linux x64 only** (download from GitHub Releases) |
+
+After `cargo install`, ensure `~/.cargo/bin` is on your `PATH`. If you see `ontocore: command not found`, run:
+
+```bash
+export PATH="$HOME/.cargo/bin:$PATH"
+```
+
+Add that line to your shell profile (`~/.bashrc`, `~/.zshrc`, etc.) for persistence. If install fails with an MSRV error, run `rustup update stable` and confirm `rustc --version` is **1.88 or newer**.
 
 ## Path A — VS Code (recommended for browsing and editing)
 
@@ -38,9 +46,8 @@ Details: [vscode-install.md](vscode-install.md) · [authoring.md](authoring.md)
 ```bash
 git clone https://github.com/eddiethedean/ontocode.git
 cd ontocode
-cargo build --release
 
-# Sample fixture ontology
+# Sample fixture ontology (debug build is fine for smoke tests)
 cargo run -- inspect fixtures
 cargo run -- query fixtures "SELECT short_name, labels FROM classes"
 cargo run -- validate fixtures

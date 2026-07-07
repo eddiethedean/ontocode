@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted — **planned v0.13**
+Accepted — **implemented v0.13**
 
 ## Context
 

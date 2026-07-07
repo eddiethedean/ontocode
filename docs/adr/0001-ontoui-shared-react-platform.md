@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted — **partially implemented** (v0.12 per-panel React webviews)
+Accepted — **implemented v0.13** (WorkspaceStore, focus relay, design tokens; per-panel webviews remain deployment mechanism)
 
 ## Context
 

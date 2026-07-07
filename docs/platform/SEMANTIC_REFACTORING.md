@@ -1,6 +1,6 @@
 # Semantic refactoring architecture
 
-> **Status:** Partial (v0.12) — LSP preview/apply shipped; unified transaction model planned v0.13+
+> **Status:** Partial (v0.13) — LSP preview/apply + `pendingRefactor` store slice shipped; unified transaction model planned v1.0
 
 ## Scope
 

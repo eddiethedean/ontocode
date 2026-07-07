@@ -14,7 +14,7 @@
 >
 > **Ecosystem architecture (canonical for users):** [Platform architecture](../architecture.md).
 >
-> **Shipped through v0.12:** workspace scanner, incremental indexing, multi-root workspaces, SQL/SPARQL queries, diagnostics, CLI, LSP, Turtle and OBO write-back, Query Workbench + Manchester editor, React webviews (inspector, graphs, workbench, refactor preview, semantic diff, imports), EL–DL reasoning (OntoLogos 1.0), OBO index + OBO write-back, OWL/XML read-only catalog, ROBOT CLI wrappers, semantic diff, `ontocore docs` export, Turtle completion, diagnostic quick fixes, property chain editing, DL unsatisfiability explanations. See [What ships today](../SHIPPED.md).
+> **Shipped through v0.13:** workspace scanner, incremental indexing, multi-root workspaces, SQL/SPARQL queries (including Horned-OWL axiom virtual tables), diagnostics (`.ontocore/diagnostics.toml`), CLI, LSP (semantic tokens, `listSqlSchema`), Turtle and OBO write-back, Query Workbench + schema browser, Manchester editor, React webviews with WorkspaceStore + focus relay (inspector, graphs, workbench, refactor preview, semantic diff, imports), EL–DL reasoning (OntoLogos 1.0), OBO index + OBO write-back, OWL/XML read-only catalog, ROBOT CLI wrappers, semantic diff (`--pr-summary`), `ontocore docs` export (hierarchy + property index), Turtle completion, diagnostic quick fixes, property chain editing, DL unsatisfiability explanations. See [What ships today](../SHIPPED.md).
 >
 > **Planned v1.0:** plugin host, OWL/XML write-back, full DL axiom catalog for all formats. See [Platform roadmap](../roadmap.md).
 >

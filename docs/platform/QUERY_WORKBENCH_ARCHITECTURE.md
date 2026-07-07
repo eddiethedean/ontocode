@@ -1,10 +1,10 @@
 # Query workbench architecture
 
-> **Status:** Partial (v0.12) — SQL/SPARQL editor shipped; schema browser planned v0.13
+> **Status:** SQL/SPARQL editor + **schema browser shipped v0.13**
 
 ## Scope
 
-Query Workspace: editor → LSP execution → results table → history/saved queries.
+Query Workspace: editor → LSP execution → results table → history/saved queries → schema browser.
 
 ## Flow
 
@@ -23,10 +23,12 @@ QueryExecuted event → WorkspaceStore
 ## Current implementation
 
 - `extension/webview-ui/src/panels/QueryWorkbench.tsx`
+- `extension/webview-ui/src/components/SchemaBrowser.tsx`
+- LSP `ontocore/listSqlSchema` — table/column metadata
 - LSP methods in [lsp-api.md](../lsp-api.md)
 - SQL subset: [sql-reference.md](../sql-reference.md)
 
-## Store shape (planned)
+## Store shape (v0.13)
 
 ```ts
 interface QueryState {
@@ -39,18 +41,22 @@ interface QueryState {
 }
 ```
 
-## Schema browser (planned v0.13)
+## Schema browser (v0.13)
 
-- Virtual table list from catalog snapshot
-- Column names and types for SQL tables
-- Insert into editor on click
+- Virtual table list from `ontocore/listSqlSchema` (includes Horned-OWL axiom tables)
+- Column names and types per table
+- **Insert column** — appends column name to editor
+- **Insert table query** — `SELECT * FROM <table>`
+- Collapsible sidebar; state in `query.schemaBrowserExpanded`
+
+Example axiom tables: `domain_axioms`, `range_axioms`, `restrictions`, `equivalent_class_axioms`, `disjoint_class_axioms`. See [sql-reference.md](../sql-reference.md#horned-owl-axiom-projections-v013).
 
 ## Links
 
 - [ui/QUERY_WORKBENCH.md](../ui/QUERY_WORKBENCH.md)
 - [ontocode/query-workbench.md](../ontocode/query-workbench.md)
-- [cursor-prompts/08-improve-query-workbench.md](../cursor-prompts/08-improve-query-workbench.md)
+- [ontocore/sql-views.md](../ontocore/sql-views.md)
 
 ## Evolution
 
-UX spec: [ui/QUERY_WORKBENCH.md](../ui/QUERY_WORKBENCH.md).
+UX spec: [ui/QUERY_WORKBENCH.md](../ui/QUERY_WORKBENCH.md). SQL `JOIN` / `GROUP BY` deferred to v1.0.

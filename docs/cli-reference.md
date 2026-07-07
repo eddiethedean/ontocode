@@ -248,6 +248,7 @@ ontocore diff HEAD..WORKTREE
 ontocore diff --left-ref main --right-ref feature --format markdown
 ontocore diff --left-ref HEAD --right-ref WORKTREE --breaking-only
 ontocore diff --left-ref ./baseline --right-ref ./candidate
+ontocore diff main..feature --pr-summary
 ```
 
 | Flag | Description |
@@ -257,7 +258,8 @@ ontocore diff --left-ref ./baseline --right-ref ./candidate
 | `--right-ref` | Right git ref, directory path, or `WORKTREE` |
 | `--repo` | Git repository root (default: current directory) |
 | `--reasoner` | Include reasoner unsatisfiability changes |
-| `--format` | `text` (default), `json`, or `markdown` |
+| `--format` | `text` (default), `json`, `markdown`, or `pr-summary` (PR-ready Markdown, v0.13+) |
+| `--pr-summary` | Shorthand for `--format pr-summary` |
 | `--breaking-only` | Filter to likely breaking changes |
 
 **Exit:** 0 on success; non-zero on git/parse/I/O errors.
@@ -280,6 +282,8 @@ ontocore docs . --format html --output ./docs-out \
 | `--output` / `-o` | *(required)* | Output directory |
 | `--format` | `markdown` | `markdown` or `html` |
 | `--ontology-id` | — | Limit export to one ontology IRI or document id |
+
+Markdown `index.md` includes **Class hierarchy** and **Property index** sections (v0.13+).
 
 **Exit:** 0 on success; non-zero on index or I/O failure.
 

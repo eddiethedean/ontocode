@@ -1,8 +1,8 @@
 # OntoCode feature tour
 
-A visual and structural overview of the OntoCode VS Code IDE (**v0.12**). For hands-on setup, start with [First success (~10 min core path)](../guides/first-success.md).
+A visual and structural overview of the OntoCode VS Code IDE (**v0.13**). For hands-on setup, start with [First success (~10 min core path)](../guides/first-success.md).
 
-Canonical capability list: [What ships today](../SHIPPED.md). **New in v0.12:** [Migration guide](../migration/v0.12.md).
+Canonical capability list: [What ships today](../SHIPPED.md). **New in v0.13:** [Migration guide](../migration/v0.13.md).
 
 ## Activity bar and explorer
 
@@ -18,7 +18,7 @@ The **OntoCode** activity bar hosts five tree views:
 
 Explorer sidebar (Ontologies, Classes, Properties, Individuals, Diagnostics) and the React **Entity Inspector** open when you click an entity (e.g. `Person` in `example.ttl`).
 
-**Typical flow:** expand **Classes** → click an entity name → **Entity Inspector** opens on the right.
+**Typical flow:** expand **Classes** → click an entity name → **Entity Inspector** opens on the right. With Inspector and Graph panels open, the same entity stays in sync (**focus relay**, v0.13).
 
 ## Entity Inspector (React)
 
@@ -37,8 +37,9 @@ Guide: [Inspector](inspector.md) · [Authoring](../authoring.md)
 
 Command Palette → **OntoCode: Open Query Workbench**
 
-- **SQL mode** — catalog virtual tables (`classes`, `properties`, `diagnostics`, …)
+- **SQL mode** — catalog virtual tables (`classes`, `properties`, `diagnostics`, Horned-OWL axiom tables, …)
 - **SPARQL mode** — graph patterns over indexed triples
+- **Schema browser** (v0.13) — browse tables/columns from LSP `listSqlSchema`; insert names into the editor
 - Export results to CSV or JSON; history and saved queries
 
 Guide: [Query Workbench](query-workbench.md)
@@ -88,6 +89,15 @@ Right-click a `.ttl` file in **Ontologies** → **Manage Imports** to add or rem
 
 Guide: [Manage Imports](manage-imports.md)
 
+## Turtle semantic highlighting and diagnostics config (v0.13)
+
+In `.ttl` and `.obo` editors:
+
+- **Semantic tokens** — namespaces, IRIs, keywords, comments (LSP `textDocument/semanticTokens/full`)
+- **Configurable diagnostics** — `.ontocore/diagnostics.toml` at workspace root or `ontocode.diagnostics.rules` setting
+
+Guide: [Migration v0.13](../migration/v0.13.md) · [LSP API](../lsp-api.md)
+
 ## Turtle completion and quick fixes (v0.11)
 
 In `.ttl` editors:
@@ -115,6 +125,7 @@ Open any supported ontology file (`.ttl`, `.owl`, `.obo`, …) for:
 | `ontocode.hierarchy.mode` | `asserted` | Switch after reasoner for inferred tree |
 | `ontocode.reasoner.default` | `el` | Default profile for **Run Reasoner** |
 | `ontocode.indexCache` | `false` | Optional `.ontocore/cache/` disk index |
+| `ontocode.diagnostics.rules` | `{}` | Per-rule enable/severity (overridden by `.ontocore/diagnostics.toml`) |
 
 Full list: [Install VS Code](../vscode-install.md#settings)
 

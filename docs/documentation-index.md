@@ -2,7 +2,7 @@
 
 Master index for OntoCode / OntoCore planning, architecture, and user documentation.
 
-**Current release:** v0.12.0 · **Canonical capabilities:** [What ships today](SHIPPED.md) · **Terms:** [Glossary](glossary.md)
+**Current release:** v0.13.0 · **Canonical capabilities:** [What ships today](SHIPPED.md) · **Terms:** [Glossary](glossary.md)
 
 ## Recommended reading order
 

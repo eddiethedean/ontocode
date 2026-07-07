@@ -1,6 +1,6 @@
 # OntoCore LSP API (v0.12)
 
-> **Status:** Documents behavior in **OntoCore v0.12.0**. Pre-1.0 APIs may change.
+> **Status:** Documents behavior in **OntoCore v0.13.0**. Pre-1.0 APIs may change.
 > Canonical feature list: [What ships today](SHIPPED.md).
 
 This document describes **what ships today** in `ontocore-lsp`. For the **v1.0 target** (extended plugin methods), see [LSP_SPEC.md](design/LSP_SPEC.md).
@@ -398,10 +398,29 @@ Compare semantic catalogs between git refs, directories, or indexed workspace sn
 | `left_path` | string? | Left directory when comparing two paths on disk |
 | `right_path` | string? | Right directory |
 | `reasoner` | boolean? | Enrich diff with reasoner unsatisfiability changes |
+| `format` | string? | `pr-summary` returns `{ "formatted": string }` PR-ready Markdown (v0.13+) |
 
 When both `left_path` and `right_path` are set, git refs are ignored and directories are compared directly (paths must resolve within workspace roots).
 
-**Result:** `{ "diff": DiffResult }` — axiom-level changes, entity additions/removals, breaking-change flags. See [Semantic diff guide](ontocode/semantic-diff.md).
+**Result:** `{ "diff": DiffResult }` — axiom-level changes, entity additions/removals, breaking-change flags. With `format: "pr-summary"`, also includes `formatted` Markdown string. See [Semantic diff guide](ontocode/semantic-diff.md).
+
+### `ontocore/listSqlSchema` (v0.13+)
+
+Returns SQL virtual table metadata for the Query Workbench schema browser.
+
+**Params:** none (uses indexed workspace catalog)
+
+**Result:** `{ "tables": [{ "name": string, "columns": [{ "name": string, "type": string }] }] }`
+
+Includes core tables (`classes`, `properties`, …) and Horned-OWL axiom projections. See [sql-reference.md](sql-reference.md).
+
+### `textDocument/semanticTokens/full` (v0.13+)
+
+Standard LSP semantic tokens for **Turtle** (`.ttl`) and **OBO** (`.obo`) open documents.
+
+**Token types:** `namespace`, `iri`, `keyword`, `comment`, `string`
+
+Requires document text in the LSP open-document buffer (unsaved buffers supported).
 
 ## Structured errors
 
@@ -416,4 +435,4 @@ Custom method failures return `LspErrorPayload` in the JSON-RPC error `data` fie
 
 ## Not implemented yet (see LSP_SPEC)
 
-`prepareRename` and additional LSP features remain planned — see [LSP_SPEC.md](design/LSP_SPEC.md). `textDocument/completion` for Turtle shipped in v0.11. For semantic diff UX in VS Code, see [Semantic diff guide](ontocode/semantic-diff.md).
+`prepareRename` and additional LSP features remain planned — see [LSP_SPEC.md](design/LSP_SPEC.md). `textDocument/completion` for Turtle shipped in v0.11; semantic tokens and `listSqlSchema` shipped in v0.13. For semantic diff UX in VS Code, see [Semantic diff guide](ontocode/semantic-diff.md).

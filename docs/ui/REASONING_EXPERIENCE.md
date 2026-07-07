@@ -9,7 +9,7 @@
 
 Reasoning is one of the defining capabilities of ontology engineering. In OntoCode, reasoning should feel like compiling software in a modern IDE.
 
-> **Implementation architecture:** [platform/REASONING_COMPILER.md](../platform/REASONING_COMPILER.md) · **Partial:** reasoner panels shipped v0.9–v0.12
+> **Implementation architecture:** [platform/REASONING_COMPILER.md](../platform/REASONING_COMPILER.md) · **Partial:** reasoner panels v0.9–v0.12; reasoning store slice v0.13
 
 ## Continuous Feedback
 

@@ -1,8 +1,8 @@
 # Platform overview
 
-> **Planned v0.13+ — not shipped today.** For what you can install and use now, read [What ships today](../SHIPPED.md) first.
+> **v0.13 foundation shipped.** For evaluator-facing capabilities, read [What ships today](../SHIPPED.md) first.
 >
-> **Status:** Architecture target for v0.13+ · **Shipped today:** [SHIPPED.md](../SHIPPED.md) · **Terms:** [Glossary](../glossary.md)
+> **Status:** OntoUI runtime + focus relay **shipped v0.13**; plugin host **planned v0.14** · **Terms:** [Glossary](../glossary.md)
 
 ## Scope
 
@@ -12,21 +12,21 @@ This document is the **implementation architecture hub** for the Ontologos platf
 
 ```text
 Applications (hosts)
-├── OntoCode (VS Code)          — Implemented
+├── OntoCode (VS Code)          — Implemented (WorkspaceStore + focus relay v0.13)
 ├── OntoStudio (desktop)        — Planned
 └── Future web client           — Proposed
 
-OntoUI (shared React platform)  — Partial
-├── Workspace runtime (store, event bus, registry)
-├── Design system + components
+OntoUI (shared React platform)  — v0.13 foundation shipped
+├── Workspace runtime (Zustand store, event bus, registry)
+├── Design tokens + shared primitives
 ├── Workspace surfaces (Entity, Graph, Query, …)
-└── Host adapter (WorkspaceHost)
+└── Host adapter (WorkspaceHost) + extension-host focus relay
 
 OntoCore (semantic engine)      — Implemented
-├── Index, query, diagnostics
+├── Index, query, diagnostics (configurable rules)
 ├── Reasoning (Ontologos)
-├── Refactoring, diff, docs export
-├── LSP + CLI
+├── Refactoring, diff (--pr-summary), docs export
+├── LSP + CLI (semantic tokens, listSqlSchema)
 └── Plugin runtime (planned v0.14)
 
 Storage / integration
@@ -40,8 +40,22 @@ Storage / integration
 |-------|------|--------------|
 | **OntoCore** | Semantic truth, indexes, LSP methods, patch apply | VS Code APIs, React components |
 | **OntoUI** | Global UI state, workspaces, components, host abstraction | Ontology parsing, reasoning algorithms |
-| **OntoCode** | Extension activation, commands, tree views, webview lifecycle | Duplicate ontology logic in TypeScript |
+| **OntoCode** | Extension activation, commands, tree views, webview lifecycle, focus relay | Duplicate ontology logic in TypeScript |
 | **OntoStudio** | Native shell, windows, marketplace (planned) | Separate React component tree |
+
+## v0.13 shipped (OntoUI foundation)
+
+| Component | Location | Notes |
+|-----------|----------|-------|
+| `WorkspaceHost` | `extension/webview-ui/src/host/` | VS Code adapter via `HostContext` |
+| `WorkspaceStore` | `extension/webview-ui/src/store/` | Zustand; focus, query, reasoning, refactor slices |
+| Event bus | `extension/webview-ui/src/store/events.ts` | `FocusChanged`, `QueryExecuted`, … |
+| `WorkspaceRegistry` | `extension/webview-ui/src/workspaces/` | Panel → workspace routing |
+| Focus relay | `extension/src/focus/focusRelay.ts` | Cross-webview `focusState` / `reasoningState` |
+| Design tokens | `extension/webview-ui/src/tokens/` | `--oc-*` CSS variables |
+| Schema browser | `extension/webview-ui/src/components/SchemaBrowser.tsx` | LSP `ontocore/listSqlSchema` |
+
+**Deferred to v1.0:** persistent tabs, bottom dock, full component migration for every panel.
 
 ## Key documents
 

@@ -36,6 +36,20 @@ SELECT ?s ?p ?o WHERE { ?s ?p ?o } LIMIT 10
 
 More examples: [SPARQL reference](../sparql-reference.md) · [Query cookbook](../examples/queries.md).
 
+## Schema browser (v0.13)
+
+When the workspace is indexed, the Query Workbench shows a collapsible **Schema** sidebar (SQL mode only):
+
+1. Expand a table name to see columns and types.
+2. Click a **column** to insert its name into the query editor.
+3. Click **Insert table query** for `SELECT * FROM <table>`.
+
+Schema metadata comes from LSP `ontocore/listSqlSchema`, including Horned-OWL axiom tables (`domain_axioms`, `range_axioms`, `restrictions`, …). See [SQL reference](../sql-reference.md#horned-owl-axiom-projections-v013).
+
+## Cross-panel focus (v0.13)
+
+Selecting an entity in the explorer updates **Current Focus** across open React panels (Inspector, Graph) via the extension-host focus relay. You do not need to re-select the same entity in each panel.
+
 ## Results
 
 - Results appear in a table below the query editor.

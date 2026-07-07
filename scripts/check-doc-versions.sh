@@ -728,7 +728,7 @@ check_file_contains "mkdocs.yml" "v0\\.13\\+" "mkdocs platform planning tab labe
 check_file_contains "docs/guides/owl-xml-workflow.md" "read-only catalog" "owl-xml workflow guide"
 check_file_contains "docs/ontocore/rust-api.md" "Book ↔ docs.rs crosswalk" "rust-api docs.rs crosswalk"
 check_file_contains "docs/troubleshooting.md" "Where to start" "troubleshooting decision tree"
-check_file_contains "docs/platform/OVERVIEW.md" "Planned v0.13+" "platform overview planned banner"
+check_file_contains "docs/platform/OVERVIEW.md" "v0.13 foundation shipped" "platform overview shipped banner"
 
 # vision.md must not claim v0.11 is current shipped release
 for file in docs/vision.md VISION.md; do

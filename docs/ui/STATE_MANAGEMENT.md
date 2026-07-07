@@ -7,11 +7,11 @@
 
 The UI must behave as one coherent semantic workspace. This requires a formal state model.
 
-> **Implementation architecture:** [platform/WORKSPACE_RUNTIME.md](../platform/WORKSPACE_RUNTIME.md) · **Status:** WorkspaceStore and event bus are **planned v0.13** (not implemented in v0.12).
+> **Implementation architecture:** [platform/WORKSPACE_RUNTIME.md](../platform/WORKSPACE_RUNTIME.md) · **Status:** WorkspaceStore and event bus **shipped v0.13**
 
 ## 2. WorkspaceStore
 
-`WorkspaceStore` is the single source of truth for global OntoUI state (**planned v0.13**).
+`WorkspaceStore` is the single source of truth for global OntoUI state (**shipped v0.13**).
 
 ```ts
 interface WorkspaceStore {

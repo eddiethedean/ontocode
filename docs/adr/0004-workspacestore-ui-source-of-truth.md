@@ -2,11 +2,11 @@
 
 ## Status
 
-Accepted — **planned v0.13**
+Accepted — **implemented v0.13** (Zustand store in `extension/webview-ui/src/store/`)
 
 ## Context
 
-Per-panel React state causes duplicate LSP fetches and inconsistent entity context between inspector and graph. [ui/STATE_MANAGEMENT.md](../ui/STATE_MANAGEMENT.md) specifies a global store but it is not implemented.
+Per-panel React state causes duplicate LSP fetches and inconsistent entity context between inspector and graph. [ui/STATE_MANAGEMENT.md](../ui/STATE_MANAGEMENT.md) specifies a global store — **shipped in v0.13**.
 
 ## Decision
 

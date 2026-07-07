@@ -48,7 +48,18 @@ ontocore diff --left-ref ./baseline --right-ref ./candidate
 | `main` | `feature` | Branch compare (git range syntax) |
 | `WORKSPACE` | `WORKTREE` | Indexed catalog vs working tree (LSP default pattern) |
 
-Output formats: `text` (default), `json`, `markdown`. Use `--breaking-only` to filter to likely breaking changes.
+Output formats: `text` (default), `json`, `markdown`, `pr-summary` (v0.13+). Use `--breaking-only` to filter to likely breaking changes.
+
+### PR summary (v0.13+)
+
+Emit Markdown suitable for pull request descriptions:
+
+```bash
+ontocore diff main..feature --pr-summary
+ontocore diff --format pr-summary HEAD..WORKTREE
+```
+
+LSP: `ontocore/semanticDiff` with `"format": "pr-summary"` returns `{ "formatted": "..." }` in addition to structured `diff`.
 
 Optional `--reasoner` enriches the diff with unsatisfiability changes (requires resolvable workspace paths and reasoner inputs).
 
@@ -59,8 +70,8 @@ Full flags: [CLI reference](../cli-reference.md#diff) · [migration v0.10](../mi
 Fail or annotate PRs when breaking ontology changes appear:
 
 ```yaml
-- run: cargo install ontocore-cli --locked --version 0.12.0
-- run: ontocore diff --format markdown --breaking-only HEAD..WORKTREE
+- run: cargo install ontocore-cli --locked --version 0.13.0
+- run: ontocore diff --pr-summary main..HEAD
 ```
 
 See [CI integration](../ci-integration.md).

@@ -15,12 +15,12 @@ Applications
 ├── OntoStudio (planned)
 └── Future Web Client
 
-OntoUI (shared React platform — partial v0.12)
+OntoUI (shared React platform — v0.13 foundation shipped)
 ├── Component library · Design tokens
-├── Workspace runtime (WorkspaceStore — planned v0.13)
+├── Workspace runtime (WorkspaceStore, focus relay, event bus)
 └── WorkspaceHost adapter
 
-OntoCore (implemented v0.12)
+OntoCore (implemented v0.13)
 └── … see platform/OVERVIEW.md
 ```
 

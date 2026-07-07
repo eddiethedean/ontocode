@@ -8,7 +8,8 @@
 > |-----------|------|
 > | **This page** (`architecture.md`) | Product/ecosystem overview — Ontologos, OntoCore, OntoCode |
 > | [Implementation architecture](design/ARCHITECTURE.md) | Contributor crate layout and internal modules |
-> | [Product design / UI platform](ui/PLATFORM_ARCHITECTURE.md) | Shared React UI, OntoStudio target, design system |
+> | [Product design / UI platform](ui/PLATFORM_ARCHITECTURE.md) | Shared **OntoUI**, OntoStudio target, design system |
+| [Platform architecture (implementation)](platform/OVERVIEW.md) | OntoUI, WorkspaceStore, Capability Providers — **planned v0.13+** |
 > | [OntoCore architecture](ontocore/architecture.md) | Short OntoCore stack summary (links here for detail) |
 >
 > **Contributor crate layout:** [Implementation architecture](design/ARCHITECTURE.md) (internal modules only).

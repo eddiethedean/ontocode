@@ -15,10 +15,13 @@ Move OntoCode beyond a VS Code ontology extension into a first-class semantic en
 
 - **OntoCore**: Rust semantic workspace engine.
 - **OntoCode**: VS Code extension experience.
-- **OntoStudio**: Future standalone desktop application.
-- **Plugin Platform**: Extension ecosystem.
-- **AI Layer**: Context-aware semantic engineering assistant.
+- **OntoUI**: Shared React UI platform ([platform/ONTOUI.md](../platform/ONTOUI.md)) — partial in v0.12.
+- **OntoStudio**: Future standalone desktop application (**planned**).
+- **Plugin Platform**: Capability Provider ecosystem (**planned** v0.14).
+- **AI Layer**: Context-aware semantic engineering assistant (**proposed** v1.1+).
 - **Design System**: Shared UI/UX language.
+
+**Terminology:** [Glossary](../glossary.md) · **Architecture hub:** [platform/OVERVIEW.md](../platform/OVERVIEW.md)
 
 ## Documents
 

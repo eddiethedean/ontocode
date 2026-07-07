@@ -7,9 +7,12 @@ OntoCode and OntoCore publish several roadmap documents. **Use this page to pick
 | I want to… | Read this |
 |------------|-----------|
 | See **what ships today** | [What ships today](SHIPPED.md) — canonical capability matrix |
+| Learn **canonical terminology** | [Glossary](glossary.md) |
+| **Implement** OntoUI / workspaces (v0.13) | [Platform overview](platform/OVERVIEW.md) · [Cursor prompts](cursor-prompts/README.md) |
 | Understand **platform direction** (releases v0.13 → v1.2) | [Platform roadmap](roadmap.md) · [ROADMAP.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/ROADMAP.md) |
 | Map **UI design specs** to release phases | [UI roadmap mapping](ui/ROADMAP_MAPPING.md) — master checklist |
-| See **UI product vision** (OntoStudio, AI, plugins) | [Product Roadmap 2.0](ui/PRODUCT_ROADMAP_2.0.md) — design targets |
+| See **UI phases with milestones** | [Product Roadmap 2.0](ui/PRODUCT_ROADMAP_2.0.md) |
+| Read **product/platform ADRs** | [adr/README.md](adr/README.md) |
 | Review **shipped engineering milestones** (v0.1–v0.11 detail) | [Design milestones](design/ROADMAP.md) |
 | Track **v1.0 exit criteria** (contributor backlog) | [v1.0 backlog](design/v1.0_BACKLOG.md) — not a shipped feature list |
 

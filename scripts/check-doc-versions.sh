@@ -696,6 +696,17 @@ check_file_contains "mkdocs.yml" "guides/api-stability.md" "mkdocs api stability
 check_file_contains "mkdocs.yml" "guides/legacy-guide-urls.md" "mkdocs legacy redirects"
 check_file_contains "mkdocs.yml" "ontocode/obo-authoring.md" "mkdocs obo authoring"
 
+check_file_contains "docs/cursor-prompts/README.md" "Cursor implementation prompts" "cursor prompts index"
+check_file_contains "docs/platform/OVERVIEW.md" "Platform overview" "platform overview"
+check_file_contains "docs/platform/ONTOUI.md" "OntoUI" "platform OntoUI doc"
+check_file_contains "docs/adr/README.md" "Product & platform ADRs" "product adr index"
+check_file_contains "docs/glossary.md" "OntoUI" "glossary OntoUI term"
+check_file_contains "docs/documentation-index.md" "Documentation index" "docs documentation index"
+check_file_contains "mkdocs.yml" "platform/OVERVIEW.md" "mkdocs platform overview"
+check_file_contains "mkdocs.yml" "cursor-prompts/README.md" "mkdocs cursor prompts"
+check_file_contains "mkdocs.yml" "adr/README.md" "mkdocs product adr"
+check_file_contains "docs/ui/README.md" "OntoUI" "ui readme OntoUI term"
+
 if [[ "$fail" -ne 0 ]]; then
   echo "Documentation version check failed." >&2
   exit 1

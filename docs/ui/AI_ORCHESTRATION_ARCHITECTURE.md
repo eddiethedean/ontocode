@@ -7,6 +7,8 @@
 
 AI orchestration coordinates models, prompts, tools, context, permissions, previews, and semantic changes.
 
+> **Implementation architecture:** [platform/AI_ORCHESTRATION.md](../platform/AI_ORCHESTRATION.md) · **Status:** proposed v1.1+
+
 ## 2. Architecture
 
 ```text

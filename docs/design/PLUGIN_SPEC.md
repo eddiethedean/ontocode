@@ -2,7 +2,7 @@
 
 ## 1. Purpose
 
-The plugin system allows users and organizations to extend OntoCore and OntoCode **without modifying the core project**.
+The plugin system allows users and organizations to extend OntoCore and OntoCode **without modifying the core project**. Plugins expose **Capability Providers** — see [platform/CAPABILITY_PROVIDERS.md](../platform/CAPABILITY_PROVIDERS.md) and [adr/0005](../adr/0005-capability-provider-plugin-model.md).
 
 **OntoCore hosts plugins; plugins are not part of OntoCore.** Build, release, workflow orchestration, and toolchain-specific validation live in external plugins that integrate through stable OntoCore APIs. OntoCore provides the semantic workspace (index, query, diagnostics, refactoring, LSP); plugins add domain-specific automation on top.
 

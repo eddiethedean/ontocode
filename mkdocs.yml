@@ -170,6 +170,44 @@ nav:
       - Releasing: releasing.md
       - Marketplace publish: marketplace-publish.md
       - Internals (design targets): internals.md
+  - Platform planning:
+      - Documentation index: documentation-index.md
+      - Glossary: glossary.md
+      - Platform overview: platform/OVERVIEW.md
+      - OntoUI: platform/ONTOUI.md
+      - Workspace runtime: platform/WORKSPACE_RUNTIME.md
+      - Capability providers: platform/CAPABILITY_PROVIDERS.md
+      - AI orchestration: platform/AI_ORCHESTRATION.md
+      - Semantic refactoring: platform/SEMANTIC_REFACTORING.md
+      - Reasoning compiler: platform/REASONING_COMPILER.md
+      - Graph architecture: platform/GRAPH_ARCHITECTURE.md
+      - Query workbench architecture: platform/QUERY_WORKBENCH_ARCHITECTURE.md
+      - OntoStudio reuse: platform/ONTOSTUDIO_REUSE.md
+      - Milestone template: platform/MILESTONE_TEMPLATE.md
+      - Product ADRs:
+          - Index: adr/README.md
+          - "0001 OntoUI platform": adr/0001-ontoui-shared-react-platform.md
+          - "0002 Workspace model": adr/0002-workspace-over-panel-model.md
+          - "0003 Current Focus": adr/0003-current-focus-central-ux.md
+          - "0004 WorkspaceStore": adr/0004-workspacestore-ui-source-of-truth.md
+          - "0005 Capability providers": adr/0005-capability-provider-plugin-model.md
+          - "0006 AI preview before apply": adr/0006-ai-preview-before-apply.md
+          - "0007 OntoStudio reuse": adr/0007-ontostudio-shares-platform.md
+      - Cursor prompts:
+          - Index: cursor-prompts/README.md
+          - "01 OntoUI platform": cursor-prompts/01-build-ontoui-workspace-platform.md
+          - "02 WorkspaceStore": cursor-prompts/02-add-workspacestore.md
+          - "03 WorkspaceRegistry": cursor-prompts/03-add-workspaceregistry.md
+          - "04 Migrate panels": cursor-prompts/04-migrate-panels-to-workspaces.md
+          - "05 Current Focus": cursor-prompts/05-implement-current-focus.md
+          - "06 Entity workspace": cursor-prompts/06-improve-entity-workspace.md
+          - "07 Graph workspace": cursor-prompts/07-improve-graph-workspace.md
+          - "08 Query workbench": cursor-prompts/08-improve-query-workbench.md
+          - "09 AI lifecycle": cursor-prompts/09-add-ai-action-lifecycle.md
+          - "10 Capability providers": cursor-prompts/10-add-capability-provider-interfaces.md
+          - "11 Refactoring preview": cursor-prompts/11-semantic-refactoring-preview-workflow.md
+          - "12 Reasoning diagnostics": cursor-prompts/12-reasoning-diagnostics-workflow.md
+          - "13 Design tokens": cursor-prompts/13-design-tokens-component-library.md
   - Developer design:
       - Design overview: design/README.md
       - "Milestones (shipped)": design/ROADMAP.md

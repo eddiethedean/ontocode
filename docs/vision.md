@@ -15,6 +15,7 @@ Three foundational projects work together:
 - **Ontologos** — Rust-native reasoning engine.
 - **OntoCore** — Semantic workspace engine and reusable platform.
 - **OntoCode** — Flagship VS Code IDE powered by OntoCore.
+- **OntoUI** — Shared React UI platform ([platform/ONTOUI.md](platform/ONTOUI.md)) — partial in v0.12; **OntoStudio** reuses it (planned).
 
 Together they enable modern workflows including AI-assisted development, CI/CD, team collaboration on version-controlled ontology files, Python and TypeScript integration, and high-performance local tooling.
 

@@ -7,33 +7,9 @@
 
 ## Purpose
 
-Reasoning is one of the defining capabilities of ontology engineering.
-In OntoCode, reasoning should feel like compiling software in a modern
-IDE: fast, understandable, continuously available, and tightly
-integrated into the development workflow.
+Reasoning is one of the defining capabilities of ontology engineering. In OntoCode, reasoning should feel like compiling software in a modern IDE.
 
-Users should not "run a reasoner" as a separate task. They should
-experience reasoning as continuous semantic feedback.
-
-------------------------------------------------------------------------
-
-# Vision
-
-Treat semantic reasoning the way modern IDEs treat compilation.
-
-Reasoning should:
-
--   Validate ontology correctness
--   Surface semantic diagnostics
--   Explain inferences
--   Detect inconsistencies
--   Suggest repairs
--   Drive code actions
--   Continuously improve ontology quality
-
-------------------------------------------------------------------------
-
-# Design Principles
+> **Implementation architecture:** [platform/REASONING_COMPILER.md](../platform/REASONING_COMPILER.md) · **Partial:** reasoner panels shipped v0.9–v0.12
 
 ## Continuous Feedback
 

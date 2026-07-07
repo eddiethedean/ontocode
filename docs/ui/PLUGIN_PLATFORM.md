@@ -7,26 +7,11 @@
 
 ## Purpose
 
-The Plugin Platform transforms OntoCode from an application into an
-ecosystem. Every major capability of the IDE should either be
-implemented as a plugin or exposed through the same extension APIs
-available to third-party developers.
+The Plugin Platform transforms OntoCode into an ecosystem via **Capability Providers** — typed extension interfaces for reasoning, query, AI, refactoring, and more.
 
-The platform should resemble the extensibility of the JetBrains Platform
-while embracing the openness of VS Code and the performance of OntoCore.
+> **Architecture:** [platform/CAPABILITY_PROVIDERS.md](../platform/CAPABILITY_PROVIDERS.md) · **Engineering spec:** [design/PLUGIN_SPEC.md](../design/PLUGIN_SPEC.md) · **Status:** planned v0.14
 
-------------------------------------------------------------------------
-
-# Vision
-
-A plugin should feel indistinguishable from built-in functionality.
-
-Users should not need to know whether a feature was developed by the
-core team or a third party.
-
-------------------------------------------------------------------------
-
-# Platform Principles
+Every major capability should be implemented as a Capability Provider or exposed through the same APIs available to third-party developers.
 
 ## Everything Extensible
 

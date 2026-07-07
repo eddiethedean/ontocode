@@ -3,42 +3,25 @@
 > **Document type:** Product design specification (target state). **Not a shipped feature list.** See [ROADMAP_MAPPING.md](ROADMAP_MAPPING.md) for release mapping and [SHIPPED.md](../SHIPPED.md) for what works today.
 
 
+> **Implementation architecture:** [platform/OVERVIEW.md](../platform/OVERVIEW.md) · **Terms:** [Glossary](../glossary.md)
+
 ## 1. Overview
 
-The Ontologos platform is a layered architecture centered on OntoCore.
+The Ontologos platform is a layered architecture centered on OntoCore. See [platform/OVERVIEW.md](../platform/OVERVIEW.md) for the canonical implementation diagram.
 
 ```text
 Applications
-├── OntoCode VS Code Extension
-├── OntoStudio Desktop
+├── OntoCode (VS Code)
+├── OntoStudio (planned)
 └── Future Web Client
 
-Shared Frontend Platform
-├── React Component Library
-├── Design System
-├── Workspace Model
-├── Plugin UI Runtime
-└── AI Interaction Layer
+OntoUI (shared React platform — partial v0.12)
+├── Component library · Design tokens
+├── Workspace runtime (WorkspaceStore — planned v0.13)
+└── WorkspaceHost adapter
 
-Semantic Platform
-├── OntoCore Workspace Engine
-├── Parser Framework
-├── Query Engine
-├── Reasoning Engine
-├── Refactoring Engine
-├── Diagnostics Engine
-├── Documentation Engine
-├── Graph Engine
-├── Plugin Runtime
-└── AI Context Engine
-
-Storage / Integration
-├── File System
-├── Git
-├── Local Cache
-├── Workspace Database
-├── Plugin Storage
-└── Remote Services
+OntoCore (implemented v0.12)
+└── … see platform/OVERVIEW.md
 ```
 
 ## 2. OntoCore Responsibilities
@@ -83,28 +66,24 @@ OntoStudio is the dedicated desktop product.
 - Local AI integration.
 - Enterprise deployment support.
 
-## 5. Shared UI Platform
+## 5. OntoUI (shared React platform)
 
-The React UI must be application-host agnostic.
+**OntoUI** is host-agnostic React UI shared by OntoCode and future OntoStudio. **WorkspaceHost** adapters provide shell integration.
 
-Host adapters provide:
+> **Architecture:** [platform/ONTOUI.md](../platform/ONTOUI.md) · [adr/0001](../adr/0001-ontoui-shared-react-platform.md)
 
-- File operations.
-- Notifications.
-- Theme values.
-- Clipboard.
-- Command execution.
-- Plugin loading.
-- Native shell integrations.
+Host adapters provide: file operations, notifications, theme, clipboard, command execution, Capability Provider loading (planned), native shell integrations.
 
-## 6. Capability Interfaces
+## 6. Capability Providers
 
-All extensible systems use capability interfaces.
+Extensibility uses **Capability Provider** interfaces.
+
+> **Architecture:** [platform/CAPABILITY_PROVIDERS.md](../platform/CAPABILITY_PROVIDERS.md) · [adr/0005](../adr/0005-capability-provider-plugin-model.md)
 
 Examples:
 
 ```ts
-interface ReasonerProvider {}
+interface ReasoningProvider {}
 interface AIProvider {}
 interface QueryLanguageProvider {}
 interface RefactoringProvider {}
@@ -114,7 +93,7 @@ interface VisualizationProvider {}
 interface ImportExportProvider {}
 ```
 
-Plugins register capabilities. The platform orchestrates them.
+Capability Providers register with the platform; OntoCore hosts runtime (planned v0.14).
 
 ## 7. API Boundaries
 
@@ -163,4 +142,8 @@ No component directly calls raw transport APIs.
 
 ## 10. Success Criteria
 
-The platform succeeds when OntoCode, OntoStudio, plugins, AI tools, and automation systems all share the same semantic foundation without duplicating domain logic.
+The platform succeeds when OntoCode, OntoStudio, Capability Providers, AI tools, and automation systems share the same semantic foundation without duplicating domain logic.
+
+## Evolution
+
+Layer diagram and API boundaries consolidated into [platform/OVERVIEW.md](../platform/OVERVIEW.md). This page retains product-level responsibility split and UX context.

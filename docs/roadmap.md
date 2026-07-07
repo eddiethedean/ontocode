@@ -267,7 +267,7 @@ Sub-phases: **v0.7a** (React foundation) → **v0.7** (graphs + inspector) → *
 
 **Theme:** Stable APIs, editor polish, and team workflow features.
 
-**UI track:** [Product Roadmap 2.0](ui/PRODUCT_ROADMAP_2.0.md) phases **0–1** — WorkspaceStore, Current Focus model, design tokens, centralized webview bus. See [ROADMAP_MAPPING.md](ui/ROADMAP_MAPPING.md) (master checklist).
+**UI track:** [Product Roadmap 2.0](ui/PRODUCT_ROADMAP_2.0.md) **Phases 0–1** (OntoUI platform) — WorkspaceStore, Current Focus, design tokens, centralized webview bus. Milestone detail: [Phase 0](ui/PRODUCT_ROADMAP_2.0.md#phase-0) · [Phase 1](ui/PRODUCT_ROADMAP_2.0.md#phase-1). Checklist: [ROADMAP_MAPPING.md](ui/ROADMAP_MAPPING.md). Implementation: [cursor-prompts/README.md](cursor-prompts/README.md).
 
 | Area | Deliverables |
 |------|--------------|

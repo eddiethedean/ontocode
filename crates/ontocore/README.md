@@ -32,7 +32,7 @@ for row in &result.rows {
 | `reasoner` | OntoLogos classification facade |
 | `refactor` | Workspace refactoring |
 | `docs` | Markdown/HTML documentation export |
-| `lsp` | LSP protocol types (feature `lsp`, enabled by default) |
+| `lsp` | LSP protocol types (feature `lsp`, enabled by default in docs.rs via `all-features`) |
 
 ## Ecosystem
 
@@ -42,6 +42,19 @@ for row in &result.rows {
 | **OntoLogos** | Reasoning engine (classification, consistency, explanations) |
 | **OntoCode** | VS Code IDE powered by OntoCore |
 | **External plugins** (e.g. [owlmake](https://github.com/INCATools/owlmake)) | Workflow/build/release automation — integrate via OntoCore plugin APIs, not core dependencies |
+
+## Features
+
+| Feature | Description |
+|---------|-------------|
+| `lsp` | Re-export `ontocore_lsp::protocol` and `catalog_snapshot_json` |
+| `plugins` | Plugin manifest discovery via `ontocore::plugin` (v0.14 foundation) |
+
+Default features are **empty** — enable `lsp` when you need LSP wire types:
+
+```toml
+ontocore = { version = "0.13", features = ["lsp"] }
+```
 
 ## Binaries
 
@@ -54,4 +67,4 @@ for row in &result.rows {
 - [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) · [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md)
 - [docs/ontocore/](https://github.com/eddiethedean/ontocode/tree/main/docs/ontocore) in this repository
 
-**Current version: 0.12.0**
+**Current version: 0.13.0**

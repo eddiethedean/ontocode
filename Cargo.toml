@@ -16,6 +16,7 @@ members = [
     "crates/ontocore-docs",
     "crates/ontocore-cli",
     "crates/ontocore-lsp",
+    "crates/ontocore-plugin",
 ]
 default-members = ["crates/ontocore-cli"]
 
@@ -87,6 +88,7 @@ ontocore-robot = { path = "crates/ontocore-robot", version = "0.13.0" }
 ontocore-refactor = { path = "crates/ontocore-refactor", version = "0.13.0" }
 ontocore-diff = { path = "crates/ontocore-diff", version = "0.13.0" }
 ontocore-docs = { path = "crates/ontocore-docs", version = "0.13.0" }
+ontocore-plugin = { path = "crates/ontocore-plugin", version = "0.13.0" }
 
 git2 = { version = "0.20", features = ["vendored-openssl"] }
 

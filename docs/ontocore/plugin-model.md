@@ -1,6 +1,6 @@
 # OntoCore plugin model
 
-> **Status:** Design target for v1.0. Not shipped in v0.9.
+> **Status:** Design target for **v0.14** (plugin host MVP) and **v1.0** (stable API). **Not shipped in v0.13.**
 
 The plugin system allows users and organizations to extend **OntoCore** and **OntoCode** without modifying the core project. **Plugins integrate with OntoCore; they are not part of OntoCore.**
 
@@ -62,7 +62,7 @@ entry = "libowlmake_plugin.so"
 
 ## Timeline
 
-- **v0.16:** Plugin platform — extension points, reference **owlmake** integration path
+- **v0.14:** Plugin host MVP — manifest discovery, reference validator/exporter plugins, OntoUI inspector cards
 - **v1.0:** Stable plugin API + reference plugins; OntoCode surfaces workflow actions in IDE
 
 See [Platform roadmap](../roadmap.md) and [OBO & ROBOT interop](../design/OBO_ROBOT_SPEC.md).

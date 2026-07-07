@@ -1,4 +1,4 @@
-# OntoCore LSP API (v0.12)
+# OntoCore LSP API (v0.13)
 
 > **Status:** Documents behavior in **OntoCore v0.13.0**. Pre-1.0 APIs may change.
 > Canonical feature list: [What ships today](SHIPPED.md).
@@ -12,7 +12,7 @@ LSP JSON uses **snake_case** for enums serialized from Rust (`EntityKind`, `Pars
 **Source of truth:**
 
 - Types: [`protocol.rs` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/crates/ontocore-lsp/src/protocol.rs)
-- JSON Schema (v0.11): [`docs/lsp-protocol.schema.json`](lsp-protocol.schema.json) — query, patch, reasoner, refactor, graph, and semantic diff payloads.
+- JSON Schema (v0.13): [`docs/lsp-protocol.schema.json`](lsp-protocol.schema.json) — query, patch, reasoner, refactor, graph, semantic diff, schema browser, and PR summary payloads.
 - Handlers: [`handlers.rs` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/crates/ontocore-lsp/src/handlers.rs)
 - Extension client: [`client.ts` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/extension/src/lsp/client.ts)
 

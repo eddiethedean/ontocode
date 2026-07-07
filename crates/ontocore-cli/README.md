@@ -31,7 +31,7 @@ Semantic diff compares indexed catalogs (directories, version refs, or two `Work
 - [Getting started](https://ontocode-vs.readthedocs.io/en/latest/getting-started/)
 - [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/)
 
-**Current version: 0.12.0**
+**Current version: 0.13.0**
 
 ## License
 

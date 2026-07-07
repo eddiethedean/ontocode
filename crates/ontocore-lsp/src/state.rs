@@ -401,6 +401,9 @@ pub fn resolve_workspace_for_index(
 }
 
 /// Resolve a workspace folder URI for multi-root folder add/remove events.
+///
+/// When `existing_roots` is non-empty, the folder must lie under at least one root
+/// (same rule as document paths). Empty roots accept the first folder as initial root.
 pub fn resolve_workspace_folder_uri(
     uri: &str,
     existing_roots: &[PathBuf],
@@ -409,7 +412,7 @@ pub fn resolve_workspace_folder_uri(
     if existing_roots.is_empty() {
         return Ok(path);
     }
-    validate_workspace_scope_any(&path, existing_roots).or(Ok(path))
+    validate_workspace_scope_any(&path, existing_roots)
 }
 
 pub(crate) fn canonical_roots_match(a: &Path, b: &Path) -> bool {
@@ -480,5 +483,29 @@ mod tests {
     fn catalog_and_reasoner_unavailable_before_index() {
         let state = ServerState::new();
         assert!(state.with_catalog_and_reasoner(|_, _| ()).is_none());
+    }
+
+    #[test]
+    fn resolve_workspace_folder_uri_rejects_outside_existing_roots() {
+        let root_dir = tempfile::tempdir().unwrap();
+        let outside = tempfile::tempdir().unwrap();
+        let root = root_dir.path().canonicalize().unwrap();
+        let outside_uri =
+            url::Url::from_file_path(outside.path().canonicalize().unwrap()).unwrap().to_string();
+
+        assert!(resolve_workspace_folder_uri(&outside_uri, &[root]).is_err());
+    }
+
+    #[test]
+    fn resolve_workspace_folder_uri_accepts_subdirectory_of_root() {
+        let root_dir = tempfile::tempdir().unwrap();
+        let sub = root_dir.path().join("ontologies");
+        std::fs::create_dir_all(&sub).unwrap();
+        let root = root_dir.path().canonicalize().unwrap();
+        let sub_uri = url::Url::from_file_path(sub.canonicalize().unwrap()).unwrap().to_string();
+
+        let resolved =
+            resolve_workspace_folder_uri(&sub_uri, &[root]).expect("subfolder under root");
+        assert!(is_path_within(&root_dir.path().canonicalize().unwrap(), &resolved));
     }
 }

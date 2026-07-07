@@ -22,7 +22,12 @@ use crate::catalog::{
     GraphKind, GraphPayload, GraphRequest, IndexBuilder, OntologyCatalog,
 };
 use crate::diff::DiffResult;
+use crate::docs::{export_workspace, ExportError, ExportOptions};
 use crate::query::{query_catalog, sparql_catalog, QueryError, QueryResult, SparqlResult};
+use crate::reasoner::{
+    classify, explain, ClassificationResult, ExplanationRequest, ExplanationResult, ReasonerError,
+    ReasonerId, ReasonerInput, WorkspaceInputLoader,
+};
 use ontocore_core::Diagnostic;
 use std::path::{Path, PathBuf};
 
@@ -124,21 +129,14 @@ impl Workspace {
     }
 
     /// Import dependency graph for visualization and analysis.
-    pub fn import_graph(&self) -> GraphPayload {
-        GraphBuilder::new(&self.catalog)
-            .build(&GraphRequest {
-                graph_kind: GraphKind::Import.as_str().to_string(),
-                root_iri: None,
-                depth: 2,
-                include_inferred: false,
-                filters: GraphFilters::default(),
-            })
-            .unwrap_or(GraphPayload {
-                nodes: vec![],
-                edges: vec![],
-                truncated: false,
-                graph_kind: GraphKind::Import.as_str().to_string(),
-            })
+    pub fn import_graph(&self) -> Result<GraphPayload, String> {
+        GraphBuilder::new(&self.catalog).build(&GraphRequest {
+            graph_kind: GraphKind::Import.as_str().to_string(),
+            root_iri: None,
+            depth: 2,
+            include_inferred: false,
+            filters: GraphFilters::default(),
+        })
     }
 
     /// Lint and parse diagnostics collected during indexing.
@@ -159,6 +157,42 @@ impl Workspace {
     /// Semantic diff against another indexed workspace.
     pub fn diff(&self, other: &Workspace) -> DiffResult {
         crate::diff::diff_catalogs(self.catalog(), other.catalog())
+    }
+
+    /// Classify the workspace with an OntoLogos reasoner profile.
+    pub fn classify(&self, profile: ReasonerId) -> Result<ClassificationResult, ReasonerError> {
+        let input = self.reasoner_input()?;
+        classify(profile, &input, profile == ReasonerId::Auto)
+    }
+
+    /// Explain an unsatisfiable class (or related axiom) with the given profile.
+    pub fn explain(
+        &self,
+        profile: ReasonerId,
+        request: &ExplanationRequest,
+    ) -> Result<ExplanationResult, ReasonerError> {
+        let input = self.reasoner_input()?;
+        explain(profile, &input, request)
+    }
+
+    /// Export workspace documentation to Markdown or HTML.
+    pub fn export_docs(&self, options: ExportOptions) -> Result<(), ExportError> {
+        export_workspace(&self.catalog, options)
+    }
+
+    /// Build reasoner input from the indexed catalog and workspace roots.
+    pub fn reasoner_input(&self) -> Result<ReasonerInput, ReasonerError> {
+        WorkspaceInputLoader::new(self.options.root.clone())
+            .scan_roots(self.options.scan_roots.clone())
+            .load(self.class_hierarchy.clone())
+    }
+
+    /// Discover plugin manifests under `.ontocore/plugins/` (requires feature `plugins`).
+    #[cfg(feature = "plugins")]
+    pub fn discover_plugins(
+        &self,
+    ) -> Result<Vec<crate::plugin::DiscoveredPlugin>, crate::plugin::PluginDiscoveryError> {
+        crate::plugin::discover_plugins(self.root())
     }
 
     /// Index `other` on disk and diff against this workspace.
@@ -263,7 +297,7 @@ mod tests {
     #[test]
     fn workspace_import_graph_non_empty() {
         let ws = Workspace::open(fixtures_path()).expect("open fixtures");
-        let graph = ws.import_graph();
+        let graph = ws.import_graph().expect("import graph");
         assert!(!graph.nodes.is_empty());
     }
 }

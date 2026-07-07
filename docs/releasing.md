@@ -70,7 +70,7 @@ Requires the `CARGO_REGISTRY_TOKEN` repository secret. For Open VSX (Cursor), se
 
 ## Published crates (dependency order)
 
-`ontocore-core` → `ontocore-parser` → `ontocore-owl` → `ontocore-obo` → `ontocore-diagnostics` → `ontocore-catalog` → `ontocore-diff` → `ontocore-docs` → `ontocore-refactor` → `ontocore-query` → `ontocore-reasoner` → `ontocore-robot` → `ontocore-lsp` → `ontocore` → `ontocore-cli`
+`ontocore-core` → `ontocore-parser` → `ontocore-owl` → `ontocore-obo` → `ontocore-diagnostics` → `ontocore-catalog` → `ontocore-diff` → `ontocore-docs` → `ontocore-refactor` → `ontocore-query` → `ontocore-reasoner` → `ontocore-robot` → `ontocore-lsp` → `ontocore-plugin` → `ontocore` → `ontocore-cli`
 
 ## VS Code Marketplace and Open VSX
 

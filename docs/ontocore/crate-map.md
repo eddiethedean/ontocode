@@ -11,6 +11,7 @@ OntoCore is currently implemented by the `ontocore-*` crates. The [`ontocore`](h
 ```toml
 [dependencies]
 ontocore = "0.13"
+# Optional: ontocore = { version = "0.13", features = ["lsp", "plugins"] }
 ```
 
 ```rust
@@ -35,6 +36,7 @@ use ontocore::catalog::IndexBuilder;  // lower-level
 | `ontocore-docs` | Markdown/HTML documentation export |
 | `ontocore-robot` | ROBOT CLI wrappers |
 | `ontocore-lsp` | Language server binary + protocol types |
+| `ontocore-plugin` | Plugin manifest discovery (v0.14 host foundation) |
 | `ontocore-cli` | `ontocore` binary |
 
 `ontocore-robot` is not re-exported by `ontocore` — use `ontocore-robot` or the CLI directly for ROBOT interop.
@@ -54,7 +56,8 @@ use ontocore::catalog::IndexBuilder;  // lower-level
 | `refactor` | `ontocore-refactor` |
 | `diff` | `ontocore-diff` |
 | `docs` | `ontocore-docs` |
-| `lsp` | `ontocore-lsp` (feature `lsp`, default on) |
+| `lsp` | `ontocore-lsp` (feature `lsp`, opt-in) |
+| `plugin` | `ontocore-plugin` (feature `plugins`, opt-in) |
 
 ## Examples
 

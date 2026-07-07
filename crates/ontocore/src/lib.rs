@@ -20,5 +20,8 @@ pub mod workspace;
 #[cfg(feature = "lsp")]
 pub mod lsp;
 
+#[cfg(feature = "plugins")]
+pub mod plugin;
+
 pub use ontocore_core::{Diagnostic, Entity, OntoCoreError};
 pub use workspace::{Workspace, WorkspaceOptions};

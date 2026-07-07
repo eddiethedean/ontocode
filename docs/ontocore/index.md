@@ -52,7 +52,7 @@ let ws = Workspace::open("./ontology")?;
 let diagnostics = ws.diagnostics();
 let results = ws.query("SELECT short_name FROM classes")?;
 let hits = ws.search("Person")?;
-let graph = ws.import_graph();
+let graph = ws.import_graph()?;
 let diff = ws.diff_against_path("./other")?;
 ```
 

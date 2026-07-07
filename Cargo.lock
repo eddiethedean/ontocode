@@ -1081,6 +1081,7 @@ dependencies = [
  "ontocore-obo",
  "ontocore-owl",
  "ontocore-parser",
+ "ontocore-plugin",
  "ontocore-query",
  "ontocore-reasoner",
  "ontocore-refactor",
@@ -1233,6 +1234,16 @@ dependencies = [
  "serde",
  "tempfile",
  "thiserror 2.0.18",
+]
+
+[[package]]
+name = "ontocore-plugin"
+version = "0.13.0"
+dependencies = [
+ "serde",
+ "tempfile",
+ "thiserror 2.0.18",
+ "toml",
 ]
 
 [[package]]

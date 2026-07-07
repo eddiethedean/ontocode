@@ -139,17 +139,19 @@ Every item from [PRODUCT_ROADMAP_2.0.md](PRODUCT_ROADMAP_2.0.md), with release a
 
 ### v0.13 — UI phases 0–1 + partial 3/5/9
 
-| Deliverable | UI phase |
-|-------------|----------|
-| Extension UX audit + flow fixes | 0 |
-| WorkspaceStore + Current Focus | 0, 1 |
-| Centralized webview bus + event bus | 0, 1 |
-| Design tokens + component library | 0 |
-| Explorer ↔ inspector sync | 1 |
-| Semantic navigation history | 1 |
-| Query schema browser | 3 |
-| Semantic PR summary (OntoCore) | 9 |
-| Accessibility + webview tests | supporting |
+| Deliverable | UI phase | Priority |
+|-------------|----------|----------|
+| Extension UX audit + flow fixes | 0 | P1 |
+| WorkspaceStore + Current Focus | 0, 1 | **P0** |
+| Centralized webview bus + event bus | 0, 1 | **P0** |
+| Design tokens + component library (Inspector + Query Workbench) | 0 | **P0** |
+| Explorer ↔ inspector ↔ graph focus relay | 1 | **P0** |
+| Semantic navigation history | 1 | P0 (stub) |
+| Refactor + reasoning store slices | 5, 6 | P0 / P1 |
+| Query schema browser | 3 | P1 |
+| Horned-OWL axiom virtual tables | 3 | P1 |
+| Semantic PR summary (`ontocore diff --pr-summary`) | 9 | P1 |
+| Accessibility + webview tests | supporting | P1 |
 
 Full list: [roadmap.md § v0.13](../roadmap.md)
 

@@ -4,6 +4,38 @@ Common problems and fixes for OntoCode (VS Code) and OntoCore (CLI/LSP).
 
 For quick answers, see also [FAQ](faq.md).
 
+## Where to start (symptom → guide)
+
+| Symptom | Likely cause | Read first |
+|---------|--------------|------------|
+| Explorer empty or stale | Not indexed, wrong folder, unsupported format | [Explorer empty](#vs-code-explorer-empty-or-stale) |
+| Language server failed to start | Untrusted workspace, bad `lspPath`, duplicate extension | [LSP failed](#vs-code-language-server-failed-to-start) |
+| Cannot edit in inspector | Wrong format (`.owl`/`.owx`/JSON-LD read-only), wrong file | [Cannot edit](#vs-code-cannot-edit-in-inspector) |
+| Patch / Manchester did not stick | Buffer vs disk conflict, stale index | [Patch did not stick](#vs-code-patch-or-manchester-apply-did-not-stick) |
+| `fixtures/` path fails in CLI | Using clone-only paths after `cargo install` | [CLI fixtures](#cli-ontocore-query-fixtures-fails) |
+| `validate` exits non-zero | Diagnostic errors in ontology | [Validate exit](#cli-validate-exits-non-zero) |
+| Query returns no rows | Stale index, wrong table/column names | [Query empty](#queries-return-no-rows-or-wrong-data) |
+| Reasoner errors or empty hierarchy | Profile mismatch, OntoLogos, unsat classes | [Reasoner](#reasoner) |
+| Cannot edit `.obo` | Pre-v0.12 extension or term not in `.obo` file | [Graphs, OBO, ROBOT](#graphs-obo-robot-and-semantic-diff) |
+| Semantic diff / graph missing | No git repo, not indexed | [Graphs, OBO, ROBOT](#graphs-obo-robot-and-semantic-diff) |
+| OWL/XML visible but not editable | Read-only by design (v0.12+) | [OWL/XML workflow](guides/owl-xml-workflow.md) |
+
+```mermaid
+flowchart TD
+  start[Something went wrong]
+  start --> vscode{VS Code or CLI?}
+  vscode -->|VS Code| empty{Explorer empty?}
+  vscode -->|CLI| cliFix[Use absolute ontology path not fixtures/]
+  empty -->|Yes| indexWs[Index Workspace + check Output panel]
+  empty -->|No| edit{Cannot edit?}
+  edit -->|Yes| formatCheck{Turtle or OBO file?}
+  formatCheck -->|No| owlXml[Read OWL/XML/RDF/XML guide]
+  formatCheck -->|Yes| trust[Trust workspace + re-index]
+  edit -->|No| reasoner{Reasoner issue?}
+  reasoner -->|Yes| reasonerGuide[Reasoner guide + lighter profile]
+  reasoner -->|No| faq[FAQ + errors reference]
+```
+
 ## VS Code: explorer empty or stale
 
 1. Run **OntoCode: Index Workspace** from the Command Palette.

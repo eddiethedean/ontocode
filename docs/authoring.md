@@ -3,7 +3,7 @@
 > **Status:** Documents behavior in **OntoCore v0.12.0**. Pre-1.0 APIs may change.
 > Canonical feature list: [What ships today](SHIPPED.md).
 
-OntoCode provides **Turtle write-back** for simple and **Manchester** ontology edits without Protégé.
+OntoCode provides **Turtle and OBO write-back** for simple edits and **Manchester** for complex class expressions — without Protégé.
 
 ## Supported operations
 
@@ -35,11 +35,19 @@ Full JSON reference: [patch-reference.md](patch-reference.md).
 
 ## VS Code workflow (simple edits)
 
+### Turtle (`.ttl`)
+
 1. Open a `.ttl` ontology and select an entity in the OntoCode explorer.
 2. Use the **Entity Inspector** edit section: add labels, comments, parents, or delete.
 3. Use context menu **Create Class/Property/Individual** on explorer views.
 4. Changes apply via `ontocore/applyAxiomPatch` and trigger a workspace reindex.
 5. VS Code undo works on saved file changes.
+
+### OBO (`.obo`)
+
+1. Open a `.obo` file and select a term in the OntoCode explorer.
+2. Edit name, definition, synonyms, `is_a`, and related fields in the Entity Inspector.
+3. Preview and apply — see [OBO authoring](ontocode/obo-authoring.md).
 
 ## Manchester editor
 

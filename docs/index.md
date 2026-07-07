@@ -19,6 +19,8 @@ OntoCode is a modern ontology IDE for VS Code, powered by <strong>OntoCore</stro
 [Install the extension](vscode-install.md){ .md-button }
 [Install CLI](getting-started.md){ .md-button }
 [What ships today](SHIPPED.md){ .md-button }
+[Documentation map](documentation-index.md){ .md-button }
+[Glossary](glossary.md){ .md-button }
 [Vision](vision.md){ .md-button }
 </div>
 
@@ -36,6 +38,8 @@ OntoCode is a modern ontology IDE for VS Code, powered by <strong>OntoCore</stro
 - **[CLI / Rust](ontocore/index.md)** — `ontocore` CLI, crates, CI and embedding.
 
 You do **not** need to clone this repo to use the extension or `cargo install ontocore-cli`.
+
+**Building or evaluating the doc set?** Start with the [Documentation index](documentation-index.md) and [Glossary](glossary.md).
 
 > **Names in 30 seconds:** **OntoCode** = VS Code extension. **OntoCore** = Rust engine (CLI + language server). **Ontologos** = external reasoner. Elsewhere, “extension”, “CLI”, and “language server” are enough.
 

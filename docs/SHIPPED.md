@@ -94,7 +94,7 @@
 | `ontocore docs` + `ontocore-docs` crate | Yes |
 | Import patch ops + Manage Imports UI | Yes |
 | OBO indexed via `fastobo` (read path) | Yes |
-| OBO write-back | Documented (ADR-0019); Turtle-only in editor |
+| OBO write-back | v0.11 read-only in editor; **shipped v0.12** — [OBO authoring](ontocode/obo-authoring.md) |
 
 ## New in v0.10.0
 
@@ -152,6 +152,7 @@ Forward milestones (v0.13 platform hardening → v1.0 Protégé replacement): **
 | CLI & CI | [Getting started](getting-started.md) · [CI integration](ci-integration.md) |
 | Graph visualization | [Graph view](ontocode/graph-view.md) |
 | OBO workflows | [OBO workflow guide](guides/obo-workflow.md) |
+| OWL/XML & RDF/XML (read-only) | [OWL/XML workflow](guides/owl-xml-workflow.md) |
 | ROBOT interop | [ROBOT interop guide](guides/robot-interop.md) |
 | LSP integrators | [LSP API](lsp-api.md) · [Webview protocol](webview-protocol.md) |
 | Enterprise evaluation | [Enterprise evaluation](guides/enterprise-eval.md) |

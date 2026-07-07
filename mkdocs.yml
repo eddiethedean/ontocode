@@ -77,6 +77,8 @@ markdown_extensions:
 nav:
   - Home: index.md
   - Get started:
+      - Documentation index: documentation-index.md
+      - Glossary: glossary.md
       - "First success (~10 min core path)": guides/first-success.md
       - Which artifact do I need?: guides/which-artifact.md
       - What's new in v0.12: migration/v0.12.md
@@ -101,6 +103,7 @@ nav:
       - Semantic diff: ontocode/semantic-diff.md
       - Reasoner: guides/reasoner.md
       - OBO workflows: guides/obo-workflow.md
+      - OWL/XML and RDF/XML (read-only): guides/owl-xml-workflow.md
       - Protégé coexistence: guides/protege-coexistence.md
       - Best practices: guides/best-practices.md
   - Use OntoCore:
@@ -170,7 +173,68 @@ nav:
       - Releasing: releasing.md
       - Marketplace publish: marketplace-publish.md
       - Internals (design targets): internals.md
-  - Platform planning:
+      - Engineering specs:
+          - Design overview: design/README.md
+          - "Milestones (shipped)": design/ROADMAP.md
+          - "Implementation architecture": design/ARCHITECTURE.md
+          - Protégé parity: design/PROTEGE_PARITY.md
+          - Dependency matrix: design/DEPENDENCY_MATRIX.md
+          - Licenses: design/LICENSES.md
+          - Plugin model (v1.0 target): ontocore/plugin-model.md
+          - Product design (UI):
+              - UI spec index: ui/README.md
+              - UI roadmap mapping: ui/ROADMAP_MAPPING.md
+              - Product Roadmap 2.0: ui/PRODUCT_ROADMAP_2.0.md
+              - Product design spec: ui/PRODUCT_DESIGN_SPECIFICATION.md
+              - Platform architecture (UI): ui/PLATFORM_ARCHITECTURE.md
+              - Design philosophy: ui/DESIGN_PHILOSOPHY.md
+              - Visual design system: ui/VISUAL_DESIGN_SYSTEM.md
+              - Human interface guidelines: ui/HUMAN_INTERFACE_GUIDELINES.md
+              - Interaction principles: ui/INTERACTION_PRINCIPLES.md
+              - Information architecture: ui/INFORMATION_ARCHITECTURE.md
+              - Workspace model: ui/WORKSPACE_MODEL.md
+              - State management: ui/STATE_MANAGEMENT.md
+              - UX patterns: ui/UX_PATTERNS.md
+              - Component library: ui/COMPONENT_LIBRARY.md
+              - Component interfaces: ui/COMPONENT_INTERFACES.md
+              - Design tokens: ui/DESIGN_TOKENS.md
+              - Workspace wireframes: ui/WORKSPACE_WIREFRAMES.md
+              - Entity editor: ui/ENTITY_EDITOR_SPEC.md
+              - Query workbench UX: ui/QUERY_WORKBENCH.md
+              - Graph workspace: ui/GRAPH_WORKSPACE.md
+              - Graph rendering: ui/GRAPH_RENDERING_ARCHITECTURE.md
+              - Reasoning experience: ui/REASONING_EXPERIENCE.md
+              - Semantic refactoring UX: ui/SEMANTIC_REFACTORING.md
+              - Collaboration: ui/COLLABORATION.md
+              - AI experience: ui/AI_EXPERIENCE.md
+              - AI orchestration: ui/AI_ORCHESTRATION_ARCHITECTURE.md
+              - Plugin platform UX: ui/PLUGIN_PLATFORM.md
+              - Plugin API spec: ui/PLUGIN_API_SPEC.md
+              - OntoStudio desktop: ui/ONTOSTUDIO_DESKTOP.md
+              - Event sequences: ui/EVENT_SEQUENCE_DIAGRAMS.md
+              - Keyboard shortcuts: ui/KEYBOARD_SHORTCUTS.md
+              - Accessibility: ui/ACCESSIBILITY_SPEC.md
+              - Testing strategy: ui/TESTING_STRATEGY.md
+              - Telemetry: ui/TELEMETRY_ANALYTICS.md
+          - Specs (planned features):
+              - Product plan: design/PLAN.md
+              - Technical spec: design/SPEC.md
+              - LSP (target): design/LSP_SPEC.md
+              - OWL authoring: design/OWL_AUTHORING_SPEC.md
+              - Reasoner: design/REASONER_SPEC.md
+              - Semantic diff: design/SEMANTIC_DIFF_SPEC.md
+              - SHACL: design/SHACL_SPEC.md
+              - OBO / ROBOT: design/OBO_ROBOT_SPEC.md
+              - Plugins: design/PLUGIN_SPEC.md
+              - UI wireframes: design/UI_WIREFRAMES.md
+              - React UI plan: design/OntoCode_React_UI_Integration_Plan.md
+          - Backlogs:
+              - v1.0 backlog: design/v1.0_BACKLOG.md
+              - MVP backlog: design/MVP_BACKLOG.md
+          - ADRs:
+              - Index (all ADRs): design/adr/README.md
+  - "Platform planning (v0.13+)":
+      - What ships today (not planned): SHIPPED.md
       - Documentation index: documentation-index.md
       - Glossary: glossary.md
       - Platform overview: platform/OVERVIEW.md
@@ -208,66 +272,6 @@ nav:
           - "11 Refactoring preview": cursor-prompts/11-semantic-refactoring-preview-workflow.md
           - "12 Reasoning diagnostics": cursor-prompts/12-reasoning-diagnostics-workflow.md
           - "13 Design tokens": cursor-prompts/13-design-tokens-component-library.md
-  - Developer design:
-      - Design overview: design/README.md
-      - "Milestones (shipped)": design/ROADMAP.md
-      - "Implementation architecture": design/ARCHITECTURE.md
-      - Protégé parity: design/PROTEGE_PARITY.md
-      - Dependency matrix: design/DEPENDENCY_MATRIX.md
-      - Licenses: design/LICENSES.md
-      - Plugin model (v1.0 target): ontocore/plugin-model.md
-      - Product design (UI):
-          - UI spec index: ui/README.md
-          - UI roadmap mapping: ui/ROADMAP_MAPPING.md
-          - Product Roadmap 2.0: ui/PRODUCT_ROADMAP_2.0.md
-          - Product design spec: ui/PRODUCT_DESIGN_SPECIFICATION.md
-          - Platform architecture (UI): ui/PLATFORM_ARCHITECTURE.md
-          - Design philosophy: ui/DESIGN_PHILOSOPHY.md
-          - Visual design system: ui/VISUAL_DESIGN_SYSTEM.md
-          - Human interface guidelines: ui/HUMAN_INTERFACE_GUIDELINES.md
-          - Interaction principles: ui/INTERACTION_PRINCIPLES.md
-          - Information architecture: ui/INFORMATION_ARCHITECTURE.md
-          - Workspace model: ui/WORKSPACE_MODEL.md
-          - State management: ui/STATE_MANAGEMENT.md
-          - UX patterns: ui/UX_PATTERNS.md
-          - Component library: ui/COMPONENT_LIBRARY.md
-          - Component interfaces: ui/COMPONENT_INTERFACES.md
-          - Design tokens: ui/DESIGN_TOKENS.md
-          - Workspace wireframes: ui/WORKSPACE_WIREFRAMES.md
-          - Entity editor: ui/ENTITY_EDITOR_SPEC.md
-          - Query workbench UX: ui/QUERY_WORKBENCH.md
-          - Graph workspace: ui/GRAPH_WORKSPACE.md
-          - Graph rendering: ui/GRAPH_RENDERING_ARCHITECTURE.md
-          - Reasoning experience: ui/REASONING_EXPERIENCE.md
-          - Semantic refactoring UX: ui/SEMANTIC_REFACTORING.md
-          - Collaboration: ui/COLLABORATION.md
-          - AI experience: ui/AI_EXPERIENCE.md
-          - AI orchestration: ui/AI_ORCHESTRATION_ARCHITECTURE.md
-          - Plugin platform UX: ui/PLUGIN_PLATFORM.md
-          - Plugin API spec: ui/PLUGIN_API_SPEC.md
-          - OntoStudio desktop: ui/ONTOSTUDIO_DESKTOP.md
-          - Event sequences: ui/EVENT_SEQUENCE_DIAGRAMS.md
-          - Keyboard shortcuts: ui/KEYBOARD_SHORTCUTS.md
-          - Accessibility: ui/ACCESSIBILITY_SPEC.md
-          - Testing strategy: ui/TESTING_STRATEGY.md
-          - Telemetry: ui/TELEMETRY_ANALYTICS.md
-      - Specs (planned features):
-          - Product plan: design/PLAN.md
-          - Technical spec: design/SPEC.md
-          - LSP (target): design/LSP_SPEC.md
-          - OWL authoring: design/OWL_AUTHORING_SPEC.md
-          - Reasoner: design/REASONER_SPEC.md
-          - Semantic diff: design/SEMANTIC_DIFF_SPEC.md
-          - SHACL: design/SHACL_SPEC.md
-          - OBO / ROBOT: design/OBO_ROBOT_SPEC.md
-          - Plugins: design/PLUGIN_SPEC.md
-          - UI wireframes: design/UI_WIREFRAMES.md
-          - React UI plan: design/OntoCode_React_UI_Integration_Plan.md
-      - Backlogs:
-          - v1.0 backlog: design/v1.0_BACKLOG.md
-          - MVP backlog: design/MVP_BACKLOG.md
-      - ADRs:
-          - Index (all ADRs): design/adr/README.md
 
 extra:
   social:

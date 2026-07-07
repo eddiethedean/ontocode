@@ -1,5 +1,7 @@
 # Platform overview
 
+> **Planned v0.13+ — not shipped today.** For what you can install and use now, read [What ships today](../SHIPPED.md) first.
+>
 > **Status:** Architecture target for v0.13+ · **Shipped today:** [SHIPPED.md](../SHIPPED.md) · **Terms:** [Glossary](../glossary.md)
 
 ## Scope

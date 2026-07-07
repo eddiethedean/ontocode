@@ -1,6 +1,6 @@
 # Modernizing the Ontology Ecosystem
 
-> **Long-term vision.** For what ships in **v0.11**, see [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/). Plugin hosting and owlmake integration are **v1.0 targets** — not installable yet.
+> **Long-term vision.** For what ships in **v0.12**, see [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/). Plugin hosting and owlmake integration are **v1.0 targets** — not installable yet.
 
 ## Mission
 

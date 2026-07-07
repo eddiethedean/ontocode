@@ -39,6 +39,24 @@ Generated API documentation is published on [docs.rs](https://docs.rs/ontocore):
 
 Search all crates: [crates.io search?q=ontocore](https://crates.io/search?q=ontocore).
 
+## Book ↔ docs.rs crosswalk
+
+Use **this book** for workflows, limits, and LSP JSON; use **docs.rs** for Rust type signatures and module layout.
+
+| You need… | Start in the book | Rust API (docs.rs) |
+|-----------|-------------------|---------------------|
+| Open and query a workspace | [Rust library guide](../guides/rust-library.md), [Workspace engine](workspace-engine.md) | [`Workspace`](https://docs.rs/ontocore/latest/ontocore/struct.Workspace.html), [`WorkspaceOptions`](https://docs.rs/ontocore/latest/ontocore/struct.WorkspaceOptions.html) |
+| SQL virtual tables | [SQL reference](../sql-reference.md), [SQL views](sql-views.md) | [`ontocore::query`](https://docs.rs/ontocore/latest/ontocore/query/index.html) |
+| SPARQL | [SPARQL reference](../sparql-reference.md) | [`Workspace::sparql`](https://docs.rs/ontocore/latest/ontocore/struct.Workspace.html#method.sparql) |
+| Turtle patch apply | [Patch JSON](../patch-reference.md), [Authoring](../authoring.md) | [`ontocore::owl`](https://docs.rs/ontocore/latest/ontocore/owl/index.html) |
+| OBO patch apply | [OBO authoring](../ontocode/obo-authoring.md) | [`ontocore::obo`](https://docs.rs/ontocore-obo/latest/ontocore_obo/index.html) |
+| Semantic diff | [Semantic diff](../ontocode/semantic-diff.md) | [`ontocore-diff`](https://docs.rs/ontocore-diff/latest/ontocore_diff/index.html) |
+| Refactoring | [Refactoring guide](../guides/refactoring.md) | [`ontocore-refactor`](https://docs.rs/ontocore-refactor/latest/ontocore_refactor/index.html) |
+| Docs export | [Docs export](../guides/docs-export.md) | [`ontocore::docs`](https://docs.rs/ontocore/latest/ontocore/docs/index.html) |
+| LSP integration | [LSP API](../lsp-api.md), [LSP overview](lsp.md) | [`ontocore-lsp`](https://docs.rs/ontocore-lsp/latest/ontocore_lsp/index.html) |
+| Error codes / exit behavior | [Errors reference](../errors.md) | Crate `thiserror` types per module |
+| Resource limits | [Workspace limits](../workspace-limits.md) | Index builder options in `ontocore-catalog` |
+
 ## Recommended entry point: `Workspace`
 
 ```rust

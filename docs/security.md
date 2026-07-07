@@ -42,6 +42,19 @@ The canonical policy (supported versions, scope, hardening table) is maintained 
 | CI validation | Use `ontocore validate` to gate merges — [ci-integration.md](ci-integration.md) |
 | Dependency audit | `cargo audit` runs in project CI (config: [`.cargo/audit.toml`](https://github.com/eddiethedean/ontocode/blob/main/.cargo/audit.toml)) |
 
+## Documented `cargo audit` exceptions
+
+CI runs `cargo audit` on every pull request. Some **transitive** advisories are documented in [`.cargo/audit.toml`](https://github.com/eddiethedean/ontocode/blob/main/.cargo/audit.toml) when they cannot be upgraded without breaking semver pins across the RDF/OWL stack:
+
+| Advisory | Crate (transitive) | Why ignored | Review |
+|----------|-------------------|-------------|--------|
+| RUSTSEC-2026-0194 | `quick-xml` | DoS in unused XML paths via horned-owl / oxigraph | 2026-10-01 |
+| RUSTSEC-2026-0195 | `quick-xml` | Same dependency graph | 2026-10-01 |
+
+**Not ignored:** advisories on direct dependencies are fixed in-tree (for example `crossbeam-epoch` bumps). Enterprise questionnaires: cite this section and [release integrity](release-integrity.md).
+
+`git2` (semantic diff) links `libgit2` — see [LGPL / licenses](guides/lgpl-compliance.md) and [DEPENDENCY_MATRIX](design/DEPENDENCY_MATRIX.md) for linkage notes.
+
 ## Enterprise evaluation
 
 Procurement-oriented summary: [enterprise evaluation guide](guides/enterprise-eval.md) · [production readiness](guides/production-readiness.md) · [LGPL compliance](guides/lgpl-compliance.md)

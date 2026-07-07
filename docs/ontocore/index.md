@@ -71,7 +71,7 @@ Lower-level access remains available through `ontocore-*` crates. See [crate map
 
 ## Compatibility (v0.10+)
 
-All crates, binaries, and LSP methods use **`ontocore`** naming. Upgrading from v0.8? See [migration guide](../migration/v0.9.md). Upgrading from v0.10? See [v0.11 migration](../migration/v0.11.md).
+All crates, binaries, and LSP methods use **`ontocore`** naming. Upgrading from **v0.11.x**? See [v0.12 migration](../migration/v0.12.md). From v0.10? See [v0.11 migration](../migration/v0.11.md). From v0.8? See [v0.9 migration](../migration/v0.9.md).
 
 | Surface | Name |
 |---------|------|

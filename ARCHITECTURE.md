@@ -19,7 +19,7 @@
 > Canonical capability matrix: [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/).
 
 ```
-External Workflow Plugins (v1.0 target)  ← not shipped in v0.11
+External Workflow Plugins (v1.0 target)  ← not shipped in v0.12
 ├── owlmake (reference design)
 ├── ROBOT / ODK workflow adapters
 └── Future build, validation, doc plugins

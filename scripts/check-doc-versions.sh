@@ -47,7 +47,7 @@ check_file_contains "mkdocs.yml" "site_url: https://ontocode-vs.readthedocs.io/"
 check_file_contains "README.md" "readthedocs.org/projects/ontocode-vs/badge" "RTD docs badge slug"
 
 # Reference page titles must match current release
-for file in docs/authoring.md docs/sql-reference.md docs/sparql-reference.md docs/patch-reference.md docs/cli-reference.md; do
+for file in docs/authoring.md docs/sql-reference.md docs/sparql-reference.md docs/patch-reference.md docs/cli-reference.md docs/errors.md; do
   if grep -qE "^# .+ \(OntoCore v0\.5\)" "$file"; then
     echo "FAIL: stale v0.5 title in $file" >&2
     fail=1
@@ -523,7 +523,7 @@ for pair in "VISION.md:docs/vision.md:Build the modern open-source platform" \
   fi
 done
 
-check_file_contains "docs/roadmap.md" "Shipped \\(v0.1–v0.9\\)" "docs roadmap shipped section"
+check_file_contains "docs/roadmap.md" "Shipped releases \\(v0.1–v0.12\\)" "docs roadmap shipped section"
 check_file_contains "ROADMAP.md" "v1.2 — Ontology Toolchain Platform" "roadmap v1.2 toolchain milestone"
 check_file_contains "docs/roadmap.md" "v1.2 — Ontology Toolchain Platform" "docs roadmap v1.2 milestone"
 check_file_contains "ROADMAP.md" "owlmake" "roadmap owlmake integration"
@@ -706,6 +706,27 @@ check_file_contains "mkdocs.yml" "platform/OVERVIEW.md" "mkdocs platform overvie
 check_file_contains "mkdocs.yml" "cursor-prompts/README.md" "mkdocs cursor prompts"
 check_file_contains "mkdocs.yml" "adr/README.md" "mkdocs product adr"
 check_file_contains "docs/ui/README.md" "OntoUI" "ui readme OntoUI term"
+
+check_file_contains "mkdocs.yml" "guides/owl-xml-workflow.md" "mkdocs owl-xml workflow guide"
+check_file_contains "mkdocs.yml" "v0\\.13\\+" "mkdocs platform planning tab label"
+check_file_contains "docs/guides/owl-xml-workflow.md" "read-only catalog" "owl-xml workflow guide"
+check_file_contains "docs/ontocore/rust-api.md" "Book ↔ docs.rs crosswalk" "rust-api docs.rs crosswalk"
+check_file_contains "docs/troubleshooting.md" "Where to start" "troubleshooting decision tree"
+check_file_contains "docs/platform/OVERVIEW.md" "Planned v0.13+" "platform overview planned banner"
+
+# vision.md must not claim v0.11 is current shipped release
+for file in docs/vision.md VISION.md; do
+  if grep -qE 'what ships in \*\*v0\.11\*\*|ships in \*\*v0\.11\*\*' "$file" 2>/dev/null; then
+    echo "FAIL: $file still says what ships in v0.11" >&2
+    fail=1
+  fi
+done
+if [[ "$fail" -eq 0 ]]; then
+  echo "ok: vision docs reference v0.12 not v0.11"
+fi
+
+# errors.md must reference current release
+check_file_contains "docs/errors.md" "v${VERSION}" "errors reference version"
 
 if [[ "$fail" -ne 0 ]]; then
   echo "Documentation version check failed." >&2

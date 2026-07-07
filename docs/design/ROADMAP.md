@@ -1,5 +1,7 @@
 # Engineering milestones (v0.1–v0.11 shipped detail)
 
+> **v0.12 shipped summary:** See [What ships today](../SHIPPED.md) and [Platform roadmap](../roadmap.md). This file is **per-crate engineering detail through v0.11**; forward phases (v0.12+) are in the platform roadmap.
+
 > **Per-crate engineering detail for shipped milestones.** Canonical full release phase plan (v0.1–post-1.2): [Platform roadmap](../roadmap.md). Ecosystem overview: [Architecture](../architecture.md) · [Vision](../vision.md).
 
 > v1.0 exit bar: [PROTEGE_PARITY.md](PROTEGE_PARITY.md) — all **P0** items green.

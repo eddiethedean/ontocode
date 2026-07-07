@@ -4,9 +4,24 @@ Thank you for contributing. This repository contains:
 
 - **OntoCore** — Rust semantic workspace engine under `crates/` (`ontocore` façade, `ontocore-*` implementation, `ontocore` CLI, `ontocore-lsp`)
 - **OntoCode** — VS Code extension under `extension/`
-- **Platform docs** — [VISION.md](VISION.md), [ARCHITECTURE.md](ARCHITECTURE.md), [ROADMAP.md](ROADMAP.md) (mirrored under `docs/` for Read the Docs)
-- **Specs** — product and architecture docs under `docs/design/` ([DEPENDENCY_MATRIX.md](docs/design/DEPENDENCY_MATRIX.md) for external crates)
 - **User guides** — install, SQL, and LSP API under `docs/`
+
+### Canonical documentation paths
+
+| Topic | GitHub (root) | Read the Docs (`docs/`) |
+|-------|---------------|-------------------------|
+| Vision | [VISION.md](VISION.md) | [docs/vision.md](docs/vision.md) |
+| Architecture | [ARCHITECTURE.md](ARCHITECTURE.md) | [docs/architecture.md](docs/architecture.md) |
+| Platform roadmap | [ROADMAP.md](ROADMAP.md) | [docs/roadmap.md](docs/roadmap.md) |
+| Engineering specs | — | [docs/design/](docs/design/README.md) |
+| Platform planning (v0.13+) | — | [docs/platform/](docs/platform/OVERVIEW.md) |
+| Product ADRs | — | [docs/adr/](docs/adr/README.md) |
+| Engineering ADRs | — | [docs/design/adr/](docs/design/adr/README.md) |
+| Documentation map | — | [docs/documentation-index.md](docs/documentation-index.md) |
+
+Root `VISION.md`, `ARCHITECTURE.md`, and `ROADMAP.md` are mirrored under `docs/` for Read the Docs. **Edit both** when changing platform-facing content, or run `./scripts/check-doc-versions.sh` to catch drift.
+
+- **Specs** — product and architecture docs under `docs/design/` ([DEPENDENCY_MATRIX.md](docs/design/DEPENDENCY_MATRIX.md) for external crates)
 
 The root Cargo package `ontocode` is unpublished and hosts workspace integration tests (`tests/`).
 

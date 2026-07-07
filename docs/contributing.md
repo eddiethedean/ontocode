@@ -4,9 +4,24 @@ Thank you for contributing. This repository contains:
 
 - **OntoCore** — Rust semantic workspace engine under `crates/` (`ontocore` façade, `ontocore-*` implementation, `ontocore` CLI, `ontocore-lsp`)
 - **OntoCode** — VS Code extension under `extension/`
-- **Platform docs** — [VISION.md](https://github.com/eddiethedean/ontocode/blob/main/VISION.md), [ARCHITECTURE.md](https://github.com/eddiethedean/ontocode/blob/main/ARCHITECTURE.md), [ROADMAP.md](https://github.com/eddiethedean/ontocode/blob/main/ROADMAP.md) (mirrored as [vision.md](vision.md), [architecture.md](architecture.md), [roadmap.md](roadmap.md))
-- **Specs** — product and architecture docs under `docs/design/` ([DEPENDENCY_MATRIX.md](design/DEPENDENCY_MATRIX.md) for external crates)
 - **User guides** — install, SQL, and LSP API under `docs/`
+
+### Canonical documentation paths
+
+| Topic | GitHub (root) | Read the Docs (`docs/`) |
+|-------|---------------|-------------------------|
+| Vision | [VISION.md](https://github.com/eddiethedean/ontocode/blob/main/VISION.md) | [vision.md](vision.md) |
+| Architecture | [ARCHITECTURE.md](https://github.com/eddiethedean/ontocode/blob/main/ARCHITECTURE.md) | [architecture.md](architecture.md) |
+| Platform roadmap | [ROADMAP.md](https://github.com/eddiethedean/ontocode/blob/main/ROADMAP.md) | [roadmap.md](roadmap.md) |
+| Engineering specs | — | [design/README.md](design/README.md) |
+| Platform planning (v0.13+) | — | [platform/OVERVIEW.md](platform/OVERVIEW.md) |
+| Product ADRs | — | [adr/README.md](adr/README.md) |
+| Engineering ADRs | — | [design/adr/README.md](design/adr/README.md) |
+| Documentation map | — | [documentation-index.md](documentation-index.md) |
+
+Root `VISION.md`, `ARCHITECTURE.md`, and `ROADMAP.md` are mirrored under `docs/` for Read the Docs. **Edit both** when changing platform-facing content, or run `./scripts/check-doc-versions.sh` to catch drift.
+
+- **Specs** — product and architecture docs under `docs/design/` ([DEPENDENCY_MATRIX.md](design/DEPENDENCY_MATRIX.md) for external crates)
 
 The root Cargo package `ontocode` is unpublished and hosts workspace integration tests (`tests/`).
 

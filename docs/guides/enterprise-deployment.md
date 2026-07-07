@@ -18,7 +18,7 @@ Ontology content stays **on disk** — no cloud upload by default ([security pol
 ### Option A — Marketplace or Open VSX (internet-connected)
 
 1. Allowlist extension publisher **`ontocode`** and extension **`ontocode.ontocode`**
-2. **Cursor / Open VSX clients:** allowlist [open-vsx.org/extension/ontocode/ontocode](https://open-vsx.org/extension/ontocode/ontocode) (v0.11+)
+2. **Cursor / Open VSX clients:** allowlist [open-vsx.org/extension/ontocode/ontocode](https://open-vsx.org/extension/ontocode/ontocode) (v0.11.0+)
 3. Pin minimum VS Code **1.85+** ([vscode-install](../vscode-install.md))
 4. Document **Trust workspace** requirement (Restricted Mode blocks custom LSP path)
 5. Communicate **multi-root** behavior — all folders are indexed since v0.10 ([FAQ](../faq.md))

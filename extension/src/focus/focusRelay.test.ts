@@ -45,4 +45,33 @@ describe("focusRelay", () => {
     assert.equal(host.messages.length, 1);
     assert.deepEqual((host.messages[0] as { type: string }).type, "focusState");
   });
+
+  it("broadcasts reasoningState to registered hosts", () => {
+    const host = mockHost();
+    focusRelay.registerHost(host);
+    focusRelay.setReasoningState({
+      unsatisfiable: ["http://example.org#Bad"],
+      profile: "el",
+      hierarchyMode: "inferred",
+      lastRunAt: 1,
+    });
+    assert.ok(
+      host.messages.some(
+        (m) =>
+          typeof m === "object" &&
+          m !== null &&
+          (m as { type?: string }).type === "reasoningState"
+      )
+    );
+  });
+
+  it("delivers focus updates to multiple hosts", () => {
+    const hostA = mockHost();
+    const hostB = mockHost();
+    focusRelay.registerHost(hostA);
+    focusRelay.registerHost(hostB);
+    focusRelay.setEntityFocus("http://example.org/test#Multi", "graph");
+    assert.equal(hostA.messages.length, 1);
+    assert.equal(hostB.messages.length, 1);
+  });
 });

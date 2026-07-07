@@ -68,4 +68,54 @@ describe("workspaceStore", () => {
     expect(useWorkspaceStore.getState().focus).toBeNull();
     expect(useWorkspaceStore.getState().query).toEqual(initialWorkspaceState.query);
   });
+
+  it("hydrateFocus updates slices without navigation push", () => {
+    const store = useWorkspaceStore.getState();
+    store.setFocus({ kind: "entity", id: "A", source: "panel" });
+    const stackLen = useWorkspaceStore.getState().navigation.stack.length;
+    store.hydrateFocus({
+      kind: "entity",
+      id: "http://example.org#Relayed",
+      source: "explorer",
+      timestamp: 99,
+    });
+    expect(useWorkspaceStore.getState().focus?.id).toBe("http://example.org#Relayed");
+    expect(useWorkspaceStore.getState().inspector.entityIri).toBe("http://example.org#Relayed");
+    expect(useWorkspaceStore.getState().navigation.stack.length).toBe(stackLen);
+  });
+
+  it("setQueryResult emits QueryExecuted", () => {
+    const languages: string[] = [];
+    subscribeWorkspaceEvents((e) => {
+      if (e.type === "QueryExecuted") {
+        languages.push(e.language);
+      }
+    });
+    useWorkspaceStore.getState().setQueryResult({
+      columns: ["a"],
+      rows: [{ a: "1" }],
+      truncated: false,
+    });
+    expect(languages).toEqual(["sql"]);
+  });
+
+  it("reasoning and refactor slices update and emit events", () => {
+    const events: string[] = [];
+    subscribeWorkspaceEvents((e) => events.push(e.type));
+    const store = useWorkspaceStore.getState();
+    store.setReasoningResult(["http://ex#Bad"], "el");
+    store.setHierarchyMode("inferred");
+    store.setPendingRefactor({
+      planId: "p1",
+      title: "Rename",
+      changes: [],
+    } as never);
+    const after = useWorkspaceStore.getState();
+    expect(after.reasoning.unsatisfiable).toEqual(["http://ex#Bad"]);
+    expect(after.reasoning.hierarchyMode).toBe("inferred");
+    expect(events).toContain("ReasoningCompleted");
+    expect(events).toContain("RefactorPreviewReady");
+    store.setPendingRefactor(null);
+    expect(events).toContain("RefactorCleared");
+  });
 });

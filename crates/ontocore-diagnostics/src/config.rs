@@ -72,4 +72,32 @@ severity = "error"
             Some(DiagnosticSeverity::Error)
         );
     }
+
+    #[test]
+    fn find_config_loads_from_workspace_dot_ontocore() {
+        let dir = tempfile::tempdir().unwrap();
+        std::fs::create_dir_all(dir.path().join(".ontocore")).unwrap();
+        std::fs::write(
+            dir.path().join(".ontocore/diagnostics.toml"),
+            "[rules.orphan_class]\nenabled = false\n",
+        )
+        .unwrap();
+        let cfg = find_config(dir.path()).expect("config");
+        assert!(!cfg.is_rule_enabled(DiagnosticCode::OrphanClass));
+    }
+
+    #[test]
+    fn hint_severity_maps_to_info() {
+        let cfg: DiagnosticConfig = toml::from_str(
+            r#"
+[rules.duplicate_label]
+severity = "hint"
+"#,
+        )
+        .unwrap();
+        assert_eq!(
+            cfg.severity_override(DiagnosticCode::DuplicateLabel),
+            Some(DiagnosticSeverity::Info)
+        );
+    }
 }

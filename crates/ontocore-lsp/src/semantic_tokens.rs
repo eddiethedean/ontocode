@@ -221,5 +221,45 @@ mod tests {
         assert!(!tokens.is_empty());
         assert!(tokens.iter().any(|t| t.token_type == TOKEN_COMMENT));
         assert!(tokens.iter().any(|t| t.token_type == TOKEN_NAMESPACE));
+        assert!(tokens.iter().any(|t| t.token_type == TOKEN_KEYWORD));
+    }
+
+    #[test]
+    fn turtle_tokens_mark_iris_in_angle_brackets() {
+        let text = "@prefix ex: <http://example.org/> .\nex:A a <http://example.org/B> .";
+        let tokens = tokenize_turtle(text);
+        assert!(tokens.iter().any(|t| t.token_type == TOKEN_IRI));
+    }
+
+    #[test]
+    fn obo_tokens_mark_comments_and_tags() {
+        let text = "format-version: 1.2\n! comment\nid: GO:0000001\nname: root\n";
+        let tokens = tokenize_obo(text);
+        assert!(tokens.iter().any(|t| t.token_type == TOKEN_COMMENT));
+        assert!(tokens.iter().any(|t| t.token_type == TOKEN_KEYWORD));
+    }
+
+    #[test]
+    fn handle_semantic_tokens_full_requires_document_text() {
+        use lsp_types::{SemanticTokensParams, TextDocumentIdentifier, Uri};
+        use std::str::FromStr;
+
+        let params = SemanticTokensParams {
+            text_document: TextDocumentIdentifier {
+                uri: Uri::from_str("file:///example.ttl").unwrap(),
+            },
+            work_done_progress_params: Default::default(),
+            partial_result_params: Default::default(),
+        };
+        assert!(handle_semantic_tokens_full(params, None).is_none());
+        let params = SemanticTokensParams {
+            text_document: TextDocumentIdentifier {
+                uri: Uri::from_str("file:///example.ttl").unwrap(),
+            },
+            work_done_progress_params: Default::default(),
+            partial_result_params: Default::default(),
+        };
+        let result = handle_semantic_tokens_full(params, Some("@prefix ex: <http://ex#> .".into()));
+        assert!(result.is_some());
     }
 }

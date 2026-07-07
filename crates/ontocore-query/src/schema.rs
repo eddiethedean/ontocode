@@ -152,7 +152,24 @@ mod tests {
     #[test]
     fn includes_axiom_tables() {
         let names: Vec<_> = list_sql_tables().into_iter().map(|t| t.name).collect();
-        assert!(names.contains(&"restrictions".to_string()));
-        assert!(names.contains(&"equivalent_class_axioms".to_string()));
+        for table in [
+            "restrictions",
+            "equivalent_class_axioms",
+            "disjoint_class_axioms",
+            "domain_axioms",
+            "range_axioms",
+        ] {
+            assert!(names.contains(&table.to_string()), "missing table {table}");
+        }
+    }
+
+    #[test]
+    fn restrictions_table_has_expected_columns() {
+        let table = list_sql_tables()
+            .into_iter()
+            .find(|t| t.name == "restrictions")
+            .expect("restrictions table");
+        let cols: Vec<_> = table.columns.iter().map(|c| c.name.as_str()).collect();
+        assert_eq!(cols, vec!["class_iri", "property_iri", "restriction_kind", "filler"]);
     }
 }

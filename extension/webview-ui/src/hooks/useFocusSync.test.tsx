@@ -33,4 +33,40 @@ describe("FocusSyncBootstrap", () => {
 
     expect(useWorkspaceStore.getState().focus?.id).toBe(iri);
   });
+
+  it("hydrates reasoning state from host message", () => {
+    resetWorkspaceStoreForTests();
+    const listeners: Array<(data: unknown) => void> = [];
+    const host = {
+      postToCore: () => {},
+      getTheme: () => "dark" as const,
+      showNotification: () => {},
+      onMessage: (handler: (data: unknown) => void) => {
+        listeners.push(handler);
+        return () => {};
+      },
+    };
+
+    render(
+      <HostProvider host={host}>
+        <FocusSyncBootstrap />
+      </HostProvider>
+    );
+
+    listeners.forEach((fn) =>
+      fn({
+        type: "reasoningState",
+        reasoning: {
+          unsatisfiable: ["http://example.org#Bad"],
+          profile: "el",
+          hierarchyMode: "inferred",
+        },
+      })
+    );
+
+    const state = useWorkspaceStore.getState();
+    expect(state.reasoning.unsatisfiable).toEqual(["http://example.org#Bad"]);
+    expect(state.reasoning.profile).toBe("el");
+    expect(state.reasoning.hierarchyMode).toBe("inferred");
+  });
 });

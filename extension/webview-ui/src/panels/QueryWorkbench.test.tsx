@@ -253,4 +253,29 @@ describe("QueryWorkbenchPanel", () => {
     postHostMessage(null as never);
     expect(screen.getByRole("heading", { name: "Query Workbench" })).toBeInTheDocument();
   });
+
+  it("schema browser inserts column into editor", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<QueryWorkbenchPanel />);
+    postHostMessage({
+      type: "queryInit",
+      saved: [],
+      history: [],
+      sqlSchema: [
+        {
+          name: "domain_axioms",
+          columns: [
+            { name: "property_iri", type: "string" },
+            { name: "domain", type: "string" },
+          ],
+        },
+      ],
+    });
+
+    await user.click(await screen.findByRole("button", { name: "Table domain_axioms" }));
+    await user.click(screen.getByRole("button", { name: "Insert column property_iri" }));
+
+    const textarea = screen.getByRole("textbox");
+    expect((textarea as HTMLTextAreaElement).value).toContain("property_iri");
+  });
 });

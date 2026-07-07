@@ -3,7 +3,7 @@
 use minijinja::{context, AutoEscape, Environment};
 use ontocore_catalog::OntologyCatalog;
 use ontocore_core::{document_matches_entity, document_matches_ontology_id, EntityKind};
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::fs;
 use std::path::PathBuf;
 
@@ -167,10 +167,12 @@ pub fn render_class_hierarchy(
     catalog: &OntologyCatalog,
     hierarchy: &ontocore_catalog::ClassHierarchy,
 ) -> String {
-    let mut roots: Vec<&str> = hierarchy
-        .parents
-        .keys()
-        .map(|s| s.as_str())
+    let mut nodes: BTreeSet<&str> = BTreeSet::new();
+    for iri in hierarchy.parents.keys().chain(hierarchy.children.keys()) {
+        nodes.insert(iri.as_str());
+    }
+    let mut roots: Vec<&str> = nodes
+        .into_iter()
         .filter(|iri| hierarchy.parents.get(*iri).map(|p| p.is_empty()).unwrap_or(true))
         .collect();
     roots.sort();
@@ -372,6 +374,35 @@ mod tests {
             index.contains(&format!("{entity_count} entities")),
             "index should report exported entity count for example.ttl"
         );
+    }
+
+    #[test]
+    fn markdown_index_includes_hierarchy_and_property_sections() {
+        let fixtures = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../fixtures");
+        let catalog = IndexBuilder::new().workspace(&fixtures).build().expect("index");
+        let dir = tempfile::tempdir().unwrap();
+        export_workspace(&catalog, ExportOptions::markdown(dir.path())).expect("export");
+        let index = fs::read_to_string(dir.path().join("index.md")).expect("index.md");
+        assert!(index.contains("## Class hierarchy"), "index should include hierarchy");
+        assert!(index.contains("## Property index"), "index should include properties");
+    }
+
+    #[test]
+    fn render_class_hierarchy_lists_fixture_classes() {
+        let fixtures = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../fixtures");
+        let catalog = IndexBuilder::new().workspace(&fixtures).build().expect("index");
+        let hierarchy = catalog.class_hierarchy();
+        let md = render_class_hierarchy(&catalog, &hierarchy);
+        assert!(md.contains("Person") || md.contains("people#Person"));
+    }
+
+    #[test]
+    fn render_property_index_lists_object_properties() {
+        let fixtures = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../fixtures");
+        let catalog = IndexBuilder::new().workspace(&fixtures).build().expect("index");
+        let md = render_property_index(&catalog);
+        assert!(md.contains("Object properties"));
+        assert!(md.contains("worksFor") || md.contains("works for"));
     }
 
     #[test]

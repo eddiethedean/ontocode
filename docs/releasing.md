@@ -94,6 +94,42 @@ The documentation site is built with [MkDocs](https://www.mkdocs.org/) and hoste
 1. Read the Docs project slug: **`ontocode-vs`** (this sets the `*.readthedocs.io` subdomain; it cannot be renamed after import — the display name can be “OntoCode” in RTD settings).
 2. RTD reads [`.readthedocs.yaml` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/.readthedocs.yaml) and installs [docs/requirements.txt](requirements.txt).
 3. `mkdocs.yml` `site_url` must match the live subdomain (`https://ontocode-vs.readthedocs.io/`).
-4. Pushes to `main` rebuild the `latest` version; tags can publish versioned docs.
+4. Pushes to `main` rebuild the `latest` version.
+
+### Versioning model
+
+| RTD version | Git ref | Audience |
+|-------------|---------|----------|
+| `latest` | `main` | In-development docs |
+| `stable` | Latest semver tag (auto) | Default for current release users |
+| `v0.13.0` | Tag `v0.13.0` | Frozen docs for that release |
+| `release-v0.13.0` | Branch `release/v0.13.0` | Release stabilization before tagging |
+
+RTD slugifies branch names by replacing `/` with `-` (`release/v0.13.0` → `release-v0.13.0`).
+
+### Automated activation (GitHub Actions)
+
+The [readthedocs workflow](https://github.com/eddiethedean/ontocode/blob/main/.github/workflows/readthedocs.yml) activates and builds a matching RTD version when you push:
+
+- a **release branch** (`release/v*`), or
+- a **semver tag** (`v*.*.*`).
+
+**One-time setup:** add repository secret `READTHEDOCS_API_TOKEN` ([RTD account token](https://app.readthedocs.org/account/tokens/)) with access to project `ontocode-vs`.
+
+To activate an existing release branch immediately (e.g. after adding the secret):
+
+1. **Actions → Read the Docs → Run workflow**, or
+2. Locally: `READTHEDOCS_API_TOKEN=… ./scripts/readthedocs-activate-version.sh release/v0.13.0`
+
+### RTD dashboard automation rules (recommended backup)
+
+Automation rules are not configurable in `.readthedocs.yaml`; add these once under **Admin → Automation rules** so new refs activate even if the GitHub Action is unavailable:
+
+| Description | Match | Type | Action |
+|-------------|-------|------|--------|
+| Activate release branches | Custom: `^release/v\d+\.\d+\.\d+$` | Branch | Activate version |
+| Activate semver tags | SemVer versions | Tag | Activate version |
+
+RTD rules apply only to **new** refs created after the rule is saved. Use the GitHub Action or `readthedocs-activate-version.sh` for branches that already exist (e.g. `release/v0.13.0`).
 
 Local preview: `pip install -r docs/requirements.txt && mkdocs serve`.

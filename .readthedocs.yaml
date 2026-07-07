@@ -1,5 +1,8 @@
 # Read the Docs configuration
 # https://docs.readthedocs.io/en/stable/config-file/v2.html
+#
+# Versioning: main → latest; release/v* branches and v* tags are activated by
+# .github/workflows/readthedocs.yml (see docs/releasing.md).
 
 version: 2
 

@@ -1,0 +1,39 @@
+# OntoCode Product Design Specification
+
+This specification pack defines the product, UX, technical architecture, design system, state model, plugin platform, AI experience, and implementation roadmap for OntoCode and the broader Ontologos semantic engineering platform.
+
+> **Integrated with repo plans:** [ROADMAP_MAPPING.md](ROADMAP_MAPPING.md) — **master checklist** for every Product Roadmap 2.0 item mapped to releases. For **what ships today**, see [SHIPPED.md](../SHIPPED.md).
+
+## Primary Goal
+
+Move OntoCode beyond a VS Code ontology extension into a first-class semantic engineering IDE and platform.
+
+## Product Stack
+
+- **OntoCore**: Rust semantic workspace engine.
+- **OntoCode**: VS Code extension experience.
+- **OntoStudio**: Future standalone desktop application.
+- **Plugin Platform**: Extension ecosystem.
+- **AI Layer**: Context-aware semantic engineering assistant.
+- **Design System**: Shared UI/UX language.
+
+## Documents
+
+1. `PRODUCT_DESIGN_SPECIFICATION.md`
+2. `PLATFORM_ARCHITECTURE.md`
+3. `STATE_MANAGEMENT.md`
+4. `DESIGN_TOKENS.md`
+5. `UX_PATTERNS.md`
+6. `WORKSPACE_WIREFRAMES.md`
+7. `COMPONENT_INTERFACES.md`
+8. `EVENT_SEQUENCE_DIAGRAMS.md`
+9. `PLUGIN_API_SPEC.md`
+10. `AI_ORCHESTRATION_ARCHITECTURE.md`
+11. `GRAPH_RENDERING_ARCHITECTURE.md`
+12. `ACCESSIBILITY_SPEC.md`
+13. `KEYBOARD_SHORTCUTS.md`
+14. `TESTING_STRATEGY.md`
+15. `TELEMETRY_ANALYTICS.md`
+16. `PRODUCT_ROADMAP_2.0.md`
+17. `ROADMAP_MAPPING.md` — **UI phases ↔ repo releases**
+18. `DESIGN_TOKENS.json`

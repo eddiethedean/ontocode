@@ -1,0 +1,67 @@
+{
+  "space": {
+    "0": "0px",
+    "1": "4px",
+    "2": "8px",
+    "3": "12px",
+    "4": "16px",
+    "5": "24px",
+    "6": "32px",
+    "7": "48px",
+    "8": "64px"
+  },
+  "radius": {
+    "sm": "4px",
+    "md": "8px",
+    "lg": "12px",
+    "pill": "999px"
+  },
+  "font": {
+    "display": {
+      "size": "28px",
+      "weight": 700
+    },
+    "title": {
+      "size": "20px",
+      "weight": 650
+    },
+    "heading": {
+      "size": "16px",
+      "weight": 650
+    },
+    "body": {
+      "size": "13px",
+      "weight": 400
+    },
+    "caption": {
+      "size": "12px",
+      "weight": 400
+    },
+    "code": {
+      "size": "13px",
+      "weight": 400
+    }
+  },
+  "motion": {
+    "fast": "150ms",
+    "normal": "200ms",
+    "slow": "250ms"
+  },
+  "color": {
+    "status": {
+      "success": "semantic-success",
+      "warning": "semantic-warning",
+      "error": "semantic-error",
+      "info": "semantic-info"
+    },
+    "entity": {
+      "class": "entity-class",
+      "property": "entity-property",
+      "individual": "entity-individual",
+      "annotation": "entity-annotation",
+      "query": "entity-query",
+      "ai": "entity-ai",
+      "reasoning": "entity-reasoning"
+    }
+  }
+}

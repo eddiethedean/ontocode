@@ -179,6 +179,27 @@ nav:
       - Dependency matrix: design/DEPENDENCY_MATRIX.md
       - Licenses: design/LICENSES.md
       - Plugin model (v1.0 target): ontocore/plugin-model.md
+      - Product design (UI):
+          - UI spec index: ui/README.md
+          - UI roadmap mapping: ui/ROADMAP_MAPPING.md
+          - Product Roadmap 2.0: ui/PRODUCT_ROADMAP_2.0.md
+          - Product design spec: ui/PRODUCT_DESIGN_SPECIFICATION.md
+          - Design philosophy: ui/DESIGN_PHILOSOPHY.md
+          - Information architecture: ui/INFORMATION_ARCHITECTURE.md
+          - State management: ui/STATE_MANAGEMENT.md
+          - Component library: ui/COMPONENT_LIBRARY.md
+          - Design tokens: ui/DESIGN_TOKENS.md
+          - Workspace wireframes: ui/WORKSPACE_WIREFRAMES.md
+          - Entity editor: ui/ENTITY_EDITOR_SPEC.md
+          - Query workbench UX: ui/QUERY_WORKBENCH.md
+          - Graph workspace: ui/GRAPH_WORKSPACE.md
+          - Reasoning experience: ui/REASONING_EXPERIENCE.md
+          - Semantic refactoring UX: ui/SEMANTIC_REFACTORING.md
+          - AI experience: ui/AI_EXPERIENCE.md
+          - Plugin platform UX: ui/PLUGIN_PLATFORM.md
+          - OntoStudio desktop: ui/ONTOSTUDIO_DESKTOP.md
+          - Accessibility: ui/ACCESSIBILITY_SPEC.md
+          - Testing strategy: ui/TESTING_STRATEGY.md
       - Specs (planned features):
           - Product plan: design/PLAN.md
           - Technical spec: design/SPEC.md

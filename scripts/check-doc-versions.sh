@@ -594,6 +594,8 @@ else
   echo "ok: start-here multi-root placement"
 fi
 
+check_file_contains "docs/ui/ROADMAP_MAPPING.md" "Master checklist" "ui roadmap master checklist"
+check_file_contains "mkdocs.yml" "ui/ROADMAP_MAPPING.md" "mkdocs ui roadmap mapping"
 check_file_contains "mkdocs.yml" "guides/which-artifact.md" "mkdocs which-artifact guide"
 check_file_contains "docs/guides/which-artifact.md" "Which artifact do I need" "which-artifact guide title"
 

@@ -8,6 +8,7 @@
 |-------|-------|----------|
 | **Platform** | [vision.md](../vision.md), [architecture.md](../architecture.md), [roadmap.md](../roadmap.md) | Everyone — mission, ecosystem, forward plan |
 | **Shipped** | [SHIPPED.md](../SHIPPED.md), guides, reference | Users evaluating current capabilities |
+| **Product design (UI)** | [ui/](../ui/) — [ROADMAP_MAPPING.md](../ui/ROADMAP_MAPPING.md) | Designers, frontend contributors — UX specs mapped to releases |
 | **Engineering** | `docs/design/` (this folder) | Contributors — specs, ADRs, v0.1–v0.11 milestones |
 
 For **user-facing guides**, pick a path:
@@ -67,8 +68,9 @@ Many specs describe **target** behavior. Check the banner at the top of each doc
 
 ### UX
 
-- [UI_WIREFRAMES.md](UI_WIREFRAMES.md) — text-based VS Code wireframes
-- [OntoCode_React_UI_Integration_Plan.md](OntoCode_React_UI_Integration_Plan.md) — **React webview migration** (v0.7a → v1.0, [ADR-0017](adr/0017-react-webview-ui.md))
+- [UI specification pack](../ui/README.md) — product design, design system, workspace model, AI/plugin UX (**target**; see [ROADMAP_MAPPING.md](../ui/ROADMAP_MAPPING.md) for shipped vs planned)
+- [UI_WIREFRAMES.md](UI_WIREFRAMES.md) — text-based VS Code wireframes (legacy; see [WORKSPACE_WIREFRAMES.md](../ui/WORKSPACE_WIREFRAMES.md))
+- [OntoCode_React_UI_Integration_Plan.md](OntoCode_React_UI_Integration_Plan.md) — **React webview migration** (v0.7a → v1.0, [ADR-0017](adr/0017-react-webview-ui.md); panels shipped v0.7–v0.11)
 
 ### Historical / backlog
 

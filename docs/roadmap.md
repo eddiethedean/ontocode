@@ -37,7 +37,7 @@ After 1.0, the roadmap shifts from parity to modernization.
 | [Product Roadmap 2.0](ui/PRODUCT_ROADMAP_2.0.md) | UI phases with milestone acceptance criteria |
 | [Product design (UI)](ui/README.md) | Product design specification pack (UX, design system, OntoStudio target) |
 
-**Current release:** v0.12.0
+**Current release:** v0.13.0
 
 ---
 
@@ -46,8 +46,8 @@ After 1.0, the roadmap shifts from parity to modernization.
 ### Timeline
 
 ```text
-SHIPPED (v0.1–v0.12) ─────────────────────────────────────────────────►
-v0.1–v0.4          v0.5–v0.8              v0.9–v0.12
+SHIPPED (v0.1–v0.13) ─────────────────────────────────────────────────►
+v0.1–v0.4          v0.5–v0.8              v0.9–v0.13
 Engine foundation    IDE depth                Platform & authoring
   │                    │                        │
   Foundation           Query, reason,           Identity, diff,
@@ -66,7 +66,7 @@ hardening          MVP                   replacement       AI        platform
 |-----|----------|--------|------------|
 | **A — Engine foundation** | v0.1–v0.4 | Shipped | Index, browse, diagnose, edit Turtle |
 | **B — IDE depth** | v0.5–v0.8 | Shipped | Query, reason, visualize, refactor |
-| **C — Platform & authoring** | v0.9–v0.12 | Shipped | OntoCore identity, semantic workspace, authoring parity |
+| **C — Platform & authoring** | v0.9–v0.13 | Shipped | OntoCore identity, semantic workspace, authoring parity |
 | **D — OntoUI platform** | v0.13–v0.14 | Planned | WorkspaceStore, plugins, stable APIs |
 | **E — Protégé replacement** | v1.0 | Planned | Daily OWL/OBO engineering without Protégé |
 | **F — Ecosystem** | v1.1–v1.2+ | Planned | SDKs, AI, toolchain & collaboration |
@@ -84,7 +84,7 @@ hardening          MVP                   replacement       AI        platform
 | 9 | v0.9 | C | Shipped | 5 (partial) | OntoCore platform identity |
 | 10 | v0.10 | C | Shipped | 9 (partial) | Semantic workspace |
 | 11 | v0.11 | C | Shipped | 5, 7, 11 (partial) | Editor depth & distribution |
-| 12 | v0.12 | C | Shipped | 2 (P0 exit) | Authoring parity |
+| 12 | v0.13 | C | Shipped | 2 (P0 exit) | Authoring parity |
 | 13 | v0.13 | D | Planned | 0, 1, 3†, 5†, 9† | Platform hardening |
 | 14 | v0.14 | D | Planned | 8 | Plugin host MVP |
 | 15 | v1.0 | E | Planned | 1–6 exit, 9† | Protégé-competitive release |
@@ -101,10 +101,10 @@ OntoUI work uses **UI phases 0–12** from [Product Roadmap 2.0](ui/PRODUCT_ROAD
 |----------|------|------------------|
 | **0** | Stabilize OntoUI | v0.13 |
 | **1** | Workspace foundation | v0.13 (core); v1.0 (tabs, dock) |
-| **2** | Entity workspace | v0.4–v0.12 (MVP); v1.0 (relationship/metadata views); v1.1† (AI explain) |
+| **2** | Entity workspace | v0.4–v0.13 (MVP); v1.0 (relationship/metadata views); v1.1† (AI explain) |
 | **3** | Query workbench | v0.5+ (shipped); v0.13 (schema browser); v1.1† (AI query) |
 | **4** | Graph workspace | v0.7+ (shipped); v1.0 (layouts, filters); v1.1† (AI graph) |
-| **5** | Reasoning experience | v0.9–v0.12 (partial); v1.0 (pipeline UI, history) |
+| **5** | Reasoning experience | v0.9–v0.13 (partial); v1.0 (pipeline UI, history) |
 | **6** | Semantic refactoring | v0.8+ (shipped); v1.0 (merge, batch, undo) |
 | **7** | AI experience | v1.1 |
 | **8** | Plugin platform | v0.14 (runtime); v1.1† (AI provider API) |
@@ -113,11 +113,11 @@ OntoUI work uses **UI phases 0–12** from [Product Roadmap 2.0](ui/PRODUCT_ROAD
 | **11** | Ecosystem & docs | v0.11+ (guides); v1.2 (registry, templates) |
 | **12** | Semantic engineering platform | Post-1.2 (browser, cloud, team workspaces) |
 
-> **Note on v0.12–v0.18 (retired labels):** Earlier drafts used v0.12–v0.18 for capabilities that **shipped in v0.3–v0.11** (diagnostics, SQL virtual tables, refactoring, Ontologos reasoning, semantic diff, docs export). Those labels are retired. Forward work from v0.12 onward is defined in the phases below.
+> **Note on v0.13–v0.18 (retired labels):** Earlier drafts used v0.13–v0.18 for capabilities that **shipped in v0.3–v0.11** (diagnostics, SQL virtual tables, refactoring, Ontologos reasoning, semantic diff, docs export). Those labels are retired. Forward work from v0.13 onward is defined in the phases below.
 
 ---
 
-## Shipped releases (v0.1–v0.12)
+## Shipped releases (v0.1–v0.13)
 
 ### Era A — Engine foundation (v0.1–v0.4)
 
@@ -255,7 +255,7 @@ Sub-phases: **v0.7a** (React foundation) → **v0.7** (graphs + inspector) → *
 
 ---
 
-### Era C — Platform & authoring (v0.9–v0.12)
+### Era C — Platform & authoring (v0.9–v0.13)
 
 ### v0.9 — OntoCore platform identity (shipped)
 
@@ -308,9 +308,9 @@ Sub-phases: **v0.7a** (React foundation) → **v0.7** (graphs + inspector) → *
 
 ---
 
-### v0.12 — Authoring parity (shipped)
+### v0.13 — Authoring parity (shipped)
 
-**Released:** v0.12.0 (2026-07-06)
+**Released:** v0.13.0 (2026-07-06)
 
 **Theme:** Close remaining **P0** OWL and OBO authoring gaps from [PROTEGE_PARITY.md](design/PROTEGE_PARITY.md).
 
@@ -335,7 +335,7 @@ Sub-phases: **v0.7a** (React foundation) → **v0.7** (graphs + inspector) → *
 
 **Theme:** OntoUI platform foundation + OntoCore hardening for plugins (v0.14) and Protégé polish (v1.0).
 
-**North star:** v0.12 closed P0 authoring parity, but React panels still hold isolated state and duplicate `postMessage` handlers. v0.13 makes **WorkspaceStore + Current Focus** the coordination layer so explorer, inspector, graph, and query surfaces stay in sync — while documenting engine APIs, team-scale query/diff workflows, and a quality bar for v1.0.
+**North star:** v0.13 closed P0 authoring parity, but React panels still hold isolated state and duplicate `postMessage` handlers. v0.13 makes **WorkspaceStore + Current Focus** the coordination layer so explorer, inspector, graph, and query surfaces stay in sync — while documenting engine APIs, team-scale query/diff workflows, and a quality bar for v1.0.
 
 **UI phases:** **0**, **1**, partial **3** (schema browser), partial **5** (reasoning store integration), partial **9** (PR summary engine). Milestones: [Product Roadmap 2.0 phases 0–1](ui/PRODUCT_ROADMAP_2.0.md#phase-0) · Checklist: [ROADMAP_MAPPING.md § v0.13](ui/ROADMAP_MAPPING.md)
 
@@ -466,7 +466,7 @@ OntoCore hosts **external** plugins through stable APIs — it does not embed RO
 | **Toolchain** | ODK project layout recognition (`src/ontology/`, catalog files, import structure); ODK QC and release workflow surfacing; ROBOT-compatible operations where practical; import existing ODK/ROBOT/owlmake workflows (Makefile, GitHub Actions); Protégé migration guide with honest parity table |
 | **Ecosystem** | Ontologos 1.0.0 reasoner gate satisfied; published `ontocore` + `ontocore-*` 1.0.0 on crates.io |
 
-**Already shipped (v0.5–v0.12):** entity editor MVP, query workbench, graph canvas, reasoner panel, refactoring preview, semantic diff — see [ROADMAP_MAPPING.md](ui/ROADMAP_MAPPING.md).
+**Already shipped (v0.5–v0.13):** entity editor MVP, query workbench, graph canvas, reasoner panel, refactoring preview, semantic diff — see [ROADMAP_MAPPING.md](ui/ROADMAP_MAPPING.md).
 
 **Exit criteria:**
 

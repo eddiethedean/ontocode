@@ -74,7 +74,7 @@ Pre-1.0: expect **minor** release API changes — test CI and integrators before
 Download pinned release binary — fastest cold start:
 
 ```bash
-VERSION=0.12.0
+VERSION=0.13.0
 ASSET="ontocore-v${VERSION}-x86_64-unknown-linux-gnu.tar.gz"
 BIN="ontocore-v${VERSION}-x86_64-unknown-linux-gnu"
 curl -fsSL -o "${ASSET}" \

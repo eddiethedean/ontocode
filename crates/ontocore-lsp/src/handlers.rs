@@ -16,7 +16,8 @@ use lsp_types::{
     DocumentSymbolParams, DocumentSymbolResponse, GotoDefinitionParams, GotoDefinitionResponse,
     Hover, HoverContents, HoverParams, HoverProviderCapability, InitializeParams, InitializeResult,
     Location, MarkupContent, MarkupKind, OneOf, Position, Range, ReferenceParams, RenameParams,
-    ServerCapabilities, SymbolInformation, SymbolKind, TextDocumentEdit,
+    SemanticTokensParams, SemanticTokensServerCapabilities, ServerCapabilities, SymbolInformation,
+    SymbolKind, TextDocumentEdit,
     TextDocumentSyncCapability, TextDocumentSyncKind, TextEdit, Uri, WorkspaceEdit,
     WorkspaceFoldersServerCapabilities, WorkspaceServerCapabilities, WorkspaceSymbolParams,
     WorkspaceSymbolResponse,
@@ -25,7 +26,7 @@ use ontocore_catalog::{GraphBuilder, GraphRequest, IndexBuilder, OntologyCatalog
 use ontocore_core::{validate_workspace_scope_any, EntityKind, OntologyFormat};
 use ontocore_diff::{
     apply_unsat_diff, catalog_at_git_ref, diff_catalogs, diff_directories, diff_git_refs,
-    discover_repo_root, DiffResult,
+    discover_repo_root, format_diff_pr_summary, DiffResult,
 };
 use ontocore_reasoner::{
     classify, explain, ExplanationRequest, ReasonerId, ReasonerSnapshot, WorkspaceInputLoader,
@@ -75,6 +76,13 @@ pub fn handle_initialize(state: &ServerState, params: InitializeParams) -> Initi
             }),
             code_action_provider: Some(CodeActionProviderCapability::Simple(true)),
             text_document_sync: Some(TextDocumentSyncCapability::Kind(TextDocumentSyncKind::FULL)),
+            semantic_tokens_provider: Some(
+                SemanticTokensServerCapabilities::SemanticTokensOptions(lsp_types::SemanticTokensOptions {
+                    legend: crate::semantic_tokens::legend(),
+                    full: Some(lsp_types::SemanticTokensFullOptions::Bool(true)),
+                    ..Default::default()
+                }),
+            ),
             workspace: Some(WorkspaceServerCapabilities {
                 workspace_folders: Some(WorkspaceFoldersServerCapabilities {
                     supported: Some(true),
@@ -211,7 +219,7 @@ pub fn handle_semantic_diff(
                     if params.reasoner {
                         enrich_diff_with_reasoner(state, &mut diff, head, &worktree)?;
                     }
-                    Ok(SemanticDiffResult { diff })
+                    Ok(semantic_diff_result(diff, params.format.as_deref()))
                 })
                 .ok_or_else(LspErrorPayload::not_indexed)?;
         }
@@ -251,7 +259,14 @@ pub fn handle_semantic_diff(
         }
     }
 
-    Ok(SemanticDiffResult { diff })
+    Ok(semantic_diff_result(diff, params.format.as_deref()))
+}
+
+fn semantic_diff_result(diff: DiffResult, format: Option<&str>) -> SemanticDiffResult {
+    let formatted = format
+        .filter(|f| f.eq_ignore_ascii_case("pr-summary"))
+        .map(|_| format_diff_pr_summary(&diff));
+    SemanticDiffResult { diff, formatted }
 }
 
 fn build_lsp_worktree_catalog(state: &ServerState) -> Result<OntologyCatalog, LspErrorPayload> {
@@ -656,6 +671,14 @@ pub fn handle_query(
             Ok(TabularQueryResult { columns: result.columns, rows: result.rows, truncated })
         })
         .ok_or_else(LspErrorPayload::not_indexed)?
+}
+
+pub fn handle_list_sql_schema(
+    state: &ServerState,
+) -> Result<Vec<ontocore_query::SqlTableSchema>, LspErrorPayload> {
+    state
+        .with_catalog(|catalog| ontocore_query::list_sql_schema(catalog))
+        .ok_or_else(LspErrorPayload::not_indexed)
 }
 
 pub fn handle_sparql(
@@ -1403,6 +1426,10 @@ pub fn handle_custom_request(
             let result = handle_query(state, params)?;
             serde_json::to_value(result).map_err(|e| LspErrorPayload::index_failed(e.to_string()))
         }
+        "ontocore/listSqlSchema" => {
+            let result = handle_list_sql_schema(state)?;
+            serde_json::to_value(result).map_err(|e| LspErrorPayload::index_failed(e.to_string()))
+        }
         "ontocore/sparql" => {
             let params: SparqlParams = serde_json::from_value(params.unwrap_or(Value::Null))
                 .map_err(|e| LspErrorPayload::index_failed(format!("invalid params: {e}")))?;
@@ -1571,6 +1598,22 @@ pub fn handle_standard_request(
                     .map(StandardRequestOutcome::Ok)
                     .unwrap_or(StandardRequestOutcome::Ok(Value::Array(vec![]))),
                 None => StandardRequestOutcome::Ok(Value::Array(vec![])),
+            }
+        }
+        "textDocument/semanticTokens/full" => {
+            let Ok(st_params) =
+                serde_json::from_value::<SemanticTokensParams>(params.unwrap_or(Value::Null))
+            else {
+                return StandardRequestOutcome::InvalidParams(invalid_params("semanticTokens/full"));
+            };
+            let doc_text = ontocore_core::workspace_uri_to_path(st_params.text_document.uri.as_str())
+                .ok()
+                .and_then(|path| state.document_text(&path));
+            match crate::semantic_tokens::handle_semantic_tokens_full(st_params, doc_text) {
+                Some(tokens) => serde_json::to_value(tokens)
+                    .map(StandardRequestOutcome::Ok)
+                    .unwrap_or(StandardRequestOutcome::Ok(Value::Null)),
+                None => StandardRequestOutcome::Ok(Value::Null),
             }
         }
         _ => StandardRequestOutcome::MethodNotFound,

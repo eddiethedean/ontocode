@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.13.0] - 2026-07-07
+
+### Added
+
+- **OntoUI platform** — `WorkspaceHost`, Zustand `WorkspaceStore`, event bus, `WorkspaceRegistry`, design tokens, shared primitives
+- **Focus relay** — extension-host `FocusRelayService` syncs Current Focus across Inspector, Graph, and Query webviews
+- **Schema browser** — Query Workbench sidebar backed by LSP `ontocore/listSqlSchema`
+- **Horned-OWL SQL tables** — `restrictions`, `equivalent_class_axioms`, `disjoint_class_axioms`, `domain_axioms`, `range_axioms`
+- **`ontocore diff --pr-summary`** — PR-ready Markdown diff format; LSP `format: "pr-summary"`
+- **Configurable diagnostics** — `.ontocore/diagnostics.toml` and `ontocode.diagnostics.rules` setting
+- **LSP semantic tokens** — Turtle and OBO (`namespace`, `iri`, `keyword`, `comment`, `string`)
+- **Docs export** — class hierarchy tree and property index in `ontocore docs` Markdown index
+- **Benchmark smoke tests** — `tests/bench_index.rs` and `scripts/fetch-bench-fixtures.sh`
+
+### Changed
+
+- Entity Inspector, Graph, Query Workbench, and Refactor Preview read state from WorkspaceStore
+- Workspace package and all `ontocore-*` crates bumped to **0.13.0**
+- Extension marketplace version **0.13.0**
+
 ## [0.12.0] - 2026-07-06
 
 ### Added

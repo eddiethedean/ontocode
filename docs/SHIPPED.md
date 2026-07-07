@@ -1,8 +1,8 @@
-# What ships today (v0.12.0)
+# What ships today (v0.13.0)
 
 > **Canonical capability matrix.** Update this page on every release. Design specs under [Project](design/README.md) may describe future targets — check here for what is actually available.
 
-**Current release:** v0.12.0 · [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md)
+**Current release:** v0.13.0 · [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md)
 
 ## Products
 
@@ -25,7 +25,7 @@
 | Generic annotation assertions | Yes (Turtle) | `ontocore patch` |
 | OBO term edit (name, synonym, def, is_a, …) | Yes (inspector) | `ontocore patch` |
 | Find usages / rename IRI / namespace migration / move / extract module | Yes (preview + apply) | `ontocore refactor` |
-| SQL-like queries | Query Workbench (React) | `ontocore query` |
+| SQL-like queries | Query Workbench (React) + schema browser | `ontocore query` |
 | SPARQL | Query Workbench (React) | `ontocore sparql` |
 | Graph visualization (class, property, import, neighborhood) | Yes (React) | LSP `ontocore/getGraph` |
 | OWL EL classification (`el` profile) | Reasoner panel + hierarchy toggle | `ontocore classify` |
@@ -42,7 +42,10 @@
 | Turtle imports add/remove | Yes (Manage Imports panel) | `ontocore patch` (`add_import`, `remove_import`) |
 | Documentation export (Markdown / HTML) | — | `ontocore docs` |
 | Patch preview | Inspector / Manchester editor / refactor preview / imports panel | `ontocore patch --preview` |
-| Semantic diff (versions / workspace compare) | Semantic Diff panel (React) | `ontocore diff` |
+| Semantic diff (versions / workspace compare) | Semantic Diff panel (React) | `ontocore diff` / `--pr-summary` |
+| Cross-panel focus sync | Explorer → Inspector + Graph (relay) | — |
+| LSP semantic tokens (Turtle, OBO) | Editor highlighting | — |
+| Configurable diagnostics | Problems panel + `.ontocore/diagnostics.toml` | `ontocore validate` |
 | React webview UI | Inspector, graphs, Query Workbench, Manchester editor, refactor preview, semantic diff, imports | — |
 
 ## Format support
@@ -52,6 +55,19 @@
 | Index / query | Yes | Yes | Yes (Horned catalog) | Yes |
 | Write-back (inspector, patches, refactor) | Yes | Yes | Read-only | Read-only |
 | Rich OBO metadata (synonyms, defs, xrefs) | — | Yes | — | — |
+
+## New in v0.13.0
+
+| Capability | Status |
+|------------|--------|
+| WorkspaceStore + focus relay across webviews | Yes |
+| Schema browser (LSP `listSqlSchema`) | Yes |
+| Horned-OWL axiom SQL virtual tables | Yes |
+| `ontocore diff --pr-summary` | Yes |
+| `.ontocore/diagnostics.toml` rule config | Yes |
+| LSP semantic tokens (Turtle, OBO) | Yes |
+| Docs class hierarchy + property index | Yes |
+| Design tokens + shared UI primitives | Yes |
 
 ## New in v0.12.0
 

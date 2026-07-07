@@ -13,6 +13,7 @@ pub(crate) mod diagnostics;
 pub(crate) mod handlers;
 pub(crate) mod index_worker;
 pub(crate) mod positions;
+pub(crate) mod semantic_tokens;
 pub mod protocol;
 pub(crate) mod state;
 

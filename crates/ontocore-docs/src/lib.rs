@@ -2,7 +2,7 @@
 
 use minijinja::{context, AutoEscape, Environment};
 use ontocore_catalog::OntologyCatalog;
-use ontocore_core::{document_matches_entity, document_matches_ontology_id};
+use ontocore_core::{document_matches_entity, document_matches_ontology_id, EntityKind};
 use std::collections::BTreeMap;
 use std::fs;
 use std::path::PathBuf;
@@ -106,7 +106,7 @@ pub fn export_workspace(catalog: &OntologyCatalog, options: ExportOptions) -> Re
         ExportFormat::Html => "index.html",
     };
     let index_path = options.output_dir.join(index_name);
-    let index_body = render_index(&ontologies, options.format)?;
+    let index_body = render_index(&ontologies, &hierarchy, catalog, options.format)?;
     fs::write(index_path, index_body)?;
 
     for ont in &ontologies {
@@ -131,7 +131,12 @@ fn slugify(iri: &str) -> String {
         .collect()
 }
 
-fn render_index(ontologies: &[OntologyDoc], format: ExportFormat) -> Result<String> {
+fn render_index(
+    ontologies: &[OntologyDoc],
+    hierarchy: &ontocore_catalog::ClassHierarchy,
+    catalog: &OntologyCatalog,
+    format: ExportFormat,
+) -> Result<String> {
     match format {
         ExportFormat::Markdown => {
             let mut md = String::from("# Ontology documentation\n\n");
@@ -144,6 +149,10 @@ fn render_index(ontologies: &[OntologyDoc], format: ExportFormat) -> Result<Stri
                     ont.imports.len()
                 ));
             }
+            md.push_str("\n## Class hierarchy\n\n");
+            md.push_str(&render_class_hierarchy(catalog, hierarchy));
+            md.push_str("\n## Property index\n\n");
+            md.push_str(&render_property_index(catalog));
             Ok(md)
         }
         ExportFormat::Html => {
@@ -152,6 +161,96 @@ fn render_index(ontologies: &[OntologyDoc], format: ExportFormat) -> Result<Stri
             Ok(tmpl.render(context! { ontologies => ontologies })?)
         }
     }
+}
+
+pub fn render_class_hierarchy(
+    catalog: &OntologyCatalog,
+    hierarchy: &ontocore_catalog::ClassHierarchy,
+) -> String {
+    let mut roots: Vec<&str> = hierarchy
+        .parents
+        .keys()
+        .map(|s| s.as_str())
+        .filter(|iri| {
+            hierarchy
+                .parents
+                .get(*iri)
+                .map(|p| p.is_empty())
+                .unwrap_or(true)
+        })
+        .collect();
+    roots.sort();
+    let mut out = String::new();
+    for root in roots {
+        render_hierarchy_node(catalog, hierarchy, root, 0, &mut out);
+    }
+    if out.is_empty() {
+        out.push_str("_No class hierarchy available._\n");
+    }
+    out
+}
+
+fn render_hierarchy_node(
+    catalog: &OntologyCatalog,
+    hierarchy: &ontocore_catalog::ClassHierarchy,
+    iri: &str,
+    depth: usize,
+    out: &mut String,
+) {
+    let label = catalog
+        .data()
+        .entities
+        .iter()
+        .find(|e| e.iri == iri)
+        .and_then(|e| e.labels.first())
+        .map(|s| s.as_str())
+        .unwrap_or(iri);
+    out.push_str(&format!("{}{} (`{}`)\n", "  ".repeat(depth), label, iri));
+    let mut children: Vec<&str> = hierarchy
+        .children
+        .get(iri)
+        .map(|v| v.iter().map(|s| s.as_str()).collect())
+        .unwrap_or_default();
+    children.sort();
+    for child in children {
+        render_hierarchy_node(catalog, hierarchy, child, depth + 1, out);
+    }
+}
+
+pub fn render_property_index(catalog: &OntologyCatalog) -> String {
+    let mut object_props = Vec::new();
+    let mut data_props = Vec::new();
+    let mut annotation_props = Vec::new();
+    for entity in &catalog.data().entities {
+        match entity.kind {
+            EntityKind::ObjectProperty => object_props.push(entity),
+            EntityKind::DataProperty => data_props.push(entity),
+            EntityKind::AnnotationProperty => annotation_props.push(entity),
+            _ => {}
+        }
+    }
+    let mut out = String::new();
+    for (title, props) in [
+        ("Object properties", &object_props),
+        ("Data properties", &data_props),
+        ("Annotation properties", &annotation_props),
+    ] {
+        if props.is_empty() {
+            continue;
+        }
+        out.push_str(&format!("### {title}\n\n"));
+        let mut sorted = props.clone();
+        sorted.sort_by(|a, b| a.short_name.cmp(&b.short_name));
+        for prop in sorted {
+            let label = prop.labels.first().map(|s| s.as_str()).unwrap_or(&prop.short_name);
+            out.push_str(&format!("- **{label}** — `{}`\n", prop.iri));
+        }
+        out.push('\n');
+    }
+    if out.is_empty() {
+        out.push_str("_No properties indexed._\n");
+    }
+    out
 }
 
 fn render_ontology(ont: &OntologyDoc, format: ExportFormat) -> Result<String> {

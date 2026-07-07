@@ -10,7 +10,7 @@ OntoCore is currently implemented by the `ontocore-*` crates. The [`ontocore`](h
 
 ```toml
 [dependencies]
-ontocore = "0.12"
+ontocore = "0.13"
 ```
 
 ```rust

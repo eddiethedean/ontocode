@@ -236,6 +236,20 @@ export async function applyAxiomPatch(
   return patch;
 }
 
+export async function listSqlSchema(): Promise<
+  Array<{ name: string; columns: Array<{ name: string; type: string }> }>
+> {
+  const c = requireClient();
+  const result = await c.sendRequest<unknown>("ontocore/listSqlSchema", {});
+  if (!Array.isArray(result)) {
+    throw new Error("Invalid listSqlSchema response");
+  }
+  return result as Array<{
+    name: string;
+    columns: Array<{ name: string; type: string }>;
+  }>;
+}
+
 export async function runSqlQuery(sql: string): Promise<TabularQueryResult> {
   const c = requireClient();
   const result = await c.sendRequest<unknown>("ontocore/query", { sql });

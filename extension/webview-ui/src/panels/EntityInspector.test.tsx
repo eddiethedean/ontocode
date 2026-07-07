@@ -1,4 +1,5 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
+import { renderWithProviders } from "../test/render";
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi } from "vitest";
 import { EntityInspectorPanel } from "./EntityInspector";
@@ -12,7 +13,7 @@ import {
 
 describe("EntityInspectorPanel", () => {
   it("shows loading state and posts ready on mount", async () => {
-    render(<EntityInspectorPanel />);
+    renderWithProviders(<EntityInspectorPanel />);
 
     expect(screen.getByRole("status")).toHaveTextContent("Loading entity…");
 
@@ -22,7 +23,7 @@ describe("EntityInspectorPanel", () => {
   });
 
   it("renders entity detail from host message", async () => {
-    render(<EntityInspectorPanel />);
+    renderWithProviders(<EntityInspectorPanel />);
     postHostMessage({ type: "loadEntity", detail: entityDetail, classOptions });
 
     expect(await screen.findByRole("heading", { name: "Person" })).toBeInTheDocument();
@@ -33,7 +34,7 @@ describe("EntityInspectorPanel", () => {
   });
 
   it("shows deprecated badge when entity is deprecated", async () => {
-    render(<EntityInspectorPanel />);
+    renderWithProviders(<EntityInspectorPanel />);
     postHostMessage({
       type: "loadEntity",
       detail: {
@@ -48,7 +49,7 @@ describe("EntityInspectorPanel", () => {
 
   it("navigates to parent entity on click", async () => {
     const user = userEvent.setup();
-    render(<EntityInspectorPanel />);
+    renderWithProviders(<EntityInspectorPanel />);
     postHostMessage({ type: "loadEntity", detail: entityDetail, classOptions });
 
     await screen.findByRole("heading", { name: "Person" });
@@ -62,7 +63,7 @@ describe("EntityInspectorPanel", () => {
 
   it("adds label via applyPatch message", async () => {
     const user = userEvent.setup();
-    render(<EntityInspectorPanel />);
+    renderWithProviders(<EntityInspectorPanel />);
     postHostMessage({ type: "loadEntity", detail: entityDetail, classOptions });
     await screen.findByRole("heading", { name: "Person" });
 
@@ -85,7 +86,7 @@ describe("EntityInspectorPanel", () => {
 
   it("posts jumpToSource from sticky actions", async () => {
     const user = userEvent.setup();
-    render(<EntityInspectorPanel />);
+    renderWithProviders(<EntityInspectorPanel />);
     postHostMessage({ type: "loadEntity", detail: entityDetail, classOptions });
     await screen.findByRole("heading", { name: "Person" });
 
@@ -94,7 +95,7 @@ describe("EntityInspectorPanel", () => {
   });
 
   it("shows preview text from host", async () => {
-    render(<EntityInspectorPanel />);
+    renderWithProviders(<EntityInspectorPanel />);
     postHostMessage({ type: "loadEntity", detail: entityDetail, classOptions });
     await screen.findByRole("heading", { name: "Person" });
 
@@ -103,7 +104,7 @@ describe("EntityInspectorPanel", () => {
   });
 
   it("shows error callout from host error message", async () => {
-    render(<EntityInspectorPanel />);
+    renderWithProviders(<EntityInspectorPanel />);
     postHostMessage({ type: "loadEntity", detail: entityDetail, classOptions });
     await screen.findByRole("heading", { name: "Person" });
 
@@ -112,7 +113,7 @@ describe("EntityInspectorPanel", () => {
   });
 
   it("shows read-only callout when not editable", async () => {
-    render(<EntityInspectorPanel />);
+    renderWithProviders(<EntityInspectorPanel />);
     postHostMessage({
       type: "loadEntity",
       detail: { ...entityDetail, editable: false },
@@ -129,7 +130,7 @@ describe("EntityInspectorPanel", () => {
     const user = userEvent.setup();
     vi.spyOn(window, "confirm").mockReturnValue(true);
 
-    render(<EntityInspectorPanel />);
+    renderWithProviders(<EntityInspectorPanel />);
     postHostMessage({ type: "loadEntity", detail: entityDetail, classOptions });
     await screen.findByRole("heading", { name: "Person" });
 
@@ -143,7 +144,7 @@ describe("EntityInspectorPanel", () => {
   });
 
   it("uses short_name when entity has no labels", async () => {
-    render(<EntityInspectorPanel />);
+    renderWithProviders(<EntityInspectorPanel />);
     postHostMessage({
       type: "loadEntity",
       detail: {
@@ -158,7 +159,7 @@ describe("EntityInspectorPanel", () => {
 
   it("adds comment and parent via applyPatch", async () => {
     const user = userEvent.setup();
-    render(<EntityInspectorPanel />);
+    renderWithProviders(<EntityInspectorPanel />);
     postHostMessage({ type: "loadEntity", detail: entityDetail, classOptions });
     await screen.findByRole("heading", { name: "Person" });
 
@@ -193,7 +194,7 @@ describe("EntityInspectorPanel", () => {
 
   it("requests preview-only patch without clearing label input", async () => {
     const user = userEvent.setup();
-    render(<EntityInspectorPanel />);
+    renderWithProviders(<EntityInspectorPanel />);
     postHostMessage({ type: "loadEntity", detail: entityDetail, classOptions });
     await screen.findByRole("heading", { name: "Person" });
 
@@ -216,7 +217,7 @@ describe("EntityInspectorPanel", () => {
 
   it("ignores empty label, comment, and parent submissions", async () => {
     const user = userEvent.setup();
-    render(<EntityInspectorPanel />);
+    renderWithProviders(<EntityInspectorPanel />);
     postHostMessage({ type: "loadEntity", detail: entityDetail, classOptions });
     await screen.findByRole("heading", { name: "Person" });
 
@@ -232,7 +233,7 @@ describe("EntityInspectorPanel", () => {
     const user = userEvent.setup();
     vi.spyOn(window, "confirm").mockReturnValue(false);
 
-    render(<EntityInspectorPanel />);
+    renderWithProviders(<EntityInspectorPanel />);
     postHostMessage({ type: "loadEntity", detail: entityDetail, classOptions });
     await screen.findByRole("heading", { name: "Person" });
 
@@ -243,7 +244,7 @@ describe("EntityInspectorPanel", () => {
 
   it("posts findUsages, renameIri, and openGraph actions", async () => {
     const user = userEvent.setup();
-    render(<EntityInspectorPanel />);
+    renderWithProviders(<EntityInspectorPanel />);
     postHostMessage({ type: "loadEntity", detail: entityDetail, classOptions });
     await screen.findByRole("heading", { name: "Person" });
 
@@ -262,7 +263,7 @@ describe("EntityInspectorPanel", () => {
 
   it("opens Manchester editor for editable axioms", async () => {
     const user = userEvent.setup();
-    render(<EntityInspectorPanel />);
+    renderWithProviders(<EntityInspectorPanel />);
     postHostMessage({ type: "loadEntity", detail: entityDetail, classOptions });
     await screen.findByRole("heading", { name: "Person" });
 
@@ -279,7 +280,7 @@ describe("EntityInspectorPanel", () => {
 
   it("posts addManchesterAxiom from section action", async () => {
     const user = userEvent.setup();
-    render(<EntityInspectorPanel />);
+    renderWithProviders(<EntityInspectorPanel />);
     postHostMessage({ type: "loadEntity", detail: entityDetail, classOptions });
     await screen.findByRole("heading", { name: "Person" });
 
@@ -289,7 +290,7 @@ describe("EntityInspectorPanel", () => {
 
   it("navigates to child entity on click", async () => {
     const user = userEvent.setup();
-    render(<EntityInspectorPanel />);
+    renderWithProviders(<EntityInspectorPanel />);
     postHostMessage({ type: "loadEntity", detail: entityDetail, classOptions });
     await screen.findByRole("heading", { name: "Person" });
 
@@ -301,7 +302,7 @@ describe("EntityInspectorPanel", () => {
   });
 
   it("clears preview when entity is reloaded", async () => {
-    render(<EntityInspectorPanel />);
+    renderWithProviders(<EntityInspectorPanel />);
     postHostMessage({ type: "loadEntity", detail: entityDetail, classOptions });
     await screen.findByRole("heading", { name: "Person" });
 
@@ -315,7 +316,7 @@ describe("EntityInspectorPanel", () => {
   });
 
   it("shows None when axioms list is empty", async () => {
-    render(<EntityInspectorPanel />);
+    renderWithProviders(<EntityInspectorPanel />);
     postHostMessage({
       type: "loadEntity",
       detail: { ...entityDetail, axioms: [] },
@@ -326,7 +327,7 @@ describe("EntityInspectorPanel", () => {
   });
 
   it("hides Manchester controls for non-class entities", async () => {
-    render(<EntityInspectorPanel />);
+    renderWithProviders(<EntityInspectorPanel />);
     postHostMessage({
       type: "loadEntity",
       detail: {
@@ -342,7 +343,7 @@ describe("EntityInspectorPanel", () => {
   });
 
   it("shows Edit disjoint label for disjoint_class axioms", async () => {
-    render(<EntityInspectorPanel />);
+    renderWithProviders(<EntityInspectorPanel />);
     postHostMessage({
       type: "loadEntity",
       detail: {
@@ -363,7 +364,7 @@ describe("EntityInspectorPanel", () => {
   });
 
   it("ignores invalid host messages", async () => {
-    render(<EntityInspectorPanel />);
+    renderWithProviders(<EntityInspectorPanel />);
     postHostMessage({ type: "loadEntity", detail: entityDetail, classOptions });
     await screen.findByRole("heading", { name: "Person" });
 
@@ -387,7 +388,7 @@ describe("EntityInspectorPanel", () => {
       children: [],
       axioms: [],
     };
-    render(<EntityInspectorPanel />);
+    renderWithProviders(<EntityInspectorPanel />);
     postHostMessage({ type: "loadEntity", detail: individualDetail, classOptions });
     await screen.findByRole("heading", { name: "Alice" });
 
@@ -432,7 +433,7 @@ describe("EntityInspectorPanel", () => {
         },
       ],
     };
-    render(<EntityInspectorPanel />);
+    renderWithProviders(<EntityInspectorPanel />);
     postHostMessage({ type: "loadEntity", detail: individualDetail, classOptions });
     await screen.findByRole("heading", { name: "Alice" });
 

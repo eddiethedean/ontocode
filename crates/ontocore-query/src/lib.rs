@@ -7,9 +7,12 @@
 //! **Pre-1.0:** virtual table names and column sets are documented but may gain columns
 //! without a major version until v1.0.
 
+pub mod schema;
 pub mod sparql;
 mod sparql_update;
 pub mod sql;
+
+pub use schema::{list_sql_schema, list_sql_tables, SqlColumnSchema, SqlTableSchema};
 
 pub use sparql::{run_sparql, SparqlResult};
 pub use sql::{run_sql, QueryResult};

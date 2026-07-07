@@ -2,20 +2,20 @@
 
 **OntoCore** is the semantic workspace engine for ontology development. It lives in the [OntoCode repository](https://github.com/eddiethedean/ontocode) and powers the OntoCode VS Code IDE.
 
-**Current release: v0.12.0** · [crates.io search](https://crates.io/search?q=ontocore)
+**Current release: v0.13.0** · [crates.io search](https://crates.io/search?q=ontocore)
 
-[![ontocore](https://img.shields.io/badge/ontocore-0.12.0-blue)](https://crates.io/crates/ontocore)
-[![core](https://img.shields.io/badge/core-0.12.0-blue)](https://crates.io/crates/ontocore-core)
-[![parser](https://img.shields.io/badge/parser-0.12.0-blue)](https://crates.io/crates/ontocore-parser)
-[![catalog](https://img.shields.io/badge/catalog-0.12.0-blue)](https://crates.io/crates/ontocore-catalog)
-[![query](https://img.shields.io/badge/query-0.12.0-blue)](https://crates.io/crates/ontocore-query)
-[![cli](https://img.shields.io/badge/cli-0.12.0-blue)](https://crates.io/crates/ontocore-cli)
-[![lsp](https://img.shields.io/badge/lsp-0.12.0-blue)](https://crates.io/crates/ontocore-lsp)
-[![owl](https://img.shields.io/badge/owl-0.12.0-blue)](https://crates.io/crates/ontocore-owl)
-[![reasoner](https://img.shields.io/badge/reasoner-0.12.0-blue)](https://crates.io/crates/ontocore-reasoner)
-[![diff](https://img.shields.io/badge/diff-0.12.0-blue)](https://crates.io/crates/ontocore-diff)
-[![refactor](https://img.shields.io/badge/refactor-0.12.0-blue)](https://crates.io/crates/ontocore-refactor)
-[![docs](https://img.shields.io/badge/docs-0.12.0-blue)](https://crates.io/crates/ontocore-docs)
+[![ontocore](https://img.shields.io/badge/ontocore-0.13.0-blue)](https://crates.io/crates/ontocore)
+[![core](https://img.shields.io/badge/core-0.13.0-blue)](https://crates.io/crates/ontocore-core)
+[![parser](https://img.shields.io/badge/parser-0.13.0-blue)](https://crates.io/crates/ontocore-parser)
+[![catalog](https://img.shields.io/badge/catalog-0.13.0-blue)](https://crates.io/crates/ontocore-catalog)
+[![query](https://img.shields.io/badge/query-0.13.0-blue)](https://crates.io/crates/ontocore-query)
+[![cli](https://img.shields.io/badge/cli-0.13.0-blue)](https://crates.io/crates/ontocore-cli)
+[![lsp](https://img.shields.io/badge/lsp-0.13.0-blue)](https://crates.io/crates/ontocore-lsp)
+[![owl](https://img.shields.io/badge/owl-0.13.0-blue)](https://crates.io/crates/ontocore-owl)
+[![reasoner](https://img.shields.io/badge/reasoner-0.13.0-blue)](https://crates.io/crates/ontocore-reasoner)
+[![diff](https://img.shields.io/badge/diff-0.13.0-blue)](https://crates.io/crates/ontocore-diff)
+[![refactor](https://img.shields.io/badge/refactor-0.13.0-blue)](https://crates.io/crates/ontocore-refactor)
+[![docs](https://img.shields.io/badge/docs-0.13.0-blue)](https://crates.io/crates/ontocore-docs)
 
 OntoCore indexes ontology workspaces on disk and provides:
 
@@ -71,7 +71,7 @@ Lower-level access remains available through `ontocore-*` crates. See [crate map
 
 ## Compatibility (v0.10+)
 
-All crates, binaries, and LSP methods use **`ontocore`** naming. Upgrading from **v0.11.x**? See [v0.12 migration](../migration/v0.12.md). From v0.10? See [v0.11 migration](../migration/v0.11.md). From v0.8? See [v0.9 migration](../migration/v0.9.md).
+All crates, binaries, and LSP methods use **`ontocore`** naming. Upgrading from **v0.11.x**? See [v0.13 migration](../migration/v0.13.md). From v0.10? See [v0.11 migration](../migration/v0.11.md). From v0.8? See [v0.9 migration](../migration/v0.9.md).
 
 | Surface | Name |
 |---------|------|

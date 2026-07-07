@@ -10,7 +10,7 @@ use ontocore_core::{
     Entity, Import, Namespace, OntologyDocument, OntologyFormat, ParseStatus, SourceLocation,
     WorkspaceScanner, MAX_FILE_BYTES,
 };
-use ontocore_diagnostics::{collect_diagnostics_with_sources, DiagnosticInput};
+use ontocore_diagnostics::{collect_diagnostics_with_config, find_config, DiagnosticInput};
 use ontocore_owl::{load_owx_text, load_turtle_text, supports_horned_load};
 use ontocore_parser::{parse_ontology_file, parse_ontology_text, ParsedOntology};
 use oxigraph::model::Quad;
@@ -531,7 +531,12 @@ impl IndexBuilder {
             namespaces: &data.namespaces,
             imports: &data.imports,
         };
-        data.diagnostics = collect_diagnostics_with_sources(&lint_input, &self.document_overrides);
+        let diag_config = find_config(&self.workspace);
+        data.diagnostics = collect_diagnostics_with_config(
+            &lint_input,
+            &self.document_overrides,
+            diag_config.as_ref(),
+        );
         data.diagnostics.extend(bridge_diagnostics);
 
         Ok((

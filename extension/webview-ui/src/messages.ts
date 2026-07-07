@@ -1,4 +1,13 @@
-/** Webview panel kinds (query param ?panel=). */
+import type { CurrentFocus } from "./store/types";
+
+export type { CurrentFocus };
+
+export interface ReasoningStatePayload {
+  profile: string;
+  unsatisfiable: string[];
+  hierarchyMode?: "asserted" | "inferred" | "combined";
+  lastRunAt: number;
+}
 export type PanelKind =
   | "smoke"
   | "inspector"
@@ -9,7 +18,10 @@ export type PanelKind =
   | "semanticDiff"
   | "imports";
 
-/** Entity summary from LSP getEntity. */
+export interface SqlTableSchema {
+  name: string;
+  columns: Array<{ name: string; type: string }>;
+}
 export interface EntitySummary {
   iri: string;
   short_name: string;
@@ -268,11 +280,13 @@ export interface ImportsDocumentPayload {
 /** Host → React */
 export type HostMessage =
   | { type: "init"; panel: PanelKind }
+  | { type: "focusState"; focus: CurrentFocus }
+  | { type: "reasoningState"; reasoning: ReasoningStatePayload }
   | { type: "loadEntity"; detail: EntityDetailPayload; classOptions: string[] }
   | { type: "graphData"; graph: GraphPayload; rootIri?: string }
   | { type: "preview"; text: string }
   | { type: "loadRefactorPlan"; plan: RefactorPlanPayload }
-  | { type: "queryInit"; saved: SavedQuery[]; history: SavedQuery[]; sqlTables: string[] }
+  | { type: "queryInit"; saved: SavedQuery[]; history: SavedQuery[]; sqlTables: string[]; sqlSchema?: SqlTableSchema[] }
   | { type: "queryResult"; runId: number; result?: TabularQueryResult; error?: string }
   | { type: "manchesterInit"; entityIri: string; axiomKind: string; expression: string; completions: ManchesterCompletions }
   | { type: "manchesterValidation"; seq: number; result?: ManchesterValidationResult; error?: string }
@@ -301,7 +315,9 @@ export type WebviewMessage =
   | { type: "exportQueryResult"; format: "csv" | "json"; runId?: number }
   | { type: "validateManchester"; expression: string; axiomKind: string; seq: number }
   | { type: "applyManchester"; expression: string; axiomKind: string; previewOnly: boolean }
-  | { type: "copyMarkdown" };
+  | { type: "copyMarkdown" }
+  | { type: "setFocus"; focus: CurrentFocus }
+  | { type: "showNotification"; message: string; level?: "info" | "warning" | "error" };
 
 export function isHostMessage(data: unknown): data is HostMessage {
   if (typeof data !== "object" || data === null || !("type" in data)) {

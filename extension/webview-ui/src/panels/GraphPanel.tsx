@@ -21,12 +21,15 @@ import {
   RangeField,
   Section,
 } from "../components/ui";
-import { getVsCodeApi } from "../vscodeApi";
+import { useWorkspaceHost } from "../context/HostContext";
+import { postFocusToHost } from "../hooks/useFocusSync";
+import { subscribeFocus, useWorkspaceStore } from "../store";
 import {
   GraphPayload,
   HostMessage,
   isHostMessage,
 } from "../messages";
+import type { WorkspaceProps } from "../workspaces/types";
 
 function readInitialParams(): { graphKind: string; rootIri?: string } {
   const params = new URLSearchParams(window.location.search);
@@ -63,7 +66,9 @@ function toFlowEdges(graph: GraphPayload, showInferred: boolean): Edge[] {
     }));
 }
 
-export function GraphPanel(): JSX.Element {
+export function GraphPanel(_props?: WorkspaceProps): JSX.Element {
+  const host = useWorkspaceHost();
+  const storeRootIri = useWorkspaceStore((s) => s.graph.rootIri);
   const initial = useMemo(() => readInitialParams(), []);
   const [graph, setGraph] = useState<GraphPayload | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -72,7 +77,9 @@ export function GraphPanel(): JSX.Element {
   const [showInferred, setShowInferred] = useState(true);
   const [hideDeprecated, setHideDeprecated] = useState(false);
   const [graphKind, setGraphKind] = useState(initial.graphKind);
-  const [rootIri, setRootIri] = useState<string | undefined>(initial.rootIri);
+  const [rootIri, setRootIri] = useState<string | undefined>(
+    initial.rootIri ?? storeRootIri ?? undefined
+  );
   const [error, setError] = useState("");
   const hasGraphData = useRef(false);
 
@@ -80,7 +87,7 @@ export function GraphPanel(): JSX.Element {
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
 
   const requestGraph = useCallback(() => {
-    getVsCodeApi().postMessage({
+    host.postToCore({
       type: "requestGraph",
       graphKind,
       rootIri,
@@ -88,16 +95,36 @@ export function GraphPanel(): JSX.Element {
       includeInferred,
       filters: { hide_deprecated: hideDeprecated },
     });
-  }, [graphKind, rootIri, depth, includeInferred, hideDeprecated]);
+  }, [host, graphKind, rootIri, depth, includeInferred, hideDeprecated]);
 
   useEffect(() => {
-    getVsCodeApi().postMessage({ type: "ready", panel: "graph" });
+    return subscribeFocus((focus) => {
+      if (focus.kind === "entity" && focus.id !== rootIri) {
+        setRootIri(focus.id);
+        setGraphKind("neighborhood");
+      }
+    });
+  }, [rootIri]);
+
+  useEffect(() => {
+    if (storeRootIri && storeRootIri !== rootIri) {
+      setRootIri(storeRootIri);
+      setGraphKind("neighborhood");
+    }
+  }, [storeRootIri, rootIri]);
+
+  useEffect(() => {
+    host.postToCore({ type: "ready", panel: "graph" });
 
     const handler = (event: MessageEvent): void => {
       if (!isHostMessage(event.data)) {
         return;
       }
       const msg: HostMessage = event.data;
+      if (msg.type === "focusState" && msg.focus.kind === "entity") {
+        setRootIri(msg.focus.id);
+        setGraphKind("neighborhood");
+      }
       if (msg.type === "graphData") {
         hasGraphData.current = true;
         setError("");
@@ -117,7 +144,13 @@ export function GraphPanel(): JSX.Element {
     };
     window.addEventListener("message", handler);
     return () => window.removeEventListener("message", handler);
-  }, [requestGraph]);
+  }, [requestGraph, host]);
+
+  useEffect(() => {
+    if (rootIri) {
+      requestGraph();
+    }
+  }, [rootIri, requestGraph]);
 
   useEffect(() => {
     if (!graph) {
@@ -211,12 +244,14 @@ export function GraphPanel(): JSX.Element {
             <ButtonBar>
               <button
                 type="button"
-                onClick={() =>
-                  getVsCodeApi().postMessage({
-                    type: "selectNode",
-                    iri: selectedNode.id,
-                  })
-                }
+                onClick={() => {
+                  postFocusToHost(host, {
+                    kind: "entity",
+                    id: selectedNode.id,
+                    source: "graph",
+                  });
+                  host.postToCore({ type: "selectNode", iri: selectedNode.id });
+                }}
               >
                 Inspect entity
               </button>

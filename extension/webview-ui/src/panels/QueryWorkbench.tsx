@@ -9,35 +9,51 @@ import {
   Toolbar,
   ToolbarGroup,
 } from "../components/ui";
-import { getVsCodeApi } from "../vscodeApi";
+import { SchemaBrowser } from "../components/SchemaBrowser";
+import { useWorkspaceHost } from "../context/HostContext";
+import { useWorkspaceStore } from "../store";
 import {
   HostMessage,
   isHostMessage,
   SavedQuery,
-  TabularQueryResult,
+  SqlTableSchema,
 } from "../messages";
+import type { WorkspaceProps } from "../workspaces/types";
 
 const STARTER_SQL = "SELECT short_name, labels FROM classes";
 const STARTER_SPARQL =
   "PREFIX ex: <http://example.org/people#>\nSELECT ?s ?p ?o WHERE { ?s ?p ?o } LIMIT 10";
 
-export function QueryWorkbenchPanel(): JSX.Element {
-  const [mode, setMode] = useState<"sql" | "sparql">("sql");
-  const [text, setText] = useState(STARTER_SQL);
+export function QueryWorkbenchPanel(_props?: WorkspaceProps): JSX.Element {
+  const host = useWorkspaceHost();
+  const mode = useWorkspaceStore((s) => s.query.language);
+  const text = useWorkspaceStore((s) => s.query.text);
+  const setQueryLanguage = useWorkspaceStore((s) => s.setQueryLanguage);
+  const setQueryText = useWorkspaceStore((s) => s.setQueryText);
+  const setQueryResult = useWorkspaceStore((s) => s.setQueryResult);
+  const addQueryHistory = useWorkspaceStore((s) => s.addQueryHistory);
   const [saved, setSaved] = useState<SavedQuery[]>([]);
   const [history, setHistory] = useState<SavedQuery[]>([]);
-  const [sqlTables, setSqlTables] = useState<string[]>([]);
-  const [result, setResult] = useState<TabularQueryResult | null>(null);
+  const [sqlSchema, setSqlSchema] = useState<SqlTableSchema[]>([]);
+  const sqlTables = sqlSchema.map((t) => t.name);
   const [error, setError] = useState("");
   const [runId, setRunId] = useState(0);
   const runIdRef = useRef(0);
+  const result = useWorkspaceStore((s) => s.query.lastResult);
 
   useEffect(() => {
     runIdRef.current = runId;
   }, [runId]);
 
   useEffect(() => {
-    getVsCodeApi().postMessage({ type: "ready", panel: "queryWorkbench" });
+    if (!useWorkspaceStore.getState().query.text) {
+      setQueryText(STARTER_SQL);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- init once
+  }, []);
+
+  useEffect(() => {
+    host.postToCore({ type: "ready", panel: "queryWorkbench" });
     const handler = (event: MessageEvent): void => {
       if (!isHostMessage(event.data)) {
         return;
@@ -46,33 +62,45 @@ export function QueryWorkbenchPanel(): JSX.Element {
       if (msg.type === "queryInit") {
         setSaved(msg.saved);
         setHistory(msg.history);
-        setSqlTables(msg.sqlTables);
+        setSqlSchema(msg.sqlSchema ?? msg.sqlTables.map((name) => ({ name, columns: [] })));
       }
       if (msg.type === "queryResult") {
         if (msg.runId !== runIdRef.current) {
           return;
         }
         setError(msg.error ?? "");
-        setResult(msg.result ?? null);
+        if (msg.result) {
+          const snapshot = {
+            columns: msg.result.columns,
+            rows: msg.result.rows.map((row) =>
+              msg.result!.columns.map((col) => row[col] ?? "")
+            ),
+            truncated: msg.result.truncated,
+          };
+          setQueryResult(snapshot);
+          addQueryHistory({ language: mode, text });
+        } else {
+          setQueryResult(null);
+        }
       }
     };
     window.addEventListener("message", handler);
     return () => window.removeEventListener("message", handler);
-  }, []);
+  }, [host, mode, text, setQueryResult, addQueryHistory]);
 
   const run = useCallback(() => {
     const id = runIdRef.current + 1;
     runIdRef.current = id;
     setRunId(id);
     setError("");
-    setResult(null);
-    getVsCodeApi().postMessage({
+    setQueryResult(null);
+    host.postToCore({
       type: "runQuery",
       mode,
       text,
       runId: id,
     });
-  }, [mode, text]);
+  }, [host, mode, text, setQueryResult]);
 
   return (
     <Panel>
@@ -88,8 +116,8 @@ export function QueryWorkbenchPanel(): JSX.Element {
               value={mode}
               onChange={(e) => {
                 const m = e.target.value as "sql" | "sparql";
-                setMode(m);
-                setText(m === "sql" ? STARTER_SQL : STARTER_SPARQL);
+                setQueryLanguage(m);
+                setQueryText(m === "sql" ? STARTER_SQL : STARTER_SPARQL);
               }}
             >
               <option value="sql">SQL</option>
@@ -101,7 +129,7 @@ export function QueryWorkbenchPanel(): JSX.Element {
               <Select
                 onChange={(e) => {
                   if (e.target.value) {
-                    setText(`SELECT * FROM ${e.target.value}`);
+                    setQueryText(`SELECT * FROM ${e.target.value}`);
                   }
                 }}
               >
@@ -127,7 +155,7 @@ export function QueryWorkbenchPanel(): JSX.Element {
               if (!name) {
                 return;
               }
-              getVsCodeApi().postMessage({
+              host.postToCore({
                 type: "saveQuery",
                 name,
                 mode,
@@ -141,7 +169,7 @@ export function QueryWorkbenchPanel(): JSX.Element {
             type="button"
             className="secondary"
             onClick={() =>
-              getVsCodeApi().postMessage({
+              host.postToCore({
                 type: "exportQueryResult",
                 format: "csv",
                 runId: runIdRef.current,
@@ -154,7 +182,7 @@ export function QueryWorkbenchPanel(): JSX.Element {
             type="button"
             className="secondary"
             onClick={() =>
-              getVsCodeApi().postMessage({
+              host.postToCore({
                 type: "exportQueryResult",
                 format: "json",
                 runId: runIdRef.current,
@@ -166,10 +194,19 @@ export function QueryWorkbenchPanel(): JSX.Element {
         </ToolbarGroup>
       </Toolbar>
 
+      {mode === "sql" && sqlSchema.length > 0 ? (
+        <SchemaBrowser
+          schema={sqlSchema}
+          onInsert={(snippet) => {
+            setQueryText(text ? `${text} ${snippet}` : snippet);
+          }}
+        />
+      ) : null}
+
       <CodeEditor
         label={mode === "sql" ? "SQL query" : "SPARQL query"}
         value={text}
-        onChange={(e) => setText(e.target.value)}
+        onChange={(e) => setQueryText(e.target.value)}
         rows={12}
       />
 
@@ -180,8 +217,8 @@ export function QueryWorkbenchPanel(): JSX.Element {
               onChange={(e) => {
                 const item = saved[Number(e.target.value)];
                 if (item) {
-                  setMode(item.mode);
-                  setText(item.text);
+                  setQueryLanguage(item.mode);
+                  setQueryText(item.text);
                 }
               }}
             >
@@ -198,8 +235,8 @@ export function QueryWorkbenchPanel(): JSX.Element {
               onChange={(e) => {
                 const item = history[Number(e.target.value)];
                 if (item) {
-                  setMode(item.mode);
-                  setText(item.text);
+                  setQueryLanguage(item.mode);
+                  setQueryText(item.text);
                 }
               }}
             >
@@ -232,8 +269,8 @@ export function QueryWorkbenchPanel(): JSX.Element {
             <tbody>
               {result.rows.map((row, ri) => (
                 <tr key={ri}>
-                  {result.columns.map((c) => (
-                    <td key={c}>{row[c] ?? ""}</td>
+                  {row.map((cell, ci) => (
+                    <td key={`${ri}-${ci}`}>{cell}</td>
                   ))}
                 </tr>
               ))}

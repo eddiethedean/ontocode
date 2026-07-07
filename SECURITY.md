@@ -4,7 +4,7 @@
 
 | Version | Supported |
 |---------|-----------|
-| 0.12.x  | Yes       |
+| 0.13.x  | Yes       |
 | 0.11.x  | No        |
 | 0.10.x  | Best effort |
 | 0.6.x   | No        |

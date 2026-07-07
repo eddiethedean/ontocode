@@ -1,6 +1,6 @@
 # Performance and sizing
 
-Guidance for sizing OntoCore workspaces and planning pilots. **Formal benchmark suite is a v1.0 backlog item** — validate performance on your own corpora before production rollout.
+Guidance for sizing OntoCore workspaces and planning pilots. **v0.13 adds CI smoke benchmarks** (`tests/bench_index.rs`); large-ontology targets use optional fixtures from `scripts/fetch-bench-fixtures.sh`.
 
 Hard limits: [workspace limits](../workspace-limits.md). Pilot criteria: [production readiness](production-readiness.md).
 
@@ -27,9 +27,27 @@ Use these tiers to choose pilot scope. **Run `ontocore inspect` on your repo** t
 | **Large** | 500–10k | 5M–20M | Enterprise taxonomy, heavy imports | Pilot required — approach caps |
 | **Extra-large** | &gt; 10k files or &gt; 20M triples | — | Full OBO, massive SKOS | **Not supported** — split workspace or wait for incremental indexing |
 
+## v0.13 smoke benchmarks (CI)
+
+Run on every `cargo test` (repository `fixtures/`):
+
+```bash
+cargo test bench_index_smoke bench_axiom_tables_smoke -- --nocapture
+```
+
+Typical dev machine results (order of magnitude):
+
+| Step | Fixtures corpus |
+|------|-----------------|
+| Full index | &lt; 2 s |
+| `SELECT short_name FROM classes` | &lt; 100 ms |
+| Axiom projection tables | &lt; 50 ms each |
+
+Large-ontology targets (GO subset ~5k classes, SNOMED EL sample): download via `./scripts/fetch-bench-fixtures.sh`, place under `tests/benchmarks/`, and run the same tests locally.
+
 ## Reference measurement (tutorial fixtures)
 
-Measured with `ontocore inspect fixtures --format json` on release **0.11.0** (repository tutorial corpus):
+Measured with `ontocore inspect fixtures --format json` on release **0.13.0** (repository tutorial corpus):
 
 | Metric | Value |
 |--------|-------|
@@ -47,7 +65,7 @@ Run on a **representative clone** of your production ontology tree:
 ```bash
 # Replace with your ontology root
 ONTO=/path/to/ontologies
-VERSION=0.12.0
+VERSION=0.13.0
 
 # Catalog stats
 time ./ontocore-v${VERSION}-x86_64-unknown-linux-gnu inspect "$ONTO" --format json

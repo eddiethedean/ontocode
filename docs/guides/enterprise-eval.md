@@ -1,6 +1,6 @@
 # Evaluating OntoCode for your organization
 
-This page helps security, platform, and ontology teams decide whether OntoCode **v0.12.0** fits your workflow. It is honest about **what ships today** vs the v1.0 Protégé-competitive target.
+This page helps security, platform, and ontology teams decide whether OntoCode **v0.13.0** fits your workflow. It is honest about **what ships today** vs the v1.0 Protégé-competitive target.
 
 Canonical capability matrix: [What ships today](../SHIPPED.md).
 
@@ -26,7 +26,7 @@ Prefer Protégé or other tools (or wait for v1.0) if you need:
 | [LGPL compliance](lgpl-compliance.md) | Legal — horned-owl obligations |
 | [Protégé coexistence](protege-coexistence.md) | Ontology teams — split workflow with Protégé |
 
-## What ships today (v0.12.0)
+## What ships today (v0.13.0)
 
 | Capability | Status |
 |------------|--------|
@@ -40,9 +40,9 @@ Prefer Protégé or other tools (or wait for v1.0) if you need:
 | EL explanations (where OntoLogos supports) | **Shipped** (EL-first; DL clash traces partial) |
 | React entity inspector + graph visualization | **Shipped** |
 | OBO format index + `obo_id` in explorer | **Shipped** |
-| OBO write-back in VS Code + CLI (`ontocore-obo`) | **Shipped** (v0.12) |
-| Turtle domain/range/chains/individual assertions | **Shipped** (v0.12) |
-| OWL/XML read-only catalog (`.owl`, `.owx`) | **Shipped** (v0.12) |
+| OBO write-back in VS Code + CLI (`ontocore-obo`) | **Shipped** (v0.13) |
+| Turtle domain/range/chains/individual assertions | **Shipped** (v0.13) |
+| OWL/XML read-only catalog (`.owl`, `.owx`) | **Shipped** (v0.13) |
 | ROBOT CLI interop (`ontocore robot`, LSP `runRobot`) | **Shipped** (requires Java + `robot` on PATH) |
 | Full OWL 2 DL axiom catalog (all axiom kinds editable) | **Partial** (Turtle + OBO; Horned formats read-only) |
 | Semantic diff | **Shipped** (v0.10 — CLI, LSP, VS Code panel) |

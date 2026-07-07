@@ -1,6 +1,6 @@
-# Ontology authoring (OntoCore v0.12)
+# Ontology authoring (OntoCore v0.13)
 
-> **Status:** Documents behavior in **OntoCore v0.12.0**. Pre-1.0 APIs may change.
+> **Status:** Documents behavior in **OntoCore v0.13.0**. Pre-1.0 APIs may change.
 > Canonical feature list: [What ships today](SHIPPED.md).
 
 OntoCode provides **Turtle and OBO write-back** for simple edits and **Manchester** for complex class expressions — without Protégé.
@@ -61,7 +61,7 @@ For complex class expressions (restrictions, `and`/`or`, cardinality):
 6. **Validate** shows parse diagnostics and an expression tree.
 7. **Preview** shows the Turtle fragment; **Apply** writes the patch.
 
-Manchester scope: named classes, `and`/`or`, `some`/`only`, `min`/`max`/`exact` cardinality, nesting, and **DisjointClasses** via IRI patch ops. Domain, range, and **property chains** are editable via inspector and patch JSON (v0.12).
+Manchester scope: named classes, `and`/`or`, `some`/`only`, `min`/`max`/`exact` cardinality, nesting, and **DisjointClasses** via IRI patch ops. Domain, range, and **property chains** are editable via inspector and patch JSON (v0.13).
 
 ## Manage Imports (v0.11)
 

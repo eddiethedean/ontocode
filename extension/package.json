@@ -2,7 +2,7 @@
   "name": "ontocode",
   "displayName": "OntoCode",
   "description": "Ontology IDE for VS Code powered by OntoCore. Browse, edit Turtle, query, reason (EL–DL), validate, and diff OWL/RDF/OBO ontologies from the IDE or CI.",
-  "version": "0.12.0",
+  "version": "0.13.0",
   "publisher": "ontocode",
   "license": "MIT",
   "repository": {
@@ -347,6 +347,11 @@
           "type": "string",
           "default": "",
           "description": "Trusted workspaces only: path to ROBOT CLI or JAR. When empty, ROBOT is resolved from PATH."
+        },
+        "ontocode.diagnostics.rules": {
+          "type": "object",
+          "default": {},
+          "description": "Per-rule diagnostic overrides (enabled, severity). Mirrors `.ontocore/diagnostics.toml` [rules.*] entries; file config takes precedence when present."
         }
       }
     }

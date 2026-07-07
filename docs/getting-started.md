@@ -73,7 +73,7 @@ ontocore validate /path/to/your/ontologies
 5. Extract and run (Linux example; replace `0.12.0` with your tag):
 
 ```bash
-VERSION=0.12.0
+VERSION=0.13.0
 ASSET="ontocore-v${VERSION}-x86_64-unknown-linux-gnu.tar.gz"
 BIN="ontocore-v${VERSION}-x86_64-unknown-linux-gnu"
 tar xzf "${ASSET}"

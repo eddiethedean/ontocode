@@ -1,6 +1,6 @@
-# Patch reference (OntoCore v0.12)
+# Patch reference (OntoCore v0.13)
 
-> **Status:** Documents behavior in **OntoCore v0.12.0**. Pre-1.0 APIs may change.
+> **Status:** Documents behavior in **OntoCore v0.13.0**. Pre-1.0 APIs may change.
 > Canonical feature list: [What ships today](SHIPPED.md).
 
 Patch write-back (Turtle and OBO) uses a JSON array of patch operations. The CLI (`ontocore patch`) and LSP (`ontocore/applyAxiomPatch`) accept the same envelope; operation sets differ by file extension.
@@ -240,9 +240,9 @@ Method: `ontocore/applyAxiomPatch`
 
 See [lsp-api.md](lsp-api.md) and [authoring.md](authoring.md).
 
-## Limitations (v0.12)
+## Limitations (v0.13)
 
 - Write-back: **Turtle (`.ttl`) and OBO (`.obo`)**; RDF/XML, OWL/XML, JSON-LD are read-only
 - Simple `add_sub_class_of` parent must be a **named class IRI**; use Manchester ops (`add_complex_sub_class_of`, `add_equivalent_class`, etc.) for class expressions
-- Manchester: `SubClassOf`, `EquivalentClasses`, and `DisjointClasses`; property chains editable via patch ops and inspector (v0.12)
+- Manchester: `SubClassOf`, `EquivalentClasses`, and `DisjointClasses`; property chains editable via patch ops and inspector (v0.13)
 - Patch engine uses targeted text edits; unusual formatting may need manual review

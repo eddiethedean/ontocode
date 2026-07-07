@@ -1,11 +1,13 @@
 import { useEffect } from "react";
 import { Panel } from "../components/ui";
-import { getVsCodeApi } from "../vscodeApi";
+import { useWorkspaceHost } from "../context/HostContext";
 
-export function SmokePanel(): JSX.Element {
+export function SmokePanel(_props?: import("../workspaces/types").WorkspaceProps): JSX.Element {
+  const host = useWorkspaceHost();
+
   useEffect(() => {
-    getVsCodeApi().postMessage({ type: "ready", panel: "smoke" });
-  }, []);
+    host.postToCore({ type: "ready", panel: "smoke" });
+  }, [host]);
 
   return (
     <Panel>

@@ -156,14 +156,18 @@ export interface DiffPayload {
   };
 }
 
+import type { CurrentFocus, ReasoningStatePayload } from "../focus/types";
+
 /** Host → React */
 export type HostMessage =
   | { type: "init"; panel: PanelKind }
+  | { type: "focusState"; focus: CurrentFocus }
+  | { type: "reasoningState"; reasoning: ReasoningStatePayload }
   | { type: "loadEntity"; detail: EntityDetailPayload; classOptions: string[] }
   | { type: "graphData"; graph: GraphPayload }
   | { type: "preview"; text: string }
   | { type: "loadRefactorPlan"; plan: RefactorPlanPayload }
-  | { type: "queryInit"; saved: SavedQuery[]; history: SavedQuery[]; sqlTables: string[] }
+  | { type: "queryInit"; saved: SavedQuery[]; history: SavedQuery[]; sqlTables: string[]; sqlSchema?: Array<{ name: string; columns: Array<{ name: string; type: string }> }> }
   | { type: "queryResult"; runId: number; result?: TabularQueryResult; error?: string }
   | { type: "manchesterInit"; entityIri: string; axiomKind: string; expression: string; completions: ManchesterCompletions }
   | { type: "manchesterValidation"; seq: number; result?: ManchesterValidationResult; error?: string }
@@ -192,7 +196,9 @@ export type WebviewMessage =
   | { type: "exportQueryResult"; format: "csv" | "json"; runId?: number }
   | { type: "validateManchester"; expression: string; axiomKind: string; seq: number }
   | { type: "applyManchester"; expression: string; axiomKind: string; previewOnly: boolean }
-  | { type: "copyMarkdown" };
+  | { type: "copyMarkdown" }
+  | { type: "setFocus"; focus: CurrentFocus }
+  | { type: "showNotification"; message: string; level?: "info" | "warning" | "error" };
 
 export function isWebviewMessage(data: unknown): data is WebviewMessage {
   if (typeof data !== "object" || data === null || !("type" in data)) {
@@ -246,6 +252,17 @@ export function isWebviewMessage(data: unknown): data is WebviewMessage {
     case "applyRefactor":
     case "cancelRefactor":
       return true;
+    case "setFocus": {
+      const focus = (data as { focus?: unknown }).focus;
+      return (
+        typeof focus === "object" &&
+        focus !== null &&
+        typeof (focus as { kind?: unknown }).kind === "string" &&
+        typeof (focus as { id?: unknown }).id === "string"
+      );
+    }
+    case "showNotification":
+      return typeof (data as { message?: unknown }).message === "string";
     default:
       return false;
   }

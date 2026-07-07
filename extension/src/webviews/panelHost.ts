@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import { getWebviewHtml } from "./getWebviewHtml";
+import { focusRelay } from "../focus/focusRelay";
 import type { HostMessage, PanelKind, WebviewMessage } from "./messages";
 import { isWebviewMessage } from "./messages";
 
@@ -24,8 +25,12 @@ export class PanelHost {
   ) {
     panel.onDidDispose(() => {
       this.disposed = true;
+      this.unregisterFocus?.();
     });
+    this.unregisterFocus = focusRelay.registerHost(this);
   }
+
+  private unregisterFocus?: () => void;
 
   get isDisposed(): boolean {
     return this.disposed;
@@ -69,6 +74,7 @@ export class PanelHost {
     }
     this.webviewReady = true;
     void this.panel.webview.postMessage({ type: "init", panel: this.panelKind });
+    focusRelay.syncHost(this);
     this.flushPending();
   }
 
@@ -111,6 +117,19 @@ export class PanelHost {
       }
       if (data.type === "ready" && data.panel === options.panel) {
         host.onWebviewReady();
+      }
+      if (data.type === "setFocus") {
+        focusRelay.setFocus(data.focus, { broadcast: true });
+      }
+      if (data.type === "showNotification") {
+        const level = data.level ?? "info";
+        if (level === "error") {
+          void vscode.window.showErrorMessage(data.message);
+        } else if (level === "warning") {
+          void vscode.window.showWarningMessage(data.message);
+        } else {
+          void vscode.window.showInformationMessage(data.message);
+        }
       }
       if (options.onMessage) {
         await options.onMessage(data, panel);

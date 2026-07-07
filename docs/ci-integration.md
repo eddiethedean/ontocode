@@ -65,7 +65,7 @@ For faster CI without compiling Rust dependencies:
 ```yaml
       - name: Download and validate ontology files
         run: |
-          VERSION=0.12.0
+          VERSION=0.13.0
           ASSET="ontocore-v${VERSION}-x86_64-unknown-linux-gnu.tar.gz"
           BIN="ontocore-v${VERSION}-x86_64-unknown-linux-gnu"
           curl -fsSL -o "${ASSET}" \

@@ -1,5 +1,6 @@
 import * as vscode from "vscode";
 import type { OntoCodeTestHooks } from "./api";
+import { focusRelay } from "./focus/focusRelay";
 import { EntityInspectorPanel } from "./webviews/inspector";
 import { QueryWorkbenchPanel } from "./webviews/queryWorkbenchReact";
 import { assertWebviewHtmlRoutesPanel } from "./webviews/webviewBootstrap";
@@ -108,6 +109,10 @@ export function createOntoCodeTestHooks(): OntoCodeTestHooks {
 
     getInspectorPanelRef(): object | undefined {
       return EntityInspectorPanel.currentPanel;
+    },
+
+    getCanonicalFocus() {
+      return focusRelay.getFocus();
     },
 
     async disposeAllPanels(): Promise<void> {

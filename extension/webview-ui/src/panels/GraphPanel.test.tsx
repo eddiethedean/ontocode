@@ -1,4 +1,5 @@
-import { render, screen, waitFor, fireEvent } from "@testing-library/react";
+import { screen, waitFor, fireEvent } from "@testing-library/react";
+import { renderWithProviders } from "../test/render";
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect } from "vitest";
 import { GraphPanel } from "./GraphPanel";
@@ -13,7 +14,7 @@ import {
 
 describe("GraphPanel", () => {
   it("posts ready on mount and shows empty state", async () => {
-    render(<GraphPanel />);
+    renderWithProviders(<GraphPanel />);
 
     expect(screen.getByText("No graph data")).toBeInTheDocument();
 
@@ -23,7 +24,7 @@ describe("GraphPanel", () => {
   });
 
   it("requests graph on init when no data loaded", async () => {
-    render(<GraphPanel />);
+    renderWithProviders(<GraphPanel />);
 
     postHostMessage({ type: "init", panel: "graph" });
 
@@ -39,7 +40,7 @@ describe("GraphPanel", () => {
   });
 
   it("renders graph canvas when data arrives", async () => {
-    render(<GraphPanel />);
+    renderWithProviders(<GraphPanel />);
     postHostMessage({ type: "graphData", graph: graphPayload });
 
     await waitFor(() => {
@@ -49,7 +50,7 @@ describe("GraphPanel", () => {
   });
 
   it("shows truncated badge when graph is truncated", async () => {
-    render(<GraphPanel />);
+    renderWithProviders(<GraphPanel />);
     postHostMessage({
       type: "graphData",
       graph: { ...graphPayload, truncated: true },
@@ -59,7 +60,7 @@ describe("GraphPanel", () => {
   });
 
   it("shows error empty state on host error", async () => {
-    render(<GraphPanel />);
+    renderWithProviders(<GraphPanel />);
     postHostMessage({ type: "error", message: "Index missing" });
 
     expect(await screen.findByText("Graph error")).toBeInTheDocument();
@@ -68,7 +69,7 @@ describe("GraphPanel", () => {
 
   it("refresh sends updated filter options", async () => {
     const user = userEvent.setup();
-    render(<GraphPanel />);
+    renderWithProviders(<GraphPanel />);
 
     await user.click(screen.getByLabelText("Include inferred (reasoner)"));
     await user.click(screen.getByRole("button", { name: "Refresh graph" }));
@@ -80,7 +81,7 @@ describe("GraphPanel", () => {
   });
 
   it("updates depth via range control", () => {
-    render(<GraphPanel />);
+    renderWithProviders(<GraphPanel />);
 
     const slider = screen.getByRole("slider");
     fireEvent.change(slider, { target: { value: "4" } });
@@ -94,7 +95,7 @@ describe("GraphPanel", () => {
       "",
       "/?graphKind=property&root=http://example.org%23Person"
     );
-    render(<GraphPanel />);
+    renderWithProviders(<GraphPanel />);
     postHostMessage({ type: "init", panel: "graph" });
 
     await waitFor(() => {
@@ -108,7 +109,7 @@ describe("GraphPanel", () => {
 
   it("updates rootIri when graphData includes rootIri", async () => {
     const user = userEvent.setup();
-    render(<GraphPanel />);
+    renderWithProviders(<GraphPanel />);
     postHostMessage({
       type: "graphData",
       graph: graphPayload,
@@ -127,7 +128,7 @@ describe("GraphPanel", () => {
   });
 
   it("does not auto-request graph on init after data is loaded", async () => {
-    render(<GraphPanel />);
+    renderWithProviders(<GraphPanel />);
     postHostMessage({ type: "graphData", graph: graphPayload });
     await waitFor(() => expect(document.querySelector(".react-flow")).toBeInTheDocument());
 
@@ -138,7 +139,7 @@ describe("GraphPanel", () => {
 
   it("includes hide_deprecated filter when toggled", async () => {
     const user = userEvent.setup();
-    render(<GraphPanel />);
+    renderWithProviders(<GraphPanel />);
 
     await user.click(screen.getByLabelText("Hide deprecated"));
     await user.click(screen.getByRole("button", { name: "Refresh graph" }));
@@ -150,7 +151,7 @@ describe("GraphPanel", () => {
   });
 
   it("shows empty state when graph has zero nodes", async () => {
-    render(<GraphPanel />);
+    renderWithProviders(<GraphPanel />);
     postHostMessage({
       type: "graphData",
       graph: { ...graphPayload, nodes: [] },
@@ -161,7 +162,7 @@ describe("GraphPanel", () => {
   });
 
   it("renders with inferred edges without crashing", async () => {
-    render(<GraphPanel />);
+    renderWithProviders(<GraphPanel />);
     postHostMessage({ type: "graphData", graph: graphWithInferredEdge });
 
     await waitFor(() => {
@@ -174,7 +175,7 @@ describe("GraphPanel", () => {
   });
 
   it("ignores invalid host messages", async () => {
-    render(<GraphPanel />);
+    renderWithProviders(<GraphPanel />);
     postHostMessage({ type: "graphData", graph: graphPayload });
     await waitFor(() => expect(document.querySelector(".react-flow")).toBeInTheDocument());
 

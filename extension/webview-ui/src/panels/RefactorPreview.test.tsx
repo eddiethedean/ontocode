@@ -1,4 +1,5 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
+import { renderWithProviders } from "../test/render";
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect } from "vitest";
 import { RefactorPreviewPanel } from "./RefactorPreview";
@@ -12,7 +13,7 @@ import {
 
 describe("RefactorPreviewPanel", () => {
   it("shows loading state and posts ready", async () => {
-    render(<RefactorPreviewPanel />);
+    renderWithProviders(<RefactorPreviewPanel />);
 
     expect(screen.getByRole("status")).toHaveTextContent("Loading refactor preview…");
 
@@ -22,7 +23,7 @@ describe("RefactorPreviewPanel", () => {
   });
 
   it("renders plan warnings and diff panes", async () => {
-    render(<RefactorPreviewPanel />);
+    renderWithProviders(<RefactorPreviewPanel />);
     postHostMessage({ type: "loadRefactorPlan", plan: refactorPlan });
 
     expect(await screen.findByRole("heading", { name: "Refactor preview" })).toBeInTheDocument();
@@ -34,7 +35,7 @@ describe("RefactorPreviewPanel", () => {
 
   it("applies refactor from sticky actions", async () => {
     const user = userEvent.setup();
-    render(<RefactorPreviewPanel />);
+    renderWithProviders(<RefactorPreviewPanel />);
     postHostMessage({ type: "loadRefactorPlan", plan: refactorPlan });
     await screen.findByRole("heading", { name: "Refactor preview" });
 
@@ -44,7 +45,7 @@ describe("RefactorPreviewPanel", () => {
 
   it("cancels refactor from sticky actions", async () => {
     const user = userEvent.setup();
-    render(<RefactorPreviewPanel />);
+    renderWithProviders(<RefactorPreviewPanel />);
     postHostMessage({ type: "loadRefactorPlan", plan: refactorPlan });
     await screen.findByRole("heading", { name: "Refactor preview" });
 
@@ -54,7 +55,7 @@ describe("RefactorPreviewPanel", () => {
 
   it("switches between multiple file diffs", async () => {
     const user = userEvent.setup();
-    render(<RefactorPreviewPanel />);
+    renderWithProviders(<RefactorPreviewPanel />);
     postHostMessage({ type: "loadRefactorPlan", plan: multiFileRefactorPlan });
     await screen.findByRole("heading", { name: "Refactor preview" });
 
@@ -67,7 +68,7 @@ describe("RefactorPreviewPanel", () => {
   });
 
   it("renders without warnings section when plan has none", async () => {
-    render(<RefactorPreviewPanel />);
+    renderWithProviders(<RefactorPreviewPanel />);
     postHostMessage({
       type: "loadRefactorPlan",
       plan: { ...refactorPlan, warnings: undefined },
@@ -79,7 +80,7 @@ describe("RefactorPreviewPanel", () => {
 
   it("resets selected file when a new plan arrives", async () => {
     const user = userEvent.setup();
-    render(<RefactorPreviewPanel />);
+    renderWithProviders(<RefactorPreviewPanel />);
     postHostMessage({ type: "loadRefactorPlan", plan: multiFileRefactorPlan });
     await screen.findByRole("heading", { name: "Refactor preview" });
 
@@ -90,7 +91,7 @@ describe("RefactorPreviewPanel", () => {
   });
 
   it("ignores invalid host messages", async () => {
-    render(<RefactorPreviewPanel />);
+    renderWithProviders(<RefactorPreviewPanel />);
     postHostMessage({ type: "loadRefactorPlan", plan: refactorPlan });
     await screen.findByRole("heading", { name: "Refactor preview" });
 

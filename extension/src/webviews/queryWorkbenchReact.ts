@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { runSqlQuery, runSparqlQuery } from "../lsp/client";
+import { runSqlQuery, runSparqlQuery, listSqlSchema } from "../lsp/client";
 import { SavedQuery, TabularQueryResult } from "../lsp/protocol";
 import { PanelHost } from "./panelHost";
 import type { WebviewMessage } from "./messages";
@@ -37,10 +37,10 @@ export class QueryWorkbenchPanel {
     });
   }
 
-  public static show(context: vscode.ExtensionContext): QueryWorkbenchPanel {
+  public static async show(context: vscode.ExtensionContext): Promise<QueryWorkbenchPanel> {
     if (QueryWorkbenchPanel.current) {
       QueryWorkbenchPanel.current.host.panel.reveal(vscode.ViewColumn.Beside);
-      QueryWorkbenchPanel.current.bootstrap();
+      await QueryWorkbenchPanel.current.bootstrap();
       return QueryWorkbenchPanel.current;
     }
     const host = PanelHost.create(context.extensionUri, {
@@ -57,19 +57,27 @@ export class QueryWorkbenchPanel {
     });
     const instance = new QueryWorkbenchPanel(host, context);
     QueryWorkbenchPanel.current = instance;
-    instance.bootstrap();
+    void instance.bootstrap();
     return instance;
   }
 
-  private bootstrap(): void {
+  private async bootstrap(): Promise<void> {
     const saved = this.context.workspaceState.get<SavedQuery[]>(SAVED_KEY) ?? [];
     const history =
       this.context.workspaceState.get<SavedQuery[]>(HISTORY_KEY) ?? [];
+    let sqlSchema: Awaited<ReturnType<typeof listSqlSchema>> | undefined;
+    try {
+      sqlSchema = await listSqlSchema();
+    } catch {
+      sqlSchema = undefined;
+    }
+    const sqlTables = sqlSchema?.map((t) => t.name) ?? [...SQL_TABLES];
     this.host.postMessage({
       type: "queryInit",
       saved,
       history,
-      sqlTables: [...SQL_TABLES],
+      sqlTables,
+      sqlSchema,
     });
   }
 
@@ -120,7 +128,7 @@ export class QueryWorkbenchPanel {
           .get<number>("queryHistoryLimit", DEFAULT_HISTORY_LIMIT)
       );
       await this.context.workspaceState.update(HISTORY_KEY, history);
-      this.bootstrap();
+      await this.bootstrap();
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
       if (!shouldDeliverQueryResult(runId, this.runId)) {
@@ -142,7 +150,7 @@ export class QueryWorkbenchPanel {
       { name, mode, text }
     );
     await this.context.workspaceState.update(SAVED_KEY, saved);
-    this.bootstrap();
+    await this.bootstrap();
     void vscode.window.showInformationMessage(`OntoCode: saved query "${name}"`);
   }
 

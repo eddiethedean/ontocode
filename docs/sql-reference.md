@@ -1,6 +1,6 @@
-# SQL query reference (OntoCore v0.12)
+# SQL query reference (OntoCore v0.13)
 
-> **Status:** Documents behavior in **OntoCore v0.12.0**. Pre-1.0 APIs may change.
+> **Status:** Documents behavior in **OntoCore v0.13.0**. Pre-1.0 APIs may change.
 > Canonical feature list: [What ships today](SHIPPED.md).
 
 OntoCore exposes indexed ontology data as **virtual tables** queried with a SQL-like `SELECT` syntax. The CLI (`ontocore query`) and Rust API (`query_catalog`) use the same engine.
@@ -86,6 +86,20 @@ Entity tables share these columns (`properties` is the union of all property kin
 | `predicate` | Predicate IRI |
 | `object` | Object IRI or value |
 | `axiom_kind` | e.g. `sub_class_of` |
+
+### Horned-OWL axiom projections (v0.13)
+
+These tables project structured axioms from the Horned-OWL catalog (Turtle, OWL/XML, `.owx`):
+
+| Table | Columns |
+|-------|---------|
+| `restrictions` | `class_iri`, `property_iri`, `restriction_kind`, `filler` |
+| `equivalent_class_axioms` | `class_iri`, `expression` |
+| `disjoint_class_axioms` | `class_iri`, `disjoint_with` |
+| `domain_axioms` | `property_iri`, `domain` |
+| `range_axioms` | `property_iri`, `range` |
+
+Browse live schema in the Query Workbench **Schema** sidebar (`ontocore/listSqlSchema`).
 
 ### `namespaces`
 

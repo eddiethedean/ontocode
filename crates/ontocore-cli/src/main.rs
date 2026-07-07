@@ -3,7 +3,8 @@ use clap::{Parser, Subcommand, ValueEnum};
 use ontocore_catalog::{CatalogStats, IndexBuilder, OntologyCatalog};
 use ontocore_diff::{
     apply_unsat_diff, catalog_at_git_ref, catalog_at_worktree, diff_catalogs,
-    diff_git_refs_with_catalogs, format_diff_json, format_diff_markdown, format_diff_text,
+    diff_git_refs_with_catalogs, format_diff_json, format_diff_markdown, format_diff_pr_summary,
+    format_diff_text,
     parse_git_range, DiffResult,
 };
 use ontocore_docs::{export_workspace, ExportFormat, ExportOptions};
@@ -25,7 +26,7 @@ use std::path::{Path, PathBuf};
 #[command(
     name = "ontocore",
     version,
-    about = "Local-first ontology index and query engine (OntoCode v0.12)"
+    about = "Local-first ontology index and query engine (OntoCode v0.13)"
 )]
 struct Cli {
     #[command(subcommand)]
@@ -158,6 +159,9 @@ enum Commands {
         format: DiffFormat,
         #[arg(long)]
         breaking_only: bool,
+        /// Emit a Markdown summary suitable for pull request descriptions
+        #[arg(long)]
+        pr_summary: bool,
     },
 }
 
@@ -526,6 +530,7 @@ fn main() -> Result<()> {
             reasoner,
             format,
             breaking_only,
+            pr_summary,
         } => {
             let diff = run_diff(
                 git_range.as_deref(),
@@ -534,10 +539,14 @@ fn main() -> Result<()> {
                 repo.as_deref(),
                 reasoner,
             )?;
-            let output = match format {
-                DiffFormat::Json => format_diff_json(&diff),
-                DiffFormat::Markdown => format_diff_markdown(&diff, breaking_only),
-                DiffFormat::Text => format_diff_text(&diff, breaking_only),
+            let output = if pr_summary {
+                format_diff_pr_summary(&diff)
+            } else {
+                match format {
+                    DiffFormat::Json => format_diff_json(&diff),
+                    DiffFormat::Markdown => format_diff_markdown(&diff, breaking_only),
+                    DiffFormat::Text => format_diff_text(&diff, breaking_only),
+                }
             };
             println!("{output}");
         }

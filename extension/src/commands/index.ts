@@ -8,6 +8,7 @@ import {
 import { patchFailureMessage } from "../lsp/patchFeedback";
 import { PatchEntityKind, PatchOp } from "../lsp/protocol";
 import { EntityInspectorPanel } from "../webviews/inspector";
+import { focusRelay } from "../focus/focusRelay";
 import { GraphPanel } from "../webviews/graphPanel";
 import { QueryWorkbenchPanel } from "../webviews/queryWorkbenchReact";
 import {
@@ -505,6 +506,7 @@ async function openInspector(
   onRefresh?: () => Promise<void>
 ): Promise<void> {
   const requestId = ++inspectorRequestSeq;
+  focusRelay.setEntityFocus(iri, "explorer");
   const snapshot = await getCatalogSnapshot();
   if (requestId !== inspectorRequestSeq) {
     return;

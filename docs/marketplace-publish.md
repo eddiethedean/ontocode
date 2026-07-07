@@ -66,7 +66,7 @@ From v0.11.3, the [release workflow on GitHub](https://github.com/eddiethedean/o
 
 ```bash
 npm install -g ovsx
-ovsx publish dist/ontocode-v0.11.3.vsix -p "$OVSX_PAT"
+ovsx publish dist/ontocode-v0.12.0.vsix -p "$OVSX_PAT"
 ```
 
 ### After Open VSX publish

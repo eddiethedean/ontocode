@@ -98,7 +98,7 @@ See [PLUGIN_SPEC.md](PLUGIN_SPEC.md) for `WorkflowPlugin` / `BuildPlugin` interf
 | Workflow | OntoCode / OntoCore role |
 |----------|--------------------------|
 | Open ODK repo | Index standard layout; show imports and modules in explorer |
-| Edit source `.ttl` / `.obo` | Turtle write-back; OBO read-only in VS Code until v1.0 |
+| Edit source `.ttl` / `.obo` | Turtle and OBO write-back (v0.12); RDF/XML read-only in VS Code |
 | Run QC | `ontocore validate` + ROBOT `report` + owlmake QC plugin |
 | Run release | owlmake or ROBOT via plugin/CLI; inspect outputs in workspace |
 | CI gates | `ontocore validate`, `ontocore classify`, `ontocore robot validate` |

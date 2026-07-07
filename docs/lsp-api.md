@@ -272,7 +272,7 @@ Apply Turtle patch operations. See [authoring.md](authoring.md).
 | `entity_detail` | Updated `EntityDetail` after successful apply (LSP only) |
 | `reindex_warning` | Present when apply succeeded but reindex failed |
 
-**`EntityAxiomSummary` kinds:** `sub_class_of`, `equivalent_class`, `disjoint_class`, `domain`, `range`, `property_chain` (property chains are view-only).
+**`EntityAxiomSummary` kinds:** `sub_class_of`, `equivalent_class`, `disjoint_class`, `domain`, `range`, `property_chain` (property chains editable via patch ops since v0.12).
 
 **Import ops (v0.11):** `add_import` and `remove_import` — see [patch-reference.md](patch-reference.md) and [Manage Imports](ontocode/manage-imports.md).
 

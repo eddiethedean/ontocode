@@ -7,7 +7,7 @@ Semantic catalog and index builder for [OntoCore](https://github.com/eddiethedea
 ## Install
 
 ```toml
-ontocore-catalog = "0.11"
+ontocore-catalog = "0.12"
 ```
 
 Supports incremental rebuilds (content-hash reuse), optional disk cache (`.ontocore/cache/`), and config fingerprinting for CI.

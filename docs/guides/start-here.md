@@ -6,14 +6,15 @@ Pick one of two documentation paths, then follow the next step for your task.
 
 | Path | When to use | Start |
 |------|-------------|-------|
-| **VS Code extension** | Browse, edit Turtle, Query Workbench, reasoner panels — no Rust install | [First success (~10 min)](first-success.md) |
+| **Which artifact?** | Not sure what to install (extension vs CLI vs crate) | [Which artifact do I need?](which-artifact.md) |
+| **VS Code extension** | Browse, edit Turtle/OBO, Query Workbench, reasoner panels — no Rust install | [First success (~10 min)](first-success.md) |
 | **Rust & CLI** | `cargo install ontocore-cli`, embed crates, CI validation | [Rust & CLI docs](rust-crates.md) |
 
 New to OWL/RDF vocabulary? Read [Ontology concepts](../concepts.md) first.
 
 ## When not to use OntoCode (today)
 
-- You need **full OBO write-back** in the IDE (OBO is index/browse only; edit Turtle or use ROBOT).
+- You need **OWL/XML or RDF/XML in-place write-back** — edit as Turtle/OBO or use Protégé.
 - You need **full SQL** (JOINs, `ORDER BY`, `LIKE`) — use SQL-like virtual tables or SPARQL instead.
 - You need a **plugin host** or owlmake integration (planned v1.0; not installable yet).
 

@@ -53,7 +53,7 @@ For complex class expressions (restrictions, `and`/`or`, cardinality):
 6. **Validate** shows parse diagnostics and an expression tree.
 7. **Preview** shows the Turtle fragment; **Apply** writes the patch.
 
-Manchester scope: named classes, `and`/`or`, `some`/`only`, `min`/`max`/`exact` cardinality, nesting, and **DisjointClasses** via IRI patch ops. Domain, range, and property chains appear in the axiom catalog (chains are view-only).
+Manchester scope: named classes, `and`/`or`, `some`/`only`, `min`/`max`/`exact` cardinality, nesting, and **DisjointClasses** via IRI patch ops. Domain, range, and **property chains** are editable via inspector and patch JSON (v0.12).
 
 ## Manage Imports (v0.11)
 
@@ -130,7 +130,7 @@ When you apply a patch or Manchester edit in VS Code, the language server uses t
 
 ## Limitations
 
-- Write-back is **Turtle only**
+- Write-back is **Turtle (`.ttl`) and OBO (`.obo`)**; RDF/XML, OWL/XML, and JSON-LD are read-only
 - Complex axioms appear in the inspector and Manchester editor but **not** as edges in the class hierarchy tree (named-parent edges only; use reasoner for inferred hierarchy)
 - Manchester autocomplete uses catalog **Insert** pickers (no inline buffer autocomplete yet)
 - No SQL/SPARQL editor autocomplete in the workbench (v0.8+)

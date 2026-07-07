@@ -83,7 +83,7 @@ Full gap analysis: [Protégé parity matrix](../design/PROTEGE_PARITY.md).
 | Limitation | Impact |
 |------------|--------|
 | **Multi-root VS Code workspaces** | **All folders indexed** (v0.10+) |
-| **Write-back** | **Turtle only**; OWL/XML is read-only in the inspector |
+| **Write-back** | **Turtle and OBO (`.obo`)**; RDF/XML and OWL/XML read-only in the inspector |
 | **Reasoning** | EL/RL/RDFS/DL/auto via OntoLogos 1.0.0; explanations EL-first; results may differ from Protégé on partial OWL mappings |
 | **CLI release binaries** | Linux x64 only; macOS/Windows use `cargo install` or bundled LSP in VSIX |
 | **Scale** | Workspaces above [workspace limits](../workspace-limits.md) may fail indexing — prefer CLI batch workflows for very large terminologies |

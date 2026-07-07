@@ -119,17 +119,17 @@
 
 ## Manchester scope (v0.8+)
 
-**Shipped:** named classes; `and` / `or`; `some` / `only`; `min` / `max` / `exact` cardinality; nested restrictions; `SubClassOf`, `EquivalentClasses`, and `DisjointClasses` via Manchester editor or patch JSON; domain/range and property chains in axiom catalog (chains view-only).
+**Shipped:** named classes; `and` / `or`; `some` / `only`; `min` / `max` / `exact` cardinality; nested restrictions; `SubClassOf`, `EquivalentClasses`, and `DisjointClasses` via Manchester editor or patch JSON; domain/range editing; **property chain editing** (v0.12) via inspector and patch JSON.
 
-**Not shipped:** property chain editing, full DL axiom catalog, inline Manchester autocomplete in the text buffer. See [Protégé parity](design/PROTEGE_PARITY.md) for the v1.0 target.
+**Not shipped:** full DL axiom catalog for all formats, inline Manchester autocomplete in the text buffer. See [Protégé parity](design/PROTEGE_PARITY.md) for the v1.0 target.
 
 ## Known limitations
 
 | Limitation | Notes |
 |------------|-------|
 | Multi-root VS Code workspaces | **All folders indexed** (v0.10+). Manual **Index Workspace** may prompt when multiple roots are open |
-| Write-back | **Turtle only** |
-| Refactoring | **Turtle only**; extract module uses direct-reference closure |
+| Write-back | **Turtle (`.ttl`) and OBO (`.obo`)**; RDF/XML, OWL/XML, JSON-LD, N-Triples read-only |
+| Refactoring | **Turtle (`.ttl`) only**; extract module uses direct-reference closure |
 | Class hierarchy tree | Named-parent edges; **inferred/combined** after reasoner run |
 | Reasoning | **EL / RL / RDFS / DL / auto** via OntoLogos 1.0 (HermiT parity) |
 | CLI release binaries | Linux x64 only; macOS/Windows use `cargo install` or bundled LSP in VSIX |
@@ -137,7 +137,7 @@
 
 ## What's next
 
-Forward milestones (v0.12 diagnostics & quality → v1.0 Protégé replacement): **[Platform roadmap](roadmap.md)**.
+Forward milestones (v0.13 platform hardening → v1.0 Protégé replacement): **[Platform roadmap](roadmap.md)**.
 
 ## Where to learn more
 

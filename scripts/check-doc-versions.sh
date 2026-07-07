@@ -165,7 +165,28 @@ else
   echo "ok: no stale --version 0.11.2 install pins"
 fi
 
-# User-facing docs must not claim 0.7.x is the current release
+if rg -q 'VERSION=0\.11\.3' "${STALE_PIN_PATHS[@]}" --glob '!**/changelog.md' --glob '!**/CHANGELOG.md' --glob '!**/migration/**' --glob '!**/design/**' 2>/dev/null; then
+  echo "FAIL: stale VERSION=0.11.3 found outside changelog/migration/design" >&2
+  rg -n 'VERSION=0\.11\.3' "${STALE_PIN_PATHS[@]}" --glob '!**/changelog.md' --glob '!**/CHANGELOG.md' --glob '!**/migration/**' --glob '!**/design/**' 2>/dev/null || true
+  fail=1
+else
+  echo "ok: no stale VERSION=0.11.3 install pins"
+fi
+
+if rg -q '--version 0\.11\.3' "${STALE_PIN_PATHS[@]}" --glob '!**/changelog.md' --glob '!**/CHANGELOG.md' --glob '!**/migration/**' --glob '!**/design/**' 2>/dev/null; then
+  echo "FAIL: stale --version 0.11.3 install pin found outside changelog/migration/design" >&2
+  rg -n '--version 0\.11\.3' "${STALE_PIN_PATHS[@]}" --glob '!**/changelog.md' --glob '!**/CHANGELOG.md' --glob '!**/migration/**' --glob '!**/design/**' 2>/dev/null || true
+  fail=1
+else
+  echo "ok: no stale --version 0.11.3 install pins"
+fi
+
+if rg -q 'latest \*\*v0\.11\.x\*\* tag' README.md docs extension crates .github --glob '!**/changelog.md' --glob '!**/CHANGELOG.md' --glob '!**/migration/**' 2>/dev/null; then
+  echo "FAIL: stale v0.11.x release tag reference in user-facing docs" >&2
+  fail=1
+else
+  echo "ok: no stale v0.11.x release tag references"
+fi
 USER_FACING_DOCS=(
   docs/faq.md
   docs/getting-started.md
@@ -418,7 +439,7 @@ if grep -qE 'read-only in the Entity Inspector|Write-back in VS Code remains \*\
 else
   echo "ok: obo-workflow OBO edit status"
 fi
-check_file_contains "docs/guides/protege-coexistence.md" "v0\.11" "protege-coexistence v0.11"
+check_file_contains "docs/guides/protege-coexistence.md" "v0\.12" "protege-coexistence v0.12"
 check_file_contains "docs/guides/release-timeline.md" "non-commitment" "release-timeline disclaimer"
 if grep -qE 'OBO format \+ ROBOT interop.*Not shipped' docs/guides/enterprise-eval.md; then
   echo "FAIL: enterprise-eval.md contradicts SHIPPED.md on OBO/ROBOT" >&2
@@ -551,7 +572,13 @@ else
   echo "ok: no stale ontocore = \"0.10\" user-facing pins"
 fi
 
-# FAQ must not list semantic diff as v1.0-only when SHIPPED documents it
+if rg -q 'ontocore = "0\.11"' "${CRATE_PIN_PATHS[@]}" --glob '!**/migration/**' --glob '!**/design/**' --glob '!**/changelog.md' 2>/dev/null; then
+  echo "FAIL: stale ontocore = \"0.11\" pin found outside migration/design/changelog" >&2
+  rg -n 'ontocore = "0\.11"' "${CRATE_PIN_PATHS[@]}" --glob '!**/migration/**' --glob '!**/design/**' --glob '!**/changelog.md' 2>/dev/null || true
+  fail=1
+else
+  echo "ok: no stale ontocore = \"0.11\" user-facing pins"
+fi
 if grep -qE 'semantic diff\) is the v1\.0 goal|Full Protégé parity \(.*semantic diff\)' docs/faq.md 2>/dev/null; then
   echo "FAIL: docs/faq.md contradicts SHIPPED on semantic diff" >&2
   fail=1
@@ -566,6 +593,44 @@ if grep -A20 'When not to use OntoCode' docs/guides/start-here.md | grep -qE 'Mu
 else
   echo "ok: start-here multi-root placement"
 fi
+
+check_file_contains "mkdocs.yml" "guides/which-artifact.md" "mkdocs which-artifact guide"
+check_file_contains "docs/guides/which-artifact.md" "Which artifact do I need" "which-artifact guide title"
+
+# SHIPPED known limitations must reflect Turtle + OBO write-back (v0.12)
+if grep -qE '\| Write-back \| \*\*Turtle only\*\*' docs/SHIPPED.md 2>/dev/null; then
+  echo "FAIL: docs/SHIPPED.md known limitations still say Turtle-only write-back" >&2
+  fail=1
+else
+  echo "ok: SHIPPED write-back limitations"
+fi
+
+# User-facing docs must not claim OBO inspector is read-only (v0.12 write-back)
+OBO_READONLY_PATHS=(docs README.md extension crates .github)
+if rg -q 'read-only in inspector|OBO is read-only|write-back: Turtle only|write-back is \*\*Turtle only\*\*|writes Turtle only' "${OBO_READONLY_PATHS[@]}" \
+  --glob '!**/changelog.md' --glob '!**/CHANGELOG.md' --glob '!**/migration/**' --glob '!**/design/**' --glob '!**/adr/**' 2>/dev/null; then
+  echo "FAIL: stale OBO read-only or Turtle-only write-back claim in user-facing docs" >&2
+  rg -n 'read-only in inspector|OBO is read-only|write-back: Turtle only|write-back is \*\*Turtle only\*\*|writes Turtle only' "${OBO_READONLY_PATHS[@]}" \
+    --glob '!**/changelog.md' --glob '!**/CHANGELOG.md' --glob '!**/migration/**' --glob '!**/design/**' --glob '!**/adr/**' 2>/dev/null || true
+  fail=1
+else
+  echo "ok: no stale OBO read-only claims"
+fi
+
+# Property chain editing shipped in v0.12 — docs must not say view-only
+if rg -q 'chains view-only|property chains are view-only|chains are view-only' docs README.md extension crates \
+  --glob '!**/changelog.md' --glob '!**/CHANGELOG.md' --glob '!**/migration/**' --glob '!**/design/**' 2>/dev/null; then
+  echo "FAIL: stale property chains view-only claim in user-facing docs" >&2
+  rg -n 'chains view-only|property chains are view-only|chains are view-only' docs README.md extension crates \
+    --glob '!**/changelog.md' --glob '!**/CHANGELOG.md' --glob '!**/migration/**' --glob '!**/design/**' 2>/dev/null || true
+  fail=1
+else
+  echo "ok: no stale property chains view-only claims"
+fi
+
+# Architecture banner must reference v0.12 ships today
+check_file_contains "ARCHITECTURE.md" "v0\.12 ships today" "ARCHITECTURE.md v0.12 banner"
+check_file_contains "docs/architecture.md" "v0\.12 ships today" "docs/architecture.md v0.12 banner"
 
 # Stale CLI alias notes
 if rg -q 'ontocore alias is planned' docs --glob '!**/migration/**' --glob '!**/design/**' 2>/dev/null; then

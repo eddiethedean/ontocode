@@ -1,16 +1,18 @@
 # Protégé coexistence
 
-Guide for teams using Protégé today and evaluating OntoCode **v0.11**. A [first-week migration guide](protege-migration.md) ships today; round-trip and OWL/XML-heavy playbooks are **v1.0 targets**.
+Guide for teams using Protégé today and evaluating OntoCode **v0.12**. A [first-week migration guide](protege-migration.md) ships today; extended OWL/XML-heavy playbooks remain **v1.0 targets**.
 
 Canonical capability matrix: [What ships today](../SHIPPED.md). Decision matrix: [Protégé vs OntoCode](protege-decision.md). Gap analysis: [Protégé parity matrix](../design/PROTEGE_PARITY.md).
 
-## Use OntoCode for (v0.11)
+## Use OntoCode for (v0.12)
 
 | Workflow | Status |
 |----------|--------|
 | Browse ontologies in VS Code | Shipped |
 | Edit labels, comments, parents in Turtle | Shipped |
+| Edit OBO terms (name, synonyms, defs, is_a, …) | Shipped (v0.12) |
 | Complex `SubClassOf` / `EquivalentClasses` / disjoint (Manchester) | Shipped |
+| Property chain editing | Shipped (v0.12) |
 | Workspace refactoring (rename, migrate namespace, move, extract) | Shipped (Turtle; preview + apply) |
 | SQL/SPARQL queries over workspace | Shipped |
 | Graph visualization (class, property, import, neighborhood) | Shipped |
@@ -18,7 +20,7 @@ Canonical capability matrix: [What ships today](../SHIPPED.md). Decision matrix:
 | EL/RL/RDFS/DL classification | Shipped |
 | OWL 2 DL classification (`dl` / `auto` profiles) | Shipped (OntoLogos 1.0.0) |
 | Inferred hierarchy toggle | Shipped (after reasoner run) |
-| OBO format index + `obo_id` in explorer | Shipped (write-back: Turtle only in VS Code) |
+| OBO format index + `obo_id` in explorer | Shipped |
 | ROBOT CLI in CI (`ontocore robot`) | Shipped (requires Java + `robot` on PATH) |
 | Multi-root VS Code workspaces | Shipped (all folders indexed) |
 | Semantic diff (CLI / LSP / panel) | Shipped |
@@ -27,24 +29,22 @@ Canonical capability matrix: [What ships today](../SHIPPED.md). Decision matrix:
 
 | Workflow | Why |
 |----------|-----|
-| Property chain **editing** | View-only in OntoCode axiom catalog until v1.0 |
-| Full OBO **write-back** in VS Code | OBO is indexed/read-only in inspector; Turtle write-back only |
-| Full OWL 2 DL axiom catalog | Partial Manchester + patches; see [Protégé parity](../design/PROTEGE_PARITY.md) |
-| Editing RDF/XML or OWL/XML in place | OntoCode write-back is **Turtle only** |
+| Full OWL 2 DL axiom catalog for all formats | Partial Manchester + patches; OWL/XML write-back not shipped — see [Protégé parity](../design/PROTEGE_PARITY.md) |
+| Editing RDF/XML or OWL/XML in place | OntoCode write-back is **Turtle and OBO only** |
 | Workflows that depend on Protégé-specific plugins | Not replicated in OntoCode |
 
 ## Practical split workflow
 
-1. **Author** routine Turtle changes in VS Code (inspector, Manchester editor, refactoring, patches)
+1. **Author** routine Turtle and OBO changes in VS Code (inspector, Manchester editor, refactoring, patches)
 2. **Validate** in CI with `ontocore validate` and optionally `ontocore classify --profile el`
 3. **Run ROBOT** in CI when needed — [ROBOT interop](robot-interop.md)
-4. **Review** DL-heavy axioms, property chains, or OBO-specific edits in Protégé when required
-5. **Share** `.ttl` changes through pull requests when your team uses version control
+4. **Review** OWL/XML-heavy modules or Protégé-specific plugins in Protégé when required
+5. **Share** `.ttl` and `.obo` changes through pull requests when your team uses version control
 
 ## File format notes
 
-- OntoCode indexes RDF/XML, JSON-LD, OBO, and N-Triples but **writes Turtle only**
-- Prefer Turtle for shared authoring; use Protégé round-trip when teams still maintain OWL/XML
+- OntoCode indexes RDF/XML, JSON-LD, OBO, and N-Triples; **writes Turtle and OBO**
+- Prefer Turtle or OBO for shared authoring; use Protégé round-trip when teams still maintain OWL/XML
 - Example round-trip fixtures: `examples/protege-roundtrip/` in the repository
 
 ## Expectations on reasoning

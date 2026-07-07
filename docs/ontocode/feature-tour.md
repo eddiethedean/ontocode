@@ -1,8 +1,8 @@
 # OntoCode feature tour
 
-A visual and structural overview of the OntoCode VS Code IDE (**v0.11**). For hands-on setup, start with [First success (~10 min core path)](../guides/first-success.md).
+A visual and structural overview of the OntoCode VS Code IDE (**v0.12**). For hands-on setup, start with [First success (~10 min core path)](../guides/first-success.md).
 
-Canonical capability list: [What ships today](../SHIPPED.md). **New in v0.11:** [Migration guide](../migration/v0.11.md).
+Canonical capability list: [What ships today](../SHIPPED.md). **New in v0.12:** [Migration guide](../migration/v0.12.md).
 
 ## Activity bar and explorer
 
@@ -29,7 +29,7 @@ The inspector shows IRI, kind, labels, comments, parents, children, and axioms. 
 - Delete entity
 - **Edit in Manchester** / **Add Manchester axiom** for complex expressions
 
-Other formats (RDF/XML, JSON-LD, `.obo`) are **read-only** in the inspector — index and browse only.
+Turtle (`.ttl`) and OBO (`.obo`) support write-back in the inspector. RDF/XML, OWL/XML, and JSON-LD are **read-only** — index and browse only.
 
 Guide: [Inspector](inspector.md) · [Authoring](../authoring.md)
 

@@ -12,7 +12,7 @@
 >
 > **Contributor crate layout:** [Implementation architecture](design/ARCHITECTURE.md) (internal modules only).
 >
-> **v0.11 ships today:** OntoCode (VS Code), OntoCore (CLI/LSP/library), Turtle completion, diagnostic quick fixes, Manage Imports, `ontocore docs`, semantic diff, incremental indexing, Ontologos reasoning, ROBOT CLI wrappers.
+> **v0.12 ships today:** OntoCode (VS Code), OntoCore (CLI/LSP/library), Turtle + OBO write-back, property chain editing, OWL/XML read-only catalog, DL explanations, semantic diff, incremental indexing, Ontologos reasoning, ROBOT CLI wrappers.
 > **Planned v1.0 (not installable yet):** plugin host, language SDKs, MCP server, owlmake-style workflow plugins.
 > Canonical capability matrix: [What ships today](SHIPPED.md).
 

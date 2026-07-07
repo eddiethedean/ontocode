@@ -36,9 +36,9 @@ OntoCode activates when your workspace contains any of:
 | `.jsonld`, `.json-ld` | JSON-LD |
 | `.nt`, `.nq` | N-Triples / N-Quads |
 | `.trig` | TriG |
-| `.obo` | OBO Format (index + syntax highlighting; read-only in inspector) |
+| `.obo` | OBO Format (index, syntax highlighting, and inspector write-back since v0.12) |
 
-Write-back in the inspector is **Turtle (`.ttl`) only**.
+Write-back in the inspector is **Turtle (`.ttl`) and OBO (`.obo`)**.
 
 You can also open the **OntoCode → Ontologies** view to force activation.
 
@@ -75,7 +75,7 @@ The Entity Inspector panel opens with:
 - Labels and comments
 - Parent and child classes
 - Axioms (e.g. `SubClassOf`)
-- **Edit section** (`.ttl` files only) — add labels, comments, parents; delete entity
+- **Edit section** (`.ttl` and `.obo` files) — add labels, comments, parents; edit OBO terms; delete entity
 - **Jump to Source** — opens the `.ttl` / `.owl` file at the declaration
 
 **Right-click** an entity for **Jump to Source** or **Create Class/Property/Individual** in the context menu.
@@ -170,9 +170,9 @@ More detail: [Installation & troubleshooting](https://ontocode-vs.readthedocs.io
 
 ## What's included in v0.12.0
 
-**Shipped:** explorer; **React** entity inspector (panel routing fix), graph panels, Query Workbench, Manchester editor, Refactor Preview, **Manage Imports**, and **Semantic Diff** panel; workspace refactor (rename IRI, migrate namespace, move, extract); EL/RL/RDFS/DL/auto reasoner (OntoLogos 1.0); OBO syntax highlighting and indexing (write-back: Turtle only); diagnostics with **quick fixes**; Turtle **completion**; LSP navigation (hover, go-to-definition, find references, rename); multi-root workspaces; optional index disk cache; [Open VSX](https://open-vsx.org/extension/ontocode/ontocode) for Cursor.
+**Shipped:** explorer; **React** entity inspector (panel routing fix), graph panels, Query Workbench, Manchester editor, Refactor Preview, **Manage Imports**, and **Semantic Diff** panel; workspace refactor (rename IRI, migrate namespace, move, extract); EL/RL/RDFS/DL/auto reasoner (OntoLogos 1.0); **Turtle and OBO write-back** (v0.12); diagnostics with **quick fixes**; Turtle **completion**; LSP navigation (hover, go-to-definition, find references, rename); multi-root workspaces; optional index disk cache; [Open VSX](https://open-vsx.org/extension/ontocode/ontocode) for Cursor.
 
-**Planned:** owlmake workflow plugin integration (v1.0). Full Protégé parity (OBO write-back in IDE, property chain editing) is a **v1.0** goal — see [Protégé parity matrix](https://ontocode-vs.readthedocs.io/en/latest/design/PROTEGE_PARITY/).
+**Planned:** owlmake workflow plugin integration (v1.0). Full Protégé parity (OWL/XML write-back, plugin host) is a **v1.0** goal — see [Protégé parity matrix](https://ontocode-vs.readthedocs.io/en/latest/design/PROTEGE_PARITY/).
 
 ---
 

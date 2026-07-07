@@ -1,6 +1,6 @@
 # Protégé vs OntoCode decision matrix
 
-Use this page to decide **when OntoCode fits**, **when to keep Protégé**, and **when to run both**. It reflects **v0.11.3** — see [What ships today](../SHIPPED.md). A [first-week migration guide](protege-migration.md) ships today; extended round-trip playbooks are planned for **v1.0**.
+Use this page to decide **when OntoCode fits**, **when to keep Protégé**, and **when to run both**. It reflects **v0.12.0** — see [What ships today](../SHIPPED.md). A [first-week migration guide](protege-migration.md) ships today; extended round-trip playbooks are planned for **v1.0**.
 
 ## Quick decision
 
@@ -8,22 +8,23 @@ Use this page to decide **when OntoCode fits**, **when to keep Protégé**, and 
 |----------------|----------------|
 | VS Code + Turtle-primary ontologies | **Adopt OntoCode** (pilot IDE + CI) |
 | CI lint/consistency gates without desktop Protégé | **Adopt OntoCore CLI** (`ontocore validate` / `classify`) |
-| Full OWL 2 DL axiom catalog + property chain editing | **Split workflow** — use OntoCode for DL classification; keep Protégé for chains and full axiom editing until v1.0 |
-| OBO release pipelines with in-editor OBO write-back | **Keep Protégé** or external OBO tools; use OntoCode for index/ROBOT CI |
+| Full OWL 2 DL axiom catalog + OWL/XML write-back | **Split workflow** — use OntoCode for Turtle/OBO authoring and DL classification; keep Protégé for OWL/XML-heavy modules until v1.0 |
+| OBO release pipelines with in-editor OBO write-back | **Adopt OntoCode** (v0.12+) for OBO inspector + `ontocore patch`; validate with ROBOT in CI |
 | Enterprise requires vendor SLA / SOC 2 | **Defer** or run limited CI pilot — [Production readiness](production-readiness.md) |
 | Air-gapped VS Code + internal artifact mirror | **Pilot** — [Enterprise deployment](enterprise-deployment.md) |
 
-## Capability comparison (v0.11)
+## Capability comparison (v0.12)
 
-| Capability | Protégé | OntoCode v0.11 | Notes |
+| Capability | Protégé | OntoCode v0.12 | Notes |
 |------------|---------|---------------|-------|
 | OWL 2 DL classification | Yes | Yes (`dl` / `auto` via OntoLogos 1.0) | Explanations EL-first; see [Reasoner guide](reasoner.md) |
 | Turtle authoring | Manual / plugins | Native write-back | OntoCode inspector + patches |
-| RDF/XML in-place editing | Yes | Read-only index | Write-back Turtle only |
-| Manchester axiom editing | Full | MVP subset | Disjoint shipped; chains view-only |
+| OBO authoring | Native | Native write-back (v0.12) | Inspector + `ontocore patch` |
+| RDF/XML in-place editing | Yes | Read-only index | Write-back Turtle and OBO |
+| Manchester axiom editing | Full | MVP subset | Disjoint + property chains shipped (v0.12) |
 | Disjoint classes | Yes | Yes (v0.9) | Via Manchester / patch JSON |
-| Property chain editing | Yes | View-only | v1.0 target |
-| OBO format | Native | Index + syntax highlight | No OBO write-back in VS Code |
+| Property chain editing | Yes | Yes (v0.12) | Inspector + patch JSON |
+| OBO format | Native | Index + write-back | v0.12 inspector + patch |
 | ROBOT integration | Common | CLI wrapper | Java + `robot` required |
 | SQL/SPARQL over repo | Plugins / external | Built-in workbench + CLI | |
 | Semantic diff in pull requests | Weak default | Strong default | Shipped v0.10 |
@@ -36,7 +37,7 @@ Use this page to decide **when OntoCode fits**, **when to keep Protégé**, and 
 
 ### Path A — CI only (lowest risk)
 
-1. Pin `ontocore-cli` **0.11.3** in Linux CI
+1. Pin `ontocore-cli` **0.12.0** in Linux CI
 2. Gate merges with `ontocore validate`
 3. Optional: `ontocore classify --profile el` when ontology is EL
 4. Keep Protégé on engineer desktops unchanged

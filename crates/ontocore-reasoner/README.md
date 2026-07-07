@@ -22,7 +22,7 @@ CLI equivalent: `ontocore classify <workspace> --profile dl`.
 ## Install
 
 ```toml
-ontocore-reasoner = "0.11"
+ontocore-reasoner = "0.12"
 ```
 
 ## Profiles

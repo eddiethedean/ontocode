@@ -78,6 +78,7 @@ nav:
   - Home: index.md
   - Get started:
       - "First success (~10 min core path)": guides/first-success.md
+      - Which artifact do I need?: guides/which-artifact.md
       - What's new in v0.12: migration/v0.12.md
       - What's new in v0.11: migration/v0.11.md
       - Pick a task: guides/start-here.md

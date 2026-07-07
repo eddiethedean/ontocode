@@ -21,6 +21,7 @@ Pre-1.0: minor releases may change library APIs, LSP JSON, and SQL virtual table
 | **v0.9** | OntoCore identity — `ontocore` façade, branding, documentation; OntoLogos 1.0 DL/auto classification | **Shipped** (2026-07-03) |
 | **v0.10** | Semantic workspace — incremental index, multi-root, stable `Workspace` API, semantic diff, optional disk cache | **Shipped** (2026-07-04) |
 | **v0.11** | Editor depth & distribution — LSP completion, code actions, docs export, imports UI, Open VSX, OBO fastobo read | **Shipped** (2026-07-05) |
+| **v0.12** | Authoring parity — OBO write-back, property chains, OWL/XML read, DL explanations | **Shipped** (2026-07-06) |
 | **v1.0** | Protégé-competitive OWL + OBO in VS Code; full axiom catalog; plugin host | Planned |
 
 Canonical forward plan: [Platform roadmap](../roadmap.md). Engineering milestone history: [Milestones (shipped)](../design/ROADMAP.md).

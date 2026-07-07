@@ -240,9 +240,9 @@ Method: `ontocore/applyAxiomPatch`
 
 See [lsp-api.md](lsp-api.md) and [authoring.md](authoring.md).
 
-## Limitations (v0.9)
+## Limitations (v0.12)
 
-- Turtle only; RDF/XML, OWL/XML, JSON-LD are read-only
+- Write-back: **Turtle (`.ttl`) and OBO (`.obo`)**; RDF/XML, OWL/XML, JSON-LD are read-only
 - Simple `add_sub_class_of` parent must be a **named class IRI**; use Manchester ops (`add_complex_sub_class_of`, `add_equivalent_class`, etc.) for class expressions
-- Manchester: `SubClassOf`, `EquivalentClasses`, and `DisjointClasses` — property chains are view-only in the axiom catalog
+- Manchester: `SubClassOf`, `EquivalentClasses`, and `DisjointClasses`; property chains editable via patch ops and inspector (v0.12)
 - Patch engine uses targeted text edits; unusual formatting may need manual review

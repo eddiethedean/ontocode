@@ -82,7 +82,7 @@ Indexing may fail above [workspace limits](workspace-limits.md) (file count, siz
 | Semantic diff: `no git repository` | Open a git checkout; or use CLI `ontocore diff --left-ref ./a --right-ref ./b` |
 | Semantic diff panel empty | Trust workspace; run **Index Workspace**; see [Semantic diff](ontocode/semantic-diff.md) |
 | Graph commands missing | Run **Index Workspace** first — [Graph view](ontocode/graph-view.md) |
-| Cannot edit `.obo` in inspector | OBO is read-only in VS Code; use Turtle write-back or external tools — [OBO guide](guides/obo-workflow.md) |
+| Cannot edit `.obo` in inspector | Confirm OntoCode **v0.12.0+**; entity must be in an indexed `.obo` file — [OBO guide](guides/obo-workflow.md) |
 | `robot` not found | Install Java + ROBOT; set `ontocode.robotPath` — [ROBOT guide](guides/robot-interop.md) |
 
 ## Reasoner

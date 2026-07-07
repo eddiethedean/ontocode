@@ -41,7 +41,7 @@ Simple named-parent `SubClassOf` (e.g. `ex:Person`) is edited in the [inspector]
 | Cardinality | `ex:hasChild min 1 ex:Person` |
 | DisjointClasses | Named class IRI via inspector / patch |
 
-Domain, range, and property chains appear in the axiom catalog (chains are view-only in v0.8).
+Domain, range, and property chains are editable via the Entity Inspector and patch JSON (v0.12).
 
 ## CLI
 

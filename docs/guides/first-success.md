@@ -63,7 +63,7 @@ See the [feature tour](../ontocode/feature-tour.md) for a visual overview of the
 
 ### 4. Edit a Turtle entity
 
-Write-back works in **Turtle (`.ttl`) files only**. RDF/XML and other formats are read-only in the inspector.
+Write-back works in **Turtle (`.ttl`) and OBO (`.obo`) files**. RDF/XML, OWL/XML, and JSON-LD are read-only in the inspector.
 
 1. Select a class from a `.ttl` file in the explorer.
 2. In the Entity Inspector **Edit** section:
@@ -125,12 +125,22 @@ Guide: [Refactoring](../guides/refactoring.md).
 
 Guide: [Graph view](../ontocode/graph-view.md).
 
+### Edit an OBO term (optional, v0.12+)
+
+If your workspace includes `.obo` files:
+
+1. Select a term in the **Classes** explorer (from an `.obo` file).
+2. In the Entity Inspector, edit **name**, **definition**, **synonyms**, or **is_a** parents.
+3. Use **Preview** then **Apply** — changes write to the `.obo` file on disk.
+
+Guide: [OBO workflow](../guides/obo-workflow.md).
+
 ### Validate from the CLI
 
 To catch lint and parse errors in CI or locally:
 
 ```bash
-cargo install ontocore-cli --locked --version 0.11.3
+cargo install ontocore-cli --locked --version 0.12.0
 ontocore validate /path/to/your/ontology/folder
 ```
 
@@ -149,7 +159,7 @@ Guide: [Semantic diff](../ontocode/semantic-diff.md).
 | Problem | What to try |
 |---------|-------------|
 | Sidebar says to index workspace | Run **OntoCode: Index Workspace** |
-| No edit controls in inspector | Entity must be in a **`.ttl`** file |
+| No edit controls in inspector | Entity must be in a **`.ttl` or `.obo`** file (other formats are read-only) |
 | Language server failed to start | See [Install VS Code](../vscode-install.md#troubleshooting) |
 | Empty **Classes** after indexing | Check **Output → OntoCore Language Server**; re-run **Index Workspace** |
 

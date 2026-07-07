@@ -26,7 +26,7 @@ OntoCode is a modern ontology IDE for VS Code, powered by <strong>OntoCore</stro
 
 <div class="oc-callout" markdown>
 
-**What's new in v0.11?** Turtle completion, diagnostic quick fixes, **Manage Imports**, `ontocore docs` export, Open VSX for Cursor — [Migration v0.10 → v0.11](migration/v0.11.md).
+**What's new in v0.12?** OBO write-back in the Entity Inspector, Turtle domain/range/property chains/annotations, OWL/XML read-only catalog, DL unsatisfiability explanations — [Migration v0.11 → v0.12](migration/v0.12.md).
 
 **Not sure where to begin?** Pick a path:
 
@@ -121,7 +121,7 @@ You do **not** need to clone this repo to use the extension or `cargo install on
 
 ## What ships today
 
-**v0.11.3 highlights:** Turtle completion, diagnostic quick fixes, Manage Imports, semantic diff (v0.10+), `ontocore docs` export, EL–DL reasoning (`dl` / `auto` profiles), multi-root indexing.
+**v0.12.0 highlights:** OBO write-back, Turtle domain/range/property chains/annotations, OWL/XML read-only catalog, DL explanations — plus v0.11 features (Turtle completion, Manage Imports, semantic diff, `ontocore docs` export, EL–DL reasoning).
 
 Full matrix: **[What ships today](SHIPPED.md)** (canonical — do not rely on this summary alone).
 
@@ -162,6 +162,7 @@ Full matrix: **[What ships today](SHIPPED.md)** (canonical — do not rely on th
 | **Rust & CLI** | [guides/rust-crates.md](guides/rust-crates.md) |
 | **What ships today (canonical)** | [SHIPPED.md](SHIPPED.md) |
 | Pick a task (all paths) | [guides/start-here.md](guides/start-here.md) |
+| Which artifact do I need? | [guides/which-artifact.md](guides/which-artifact.md) |
 | First success tutorial | [guides/first-success.md](guides/first-success.md) |
 | Feature tour | [ontocode/feature-tour.md](ontocode/feature-tour.md) |
 | Migrating from Protégé | [guides/protege-migration.md](guides/protege-migration.md) |

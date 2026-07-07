@@ -100,7 +100,7 @@ Parse errors plus catalog lint rules: broken imports, undefined prefixes, duplic
 
 **Which formats can I edit?**
 
-Turtle (`.ttl`) only for write-back. All supported formats can be indexed and queried.
+Turtle (`.ttl`) and OBO (`.obo`) for write-back. RDF/XML, OWL/XML, and JSON-LD can be indexed and queried but are read-only in the inspector.
 
 **Where is the patch JSON format documented?**
 
@@ -150,13 +150,13 @@ EL/RL/RDFS shipped in **v0.6.0** (OntoLogos 0.9.0). Full OWL 2 DL classification
 
 **How does this compare to Protégé?**
 
-OntoCode targets OWL/OBO workflows in VS Code: browse and edit Turtle, SQL/SPARQL queries, EL–DL reasoning, refactoring, graph views, Turtle completion, diagnostic quick fixes, Manage Imports, and **semantic diff** (CLI, LSP, and VS Code panel). Gaps vs Protégé today include **full OBO write-back in the IDE**, **property chain editing**, and a **plugin host** — see the [Protégé parity matrix](design/PROTEGE_PARITY.md) and [What ships today](SHIPPED.md). For a first-week adoption path, see [Migrating from Protégé](guides/protege-migration.md).
+OntoCode targets OWL/OBO workflows in VS Code: browse and edit Turtle and OBO, SQL/SPARQL queries, EL–DL reasoning, refactoring, graph views, Turtle completion, diagnostic quick fixes, Manage Imports, property chain editing, and **semantic diff** (CLI, LSP, and VS Code panel). Gaps vs Protégé today include **OWL/XML write-back**, **full DL axiom catalog for all formats**, and a **plugin host** — see the [Protégé parity matrix](design/PROTEGE_PARITY.md) and [What ships today](SHIPPED.md). For a first-week adoption path, see [Migrating from Protégé](guides/protege-migration.md).
 
 ## OBO and graphs
 
 **Can I edit `.obo` files in the inspector?**
 
-No — OBO is indexed and syntax-highlighted, but write-back is **Turtle only**. See [OBO workflow guide](guides/obo-workflow.md).
+**Yes (v0.12+).** OBO terms can be edited in the Entity Inspector and via `ontocore patch` on `.obo` files. RDF/XML and JSON-LD remain read-only. See [OBO workflow guide](guides/obo-workflow.md).
 
 **How do I open ontology graphs?**
 

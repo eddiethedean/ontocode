@@ -16,19 +16,18 @@ OntoCode v0.12 is **not** documented as a general-availability replacement for P
 
 ## Approved use cases (pilot or production)
 
-| Use case | v0.11 readiness | Notes |
+| Use case | v0.12 readiness | Notes |
 |----------|----------------|-------|
 | CI lint gate on ontology repos | **Suitable** | `ontocore validate` — [CI integration](../ci-integration.md) |
 | CI consistency gate (EL profile) | **Suitable** | `ontocore classify --profile el` — profile must match ontology |
 | CI consistency gate (DL profile) | **Pilot** | `ontocore classify --profile dl` or `auto` — OntoLogos 1.0.0; verify on your corpus |
-| Developer IDE for Turtle authoring | **Pilot** | Turtle write-back only; pre-1.0 extension APIs |
+| Developer IDE for Turtle/OBO authoring | **Pilot** | Turtle + OBO write-back; pre-1.0 extension APIs |
 | Workspace refactoring (rename, migrate, move, extract) | **Pilot** | Turtle only; preview before apply — [Refactoring guide](refactoring.md) |
 | Semantic diff in PR review | **Pilot** | `ontocore diff` + VS Code panel — [Semantic diff](../ontocode/semantic-diff.md) |
 | Ontology browse/query in VS Code | **Pilot** | Local-first; multi-root supported — [enterprise deployment](enterprise-deployment.md) |
 | Air-gapped VS Code install | **Pilot** | VSIX + SHA256 — [enterprise deployment](enterprise-deployment.md) |
-| OBO index + ROBOT CLI in CI | **Pilot** | Index `.obo`; `ontocore robot validate` — requires Java + `robot` on PATH — [ROBOT interop](robot-interop.md) |
-| Replace Protégé for full OWL 2 DL engineering | **Not supported** | DL classification shipped; full axiom catalog, chains, OBO write-back remain v1.0 — [Protégé coexistence](protege-coexistence.md) |
-| Full OBO write-back in VS Code | **Not supported** | OBO is read-only in inspector; Turtle write-back only |
+| OBO index + write-back + ROBOT CLI in CI | **Pilot** | Index and edit `.obo`; `ontocore robot validate` — requires Java + `robot` on PATH — [ROBOT interop](robot-interop.md) |
+| Replace Protégé for full OWL 2 DL engineering | **Not supported** | DL classification shipped; full axiom catalog for all formats and OWL/XML write-back remain v1.0 — [Protégé coexistence](protege-coexistence.md) |
 | Org-wide mandatory IDE standard | **Defer** | Complete pilot + legal review first |
 
 ## Pilot criteria (recommended before wider rollout)
@@ -47,7 +46,7 @@ Suggested pilot duration: **4–8 weeks** with 3–10 engineers on one ontology 
 
 ## What is stable enough for automation
 
-| Surface | Stability (v0.11) |
+| Surface | Stability (v0.12) |
 |---------|-------------------|
 | `ontocore validate` exit codes | Documented for CI |
 | `ontocore classify` exit codes | Documented for CI |

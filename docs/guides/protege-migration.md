@@ -1,6 +1,6 @@
 # Migrating from Protégé — first week
 
-This guide helps ontology teams adopt OntoCode **v0.11** alongside or instead of [Protégé](https://protege.stanford.edu/). For a capability comparison, see [Protégé vs OntoCode](protege-decision.md) and [What ships today](../SHIPPED.md).
+This guide helps ontology teams adopt OntoCode **v0.12** alongside or instead of [Protégé](https://protege.stanford.edu/). For a capability comparison, see [Protégé vs OntoCode](protege-decision.md) and [What ships today](../SHIPPED.md).
 
 ## Before you start
 
@@ -8,13 +8,14 @@ This guide helps ontology teams adopt OntoCode **v0.11** alongside or instead of
 
 - Version-control ontology files (Turtle, OWL, OBO) when your team uses shared repositories
 - Want VS Code editing, CI validation, and semantic diff
-- Can edit **Turtle (`.ttl`)** for write-back (other formats are read-only in the inspector)
+- Can edit **Turtle (`.ttl`)** or **OBO (`.obo`)** for write-back (RDF/XML and JSON-LD are read-only in the inspector)
 
 **Keep Protégé (for now) when you need:**
 
-- Full **OBO write-back** in the IDE
-- **Property chain editing** or a full DL axiom catalog UI
+- **OWL/XML or RDF/XML in-place editing**
+- A **full DL axiom catalog UI** for every axiom kind and format
 - Desktop-only workflows with no Git/CI requirement
+- **Protégé-specific plugins**
 
 Many teams use **both**: Protégé for heavy axiom authoring, OntoCode for browse, lint, diff, and CI validation. See [Protégé coexistence](protege-coexistence.md).
 
@@ -30,10 +31,10 @@ Follow the [first success core path](../guides/first-success.md) if anything is 
 
 ## Day 2 — Map Protégé habits to OntoCode
 
-| In Protégé | In OntoCode v0.11 |
+| In Protégé | In OntoCode v0.12 |
 |------------|-------------------|
 | Class hierarchy tab | **Classes** explorer view; toggle **asserted / inferred / combined** after reasoner |
-| Entity editor (labels, parents) | **Entity Inspector** edit section (`.ttl` only) |
+| Entity editor (labels, parents) | **Entity Inspector** edit section (`.ttl` and `.obo`) |
 | DL query tab | **Query Workbench** — SQL catalog tables or SPARQL |
 | Reasoner (HermiT, etc.) | **OntoCode: Run Reasoner** — EL/RL/RDFS/DL/auto via OntoLogos 1.0 |
 | Active ontology | All workspace folders indexed (multi-root supported) |
@@ -45,7 +46,7 @@ Follow the [first success core path](../guides/first-success.md) if anything is 
 Add a pipeline gate so Protégé-only mistakes are caught before merge:
 
 ```yaml
-- run: cargo install ontocore-cli --locked --version 0.11.3
+- run: cargo install ontocore-cli --locked --version 0.12.0
 - run: ontocore validate ./src/ontologies
 ```
 
@@ -89,7 +90,7 @@ By end of week one you should be able to:
 | Cannot edit OWL/XML in inspector | Convert module to Turtle for write-back, or edit in Protégé |
 | SQL query fails | OntoCore SQL is single-table subset — use SPARQL for graph patterns |
 | Reasoner slow or fails on DL | Check [workspace limits](../workspace-limits.md); try `el` profile first |
-| Team expects plugin ecosystem | Plugin host is **v1.0 target** — not installable in v0.11 |
+| Team expects plugin ecosystem | Plugin host is **v1.0 target** — not installable in v0.12 |
 
 ## Next steps
 

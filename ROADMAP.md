@@ -329,7 +329,7 @@ Sub-phases: **v0.7a** (React foundation) → **v0.7** (graphs + inspector) → *
 
 ### v0.13 — Platform hardening (shipped)
 
-**Released:** v0.13.0 (2026-07-07)
+**Released:** v0.13.0 (2026-07-08)
 
 **Theme:** OntoUI platform foundation + OntoCore hardening for plugins (v0.14) and Protégé polish (v1.0).
 

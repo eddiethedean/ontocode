@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.13.0] - 2026-07-07
+## [0.13.0] - 2026-07-08
 
 ### Added
 
@@ -26,6 +26,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Entity Inspector, Graph, Query Workbench, and Refactor Preview read state from WorkspaceStore
 - Workspace package and all `ontocore-*` crates bumped to **0.13.0**
 - Extension marketplace version **0.13.0**
+
+### Fixed
+
+- **Refactor rename** — do not rewrite IRIs inside Turtle single-quoted string literals
+- **Axiom patch feedback** — report failure when editor buffer sync is cancelled instead of false success
+- **Manchester editor** — discard stale parse results when switching entities during bootstrap
+- **Git worktree diff** — include untracked ontology files in `HEAD..WORKTREE` catalog comparison
+- **Reasoner** — derive asserted hierarchy from loaded ontology (including open buffers) so buffer subclass axioms are not misreported as inferences
+- **OBO patches** — exact `id:`, `is_a:`, `xref:`, and `synonym:` matching (no prefix collisions such as `EX:001` vs `EX:0010`)
+- **Property chain editor** — offer object property IRIs only; reject class IRIs in `add_property_chain`
 
 ## [0.12.0] - 2026-07-06
 

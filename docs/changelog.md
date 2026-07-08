@@ -4,9 +4,9 @@ Canonical source: [CHANGELOG.md on GitHub](https://github.com/eddiethedean/ontoc
 
 Migration guides: [Migration index](migration/README.md)
 
-## [0.13.0] - 2026-07-07
+## [0.13.0] - 2026-07-08
 
-**v0.13.0** — OntoUI platform (WorkspaceStore, focus relay, design tokens), schema browser, Horned-OWL axiom SQL tables, `ontocore diff --pr-summary`, configurable diagnostics, LSP semantic tokens, docs hierarchy export. See [CHANGELOG.md](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) and [migration/v0.13.md](migration/v0.13.md).
+**v0.13.0** — OntoUI platform (WorkspaceStore, focus relay, design tokens), schema browser, Horned-OWL axiom SQL tables, `ontocore diff --pr-summary`, configurable diagnostics, LSP semantic tokens, docs hierarchy export. Includes high-severity bug fixes for refactor rename, axiom patch sync, Manchester bootstrap, worktree diff, reasoner buffer overrides, OBO patch matching, and property chain editing. See [CHANGELOG.md](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) and [migration/v0.13.md](migration/v0.13.md).
 
 ## [0.12.0] - 2026-07-06
 

@@ -117,7 +117,7 @@ You do **not** need to clone this repo to use the extension or `cargo install on
 
     ---
 
-    FAQ, troubleshooting, workspace limits, and security.
+    FAQ, troubleshooting, support, workspace limits, and security.
 
     [:octicons-arrow-right-24: Troubleshooting](troubleshooting.md)
 

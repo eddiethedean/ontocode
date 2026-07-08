@@ -103,6 +103,7 @@ For VS Code, install the `ontocode-*.vsix` from the same release.
 | Goal | Document |
 |------|----------|
 | What ships today | [SHIPPED.md](SHIPPED.md) |
+| Supported ontology formats | [supported-formats.md](supported-formats.md) |
 | Query Workbench (VS Code) | [ontocode/query-workbench.md](ontocode/query-workbench.md) |
 | Manchester editor | [ontocode/manchester-editor.md](ontocode/manchester-editor.md) |
 | Reasoner | [guides/reasoner.md](guides/reasoner.md) |

@@ -62,7 +62,14 @@ When VS Code asks, choose **Trust** the workspace. OntoCode uses its **bundled**
 ### 3. Browse the explorer
 
 1. Click the **OntoCode** icon in the **Activity Bar** (left edge of the window).
-2. Wait for indexing to finish — indexing is complete when **Classes** lists entities (e.g. `Person`) and **Ontologies** shows your `.ttl` files without parse errors. For the tutorial pack (~2 files), this usually takes a few seconds. To confirm progress, open **View → Output**, select **OntoCore Language Server**, and look for index completion messages. If trees stay empty after 30 seconds, run **OntoCode: Index Workspace** and confirm the workspace is trusted.
+2. Wait for indexing to finish.
+
+**Success looks like:**
+
+- **Classes** contains `Person` (from `example.ttl`).
+- **Ontologies** lists `example.ttl` and `complex-classes.ttl` with no parse errors.
+
+For the tutorial pack (~2 files), this usually takes a few seconds. To confirm progress, open **View → Output**, select **OntoCore Language Server**, and look for index completion messages. If trees stay empty after 30 seconds, run **OntoCode: Index Workspace** and confirm the workspace is trusted.
 3. Expand **Ontologies** to see indexed files and parse status.
 4. Expand **Classes**, **Properties**, or **Individuals** to browse entities.
 5. **Click an entity name** (e.g. `Person`) to open the **Entity Inspector**.
@@ -77,7 +84,7 @@ See the [feature tour](../ontocode/feature-tour.md) for a visual overview of the
 
 ### 4. Edit a Turtle entity
 
-Write-back works in **Turtle (`.ttl`) and OBO (`.obo`) files**. RDF/XML, OWL/XML, and JSON-LD are read-only in the inspector.
+Write-back works in **Turtle (`.ttl`) and OBO (`.obo`) files**. For a full matrix (index/query vs write-back), see [Supported formats](../supported-formats.md). RDF/XML, OWL/XML, and JSON-LD are read-only in the inspector.
 
 1. Select a class from a `.ttl` file in the explorer.
 2. In the Entity Inspector **Edit** section:
@@ -85,6 +92,11 @@ Write-back works in **Turtle (`.ttl`) and OBO (`.obo`) files**. RDF/XML, OWL/XML
    - Add a **parent class** (named parent IRI)
    - Or use **Delete entity** to remove the entity from the file
 3. Changes are written back to the `.ttl` file on disk.
+
+**Success looks like:**
+
+- The `.ttl` file updates on disk (you can open `example.ttl` and see the new `rdfs:label` or axiom).
+- Re-indexing is not required for this tutorial step, but the explorer/inspector should reflect the new value shortly after the write completes.
 
 You can also right-click in the explorer to **Create Class**, **Create Property**, or **Create Individual** in a Turtle file.
 

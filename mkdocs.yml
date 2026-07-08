@@ -11,6 +11,8 @@ copyright: OntoCode documentation · <a href="SHIPPED/">What ships today</a> (ca
 
 docs_dir: docs
 strict: true
+exclude_docs: |
+  README.md
 
 validation:
   nav:
@@ -77,6 +79,7 @@ markdown_extensions:
 nav:
   - Home: index.md
   - Get started:
+      - Start here (strict path): start.md
       - "First success (~10 min core path)": guides/first-success.md
       - Which artifact do I need?: guides/which-artifact.md
       - "Getting started (all paths)": getting-started.md
@@ -137,6 +140,8 @@ nav:
       - Webview protocol: webview-protocol.md
       - Errors: errors.md
       - Workspace limits: workspace-limits.md
+      - Supported formats: supported-formats.md
+      - Automation and stability: automation-stability.md
       - OntoCore SQL views: ontocore/sql-views.md
       - OntoCore LSP overview: ontocore/lsp.md
       - LSP hello world: guides/lsp-hello-world.md
@@ -161,6 +166,7 @@ nav:
   - Help:
       - FAQ: faq.md
       - Troubleshooting: troubleshooting.md
+      - Support and contact: support.md
       - Changelog: changelog.md
       - Migrations:
           - Migration index: migration/README.md

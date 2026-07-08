@@ -2,6 +2,8 @@
 
 Common questions about OntoCode and OntoCore. For step-by-step fixes, see [Troubleshooting](troubleshooting.md).
 
+If you’re stuck or want to report a bug, see [Support and contact](support.md).
+
 ## Naming and products
 
 **What is the difference between OntoCode and OntoCore?**
@@ -63,7 +65,7 @@ Select a class in a `.ttl` file → Entity Inspector → **Edit in Manchester** 
 
 **I cannot edit in the Entity Inspector.**
 
-Write-back applies to **Turtle (`.ttl`) and OBO (`.obo`)** files (engine v0.12; inspector write-back v0.13). RDF/XML, OWL/XML, and JSON-LD are read-only in the inspector. See [OBO authoring](ontocode/obo-authoring.md).
+Write-back applies to **Turtle (`.ttl`) and OBO (`.obo`)** files (engine v0.12; inspector write-back v0.13). For the full matrix (index/query vs write-back), see [Supported formats](supported-formats.md). RDF/XML, OWL/XML, and JSON-LD are read-only in the inspector. See [OBO authoring](ontocode/obo-authoring.md).
 
 **How do multi-root VS Code workspaces work?**
 
@@ -106,7 +108,7 @@ Parse errors plus catalog lint rules: broken imports, undefined prefixes, duplic
 
 **Which formats can I edit?**
 
-Turtle (`.ttl`) and OBO (`.obo`) for write-back. RDF/XML, OWL/XML, and JSON-LD can be indexed and queried but are read-only in the inspector.
+Turtle (`.ttl`) and OBO (`.obo`) for write-back. RDF/XML, OWL/XML, and JSON-LD can be indexed and queried but are read-only in the inspector. See [Supported formats](supported-formats.md).
 
 **Where is the patch JSON format documented?**
 

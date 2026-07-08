@@ -52,7 +52,9 @@ Engine foundation    IDE depth                Platform & authoring   OntoUI + pl
   Explorer, diag,      graphs, refactor,        OBO write-back,      focus relay,
   write-back           Manchester               OWL/XML catalog      plugin host MVP
 
-PLANNED (v1.0+) ──────────────────────────────────────────────────────►
+PLANNED (v0.15–v1.0) ─────────────────────────────────────────────────►
+v0.15–v0.18                                                          v1.0
+Protégé parity closeout                                              1.0 exit
 ```
 
 ### Phase index
@@ -63,8 +65,9 @@ PLANNED (v1.0+) ─────────────────────�
 | **B — IDE depth** | v0.5–v0.8 | Shipped | Query, reason, visualize, refactor |
 | **C — Platform & authoring** | v0.9–v0.12 | Shipped | OntoCore identity, semantic workspace, authoring parity |
 | **D — OntoUI platform** | v0.13–v0.14 | Shipped | v0.13: WorkspaceStore, focus relay; v0.14: plugin host MVP |
-| **E — Protégé replacement** | v1.0 | Planned | Daily OWL/OBO engineering without Protégé |
-| **F — Ecosystem** | v1.1–v1.2+ | Planned | SDKs, AI, toolchain & collaboration |
+| **E — Pre-1.0 Protégé parity** | v0.15–v0.18 | Planned | Close remaining Protégé Desktop parity gaps |
+| **F — Protégé replacement** | v1.0 | Planned | Daily OWL/OBO engineering without Protégé |
+| **G — Ecosystem** | v1.1–v1.2+ | Planned | SDKs, AI, toolchain & collaboration |
 
 | Phase | Version | Era | Status | UI phases | Theme |
 |-------|---------|-----|--------|-----------|-------|
@@ -82,9 +85,13 @@ PLANNED (v1.0+) ─────────────────────�
 | 12 | v0.12 | C | Shipped | 2 (P0 exit) | Authoring parity |
 | 13 | v0.13 | D | Shipped | 0, 1, 3†, 5†, 9† | Platform hardening |
 | 14 | v0.14 | D | Shipped | 8 | Plugin host MVP |
-| 15 | v1.0 | E | Planned | 1–6 exit, 9† | Protégé-competitive release |
-| 16 | v1.1 | F | Planned | 7, 2†, 3†, 4†, 8†, 9† | Language bindings & AI primitives |
-| 17 | v1.2+ | F | Planned | 9, 10, 11 | Ontology toolchain platform |
+| 15 | v0.15 | E | Planned | 4†, 5†, 8† | Plugin API + visualization + explanations |
+| 16 | v0.16 | E | Planned | 1†, 2† | Workspace layouts + preferences + imports polish |
+| 17 | v0.17 | E | Planned | — | Menu/toolbar/dialog parity + keyboard workflows |
+| 18 | v0.18 | E | Planned | — | Protégé Desktop parity gate + migration readiness |
+| 19 | v1.0 | F | Planned | 1–6 exit, 9† | Protégé-competitive release |
+| 20 | v1.1 | G | Planned | 7, 2†, 3†, 4†, 8†, 9† | Language bindings & AI primitives |
+| 21 | v1.2+ | G | Planned | 9, 10, 11 | Ontology toolchain platform |
 
 †Partial scope in this release (remainder in later releases). Full mapping: [ROADMAP_MAPPING.md](docs/ui/ROADMAP_MAPPING.md).
 
@@ -379,11 +386,96 @@ Sub-phases: **v0.7a** (React foundation) → **v0.7** (graphs + inspector) → *
 
 ---
 
-## Planned releases (v1.0 → v1.2+)
+## Planned releases (v0.15 → v1.2+)
 
 ---
 
-### Era E — Protégé replacement (v1.0)
+### Era E — Pre-1.0 Protégé parity (v0.15–v0.18)
+
+> **Scope note:** These phases target **Protégé Desktop parity** only. WebProtégé parity (live collaboration, permissions, notifications, etc.) remains post-1.0.
+
+### v0.15 — Plugin API + visualization parity + explanation workspace (planned)
+
+**Theme:** Turn the v0.14 plugin host MVP into a stable extensibility surface, and close the biggest remaining “daily Protégé” UX gaps around visualization and explanations.
+
+**Primary specs:**
+- Plugin API: [docs/PROTEGE_REVERSE_ENGINEERING/PLUGINS/API.md](docs/PROTEGE_REVERSE_ENGINEERING/PLUGINS/API.md)
+- Visualization: [docs/PROTEGE_REVERSE_ENGINEERING/PLUGINS/OWLVIZ.md](docs/PROTEGE_REVERSE_ENGINEERING/PLUGINS/OWLVIZ.md), [docs/PROTEGE_REVERSE_ENGINEERING/PLUGINS/ONTOGRAF.md](docs/PROTEGE_REVERSE_ENGINEERING/PLUGINS/ONTOGRAF.md), [docs/PROTEGE_REVERSE_ENGINEERING/WORKFLOWS/VISUALIZATION.md](docs/PROTEGE_REVERSE_ENGINEERING/WORKFLOWS/VISUALIZATION.md)
+- Explanations + reasoning workflow: [docs/PROTEGE_REVERSE_ENGINEERING/PLUGINS/EXPLANATION.md](docs/PROTEGE_REVERSE_ENGINEERING/PLUGINS/EXPLANATION.md), [docs/PROTEGE_REVERSE_ENGINEERING/REASONING/INFERENCE_WORKFLOWS.md](docs/PROTEGE_REVERSE_ENGINEERING/REASONING/INFERENCE_WORKFLOWS.md)
+
+| Area | Deliverables |
+|------|--------------|
+| **OntoCore** | **Plugin API v0** (versioned contract + capability discovery + lifecycle hooks + permission declarations); subprocess constraints hardened (timeouts, output caps, workspace path jail); explanation APIs exposed through LSP/CLI (request explanation, cancel, progress, caching); inference artifacts structured for UI consumption (unsats, inferred edges, justifications) |
+| **OntoUI** | **Plugin contributions beyond “cards”**: plugin-defined commands, views, context actions, and preferences pages (wired through a central command registry + event bus); **Explanation workspace MVP** (justification list + details + navigation); graph workspace upgrades toward **OWLViz + OntoGraf parity** (asserted/inferred modes, multiple layouts, filters, search, incremental expansion, export) |
+| **OntoCode** | Command palette / menus surface plugin commands; graph and explanation workspaces participate in focus sync and selection synchronization; UX polish for reasoning “dirty” state, progress, cancellation, and stale-explanation detection/regeneration |
+| **Ecosystem** | Reference plugins updated to new API surface; plugin authoring guide updated with commands/views/preferences examples; fixtures that validate OWLViz-style and explanation workflows |
+
+**Exit criteria:**
+- Plugin can register **at least one dockable view** and **one command** via a versioned contract (no private UI coupling), and be safely disabled/unloaded.
+- User can open a **class hierarchy graph** with **asserted vs inferred** modes, pan/zoom/search/center, and navigate back to the entity editor.
+- User can generate an explanation for an **unsatisfiable class** with **multiple alternative justifications**, click through supporting axioms/entities, and detect/regenerate stale explanations after edits.
+
+---
+
+### v0.16 — Workspace layouts + preferences + imports polish (planned)
+
+**Theme:** Close the “desktop shell” parity gap: dockable views, layout persistence, preferences, and a Protégé-grade imports experience.
+
+**Primary specs:**
+- Workspace + views: [docs/PROTEGE_REVERSE_ENGINEERING/UI/WORKSPACE.md](docs/PROTEGE_REVERSE_ENGINEERING/UI/WORKSPACE.md), [docs/PROTEGE_REVERSE_ENGINEERING/UI/VIEWS.md](docs/PROTEGE_REVERSE_ENGINEERING/UI/VIEWS.md)
+- Preferences: [docs/PROTEGE_REVERSE_ENGINEERING/UI/PREFERENCES.md](docs/PROTEGE_REVERSE_ENGINEERING/UI/PREFERENCES.md)
+- Imports: [docs/PROTEGE_REVERSE_ENGINEERING/EDITORS/IMPORTS.md](docs/PROTEGE_REVERSE_ENGINEERING/EDITORS/IMPORTS.md)
+
+| Area | Deliverables |
+|------|--------------|
+| **OntoCore** | Persisted workspace layout state (views, positions, open tabs) in `.ontocore/` user config; import resolution/reporting improvements (logical↔physical mapping, closure inspection, cycle detection, version mismatch diagnostics); preference schema + validation + migration |
+| **OntoUI** | Dockable/floating/hideable views; **layout persistence** (save/restore/reset to default); workspace profiles/perspectives (modeling/reasoning) as named layouts; searchable Preferences UI with categories + reset defaults + import/export settings; imports workspace polish (import tree, inspector, closure view, dependency graph, reload selected/all, diagnostics panel) |
+| **OntoCode** | “Window/View” shell commands wired (show/hide view, reset layout, switch tabs); global status indicators (dirty state, active reasoner, background tasks); preferences + imports integrated into command palette |
+
+**Exit criteria:**
+- User can **dock/move/hide** key views, **persist layout**, and **restore default** across sessions.
+- Preferences UI is **searchable**, validates inputs, supports **reset defaults**, and allows **plugin-contributed preference pages**.
+- Imports experience supports add/remove/reload, closure inspection, and clear diagnostics for missing/circular/version-conflicting imports.
+
+---
+
+### v0.17 — Menus/toolbars/dialog parity + keyboard-first workflows (planned)
+
+**Theme:** Make every Protégé “menu action” and common dialog-driven workflow available in OntoCode’s command system with strong keyboard and context-menu affordances.
+
+**Primary specs:**
+- Menus: [docs/PROTEGE_REVERSE_ENGINEERING/UI/MENUS.md](docs/PROTEGE_REVERSE_ENGINEERING/UI/MENUS.md)
+- Toolbars: [docs/PROTEGE_REVERSE_ENGINEERING/UI/TOOLBARS.md](docs/PROTEGE_REVERSE_ENGINEERING/UI/TOOLBARS.md)
+- Dialogs: [docs/PROTEGE_REVERSE_ENGINEERING/UI/DIALOGS.md](docs/PROTEGE_REVERSE_ENGINEERING/UI/DIALOGS.md)
+
+| Area | Deliverables |
+|------|--------------|
+| **OntoCore** | Stable command metadata + enablement predicates (dirty state, selection state, reasoner state, read-only imports); undo/redo action labels for semantic edits; structured dialog schemas for “new ontology / import / export / prefix manager / metadata” flows |
+| **OntoUI** | Menu + toolbar surfaces backed by a centralized command registry; entity/context menus across trees, axiom lists, search results; keybinding registry + conflict detection; core dialogs parity (new/open/save-as/import/export, rename, delete confirmation with impact summary, prefix manager, ontology metadata, reasoner settings, metrics/search) |
+| **OntoCode** | Command palette parity for menu/context actions; keyboard navigation through dialogs and toolbars; help/about + error log viewer + plugin info surfaces |
+
+**Exit criteria:**
+- Every high-frequency Protégé action in the reverse-engineered checklists is accessible via **command palette + menus/toolbars**, with correct enablement and keyboard shortcuts.
+- Critical dialogs support live validation and do not allow invalid IRIs/prefixes/imports to be persisted.
+
+---
+
+### v0.18 — Protégé Desktop parity gate + 1.0 migration readiness (planned)
+
+**Theme:** Finish the last-mile parity items and ship a verifiable “Protégé not required” desktop experience before the 1.0 stabilization push.
+
+| Area | Deliverables |
+|------|--------------|
+| **OntoCore** | Parity regression fixtures (round-trip + workflow-level); performance hardening for large ontologies (virtualized trees/graphs, incremental refresh where possible); reasoning/explanation reliability (caching, cancellation, progress); import/serialization edge-case coverage |
+| **OntoUI / OntoCode** | Parity audits against the reverse-engineered checklist (workspace shell, menus/toolbars/dialogs, views, explanations, visualization); accessibility pass on remaining panels; migration guide drafts (“from Protégé to OntoCode”) with honest known-gap list (desktop only) |
+
+**Exit criteria:**
+- **Protégé Desktop parity = 100%** for the agreed pre-1.0 scope (desktop only), backed by the reverse-engineering specs and fixture-driven regression checks.
+- A working “Protégé → OntoCode” migration path is documented for common workflows (modeling, reasoning, explanations, visualization, imports, preferences).
+
+---
+
+### Era F — Protégé replacement (v1.0)
 
 ### v1.0 — Protégé-competitive release (planned)
 
@@ -442,7 +534,7 @@ Ontologos provides **reasoning**. OntoCore provides the **workspace platform** a
 
 ---
 
-### Era F — Ecosystem expansion (v1.1+)
+### Era G — Ecosystem expansion (v1.1+)
 
 ### v1.1 — Language bindings & AI primitives (planned)
 

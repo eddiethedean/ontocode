@@ -90,7 +90,7 @@ ontocore plugins list /path/to/workspace
 ontocore plugins run ontocode.naming-validator --action validate /path/to/workspace
 ontocore validate /path/to/workspace    # merges plugin diagnostics
 ontocore docs /path/to/workspace -o out --plugin ontocode.markdown-export
-ontocore workflow run --plugin owlmake --step qc
+ontocore workflow --plugin owlmake --step qc /path/to/workspace
 ```
 
 ## LSP / OntoCode

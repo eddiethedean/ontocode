@@ -73,7 +73,14 @@ Reasoning algorithms and semantic inference. OntoCore delegates classification, 
 
 ### OntoCore
 
-Reusable semantic workspace platform: index, query, diagnostics, refactoring, and semantic diff. Consumed by the VS Code extension, CLI, and Rust library. **Plugin hosting is a v1.0 design** — not installable yet. OntoCore is **not** a workflow engine; build, release, and QC automation will live in external plugins when the host ships.
+Reusable semantic workspace platform: index, query, diagnostics, refactoring, and semantic diff. Consumed by the VS Code extension, CLI, and Rust library.
+
+**Plugin platform status:**
+
+- **Shipped (v0.14):** plugin host MVP — workspace manifest discovery, reference plugins, CLI/LSP hooks, and a subprocess workflow runner (see [Plugin authoring](guides/plugins.md)).
+- **Planned (v1.0+):** semver-stable plugin API, hardened permissions/sandboxing, and marketplace/discovery.
+
+OntoCore is **not** a workflow engine; build, release, and QC automation should live in external tools and workflow plugins rather than becoming core engine dependencies.
 
 ### External workflow plugins (e.g. owlmake)
 

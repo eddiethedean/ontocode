@@ -5,14 +5,28 @@
 
 This document describes **what ships today** in `ontocore-lsp`. For the **v1.0 target** (extended plugin methods), see [LSP_SPEC.md](design/LSP_SPEC.md).
 
+## Start with the schema (recommended)
+
+If you are integrating OntoCore outside VS Code (custom editor, scripts, automation), treat the JSON schema as the **canonical, machine-readable contract** for this release:
+
+- **LSP JSON Schema (v0.14):** [`lsp-protocol.schema.json`](lsp-protocol.schema.json)
+
+### Versioning and pinning (pre-1.0)
+
+Until v1.0, minor releases may change request/response fields.
+For stable integrations:
+
+- **Pin OntoCore** (CLI/LSP) to an exact version (e.g. `0.14.0`) in your tooling.
+- Prefer consuming `lsp-protocol.schema.json` from the same tagged release you deploy.
+
 ## Wire format
 
 LSP JSON uses **snake_case** for enums serialized from Rust (`EntityKind`, `ParseStatus`, `OntologyFormat`), e.g. `"kind": "class"`, `"parse_status": "ok"`. SQL virtual tables use the same snake_case strings via `as_str()` on core enums (e.g. `ParseStatus::as_str()` → `"ok"`, `EntityKind::as_str()` → `"class"`, `axiom_kind` → `"sub_class_of"`).
 
-**Source of truth:**
+**Reference links (implementation):**
 
 - Types: [`protocol.rs` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/crates/ontocore-lsp/src/protocol.rs)
-- JSON Schema (v0.14): [`docs/lsp-protocol.schema.json`](lsp-protocol.schema.json) — query, patch, reasoner, refactor, graph, semantic diff, schema browser, PR summary, and plugin payloads.
+- JSON Schema (v0.14): [`lsp-protocol.schema.json`](lsp-protocol.schema.json) — query, patch, reasoner, refactor, graph, semantic diff, schema browser, PR summary, and plugin payloads.
 - Handlers: [`handlers.rs` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/crates/ontocore-lsp/src/handlers.rs)
 - Extension client: [`client.ts` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/extension/src/lsp/client.ts)
 

@@ -22,6 +22,8 @@ For quick answers, see also [FAQ](faq.md).
 | Schema browser empty in Query Workbench | Workspace not indexed or SPARQL mode selected | Index workspace; switch to SQL mode — [Query Workbench](ontocode/query-workbench.md) |
 | OWL/XML visible but not editable | Read-only by design (v0.12+) | [OWL/XML workflow](guides/owl-xml-workflow.md) |
 
+Need help beyond this page? See [Support and contact](support.md).
+
 ```mermaid
 flowchart TD
   start[Something went wrong]
@@ -55,7 +57,7 @@ flowchart TD
 
 ## VS Code: cannot edit in inspector
 
-- Write-back applies to **Turtle (`.ttl`) and OBO (`.obo`)** (v0.12+). RDF/XML, OWL/XML, and JSON-LD are read-only.
+- Write-back applies to **Turtle (`.ttl`) and OBO (`.obo`)** (v0.12+). See [Supported formats](supported-formats.md) for the full matrix. RDF/XML, OWL/XML, and JSON-LD are read-only.
 - Entity must be declared in an indexed `.ttl` or `.obo` file in the workspace.
 - See [OBO authoring](ontocode/obo-authoring.md).
 

@@ -13,6 +13,10 @@ Run OntoCore validation in continuous integration to catch ontology lint and par
 
 Warnings and info are printed to stderr but do not fail the job.
 
+## What is safe to automate (pre-1.0)
+
+See [Automation and stability](automation-stability.md) for what is stable enough for CI gating and how to pin versions.
+
 ## GitHub Actions (cargo install)
 
 ```yaml

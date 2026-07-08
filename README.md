@@ -21,7 +21,7 @@
 | Validate or query in CI | `cargo install ontocore-cli --locked` → [CI guide](https://ontocode-vs.readthedocs.io/en/latest/ci-integration/) |
 | Embed in Rust | [Rust library guide](https://ontocode-vs.readthedocs.io/en/latest/guides/rust-library/) |
 | Compare ontology versions | [Semantic diff](https://ontocode-vs.readthedocs.io/en/latest/ontocode/semantic-diff/) |
-| Navigate all documentation | [Documentation map](https://ontocode-vs.readthedocs.io/en/latest/documentation-index/) · [Glossary](https://ontocode-vs.readthedocs.io/en/latest/glossary/) |
+| Navigate all documentation | [Documentation map](https://ontocode-vs.readthedocs.io/en/latest/documentation-index/) · [GitHub docs entrypoint](docs/README.md) · [Glossary](https://ontocode-vs.readthedocs.io/en/latest/glossary/) |
 
 Full documentation: **[Read the Docs](https://ontocode-vs.readthedocs.io/en/latest/)**. You do not need to clone this repo to use the extension or installed CLI.
 
@@ -73,7 +73,8 @@ cargo run -- validate fixtures
 
 ```text
 ┌──────────────────────────────────────────────────────────────┐
-│  Planned v1.0: workflow plugins (owlmake, etc.) — not shipped│
+│  Shipped v0.14: plugin host MVP + workflow scaffold (owlmake) │
+│  Planned v1.0+: semver-stable plugin API + ecosystem hardening│
 └────────────────────────────┬─────────────────────────────────┘
                              │ ontocore-lsp (stdio)
 ┌────────────────────────────▼─────────────────────────────────┐

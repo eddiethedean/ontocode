@@ -83,22 +83,18 @@ fn apply_one(text: &mut String, patch: &OboPatchOp) -> Result<()> {
             let line = format!("synonym: \"{value}\" {scope} []");
             add_line_in_term(text, term_id, &line)
         }
-        OboPatchOp::RemoveSynonym { term_id, value } => {
-            remove_lines_matching(text, term_id, &format!("synonym: \"{value}\""))
-        }
+        OboPatchOp::RemoveSynonym { term_id, value } => remove_synonym_line(text, term_id, value),
         OboPatchOp::AddDef { term_id, value } => {
             let escaped = value.replace('"', "\\\"");
             let line = format!("def: \"{escaped}\" []");
             set_or_add_line(text, term_id, "def:", &line)
         }
-        OboPatchOp::RemoveDef { term_id } => remove_lines_matching(text, term_id, "def:"),
+        OboPatchOp::RemoveDef { term_id } => remove_lines_with_prefix(text, term_id, "def:"),
         OboPatchOp::AddXref { term_id, xref } => {
             let line = format!("xref: {xref}");
             add_line_in_term(text, term_id, &line)
         }
-        OboPatchOp::RemoveXref { term_id, xref } => {
-            remove_lines_matching(text, term_id, &format!("xref: {xref}"))
-        }
+        OboPatchOp::RemoveXref { term_id, xref } => remove_xref_line(text, term_id, xref),
         OboPatchOp::SetNamespace { term_id, namespace } => {
             set_single_line(text, term_id, "namespace:", namespace, false)
         }
@@ -110,9 +106,7 @@ fn apply_one(text: &mut String, patch: &OboPatchOp) -> Result<()> {
             let line = format!("is_a: {parent_id} ! {parent_id}");
             add_line_in_term(text, term_id, &line)
         }
-        OboPatchOp::RemoveIsA { term_id, parent_id } => {
-            remove_lines_matching(text, term_id, &format!("is_a: {parent_id}"))
-        }
+        OboPatchOp::RemoveIsA { term_id, parent_id } => remove_is_a_line(text, term_id, parent_id),
     }
 }
 
@@ -157,7 +151,7 @@ fn set_or_add_line(text: &mut String, term_id: &str, prefix: &str, full_line: &s
     let (start, end) = term_block_range(text, term_id)?;
     let block = &text[start..end];
     if block.lines().any(|l| l.trim_start().starts_with(prefix)) {
-        remove_lines_matching(text, term_id, prefix)?;
+        remove_lines_with_prefix(text, term_id, prefix)?;
     }
     add_line_in_term(text, term_id, full_line)
 }
@@ -175,17 +169,116 @@ fn add_line_in_term(text: &mut String, term_id: &str, line: &str) -> Result<()> 
     Ok(())
 }
 
-fn remove_lines_matching(text: &mut String, term_id: &str, needle: &str) -> Result<()> {
+fn remove_lines_where(
+    text: &mut String,
+    term_id: &str,
+    should_remove: impl Fn(&str) -> bool,
+    not_found: Option<&str>,
+) -> Result<()> {
     let (start, end) = term_block_range(text, term_id)?;
     let block = &text[start..end];
+    let lines: Vec<&str> = block.lines().collect();
+    let removed_any = lines.iter().any(|l| should_remove(l));
+    if let Some(message) = not_found {
+        if !removed_any {
+            return Err(OboError::PatchInvalid(message.to_string()));
+        }
+    }
     let filtered: String =
-        block.lines().filter(|l| !l.contains(needle)).collect::<Vec<_>>().join("\n");
+        lines.into_iter().filter(|l| !should_remove(l)).collect::<Vec<_>>().join("\n");
     let mut new_block = filtered;
     if !new_block.ends_with('\n') {
         new_block.push('\n');
     }
     text.replace_range(start..end, &new_block);
     Ok(())
+}
+
+fn remove_lines_with_prefix(text: &mut String, term_id: &str, prefix: &str) -> Result<()> {
+    remove_lines_where(text, term_id, |l| l.trim_start().starts_with(prefix), None)
+}
+
+fn remove_is_a_line(text: &mut String, term_id: &str, parent_id: &str) -> Result<()> {
+    let parent_id = parent_id.to_string();
+    let not_found = format!("is_a parent not found: {parent_id}");
+    remove_lines_where(
+        text,
+        term_id,
+        move |l| is_is_a_parent_line(l, &parent_id),
+        Some(&not_found),
+    )
+}
+
+fn remove_xref_line(text: &mut String, term_id: &str, xref: &str) -> Result<()> {
+    let xref = xref.to_string();
+    let not_found = format!("xref not found: {xref}");
+    remove_lines_where(
+        text,
+        term_id,
+        move |l| is_xref_line(l, &xref),
+        Some(&not_found),
+    )
+}
+
+fn remove_synonym_line(text: &mut String, term_id: &str, value: &str) -> Result<()> {
+    let value = value.to_string();
+    let not_found = format!("synonym not found: {value}");
+    remove_lines_where(
+        text,
+        term_id,
+        move |l| is_synonym_value_line(l, &value),
+        Some(&not_found),
+    )
+}
+
+fn obo_field_token(rest: &str) -> Option<&str> {
+    let end = rest.find(|c: char| c.is_whitespace() || c == '!' || c == '{').unwrap_or(rest.len());
+    let token = rest[..end].trim();
+    if token.is_empty() { None } else { Some(token) }
+}
+
+fn is_is_a_parent_line(line: &str, parent_id: &str) -> bool {
+    let trimmed = line.trim_start();
+    if !trimmed.starts_with("is_a:") {
+        return false;
+    }
+    obo_field_token(trimmed["is_a:".len()..].trim_start()) == Some(parent_id)
+}
+
+fn is_xref_line(line: &str, xref: &str) -> bool {
+    let trimmed = line.trim_start();
+    if !trimmed.starts_with("xref:") {
+        return false;
+    }
+    obo_field_token(trimmed["xref:".len()..].trim_start()) == Some(xref)
+}
+
+fn is_synonym_value_line(line: &str, value: &str) -> bool {
+    parse_quoted_value_after_prefix(line, "synonym:").as_deref() == Some(value)
+}
+
+fn parse_quoted_value_after_prefix(line: &str, prefix: &str) -> Option<String> {
+    let trimmed = line.trim_start();
+    if !trimmed.starts_with(prefix) {
+        return None;
+    }
+    let mut rest = trimmed[prefix.len()..].trim_start();
+    if !rest.starts_with('"') {
+        return None;
+    }
+    rest = &rest[1..];
+    let mut out = String::new();
+    let mut chars = rest.chars();
+    while let Some(c) = chars.next() {
+        if c == '\\' {
+            out.push(chars.next()?);
+        } else if c == '"' {
+            return Some(out);
+        } else {
+            out.push(c);
+        }
+    }
+    None
 }
 
 pub fn atomic_write(path: &Path, contents: &str) -> Result<()> {
@@ -259,6 +352,52 @@ name: other
         )
         .expect("remove");
         let text = removed.preview_text.expect("preview");
-        assert!(!text.contains("EX:002") || !text.lines().any(|l| l.contains("is_a: EX:001")));
+        let (start, end) = term_block_range(&text, "EX:002").expect("term block");
+        assert!(
+            !text[start..end].lines().any(|l| is_is_a_parent_line(l, "EX:001")),
+            "EX:001 parent must be removed from EX:002"
+        );
+    }
+
+    #[test]
+    fn remove_is_a_does_not_match_prefix_collision_parent_ids() {
+        const COLLISION: &str = r#"format-version: 1.2
+ontology: ex
+
+[Term]
+id: EX:002
+name: child
+is_a: EX:0010 ! longer parent
+is_a: EX:001 ! shorter parent
+"#;
+
+        let result = apply_patches_to_text(
+            COLLISION,
+            &[OboPatchOp::RemoveIsA { term_id: "EX:002".into(), parent_id: "EX:001".into() }],
+            true,
+        )
+        .expect("remove shorter parent only");
+
+        let text = result.preview_text.expect("preview");
+        assert!(
+            text.lines().any(|l| l.contains("is_a: EX:0010")),
+            "EX:0010 parent must remain when removing EX:001"
+        );
+        assert!(
+            !text.lines().any(|l| is_is_a_parent_line(l, "EX:001")),
+            "EX:001 parent must be removed"
+        );
+    }
+
+    #[test]
+    fn remove_is_a_errors_when_parent_missing() {
+        let err = apply_patches_to_text(
+            SAMPLE,
+            &[OboPatchOp::RemoveIsA { term_id: "EX:001".into(), parent_id: "EX:999".into() }],
+            true,
+        )
+        .expect("patch result");
+        assert!(!err.diagnostics.is_empty());
+        assert!(err.diagnostics[0].message.contains("is_a parent not found"));
     }
 }

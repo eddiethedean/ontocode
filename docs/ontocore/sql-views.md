@@ -28,6 +28,11 @@ let result = ws.query("SELECT short_name FROM classes WHERE deprecated = false")
 | `entities` | All extracted entities |
 | `annotations` | Label/comment and other annotation triples |
 | `axioms` | Extracted axioms (e.g. SubClassOf) |
+| `restrictions` | OWL class restrictions (Horned-OWL catalog) |
+| `equivalent_class_axioms` | Equivalent class expressions |
+| `disjoint_class_axioms` | Disjoint class pairs |
+| `domain_axioms` | Property domain axioms |
+| `range_axioms` | Property range axioms |
 | `namespaces` | Namespace prefixes |
 | `imports` | Ontology imports |
 | `diagnostics` | Lint and parse diagnostics |

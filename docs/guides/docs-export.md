@@ -33,7 +33,7 @@ export_workspace(
 
 | File | Contents |
 |------|----------|
-| `index.md` / `index.html` | Links to per-ontology pages |
+| `index.md` / `index.html` | Links to per-ontology pages; **class hierarchy** and **property index** (v0.13+) |
 | `{slug}.md` / `{slug}.html` | Entity tables, labels, comments, class parents, import list |
 
 ## CI / team docs
@@ -49,4 +49,4 @@ Commit or publish `docs/generated/` as part of your release pipeline.
 ## Related
 
 - [SHIPPED.md](../SHIPPED.md) — capability matrix
-- [migration/v0.11.md](../migration/v0.11.md) — release notes
+- [migration/v0.13.md](../migration/v0.13.md) — hierarchy + property index sections

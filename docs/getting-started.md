@@ -23,9 +23,17 @@ VS Code extension (bundled language server on Linux, macOS, and Windows): [vscod
 | Path | Requires |
 |------|----------|
 | Minimum VS Code | **1.85+** — see [platform compatibility guide](guides/platform-compatibility.md) |
-| `cargo install` CLI | Rust 1.88+ |
+| `cargo install` CLI | Rust 1.88+; `~/.cargo/bin` on your `PATH` |
 | Git clone + `cargo run` | Rust 1.88+ |
 | Release CLI binaries | No Rust; **Linux x64 only** (download from GitHub Releases) |
+
+After `cargo install`, ensure `~/.cargo/bin` is on your `PATH`. If you see `ontocore: command not found`, run:
+
+```bash
+export PATH="$HOME/.cargo/bin:$PATH"
+```
+
+Add that line to your shell profile (`~/.bashrc`, `~/.zshrc`, etc.) for persistence. If install fails with an MSRV error, run `rustup update stable` and confirm `rustc --version` is **1.88 or newer**.
 
 ## Path A — VS Code (recommended for browsing and editing)
 
@@ -38,9 +46,8 @@ Details: [vscode-install.md](vscode-install.md) · [authoring.md](authoring.md)
 ```bash
 git clone https://github.com/eddiethedean/ontocode.git
 cd ontocode
-cargo build --release
 
-# Sample fixture ontology
+# Sample fixture ontology (debug build is fine for smoke tests)
 cargo run -- inspect fixtures
 cargo run -- query fixtures "SELECT short_name, labels FROM classes"
 cargo run -- validate fixtures
@@ -54,6 +61,8 @@ The `fixtures/` directory is included in the repository for examples and tests.
 cargo install ontocore-cli --locked
 ```
 
+**Version pinning:** Use `--locked` for reproducible installs from crates.io (recommended). Pin an exact release in CI with `cargo install ontocore-cli --locked --version 0.13.0` — see [API stability](guides/api-stability.md) and [release integrity](release-integrity.md).
+
 Use **your own ontology directory** — there is no `fixtures/` folder outside a clone:
 
 ```bash
@@ -66,14 +75,14 @@ ontocore validate /path/to/your/ontologies
 
 **CLI pre-builds are Linux x64 only.** On macOS or Windows, use Path C (`cargo install ontocore-cli`) or install the VS Code extension (bundled LSP).
 
-1. Open [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) for the latest **v0.12.x** tag.
+1. Open [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) for the latest **v0.13.x** tag.
 2. **For CLI on Linux x64:** download `ontocore-v<version>-x86_64-unknown-linux-gnu.tar.gz`.
 3. **For VS Code (any supported OS):** download `ontocode-<version>.vsix` — see [vscode-install.md](vscode-install.md).
 4. Verify with `SHA256SUMS` — see [release-integrity.md](release-integrity.md).
-5. Extract and run (Linux example; replace `0.12.0` with your tag):
+5. Extract and run (Linux example; replace `0.13.0` with your tag):
 
 ```bash
-VERSION=0.12.0
+VERSION=0.13.0
 ASSET="ontocore-v${VERSION}-x86_64-unknown-linux-gnu.tar.gz"
 BIN="ontocore-v${VERSION}-x86_64-unknown-linux-gnu"
 tar xzf "${ASSET}"

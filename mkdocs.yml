@@ -77,18 +77,17 @@ markdown_extensions:
 nav:
   - Home: index.md
   - Get started:
-      - Documentation index: documentation-index.md
-      - Glossary: glossary.md
       - "First success (~10 min core path)": guides/first-success.md
       - Which artifact do I need?: guides/which-artifact.md
-      - What's new in v0.12: migration/v0.12.md
-      - What's new in v0.11: migration/v0.11.md
-      - Pick a task: guides/start-here.md
-      - What ships today: SHIPPED.md
+      - "Getting started (all paths)": getting-started.md
       - Install VS Code: vscode-install.md
-      - Install CLI: getting-started.md
+      - What ships today: SHIPPED.md
+      - Glossary: glossary.md
+      - "What's new in v0.13": migration/v0.13.md
+      - Pick a task: guides/start-here.md
       - Ontology concepts: concepts.md
       - Migrating from Protégé: guides/protege-migration.md
+      - Documentation index: documentation-index.md
   - Use OntoCode:
       - Feature tour: ontocode/feature-tour.md
       - Overview: ontocode/vscode-extension.md
@@ -121,6 +120,10 @@ nav:
           - Query cookbook: examples/queries.md
           - Sample patches: examples/patches.md
           - Refactoring: examples/refactoring.md
+          - Classify: examples/classify.md
+          - Semantic diff: examples/diff.md
+          - Docs export: examples/docs-export.md
+          - Index vs inspect: examples/inspect.md
   - Reference:
       - CLI reference: cli-reference.md
       - Rust API: ontocore/rust-api.md
@@ -134,6 +137,7 @@ nav:
       - Workspace limits: workspace-limits.md
       - OntoCore SQL views: ontocore/sql-views.md
       - OntoCore LSP overview: ontocore/lsp.md
+      - LSP hello world: guides/lsp-hello-world.md
   - Evaluate:
       - Vision: vision.md
       - Architecture: architecture.md
@@ -165,10 +169,12 @@ nav:
           - v0.9 → v0.10: migration/v0.10.md
           - v0.10 → v0.11: migration/v0.11.md
           - v0.11 → v0.12: migration/v0.12.md
+          - v0.12 → v0.13: migration/v0.13.md
       - Legacy guide URLs: guides/legacy-guide-urls.md
       - Release integrity: release-integrity.md
   - Contribute:
       - Guide: contributing.md
+      - Extension development: guides/extension-development.md
       - Debugging: debugging.md
       - Releasing: releasing.md
       - Marketplace publish: marketplace-publish.md
@@ -234,10 +240,8 @@ nav:
           - ADRs:
               - Index (all ADRs): design/adr/README.md
   - "Platform planning (v0.13+)":
-      - What ships today (not planned): SHIPPED.md
-      - Documentation index: documentation-index.md
-      - Glossary: glossary.md
       - Platform overview: platform/OVERVIEW.md
+      - UX audit (v0.13): ui/UX_AUDIT_v0.13.md
       - OntoUI: platform/ONTOUI.md
       - Workspace runtime: platform/WORKSPACE_RUNTIME.md
       - Capability providers: platform/CAPABILITY_PROVIDERS.md

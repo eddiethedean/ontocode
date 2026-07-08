@@ -166,6 +166,31 @@ describe("isHostMessage", () => {
         },
       })
     ).toBe(true);
+    expect(
+      isHostMessage({
+        type: "focusState",
+        focus: {
+          kind: "entity",
+          id: "http://example.org/people#Person",
+          source: "explorer",
+          timestamp: 1,
+        },
+      })
+    ).toBe(true);
+    expect(
+      isHostMessage({
+        type: "reasoningState",
+        reasoning: { unsatisfiable: [], profile: "el", hierarchyMode: "asserted" },
+      })
+    ).toBe(true);
+    expect(
+      isHostMessage({
+        type: "queryInit",
+        saved: [],
+        history: [],
+        sqlSchema: [{ name: "classes", columns: [{ name: "iri", type: "string" }] }],
+      })
+    ).toBe(true);
   });
 
   it("rejects invalid payloads", () => {

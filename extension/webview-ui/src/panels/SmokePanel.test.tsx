@@ -1,12 +1,16 @@
 import { render, screen, waitFor } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
 import { describe, it, expect } from "vitest";
+import { HostProvider } from "../context/HostContext";
 import { SmokePanel } from "../panels/SmokePanel";
 import { postedMessages } from "../test/fixtures";
 
 describe("SmokePanel", () => {
   it("renders brand content and posts ready message", async () => {
-    render(<SmokePanel />);
+    render(
+      <HostProvider>
+        <SmokePanel />
+      </HostProvider>
+    );
 
     expect(screen.getByRole("heading", { name: "OntoCode React" })).toBeInTheDocument();
     expect(screen.getByText("Webview foundation is active.")).toBeInTheDocument();

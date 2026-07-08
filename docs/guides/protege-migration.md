@@ -1,6 +1,6 @@
 # Migrating from Protégé — first week
 
-This guide helps ontology teams adopt OntoCode **v0.12** alongside or instead of [Protégé](https://protege.stanford.edu/). For a capability comparison, see [Protégé vs OntoCode](protege-decision.md) and [What ships today](../SHIPPED.md).
+This guide helps ontology teams adopt OntoCode **v0.13** alongside or instead of [Protégé](https://protege.stanford.edu/). For a capability comparison, see [Protégé vs OntoCode](protege-decision.md) and [What ships today](../SHIPPED.md).
 
 ## Before you start
 
@@ -31,7 +31,7 @@ Follow the [first success core path](../guides/first-success.md) if anything is 
 
 ## Day 2 — Map Protégé habits to OntoCode
 
-| In Protégé | In OntoCode v0.12 |
+| In Protégé | In OntoCode v0.13 |
 |------------|-------------------|
 | Class hierarchy tab | **Classes** explorer view; toggle **asserted / inferred / combined** after reasoner |
 | Entity editor (labels, parents) | **Entity Inspector** edit section (`.ttl` and `.obo`) |
@@ -46,7 +46,7 @@ Follow the [first success core path](../guides/first-success.md) if anything is 
 Add a pipeline gate so Protégé-only mistakes are caught before merge:
 
 ```yaml
-- run: cargo install ontocore-cli --locked --version 0.12.0
+- run: cargo install ontocore-cli --locked --version 0.13.0
 - run: ontocore validate ./src/ontologies
 ```
 
@@ -90,7 +90,7 @@ By end of week one you should be able to:
 | Cannot edit OWL/XML in inspector | Convert module to Turtle for write-back, or edit in Protégé |
 | SQL query fails | OntoCore SQL is single-table subset — use SPARQL for graph patterns |
 | Reasoner slow or fails on DL | Check [workspace limits](../workspace-limits.md); try `el` profile first |
-| Team expects plugin ecosystem | Plugin host is **v1.0 target** — not installable in v0.12 |
+| Team expects plugin ecosystem | Plugin host is **v1.0 target** — not installable in v0.13 |
 
 ## Next steps
 

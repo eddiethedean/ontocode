@@ -7,6 +7,7 @@ import {
   TabularQueryResult,
 } from "./lsp/protocol";
 import type { PanelKind } from "./webviews/messages";
+import type { CurrentFocus } from "./focus/types";
 
 /** VS Code integration test hooks (only when ONTOCODE_TEST_FIXTURES is set). */
 export interface OntoCodeTestHooks {
@@ -25,6 +26,7 @@ export interface OntoCodeTestHooks {
   getInspectorPanelTitle(): string | undefined;
   waitForInspectorIri(iri: string, timeoutMs?: number): Promise<void>;
   getInspectorPanelRef(): object | undefined;
+  getCanonicalFocus(): CurrentFocus | null;
 }
 
 /** Extension activation API (used by VS Code integration tests). */

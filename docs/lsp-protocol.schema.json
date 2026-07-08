@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/eddiethedean/ontocode/docs/lsp-protocol.schema.json",
-  "title": "OntoCore LSP protocol (v0.10)",
-  "description": "JSON Schema for ontocore/* custom LSP method payloads (v0.10). Method routing is documented in lsp-api.md.",
+  "title": "OntoCore LSP protocol (v0.13)",
+  "description": "JSON Schema for ontocore/* custom LSP method payloads (v0.13). Method routing is documented in lsp-api.md. Standard LSP textDocument/semanticTokens/full is documented in lsp-api.md but not duplicated here.",
   "definitions": {
     "EntityKind": {
       "type": "string",
@@ -510,7 +510,11 @@
         "right_ref": { "type": ["string", "null"] },
         "left_path": { "type": ["string", "null"] },
         "right_path": { "type": ["string", "null"] },
-        "reasoner": { "type": "boolean", "default": false }
+        "reasoner": { "type": "boolean", "default": false },
+        "format": {
+          "type": ["string", "null"],
+          "description": "When set to pr-summary, result includes formatted Markdown string (v0.13+)."
+        }
       },
       "additionalProperties": false
     },
@@ -518,7 +522,43 @@
       "type": "object",
       "required": ["diff"],
       "properties": {
-        "diff": { "type": "object", "additionalProperties": true }
+        "diff": { "type": "object", "additionalProperties": true },
+        "formatted": {
+          "type": "string",
+          "description": "PR-ready Markdown when format is pr-summary (v0.13+)."
+        }
+      },
+      "additionalProperties": false
+    },
+    "SqlColumnSchema": {
+      "type": "object",
+      "required": ["name", "type"],
+      "properties": {
+        "name": { "type": "string" },
+        "type": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "SqlTableSchema": {
+      "type": "object",
+      "required": ["name", "columns"],
+      "properties": {
+        "name": { "type": "string" },
+        "columns": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/SqlColumnSchema" }
+        }
+      },
+      "additionalProperties": false
+    },
+    "ListSqlSchemaResult": {
+      "type": "object",
+      "required": ["tables"],
+      "properties": {
+        "tables": {
+          "type": "array",
+          "items": { "$ref": "#/definitions/SqlTableSchema" }
+        }
       },
       "additionalProperties": false
     },

@@ -31,23 +31,23 @@
 
 ## Master checklist — Product Roadmap 2.0
 
-Every item from [PRODUCT_ROADMAP_2.0.md](PRODUCT_ROADMAP_2.0.md), with release assignment. **Shipped** = available in v0.12.0 unless noted.
+Every item from [PRODUCT_ROADMAP_2.0.md](PRODUCT_ROADMAP_2.0.md), with release assignment. **Shipped** = available in the current release unless noted (v0.13.0).
 
 | UI phase | Deliverable | Status | Target release | Spec |
 |----------|-------------|--------|----------------|------|
-| **0** | Audit existing VS Code extension | Planned | v0.13 | [TESTING_STRATEGY.md](TESTING_STRATEGY.md) |
-| **0** | Identify clunky UI flows | Planned | v0.13 | [UX_PATTERNS.md](UX_PATTERNS.md) |
-| **0** | Centralize webview communication | Planned | v0.13 | [EVENT_SEQUENCE_DIAGRAMS.md](EVENT_SEQUENCE_DIAGRAMS.md) |
-| **0** | Create basic WorkspaceStore | Planned | v0.13 | [STATE_MANAGEMENT.md](STATE_MANAGEMENT.md) |
-| **0** | Establish design tokens | Planned | v0.13 | [DESIGN_TOKENS.md](DESIGN_TOKENS.md) |
+| **0** | Audit existing VS Code extension | Shipped | v0.13 | [UX_AUDIT_v0.13.md](UX_AUDIT_v0.13.md) |
+| **0** | Identify clunky UI flows | Shipped | v0.13 | [UX_PATTERNS.md](UX_PATTERNS.md) |
+| **0** | Centralize webview communication | Shipped | v0.13 | [EVENT_SEQUENCE_DIAGRAMS.md](EVENT_SEQUENCE_DIAGRAMS.md) |
+| **0** | Create basic WorkspaceStore | Shipped | v0.13 | [STATE_MANAGEMENT.md](STATE_MANAGEMENT.md) |
+| **0** | Establish design tokens | Shipped | v0.13 | [DESIGN_TOKENS.md](DESIGN_TOKENS.md) |
 | **0** | Migrate legacy UI to reusable components | Partial | v0.13 | [COMPONENT_LIBRARY.md](COMPONENT_LIBRARY.md) |
-| **1** | Current Focus model | Planned | v0.13 | [STATE_MANAGEMENT.md](STATE_MANAGEMENT.md) |
-| **1** | Semantic navigation history | Planned | v0.13 | [WORKSPACE_MODEL.md](WORKSPACE_MODEL.md) |
-| **1** | Shared explorer/inspector synchronization | Partial | v0.13 | [INFORMATION_ARCHITECTURE.md](INFORMATION_ARCHITECTURE.md) |
+| **1** | Current Focus model | Shipped | v0.13 | [STATE_MANAGEMENT.md](STATE_MANAGEMENT.md) |
+| **1** | Semantic navigation history | Partial | v0.13 | [WORKSPACE_MODEL.md](WORKSPACE_MODEL.md) |
+| **1** | Shared explorer/inspector synchronization | Shipped | v0.13 | [INFORMATION_ARCHITECTURE.md](INFORMATION_ARCHITECTURE.md) |
 | **1** | Persistent tabs | Planned | v1.0 | [WORKSPACE_WIREFRAMES.md](WORKSPACE_WIREFRAMES.md) |
 | **1** | Bottom dock | Planned | v1.0 | [WORKSPACE_WIREFRAMES.md](WORKSPACE_WIREFRAMES.md) |
 | **1** | Command palette integration | Shipped | v0.2+ | VS Code commands |
-| **1** | Core event bus | Planned | v0.13 | [EVENT_SEQUENCE_DIAGRAMS.md](EVENT_SEQUENCE_DIAGRAMS.md) |
+| **1** | Core event bus | Shipped | v0.13 | [EVENT_SEQUENCE_DIAGRAMS.md](EVENT_SEQUENCE_DIAGRAMS.md) |
 | **2** | Entity editor MVP | Shipped | v0.7+ | [ENTITY_EDITOR_SPEC.md](ENTITY_EDITOR_SPEC.md) |
 | **2** | Inline labels/comments | Shipped | v0.12 | [ENTITY_EDITOR_SPEC.md](ENTITY_EDITOR_SPEC.md) |
 | **2** | Hierarchy view | Shipped | v0.2+ | Explorer + reasoner toggle |
@@ -57,7 +57,7 @@ Every item from [PRODUCT_ROADMAP_2.0.md](PRODUCT_ROADMAP_2.0.md), with release a
 | **2** | Diagnostics integration in entity workspace | Partial | v1.0 | [REASONING_EXPERIENCE.md](REASONING_EXPERIENCE.md) |
 | **2** | AI explain entity | Planned | v1.1 | [AI_EXPERIENCE.md](AI_EXPERIENCE.md) |
 | **3** | SQL/OntoSQL editor | Shipped | v0.5+ | [QUERY_WORKBENCH.md](QUERY_WORKBENCH.md) |
-| **3** | Schema browser | Planned | v0.13 | [QUERY_WORKBENCH.md](QUERY_WORKBENCH.md) |
+| **3** | Schema browser | Shipped | v0.13 | [QUERY_WORKBENCH.md](QUERY_WORKBENCH.md) |
 | **3** | Query execution | Shipped | v0.5+ | [QUERY_WORKBENCH.md](QUERY_WORKBENCH.md) |
 | **3** | Results table | Shipped | v0.5+ | [QUERY_WORKBENCH.md](QUERY_WORKBENCH.md) |
 | **3** | Query history | Shipped | v0.5+ | [QUERY_WORKBENCH.md](QUERY_WORKBENCH.md) |
@@ -99,7 +99,7 @@ Every item from [PRODUCT_ROADMAP_2.0.md](PRODUCT_ROADMAP_2.0.md), with release a
 | **9** | Semantic diff | Shipped | v0.10+ | [COLLABORATION.md](COLLABORATION.md) |
 | **9** | Review workspace | Planned | v1.0 / Post-1.2 | [COLLABORATION.md](COLLABORATION.md) |
 | **9** | GitHub integration | Planned | v1.2 | [COLLABORATION.md](COLLABORATION.md) |
-| **9** | Semantic PR summaries | Partial | v0.13 / v1.2 | OntoCore PR summary v0.13; UI v1.2 |
+| **9** | Semantic PR summaries | Partial | v0.13 / v1.2 | CLI/LSP `--pr-summary` shipped v0.13; UI panel v1.2 |
 | **9** | AI review | Planned | v1.1 | [COLLABORATION.md](COLLABORATION.md) |
 | **9** | Merge checks | Planned | v1.2 | [COLLABORATION.md](COLLABORATION.md) |
 | **10** | Tauri app shell | Planned | Post-1.2 | [ONTOSTUDIO_DESKTOP.md](ONTOSTUDIO_DESKTOP.md) |
@@ -129,7 +129,7 @@ Every item from [PRODUCT_ROADMAP_2.0.md](PRODUCT_ROADMAP_2.0.md), with release a
 | Human interface guidelines | Planned | v1.0 | [HUMAN_INTERFACE_GUIDELINES.md](HUMAN_INTERFACE_GUIDELINES.md) |
 | Interaction principles | Reference | — | [INTERACTION_PRINCIPLES.md](INTERACTION_PRINCIPLES.md) |
 | Keyboard shortcuts catalog | Planned | v1.0 | [KEYBOARD_SHORTCUTS.md](KEYBOARD_SHORTCUTS.md) |
-| Accessibility (WCAG) | Planned | v0.13 / v1.0 | [ACCESSIBILITY_SPEC.md](ACCESSIBILITY_SPEC.md) |
+| Accessibility (WCAG) | Partial | v0.13 / v1.0 | [ACCESSIBILITY_SPEC.md](ACCESSIBILITY_SPEC.md) · migrated panels v0.13 |
 | Telemetry / analytics | Not planned (opt-in only) | — | [TELEMETRY_ANALYTICS.md](TELEMETRY_ANALYTICS.md) |
 | Documentation workspace UX | Partial | v1.0 | [PRODUCT_DESIGN_SPECIFICATION.md](PRODUCT_DESIGN_SPECIFICATION.md) §4.6 |
 
@@ -137,7 +137,7 @@ Every item from [PRODUCT_ROADMAP_2.0.md](PRODUCT_ROADMAP_2.0.md), with release a
 
 ## Release summary (by milestone)
 
-### v0.13 — UI phases 0–1 + partial 3/5/9
+### v0.13 — UI phases 0–1 + partial 3/5/9 (shipped 2026-07-07)
 
 | Deliverable | UI phase | Priority |
 |-------------|----------|----------|

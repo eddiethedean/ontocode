@@ -1,6 +1,9 @@
 use crate::QueryError;
 use ontocore_catalog::OntologyCatalog;
-use ontocore_core::{limits::MAX_QUERY_BYTES, limits::MAX_SQL_RESULT_ROWS, EntityKind};
+use ontocore_core::{
+    limits::MAX_QUERY_BYTES, limits::MAX_SQL_RESULT_ROWS, EntityKind, AXIOM_KIND_DISJOINT_CLASS,
+    AXIOM_KIND_DOMAIN, AXIOM_KIND_EQUIVALENT_CLASS, AXIOM_KIND_RANGE, AXIOM_KIND_SUB_CLASS_OF,
+};
 use serde::Serialize;
 use sqlparser::ast::{
     Expr, GroupByExpr, Select, SelectItem, SetExpr, Statement, TableFactor, Value,
@@ -170,6 +173,15 @@ fn table_row_iter<'a>(
             row.insert("entity_iri".into(), d.entity_iri.clone().unwrap_or_default());
             row
         }))),
+        "equivalent_class_axioms" => {
+            axiom_kind_rows(catalog, AXIOM_KIND_EQUIVALENT_CLASS, "class_iri", "expression")
+        }
+        "disjoint_class_axioms" => {
+            axiom_kind_rows(catalog, AXIOM_KIND_DISJOINT_CLASS, "class_iri", "disjoint_with")
+        }
+        "domain_axioms" => axiom_kind_rows(catalog, AXIOM_KIND_DOMAIN, "property_iri", "domain"),
+        "range_axioms" => axiom_kind_rows(catalog, AXIOM_KIND_RANGE, "property_iri", "range"),
+        "restrictions" => restriction_rows(catalog),
         "properties" => {
             let mut iter: Box<dyn Iterator<Item = Row>> = Box::new(std::iter::empty());
             for kind in [
@@ -191,6 +203,71 @@ fn entity_row_iter(
     kind: EntityKind,
 ) -> Result<Box<dyn Iterator<Item = Row> + '_>> {
     Ok(Box::new(catalog.data().entities.iter().filter(move |e| e.kind == kind).map(entity_to_row)))
+}
+
+fn axiom_kind_rows<'a>(
+    catalog: &'a OntologyCatalog,
+    kind: &str,
+    col_a: &str,
+    col_b: &str,
+) -> Result<Box<dyn Iterator<Item = Row> + 'a>> {
+    let col_a = col_a.to_string();
+    let col_b = col_b.to_string();
+    let kind = kind.to_string();
+    Ok(Box::new(catalog.data().axioms.iter().filter(move |a| a.axiom_kind == kind).map(move |a| {
+        let mut row = BTreeMap::new();
+        row.insert(col_a.clone(), a.subject.clone());
+        row.insert(col_b.clone(), a.object.clone());
+        row
+    })))
+}
+
+fn restriction_rows<'a>(
+    catalog: &'a OntologyCatalog,
+) -> Result<Box<dyn Iterator<Item = Row> + 'a>> {
+    Ok(Box::new(
+        catalog
+            .data()
+            .axioms
+            .iter()
+            .filter(|a| a.axiom_kind == AXIOM_KIND_SUB_CLASS_OF && is_restriction_expr(&a.object))
+            .map(|a| {
+                let (property_iri, restriction_kind) = parse_restriction_header(&a.object);
+                let mut row = BTreeMap::new();
+                row.insert("class_iri".into(), a.subject.clone());
+                row.insert("property_iri".into(), property_iri);
+                row.insert("restriction_kind".into(), restriction_kind);
+                row.insert("filler".into(), a.object.clone());
+                row
+            }),
+    ))
+}
+
+fn is_restriction_expr(expr: &str) -> bool {
+    let lower = expr.to_ascii_lowercase();
+    lower.contains(" some ")
+        || lower.contains(" only ")
+        || lower.contains(" value ")
+        || lower.contains(" min ")
+        || lower.contains(" max ")
+        || lower.contains("self")
+}
+
+fn parse_restriction_header(expr: &str) -> (String, String) {
+    let trimmed = expr.trim();
+    for kind in ["some", "only", "value", "min", "max", "self"] {
+        let needle = format!(" {kind} ");
+        if let Some(idx) = trimmed.to_ascii_lowercase().find(&needle) {
+            let property = trimmed[..idx].trim().to_string();
+            return (property, kind.to_string());
+        }
+        if trimmed.to_ascii_lowercase().ends_with(kind) && kind == "self" {
+            let property =
+                trimmed.trim_end_matches("self").trim().trim_end_matches("and").trim().to_string();
+            return (property, kind.to_string());
+        }
+    }
+    (String::new(), "complex".to_string())
 }
 
 fn entity_to_row(entity: &ontocore_core::Entity) -> Row {

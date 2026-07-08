@@ -3,8 +3,8 @@ use clap::{Parser, Subcommand, ValueEnum};
 use ontocore_catalog::{CatalogStats, IndexBuilder, OntologyCatalog};
 use ontocore_diff::{
     apply_unsat_diff, catalog_at_git_ref, catalog_at_worktree, diff_catalogs,
-    diff_git_refs_with_catalogs, format_diff_json, format_diff_markdown, format_diff_text,
-    parse_git_range, DiffResult,
+    diff_git_refs_with_catalogs, format_diff_json, format_diff_markdown, format_diff_pr_summary,
+    format_diff_text, parse_git_range, DiffResult,
 };
 use ontocore_docs::{export_workspace, ExportFormat, ExportOptions};
 use ontocore_query::{
@@ -25,7 +25,7 @@ use std::path::{Path, PathBuf};
 #[command(
     name = "ontocore",
     version,
-    about = "Local-first ontology index and query engine (OntoCode v0.12)"
+    about = "Local-first ontology index and query engine (OntoCode v0.13)"
 )]
 struct Cli {
     #[command(subcommand)]
@@ -158,6 +158,9 @@ enum Commands {
         format: DiffFormat,
         #[arg(long)]
         breaking_only: bool,
+        /// Emit a Markdown summary suitable for pull request descriptions
+        #[arg(long)]
+        pr_summary: bool,
     },
 }
 
@@ -261,6 +264,8 @@ enum DiffFormat {
     Text,
     Json,
     Markdown,
+    #[value(name = "pr-summary")]
+    PrSummary,
 }
 
 #[derive(Clone, Copy, ValueEnum)]
@@ -343,6 +348,35 @@ fn main() -> Result<()> {
         Commands::Inspect { workspace, format } => {
             let catalog = build_catalog(&workspace)?;
             print_stats(&catalog.data().stats(), format)?;
+            let data = catalog.data();
+            let mut errors = 0usize;
+            let mut warnings = 0usize;
+            for diag in &data.diagnostics {
+                match diag.severity {
+                    ontocore_core::DiagnosticSeverity::Error => errors += 1,
+                    ontocore_core::DiagnosticSeverity::Warning => warnings += 1,
+                    _ => {}
+                }
+            }
+            if errors > 0 || warnings > 0 {
+                println!("\nDiagnostics: {errors} error(s), {warnings} warning(s)");
+                for diag in data.diagnostics.iter().take(10) {
+                    println!(
+                        "  [{}] {} — {}",
+                        diag.code.as_str(),
+                        diag.severity.as_str(),
+                        diag.message
+                    );
+                }
+                if data.diagnostics.len() > 10 {
+                    println!(
+                        "  … and {} more (run `ontocore validate` for full list)",
+                        data.diagnostics.len() - 10
+                    );
+                }
+            } else {
+                println!("\nNo diagnostics.");
+            }
         }
         Commands::Patch { document, patch_file, preview } => {
             let patch_bytes = std::fs::read(&patch_file)?;
@@ -526,6 +560,7 @@ fn main() -> Result<()> {
             reasoner,
             format,
             breaking_only,
+            pr_summary,
         } => {
             let diff = run_diff(
                 git_range.as_deref(),
@@ -534,10 +569,16 @@ fn main() -> Result<()> {
                 repo.as_deref(),
                 reasoner,
             )?;
-            let output = match format {
-                DiffFormat::Json => format_diff_json(&diff),
-                DiffFormat::Markdown => format_diff_markdown(&diff, breaking_only),
-                DiffFormat::Text => format_diff_text(&diff, breaking_only),
+            let output = if pr_summary || matches!(format, DiffFormat::PrSummary) {
+                format_diff_pr_summary(&diff)
+            } else {
+                match format {
+                    DiffFormat::Json => format_diff_json(&diff),
+                    DiffFormat::Markdown => format_diff_markdown(&diff, breaking_only),
+                    DiffFormat::Text | DiffFormat::PrSummary => {
+                        format_diff_text(&diff, breaking_only)
+                    }
+                }
             };
             println!("{output}");
         }
@@ -643,7 +684,13 @@ fn diff_from_refs_with_catalogs(
 }
 
 fn resolve_git_catalog(repo: &Path, git_ref: &str) -> Result<OntologyCatalog> {
-    if git_ref.eq_ignore_ascii_case("WORKTREE") || git_ref.eq_ignore_ascii_case("WORKSPACE") {
+    if ontocore_diff::is_indexed_catalog_ref(git_ref) {
+        anyhow::bail!(
+            "ref {git_ref}: indexed catalog (INDEXED) is only available via LSP semantic diff; \
+             use WORKTREE or a git commit ref in the CLI"
+        );
+    }
+    if ontocore_diff::is_worktree_ref(git_ref) {
         catalog_at_worktree(repo).map_err(|e| anyhow::anyhow!(e))
     } else {
         catalog_at_git_ref(repo, git_ref).map_err(|e| anyhow::anyhow!(e))

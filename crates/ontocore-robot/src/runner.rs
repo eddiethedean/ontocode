@@ -2,6 +2,7 @@ use crate::error::{Result, RobotError};
 use std::path::{Component, Path};
 use std::process::Command;
 
+#[derive(Debug)]
 pub struct RobotOutput {
     pub exit_code: i32,
     pub stdout: String,
@@ -103,4 +104,74 @@ pub fn robot_report(
             report_path.display().to_string(),
         ],
     )
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::error::RobotError;
+
+    #[test]
+    fn rejects_disallowed_robot_subcommand() {
+        let err = match run_robot(Some("/definitely/not/robot"), &[String::from("convert")]) {
+            Err(e) => e,
+            Ok(output) => panic!("expected disallowed subcommand error, got {output:?}"),
+        };
+        match err {
+            RobotError::Run(msg) => {
+                assert!(msg.contains("not allowed"));
+                assert!(msg.contains("convert"));
+            }
+            other => panic!("expected Run error, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn rejects_empty_robot_args() {
+        let err = match run_robot(Some("/definitely/not/robot"), &[]) {
+            Err(e) => e,
+            Ok(output) => panic!("expected empty-args error, got {output:?}"),
+        };
+        match err {
+            RobotError::Run(msg) => assert!(msg.contains("requires a subcommand")),
+            other => panic!("expected Run error, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn allows_known_subcommands_in_validation() {
+        for sub in ["validate-profile", "validate", "merge", "report", "reason", "query"] {
+            let result = run_robot(Some("/definitely/not/robot"), &[String::from(sub)]);
+            match result {
+                Err(RobotError::Run(ref msg)) if msg.contains("not allowed") => {
+                    panic!("subcommand {sub} should pass allowlist, got {msg}");
+                }
+                _ => {}
+            }
+        }
+    }
+
+    #[test]
+    fn rejects_parent_dir_in_explicit_robot_path() {
+        let err = detect_robot(Some("../robot")).unwrap_err();
+        assert!(matches!(err, RobotError::NotFound));
+    }
+
+    #[test]
+    fn rejects_non_robot_binary_name() {
+        let err = detect_robot(Some("/usr/bin/java")).unwrap_err();
+        assert!(matches!(err, RobotError::NotFound));
+    }
+
+    #[test]
+    fn accepts_robot_binary_names() {
+        for name in ["robot", "robot.cmd", "robot.bat", "robot.exe"] {
+            let path = format!("/definitely/not/{name}");
+            let err = detect_robot(Some(&path)).unwrap_err();
+            assert!(
+                matches!(err, RobotError::NotFound),
+                "{name} should be accepted by name check before existence"
+            );
+        }
+    }
 }

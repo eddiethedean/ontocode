@@ -1,6 +1,8 @@
 /* OntoCode webview — premium design system, VS Code theme native */
+/* Token map: extension/webview-ui/src/tokens/cssVars.ts (docs/ui/DESIGN_TOKENS.json) */
 
 :root {
+  --oc-space-0: 0px;
   --oc-space-1: 4px;
   --oc-space-2: 8px;
   --oc-space-3: 12px;
@@ -1265,4 +1267,47 @@ ul {
   );
   border: 1px solid color-mix(in srgb, var(--oc-accent) 30%, var(--oc-border-subtle));
   box-shadow: var(--oc-shadow-md), 0 0 40px var(--oc-accent-soft);
+}
+
+/* ── Schema browser (Query Workbench) ─────────────────── */
+
+.oc-schema-browser {
+  margin: var(--oc-space-3) 0;
+  padding: var(--oc-space-3);
+  border: 1px solid var(--oc-border-subtle);
+  border-radius: var(--oc-radius);
+  background: var(--oc-surface-raised);
+}
+
+.oc-schema-browser-toggle {
+  font-weight: 600;
+  background: transparent;
+  border: none;
+  color: var(--vscode-foreground);
+  cursor: pointer;
+  padding: 0;
+}
+
+.oc-schema-table-list,
+.oc-schema-column-list {
+  list-style: none;
+  margin: var(--oc-space-2) 0 0;
+  padding: 0;
+}
+
+.oc-schema-table-btn,
+.oc-schema-column-btn,
+.oc-schema-insert-table {
+  background: transparent;
+  border: none;
+  color: var(--vscode-textLink-foreground);
+  cursor: pointer;
+  text-align: left;
+  padding: var(--oc-space-1) 0;
+  font-family: var(--oc-font-mono);
+  font-size: 0.9em;
+}
+
+.oc-schema-column-list {
+  margin-left: var(--oc-space-4);
 }

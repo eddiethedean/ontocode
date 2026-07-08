@@ -1,14 +1,32 @@
 # API stability (pre-1.0)
 
-OntoCode and OntoCore are **pre-1.0**. Published crates use **0.12.x** semver, but minor releases may add or change APIs until v1.0.0. This page tiers surfaces by stability so integrators can assess risk.
+OntoCode and OntoCore are **pre-1.0**. Published crates use **0.13.x** semver, but minor releases may add or change APIs until v1.0.0. This page tiers surfaces by stability so integrators can assess risk.
 
 **Canonical capabilities:** [What ships today](../SHIPPED.md)
+
+## v0.13 API freeze scope (path to 1.0)
+
+The following modules are **documented and intended to stabilize** toward 1.0:
+
+| Module / surface | Crate | Notes |
+|------------------|-------|-------|
+| `Workspace`, catalog index | `ontocore` | Primary embedding entry |
+| Core model types | `ontocore-core` | `Entity`, `Diagnostic`, IRI helpers |
+| SQL / SPARQL query | `ontocore-query` | Virtual tables; new tables may be added pre-1.0 |
+| Diagnostics | `ontocore-diagnostics` | Rule codes + `DiagnosticConfig` |
+| Semantic diff | `ontocore-diff` | `DiffResult`, `format_diff_*` |
+| Docs export | `ontocore-docs` | `export_workspace`, hierarchy/property renderers |
+| OWL / OBO patch | `ontocore-owl`, `ontocore-obo` | Patch op JSON shapes |
+
+**May still change pre-1.0:** internal indexer modules, LSP field additions, webview `postMessage` types (ship with extension), SQL column additions.
+
+**Frozen at 1.0 (target):** CLI command names, exit codes, stable Rust types above, documented LSP `ontocore/*` methods.
 
 ## Stability tiers
 
 | Tier | Surface | Stability | Notes |
 |------|---------|-----------|-------|
-| **A — Stable enough for CI** | `ontocore validate`, `query`, `sparql`, `classify`, `diff`, `docs`, `patch`, `robot` CLI | High for **commands and exit codes** | Pin with `cargo install ontocore-cli --locked --version 0.12.0`. Exit codes documented in [workspace limits](../workspace-limits.md). |
+| **A — Stable enough for CI** | `ontocore validate`, `query`, `sparql`, `classify`, `diff`, `docs`, `patch`, `robot` CLI | High for **commands and exit codes** | Pin with `cargo install ontocore-cli --locked --version 0.13.0`. Exit codes documented in [workspace limits](../workspace-limits.md). |
 | **B — Documented, may evolve** | LSP custom methods (`ontocore/*`) | Medium | Wire format in [LSP API](../lsp-api.md) and [JSON Schema](../lsp-protocol.schema.json). Minor releases may add fields or methods. |
 | **C — Library APIs** | `ontocore` and `ontocore-*` Rust crates | Medium-low | Public types used by CLI/LSP are more stable than internal modules. Pin exact versions in `Cargo.toml`. |
 | **D — Experimental / not shipped** | Plugin host, SHACL, MCP, Python/TS SDKs | N/A | Design specs only — see [Plugin model](../ontocore/plugin-model.md). |
@@ -21,7 +39,7 @@ OntoCode and OntoCore are **pre-1.0**. Published crates use **0.12.x** semver, b
 
 ## What may change between minors
 
-- Rust public API on `ontocore-*` crates (prefer pinning `0.12` in Cargo.toml).
+- Rust public API on `ontocore-*` crates (prefer pinning `0.13` in Cargo.toml).
 - LSP request/response fields (clients should tolerate unknown fields).
 - SQL virtual table columns (check [sql-reference](../sql-reference.md) per release).
 - Webview `postMessage` payloads (extension + webview-ui ship together in the VSIX).
@@ -31,25 +49,20 @@ OntoCode and OntoCore are **pre-1.0**. Published crates use **0.12.x** semver, b
 **CI / ops:**
 
 ```bash
-cargo install ontocore-cli --locked --version 0.12.0
+cargo install ontocore-cli --locked --version 0.13.0
 ```
 
 **Rust embedding:**
 
 ```toml
-ontocore = "0.12"
-ontocore-core = "0.12"
+ontocore = "0.13"
+ontocore-core = "0.13"
 ```
 
-**VS Code:** install OntoCode **0.12.0** from Marketplace, Open VSX, or a release VSIX — the bundled `ontocore-lsp` matches the extension version.
+**VS Code:** install OntoCode **0.13.0** from Marketplace, Open VSX, or a release VSIX — the bundled `ontocore-lsp` matches the extension version.
 
 ## Enterprise evaluation
 
 - **Production readiness:** [Production readiness](production-readiness.md)
 - **Security:** [Security](../security.md)
 - **LGPL (horned-owl):** [LGPL compliance](lgpl-compliance.md)
-- **Support policy:** [Governance](governance.md)
-
-## After v1.0
-
-v1.0.0 will semver **library and LSP wire format** under documented stability rules. Until then, treat this page and [SHIPPED.md](../SHIPPED.md) as the integration contract.

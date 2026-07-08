@@ -2,11 +2,11 @@
 
 ## Status
 
-Accepted — **planned v0.13**
+Accepted — **implemented v0.13**
 
 ## Context
 
-Multiple UI specs describe a single active semantic object driving the IDE ([ui/DESIGN_PHILOSOPHY.md](../ui/DESIGN_PHILOSOPHY.md), [ui/INTERACTION_PRINCIPLES.md](../ui/INTERACTION_PRINCIPLES.md)) but no shared implementation exists.
+Multiple UI specs describe a single active semantic object driving the IDE ([ui/DESIGN_PHILOSOPHY.md](../ui/DESIGN_PHILOSOPHY.md), [ui/INTERACTION_PRINCIPLES.md](../ui/INTERACTION_PRINCIPLES.md)) — **implemented in v0.13** via `WorkspaceStore` + extension-host focus relay.
 
 ## Decision
 

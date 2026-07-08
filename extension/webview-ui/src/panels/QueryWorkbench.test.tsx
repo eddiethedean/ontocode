@@ -1,4 +1,5 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { screen, waitFor } from "@testing-library/react";
+import { renderWithProviders } from "../test/render";
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi } from "vitest";
 import { QueryWorkbenchPanel } from "./QueryWorkbench";
@@ -13,7 +14,7 @@ import {
 
 describe("QueryWorkbenchPanel", () => {
   it("posts ready and renders toolbar", async () => {
-    render(<QueryWorkbenchPanel />);
+    renderWithProviders(<QueryWorkbenchPanel />);
 
     expect(screen.getByRole("heading", { name: "Query Workbench" })).toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Run" })).toBeInTheDocument();
@@ -24,7 +25,7 @@ describe("QueryWorkbenchPanel", () => {
   });
 
   it("loads saved queries and sql tables from queryInit", async () => {
-    render(<QueryWorkbenchPanel />);
+    renderWithProviders(<QueryWorkbenchPanel />);
     postHostMessage({
       type: "queryInit",
       saved: savedQueries,
@@ -38,7 +39,7 @@ describe("QueryWorkbenchPanel", () => {
 
   it("runs query with incremented runId", async () => {
     const user = userEvent.setup();
-    render(<QueryWorkbenchPanel />);
+    renderWithProviders(<QueryWorkbenchPanel />);
 
     const textarea = screen.getByRole("textbox");
     await user.clear(textarea);
@@ -55,7 +56,7 @@ describe("QueryWorkbenchPanel", () => {
 
   it("switches to SPARQL mode and starter query", async () => {
     const user = userEvent.setup();
-    render(<QueryWorkbenchPanel />);
+    renderWithProviders(<QueryWorkbenchPanel />);
 
     const modeSelect = screen.getAllByRole("combobox")[0];
     await user.selectOptions(modeSelect, "sparql");
@@ -66,7 +67,7 @@ describe("QueryWorkbenchPanel", () => {
   });
 
   it("displays tabular results from host", async () => {
-    render(<QueryWorkbenchPanel />);
+    renderWithProviders(<QueryWorkbenchPanel />);
 
     await userEvent.setup().click(screen.getByRole("button", { name: "Run" }));
     const runId = (lastPostedMessage() as { runId: number }).runId;
@@ -78,7 +79,7 @@ describe("QueryWorkbenchPanel", () => {
   });
 
   it("shows error callout from host", async () => {
-    render(<QueryWorkbenchPanel />);
+    renderWithProviders(<QueryWorkbenchPanel />);
 
     await userEvent.setup().click(screen.getByRole("button", { name: "Run" }));
     const runId = (lastPostedMessage() as { runId: number }).runId;
@@ -89,7 +90,7 @@ describe("QueryWorkbenchPanel", () => {
   });
 
   it("ignores stale query results", async () => {
-    render(<QueryWorkbenchPanel />);
+    renderWithProviders(<QueryWorkbenchPanel />);
     postHostMessage({ type: "queryResult", runId: 999, result: queryResult });
 
     await waitFor(() => {
@@ -101,7 +102,7 @@ describe("QueryWorkbenchPanel", () => {
     const user = userEvent.setup();
     vi.spyOn(window, "prompt").mockReturnValue("My query");
 
-    render(<QueryWorkbenchPanel />);
+    renderWithProviders(<QueryWorkbenchPanel />);
     await user.click(screen.getByRole("button", { name: "Save" }));
 
     expect(lastPostedMessage()).toMatchObject({
@@ -113,7 +114,7 @@ describe("QueryWorkbenchPanel", () => {
 
   it("exports csv with current run id", async () => {
     const user = userEvent.setup();
-    render(<QueryWorkbenchPanel />);
+    renderWithProviders(<QueryWorkbenchPanel />);
 
     await user.click(screen.getByRole("button", { name: "Run" }));
     await user.click(screen.getByRole("button", { name: "Export CSV" }));
@@ -127,7 +128,7 @@ describe("QueryWorkbenchPanel", () => {
 
   it("sets query text when SQL table is selected", async () => {
     const user = userEvent.setup();
-    render(<QueryWorkbenchPanel />);
+    renderWithProviders(<QueryWorkbenchPanel />);
     postHostMessage({
       type: "queryInit",
       saved: [],
@@ -144,7 +145,7 @@ describe("QueryWorkbenchPanel", () => {
 
   it("loads query text from saved and history dropdowns", async () => {
     const user = userEvent.setup();
-    render(<QueryWorkbenchPanel />);
+    renderWithProviders(<QueryWorkbenchPanel />);
     postHostMessage({
       type: "queryInit",
       saved: savedQueries,
@@ -167,7 +168,7 @@ describe("QueryWorkbenchPanel", () => {
 
   it("exports JSON results", async () => {
     const user = userEvent.setup();
-    render(<QueryWorkbenchPanel />);
+    renderWithProviders(<QueryWorkbenchPanel />);
     await user.click(screen.getByRole("button", { name: "Run" }));
     await user.click(screen.getByRole("button", { name: "Export JSON" }));
 
@@ -182,14 +183,14 @@ describe("QueryWorkbenchPanel", () => {
     const user = userEvent.setup();
     vi.spyOn(window, "prompt").mockReturnValue(null);
 
-    render(<QueryWorkbenchPanel />);
+    renderWithProviders(<QueryWorkbenchPanel />);
     const before = postedMessages().length;
     await user.click(screen.getByRole("button", { name: "Save" }));
     expect(postedMessages().length).toBe(before);
   });
 
   it("shows truncated results banner", async () => {
-    render(<QueryWorkbenchPanel />);
+    renderWithProviders(<QueryWorkbenchPanel />);
     await userEvent.setup().click(screen.getByRole("button", { name: "Run" }));
     const runId = (lastPostedMessage() as { runId: number }).runId;
 
@@ -206,7 +207,7 @@ describe("QueryWorkbenchPanel", () => {
 
   it("clears prior error when running a new query", async () => {
     const user = userEvent.setup();
-    render(<QueryWorkbenchPanel />);
+    renderWithProviders(<QueryWorkbenchPanel />);
 
     await user.click(screen.getByRole("button", { name: "Run" }));
     const runId = (lastPostedMessage() as { runId: number }).runId;
@@ -221,7 +222,7 @@ describe("QueryWorkbenchPanel", () => {
 
   it("hides table picker in SPARQL mode", async () => {
     const user = userEvent.setup();
-    render(<QueryWorkbenchPanel />);
+    renderWithProviders(<QueryWorkbenchPanel />);
     postHostMessage({
       type: "queryInit",
       saved: [],
@@ -237,7 +238,7 @@ describe("QueryWorkbenchPanel", () => {
 
   it("switches back to SQL starter query", async () => {
     const user = userEvent.setup();
-    render(<QueryWorkbenchPanel />);
+    renderWithProviders(<QueryWorkbenchPanel />);
 
     await user.selectOptions(screen.getAllByRole("combobox")[0], "sparql");
     await user.selectOptions(screen.getAllByRole("combobox")[0], "sql");
@@ -247,9 +248,34 @@ describe("QueryWorkbenchPanel", () => {
   });
 
   it("ignores invalid host messages", async () => {
-    render(<QueryWorkbenchPanel />);
+    renderWithProviders(<QueryWorkbenchPanel />);
     postHostMessage({ type: "queryResult", runId: 1 } as never);
     postHostMessage(null as never);
     expect(screen.getByRole("heading", { name: "Query Workbench" })).toBeInTheDocument();
+  });
+
+  it("schema browser inserts column into editor", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<QueryWorkbenchPanel />);
+    postHostMessage({
+      type: "queryInit",
+      saved: [],
+      history: [],
+      sqlSchema: [
+        {
+          name: "domain_axioms",
+          columns: [
+            { name: "property_iri", type: "string" },
+            { name: "domain", type: "string" },
+          ],
+        },
+      ],
+    });
+
+    await user.click(await screen.findByRole("button", { name: "Table domain_axioms" }));
+    await user.click(screen.getByRole("button", { name: "Insert column property_iri" }));
+
+    const textarea = screen.getByRole("textbox");
+    expect((textarea as HTMLTextAreaElement).value).toContain("property_iri");
   });
 });

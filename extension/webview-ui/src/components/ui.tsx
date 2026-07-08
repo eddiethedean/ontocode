@@ -1,4 +1,6 @@
 import type { ReactNode } from "react";
+export { Button, Card, Input } from "./primitives";
+import { Card } from "./primitives";
 
 export function Panel({
   children,
@@ -36,22 +38,6 @@ export function PanelHeader({
         {badges ? <div className="oc-badge-row">{badges}</div> : null}
       </div>
     </header>
-  );
-}
-
-export function Card({
-  children,
-  className = "",
-  variant = "default",
-}: {
-  children: ReactNode;
-  className?: string;
-  variant?: "default" | "elevated" | "inset" | "danger";
-}): JSX.Element {
-  return (
-    <div className={`oc-card oc-card--${variant} ${className}`.trim()}>
-      {children}
-    </div>
   );
 }
 
@@ -208,10 +194,6 @@ export function TextArea(props: React.TextareaHTMLAttributes<HTMLTextAreaElement
 
 export function Select(props: React.SelectHTMLAttributes<HTMLSelectElement>): JSX.Element {
   return <select className="oc-select" {...props} />;
-}
-
-export function Input(props: React.InputHTMLAttributes<HTMLInputElement>): JSX.Element {
-  return <input className="oc-input" {...props} />;
 }
 
 export function CheckboxRow({

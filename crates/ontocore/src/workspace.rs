@@ -18,11 +18,16 @@
 //! ```
 
 use crate::catalog::{
-    CatalogError, CatalogStats, ClassHierarchy, EntityDetail, GraphBuilder, GraphFilters,
-    GraphKind, GraphPayload, GraphRequest, IndexBuilder, OntologyCatalog,
+    CatalogError, CatalogStats, ClassHierarchy, EntityDetail, GraphBuilder, GraphError,
+    GraphFilters, GraphKind, GraphPayload, GraphRequest, IndexBuilder, OntologyCatalog,
 };
 use crate::diff::DiffResult;
+use crate::docs::{export_workspace, ExportError, ExportOptions};
 use crate::query::{query_catalog, sparql_catalog, QueryError, QueryResult, SparqlResult};
+use crate::reasoner::{
+    classify, explain, ClassificationResult, ExplanationRequest, ExplanationResult, ReasonerError,
+    ReasonerId, ReasonerInput, WorkspaceInputLoader,
+};
 use ontocore_core::Diagnostic;
 use std::path::{Path, PathBuf};
 
@@ -34,7 +39,7 @@ use std::path::{Path, PathBuf};
 pub struct WorkspaceOptions {
     /// Primary workspace root (indexed catalog workspace path).
     pub root: PathBuf,
-    /// Additional roots merged into one catalog (multi-root).
+    /// Additional roots merged into one catalog (multi-root). Primary [`WorkspaceOptions::root`] is always scanned.
     pub scan_roots: Vec<PathBuf>,
     /// Persist parse snapshots under `.ontocore/cache/`.
     pub disk_cache: bool,
@@ -64,6 +69,8 @@ pub struct Workspace {
     options: WorkspaceOptions,
     catalog: OntologyCatalog,
     class_hierarchy: ClassHierarchy,
+    /// Cached scan roots (primary + additional) used for indexing.
+    effective_scan_roots: Vec<PathBuf>,
 }
 
 impl Workspace {
@@ -74,6 +81,8 @@ impl Workspace {
 
     /// Open with explicit roots and optional disk cache.
     pub fn open_with_options(options: WorkspaceOptions) -> Result<Self, CatalogError> {
+        let effective_scan_roots =
+            IndexBuilder::effective_scan_roots(&options.root, &options.scan_roots);
         let mut builder =
             IndexBuilder::new().workspace(options.root.clone()).disk_cache(options.disk_cache);
         if !options.scan_roots.is_empty() {
@@ -81,7 +90,7 @@ impl Workspace {
         }
         let catalog = builder.build()?;
         let class_hierarchy = catalog.class_hierarchy();
-        Ok(Self { options, catalog, class_hierarchy })
+        Ok(Self { options, catalog, class_hierarchy, effective_scan_roots })
     }
 
     /// Full rebuild from disk.
@@ -104,13 +113,9 @@ impl Workspace {
         &self.options.root
     }
 
-    /// All scan roots (includes primary when none were configured).
+    /// All scan roots (primary plus any configured additional roots).
     pub fn scan_roots(&self) -> &[PathBuf] {
-        if self.options.scan_roots.is_empty() {
-            std::slice::from_ref(&self.options.root)
-        } else {
-            &self.options.scan_roots
-        }
+        &self.effective_scan_roots
     }
 
     /// Indexed catalog (SQL, SPARQL, entity API).
@@ -123,22 +128,20 @@ impl Workspace {
         self.catalog.data().stats()
     }
 
-    /// Import dependency graph for visualization and analysis.
-    pub fn import_graph(&self) -> GraphPayload {
-        GraphBuilder::new(&self.catalog)
-            .build(&GraphRequest {
-                graph_kind: GraphKind::Import.as_str().to_string(),
-                root_iri: None,
-                depth: 2,
-                include_inferred: false,
-                filters: GraphFilters::default(),
-            })
-            .unwrap_or(GraphPayload {
-                nodes: vec![],
-                edges: vec![],
-                truncated: false,
-                graph_kind: GraphKind::Import.as_str().to_string(),
-            })
+    /// Import dependency graph (default: import kind, depth 2).
+    pub fn import_graph(&self) -> Result<GraphPayload, GraphError> {
+        self.import_graph_with(&GraphRequest {
+            graph_kind: GraphKind::Import.as_str().to_string(),
+            root_iri: None,
+            depth: 2,
+            include_inferred: false,
+            filters: GraphFilters::default(),
+        })
+    }
+
+    /// Import or other graph export with explicit [`GraphRequest`] parameters.
+    pub fn import_graph_with(&self, request: &GraphRequest) -> Result<GraphPayload, GraphError> {
+        GraphBuilder::new(&self.catalog).build(request)
     }
 
     /// Lint and parse diagnostics collected during indexing.
@@ -159,6 +162,42 @@ impl Workspace {
     /// Semantic diff against another indexed workspace.
     pub fn diff(&self, other: &Workspace) -> DiffResult {
         crate::diff::diff_catalogs(self.catalog(), other.catalog())
+    }
+
+    /// Classify the workspace with an OntoLogos reasoner profile.
+    pub fn classify(&self, profile: ReasonerId) -> Result<ClassificationResult, ReasonerError> {
+        let input = self.reasoner_input()?;
+        classify(profile, &input, profile == ReasonerId::Auto)
+    }
+
+    /// Explain an unsatisfiable class (or related axiom) with the given profile.
+    pub fn explain(
+        &self,
+        profile: ReasonerId,
+        request: &ExplanationRequest,
+    ) -> Result<ExplanationResult, ReasonerError> {
+        let input = self.reasoner_input()?;
+        explain(profile, &input, request)
+    }
+
+    /// Export workspace documentation to Markdown or HTML.
+    pub fn export_docs(&self, options: ExportOptions) -> Result<(), ExportError> {
+        export_workspace(&self.catalog, options)
+    }
+
+    /// Build reasoner input from the indexed catalog and workspace roots.
+    pub fn reasoner_input(&self) -> Result<ReasonerInput, ReasonerError> {
+        WorkspaceInputLoader::new(self.options.root.clone())
+            .scan_roots(self.options.scan_roots.clone())
+            .load(self.class_hierarchy.clone())
+    }
+
+    /// Discover plugin manifests under `.ontocore/plugins/` (requires feature `plugins`).
+    #[cfg(feature = "plugins")]
+    pub fn discover_plugins(
+        &self,
+    ) -> Result<Vec<crate::plugin::DiscoveredPlugin>, crate::plugin::PluginDiscoveryError> {
+        crate::plugin::discover_plugins(self.root())
     }
 
     /// Index `other` on disk and diff against this workspace.
@@ -263,7 +302,7 @@ mod tests {
     #[test]
     fn workspace_import_graph_non_empty() {
         let ws = Workspace::open(fixtures_path()).expect("open fixtures");
-        let graph = ws.import_graph();
+        let graph = ws.import_graph().expect("import graph");
         assert!(!graph.nodes.is_empty());
     }
 }

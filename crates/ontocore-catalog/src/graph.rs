@@ -9,6 +9,19 @@ use ontocore_core::{
 };
 use serde::{Deserialize, Serialize};
 use std::collections::{HashSet, VecDeque};
+use thiserror::Error;
+
+#[derive(Debug, Error)]
+#[error("{0}")]
+pub struct GraphError(String);
+
+impl From<String> for GraphError {
+    fn from(value: String) -> Self {
+        Self(value)
+    }
+}
+
+pub type GraphResult<T> = std::result::Result<T, GraphError>;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -101,9 +114,9 @@ impl<'a> GraphBuilder<'a> {
         self
     }
 
-    pub fn build(&self, request: &GraphRequest) -> Result<GraphPayload, String> {
+    pub fn build(&self, request: &GraphRequest) -> GraphResult<GraphPayload> {
         let kind = GraphKind::parse(&request.graph_kind)
-            .ok_or_else(|| format!("unknown graph_kind: {}", request.graph_kind))?;
+            .ok_or_else(|| GraphError(format!("unknown graph_kind: {}", request.graph_kind)))?;
         let depth = request.depth.clamp(1, 5);
 
         let mut payload = match kind {
@@ -111,10 +124,9 @@ impl<'a> GraphBuilder<'a> {
             GraphKind::Property => self.build_property_graph(request),
             GraphKind::Import => self.build_import_graph(request),
             GraphKind::Neighborhood => {
-                let root = request
-                    .root_iri
-                    .as_deref()
-                    .ok_or_else(|| "neighborhood graph requires root_iri".to_string())?;
+                let root = request.root_iri.as_deref().ok_or_else(|| {
+                    GraphError("neighborhood graph requires root_iri".to_string())
+                })?;
                 self.build_neighborhood_graph(request, root, depth)
             }
         }?;

@@ -37,10 +37,10 @@ flowchart TB
 ## Rules of thumb
 
 1. **Evaluators and new users:** start at [SHIPPED.md](SHIPPED.md), not a roadmap or UI spec.
-2. **UI specs under `docs/ui/`** describe target UX — many items are planned for v0.13+ or v1.0+. Cross-check [ROADMAP_MAPPING.md](ui/ROADMAP_MAPPING.md).
+2. **UI specs under `docs/ui/`** describe target UX — many items are planned for v1.0+. Cross-check [ROADMAP_MAPPING.md](ui/ROADMAP_MAPPING.md) (v0.13 foundation items shipped).
 3. **Unchecked boxes** in [v1.0 backlog](design/v1.0_BACKLOG.md) mean "v1.0 exit bar" — not "missing today."
 4. **Release timeline** for procurement: [Release timeline](guides/release-timeline.md) (non-commitment disclaimer applies).
 
 ## Current release
 
-**v0.12.0** — see [Migration v0.11 → v0.12](migration/v0.12.md) and [Changelog](changelog.md).
+**v0.13.0** — see [Migration v0.12 → v0.13](migration/v0.13.md) and [Changelog](changelog.md).

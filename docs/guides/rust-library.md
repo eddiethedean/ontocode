@@ -10,6 +10,7 @@ Pre-1.0: public APIs may change between minor releases until v1.0.
 
 ```bash
 cargo run -p ontocode --example ontocore_workspace
+cargo run -p ontocode --example workspace_operations
 ```
 
 ```rust

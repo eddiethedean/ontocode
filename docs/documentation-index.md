@@ -2,7 +2,7 @@
 
 Master index for OntoCode / OntoCore planning, architecture, and user documentation.
 
-**Current release:** v0.12.0 · **Canonical capabilities:** [What ships today](SHIPPED.md) · **Terms:** [Glossary](glossary.md)
+**Current release:** v0.13.0 · **Canonical capabilities:** [What ships today](SHIPPED.md) · **Terms:** [Glossary](glossary.md)
 
 ## Recommended reading order
 
@@ -39,8 +39,8 @@ Master index for OntoCode / OntoCore planning, architecture, and user documentat
 | [roadmap-hub.md](roadmap-hub.md) | Which roadmap doc to read | All | P0 | Active | Platform |
 | [roadmap.md](roadmap.md) | Platform release plan | All | P1 | Active | Platform |
 | [platform/OVERVIEW.md](platform/OVERVIEW.md) | Implementation architecture hub | Architect, implementer | P0 | Active | Platform |
-| [platform/ONTOUI.md](platform/ONTOUI.md) | Shared React UI platform | Implementer | P0 | Planned v0.13 | OntoUI |
-| [platform/WORKSPACE_RUNTIME.md](platform/WORKSPACE_RUNTIME.md) | WorkspaceStore, event bus, hosts | Implementer | P0 | Planned v0.13 | OntoUI |
+| [platform/ONTOUI.md](platform/ONTOUI.md) | Shared React UI platform | Implementer | P0 | Shipped v0.13 | OntoUI |
+| [platform/WORKSPACE_RUNTIME.md](platform/WORKSPACE_RUNTIME.md) | WorkspaceStore, event bus, hosts | Implementer | P0 | Shipped v0.13 | OntoUI |
 | [platform/CAPABILITY_PROVIDERS.md](platform/CAPABILITY_PROVIDERS.md) | Plugin capability interfaces | Architect | P1 | Planned v0.14 | Platform |
 | [ui/ROADMAP_MAPPING.md](ui/ROADMAP_MAPPING.md) | UI items ↔ releases checklist | Implementer | P0 | Active | OntoUI |
 | [ui/PRODUCT_ROADMAP_2.0.md](ui/PRODUCT_ROADMAP_2.0.md) | UI phases with milestones | Implementer | P1 | Active | OntoUI |

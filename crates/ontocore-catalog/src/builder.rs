@@ -10,7 +10,7 @@ use ontocore_core::{
     Entity, Import, Namespace, OntologyDocument, OntologyFormat, ParseStatus, SourceLocation,
     WorkspaceScanner, MAX_FILE_BYTES,
 };
-use ontocore_diagnostics::{collect_diagnostics_with_sources, DiagnosticInput};
+use ontocore_diagnostics::{collect_diagnostics_with_config, find_config, DiagnosticInput};
 use ontocore_owl::{load_owx_text, load_turtle_text, supports_horned_load};
 use ontocore_parser::{parse_ontology_file, parse_ontology_text, ParsedOntology};
 use oxigraph::model::Quad;
@@ -58,9 +58,15 @@ impl IndexBuilder {
     }
 
     /// Additional workspace roots to scan and merge into one catalog (multi-root).
+    /// The primary [`workspace`](Self::workspace) root is always included.
     pub fn scan_roots(mut self, roots: Vec<PathBuf>) -> Self {
         self.scan_roots = roots;
         self
+    }
+
+    /// Roots scanned by [`Self::build`] — primary workspace plus any [`Self::scan_roots`].
+    pub fn effective_scan_roots(workspace: &Path, extra_roots: &[PathBuf]) -> Vec<PathBuf> {
+        merge_scan_roots(workspace, extra_roots)
     }
 
     /// Use in-memory text instead of disk for specific paths (LSP open buffers).
@@ -88,11 +94,7 @@ impl IndexBuilder {
     }
 
     fn config_fingerprint(&self) -> String {
-        let scan_roots = if self.scan_roots.is_empty() {
-            vec![self.workspace.clone()]
-        } else {
-            self.scan_roots.clone()
-        };
+        let scan_roots = merge_scan_roots(&self.workspace, &self.scan_roots);
         config_fingerprint(&scan_roots, self.disk_cache, &self.document_overrides)
     }
 
@@ -117,11 +119,7 @@ impl IndexBuilder {
         previous_snapshots: Option<&HashMap<PathBuf, DocumentSnapshot>>,
         incremental: bool,
     ) -> Result<(OntologyCatalog, IncrementalStats)> {
-        let scan_roots = if self.scan_roots.is_empty() {
-            vec![self.workspace.clone()]
-        } else {
-            self.scan_roots.clone()
-        };
+        let scan_roots = merge_scan_roots(&self.workspace, &self.scan_roots);
         let mut files = Vec::new();
         let mut seen = std::collections::HashSet::new();
         if let Some(ref only) = self.only_paths {
@@ -531,7 +529,12 @@ impl IndexBuilder {
             namespaces: &data.namespaces,
             imports: &data.imports,
         };
-        data.diagnostics = collect_diagnostics_with_sources(&lint_input, &self.document_overrides);
+        let diag_config = find_config(&self.workspace);
+        data.diagnostics = collect_diagnostics_with_config(
+            &lint_input,
+            &self.document_overrides,
+            diag_config.as_ref(),
+        );
         data.diagnostics.extend(bridge_diagnostics);
 
         Ok((
@@ -832,6 +835,36 @@ fn verified_snapshot_source(
         Some((file.path, file.modified_time))
     } else {
         None
+    }
+}
+
+/// Primary workspace root plus any additional scan roots (deduplicated).
+pub(crate) fn merge_scan_roots(workspace: &Path, extra_roots: &[PathBuf]) -> Vec<PathBuf> {
+    let mut roots = vec![workspace.to_path_buf()];
+    for root in extra_roots {
+        if roots.iter().any(|existing| paths_equal(existing, root)) {
+            continue;
+        }
+        roots.push(root.clone());
+    }
+    roots
+}
+
+#[cfg(test)]
+mod merge_scan_roots_tests {
+    use super::*;
+
+    #[test]
+    fn merge_scan_roots_includes_primary_when_extras_set() {
+        let dir = tempfile::tempdir().unwrap();
+        let primary = dir.path().join("ws");
+        let extra = dir.path().join("imports");
+        std::fs::create_dir_all(&primary).unwrap();
+        std::fs::create_dir_all(&extra).unwrap();
+        let merged = merge_scan_roots(&primary, std::slice::from_ref(&extra));
+        assert_eq!(merged.len(), 2);
+        assert!(merged.iter().any(|p| paths_equal(p, &primary)));
+        assert!(merged.iter().any(|p| paths_equal(p, &extra)));
     }
 }
 

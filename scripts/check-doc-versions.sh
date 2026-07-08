@@ -181,6 +181,22 @@ else
   echo "ok: no stale --version 0.11.3 install pins"
 fi
 
+if rg -q 'VERSION=0\.12\.0' "${STALE_PIN_PATHS[@]}" --glob '!**/changelog.md' --glob '!**/CHANGELOG.md' --glob '!**/migration/**' --glob '!**/design/**' 2>/dev/null; then
+  echo "FAIL: stale VERSION=0.12.0 found outside changelog/migration/design" >&2
+  rg -n 'VERSION=0\.12\.0' "${STALE_PIN_PATHS[@]}" --glob '!**/changelog.md' --glob '!**/CHANGELOG.md' --glob '!**/migration/**' --glob '!**/design/**' 2>/dev/null || true
+  fail=1
+else
+  echo "ok: no stale VERSION=0.12.0 install pins"
+fi
+
+if rg -q '--version 0\.12\.0' "${STALE_PIN_PATHS[@]}" --glob '!**/changelog.md' --glob '!**/CHANGELOG.md' --glob '!**/migration/**' --glob '!**/design/**' 2>/dev/null; then
+  echo "FAIL: stale --version 0.12.0 install pin found outside changelog/migration/design" >&2
+  rg -n '--version 0\.12\.0' "${STALE_PIN_PATHS[@]}" --glob '!**/changelog.md' --glob '!**/CHANGELOG.md' --glob '!**/migration/**' --glob '!**/design/**' 2>/dev/null || true
+  fail=1
+else
+  echo "ok: no stale --version 0.12.0 install pins"
+fi
+
 if rg -q 'latest \*\*v0\.11\.x\*\* tag' README.md docs extension crates .github --glob '!**/changelog.md' --glob '!**/CHANGELOG.md' --glob '!**/migration/**' 2>/dev/null; then
   echo "FAIL: stale v0.11.x release tag reference in user-facing docs" >&2
   fail=1
@@ -347,9 +363,9 @@ for file in docs/guides/refactoring.md docs/migration/v0.8.md docs/migration/v0.
   fi
 done
 
-check_file_contains "docs/faq.md" "0\.12\.x" "faq crate version"
+check_file_contains "docs/faq.md" "0\.13\.x" "faq crate version"
 check_file_contains "docs/guides/release-timeline.md" "${VERSION}.*Current" "release-timeline current version"
-check_file_contains "docs/guides/release-timeline.md" "v0\.11.*Shipped" "release-timeline v0.11 shipped"
+check_file_contains "docs/guides/release-timeline.md" "v0\.12.*Shipped" "release-timeline v0.12 shipped"
 
 # Stale multi-root limitation (v0.10 indexes all folders)
 MULTIROOT_STALE_PATHS=(docs/SHIPPED.md docs/faq.md docs/vscode-install.md docs/guides/first-success.md docs/troubleshooting.md)
@@ -391,21 +407,21 @@ fi
 
 check_file_contains "docs/guides/production-readiness.md" "${MINOR_VERSION}\.x \\(current\\)" "production-readiness current minor"
 check_file_contains "docs/ontocore/index.md" "v${VERSION}" "ontocore index version"
-check_file_contains "docs/ontocore/rust-api.md" 'ontocore = "0.12"' "rust-api version pin"
-check_file_contains "docs/ontocore/crate-map.md" 'ontocore = "0.12"' "crate-map version pin"
+check_file_contains "docs/ontocore/rust-api.md" 'ontocore = "0.13"' "rust-api version pin"
+check_file_contains "docs/ontocore/crate-map.md" 'ontocore = "0.13"' "crate-map version pin"
 check_file_contains "docs/ontocode/manage-imports.md" "Manage Imports" "manage-imports guide"
 check_file_contains "mkdocs.yml" "ontocode/manage-imports.md" "mkdocs manage-imports guide"
-check_file_contains "mkdocs.yml" "migration/v0.11.md" "mkdocs whats-new migration link"
+check_file_contains "mkdocs.yml" "migration/v0.13.md" "mkdocs whats-new migration link"
 
 check_file_contains "docs/guides/production-readiness.md" "v${VERSION}" "production-readiness version"
 check_file_contains "mkdocs.yml" "ontocore/rust-api.md" "mkdocs Rust API reference"
 check_file_contains "mkdocs.yml" "guides/protege-migration.md" "mkdocs Protégé migration guide"
 check_file_contains "mkdocs.yml" "ontocode/feature-tour.md" "mkdocs feature tour"
-check_file_contains "mkdocs.yml" "migration/v0.11.md" "mkdocs v0.11 migration guide"
+check_file_contains "mkdocs.yml" "migration/v0.13.md" "mkdocs v0.13 migration guide"
 check_file_contains "mkdocs.yml" "guides/docs-export.md" "mkdocs docs export guide"
 check_file_contains "mkdocs.yml" "design/adr/README.md" "mkdocs ADR index"
 check_file_contains "mkdocs.yml" "Reference:" "mkdocs Reference tab"
-check_file_contains "docs/guides/rust-crates.md" 'ontocore = "0.12"' "rust-crates version pin"
+check_file_contains "docs/guides/rust-crates.md" 'ontocore = "0.13"' "rust-crates version pin"
 
 # Stale protege-coexistence version banner
 if grep -qE 'evaluating OntoCode \*\*v0\.6\*\*|v0\.6 support' docs/guides/protege-coexistence.md; then
@@ -439,7 +455,7 @@ if grep -qE 'read-only in the Entity Inspector|Write-back in VS Code remains \*\
 else
   echo "ok: obo-workflow OBO edit status"
 fi
-check_file_contains "docs/guides/protege-coexistence.md" "v0\.12" "protege-coexistence v0.12"
+check_file_contains "docs/guides/protege-coexistence.md" "v0\.13" "protege-coexistence v0.13"
 check_file_contains "docs/guides/release-timeline.md" "non-commitment" "release-timeline disclaimer"
 if grep -qE 'OBO format \+ ROBOT interop.*Not shipped' docs/guides/enterprise-eval.md; then
   echo "FAIL: enterprise-eval.md contradicts SHIPPED.md on OBO/ROBOT" >&2
@@ -523,7 +539,7 @@ for pair in "VISION.md:docs/vision.md:Build the modern open-source platform" \
   fi
 done
 
-check_file_contains "docs/roadmap.md" "Shipped releases \\(v0.1–v0.12\\)" "docs roadmap shipped section"
+check_file_contains "docs/roadmap.md" "Shipped releases \\(v0.1–v0.13\\)" "docs roadmap shipped section"
 check_file_contains "ROADMAP.md" "v1.2 — Ontology Toolchain Platform" "roadmap v1.2 toolchain milestone"
 check_file_contains "docs/roadmap.md" "v1.2 — Ontology Toolchain Platform" "docs roadmap v1.2 milestone"
 check_file_contains "ROADMAP.md" "owlmake" "roadmap owlmake integration"
@@ -630,9 +646,9 @@ else
   echo "ok: no stale property chains view-only claims"
 fi
 
-# Architecture banner must reference v0.12 ships today
-check_file_contains "ARCHITECTURE.md" "v0\.12 ships today" "ARCHITECTURE.md v0.12 banner"
-check_file_contains "docs/architecture.md" "v0\.12 ships today" "docs/architecture.md v0.12 banner"
+# Architecture banner must reference v0.13 ships today
+check_file_contains "ARCHITECTURE.md" "v0\.13 ships today" "ARCHITECTURE.md v0.13 banner"
+check_file_contains "docs/architecture.md" "v0\.13 ships today" "docs/architecture.md v0.13 banner"
 
 # Stale CLI alias notes
 if rg -q 'ontocore alias is planned' docs --glob '!**/migration/**' --glob '!**/design/**' 2>/dev/null; then
@@ -712,18 +728,41 @@ check_file_contains "mkdocs.yml" "v0\\.13\\+" "mkdocs platform planning tab labe
 check_file_contains "docs/guides/owl-xml-workflow.md" "read-only catalog" "owl-xml workflow guide"
 check_file_contains "docs/ontocore/rust-api.md" "Book ↔ docs.rs crosswalk" "rust-api docs.rs crosswalk"
 check_file_contains "docs/troubleshooting.md" "Where to start" "troubleshooting decision tree"
-check_file_contains "docs/platform/OVERVIEW.md" "Planned v0.13+" "platform overview planned banner"
+check_file_contains "docs/platform/OVERVIEW.md" "v0.13 foundation shipped" "platform overview shipped banner"
 
-# vision.md must not claim v0.11 is current shipped release
+# vision.md must reference current shipped release (not v0.11 or v0.12)
 for file in docs/vision.md VISION.md; do
-  if grep -qE 'what ships in \*\*v0\.11\*\*|ships in \*\*v0\.11\*\*' "$file" 2>/dev/null; then
-    echo "FAIL: $file still says what ships in v0.11" >&2
+  if grep -qE 'what ships in \*\*v0\.11\*\*|what ships in \*\*v0\.12\*\*|ships in \*\*v0\.11\*\*|ships in \*\*v0\.12\*\*' "$file" 2>/dev/null; then
+    echo "FAIL: $file vision banner references stale release (expected v${VERSION%.*})" >&2
     fail=1
   fi
 done
-if [[ "$fail" -eq 0 ]]; then
-  echo "ok: vision docs reference v0.12 not v0.11"
+if ! grep -qF "what ships in **v${VERSION%.*}**" docs/vision.md 2>/dev/null || \
+   ! grep -qF "what ships in **v${VERSION%.*}**" VISION.md 2>/dev/null; then
+  echo "FAIL: docs/vision.md and VISION.md must say what ships in v${VERSION%.*}" >&2
+  fail=1
+else
+  echo "ok: vision banner sync v${VERSION%.*}"
 fi
+
+check_file_contains "docs/glossary.md" "\\*\\*Implemented\\*\\* \\(v${VERSION%.*}\\)" "glossary OntoCore/OntoCode version"
+check_file_contains "docs/glossary.md" "\\*\\*Shipped\\*\\* \\(v${VERSION%.*}\\)" "glossary WorkspaceStore shipped"
+check_file_contains "docs/vscode-install.md" "1.85" "vscode-install minimum VS Code version"
+check_file_contains "docs/documentation-index.md" "Shipped v${VERSION%.*}" "documentation-index OntoUI shipped"
+if grep -q 'Turtle (`.ttl`) only' extension/README.md 2>/dev/null; then
+  echo "FAIL: extension/README.md troubleshooting still says Turtle-only inspector" >&2
+  fail=1
+else
+  echo "ok: extension README inspector write-back"
+fi
+check_file_contains "CONTRIBUTING.md" "run-ci-local.sh" "contributing documents local CI script"
+check_file_contains "docs/internals.md" "Extension-only" "internals extension-only path"
+check_file_contains "docs/guides/lsp-hello-world.md" "ontocore-lsp" "lsp hello-world guide"
+check_file_contains "mkdocs.yml" "guides/extension-development.md" "mkdocs extension development guide"
+check_file_contains "mkdocs.yml" "guides/lsp-hello-world.md" "mkdocs lsp hello-world guide"
+check_file_contains "docs/guides/extension-development.md" "extension/" "extension development guide"
+check_file_contains "crates/ontocore-plugin/README.md" "Experimental" "plugin README experimental banner"
+check_file_contains "crates/ontocore-obo/README.md" "ontocore-obo" "ontocore-obo README"
 
 # errors.md must reference current release
 check_file_contains "docs/errors.md" "v${VERSION}" "errors reference version"

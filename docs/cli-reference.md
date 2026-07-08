@@ -1,4 +1,4 @@
-# CLI reference (OntoCore v0.12)
+# CLI reference (OntoCore v0.13)
 
 The `ontocore` binary indexes ontology workspaces and exposes query, validation, patch, and reasoning commands.
 
@@ -18,7 +18,7 @@ Several commands accept `--format text|json|csv` (where noted). Default is `text
 
 ### `index`
 
-Scan and index ontology files in a workspace.
+Scan and index ontology files in a workspace. Prints catalog statistics only — use for CI scripts and machine-readable output.
 
 ```bash
 ontocore index [workspace]
@@ -27,9 +27,11 @@ ontocore index ./ontologies --format json
 
 Default workspace: `.` (current directory).
 
+**Exit:** 0 on success; non-zero on index failure.
+
 ### `inspect`
 
-Print catalog statistics (same data as `index`, human-oriented output by default).
+Index the workspace and print catalog statistics **plus a diagnostic summary** (counts and up to 10 sample messages). Use for a quick human health check; run `validate` for full diagnostic listing and CI gating.
 
 ```bash
 ontocore inspect fixtures
@@ -76,7 +78,7 @@ ontocore validate /path/to/ontologies
 
 ### `patch`
 
-Apply Turtle patch operations from a JSON file. See [patch reference](patch-reference.md).
+Apply **Turtle (`.ttl`) and OBO (`.obo`)** patch operations from a JSON file. See [patch reference](patch-reference.md) and [patch examples](examples/patches.md).
 
 ```bash
 ontocore patch ./ontology.ttl patches.json --preview
@@ -248,17 +250,21 @@ ontocore diff HEAD..WORKTREE
 ontocore diff --left-ref main --right-ref feature --format markdown
 ontocore diff --left-ref HEAD --right-ref WORKTREE --breaking-only
 ontocore diff --left-ref ./baseline --right-ref ./candidate
+ontocore diff main..feature --pr-summary
 ```
 
 | Flag | Description |
 |------|-------------|
 | `GIT_RANGE` | Optional positional range (`main..feature`) |
-| `--left-ref` | Left git ref, directory path, or `WORKSPACE` |
+| `--left-ref` | Left git ref, directory path, or `WORKTREE` |
 | `--right-ref` | Right git ref, directory path, or `WORKTREE` |
 | `--repo` | Git repository root (default: current directory) |
 | `--reasoner` | Include reasoner unsatisfiability changes |
-| `--format` | `text` (default), `json`, or `markdown` |
+| `--format` | `text` (default), `json`, `markdown`, or `pr-summary` (PR-ready Markdown, v0.13+) |
+| `--pr-summary` | Shorthand for `--format pr-summary` |
 | `--breaking-only` | Filter to likely breaking changes |
+
+**Ref tokens (CLI vs LSP):** The CLI compares **git refs** and **directories on disk** only. Use `WORKTREE` for the working-tree catalog built from disk. To compare against the **indexed in-memory catalog** (LSP / VS Code), use `ontocore/semanticDiff` with `INDEXED` or `CATALOG` (legacy alias: `WORKSPACE`). Passing `WORKSPACE` / `INDEXED` / `CATALOG` to the CLI returns an error directing you to the LSP or `WORKTREE`.
 
 **Exit:** 0 on success; non-zero on git/parse/I/O errors.
 
@@ -280,6 +286,8 @@ ontocore docs . --format html --output ./docs-out \
 | `--output` / `-o` | *(required)* | Output directory |
 | `--format` | `markdown` | `markdown` or `html` |
 | `--ontology-id` | — | Limit export to one ontology IRI or document id |
+
+Markdown `index.md` includes **Class hierarchy** and **Property index** sections (v0.13+).
 
 **Exit:** 0 on success; non-zero on index or I/O failure.
 

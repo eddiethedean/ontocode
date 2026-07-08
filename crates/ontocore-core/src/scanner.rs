@@ -1,7 +1,7 @@
 use crate::error::{OntoCoreError, Result};
 use crate::limits::{MAX_FILE_BYTES, MAX_SCAN_FILES, MAX_SCAN_WALK_ENTRIES};
 use crate::model::OntologyFormat;
-use crate::path_jail::canonical_workspace_root;
+use crate::path_jail::{canonical_workspace_root, is_path_within};
 use ignore::WalkBuilder;
 use sha2::{Digest, Sha256};
 use std::fs;
@@ -79,7 +79,7 @@ impl WorkspaceScanner {
                 if ONTOLOGY_EXTENSIONS.contains(&ext.to_ascii_lowercase().as_str()) {
                     let canonical =
                         path.canonicalize().map_err(|e| OntoCoreError::Scanner(e.to_string()))?;
-                    if !canonical.starts_with(&self.canonical_root) {
+                    if !is_path_within(&self.canonical_root, &canonical) {
                         continue;
                     }
                     files.push(self.describe_file(&canonical)?);
@@ -94,7 +94,7 @@ impl WorkspaceScanner {
     /// Describe a single ontology file on disk (hash, format, mtime).
     pub fn describe_path(&self, path: &Path) -> Result<OntologyFile> {
         let canonical = path.canonicalize().map_err(|e| OntoCoreError::Scanner(e.to_string()))?;
-        if !canonical.starts_with(&self.canonical_root) {
+        if !is_path_within(&self.canonical_root, &canonical) {
             return Err(OntoCoreError::Scanner(format!(
                 "path outside workspace: {}",
                 path.display()
@@ -176,5 +176,19 @@ mod tests {
             let files = scanner.scan().unwrap();
             assert_eq!(files.len(), 0);
         }
+    }
+
+    #[test]
+    fn skips_files_in_sibling_prefix_directory() {
+        let dir = tempfile::tempdir().unwrap();
+        let root = dir.path().join("ws");
+        fs::create_dir_all(&root).unwrap();
+        let sibling = dir.path().join("ws_extra");
+        fs::create_dir_all(&sibling).unwrap();
+        fs::write(sibling.join("secret.ttl"), "@prefix ex: <http://ex/> .").unwrap();
+
+        let scanner = WorkspaceScanner::new(&root);
+        let files = scanner.scan().unwrap();
+        assert_eq!(files.len(), 0);
     }
 }

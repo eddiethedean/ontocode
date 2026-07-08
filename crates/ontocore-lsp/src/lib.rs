@@ -14,6 +14,7 @@ pub(crate) mod handlers;
 pub(crate) mod index_worker;
 pub(crate) mod positions;
 pub mod protocol;
+pub(crate) mod semantic_tokens;
 pub(crate) mod state;
 
 use handlers::build_catalog_snapshot;

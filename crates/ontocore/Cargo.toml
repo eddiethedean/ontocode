@@ -14,8 +14,9 @@ categories.workspace = true
 include = ["src/**/*", "Cargo.toml", "README.md", "LICENSE-MIT", "LICENSE-APACHE-2.0"]
 
 [features]
-default = ["lsp"]
+default = []
 lsp = ["dep:ontocore-lsp"]
+plugins = ["dep:ontocore-plugin"]
 
 [dependencies]
 ontocore-catalog = { workspace = true }
@@ -24,15 +25,18 @@ ontocore-diagnostics = { workspace = true }
 ontocore-diff = { workspace = true }
 ontocore-docs = { workspace = true }
 ontocore-lsp = { workspace = true, optional = true }
+ontocore-plugin = { workspace = true, optional = true }
 ontocore-owl = { workspace = true }
 ontocore-obo = { workspace = true }
 ontocore-parser = { workspace = true }
 ontocore-query = { workspace = true }
 ontocore-reasoner = { workspace = true }
 ontocore-refactor = { workspace = true }
+thiserror = { workspace = true }
 
 [package.metadata.docs.rs]
 all-features = true
 
 [dev-dependencies]
 tempfile = "3"
+ontocore-plugin = { workspace = true }

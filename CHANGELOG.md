@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.13.0] - 2026-07-07
+
+### Added
+
+- **OntoUI platform** — `WorkspaceHost`, Zustand `WorkspaceStore`, event bus, `WorkspaceRegistry`, design tokens, shared primitives
+- **Focus relay** — extension-host `FocusRelayService` syncs Current Focus across Inspector, Graph, and Query webviews
+- **Schema browser** — Query Workbench sidebar backed by LSP `ontocore/listSqlSchema`
+- **Horned-OWL SQL tables** — `restrictions`, `equivalent_class_axioms`, `disjoint_class_axioms`, `domain_axioms`, `range_axioms`
+- **`ontocore diff --pr-summary`** — PR-ready Markdown diff format; LSP `format: "pr-summary"`
+- **Configurable diagnostics** — `.ontocore/diagnostics.toml` and `ontocode.diagnostics.rules` setting
+- **LSP semantic tokens** — Turtle and OBO (`namespace`, `iri`, `keyword`, `comment`, `string`)
+- **Docs export** — class hierarchy tree and property index in `ontocore docs` Markdown index
+- **Benchmark smoke tests** — `tests/bench_index.rs` and `scripts/fetch-bench-fixtures.sh`
+
+### Changed
+
+- Entity Inspector, Graph, Query Workbench, and Refactor Preview read state from WorkspaceStore
+- Workspace package and all `ontocore-*` crates bumped to **0.13.0**
+- Extension marketplace version **0.13.0**
+
 ## [0.12.0] - 2026-07-06
 
 ### Added
@@ -195,6 +215,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SPARQL update guard bypass after `PREFIX` or comment lines
 - Capped file reads in parser, catalog semantics, and refactor preview/backup paths
 
+[0.13.0]: https://github.com/eddiethedean/ontocode/releases/tag/v0.13.0
+[0.12.0]: https://github.com/eddiethedean/ontocode/releases/tag/v0.12.0
+[0.11.3]: https://github.com/eddiethedean/ontocode/releases/tag/v0.11.3
+[0.11.2]: https://github.com/eddiethedean/ontocode/releases/tag/v0.11.2
+[0.11.1]: https://github.com/eddiethedean/ontocode/releases/tag/v0.11.1
+[0.11.0]: https://github.com/eddiethedean/ontocode/releases/tag/v0.11.0
 [0.10.0]: https://github.com/eddiethedean/ontocode/releases/tag/v0.10.0
 [0.9.0]: https://github.com/eddiethedean/ontocode/releases/tag/v0.9.0
 [0.8.0]: https://github.com/eddiethedean/ontocode/releases/tag/v0.8.0

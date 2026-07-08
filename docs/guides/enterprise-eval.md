@@ -1,6 +1,6 @@
 # Evaluating OntoCode for your organization
 
-This page helps security, platform, and ontology teams decide whether OntoCode **v0.12.0** fits your workflow. It is honest about **what ships today** vs the v1.0 Protégé-competitive target.
+This page helps security, platform, and ontology teams decide whether OntoCode **v0.13.0** fits your workflow. It is honest about **what ships today** vs the v1.0 Protégé-competitive target.
 
 Canonical capability matrix: [What ships today](../SHIPPED.md).
 
@@ -9,7 +9,7 @@ Canonical capability matrix: [What ships today](../SHIPPED.md).
 Prefer Protégé or other tools (or wait for v1.0) if you need:
 
 - Full **SQL** analytics (JOINs, aggregates) — only SQL-like virtual tables ship today
-- An installable **plugin host** / owlmake workflow integration (design only until v1.0)
+- An installable **plugin host** / owlmake workflow integration (experimental foundation in v0.13; MVP planned **v0.14**)
 
 ## Enterprise documentation pack
 
@@ -26,7 +26,7 @@ Prefer Protégé or other tools (or wait for v1.0) if you need:
 | [LGPL compliance](lgpl-compliance.md) | Legal — horned-owl obligations |
 | [Protégé coexistence](protege-coexistence.md) | Ontology teams — split workflow with Protégé |
 
-## What ships today (v0.12.0)
+## What ships today (v0.13.0)
 
 | Capability | Status |
 |------------|--------|
@@ -35,12 +35,12 @@ Prefer Protégé or other tools (or wait for v1.0) if you need:
 | CLI SQL/SPARQL queries and `validate` for CI | Shipped |
 | Inline diagnostics (Problems panel) | Shipped |
 | Query workbench + Manchester editor in VS Code | Shipped |
-| EL/RL/RDFS/DL reasoning + inferred hierarchy | **Shipped** (OntoLogos 1.0.0) |
-| OWL 2 DL classification (`dl` / `auto` profiles) | **Shipped** (OntoLogos 1.0.0; HermiT parity) |
+| EL/RL/RDFS/DL reasoning + inferred hierarchy | **Shipped** (OntoLogos 1.x) |
+| OWL 2 DL classification (`dl` / `auto` profiles) | **Shipped** (OntoLogos 1.x; HermiT parity) |
 | EL explanations (where OntoLogos supports) | **Shipped** (EL-first; DL clash traces partial) |
 | React entity inspector + graph visualization | **Shipped** |
 | OBO format index + `obo_id` in explorer | **Shipped** |
-| OBO write-back in VS Code + CLI (`ontocore-obo`) | **Shipped** (v0.12) |
+| OBO write-back in VS Code + CLI (`ontocore-obo`) | **Shipped** (engine v0.12; inspector v0.13) |
 | Turtle domain/range/chains/individual assertions | **Shipped** (v0.12) |
 | OWL/XML read-only catalog (`.owl`, `.owx`) | **Shipped** (v0.12) |
 | ROBOT CLI interop (`ontocore robot`, LSP `runRobot`) | **Shipped** (requires Java + `robot` on PATH) |
@@ -84,7 +84,7 @@ Full gap analysis: [Protégé parity matrix](../design/PROTEGE_PARITY.md).
 |------------|--------|
 | **Multi-root VS Code workspaces** | **All folders indexed** (v0.10+) |
 | **Write-back** | **Turtle and OBO (`.obo`)**; RDF/XML and OWL/XML read-only in the inspector |
-| **Reasoning** | EL/RL/RDFS/DL/auto via OntoLogos 1.0.0; explanations EL-first; results may differ from Protégé on partial OWL mappings |
+| **Reasoning** | EL/RL/RDFS/DL/auto via OntoLogos 1.x; explanations EL-first; results may differ from Protégé on partial OWL mappings |
 | **CLI release binaries** | Linux x64 only; macOS/Windows use `cargo install` or bundled LSP in VSIX |
 | **Scale** | Workspaces above [workspace limits](../workspace-limits.md) may fail indexing — prefer CLI batch workflows for very large terminologies |
 | **ROBOT / Java** | `ontocore robot` and LSP `runRobot` spawn an external Java `robot` process — not JVM-free for that workflow |
@@ -95,8 +95,8 @@ A [first-week Protégé migration guide](protege-migration.md) ships today. Roun
 
 - [Protégé coexistence guide](protege-coexistence.md) — split workflow when keeping Protégé for specific features
 
-- Use OntoCode for **Turtle editing in VS Code**, **CI validation**, **SQL/SPARQL queries**, **Manchester axioms** (including disjoint classes in v0.8), **workspace refactoring**, and **EL/RL/RDFS/DL classification**
-- Keep Protégé for **full OWL 2 DL axiom editing**, **property chain editing**, **full OBO write-back**, and axiom types not yet in the [Protégé parity matrix](../design/PROTEGE_PARITY.md) until v1.0
+- Use OntoCode for **Turtle and OBO editing in VS Code**, **CI validation**, **SQL/SPARQL queries**, **Manchester axioms** (including disjoint classes), **workspace refactoring**, **property chain editing**, and **EL/RL/RDFS/DL classification**
+- Keep Protégé for **full OWL 2 DL axiom editing in OWL/XML**, **Protégé-specific plugins**, and axiom types not yet in the [Protégé parity matrix](../design/PROTEGE_PARITY.md) until v1.0
 - See [Protégé parity matrix](../design/PROTEGE_PARITY.md) and [What ships today](../SHIPPED.md)
 
 ## Evaluation checklist

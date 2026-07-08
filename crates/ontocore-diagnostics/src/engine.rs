@@ -1,3 +1,4 @@
+use crate::config::DiagnosticConfig;
 use crate::input::DiagnosticInput;
 use crate::rules::{
     broken_imports, duplicate_labels, missing_labels, orphan_classes, parse_errors,
@@ -13,7 +14,25 @@ use std::path::PathBuf;
 
 /// Collect all diagnostics for a catalog snapshot.
 pub fn collect_diagnostics(input: &DiagnosticInput<'_>) -> Vec<Diagnostic> {
-    collect_diagnostics_with_sources(input, &HashMap::new())
+    collect_diagnostics_with_config(input, &HashMap::new(), None)
+}
+
+/// Collect diagnostics with optional workspace rule configuration.
+pub fn collect_diagnostics_with_config(
+    input: &DiagnosticInput<'_>,
+    source_overrides: &HashMap<PathBuf, String>,
+    config: Option<&DiagnosticConfig>,
+) -> Vec<Diagnostic> {
+    let mut diagnostics = collect_diagnostics_with_sources(input, source_overrides);
+    if let Some(cfg) = config {
+        diagnostics.retain(|d| cfg.is_rule_enabled(d.code));
+        for d in &mut diagnostics {
+            if let Some(sev) = cfg.severity_override(d.code) {
+                d.severity = sev;
+            }
+        }
+    }
+    diagnostics
 }
 
 /// Collect diagnostics, optionally using in-memory source text overrides (LSP open buffers).

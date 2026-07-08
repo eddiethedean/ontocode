@@ -1,6 +1,6 @@
-# OntoCore LSP API (v0.12)
+# OntoCore LSP API (v0.13)
 
-> **Status:** Documents behavior in **OntoCore v0.12.0**. Pre-1.0 APIs may change.
+> **Status:** Documents behavior in **OntoCore v0.13.0**. Pre-1.0 APIs may change.
 > Canonical feature list: [What ships today](SHIPPED.md).
 
 This document describes **what ships today** in `ontocore-lsp`. For the **v1.0 target** (extended plugin methods), see [LSP_SPEC.md](design/LSP_SPEC.md).
@@ -12,7 +12,7 @@ LSP JSON uses **snake_case** for enums serialized from Rust (`EntityKind`, `Pars
 **Source of truth:**
 
 - Types: [`protocol.rs` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/crates/ontocore-lsp/src/protocol.rs)
-- JSON Schema (v0.11): [`docs/lsp-protocol.schema.json`](lsp-protocol.schema.json) — query, patch, reasoner, refactor, graph, and semantic diff payloads.
+- JSON Schema (v0.13): [`docs/lsp-protocol.schema.json`](lsp-protocol.schema.json) — query, patch, reasoner, refactor, graph, semantic diff, schema browser, and PR summary payloads.
 - Handlers: [`handlers.rs` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/crates/ontocore-lsp/src/handlers.rs)
 - Extension client: [`client.ts` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/extension/src/lsp/client.ts)
 
@@ -270,6 +270,7 @@ Apply patch operations to Turtle (`.ttl`) or OBO (`.obo`) documents. See [author
 | `diagnostics` | `PatchDiagnostic[]` on failure (`severity`, `message`) |
 | `document_path` | Path to modified file |
 | `entity_detail` | Updated `EntityDetail` after successful apply (LSP only) |
+| `workspace_edit` | Optional LSP `WorkspaceEdit` for buffer sync (VS Code client applies this) |
 | `reindex_warning` | Present when apply succeeded but reindex failed |
 
 **`EntityAxiomSummary` kinds:** `sub_class_of`, `equivalent_class`, `disjoint_class`, `domain`, `range`, `property_chain` (property chains editable via patch ops since v0.12).
@@ -393,15 +394,38 @@ Compare semantic catalogs between git refs, directories, or indexed workspace sn
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `left_ref` | string? | Git left ref (default `HEAD`) or `WORKSPACE` for indexed catalog |
-| `right_ref` | string? | Git right ref (default `WORKTREE`) or `WORKSPACE` |
+| `left_ref` | string? | Git left ref (default `HEAD`) or `INDEXED` / `CATALOG` for indexed catalog (legacy alias: `WORKSPACE`) |
+| `right_ref` | string? | Git right ref (default `WORKTREE`) or `INDEXED` / `CATALOG` for indexed catalog (legacy alias: `WORKSPACE`) |
 | `left_path` | string? | Left directory when comparing two paths on disk |
 | `right_path` | string? | Right directory |
 | `reasoner` | boolean? | Enrich diff with reasoner unsatisfiability changes |
+| `format` | string? | `pr-summary` returns `{ "formatted": string }` PR-ready Markdown (v0.13+) |
 
 When both `left_path` and `right_path` are set, git refs are ignored and directories are compared directly (paths must resolve within workspace roots).
 
-**Result:** `{ "diff": DiffResult }` — axiom-level changes, entity additions/removals, breaking-change flags. See [Semantic diff guide](ontocode/semantic-diff.md).
+**Result:** `{ "diff": DiffResult }` — axiom-level changes, entity additions/removals, breaking-change flags. With `format: "pr-summary"`, also includes `formatted` Markdown string. See [Semantic diff guide](ontocode/semantic-diff.md).
+
+**Errors:** `INVALID_PARAMS` (bad refs, paths outside workspace, git errors), `NOT_INDEXED` (indexed-catalog ref before first index), `REASONER_FAILED` (when `reasoner: true` enrichment fails)
+
+### `ontocore/listSqlSchema` (v0.13+)
+
+Returns SQL virtual table metadata for the Query Workbench schema browser.
+
+**Params:** none (uses indexed workspace catalog)
+
+**Result:** `{ "tables": [{ "name": string, "columns": [{ "name": string, "type": string }] }] }`
+
+Includes core tables (`classes`, `properties`, …) and Horned-OWL axiom projections. See [sql-reference.md](sql-reference.md).
+
+**Errors:** `NOT_INDEXED`
+
+### `textDocument/semanticTokens/full` (v0.13+)
+
+Standard LSP semantic tokens for **Turtle** (`.ttl`) and **OBO** (`.obo`) open documents.
+
+**Token types:** `namespace`, `iri`, `keyword`, `comment`, `string`
+
+Requires document text in the LSP open-document buffer (unsaved buffers supported).
 
 ## Structured errors
 
@@ -409,11 +433,11 @@ Custom method failures return `LspErrorPayload` in the JSON-RPC error `data` fie
 
 | Field | Description |
 |-------|-------------|
-| `code` | Machine-readable code (`NOT_INDEXED`, `ENTITY_NOT_FOUND`, `PATCH_INVALID`, `UNSUPPORTED_FORMAT`, `INDEX_FAILED`, `QUERY_FAILED`, `MANCHESTER_INVALID`, `APPLIED_NOT_INDEXED`, `REASONER_FAILED`, `EXPLANATION_FAILED`, …) |
+| `code` | Machine-readable code (`NOT_INDEXED`, `INVALID_PARAMS`, `ENTITY_NOT_FOUND`, `PATCH_INVALID`, `UNSUPPORTED_FORMAT`, `INDEX_FAILED`, `QUERY_FAILED`, `MANCHESTER_INVALID`, `APPLIED_NOT_INDEXED`, `REASONER_FAILED`, `EXPLANATION_FAILED`, …) |
 | `message` | Human-readable message |
 | `recoverable` | Whether the client can retry |
 | `user_action` | Suggested user action (optional) |
 
 ## Not implemented yet (see LSP_SPEC)
 
-`prepareRename` and additional LSP features remain planned — see [LSP_SPEC.md](design/LSP_SPEC.md). `textDocument/completion` for Turtle shipped in v0.11. For semantic diff UX in VS Code, see [Semantic diff guide](ontocode/semantic-diff.md).
+`prepareRename` and additional LSP features remain planned — see [LSP_SPEC.md](design/LSP_SPEC.md). `textDocument/completion` for Turtle shipped in v0.11; semantic tokens and `listSqlSchema` shipped in v0.13. For semantic diff UX in VS Code, see [Semantic diff guide](ontocode/semantic-diff.md).

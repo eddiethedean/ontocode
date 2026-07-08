@@ -16,7 +16,8 @@ mod incremental;
 pub use builder::{CatalogError, IndexBuilder, OntologyCatalog};
 pub use entity_api::{ClassHierarchy, EntityDetail, SourceHint, SubclassEdge};
 pub use graph::{
-    GraphBuilder, GraphEdge, GraphFilters, GraphKind, GraphNode, GraphPayload, GraphRequest,
+    GraphBuilder, GraphEdge, GraphError, GraphFilters, GraphKind, GraphNode, GraphPayload,
+    GraphRequest,
 };
 pub use incremental::IncrementalStats;
 

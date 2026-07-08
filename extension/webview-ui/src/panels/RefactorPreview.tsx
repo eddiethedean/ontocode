@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import {
-  Callout,
   DiffColumns,
   FormField,
   LoadingState,
@@ -9,33 +8,37 @@ import {
   Select,
   StickyActions,
 } from "../components/ui";
-import { getVsCodeApi } from "../vscodeApi";
-import { HostMessage, isHostMessage, RefactorPlanPayload } from "../messages";
+import { useWorkspaceHost } from "../context/HostContext";
+import { useWorkspaceStore } from "../store";
+import { HostMessage, isHostMessage } from "../messages";
+import type { WorkspaceProps } from "../workspaces/types";
 
 function fileName(path: string): string {
   const parts = path.split(/[/\\]/);
   return parts[parts.length - 1] ?? path;
 }
 
-export function RefactorPreviewPanel(): JSX.Element {
-  const [plan, setPlan] = useState<RefactorPlanPayload | null>(null);
+export function RefactorPreviewPanel(_props?: WorkspaceProps): JSX.Element {
+  const host = useWorkspaceHost();
+  const plan = useWorkspaceStore((s) => s.refactoring.pending);
+  const setPendingRefactor = useWorkspaceStore((s) => s.setPendingRefactor);
   const [selected, setSelected] = useState(0);
 
   useEffect(() => {
-    getVsCodeApi().postMessage({ type: "ready", panel: "refactorPreview" });
+    host.postToCore({ type: "ready", panel: "refactorPreview" });
     const handler = (event: MessageEvent): void => {
       if (!isHostMessage(event.data)) {
         return;
       }
       const msg: HostMessage = event.data;
       if (msg.type === "loadRefactorPlan") {
-        setPlan(msg.plan);
+        setPendingRefactor(msg.plan);
         setSelected(0);
       }
     };
     window.addEventListener("message", handler);
     return () => window.removeEventListener("message", handler);
-  }, []);
+  }, [host, setPendingRefactor]);
 
   if (!plan) {
     return (
@@ -82,14 +85,18 @@ export function RefactorPreviewPanel(): JSX.Element {
       <StickyActions>
         <button
           type="button"
-          onClick={() => getVsCodeApi().postMessage({ type: "applyRefactor" })}
+          disabled={!plan}
+          onClick={() => host.postToCore({ type: "applyRefactor" })}
         >
           Apply changes
         </button>
         <button
           type="button"
           className="secondary"
-          onClick={() => getVsCodeApi().postMessage({ type: "cancelRefactor" })}
+          onClick={() => {
+            setPendingRefactor(null);
+            host.postToCore({ type: "cancelRefactor" });
+          }}
         >
           Cancel
         </button>

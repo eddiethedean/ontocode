@@ -9,7 +9,7 @@
 
 The **Workspace** (product surface) defines the runtime UX architecture — not a VS Code workspace folder. See [Glossary](../glossary.md).
 
-> **Implementation architecture:** [platform/WORKSPACE_RUNTIME.md](../platform/WORKSPACE_RUNTIME.md) · **Current Focus** and **WorkspaceStore** are **planned v0.13**.
+> **Implementation architecture:** [platform/WORKSPACE_RUNTIME.md](../platform/WORKSPACE_RUNTIME.md) · **Current Focus** and **WorkspaceStore** **shipped v0.13**
 
 OntoCode operates as a single synchronized semantic workspace centered on shared application state (target). Today: isolated webview panels ([platform/ONTOUI.md](../platform/ONTOUI.md)).
 

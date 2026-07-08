@@ -1,29 +1,38 @@
 # OntoUI architecture
 
-> **Status:** Partial (v0.12) — per-panel React webviews; **Target:** v0.13 shared platform · **ADR:** [0001-ontoui-shared-react-platform.md](../adr/0001-ontoui-shared-react-platform.md)
+> **Status:** v0.13 foundation **shipped** — WorkspaceStore, focus relay, design tokens · **ADR:** [0001-ontoui-shared-react-platform.md](../adr/0001-ontoui-shared-react-platform.md)
 
 ## Scope
 
 **OntoUI** is the shared React UI platform for OntoCode and future OntoStudio. Host-agnostic components and state; hosts provide file I/O, notifications, and shell integration via **WorkspaceHost**.
 
-## Current implementation (v0.12)
+## Implementation (v0.13)
 
 | Path | Role |
 |------|------|
 | `extension/webview-ui/` | Vite + React + TypeScript bundle |
-| `extension/webview-ui/src/App.tsx` | Routes by `?panel=` query param to panel components |
-| `extension/webview-ui/src/messages.ts` | Typed postMessage protocol |
-| `extension/webview-ui/src/vscodeApi.ts` | VS Code webview API wrapper |
-| `extension/webview-ui/src/panels/*` | EntityInspector, GraphPanel, QueryWorkbench, … |
-| `extension/webview-ui/src/components/ui.tsx` | Shared UI primitives (partial) |
-| `extension/src/webview/` | Extension host: webview lifecycle, CSP, message bridge |
+| `extension/webview-ui/src/App.tsx` | Routes by `?panel=`; `FocusSyncBootstrap` hydrates store from host |
+| `extension/webview-ui/src/context/HostContext.tsx` | `WorkspaceHost` provider |
+| `extension/webview-ui/src/store/` | Zustand `WorkspaceStore`, event bus, types |
+| `extension/webview-ui/src/host/` | `WorkspaceHost` interface + VS Code implementation |
+| `extension/webview-ui/src/workspaces/registry.ts` | Workspace registration |
+| `extension/webview-ui/src/tokens/cssVars.ts` | Design tokens → CSS variables |
+| `extension/webview-ui/src/components/primitives/` | Shared UI primitives |
+| `extension/webview-ui/src/components/SchemaBrowser.tsx` | SQL schema sidebar |
+| `extension/webview-ui/src/messages.ts` | Typed postMessage protocol (`focusState`, `reasoningState`, …) |
+| `extension/src/focus/focusRelay.ts` | Extension-host relay (webviews cannot share in-memory Zustand) |
+| `extension/src/webview/` | Webview lifecycle, CSP, message bridge |
 
-**Gap:** No shared WorkspaceStore; each panel manages local state and talks to LSP independently.
+**Store-integrated panels:** Entity Inspector, Graph, Query Workbench, Refactor Preview.
 
-## Target architecture (v0.13+)
+**Still per-panel local state:** Manchester editor, Semantic Diff, Manage Imports (full migration → v1.0).
+
+## Architecture
 
 ```text
-WorkspaceHost (VS Code | OntoStudio)
+Extension host (FocusRelayService)
+    ↕ focusState / reasoningState / setFocus
+WorkspaceHost (VS Code | future OntoStudio)
     ↕ host adapter API
 OntoUI shell
 ├── WorkspaceStore (global state)
@@ -32,25 +41,23 @@ OntoUI shell
 └── LSP client facade (typed, shared)
 ```
 
-## WorkspaceHost interface (planned)
+## WorkspaceHost interface
 
 ```ts
 interface WorkspaceHost {
   postToCore(message: HostToLspMessage): Promise<unknown>
   showNotification(level: "info" | "warn" | "error", message: string): void
   getTheme(): ThemeTokens
-  readFile(uri: string): Promise<string>
-  writeFile(uri: string, content: string): Promise<void>
-  executeCommand(id: string, args?: unknown): Promise<void>
+  onMessage(handler: (data: HostMessage) => void): () => void
 }
 ```
 
 VS Code implementation lives in the extension host; OntoStudio will implement the same interface without `vscode.*` APIs.
 
-## Panel → workspace migration
+## Panel → workspace mapping
 
-| Current panel (`?panel=`) | Target workspace |
-|----------------------------|------------------|
+| Panel (`?panel=`) | Workspace |
+|-------------------|-----------|
 | `inspector` | Entity Workspace |
 | `graph` | Graph Workspace |
 | `queryWorkbench` | Query Workspace |
@@ -59,12 +66,11 @@ VS Code implementation lives in the extension host; OntoStudio will implement th
 | `semanticDiff` | Diff Workspace |
 | `imports` | Import Workspace |
 
-Migration: register workspaces in **WorkspaceRegistry**; App.tsx delegates to active workspace type instead of switch on panel kind.
-
 ## Build and test
 
 ```bash
-cd extension/webview-ui && npm test
+cd extension/webview-ui && npm test    # Vitest (161+ tests)
+cd extension && npm test               # Extension unit tests
 cd extension && npm run build:webview
 ```
 
@@ -73,7 +79,7 @@ cd extension && npm run build:webview
 - [WORKSPACE_RUNTIME.md](WORKSPACE_RUNTIME.md)
 - [design/adr/0017-react-webview-ui.md](../design/adr/0017-react-webview-ui.md)
 - [ui/COMPONENT_LIBRARY.md](../ui/COMPONENT_LIBRARY.md)
-- [cursor-prompts/01-build-ontoui-workspace-platform.md](../cursor-prompts/01-build-ontoui-workspace-platform.md)
+- [migration/v0.13.md](../migration/v0.13.md)
 
 ## Evolution
 

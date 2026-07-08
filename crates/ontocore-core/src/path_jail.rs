@@ -174,12 +174,14 @@ fn normalize_lexical(path: &Path) -> PathBuf {
 fn is_path_within_lexical(root: &Path, path: &Path) -> bool {
     let root = normalize_lexical(root);
     let path = normalize_lexical(path);
-    path == root || path.starts_with(&root)
+    path_is_under(&root, &path)
 }
 
 /// Component-aware containment for already-canonical (or known-absolute) paths.
+///
+/// Rejects sibling-directory prefix traps (e.g. `/tmp/ws` must not contain `/tmp/ws_extra`).
 fn path_is_under(root: &Path, path: &Path) -> bool {
-    path == root || path.starts_with(root)
+    path == root || path.strip_prefix(root).is_ok()
 }
 
 /// Returns true if `path` is `workspace_root` or nested under it.
@@ -351,6 +353,26 @@ mod tests {
         let root = canonical_workspace_root(dir.path()).unwrap();
         let target = link.join("nested").join("pwn.ttl");
         assert!(validate_workspace_scope(&target, &root).is_err());
+    }
+
+    #[test]
+    fn rejects_sibling_directory_prefix_trap() {
+        let dir = tempfile::tempdir().unwrap();
+        let sibling = dir.path().join("ws_extra");
+        fs::create_dir_all(&sibling).unwrap();
+        let secret = sibling.join("secret.ttl");
+        fs::write(&secret, "@prefix ex: <http://ex/> .").unwrap();
+
+        let root = dir.path().join("ws");
+        fs::create_dir_all(&root).unwrap();
+        let root = canonical_workspace_root(&root).unwrap();
+
+        assert!(
+            !is_path_within(&root, &secret.canonicalize().unwrap()),
+            "sibling directory must not match as workspace child"
+        );
+        let uri = url::Url::from_file_path(&secret).unwrap().to_string();
+        assert!(resolve_document_path(&uri, &root).is_err());
     }
 
     #[test]

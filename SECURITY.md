@@ -4,14 +4,11 @@
 
 | Version | Supported |
 |---------|-----------|
-| 0.12.x  | Yes       |
+| 0.13.x  | Yes       |
+| 0.12.x  | Best effort |
 | 0.11.x  | No        |
 | 0.10.x  | Best effort |
-| 0.6.x   | No        |
-| 0.5.x   | No        |
-| 0.4.x   | No        |
-| 0.3.x   | No        |
-| < 0.3   | No        |
+| ≤ 0.9.x | No        |
 
 ## Reporting a vulnerability
 

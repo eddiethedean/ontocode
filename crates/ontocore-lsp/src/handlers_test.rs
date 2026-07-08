@@ -499,3 +499,49 @@ fn apply_refactor_tracks_only_open_buffers() {
     assert!(updated.contains(buffer_marker), "refactor should update open buffer in place");
     assert!(updated.contains("Agent") || updated.contains("ex:Agent"));
 }
+
+#[test]
+fn list_sql_schema_returns_axiom_tables() {
+    let state = indexed_state();
+    let schema = crate::handlers::handle_list_sql_schema(&state).expect("listSqlSchema");
+    let names: Vec<_> = schema.tables.iter().map(|t| t.name.as_str()).collect();
+    assert!(names.contains(&"domain_axioms"));
+    assert!(names.contains(&"restrictions"));
+    let restrictions = schema.tables.iter().find(|t| t.name == "restrictions").unwrap();
+    assert_eq!(restrictions.columns.len(), 4);
+}
+
+#[test]
+fn semantic_tokens_full_returns_tokens_for_open_ttl_buffer() {
+    let state = indexed_state();
+    let path = state
+        .with_catalog(|catalog| {
+            catalog
+                .data()
+                .documents
+                .iter()
+                .find(|d| d.path.file_name().and_then(|n| n.to_str()) == Some("example.ttl"))
+                .map(|d| d.path.clone())
+        })
+        .expect("indexed catalog")
+        .expect("example.ttl document");
+    let text = std::fs::read_to_string(&path).expect("read example.ttl");
+    state.set_document_text(path.clone(), text).expect("open buffer");
+
+    let uri = Uri::from_str(&path_to_uri(&path)).expect("uri");
+    let outcome = handle_standard_request(
+        &state,
+        "textDocument/semanticTokens/full",
+        Some(serde_json::json!({
+            "textDocument": { "uri": uri.to_string() }
+        })),
+    );
+    match outcome {
+        StandardRequestOutcome::Ok(value) => {
+            let data =
+                value.get("data").and_then(|d| d.as_array()).expect("semantic token data array");
+            assert!(!data.is_empty(), "expected semantic tokens for example.ttl");
+        }
+        other => panic!("unexpected semantic tokens outcome: {other:?}"),
+    }
+}

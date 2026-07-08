@@ -189,6 +189,7 @@ jobs:
           publish_with_pause ontocore-reasoner
           publish_with_pause ontocore-robot
           publish_with_pause ontocore-lsp
+          publish_with_pause ontocore-plugin
           publish_with_pause ontocore
           publish_crate ontocore-cli
 

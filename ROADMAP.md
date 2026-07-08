@@ -31,11 +31,11 @@ After 1.0, the roadmap shifts from parity to modernization.
 | [design/ROADMAP.md](docs/design/ROADMAP.md) | Per-crate engineering detail for **shipped** v0.1–v0.11 milestones |
 | [PROTEGE_PARITY.md](docs/design/PROTEGE_PARITY.md) | **v1.0 exit bar** — P0 / P1 / P2 parity tiers |
 | [v1.0_BACKLOG.md](docs/design/v1.0_BACKLOG.md) | Implementation checklist toward v1.0 |
-| [platform/OVERVIEW.md](docs/platform/OVERVIEW.md) | OntoUI / WorkspaceStore architecture (**planned v0.13+**) |
+| [platform/OVERVIEW.md](docs/platform/OVERVIEW.md) | OntoUI / WorkspaceStore architecture (foundation shipped v0.13) |
 | [PRODUCT_ROADMAP_2.0.md](docs/ui/PRODUCT_ROADMAP_2.0.md) | UI phases with milestone acceptance criteria |
 | [ui/README.md](docs/ui/README.md) | Product design specification pack (UX, design system, OntoStudio target) |
 
-**Current release:** v0.12.0
+**Current release:** v0.13.0
 
 ---
 
@@ -44,18 +44,18 @@ After 1.0, the roadmap shifts from parity to modernization.
 ### Timeline
 
 ```text
-SHIPPED (v0.1–v0.12) ─────────────────────────────────────────────────►
-v0.1–v0.4          v0.5–v0.8              v0.9–v0.12
-Engine foundation    IDE depth                Platform & authoring
-  │                    │                        │
-  Foundation           Query, reason,           Identity, diff,
-  Explorer, diag,      graphs, refactor,        OBO write-back,
-  write-back           Manchester               OWL/XML catalog
+SHIPPED (v0.1–v0.13) ─────────────────────────────────────────────────►
+v0.1–v0.4          v0.5–v0.8              v0.9–v0.12           v0.13
+Engine foundation    IDE depth                Platform & authoring   OntoUI platform
+  │                    │                        │                      │
+  Foundation           Query, reason,           Identity, diff,      WorkspaceStore,
+  Explorer, diag,      graphs, refactor,        OBO write-back,      focus relay,
+  write-back           Manchester               OWL/XML catalog      schema browser
 
-PLANNED (v0.13+) ─────────────────────────────────────────────────────►
-v0.13              v0.14                 v1.0              v1.1      v1.2+
-Platform           Plugin host           Protégé           SDKs &    Toolchain
-hardening          MVP                   replacement       AI        platform
+PLANNED (v0.14+) ─────────────────────────────────────────────────────►
+v0.14              v1.0                  v1.1              v1.2+
+Plugin host        Protégé               SDKs &            Toolchain
+MVP                replacement           AI                platform
 ```
 
 ### Phase index
@@ -65,7 +65,7 @@ hardening          MVP                   replacement       AI        platform
 | **A — Engine foundation** | v0.1–v0.4 | Shipped | Index, browse, diagnose, edit Turtle |
 | **B — IDE depth** | v0.5–v0.8 | Shipped | Query, reason, visualize, refactor |
 | **C — Platform & authoring** | v0.9–v0.12 | Shipped | OntoCore identity, semantic workspace, authoring parity |
-| **D — OntoUI platform** | v0.13–v0.14 | Planned | WorkspaceStore, plugins, stable APIs |
+| **D — OntoUI platform** | v0.13–v0.14 | In progress | v0.13 shipped: WorkspaceStore, focus relay; v0.14: plugins |
 | **E — Protégé replacement** | v1.0 | Planned | Daily OWL/OBO engineering without Protégé |
 | **F — Ecosystem** | v1.1–v1.2+ | Planned | SDKs, AI, toolchain & collaboration |
 
@@ -83,7 +83,7 @@ hardening          MVP                   replacement       AI        platform
 | 10 | v0.10 | C | Shipped | 9 (partial) | Semantic workspace |
 | 11 | v0.11 | C | Shipped | 5, 7, 11 (partial) | Editor depth & distribution |
 | 12 | v0.12 | C | Shipped | 2 (P0 exit) | Authoring parity |
-| 13 | v0.13 | D | Planned | 0, 1, 3†, 5†, 9† | Platform hardening |
+| 13 | v0.13 | D | Shipped | 0, 1, 3†, 5†, 9† | Platform hardening |
 | 14 | v0.14 | D | Planned | 8 | Plugin host MVP |
 | 15 | v1.0 | E | Planned | 1–6 exit, 9† | Protégé-competitive release |
 | 16 | v1.1 | F | Planned | 7, 2†, 3†, 4†, 8†, 9† | Language bindings & AI primitives |
@@ -97,25 +97,25 @@ OntoUI work uses **UI phases 0–12** from [Product Roadmap 2.0](docs/ui/PRODUCT
 
 | UI phase | Name | Primary releases |
 |----------|------|------------------|
-| **0** | Stabilize OntoUI | v0.13 |
-| **1** | Workspace foundation | v0.13 (core); v1.0 (tabs, dock) |
+| **0** | Stabilize OntoUI | v0.13 (shipped) |
+| **1** | Workspace foundation | v0.13 (core shipped); v1.0 (tabs, dock) |
 | **2** | Entity workspace | v0.4–v0.12 (MVP); v1.0 (relationship/metadata views); v1.1† (AI explain) |
-| **3** | Query workbench | v0.5+ (shipped); v0.13 (schema browser); v1.1† (AI query) |
+| **3** | Query workbench | v0.5+ (shipped); v0.13† (schema browser shipped); v1.1† (AI query) |
 | **4** | Graph workspace | v0.7+ (shipped); v1.0 (layouts, filters); v1.1† (AI graph) |
-| **5** | Reasoning experience | v0.9–v0.12 (partial); v1.0 (pipeline UI, history) |
+| **5** | Reasoning experience | v0.9–v0.13† (store integration shipped); v1.0 (pipeline UI, history) |
 | **6** | Semantic refactoring | v0.8+ (shipped); v1.0 (merge, batch, undo) |
 | **7** | AI experience | v1.1 |
 | **8** | Plugin platform | v0.14 (runtime); v1.1† (AI provider API) |
-| **9** | Collaboration | v0.10+ (diff); v0.13† (PR summary); v1.0 (review); v1.2 (GitHub) |
+| **9** | Collaboration | v0.10+ (diff); v0.13† (PR summary CLI shipped); v1.0 (review); v1.2 (GitHub UI) |
 | **10** | OntoStudio desktop | v1.2† (marketplace); Post-1.2 (shell, native graph) |
 | **11** | Ecosystem & docs | v0.11+ (guides); v1.2 (registry, templates) |
 | **12** | Semantic engineering platform | Post-1.2 (browser, cloud, team workspaces) |
 
-> **Note on v0.12–v0.18 (retired labels):** Earlier drafts used v0.12–v0.18 for capabilities that **shipped in v0.3–v0.11** (diagnostics, SQL virtual tables, refactoring, Ontologos reasoning, semantic diff, docs export). Those labels are retired. Forward work from v0.12 onward is defined in the phases below.
+> **Note on v0.13–v0.18 (retired labels):** Earlier drafts used v0.13–v0.18 for capabilities that **shipped in v0.3–v0.11** (diagnostics, SQL virtual tables, refactoring, Ontologos reasoning, semantic diff, docs export). Those labels are retired. Forward work from v0.13 onward is defined in the phases below.
 
 ---
 
-## Shipped releases (v0.1–v0.12)
+## Shipped releases (v0.1–v0.13)
 
 ### Era A — Engine foundation (v0.1–v0.4)
 
@@ -325,107 +325,40 @@ Sub-phases: **v0.7a** (React foundation) → **v0.7** (graphs + inspector) → *
 
 ---
 
-## Planned releases (v0.13 → v1.2+)
+### Era D — OntoUI platform (v0.13)
 
-### Era D — OntoUI platform (v0.13–v0.14)
+### v0.13 — Platform hardening (shipped)
 
-### v0.13 — Platform hardening (planned)
+**Released:** v0.13.0 (2026-07-07)
 
 **Theme:** OntoUI platform foundation + OntoCore hardening for plugins (v0.14) and Protégé polish (v1.0).
 
-**North star:** v0.12 closed P0 authoring parity, but React panels still hold isolated state and duplicate `postMessage` handlers. v0.13 makes **WorkspaceStore + Current Focus** the coordination layer so explorer, inspector, graph, and query surfaces stay in sync — while documenting engine APIs, team-scale query/diff workflows, and a quality bar for v1.0.
+**UI phases delivered:** **0**, **1**, partial **3** (schema browser), partial **5** (reasoning store integration), partial **9** (PR summary CLI). Checklist: [ROADMAP_MAPPING.md § v0.13](docs/ui/ROADMAP_MAPPING.md)
 
-**UI phases:** **0**, **1**, partial **3** (schema browser), partial **5** (reasoning store integration), partial **9** (PR summary engine). Milestones: [Product Roadmap 2.0 phases 0–1](docs/ui/PRODUCT_ROADMAP_2.0.md#phase-0) · Checklist: [ROADMAP_MAPPING.md § v0.13](docs/ui/ROADMAP_MAPPING.md)
+| Area | Deliverables |
+|------|--------------|
+| **OntoUI** | `WorkspaceHost` adapter; Zustand `WorkspaceStore` + event bus; Current Focus + `FocusChanged`; `WorkspaceRegistry`; design tokens + shared primitives; extension-host `FocusRelayService`; Entity Inspector, Graph, Query Workbench, and Refactor Preview on store; schema browser in Query Workbench; refactor + reasoning store slices |
+| **OntoCore** | Horned-OWL SQL virtual tables (`restrictions`, `equivalent_class_axioms`, `disjoint_class_axioms`, `domain_axioms`, `range_axioms`); LSP `ontocore/listSqlSchema`; `ontocore diff --pr-summary`; `.ontocore/diagnostics.toml`; LSP semantic tokens (Turtle/OBO); `ontocore docs` class hierarchy + property index; API stability policy; benchmark smoke tests (`tests/bench_index.rs`) |
+| **OntoCode** | Cross-panel focus sync (explorer → inspector + graph); Vitest + extension integration tests for focus relay, schema browser, and store slices; UX audit ([UX_AUDIT_v0.13.md](docs/ui/UX_AUDIT_v0.13.md)) |
 
-#### Why now
+**Exit criteria (met):**
 
-| Unblocks | Dependency |
-|----------|------------|
-| **v0.14** plugin host | WorkspaceHost adapter, stable webview/LSP event patterns, documented public APIs |
-| **v1.0** IDE polish | WorkspaceStore, focus sync, shared components — prerequisites for persistent tabs, dock, and entity workspace depth |
-| **OntoStudio** (post-1.0) | Host-agnostic OntoUI ([ADR-0007](docs/adr/0007-ontostudio-shares-platform.md)) |
+- [x] **Focus sync** — explorer selection relays to inspector and graph via extension-host focus relay
+- [x] **Store ownership** — Entity, Graph, Query, and Refactor Preview workspaces consume WorkspaceStore
+- [x] **Design system** — design tokens + shared primitives on Entity Inspector and Query Workbench
+- [x] **Schema browser** — browse virtual tables/columns; insert snippets into Query Workbench editor
+- [x] **Team workflow** — `ontocore diff A..B --pr-summary` emits PR-ready Markdown; documented and tested
+- [x] **Performance** — benchmark fixtures + sizing guide update
+- [x] **Quality** — 161 webview-ui Vitest tests + extension integration tests; accessibility pass on migrated panels
+- [x] **API policy** — public `ontocore` API stability documented on path to 1.0
 
-#### Scope boundaries
+**Deferred to later releases:** persistent tabs + bottom dock, full panel component migration, SQL `JOIN`/`GROUP BY`, PR summary UI panel, validation report panel, Reasoner/Semantic Diff full store migration → **v1.0** / **v1.2** per original scope boundaries.
 
-| In scope (v0.13) | Deferred |
-|------------------|----------|
-| WorkspaceStore, Current Focus, event bus, extension-host focus relay | Persistent tabs, bottom dock → **v1.0** |
-| Design tokens + shared primitives (Entity Inspector, Query Workbench minimum) | Full component migration for every panel → **v1.0** |
-| Explorer ↔ inspector ↔ graph focus sync | Relationship cards, metadata view → **v1.0** |
-| Query schema browser | AI query generation → **v1.1** |
-| Horned-OWL axiom virtual tables (schema browser + SQL) | SQL `JOIN` / `GROUP BY` → **v1.0** ([ADR-0016](docs/design/adr/0016-dependency-first-implementation.md)) |
-| `ontocore diff` PR-summary output (CLI/LSP) | PR summary UI panel → **v1.2** |
-| Configurable diagnostic rules; semantic tokens; benchmarks | Plugin host, SHACL → **v0.14** |
-| Refactor/reasoning store slices | Merge classes, undo stack → **v1.0** |
-
-#### Priority tiers
-
-**P0 — must ship** (release blockers)
-
-| Track | Work | Prompts / specs |
-|-------|------|-----------------|
-| **A — OntoUI foundation** | WorkspaceHost adapter; centralized webview routing; WorkspaceStore; Current Focus + `FocusChanged`; WorkspaceRegistry; semantic navigation history (stub); design tokens in `global.css` | [01](docs/cursor-prompts/01-build-ontoui-workspace-platform.md) → [02](docs/cursor-prompts/02-add-workspacestore.md) → [05](docs/cursor-prompts/05-implement-current-focus.md) → [03](docs/cursor-prompts/03-add-workspaceregistry.md) → [13](docs/cursor-prompts/13-design-tokens-component-library.md) · [WORKSPACE_RUNTIME](docs/platform/WORKSPACE_RUNTIME.md) |
-| **B — Panel store integration** | Migrate Entity, Graph, Query workspaces to store; extension-host relay for cross-webview focus; Refactor Preview + reasoning slices in store | [04](docs/cursor-prompts/04-migrate-panels-to-workspaces.md), [11](docs/cursor-prompts/11-semantic-refactoring-preview-workflow.md), [12](docs/cursor-prompts/12-reasoning-diagnostics-workflow.md) |
-
-**P1 — should ship** (target v0.13.0; slip to patch only with documented reason)
-
-| Track | Work | Prompts / specs |
-|-------|------|-----------------|
-| **C — Query depth** | Schema browser (tables, columns, insert-snippet); Horned-OWL virtual tables: `restrictions`, `equivalent_class_axioms`, `disjoint_class_axioms`, `domain_axioms`, `range_axioms` | [08](docs/cursor-prompts/08-improve-query-workbench.md) · [QUERY_WORKBENCH_ARCHITECTURE](docs/platform/QUERY_WORKBENCH_ARCHITECTURE.md) |
-| **D — Engine hardening** | Document public `ontocore` API stability policy; `ontocore diff --pr-summary` (Markdown for PRs); workspace-configurable diagnostic rules; LSP semantic tokens (Turtle/OBO); performance benchmarks (GO/SNOMED-scale fixtures); `ontocore docs` class hierarchy + property sections | [sql-views](docs/ontocore/sql-views.md), [performance-sizing](docs/guides/performance-sizing.md) |
-| **E — Quality bar** | Extension UX audit + documented flow fixes; webview integration tests; accessibility pass on migrated panels (core flows) | [TESTING_STRATEGY](docs/ui/TESTING_STRATEGY.md), [ACCESSIBILITY_SPEC](docs/ui/ACCESSIBILITY_SPEC.md), [UX_PATTERNS](docs/ui/UX_PATTERNS.md) |
-
-**P2 — stretch** (cut first if schedule slips)
-
-- Validation report panel (aggregated diagnostics export)
-- SQL ontology helper functions in query layer
-- Full Reasoner / Semantic Diff / Refactor panel component migration
-- DataFusion spike — only if Horned-OWL virtual tables are insufficient for schema browser ([ADR-0016](docs/design/adr/0016-dependency-first-implementation.md))
-
-#### Implementation sequence
-
-```text
-Track A (foundation)  ──►  Track B (panel migration)  ──►  Track C (schema browser)
-         │                            │                           │
-         └────────────────────────────┴───────────────────────────┘
-                                          │
-                              Track D (engine) + Track E (quality) in parallel
-```
-
-Recommended prompt order: **01 → 02 → 05 → 03 → 13 → 04 → 11 → 12 → 08** (Tracks D/E alongside Tracks B–C).
-
-#### Deliverables
-
-| Area | P0 | P1 |
-|------|----|----|
-| **OntoUI** | WorkspaceStore + Current Focus; event bus; WorkspaceHost; explorer ↔ inspector ↔ graph focus relay; design tokens + shared primitives on Entity Inspector + Query Workbench | Schema browser UI; refactor + reasoning store slices; UX audit outcomes; webview integration tests; accessibility on migrated panels |
-| **OntoCore** | — | Horned-OWL axiom virtual tables; `ontocore diff --pr-summary`; configurable diagnostics; documented API stability policy; benchmarks + sizing guide update |
-| **OntoCode** | Extension-host focus relay; panels consume store via relay | LSP semantic tokens; `ontocore docs` hierarchy/property sections |
-
-#### Exit criteria
-
-> v0.13 is done when the platform foundation is real — not when every stretch item lands.
-
-- [ ] **Focus sync:** Selecting an entity in the explorer updates Current Focus; inspector and graph reflect the same entity without manual re-selection (cross-webview relay acceptable).
-- [ ] **Store ownership:** Entity, Graph, and Query workspaces read focus from WorkspaceStore; Refactor Preview reads `pendingRefactor` from store ([SEMANTIC_REFACTORING](docs/platform/SEMANTIC_REFACTORING.md) acceptance criteria).
-- [ ] **Design system:** Design tokens applied globally; at least Entity Inspector and Query Workbench use shared components from [COMPONENT_LIBRARY](docs/ui/COMPONENT_LIBRARY.md).
-- [ ] **Schema browser:** User can browse virtual tables/columns and insert names into the Query Workbench editor.
-- [ ] **Team workflow:** `ontocore diff A..B --pr-summary` emits a Markdown summary suitable for PR descriptions; documented and tested.
-- [ ] **Performance:** Benchmark results published for at least two large-ontology targets; [performance-sizing](docs/guides/performance-sizing.md) updated.
-- [ ] **Quality:** `extension/webview-ui` Vitest + extension integration tests pass; accessibility checklist completed for migrated panels.
-- [ ] **API policy:** Public `ontocore` crate API surface documented with semver expectations on the path to 1.0.
-
-#### Risks
-
-| Risk | Mitigation |
-|------|------------|
-| VS Code webviews cannot share in-memory store | Extension-host relay serializes focus/events ([PRODUCT_ROADMAP_2.0 phase 1](docs/ui/PRODUCT_ROADMAP_2.0.md#phase-1)) |
-| Scope creep (SQL joins, full a11y, every panel migrated) | P0/P1/P2 tiers above; JOIN/GROUP BY explicitly v1.0 |
-| Breaking LSP/extension protocol during store migration | Incremental panel migration; keep `?panel=` URLs until Track B complete |
-
-**Dependencies:** `sqlparser` + `horned-owl` ([ADR-0011](docs/design/adr/0011-use-sqlparser-for-sql.md), [ADR-0013](docs/design/adr/0013-dual-stack-oxigraph-horned-owl.md)); platform ADRs [0002–0004](docs/adr/README.md); [cursor-prompts/](docs/cursor-prompts/README.md) 01–05, 08, 11–13
+**Dependencies:** `sqlparser` + `horned-owl` ([ADR-0011](docs/design/adr/0011-use-sqlparser-for-sql.md), [ADR-0013](docs/design/adr/0013-dual-stack-oxigraph-horned-owl.md)); platform ADRs [0002–0004](docs/adr/README.md)
 
 ---
+
+## Planned releases (v0.14 → v1.2+)
 
 ### v0.14 — Plugin host MVP (planned)
 
@@ -464,7 +397,7 @@ OntoCore hosts **external** plugins through stable APIs — it does not embed RO
 | **Toolchain** | ODK project layout recognition (`src/ontology/`, catalog files, import structure); ODK QC and release workflow surfacing; ROBOT-compatible operations where practical; import existing ODK/ROBOT/owlmake workflows (Makefile, GitHub Actions); Protégé migration guide with honest parity table |
 | **Ecosystem** | Ontologos 1.0.0 reasoner gate satisfied; published `ontocore` + `ontocore-*` 1.0.0 on crates.io |
 
-**Already shipped (v0.5–v0.12):** entity editor MVP, query workbench, graph canvas, reasoner panel, refactoring preview, semantic diff — see [ROADMAP_MAPPING.md](docs/ui/ROADMAP_MAPPING.md).
+**Already shipped (v0.5–v0.13):** entity editor MVP, query workbench, graph canvas, reasoner panel, refactoring preview, semantic diff, WorkspaceStore + focus relay, schema browser — see [ROADMAP_MAPPING.md](docs/ui/ROADMAP_MAPPING.md).
 
 **Exit criteria:**
 

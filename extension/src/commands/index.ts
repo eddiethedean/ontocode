@@ -8,6 +8,7 @@ import {
 import { patchFailureMessage } from "../lsp/patchFeedback";
 import { PatchEntityKind, PatchOp } from "../lsp/protocol";
 import { EntityInspectorPanel } from "../webviews/inspector";
+import { focusRelay } from "../focus/focusRelay";
 import { GraphPanel } from "../webviews/graphPanel";
 import { QueryWorkbenchPanel } from "../webviews/queryWorkbenchReact";
 import {
@@ -322,15 +323,15 @@ export function registerCommands(
     vscode.commands.registerCommand("ontocode.semanticDiff", async () => {
       try {
         const leftRef = await vscode.window.showInputBox({
-          prompt: "Left git ref (or WORKSPACE)",
+          prompt: "Left git ref (or INDEXED / CATALOG for indexed catalog)",
           value: "HEAD",
         });
         if (leftRef === undefined) {
           return;
         }
         const rightRef = await vscode.window.showInputBox({
-          prompt: "Right git ref (WORKTREE or WORKSPACE)",
-          value: "WORKSPACE",
+          prompt: "Right git ref (WORKTREE, INDEXED, or CATALOG)",
+          value: "WORKTREE",
         });
         if (rightRef === undefined) {
           return;
@@ -505,6 +506,7 @@ async function openInspector(
   onRefresh?: () => Promise<void>
 ): Promise<void> {
   const requestId = ++inspectorRequestSeq;
+  focusRelay.setEntityFocus(iri, "explorer");
   const snapshot = await getCatalogSnapshot();
   if (requestId !== inspectorRequestSeq) {
     return;

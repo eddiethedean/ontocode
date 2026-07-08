@@ -7,8 +7,12 @@ Runnable examples for OntoCore CLI, Rust embedding, and OntoCode workflows.
 | Guide | Description |
 |-------|-------------|
 | [Query cookbook](queries.md) | SQL and SPARQL over virtual tables |
-| [Sample patches](patches.md) | `ontocore patch` JSON for Turtle write-back |
+| [Sample patches](patches.md) | `ontocore patch` JSON for Turtle and OBO write-back |
 | [Refactoring](refactoring.md) | Rename, migrate namespace, move, extract |
+| [Classify](classify.md) | Reasoner profiles and CI exit semantics |
+| [Semantic diff](diff.md) | Git refs, PR summary, directory compare |
+| [Docs export](docs-export.md) | Markdown/HTML documentation export |
+| [Index vs inspect](inspect.md) | Stats-only vs diagnostic summary |
 
 From a git clone, prefix commands with `cargo run --` (e.g. `cargo run -- query fixtures "SELECT * FROM classes"`). With `cargo install ontocore-cli`, use `ontocore` directly.
 
@@ -16,9 +20,10 @@ From a git clone, prefix commands with `cargo run --` (e.g. `cargo run -- query 
 
 | Example | Run | Description |
 |---------|-----|-------------|
-| `index_and_query` | `cargo run -p ontocode --example index_and_query` | `IndexBuilder` + SQL query on `fixtures/` |
+| `index_and_query` | `cargo run -p ontocode --example index_and_query` | `Workspace` + SQL query on `fixtures/` |
 | `ontocore_workspace` | `cargo run -p ontocode --example ontocore_workspace` | High-level `Workspace` API |
-| `error_handling` | `cargo run -p ontocode --example error_handling` | Error handling patterns |
+| `workspace_operations` | `cargo run -p ontocode --example workspace_operations` | Classify, import graph, docs export |
+| `error_handling` | `cargo run -p ontocode --example error_handling` | `ontocore::Error` handling |
 | `semantic_diff` | `cargo run -p ontocode --example semantic_diff` | Git/workspace semantic diff (optional git repo) |
 
 ## Fixture workspaces

@@ -58,7 +58,7 @@ ontocore patch ./terms.obo patches-obo.json --preview
 ontocore patch ./terms.obo patches-obo.json
 ```
 
-See [OBO authoring](../ontocode/obo-authoring.md).
+Download: [patches-obo.json](patches-obo.json)
 
 ## Complex axioms (v0.5)
 

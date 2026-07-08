@@ -169,7 +169,6 @@ function resolveServerPath(context: vscode.ExtensionContext): string {
 export async function indexWorkspace(
   workspaceUri?: string
 ): Promise<IndexWorkspaceResult> {
-  const c = requireClient();
   const uri = workspaceUri ?? (await pickWorkspaceFolderUri());
   if (!uri) {
     throw new Error(
@@ -179,7 +178,7 @@ export async function indexWorkspace(
   const diskCache = vscode.workspace
     .getConfiguration("ontocode")
     .get<boolean>("indexCache", false);
-  const result = await c.sendRequest<unknown>("ontocore/indexWorkspace", {
+  const result = await ontcoreRequest<unknown>("ontocore/indexWorkspace", {
     workspace_uri: uri,
     disk_cache: diskCache,
   });
@@ -201,8 +200,7 @@ async function pickWorkspaceFolderUri(): Promise<string | undefined> {
 }
 
 export async function getCatalogSnapshot(): Promise<CatalogSnapshot> {
-  const c = requireClient();
-  const result = await c.sendRequest<unknown>(
+  const result = await ontcoreRequest<unknown>(
     "ontocore/getCatalogSnapshot",
     null
   );
@@ -210,16 +208,14 @@ export async function getCatalogSnapshot(): Promise<CatalogSnapshot> {
 }
 
 export async function getEntity(iri: string): Promise<GetEntityResult> {
-  const c = requireClient();
-  const result = await c.sendRequest<unknown>("ontocore/getEntity", { iri });
+  const result = await ontcoreRequest<unknown>("ontocore/getEntity", { iri });
   return assertGetEntityResult(result);
 }
 
 export async function applyAxiomPatch(
   params: ApplyAxiomPatchParams
 ): Promise<ApplyPatchResult> {
-  const c = requireClient();
-  const result = await c.sendRequest<unknown>(
+  const result = await ontcoreRequest<unknown>(
     "ontocore/applyAxiomPatch",
     params
   );
@@ -236,25 +232,46 @@ export async function applyAxiomPatch(
   return patch;
 }
 
+type SqlTableSchema = {
+  name: string;
+  columns: Array<{ name: string; type: string }>;
+};
+
+function parseListSqlSchemaResult(result: unknown): SqlTableSchema[] {
+  if (Array.isArray(result)) {
+    return result as SqlTableSchema[];
+  }
+  if (
+    result &&
+    typeof result === "object" &&
+    Array.isArray((result as { tables?: unknown }).tables)
+  ) {
+    return (result as { tables: SqlTableSchema[] }).tables;
+  }
+  throw new Error("Invalid listSqlSchema response");
+}
+
+export async function listSqlSchema(): Promise<SqlTableSchema[]> {
+  const result = await ontcoreRequest<unknown>("ontocore/listSqlSchema", {});
+  return parseListSqlSchemaResult(result);
+}
+
 export async function runSqlQuery(sql: string): Promise<TabularQueryResult> {
-  const c = requireClient();
-  const result = await c.sendRequest<unknown>("ontocore/query", { sql });
+  const result = await ontcoreRequest<unknown>("ontocore/query", { sql });
   return assertTabularQueryResult(result);
 }
 
 export async function runSparqlQuery(
   query: string
 ): Promise<TabularQueryResult> {
-  const c = requireClient();
-  const result = await c.sendRequest<unknown>("ontocore/sparql", { query });
+  const result = await ontcoreRequest<unknown>("ontocore/sparql", { query });
   return assertTabularQueryResult(result);
 }
 
 export async function parseManchester(
   params: ParseManchesterParams
 ): Promise<ParseManchesterResult> {
-  const c = requireClient();
-  const result = await c.sendRequest<unknown>(
+  const result = await ontcoreRequest<unknown>(
     "ontocore/parseManchester",
     params
   );
@@ -264,16 +281,14 @@ export async function parseManchester(
 export async function runReasoner(
   params: RunReasonerParams
 ): Promise<RunReasonerResult> {
-  const c = requireClient();
-  const result = await c.sendRequest<unknown>("ontocore/runReasoner", params);
+  const result = await ontcoreRequest<unknown>("ontocore/runReasoner", params);
   return assertRunReasonerResult(result);
 }
 
 export async function getExplanation(
   params: GetExplanationParams
 ): Promise<GetExplanationResult> {
-  const c = requireClient();
-  const result = await c.sendRequest<unknown>(
+  const result = await ontcoreRequest<unknown>(
     "ontocore/getExplanation",
     params
   );
@@ -281,13 +296,11 @@ export async function getExplanation(
 }
 
 export async function getGraph(params: GetGraphParams): Promise<GetGraphResult> {
-  const c = requireClient();
-  const result = await c.sendRequest<unknown>("ontocore/getGraph", params);
+  const result = await ontcoreRequest<unknown>("ontocore/getGraph", params);
   return assertGetGraphResult(result);
 }
 
 export async function runRobot(params: RunRobotParams): Promise<RunRobotResult> {
-  const c = requireClient();
   let robotPath =
     params.robot_path ??
     vscode.workspace.getConfiguration("ontocode").get<string>("robotPath");
@@ -297,7 +310,7 @@ export async function runRobot(params: RunRobotParams): Promise<RunRobotResult> 
     );
     robotPath = undefined;
   }
-  const result = await c.sendRequest<unknown>("ontocore/runRobot", {
+  const result = await ontcoreRequest<unknown>("ontocore/runRobot", {
     ...params,
     robot_path: robotPath || undefined,
   });
@@ -305,16 +318,14 @@ export async function runRobot(params: RunRobotParams): Promise<RunRobotResult> 
 }
 
 export async function findUsages(iri: string): Promise<FindUsagesResult> {
-  const c = requireClient();
-  const result = await c.sendRequest<unknown>("ontocore/findUsages", { iri });
+  const result = await ontcoreRequest<unknown>("ontocore/findUsages", { iri });
   return assertFindUsagesResult(result);
 }
 
 export async function previewRefactor(
   request: RefactorRequest
 ): Promise<PreviewRefactorResult> {
-  const c = requireClient();
-  const result = await c.sendRequest<unknown>(
+  const result = await ontcoreRequest<unknown>(
     "ontocore/previewRefactor",
     request
   );
@@ -326,8 +337,7 @@ export async function applyRefactor(
   request: RefactorRequest,
   previewOnly = false
 ): Promise<ApplyRefactorResult> {
-  const c = requireClient();
-  const result = await c.sendRequest<unknown>("ontocore/applyRefactor", {
+  const result = await ontcoreRequest<unknown>("ontocore/applyRefactor", {
     plan,
     request,
     preview_only: previewOnly,
@@ -338,9 +348,45 @@ export async function applyRefactor(
 export async function semanticDiff(
   params: SemanticDiffParams
 ): Promise<SemanticDiffResult> {
-  const c = requireClient();
-  const result = await c.sendRequest<unknown>("ontocore/semanticDiff", params);
+  const result = await ontcoreRequest<unknown>("ontocore/semanticDiff", params);
   return assertSemanticDiffResult(result);
+}
+
+interface LspErrorPayload {
+  code?: string;
+  message?: string;
+  user_action?: string;
+  recoverable?: boolean;
+}
+
+function formatOntocoreRpcError(err: unknown): Error {
+  if (err && typeof err === "object") {
+    const rpc = err as {
+      code?: number;
+      message?: string;
+      data?: LspErrorPayload;
+    };
+    const data = rpc.data;
+    if (data?.message) {
+      const action = data.user_action ? ` ${data.user_action}` : "";
+      return new Error(`${data.code ?? "LSP_ERROR"}: ${data.message}${action}`);
+    }
+    if (rpc.message) {
+      return new Error(rpc.message);
+    }
+  }
+  if (err instanceof Error) {
+    return err;
+  }
+  return new Error(String(err));
+}
+
+async function ontcoreRequest<T>(method: string, params: unknown): Promise<T> {
+  try {
+    return await requireClient().sendRequest<T>(method, params);
+  } catch (err) {
+    throw formatOntocoreRpcError(err);
+  }
 }
 
 function requireClient(): LanguageClient {

@@ -18,6 +18,8 @@ For quick answers, see also [FAQ](faq.md).
 | Reasoner errors or empty hierarchy | Profile mismatch, OntoLogos, unsat classes | [Reasoner](#reasoner) |
 | Cannot edit `.obo` | Pre-v0.12 extension or term not in `.obo` file | [Graphs, OBO, ROBOT](#graphs-obo-robot-and-semantic-diff) |
 | Semantic diff / graph missing | No git repo, not indexed | [Graphs, OBO, ROBOT](#graphs-obo-robot-and-semantic-diff) |
+| Inspector and graph show different entities | Panels opened before v0.13 or focus relay disabled | Re-open panels; click entity in explorer — [migration v0.13](migration/v0.13.md) |
+| Schema browser empty in Query Workbench | Workspace not indexed or SPARQL mode selected | Index workspace; switch to SQL mode — [Query Workbench](ontocode/query-workbench.md) |
 | OWL/XML visible but not editable | Read-only by design (v0.12+) | [OWL/XML workflow](guides/owl-xml-workflow.md) |
 
 ```mermaid
@@ -73,6 +75,16 @@ The `fixtures/` directory exists only in a **git clone**, not after `cargo insta
 ```bash
 ontocore query /path/to/your/ontologies "SELECT * FROM classes"
 ```
+
+## CLI: install and PATH
+
+| Symptom | Fix |
+|---------|-----|
+| `ontocore: command not found` after `cargo install` | Add `~/.cargo/bin` to your `PATH` — see [Getting started](getting-started.md#prerequisites) |
+| `cargo install` fails with MSRV / edition error | Run `rustup update stable`; require Rust **1.88+** (`rustc --version`) |
+| `cargo install` network / crates.io errors | Retry with `--locked`; pin `--version 0.13.0` in CI |
+| Release tarball on macOS/Windows | CLI pre-builds are **Linux x64 only** — use `cargo install` or the VSIX extension |
+| `ontocore diff HEAD..WORKTREE` fails | Run from a **git repository** root containing ontology files |
 
 ## CLI: `validate` exits non-zero
 

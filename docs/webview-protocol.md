@@ -1,4 +1,4 @@
-# Webview message protocol (v0.11)
+# Webview message protocol (v0.13)
 
 Typed messages between the VS Code extension host (`extension/src/webviews/`) and the React app (`extension/webview-ui/`).
 
@@ -7,6 +7,35 @@ Typed messages between the VS Code extension host (`extension/src/webviews/`) an
 Webviews load `webview-ui/dist` with query param `?panel=`:
 
 `inspector` | `graph` | `smoke` | `refactorPreview` | `queryWorkbench` | `manchesterEditor` | `semanticDiff` | `imports`
+
+## Host → React (v0.13 focus relay)
+
+Cross-panel synchronization via `FocusRelayService` in the extension host. All webviews that call `useFocusSync` accept:
+
+| type | payload |
+|------|---------|
+| `focusState` | `{ focus: CurrentFocus }` — broadcast when explorer, inspector, or graph changes selection |
+| `reasoningState` | `{ reasoning: ReasoningStatePayload }` — last reasoner run summary for graph/inspector |
+
+`CurrentFocus`:
+
+| field | type | description |
+|-------|------|-------------|
+| `kind` | string | `entity` \| `axiom` \| `query` \| `diagnostic` \| `graphNode` \| `documentation` \| `review` |
+| `id` | string | IRI or stable object id |
+| `source` | string | Originating panel id (e.g. `explorer`, `inspector`, `graph`) |
+| `timestamp` | number | Unix epoch ms |
+
+`ReasoningStatePayload`:
+
+| field | type | description |
+|-------|------|-------------|
+| `profile` | string | Reasoner profile used (`el`, `rl`, `dl`, `auto`, …) |
+| `unsatisfiable` | string[] | Unsatisfiable class IRIs from last run |
+| `hierarchyMode` | string? | `asserted` \| `inferred` \| `combined` when applicable |
+| `lastRunAt` | number | Unix epoch ms |
+
+Query Workbench `queryInit` may also include `sqlSchema` — array of `{ name, columns: [{ name, type }] }` from LSP `ontocore/listSqlSchema`.
 
 ## Host → React (shared)
 
@@ -119,5 +148,7 @@ See [Manage Imports guide](ontocode/manage-imports.md).
 | `applyRefactor` | — |
 | `cancelRefactor` | — |
 | `copyMarkdown` | — (semantic diff panel — copies breaking changes to clipboard) |
+| `setFocus` | `{ focus: CurrentFocus }` — request focus change from a webview (relayed to other panels) |
+| `showNotification` | `{ message, level? }` — toast in VS Code host |
 
 Ontology operations use LSP from the host only ([ADR-0007](design/adr/0007-language-server-boundary.md)).

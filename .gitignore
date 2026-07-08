@@ -12,3 +12,4 @@ extension/.vscode-test/
 extension/server/
 extension/*.vsix
 /site/
+.ci-local-run.log

@@ -3,6 +3,7 @@ import "@testing-library/jest-dom/vitest";
 import { afterEach, beforeEach, vi } from "vitest";
 import { resetVsCodeApiForTests } from "../vscodeApi";
 import { vscodePostMessage } from "./vscodeMock";
+import { resetWorkspaceStoreForTests } from "./render";
 import "../styles/global.css";
 
 class ResizeObserverMock {
@@ -13,6 +14,7 @@ class ResizeObserverMock {
 
 beforeEach(() => {
   resetVsCodeApiForTests();
+  resetWorkspaceStoreForTests();
   vscodePostMessage.mockClear();
   window.history.replaceState({}, "", "/");
 

@@ -389,11 +389,21 @@ pub struct SemanticDiffParams {
     /// When true, enrich the diff with reasoner unsatisfiability changes.
     #[serde(default)]
     pub reasoner: bool,
+    /// Output format hint: `pr-summary` returns Markdown in `formatted`.
+    #[serde(default)]
+    pub format: Option<String>,
 }
 
 #[derive(Debug, Serialize)]
 pub struct SemanticDiffResult {
     pub diff: ontocore_diff::DiffResult,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub formatted: Option<String>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct ListSqlSchemaResult {
+    pub tables: Vec<ontocore_query::SqlTableSchema>,
 }
 
 #[derive(Debug, Serialize)]

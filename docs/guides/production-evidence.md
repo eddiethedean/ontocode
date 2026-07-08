@@ -14,7 +14,7 @@ Canonical limits: [workspace limits](../workspace-limits.md). Pilot criteria: [p
 
 ## Prerequisites
 
-- Pin OntoCore **0.12.0** — `cargo install ontocore-cli --locked --version 0.12.0` or release binary with SHA256 verification — [release integrity](../release-integrity.md)
+- Pin OntoCore **0.13.0** — `cargo install ontocore-cli --locked --version 0.13.0` or release binary with SHA256 verification — [release integrity](../release-integrity.md)
 - A **representative clone** of your production ontology tree (not sanitized tutorial data)
 - Record host OS, CPU, RAM, and CI runner specs
 
@@ -34,7 +34,7 @@ Record:
 | `class_count` | | |
 | `diagnostic_error_count` | | |
 
-**Pass:** Counts within [workspace limits](../workspace-limits.md). **Fail:** Split workspace or defer until incremental indexing ships — [release timeline](release-timeline.md).
+**Pass:** Counts within [workspace limits](../workspace-limits.md). **Fail:** Split workspace or shard by module — incremental indexing shipped in v0.10 ([release timeline](release-timeline.md)).
 
 ## Step 2 — CI latency budget
 

@@ -25,11 +25,29 @@ Root `VISION.md`, `ARCHITECTURE.md`, and `ROADMAP.md` are mirrored under `docs/`
 
 The root Cargo package `ontocode` is unpublished and hosts workspace integration tests (`tests/`).
 
+**New contributors:** start with [internals.md](docs/internals.md) for role-based paths (Rust, extension, docs, LSP).
+
+## Before opening a PR
+
+**Minimum checks (most changes):**
+
+```bash
+cargo fmt --all --check
+cargo test --workspace
+cargo build -p ontocore-lsp --bins
+cd extension && ONTOCORE_LSP_BIN=../target/debug/ontocore-lsp npm test
+```
+
+**Full CI parity (release branches or broad changes):** `./scripts/run-ci-local.sh` (~30+ minutes).
+
+Open an issue or discussion before large features. Follow existing commit message style in `git log`.
+
 ## Prerequisites
 
 - Rust **1.88+** (see `rust-version` in `Cargo.toml`)
 - Node.js **20** (extension CI)
 - `npm` (extension build)
+- **`cargo-audit`** — `cargo install cargo-audit` (required by CI; run `cargo audit` before PRs)
 
 ## Optional dependencies
 
@@ -133,6 +151,7 @@ Review the diffs before committing.
 ```bash
 cargo run -p ontocode --example index_and_query
 cargo run -p ontocode --example ontocore_workspace
+cargo run -p ontocode --example workspace_operations
 cargo run -p ontocode --example semantic_diff
 ```
 
@@ -148,6 +167,16 @@ mkdocs build --strict   # CI uses this; must pass with no warnings
 ```
 
 Open http://127.0.0.1:8000. Configuration: [`mkdocs.yml`](mkdocs.yml), [`.readthedocs.yaml`](.readthedocs.yaml).
+
+### Full local CI (recommended before PR)
+
+Mirrors [`.github/workflows/ci.yml`](.github/workflows/ci.yml) plus VS Code e2e for your platform:
+
+```bash
+./scripts/run-ci-local.sh
+```
+
+This runs rustfmt, `./scripts/check-doc-versions.sh`, clippy, workspace tests, MSRV (1.88), CLI smoke, release build, LSP smoke tests, webview-ui tests, extension build/tests, `cargo audit`, crate packaging dry-run, mkdocs strict build, and VS Code extension e2e. Expect 30+ minutes on a cold build.
 
 ## Pull requests
 

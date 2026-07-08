@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import { focusRelay } from "../focus/focusRelay";
 import { runReasoner } from "../lsp/client";
 import { RunReasonerResult } from "../lsp/protocol";
 import {
@@ -98,6 +99,11 @@ export class ReasonerPanel {
         return;
       }
       this.lastResult = result;
+      focusRelay.setReasoningState({
+        profile: result.profile_used ?? profile,
+        unsatisfiable: result.unsatisfiable ?? [],
+        lastRunAt: Date.now(),
+      });
       this.postToWebview({
         command: "result",
         runId,

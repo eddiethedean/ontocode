@@ -18,7 +18,9 @@ import {
 } from "../components/ui";
 import { PreviewApplyBar } from "../components/PreviewApplyBar";
 import { PropertyChainEditor } from "./PropertyChainEditor";
-import { getVsCodeApi } from "../vscodeApi";
+import { useWorkspaceHost } from "../context/HostContext";
+import { postFocusToHost } from "../hooks/useFocusSync";
+import { useWorkspaceStore } from "../store";
 import {
   EntityDetailPayload,
   HostMessage,
@@ -26,8 +28,12 @@ import {
   PatchOp,
   PropertyCharacteristics,
 } from "../messages";
+import type { WorkspaceProps } from "../workspaces/types";
 
-export function EntityInspectorPanel(): JSX.Element {
+export function EntityInspectorPanel(_props?: WorkspaceProps): JSX.Element {
+  const host = useWorkspaceHost();
+  const setFocus = useWorkspaceStore((s) => s.setFocus);
+  const focusIri = useWorkspaceStore((s) => s.inspector.entityIri);
   const [detail, setDetail] = useState<EntityDetailPayload | null>(null);
   const [classOptions, setClassOptions] = useState<string[]>([]);
   const [preview, setPreview] = useState("");
@@ -44,16 +50,23 @@ export function EntityInspectorPanel(): JSX.Element {
   const [oboParent, setOboParent] = useState("");
   const [editPreview, setEditPreview] = useState("");
 
-  const openEntity = useCallback((iri: string) => {
-    getVsCodeApi().postMessage({ type: "openEntity", iri });
-  }, []);
+  const openEntity = useCallback(
+    (iri: string) => {
+      postFocusToHost(host, { kind: "entity", id: iri, source: "inspector" });
+      host.postToCore({ type: "openEntity", iri });
+    },
+    [host]
+  );
 
-  const apply = useCallback((patches: PatchOp[], previewOnly: boolean) => {
-    getVsCodeApi().postMessage({ type: "applyPatch", patches, previewOnly });
-  }, []);
+  const apply = useCallback(
+    (patches: PatchOp[], previewOnly: boolean) => {
+      host.postToCore({ type: "applyPatch", patches, previewOnly });
+    },
+    [host]
+  );
 
   useEffect(() => {
-    getVsCodeApi().postMessage({ type: "ready", panel: "inspector" });
+    host.postToCore({ type: "ready", panel: "inspector" });
 
     const handler = (event: MessageEvent): void => {
       if (!isHostMessage(event.data)) {
@@ -65,6 +78,11 @@ export function EntityInspectorPanel(): JSX.Element {
         setClassOptions(msg.classOptions);
         setPreview("");
         setEditPreview("");
+        setFocus({
+          kind: "entity",
+          id: msg.detail.entity.iri,
+          source: "inspector",
+        });
       } else if (msg.type === "preview") {
         setPreview(msg.text);
         setEditPreview(msg.text);
@@ -75,12 +93,12 @@ export function EntityInspectorPanel(): JSX.Element {
     };
     window.addEventListener("message", handler);
     return () => window.removeEventListener("message", handler);
-  }, []);
+  }, [host, setFocus]);
 
   if (!detail) {
     return (
       <Panel>
-        <LoadingState label="Loading entity…" />
+        <LoadingState label={focusIri ? `Loading ${shortLabel(focusIri)}…` : "Loading entity…"} />
       </Panel>
     );
   }
@@ -175,7 +193,7 @@ export function EntityInspectorPanel(): JSX.Element {
               type="button"
               className="secondary"
               onClick={() =>
-                getVsCodeApi().postMessage({ type: "addManchesterAxiom" })
+                host.postToCore({ type: "addManchesterAxiom" })
               }
             >
               Add Manchester axiom
@@ -200,7 +218,7 @@ export function EntityInspectorPanel(): JSX.Element {
                           type="button"
                           className="secondary"
                           onClick={() =>
-                            getVsCodeApi().postMessage({
+                            host.postToCore({
                               type: "openManchester",
                               axiom: {
                                 kind: a.kind,
@@ -770,21 +788,21 @@ export function EntityInspectorPanel(): JSX.Element {
       <StickyActions>
         <button
           type="button"
-          onClick={() => getVsCodeApi().postMessage({ type: "jumpToSource" })}
+          onClick={() => host.postToCore({ type: "jumpToSource" })}
         >
           Jump to Source
         </button>
         <button
           type="button"
           className="secondary"
-          onClick={() => getVsCodeApi().postMessage({ type: "findUsages" })}
+          onClick={() => host.postToCore({ type: "findUsages" })}
         >
           Find Usages
         </button>
         <button
           type="button"
           className="secondary"
-          onClick={() => getVsCodeApi().postMessage({ type: "renameIri" })}
+          onClick={() => host.postToCore({ type: "renameIri" })}
         >
           Rename IRI
         </button>
@@ -792,7 +810,7 @@ export function EntityInspectorPanel(): JSX.Element {
           type="button"
           className="secondary"
           onClick={() =>
-            getVsCodeApi().postMessage({
+            host.postToCore({
               type: "openGraph",
               rootIri: entity.iri,
             })

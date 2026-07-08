@@ -6,10 +6,28 @@ mod support;
 
 use ontocore_catalog::IndexBuilder;
 use ontocore_plugin_builtins::load_plugin_host;
-use std::path::{Path, PathBuf};
+use std::path::{Component, Path, PathBuf};
 
 fn is_within(root: &Path, candidate: &Path) -> bool {
     candidate.starts_with(root)
+}
+
+/// Lexically normalize a path by resolving `.` and `..` segments without touching the filesystem.
+///
+/// This is intentionally *not* `canonicalize()`: security checks must work even when the target
+/// path doesn't exist or is not readable on the current machine (e.g. CI runners).
+fn normalize_lexical(path: &Path) -> PathBuf {
+    let mut out = PathBuf::new();
+    for c in path.components() {
+        match c {
+            Component::CurDir => {}
+            Component::ParentDir => {
+                out.pop();
+            }
+            other => out.push(other.as_os_str()),
+        }
+    }
+    out
 }
 
 #[test]
@@ -66,7 +84,7 @@ diagnostics = true
     let file = result.first().expect("one diagnostic").file.display().to_string();
 
     let root = workspace.canonicalize().expect("canonical root");
-    let resolved = PathBuf::from(&file).canonicalize().unwrap_or_else(|_| PathBuf::from(&file));
+    let resolved = normalize_lexical(Path::new(&file));
 
     assert!(
         !is_within(&root, &resolved),

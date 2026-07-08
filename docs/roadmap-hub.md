@@ -43,4 +43,4 @@ flowchart TB
 
 ## Current release
 
-**v0.14.0** — see [Migration v0.13 → v0.14](migration/v0.14.md) and [Changelog](changelog.md).
+**v0.15.0** — see [Migration v0.14 → v0.15](migration/v0.15.md) and [Changelog](changelog.md).

@@ -6,7 +6,7 @@ hide:
 
 <div class="oc-hero" markdown>
 
-<p class="oc-hero-kicker">OntoCode documentation · v0.14.0</p>
+<p class="oc-hero-kicker">OntoCode documentation · v0.15.0</p>
 
 <p class="oc-hero-title">Ontology IDE for VS Code</p>
 
@@ -28,7 +28,7 @@ OntoCode is a modern ontology IDE for VS Code, powered by <strong>OntoCore</stro
 
 <div class="oc-callout" markdown>
 
-**What's new in v0.14?** Plugin host MVP — workspace manifests, reference validators/exporters, `ontocore plugins`, LSP `listPlugins`/`runPlugin`, owlmake workflow scaffold — [Migration v0.13 → v0.14](migration/v0.14.md).
+**What's new in v0.15?** Plugin API, UI views, and explanation workflows — [Migration v0.14 → v0.15](migration/v0.15.md).
 
 **Not sure where to begin?** Pick a path:
 

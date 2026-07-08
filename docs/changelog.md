@@ -4,6 +4,10 @@ Canonical source: [CHANGELOG.md on GitHub](https://github.com/eddiethedean/ontoc
 
 Migration guides: [Migration index](migration/README.md)
 
+## [0.15.0] - Unreleased
+
+**v0.15.0** — See the repository changelog on GitHub for release notes.
+
 ## [0.14.0] - 2026-07-09
 
 **v0.14.0** — Plugin host MVP: workspace manifests, reference naming validator and Markdown exporter, SHACL scaffold, `ontocore plugins list/run`, validate/docs hooks, LSP `listPlugins`/`runPlugin`, OntoCode workflow scaffold, capability registry inspector cards. See [CHANGELOG.md](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) and [migration/v0.14.md](migration/v0.14.md).

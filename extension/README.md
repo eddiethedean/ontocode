@@ -168,7 +168,7 @@ More detail: [Installation & troubleshooting](https://ontocode-vs.readthedocs.io
 
 ---
 
-## What's included in v0.14.0
+## What's included in v0.15.0
 
 **Shipped:** explorer; **React** entity inspector (panel routing fix), graph panels, Query Workbench, Manchester editor, Refactor Preview, **Manage Imports**, and **Semantic Diff** panel; workspace refactor (rename IRI, migrate namespace, move, extract); EL/RL/RDFS/DL/auto reasoner (OntoLogos 1.x); **Turtle and OBO write-back** (engine v0.12; inspector v0.13); diagnostics with **quick fixes**; Turtle **completion**; LSP navigation (hover, go-to-definition, find references, rename); multi-root workspaces; optional index disk cache; **plugin host MVP** (`ontocore plugins`, workflow scaffold, inspector plugin cards); [Open VSX](https://open-vsx.org/extension/ontocode/ontocode) for Cursor.
 

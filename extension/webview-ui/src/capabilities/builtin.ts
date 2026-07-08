@@ -5,7 +5,7 @@ import type { DiagnosticsProvider, QueryProvider, ReasoningProvider } from "./ty
 export function registerBuiltinProviders(): void {
   const ontocore: ReasoningProvider & QueryProvider & DiagnosticsProvider = {
     id: "ontocore",
-    version: "0.14.0",
+    version: "0.15.0",
     capabilities: ["reasoning", "query", "diagnostics"],
     async classify() {
       return { delegated: true, provider: "ontocore" };

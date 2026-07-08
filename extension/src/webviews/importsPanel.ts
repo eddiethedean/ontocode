@@ -3,6 +3,7 @@ import * as vscode from "vscode";
 import { applyAxiomPatch, getCatalogSnapshot } from "../lsp/client";
 import {
   hasPatchFailureDiagnostics,
+  isPatchFullySynced,
   patchFailureMessage,
 } from "../lsp/patchFeedback";
 import { Entity, OntologyDocument, PatchOp } from "../lsp/protocol";
@@ -210,6 +211,9 @@ export class ImportsPanel {
       }
       if (!result.applied) {
         void vscode.window.showErrorMessage(patchFailureMessage(result));
+        return;
+      }
+      if (!isPatchFullySynced(result)) {
         return;
       }
       if (result.reindex_warning) {

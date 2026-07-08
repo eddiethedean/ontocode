@@ -314,6 +314,12 @@ export interface ApplyPatchResult {
   workspace_edit?: LspWorkspaceEdit;
 }
 
+/** Client-side result after optional VS Code workspace edit sync. */
+export interface ApplyAxiomPatchClientResult extends ApplyPatchResult {
+  /** False when disk write succeeded but the user cancelled editor sync. */
+  editor_synced: boolean;
+}
+
 export interface ApplyAxiomPatchParams {
   document_uri: string;
   patches: PatchOp[];

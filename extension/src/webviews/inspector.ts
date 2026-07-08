@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import { applyAxiomPatch, getEntity } from "../lsp/client";
 import {
   hasPatchFailureDiagnostics,
+  isPatchFullySynced,
   patchFailureMessage,
 } from "../lsp/patchFeedback";
 import { EntityDetail, PatchOp } from "../lsp/protocol";
@@ -225,6 +226,9 @@ export class EntityInspectorPanel {
       }
       if (!result.applied) {
         void vscode.window.showErrorMessage(patchFailureMessage(result));
+        return;
+      }
+      if (!isPatchFullySynced(result)) {
         return;
       }
       const deleted = patches.some((p) => p.op === "delete_entity");

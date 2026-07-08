@@ -23,6 +23,7 @@ import {
   assertSemanticDiffResult,
 } from "./protocolGuards";
 import {
+  ApplyAxiomPatchClientResult,
   ApplyAxiomPatchParams,
   ApplyPatchResult,
   CatalogSnapshot,
@@ -214,7 +215,7 @@ export async function getEntity(iri: string): Promise<GetEntityResult> {
 
 export async function applyAxiomPatch(
   params: ApplyAxiomPatchParams
-): Promise<ApplyPatchResult> {
+): Promise<ApplyAxiomPatchClientResult> {
   const result = await ontcoreRequest<unknown>(
     "ontocore/applyAxiomPatch",
     params
@@ -227,9 +228,11 @@ export async function applyAxiomPatch(
       void vscode.window.showWarningMessage(
         "OntoCode: changes written to disk but editor sync was cancelled"
       );
+      return { ...patch, editor_synced: false };
     }
+    return { ...patch, editor_synced: true };
   }
-  return patch;
+  return { ...patch, editor_synced: true };
 }
 
 type SqlTableSchema = {

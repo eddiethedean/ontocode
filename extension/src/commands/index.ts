@@ -5,7 +5,7 @@ import {
   getEntity,
   indexWorkspace,
 } from "../lsp/client";
-import { patchFailureMessage } from "../lsp/patchFeedback";
+import { isPatchFullySynced, patchFailureMessage } from "../lsp/patchFeedback";
 import { PatchEntityKind, PatchOp } from "../lsp/protocol";
 import { EntityInspectorPanel } from "../webviews/inspector";
 import { focusRelay } from "../focus/focusRelay";
@@ -213,6 +213,9 @@ export function registerCommands(
         });
         if (!result.applied) {
           void vscode.window.showErrorMessage(patchFailureMessage(result));
+          return;
+        }
+        if (!isPatchFullySynced(result)) {
           return;
         }
         await refreshExplorer(providers);
@@ -580,6 +583,9 @@ async function createEntity(
     });
     if (!result.applied) {
       void vscode.window.showErrorMessage(patchFailureMessage(result));
+      return;
+    }
+    if (!isPatchFullySynced(result)) {
       return;
     }
     await refreshExplorer(providers);

@@ -121,9 +121,8 @@ diagnostics = true
     let catalog =
         IndexBuilder::new().workspace(workspace.clone()).build().expect("index workspace");
     let host = load_plugin_host(&workspace).expect("load plugin host");
-    let result = host
-        .run_validate_plugin("org.example.evilabs", &catalog)
-        .expect("run validator plugin");
+    let result =
+        host.run_validate_plugin("org.example.evilabs", &catalog).expect("run validator plugin");
     let file = &result.first().expect("one diagnostic").file;
 
     let root = workspace.canonicalize().expect("canonical root");

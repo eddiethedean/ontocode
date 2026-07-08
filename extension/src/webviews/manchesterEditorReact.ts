@@ -30,6 +30,7 @@ export class ManchesterEditorPanel {
   private host: PanelHost;
   private options: ManchesterEditorOptions;
   private activeValidateSeq = 0;
+  private bootstrapGeneration = 0;
 
   private constructor(host: PanelHost, options: ManchesterEditorOptions) {
     this.host = host;
@@ -45,6 +46,9 @@ export class ManchesterEditorPanel {
   ): Promise<ManchesterEditorPanel> {
     if (ManchesterEditorPanel.current) {
       ManchesterEditorPanel.current.options = options;
+      ManchesterEditorPanel.current.host.panel.title = `Manchester: ${
+        options.iri.split(/[#/]/).pop() ?? "entity"
+      }`;
       ManchesterEditorPanel.current.host.panel.reveal(vscode.ViewColumn.Beside);
       await ManchesterEditorPanel.current.bootstrap();
       return ManchesterEditorPanel.current;
@@ -68,6 +72,7 @@ export class ManchesterEditorPanel {
   }
 
   private async bootstrap(): Promise<void> {
+    const generation = ++this.bootstrapGeneration;
     const axiomKind = this.options.axiomKind ?? "sub_class_of";
     const expression = this.options.initialExpression ?? "";
     let completions = {
@@ -84,10 +89,16 @@ export class ManchesterEditorPanel {
           entity_iri: this.options.iri,
           document_uri: this.options.documentUri,
         });
+        if (generation !== this.bootstrapGeneration) {
+          return;
+        }
         completions = parsed.completions;
       } catch {
         // optional
       }
+    }
+    if (generation !== this.bootstrapGeneration) {
+      return;
     }
     this.host.postMessage({
       type: "manchesterInit",

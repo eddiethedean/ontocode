@@ -1,4 +1,5 @@
 use crate::error::{ReasonerError, Result};
+use crate::hierarchy::asserted_hierarchy_from_ontology;
 use ontocore_catalog::ClassHierarchy;
 use ontocore_core::{OntologyFile, OntologyFormat, WorkspaceScanner};
 use ontocore_parser::{parse_ontology_file, parse_ontology_text, serialize_quads_turtle};
@@ -44,7 +45,7 @@ impl WorkspaceInputLoader {
         self
     }
 
-    pub fn load(&self, asserted_hierarchy: ClassHierarchy) -> Result<ReasonerInput> {
+    pub fn load(&self) -> Result<ReasonerInput> {
         let scan_roots =
             ontocore_catalog::IndexBuilder::effective_scan_roots(&self.workspace, &self.scan_roots);
         let mut files: Vec<OntologyFile> = Vec::new();
@@ -92,6 +93,8 @@ impl WorkspaceInputLoader {
             let loaded = load_workspace_file(path, format, Some(text), &file_stub)?;
             merge_ontology(&mut ontology, loaded)?;
         }
+
+        let asserted_hierarchy = asserted_hierarchy_from_ontology(&ontology);
 
         Ok(ReasonerInput {
             workspace: self.workspace.clone(),
@@ -208,7 +211,8 @@ fn merge_ontology(target: &mut Ontology, source: Ontology) -> Result<()> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use ontocore_catalog::ClassHierarchy;
+    use crate::{classify, ReasonerId};
+    use ontocore_catalog::IndexBuilder;
     use std::fs;
 
     #[test]
@@ -221,9 +225,7 @@ mod tests {
         )
         .unwrap();
 
-        let disk_input = WorkspaceInputLoader::new(dir.path())
-            .load(ClassHierarchy::default())
-            .expect("disk load");
+        let disk_input = WorkspaceInputLoader::new(dir.path()).load().expect("disk load");
 
         let mut overrides = HashMap::new();
         overrides.insert(
@@ -233,13 +235,94 @@ mod tests {
         );
         let override_input = WorkspaceInputLoader::new(dir.path())
             .document_overrides(overrides)
-            .load(ClassHierarchy::default())
+            .load()
             .expect("override load");
 
         assert_ne!(
             disk_input.content_hash, override_input.content_hash,
             "open-buffer overrides must change reasoner content_hash"
         );
+    }
+
+    #[test]
+    fn buffer_subclass_axiom_not_reported_as_new_inference() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("ex.ttl");
+        fs::write(
+            &path,
+            "@prefix ex: <http://ex#> .\n\
+             @prefix owl: <http://www.w3.org/2002/07/owl#> .\n\
+             @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n\
+             ex:A a owl:Class .\n\
+             ex:C a owl:Class ; rdfs:subClassOf ex:A .\n",
+        )
+        .unwrap();
+
+        let catalog = IndexBuilder::new().workspace(dir.path()).build().expect("index");
+        assert!(
+            !catalog.class_hierarchy().edges.iter().any(|e| e.child.ends_with("D")),
+            "stale catalog must not yet include ex:D"
+        );
+
+        let mut overrides = HashMap::new();
+        overrides.insert(
+            path,
+            "@prefix ex: <http://ex#> .\n\
+             @prefix owl: <http://www.w3.org/2002/07/owl#> .\n\
+             @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n\
+             ex:A a owl:Class .\n\
+             ex:C a owl:Class ; rdfs:subClassOf ex:A .\n\
+             ex:D a owl:Class ; rdfs:subClassOf ex:C .\n"
+                .to_string(),
+        );
+
+        let input = WorkspaceInputLoader::new(dir.path())
+            .document_overrides(overrides)
+            .load()
+            .expect("override load");
+
+        assert!(
+            input.asserted_hierarchy.edges.iter().any(|e| e.child.ends_with("D") && e.parent.ends_with("C")),
+            "asserted hierarchy must include buffer subclass axiom D ⊑ C"
+        );
+
+        let result = classify(ReasonerId::Rdfs, &input, false).expect("classify");
+        assert!(
+            !result.new_inferences.iter().any(|e| e.child.ends_with("D") && e.parent.ends_with("C")),
+            "buffer-authored D ⊑ C must not appear in new_inferences"
+        );
+    }
+
+    #[test]
+    fn asserted_hierarchy_matches_catalog_without_overrides() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("ex.ttl");
+        fs::write(
+            &path,
+            "@prefix ex: <http://ex#> .\n\
+             @prefix owl: <http://www.w3.org/2002/07/owl#> .\n\
+             @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n\
+             ex:A a owl:Class .\n\
+             ex:C a owl:Class ; rdfs:subClassOf ex:A .\n",
+        )
+        .unwrap();
+
+        let catalog = IndexBuilder::new().workspace(dir.path()).build().expect("index");
+        let input = WorkspaceInputLoader::new(dir.path()).load().expect("load");
+
+        let catalog_edges: std::collections::BTreeSet<_> = catalog
+            .class_hierarchy()
+            .edges
+            .iter()
+            .map(|e| (e.child.clone(), e.parent.clone()))
+            .collect();
+        let input_edges: std::collections::BTreeSet<_> = input
+            .asserted_hierarchy
+            .edges
+            .iter()
+            .map(|e| (e.child.clone(), e.parent.clone()))
+            .collect();
+        assert_eq!(catalog_edges, input_edges);
     }
 
     #[test]
@@ -259,9 +342,7 @@ name: parent\n",
         )
         .unwrap();
 
-        let input = WorkspaceInputLoader::new(dir.path())
-            .load(ClassHierarchy::default())
-            .expect("OBO workspace should load for reasoner");
+        let input = WorkspaceInputLoader::new(dir.path()).load().expect("OBO workspace should load for reasoner");
         let triples = core_to_triples_all(&input.ontology).expect("triples");
         assert!(!triples.is_empty(), "OBO-derived ontology should contain triples");
     }

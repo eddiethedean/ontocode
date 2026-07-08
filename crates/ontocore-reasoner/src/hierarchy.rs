@@ -1,5 +1,29 @@
-use ontocore_catalog::ClassHierarchy;
+use ontocore_catalog::{ClassHierarchy, SubclassEdge};
 use ontologos_core::{EntityKind, Ontology};
+
+/// Asserted subclass edges taken from the ontology actually loaded for reasoning
+/// (including open-buffer overrides), not from a separately indexed catalog.
+pub fn asserted_hierarchy_from_ontology(ontology: &Ontology) -> ClassHierarchy {
+    let mut edges = Vec::new();
+    for (id, entity) in ontology.entities().iter() {
+        if entity.kind != EntityKind::Class {
+            continue;
+        }
+        let Ok(child) = ontology.resolve_iri(entity.iri).map(|s| s.to_string()) else {
+            continue;
+        };
+        for &parent_id in ontology.direct_superclasses(id) {
+            let Ok(parent_entity) = ontology.entity(parent_id) else {
+                continue;
+            };
+            let Ok(parent) = ontology.resolve_iri(parent_entity.iri).map(|s| s.to_string()) else {
+                continue;
+            };
+            edges.push(SubclassEdge { child: child.clone(), parent });
+        }
+    }
+    crate::result::hierarchy_from_edges(edges)
+}
 
 pub fn subclass_edges_from_ontology(
     ontology: &Ontology,

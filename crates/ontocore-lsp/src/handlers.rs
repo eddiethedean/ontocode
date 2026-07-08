@@ -308,10 +308,10 @@ fn enrich_diff_with_reasoner(
     }
 
     let base_input = base_loader
-        .load(base_catalog.class_hierarchy())
+        .load()
         .map_err(|e| LspErrorPayload::reasoner_failed(e.to_string()))?;
     let head_input = head_loader
-        .load(head_catalog.class_hierarchy())
+        .load()
         .map_err(|e| LspErrorPayload::reasoner_failed(e.to_string()))?;
     let base_cls = classify(profile, &base_input, true)
         .map_err(|e| LspErrorPayload::reasoner_failed(e.to_string()))?;
@@ -829,14 +829,11 @@ fn load_reasoner_input(
         .indexed_workspace()
         .or_else(|| state.workspace_root())
         .ok_or_else(LspErrorPayload::not_indexed)?;
-    let asserted = state
-        .with_catalog(|catalog| catalog.class_hierarchy())
-        .ok_or_else(LspErrorPayload::not_indexed)?;
     let overrides = state.open_documents_for_reasoner();
     WorkspaceInputLoader::new(&workspace)
         .scan_roots(roots)
         .document_overrides(overrides)
-        .load(asserted)
+        .load()
         .map_err(|e| LspErrorPayload::reasoner_failed(e.to_string()))
 }
 

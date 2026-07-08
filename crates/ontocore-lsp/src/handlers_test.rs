@@ -40,6 +40,43 @@ fn fixture_ttl_uri() -> Uri {
 }
 
 #[test]
+fn index_workspace_respects_requested_root_in_multi_root() {
+    let state = ServerState::new();
+    let root_a = tempfile::tempdir().unwrap();
+    let root_b = tempfile::tempdir().unwrap();
+
+    let a_ttl = root_a.path().join("a.ttl");
+    std::fs::write(
+        &a_ttl,
+        "@prefix exa: <http://example.org/a#> .\n@prefix owl: <http://www.w3.org/2002/07/owl#> .\nexa:AClass a owl:Class .\n",
+    )
+    .unwrap();
+
+    let b_ttl = root_b.path().join("b.ttl");
+    std::fs::write(
+        &b_ttl,
+        "@prefix exb: <http://example.org/b#> .\n@prefix owl: <http://www.w3.org/2002/07/owl#> .\nexb:BClass a owl:Class .\n",
+    )
+    .unwrap();
+
+    state
+        .set_workspace_roots(vec![root_a.path().to_path_buf(), root_b.path().to_path_buf()])
+        .expect("set workspace");
+
+    state.index_workspace(root_b.path().to_path_buf()).expect("index root_b");
+
+    let b =
+        handle_get_entity(&state, GetEntityParams { iri: "http://example.org/b#BClass".into() })
+            .expect("getEntity B");
+    assert_eq!(b.detail.entity.short_name, "BClass");
+
+    let a =
+        handle_get_entity(&state, GetEntityParams { iri: "http://example.org/a#AClass".into() })
+            .expect("getEntity A");
+    assert_eq!(a.detail.entity.short_name, "AClass");
+}
+
+#[test]
 fn get_catalog_snapshot_before_index_returns_not_indexed() {
     let state = ServerState::new();
     let err = handle_get_catalog_snapshot(&state).unwrap_err();

@@ -24,10 +24,7 @@ name: parent\n",
 #[test]
 fn el_classify_obo_workspace() {
     let (_dir, workspace) = obo_workspace();
-    let catalog =
-        ontocore_catalog::IndexBuilder::new().workspace(&workspace).build().expect("index");
-    let input =
-        WorkspaceInputLoader::new(&workspace).load().expect("load");
+    let input = WorkspaceInputLoader::new(&workspace).load().expect("load");
     let result = classify(ReasonerId::El, &input, false).expect("classify");
 
     assert_eq!(result.profile_used, "el");

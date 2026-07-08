@@ -17,10 +17,7 @@ fn unsat_workspace() -> (tempfile::TempDir, PathBuf) {
 #[test]
 fn el_classify_detects_unsatisfiable_fixture() {
     let (_dir, workspace) = unsat_workspace();
-    let catalog =
-        ontocore_catalog::IndexBuilder::new().workspace(&workspace).build().expect("index");
-    let input =
-        WorkspaceInputLoader::new(&workspace).load().expect("load");
+    let input = WorkspaceInputLoader::new(&workspace).load().expect("load");
     let result = classify(ReasonerId::El, &input, false).expect("classify");
 
     assert_eq!(result.profile_used, "el");

@@ -686,12 +686,8 @@ fn validate_property_chain_members(
     properties: &[String],
     namespaces: &BTreeMap<String, String>,
 ) -> Result<()> {
-    const INVALID_TYPES: &[&str] = &[
-        "owl:Class",
-        "owl:NamedIndividual",
-        "owl:DatatypeProperty",
-        "owl:AnnotationProperty",
-    ];
+    const INVALID_TYPES: &[&str] =
+        &["owl:Class", "owl:NamedIndividual", "owl:DatatypeProperty", "owl:AnnotationProperty"];
     for iri in properties {
         for owl_type in INVALID_TYPES {
             if entity_declared_as(text, iri, owl_type, namespaces) {

@@ -307,12 +307,10 @@ fn enrich_diff_with_reasoner(
             head_loader.scan_roots(roots).document_overrides(state.open_documents_for_reasoner());
     }
 
-    let base_input = base_loader
-        .load()
-        .map_err(|e| LspErrorPayload::reasoner_failed(e.to_string()))?;
-    let head_input = head_loader
-        .load()
-        .map_err(|e| LspErrorPayload::reasoner_failed(e.to_string()))?;
+    let base_input =
+        base_loader.load().map_err(|e| LspErrorPayload::reasoner_failed(e.to_string()))?;
+    let head_input =
+        head_loader.load().map_err(|e| LspErrorPayload::reasoner_failed(e.to_string()))?;
     let base_cls = classify(profile, &base_input, true)
         .map_err(|e| LspErrorPayload::reasoner_failed(e.to_string()))?;
     let head_cls = classify(profile, &head_input, true)

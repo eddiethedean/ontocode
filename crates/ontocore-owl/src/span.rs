@@ -324,11 +324,7 @@ pub fn is_in_comment_or_string(text: &str, byte_offset: usize) -> bool {
         if let Some(kind) = string_kind {
             match kind {
                 TurtleStringKind::ShortDouble | TurtleStringKind::ShortSingle => {
-                    let quote = if kind == TurtleStringKind::ShortDouble {
-                        b'"'
-                    } else {
-                        b'\''
-                    };
+                    let quote = if kind == TurtleStringKind::ShortDouble { b'"' } else { b'\'' };
                     if escape {
                         escape = false;
                     } else if b == b'\\' {

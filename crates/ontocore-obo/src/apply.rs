@@ -221,40 +221,29 @@ fn remove_lines_with_prefix(text: &mut String, term_id: &str, prefix: &str) -> R
 fn remove_is_a_line(text: &mut String, term_id: &str, parent_id: &str) -> Result<()> {
     let parent_id = parent_id.to_string();
     let not_found = format!("is_a parent not found: {parent_id}");
-    remove_lines_where(
-        text,
-        term_id,
-        move |l| is_is_a_parent_line(l, &parent_id),
-        Some(&not_found),
-    )
+    remove_lines_where(text, term_id, move |l| is_is_a_parent_line(l, &parent_id), Some(&not_found))
 }
 
 fn remove_xref_line(text: &mut String, term_id: &str, xref: &str) -> Result<()> {
     let xref = xref.to_string();
     let not_found = format!("xref not found: {xref}");
-    remove_lines_where(
-        text,
-        term_id,
-        move |l| is_xref_line(l, &xref),
-        Some(&not_found),
-    )
+    remove_lines_where(text, term_id, move |l| is_xref_line(l, &xref), Some(&not_found))
 }
 
 fn remove_synonym_line(text: &mut String, term_id: &str, value: &str) -> Result<()> {
     let value = value.to_string();
     let not_found = format!("synonym not found: {value}");
-    remove_lines_where(
-        text,
-        term_id,
-        move |l| is_synonym_value_line(l, &value),
-        Some(&not_found),
-    )
+    remove_lines_where(text, term_id, move |l| is_synonym_value_line(l, &value), Some(&not_found))
 }
 
 fn obo_field_token(rest: &str) -> Option<&str> {
     let end = rest.find(|c: char| c.is_whitespace() || c == '!' || c == '{').unwrap_or(rest.len());
     let token = rest[..end].trim();
-    if token.is_empty() { None } else { Some(token) }
+    if token.is_empty() {
+        None
+    } else {
+        Some(token)
+    }
 }
 
 fn is_is_a_parent_line(line: &str, parent_id: &str) -> bool {

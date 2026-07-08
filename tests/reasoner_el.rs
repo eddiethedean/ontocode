@@ -17,10 +17,7 @@ fn el_only_workspace() -> (tempfile::TempDir, PathBuf) {
 #[test]
 fn el_classify_el_fixture_workspace() {
     let (_dir, workspace) = el_only_workspace();
-    let catalog =
-        ontocore_catalog::IndexBuilder::new().workspace(&workspace).build().expect("index");
-    let input =
-        WorkspaceInputLoader::new(&workspace).load().expect("load");
+    let input = WorkspaceInputLoader::new(&workspace).load().expect("load");
     let result = classify(ReasonerId::El, &input, false).expect("classify");
 
     assert_eq!(result.profile_used, "el");
@@ -30,10 +27,7 @@ fn el_classify_el_fixture_workspace() {
 #[test]
 fn dl_profile_classifies_el_fixture_workspace() {
     let (_dir, workspace) = el_only_workspace();
-    let catalog =
-        ontocore_catalog::IndexBuilder::new().workspace(&workspace).build().expect("index");
-    let input =
-        WorkspaceInputLoader::new(&workspace).load().expect("load");
+    let input = WorkspaceInputLoader::new(&workspace).load().expect("load");
     let result = classify(ReasonerId::Dl, &input, false).expect("classify");
 
     assert_eq!(result.profile_used, "dl");
@@ -43,10 +37,7 @@ fn dl_profile_classifies_el_fixture_workspace() {
 #[test]
 fn auto_profile_classifies_el_fixture_workspace() {
     let (_dir, workspace) = el_only_workspace();
-    let catalog =
-        ontocore_catalog::IndexBuilder::new().workspace(&workspace).build().expect("index");
-    let input =
-        WorkspaceInputLoader::new(&workspace).load().expect("load");
+    let input = WorkspaceInputLoader::new(&workspace).load().expect("load");
     let result = classify(ReasonerId::Auto, &input, false).expect("classify");
 
     assert!(

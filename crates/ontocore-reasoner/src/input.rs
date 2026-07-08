@@ -282,13 +282,20 @@ mod tests {
             .expect("override load");
 
         assert!(
-            input.asserted_hierarchy.edges.iter().any(|e| e.child.ends_with("D") && e.parent.ends_with("C")),
+            input
+                .asserted_hierarchy
+                .edges
+                .iter()
+                .any(|e| e.child.ends_with("D") && e.parent.ends_with("C")),
             "asserted hierarchy must include buffer subclass axiom D ⊑ C"
         );
 
         let result = classify(ReasonerId::Rdfs, &input, false).expect("classify");
         assert!(
-            !result.new_inferences.iter().any(|e| e.child.ends_with("D") && e.parent.ends_with("C")),
+            !result
+                .new_inferences
+                .iter()
+                .any(|e| e.child.ends_with("D") && e.parent.ends_with("C")),
             "buffer-authored D ⊑ C must not appear in new_inferences"
         );
     }
@@ -342,7 +349,9 @@ name: parent\n",
         )
         .unwrap();
 
-        let input = WorkspaceInputLoader::new(dir.path()).load().expect("OBO workspace should load for reasoner");
+        let input = WorkspaceInputLoader::new(dir.path())
+            .load()
+            .expect("OBO workspace should load for reasoner");
         let triples = core_to_triples_all(&input.ontology).expect("triples");
         assert!(!triples.is_empty(), "OBO-derived ontology should contain triples");
     }

@@ -134,9 +134,8 @@ fn worktree_ontology_paths(repo_path: &Path) -> Result<Vec<PathBuf>> {
         push_worktree_path(&mut seen, &mut paths, path)?;
     }
 
-    let scanned = WorkspaceScanner::new(repo_path)
-        .scan()
-        .map_err(|e| DiffError::Message(e.to_string()))?;
+    let scanned =
+        WorkspaceScanner::new(repo_path).scan().map_err(|e| DiffError::Message(e.to_string()))?;
     for file in scanned {
         push_worktree_path(&mut seen, &mut paths, file.path)?;
     }
@@ -344,25 +343,17 @@ mod tests {
 
         let repo = Repository::init(root).expect("git init");
         let mut index = repo.index().expect("index");
-        index
-            .add_path(Path::new("tracked.ttl"))
-            .expect("index add tracked");
+        index.add_path(Path::new("tracked.ttl")).expect("index add tracked");
         index.write().expect("index write");
         let tree_id = index.write_tree().expect("write tree");
         let tree = repo.find_tree(tree_id).expect("find tree");
         let sig = Signature::now("OntoCode Test", "test@example.com").expect("signature");
-        repo.commit(Some("HEAD"), &sig, &sig, "init", &tree, &[])
-            .expect("commit");
+        repo.commit(Some("HEAD"), &sig, &sig, "init", &tree, &[]).expect("commit");
 
         std::fs::write(root.join("new.ttl"), untracked_ttl).unwrap();
 
         let catalog = catalog_at_worktree(root).expect("worktree catalog");
-        let iris: Vec<_> = catalog
-            .data()
-            .entities
-            .iter()
-            .map(|e| e.iri.as_str())
-            .collect();
+        let iris: Vec<_> = catalog.data().entities.iter().map(|e| e.iri.as_str()).collect();
         assert!(
             iris.iter().any(|iri| iri.contains("Tracked")),
             "expected tracked entity, got {iris:?}"

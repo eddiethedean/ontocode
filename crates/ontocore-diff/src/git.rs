@@ -4,8 +4,9 @@ use git2::{ObjectType, Oid, Repository, TreeWalkMode};
 use ontocore_catalog::{IndexBuilder, OntologyCatalog};
 use ontocore_core::{
     discover_git_repo_root, ensure_extract_path_within, limits::MAX_FILE_BYTES,
-    limits::MAX_SCAN_FILES, path_jail::path_has_parent_escape,
+    limits::MAX_SCAN_FILES, path_jail::path_has_parent_escape, WorkspaceScanner,
 };
+use std::collections::HashSet;
 use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex};
 
@@ -114,14 +115,50 @@ pub fn catalog_at_git_ref(repo_path: &Path, git_ref: &str) -> Result<OntologyCat
     checkout_catalog(&repo, git_ref)
 }
 
-/// Build catalog from git-tracked ontology files in the working tree (aligned with git-side diffs).
+/// Build catalog from ontology files in the working tree: git-indexed paths plus
+/// untracked workspace files (respecting path jail and scan limits).
 pub fn catalog_at_worktree(repo_path: &Path) -> Result<OntologyCatalog> {
-    let tracked = list_git_tracked_ontology_paths(repo_path)?;
+    let paths = worktree_ontology_paths(repo_path)?;
     let mut builder = IndexBuilder::new().workspace(repo_path);
-    if !tracked.is_empty() {
-        builder = builder.only_paths(tracked);
+    if !paths.is_empty() {
+        builder = builder.only_paths(paths);
     }
     builder.build().map_err(DiffError::from)
+}
+
+fn worktree_ontology_paths(repo_path: &Path) -> Result<Vec<PathBuf>> {
+    let mut seen = HashSet::new();
+    let mut paths = Vec::new();
+
+    for path in list_git_tracked_ontology_paths(repo_path)? {
+        push_worktree_path(&mut seen, &mut paths, path)?;
+    }
+
+    let scanned = WorkspaceScanner::new(repo_path)
+        .scan()
+        .map_err(|e| DiffError::Message(e.to_string()))?;
+    for file in scanned {
+        push_worktree_path(&mut seen, &mut paths, file.path)?;
+    }
+
+    Ok(paths)
+}
+
+fn push_worktree_path(
+    seen: &mut HashSet<PathBuf>,
+    paths: &mut Vec<PathBuf>,
+    path: PathBuf,
+) -> Result<()> {
+    let key = path.canonicalize().unwrap_or_else(|_| path.clone());
+    if seen.insert(key) {
+        paths.push(path);
+        if paths.len() > MAX_SCAN_FILES {
+            return Err(DiffError::Message(format!(
+                "worktree ontology files exceed maximum of {MAX_SCAN_FILES}"
+            )));
+        }
+    }
+    Ok(())
 }
 
 fn list_git_tracked_ontology_paths(repo_path: &Path) -> Result<Vec<PathBuf>> {
@@ -267,6 +304,7 @@ fn is_ontology_file(name: &str) -> bool {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use git2::{Repository, Signature};
 
     #[test]
     fn parse_triple_dot_range() {
@@ -286,5 +324,52 @@ mod tests {
     fn reject_escape_path() {
         let dir = tempfile::tempdir().unwrap();
         assert!(ensure_extract_path_within(dir.path(), "../outside.ttl").is_err());
+    }
+
+    #[test]
+    fn worktree_catalog_includes_untracked_ontology_files() {
+        let dir = tempfile::tempdir().unwrap();
+        let root = dir.path();
+        let tracked_ttl = concat!(
+            "@prefix ex: <http://example.org#> .\n",
+            "@prefix owl: <http://www.w3.org/2002/07/owl#> .\n",
+            "ex:Tracked a owl:Class .\n"
+        );
+        let untracked_ttl = concat!(
+            "@prefix ex: <http://example.org#> .\n",
+            "@prefix owl: <http://www.w3.org/2002/07/owl#> .\n",
+            "ex:Untracked a owl:Class .\n"
+        );
+        std::fs::write(root.join("tracked.ttl"), tracked_ttl).unwrap();
+
+        let repo = Repository::init(root).expect("git init");
+        let mut index = repo.index().expect("index");
+        index
+            .add_path(Path::new("tracked.ttl"))
+            .expect("index add tracked");
+        index.write().expect("index write");
+        let tree_id = index.write_tree().expect("write tree");
+        let tree = repo.find_tree(tree_id).expect("find tree");
+        let sig = Signature::now("OntoCode Test", "test@example.com").expect("signature");
+        repo.commit(Some("HEAD"), &sig, &sig, "init", &tree, &[])
+            .expect("commit");
+
+        std::fs::write(root.join("new.ttl"), untracked_ttl).unwrap();
+
+        let catalog = catalog_at_worktree(root).expect("worktree catalog");
+        let iris: Vec<_> = catalog
+            .data()
+            .entities
+            .iter()
+            .map(|e| e.iri.as_str())
+            .collect();
+        assert!(
+            iris.iter().any(|iri| iri.contains("Tracked")),
+            "expected tracked entity, got {iris:?}"
+        );
+        assert!(
+            iris.iter().any(|iri| iri.contains("Untracked")),
+            "expected untracked entity in WORKTREE catalog, got {iris:?}"
+        );
     }
 }

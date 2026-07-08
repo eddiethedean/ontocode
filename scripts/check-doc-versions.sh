@@ -197,6 +197,22 @@ else
   echo "ok: no stale --version 0.12.0 install pins"
 fi
 
+if rg -q 'VERSION=0\.13\.0' "${STALE_PIN_PATHS[@]}" --glob '!**/changelog.md' --glob '!**/CHANGELOG.md' --glob '!**/migration/**' --glob '!**/design/**' 2>/dev/null; then
+  echo "FAIL: stale VERSION=0.13.0 found outside changelog/migration/design" >&2
+  rg -n 'VERSION=0\.13\.0' "${STALE_PIN_PATHS[@]}" --glob '!**/changelog.md' --glob '!**/CHANGELOG.md' --glob '!**/migration/**' --glob '!**/design/**' 2>/dev/null || true
+  fail=1
+else
+  echo "ok: no stale VERSION=0.13.0 install pins"
+fi
+
+if rg -q '--version 0\.13\.0' "${STALE_PIN_PATHS[@]}" --glob '!**/changelog.md' --glob '!**/CHANGELOG.md' --glob '!**/migration/**' --glob '!**/design/**' 2>/dev/null; then
+  echo "FAIL: stale --version 0.13.0 install pin found outside changelog/migration/design" >&2
+  rg -n '--version 0\.13\.0' "${STALE_PIN_PATHS[@]}" --glob '!**/changelog.md' --glob '!**/CHANGELOG.md' --glob '!**/migration/**' --glob '!**/design/**' 2>/dev/null || true
+  fail=1
+else
+  echo "ok: no stale --version 0.13.0 install pins"
+fi
+
 if rg -q 'latest \*\*v0\.11\.x\*\* tag' README.md docs extension crates .github --glob '!**/changelog.md' --glob '!**/CHANGELOG.md' --glob '!**/migration/**' 2>/dev/null; then
   echo "FAIL: stale v0.11.x release tag reference in user-facing docs" >&2
   fail=1
@@ -539,6 +555,8 @@ for pair in "VISION.md:docs/vision.md:Build the modern open-source platform" \
 done
 
 check_file_contains "docs/roadmap.md" "Shipped releases \\(v0.1–v0.14\\)" "docs roadmap shipped section"
+check_file_contains "ROADMAP.md" "Shipped releases \\(v0.1–v0.14\\)" "ROADMAP.md shipped section"
+check_file_contains "ROADMAP.md" "v0.14 — Plugin host MVP \\(shipped\\)" "ROADMAP.md v0.14 shipped section"
 check_file_contains "ROADMAP.md" "v1.2 — Ontology Toolchain Platform" "roadmap v1.2 toolchain milestone"
 check_file_contains "docs/roadmap.md" "v1.2 — Ontology Toolchain Platform" "docs roadmap v1.2 milestone"
 check_file_contains "ROADMAP.md" "owlmake" "roadmap owlmake integration"
@@ -702,7 +720,7 @@ else
   echo "ok: faq inspector edit answer"
 fi
 
-check_file_contains "docs/roadmap-hub.md" "Roadmap hub" "roadmap hub page"
+check_file_contains "docs/roadmap-hub.md" "v${VERSION}" "roadmap-hub current release"
 check_file_contains "docs/guides/api-stability.md" "API stability" "api stability page"
 check_file_contains "docs/guides/legacy-guide-urls.md" "Legacy guide URLs" "legacy guide redirects page"
 check_file_contains "docs/ontocode/obo-authoring.md" "OBO authoring" "obo authoring guide"
@@ -717,13 +735,15 @@ check_file_contains "docs/platform/ONTOUI.md" "OntoUI" "platform OntoUI doc"
 check_file_contains "docs/adr/README.md" "Product & platform ADRs" "product adr index"
 check_file_contains "docs/glossary.md" "OntoUI" "glossary OntoUI term"
 check_file_contains "docs/documentation-index.md" "Documentation index" "docs documentation index"
+check_file_contains "docs/documentation-index.md" "v${VERSION}" "documentation-index current release"
 check_file_contains "mkdocs.yml" "platform/OVERVIEW.md" "mkdocs platform overview"
 check_file_contains "mkdocs.yml" "cursor-prompts/README.md" "mkdocs cursor prompts"
 check_file_contains "mkdocs.yml" "adr/README.md" "mkdocs product adr"
 check_file_contains "docs/ui/README.md" "OntoUI" "ui readme OntoUI term"
 
 check_file_contains "mkdocs.yml" "guides/owl-xml-workflow.md" "mkdocs owl-xml workflow guide"
-check_file_contains "mkdocs.yml" "v0\\.13\\+" "mkdocs platform planning tab label"
+check_file_contains "mkdocs.yml" "v0\\.14\\+" "mkdocs platform planning tab label"
+check_file_contains "mkdocs.yml" "v0\\.13 → v0\\.14" "mkdocs v0.14 migration in Help nav"
 check_file_contains "docs/guides/owl-xml-workflow.md" "read-only catalog" "owl-xml workflow guide"
 check_file_contains "docs/ontocore/rust-api.md" "Book ↔ docs.rs crosswalk" "rust-api docs.rs crosswalk"
 check_file_contains "docs/troubleshooting.md" "Where to start" "troubleshooting decision tree"

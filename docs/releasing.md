@@ -42,6 +42,9 @@ Maintainer checklist for publishing crates, binaries, and the VS Code extension.
 - [ ] [docs/migration/v0.11.md](migration/v0.11.md) — editor depth upgrade notes when applicable
 - [ ] [docs/migration/v0.12.md](migration/v0.12.md) — authoring parity upgrade notes when applicable
 - [ ] [docs/migration/v0.13.md](migration/v0.13.md) — OntoUI platform upgrade notes when applicable
+- [ ] [docs/migration/v0.14.md](migration/v0.14.md) — plugin host MVP upgrade notes when applicable
+- [ ] [ROADMAP.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/ROADMAP.md) and [docs/roadmap.md](roadmap.md) — keep shipped/planned sections in sync
+- [ ] [docs/guides/plugins.md](guides/plugins.md) — plugin authoring when plugin surface changes
 - [ ] [docs/design/PROTEGE_PARITY.md](design/PROTEGE_PARITY.md) — status columns if features shipped
 - [ ] [docs/design/ARCHITECTURE.md](design/ARCHITECTURE.md) / [OWL_AUTHORING_SPEC.md](design/OWL_AUTHORING_SPEC.md) — shipped vs target banners
 - [ ] [docs/design/LICENSES.md](design/LICENSES.md) — dependency sections

@@ -9,7 +9,8 @@
 > | **This page** (`architecture.md`) | Product/ecosystem overview — Ontologos, OntoCore, OntoCode |
 > | [Implementation architecture](design/ARCHITECTURE.md) | Contributor crate layout and internal modules |
 > | [Product design / UI platform](ui/PLATFORM_ARCHITECTURE.md) | Shared **OntoUI**, OntoStudio target, design system |
-> | [Platform architecture (implementation)](platform/OVERVIEW.md) | OntoUI, WorkspaceStore, focus relay — **shipped v0.13** |
+> | [Platform architecture (implementation)](platform/OVERVIEW.md) | OntoUI, WorkspaceStore, plugin host MVP — **shipped v0.13–v0.14** |
+| [Plugin authoring](guides/plugins.md) | Workspace manifests, reference plugins, subprocess workflows (v0.14) |
 > | [OntoCore architecture](ontocore/architecture.md) | Short OntoCore stack summary (links here for detail) |
 >
 > **Contributor crate layout:** [Implementation architecture](design/ARCHITECTURE.md) (internal modules only).

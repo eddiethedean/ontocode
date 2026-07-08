@@ -60,7 +60,7 @@ Pin CLI version in CI: release binary with `VERSION=0.14.0` or `cargo install on
 
 ## Support and incident response
 
-| Topic | v0.9 policy |
+| Topic | v0.14 policy |
 |-------|-------------|
 | Commercial support | **Not offered** — community / GitHub issues |
 | Security reports | [GitHub Security Advisories](https://github.com/eddiethedean/ontocode/security/advisories/new) — not public issues |

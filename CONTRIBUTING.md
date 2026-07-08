@@ -14,7 +14,7 @@ Thank you for contributing. This repository contains:
 | Architecture | [ARCHITECTURE.md](ARCHITECTURE.md) | [docs/architecture.md](docs/architecture.md) |
 | Platform roadmap | [ROADMAP.md](ROADMAP.md) | [docs/roadmap.md](docs/roadmap.md) |
 | Engineering specs | — | [docs/design/](docs/design/README.md) |
-| Platform planning (v0.13+) | — | [docs/platform/](docs/platform/OVERVIEW.md) |
+| Platform planning (v0.14+) | — | [docs/platform/](docs/platform/OVERVIEW.md) |
 | Product ADRs | — | [docs/adr/](docs/adr/README.md) |
 | Engineering ADRs | — | [docs/design/adr/](docs/design/adr/README.md) |
 | Documentation map | — | [docs/documentation-index.md](docs/documentation-index.md) |
@@ -27,18 +27,33 @@ The root Cargo package `ontocode` is unpublished and hosts workspace integration
 
 **New contributors:** start with [internals.md](docs/internals.md) for role-based paths (Rust, extension, docs, LSP).
 
+### Plugin contributors (v0.14+)
+
+| Task | Start here |
+|------|------------|
+| Author a workspace plugin (manifest, validator, exporter) | [docs/guides/plugins.md](docs/guides/plugins.md) |
+| Understand host traits and manifest schema | [docs/ontocore/plugin-model.md](docs/ontocore/plugin-model.md), [PLUGIN_SPEC.md](docs/design/PLUGIN_SPEC.md) |
+| Reference implementation | `crates/ontocore-plugin-naming/`, `examples/plugin-workspace/` |
+| Wire LSP / CLI integration | [docs/lsp-api.md](docs/lsp-api.md), `crates/ontocore-lsp/` |
+| OntoUI inspector plugin cards | [docs/platform/CAPABILITY_PROVIDERS.md](docs/platform/CAPABILITY_PROVIDERS.md), `extension/webview-ui/src/capabilities/` |
+
+Run `./scripts/run-ci-local.sh` before PRs that touch plugin host, reference plugins, or extension capability registry.
+
 ## Before opening a PR
 
 **Minimum checks (most changes):**
 
 ```bash
 cargo fmt --all --check
+cargo clippy --workspace --all-targets --all-features -- -D warnings
 cargo test --workspace
 cargo build -p ontocore-lsp --bins
-cd extension && ONTOCORE_LSP_BIN=../target/debug/ontocore-lsp npm test
+cd extension/webview-ui && npm ci && npm test
+cd extension && ONTOCORE_LSP_BIN=../target/debug/ontocore-lsp npm ci && npm run compile && npm test
+./scripts/check-doc-versions.sh
 ```
 
-**Full CI parity (release branches or broad changes):** `./scripts/run-ci-local.sh` (~30+ minutes).
+**Full CI parity (release branches or broad changes):** `./scripts/run-ci-local.sh` (~30+ minutes). This matches GitHub Actions (rustfmt, clippy, tests, extension e2e, mkdocs, packaging).
 
 Open an issue or discussion before large features. Follow existing commit message style in `git log`.
 

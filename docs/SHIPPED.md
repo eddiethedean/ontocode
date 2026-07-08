@@ -169,7 +169,7 @@
 
 ## What's next
 
-Forward milestones (v0.13 platform hardening → v1.0 Protégé replacement): **[Platform roadmap](roadmap.md)**.
+Forward milestones (v0.14 plugin host MVP → v1.0 Protégé replacement): **[Platform roadmap](roadmap.md)**.
 
 ## Where to learn more
 

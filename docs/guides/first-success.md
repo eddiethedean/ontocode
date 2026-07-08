@@ -2,6 +2,8 @@
 
 This is the **canonical tutorial** for new OntoCode users. You do not need to clone this repository.
 
+**Prerequisites:** VS Code **1.85+**; network access to download tutorial files (step 2); optional [Ontology concepts](../concepts.md) skim if you are new to OWL/RDF.
+
 New to OWL/RDF? Skim [Ontology concepts](../concepts.md) first (IRIs, Turtle, classes).
 
 > **Multi-root workspaces (v0.10+):** All workspace folders are indexed on open. **OntoCode: Index Workspace** may prompt you to pick a folder when multiple roots are open.
@@ -12,7 +14,19 @@ Complete these four steps before exploring optional features below.
 
 ### 1. Install OntoCode
 
-Install from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) or [Open VSX](https://open-vsx.org/extension/ontocode/ontocode) (Cursor):
+**VS Code:**
+
+1. Open **Extensions** (`Ctrl+Shift+X` / `Cmd+Shift+X`).
+2. Search for **OntoCode**.
+3. Click **Install** on the extension by OntoCode.
+4. Reload the window if prompted.
+
+**Cursor (Open VSX):**
+
+1. Open **Extensions**.
+2. Search for **OntoCode** or install from [Open VSX](https://open-vsx.org/extension/ontocode/ontocode).
+
+Or install from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode):
 
 [![Open VSX](https://img.shields.io/open-vsx/v/ontocode/ontocode)](https://open-vsx.org/extension/ontocode/ontocode)
 [![VS Code Marketplace](https://vsmarketplacebadges.dev/version/ontocode.ontocode.svg?label=marketplace)](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode)
@@ -140,7 +154,7 @@ Guide: [OBO workflow](../guides/obo-workflow.md).
 To catch lint and parse errors in CI or locally:
 
 ```bash
-cargo install ontocore-cli --locked --version 0.13.0
+cargo install ontocore-cli --locked --version 0.14.0
 ontocore validate /path/to/your/ontology/folder
 ```
 

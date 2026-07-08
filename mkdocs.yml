@@ -172,6 +172,7 @@ nav:
           - v0.10 → v0.11: migration/v0.11.md
           - v0.11 → v0.12: migration/v0.12.md
           - v0.12 → v0.13: migration/v0.13.md
+          - v0.13 → v0.14: migration/v0.14.md
       - Legacy guide URLs: guides/legacy-guide-urls.md
       - Release integrity: release-integrity.md
   - Contribute:
@@ -241,7 +242,7 @@ nav:
               - MVP backlog: design/MVP_BACKLOG.md
           - ADRs:
               - Index (all ADRs): design/adr/README.md
-  - "Platform planning (v0.13+)":
+  - "Platform planning (v0.14+)":
       - Platform overview: platform/OVERVIEW.md
       - UX audit (v0.13): ui/UX_AUDIT_v0.13.md
       - OntoUI: platform/ONTOUI.md

@@ -44,18 +44,15 @@ After 1.0, the roadmap shifts from parity to modernization.
 ### Timeline
 
 ```text
-SHIPPED (v0.1–v0.13) ─────────────────────────────────────────────────►
-v0.1–v0.4          v0.5–v0.8              v0.9–v0.12           v0.13
-Engine foundation    IDE depth                Platform & authoring   OntoUI platform
+SHIPPED (v0.1–v0.14) ─────────────────────────────────────────────────►
+v0.1–v0.4          v0.5–v0.8              v0.9–v0.12           v0.13–v0.14
+Engine foundation    IDE depth                Platform & authoring   OntoUI + plugins
   │                    │                        │                      │
   Foundation           Query, reason,           Identity, diff,      WorkspaceStore,
   Explorer, diag,      graphs, refactor,        OBO write-back,      focus relay,
-  write-back           Manchester               OWL/XML catalog      schema browser
+  write-back           Manchester               OWL/XML catalog      plugin host MVP
 
-PLANNED (v0.14+) ─────────────────────────────────────────────────────►
-v0.14              v1.0                  v1.1              v1.2+
-Plugin host        Protégé               SDKs &            Toolchain
-MVP                replacement           AI                platform
+PLANNED (v1.0+) ──────────────────────────────────────────────────────►
 ```
 
 ### Phase index
@@ -65,7 +62,7 @@ MVP                replacement           AI                platform
 | **A — Engine foundation** | v0.1–v0.4 | Shipped | Index, browse, diagnose, edit Turtle |
 | **B — IDE depth** | v0.5–v0.8 | Shipped | Query, reason, visualize, refactor |
 | **C — Platform & authoring** | v0.9–v0.12 | Shipped | OntoCore identity, semantic workspace, authoring parity |
-| **D — OntoUI platform** | v0.13–v0.14 | In progress | v0.13 shipped: WorkspaceStore, focus relay; v0.14: plugins |
+| **D — OntoUI platform** | v0.13–v0.14 | Shipped | v0.13: WorkspaceStore, focus relay; v0.14: plugin host MVP |
 | **E — Protégé replacement** | v1.0 | Planned | Daily OWL/OBO engineering without Protégé |
 | **F — Ecosystem** | v1.1–v1.2+ | Planned | SDKs, AI, toolchain & collaboration |
 
@@ -105,7 +102,7 @@ OntoUI work uses **UI phases 0–12** from [Product Roadmap 2.0](docs/ui/PRODUCT
 | **5** | Reasoning experience | v0.9–v0.13† (store integration shipped); v1.0 (pipeline UI, history) |
 | **6** | Semantic refactoring | v0.8+ (shipped); v1.0 (merge, batch, undo) |
 | **7** | AI experience | v1.1 |
-| **8** | Plugin platform | v0.14 (runtime); v1.1† (AI provider API) |
+| **8** | Plugin platform | v0.14 (runtime shipped); v1.1† (AI provider API) |
 | **9** | Collaboration | v0.10+ (diff); v0.13† (PR summary CLI shipped); v1.0 (review); v1.2 (GitHub UI) |
 | **10** | OntoStudio desktop | v1.2† (marketplace); Post-1.2 (shell, native graph) |
 | **11** | Ecosystem & docs | v0.11+ (guides); v1.2 (registry, templates) |
@@ -115,7 +112,7 @@ OntoUI work uses **UI phases 0–12** from [Product Roadmap 2.0](docs/ui/PRODUCT
 
 ---
 
-## Shipped releases (v0.1–v0.13)
+## Shipped releases (v0.1–v0.14)
 
 ### Era A — Engine foundation (v0.1–v0.4)
 
@@ -358,26 +355,31 @@ Sub-phases: **v0.7a** (React foundation) → **v0.7** (graphs + inspector) → *
 
 ---
 
-## Planned releases (v0.14 → v1.2+)
+### v0.14 — Plugin host MVP (shipped)
 
-### v0.14 — Plugin host MVP (planned)
+**Released:** v0.14.0 (2026-07-09)
 
 **Theme:** External extensibility without embedding workflow engines in core.
 
-**UI phases:** **8** (plugin platform). Milestone: [Product Roadmap 2.0 phase 8](docs/ui/PRODUCT_ROADMAP_2.0.md).
-
-OntoCore hosts **external** plugins through stable APIs — it does not embed ROBOT, ODK, or owlmake as core dependencies. See [PLUGIN_SPEC.md](docs/design/PLUGIN_SPEC.md).
+**UI phases delivered:** **8** (plugin platform MVP). Milestone: [Product Roadmap 2.0 phase 8](docs/ui/PRODUCT_ROADMAP_2.0.md).
 
 | Area | Deliverables |
 |------|--------------|
-| **OntoCore** | Plugin host runtime; stable plugin API (semver); plugin load/discover from workspace config; reference plugins: naming convention validator, Markdown exporter, SHACL validator via `rudof` ([SHACL_SPEC.md](docs/design/SHACL_SPEC.md)); CLI/LSP hooks for plugin diagnostics and exports |
-| **OntoUI** | **[8]** Plugin manifest + runtime; command API; inspector card API; reasoner provider API; plugin SDK + reference examples ([PLUGIN_API_SPEC](docs/ui/PLUGIN_API_SPEC.md), [PLUGIN_PLATFORM](docs/ui/PLUGIN_PLATFORM.md), [PLUGIN_SPEC](docs/design/PLUGIN_SPEC.md)); plugin-contributed diagnostics in Problems panel |
-| **OntoCode** | Plugin commands in palette; owlmake integration scaffold (invoke external workflow, surface build/QC status) |
-| **Ecosystem** | `examples/obo-workflow/` fixture repo; owlmake as first reference workflow plugin (external repo) |
+| **OntoCore** | `PluginHost` runtime; manifest discovery from `.ontocore/plugins/`; reference plugins (naming validator, Markdown exporter, SHACL scaffold); CLI `plugins list/run`, `validate`/`docs` hooks; LSP `listPlugins`/`runPlugin`; subprocess workflow runner |
+| **OntoUI** | Capability provider registry; inspector plugin cards; `WorkspaceStore` plugins slice |
+| **OntoCode** | Plugin commands; owlmake workflow scaffold (`workflow run --plugin owlmake`); workflow output panel |
+| **Ecosystem** | `examples/plugin-workspace/` fixture; [Plugin authoring guide](docs/guides/plugins.md) |
 
-**Exit criteria:** Third party can ship a validation or export plugin without forking OntoCore; owlmake can be invoked from OntoCode as an external workflow.
+**Exit criteria (met):**
 
-**Dependencies:** `rudof` (SHACL P1); owlmake (external); [cursor-prompts/10-add-capability-provider-interfaces.md](docs/cursor-prompts/10-add-capability-provider-interfaces.md)
+- [x] Third party can ship a validation or export plugin without forking OntoCore (reference plugins + manifest schema)
+- [x] owlmake can be invoked from OntoCode as an external workflow (subprocess scaffold)
+
+**Dependencies:** `ontocore-plugin` crate; reference plugin binaries; [PLUGIN_SPEC.md](docs/design/PLUGIN_SPEC.md)
+
+---
+
+## Planned releases (v1.0 → v1.2+)
 
 ---
 
@@ -397,7 +399,7 @@ OntoCore hosts **external** plugins through stable APIs — it does not embed RO
 | **Toolchain** | ODK project layout recognition (`src/ontology/`, catalog files, import structure); ODK QC and release workflow surfacing; ROBOT-compatible operations where practical; import existing ODK/ROBOT/owlmake workflows (Makefile, GitHub Actions); Protégé migration guide with honest parity table |
 | **Ecosystem** | Ontologos 1.0.0 reasoner gate satisfied; published `ontocore` + `ontocore-*` 1.0.0 on crates.io |
 
-**Already shipped (v0.5–v0.13):** entity editor MVP, query workbench, graph canvas, reasoner panel, refactoring preview, semantic diff, WorkspaceStore + focus relay, schema browser — see [ROADMAP_MAPPING.md](docs/ui/ROADMAP_MAPPING.md).
+**Already shipped (v0.5–v0.14):** entity editor MVP, query workbench, graph canvas, reasoner panel, refactoring preview, semantic diff, WorkspaceStore + focus relay, schema browser, plugin host MVP — see [ROADMAP_MAPPING.md](docs/ui/ROADMAP_MAPPING.md).
 
 **Exit criteria:**
 

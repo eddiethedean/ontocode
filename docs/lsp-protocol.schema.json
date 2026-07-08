@@ -1,8 +1,8 @@
 {
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "$id": "https://github.com/eddiethedean/ontocode/docs/lsp-protocol.schema.json",
-  "title": "OntoCore LSP protocol (v0.13)",
-  "description": "JSON Schema for ontocore/* custom LSP method payloads (v0.13). Method routing is documented in lsp-api.md. Standard LSP textDocument/semanticTokens/full is documented in lsp-api.md but not duplicated here.",
+  "title": "OntoCore LSP protocol (v0.14)",
+  "description": "JSON Schema for ontocore/* custom LSP method payloads (v0.14). Method routing is documented in lsp-api.md. Standard LSP textDocument/semanticTokens/full is documented in lsp-api.md but not duplicated here.",
   "definitions": {
     "EntityKind": {
       "type": "string",
@@ -579,6 +579,90 @@
         "exit_code": { "type": "integer" },
         "stdout": { "type": "string" },
         "stderr": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "PluginCapabilities": {
+      "type": "object",
+      "properties": {
+        "build": { "type": "boolean" },
+        "validate": { "type": "boolean" },
+        "release": { "type": "boolean" },
+        "diagnostics": { "type": "boolean" },
+        "export": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "PluginUiCommand": {
+      "type": "object",
+      "required": ["id", "title"],
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "scope": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "PluginInspectorCard": {
+      "type": "object",
+      "required": ["id", "title", "applies_to"],
+      "properties": {
+        "id": { "type": "string" },
+        "title": { "type": "string" },
+        "applies_to": { "type": "string" },
+        "command": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "PluginUiContributions": {
+      "type": "object",
+      "properties": {
+        "commands": { "type": "array", "items": { "$ref": "#/definitions/PluginUiCommand" } },
+        "inspector_cards": { "type": "array", "items": { "$ref": "#/definitions/PluginInspectorCard" } }
+      },
+      "additionalProperties": false
+    },
+    "PluginDescriptor": {
+      "type": "object",
+      "required": ["id", "name", "version", "kind", "manifest_path", "capabilities", "ui", "in_process"],
+      "properties": {
+        "id": { "type": "string" },
+        "name": { "type": "string" },
+        "version": { "type": "string" },
+        "kind": { "type": "string" },
+        "manifest_path": { "type": "string" },
+        "capabilities": { "$ref": "#/definitions/PluginCapabilities" },
+        "ui": { "$ref": "#/definitions/PluginUiContributions" },
+        "in_process": { "type": "boolean" }
+      },
+      "additionalProperties": false
+    },
+    "ListPluginsResult": {
+      "type": "object",
+      "required": ["plugins"],
+      "properties": {
+        "plugins": { "type": "array", "items": { "$ref": "#/definitions/PluginDescriptor" } }
+      },
+      "additionalProperties": false
+    },
+    "RunPluginParams": {
+      "type": "object",
+      "required": ["plugin_id"],
+      "properties": {
+        "plugin_id": { "type": "string" },
+        "action": { "type": "string" },
+        "step": { "type": "string" }
+      },
+      "additionalProperties": false
+    },
+    "RunPluginResult": {
+      "type": "object",
+      "required": ["diagnostics", "output_paths", "success"],
+      "properties": {
+        "diagnostics": { "type": "array", "items": { "$ref": "#/definitions/DiagnosticSummary" } },
+        "output_paths": { "type": "array", "items": { "type": "string" } },
+        "logs": { "type": ["string", "null"] },
+        "success": { "type": "boolean" }
       },
       "additionalProperties": false
     }

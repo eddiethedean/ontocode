@@ -9,7 +9,7 @@ Canonical capability matrix: [What ships today](../SHIPPED.md).
 Prefer Protégé or other tools (or wait for v1.0) if you need:
 
 - Full **SQL** analytics (JOINs, aggregates) — only SQL-like virtual tables ship today
-- An installable **plugin host** / owlmake workflow integration (**shipped MVP in v0.14**; stable ecosystem API planned **v1.0**)
+- A **stable, semver-guaranteed plugin API** or production owlmake integration without subprocess scaffolding — plugin host **MVP shipped in v0.14**; stable ecosystem API planned **v1.0**
 
 ## Enterprise documentation pack
 
@@ -25,6 +25,7 @@ Prefer Protégé or other tools (or wait for v1.0) if you need:
 | [Release timeline (non-commitment)](release-timeline.md) | Planning — v0.9/v1.0 goals without fixed dates |
 | [LGPL compliance](lgpl-compliance.md) | Legal — horned-owl obligations |
 | [Protégé coexistence](protege-coexistence.md) | Ontology teams — split workflow with Protégé |
+| [Plugin authoring](plugins.md) | Platform — v0.14 plugin host MVP, manifests, subprocess plugins |
 
 ## What ships today (v0.14.0)
 
@@ -51,6 +52,9 @@ Prefer Protégé or other tools (or wait for v1.0) if you need:
 | Manage Imports UI + import patch ops | **Shipped** (v0.11) |
 | `ontocore docs` export | **Shipped** (v0.11) |
 | Open VSX / Cursor marketplace | **Shipped** (v0.11) |
+| Plugin host MVP (`ontocore plugins`, LSP `listPlugins`/`runPlugin`) | **Shipped** (v0.14) |
+| Reference plugins (naming validator, Markdown exporter, SHACL scaffold) | **Shipped** (v0.14) |
+| owlmake workflow scaffold (`ontocore workflow run`) | **Shipped** (v0.14 — subprocess; not production-hardened) |
 
 Full gap analysis: [Protégé parity matrix](../design/PROTEGE_PARITY.md).
 

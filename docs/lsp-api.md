@@ -12,7 +12,7 @@ LSP JSON uses **snake_case** for enums serialized from Rust (`EntityKind`, `Pars
 **Source of truth:**
 
 - Types: [`protocol.rs` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/crates/ontocore-lsp/src/protocol.rs)
-- JSON Schema (v0.13): [`docs/lsp-protocol.schema.json`](lsp-protocol.schema.json) — query, patch, reasoner, refactor, graph, semantic diff, schema browser, and PR summary payloads.
+- JSON Schema (v0.14): [`docs/lsp-protocol.schema.json`](lsp-protocol.schema.json) — query, patch, reasoner, refactor, graph, semantic diff, schema browser, PR summary, and plugin payloads.
 - Handlers: [`handlers.rs` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/crates/ontocore-lsp/src/handlers.rs)
 - Extension client: [`client.ts` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/extension/src/lsp/client.ts)
 
@@ -433,9 +433,21 @@ Returns discovered workspace plugins from `.ontocore/plugins/*.toml` plus built-
 
 **Params:** none (uses indexed workspace root)
 
-**Result:** `{ "plugins": PluginDescriptor[] }` — id, name, version, kind, capabilities, `ui.commands`, `ui.inspector_cards`, `in_process`.
+**Result:** `{ "plugins": PluginDescriptor[] }`
 
-**Errors:** `NOT_INDEXED`
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | string | Plugin id |
+| `name` | string | Display name |
+| `version` | string | Manifest version |
+| `kind` | string | `validator`, `exporter`, `workflow`, … |
+| `manifest_path` | string | Absolute path to manifest TOML |
+| `capabilities` | object | `build`, `validate`, `release`, `diagnostics`, `export` flags |
+| `ui.commands` | array | `{ id, title, scope? }` palette contributions |
+| `ui.inspector_cards` | array | `{ id, title, applies_to, command? }` inspector slots |
+| `in_process` | boolean | `true` for built-in reference plugins |
+
+**Errors:** `NOT_INDEXED`, `INDEX_FAILED` (discovery/host failure)
 
 ### `ontocore/runPlugin` (v0.14+)
 
@@ -451,9 +463,11 @@ Run a plugin validate/export/workflow action.
 
 **Result:** `{ "diagnostics": DiagnosticSummary[], "output_paths": string[], "logs": string?, "success": boolean }`
 
-Plugin diagnostics use `code` values like `plugin:<id>:<code>` and LSP `source` `ontocore-plugin:<id>`.
+Plugin diagnostics use `code` values like `plugin:<id>:<code>` and LSP `source` `ontocore-plugin:<id>`. See [errors.md](errors.md#plugin-diagnostic-codes-v014).
 
-**Errors:** `NOT_INDEXED`, `INVALID_PARAMS`
+**Errors:** `NOT_INDEXED`, `INDEX_FAILED` (plugin not found, unsupported action, subprocess failure, or export error)
+
+`getCatalogSnapshot` includes plugin diagnostics merged after index (same wire codes).
 
 ## Structured errors
 

@@ -11,7 +11,7 @@ use ontocore_catalog::IndexBuilder;
 use ontocore_reasoner::{classify, ReasonerId, WorkspaceInputLoader};
 
 let catalog = IndexBuilder::new().workspace("fixtures").build()?;
-let input = WorkspaceInputLoader::new("fixtures").load(catalog.class_hierarchy())?;
+let input = WorkspaceInputLoader::new("fixtures").load()?;
 let result = classify(ReasonerId::Dl, &input, false)?;
 // `consistent` is true when no *named class* is unsatisfiable (not full ABox consistency).
 println!("consistent: {}", result.consistent);

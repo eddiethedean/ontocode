@@ -704,10 +704,10 @@ fn apply_reasoner_unsat_catalogs(
 ) -> Result<()> {
     let profile = ReasonerId::El;
     let base_input = WorkspaceInputLoader::new(base.workspace())
-        .load(base.class_hierarchy())
+        .load()
         .map_err(|e| anyhow::anyhow!(e))?;
     let head_input = WorkspaceInputLoader::new(head.workspace())
-        .load(head.class_hierarchy())
+        .load()
         .map_err(|e| anyhow::anyhow!(e))?;
     let base_cls = classify(profile, &base_input, true).map_err(|e| anyhow::anyhow!(e))?;
     let head_cls = classify(profile, &head_input, true).map_err(|e| anyhow::anyhow!(e))?;
@@ -725,7 +725,7 @@ fn build_catalog(workspace: &PathBuf) -> Result<OntologyCatalog> {
 fn load_reasoner_input(workspace: &PathBuf) -> Result<ontocore_reasoner::ReasonerInput> {
     let catalog = build_catalog(workspace)?;
     WorkspaceInputLoader::new(workspace)
-        .load(catalog.class_hierarchy())
+        .load()
         .map_err(|e| anyhow::anyhow!(e))
 }
 

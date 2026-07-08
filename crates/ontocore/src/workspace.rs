@@ -189,7 +189,7 @@ impl Workspace {
     pub fn reasoner_input(&self) -> Result<ReasonerInput, ReasonerError> {
         WorkspaceInputLoader::new(self.options.root.clone())
             .scan_roots(self.options.scan_roots.clone())
-            .load(self.class_hierarchy.clone())
+            .load()
     }
 
     /// Discover plugin manifests under `.ontocore/plugins/` (requires feature `plugins`).

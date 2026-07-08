@@ -60,7 +60,7 @@ use ontocore::catalog::IndexBuilder;
 use ontocore::reasoner::{classify, ReasonerId, WorkspaceInputLoader};
 
 let catalog = IndexBuilder::new().workspace(".").build()?;
-let input = WorkspaceInputLoader::new(".").load(catalog.class_hierarchy())?;
+let input = WorkspaceInputLoader::new(".").load()?;
 let result = classify(ReasonerId::El, &input, false)?;
 println!("consistent: {}", result.consistent);
 ```

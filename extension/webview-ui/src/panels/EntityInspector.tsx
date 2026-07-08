@@ -36,6 +36,7 @@ export function EntityInspectorPanel(_props?: WorkspaceProps): JSX.Element {
   const focusIri = useWorkspaceStore((s) => s.inspector.entityIri);
   const [detail, setDetail] = useState<EntityDetailPayload | null>(null);
   const [classOptions, setClassOptions] = useState<string[]>([]);
+  const [objectPropertyOptions, setObjectPropertyOptions] = useState<string[]>([]);
   const [preview, setPreview] = useState("");
   const [newLabel, setNewLabel] = useState("");
   const [newComment, setNewComment] = useState("");
@@ -76,6 +77,7 @@ export function EntityInspectorPanel(_props?: WorkspaceProps): JSX.Element {
       if (msg.type === "loadEntity") {
         setDetail(msg.detail);
         setClassOptions(msg.classOptions);
+        setObjectPropertyOptions(msg.objectPropertyOptions ?? []);
         setPreview("");
         setEditPreview("");
         setFocus({
@@ -142,6 +144,7 @@ export function EntityInspectorPanel(_props?: WorkspaceProps): JSX.Element {
     }
   };
   const parentOptions = classOptions.filter((c) => c !== entity.iri);
+  const chainPropertyOptions = objectPropertyOptions.filter((p) => p !== entity.iri);
 
   return (
     <Panel>
@@ -737,7 +740,7 @@ export function EntityInspectorPanel(_props?: WorkspaceProps): JSX.Element {
                 chains={axioms
                   .filter((a) => a.kind === "property_chain")
                   .map((a) => ({ display: a.display, properties: [] }))}
-                propertyOptions={parentOptions}
+                propertyOptions={chainPropertyOptions}
                 preview={editPreview}
                 onPreview={(patches) => apply(patches, true)}
                 onApply={(patches) => apply(patches, false)}

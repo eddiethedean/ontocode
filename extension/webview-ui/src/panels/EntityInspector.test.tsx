@@ -1,4 +1,4 @@
-import { screen, waitFor } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import { renderWithProviders } from "../test/render";
 import userEvent from "@testing-library/user-event";
 import { describe, it, expect, vi } from "vitest";
@@ -340,6 +340,36 @@ describe("EntityInspectorPanel", () => {
 
     expect(screen.queryByRole("button", { name: "Add Manchester axiom" })).not.toBeInTheDocument();
     expect(screen.queryByRole("button", { name: "Edit in Manchester" })).not.toBeInTheDocument();
+  });
+
+  it("property chain editor lists object properties not classes", async () => {
+    renderWithProviders(<EntityInspectorPanel />);
+    postHostMessage({
+      type: "loadEntity",
+      detail: {
+        ...entityDetail,
+        entity: {
+          ...entityDetail.entity,
+          kind: "object_property",
+          iri: "http://example.org#worksFor",
+          short_name: "worksFor",
+          labels: ["works for"],
+        },
+        axioms: [],
+      },
+      classOptions: ["http://example.org#Person", "http://example.org#Agent"],
+      objectPropertyOptions: [
+        "http://example.org#worksFor",
+        "http://example.org#knows",
+      ],
+    });
+    await screen.findByText("Property chains");
+    const chainSection = screen.getByText("Property chains").closest(".oc-section");
+    expect(chainSection).not.toBeNull();
+    const chainOptions = within(chainSection as HTMLElement);
+    expect(chainOptions.getByRole("option", { name: "knows" })).toBeInTheDocument();
+    expect(chainOptions.queryByRole("option", { name: "Person" })).not.toBeInTheDocument();
+    expect(chainOptions.queryByRole("option", { name: "Agent" })).not.toBeInTheDocument();
   });
 
   it("shows Edit disjoint label for disjoint_class axioms", async () => {

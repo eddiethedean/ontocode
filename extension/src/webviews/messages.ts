@@ -163,7 +163,7 @@ export type HostMessage =
   | { type: "init"; panel: PanelKind }
   | { type: "focusState"; focus: CurrentFocus }
   | { type: "reasoningState"; reasoning: ReasoningStatePayload }
-  | { type: "loadEntity"; detail: EntityDetailPayload; classOptions: string[] }
+  | { type: "loadEntity"; detail: EntityDetailPayload; classOptions: string[]; objectPropertyOptions?: string[] }
   | { type: "graphData"; graph: GraphPayload }
   | { type: "preview"; text: string }
   | { type: "loadRefactorPlan"; plan: RefactorPlanPayload }

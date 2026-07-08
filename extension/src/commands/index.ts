@@ -517,11 +517,21 @@ async function openInspector(
   const classOptions = snapshot.entities
     .filter((e) => e.kind === "class")
     .map((e) => e.iri);
+  const objectPropertyOptions = snapshot.entities
+    .filter((e) => e.kind === "object_property")
+    .map((e) => e.iri);
   const { detail } = await getEntity(iri);
   if (requestId !== inspectorRequestSeq) {
     return;
   }
-  EntityInspectorPanel.show(extensionUri, detail, classOptions, onRefresh, requestId);
+  EntityInspectorPanel.show(
+    extensionUri,
+    detail,
+    classOptions,
+    objectPropertyOptions,
+    onRefresh,
+    requestId
+  );
 }
 
 async function createEntity(

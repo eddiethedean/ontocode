@@ -66,9 +66,7 @@ fn read_capped(mut reader: impl Read, cap: usize) -> Result<Vec<u8>, SubprocessE
     let mut buf = Vec::new();
     let mut chunk = [0u8; 8192];
     loop {
-        let n = reader
-            .read(&mut chunk)
-            .map_err(|e| SubprocessError::RunFailed(e.to_string()))?;
+        let n = reader.read(&mut chunk).map_err(|e| SubprocessError::RunFailed(e.to_string()))?;
         if n == 0 {
             break;
         }
@@ -111,12 +109,12 @@ pub fn run_plugin_subprocess(
     loop {
         match child.try_wait() {
             Ok(Some(status)) => {
-                let out = out_handle
-                    .join()
-                    .map_err(|_| SubprocessError::RunFailed("stdout reader panicked".to_string()))??;
-                let err = err_handle
-                    .join()
-                    .map_err(|_| SubprocessError::RunFailed("stderr reader panicked".to_string()))??;
+                let out = out_handle.join().map_err(|_| {
+                    SubprocessError::RunFailed("stdout reader panicked".to_string())
+                })??;
+                let err = err_handle.join().map_err(|_| {
+                    SubprocessError::RunFailed("stderr reader panicked".to_string())
+                })??;
 
                 if !status.success() {
                     let stderr = String::from_utf8_lossy(&err);
@@ -131,8 +129,9 @@ pub fn run_plugin_subprocess(
                 if stdout.trim().is_empty() {
                     return Ok(PluginOutput::default());
                 }
-                return serde_json::from_str(stdout.trim())
-                    .map_err(|e| SubprocessError::InvalidOutput(format!("{e}: {}", stdout.trim())));
+                return serde_json::from_str(stdout.trim()).map_err(|e| {
+                    SubprocessError::InvalidOutput(format!("{e}: {}", stdout.trim()))
+                });
             }
             Ok(None) => {
                 if Instant::now() >= deadline {

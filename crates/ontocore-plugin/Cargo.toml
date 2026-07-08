@@ -11,7 +11,17 @@ authors.workspace = true
 readme = "README.md"
 keywords.workspace = true
 categories.workspace = true
-include = ["src/**/*", "Cargo.toml", "README.md", "LICENSE-MIT", "LICENSE-APACHE-2.0"]
+#
+# Note: this crate embeds builtin fixture manifests via `include_str!`, so the
+# fixture files must be shipped in the published crate tarball.
+include = [
+  "src/**/*",
+  "fixtures/*.toml",
+  "Cargo.toml",
+  "README.md",
+  "LICENSE-MIT",
+  "LICENSE-APACHE-2.0",
+]
 
 [dependencies]
 ontocore-catalog = { workspace = true }

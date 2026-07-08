@@ -111,12 +111,32 @@ fn apply_one(text: &mut String, patch: &OboPatchOp) -> Result<()> {
 }
 
 fn term_block_range(text: &str, term_id: &str) -> Result<(usize, usize)> {
-    let id_line = format!("id: {term_id}");
-    let start = text.find(&id_line).ok_or_else(|| OboError::TermNotFound(term_id.to_string()))?;
-    let block_start = text[..start].rfind("[Term]").unwrap_or(start);
-    let rest = &text[start..];
-    let next_term = rest[1..].find("\n[Term]").map(|i| start + 1 + i).unwrap_or(text.len());
+    let id_line_start = find_term_id_line_start(text, term_id)
+        .ok_or_else(|| OboError::TermNotFound(term_id.to_string()))?;
+    let block_start = text[..id_line_start].rfind("[Term]").unwrap_or(id_line_start);
+    let rest = &text[id_line_start..];
+    let next_term = rest[1..].find("\n[Term]").map(|i| id_line_start + 1 + i).unwrap_or(text.len());
     Ok((block_start, next_term))
+}
+
+fn find_term_id_line_start(text: &str, term_id: &str) -> Option<usize> {
+    let mut offset = 0usize;
+    for line in text.split_inclusive('\n') {
+        let line_body = line.trim_end_matches('\n');
+        if obo_id_line_matches(line_body, term_id) {
+            return Some(offset);
+        }
+        offset += line.len();
+    }
+    None
+}
+
+fn obo_id_line_matches(line: &str, term_id: &str) -> bool {
+    let trimmed = line.trim_start();
+    if !trimmed.starts_with("id:") {
+        return false;
+    }
+    obo_field_token(trimmed["id:".len()..].trim_start()) == Some(term_id)
 }
 
 fn set_single_line(
@@ -387,6 +407,35 @@ is_a: EX:001 ! shorter parent
             !text.lines().any(|l| is_is_a_parent_line(l, "EX:001")),
             "EX:001 parent must be removed"
         );
+    }
+
+    #[test]
+    fn set_name_targets_exact_term_id_not_prefix() {
+        const COLLISION: &str = r#"format-version: 1.2
+ontology: test
+
+[Term]
+id: GO:00000010
+name: ten
+
+[Term]
+id: GO:0000001
+name: one
+"#;
+
+        let result = apply_patches_to_text(
+            COLLISION,
+            &[OboPatchOp::SetName { term_id: "GO:0000001".into(), value: "one renamed".into() }],
+            true,
+        )
+        .expect("patch shorter id");
+
+        let text = result.preview_text.expect("preview");
+        let (short_start, short_end) = term_block_range(&text, "GO:0000001").expect("short term");
+        let (long_start, long_end) = term_block_range(&text, "GO:00000010").expect("long term");
+        assert!(text[short_start..short_end].contains("name: one renamed"));
+        assert!(text[long_start..long_end].contains("name: ten"));
+        assert!(!text[long_start..long_end].contains("one renamed"));
     }
 
     #[test]

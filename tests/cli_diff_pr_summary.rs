@@ -4,8 +4,6 @@ mod support;
 
 use std::process::Command;
 
-use support::ontocore_binary;
-
 #[test]
 fn diff_pr_summary_emits_markdown_between_directories() {
     let left = tempfile::tempdir().unwrap();
@@ -19,8 +17,13 @@ fn diff_pr_summary_emits_markdown_between_directories() {
     )
     .unwrap();
 
-    let output = Command::new(ontocore_binary())
+    let output = Command::new("cargo")
         .args([
+            "run",
+            "-q",
+            "-p",
+            "ontocore-cli",
+            "--",
             "diff",
             "--left-ref",
             left.path().to_str().unwrap(),

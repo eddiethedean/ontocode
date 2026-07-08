@@ -4,7 +4,6 @@ mod support;
 
 #[test]
 fn cli_classify_el_json() {
-    let bin = support::ontocore_binary();
     let dir = tempfile::tempdir().expect("tempdir");
     let workspace = dir.path().to_path_buf();
     std::fs::copy(
@@ -12,8 +11,20 @@ fn cli_classify_el_json() {
         workspace.join("reasoner-el.ttl"),
     )
     .expect("copy fixture");
-    let output = Command::new(&bin)
-        .args(["classify", workspace.to_str().unwrap(), "--profile", "el", "--format", "json"])
+    let output = Command::new("cargo")
+        .args([
+            "run",
+            "-q",
+            "-p",
+            "ontocore-cli",
+            "--",
+            "classify",
+            workspace.to_str().unwrap(),
+            "--profile",
+            "el",
+            "--format",
+            "json",
+        ])
         .output()
         .expect("run classify");
 
@@ -26,7 +37,6 @@ fn cli_classify_el_json() {
 
 #[test]
 fn cli_dl_profile_classifies_json() {
-    let bin = support::ontocore_binary();
     let dir = tempfile::tempdir().expect("tempdir");
     let workspace = dir.path().to_path_buf();
     std::fs::copy(
@@ -34,8 +44,20 @@ fn cli_dl_profile_classifies_json() {
         workspace.join("reasoner-el.ttl"),
     )
     .expect("copy fixture");
-    let output = Command::new(&bin)
-        .args(["classify", workspace.to_str().unwrap(), "--profile", "dl", "--format", "json"])
+    let output = Command::new("cargo")
+        .args([
+            "run",
+            "-q",
+            "-p",
+            "ontocore-cli",
+            "--",
+            "classify",
+            workspace.to_str().unwrap(),
+            "--profile",
+            "dl",
+            "--format",
+            "json",
+        ])
         .output()
         .expect("run classify");
 
@@ -48,7 +70,6 @@ fn cli_dl_profile_classifies_json() {
 
 #[test]
 fn cli_auto_profile_classifies_json() {
-    let bin = support::ontocore_binary();
     let dir = tempfile::tempdir().expect("tempdir");
     let workspace = dir.path().to_path_buf();
     std::fs::copy(
@@ -56,8 +77,20 @@ fn cli_auto_profile_classifies_json() {
         workspace.join("reasoner-el.ttl"),
     )
     .expect("copy fixture");
-    let output = Command::new(&bin)
-        .args(["classify", workspace.to_str().unwrap(), "--profile", "auto", "--format", "json"])
+    let output = Command::new("cargo")
+        .args([
+            "run",
+            "-q",
+            "-p",
+            "ontocore-cli",
+            "--",
+            "classify",
+            workspace.to_str().unwrap(),
+            "--profile",
+            "auto",
+            "--format",
+            "json",
+        ])
         .output()
         .expect("run classify");
 

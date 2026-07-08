@@ -1,46 +1,17 @@
-use std::path::{Path, PathBuf};
 use std::process::Command;
 
 mod support;
 
-pub fn ontocore_binary() -> PathBuf {
-    if let Ok(path) = std::env::var("CARGO_BIN_EXE_ontocore") {
-        let candidate = PathBuf::from(path);
-        if candidate.exists() {
-            return candidate;
-        }
-    }
-
-    find_ontocore_binary_in_target().unwrap_or_else(|| {
-        let target_dir = std::env::var("CARGO_TARGET_DIR")
-            .map(PathBuf::from)
-            .unwrap_or_else(|_| Path::new(env!("CARGO_MANIFEST_DIR")).join("target"));
-        panic!(
-            "ontocore binary not found under {} (run `cargo build -p ontocore-cli` first)",
-            target_dir.display()
-        );
-    })
-}
-
-fn find_ontocore_binary_in_target() -> Option<PathBuf> {
-    let target_dir = std::env::var("CARGO_TARGET_DIR")
-        .map(PathBuf::from)
-        .unwrap_or_else(|_| Path::new(env!("CARGO_MANIFEST_DIR")).join("target"));
-
-    for subdir in ["debug", "release"] {
-        let candidate = target_dir.join(subdir).join("ontocore");
-        if candidate.exists() {
-            return Some(candidate);
-        }
-    }
-
-    None
+fn ontocore_cmd() -> Command {
+    let mut cmd = Command::new("cargo");
+    cmd.args(["run", "-q", "-p", "ontocore-cli", "--"]);
+    cmd
 }
 
 #[test]
 fn validate_exits_zero_on_clean_fixtures() {
     let fixtures = support::fixture_workspace();
-    let output = Command::new(ontocore_binary())
+    let output = ontocore_cmd()
         .args(["validate", fixtures.to_str().expect("fixture path")])
         .output()
         .expect("spawn ontocore validate");
@@ -58,13 +29,13 @@ fn validate_exits_zero_on_clean_fixtures() {
 fn validate_exits_zero_when_only_warnings() {
     let dir = tempfile::tempdir().unwrap();
     std::fs::copy(
-        PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
             .join("tests/fixtures/diagnostics/lint-orphan.ttl"),
         dir.path().join("orphan.ttl"),
     )
     .unwrap();
 
-    let output = Command::new(ontocore_binary())
+    let output = ontocore_cmd()
         .args(["validate", dir.path().to_str().expect("temp path")])
         .output()
         .expect("spawn ontocore validate");
@@ -87,13 +58,13 @@ fn validate_exits_zero_when_only_warnings() {
 fn validate_exits_nonzero_on_diagnostic_errors() {
     let dir = tempfile::tempdir().unwrap();
     std::fs::copy(
-        PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
             .join("tests/fixtures/diagnostics/lint-broken-import.ttl"),
         dir.path().join("bad.ttl"),
     )
     .unwrap();
 
-    let output = Command::new(ontocore_binary())
+    let output = ontocore_cmd()
         .args(["validate", dir.path().to_str().expect("temp path")])
         .output()
         .expect("spawn ontocore validate");

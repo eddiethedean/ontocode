@@ -197,14 +197,23 @@ fn lsp_binary() -> PathBuf {
         }
     }
 
+    if let Some(bin) = find_lsp_binary_in_target() {
+        return bin;
+    }
+
+    // When running workspace-level integration tests, Cargo does not automatically
+    // build bin targets like `ontocore-lsp`. Build it explicitly, then locate it.
+    let status = Command::new("cargo")
+        .args(["build", "-q", "-p", "ontocore-lsp", "--bin", "ontocore-lsp"])
+        .status()
+        .expect("cargo build ontocore-lsp");
+    assert!(status.success(), "failed to build ontocore-lsp");
+
     find_lsp_binary_in_target().unwrap_or_else(|| {
         let target_dir = std::env::var("CARGO_TARGET_DIR")
             .map(PathBuf::from)
             .unwrap_or_else(|_| Path::new(env!("CARGO_MANIFEST_DIR")).join("target"));
-        panic!(
-            "ontocore-lsp binary not found under {} (run `cargo build -p ontocore-lsp` first)",
-            target_dir.display()
-        );
+        panic!("ontocore-lsp binary not found under {} after build", target_dir.display());
     })
 }
 

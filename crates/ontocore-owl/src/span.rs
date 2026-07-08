@@ -292,12 +292,103 @@ pub(crate) fn is_turtle_terminating_dot(bytes: &[u8], i: usize) -> bool {
     !(prev_name && next_name)
 }
 
-#[derive(Clone, Copy)]
+#[derive(Clone, Copy, PartialEq, Eq)]
 enum TurtleStringKind {
     ShortDouble,
     ShortSingle,
     LongDouble,
     LongSingle,
+}
+
+/// True when `byte_offset` lies inside a `#` line comment or any Turtle string literal.
+///
+/// Handles `"…"`, `'…'`, `"""…"""`, and `'''…'''` forms (same lexer rules as
+/// [`statement_end_byte`]).
+pub fn is_in_comment_or_string(text: &str, byte_offset: usize) -> bool {
+    let bytes = text.as_bytes();
+    let mut i = 0usize;
+    let mut string_kind: Option<TurtleStringKind> = None;
+    let mut in_iri = false;
+    let mut line_comment = false;
+    let mut escape = false;
+
+    while i < byte_offset && i < bytes.len() {
+        let b = bytes[i];
+        if line_comment {
+            if b == b'\n' {
+                line_comment = false;
+            }
+            i += 1;
+            continue;
+        }
+        if let Some(kind) = string_kind {
+            match kind {
+                TurtleStringKind::ShortDouble | TurtleStringKind::ShortSingle => {
+                    let quote = if kind == TurtleStringKind::ShortDouble {
+                        b'"'
+                    } else {
+                        b'\''
+                    };
+                    if escape {
+                        escape = false;
+                    } else if b == b'\\' {
+                        escape = true;
+                    } else if b == quote {
+                        string_kind = None;
+                    }
+                    i += 1;
+                    continue;
+                }
+                TurtleStringKind::LongDouble => {
+                    if bytes.get(i..i + 3) == Some(br#"""""#) {
+                        string_kind = None;
+                        i += 3;
+                        continue;
+                    }
+                    i += 1;
+                    continue;
+                }
+                TurtleStringKind::LongSingle => {
+                    if bytes.get(i..i + 3) == Some(br"'''") {
+                        string_kind = None;
+                        i += 3;
+                        continue;
+                    }
+                    i += 1;
+                    continue;
+                }
+            }
+        }
+        if in_iri {
+            if b == b'>' {
+                in_iri = false;
+            }
+            i += 1;
+            continue;
+        }
+
+        if bytes.get(i..i + 3) == Some(br#"""""#) {
+            string_kind = Some(TurtleStringKind::LongDouble);
+            i += 3;
+            continue;
+        }
+        if bytes.get(i..i + 3) == Some(br"'''") {
+            string_kind = Some(TurtleStringKind::LongSingle);
+            i += 3;
+            continue;
+        }
+
+        match b {
+            b'#' => line_comment = true,
+            b'"' => string_kind = Some(TurtleStringKind::ShortDouble),
+            b'\'' => string_kind = Some(TurtleStringKind::ShortSingle),
+            b'<' => in_iri = true,
+            _ => {}
+        }
+        i += 1;
+    }
+
+    string_kind.is_some() || line_comment
 }
 
 /// Walk from subject start to the terminating `.` of this statement.
@@ -586,6 +677,29 @@ mod tests {
         let ttl = "ex:foo.bar a owl:Class .\n";
         let end = statement_end_byte(ttl, 0).expect("end");
         assert_eq!(&ttl[..end], "ex:foo.bar a owl:Class .");
+    }
+
+    #[test]
+    fn is_in_comment_or_string_detects_all_turtle_string_forms() {
+        let double = "rdfs:label \"http://example.org#Person\" .";
+        let person_in_double = double.find("http://example.org#Person").unwrap();
+        assert!(is_in_comment_or_string(double, person_in_double));
+
+        let single = "rdfs:comment 'http://example.org#Person' .";
+        let person_in_single = single.find("http://example.org#Person").unwrap();
+        assert!(is_in_comment_or_string(single, person_in_single));
+
+        let long_double = "rdfs:comment \"\"\"http://example.org#Person\"\"\" .";
+        let person_in_long_double = long_double.find("http://example.org#Person").unwrap();
+        assert!(is_in_comment_or_string(long_double, person_in_long_double));
+
+        let long_single = "rdfs:comment '''http://example.org#Person''' .";
+        let person_in_long_single = long_single.find("http://example.org#Person").unwrap();
+        assert!(is_in_comment_or_string(long_single, person_in_long_single));
+
+        let outside = "ex:Person a owl:Class .";
+        let person_outside = outside.find("ex:Person").unwrap();
+        assert!(!is_in_comment_or_string(outside, person_outside));
     }
 
     #[test]

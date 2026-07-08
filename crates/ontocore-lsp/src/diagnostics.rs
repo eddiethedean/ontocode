@@ -116,8 +116,12 @@ fn to_lsp_diagnostic(
             ontocore_core::DiagnosticSeverity::Warning => DiagnosticSeverity::WARNING,
             ontocore_core::DiagnosticSeverity::Info => DiagnosticSeverity::INFORMATION,
         }),
-        code: Some(NumberOrString::String(diag.code.as_str().to_string())),
-        source: Some("ontocore".to_string()),
+        code: Some(NumberOrString::String(diag.display_code())),
+        source: Some(if let Some(pid) = &diag.plugin_id {
+            format!("ontocore-plugin:{pid}")
+        } else {
+            "ontocore".to_string()
+        }),
         message: diag.message.clone(),
         data: diag.quick_fix.as_ref().map(|s| serde_json::Value::String(s.clone())),
         ..Default::default()
@@ -140,6 +144,8 @@ mod tests {
             range: SourceLocation::at_line_col(2, 4),
             entity_iri: None,
             quick_fix: None,
+            plugin_id: None,
+            plugin_code: None,
         };
         let lsp = to_lsp_diagnostic(&diag, &|_| None);
         assert_eq!(lsp.range.start.line, 1);
@@ -184,6 +190,8 @@ mod tests {
             range: SourceLocation::at_line_col(1, 0),
             entity_iri: None,
             quick_fix: None,
+            plugin_id: None,
+            plugin_code: None,
         };
 
         let state = ServerState::new();

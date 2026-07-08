@@ -69,6 +69,8 @@ pub fn undefined_prefixes(
                 range,
                 entity_iri: None,
                 quick_fix,
+                plugin_id: None,
+                plugin_code: None,
             });
         }
     }

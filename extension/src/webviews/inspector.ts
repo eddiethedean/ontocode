@@ -1,5 +1,5 @@
 import * as vscode from "vscode";
-import { applyAxiomPatch, getEntity } from "../lsp/client";
+import { applyAxiomPatch, getEntity, listPlugins } from "../lsp/client";
 import {
   hasPatchFailureDiagnostics,
   isPatchFullySynced,
@@ -124,6 +124,30 @@ export class EntityInspectorPanel {
       classOptions,
       objectPropertyOptions,
     });
+    void this.postPluginsLoaded();
+  }
+
+  private async postPluginsLoaded(): Promise<void> {
+    try {
+      const { plugins } = await listPlugins();
+      this.host.postMessage({
+        type: "pluginsLoaded",
+        plugins: plugins.map((p) => ({
+          id: p.id,
+          name: p.name,
+          version: p.version,
+          kind: p.kind,
+          inspector_cards: p.ui.inspector_cards.map((c) => ({
+            id: c.id,
+            title: c.title,
+            applies_to: c.applies_to,
+            command: c.command,
+          })),
+        })),
+      });
+    } catch {
+      // Plugins are optional when workspace is not indexed.
+    }
   }
 
   private async handleMessage(message: WebviewMessage): Promise<void> {

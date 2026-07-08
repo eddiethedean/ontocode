@@ -4,6 +4,7 @@ import {
   getCatalogSnapshot,
   getEntity,
   indexWorkspace,
+  listPlugins,
 } from "../lsp/client";
 import { isPatchFullySynced, patchFailureMessage } from "../lsp/patchFeedback";
 import { PatchEntityKind, PatchOp } from "../lsp/protocol";
@@ -30,6 +31,8 @@ import { ExplorerTreeProvider } from "../treeviews/explorer";
 import { resolveEntityIri } from "../utils/resolveEntityIri";
 import { byteColToUtf16 } from "../utils/positions";
 import { documentUriInWorkspace, openWorkspaceTextDocument } from "../utils/workspacePath";
+import { refreshPluginCommands } from "./pluginCommands";
+import { WorkflowPanel } from "../webviews/workflowPanel";
 
 export function registerCommands(
   context: vscode.ExtensionContext,
@@ -42,8 +45,11 @@ export function registerCommands(
   }
 ): void {
   context.subscriptions.push(
+    vscode.commands.registerCommand("ontocode.runOwlmakeWorkflow", async () => {
+      await WorkflowPanel.runOwlmake("qc");
+    }),
     vscode.commands.registerCommand("ontocode.indexWorkspace", async () => {
-      await runIndexAndRefresh(providers);
+      await runIndexAndRefresh(context, providers);
       vscode.window.showInformationMessage("OntoCode: workspace indexed");
     }),
     vscode.commands.registerCommand("ontocode.refreshExplorer", async () => {
@@ -470,7 +476,9 @@ export function registerCommands(
   );
 }
 
-async function runIndexAndRefresh(providers: {
+async function runIndexAndRefresh(
+  context: vscode.ExtensionContext,
+  providers: {
   ontologies: ExplorerTreeProvider;
   classes: ExplorerTreeProvider;
   properties: ExplorerTreeProvider;
@@ -479,6 +487,7 @@ async function runIndexAndRefresh(providers: {
 }): Promise<void> {
   await indexWorkspace();
   await refreshExplorer(providers);
+  await refreshPluginCommands(context);
 }
 
 export async function refreshExplorer(providers: {

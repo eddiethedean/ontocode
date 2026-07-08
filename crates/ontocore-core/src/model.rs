@@ -146,6 +146,7 @@ pub enum DiagnosticCode {
     OrphanClass,
     OwlBridgeFailed,
     IoReadError,
+    PluginViolation,
 }
 
 impl DiagnosticCode {
@@ -159,6 +160,7 @@ impl DiagnosticCode {
             Self::OrphanClass => "orphan_class",
             Self::OwlBridgeFailed => "owl_bridge_failed",
             Self::IoReadError => "io_read_error",
+            Self::PluginViolation => "plugin_violation",
         }
     }
 }
@@ -174,6 +176,20 @@ pub struct Diagnostic {
     pub entity_iri: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub quick_fix: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub plugin_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub plugin_code: Option<String>,
+}
+
+impl Diagnostic {
+    pub fn display_code(&self) -> String {
+        if let (Some(plugin_id), Some(code)) = (&self.plugin_id, &self.plugin_code) {
+            format!("plugin:{plugin_id}:{code}")
+        } else {
+            self.code.as_str().to_string()
+        }
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

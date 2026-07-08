@@ -21,6 +21,8 @@ import {
   assertPreviewRefactorResult,
   assertApplyRefactorResult,
   assertSemanticDiffResult,
+  assertListPluginsResult,
+  assertRunPluginResult,
 } from "./protocolGuards";
 import {
   ApplyAxiomPatchClientResult,
@@ -47,6 +49,9 @@ import {
   ApplyRefactorResult,
   SemanticDiffParams,
   SemanticDiffResult,
+  ListPluginsResult,
+  RunPluginParams,
+  RunPluginResult,
 } from "./protocol";
 import {
   bundledServerPath,
@@ -206,6 +211,20 @@ export async function getCatalogSnapshot(): Promise<CatalogSnapshot> {
     null
   );
   return assertCatalogSnapshot(result);
+}
+
+export async function listPlugins(): Promise<ListPluginsResult> {
+  const result = await ontcoreRequest<unknown>("ontocore/listPlugins", null);
+  return assertListPluginsResult(result);
+}
+
+export async function runPlugin(params: RunPluginParams): Promise<RunPluginResult> {
+  const result = await ontcoreRequest<unknown>("ontocore/runPlugin", {
+    plugin_id: params.plugin_id,
+    action: params.action ?? "validate",
+    step: params.step,
+  });
+  return assertRunPluginResult(result);
 }
 
 export async function getEntity(iri: string): Promise<GetEntityResult> {

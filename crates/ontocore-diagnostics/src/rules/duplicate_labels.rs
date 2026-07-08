@@ -39,6 +39,8 @@ pub fn duplicate_labels(
                 range,
                 entity_iri: Some(entity.iri.clone()),
                 quick_fix: None,
+                plugin_id: None,
+                plugin_code: None,
             });
         }
     }

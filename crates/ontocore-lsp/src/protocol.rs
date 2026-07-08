@@ -19,7 +19,7 @@ pub struct DiagnosticSummary {
 impl From<&Diagnostic> for DiagnosticSummary {
     fn from(d: &Diagnostic) -> Self {
         Self {
-            code: d.code.as_str().to_string(),
+            code: d.display_code(),
             severity: d.severity.as_str().to_string(),
             message: d.message.clone(),
             file: d.file.display().to_string(),
@@ -413,4 +413,32 @@ pub struct ApplyRefactorResult {
     pub reindex_warning: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub workspace_edit: Option<lsp_types::WorkspaceEdit>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct ListPluginsResult {
+    pub plugins: Vec<ontocore_plugin::PluginDescriptor>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct RunPluginParams {
+    pub plugin_id: String,
+    #[serde(default = "default_validate_action")]
+    pub action: String,
+    #[serde(default)]
+    pub step: Option<String>,
+}
+
+fn default_validate_action() -> String {
+    "validate".to_string()
+}
+
+#[derive(Debug, Serialize)]
+pub struct RunPluginResult {
+    pub diagnostics: Vec<DiagnosticSummary>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub output_paths: Vec<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub logs: Option<String>,
+    pub success: bool,
 }

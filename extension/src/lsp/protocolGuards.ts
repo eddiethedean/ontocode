@@ -435,3 +435,29 @@ export function assertSemanticDiffResult(
   }
   throw new Error("Invalid semantic diff result from language server");
 }
+
+export function assertListPluginsResult(
+  value: unknown
+): import("./protocol").ListPluginsResult {
+  if (!value || typeof value !== "object") {
+    throw new Error("Invalid list plugins result from language server");
+  }
+  const result = value as Record<string, unknown>;
+  if (!Array.isArray(result.plugins)) {
+    throw new Error("Invalid list plugins result: missing plugins array");
+  }
+  return { plugins: result.plugins as import("./protocol").PluginDescriptor[] };
+}
+
+export function assertRunPluginResult(
+  value: unknown
+): import("./protocol").RunPluginResult {
+  if (!value || typeof value !== "object") {
+    throw new Error("Invalid run plugin result from language server");
+  }
+  const result = value as Record<string, unknown>;
+  if (!Array.isArray(result.diagnostics) || typeof result.success !== "boolean") {
+    throw new Error("Invalid run plugin result from language server");
+  }
+  return result as unknown as import("./protocol").RunPluginResult;
+}

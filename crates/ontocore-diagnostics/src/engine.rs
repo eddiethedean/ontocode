@@ -67,6 +67,8 @@ pub fn collect_diagnostics_with_sources(
                     range: SourceLocation::default(),
                     entity_iri: None,
                     quick_fix: None,
+                    plugin_id: None,
+                    plugin_code: None,
                 });
                 String::new()
             }

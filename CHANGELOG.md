@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.14.0] - 2026-07-09
+
+### Added
+
+- **Plugin host MVP** — `PluginHost` registry, manifest discovery from `.ontocore/plugins/`, in-process reference plugins, subprocess workflow runner
+- **Reference plugins** — naming convention validator, Markdown exporter, SHACL scaffold (`ontocore-plugin-naming`, `ontocore-plugin-markdown-export`, `ontocore-plugin-shacl`)
+- **CLI** — `ontocore plugins list`, `ontocore plugins run`, `ontocore workflow run --plugin owlmake --step qc`, plugin diagnostics in `validate`, `docs --plugin`
+- **LSP** — `ontocore/listPlugins`, `ontocore/runPlugin`; plugin diagnostics merged on index
+- **OntoCode** — plugin commands, workflow output panel scaffold, OntoUI capability registry + inspector plugin cards
+- **Examples** — `examples/plugin-workspace/` fixture; [Plugin authoring guide](docs/guides/plugins.md)
+
+### Changed
+
+- Workspace package and all `ontocore-*` crates bumped to **0.14.0**
+- Extension marketplace version **0.14.0**
+- `Diagnostic` model extended with `PluginViolation` and plugin metadata
+
 ## [0.13.0] - 2026-07-08
 
 ### Added
@@ -225,6 +242,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SPARQL update guard bypass after `PREFIX` or comment lines
 - Capped file reads in parser, catalog semantics, and refactor preview/backup paths
 
+[0.14.0]: https://github.com/eddiethedean/ontocode/releases/tag/v0.14.0
 [0.13.0]: https://github.com/eddiethedean/ontocode/releases/tag/v0.13.0
 [0.12.0]: https://github.com/eddiethedean/ontocode/releases/tag/v0.12.0
 [0.11.3]: https://github.com/eddiethedean/ontocode/releases/tag/v0.11.3

@@ -1,6 +1,6 @@
-# OntoCore LSP API (v0.13)
+# OntoCore LSP API (v0.14)
 
-> **Status:** Documents behavior in **OntoCore v0.13.0**. Pre-1.0 APIs may change.
+> **Status:** Documents behavior in **OntoCore v0.14.0**. Pre-1.0 APIs may change.
 > Canonical feature list: [What ships today](SHIPPED.md).
 
 This document describes **what ships today** in `ontocore-lsp`. For the **v1.0 target** (extended plugin methods), see [LSP_SPEC.md](design/LSP_SPEC.md).
@@ -426,6 +426,34 @@ Standard LSP semantic tokens for **Turtle** (`.ttl`) and **OBO** (`.obo`) open d
 **Token types:** `namespace`, `iri`, `keyword`, `comment`, `string`
 
 Requires document text in the LSP open-document buffer (unsaved buffers supported).
+
+### `ontocore/listPlugins` (v0.14+)
+
+Returns discovered workspace plugins from `.ontocore/plugins/*.toml` plus built-in registration metadata.
+
+**Params:** none (uses indexed workspace root)
+
+**Result:** `{ "plugins": PluginDescriptor[] }` — id, name, version, kind, capabilities, `ui.commands`, `ui.inspector_cards`, `in_process`.
+
+**Errors:** `NOT_INDEXED`
+
+### `ontocore/runPlugin` (v0.14+)
+
+Run a plugin validate/export/workflow action.
+
+**Params:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `plugin_id` | string | Plugin id from manifest |
+| `action` | string? | `validate` (default), `export`, `workflow` |
+| `step` | string? | Workflow step when `action` is `workflow` |
+
+**Result:** `{ "diagnostics": DiagnosticSummary[], "output_paths": string[], "logs": string?, "success": boolean }`
+
+Plugin diagnostics use `code` values like `plugin:<id>:<code>` and LSP `source` `ontocore-plugin:<id>`.
+
+**Errors:** `NOT_INDEXED`, `INVALID_PARAMS`
 
 ## Structured errors
 

@@ -4,7 +4,7 @@
 
 **OntoCode** is a VS Code extension for browsing and editing ontologies in your workspace. **OntoCore** is the Rust semantic workspace engine behind it (CLI + language server). Browse OWL/RDF/OBO in VS Code, edit Turtle and OBO in the Entity Inspector, run EL–DL reasoning, query or validate in CI — without Protégé.
 
-**Current release: v0.13.0** · [Changelog](CHANGELOG.md) · [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) · [Migration v0.13](docs/migration/v0.13.md)
+**Current release: v0.14.0** · [Changelog](CHANGELOG.md) · [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) · [Migration v0.13](docs/migration/v0.13.md)
 
 [![CI](https://github.com/eddiethedean/ontocode/actions/workflows/ci.yml/badge.svg)](https://github.com/eddiethedean/ontocode/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue)](https://github.com/eddiethedean/ontocode/blob/main/LICENSE-MIT)
@@ -95,7 +95,7 @@ cargo run -- validate fixtures
 
 Platform docs: [Vision](https://ontocode-vs.readthedocs.io/en/latest/vision/) · [Architecture](ARCHITECTURE.md) · [Roadmap](ROADMAP.md) · [Protégé parity](https://ontocode-vs.readthedocs.io/en/latest/design/PROTEGE_PARITY/)
 
-**OntoCode 1.0** targets a Protégé-competitive OWL + OBO IDE in VS Code, with CLI gates for CI. **v0.13** ships WorkspaceStore + focus relay, Query Workbench schema browser, semantic tokens, PR-summary diffs, and Turtle/OBO inspector write-back — on top of v0.11–v0.12 editor depth, semantic diff, multi-root indexing, and EL/DL reasoning. See [SHIPPED matrix](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/).
+**OntoCode 1.0** targets a Protégé-competitive OWL + OBO IDE in VS Code, with CLI gates for CI. **v0.14** ships the plugin host MVP (manifests, reference plugins, CLI/LSP hooks, owlmake scaffold) on top of **v0.13** WorkspaceStore + focus relay, Query Workbench schema browser, semantic tokens, PR-summary diffs, and Turtle/OBO inspector write-back. See [SHIPPED matrix](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/).
 
 ## Development
 

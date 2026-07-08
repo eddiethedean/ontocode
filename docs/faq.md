@@ -13,7 +13,7 @@ OntoCore was previously branded **OntoIndex** (`ontoindex` CLI, `ontoindex-*` cr
 
 **Is the API stable?**
 
-Pre-1.0. Published crates are at **0.13.x**. Library APIs, LSP JSON, and SQL table columns may change between minor releases until v1.0. Pin versions in CI with `cargo install ontocore-cli --locked --version 0.13.0`. See [API stability](guides/api-stability.md). Upgrading from **0.11.x**? See [v0.13 migration](migration/v0.13.md). The `validate` and `classify` exit codes are documented in [workspace-limits.md](workspace-limits.md).
+Pre-1.0. Published crates are at **0.14.x**. Library APIs, LSP JSON, and SQL table columns may change between minor releases until v1.0. Pin versions in CI with `cargo install ontocore-cli --locked --version 0.14.0`. See [API stability](guides/api-stability.md). Upgrading from **0.13.x**? See [v0.14 migration](migration/v0.14.md). The `validate` and `classify` exit codes are documented in [workspace-limits.md](workspace-limits.md).
 
 **What ships in the current release?**
 
@@ -23,7 +23,7 @@ See [What ships today](SHIPPED.md) for the canonical capability matrix.
 
 **Is OntoCode production-ready?**
 
-**Pilot-ready for many OWL/OBO workflows in VS Code and CI** — not a full Protégé replacement for every profile. Use [What ships today](SHIPPED.md) for the capability matrix, [Production readiness](guides/production-readiness.md) for pilot vs production tiers, and [Protégé decision guide](guides/protege-decision.md) for gap analysis. Pin releases in CI (`--version 0.13.0`) and review [API stability](guides/api-stability.md) before embedding Rust libraries.
+**Pilot-ready for many OWL/OBO workflows in VS Code and CI** — not a full Protégé replacement for every profile. Use [What ships today](SHIPPED.md) for the capability matrix, [Production readiness](guides/production-readiness.md) for pilot vs production tiers, and [Protégé decision guide](guides/protege-decision.md) for gap analysis. Pin releases in CI (`--version 0.14.0`) and review [API stability](guides/api-stability.md) before embedding Rust libraries.
 
 ## Installation
 

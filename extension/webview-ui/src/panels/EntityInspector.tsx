@@ -34,6 +34,8 @@ export function EntityInspectorPanel(_props?: WorkspaceProps): JSX.Element {
   const host = useWorkspaceHost();
   const setFocus = useWorkspaceStore((s) => s.setFocus);
   const focusIri = useWorkspaceStore((s) => s.inspector.entityIri);
+  const installedPlugins = useWorkspaceStore((s) => s.plugins.installed);
+  const setPlugins = useWorkspaceStore((s) => s.setPlugins);
   const [detail, setDetail] = useState<EntityDetailPayload | null>(null);
   const [classOptions, setClassOptions] = useState<string[]>([]);
   const [objectPropertyOptions, setObjectPropertyOptions] = useState<string[]>([]);
@@ -88,6 +90,16 @@ export function EntityInspectorPanel(_props?: WorkspaceProps): JSX.Element {
       } else if (msg.type === "preview") {
         setPreview(msg.text);
         setEditPreview(msg.text);
+      } else if (msg.type === "pluginsLoaded") {
+        setPlugins(
+          msg.plugins.map((p) => ({
+            id: p.id,
+            name: p.name,
+            version: p.version,
+            kind: p.kind,
+            inspector_cards: p.inspector_cards ?? [],
+          }))
+        );
       } else if (msg.type === "error") {
         setPreview(`Error: ${msg.message}`);
         setEditPreview(`Error: ${msg.message}`);
@@ -95,7 +107,7 @@ export function EntityInspectorPanel(_props?: WorkspaceProps): JSX.Element {
     };
     window.addEventListener("message", handler);
     return () => window.removeEventListener("message", handler);
-  }, [host, setFocus]);
+  }, [host, setFocus, setPlugins]);
 
   if (!detail) {
     return (
@@ -106,6 +118,13 @@ export function EntityInspectorPanel(_props?: WorkspaceProps): JSX.Element {
   }
 
   const { entity, parents, children, axioms, editable, document_path, annotations = [], characteristics } = detail;
+
+  const pluginCards = installedPlugins.flatMap((plugin) =>
+    plugin.inspector_cards.filter(
+      (card) =>
+        card.applies_to.length === 0 || card.applies_to.includes(entity.kind)
+    )
+  );
 
   const isObo = document_path?.endsWith(".obo") ?? false;
   const isTurtle = document_path?.endsWith(".ttl") ?? false;
@@ -178,6 +197,20 @@ export function EntityInspectorPanel(_props?: WorkspaceProps): JSX.Element {
       <Section title="Comments" card>
         <IriList items={entity.comments} />
       </Section>
+
+      {pluginCards.length > 0 ? (
+        <Section title="Plugin insights" card>
+          {pluginCards.map((card) => (
+            <Callout key={card.id} variant="info">
+              <strong>{card.title}</strong>
+              <p className="muted">
+                Naming convention checks run via workspace plugins. Review the Problems panel for
+                plugin diagnostics.
+              </p>
+            </Callout>
+          ))}
+        </Section>
+      ) : null}
 
       <Section title="Parents" card>
         <IriList items={parents} onSelect={openEntity} />

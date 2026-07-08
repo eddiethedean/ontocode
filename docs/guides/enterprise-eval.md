@@ -1,6 +1,6 @@
 # Evaluating OntoCode for your organization
 
-This page helps security, platform, and ontology teams decide whether OntoCode **v0.13.0** fits your workflow. It is honest about **what ships today** vs the v1.0 Protégé-competitive target.
+This page helps security, platform, and ontology teams decide whether OntoCode **v0.14.0** fits your workflow. It is honest about **what ships today** vs the v1.0 Protégé-competitive target.
 
 Canonical capability matrix: [What ships today](../SHIPPED.md).
 
@@ -9,7 +9,7 @@ Canonical capability matrix: [What ships today](../SHIPPED.md).
 Prefer Protégé or other tools (or wait for v1.0) if you need:
 
 - Full **SQL** analytics (JOINs, aggregates) — only SQL-like virtual tables ship today
-- An installable **plugin host** / owlmake workflow integration (experimental foundation in v0.13; MVP planned **v0.14**)
+- An installable **plugin host** / owlmake workflow integration (**shipped MVP in v0.14**; stable ecosystem API planned **v1.0**)
 
 ## Enterprise documentation pack
 
@@ -26,7 +26,7 @@ Prefer Protégé or other tools (or wait for v1.0) if you need:
 | [LGPL compliance](lgpl-compliance.md) | Legal — horned-owl obligations |
 | [Protégé coexistence](protege-coexistence.md) | Ontology teams — split workflow with Protégé |
 
-## What ships today (v0.13.0)
+## What ships today (v0.14.0)
 
 | Capability | Status |
 |------------|--------|

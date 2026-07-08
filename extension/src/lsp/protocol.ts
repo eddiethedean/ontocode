@@ -505,3 +505,57 @@ export interface LspTextDocumentEdit {
 export interface LspWorkspaceEdit {
   document_changes?: LspTextDocumentEdit[];
 }
+
+export interface PluginCommandContribution {
+  id: string;
+  title: string;
+  scope?: string;
+}
+
+export interface PluginInspectorCard {
+  id: string;
+  title: string;
+  applies_to?: string[];
+  command?: string;
+}
+
+export interface PluginUiContributions {
+  commands: PluginCommandContribution[];
+  inspector_cards: PluginInspectorCard[];
+}
+
+export interface PluginCapabilities {
+  build: boolean;
+  validate: boolean;
+  release: boolean;
+  diagnostics: boolean;
+  export: boolean;
+}
+
+export interface PluginDescriptor {
+  id: string;
+  name: string;
+  version: string;
+  kind: string;
+  capabilities: PluginCapabilities;
+  manifest_path: string;
+  ui: PluginUiContributions;
+  in_process: boolean;
+}
+
+export interface ListPluginsResult {
+  plugins: PluginDescriptor[];
+}
+
+export interface RunPluginParams {
+  plugin_id: string;
+  action?: string;
+  step?: string;
+}
+
+export interface RunPluginResult {
+  diagnostics: DiagnosticSummary[];
+  output_paths?: string[];
+  logs?: string;
+  success: boolean;
+}

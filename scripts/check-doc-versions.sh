@@ -363,7 +363,7 @@ for file in docs/guides/refactoring.md docs/migration/v0.8.md docs/migration/v0.
   fi
 done
 
-check_file_contains "docs/faq.md" "0\.13\.x" "faq crate version"
+check_file_contains "docs/faq.md" "0\.14\.x" "faq crate version"
 check_file_contains "docs/guides/release-timeline.md" "${VERSION}.*Current" "release-timeline current version"
 check_file_contains "docs/guides/release-timeline.md" "v0\.12.*Shipped" "release-timeline v0.12 shipped"
 
@@ -407,21 +407,20 @@ fi
 
 check_file_contains "docs/guides/production-readiness.md" "${MINOR_VERSION}\.x \\(current\\)" "production-readiness current minor"
 check_file_contains "docs/ontocore/index.md" "v${VERSION}" "ontocore index version"
-check_file_contains "docs/ontocore/rust-api.md" 'ontocore = "0.13"' "rust-api version pin"
-check_file_contains "docs/ontocore/crate-map.md" 'ontocore = "0.13"' "crate-map version pin"
+check_file_contains "docs/ontocore/rust-api.md" "ontocore = \"${MINOR_VERSION}\"" "rust-api version pin"
+check_file_contains "docs/ontocore/crate-map.md" 'ontocore = "0.14"' "crate-map version pin"
 check_file_contains "docs/ontocode/manage-imports.md" "Manage Imports" "manage-imports guide"
 check_file_contains "mkdocs.yml" "ontocode/manage-imports.md" "mkdocs manage-imports guide"
-check_file_contains "mkdocs.yml" "migration/v0.13.md" "mkdocs whats-new migration link"
-
+check_file_contains "mkdocs.yml" "migration/v0.14.md" "mkdocs v0.14 migration guide"
 check_file_contains "docs/guides/production-readiness.md" "v${VERSION}" "production-readiness version"
 check_file_contains "mkdocs.yml" "ontocore/rust-api.md" "mkdocs Rust API reference"
 check_file_contains "mkdocs.yml" "guides/protege-migration.md" "mkdocs Protégé migration guide"
 check_file_contains "mkdocs.yml" "ontocode/feature-tour.md" "mkdocs feature tour"
-check_file_contains "mkdocs.yml" "migration/v0.13.md" "mkdocs v0.13 migration guide"
+check_file_contains "mkdocs.yml" "guides/plugins.md" "mkdocs plugins guide"
 check_file_contains "mkdocs.yml" "guides/docs-export.md" "mkdocs docs export guide"
 check_file_contains "mkdocs.yml" "design/adr/README.md" "mkdocs ADR index"
 check_file_contains "mkdocs.yml" "Reference:" "mkdocs Reference tab"
-check_file_contains "docs/guides/rust-crates.md" 'ontocore = "0.13"' "rust-crates version pin"
+check_file_contains "docs/guides/rust-crates.md" 'ontocore = "0.14"' "rust-crates version pin"
 
 # Stale protege-coexistence version banner
 if grep -qE 'evaluating OntoCode \*\*v0\.6\*\*|v0\.6 support' docs/guides/protege-coexistence.md; then
@@ -455,7 +454,7 @@ if grep -qE 'read-only in the Entity Inspector|Write-back in VS Code remains \*\
 else
   echo "ok: obo-workflow OBO edit status"
 fi
-check_file_contains "docs/guides/protege-coexistence.md" "v0\.13" "protege-coexistence v0.13"
+check_file_contains "docs/guides/protege-coexistence.md" "v0\.14" "protege-coexistence v0.14"
 check_file_contains "docs/guides/release-timeline.md" "non-commitment" "release-timeline disclaimer"
 if grep -qE 'OBO format \+ ROBOT interop.*Not shipped' docs/guides/enterprise-eval.md; then
   echo "FAIL: enterprise-eval.md contradicts SHIPPED.md on OBO/ROBOT" >&2
@@ -539,7 +538,7 @@ for pair in "VISION.md:docs/vision.md:Build the modern open-source platform" \
   fi
 done
 
-check_file_contains "docs/roadmap.md" "Shipped releases \\(v0.1–v0.13\\)" "docs roadmap shipped section"
+check_file_contains "docs/roadmap.md" "Shipped releases \\(v0.1–v0.14\\)" "docs roadmap shipped section"
 check_file_contains "ROADMAP.md" "v1.2 — Ontology Toolchain Platform" "roadmap v1.2 toolchain milestone"
 check_file_contains "docs/roadmap.md" "v1.2 — Ontology Toolchain Platform" "docs roadmap v1.2 milestone"
 check_file_contains "ROADMAP.md" "owlmake" "roadmap owlmake integration"
@@ -646,9 +645,9 @@ else
   echo "ok: no stale property chains view-only claims"
 fi
 
-# Architecture banner must reference v0.13 ships today
-check_file_contains "ARCHITECTURE.md" "v0\.13 ships today" "ARCHITECTURE.md v0.13 banner"
-check_file_contains "docs/architecture.md" "v0\.13 ships today" "docs/architecture.md v0.13 banner"
+# Architecture banner must reference current release ships today
+check_file_contains "ARCHITECTURE.md" "v0\.14 ships today" "ARCHITECTURE.md v0.14 banner"
+check_file_contains "docs/architecture.md" "v0\.14 ships today" "docs/architecture.md v0.14 banner"
 
 # Stale CLI alias notes
 if rg -q 'ontocore alias is planned' docs --glob '!**/migration/**' --glob '!**/design/**' 2>/dev/null; then
@@ -728,7 +727,7 @@ check_file_contains "mkdocs.yml" "v0\\.13\\+" "mkdocs platform planning tab labe
 check_file_contains "docs/guides/owl-xml-workflow.md" "read-only catalog" "owl-xml workflow guide"
 check_file_contains "docs/ontocore/rust-api.md" "Book ↔ docs.rs crosswalk" "rust-api docs.rs crosswalk"
 check_file_contains "docs/troubleshooting.md" "Where to start" "troubleshooting decision tree"
-check_file_contains "docs/platform/OVERVIEW.md" "v0.13 foundation shipped" "platform overview shipped banner"
+check_file_contains "docs/platform/OVERVIEW.md" "v0.14 foundation shipped" "platform overview shipped banner"
 
 # vision.md must reference current shipped release (not v0.11 or v0.12)
 for file in docs/vision.md VISION.md; do

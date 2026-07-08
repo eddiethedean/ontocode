@@ -1,6 +1,6 @@
 # Modernizing the Ontology Ecosystem
 
-> **Long-term vision.** For what ships in **v0.13**, see [What ships today](SHIPPED.md). Plugin hosting and owlmake integration are **v1.0 targets** — not installable yet.
+> **Long-term vision.** For what ships in **v0.14**, see [What ships today](SHIPPED.md). Plugin host MVP and owlmake workflow scaffold **shipped in v0.14**; stable plugin ecosystem API is a **v1.0 target**.
 
 ## Mission
 

@@ -6,7 +6,8 @@ Planning ranges for OntoCode / OntoCore. **These are product goals, not contract
 
 | Version | Status | Date (changelog) |
 |---------|--------|------------------|
-| **0.13.0** | Current | 2026-07-08 |
+| **0.14.0** | Current | 2026-07-09 |
+| **0.13.0** | Previous | 2026-07-08 |
 | **0.12.0** | Previous | 2026-07-06 |
 | **0.11.3** | Previous | 2026-07-06 |
 | **0.11.2** | Previous | 2026-07-06 |
@@ -24,7 +25,8 @@ Pre-1.0: minor releases may change library APIs, LSP JSON, and SQL virtual table
 | **v0.11** | Editor depth & distribution — LSP completion, code actions, docs export, imports UI, Open VSX, OBO fastobo read | **Shipped** (2026-07-05) |
 | **v0.12** | Authoring parity — OBO write-back, property chains, OWL/XML read, DL explanations | **Shipped** (2026-07-06) |
 | **v0.13** | OntoUI platform — WorkspaceStore, focus relay, schema browser, PR summary, semantic tokens | **Shipped** (2026-07-08) |
-| **v1.0** | Protégé-competitive OWL + OBO in VS Code; full axiom catalog; plugin host | Planned |
+| **v0.14** | Plugin host MVP — manifests, reference plugins, CLI/LSP hooks, owlmake scaffold | **Shipped** (2026-07-09) |
+| **v1.0** | Protégé-competitive OWL + OBO in VS Code; full axiom catalog; stable plugin API | Planned |
 
 Canonical forward plan: [Platform roadmap](../roadmap.md). Engineering milestone history: [Milestones (shipped)](../design/ROADMAP.md).
 
@@ -42,13 +44,13 @@ Canonical forward plan: [Platform roadmap](../roadmap.md). Engineering milestone
 ### v1.0 (planned)
 
 - Extended OWL 2 DL axiom catalog and Protégé round-trip playbooks per parity matrix
-- Installable plugin host / owlmake-style workflow integration (MVP planned **v0.14**)
+- Installable plugin host / owlmake-style workflow integration (**shipped MVP in v0.14**; stable API planned **v1.0**)
 - Formal performance benchmarks (currently v1.0 backlog — [performance sizing](performance-sizing.md))
 - Extended Protégé migration playbooks (today: [first-week guide](protege-migration.md), [coexistence](protege-coexistence.md), [decision matrix](protege-decision.md))
 
 ## How to plan enterprise adoption without a v1.0 date
 
-1. **Now (v0.13):** CI gates + controlled IDE pilot — [production readiness](production-readiness.md)
+1. **Now (v0.14):** CI gates + controlled IDE pilot — [production readiness](production-readiness.md)
 2. **Run** [production evidence protocol](production-evidence.md) on your corpus
 3. **Re-evaluate** at each pinned minor bump using [migration index](../migration/README.md)
 4. **Do not** retire Protégé for DL/OBO workflows until parity matrix items you need are green in SHIPPED

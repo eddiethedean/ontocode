@@ -2,7 +2,7 @@
   "name": "ontocode",
   "displayName": "OntoCode",
   "description": "Ontology IDE for VS Code powered by OntoCore. Browse, edit Turtle, query, reason (EL–DL), validate, and diff OWL/RDF/OBO ontologies from the IDE or CI.",
-  "version": "0.13.0",
+  "version": "0.14.0",
   "publisher": "ontocode",
   "license": "MIT",
   "repository": {
@@ -169,6 +169,10 @@
       {
         "command": "ontocode.runReasoner",
         "title": "OntoCode: Run Reasoner"
+      },
+      {
+        "command": "ontocode.runOwlmakeWorkflow",
+        "title": "OntoCode: Run Workflow (owlmake)"
       },
       {
         "command": "ontocode.semanticDiff",

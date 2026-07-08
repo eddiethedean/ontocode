@@ -35,7 +35,7 @@ After 1.0, the roadmap shifts from parity to modernization.
 | [PRODUCT_ROADMAP_2.0.md](docs/ui/PRODUCT_ROADMAP_2.0.md) | UI phases with milestone acceptance criteria |
 | [ui/README.md](docs/ui/README.md) | Product design specification pack (UX, design system, OntoStudio target) |
 
-**Current release:** v0.13.0
+**Current release:** v0.14.0
 
 ---
 
@@ -84,7 +84,7 @@ MVP                replacement           AI                platform
 | 11 | v0.11 | C | Shipped | 5, 7, 11 (partial) | Editor depth & distribution |
 | 12 | v0.12 | C | Shipped | 2 (P0 exit) | Authoring parity |
 | 13 | v0.13 | D | Shipped | 0, 1, 3†, 5†, 9† | Platform hardening |
-| 14 | v0.14 | D | Planned | 8 | Plugin host MVP |
+| 14 | v0.14 | D | Shipped | 8 | Plugin host MVP |
 | 15 | v1.0 | E | Planned | 1–6 exit, 9† | Protégé-competitive release |
 | 16 | v1.1 | F | Planned | 7, 2†, 3†, 4†, 8†, 9† | Language bindings & AI primitives |
 | 17 | v1.2+ | F | Planned | 9, 10, 11 | Ontology toolchain platform |

@@ -31,7 +31,7 @@ Design documents, ADRs, and backlogs live under [design/](design/README.md). **P
 ### LSP / custom editor integrators
 
 1. [LSP hello world](guides/lsp-hello-world.md) — minimal stdio client
-2. [LSP API reference](lsp-api.md) — shipped v0.13 methods
+2. [LSP API reference](lsp-api.md) — shipped v0.14 methods
 3. Do **not** use [design/LSP_SPEC.md](design/LSP_SPEC.md) for current behavior (future target)
 
 ## Start here for contributors
@@ -53,4 +53,4 @@ Design documents, ADRs, and backlogs live under [design/](design/README.md). **P
 
 ## Plugin model
 
-The plugin host is a **v0.14 design** with an **experimental** `ontocore-plugin` discovery crate — **not a stable API in v0.13**. See [plugin model](ontocore/plugin-model.md) and [PLUGIN_SPEC.md](design/PLUGIN_SPEC.md).
+The plugin host **shipped in v0.14** as an MVP (`ontocore-plugin` discovery + `PluginHost` runtime). The API is **not stable** until v1.0. See [plugin model](ontocore/plugin-model.md), [Plugin authoring guide](guides/plugins.md), and [PLUGIN_SPEC.md](design/PLUGIN_SPEC.md).

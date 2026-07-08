@@ -31,6 +31,8 @@ ontocore-reasoner = { workspace = true }
 ontocore-refactor = { workspace = true }
 ontocore-robot = { workspace = true }
 ontocore-diff = { workspace = true }
+ontocore-plugin-builtins = { workspace = true }
+ontocore-plugin = { workspace = true }
 lsp-server.workspace = true
 lsp-types.workspace = true
 serde = { workspace = true }

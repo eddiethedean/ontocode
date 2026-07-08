@@ -2,9 +2,10 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
   hasPatchFailureDiagnostics,
+  isPatchFullySynced,
   patchFailureMessage,
 } from "./patchFeedback";
-import type { ApplyPatchResult } from "./protocol";
+import type { ApplyAxiomPatchClientResult, ApplyPatchResult } from "./protocol";
 
 describe("patchFeedback", () => {
   it("uses first diagnostic message when present", () => {
@@ -23,5 +24,23 @@ describe("patchFeedback", () => {
       "OntoCode: patch was not applied"
     );
     assert.equal(hasPatchFailureDiagnostics(result), false);
+  });
+
+  it("isPatchFullySynced requires applied and editor_synced", () => {
+    const synced: ApplyAxiomPatchClientResult = {
+      applied: true,
+      editor_synced: true,
+    };
+    const cancelled: ApplyAxiomPatchClientResult = {
+      applied: true,
+      editor_synced: false,
+    };
+    const failed: ApplyAxiomPatchClientResult = {
+      applied: false,
+      editor_synced: true,
+    };
+    assert.equal(isPatchFullySynced(synced), true);
+    assert.equal(isPatchFullySynced(cancelled), false);
+    assert.equal(isPatchFullySynced(failed), false);
   });
 });

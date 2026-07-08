@@ -6,6 +6,7 @@ import {
 } from "../lsp/client";
 import {
   hasPatchFailureDiagnostics,
+  isPatchFullySynced,
   patchFailureMessage,
 } from "../lsp/patchFeedback";
 import { PanelHost } from "./panelHost";
@@ -210,6 +211,9 @@ export class ManchesterEditorPanel {
       }
       if (!result.applied) {
         void vscode.window.showErrorMessage(patchFailureMessage(result));
+        return;
+      }
+      if (!isPatchFullySynced(result)) {
         return;
       }
       if (this.options.onRefresh) {

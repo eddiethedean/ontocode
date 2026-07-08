@@ -35,7 +35,7 @@ pub fn remap_iri(iri: &str, from_base: &str, to_base: &str) -> Option<String> {
 
 /// Replace all occurrences of `old_iri` with `new_iri` in Turtle text, preserving prefix forms.
 ///
-/// Skips matches inside `#` comments and `"..."` string literals.
+/// Skips matches inside `#` comments and Turtle string literals (`"…"`, `'…'`, `"""…"""`, `'''…'''`).
 pub fn replace_iri_in_text(
     text: &str,
     old_iri: &str,
@@ -94,7 +94,7 @@ pub fn replace_iri_in_text(
         while let Some(pos) = result[search_from..].find(old) {
             let start = search_from + pos;
             let end = start + old.len();
-            if is_in_comment_or_string(&result, start)
+            if ontocore_owl::is_in_comment_or_string(&result, start)
                 || !is_safe_replacement_boundary(&result, start, end)
             {
                 search_from = end;
@@ -107,43 +107,6 @@ pub fn replace_iri_in_text(
     }
 
     (result, hunks)
-}
-
-/// True when `byte_offset` lies inside a `#` line comment or a `"..."` string.
-fn is_in_comment_or_string(text: &str, byte_offset: usize) -> bool {
-    let bytes = text.as_bytes();
-    let mut i = 0usize;
-    let mut in_string = false;
-    let mut escape = false;
-    let mut line_comment = false;
-    while i < byte_offset && i < bytes.len() {
-        let b = bytes[i];
-        if line_comment {
-            if b == b'\n' {
-                line_comment = false;
-            }
-            i += 1;
-            continue;
-        }
-        if in_string {
-            if escape {
-                escape = false;
-            } else if b == b'\\' {
-                escape = true;
-            } else if b == b'"' {
-                in_string = false;
-            }
-            i += 1;
-            continue;
-        }
-        match b {
-            b'"' => in_string = true,
-            b'#' => line_comment = true,
-            _ => {}
-        }
-        i += 1;
-    }
-    in_string || line_comment
 }
 
 fn namespace_for_iri(iri: &str, namespaces: &BTreeMap<String, String>) -> Option<String> {
@@ -241,6 +204,49 @@ mod tests {
         assert!(out.contains("\"see http://example.org#Person\""));
         assert!(out.contains("ex:Agent"));
         assert!(!out.contains("ex:Person a"));
+    }
+
+    #[test]
+    fn replace_iri_skips_single_quoted_literals() {
+        let ttl = "@prefix ex: <http://example.org#> .\n\
+                   @prefix owl: <http://www.w3.org/2002/07/owl#> .\n\
+                   @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n\
+                   ex:Doc rdfs:comment 'Documents http://example.org#Person usage' .\n\
+                   ex:Person a owl:Class .\n";
+        let ns = BTreeMap::from([("ex".to_string(), "http://example.org#".to_string())]);
+        let (out, _) =
+            replace_iri_in_text(ttl, "http://example.org#Person", "http://example.org#Human", &ns);
+        assert!(out.contains("'Documents http://example.org#Person usage'"));
+        assert!(out.contains("ex:Human a owl:Class"));
+        assert!(!out.contains("ex:Person a owl:Class"));
+    }
+
+    #[test]
+    fn replace_iri_skips_long_double_quoted_literals() {
+        let ttl = "@prefix ex: <http://example.org#> .\n\
+                   @prefix owl: <http://www.w3.org/2002/07/owl#> .\n\
+                   @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n\
+                   ex:Doc rdfs:comment \"\"\"See http://example.org#Person here\"\"\" .\n\
+                   ex:Person a owl:Class .\n";
+        let ns = BTreeMap::from([("ex".to_string(), "http://example.org#".to_string())]);
+        let (out, _) =
+            replace_iri_in_text(ttl, "http://example.org#Person", "http://example.org#Human", &ns);
+        assert!(out.contains("http://example.org#Person here"));
+        assert!(out.contains("ex:Human a owl:Class"));
+    }
+
+    #[test]
+    fn replace_iri_skips_long_single_quoted_literals() {
+        let ttl = "@prefix ex: <http://example.org#> .\n\
+                   @prefix owl: <http://www.w3.org/2002/07/owl#> .\n\
+                   @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n\
+                   ex:Doc rdfs:comment '''See http://example.org#Person here''' .\n\
+                   ex:Person a owl:Class .\n";
+        let ns = BTreeMap::from([("ex".to_string(), "http://example.org#".to_string())]);
+        let (out, _) =
+            replace_iri_in_text(ttl, "http://example.org#Person", "http://example.org#Human", &ns);
+        assert!(out.contains("http://example.org#Person here"));
+        assert!(out.contains("ex:Human a owl:Class"));
     }
 
     #[test]

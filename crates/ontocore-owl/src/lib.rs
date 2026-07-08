@@ -22,5 +22,6 @@ pub use patch::{
 };
 pub use span::{
     all_entity_statement_ranges, entity_block_range, entity_primary_block_range,
-    namespaces_for_text, prefixes_from_turtle, short_name_from_iri, ByteRange,
+    is_in_comment_or_string, namespaces_for_text, prefixes_from_turtle, short_name_from_iri,
+    ByteRange,
 };

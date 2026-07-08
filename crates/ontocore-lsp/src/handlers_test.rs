@@ -65,18 +65,14 @@ fn index_workspace_respects_requested_root_in_multi_root() {
 
     state.index_workspace(root_b.path().to_path_buf()).expect("index root_b");
 
-    let b = handle_get_entity(
-        &state,
-        GetEntityParams { iri: "http://example.org/b#BClass".into() },
-    )
-    .expect("getEntity B");
+    let b =
+        handle_get_entity(&state, GetEntityParams { iri: "http://example.org/b#BClass".into() })
+            .expect("getEntity B");
     assert_eq!(b.detail.entity.short_name, "BClass");
 
-    let a = handle_get_entity(
-        &state,
-        GetEntityParams { iri: "http://example.org/a#AClass".into() },
-    )
-    .expect("getEntity A");
+    let a =
+        handle_get_entity(&state, GetEntityParams { iri: "http://example.org/a#AClass".into() })
+            .expect("getEntity A");
     assert_eq!(a.detail.entity.short_name, "AClass");
 }
 

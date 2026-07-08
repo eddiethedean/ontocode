@@ -11,6 +11,104 @@ env:
   RUST_BACKTRACE: 1
 
 jobs:
+  preflight:
+    name: Preflight (CI gates)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: rustfmt, clippy
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: release-preflight
+
+      - name: rustfmt
+        run: cargo fmt --all -- --check
+
+      - name: Documentation version sync
+        run: |
+          set -euo pipefail
+          chmod +x scripts/check-doc-versions.sh
+          ./scripts/check-doc-versions.sh
+
+      - name: clippy
+        run: cargo clippy --workspace --all-targets --all-features -- -D warnings
+
+      - name: Build core binaries (cached for tests)
+        run: cargo build -p ontocore-lsp -p ontocore-cli --bins
+
+      - name: cargo test --workspace
+        run: cargo test --workspace
+
+      - name: MkDocs (strict)
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install MkDocs deps
+        run: pip install -r docs/requirements.txt
+
+      - name: Build documentation
+        run: mkdocs build --strict
+
+      - name: Webview UI tests
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: extension/webview-ui/package-lock.json
+
+      - run: npm ci
+        working-directory: extension/webview-ui
+
+      - run: npm test
+        working-directory: extension/webview-ui
+
+      - name: Extension build + tests (bundled LSP)
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: extension/package-lock.json
+
+      - run: npm ci
+        working-directory: extension
+
+      - run: npm run compile
+        working-directory: extension
+
+      - name: Extension unit and bundled-LSP e2e tests
+        run: npm test
+        working-directory: extension
+        env:
+          ONTOCORE_LSP_BIN: ${{ github.workspace }}/target/debug/ontocore-lsp
+
+      - name: cargo audit
+        run: |
+          set -euo pipefail
+          cargo install cargo-audit --locked
+          cargo audit
+
+      - name: Crate packaging (dry-run + build sanity)
+        run: |
+          set -euo pipefail
+          # Only leaf crates (no unpublished path deps) can dry-run here.
+          # Full graph is published in dependency order on release tags.
+          cargo publish -p ontocore-core --dry-run
+          cargo publish -p ontocore-robot --dry-run
+          cargo build -p ontocore-diagnostics -p ontocore-owl -p ontocore-cli -p ontocore
+
+      - name: CLI smoke
+        run: |
+          set -euo pipefail
+          cargo run -- query fixtures "SELECT * FROM classes"
+          cargo run -- validate fixtures
+          cargo run -- query fixtures "SELECT code FROM diagnostics"
+          cargo run -- sparql fixtures "SELECT ?s WHERE { ?s ?p ?o } LIMIT 1"
+
   build-lsp:
     name: LSP (${{ matrix.bundle_dir }})
     runs-on: ${{ matrix.runner }}
@@ -75,7 +173,7 @@ jobs:
           retention-days: 1
 
   release:
-    needs: build-lsp
+    needs: [preflight, build-lsp]
     runs-on: ubuntu-latest
     permissions:
       contents: write

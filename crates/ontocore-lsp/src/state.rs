@@ -134,7 +134,7 @@ impl ServerState {
         let catalog = {
             let overrides = self.open_documents_snapshot();
             let builder = IndexBuilder::new()
-                .workspace(roots[0].clone())
+                .workspace(workspace.clone())
                 .scan_roots(roots.clone())
                 .document_overrides(overrides)
                 .disk_cache(disk_cache);

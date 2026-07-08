@@ -1,0 +1,17 @@
+[plugin]
+name = "demo-ui-view"
+version = "0.1.0"
+kind = "ui"
+id = "org.example.demo-ui-view"
+api_version = "1"
+entry = "demo_ui_view.sh"
+permissions = ["workspace.read", "external_process"]
+
+[[ui.views]]
+id = "demo.view"
+title = "Demo View"
+kind = "dock"
+
+[[ui.commands]]
+id = "demo.view.open"
+title = "Open Demo View"

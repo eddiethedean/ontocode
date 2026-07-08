@@ -1,4 +1,4 @@
-# Plugin authoring (v0.14)
+# Plugin authoring (v0.15)
 
 OntoCore v0.14 ships a **plugin host MVP** with manifest discovery, in-process reference plugins, and subprocess workflow plugins.
 
@@ -20,6 +20,7 @@ kind = "validator"          # validator | exporter | workflow | …
 id = "org.example.my-validator"
 api_version = "1"
 entry = "my-plugin-cli"     # optional subprocess binary
+permissions = ["workspace.read", "external_process"]
 
 [capabilities]
 validate = true
@@ -34,6 +35,22 @@ shapes_dir = "shapes"
 id = "org.example.check"
 title = "Run my validator"
 
+[[ui.views]]
+id = "org.example.view"
+title = "My dockable view"
+
+[[ui.preferences_pages]]
+id = "org.example.prefs"
+title = "My plugin"
+category = "Validation"
+
+[[ui.context_actions]]
+id = "org.example.ctx"
+title = "Validate this class"
+scope = "entity"
+applies_to = ["class"]
+command = "org.example.check"
+
 [[ui.inspector_cards]]
 id = "my-card"
 title = "My validator"
@@ -45,10 +62,10 @@ applies_to = ["class"]
 Plugins with an `entry` binary are invoked as:
 
 ```text
-<entry> <action> --workspace <path> [--step <name>]
+<entry> <action> --workspace <path> [--step <name>] [--view <id>]
 ```
 
-Supported actions: `validate`, `export`, `workflow`.
+Supported actions: `validate`, `export`, `workflow`, `ui-view`.
 
 Stdout must be JSON:
 
@@ -64,7 +81,8 @@ Stdout must be JSON:
     }
   ],
   "output_paths": [],
-  "logs": "optional log text"
+  "logs": "optional log text",
+  "view_html": "<h1>optional HTML for ui-view</h1>"
 }
 ```
 
@@ -96,7 +114,9 @@ ontocore workflow --plugin owlmake --step qc /path/to/workspace
 ## LSP / OntoCode
 
 - `ontocore/listPlugins` — discovered plugins + UI metadata
-- `ontocore/runPlugin` — run validate/export/workflow actions
+- `ontocore/runPlugin` — run validate/export/workflow actions (and `ui_view` for views)
+- OntoCode command **Plugins: Run Command…** — browse plugin commands
+- OntoCode command **Plugins: Open View…** — open plugin-contributed views
 - OntoCode command **Run Workflow (owlmake)** — workflow scaffold output channel
 
 ## Stability

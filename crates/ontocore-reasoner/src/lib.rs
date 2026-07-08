@@ -24,4 +24,4 @@ pub use result::{
     ClassificationResult, ConsistencyResult, ExplanationRequest, ExplanationResult,
     ExplanationStep, InferredHierarchy, ReasonerSnapshot, ReasonerWarning,
 };
-pub use runner::{classify, explain};
+pub use runner::{classify, explain, explain_alternatives};

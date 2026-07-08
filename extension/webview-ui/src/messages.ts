@@ -7,6 +7,8 @@ export interface ReasoningStatePayload {
   unsatisfiable: string[];
   hierarchyMode?: "asserted" | "inferred" | "combined";
   lastRunAt: number;
+  dirty?: boolean;
+  running?: boolean;
 }
 export type PanelKind =
   | "smoke"

@@ -29,7 +29,8 @@ use ontocore_diff::{
     discover_repo_root, format_diff_pr_summary, DiffResult,
 };
 use ontocore_reasoner::{
-    classify, explain, ExplanationRequest, ReasonerId, ReasonerSnapshot, WorkspaceInputLoader,
+    classify, explain_alternatives, ExplanationRequest, ReasonerId, ReasonerSnapshot,
+    WorkspaceInputLoader,
 };
 use ontocore_refactor::{
     apply_refactor_plan_checked_with_overrides, find_usages_with_overrides, plans_equivalent,
@@ -188,11 +189,13 @@ pub fn handle_run_plugin(
                 Some(catalog),
                 None,
                 params.step.as_deref(),
+                params.view_id.as_deref(),
             )
             .map(|result| RunPluginResult {
                 diagnostics: result.diagnostics.iter().map(DiagnosticSummary::from).collect(),
                 output_paths: result.output_paths,
                 logs: result.logs,
+                view_html: result.view_html,
                 success: result.success,
             })
             .map_err(|e| LspErrorPayload::index_failed(e.to_string()))
@@ -835,11 +838,39 @@ pub fn handle_get_explanation(
         .flatten()
         .unwrap_or(fresh_input);
 
-    let result =
-        explain(profile, &input, &ExplanationRequest { class_iri: params.class_iri.clone() })
-            .map_err(|e| LspErrorPayload::explanation_failed(e.to_string()))?;
+    let profile_key = profile.as_str().to_string();
+    if let Some(cached) =
+        state.get_cached_explanation(&input.content_hash, &profile_key, &params.class_iri)
+    {
+        return Ok(GetExplanationResult {
+            class_iri: cached.class_iri,
+            steps: cached.steps,
+            text: cached.text,
+            alternatives: Vec::new(),
+            indexed_at: state.indexed_at().unwrap_or(0),
+            content_hash: input.content_hash,
+        });
+    }
 
-    Ok(GetExplanationResult { class_iri: result.class_iri, steps: result.steps, text: result.text })
+    let request = ExplanationRequest { class_iri: params.class_iri.clone() };
+    let mut alternatives = explain_alternatives(profile, &input, &request, 5)
+        .map_err(|e| LspErrorPayload::explanation_failed(e.to_string()))?;
+    let primary = alternatives.remove(0);
+    state.put_cached_explanation(
+        &input.content_hash,
+        &profile_key,
+        &params.class_iri,
+        primary.clone(),
+    );
+
+    Ok(GetExplanationResult {
+        class_iri: primary.class_iri,
+        steps: primary.steps,
+        text: primary.text,
+        alternatives,
+        indexed_at: state.indexed_at().unwrap_or(0),
+        content_hash: input.content_hash,
+    })
 }
 
 fn run_reasoner_result_from_classification(

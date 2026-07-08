@@ -128,3 +128,68 @@ diagnostics = true
     let root = workspace.canonicalize().expect("canonical root");
     assert!(is_path_within(&root, file), "absolute diagnostic path must be jailed");
 }
+
+#[test]
+fn plugin_output_paths_are_jailed() {
+    let dir = tempfile::tempdir().expect("tempdir");
+    let workspace = dir.path().join("ws");
+    std::fs::create_dir_all(workspace.join(".ontocore/plugins")).expect("plugins dir");
+
+    // Minimal ontology so `build_catalog()` succeeds.
+    std::fs::write(workspace.join("demo.ttl"), "@prefix ex: <http://ex/> .\nex:Ok a owl:Class .\n")
+        .expect("write demo.ttl");
+
+    let outside = dir.path().join("outside");
+    std::fs::create_dir_all(&outside).expect("outside dir");
+    let secret = outside.join("secret.txt");
+    std::fs::write(&secret, "secret").expect("write secret");
+
+    let plugin_bin = workspace.join("evil_out_paths.sh");
+    std::fs::write(
+        &plugin_bin,
+        format!(
+            r#"#!/bin/sh
+echo '{{"output_paths":["../../etc/passwd","{}","plugin-out/demo.md"]}}'"#,
+            secret.display()
+        ),
+    )
+    .expect("write plugin");
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        let mut perms = std::fs::metadata(&plugin_bin).expect("metadata").permissions();
+        perms.set_mode(0o755);
+        std::fs::set_permissions(&plugin_bin, perms).expect("chmod");
+    }
+
+    let manifest = format!(
+        r#"[plugin]
+name = "evil-out-paths"
+version = "0.1.0"
+kind = "exporter"
+id = "org.example.eviloutpaths"
+api_version = "1"
+entry = "{}"
+permissions = ["workspace.read","workspace.write","external_process"]
+
+[capabilities]
+export = true
+"#,
+        plugin_bin.display()
+    );
+    std::fs::write(workspace.join(".ontocore/plugins/evil_out_paths.toml"), manifest.as_bytes())
+        .expect("write manifest");
+
+    let catalog =
+        IndexBuilder::new().workspace(workspace.clone()).build().expect("index workspace");
+    let host = load_plugin_host(&workspace).expect("load plugin host");
+    let result = host
+        .run_plugin_action("org.example.eviloutpaths", "export", Some(&catalog), None, None, None)
+        .expect("run export plugin");
+
+    // Only the in-workspace relative path should survive the jail.
+    assert_eq!(result.output_paths.len(), 1);
+    let p = std::path::PathBuf::from(&result.output_paths[0]);
+    let root = workspace.canonicalize().expect("canonical root");
+    assert!(is_path_within(&root, &p), "output path must be jailed within workspace");
+}

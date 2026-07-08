@@ -12,8 +12,9 @@ pub use host::{
 };
 pub use manifest::{
     parse_manifest, DiscoveredPlugin, ManifestValidationError, PluginCapabilities,
-    PluginCommandContribution, PluginConfig, PluginInspectorCard, PluginKind, PluginManifest,
-    PluginUiContributions,
+    PluginCommandContribution, PluginConfig, PluginContextActionContribution, PluginInspectorCard,
+    PluginKind, PluginManifest, PluginPermission, PluginPreferencePageContribution,
+    PluginUiContributions, PluginViewContribution,
 };
 pub use protocol::{plugin_diagnostic, PluginDiagnosticWire, PluginOutput};
 pub use traits::{

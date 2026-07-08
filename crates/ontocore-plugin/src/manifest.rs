@@ -2,6 +2,40 @@ use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 use thiserror::Error;
 
+/// Explicit permissions requested by a plugin.
+///
+/// These are surfaced to UI and enforced for sensitive actions.
+#[derive(Debug, Clone, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum PluginPermission {
+    WorkspaceRead,
+    WorkspaceWrite,
+    FilesystemRead,
+    FilesystemWrite,
+    Network,
+    AiInvoke,
+    GitRead,
+    GitWrite,
+    ExternalProcess,
+}
+
+impl PluginPermission {
+    pub fn parse(s: &str) -> Result<Self, ManifestValidationError> {
+        match s {
+            "workspace.read" => Ok(Self::WorkspaceRead),
+            "workspace.write" => Ok(Self::WorkspaceWrite),
+            "filesystem.read" => Ok(Self::FilesystemRead),
+            "filesystem.write" => Ok(Self::FilesystemWrite),
+            "network" => Ok(Self::Network),
+            "ai.invoke" => Ok(Self::AiInvoke),
+            "git.read" => Ok(Self::GitRead),
+            "git.write" => Ok(Self::GitWrite),
+            "external_process" => Ok(Self::ExternalProcess),
+            other => Err(ManifestValidationError::UnknownPermission(other.to_string())),
+        }
+    }
+}
+
 /// Supported plugin kinds per PLUGIN_SPEC.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -55,6 +89,8 @@ impl PluginKind {
 pub enum ManifestValidationError {
     #[error("unknown plugin kind: {0}")]
     UnknownKind(String),
+    #[error("unknown plugin permission: {0}")]
+    UnknownPermission(String),
     #[error("unsupported api_version: {0} (expected \"1\")")]
     UnsupportedApiVersion(String),
     #[error("missing required field: {0}")]
@@ -69,6 +105,7 @@ pub struct PluginManifest {
     pub kind: PluginKind,
     pub id: Option<String>,
     pub api_version: Option<String>,
+    pub permissions: Vec<PluginPermission>,
     pub entry: Option<String>,
     pub capabilities: PluginCapabilities,
     pub config: PluginConfig,
@@ -96,6 +133,40 @@ pub struct PluginCommandContribution {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct PluginViewContribution {
+    pub id: String,
+    pub title: String,
+    /// Optional view type hint (e.g. "dock", "panel") for UI placement.
+    #[serde(default)]
+    pub kind: Option<String>,
+    /// Optional command to invoke when opening the view.
+    #[serde(default)]
+    pub command: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct PluginPreferencePageContribution {
+    pub id: String,
+    pub title: String,
+    #[serde(default)]
+    pub category: Option<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct PluginContextActionContribution {
+    pub id: String,
+    pub title: String,
+    /// Context scopes like "entity", "graphNode", "workspace".
+    #[serde(default)]
+    pub scope: Option<String>,
+    /// Optional entity kinds the action applies to (e.g. "class", "property").
+    #[serde(default)]
+    pub applies_to: Vec<String>,
+    /// Command invoked when the action is selected.
+    pub command: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct PluginInspectorCard {
     pub id: String,
     pub title: String,
@@ -109,6 +180,12 @@ pub struct PluginInspectorCard {
 pub struct PluginUiContributions {
     #[serde(default)]
     pub commands: Vec<PluginCommandContribution>,
+    #[serde(default)]
+    pub views: Vec<PluginViewContribution>,
+    #[serde(default, rename = "preferences_pages")]
+    pub preferences_pages: Vec<PluginPreferencePageContribution>,
+    #[serde(default, rename = "context_actions")]
+    pub context_actions: Vec<PluginContextActionContribution>,
     #[serde(default, rename = "inspector_cards")]
     pub inspector_cards: Vec<PluginInspectorCard>,
 }
@@ -166,6 +243,8 @@ struct PluginSection {
     #[serde(default)]
     api_version: Option<String>,
     #[serde(default)]
+    permissions: Vec<String>,
+    #[serde(default)]
     entry: Option<String>,
 }
 
@@ -185,12 +264,25 @@ pub fn parse_manifest(text: &str) -> Result<PluginManifest, ManifestValidationEr
         }
     }
     let kind = PluginKind::parse(&file.plugin.kind)?;
+    let mut permissions = Vec::new();
+    for p in &file.plugin.permissions {
+        permissions.push(PluginPermission::parse(p)?);
+    }
+    // Backward-compatible defaults for v0.14 manifests that didn't declare permissions yet.
+    // v0.15+ plugins should explicitly declare permissions in `[plugin].permissions`.
+    if permissions.is_empty() {
+        permissions.push(PluginPermission::WorkspaceRead);
+        if file.plugin.entry.is_some() {
+            permissions.push(PluginPermission::ExternalProcess);
+        }
+    }
     Ok(PluginManifest {
         name: file.plugin.name,
         version: file.plugin.version,
         kind,
         id: file.plugin.id,
         api_version: file.plugin.api_version,
+        permissions,
         entry: file.plugin.entry,
         capabilities: file.capabilities,
         config: file.config,
@@ -240,10 +332,26 @@ name = "naming"
 version = "0.1.0"
 kind = "validator"
 id = "ontocode.naming-validator"
+permissions = ["workspace.read"]
 
 [[ui.commands]]
 id = "naming.check"
 title = "Check naming conventions"
+
+[[ui.views]]
+id = "naming.view"
+title = "Naming view"
+
+[[ui.preferences_pages]]
+id = "naming.prefs"
+title = "Naming"
+
+[[ui.context_actions]]
+id = "naming.ctx"
+title = "Check naming for class"
+scope = "entity"
+applies_to = ["class"]
+command = "naming.check"
 
 [[ui.inspector_cards]]
 id = "naming-summary"
@@ -252,6 +360,10 @@ applies_to = ["class"]
 "#;
         let manifest = parse_manifest(text).expect("parse");
         assert_eq!(manifest.ui.commands.len(), 1);
+        assert_eq!(manifest.ui.views.len(), 1);
+        assert_eq!(manifest.ui.preferences_pages.len(), 1);
+        assert_eq!(manifest.ui.context_actions.len(), 1);
         assert_eq!(manifest.ui.inspector_cards.len(), 1);
+        assert_eq!(manifest.permissions.len(), 1);
     }
 }

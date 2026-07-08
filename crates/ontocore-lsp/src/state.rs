@@ -32,6 +32,7 @@ struct InnerState {
     document_versions: HashMap<PathBuf, i32>,
     reasoner_cache: ReasonerCacheStore,
     reasoner_snapshot: Option<ReasonerSnapshot>,
+    explanation_cache: HashMap<(String, String, String), ontocore_reasoner::ExplanationResult>,
     /// Diagnostics from workspace plugins (merged at publish time).
     plugin_diagnostics: Vec<Diagnostic>,
     /// URIs that received `publishDiagnostics` (for stale clears).
@@ -53,6 +54,7 @@ impl ServerState {
                 document_versions: HashMap::new(),
                 reasoner_cache: ReasonerCacheStore::new(),
                 reasoner_snapshot: None,
+                explanation_cache: HashMap::new(),
                 plugin_diagnostics: Vec::new(),
                 published_diagnostic_uris: BTreeSet::new(),
                 index_disk_cache: false,
@@ -158,9 +160,42 @@ impl ServerState {
         guard.indexed_at = Some(indexed_at);
         guard.reasoner_cache.invalidate();
         guard.reasoner_snapshot = None;
+        guard.explanation_cache.clear();
         guard.plugin_diagnostics = plugin_diags;
 
         Ok((stats, indexed_at))
+    }
+
+    pub fn get_cached_explanation(
+        &self,
+        content_hash: &str,
+        profile: &str,
+        class_iri: &str,
+    ) -> Option<ontocore_reasoner::ExplanationResult> {
+        let guard = self.inner.read().ok()?;
+        guard
+            .explanation_cache
+            .get(&(content_hash.to_string(), profile.to_string(), class_iri.to_string()))
+            .cloned()
+    }
+
+    pub fn put_cached_explanation(
+        &self,
+        content_hash: &str,
+        profile: &str,
+        class_iri: &str,
+        result: ontocore_reasoner::ExplanationResult,
+    ) {
+        if let Ok(mut guard) = self.inner.write() {
+            guard.explanation_cache.insert(
+                (content_hash.to_string(), profile.to_string(), class_iri.to_string()),
+                result,
+            );
+        }
+    }
+
+    pub fn indexed_at(&self) -> Option<u64> {
+        self.inner.read().ok().and_then(|g| g.indexed_at)
     }
 
     pub fn set_reasoner_snapshot(&self, snapshot: ReasonerSnapshot) {

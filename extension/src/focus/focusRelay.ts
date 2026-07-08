@@ -56,6 +56,22 @@ class FocusRelayService {
     this.broadcastReasoning();
   }
 
+  markReasoningDirty(): void {
+    if (!this.reasoning) {
+      return;
+    }
+    this.reasoning = { ...this.reasoning, dirty: true };
+    this.broadcastReasoning();
+  }
+
+  setReasoningRunning(running: boolean): void {
+    if (!this.reasoning) {
+      return;
+    }
+    this.reasoning = { ...this.reasoning, running };
+    this.broadcastReasoning();
+  }
+
   /** Push current focus + reasoning to a single host (e.g. on webview ready). */
   syncHost(host: PanelHost): void {
     if (this.focus) {

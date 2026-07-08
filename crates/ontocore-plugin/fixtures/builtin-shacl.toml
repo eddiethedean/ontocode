@@ -4,6 +4,7 @@ version = "0.1.0"
 kind = "validator"
 id = "ontocode.shacl-validator"
 api_version = "1"
+permissions = ["workspace.read"]
 
 [capabilities]
 validate = true

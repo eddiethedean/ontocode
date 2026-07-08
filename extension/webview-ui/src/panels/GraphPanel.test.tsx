@@ -71,7 +71,7 @@ describe("GraphPanel", () => {
     const user = userEvent.setup();
     renderWithProviders(<GraphPanel />);
 
-    await user.click(screen.getByLabelText("Include inferred (reasoner)"));
+    await user.selectOptions(screen.getByLabelText("Mode"), "combined");
     await user.click(screen.getByRole("button", { name: "Refresh graph" }));
 
     expect(lastPostedMessage()).toMatchObject({
@@ -170,7 +170,7 @@ describe("GraphPanel", () => {
     });
 
     const user = userEvent.setup();
-    await user.click(screen.getByLabelText("Show inferred edges"));
+    await user.selectOptions(screen.getByLabelText("Mode"), "combined");
     expect(document.querySelector(".react-flow")).toBeInTheDocument();
   });
 

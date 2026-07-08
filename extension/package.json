@@ -175,6 +175,14 @@
         "title": "OntoCode: Run Workflow (owlmake)"
       },
       {
+        "command": "ontocode.plugins.runCommand",
+        "title": "OntoCode: Plugins: Run Command…"
+      },
+      {
+        "command": "ontocode.plugins.openView",
+        "title": "OntoCode: Plugins: Open View…"
+      },
+      {
         "command": "ontocode.semanticDiff",
         "title": "OntoCode: Semantic Diff…"
       },

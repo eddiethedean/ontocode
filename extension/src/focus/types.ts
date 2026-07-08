@@ -19,4 +19,8 @@ export interface ReasoningStatePayload {
   unsatisfiable: string[];
   hierarchyMode?: "asserted" | "inferred" | "combined";
   lastRunAt: number;
+  /** True when ontology edits occurred after last run. */
+  dirty?: boolean;
+  /** True while a reasoner run is in-flight. */
+  running?: boolean;
 }

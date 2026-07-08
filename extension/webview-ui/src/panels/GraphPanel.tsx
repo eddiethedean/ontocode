@@ -8,6 +8,7 @@ import {
   useEdgesState,
   type Node,
   type Edge,
+  type ReactFlowInstance,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import {
@@ -39,33 +40,6 @@ function readInitialParams(): { graphKind: string; rootIri?: string } {
   };
 }
 
-function layoutNodes(graph: GraphPayload): Node[] {
-  const byKind = new Map<string, number>();
-  return graph.nodes.map((n, i) => {
-    const row = byKind.get(n.kind) ?? 0;
-    byKind.set(n.kind, row + 1);
-    return {
-      id: n.id,
-      position: { x: (i % 8) * 180, y: row * 100 + (n.kind === "ontology" ? 0 : 40) },
-      data: { label: n.label || n.id },
-      className: "oc-graph-node",
-    };
-  });
-}
-
-function toFlowEdges(graph: GraphPayload, showInferred: boolean): Edge[] {
-  return graph.edges
-    .filter((e) => showInferred || !e.inferred)
-    .map((e, i) => ({
-      id: `${e.source}-${e.target}-${e.kind}-${i}`,
-      source: e.source,
-      target: e.target,
-      label: e.kind,
-      animated: e.inferred,
-      className: e.inferred ? "oc-graph-edge oc-graph-edge--inferred" : "oc-graph-edge",
-    }));
-}
-
 export function GraphPanel(_props?: WorkspaceProps): JSX.Element {
   const host = useWorkspaceHost();
   const storeRootIri = useWorkspaceStore((s) => s.graph.rootIri);
@@ -73,18 +47,22 @@ export function GraphPanel(_props?: WorkspaceProps): JSX.Element {
   const [graph, setGraph] = useState<GraphPayload | null>(null);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [depth, setDepth] = useState(2);
-  const [includeInferred, setIncludeInferred] = useState(false);
-  const [showInferred, setShowInferred] = useState(true);
+  const [graphMode, setGraphMode] = useState<"asserted" | "inferred" | "combined">(
+    "asserted"
+  );
   const [hideDeprecated, setHideDeprecated] = useState(false);
   const [graphKind, setGraphKind] = useState(initial.graphKind);
   const [rootIri, setRootIri] = useState<string | undefined>(
     initial.rootIri ?? storeRootIri ?? undefined
   );
+  const [layout, setLayout] = useState<"grid" | "circle" | "stack">("grid");
+  const [search, setSearch] = useState("");
   const [error, setError] = useState("");
   const hasGraphData = useRef(false);
 
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
+  const rf = useRef<ReactFlowInstance | null>(null);
 
   const requestGraph = useCallback(() => {
     host.postToCore({
@@ -92,10 +70,10 @@ export function GraphPanel(_props?: WorkspaceProps): JSX.Element {
       graphKind,
       rootIri,
       depth,
-      includeInferred,
+      includeInferred: graphMode !== "asserted",
       filters: { hide_deprecated: hideDeprecated },
     });
-  }, [host, graphKind, rootIri, depth, includeInferred, hideDeprecated]);
+  }, [host, graphKind, rootIri, depth, graphMode, hideDeprecated]);
 
   useEffect(() => {
     return subscribeFocus((focus) => {
@@ -156,14 +134,28 @@ export function GraphPanel(_props?: WorkspaceProps): JSX.Element {
     if (!graph) {
       return;
     }
-    setNodes(layoutNodes(graph));
-    setEdges(toFlowEdges(graph, showInferred));
-  }, [graph, showInferred, setNodes, setEdges]);
+    setNodes(layoutNodes(graph, layout));
+    setEdges(toFlowEdges(graph, graphMode));
+  }, [graph, graphMode, layout, setNodes, setEdges]);
 
   const selectedNode = useMemo(
     () => graph?.nodes.find((n) => n.id === selectedId),
     [graph, selectedId]
   );
+
+  const filteredNodeIds = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q || !graph) {
+      return null;
+    }
+    const ids = new Set<string>();
+    for (const n of graph.nodes) {
+      if ((n.label || n.id).toLowerCase().includes(q)) {
+        ids.add(n.id);
+      }
+    }
+    return ids;
+  }, [search, graph]);
 
   return (
     <div className="graph-layout">
@@ -175,6 +167,9 @@ export function GraphPanel(_props?: WorkspaceProps): JSX.Element {
             onNodesChange={onNodesChange}
             onEdgesChange={onEdgesChange}
             fitView
+            onInit={(instance) => {
+              rf.current = instance;
+            }}
             onNodeClick={(_, node) => {
               setSelectedId(node.id);
             }}
@@ -204,6 +199,30 @@ export function GraphPanel(_props?: WorkspaceProps): JSX.Element {
         </Section>
 
         <Section title="Controls" card>
+          <label className="oc-field">
+            <div className="oc-field-label">Mode</div>
+            <select
+              aria-label="Mode"
+              value={graphMode}
+              onChange={(e) => setGraphMode(e.target.value as typeof graphMode)}
+            >
+              <option value="asserted">Asserted</option>
+              <option value="inferred">Inferred only</option>
+              <option value="combined">Combined</option>
+            </select>
+          </label>
+          <label className="oc-field">
+            <div className="oc-field-label">Layout</div>
+            <select
+              aria-label="Layout"
+              value={layout}
+              onChange={(e) => setLayout(e.target.value as typeof layout)}
+            >
+              <option value="grid">Grid</option>
+              <option value="circle">Circle</option>
+              <option value="stack">Stack by kind</option>
+            </select>
+          </label>
           <RangeField
             label="Depth"
             value={depth}
@@ -212,23 +231,62 @@ export function GraphPanel(_props?: WorkspaceProps): JSX.Element {
             onChange={setDepth}
           />
           <CheckboxRow
-            label="Include inferred (reasoner)"
-            checked={includeInferred}
-            onChange={setIncludeInferred}
-          />
-          <CheckboxRow
-            label="Show inferred edges"
-            checked={showInferred}
-            onChange={setShowInferred}
-          />
-          <CheckboxRow
             label="Hide deprecated"
             checked={hideDeprecated}
             onChange={setHideDeprecated}
           />
+          <label className="oc-field">
+            <div className="oc-field-label">Search</div>
+            <input
+              aria-label="Search"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Label or IRI…"
+            />
+          </label>
           <ButtonBar>
             <button type="button" onClick={requestGraph}>
               Refresh graph
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setDepth((d) => Math.min(5, d + 1));
+              }}
+            >
+              Expand
+            </button>
+            <button
+              type="button"
+              onClick={async () => {
+                if (!graph) {
+                  return;
+                }
+                const text = JSON.stringify(graph, null, 2);
+                await navigator.clipboard.writeText(text);
+              }}
+            >
+              Copy JSON
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                if (!filteredNodeIds || filteredNodeIds.size === 0) {
+                  return;
+                }
+                const id = [...filteredNodeIds][0];
+                setSelectedId(id);
+                const node = nodes.find((n) => n.id === id);
+                if (node) {
+                  rf.current?.fitView({
+                    nodes: [node],
+                    padding: 0.5,
+                    duration: 300,
+                  });
+                }
+              }}
+            >
+              Center match
             </button>
           </ButtonBar>
         </Section>
@@ -263,4 +321,73 @@ export function GraphPanel(_props?: WorkspaceProps): JSX.Element {
       </aside>
     </div>
   );
+}
+
+function layoutNodes(graph: GraphPayload, layout: "grid" | "circle" | "stack"): Node[] {
+  if (layout === "circle") {
+    const r = 320;
+    const n = Math.max(1, graph.nodes.length);
+    return graph.nodes.map((node, i) => {
+      const angle = (2 * Math.PI * i) / n;
+      return {
+        id: node.id,
+        position: { x: Math.cos(angle) * r, y: Math.sin(angle) * r },
+        data: { label: node.label || node.id },
+        className: "oc-graph-node",
+      };
+    });
+  }
+  if (layout === "stack") {
+    const byKind = new Map<string, number>();
+    const colByKind = new Map<string, number>();
+    const kinds = Array.from(new Set(graph.nodes.map((n) => n.kind)));
+    kinds.forEach((k, i) => colByKind.set(k, i));
+    return graph.nodes.map((n) => {
+      const row = byKind.get(n.kind) ?? 0;
+      byKind.set(n.kind, row + 1);
+      const col = colByKind.get(n.kind) ?? 0;
+      return {
+        id: n.id,
+        position: { x: col * 240, y: row * 110 },
+        data: { label: n.label || n.id },
+        className: "oc-graph-node",
+      };
+    });
+  }
+  // Default grid layout.
+  const byKind = new Map<string, number>();
+  return graph.nodes.map((n, i) => {
+    const row = byKind.get(n.kind) ?? 0;
+    byKind.set(n.kind, row + 1);
+    return {
+      id: n.id,
+      position: { x: (i % 8) * 180, y: row * 100 + (n.kind === "ontology" ? 0 : 40) },
+      data: { label: n.label || n.id },
+      className: "oc-graph-node",
+    };
+  });
+}
+
+function toFlowEdges(
+  graph: GraphPayload,
+  mode: "asserted" | "inferred" | "combined"
+): Edge[] {
+  return graph.edges
+    .filter((e) => {
+      if (mode === "combined") {
+        return true;
+      }
+      if (mode === "asserted") {
+        return !e.inferred;
+      }
+      return e.inferred;
+    })
+    .map((e, i) => ({
+      id: `${e.source}-${e.target}-${e.kind}-${i}`,
+      source: e.source,
+      target: e.target,
+      label: e.kind,
+      animated: e.inferred,
+      className: e.inferred ? "oc-graph-edge oc-graph-edge--inferred" : "oc-graph-edge",
+    }));
 }

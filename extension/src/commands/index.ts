@@ -33,6 +33,7 @@ import { byteColToUtf16 } from "../utils/positions";
 import { documentUriInWorkspace, openWorkspaceTextDocument } from "../utils/workspacePath";
 import { refreshPluginCommands } from "./pluginCommands";
 import { WorkflowPanel } from "../webviews/workflowPanel";
+import { PluginViewPanel } from "../webviews/pluginViewPanel";
 
 export function registerCommands(
   context: vscode.ExtensionContext,
@@ -54,6 +55,61 @@ export function registerCommands(
     }),
     vscode.commands.registerCommand("ontocode.refreshExplorer", async () => {
       await refreshExplorer(providers);
+    }),
+    vscode.commands.registerCommand("ontocode.plugins.runCommand", async () => {
+      const plugins = await listPlugins().then((r) => r.plugins).catch(() => []);
+      const items: Array<{
+        label: string;
+        description: string;
+        plugin: import("../lsp/protocol").PluginDescriptor;
+        cmd: import("../lsp/protocol").PluginCommandContribution;
+      }> = [];
+      for (const plugin of plugins) {
+        for (const cmd of plugin.ui.commands ?? []) {
+          items.push({
+            label: cmd.title,
+            description: plugin.name,
+            plugin,
+            cmd,
+          });
+        }
+      }
+      const picked = await vscode.window.showQuickPick(items, {
+        title: "OntoCode Plugin Commands",
+        matchOnDescription: true,
+      });
+      if (!picked) {
+        return;
+      }
+      const commandId = `ontocode.plugin.${picked.cmd.id}`;
+      await vscode.commands.executeCommand(commandId);
+    }),
+    vscode.commands.registerCommand("ontocode.plugins.openView", async () => {
+      const plugins = await listPlugins().then((r) => r.plugins).catch(() => []);
+      const items: Array<{
+        label: string;
+        description: string;
+        plugin: import("../lsp/protocol").PluginDescriptor;
+        view: import("../lsp/protocol").PluginViewContribution;
+      }> = [];
+      for (const plugin of plugins) {
+        for (const view of plugin.ui.views ?? []) {
+          items.push({
+            label: view.title,
+            description: plugin.name,
+            plugin,
+            view,
+          });
+        }
+      }
+      const picked = await vscode.window.showQuickPick(items, {
+        title: "OntoCode Plugin Views",
+        matchOnDescription: true,
+      });
+      if (!picked) {
+        return;
+      }
+      await PluginViewPanel.open(context.extensionUri, picked.plugin, picked.view);
     }),
     vscode.commands.registerCommand(
       "ontocode.showEntityInspector",
@@ -327,7 +383,27 @@ export function registerCommands(
     ),
     vscode.commands.registerCommand("ontocode.runReasoner", async () => {
       const panel = ReasonerPanel.show();
-      await panel.runWithDefaults();
+      await vscode.window.withProgress(
+        {
+          location: vscode.ProgressLocation.Notification,
+          title: "OntoCode: Running reasoner",
+          cancellable: true,
+        },
+        async (_progress, token) => {
+          const run = panel.runWithDefaults();
+          await Promise.race([
+            run,
+            new Promise<void>((resolve) => {
+              token.onCancellationRequested(() => resolve());
+            }),
+          ]);
+          if (token.isCancellationRequested) {
+            void vscode.window.showWarningMessage(
+              "OntoCode: reasoner run cancelled (result will be ignored if it completes)"
+            );
+          }
+        }
+      );
     }),
     vscode.commands.registerCommand("ontocode.semanticDiff", async () => {
       try {

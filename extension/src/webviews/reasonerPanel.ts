@@ -94,6 +94,13 @@ export class ReasonerPanel {
     this.runId = runId;
     this.postToWebview({ command: "syncRunId", runId });
     try {
+      focusRelay.setReasoningState({
+        profile,
+        unsatisfiable: this.lastResult?.unsatisfiable ?? [],
+        lastRunAt: Date.now(),
+        dirty: false,
+        running: true,
+      });
       const result = await runReasoner({ profile, auto_detect: autoDetect });
       if (runId !== this.runId) {
         return;
@@ -103,6 +110,8 @@ export class ReasonerPanel {
         profile: result.profile_used ?? profile,
         unsatisfiable: result.unsatisfiable ?? [],
         lastRunAt: Date.now(),
+        dirty: false,
+        running: false,
       });
       this.postToWebview({
         command: "result",
@@ -117,6 +126,13 @@ export class ReasonerPanel {
         return;
       }
       const message = err instanceof Error ? err.message : String(err);
+      focusRelay.setReasoningState({
+        profile,
+        unsatisfiable: this.lastResult?.unsatisfiable ?? [],
+        lastRunAt: Date.now(),
+        dirty: true,
+        running: false,
+      });
       this.postToWebview({
         command: "result",
         runId,

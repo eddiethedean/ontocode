@@ -53,6 +53,7 @@ import {
   RunPluginParams,
   RunPluginResult,
 } from "./protocol";
+import { focusRelay } from "../focus/focusRelay";
 import {
   bundledServerPath,
   ensureBundledServerExecutable,
@@ -223,6 +224,7 @@ export async function runPlugin(params: RunPluginParams): Promise<RunPluginResul
     plugin_id: params.plugin_id,
     action: params.action ?? "validate",
     step: params.step,
+    view_id: params.view_id,
   });
   return assertRunPluginResult(result);
 }
@@ -240,6 +242,9 @@ export async function applyAxiomPatch(
     params
   );
   const patch = assertApplyPatchResult(result);
+  if (patch.applied) {
+    focusRelay.markReasoningDirty();
+  }
   if (patch.applied && patch.workspace_edit) {
     const { applyLspWorkspaceEdit } = await import("./workspaceEdit");
     const synced = await applyLspWorkspaceEdit(patch.workspace_edit);

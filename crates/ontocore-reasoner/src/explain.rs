@@ -10,6 +10,35 @@ use ontologos_rl::rdfs::RdfsEngine;
 use ontologos_rl::RlEngine;
 use std::collections::{HashSet, VecDeque};
 
+pub fn explain_unsatisfiable_alternatives(
+    profile: crate::adapter::ReasonerId,
+    ontology: &Ontology,
+    class_iri: &str,
+    max_justifications: usize,
+) -> Result<Vec<ExplanationResult>> {
+    let max = max_justifications.clamp(1, 8);
+    let mut results = match profile {
+        crate::adapter::ReasonerId::El => {
+            explain_unsatisfiable_el_alternatives(ontology, class_iri, max)?
+        }
+        crate::adapter::ReasonerId::Rl => vec![explain_unsatisfiable_rl(ontology, class_iri)?],
+        crate::adapter::ReasonerId::Rdfs => vec![explain_unsatisfiable_rdfs(ontology, class_iri)?],
+        crate::adapter::ReasonerId::Dl => vec![explain_unsatisfiable_dl(ontology, class_iri)?],
+        crate::adapter::ReasonerId::Auto => {
+            // Auto falls back to the same trace-based explanations as DL.
+            vec![explain_unsatisfiable_dl(ontology, class_iri)?]
+        }
+    };
+
+    // Basic de-duplication by rendered text.
+    let mut seen = std::collections::HashSet::new();
+    results.retain(|r| seen.insert(r.text.clone()));
+    if results.is_empty() {
+        return Err(ReasonerError::ExplanationUnavailable(class_iri.to_string()));
+    }
+    Ok(results)
+}
+
 pub fn explain_unsatisfiable_el(ontology: &Ontology, class_iri: &str) -> Result<ExplanationResult> {
     let class_id = ontology
         .lookup_entity(class_iri)
@@ -25,6 +54,50 @@ pub fn explain_unsatisfiable_el(ontology: &Ontology, class_iri: &str) -> Result<
     let graph = explain_unsatisfiable_trace(ontology, class_id, bottom, &report.trace)
         .map_err(|e| ReasonerError::Explain(e.to_string()))?;
     map_proof_graph(ontology, class_iri, graph)
+}
+
+pub fn explain_unsatisfiable_el_alternatives(
+    ontology: &Ontology,
+    class_iri: &str,
+    max: usize,
+) -> Result<Vec<ExplanationResult>> {
+    let class_id = ontology
+        .lookup_entity(class_iri)
+        .ok_or_else(|| ReasonerError::ClassNotFound(class_iri.to_string()))?;
+
+    let report = ElClassifier::new()
+        .classify_with_options(ontology, true)
+        .map_err(|e| ReasonerError::Explain(e.to_string()))?;
+
+    let bottom = find_bottom_subsumption(ontology, class_id, &report.trace)
+        .ok_or_else(|| ReasonerError::ExplanationUnavailable(class_iri.to_string()))?;
+
+    let target_idxs: Vec<usize> = report
+        .trace
+        .steps
+        .iter()
+        .enumerate()
+        .filter_map(|(idx, s)| {
+            if conclusion_matches_subsumption(ontology, &s.conclusion, class_id, bottom) {
+                Some(idx)
+            } else {
+                None
+            }
+        })
+        .take(max)
+        .collect();
+
+    let mut out = Vec::new();
+    for idx in target_idxs {
+        let subgraph = InferenceTrace { steps: hst_prune(&report.trace, idx) };
+        let graph = build_proof_graph(ontology, &subgraph)
+            .map_err(|e| ReasonerError::Explain(e.to_string()))?;
+        out.push(map_proof_graph(ontology, class_iri, graph)?);
+    }
+    if out.is_empty() {
+        out.push(explain_unsatisfiable_el(ontology, class_iri)?);
+    }
+    Ok(out)
 }
 
 pub fn explain_unsatisfiable_rl(ontology: &Ontology, class_iri: &str) -> Result<ExplanationResult> {

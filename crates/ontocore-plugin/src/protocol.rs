@@ -15,6 +15,12 @@ pub struct PluginOutput {
     pub logs: Option<String>,
     #[serde(default)]
     pub exit_message: Option<String>,
+    /// Optional HTML payload for UI view contributions.
+    #[serde(default)]
+    pub view_html: Option<String>,
+    /// Non-fatal security violations (e.g. rejected paths) detected by the host.
+    #[serde(default)]
+    pub violations: Vec<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -65,6 +71,25 @@ impl PluginDiagnosticWire {
             plugin_code: Some(self.code),
         }
     }
+}
+
+pub fn jail_output_paths(
+    plugin_id: &str,
+    workspace: &Path,
+    mut output: PluginOutput,
+) -> PluginOutput {
+    let mut jailed = Vec::new();
+    for p in output.output_paths.drain(..) {
+        let requested = PathBuf::from(&p);
+        match validate_workspace_scope(&requested, workspace) {
+            Ok(path) => jailed.push(path.display().to_string()),
+            Err(err) => output
+                .violations
+                .push(format!("rejected plugin output path '{p}' for {plugin_id}: {err}")),
+        }
+    }
+    output.output_paths = jailed;
+    output
 }
 
 pub fn plugin_diagnostic(

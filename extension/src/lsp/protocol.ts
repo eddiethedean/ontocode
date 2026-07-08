@@ -132,6 +132,13 @@ export interface GetExplanationResult {
   class_iri: string;
   steps: ExplanationStep[];
   text: string;
+  alternatives?: Array<{
+    class_iri: string;
+    steps: ExplanationStep[];
+    text: string;
+  }>;
+  indexed_at: number;
+  content_hash: string;
 }
 
 export interface SourceHint {
@@ -512,6 +519,27 @@ export interface PluginCommandContribution {
   scope?: string;
 }
 
+export interface PluginViewContribution {
+  id: string;
+  title: string;
+  kind?: string;
+  command?: string;
+}
+
+export interface PluginPreferencePageContribution {
+  id: string;
+  title: string;
+  category?: string;
+}
+
+export interface PluginContextActionContribution {
+  id: string;
+  title: string;
+  scope?: string;
+  applies_to?: string[];
+  command: string;
+}
+
 export interface PluginInspectorCard {
   id: string;
   title: string;
@@ -521,6 +549,9 @@ export interface PluginInspectorCard {
 
 export interface PluginUiContributions {
   commands: PluginCommandContribution[];
+  views: PluginViewContribution[];
+  preferences_pages: PluginPreferencePageContribution[];
+  context_actions: PluginContextActionContribution[];
   inspector_cards: PluginInspectorCard[];
 }
 
@@ -537,10 +568,13 @@ export interface PluginDescriptor {
   name: string;
   version: string;
   kind: string;
+  api_version?: string;
+  permissions?: string[];
   capabilities: PluginCapabilities;
   manifest_path: string;
   ui: PluginUiContributions;
   in_process: boolean;
+  disabled?: boolean;
 }
 
 export interface ListPluginsResult {
@@ -551,11 +585,13 @@ export interface RunPluginParams {
   plugin_id: string;
   action?: string;
   step?: string;
+  view_id?: string;
 }
 
 export interface RunPluginResult {
   diagnostics: DiagnosticSummary[];
   output_paths?: string[];
   logs?: string;
+  view_html?: string;
   success: boolean;
 }

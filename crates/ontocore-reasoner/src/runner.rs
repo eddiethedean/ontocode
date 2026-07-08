@@ -55,6 +55,20 @@ pub fn explain(
     adapter.explain(input, request)
 }
 
+pub fn explain_alternatives(
+    profile: ReasonerId,
+    input: &ReasonerInput,
+    request: &ExplanationRequest,
+    max_justifications: usize,
+) -> Result<Vec<ExplanationResult>> {
+    crate::explain::explain_unsatisfiable_alternatives(
+        profile,
+        &input.ontology,
+        &request.class_iri,
+        max_justifications,
+    )
+}
+
 fn profile_warnings(
     ontology: &ontologos_core::Ontology,
     profile: ReasonerId,

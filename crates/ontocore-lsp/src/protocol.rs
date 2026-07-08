@@ -329,6 +329,10 @@ pub struct GetExplanationResult {
     pub class_iri: String,
     pub steps: Vec<ontocore_reasoner::ExplanationStep>,
     pub text: String,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub alternatives: Vec<ontocore_reasoner::ExplanationResult>,
+    pub indexed_at: u64,
+    pub content_hash: String,
 }
 
 #[derive(Debug, Deserialize)]
@@ -427,6 +431,9 @@ pub struct RunPluginParams {
     pub action: String,
     #[serde(default)]
     pub step: Option<String>,
+    /// Used with `action = "ui_view"`.
+    #[serde(default)]
+    pub view_id: Option<String>,
 }
 
 fn default_validate_action() -> String {
@@ -440,5 +447,8 @@ pub struct RunPluginResult {
     pub output_paths: Vec<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub logs: Option<String>,
+    /// Optional HTML payload for plugin-defined views.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub view_html: Option<String>,
     pub success: bool,
 }

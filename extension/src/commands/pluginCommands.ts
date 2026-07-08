@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import { listPlugins } from "../lsp/client";
 import type { PluginDescriptor } from "../lsp/protocol";
 import { WorkflowPanel } from "../webviews/workflowPanel";
+import { PluginViewPanel } from "../webviews/pluginViewPanel";
 
 const registered = new Map<string, vscode.Disposable>();
 
@@ -32,6 +33,15 @@ export async function refreshPluginCommands(
         void vscode.window.showInformationMessage(
           `OntoCode plugin: ${plugin.name} — ${cmd.title}`
         );
+      });
+      registered.set(commandId, disposable);
+      context.subscriptions.push(disposable);
+    }
+
+    for (const view of plugin.ui.views ?? []) {
+      const commandId = `ontocode.plugin.view.${plugin.id}.${view.id}`;
+      const disposable = vscode.commands.registerCommand(commandId, async () => {
+        await PluginViewPanel.open(context.extensionUri, plugin, view);
       });
       registered.set(commandId, disposable);
       context.subscriptions.push(disposable);

@@ -49,10 +49,29 @@ pub fn resolve_entry_path(
         plugin.manifest_path.parent().unwrap_or(Path::new(".")).join(entry)
     };
     validate_binary_path(&path)?;
+    if let Some(root) = infer_workspace_root(&plugin.manifest_path) {
+        // Prevent invoking binaries outside the workspace root.
+        let root = root.canonicalize().unwrap_or(root);
+        let resolved = path.canonicalize().unwrap_or(path.clone());
+        if !ontocore_core::is_path_within(&root, &resolved) {
+            return Err(SubprocessError::PathNotAllowed(path.display().to_string()));
+        }
+    }
     if !path.exists() {
         return Err(SubprocessError::NotFound(path.display().to_string()));
     }
     Ok(path)
+}
+
+fn infer_workspace_root(manifest_path: &Path) -> Option<std::path::PathBuf> {
+    // We discover manifests under `{workspace}/.ontocore/plugins/*.toml`.
+    // Infer `{workspace}` so we can jail subprocess entry paths.
+    let plugins_dir = manifest_path.parent()?;
+    let ontocore_dir = plugins_dir.parent()?;
+    if ontocore_dir.file_name().and_then(|n| n.to_str()) != Some(".ontocore") {
+        return None;
+    }
+    ontocore_dir.parent().map(|p| p.to_path_buf())
 }
 
 fn validate_binary_path(path: &Path) -> Result<(), SubprocessError> {

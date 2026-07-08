@@ -680,7 +680,14 @@ fn main() -> Result<()> {
                 let catalog = build_catalog(&workspace)?;
                 let host = load_plugin_host(&workspace)?;
                 let result = host
-                    .run_plugin_action(&plugin_id, &action, Some(&catalog), None, step.as_deref())
+                    .run_plugin_action(
+                        &plugin_id,
+                        &action,
+                        Some(&catalog),
+                        None,
+                        step.as_deref(),
+                        None,
+                    )
                     .with_context(|| format!("plugin run failed for {plugin_id}"))?;
                 match format {
                     OutputFormat::Json => println!("{}", serde_json::to_string_pretty(&result)?),

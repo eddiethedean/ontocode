@@ -1,4 +1,6 @@
-use ontocore_core::{Diagnostic, DiagnosticCode, DiagnosticSeverity, SourceLocation};
+use ontocore_core::{
+    validate_workspace_scope, Diagnostic, DiagnosticCode, DiagnosticSeverity, SourceLocation,
+};
 use serde::{Deserialize, Serialize};
 use std::path::{Path, PathBuf};
 
@@ -31,10 +33,16 @@ pub struct PluginDiagnosticWire {
 
 impl PluginDiagnosticWire {
     pub fn into_diagnostic(self, plugin_id: &str, workspace: &Path) -> Diagnostic {
-        let file = if Path::new(&self.file).is_absolute() {
-            PathBuf::from(&self.file)
-        } else {
-            workspace.join(&self.file)
+        let requested = PathBuf::from(&self.file);
+        let (file, message) = match validate_workspace_scope(&requested, workspace) {
+            Ok(file) => (file, self.message),
+            Err(err) => (
+                workspace.to_path_buf(),
+                format!(
+                    "{} (rejected plugin diagnostic file path '{}': {})",
+                    self.message, self.file, err
+                ),
+            ),
         };
         Diagnostic {
             code: DiagnosticCode::PluginViolation,
@@ -43,7 +51,7 @@ impl PluginDiagnosticWire {
                 "warning" => DiagnosticSeverity::Warning,
                 _ => DiagnosticSeverity::Info,
             },
-            message: self.message,
+            message,
             file,
             range: SourceLocation {
                 line: self.line,

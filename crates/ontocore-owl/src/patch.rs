@@ -655,6 +655,55 @@ fn add_data_property_assertion(
     insert_into_entity_block(text, entity_iri, &triple, namespaces, false)
 }
 
+fn entity_declared_as(
+    text: &str,
+    entity_iri: &str,
+    owl_type: &str,
+    namespaces: &BTreeMap<String, String>,
+) -> bool {
+    if !text_contains_entity(text, entity_iri, namespaces) {
+        return false;
+    }
+    let namespaces = crate::span::namespaces_for_text(text, namespaces);
+    let short = short_name_from_iri(entity_iri);
+    let mut needles = vec![entity_iri.to_string(), format!("<{entity_iri}>")];
+    for (prefix, ns) in &namespaces {
+        if entity_iri.starts_with(ns) {
+            needles.push(format!("{prefix}:{short}"));
+        }
+    }
+    text.lines().any(|line| {
+        let trimmed = line.trim_start();
+        let is_subject = needles.iter().any(|needle| line_starts_with_subject(trimmed, needle));
+        is_subject
+            && (trimmed.contains(" a ") || trimmed.contains("\ta"))
+            && trimmed.contains(owl_type)
+    })
+}
+
+fn validate_property_chain_members(
+    text: &str,
+    properties: &[String],
+    namespaces: &BTreeMap<String, String>,
+) -> Result<()> {
+    const INVALID_TYPES: &[&str] = &[
+        "owl:Class",
+        "owl:NamedIndividual",
+        "owl:DatatypeProperty",
+        "owl:AnnotationProperty",
+    ];
+    for iri in properties {
+        for owl_type in INVALID_TYPES {
+            if entity_declared_as(text, iri, owl_type, namespaces) {
+                return Err(OwlError::PatchInvalid(format!(
+                    "property chain member {iri} is declared as {owl_type}, expected owl:ObjectProperty"
+                )));
+            }
+        }
+    }
+    Ok(())
+}
+
 fn add_property_chain(
     text: &mut String,
     entity_iri: &str,
@@ -666,6 +715,7 @@ fn add_property_chain(
             "property chain must have at least one property".into(),
         ));
     }
+    validate_property_chain_members(text, properties, namespaces)?;
     let terms: Vec<String> =
         properties.iter().map(|p| iri_to_turtle_term(p, namespaces)).collect::<Result<Vec<_>>>()?;
     let chain_obj = format!("( {} )", terms.join(" "));
@@ -1697,6 +1747,27 @@ ex:Person a owl:Class ;
         .expect("add chain");
         let preview = result.preview_text.expect("preview");
         assert!(preview.contains("owl:propertyChainAxiom"));
+    }
+
+    #[test]
+    fn add_property_chain_rejects_class_iris() {
+        let ttl = include_str!("../../../fixtures/disjoint-classes.ttl");
+        let ns = org_ns();
+        let result = apply_patches_to_text(
+            ttl,
+            &[PatchOp::AddPropertyChain {
+                entity_iri: "http://example.org/org#chases".to_string(),
+                properties: vec![
+                    "http://example.org/org#Cat".to_string(),
+                    "http://example.org/org#Dog".to_string(),
+                ],
+            }],
+            true,
+            &ns,
+        )
+        .expect("patch result");
+        assert!(!result.diagnostics.is_empty());
+        assert!(result.diagnostics[0].message.contains("owl:Class"));
     }
 
     #[test]

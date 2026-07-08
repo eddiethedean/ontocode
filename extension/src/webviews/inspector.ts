@@ -44,6 +44,7 @@ export class EntityInspectorPanel {
   private oboId: string | undefined;
   private documentUri: string | undefined;
   private classOptions: string[] = [];
+  private objectPropertyOptions: string[] = [];
   private activeRequestId = 0;
 
   private constructor(
@@ -62,6 +63,7 @@ export class EntityInspectorPanel {
     extensionUri: vscode.Uri,
     detail: EntityDetail,
     classOptions: string[] = [],
+    objectPropertyOptions: string[] = [],
     onRefresh?: RefreshFn,
     requestId?: number
   ): EntityInspectorPanel {
@@ -71,7 +73,7 @@ export class EntityInspectorPanel {
         existing.disposeForTests();
         EntityInspectorPanel.currentPanel = undefined;
       } else {
-        existing.reveal(detail, classOptions, requestId);
+        existing.reveal(detail, classOptions, objectPropertyOptions, requestId);
         existing.host.panel.reveal();
         return existing;
       }
@@ -92,13 +94,14 @@ export class EntityInspectorPanel {
 
     const instance = new EntityInspectorPanel(host, extensionUri, onRefresh);
     EntityInspectorPanel.currentPanel = instance;
-    instance.reveal(detail, classOptions, requestId);
+    instance.reveal(detail, classOptions, objectPropertyOptions, requestId);
     return instance;
   }
 
   private reveal(
     detail: EntityDetail,
     classOptions: string[] = [],
+    objectPropertyOptions: string[] = [],
     requestId?: number
   ): void {
     if (!acceptInspectorRevealRequest(this.activeRequestId, requestId)) {
@@ -110,6 +113,7 @@ export class EntityInspectorPanel {
     this.iri = detail.entity.iri;
     this.oboId = detail.entity.obo_id;
     this.classOptions = classOptions;
+    this.objectPropertyOptions = objectPropertyOptions;
     this.documentUri = detail.document_path
       ? documentUriInWorkspace(detail.document_path)
       : undefined;
@@ -118,6 +122,7 @@ export class EntityInspectorPanel {
       type: "loadEntity",
       detail: toPayload(detail),
       classOptions,
+      objectPropertyOptions,
     });
   }
 
@@ -190,7 +195,7 @@ export class EntityInspectorPanel {
     if (iriAtStart !== this.iri) {
       return;
     }
-    this.reveal(detail, this.classOptions, requestId);
+    this.reveal(detail, this.classOptions, this.objectPropertyOptions, requestId);
   }
 
   private async runPatch(
@@ -250,13 +255,13 @@ export class EntityInspectorPanel {
         if (result.entity_detail.entity.iri !== this.iri) {
           return;
         }
-        this.reveal(result.entity_detail, this.classOptions, requestId);
+        this.reveal(result.entity_detail, this.classOptions, this.objectPropertyOptions, requestId);
       } else if (this.iri) {
         const { detail } = await getEntity(this.iri);
         if (iriAtStart !== this.iri) {
           return;
         }
-        this.reveal(detail, this.classOptions, requestId);
+        this.reveal(detail, this.classOptions, this.objectPropertyOptions, requestId);
       }
       if (this.onRefresh) {
         await this.onRefresh();

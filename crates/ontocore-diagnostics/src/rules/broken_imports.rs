@@ -47,6 +47,8 @@ pub fn broken_imports(
             range,
             entity_iri: Some(imp.import_iri.clone()),
             quick_fix,
+            plugin_id: None,
+            plugin_code: None,
         });
     }
     diagnostics

@@ -1,8 +1,8 @@
 # Platform overview
 
-> **v0.13 foundation shipped.** For evaluator-facing capabilities, read [What ships today](../SHIPPED.md) first.
+> **v0.14 foundation shipped.** For evaluator-facing capabilities, read [What ships today](../SHIPPED.md) first.
 >
-> **Status:** OntoUI runtime + focus relay **shipped v0.13**; plugin host **planned v0.14** · **Terms:** [Glossary](../glossary.md)
+> **Status:** OntoUI runtime + focus relay **shipped v0.13**; plugin host MVP **shipped v0.14** · **Terms:** [Glossary](../glossary.md)
 
 ## Scope
 

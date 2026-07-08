@@ -293,6 +293,21 @@ export type HostMessage =
   | { type: "loading" }
   | { type: "semanticDiffData"; diff: DiffPayload }
   | { type: "loadImports"; payload: ImportsDocumentPayload }
+  | {
+      type: "pluginsLoaded";
+      plugins: Array<{
+        id: string;
+        name: string;
+        version: string;
+        kind: string;
+        inspector_cards: Array<{
+          id: string;
+          title: string;
+          applies_to: string[];
+          command?: string;
+        }>;
+      }>;
+    }
   | { type: "error"; message: string };
 
 /** React → Host */

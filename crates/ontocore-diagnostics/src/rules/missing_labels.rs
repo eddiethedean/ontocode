@@ -45,6 +45,8 @@ pub fn missing_labels(
             range,
             entity_iri: Some(entity.iri.clone()),
             quick_fix,
+            plugin_id: None,
+            plugin_code: None,
         });
     }
     diagnostics

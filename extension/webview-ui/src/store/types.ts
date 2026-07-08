@@ -77,6 +77,26 @@ export interface ExplorerState {
   highlightedIri: string | null;
 }
 
+export interface PluginInspectorCardState {
+  id: string;
+  title: string;
+  applies_to: string[];
+  command?: string;
+}
+
+export interface PluginDescriptorState {
+  id: string;
+  name: string;
+  version: string;
+  kind: string;
+  inspector_cards: PluginInspectorCardState[];
+}
+
+export interface PluginsState {
+  installed: PluginDescriptorState[];
+  active: string[];
+}
+
 export interface WorkspaceStoreState {
   focus: CurrentFocus | null;
   selection: SelectionState;
@@ -87,4 +107,5 @@ export interface WorkspaceStoreState {
   inspector: InspectorState;
   graph: GraphState;
   explorer: ExplorerState;
+  plugins: PluginsState;
 }

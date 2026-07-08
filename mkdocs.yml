@@ -83,6 +83,7 @@ nav:
       - Install VS Code: vscode-install.md
       - What ships today: SHIPPED.md
       - Glossary: glossary.md
+      - "What's new in v0.14": migration/v0.14.md
       - "What's new in v0.13": migration/v0.13.md
       - Pick a task: guides/start-here.md
       - Ontology concepts: concepts.md
@@ -112,6 +113,7 @@ nav:
       - CI integration: ci-integration.md
       - ROBOT interop: guides/robot-interop.md
       - Documentation export: guides/docs-export.md
+      - Plugin authoring: guides/plugins.md
       - Crate map: ontocore/crate-map.md
       - Workspace engine: ontocore/workspace-engine.md
       - OntoCore architecture: ontocore/architecture.md
@@ -170,6 +172,7 @@ nav:
           - v0.10 → v0.11: migration/v0.11.md
           - v0.11 → v0.12: migration/v0.12.md
           - v0.12 → v0.13: migration/v0.13.md
+          - v0.13 → v0.14: migration/v0.14.md
       - Legacy guide URLs: guides/legacy-guide-urls.md
       - Release integrity: release-integrity.md
   - Contribute:
@@ -239,7 +242,7 @@ nav:
               - MVP backlog: design/MVP_BACKLOG.md
           - ADRs:
               - Index (all ADRs): design/adr/README.md
-  - "Platform planning (v0.13+)":
+  - "Platform planning (v0.14+)":
       - Platform overview: platform/OVERVIEW.md
       - UX audit (v0.13): ui/UX_AUDIT_v0.13.md
       - OntoUI: platform/ONTOUI.md

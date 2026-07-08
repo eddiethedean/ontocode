@@ -1,15 +1,15 @@
-# What ships today (v0.13.0)
+# What ships today (v0.14.0)
 
 > **Canonical capability matrix.** Update this page on every release. Design specs under [Project](design/README.md) may describe future targets — check here for what is actually available.
 
-**Current release:** v0.13.0 · [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md)
+**Current release:** v0.14.0 · [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md)
 
 ## Products
 
 | Product | What it is |
 |---------|------------|
-| **OntoCode** | VS Code IDE — explorer, React inspector, graphs, Query Workbench, Manchester editor, refactor preview, reasoner |
-| **OntoCore** | Rust semantic workspace engine — `ontocore` façade, `ontocore-*` crates, `ontocore` CLI, `ontocore-lsp` |
+| **OntoCode** | VS Code IDE — explorer, React inspector, graphs, Query Workbench, Manchester editor, refactor preview, reasoner, plugin commands |
+| **OntoCore** | Rust semantic workspace engine — `ontocore` façade, `ontocore-*` crates, `ontocore` CLI, `ontocore-lsp`, plugin host |
 
 ## Capability matrix
 
@@ -47,6 +47,8 @@
 | LSP semantic tokens (Turtle, OBO) | Editor highlighting | — |
 | Configurable diagnostics | Problems panel + `.ontocore/diagnostics.toml` | `ontocore validate` |
 | React webview UI | Inspector, graphs, Query Workbench, Manchester editor, refactor preview, semantic diff, imports | — |
+| Plugin host (manifest + runtime) | Plugin commands, inspector cards, plugin Problems diagnostics | `ontocore plugins` / `ontocore workflow` |
+| Reference plugins (naming, Markdown export, SHACL scaffold) | Via validate + plugins | `ontocore plugins run` |
 
 ## Format support
 
@@ -55,6 +57,20 @@
 | Index / query | Yes | Yes | Yes (Horned catalog) | Yes |
 | Write-back (inspector, patches, refactor) | Yes | Yes | Read-only | Read-only |
 | Rich OBO metadata (synonyms, defs, xrefs) | — | Yes | — | — |
+
+## New in v0.14.0
+
+| Capability | Status |
+|------------|--------|
+| Plugin manifest discovery (`.ontocore/plugins/*.toml`) | Yes |
+| Plugin host runtime (in-process + subprocess) | Yes |
+| Reference naming validator plugin | Yes |
+| Reference Markdown exporter plugin | Yes |
+| SHACL validator scaffold | Yes |
+| `ontocore plugins list/run`, `ontocore workflow` | Yes |
+| LSP `ontocore/listPlugins`, `ontocore/runPlugin` | Yes |
+| OntoUI capability registry + WorkspaceStore plugins slice | Yes |
+| owlmake workflow scaffold command | Yes |
 
 ## New in v0.13.0
 
@@ -153,7 +169,7 @@
 
 ## What's next
 
-Forward milestones (v0.13 platform hardening → v1.0 Protégé replacement): **[Platform roadmap](roadmap.md)**.
+Forward milestones (v0.14 plugin host MVP → v1.0 Protégé replacement): **[Platform roadmap](roadmap.md)**.
 
 ## Where to learn more
 

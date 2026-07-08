@@ -21,6 +21,8 @@ pub fn parse_errors(
             range,
             entity_iri: None,
             quick_fix: None,
+            plugin_id: None,
+            plugin_code: None,
         });
     }
     diagnostics

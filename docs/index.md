@@ -6,7 +6,7 @@ hide:
 
 <div class="oc-hero" markdown>
 
-<p class="oc-hero-kicker">OntoCode documentation · v0.13.0</p>
+<p class="oc-hero-kicker">OntoCode documentation · v0.14.0</p>
 
 <p class="oc-hero-title">Ontology IDE for VS Code</p>
 
@@ -28,7 +28,7 @@ OntoCode is a modern ontology IDE for VS Code, powered by <strong>OntoCore</stro
 
 <div class="oc-callout" markdown>
 
-**What's new in v0.13?** WorkspaceStore + cross-panel focus sync, Query Workbench schema browser, PR summary diffs, configurable diagnostics, semantic tokens — [Migration v0.12 → v0.13](migration/v0.13.md).
+**What's new in v0.14?** Plugin host MVP — workspace manifests, reference validators/exporters, `ontocore plugins`, LSP `listPlugins`/`runPlugin`, owlmake workflow scaffold — [Migration v0.13 → v0.14](migration/v0.14.md).
 
 **Not sure where to begin?** Pick a path:
 
@@ -125,7 +125,7 @@ You do **not** need to clone this repo to use the extension or `cargo install on
 
 ## What ships today
 
-**v0.13.0 highlights:** OBO write-back, Turtle domain/range/property chains/annotations, OWL/XML read-only catalog, DL explanations — plus v0.11 features (Turtle completion, Manage Imports, semantic diff, `ontocore docs` export, EL–DL reasoning).
+**v0.14.0 highlights:** Plugin host MVP (manifests, reference plugins, `ontocore plugins`, LSP `listPlugins`/`runPlugin`, owlmake workflow scaffold) — on top of v0.13 WorkspaceStore + focus relay, schema browser, PR summary diffs, semantic tokens, and Turtle/OBO inspector write-back.
 
 Full matrix: **[What ships today](SHIPPED.md)** (canonical — do not rely on this summary alone).
 
@@ -155,6 +155,13 @@ Full matrix: **[What ships today](SHIPPED.md)** (canonical — do not rely on th
     ```
 
 ## Documentation map
+
+| I need… | Read |
+|---------|------|
+| Product / ecosystem overview | [architecture.md](architecture.md) |
+| Crate layout (contributors) | [design/ARCHITECTURE.md](design/ARCHITECTURE.md) |
+| OntoUI runtime (implementers) | [platform/OVERVIEW.md](platform/OVERVIEW.md) |
+| Plugin authoring (v0.14) | [guides/plugins.md](guides/plugins.md) |
 
 | Topic | Link |
 |-------|------|

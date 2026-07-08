@@ -108,8 +108,8 @@ run_step "cargo audit" cargo audit
 
 run_step "crate packaging dry-run" bash -c '
   set -euo pipefail
-  cargo publish -p ontocore-core --dry-run
-  cargo publish -p ontocore-robot --dry-run
+  cargo publish -p ontocore-core --dry-run --allow-dirty
+  cargo publish -p ontocore-robot --dry-run --allow-dirty
   cargo build -p ontocore-obo -p ontocore-diagnostics -p ontocore-owl -p ontocore-cli -p ontocore
 '
 

@@ -4,11 +4,11 @@ use crate::protocol::{
     ApplyAxiomPatchParams, ApplyAxiomPatchResult, ApplyRefactorParams, ApplyRefactorResult,
     CatalogSnapshot, DiagnosticSummary, FindUsagesParams, FindUsagesResult, GetEntityParams,
     GetEntityResult, GetExplanationParams, GetExplanationResult, GetGraphResult,
-    IndexWorkspaceParams, IndexWorkspaceResult, ListSqlSchemaResult, LspErrorPayload,
-    ManchesterCompletions, ParseManchesterParams, ParseManchesterResult, PreviewRefactorParams,
-    PreviewRefactorResult, QueryParams, RunReasonerParams, RunReasonerResult, RunRobotParams,
-    RunRobotResult, SemanticDiffParams, SemanticDiffResult, SparqlParams, TabularQueryResult,
-    UsageSummary,
+    IndexWorkspaceParams, IndexWorkspaceResult, ListPluginsResult, ListSqlSchemaResult,
+    LspErrorPayload, ManchesterCompletions, ParseManchesterParams, ParseManchesterResult,
+    PreviewRefactorParams, PreviewRefactorResult, QueryParams, RunPluginParams, RunPluginResult,
+    RunReasonerParams, RunReasonerResult, RunRobotParams, RunRobotResult, SemanticDiffParams,
+    SemanticDiffResult, SparqlParams, TabularQueryResult, UsageSummary,
 };
 use crate::state::{path_to_uri, resolve_workspace_for_index, ServerState};
 use lsp_server::ResponseError;
@@ -129,12 +129,18 @@ pub fn handle_index_workspace(
     Ok(IndexWorkspaceResult { stats, indexed_at })
 }
 
-pub fn build_catalog_snapshot(catalog: &ontocore_catalog::OntologyCatalog) -> CatalogSnapshot {
+pub fn build_catalog_snapshot(
+    catalog: &ontocore_catalog::OntologyCatalog,
+    extra_diagnostics: &[ontocore_core::Diagnostic],
+) -> CatalogSnapshot {
+    let mut diagnostics: Vec<DiagnosticSummary> =
+        catalog.data().diagnostics.iter().map(DiagnosticSummary::from).collect();
+    diagnostics.extend(extra_diagnostics.iter().map(DiagnosticSummary::from));
     CatalogSnapshot {
         documents: catalog.data().documents.clone(),
         entities: catalog.data().entities.clone(),
         hierarchy: catalog.class_hierarchy(),
-        diagnostics: catalog.data().diagnostics.iter().map(DiagnosticSummary::from).collect(),
+        diagnostics,
         reasoner: None,
     }
 }
@@ -142,8 +148,9 @@ pub fn build_catalog_snapshot(catalog: &ontocore_catalog::OntologyCatalog) -> Ca
 pub fn build_catalog_snapshot_with_reasoner(
     catalog: &ontocore_catalog::OntologyCatalog,
     reasoner: Option<ontocore_reasoner::ReasonerSnapshot>,
+    extra_diagnostics: &[ontocore_core::Diagnostic],
 ) -> CatalogSnapshot {
-    let mut snapshot = build_catalog_snapshot(catalog);
+    let mut snapshot = build_catalog_snapshot(catalog, extra_diagnostics);
     snapshot.reasoner = reasoner;
     snapshot
 }
@@ -151,11 +158,46 @@ pub fn build_catalog_snapshot_with_reasoner(
 pub fn handle_get_catalog_snapshot(
     state: &ServerState,
 ) -> Result<CatalogSnapshot, LspErrorPayload> {
+    let plugin_diags = state.plugin_diagnostics();
     state
         .with_catalog_and_reasoner(|catalog, reasoner| {
-            build_catalog_snapshot_with_reasoner(catalog, reasoner.cloned())
+            build_catalog_snapshot_with_reasoner(catalog, reasoner.cloned(), &plugin_diags)
         })
         .ok_or_else(LspErrorPayload::not_indexed)
+}
+
+pub fn handle_list_plugins(state: &ServerState) -> Result<ListPluginsResult, LspErrorPayload> {
+    let workspace = state.effective_index_root().ok_or_else(LspErrorPayload::not_indexed)?;
+    let host = ontocore_plugin_builtins::load_plugin_host(&workspace)
+        .map_err(|e| LspErrorPayload::index_failed(e.to_string()))?;
+    Ok(ListPluginsResult { plugins: host.list_plugins() })
+}
+
+pub fn handle_run_plugin(
+    state: &ServerState,
+    params: RunPluginParams,
+) -> Result<RunPluginResult, LspErrorPayload> {
+    let workspace = state.effective_index_root().ok_or_else(LspErrorPayload::not_indexed)?;
+    let host = ontocore_plugin_builtins::load_plugin_host(&workspace)
+        .map_err(|e| LspErrorPayload::index_failed(e.to_string()))?;
+    state
+        .with_catalog(|catalog| {
+            host.run_plugin_action(
+                &params.plugin_id,
+                &params.action,
+                Some(catalog),
+                None,
+                params.step.as_deref(),
+            )
+            .map(|result| RunPluginResult {
+                diagnostics: result.diagnostics.iter().map(DiagnosticSummary::from).collect(),
+                output_paths: result.output_paths,
+                logs: result.logs,
+                success: result.success,
+            })
+            .map_err(|e| LspErrorPayload::index_failed(e.to_string()))
+        })
+        .ok_or_else(LspErrorPayload::not_indexed)?
 }
 
 pub fn handle_get_entity(
@@ -1477,6 +1519,15 @@ pub fn handle_custom_request(
             let params: SemanticDiffParams = parse_custom_params(params)?;
             let result = handle_semantic_diff(state, params)?;
             serde_json::to_value(result).map_err(|e| LspErrorPayload::invalid_params(e.to_string()))
+        }
+        "ontocore/listPlugins" => {
+            let result = handle_list_plugins(state)?;
+            serde_json::to_value(result).map_err(|e| LspErrorPayload::index_failed(e.to_string()))
+        }
+        "ontocore/runPlugin" => {
+            let params: RunPluginParams = parse_custom_params(params)?;
+            let result = handle_run_plugin(state, params)?;
+            serde_json::to_value(result).map_err(|e| LspErrorPayload::index_failed(e.to_string()))
         }
         _ => Err(LspErrorPayload::invalid_params(format!("unknown method: {method}"))),
     }

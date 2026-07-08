@@ -1,6 +1,8 @@
-//! Plugin manifest discovery (v0.14 host foundation).
-
 pub use ontocore_plugin::{
-    discover_plugins, parse_manifest, DiscoveredPlugin, PluginCapabilities, PluginDiscoveryError,
-    PluginManifest, PLUGIN_DIR,
+    discover_plugins, merge_plugin_diagnostics, parse_manifest, plugin_diagnostic,
+    DiscoveredPlugin, ExporterPlugin, ManifestValidationError, PluginCapabilities,
+    PluginCommandContribution, PluginConfig, PluginDescriptor, PluginDiagnosticWire,
+    PluginDiscoveryError, PluginHost, PluginHostError, PluginInspectorCard, PluginKind,
+    PluginManifest, PluginOutput, PluginUiContributions, RunPluginResult, ValidatorPlugin,
+    WorkflowPlugin, WorkflowRequest, WorkflowResult, PLUGIN_DIR,
 };

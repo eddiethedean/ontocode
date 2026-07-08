@@ -14,9 +14,14 @@ categories.workspace = true
 include = ["src/**/*", "Cargo.toml", "README.md", "LICENSE-MIT", "LICENSE-APACHE-2.0"]
 
 [dependencies]
+ontocore-catalog = { workspace = true }
+ontocore-core = { workspace = true }
+ontocore-docs = { workspace = true }
 serde = { workspace = true }
+serde_json = { workspace = true }
 thiserror.workspace = true
 toml = "0.8"
 
 [dev-dependencies]
+ontocore-catalog = { workspace = true }
 tempfile = "3"

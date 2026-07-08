@@ -30,6 +30,7 @@ export const initialWorkspaceState: WorkspaceStoreState = {
   inspector: { entityIri: null },
   graph: { rootIri: null },
   explorer: { highlightedIri: null },
+  plugins: { installed: [], active: [] },
 };
 
 export interface WorkspaceStoreActions {
@@ -50,6 +51,7 @@ export interface WorkspaceStoreActions {
   setInspectorEntityIri: (iri: string | null) => void;
   setGraphRootIri: (iri: string | null) => void;
   setExplorerHighlight: (iri: string | null) => void;
+  setPlugins: (installed: import("./types").PluginDescriptorState[]) => void;
   hydrateFocus: (focus: CurrentFocus | null) => void;
   reset: () => void;
 }
@@ -197,6 +199,15 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
 
   setExplorerHighlight(highlightedIri) {
     set({ explorer: { highlightedIri } });
+  },
+
+  setPlugins(installed) {
+    set({
+      plugins: {
+        installed,
+        active: installed.map((p) => p.id),
+      },
+    });
   },
 
   hydrateFocus(focus) {

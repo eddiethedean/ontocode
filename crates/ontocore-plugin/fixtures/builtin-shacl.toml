@@ -1,0 +1,13 @@
+[plugin]
+name = "shacl-validator"
+version = "0.1.0"
+kind = "validator"
+id = "ontocode.shacl-validator"
+api_version = "1"
+
+[capabilities]
+validate = true
+diagnostics = true
+
+[config]
+shapes_dir = "shapes"

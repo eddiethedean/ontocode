@@ -1,4 +1,4 @@
-# CLI reference (OntoCore v0.13)
+# CLI reference (OntoCore v0.14)
 
 The `ontocore` binary indexes ontology workspaces and exposes query, validation, patch, and reasoning commands.
 
@@ -286,14 +286,62 @@ ontocore docs . --format html --output ./docs-out \
 | `--output` / `-o` | *(required)* | Output directory |
 | `--format` | `markdown` | `markdown` or `html` |
 | `--ontology-id` | — | Limit export to one ontology IRI or document id |
+| `--plugin` | — | Exporter plugin id (e.g. `ontocode.markdown-export`); omit for built-in docs export |
 
 Markdown `index.md` includes **Class hierarchy** and **Property index** sections (v0.13+).
 
-**Exit:** 0 on success; non-zero on index or I/O failure.
+**Exit:** 0 on success; non-zero on index, plugin export, or I/O failure.
+
+### `plugins`
+
+Discover and run workspace plugins from `.ontocore/plugins/*.toml`. See [Plugin authoring guide](guides/plugins.md).
+
+#### `plugins list`
+
+```bash
+ontocore plugins list [workspace]
+ontocore plugins list . --format json
+```
+
+**Result (text):** one line per plugin (`id`, `kind`, `version`). **Result (json):** array of plugin descriptors.
+
+**Exit:** 0 on success; non-zero on discovery/host failure.
+
+#### `plugins run`
+
+```bash
+ontocore plugins run <plugin_id> [--action validate|export|workflow] [--step <name>] [workspace]
+ontocore plugins run ontocode.naming-validator --action validate .
+```
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `plugin_id` | *(required)* | Plugin id from manifest |
+| `--action` | `validate` | `validate`, `export`, or `workflow` |
+| `--step` | — | Workflow step when `--action workflow` |
+| `--format` | `text` | `text` or `json` |
+
+**Exit:** 0 on success; non-zero on host/action failure or plugin-reported failure.
+
+### `workflow`
+
+Run an external workflow plugin subprocess (e.g. owlmake scaffold).
+
+```bash
+ontocore workflow --plugin owlmake --step qc [workspace]
+```
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--plugin` | *(required)* | Plugin id from `.ontocore/plugins/` |
+| `--step` | `qc` | Workflow step: `build`, `qc`, `release`, or `report` |
+| `workspace` | `.` | Workspace directory |
+
+**Exit:** 0 when the workflow reports success; non-zero when the plugin fails or subprocess exits unsuccessfully.
 
 ## Related
 
-- [Documentation export guide](guides/docs-export.md)
+- [Plugin authoring guide](guides/plugins.md)
 - [Refactoring guide](guides/refactoring.md)
 - [Examples: refactoring](examples/refactoring.md)
 - [Getting started](getting-started.md)

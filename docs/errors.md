@@ -1,6 +1,6 @@
-# Errors reference (OntoCore v0.13)
+# Errors reference (OntoCore v0.14)
 
-Unified catalog of error codes, exit behavior, and failure modes for OntoCore **v0.13.0**.
+Unified catalog of error codes, exit behavior, and failure modes for OntoCore **v0.14.0**.
 
 ## CLI exit codes
 
@@ -8,7 +8,7 @@ Unified catalog of error codes, exit behavior, and failure modes for OntoCore **
 |---------|--------|---------------|
 | `ontocore index` | Index succeeded | Index/parse/I/O failure |
 | `ontocore inspect` | Index succeeded | Index/parse/I/O failure |
-| `ontocore validate` | No diagnostic **errors** (warnings/info allowed) | One or more diagnostic **errors** |
+| `ontocore validate` | No diagnostic **errors** (warnings/info allowed; includes plugin validators) | One or more diagnostic **errors** (core or plugin) |
 | `ontocore query` | Query succeeded | Parse error, unsupported SQL, I/O failure |
 | `ontocore sparql` | Query succeeded (results may be truncated at row cap) | Parse error, I/O failure |
 | `ontocore patch` | Patch applied or preview succeeded | Invalid patch, unsupported format, I/O failure |
@@ -16,7 +16,10 @@ Unified catalog of error codes, exit behavior, and failure modes for OntoCore **
 | `ontocore explain` | Explanation produced | Class not found, explanation unavailable, reasoner error |
 | `ontocore refactor` (subcommands) | Preview or apply succeeded | Invalid request, path outside workspace, I/O failure |
 | `ontocore diff` | Diff succeeded | Git/parse/I/O failure, invalid ref token |
-| `ontocore docs` | Export succeeded | Index or I/O failure |
+| `ontocore docs` | Export succeeded | Index, plugin export, or I/O failure |
+| `ontocore plugins list` | Discovery succeeded | Host/discovery failure |
+| `ontocore plugins run` | Plugin action succeeded | Host/action failure |
+| `ontocore workflow` | Workflow step succeeded | Plugin/subprocess failure |
 | `ontocore robot` | ROBOT subprocess exit 0 | ROBOT non-zero exit or spawn failure |
 
 `validate` and `classify` exit semantics are stable for CI — see [workspace-limits.md](workspace-limits.md) and [ci-integration.md](ci-integration.md).
@@ -52,7 +55,7 @@ Custom `ontocore/*` method failures return JSON-RPC errors with `data` containin
 | `ENTITY_NOT_FOUND` | `getEntity` IRI not in catalog | Check IRI spelling / re-index |
 | `PATCH_INVALID` | Patch JSON invalid or entity missing | Check patch parameters and entity IRIs |
 | `UNSUPPORTED_FORMAT` | Write-back on non-Turtle file | Save as Turtle (.ttl) for write-back |
-| `INDEX_FAILED` | Indexing failed (parse, limits, I/O) | Check ontology files for parse errors |
+| `INDEX_FAILED` | Indexing failed (parse, limits, I/O) **or plugin host failure** (`listPlugins`, `runPlugin`) | Check ontology files; verify plugin manifest and subprocess entry |
 | `QUERY_FAILED` | SQL or SPARQL query failed | Check query syntax and [sql-reference](sql-reference.md) |
 | `MANCHESTER_INVALID` | Manchester expression parse failed | Fix expression; see [Manchester editor](ontocode/manchester-editor.md) |
 | `APPLIED_NOT_INDEXED` | Patch written to buffer/disk but reindex failed | Run Index Workspace; file may already be updated (`recoverable: true`) |
@@ -61,6 +64,8 @@ Custom `ontocore/*` method failures return JSON-RPC errors with `data` containin
 | `REFACTOR_FAILED` | Refactor preview/apply failed | Check IRIs, Turtle-only scope, and preview plan |
 | `GRAPH_FAILED` | `getGraph` failed | Re-index workspace or reduce neighborhood depth |
 | `ROBOT_FAILED` | `runRobot` external process failed | Check `ontocode.robotPath` and ROBOT install |
+
+Plugin host errors (`listPlugins`, `runPlugin`) return `INDEX_FAILED` with a message describing the plugin failure (not `INVALID_PARAMS`).
 
 Successful patch/refactor apply may include `reindex_warning` in the result when disk write succeeded but reindex failed.
 
@@ -117,6 +122,21 @@ LSP `applyAxiomPatch` returns the same `ApplyPatchResult` fields (`applied`, `pr
 | `io_read_error` | error | Diagnostic engine could not read file from disk |
 
 Query diagnostics: `SELECT code, severity, message, file FROM diagnostics WHERE severity = 'error'`
+
+## Plugin diagnostic codes (v0.14+)
+
+Plugin validators contribute diagnostics with wire codes `plugin:<plugin_id>:<code>` and LSP `source` `ontocore-plugin:<plugin_id>`.
+
+| Wire code suffix | Plugin | Severity | Meaning |
+|------------------|--------|----------|---------|
+| `missing_label` | `ontocode.naming-validator` | warning | Class/property missing `rdfs:label` |
+| `iri_prefix` | `ontocode.naming-validator` | warning | IRI does not match configured prefix |
+| `shapes_missing` | `ontocode.shacl-validator` | info | SHACL shapes directory not found |
+| `shapes_empty` | `ontocode.shacl-validator` | info | No `.ttl`/`.rdf`/`.shacl` files in shapes dir |
+| `shacl_pending` | `ontocode.shacl-validator` | info | Shapes found; full rudof validation not yet integrated |
+| `plugin_error` | any | error | Plugin host run failure |
+
+Example: `plugin:ontocode.naming-validator:missing_label`
 
 ## Workspace limit failures
 

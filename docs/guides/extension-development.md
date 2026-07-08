@@ -51,11 +51,17 @@ Press **F5** in VS Code with the `extension/` folder open (or use **Run Extensio
 Run extension-related CI locally:
 
 ```bash
+cargo fmt --all --check
+cargo clippy --workspace --all-targets --all-features -- -D warnings
+cargo build -p ontocore-lsp --bins
 cd extension/webview-ui && npm ci && npm test
-cd extension && npm ci && npm run compile && npm test
+cd extension && ONTOCORE_LSP_BIN=../target/debug/ontocore-lsp npm ci && npm run compile && npm test
+./scripts/check-doc-versions.sh
 ```
 
 For full CI parity (Rust, docs, packaging, VS Code e2e): `./scripts/run-ci-local.sh` — see [Contributing](../contributing.md).
+
+Plugin UI work: see [Capability providers](../platform/CAPABILITY_PROVIDERS.md) and `extension/webview-ui/src/capabilities/`.
 
 ## Related
 

@@ -32,6 +32,8 @@ struct InnerState {
     document_versions: HashMap<PathBuf, i32>,
     reasoner_cache: ReasonerCacheStore,
     reasoner_snapshot: Option<ReasonerSnapshot>,
+    /// Diagnostics from workspace plugins (merged at publish time).
+    plugin_diagnostics: Vec<Diagnostic>,
     /// URIs that received `publishDiagnostics` (for stale clears).
     published_diagnostic_uris: BTreeSet<String>,
     /// Persist `.ontocore/cache/` during indexing when enabled via `ontocore/indexWorkspace`.
@@ -51,6 +53,7 @@ impl ServerState {
                 document_versions: HashMap::new(),
                 reasoner_cache: ReasonerCacheStore::new(),
                 reasoner_snapshot: None,
+                plugin_diagnostics: Vec::new(),
                 published_diagnostic_uris: BTreeSet::new(),
                 index_disk_cache: false,
             })),
@@ -145,12 +148,17 @@ impl ServerState {
         let stats = catalog.data().stats();
         let indexed_at = now_epoch_secs();
 
+        let plugin_diags = ontocore_plugin_builtins::load_plugin_host(&workspace)
+            .map(|host| host.run_all_validators(&catalog))
+            .unwrap_or_default();
+
         let mut guard = self.inner.write().map_err(|e| e.to_string())?;
         guard.catalog = Some(catalog);
         guard.indexed_workspace = Some(workspace);
         guard.indexed_at = Some(indexed_at);
         guard.reasoner_cache.invalidate();
         guard.reasoner_snapshot = None;
+        guard.plugin_diagnostics = plugin_diags;
 
         Ok((stats, indexed_at))
     }
@@ -195,13 +203,21 @@ impl ServerState {
         self.open_documents_snapshot()
     }
 
+    pub fn plugin_diagnostics(&self) -> Vec<Diagnostic> {
+        self.inner.read().ok().map(|g| g.plugin_diagnostics.clone()).unwrap_or_default()
+    }
+
     /// Clone catalog documents and diagnostics for publishing outside the read lock.
     pub fn catalog_diagnostic_snapshot(&self) -> Option<CatalogDiagnosticSnapshot> {
         let guard = self.inner.read().ok()?;
         let catalog = guard.catalog.as_ref()?;
         Some(CatalogDiagnosticSnapshot {
             documents: catalog.data().documents.clone(),
-            diagnostics: catalog.data().diagnostics.clone(),
+            diagnostics: {
+                let mut all = catalog.data().diagnostics.clone();
+                all.extend(guard.plugin_diagnostics.clone());
+                all
+            },
         })
     }
 
@@ -359,6 +375,7 @@ fn clear_workspace_state_inner(guard: &mut InnerState) {
     guard.document_versions.clear();
     guard.reasoner_cache.invalidate();
     guard.reasoner_snapshot = None;
+    guard.plugin_diagnostics.clear();
 }
 
 fn on_workspace_roots_changed_inner(guard: &mut InnerState, new_roots: &[PathBuf]) {
@@ -366,6 +383,7 @@ fn on_workspace_roots_changed_inner(guard: &mut InnerState, new_roots: &[PathBuf
     guard.indexed_at = None;
     guard.reasoner_cache.invalidate();
     guard.reasoner_snapshot = None;
+    guard.plugin_diagnostics.clear();
     if let Some(ref indexed) = guard.indexed_workspace {
         if !is_path_within_any(new_roots, indexed) {
             guard.indexed_workspace = None;

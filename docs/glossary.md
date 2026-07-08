@@ -4,16 +4,17 @@ Canonical terminology for OntoCode, OntoCore, OntoUI, and the Ontologos platform
 
 | Term | Definition | Status |
 |------|------------|--------|
-| **OntoCore** | Rust semantic workspace engine — indexing, queries, diagnostics, reasoning integration, refactoring, CLI, LSP | **Implemented** (v0.13) |
-| **OntoCode** | VS Code extension — host shell, commands, LSP client, webview hosting | **Implemented** (v0.13) |
-| **OntoUI** | Shared React UI platform — component library, design tokens, workspace runtime; lives in `extension/webview-ui/` | **Partial** — WorkspaceStore + focus relay **shipped v0.13**; full workspace registry planned |
+| **OntoCore** | Rust semantic workspace engine — indexing, queries, diagnostics, reasoning integration, refactoring, CLI, LSP, plugin host | **Implemented** (v0.14) |
+| **OntoCode** | VS Code extension — host shell, commands, LSP client, webview hosting | **Implemented** (v0.14) |
+| **OntoUI** | Shared React UI platform — component library, design tokens, workspace runtime; lives in `extension/webview-ui/` | **Partial** — WorkspaceStore + focus relay **shipped v0.13**; plugin inspector cards **shipped v0.14** |
 | **OntoStudio** | Future standalone desktop application reusing OntoUI + OntoCore | **Planned** (post v1.0) |
 | **Workspace** | Task-oriented product surface (Entity, Graph, Query, Reasoning, Refactoring, …) — **not** a VS Code workspace folder | **Partial** — cross-panel focus sync shipped v0.13; surfaces remain webview panels |
 | **Current Focus** | Active semantic object (entity, axiom, query, diagnostic, graph node) that drives UI synchronization | **Shipped** (v0.13) |
 | **WorkspaceStore** | Single source of truth for OntoUI global state | **Shipped** (v0.13) |
-| **WorkspaceRegistry** | Registry mapping workspace type → factory / component | **Planned** (v0.14) |
+| **WorkspaceRegistry** | Registry mapping workspace type → factory / component | **Partial** — capability registry shipped v0.14 |
 | **WorkspaceHost** | Host adapter bridging OntoUI to a shell (VS Code webview, future Electron/Tauri) | **Partial** — VS Code extension host only |
-| **Capability Provider** | Plugin-provided implementation of a platform capability (reasoning, querying, AI, refactoring, diagnostics, import/export) | **Planned** (v0.14+) |
+| **Capability Provider** | Plugin-provided implementation of a platform capability (reasoning, querying, AI, refactoring, diagnostics, import/export) | **Shipped** (v0.14) — MVP registry + inspector cards |
+| **Plugin host** | OntoCore runtime that discovers workspace manifests and runs in-process or subprocess plugins | **Shipped** (v0.14) |
 | **Ontologos** | External OWL reasoner (EL/RL/RDFS/DL) integrated via `ontocore-reasoner` | **Implemented** (v0.9+) |
 
 ## Disambiguation

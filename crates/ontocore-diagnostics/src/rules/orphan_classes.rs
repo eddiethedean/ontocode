@@ -69,6 +69,8 @@ pub fn orphan_classes(
             range,
             entity_iri: Some(class.iri.clone()),
             quick_fix: None,
+            plugin_id: None,
+            plugin_code: None,
         });
     }
     diagnostics

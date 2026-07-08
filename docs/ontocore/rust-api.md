@@ -15,10 +15,10 @@ Pin dependencies in `Cargo.toml`:
 
 ```toml
 [dependencies]
-ontocore = "0.13"
+ontocore = "0.14"
 ```
 
-For CI and reproducible builds: `cargo install ontocore-cli --locked --version 0.13.0`.
+For CI and reproducible builds: `cargo install ontocore-cli --locked --version 0.14.0`.
 
 ## docs.rs
 
@@ -40,7 +40,7 @@ Generated API documentation is published on [docs.rs](https://docs.rs/ontocore):
 | `ontocore-diff` | [docs.rs/ontocore-diff](https://docs.rs/ontocore-diff) |
 | `ontocore-docs` | [docs.rs/ontocore-docs](https://docs.rs/ontocore-docs) |
 | `ontocore-refactor` | [docs.rs/ontocore-refactor](https://docs.rs/ontocore-refactor) |
-| `ontocore-plugin` | [docs.rs/ontocore-plugin](https://docs.rs/ontocore-plugin) (experimental; Tier D in v0.13) |
+| `ontocore-plugin` | [docs.rs/ontocore-plugin](https://docs.rs/ontocore-plugin) (experimental; plugin host MVP in v0.14) |
 | `ontocore-cli` | [docs.rs/ontocore-cli](https://docs.rs/ontocore-cli) |
 
 Search all crates: [crates.io search?q=ontocore](https://crates.io/search?q=ontocore).

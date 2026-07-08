@@ -3,6 +3,8 @@ import { FocusSyncBootstrap } from "./hooks/useFocusSync";
 import { HostProvider } from "./context/HostContext";
 import { getWorkspaceByPanelKind } from "./workspaces";
 
+import { registerBuiltinProviders } from "./capabilities/builtin";
+
 function panelFromQuery(): PanelKind {
   const params = new URLSearchParams(window.location.search);
   const panel = params.get("panel");
@@ -33,6 +35,7 @@ function WorkspaceRoot(): JSX.Element {
 }
 
 export default function App(): JSX.Element {
+  registerBuiltinProviders();
   return (
     <HostProvider>
       <FocusSyncBootstrap />

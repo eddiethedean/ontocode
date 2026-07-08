@@ -24,7 +24,7 @@ use ontocore_catalog::OntologyCatalog;
 pub fn catalog_snapshot_json(
     catalog: &OntologyCatalog,
 ) -> Result<serde_json::Value, serde_json::Error> {
-    serde_json::to_value(build_catalog_snapshot(catalog))
+    serde_json::to_value(build_catalog_snapshot(catalog, &[]))
 }
 
 #[cfg(test)]

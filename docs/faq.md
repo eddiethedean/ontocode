@@ -13,7 +13,7 @@ OntoCore was previously branded **OntoIndex** (`ontoindex` CLI, `ontoindex-*` cr
 
 **Is the API stable?**
 
-Pre-1.0. Published crates are at **0.13.x**. Library APIs, LSP JSON, and SQL table columns may change between minor releases until v1.0. Pin versions in CI with `cargo install ontocore-cli --locked --version 0.13.0`. See [API stability](guides/api-stability.md). Upgrading from **0.11.x**? See [v0.13 migration](migration/v0.13.md). The `validate` and `classify` exit codes are documented in [workspace-limits.md](workspace-limits.md).
+Pre-1.0. Published crates are at **0.14.x**. Library APIs, LSP JSON, and SQL table columns may change between minor releases until v1.0. Pin versions in CI with `cargo install ontocore-cli --locked --version 0.14.0`. See [API stability](guides/api-stability.md). Upgrading from **0.13.x**? See [v0.14 migration](migration/v0.14.md). The `validate` and `classify` exit codes are documented in [workspace-limits.md](workspace-limits.md).
 
 **What ships in the current release?**
 
@@ -23,7 +23,7 @@ See [What ships today](SHIPPED.md) for the canonical capability matrix.
 
 **Is OntoCode production-ready?**
 
-**Pilot-ready for many OWL/OBO workflows in VS Code and CI** — not a full Protégé replacement for every profile. Use [What ships today](SHIPPED.md) for the capability matrix, [Production readiness](guides/production-readiness.md) for pilot vs production tiers, and [Protégé decision guide](guides/protege-decision.md) for gap analysis. Pin releases in CI (`--version 0.13.0`) and review [API stability](guides/api-stability.md) before embedding Rust libraries.
+**Pilot-ready for many OWL/OBO workflows in VS Code and CI** — not a full Protégé replacement for every profile. Use [What ships today](SHIPPED.md) for the capability matrix, [Production readiness](guides/production-readiness.md) for pilot vs production tiers, and [Protégé decision guide](guides/protege-decision.md) for gap analysis. Pin releases in CI (`--version 0.14.0`) and review [API stability](guides/api-stability.md) before embedding Rust libraries.
 
 ## Installation
 
@@ -156,7 +156,7 @@ EL/RL/RDFS shipped in **v0.6.0** (OntoLogos 0.9.0). Full OWL 2 DL classification
 
 **How does this compare to Protégé?**
 
-OntoCode targets OWL/OBO workflows in VS Code: browse and edit Turtle and OBO, SQL/SPARQL queries, EL–DL reasoning, refactoring, graph views, Turtle completion, diagnostic quick fixes, Manage Imports, property chain editing, and **semantic diff** (CLI, LSP, and VS Code panel). Gaps vs Protégé today include **OWL/XML write-back**, **full DL axiom catalog for all formats**, and a **plugin host** — see the [Protégé parity matrix](design/PROTEGE_PARITY.md) and [What ships today](SHIPPED.md). For a first-week adoption path, see [Migrating from Protégé](guides/protege-migration.md).
+OntoCode targets OWL/OBO workflows in VS Code: browse and edit Turtle and OBO, SQL/SPARQL queries, EL–DL reasoning, refactoring, graph views, Turtle completion, diagnostic quick fixes, Manage Imports, property chain editing, **semantic diff** (CLI, LSP, and VS Code panel), and **plugin host MVP** (manifests, reference plugins, CLI/LSP hooks — v0.14). Gaps vs Protégé today include **OWL/XML write-back**, **full DL axiom catalog for all formats**, and a **stable third-party plugin ecosystem API** (v1.0) — see the [Protégé parity matrix](design/PROTEGE_PARITY.md) and [What ships today](SHIPPED.md). For a first-week adoption path, see [Migrating from Protégé](guides/protege-migration.md).
 
 ## OBO and graphs
 

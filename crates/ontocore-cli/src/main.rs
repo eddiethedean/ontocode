@@ -7,6 +7,7 @@ use ontocore_diff::{
     format_diff_text, parse_git_range, DiffResult,
 };
 use ontocore_docs::{export_workspace, ExportFormat, ExportOptions};
+use ontocore_plugin_builtins::load_plugin_host;
 use ontocore_query::{
     query_catalog,
     sparql::to_json as sparql_to_json,
@@ -25,7 +26,7 @@ use std::path::{Path, PathBuf};
 #[command(
     name = "ontocore",
     version,
-    about = "Local-first ontology index and query engine (OntoCode v0.13)"
+    about = "Local-first ontology index and query engine (OntoCode v0.14)"
 )]
 struct Cli {
     #[command(subcommand)]
@@ -136,6 +137,9 @@ enum Commands {
         /// Limit export to a single ontology id / base IRI
         #[arg(long)]
         ontology_id: Option<String>,
+        /// Exporter plugin id (default: built-in docs export)
+        #[arg(long)]
+        plugin: Option<String>,
     },
     /// Semantic diff between git refs, directories, or indexed snapshots
     Diff {
@@ -161,6 +165,48 @@ enum Commands {
         /// Emit a Markdown summary suitable for pull request descriptions
         #[arg(long)]
         pr_summary: bool,
+    },
+    /// Discover and manage workspace plugins
+    Plugins {
+        #[command(subcommand)]
+        command: PluginCommands,
+    },
+    /// Run an external workflow plugin (e.g. owlmake)
+    Workflow {
+        /// Workspace directory
+        #[arg(default_value = ".")]
+        workspace: PathBuf,
+        /// Plugin id from `.ontocore/plugins/`
+        #[arg(long)]
+        plugin: String,
+        /// Workflow step (build, qc, release, report)
+        #[arg(long, default_value = "qc")]
+        step: String,
+    },
+}
+
+#[derive(Subcommand)]
+enum PluginCommands {
+    /// List discovered plugins
+    List {
+        #[arg(default_value = ".")]
+        workspace: PathBuf,
+        #[arg(long, value_enum, default_value_t = OutputFormat::Text)]
+        format: OutputFormat,
+    },
+    /// Run a plugin action
+    Run {
+        #[arg(default_value = ".")]
+        workspace: PathBuf,
+        /// Plugin id
+        plugin_id: String,
+        /// Action: validate, export, workflow
+        #[arg(long, default_value = "validate")]
+        action: String,
+        #[arg(long)]
+        step: Option<String>,
+        #[arg(long, value_enum, default_value_t = OutputFormat::Text)]
+        format: OutputFormat,
     },
 }
 
@@ -301,13 +347,19 @@ fn main() -> Result<()> {
             let mut error_count = 0usize;
             let mut warning_count = 0usize;
 
-            for diag in &data.diagnostics {
+            let mut all_diags = data.diagnostics.clone();
+            if let Ok(host) = load_plugin_host(&workspace) {
+                let plugin_diags = host.run_all_validators(&catalog);
+                all_diags.extend(plugin_diags);
+            }
+
+            for diag in &all_diags {
+                let code = diag.display_code();
                 match diag.severity {
                     ontocore_core::DiagnosticSeverity::Error => {
                         error_count += 1;
                         eprintln!(
-                            "ERROR [{}] {}:{}:{}: {}",
-                            diag.code.as_str(),
+                            "ERROR [{code}] {}:{}:{}: {}",
                             diag.file.display(),
                             diag.range.line.unwrap_or(0),
                             diag.range.column.unwrap_or(0),
@@ -317,8 +369,7 @@ fn main() -> Result<()> {
                     ontocore_core::DiagnosticSeverity::Warning => {
                         warning_count += 1;
                         eprintln!(
-                            "WARN  [{}] {}:{}:{}: {}",
-                            diag.code.as_str(),
+                            "WARN  [{code}] {}:{}:{}: {}",
                             diag.file.display(),
                             diag.range.line.unwrap_or(0),
                             diag.range.column.unwrap_or(0),
@@ -326,12 +377,7 @@ fn main() -> Result<()> {
                         );
                     }
                     ontocore_core::DiagnosticSeverity::Info => {
-                        eprintln!(
-                            "INFO  [{}] {}: {}",
-                            diag.code.as_str(),
-                            diag.file.display(),
-                            diag.message
-                        );
+                        eprintln!("INFO  [{code}] {}: {}", diag.file.display(), diag.message);
                     }
                 }
             }
@@ -538,19 +584,43 @@ fn main() -> Result<()> {
                 run_refactor_plan(&plan, preview, format, &workspace)?;
             }
         },
-        Commands::Docs { workspace, output, format, ontology_id } => {
+        Commands::Docs { workspace, output, format, ontology_id, plugin } => {
             let catalog = build_catalog(&workspace)?;
-            let export_format = match format {
-                DocsFormat::Markdown => ExportFormat::Markdown,
-                DocsFormat::Html => ExportFormat::Html,
-            };
-            let mut options =
-                ExportOptions { output_dir: output, format: export_format, ontology_id: None };
-            if let Some(id) = ontology_id {
-                options = options.with_ontology_id(id);
+            if let Some(plugin_id) = plugin {
+                let host = load_plugin_host(&workspace)?;
+                let export_format = match format {
+                    DocsFormat::Markdown => ExportFormat::Markdown,
+                    DocsFormat::Html => ExportFormat::Html,
+                };
+                let mut options = ExportOptions {
+                    output_dir: output.clone(),
+                    format: export_format,
+                    ontology_id: None,
+                };
+                if let Some(id) = ontology_id {
+                    options = options.with_ontology_id(id);
+                }
+                let result = host
+                    .run_export_plugin(&plugin_id, &catalog, options)
+                    .with_context(|| format!("plugin export '{plugin_id}' failed"))?;
+                if !result.output_paths.is_empty() {
+                    println!("Wrote: {}", result.output_paths.join(", "));
+                } else {
+                    println!("Wrote documentation to {}", output.display());
+                }
+            } else {
+                let export_format = match format {
+                    DocsFormat::Markdown => ExportFormat::Markdown,
+                    DocsFormat::Html => ExportFormat::Html,
+                };
+                let mut options =
+                    ExportOptions { output_dir: output, format: export_format, ontology_id: None };
+                if let Some(id) = ontology_id {
+                    options = options.with_ontology_id(id);
+                }
+                export_workspace(&catalog, options.clone()).context("docs export failed")?;
+                println!("Wrote documentation to {}", options.output_dir.display());
             }
-            export_workspace(&catalog, options.clone()).context("docs export failed")?;
-            println!("Wrote documentation to {}", options.output_dir.display());
         }
         Commands::Diff {
             git_range,
@@ -581,6 +651,68 @@ fn main() -> Result<()> {
                 }
             };
             println!("{output}");
+        }
+        Commands::Plugins { command } => match command {
+            PluginCommands::List { workspace, format } => {
+                let host = load_plugin_host(&workspace)?;
+                let plugins = host.list_plugins();
+                match format {
+                    OutputFormat::Json => println!("{}", serde_json::to_string_pretty(&plugins)?),
+                    _ => {
+                        if plugins.is_empty() {
+                            println!("No plugins discovered under .ontocore/plugins/");
+                        }
+                        for p in plugins {
+                            println!(
+                                "{} {} ({}) — validate={} export={} in_process={}",
+                                p.id,
+                                p.version,
+                                p.kind,
+                                p.capabilities.validate,
+                                p.capabilities.export,
+                                p.in_process
+                            );
+                        }
+                    }
+                }
+            }
+            PluginCommands::Run { workspace, plugin_id, action, step, format } => {
+                let catalog = build_catalog(&workspace)?;
+                let host = load_plugin_host(&workspace)?;
+                let result = host
+                    .run_plugin_action(&plugin_id, &action, Some(&catalog), None, step.as_deref())
+                    .with_context(|| format!("plugin run failed for {plugin_id}"))?;
+                match format {
+                    OutputFormat::Json => println!("{}", serde_json::to_string_pretty(&result)?),
+                    _ => {
+                        if let Some(logs) = &result.logs {
+                            println!("{logs}");
+                        }
+                        for diag in &result.diagnostics {
+                            println!("[{}] {}", diag.display_code(), diag.message);
+                        }
+                        if !result.output_paths.is_empty() {
+                            println!("output: {}", result.output_paths.join(", "));
+                        }
+                    }
+                }
+            }
+        },
+        Commands::Workflow { workspace, plugin, step } => {
+            let host = load_plugin_host(&workspace)?;
+            let result = host
+                .run_workflow_plugin(&plugin, &step)
+                .with_context(|| format!("workflow plugin '{plugin}' failed"))?;
+            if let Some(logs) = &result.logs {
+                println!("{logs}");
+            }
+            for diag in &result.diagnostics {
+                eprintln!("[{}] {}", diag.display_code(), diag.message);
+            }
+            if !result.success {
+                bail!("workflow step '{step}' failed");
+            }
+            println!("workflow '{step}' completed");
         }
     }
     Ok(())

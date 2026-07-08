@@ -16,7 +16,7 @@ New to OWL/RDF vocabulary? Read [Ontology concepts](../concepts.md) first.
 
 - You need **OWL/XML or RDF/XML in-place write-back** — edit as Turtle/OBO or use Protégé.
 - You need **full SQL** (JOINs, `ORDER BY`, `LIKE`) — use SQL-like virtual tables or SPARQL instead.
-- You need a **plugin host** or owlmake integration (planned v1.0; not installable yet).
+- You need a **stable, semver-guaranteed plugin API** or production owlmake integration without subprocess scaffolding — plugin host **MVP shipped in v0.14** ([Plugin authoring](plugins.md)); ecosystem hardening is **v1.0**.
 
 Canonical matrix: [What ships today](../SHIPPED.md).
 

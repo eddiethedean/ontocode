@@ -1,0 +1,16 @@
+[plugin]
+name = "owlmake"
+version = "0.1.0"
+kind = "workflow"
+id = "owlmake"
+api_version = "1"
+entry = "owlmake"
+
+[capabilities]
+build = true
+validate = true
+release = true
+
+[[ui.commands]]
+id = "owlmake.run.qc"
+title = "Run owlmake QC"

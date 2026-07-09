@@ -1,14 +1,14 @@
-# What ships today (v0.15.0)
+# What ships today (v0.16.0)
 
 > **Canonical capability matrix.** Update this page on every release. Design specs under [Project](design/README.md) may describe future targets — check here for what is actually available.
 
-**Current release:** v0.15.0 · [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) · [Migration from v0.14](migration/v0.15.md)
+**Current release:** v0.16.0 · [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) · [Migration from v0.15](migration/v0.16.md)
 
 ## Products
 
 | Product | What it is |
 |---------|------------|
-| **OntoCode** | VS Code IDE — explorer, React inspector, graphs (asserted/inferred modes), Query Workbench, Manchester editor, refactor preview, reasoner, explanation panel, plugin commands and views |
+| **OntoCode** | VS Code IDE — explorer, React inspector, graphs (asserted/inferred modes), Query Workbench, Manchester editor, refactor preview, reasoner, explanation panel, plugin commands/views/preferences/context actions |
 | **OntoCore** | Rust semantic workspace engine — `ontocore` façade, `ontocore-*` crates, `ontocore` CLI, `ontocore-lsp`, plugin host |
 
 ## Capability matrix
@@ -47,7 +47,7 @@
 | LSP semantic tokens (Turtle, OBO) | Editor highlighting | — |
 | Configurable diagnostics | Problems panel + `.ontocore/diagnostics.toml` | `ontocore validate` |
 | React webview UI | Inspector, graphs, Query Workbench, Manchester editor, refactor preview, semantic diff, imports | — |
-| Plugin host (manifest + runtime) | Plugin commands, dockable views, inspector cards, plugin Problems diagnostics | `ontocore plugins` / `ontocore workflow` |
+| Plugin host (manifest + runtime) | Plugin commands, dockable views, inspector cards, preferences pages, context actions, plugin Problems diagnostics | `ontocore plugins` / `ontocore workflow` |
 | Plugin permissions (`api_version = "1"`) | Enforced on plugin load/run | Enforced on CLI/LSP plugin host |
 | Reference plugins (naming, Markdown export, SHACL scaffold) | Via validate + plugins | `ontocore plugins run` |
 
@@ -58,6 +58,16 @@
 | Index / query | Yes | Yes | Yes (Horned catalog) | Yes |
 | Write-back (inspector, patches, refactor) | Yes | Yes | Read-only | Read-only |
 | Rich OBO metadata (synonyms, defs, xrefs) | — | Yes | — | — |
+
+## New in v0.16.0
+
+| Capability | Status |
+|------------|--------|
+| Plugin preference pages (`ui.preferences_pages`) wired in the extension | Yes |
+| Plugin context actions (`ui.context_actions`) wired in the extension | Yes |
+| Plugin command contributions execute via LSP `ontocore/runPlugin` | Yes |
+| Imports reload command (reindex + refresh imports panel) | Yes |
+| Layout reset command (close key OntoCode panels) | Yes |
 
 ## New in v0.15.0
 
@@ -75,7 +85,7 @@
 | Subprocess plugin path-jail hardening | Yes |
 | Multi-root index workspace root selection fix | Yes |
 
-**Schema only (manifest defined, extension not wired):** `preferences_pages`, `context_actions` — see [Plugin authoring](guides/plugins.md).
+**Plugin authoring:** see [Plugin authoring](guides/plugins.md).
 
 ## New in v0.14.0
 

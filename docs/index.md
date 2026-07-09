@@ -6,11 +6,14 @@ hide:
 
 <div class="oc-hero">
 
-<div class="oc-hero-inner">
+<div class="oc-hero-badges">
+  <span class="oc-badge oc-badge--accent">v0.15.0</span>
+  <span class="oc-badge">VS Code</span>
+  <span class="oc-badge">CLI · LSP</span>
+  <span class="oc-badge">Plugins</span>
+</div>
 
-<div class="oc-hero-left">
-
-<p class="oc-hero-kicker">OntoCode documentation · v0.15.0</p>
+<p class="oc-hero-kicker">OntoCode documentation</p>
 
 <p class="oc-hero-title">Ontology IDE for VS Code</p>
 
@@ -18,28 +21,19 @@ hide:
 Index and explore OWL/RDF/OBO, run queries, refactors, and reasoning — in VS Code — powered by <strong>OntoCore</strong> (Rust workspace engine + LSP).
 </p>
 
-<div class="oc-hero-tags">
-<span class="oc-tag">VS Code / Cursor</span>
-<span class="oc-tag">CLI</span>
-<span class="oc-tag">LSP</span>
-<span class="oc-tag">Plugins</span>
-</div>
+<p class="oc-hero-ctas">
+  <a class="oc-hero-cta" href="guides/first-success/">First success →</a>
+  <a class="oc-hero-cta" href="vscode-install/" style="margin-left:0.75rem">Install extension →</a>
+  <a class="oc-hero-cta" href="getting-started/" style="margin-left:0.75rem">Install CLI →</a>
+</p>
 
-<div class="oc-hero-actions">
-  <a class="md-button md-button--primary" href="guides/first-success/">First success</a>
-  <a class="md-button" href="vscode-install/">Install extension</a>
-  <a class="md-button" href="getting-started/">Install CLI</a>
-</div>
+<p class="oc-hero-subcta"><a href="start/">Not sure? Start here</a></p>
 
 <div class="oc-hero-links">
   <a href="documentation-index/">Documentation map</a>
   <a href="glossary/">Glossary</a>
   <a href="SHIPPED/">What ships today</a>
   <a href="vision/">Vision</a>
-</div>
-
-</div>
-
 </div>
 
 </div>

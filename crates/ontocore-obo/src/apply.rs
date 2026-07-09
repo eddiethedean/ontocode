@@ -537,10 +537,7 @@ name: one
     fn rejects_add_is_a_with_whitespace_in_parent_id() {
         let result = apply_patches_to_text(
             SAMPLE,
-            &[OboPatchOp::AddIsA {
-                term_id: "EX:002".into(),
-                parent_id: "EX:001 injected".into(),
-            }],
+            &[OboPatchOp::AddIsA { term_id: "EX:002".into(), parent_id: "EX:001 injected".into() }],
             true,
         )
         .expect("patch result");

@@ -19,6 +19,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Plugin `ui.commands` contributions execute via LSP `ontocore/runPlugin` (validator/export/workflow dispatch)
+- Workspace package and all `ontocore-*` crates at **0.16.0**; extension marketplace **0.16.0**
+
+### Fixed
+
+- **OBO idspace IRI expansion** — standard `idspace:` headers now produce canonical PURLs (`GO:0000001` → `…/GO_0000001`) ([#111](https://github.com/eddiethedean/ontocode/issues/111))
+- **OBO patch input validation** — reject patch values with embedded newlines or invalid tokens before writing to disk ([#112](https://github.com/eddiethedean/ontocode/issues/112))
 
 ## [0.15.0] - 2026-07-08
 

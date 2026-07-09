@@ -6,7 +6,7 @@ Migration guides: [Migration index](migration/README.md)
 
 ## [0.16.0] - 2026-07-09
 
-**v0.16.0** — Plugin preferences pages + context actions wired in the extension, plugin command execution via `ontocore/runPlugin`, imports reload + layout reset. See [CHANGELOG.md](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) and [migration/v0.16.md](migration/v0.16.md).
+**v0.16.0** — Plugin preferences pages + context actions wired in the extension, plugin command execution via `ontocore/runPlugin`, imports reload + layout reset. Includes OBO idspace IRI normalization ([#111](https://github.com/eddiethedean/ontocode/issues/111)) and OBO patch newline/token validation ([#112](https://github.com/eddiethedean/ontocode/issues/112)). See [CHANGELOG.md](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) and [migration/v0.16.md](migration/v0.16.md).
 
 ## [0.15.0] - 2026-07-08
 

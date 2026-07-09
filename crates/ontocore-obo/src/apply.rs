@@ -74,7 +74,70 @@ fn validate_obo(text: &str) -> Result<()> {
     Ok(())
 }
 
+/// Reject values that would break single-line OBO fields or inject extra stanzas.
+fn reject_line_breaks(value: &str, field: &str) -> Result<()> {
+    if value.contains('\n') || value.contains('\r') {
+        return Err(OboError::PatchInvalid(format!("{field} must not contain line breaks")));
+    }
+    Ok(())
+}
+
+/// Reject OBO token values (IDs, xrefs) that contain whitespace or line breaks.
+fn reject_obo_token(value: &str, field: &str) -> Result<()> {
+    reject_line_breaks(value, field)?;
+    if value.chars().any(char::is_whitespace) {
+        return Err(OboError::PatchInvalid(format!("{field} must not contain whitespace")));
+    }
+    Ok(())
+}
+
+fn validate_patch(patch: &OboPatchOp) -> Result<()> {
+    match patch {
+        OboPatchOp::SetName { term_id, value } => {
+            reject_obo_token(term_id, "term_id")?;
+            reject_line_breaks(value, "name")?;
+        }
+        OboPatchOp::AddSynonym { term_id, value, scope } => {
+            reject_obo_token(term_id, "term_id")?;
+            reject_line_breaks(value, "synonym")?;
+            reject_line_breaks(scope, "synonym scope")?;
+        }
+        OboPatchOp::RemoveSynonym { term_id, value } => {
+            reject_obo_token(term_id, "term_id")?;
+            reject_line_breaks(value, "synonym")?;
+        }
+        OboPatchOp::AddDef { term_id, value } => {
+            reject_obo_token(term_id, "term_id")?;
+            reject_line_breaks(value, "definition")?;
+        }
+        OboPatchOp::RemoveDef { term_id } => reject_obo_token(term_id, "term_id")?,
+        OboPatchOp::AddXref { term_id, xref } => {
+            reject_obo_token(term_id, "term_id")?;
+            reject_obo_token(xref, "xref")?;
+        }
+        OboPatchOp::RemoveXref { term_id, xref } => {
+            reject_obo_token(term_id, "term_id")?;
+            reject_obo_token(xref, "xref")?;
+        }
+        OboPatchOp::SetNamespace { term_id, namespace } => {
+            reject_obo_token(term_id, "term_id")?;
+            reject_line_breaks(namespace, "namespace")?;
+        }
+        OboPatchOp::SetDeprecated { term_id, .. } => reject_obo_token(term_id, "term_id")?,
+        OboPatchOp::AddIsA { term_id, parent_id } => {
+            reject_obo_token(term_id, "term_id")?;
+            reject_obo_token(parent_id, "parent_id")?;
+        }
+        OboPatchOp::RemoveIsA { term_id, parent_id } => {
+            reject_obo_token(term_id, "term_id")?;
+            reject_obo_token(parent_id, "parent_id")?;
+        }
+    }
+    Ok(())
+}
+
 fn apply_one(text: &mut String, patch: &OboPatchOp) -> Result<()> {
+    validate_patch(patch)?;
     match patch {
         OboPatchOp::SetName { term_id, value } => {
             set_single_line(text, term_id, "name:", value, false)
@@ -437,5 +500,51 @@ name: one
         .expect("patch result");
         assert!(!err.diagnostics.is_empty());
         assert!(err.diagnostics[0].message.contains("is_a parent not found"));
+    }
+
+    #[test]
+    fn rejects_set_name_with_embedded_newline() {
+        let result = apply_patches_to_text(
+            SAMPLE,
+            &[OboPatchOp::SetName {
+                term_id: "EX:001".into(),
+                value: "evil\nis_a: ATTACK:001".into(),
+            }],
+            true,
+        )
+        .expect("patch result");
+        assert!(!result.applied);
+        assert!(result.diagnostics.iter().any(|d| d.message.contains("line breaks")));
+        assert_eq!(result.preview_text.as_deref(), Some(SAMPLE));
+    }
+
+    #[test]
+    fn rejects_add_xref_with_embedded_newline() {
+        let result = apply_patches_to_text(
+            SAMPLE,
+            &[OboPatchOp::AddXref {
+                term_id: "EX:001".into(),
+                xref: "FOO:1\nname: injected".into(),
+            }],
+            true,
+        )
+        .expect("patch result");
+        assert!(!result.applied);
+        assert!(result.diagnostics.iter().any(|d| d.message.contains("line breaks")));
+    }
+
+    #[test]
+    fn rejects_add_is_a_with_whitespace_in_parent_id() {
+        let result = apply_patches_to_text(
+            SAMPLE,
+            &[OboPatchOp::AddIsA {
+                term_id: "EX:002".into(),
+                parent_id: "EX:001 injected".into(),
+            }],
+            true,
+        )
+        .expect("patch result");
+        assert!(!result.applied);
+        assert!(result.diagnostics.iter().any(|d| d.message.contains("whitespace")));
     }
 }

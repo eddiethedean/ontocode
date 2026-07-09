@@ -1,16 +1,23 @@
 #!/usr/bin/env bash
 # Run CI workflow steps locally (mirrors .github/workflows/ci.yml + extension-vscode-e2e darwin-arm64).
+#
+# GitHub CI runs jobs on separate VMs with remote rust-cache. Locally, running many
+# cargo jobs in parallel with isolated target dirs forces full recompiles and CPU/IO
+# contention — usually slower than sequential with one shared target/.
+#
+# PARALLEL=1 (default): overlap only non-Rust jobs (rustfmt, doc pins, mkdocs, audit)
+# while Rust/extension steps run sequentially with shared target/.
+# PARALLEL=0: fully sequential (original behavior).
 set -uo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 export ROOT
 cd "$ROOT"
 
-# Default target dir (can be overridden per-parallel job).
 export CARGO_TARGET_DIR="${CARGO_TARGET_DIR:-$ROOT/target}"
 export CARGO_HOME="${CARGO_HOME:-$HOME/.cargo}"
 export TMPDIR="${TMPDIR:-$ROOT/target/tmp}"
-mkdir -p "$TMPDIR"
+mkdir -p "$TMPDIR" "$CARGO_TARGET_DIR"
 
 PLATFORM="$(uname -s | tr '[:upper:]' '[:lower:]')"
 case "$(uname -m)" in
@@ -26,6 +33,10 @@ PASSED=()
 PARALLEL="${PARALLEL:-1}"
 LOG_DIR="${LOG_DIR:-$ROOT/target/ci-local-logs}"
 mkdir -p "$LOG_DIR"
+
+BG_PIDS=()
+BG_NAMES=()
+BG_LOGS=()
 
 run_step() {
   local name="$1"
@@ -43,50 +54,56 @@ run_step() {
   fi
 }
 
-run_parallel_step() {
+run_bg_step() {
   local name="$1"
   local slug="$2"
   shift 2
 
   local log="$LOG_DIR/${slug}.log"
-  local target_dir="$ROOT/target/ci-local-target/${slug}"
-  local tmp_dir="$ROOT/target/ci-local-tmp/${slug}"
-  mkdir -p "$target_dir" "$tmp_dir"
-
   echo ""
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
-  echo "▶ ${name} (parallel)"
+  echo "▶ ${name} (background)"
   echo "  log: ${log}"
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
 
   (
     set -euo pipefail
-    export CARGO_TARGET_DIR="${CARGO_TARGET_DIR_OVERRIDE:-$target_dir}"
-    export TMPDIR="${TMPDIR_OVERRIDE:-$tmp_dir}"
     "$@"
   ) >"$log" 2>&1 &
 
-  PARALLEL_PIDS+=("$!")
-  PARALLEL_NAMES+=("$name")
-  PARALLEL_LOGS+=("$log")
+  BG_PIDS+=("$!")
+  BG_NAMES+=("$name")
+  BG_LOGS+=("$log")
 }
 
-PARALLEL_PIDS=()
-PARALLEL_NAMES=()
-PARALLEL_LOGS=()
+wait_bg_steps() {
+  for i in "${!BG_PIDS[@]}"; do
+    local pid="${BG_PIDS[$i]}"
+    local name="${BG_NAMES[$i]}"
+    local log="${BG_LOGS[$i]}"
+    if wait "$pid"; then
+      echo "✓ PASS: ${name}"
+      PASSED+=("${name}")
+    else
+      echo "✗ FAIL: ${name}"
+      echo "  log: ${log}"
+      FAILED+=("${name}")
+    fi
+  done
+  BG_PIDS=()
+  BG_NAMES=()
+  BG_LOGS=()
+}
 
-if [[ "$PARALLEL" == "0" ]]; then
-  run_step "rustfmt" cargo fmt --all -- --check
-  run_step "documentation version sync" ./scripts/check-doc-versions.sh
-  run_step "clippy" cargo clippy --workspace --all-targets --all-features -- -D warnings
+run_rust_and_extension_steps() {
+  run_step "clippy" \
+    cargo clippy --workspace --all-targets --all-features -- -D warnings
+
   run_step "cargo test" bash -c '
     cargo build -p ontocore-lsp -p ontocore-cli --bins
     cargo test --workspace
   '
-  run_step "MSRV (1.88)" bash -c '
-    rustup run 1.88 cargo build -p ontocore-lsp -p ontocore-cli --bins
-    rustup run 1.88 cargo test --workspace
-  '
+
   run_step "CLI smoke" bash -c '
     set -euo pipefail
     cargo run -- query fixtures "SELECT * FROM classes"
@@ -94,121 +111,39 @@ if [[ "$PARALLEL" == "0" ]]; then
     cargo run -- query fixtures "SELECT code FROM diagnostics"
     cargo run -- sparql fixtures "SELECT ?s WHERE { ?s ?p ?o } LIMIT 1"
   '
+
   run_step "release build" bash -c '
     set -euo pipefail
     cargo build --release --locked -p ontocore-cli -p ontocore-lsp --bins
     ./target/release/ontocore inspect fixtures
   '
+
   run_step "LSP smoke + reasoner tests" bash -c '
     cargo build --locked -p ontocore-lsp --bins
     cargo test -p ontocode --test lsp_smoke
     cargo test -p ontocode --test lsp_reasoner
   '
-  run_step "webview-ui tests" bash -c '
-    cd extension/webview-ui
-    npm ci
-    npm test
-  '
-  run_step "extension build + unit tests" bash -c '
-    set -euo pipefail
-    cargo build -p ontocore-lsp --bins
-    cd extension
-    npm ci
-    npm run compile
-    ONTOCORE_LSP_BIN="$ROOT/target/debug/ontocore-lsp" npm test
-  '
-  run_step "extension VSIX unpack e2e" bash -c '
-    set -euo pipefail
-    cargo build -p ontocore-lsp --bins
-    mkdir -p "extension/server/linux-x64"
-    cp target/debug/ontocore-lsp extension/server/linux-x64/ontocore-lsp
-    chmod +x extension/server/linux-x64/ontocore-lsp
-    cd extension
-    npx vsce package --no-dependencies -o /tmp/ontocode-ci-local.vsix
-    rm -rf /tmp/ontocode-vsix-unpack-local
-    unzip -q /tmp/ontocode-ci-local.vsix -d /tmp/ontocode-vsix-unpack-local
-    export ONTOCODE_E2E_EXTENSION_ROOT=/tmp/ontocode-vsix-unpack-local/extension
-    export ONTOCORE_LSP_BIN="$ROOT/target/debug/ontocore-lsp"
-    npm test
-  '
-  run_step "cargo audit" cargo audit
+
   run_step "crate packaging dry-run" bash -c '
     set -euo pipefail
     cargo publish -p ontocore-core --dry-run --allow-dirty
     cargo publish -p ontocore-robot --dry-run --allow-dirty
     cargo build -p ontocore-obo -p ontocore-diagnostics -p ontocore-owl -p ontocore-cli -p ontocore
   '
-  run_step "mkdocs strict build" bash -c '
-    pip install -q -r docs/requirements.txt
-    mkdocs build --strict
-  '
-  run_step "VS Code extension e2e (${EXT_PLATFORM})" bash -c "
-    set -euo pipefail
-    cargo build -p ontocore-lsp --bins
-    ./scripts/prepare-extension-server.sh '${EXT_PLATFORM}'
-    chmod -x extension/server/${EXT_PLATFORM}/ontocore-lsp
-    cd extension
-    npm ci
-    npm run compile
-    npm run compile:vscode-test
-    npm run test:vscode
-  "
-else
-  # Rust/doc jobs (isolate cargo outputs like CI does by job).
-  run_parallel_step "rustfmt" "rustfmt" cargo fmt --all -- --check
-  run_parallel_step "documentation version sync" "doc-versions" ./scripts/check-doc-versions.sh
-  run_parallel_step "clippy" "clippy" cargo clippy --workspace --all-targets --all-features -- -D warnings
-  run_parallel_step "cargo test" "cargo-test" bash -c '
-    cargo build -p ontocore-lsp -p ontocore-cli --bins
-    cargo test --workspace
-  '
-  run_parallel_step "CLI smoke" "cli-smoke" bash -c '
-    set -euo pipefail
-    cargo run -- query fixtures "SELECT * FROM classes"
-    cargo run -- validate fixtures
-    cargo run -- query fixtures "SELECT code FROM diagnostics"
-    cargo run -- sparql fixtures "SELECT ?s WHERE { ?s ?p ?o } LIMIT 1"
-  '
-  run_parallel_step "release build" "release-build" bash -c '
-    set -euo pipefail
-    cargo build --release --locked -p ontocore-cli -p ontocore-lsp --bins
-    ./target/release/ontocore inspect fixtures
-  '
-  run_parallel_step "LSP smoke + reasoner tests" "lsp-smoke" bash -c '
-    cargo build --locked -p ontocore-lsp --bins
-    cargo test -p ontocode --test lsp_smoke
-    cargo test -p ontocode --test lsp_reasoner
-  '
-  run_parallel_step "cargo audit" "cargo-audit" cargo audit
-  run_parallel_step "crate packaging dry-run" "crate-dryrun" bash -c '
-    set -euo pipefail
-    cargo publish -p ontocore-core --dry-run --allow-dirty
-    cargo publish -p ontocore-robot --dry-run --allow-dirty
-    cargo build -p ontocore-obo -p ontocore-diagnostics -p ontocore-owl -p ontocore-cli -p ontocore
-  '
-  run_parallel_step "mkdocs strict build" "mkdocs" bash -c '
-    pip install -q -r docs/requirements.txt
-    mkdocs build --strict
-  '
 
-  # Node/extension jobs must not run concurrently in the same working tree.
-  # CI runs these on separate runners; locally we sequence them inside one job.
-  run_parallel_step "extension jobs (unit + e2e)" "extension-all" bash -c "
+  run_step "extension jobs (unit + e2e)" bash -c "
     set -euo pipefail
     cargo build -p ontocore-lsp --bins
 
     cd extension
     npm ci
 
-    # webview-ui tests
     npm --prefix webview-ui ci
     npm --prefix webview-ui test
 
-    # unit tests (includes webview build + extension compile)
     npm run compile
     ONTOCORE_LSP_BIN=\"$ROOT/target/debug/ontocore-lsp\" npm test
 
-    # VSIX unpack e2e
     mkdir -p \"server/linux-x64\"
     cp \"$ROOT/target/debug/ontocore-lsp\" \"server/linux-x64/ontocore-lsp\"
     chmod +x \"server/linux-x64/ontocore-lsp\"
@@ -219,7 +154,6 @@ else
     export ONTOCORE_LSP_BIN=\"$ROOT/target/debug/ontocore-lsp\"
     npm test
 
-    # VS Code extension e2e
     cd \"$ROOT\"
     ./scripts/prepare-extension-server.sh '${EXT_PLATFORM}'
     chmod -x \"extension/server/${EXT_PLATFORM}/ontocore-lsp\"
@@ -228,29 +162,36 @@ else
     npm run compile:vscode-test
     npm run test:vscode
   "
+}
 
-  # Collect results.
-  for i in "${!PARALLEL_PIDS[@]}"; do
-    pid="${PARALLEL_PIDS[$i]}"
-    name="${PARALLEL_NAMES[$i]}"
-    log="${PARALLEL_LOGS[$i]}"
-    if wait "$pid"; then
-      echo "✓ PASS: ${name}"
-      PASSED+=("${name}")
-    else
-      echo "✗ FAIL: ${name}"
-      echo "  log: ${log}"
-      FAILED+=("${name}")
-    fi
-  done
-
-  # MSRV is intentionally run after the parallel batch.
-  # It can contend with other concurrent cargo builds on some local setups.
-  run_step "MSRV (1.88)" bash -c '
-    rustup run 1.88 cargo build -p ontocore-lsp -p ontocore-cli --bins
-    rustup run 1.88 cargo test --workspace
+if [[ "$PARALLEL" == "0" ]]; then
+  run_step "rustfmt" cargo fmt --all -- --check
+  run_step "documentation version sync" ./scripts/check-doc-versions.sh
+  run_rust_and_extension_steps
+  run_step "cargo audit" cargo audit
+  run_step "mkdocs strict build" bash -c '
+    pip install -q -r docs/requirements.txt
+    mkdocs build --strict
   '
+else
+  # Overlap cheap / non-cargo jobs with the shared-target Rust pipeline.
+  run_bg_step "rustfmt" "rustfmt" cargo fmt --all -- --check
+  run_bg_step "documentation version sync" "doc-versions" ./scripts/check-doc-versions.sh
+  run_bg_step "cargo audit" "cargo-audit" cargo audit
+  run_bg_step "mkdocs strict build" "mkdocs" bash -c '
+    pip install -q -r docs/requirements.txt
+    mkdocs build --strict
+  '
+
+  run_rust_and_extension_steps
+  wait_bg_steps
 fi
+
+# MSRV uses a different toolchain; run after the main pipeline to avoid lock contention.
+run_step "MSRV (1.88)" bash -c '
+  rustup run 1.88 cargo build -p ontocore-lsp -p ontocore-cli --bins
+  rustup run 1.88 cargo test --workspace
+'
 
 echo ""
 echo "════════════════════════════════════════════════════════════"

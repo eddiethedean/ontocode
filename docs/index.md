@@ -4,24 +4,42 @@ hide:
   - toc
 ---
 
-<div class="oc-hero" markdown>
+<div class="oc-hero">
+
+<div class="oc-hero-inner">
+
+<div class="oc-hero-left">
 
 <p class="oc-hero-kicker">OntoCode documentation · v0.15.0</p>
 
 <p class="oc-hero-title">Ontology IDE for VS Code</p>
 
 <p class="oc-hero-lead">
-OntoCode is a modern ontology IDE for VS Code, powered by <strong>OntoCore</strong> — the Rust semantic workspace engine for indexing, queries, diagnostics, and reasoning.
+Index and explore OWL/RDF/OBO, run queries, refactors, and reasoning — in VS Code — powered by <strong>OntoCore</strong> (Rust workspace engine + LSP).
 </p>
 
-<div class="oc-hero-actions" markdown>
-[First success (~10 min core path)](guides/first-success.md){ .md-button .md-button--primary }
-[Install the extension](vscode-install.md){ .md-button }
-[Install CLI](getting-started.md){ .md-button }
-[What ships today](SHIPPED.md){ .md-button }
-[Documentation map](documentation-index.md){ .md-button }
-[Glossary](glossary.md){ .md-button }
-[Vision](vision.md){ .md-button }
+<div class="oc-hero-tags">
+<span class="oc-tag">VS Code / Cursor</span>
+<span class="oc-tag">CLI</span>
+<span class="oc-tag">LSP</span>
+<span class="oc-tag">Plugins</span>
+</div>
+
+<div class="oc-hero-actions">
+  <a class="md-button md-button--primary" href="guides/first-success/">First success</a>
+  <a class="md-button" href="vscode-install/">Install extension</a>
+  <a class="md-button" href="getting-started/">Install CLI</a>
+</div>
+
+<div class="oc-hero-links">
+  <a href="documentation-index/">Documentation map</a>
+  <a href="glossary/">Glossary</a>
+  <a href="SHIPPED/">What ships today</a>
+  <a href="vision/">Vision</a>
+</div>
+
+</div>
+
 </div>
 
 </div>

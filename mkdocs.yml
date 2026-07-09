@@ -44,6 +44,7 @@ theme:
     - navigation.tabs
     - navigation.tabs.sticky
     - navigation.sections
+    - navigation.indexes
     - navigation.expand
     - navigation.top
     - navigation.footer
@@ -51,10 +52,19 @@ theme:
     - search.highlight
     - content.code.copy
     - content.action.edit
+    - content.tabs.link
     - toc.follow
 
 plugins:
   - search
+  - git-revision-date-localized:
+      type: timeago
+      enable_creation_date: true
+      fallback_to_build_date: true
+  - minify:
+      minify_html: true
+  - redirects:
+      redirect_maps: {}
 
 extra_css:
   - stylesheets/extra.css

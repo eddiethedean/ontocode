@@ -158,7 +158,12 @@ fn obo_id_to_iri(obo_id: &str, namespaces: &BTreeMap<String, String>) -> String 
     }
     if let Some((prefix, local)) = obo_id.split_once(':') {
         if let Some(ns) = namespaces.get(prefix) {
-            return format!("{ns}{local}");
+            // When the idspace URL already ends with `PREFIX_` (e.g. `…/obo/GO_`), append
+            // only the local segment. Otherwise append `PREFIX_LOCAL` per OBO PURL rules.
+            if ns.ends_with(&format!("{prefix}_")) {
+                return format!("{ns}{local}");
+            }
+            return format!("{ns}{prefix}_{local}");
         }
     }
     let normalized = obo_id.replace(':', "_");
@@ -246,6 +251,19 @@ id: GO:0000001\n\
 name: mitochondrion\n";
         let parsed = parse_obo_text(Path::new("go.obo"), "doc-1", text).unwrap();
         assert_eq!(parsed.entities[0].iri, "http://purl.obolibrary.org/obo/GO_0000001");
+    }
+
+    #[test]
+    fn idspace_standard_obo_foundry_base_normalizes_colon_to_underscore() {
+        let text = "format-version: 1.2\n\
+idspace: GO http://purl.obolibrary.org/obo/\n\n\
+[Term]\n\
+id: GO:0000001\n\
+name: mitochondrion\n\
+is_a: GO:0000002 ! parent\n";
+        let parsed = parse_obo_text(Path::new("go.obo"), "doc-1", text).unwrap();
+        assert_eq!(parsed.entities[0].iri, "http://purl.obolibrary.org/obo/GO_0000001");
+        assert_eq!(parsed.axioms[0].object, "http://purl.obolibrary.org/obo/GO_0000002");
     }
 
     #[test]

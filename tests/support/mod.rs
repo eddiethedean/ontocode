@@ -1,5 +1,6 @@
 use ontocore_catalog::{IndexBuilder, OntologyCatalog};
 use std::path::{Path, PathBuf};
+use std::process::Command;
 
 pub fn fixture_workspace() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("fixtures")
@@ -31,7 +32,12 @@ pub fn ontocore_binary() -> PathBuf {
     }
 
     panic!(
-        "ontocore binary not found under {} (run `cargo build -p ontocore-cli` first)",
+        "ontocore binary not found under {} (run `cargo build -p ontocore-cli` first, or add ontocore-cli as a dev-dependency)",
         target_dir.display()
     );
+}
+
+/// Spawn the prebuilt `ontocore` CLI (avoids `cargo run` re-linking on every test invocation).
+pub fn ontocore_cmd() -> Command {
+    Command::new(ontocore_binary())
 }

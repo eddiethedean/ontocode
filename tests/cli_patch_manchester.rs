@@ -1,7 +1,6 @@
 mod support;
 
 use std::fs;
-use std::process::Command;
 
 #[test]
 fn patch_complex_subclass_manchester() {
@@ -22,17 +21,8 @@ fn patch_complex_subclass_manchester() {
     let patch_file = tmp.path().join("patch.json");
     fs::write(&patch_file, serde_json::to_string(&patch).unwrap()).unwrap();
 
-    let output = Command::new("cargo")
-        .args([
-            "run",
-            "-q",
-            "-p",
-            "ontocore-cli",
-            "--",
-            "patch",
-            dst.to_str().unwrap(),
-            patch_file.to_str().unwrap(),
-        ])
+    let output = support::ontocore_cmd()
+        .args(["patch", dst.to_str().unwrap(), patch_file.to_str().unwrap()])
         .output()
         .expect("run patch");
     assert!(output.status.success(), "patch failed: {}", String::from_utf8_lossy(&output.stderr));
@@ -44,8 +34,8 @@ fn patch_complex_subclass_manchester() {
         "expected new restriction in Turtle output"
     );
 
-    let validate = Command::new("cargo")
-        .args(["run", "-q", "-p", "ontocore-cli", "--", "validate", dst.to_str().unwrap()])
+    let validate = support::ontocore_cmd()
+        .args(["validate", dst.to_str().unwrap()])
         .output()
         .expect("validate");
     assert!(

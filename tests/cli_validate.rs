@@ -1,17 +1,9 @@
-use std::process::Command;
-
 mod support;
-
-fn ontocore_cmd() -> Command {
-    let mut cmd = Command::new("cargo");
-    cmd.args(["run", "-q", "-p", "ontocore-cli", "--"]);
-    cmd
-}
 
 #[test]
 fn validate_exits_zero_on_clean_fixtures() {
     let fixtures = support::fixture_workspace();
-    let output = ontocore_cmd()
+    let output = support::ontocore_cmd()
         .args(["validate", fixtures.to_str().expect("fixture path")])
         .output()
         .expect("spawn ontocore validate");
@@ -35,7 +27,7 @@ fn validate_exits_zero_when_only_warnings() {
     )
     .unwrap();
 
-    let output = ontocore_cmd()
+    let output = support::ontocore_cmd()
         .args(["validate", dir.path().to_str().expect("temp path")])
         .output()
         .expect("spawn ontocore validate");
@@ -64,7 +56,7 @@ fn validate_exits_nonzero_on_diagnostic_errors() {
     )
     .unwrap();
 
-    let output = ontocore_cmd()
+    let output = support::ontocore_cmd()
         .args(["validate", dir.path().to_str().expect("temp path")])
         .output()
         .expect("spawn ontocore validate");

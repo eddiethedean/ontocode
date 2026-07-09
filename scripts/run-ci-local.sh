@@ -9,6 +9,8 @@ cd "$ROOT"
 # Default target dir (can be overridden per-parallel job).
 export CARGO_TARGET_DIR="${CARGO_TARGET_DIR:-$ROOT/target}"
 export CARGO_HOME="${CARGO_HOME:-$HOME/.cargo}"
+export TMPDIR="${TMPDIR:-$ROOT/target/tmp}"
+mkdir -p "$TMPDIR"
 
 PLATFORM="$(uname -s | tr '[:upper:]' '[:lower:]')"
 case "$(uname -m)" in
@@ -48,6 +50,8 @@ run_parallel_step() {
 
   local log="$LOG_DIR/${slug}.log"
   local target_dir="$ROOT/target/ci-local-target/${slug}"
+  local tmp_dir="$ROOT/target/ci-local-tmp/${slug}"
+  mkdir -p "$target_dir" "$tmp_dir"
 
   echo ""
   echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
@@ -58,6 +62,7 @@ run_parallel_step() {
   (
     set -euo pipefail
     export CARGO_TARGET_DIR="${CARGO_TARGET_DIR_OVERRIDE:-$target_dir}"
+    export TMPDIR="${TMPDIR_OVERRIDE:-$tmp_dir}"
     "$@"
   ) >"$log" 2>&1 &
 
@@ -157,10 +162,6 @@ else
     cargo build -p ontocore-lsp -p ontocore-cli --bins
     cargo test --workspace
   '
-  run_parallel_step "MSRV (1.88)" "msrv-1.88" bash -c '
-    rustup run 1.88 cargo build -p ontocore-lsp -p ontocore-cli --bins
-    rustup run 1.88 cargo test --workspace
-  '
   run_parallel_step "CLI smoke" "cli-smoke" bash -c '
     set -euo pipefail
     cargo run -- query fixtures "SELECT * FROM classes"
@@ -190,41 +191,39 @@ else
     mkdocs build --strict
   '
 
-  # Node/extension jobs.
-  run_parallel_step "webview-ui tests" "webview-ui" bash -c '
-    cd extension/webview-ui
-    npm ci
-    npm test
-  '
-  run_parallel_step "extension build + unit tests" "extension-unit" bash -c '
+  # Node/extension jobs must not run concurrently in the same working tree.
+  # CI runs these on separate runners; locally we sequence them inside one job.
+  run_parallel_step "extension jobs (unit + e2e)" "extension-all" bash -c "
     set -euo pipefail
     cargo build -p ontocore-lsp --bins
+
     cd extension
     npm ci
+
+    # webview-ui tests
+    npm --prefix webview-ui ci
+    npm --prefix webview-ui test
+
+    # unit tests (includes webview build + extension compile)
     npm run compile
-    ONTOCORE_LSP_BIN="$ROOT/target/debug/ontocore-lsp" npm test
-  '
-  run_parallel_step "extension VSIX unpack e2e" "extension-vsix-e2e" bash -c '
-    set -euo pipefail
-    cargo build -p ontocore-lsp --bins
-    mkdir -p "extension/server/linux-x64"
-    cp target/debug/ontocore-lsp extension/server/linux-x64/ontocore-lsp
-    chmod +x extension/server/linux-x64/ontocore-lsp
-    cd extension
+    ONTOCORE_LSP_BIN=\"$ROOT/target/debug/ontocore-lsp\" npm test
+
+    # VSIX unpack e2e
+    mkdir -p \"server/linux-x64\"
+    cp \"$ROOT/target/debug/ontocore-lsp\" \"server/linux-x64/ontocore-lsp\"
+    chmod +x \"server/linux-x64/ontocore-lsp\"
     npx vsce package --no-dependencies -o /tmp/ontocode-ci-local.vsix
     rm -rf /tmp/ontocode-vsix-unpack-local
     unzip -q /tmp/ontocode-ci-local.vsix -d /tmp/ontocode-vsix-unpack-local
     export ONTOCODE_E2E_EXTENSION_ROOT=/tmp/ontocode-vsix-unpack-local/extension
-    export ONTOCORE_LSP_BIN="$ROOT/target/debug/ontocore-lsp"
+    export ONTOCORE_LSP_BIN=\"$ROOT/target/debug/ontocore-lsp\"
     npm test
-  '
-  run_parallel_step "VS Code extension e2e (${EXT_PLATFORM})" "extension-e2e" bash -c "
-    set -euo pipefail
-    cargo build -p ontocore-lsp --bins
+
+    # VS Code extension e2e
+    cd \"$ROOT\"
     ./scripts/prepare-extension-server.sh '${EXT_PLATFORM}'
-    chmod -x extension/server/${EXT_PLATFORM}/ontocore-lsp
+    chmod -x \"extension/server/${EXT_PLATFORM}/ontocore-lsp\"
     cd extension
-    npm ci
     npm run compile
     npm run compile:vscode-test
     npm run test:vscode
@@ -244,6 +243,13 @@ else
       FAILED+=("${name}")
     fi
   done
+
+  # MSRV is intentionally run after the parallel batch.
+  # It can contend with other concurrent cargo builds on some local setups.
+  run_step "MSRV (1.88)" bash -c '
+    rustup run 1.88 cargo build -p ontocore-lsp -p ontocore-cli --bins
+    rustup run 1.88 cargo test --workspace
+  '
 fi
 
 echo ""

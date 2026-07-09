@@ -52,6 +52,10 @@ export class ReasonerPanel {
     this.panel.webview.html = this.renderHtml();
   }
 
+  public dispose(): void {
+    this.panel.dispose();
+  }
+
   private postToWebview(message: unknown): void {
     if (!this.webviewReady) {
       this.pendingMessages.push(message);

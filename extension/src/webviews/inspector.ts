@@ -59,6 +59,10 @@ export class EntityInspectorPanel {
     });
   }
 
+  public dispose(): void {
+    this.host.panel.dispose();
+  }
+
   public static show(
     extensionUri: vscode.Uri,
     detail: EntityDetail,

@@ -183,6 +183,14 @@
         "title": "OntoCode: Plugins: Open View…"
       },
       {
+        "command": "ontocode.plugins.openPreferences",
+        "title": "OntoCode: Plugins: Open Preferences…"
+      },
+      {
+        "command": "ontocode.plugins.runContextAction",
+        "title": "OntoCode: Plugins: Run Context Action…"
+      },
+      {
         "command": "ontocode.semanticDiff",
         "title": "OntoCode: Semantic Diff…"
       },
@@ -209,6 +217,14 @@
       {
         "command": "ontocode.manageImports",
         "title": "OntoCode: Manage Imports"
+      },
+      {
+        "command": "ontocode.reloadImports",
+        "title": "OntoCode: Reload Imports"
+      },
+      {
+        "command": "ontocode.resetLayout",
+        "title": "OntoCode: Reset Layout"
       },
       {
         "command": "ontocode.openNeighborhoodGraph",

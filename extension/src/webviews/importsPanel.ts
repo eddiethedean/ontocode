@@ -78,6 +78,10 @@ export class ImportsPanel {
     });
   }
 
+  public dispose(): void {
+    this.host.panel.dispose();
+  }
+
   public static async show(
     extensionUri: vscode.Uri,
     filePath: string,
@@ -106,6 +110,13 @@ export class ImportsPanel {
     ImportsPanel.current = instance;
     await instance.load(filePath);
     return instance;
+  }
+
+  public async refresh(): Promise<void> {
+    if (!this.filePath) {
+      return;
+    }
+    await this.load(this.filePath);
   }
 
   private async load(filePath: string): Promise<void> {

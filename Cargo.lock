@@ -251,18 +251,18 @@ dependencies = [
 
 [[package]]
 name = "crossbeam-channel"
-version = "0.5.15"
+version = "0.5.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "82b8f8f868b36967f9606790d1903570de9ceaf870a7bf9fbbd3016d636a2cb2"
+checksum = "d85363c37faeca707aef026efa9f3b34d077bce547e48f770770625c6013679e"
 dependencies = [
  "crossbeam-utils",
 ]
 
 [[package]]
 name = "crossbeam-deque"
-version = "0.8.6"
+version = "0.8.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9dd111b7b7f7d55b72c0a6ae361660ee5853c9af73f70c3c2ef6858b950e2e51"
+checksum = "5181e0de7b61eb03a81e347d6dd8797bae9da5146707b51077e2d71a54ec0ceb"
 dependencies = [
  "crossbeam-epoch",
  "crossbeam-utils",
@@ -279,9 +279,9 @@ dependencies = [
 
 [[package]]
 name = "crossbeam-utils"
-version = "0.8.21"
+version = "0.8.22"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d0a5c400df2834b80a4c3327b3aad3a4c4cd4de0629063962b03235697506a28"
+checksum = "61803da095bee82a81bb1a452ecc25d3b2f1416d1897eb86430c6159ef717c17"
 
 [[package]]
 name = "crypto-common"
@@ -973,9 +973,9 @@ dependencies = [
 
 [[package]]
 name = "memchr"
-version = "2.8.2"
+version = "2.8.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "88904434abc2901f197fe8cc55f0445e7ded921dba5911dad2e2b39b48e663c4"
+checksum = "cf8baf1c55e62ffcace7a9f06f4bd9cd3f0c4beb022d3b367256b91b87513d98"
 
 [[package]]
 name = "memo-map"
@@ -1358,9 +1358,9 @@ dependencies = [
 
 [[package]]
 name = "ontologos-alc"
-version = "1.1.1"
+version = "1.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d5816efc4c6ea041758f7b3185ff59141dbf20d1d10be6ab535c3889d83c2df7"
+checksum = "f16939be4e141d9997f63b95a60e79133bef23b21335dc4ce190674894ce30b2"
 dependencies = [
  "ontologos-core",
  "ontologos-parser",
@@ -1373,9 +1373,9 @@ dependencies = [
 
 [[package]]
 name = "ontologos-bridge"
-version = "1.1.1"
+version = "1.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "81b1d27ca542b79b40ad6246f3ec69e1658b88d47fd0184a4aff28840df79f49"
+checksum = "df23fb53dbc22881194232c724ab241047e42096fe675b048fc3afd1e3ce7775"
 dependencies = [
  "horned-owl",
  "ontologos-core",
@@ -1389,9 +1389,9 @@ dependencies = [
 
 [[package]]
 name = "ontologos-core"
-version = "1.1.1"
+version = "1.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "763a8e1f6689c9c98052cb9f8738d35c88ac71ab714d19abb115c51cefe08835"
+checksum = "6525e12b595d901a8bfa1ef7c0fca7958dcc3da634e978ae9c9e9d01ef179379"
 dependencies = [
  "serde",
  "serde_json",
@@ -1401,9 +1401,9 @@ dependencies = [
 
 [[package]]
 name = "ontologos-dl"
-version = "1.1.1"
+version = "1.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "17f2bef0feb5513e7e75329c68bf64cc1cd2c23c8b5307a0d56cf61960300935"
+checksum = "65ace72a28e780549ec34bf1f8ee63a99b4c3e5667a4d443f01315af95b2bf77"
 dependencies = [
  "horned-owl",
  "ontologos-alc",
@@ -1420,9 +1420,9 @@ dependencies = [
 
 [[package]]
 name = "ontologos-el"
-version = "1.1.1"
+version = "1.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "38f02bd6540f8fe2991af8b8875142ec44801c20e75630d92c075127692e2146"
+checksum = "07b25baf640368437cadfba355b304a8b50516abbb90f37b9ab64b9747260cec"
 dependencies = [
  "ontologos-core",
  "ontologos-profile",
@@ -1432,9 +1432,9 @@ dependencies = [
 
 [[package]]
 name = "ontologos-explain"
-version = "1.1.1"
+version = "1.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "56d9eef91a4d214120150784f8e6742ef743c1a6f3cf7532ca3f14eeeea15397"
+checksum = "98e48b84a49c323479c5efecb17107e7e5b6a271e2aabc04b0f20f6787f143f2"
 dependencies = [
  "ontologos-core",
  "ontologos-el",
@@ -1446,9 +1446,9 @@ dependencies = [
 
 [[package]]
 name = "ontologos-facade"
-version = "1.1.1"
+version = "1.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "75ac51c758ace83f78f3c18c2f6668c3b51ce35f947dd9bb003d5146a0950ef5"
+checksum = "9d4d788b09e831fc7625942952b7e707c31dd047a1652ae9a266684673ad765f"
 dependencies = [
  "ontologos-bridge",
  "ontologos-core",
@@ -1465,9 +1465,9 @@ dependencies = [
 
 [[package]]
 name = "ontologos-parser"
-version = "1.1.1"
+version = "1.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0cf067f23943dabccf9245d4c3b6520d245cd7b03bc0497ad4b9257d3d4b5f71"
+checksum = "454bece11417a09fb284b08fcbcce081794f36abc9e177ae7c20f04b4ab3178d"
 dependencies = [
  "horned-owl",
  "libc",
@@ -1478,9 +1478,9 @@ dependencies = [
 
 [[package]]
 name = "ontologos-profile"
-version = "1.1.1"
+version = "1.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "05398701c108d6226204ec9c2275fbdeda92e1c7f79e998cff24dcdd7387089b"
+checksum = "ef36a9d4fe2da596fbd5600b9f3a7ba2c474a1729158f667b63166125d9de23d"
 dependencies = [
  "ontologos-core",
  "serde",
@@ -1489,9 +1489,9 @@ dependencies = [
 
 [[package]]
 name = "ontologos-ql"
-version = "1.1.1"
+version = "1.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e1855e96455ad4d867a6f412a739cd9da59c0cb8c476df84af24448b295c9eb9"
+checksum = "61fc0cd9909a79891c4e1d1b1c04811704dd4031add3be4b36d6231d542d999f"
 dependencies = [
  "ontologos-core",
  "thiserror 2.0.18",
@@ -1499,9 +1499,9 @@ dependencies = [
 
 [[package]]
 name = "ontologos-rl"
-version = "1.1.1"
+version = "1.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2e58fc2ffd1292f69e50493238a228ad14334a82ec57e1bae2a62af203caf3c8"
+checksum = "c81eeae2c0f9d081abdf544718bb75f35d9245059c23cebfeef16cb1e7f1073b"
 dependencies = [
  "ontologos-bridge",
  "ontologos-core",
@@ -1512,9 +1512,9 @@ dependencies = [
 
 [[package]]
 name = "ontologos-swrl"
-version = "1.1.1"
+version = "1.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "86d62a85178a303bcc7bed560c534eeb473d24c94acc52051a2e19ebac8f7426"
+checksum = "21f033c21346ea5f00cb58e8f9bf93b9ce6b14aac28d6715519e803d7dbcd19c"
 dependencies = [
  "ontologos-core",
  "ontologos-dl",

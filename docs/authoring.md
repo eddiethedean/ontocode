@@ -1,6 +1,6 @@
-# Ontology authoring (OntoCore v0.15)
+# Ontology authoring (OntoCore v0.16)
 
-> **Status:** Documents behavior in **OntoCore v0.15.0**. Pre-1.0 APIs may change.
+> **Status:** Documents behavior in **OntoCore v0.16.0**. Pre-1.0 APIs may change.
 > Canonical feature list: [What ships today](SHIPPED.md).
 
 OntoCode provides **Turtle and OBO write-back** for simple edits and **Manchester** for complex class expressions — without Protégé.

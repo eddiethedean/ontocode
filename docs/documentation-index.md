@@ -2,7 +2,7 @@
 
 Master index for OntoCode / OntoCore planning, architecture, and user documentation.
 
-**Current release:** v0.15.0 · **Canonical capabilities:** [What ships today](SHIPPED.md) · **Terms:** [Glossary](glossary.md)
+**Current release:** v0.16.0 · **Canonical capabilities:** [What ships today](SHIPPED.md) · **Terms:** [Glossary](glossary.md)
 
 ## Recommended reading order
 
@@ -13,7 +13,7 @@ Master index for OntoCode / OntoCore planning, architecture, and user documentat
 3. [Roadmap hub](roadmap-hub.md)
 4. [First success (~10 min)](guides/first-success.md)
 
-### Implementers (Shipped v0.15 platform)
+### Implementers (Shipped v0.16 platform)
 
 1. [Glossary](glossary.md)
 2. [Platform overview](platform/OVERVIEW.md)

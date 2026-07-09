@@ -7,7 +7,7 @@ hide:
 <div class="oc-hero">
 
 <div class="oc-hero-badges">
-  <span class="oc-badge oc-badge--accent">v0.15.0</span>
+  <span class="oc-badge oc-badge--accent">v0.16.0</span>
   <span class="oc-badge">VS Code</span>
   <span class="oc-badge">CLI · LSP</span>
   <span class="oc-badge">Plugins</span>
@@ -40,7 +40,7 @@ Index and explore OWL/RDF/OBO, run queries, refactors, and reasoning — in VS C
 
 <div class="oc-callout" markdown>
 
-**What's new in v0.15?** Plugin API, UI views, and explanation workflows — [Migration v0.14 → v0.15](migration/v0.15.md).
+**What's new in v0.16?** Preferences pages + context actions for plugins, plus imports/layout polish — [Migration v0.15 → v0.16](migration/v0.16.md).
 
 **Not sure where to begin?** Pick a path:
 

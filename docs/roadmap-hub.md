@@ -2,6 +2,8 @@
 
 OntoCode and OntoCore publish several roadmap documents. **Use this page to pick the right one** — they serve different audiences and must not be read as a single capability list.
 
+**Current release:** v0.16.0 · [What ships today](SHIPPED.md)
+
 ## Which document should I read?
 
 | I want to… | Read this |

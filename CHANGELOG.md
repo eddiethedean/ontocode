@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.16.0] - 2026-07-09
+
+### Added
+
+- **Plugin preferences pages** — extension command **Plugins: Open Preferences…** hosts `ui.preferences_pages` contributions
+- **Plugin context actions** — extension command **Plugins: Run Context Action…** runs `ui.context_actions` against the focused entity
+- **Imports reload** — command **OntoCode: Reload Imports** re-indexes and refreshes the imports panel
+- **Layout reset** — command **OntoCode: Reset Layout** closes key OntoCode panels
+
+### Changed
+
+- Plugin `ui.commands` contributions execute via LSP `ontocore/runPlugin` (validator/export/workflow dispatch)
+
 ## [0.15.0] - 2026-07-08
 
 ### Added

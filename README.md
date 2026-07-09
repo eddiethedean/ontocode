@@ -73,8 +73,8 @@ cargo run -- validate fixtures
 
 ```text
 ┌──────────────────────────────────────────────────────────────┐
-│  Shipped v0.14: plugin host MVP + workflow scaffold (owlmake) │
-│  Planned v1.0+: semver-stable plugin API + ecosystem hardening│
+│  Shipped v0.15: plugin permissions/views, explanation alts,   │
+│  graph modes · Planned v1.0+: stable plugin API + Protégé exit │
 └────────────────────────────┬─────────────────────────────────┘
                              │ ontocore-lsp (stdio)
 ┌────────────────────────────▼─────────────────────────────────┐
@@ -96,7 +96,7 @@ cargo run -- validate fixtures
 
 Platform docs: [Vision](https://ontocode-vs.readthedocs.io/en/latest/vision/) · [Architecture](ARCHITECTURE.md) · [Roadmap](ROADMAP.md) · [Protégé parity](https://ontocode-vs.readthedocs.io/en/latest/design/PROTEGE_PARITY/)
 
-**OntoCode 1.0** targets a Protégé-competitive OWL + OBO IDE in VS Code, with CLI gates for CI. **v0.14** ships the plugin host MVP (manifests, reference plugins, CLI/LSP hooks, owlmake scaffold) on top of **v0.13** WorkspaceStore + focus relay, Query Workbench schema browser, semantic tokens, PR-summary diffs, and Turtle/OBO inspector write-back. See [SHIPPED matrix](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/).
+**OntoCode 1.0** targets a Protégé-competitive OWL + OBO IDE in VS Code, with CLI gates for CI. **v0.15** extends the v0.14 plugin host with permissions, UI views, explanation alternatives, and graph asserted/inferred modes. See [SHIPPED matrix](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) and [What's new in v0.15](docs/migration/v0.15.md).
 
 ## Development
 

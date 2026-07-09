@@ -13,6 +13,7 @@ Upgrade notes between OntoCode / OntoCore releases.
 | v0.11 → v0.12 | [Migration v0.11 → v0.12](v0.12.md) — authoring parity, OBO write-back, OWL/XML read, DL explanations |
 | v0.12 → v0.13 | [Migration v0.12 → v0.13](v0.13.md) — OntoUI platform, schema browser, PR summary, diagnostics config |
 | v0.13 → v0.14 | [Migration v0.13 → v0.14](v0.14.md) — plugin host MVP, CLI/LSP plugin hooks, capability registry |
+| v0.14 → v0.15 | [Migration v0.14 → v0.15](v0.15.md) — plugin permissions, UI views, explanation alternatives, graph modes |
 
 Pre-1.0: library APIs, LSP JSON, and SQL virtual table columns may change between minor releases. See [API stability](../guides/api-stability.md) and [workspace limits](../workspace-limits.md).
 

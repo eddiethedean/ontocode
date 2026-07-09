@@ -428,6 +428,7 @@ check_file_contains "docs/ontocore/crate-map.md" 'ontocore = "0.14"' "crate-map 
 check_file_contains "docs/ontocode/manage-imports.md" "Manage Imports" "manage-imports guide"
 check_file_contains "mkdocs.yml" "ontocode/manage-imports.md" "mkdocs manage-imports guide"
 check_file_contains "mkdocs.yml" "migration/v0.14.md" "mkdocs v0.14 migration guide"
+check_file_contains "mkdocs.yml" "What's new in v0.15" "mkdocs v0.15 migration in Get started"
 check_file_contains "docs/guides/production-readiness.md" "v${VERSION}" "production-readiness version"
 check_file_contains "mkdocs.yml" "ontocore/rust-api.md" "mkdocs Rust API reference"
 check_file_contains "mkdocs.yml" "guides/protege-migration.md" "mkdocs Protégé migration guide"
@@ -664,8 +665,8 @@ else
 fi
 
 # Architecture banner must reference current release ships today
-check_file_contains "ARCHITECTURE.md" "v0\.14 ships today" "ARCHITECTURE.md v0.14 banner"
-check_file_contains "docs/architecture.md" "v0\.14 ships today" "docs/architecture.md v0.14 banner"
+check_file_contains "ARCHITECTURE.md" "v0\.15 ships today" "ARCHITECTURE.md v0.15 banner"
+check_file_contains "docs/architecture.md" "v0\.15 ships today" "docs/architecture.md v0.15 banner"
 
 # Stale CLI alias notes
 if rg -q 'ontocore alias is planned' docs --glob '!**/migration/**' --glob '!**/design/**' 2>/dev/null; then
@@ -742,12 +743,12 @@ check_file_contains "mkdocs.yml" "adr/README.md" "mkdocs product adr"
 check_file_contains "docs/ui/README.md" "OntoUI" "ui readme OntoUI term"
 
 check_file_contains "mkdocs.yml" "guides/owl-xml-workflow.md" "mkdocs owl-xml workflow guide"
-check_file_contains "mkdocs.yml" "v0\\.14\\+" "mkdocs platform planning tab label"
-check_file_contains "mkdocs.yml" "v0\\.13 → v0\\.14" "mkdocs v0.14 migration in Help nav"
+check_file_contains "mkdocs.yml" "targets, not shipped" "mkdocs platform planning under contribute"
+check_file_contains "mkdocs.yml" "v0\\.14 → v0\\.15" "mkdocs v0.15 migration in Help nav"
 check_file_contains "docs/guides/owl-xml-workflow.md" "read-only catalog" "owl-xml workflow guide"
 check_file_contains "docs/ontocore/rust-api.md" "Book ↔ docs.rs crosswalk" "rust-api docs.rs crosswalk"
 check_file_contains "docs/troubleshooting.md" "Where to start" "troubleshooting decision tree"
-check_file_contains "docs/platform/OVERVIEW.md" "v0.14 foundation shipped" "platform overview shipped banner"
+check_file_contains "docs/platform/OVERVIEW.md" "v0.15 foundation shipped" "platform overview shipped banner"
 
 # vision.md must reference current shipped release (not v0.11 or v0.12)
 for file in docs/vision.md VISION.md; do
@@ -785,6 +786,23 @@ check_file_contains "crates/ontocore-obo/README.md" "ontocore-obo" "ontocore-obo
 
 # errors.md must reference current release
 check_file_contains "docs/errors.md" "v${VERSION}" "errors reference version"
+
+# Canonical SHIPPED matrix must match workspace version
+check_file_contains "docs/SHIPPED.md" "What ships today \\(v${VERSION}\\)" "SHIPPED header version"
+check_file_contains "docs/SHIPPED.md" "Current release:.*v${VERSION}" "SHIPPED current release line"
+
+# FAQ and LSP API must pin current release (not stale minors)
+check_file_contains "docs/faq.md" "version ${VERSION}" "faq CI version pin"
+check_file_contains "docs/lsp-api.md" "OntoCore v${VERSION}" "lsp-api status banner version"
+
+# Enterprise eval capability table header must match release
+check_file_contains "docs/guides/enterprise-eval.md" "What ships today \\(v${VERSION}\\)" "enterprise-eval capability table version"
+
+# Governance must list current minor as supported
+check_file_contains "docs/guides/governance.md" "\\*\\*${MINOR_VERSION}\\.x\\*\\* \\| Yes — current release" "governance current release stream"
+
+# MkDocs must surface v0.15 migration in Get started / Help
+check_file_contains "mkdocs.yml" "migration/v0.15.md" "mkdocs v0.15 migration guide"
 
 if [[ "$fail" -ne 0 ]]; then
   echo "Documentation version check failed." >&2

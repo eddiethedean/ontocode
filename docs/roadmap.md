@@ -37,7 +37,7 @@ After 1.0, the roadmap shifts from parity to modernization.
 | [Product Roadmap 2.0](ui/PRODUCT_ROADMAP_2.0.md) | UI phases with milestone acceptance criteria |
 | [Product design (UI)](ui/README.md) | Product design specification pack (UX, design system, OntoStudio target) |
 
-**Current release:** v0.14.0
+**Current release:** v0.15.0
 
 ---
 
@@ -84,9 +84,10 @@ PLANNED (v1.0+) ─────────────────────�
 | 12 | v0.12 | C | Shipped | 2 (P0 exit) | Authoring parity |
 | 13 | v0.13 | D | Shipped | 0, 1, 3†, 5†, 9† | Platform hardening |
 | 14 | v0.14 | D | Shipped | 8 | Plugin host MVP |
-| 15 | v1.0 | E | Planned | 1–6 exit, 9† | Protégé-competitive release |
-| 16 | v1.1 | F | Planned | 7, 2†, 3†, 4†, 8†, 9† | Language bindings & AI primitives |
-| 17 | v1.2+ | F | Planned | 9, 10, 11 | Ontology toolchain platform |
+| 15 | v0.15 | E | Shipped (partial) | 4†, 5†, 8† | Plugin API + visualization + explanations |
+| 16 | v1.0 | E | Planned | 1–6 exit, 9† | Protégé-competitive release |
+| 17 | v1.1 | F | Planned | 7, 2†, 3†, 4†, 8†, 9† | Language bindings & AI primitives |
+| 18 | v1.2+ | F | Planned | 9, 10, 11 | Ontology toolchain platform |
 
 †Partial scope in this release (remainder in later releases). Full mapping: [ROADMAP_MAPPING.md](ui/ROADMAP_MAPPING.md).
 
@@ -381,6 +382,25 @@ Sub-phases: **v0.7a** (React foundation) → **v0.7** (graphs + inspector) → *
 
 ---
 
+### v0.15 — Plugin API + visualization parity + explanation workspace (shipped, partial)
+
+**Released:** v0.15.0 (2026-07-08)
+
+**Theme:** Extend the v0.14 plugin host with permissions, UI views, explanation alternatives, and graph asserted/inferred modes.
+
+| Area | Deliverables |
+|------|--------------|
+| **OntoCore** | Plugin permissions + `api_version = "1"`; subprocess path-jail hardening; explanation alternatives + staleness metadata in LSP/CLI |
+| **OntoUI** | Graph asserted/inferred/combined modes, layouts, search; explanation panel with multiple justifications |
+| **OntoCode** | Plugin UI views (dockable panels); plugin commands; explanation staleness warnings |
+| **Ecosystem** | `demo-ui-view.toml` fixture; updated [Plugin authoring guide](guides/plugins.md) |
+
+**Exit criteria (partial):** dockable plugin views + commands shipped; graph modes + explanation alternatives shipped; preferences/context actions remain schema-only.
+
+See [migration/v0.15.md](migration/v0.15.md) and [SHIPPED.md](SHIPPED.md).
+
+---
+
 ## Planned releases (v1.0 → v1.2+)
 
 ---
@@ -401,7 +421,7 @@ Sub-phases: **v0.7a** (React foundation) → **v0.7** (graphs + inspector) → *
 | **Toolchain** | ODK project layout recognition (`src/ontology/`, catalog files, import structure); ODK QC and release workflow surfacing; ROBOT-compatible operations where practical; import existing ODK/ROBOT/owlmake workflows (Makefile, GitHub Actions); Protégé migration guide with honest parity table |
 | **Ecosystem** | Ontologos 1.0.0 reasoner gate satisfied; published `ontocore` + `ontocore-*` 1.0.0 on crates.io |
 
-**Already shipped (v0.5–v0.14):** entity editor MVP, query workbench, graph canvas, reasoner panel, refactoring preview, semantic diff, WorkspaceStore + focus relay, schema browser, plugin host MVP — see [ROADMAP_MAPPING.md](ui/ROADMAP_MAPPING.md).
+**Already shipped (v0.5–v0.15):** entity editor MVP, query workbench, graph canvas (with asserted/inferred modes in v0.15), reasoner panel, refactoring preview, semantic diff, WorkspaceStore + focus relay, schema browser, plugin host MVP + plugin permissions/views — see [ROADMAP_MAPPING.md](ui/ROADMAP_MAPPING.md).
 
 **Exit criteria:**
 

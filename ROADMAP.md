@@ -35,7 +35,7 @@ After 1.0, the roadmap shifts from parity to modernization.
 | [PRODUCT_ROADMAP_2.0.md](docs/ui/PRODUCT_ROADMAP_2.0.md) | UI phases with milestone acceptance criteria |
 | [ui/README.md](docs/ui/README.md) | Product design specification pack (UX, design system, OntoStudio target) |
 
-**Current release:** v0.14.0
+**Current release:** v0.15.0
 
 ---
 
@@ -85,7 +85,7 @@ Protégé parity closeout                                              1.0 exit
 | 12 | v0.12 | C | Shipped | 2 (P0 exit) | Authoring parity |
 | 13 | v0.13 | D | Shipped | 0, 1, 3†, 5†, 9† | Platform hardening |
 | 14 | v0.14 | D | Shipped | 8 | Plugin host MVP |
-| 15 | v0.15 | E | Planned | 4†, 5†, 8† | Plugin API + visualization + explanations |
+| 15 | v0.15 | E | Shipped (partial) | 4†, 5†, 8† | Plugin API + visualization + explanations |
 | 16 | v0.16 | E | Planned | 1†, 2† | Workspace layouts + preferences + imports polish |
 | 17 | v0.17 | E | Planned | — | Menu/toolbar/dialog parity + keyboard workflows |
 | 18 | v0.18 | E | Planned | — | Protégé Desktop parity gate + migration readiness |
@@ -394,7 +394,9 @@ Sub-phases: **v0.7a** (React foundation) → **v0.7** (graphs + inspector) → *
 
 > **Scope note:** These phases target **Protégé Desktop parity** only. WebProtégé parity (live collaboration, permissions, notifications, etc.) remains post-1.0.
 
-### v0.15 — Plugin API + visualization parity + explanation workspace (planned)
+### v0.15 — Plugin API + visualization parity + explanation workspace (shipped, partial)
+
+**Released:** v0.15.0 (2026-07-08)
 
 **Theme:** Turn the v0.14 plugin host MVP into a stable extensibility surface, and close the biggest remaining “daily Protégé” UX gaps around visualization and explanations.
 

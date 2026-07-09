@@ -1,14 +1,14 @@
-# What ships today (v0.14.0)
+# What ships today (v0.15.0)
 
 > **Canonical capability matrix.** Update this page on every release. Design specs under [Project](design/README.md) may describe future targets — check here for what is actually available.
 
-**Current release:** v0.14.0 · [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md)
+**Current release:** v0.15.0 · [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) · [Migration from v0.14](migration/v0.15.md)
 
 ## Products
 
 | Product | What it is |
 |---------|------------|
-| **OntoCode** | VS Code IDE — explorer, React inspector, graphs, Query Workbench, Manchester editor, refactor preview, reasoner, plugin commands |
+| **OntoCode** | VS Code IDE — explorer, React inspector, graphs (asserted/inferred modes), Query Workbench, Manchester editor, refactor preview, reasoner, explanation panel, plugin commands and views |
 | **OntoCore** | Rust semantic workspace engine — `ontocore` façade, `ontocore-*` crates, `ontocore` CLI, `ontocore-lsp`, plugin host |
 
 ## Capability matrix
@@ -27,12 +27,12 @@
 | Find usages / rename IRI / namespace migration / move / extract module | Yes (preview + apply) | `ontocore refactor` |
 | SQL-like queries | Query Workbench (React) + schema browser | `ontocore query` |
 | SPARQL | Query Workbench (React) | `ontocore sparql` |
-| Graph visualization (class, property, import, neighborhood) | Yes (React) | LSP `ontocore/getGraph` |
+| Graph visualization (class, property, import, neighborhood) | Yes (React; asserted/inferred/combined modes, layouts, search) | LSP `ontocore/getGraph` |
 | OWL EL classification (`el` profile) | Reasoner panel + hierarchy toggle | `ontocore classify` |
 | RL / RDFS classification | Reasoner panel | `ontocore classify --profile rl\|rdfs` |
 | OWL 2 DL classification (`dl` profile) | Reasoner panel + hierarchy toggle | `ontocore classify --profile dl` |
 | Auto profile routing (`auto`) | Reasoner panel | `ontocore classify --profile auto` |
-| EL / DL explanations (where available) | Explanation panel | `ontocore explain` |
+| EL / DL explanations (where available) | Explanation panel (multiple alternatives, staleness detection) | `ontocore explain` |
 | OBO format index + `obo_id` in explorer | Yes | `ontocore inspect` |
 | ROBOT interop | — | `ontocore robot validate\|merge\|report` |
 | Diagnostics / lint | Problems panel | `ontocore validate` |
@@ -47,7 +47,8 @@
 | LSP semantic tokens (Turtle, OBO) | Editor highlighting | — |
 | Configurable diagnostics | Problems panel + `.ontocore/diagnostics.toml` | `ontocore validate` |
 | React webview UI | Inspector, graphs, Query Workbench, Manchester editor, refactor preview, semantic diff, imports | — |
-| Plugin host (manifest + runtime) | Plugin commands, inspector cards, plugin Problems diagnostics | `ontocore plugins` / `ontocore workflow` |
+| Plugin host (manifest + runtime) | Plugin commands, dockable views, inspector cards, plugin Problems diagnostics | `ontocore plugins` / `ontocore workflow` |
+| Plugin permissions (`api_version = "1"`) | Enforced on plugin load/run | Enforced on CLI/LSP plugin host |
 | Reference plugins (naming, Markdown export, SHACL scaffold) | Via validate + plugins | `ontocore plugins run` |
 
 ## Format support
@@ -57,6 +58,24 @@
 | Index / query | Yes | Yes | Yes (Horned catalog) | Yes |
 | Write-back (inspector, patches, refactor) | Yes | Yes | Read-only | Read-only |
 | Rich OBO metadata (synonyms, defs, xrefs) | — | Yes | — | — |
+
+## New in v0.15.0
+
+| Capability | Status |
+|------------|--------|
+| Plugin permissions enforcement (`workspace.read`, `workspace.write`, `external_process`) | Yes |
+| Versioned plugin API (`api_version = "1"`) | Yes |
+| Plugin UI views (dockable webview panels) | Yes |
+| Plugin UI commands (command palette) | Yes |
+| LSP `ontocore/runPlugin` `ui_view` action | Yes |
+| Explanation alternatives (multiple justifications) | Yes |
+| Explanation staleness metadata (`indexed_at`, `content_hash`) | Yes |
+| Graph asserted / inferred / combined modes | Yes |
+| Graph layouts (grid, circle, stack) and search | Yes |
+| Subprocess plugin path-jail hardening | Yes |
+| Multi-root index workspace root selection fix | Yes |
+
+**Schema only (manifest defined, extension not wired):** `preferences_pages`, `context_actions` — see [Plugin authoring](guides/plugins.md).
 
 ## New in v0.14.0
 
@@ -169,7 +188,7 @@
 
 ## What's next
 
-Forward milestones (v0.14 plugin host MVP → v1.0 Protégé replacement): **[Platform roadmap](roadmap.md)**.
+Forward milestones (v0.15 plugin API → v1.0 Protégé replacement): **[Platform roadmap](roadmap.md)**.
 
 ## Where to learn more
 
@@ -177,7 +196,8 @@ Forward milestones (v0.14 plugin host MVP → v1.0 Protégé replacement): **[Pl
 |-------|-------|
 | VS Code onboarding | [First success in 10 minutes](guides/first-success.md) |
 | Query workbench | [Query Workbench](ontocode/query-workbench.md) |
-| Reasoner | [Reasoner guide](guides/reasoner.md) |
+| Reasoner & explanations | [Reasoner guide](guides/reasoner.md) |
+| Plugin authoring | [Plugin authoring](guides/plugins.md) |
 | Manchester editor | [Manchester editor](ontocode/manchester-editor.md) |
 | Semantic diff | [Semantic diff guide](ontocode/semantic-diff.md) |
 | Turtle editing & patches | [Authoring](authoring.md) · [Patch reference](patch-reference.md) · [Refactoring](guides/refactoring.md) |

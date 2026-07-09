@@ -9,19 +9,19 @@
 > | **This page** (`architecture.md`) | Product/ecosystem overview — Ontologos, OntoCore, OntoCode |
 > | [Implementation architecture](design/ARCHITECTURE.md) | Contributor crate layout and internal modules |
 > | [Product design / UI platform](ui/PLATFORM_ARCHITECTURE.md) | Shared **OntoUI**, OntoStudio target, design system |
-> | [Platform architecture (implementation)](platform/OVERVIEW.md) | OntoUI, WorkspaceStore, plugin host MVP — **shipped v0.13–v0.14** |
-| [Plugin authoring](guides/plugins.md) | Workspace manifests, reference plugins, subprocess workflows (v0.14) |
+> | [Platform architecture (implementation)](platform/OVERVIEW.md) | OntoUI, WorkspaceStore, plugin host — **shipped v0.13–v0.15** |
+| [Plugin authoring](guides/plugins.md) | Workspace manifests, reference plugins, subprocess workflows (v0.15) |
 > | [OntoCore architecture](ontocore/architecture.md) | Short OntoCore stack summary (links here for detail) |
 >
 > **Contributor crate layout:** [Implementation architecture](design/ARCHITECTURE.md) (internal modules only).
 >
-> **v0.14 ships today:** OntoCode (VS Code), OntoCore (CLI/LSP/library), Turtle + OBO write-back, property chain editing, OWL/XML read-only catalog, DL explanations, semantic diff (`--pr-summary`), incremental indexing, Ontologos reasoning, ROBOT CLI wrappers, **WorkspaceStore + cross-panel focus sync**, **Query Workbench schema browser**, **configurable diagnostics**, **LSP semantic tokens** (Turtle/OBO), **plugin host MVP** (manifests, reference plugins, CLI/LSP hooks, owlmake scaffold).
+> **v0.15 ships today:** OntoCode (VS Code), OntoCore (CLI/LSP/library), Turtle + OBO write-back, property chain editing, OWL/XML read-only catalog, DL explanations (with alternatives and staleness), semantic diff (`--pr-summary`), incremental indexing, Ontologos reasoning, ROBOT CLI wrappers, **WorkspaceStore + cross-panel focus sync**, **Query Workbench schema browser**, **configurable diagnostics**, **LSP semantic tokens** (Turtle/OBO), **plugin host** (manifests, permissions, UI views/commands, reference plugins, CLI/LSP hooks, owlmake scaffold), **graph asserted/inferred/combined modes**.
 > **Planned v1.0:** stable plugin API, full workflow plugin integration, language SDKs, MCP server. See [Platform roadmap](roadmap.md).
 > **Planned post-1.0:** OntoStudio desktop, AI-native workflows — [UI roadmap mapping](ui/ROADMAP_MAPPING.md).
 > Canonical capability matrix: [What ships today](SHIPPED.md).
 
 ```
-External Workflow Plugins (v0.14 MVP)  ← subprocess workflow plugins; stable API v1.0
+External Workflow Plugins (v0.15)  ← subprocess workflow plugins; API v1 (permissions, views)
 ├── owlmake (reference design)
 ├── ROBOT / ODK workflow adapters
 └── Future build, validation, doc plugins

@@ -86,12 +86,11 @@ nav:
       - Install VS Code: vscode-install.md
       - What ships today: SHIPPED.md
       - Glossary: glossary.md
+      - "What's new in v0.15": migration/v0.15.md
       - "What's new in v0.14": migration/v0.14.md
-      - "What's new in v0.13": migration/v0.13.md
       - Pick a task: guides/start-here.md
       - Ontology concepts: concepts.md
       - Migrating from Protégé: guides/protege-migration.md
-      - Documentation index: documentation-index.md
   - Use OntoCode:
       - Feature tour: ontocode/feature-tour.md
       - Overview: ontocode/vscode-extension.md
@@ -170,14 +169,7 @@ nav:
       - Changelog: changelog.md
       - Migrations:
           - Migration index: migration/README.md
-          - v0.5 → v0.6: migration/v0.6.md
-          - v0.6 → v0.7: migration/v0.7.md
-          - v0.7 → v0.8: migration/v0.8.md
-          - v0.8 → v0.9: migration/v0.9.md
-          - v0.9 → v0.10: migration/v0.10.md
-          - v0.10 → v0.11: migration/v0.11.md
-          - v0.11 → v0.12: migration/v0.12.md
-          - v0.12 → v0.13: migration/v0.13.md
+          - v0.14 → v0.15: migration/v0.15.md
           - v0.13 → v0.14: migration/v0.14.md
       - Legacy guide URLs: guides/legacy-guide-urls.md
       - Release integrity: release-integrity.md
@@ -248,43 +240,44 @@ nav:
               - MVP backlog: design/MVP_BACKLOG.md
           - ADRs:
               - Index (all ADRs): design/adr/README.md
-  - "Platform planning (v0.14+)":
-      - Platform overview: platform/OVERVIEW.md
-      - UX audit (v0.13): ui/UX_AUDIT_v0.13.md
-      - OntoUI: platform/ONTOUI.md
-      - Workspace runtime: platform/WORKSPACE_RUNTIME.md
-      - Capability providers: platform/CAPABILITY_PROVIDERS.md
-      - AI orchestration: platform/AI_ORCHESTRATION.md
-      - Semantic refactoring: platform/SEMANTIC_REFACTORING.md
-      - Reasoning compiler: platform/REASONING_COMPILER.md
-      - Graph architecture: platform/GRAPH_ARCHITECTURE.md
-      - Query workbench architecture: platform/QUERY_WORKBENCH_ARCHITECTURE.md
-      - OntoStudio reuse: platform/ONTOSTUDIO_REUSE.md
-      - Milestone template: platform/MILESTONE_TEMPLATE.md
-      - Product ADRs:
-          - Index: adr/README.md
-          - "0001 OntoUI platform": adr/0001-ontoui-shared-react-platform.md
-          - "0002 Workspace model": adr/0002-workspace-over-panel-model.md
-          - "0003 Current Focus": adr/0003-current-focus-central-ux.md
-          - "0004 WorkspaceStore": adr/0004-workspacestore-ui-source-of-truth.md
-          - "0005 Capability providers": adr/0005-capability-provider-plugin-model.md
-          - "0006 AI preview before apply": adr/0006-ai-preview-before-apply.md
-          - "0007 OntoStudio reuse": adr/0007-ontostudio-shares-platform.md
-      - Cursor prompts:
-          - Index: cursor-prompts/README.md
-          - "01 OntoUI platform": cursor-prompts/01-build-ontoui-workspace-platform.md
-          - "02 WorkspaceStore": cursor-prompts/02-add-workspacestore.md
-          - "03 WorkspaceRegistry": cursor-prompts/03-add-workspaceregistry.md
-          - "04 Migrate panels": cursor-prompts/04-migrate-panels-to-workspaces.md
-          - "05 Current Focus": cursor-prompts/05-implement-current-focus.md
-          - "06 Entity workspace": cursor-prompts/06-improve-entity-workspace.md
-          - "07 Graph workspace": cursor-prompts/07-improve-graph-workspace.md
-          - "08 Query workbench": cursor-prompts/08-improve-query-workbench.md
-          - "09 AI lifecycle": cursor-prompts/09-add-ai-action-lifecycle.md
-          - "10 Capability providers": cursor-prompts/10-add-capability-provider-interfaces.md
-          - "11 Refactoring preview": cursor-prompts/11-semantic-refactoring-preview-workflow.md
-          - "12 Reasoning diagnostics": cursor-prompts/12-reasoning-diagnostics-workflow.md
-          - "13 Design tokens": cursor-prompts/13-design-tokens-component-library.md
+      - Documentation index: documentation-index.md
+      - "Platform planning (targets, not shipped)":
+          - Platform overview: platform/OVERVIEW.md
+          - UX audit (v0.13): ui/UX_AUDIT_v0.13.md
+          - OntoUI: platform/ONTOUI.md
+          - Workspace runtime: platform/WORKSPACE_RUNTIME.md
+          - Capability providers: platform/CAPABILITY_PROVIDERS.md
+          - AI orchestration: platform/AI_ORCHESTRATION.md
+          - Semantic refactoring: platform/SEMANTIC_REFACTORING.md
+          - Reasoning compiler: platform/REASONING_COMPILER.md
+          - Graph architecture: platform/GRAPH_ARCHITECTURE.md
+          - Query workbench architecture: platform/QUERY_WORKBENCH_ARCHITECTURE.md
+          - OntoStudio reuse: platform/ONTOSTUDIO_REUSE.md
+          - Milestone template: platform/MILESTONE_TEMPLATE.md
+          - Product ADRs:
+              - Index: adr/README.md
+              - "0001 OntoUI platform": adr/0001-ontoui-shared-react-platform.md
+              - "0002 Workspace model": adr/0002-workspace-over-panel-model.md
+              - "0003 Current Focus": adr/0003-current-focus-central-ux.md
+              - "0004 WorkspaceStore": adr/0004-workspacestore-ui-source-of-truth.md
+              - "0005 Capability providers": adr/0005-capability-provider-plugin-model.md
+              - "0006 AI preview before apply": adr/0006-ai-preview-before-apply.md
+              - "0007 OntoStudio reuse": adr/0007-ontostudio-shares-platform.md
+          - Cursor prompts:
+              - Index: cursor-prompts/README.md
+              - "01 OntoUI platform": cursor-prompts/01-build-ontoui-workspace-platform.md
+              - "02 WorkspaceStore": cursor-prompts/02-add-workspacestore.md
+              - "03 WorkspaceRegistry": cursor-prompts/03-add-workspaceregistry.md
+              - "04 Migrate panels": cursor-prompts/04-migrate-panels-to-workspaces.md
+              - "05 Current Focus": cursor-prompts/05-implement-current-focus.md
+              - "06 Entity workspace": cursor-prompts/06-improve-entity-workspace.md
+              - "07 Graph workspace": cursor-prompts/07-improve-graph-workspace.md
+              - "08 Query workbench": cursor-prompts/08-improve-query-workbench.md
+              - "09 AI lifecycle": cursor-prompts/09-add-ai-action-lifecycle.md
+              - "10 Capability providers": cursor-prompts/10-add-capability-provider-interfaces.md
+              - "11 Refactoring preview": cursor-prompts/11-semantic-refactoring-preview-workflow.md
+              - "12 Reasoning diagnostics": cursor-prompts/12-reasoning-diagnostics-workflow.md
+              - "13 Design tokens": cursor-prompts/13-design-tokens-component-library.md
 
 extra:
   social:

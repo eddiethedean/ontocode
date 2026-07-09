@@ -20,9 +20,14 @@ You can also run **OntoCode: Open Graph** and pick the graph kind from the quick
 ## Using the graph panel
 
 - **Pan and zoom** — standard React Flow controls.
-- **Click a node** — opens the [Entity Inspector](inspector.md) for that IRI.
-- **Include inferred** — when a reasoner snapshot exists, toggle inferred edges (class and neighborhood graphs).
-- **Filter** — optional ontology IRI filter and hide deprecated terms.
+- **Click a node** — opens the [Entity Inspector](inspector.md) for that IRI (focus relay syncs selection).
+- **Graph mode (v0.15)** — **Asserted**, **Inferred only**, or **Combined** edges (requires a successful reasoner run for inferred/combined).
+- **Layout (v0.15)** — **Grid**, **Circle**, or **Stack** node layouts.
+- **Search (v0.15)** — filter visible nodes by label or IRI substring.
+- **Depth** — neighborhood graph expansion depth (LSP `depth` param).
+- **Hide deprecated** — optional filter for deprecated entities.
+
+Inferred edges are animated in the panel when shown. Run **`OntoCode: Run Reasoner`** before switching to inferred or combined modes.
 
 If the graph hits server limits, the panel shows a truncation notice. Limits: **2,000 nodes** and **5,000 edges** ([workspace limits](../workspace-limits.md)).
 

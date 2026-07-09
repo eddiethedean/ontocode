@@ -7,7 +7,13 @@ OntoCode ships OWL reasoning via [OntoLogos](https://github.com/eddiethedean/ont
 1. Index the workspace (**OntoCode: Index Workspace**).
 2. Run **`OntoCode: Run Reasoner`** — opens the Reasoner Results panel.
 3. Use **`OntoCode: Set Hierarchy Mode`** to switch the Classes tree between **asserted**, **inferred**, and **combined** hierarchies.
-4. Click an unsatisfiable class in the panel to open **`OntoCode: Show Explanation`** (EL-first).
+4. Click an unsatisfiable class in the panel to open **`OntoCode: Show Explanation`** (EL-first; DL where supported).
+
+### Explanation panel (v0.15)
+
+- **Multiple justifications** — when available, use the justification dropdown to switch between alternative proofs.
+- **Stale explanations** — after ontology edits or re-indexing, the panel warns when `indexed_at` / `content_hash` no longer match; re-run the reasoner and open the explanation again.
+- **Navigate steps** — click entity IRIs in justification steps to open the Entity Inspector.
 
 Settings:
 
@@ -59,7 +65,7 @@ Axiom counts and some constructs may differ from Protégé until the Horned-OWL 
 
 | Limitation | Notes |
 |------------|-------|
-| Explanations | EL-first; full DL clash traces depend on `ontologos-explain` coverage |
+| Explanations | EL-first with **multiple alternatives** (v0.15) where `ontologos-explain` supports; full DL clash traces depend on profile coverage |
 | Hierarchy toggle | **Inferred** / **combined** need a successful reasoner run first |
 | Parse coverage | Partial OWL mapping — see [Protégé parity](../design/PROTEGE_PARITY.md) |
 

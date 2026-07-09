@@ -4,9 +4,9 @@ Canonical source: [CHANGELOG.md on GitHub](https://github.com/eddiethedean/ontoc
 
 Migration guides: [Migration index](migration/README.md)
 
-## [0.15.0] - Unreleased
+## [0.15.0] - 2026-07-08
 
-**v0.15.0** — See the repository changelog on GitHub for release notes.
+**v0.15.0** — Plugin API permissions and UI views, explanation alternatives with staleness metadata, graph asserted/inferred modes, multi-root index fix. See [CHANGELOG.md](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) and [migration/v0.15.md](migration/v0.15.md).
 
 ## [0.14.0] - 2026-07-09
 

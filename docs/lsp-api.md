@@ -1,6 +1,6 @@
-# OntoCore LSP API (v0.14)
+# OntoCore LSP API (v0.15)
 
-> **Status:** Documents behavior in **OntoCore v0.14.0**. Pre-1.0 APIs may change.
+> **Status:** Documents behavior in **OntoCore v0.15.0**. Pre-1.0 APIs may change.
 > Canonical feature list: [What ships today](SHIPPED.md).
 
 This document describes **what ships today** in `ontocore-lsp`. For the **v1.0 target** (extended plugin methods), see [LSP_SPEC.md](design/LSP_SPEC.md).
@@ -9,14 +9,14 @@ This document describes **what ships today** in `ontocore-lsp`. For the **v1.0 t
 
 If you are integrating OntoCore outside VS Code (custom editor, scripts, automation), treat the JSON schema as the **canonical, machine-readable contract** for this release:
 
-- **LSP JSON Schema (v0.14):** [`lsp-protocol.schema.json`](lsp-protocol.schema.json)
+- **LSP JSON Schema (v0.15):** [`lsp-protocol.schema.json`](lsp-protocol.schema.json)
 
 ### Versioning and pinning (pre-1.0)
 
 Until v1.0, minor releases may change request/response fields.
 For stable integrations:
 
-- **Pin OntoCore** (CLI/LSP) to an exact version (e.g. `0.14.0`) in your tooling.
+- **Pin OntoCore** (CLI/LSP) to an exact version (e.g. `0.15.0`) in your tooling.
 - Prefer consuming `lsp-protocol.schema.json` from the same tagged release you deploy.
 
 ## Wire format
@@ -26,7 +26,7 @@ LSP JSON uses **snake_case** for enums serialized from Rust (`EntityKind`, `Pars
 **Reference links (implementation):**
 
 - Types: [`protocol.rs` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/crates/ontocore-lsp/src/protocol.rs)
-- JSON Schema (v0.14): [`lsp-protocol.schema.json`](lsp-protocol.schema.json) — query, patch, reasoner, refactor, graph, semantic diff, schema browser, PR summary, and plugin payloads.
+- JSON Schema (v0.15): [`lsp-protocol.schema.json`](lsp-protocol.schema.json) — query, patch, reasoner, refactor, graph, semantic diff, schema browser, PR summary, plugin payloads, explanation alternatives.
 - Handlers: [`handlers.rs` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/crates/ontocore-lsp/src/handlers.rs)
 - Extension client: [`client.ts` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/extension/src/lsp/client.ts)
 
@@ -325,9 +325,9 @@ Run OWL classification via OntoLogos 1.0.0 (`el`, `rl`, `rdfs`, `dl`, `auto`).
 
 **Errors:** `NOT_INDEXED`, `REASONER_FAILED`
 
-### `ontocore/getExplanation`
+### `ontocore/getExplanation` (v0.15+)
 
-Return an EL/RL/RDFS explanation for an unsatisfiable class (requires a prior reasoner run or loads ontology on demand).
+Return an EL/RL/RDFS/DL explanation for an unsatisfiable class. Responses may include **multiple alternative justifications** and **staleness metadata** for cache invalidation.
 
 **Params:** `GetExplanationParams`
 
@@ -340,8 +340,13 @@ Return an EL/RL/RDFS explanation for an unsatisfiable class (requires a prior re
 | Field | Description |
 |-------|-------------|
 | `class_iri` | Requested class |
-| `steps` | Ordered `ExplanationStep[]` (`index`, `rule`, `display`, optional IRIs) |
-| `text` | Rendered proof text |
+| `steps` | Primary justification — ordered `ExplanationStep[]` (`index`, `rule`, `display`, optional IRIs) |
+| `text` | Rendered proof text for the primary justification |
+| `alternatives` | **(v0.15+)** Additional `ExplanationResult` objects (each with `steps` and `text`) when the reasoner provides multiple justifications |
+| `indexed_at` | **(v0.15+)** Unix timestamp (seconds) of the workspace index used when the explanation was generated |
+| `content_hash` | **(v0.15+)** Workspace content hash at explanation time — compare on later calls to detect stale explanations after edits |
+
+Clients should treat explanations as **stale** when `indexed_at` or `content_hash` no longer matches the current workspace snapshot. The OntoCode explanation panel shows a stale warning and offers re-run.
 
 **Errors:** `NOT_INDEXED`, `EXPLANATION_FAILED`
 
@@ -358,6 +363,8 @@ Returns graph nodes and edges for visualization webviews.
 | `depth` | number? | BFS depth for neighborhood (default 2, max 5) |
 | `include_inferred` | boolean? | Include reasoner edges when snapshot exists |
 | `filters` | object? | `ontology_iri`, `hide_deprecated` |
+
+**Graph panel (v0.15):** The React graph webview supports **asserted**, **inferred only**, and **combined** edge modes, plus grid/circle/stack layouts and node search. These map to `include_inferred` and reasoner snapshot state on the LSP request.
 
 **Result:** `{ graph: { nodes, edges, truncated, graph_kind } }`
 
@@ -457,29 +464,35 @@ Returns discovered workspace plugins from `.ontocore/plugins/*.toml` plus built-
 | `kind` | string | `validator`, `exporter`, `workflow`, … |
 | `manifest_path` | string | Absolute path to manifest TOML |
 | `capabilities` | object | `build`, `validate`, `release`, `diagnostics`, `export` flags |
+| `permissions` | array | **(v0.15+)** Declared permission strings (`workspace.read`, `workspace.write`, `external_process`) |
+| `api_version` | string? | **(v0.15+)** Manifest API version (e.g. `"1"`) |
 | `ui.commands` | array | `{ id, title, scope? }` palette contributions |
+| `ui.views` | array | **(v0.15+)** `{ id, title }` dockable view contributions |
 | `ui.inspector_cards` | array | `{ id, title, applies_to, command? }` inspector slots |
 | `in_process` | boolean | `true` for built-in reference plugins |
 
 **Errors:** `NOT_INDEXED`, `INDEX_FAILED` (discovery/host failure)
 
-### `ontocore/runPlugin` (v0.14+)
+### `ontocore/runPlugin` (v0.14+, views v0.15)
 
-Run a plugin validate/export/workflow action.
+Run a plugin validate/export/workflow/**ui_view** action.
 
 **Params:**
 
 | Field | Type | Description |
 |-------|------|-------------|
 | `plugin_id` | string | Plugin id from manifest |
-| `action` | string? | `validate` (default), `export`, `workflow` |
+| `action` | string? | `validate` (default), `export`, `workflow`, or **`ui_view`** (v0.15+) |
 | `step` | string? | Workflow step when `action` is `workflow` |
+| `view_id` | string? | **(v0.15+)** View id from `ui.views` when `action` is `ui_view` |
 
-**Result:** `{ "diagnostics": DiagnosticSummary[], "output_paths": string[], "logs": string?, "success": boolean }`
+**Result:** `{ "diagnostics": DiagnosticSummary[], "output_paths": string[], "logs": string?, "view_html": string?, "success": boolean }`
+
+`view_html` is populated for `ui_view` actions — HTML rendered in the plugin view panel.
 
 Plugin diagnostics use `code` values like `plugin:<id>:<code>` and LSP `source` `ontocore-plugin:<id>`. See [errors.md](errors.md#plugin-diagnostic-codes-v014).
 
-**Errors:** `NOT_INDEXED`, `INDEX_FAILED` (plugin not found, unsupported action, subprocess failure, or export error)
+**Errors:** `NOT_INDEXED`, `INDEX_FAILED` (plugin not found, missing permission, unsupported action, subprocess failure, or export error)
 
 `getCatalogSnapshot` includes plugin diagnostics merged after index (same wire codes).
 

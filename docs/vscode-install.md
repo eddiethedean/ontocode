@@ -24,7 +24,7 @@ CLI install options (separate from the extension): [getting started (CLI)](getti
 
 ## Option A — VS Code Marketplace (recommended)
 
-1. Install [OntoCode from the Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) (v0.14.0+).
+1. Install [OntoCode from the Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) (v0.15.0+).
 2. **File → Open Folder…** and choose a directory with ontology files.
 3. **Trust** the workspace when prompted.
 4. Open the **OntoCode** activity bar and browse ontologies, classes, properties, individuals, and **Diagnostics**.

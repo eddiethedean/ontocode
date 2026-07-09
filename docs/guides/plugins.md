@@ -1,6 +1,32 @@
 # Plugin authoring (v0.15)
 
-OntoCore v0.14 ships a **plugin host MVP** with manifest discovery, in-process reference plugins, and subprocess workflow plugins.
+OntoCore v0.15 extends the v0.14 plugin host with **permissions**, **versioned API** (`api_version = "1"`), and **UI views/commands**. Manifests may also declare `preferences_pages` and `context_actions` — those are **schema-only** in v0.15 (not yet hosted in the VS Code extension).
+
+## UI contribution matrix (v0.15)
+
+| Manifest field | VS Code | CLI / LSP | Status |
+|----------------|---------|-----------|--------|
+| `[[ui.commands]]` | Command palette (**Plugins: Run Command…**) | `ontocore/runPlugin` | **Shipped** |
+| `[[ui.views]]` | Dockable panel (**Plugins: Open View…**) | `ontocore/runPlugin` with `action: "ui_view"` | **Shipped** |
+| `[[ui.inspector_cards]]` | Entity Inspector cards | Via validate/index | **Shipped** (v0.14) |
+| `[[ui.preferences_pages]]` | — | — | **Schema only** |
+| `[[ui.context_actions]]` | — | — | **Schema only** |
+
+## Permissions (v0.15)
+
+Declare in `[plugin]`:
+
+```toml
+permissions = ["workspace.read", "workspace.write", "external_process"]
+```
+
+| Permission | Required for |
+|------------|--------------|
+| `workspace.read` | Validate, export, list plugins, read workspace files |
+| `workspace.write` | Plugins that write into the workspace |
+| `external_process` | Subprocess `entry` binaries |
+
+Manifests that omit `permissions` receive backward-compatible defaults (`workspace.read`, and `external_process` when `entry` is set). **New plugins should always declare permissions explicitly.**
 
 ## Quick start
 

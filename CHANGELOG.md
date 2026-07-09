@@ -7,6 +7,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.15.0] - 2026-07-08
+
+### Added
+
+- **Plugin API v0.15** — manifest `permissions`, `api_version = "1"`, UI views and commands; LSP `ontocore/runPlugin` `ui_view` action
+- **Plugin UI views** — dockable webview panels via **Plugins: Open View…**; `PluginViewPanel` host
+- **Explanation alternatives** — multiple unsatisfiability justifications via `explain_alternatives`; explanation panel justification selector
+- **Explanation staleness** — `indexed_at` and `content_hash` on explanation payloads; stale warning in explanation panel
+- **Graph panel upgrades** — asserted / inferred / combined modes, grid/circle/stack layouts, search filter
+- **Subprocess plugin hardening** — path-jail improvements and security regression tests (`tests/cli_plugins_security.rs`)
+- **Examples** — `demo-ui-view.toml` plugin fixture and `demo_ui_view.sh`
+
+### Changed
+
+- Workspace package and all `ontocore-*` crates bumped to **0.15.0**
+- Extension marketplace version **0.15.0**
+- Plugin host enforces declared permissions; backward-compatible defaults for manifests omitting `permissions`
+
+### Fixed
+
+- **Multi-root workspaces** — `ontocore/indexWorkspace` respects requested root when indexing multi-root workspaces
+
 ## [0.14.0] - 2026-07-09
 
 ### Added
@@ -242,6 +264,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SPARQL update guard bypass after `PREFIX` or comment lines
 - Capped file reads in parser, catalog semantics, and refactor preview/backup paths
 
+[0.15.0]: https://github.com/eddiethedean/ontocode/releases/tag/v0.15.0
 [0.14.0]: https://github.com/eddiethedean/ontocode/releases/tag/v0.14.0
 [0.13.0]: https://github.com/eddiethedean/ontocode/releases/tag/v0.13.0
 [0.12.0]: https://github.com/eddiethedean/ontocode/releases/tag/v0.12.0

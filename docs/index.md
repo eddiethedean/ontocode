@@ -125,7 +125,7 @@ You do **not** need to clone this repo to use the extension or `cargo install on
 
 ## What ships today
 
-**v0.14.0 highlights:** Plugin host MVP (manifests, reference plugins, `ontocore plugins`, LSP `listPlugins`/`runPlugin`, owlmake workflow scaffold) — on top of v0.13 WorkspaceStore + focus relay, schema browser, PR summary diffs, semantic tokens, and Turtle/OBO inspector write-back.
+**v0.15.0 highlights:** Plugin permissions and UI views, explanation alternatives with staleness detection, graph asserted/inferred/combined modes — on top of v0.14 plugin host MVP and v0.13 WorkspaceStore + focus relay.
 
 Full matrix: **[What ships today](SHIPPED.md)** (canonical — do not rely on this summary alone).
 

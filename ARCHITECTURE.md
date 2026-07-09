@@ -13,13 +13,13 @@
 >
 > **Contributor crate layout:** [Implementation architecture](docs/design/ARCHITECTURE.md) (internal modules, not a user capability list).
 >
-> **v0.14 ships today:** OntoCode (VS Code), OntoCore (CLI/LSP/library), Turtle + OBO write-back, property chain editing, OWL/XML read-only catalog, DL explanations, semantic diff, incremental indexing, Ontologos reasoning, ROBOT CLI wrappers, **plugin host MVP** (manifests, reference validators/exporters, CLI/LSP hooks, owlmake workflow scaffold).
+> **v0.15 ships today:** OntoCode (VS Code), OntoCore (CLI/LSP/library), Turtle + OBO write-back, property chain editing, OWL/XML read-only catalog, DL explanations (with alternatives and staleness), semantic diff, incremental indexing, Ontologos reasoning, ROBOT CLI wrappers, **plugin host** (manifests, permissions, UI views/commands, reference validators/exporters, CLI/LSP hooks, owlmake workflow scaffold), **graph asserted/inferred/combined modes**.
 > **Planned v1.0 (not installable yet):** stable plugin API, language SDKs, MCP server, full owlmake integration.
 > **Planned post-1.0:** OntoStudio desktop, AI-native workflows — [UI roadmap mapping](docs/ui/ROADMAP_MAPPING.md).
 > Canonical capability matrix: [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/).
 
 ```
-External Workflow Plugins (v0.14 MVP)  ← subprocess workflow plugins; stable API v1.0
+External Workflow Plugins (v0.15)  ← subprocess workflow plugins; API v1 (permissions, views)
 ├── owlmake (reference design)
 ├── ROBOT / ODK workflow adapters
 └── Future build, validation, doc plugins

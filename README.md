@@ -4,7 +4,7 @@
 
 **OntoCode** is a VS Code extension for browsing and editing ontologies in your workspace. **OntoCore** is the Rust semantic workspace engine behind it (CLI + language server). Browse OWL/RDF/OBO in VS Code, edit Turtle and OBO in the Entity Inspector, run EL–DL reasoning, query or validate in CI — without Protégé.
 
-**Current release: v0.15.0** · [Changelog](CHANGELOG.md) · [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) · [What's new in v0.15](docs/migration/v0.15.md)
+**Current release: v0.16.0** · [Changelog](CHANGELOG.md) · [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) · [What's new in v0.16](docs/migration/v0.16.md)
 
 [![CI](https://github.com/eddiethedean/ontocode/actions/workflows/ci.yml/badge.svg)](https://github.com/eddiethedean/ontocode/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue)](https://github.com/eddiethedean/ontocode/blob/main/LICENSE-MIT)
@@ -73,7 +73,7 @@ cargo run -- validate fixtures
 
 ```text
 ┌──────────────────────────────────────────────────────────────┐
-│  Shipped v0.15: plugin permissions/views, explanation alts,   │
+│  Shipped v0.16: plugin preferences/actions, imports/layout,   │
 │  graph modes · Planned v1.0+: stable plugin API + Protégé exit │
 └────────────────────────────┬─────────────────────────────────┘
                              │ ontocore-lsp (stdio)

@@ -28,6 +28,10 @@ export class ExplanationPanel {
     });
   }
 
+  public dispose(): void {
+    this.panel.dispose();
+  }
+
   public static async show(classIri: string): Promise<void> {
     const cfg = vscode.workspace.getConfiguration("ontocode");
     const profile = cfg.get<string>("reasoner.default") ?? "el";

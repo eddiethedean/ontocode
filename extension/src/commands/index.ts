@@ -34,6 +34,7 @@ import { documentUriInWorkspace, openWorkspaceTextDocument } from "../utils/work
 import { refreshPluginCommands } from "./pluginCommands";
 import { WorkflowPanel } from "../webviews/workflowPanel";
 import { PluginViewPanel } from "../webviews/pluginViewPanel";
+import { QueryWorkbenchPanel } from "../webviews/queryWorkbenchReact";
 
 export function registerCommands(
   context: vscode.ExtensionContext,
@@ -111,6 +112,92 @@ export function registerCommands(
       }
       await PluginViewPanel.open(context.extensionUri, picked.plugin, picked.view);
     }),
+    vscode.commands.registerCommand(
+      "ontocode.plugins.openPreferences",
+      async () => {
+        const plugins = await listPlugins().then((r) => r.plugins).catch(() => []);
+        const items: Array<{
+          label: string;
+          description: string;
+          plugin: import("../lsp/protocol").PluginDescriptor;
+          page: import("../lsp/protocol").PluginPreferencePageContribution;
+        }> = [];
+
+        for (const plugin of plugins) {
+          for (const page of plugin.ui.preferences_pages ?? []) {
+            items.push({
+              label: page.title,
+              description: `${plugin.name}${page.category ? ` · ${page.category}` : ""}`,
+              plugin,
+              page,
+            });
+          }
+        }
+
+        const picked = await vscode.window.showQuickPick(items, {
+          title: "OntoCode Plugin Preferences",
+          matchOnDescription: true,
+        });
+        if (!picked) {
+          return;
+        }
+
+        // Preferences pages are hosted as a plugin view (ui_view) for now.
+        await PluginViewPanel.open(context.extensionUri, picked.plugin, {
+          id: picked.page.id,
+          title: picked.page.title,
+          kind: "preferences",
+        });
+      }
+    ),
+    vscode.commands.registerCommand(
+      "ontocode.plugins.runContextAction",
+      async () => {
+        const focus = focusRelay.getFocus();
+        if (!focus || focus.kind !== "entity") {
+          void vscode.window.showWarningMessage(
+            "OntoCode: no focused entity. Open an entity in the inspector first."
+          );
+          return;
+        }
+
+        const plugins = await listPlugins().then((r) => r.plugins).catch(() => []);
+        const items: Array<{
+          label: string;
+          description: string;
+          plugin: import("../lsp/protocol").PluginDescriptor;
+          action: import("../lsp/protocol").PluginContextActionContribution;
+        }> = [];
+
+        for (const plugin of plugins) {
+          for (const action of plugin.ui.context_actions ?? []) {
+            if (action.scope && action.scope !== "entity") {
+              continue;
+            }
+            items.push({
+              label: action.title,
+              description: plugin.name,
+              plugin,
+              action,
+            });
+          }
+        }
+
+        const picked = await vscode.window.showQuickPick(items, {
+          title: "OntoCode Plugin Context Actions",
+          matchOnDescription: true,
+        });
+        if (!picked) {
+          return;
+        }
+
+        // For now, context actions execute the referenced plugin command contribution.
+        const commandId = `ontocode.plugin.${picked.action.command}`;
+        await vscode.commands.executeCommand(commandId, {
+          focus: { kind: focus.kind, id: focus.id, source: focus.source },
+        });
+      }
+    ),
     vscode.commands.registerCommand(
       "ontocode.showEntityInspector",
       async (iri?: string) => {
@@ -513,6 +600,25 @@ export function registerCommands(
         }
       }
     ),
+    vscode.commands.registerCommand("ontocode.reloadImports", async () => {
+      await runIndexAndRefresh(context, providers);
+      if (ImportsPanel.current) {
+        await ImportsPanel.current.refresh();
+      }
+      void vscode.window.showInformationMessage("OntoCode: imports reloaded");
+    }),
+    vscode.commands.registerCommand("ontocode.resetLayout", async () => {
+      EntityInspectorPanel.currentPanel?.dispose();
+      GraphPanel.currentPanel?.dispose();
+      QueryWorkbenchPanel.current?.dispose();
+      ImportsPanel.current?.dispose();
+      ReasonerPanel.current?.dispose();
+      ExplanationPanel.current?.dispose();
+      SemanticDiffPanel.current?.dispose();
+      RefactorPreviewPanel.current?.dispose();
+      ManchesterEditorPanel.current?.dispose();
+      void vscode.window.showInformationMessage("OntoCode: layout reset");
+    }),
     vscode.commands.registerCommand(
       "ontocode.openNeighborhoodGraph",
       async (arg?: unknown) => {

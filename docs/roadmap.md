@@ -37,7 +37,7 @@ After 1.0, the roadmap shifts from parity to modernization.
 | [Product Roadmap 2.0](ui/PRODUCT_ROADMAP_2.0.md) | UI phases with milestone acceptance criteria |
 | [Product design (UI)](ui/README.md) | Product design specification pack (UX, design system, OntoStudio target) |
 
-**Current release:** v0.15.0
+**Current release:** v0.16.0
 
 ---
 
@@ -398,6 +398,25 @@ Sub-phases: **v0.7a** (React foundation) → **v0.7** (graphs + inspector) → *
 **Exit criteria (partial):** dockable plugin views + commands shipped; graph modes + explanation alternatives shipped; preferences/context actions remain schema-only.
 
 See [migration/v0.15.md](migration/v0.15.md) and [SHIPPED.md](SHIPPED.md).
+
+---
+
+### v0.16 — Workspace layouts + preferences + imports polish (shipped, partial)
+
+**Released:** v0.16.0 (2026-07-09)
+
+**Theme:** Close the “desktop shell” parity gap: plugin preferences, context actions, and imports/layout polish in the VS Code extension.
+
+| Area | Deliverables |
+|------|--------------|
+| **OntoCore** | Plugin command dispatch via LSP `ontocore/runPlugin` (validator/export/workflow) |
+| **OntoUI** | Plugin preferences pages and context actions surfaced from manifest contributions |
+| **OntoCode** | **Plugins: Open Preferences…**, **Plugins: Run Context Action…**, **Reload Imports**, **Reset Layout** commands |
+| **Ecosystem** | [v0.16 scope](design/v0.16_SCOPE.md); [migration/v0.16.md](migration/v0.16.md) |
+
+**Exit criteria (partial):** P0 preferences/context actions/imports reload shipped; full layout persistence and workspace perspectives deferred to v0.17+.
+
+See [migration/v0.16.md](migration/v0.16.md) and [SHIPPED.md](SHIPPED.md).
 
 ---
 

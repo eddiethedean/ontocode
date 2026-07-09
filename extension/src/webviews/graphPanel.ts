@@ -23,6 +23,10 @@ export class GraphPanel {
     });
   }
 
+  public dispose(): void {
+    this.host.panel.dispose();
+  }
+
   public static async show(
     extensionUri: vscode.Uri,
     options: GraphPanelOptions,

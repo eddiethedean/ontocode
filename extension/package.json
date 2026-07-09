@@ -2,7 +2,7 @@
   "name": "ontocode",
   "displayName": "OntoCode",
   "description": "Ontology IDE for VS Code powered by OntoCore. Browse, edit Turtle, query, reason (EL–DL), validate, and diff OWL/RDF/OBO ontologies from the IDE or CI.",
-  "version": "0.15.0",
+  "version": "0.16.0",
   "publisher": "ontocode",
   "license": "MIT",
   "repository": {
@@ -183,6 +183,14 @@
         "title": "OntoCode: Plugins: Open View…"
       },
       {
+        "command": "ontocode.plugins.openPreferences",
+        "title": "OntoCode: Plugins: Open Preferences…"
+      },
+      {
+        "command": "ontocode.plugins.runContextAction",
+        "title": "OntoCode: Plugins: Run Context Action…"
+      },
+      {
         "command": "ontocode.semanticDiff",
         "title": "OntoCode: Semantic Diff…"
       },
@@ -209,6 +217,14 @@
       {
         "command": "ontocode.manageImports",
         "title": "OntoCode: Manage Imports"
+      },
+      {
+        "command": "ontocode.reloadImports",
+        "title": "OntoCode: Reload Imports"
+      },
+      {
+        "command": "ontocode.resetLayout",
+        "title": "OntoCode: Reset Layout"
       },
       {
         "command": "ontocode.openNeighborhoodGraph",

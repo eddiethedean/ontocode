@@ -37,6 +37,10 @@ export class QueryWorkbenchPanel {
     });
   }
 
+  public dispose(): void {
+    this.host.panel.dispose();
+  }
+
   public static async show(context: vscode.ExtensionContext): Promise<QueryWorkbenchPanel> {
     if (QueryWorkbenchPanel.current) {
       QueryWorkbenchPanel.current.host.panel.reveal(vscode.ViewColumn.Beside);

@@ -304,6 +304,22 @@ if [[ "$fail" -eq 0 ]]; then
   echo "ok: no stale 0.11.2 current-release claims in user-facing docs"
 fi
 
+# User-facing docs must not claim 0.15.x is the current release (0.16+)
+CURRENT_RELEASE_STALE_PATHS=(
+  ROADMAP.md docs/roadmap.md docs/roadmap-hub.md docs/index.md
+  docs/design/README.md extension/README.md docs/platform/OVERVIEW.md
+  ARCHITECTURE.md docs/architecture.md
+)
+for file in "${CURRENT_RELEASE_STALE_PATHS[@]}"; do
+  if grep -qE '\*\*Current release:\*\* v0\.15\.0|v0\.15 ships today|v0\.15 foundation shipped|What.s included in v0\.15' "$file" 2>/dev/null; then
+    echo "FAIL: stale 0.15.x current-release claim in $file" >&2
+    fail=1
+  fi
+done
+if [[ "$fail" -eq 0 ]]; then
+  echo "ok: no stale 0.15.x current-release claims in user-facing docs"
+fi
+
 # Reference status banners must not contradict OntoCore v{N} titles
 for file in docs/authoring.md docs/sql-reference.md docs/sparql-reference.md docs/patch-reference.md docs/lsp-api.md docs/errors.md docs/webview-protocol.md; do
   if grep -qE 'OntoCore v0\.8' "$file" 2>/dev/null; then
@@ -428,7 +444,8 @@ check_file_contains "docs/ontocore/crate-map.md" 'ontocore = "0.14"' "crate-map 
 check_file_contains "docs/ontocode/manage-imports.md" "Manage Imports" "manage-imports guide"
 check_file_contains "mkdocs.yml" "ontocode/manage-imports.md" "mkdocs manage-imports guide"
 check_file_contains "mkdocs.yml" "migration/v0.14.md" "mkdocs v0.14 migration guide"
-check_file_contains "mkdocs.yml" "What's new in v0.15" "mkdocs v0.15 migration in Get started"
+check_file_contains "mkdocs.yml" "What's new in v0.16" "mkdocs v0.16 migration in Get started"
+check_file_contains "mkdocs.yml" "v0\\.15 → v0\\.16" "mkdocs v0.16 migration in Help nav"
 check_file_contains "docs/guides/production-readiness.md" "v${VERSION}" "production-readiness version"
 check_file_contains "mkdocs.yml" "ontocore/rust-api.md" "mkdocs Rust API reference"
 check_file_contains "mkdocs.yml" "guides/protege-migration.md" "mkdocs Protégé migration guide"
@@ -665,8 +682,8 @@ else
 fi
 
 # Architecture banner must reference current release ships today
-check_file_contains "ARCHITECTURE.md" "v0\.15 ships today" "ARCHITECTURE.md v0.15 banner"
-check_file_contains "docs/architecture.md" "v0\.15 ships today" "docs/architecture.md v0.15 banner"
+check_file_contains "ARCHITECTURE.md" "v0\.16 ships today" "ARCHITECTURE.md v0.16 banner"
+check_file_contains "docs/architecture.md" "v0\.16 ships today" "docs/architecture.md v0.16 banner"
 
 # Stale CLI alias notes
 if rg -q 'ontocore alias is planned' docs --glob '!**/migration/**' --glob '!**/design/**' 2>/dev/null; then
@@ -748,7 +765,7 @@ check_file_contains "mkdocs.yml" "v0\\.14 → v0\\.15" "mkdocs v0.15 migration i
 check_file_contains "docs/guides/owl-xml-workflow.md" "read-only catalog" "owl-xml workflow guide"
 check_file_contains "docs/ontocore/rust-api.md" "Book ↔ docs.rs crosswalk" "rust-api docs.rs crosswalk"
 check_file_contains "docs/troubleshooting.md" "Where to start" "troubleshooting decision tree"
-check_file_contains "docs/platform/OVERVIEW.md" "v0.15 foundation shipped" "platform overview shipped banner"
+check_file_contains "docs/platform/OVERVIEW.md" "v0.16 foundation shipped" "platform overview shipped banner"
 
 # vision.md must reference current shipped release (not v0.11 or v0.12)
 for file in docs/vision.md VISION.md; do
@@ -802,6 +819,7 @@ check_file_contains "docs/guides/enterprise-eval.md" "What ships today \\(v${VER
 check_file_contains "docs/guides/governance.md" "\\*\\*${MINOR_VERSION}\\.x\\*\\* \\| Yes — current release" "governance current release stream"
 
 # MkDocs must surface v0.15 migration in Get started / Help
+check_file_contains "mkdocs.yml" "migration/v0.16.md" "mkdocs v0.16 migration guide"
 check_file_contains "mkdocs.yml" "migration/v0.15.md" "mkdocs v0.15 migration guide"
 
 if [[ "$fail" -ne 0 ]]; then

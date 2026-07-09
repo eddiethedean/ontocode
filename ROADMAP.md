@@ -35,7 +35,7 @@ After 1.0, the roadmap shifts from parity to modernization.
 | [PRODUCT_ROADMAP_2.0.md](docs/ui/PRODUCT_ROADMAP_2.0.md) | UI phases with milestone acceptance criteria |
 | [ui/README.md](docs/ui/README.md) | Product design specification pack (UX, design system, OntoStudio target) |
 
-**Current release:** v0.15.0
+**Current release:** v0.16.0
 
 ---
 
@@ -52,7 +52,7 @@ Engine foundation    IDE depth                Platform & authoring   OntoUI + pl
   Explorer, diag,      graphs, refactor,        OBO write-back,      focus relay,
   write-back           Manchester               OWL/XML catalog      plugin host MVP
 
-PLANNED (v0.15–v1.0) ─────────────────────────────────────────────────►
+PLANNED (v0.17–v1.0) ─────────────────────────────────────────────────►
 v0.15–v0.18                                                          v1.0
 Protégé parity closeout                                              1.0 exit
 ```
@@ -86,7 +86,7 @@ Protégé parity closeout                                              1.0 exit
 | 13 | v0.13 | D | Shipped | 0, 1, 3†, 5†, 9† | Platform hardening |
 | 14 | v0.14 | D | Shipped | 8 | Plugin host MVP |
 | 15 | v0.15 | E | Shipped (partial) | 4†, 5†, 8† | Plugin API + visualization + explanations |
-| 16 | v0.16 | E | Planned | 1†, 2† | Workspace layouts + preferences + imports polish |
+| 16 | v0.16 | E | Shipped (partial) | 1†, 2† | Workspace layouts + preferences + imports polish |
 | 17 | v0.17 | E | Planned | — | Menu/toolbar/dialog parity + keyboard workflows |
 | 18 | v0.18 | E | Planned | — | Protégé Desktop parity gate + migration readiness |
 | 19 | v1.0 | F | Planned | 1–6 exit, 9† | Protégé-competitive release |
@@ -386,7 +386,7 @@ Sub-phases: **v0.7a** (React foundation) → **v0.7** (graphs + inspector) → *
 
 ---
 
-## Planned releases (v0.15 → v1.2+)
+## Planned releases (v0.17 → v1.2+)
 
 ---
 
@@ -419,25 +419,22 @@ Sub-phases: **v0.7a** (React foundation) → **v0.7** (graphs + inspector) → *
 
 ---
 
-### v0.16 — Workspace layouts + preferences + imports polish (planned)
+### v0.16 — Workspace layouts + preferences + imports polish (shipped, partial)
 
-**Theme:** Close the “desktop shell” parity gap: dockable views, layout persistence, preferences, and a Protégé-grade imports experience.
+**Released:** v0.16.0 (2026-07-09)
 
-**Primary specs:**
-- Workspace + views: [docs/PROTEGE_REVERSE_ENGINEERING/UI/WORKSPACE.md](docs/PROTEGE_REVERSE_ENGINEERING/UI/WORKSPACE.md), [docs/PROTEGE_REVERSE_ENGINEERING/UI/VIEWS.md](docs/PROTEGE_REVERSE_ENGINEERING/UI/VIEWS.md)
-- Preferences: [docs/PROTEGE_REVERSE_ENGINEERING/UI/PREFERENCES.md](docs/PROTEGE_REVERSE_ENGINEERING/UI/PREFERENCES.md)
-- Imports: [docs/PROTEGE_REVERSE_ENGINEERING/EDITORS/IMPORTS.md](docs/PROTEGE_REVERSE_ENGINEERING/EDITORS/IMPORTS.md)
+**Theme:** Close the “desktop shell” parity gap: plugin preferences, context actions, and imports/layout polish in the VS Code extension.
 
 | Area | Deliverables |
 |------|--------------|
-| **OntoCore** | Persisted workspace layout state (views, positions, open tabs) in `.ontocore/` user config; import resolution/reporting improvements (logical↔physical mapping, closure inspection, cycle detection, version mismatch diagnostics); preference schema + validation + migration |
-| **OntoUI** | Dockable/floating/hideable views; **layout persistence** (save/restore/reset to default); workspace profiles/perspectives (modeling/reasoning) as named layouts; searchable Preferences UI with categories + reset defaults + import/export settings; imports workspace polish (import tree, inspector, closure view, dependency graph, reload selected/all, diagnostics panel) |
-| **OntoCode** | “Window/View” shell commands wired (show/hide view, reset layout, switch tabs); global status indicators (dirty state, active reasoner, background tasks); preferences + imports integrated into command palette |
+| **OntoCore** | Plugin command dispatch via LSP `ontocore/runPlugin` (validator/export/workflow) |
+| **OntoUI** | Plugin preferences pages and context actions surfaced from manifest contributions |
+| **OntoCode** | **Plugins: Open Preferences…**, **Plugins: Run Context Action…**, **Reload Imports**, **Reset Layout** commands |
+| **Ecosystem** | [v0.16 scope](docs/design/v0.16_SCOPE.md); [migration/v0.16.md](docs/migration/v0.16.md) |
 
-**Exit criteria:**
-- User can **dock/move/hide** key views, **persist layout**, and **restore default** across sessions.
-- Preferences UI is **searchable**, validates inputs, supports **reset defaults**, and allows **plugin-contributed preference pages**.
-- Imports experience supports add/remove/reload, closure inspection, and clear diagnostics for missing/circular/version-conflicting imports.
+**Exit criteria (partial):** P0 preferences/context actions/imports reload shipped; full layout persistence and workspace perspectives deferred to v0.17+.
+
+See [migration/v0.16.md](docs/migration/v0.16.md) and [SHIPPED.md](docs/SHIPPED.md).
 
 ---
 

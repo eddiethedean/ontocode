@@ -38,6 +38,7 @@ pub fn ontocore_binary() -> PathBuf {
 }
 
 /// Spawn the prebuilt `ontocore` CLI (avoids `cargo run` re-linking on every test invocation).
+#[allow(dead_code)]
 pub fn ontocore_cmd() -> Command {
     Command::new(ontocore_binary())
 }

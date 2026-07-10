@@ -1,13 +1,13 @@
 use crate::handlers::{
-    handle_apply_axiom_patch, handle_apply_refactor, handle_delete_impact, handle_find_usages,
-    handle_get_catalog_snapshot, handle_get_entity, handle_goto_definition, handle_hover,
-    handle_query, handle_references, handle_sparql, handle_standard_request,
+    handle_apply_axiom_patch, handle_apply_refactor, handle_create_ontology, handle_delete_impact,
+    handle_find_usages, handle_get_catalog_snapshot, handle_get_entity, handle_goto_definition,
+    handle_hover, handle_query, handle_references, handle_sparql, handle_standard_request,
     handle_workspace_symbol, StandardRequestOutcome,
 };
 use crate::index_worker::IndexWorker;
 use crate::protocol::{
-    ApplyAxiomPatchParams, ApplyRefactorParams, DeleteImpactParams, FindUsagesParams,
-    GetEntityParams, QueryParams, SparqlParams,
+    ApplyAxiomPatchParams, ApplyRefactorParams, CreateOntologyParams, DeleteImpactParams,
+    FindUsagesParams, GetEntityParams, QueryParams, SparqlParams,
 };
 use crate::state::{path_to_uri, ServerState};
 use crossbeam_channel::unbounded;
@@ -608,4 +608,84 @@ fn semantic_tokens_full_returns_tokens_for_open_ttl_buffer() {
         }
         other => panic!("unexpected semantic tokens outcome: {other:?}"),
     }
+}
+
+#[test]
+fn create_ontology_rejects_adversarial_iri() {
+    let dir = tempfile::tempdir().unwrap();
+    let state = ServerState::new();
+    state.set_workspace_roots(vec![dir.path().to_path_buf()]).expect("set workspace");
+    let path = dir.path().join("evil.ttl");
+    let evil = "http://ex.org/x> a owl:Class . <http://ex.org/y".to_string();
+    let err = handle_create_ontology(
+        &state,
+        CreateOntologyParams {
+            path: path.display().to_string(),
+            ontology_iri: evil,
+            version_iri: None,
+            format: Some("ttl".into()),
+            prefixes: None,
+        },
+    )
+    .expect_err("unsafe IRI must be rejected");
+    assert!(
+        err.message.contains("cannot be safely written") || err.message.contains("ontology IRI"),
+        "unexpected error: {}",
+        err.message
+    );
+    assert!(!path.exists());
+}
+
+#[test]
+fn create_ontology_rejects_unsafe_prefix_iri() {
+    let dir = tempfile::tempdir().unwrap();
+    let state = ServerState::new();
+    state.set_workspace_roots(vec![dir.path().to_path_buf()]).expect("set workspace");
+    let path = dir.path().join("evil-prefix.ttl");
+    let mut prefixes = std::collections::BTreeMap::new();
+    prefixes.insert(
+        "ex".to_string(),
+        "http://ex.org/x> . <http://ex.org/y".to_string(),
+    );
+    let err = handle_create_ontology(
+        &state,
+        CreateOntologyParams {
+            path: path.display().to_string(),
+            ontology_iri: "http://example.org/ont".into(),
+            version_iri: None,
+            format: Some("ttl".into()),
+            prefixes: Some(prefixes),
+        },
+    )
+    .expect_err("unsafe prefix IRI must be rejected");
+    assert!(
+        err.message.contains("prefix") || err.message.contains("IRI"),
+        "unexpected error: {}",
+        err.message
+    );
+    assert!(!path.exists());
+}
+
+#[test]
+fn create_ontology_writes_safe_turtle() {
+    let dir = tempfile::tempdir().unwrap();
+    let state = ServerState::new();
+    state.set_workspace_roots(vec![dir.path().to_path_buf()]).expect("set workspace");
+    let path = dir.path().join("fresh.ttl");
+    let result = handle_create_ontology(
+        &state,
+        CreateOntologyParams {
+            path: path.display().to_string(),
+            ontology_iri: "http://example.org/ont".into(),
+            version_iri: Some("http://example.org/ont/1".into()),
+            format: Some("ttl".into()),
+            prefixes: None,
+        },
+    )
+    .expect("create ontology");
+    assert_eq!(result.ontology_iri, "http://example.org/ont");
+    let contents = std::fs::read_to_string(&path).expect("read created file");
+    assert!(contents.contains("<http://example.org/ont> a owl:Ontology"));
+    assert!(contents.contains("owl:versionIRI <http://example.org/ont/1>"));
+    assert!(!contents.contains("a owl:Class"));
 }

@@ -635,6 +635,25 @@ pub fn handle_create_ontology(
             path.display()
         )));
     }
+    if !ontocore_owl::is_safe_iri(&params.ontology_iri) {
+        return Err(LspErrorPayload::invalid_params(format!(
+            "ontology IRI contains characters that cannot be safely written: {:?}",
+            params.ontology_iri
+        )));
+    }
+    if let Some(version_iri) = &params.version_iri {
+        if !ontocore_owl::is_safe_iri(version_iri) {
+            return Err(LspErrorPayload::invalid_params(format!(
+                "version IRI contains characters that cannot be safely written: {version_iri:?}"
+            )));
+        }
+    }
+    if let Some(prefixes) = &params.prefixes {
+        for (prefix, iri) in prefixes {
+            ontocore_owl::validate_prefix(prefix, iri)
+                .map_err(|e| LspErrorPayload::invalid_params(e.to_string()))?;
+        }
+    }
     if let Some(parent) = path.parent() {
         std::fs::create_dir_all(parent)
             .map_err(|e| LspErrorPayload::index_failed(e.to_string()))?;

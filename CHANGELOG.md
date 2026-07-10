@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Reject unsafe ontology/version/prefix IRIs in `createOntology` and `ontocore new`, and refuse CLI overwrite unless `--force` ([#124](https://github.com/eddiethedean/ontocode/issues/124))
 - Replace existing `owl:versionIRI` in `SetVersionIri` instead of appending another statement ([#125](https://github.com/eddiethedean/ontocode/issues/125))
 - Rewrite CURIE-form `owl:Ontology` subjects in `SetOntologyIri` instead of appending a second ontology declaration ([#126](https://github.com/eddiethedean/ontocode/issues/126))
 - Validate annotation predicate CURIEs against known prefixes and PN_LOCAL rules so Turtle injection via `AddAnnotation` / `AddOntologyAnnotation` is rejected ([#127](https://github.com/eddiethedean/ontocode/issues/127))

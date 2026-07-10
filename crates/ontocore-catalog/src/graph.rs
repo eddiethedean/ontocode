@@ -137,6 +137,11 @@ impl<'a> GraphBuilder<'a> {
 
     fn entity_allowed(&self, iri: &str, filters: &GraphFilters) -> bool {
         let Some(entity) = self.catalog.find_entity(iri) else {
+            // Unknown IRIs are not in any indexed ontology — exclude them when filtering
+            // by ontology_iri so external/imported parents cannot bypass the filter (#117).
+            if filters.ontology_iri.is_some() {
+                return false;
+            }
             return !filters.hide_deprecated;
         };
         if filters.hide_deprecated && entity.deprecated {
@@ -620,6 +625,70 @@ mod tests {
         assert!(
             payload.edges.iter().any(|e| e.source == patient && e.target == record),
             "expected Patient -> MedicalRecord restriction edge"
+        );
+    }
+
+    #[test]
+    fn ontology_iri_filter_excludes_unknown_entities() {
+        let dir = tempfile::tempdir().expect("tempdir");
+        std::fs::write(
+            dir.path().join("local.ttl"),
+            "@prefix ex: <http://ex#> .\n\
+             @prefix owl: <http://www.w3.org/2002/07/owl#> .\n\
+             @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n\
+             <http://ex/onto> a owl:Ontology .\n\
+             ex:Child a owl:Class ; rdfs:subClassOf <http://external.example/Parent> .\n",
+        )
+        .expect("write");
+        let catalog = IndexBuilder::new().workspace(dir.path()).build().expect("build");
+        let ont_id = catalog
+            .data()
+            .documents
+            .first()
+            .map(|d| d.id.clone())
+            .expect("doc");
+        let unfiltered = GraphBuilder::new(&catalog)
+            .build(&GraphRequest {
+                graph_kind: "class".to_string(),
+                root_iri: None,
+                depth: 2,
+                include_inferred: false,
+                filters: GraphFilters::default(),
+            })
+            .expect("unfiltered");
+        assert!(
+            unfiltered
+                .nodes
+                .iter()
+                .any(|n| n.id == "http://external.example/Parent"),
+            "unknown parent should appear without ontology filter"
+        );
+
+        let filtered = GraphBuilder::new(&catalog)
+            .build(&GraphRequest {
+                graph_kind: "class".to_string(),
+                root_iri: None,
+                depth: 2,
+                include_inferred: false,
+                filters: GraphFilters {
+                    ontology_iri: Some(ont_id),
+                    hide_deprecated: false,
+                },
+            })
+            .expect("filtered");
+        assert!(
+            filtered
+                .nodes
+                .iter()
+                .all(|n| n.id != "http://external.example/Parent"),
+            "unknown parent must not bypass ontology_iri filter"
+        );
+        assert!(
+            filtered.edges.iter().all(|e| {
+                e.source != "http://external.example/Parent"
+                    && e.target != "http://external.example/Parent"
+            }),
+            "edges to unknown parent must be excluded when filtering"
         );
     }
 }

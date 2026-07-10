@@ -183,4 +183,27 @@ describe("GraphPanel", () => {
     postHostMessage({ type: "init", panel: "inspector" } as never);
     expect(document.querySelector(".react-flow")).toBeInTheDocument();
   });
+
+  it("keeps class graph kind when entity focus arrives", async () => {
+    renderWithProviders(<GraphPanel />);
+    postHostMessage({ type: "graphData", graph: graphPayload });
+    await waitFor(() => {
+      expect(screen.getByText("class")).toBeInTheDocument();
+    });
+
+    postHostMessage({
+      type: "focusState",
+      focus: {
+        kind: "entity",
+        id: "http://example.org#Agent",
+        source: "explorer",
+        timestamp: Date.now(),
+      },
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText("class")).toBeInTheDocument();
+    });
+    expect(screen.queryByText("neighborhood")).not.toBeInTheDocument();
+  });
 });

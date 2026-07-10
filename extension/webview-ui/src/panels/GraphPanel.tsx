@@ -59,6 +59,8 @@ export function GraphPanel(_props?: WorkspaceProps): JSX.Element {
   const [search, setSearch] = useState("");
   const [error, setError] = useState("");
   const hasGraphData = useRef(false);
+  const graphKindRef = useRef(graphKind);
+  graphKindRef.current = graphKind;
 
   const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
   const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
@@ -75,21 +77,28 @@ export function GraphPanel(_props?: WorkspaceProps): JSX.Element {
     });
   }, [host, graphKind, rootIri, depth, graphMode, hideDeprecated]);
 
+  // Entity focus updates selection; only neighborhood graphs follow focus as root (#154).
   useEffect(() => {
     return subscribeFocus((focus) => {
-      if (focus.kind === "entity" && focus.id !== rootIri) {
+      if (focus.kind !== "entity") {
+        return;
+      }
+      setSelectedId(focus.id);
+      if (graphKindRef.current === "neighborhood" && focus.id !== rootIri) {
         setRootIri(focus.id);
-        setGraphKind("neighborhood");
       }
     });
   }, [rootIri]);
 
   useEffect(() => {
-    if (storeRootIri && storeRootIri !== rootIri) {
+    if (
+      storeRootIri &&
+      graphKind === "neighborhood" &&
+      storeRootIri !== rootIri
+    ) {
       setRootIri(storeRootIri);
-      setGraphKind("neighborhood");
     }
-  }, [storeRootIri, rootIri]);
+  }, [storeRootIri, rootIri, graphKind]);
 
   useEffect(() => {
     host.postToCore({ type: "ready", panel: "graph" });
@@ -100,8 +109,10 @@ export function GraphPanel(_props?: WorkspaceProps): JSX.Element {
       }
       const msg: HostMessage = event.data;
       if (msg.type === "focusState" && msg.focus.kind === "entity") {
-        setRootIri(msg.focus.id);
-        setGraphKind("neighborhood");
+        setSelectedId(msg.focus.id);
+        if (graphKindRef.current === "neighborhood") {
+          setRootIri(msg.focus.id);
+        }
       }
       if (msg.type === "graphData") {
         hasGraphData.current = true;

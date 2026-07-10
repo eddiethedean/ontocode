@@ -28,6 +28,23 @@ export function PropertyChainEditor({
           {chains.map((c, idx) => (
             <li key={`chain-${idx}`} className="oc-axiom-item">
               <code>{c.display}</code>
+              {c.properties.length >= 2 ? (
+                <button
+                  type="button"
+                  className="secondary"
+                  onClick={() =>
+                    onApply([
+                      {
+                        op: "remove_property_chain",
+                        entity_iri: entityIri,
+                        properties: c.properties,
+                      },
+                    ])
+                  }
+                >
+                  Remove
+                </button>
+              ) : null}
             </li>
           ))}
         </ul>

@@ -567,4 +567,23 @@ describe("EntityInspectorPanel", () => {
       previewOnly: false,
     });
   });
+
+  it("loadEntity hydrates focus without pushing navigation history", async () => {
+    const { useWorkspaceStore } = await import("../store/workspaceStore");
+    useWorkspaceStore.getState().reset();
+    useWorkspaceStore.getState().setFocus({
+      kind: "entity",
+      id: "http://example.org#Seed",
+      source: "explorer",
+      timestamp: 1,
+    });
+    const stackBefore = useWorkspaceStore.getState().navigation.stack.length;
+
+    renderWithProviders(<EntityInspectorPanel />);
+    postHostMessage({ type: "loadEntity", detail: entityDetail, classOptions });
+    expect(await screen.findByRole("heading", { name: "Person" })).toBeInTheDocument();
+
+    expect(useWorkspaceStore.getState().focus?.id).toBe("http://example.org#Person");
+    expect(useWorkspaceStore.getState().navigation.stack.length).toBe(stackBefore);
+  });
 });

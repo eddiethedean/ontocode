@@ -14,6 +14,7 @@ import type { WebviewMessage } from "./messages";
 import {
   ManchesterAxiomKind,
   buildManchesterPatches,
+  resolveManchesterApplyMode,
 } from "./manchesterEditorLogic";
 
 export interface ManchesterEditorOptions {
@@ -189,7 +190,12 @@ export class ManchesterEditorPanel {
     axiomKind: string,
     previewOnly: boolean
   ): Promise<void> {
-    const mode = this.options.mode ?? "add";
+    const { mode, initialExpression } = resolveManchesterApplyMode(
+      axiomKind,
+      this.options.axiomKind,
+      this.options.mode,
+      this.options.initialExpression
+    );
     let patches;
     if (axiomKind === "disjoint_class") {
       patches = buildManchesterPatches(
@@ -197,7 +203,7 @@ export class ManchesterEditorPanel {
         this.options.iri,
         expression,
         mode,
-        this.options.initialExpression
+        initialExpression
       );
     } else {
       patches = buildManchesterPatches(
@@ -205,7 +211,7 @@ export class ManchesterEditorPanel {
         this.options.iri,
         expression,
         mode,
-        this.options.initialExpression
+        initialExpression
       );
     }
     try {

@@ -32,7 +32,7 @@ import type { WorkspaceProps } from "../workspaces/types";
 
 export function EntityInspectorPanel(_props?: WorkspaceProps): JSX.Element {
   const host = useWorkspaceHost();
-  const setFocus = useWorkspaceStore((s) => s.setFocus);
+  const hydrateFocus = useWorkspaceStore((s) => s.hydrateFocus);
   const focusIri = useWorkspaceStore((s) => s.inspector.entityIri);
   const installedPlugins = useWorkspaceStore((s) => s.plugins.installed);
   const setPlugins = useWorkspaceStore((s) => s.setPlugins);
@@ -99,7 +99,8 @@ export function EntityInspectorPanel(_props?: WorkspaceProps): JSX.Element {
         setClassOptions(msg.classOptions);
         setObjectPropertyOptions(msg.objectPropertyOptions ?? []);
         resetFormState();
-        setFocus({
+        // Host-driven loads must not push navigation history (#92).
+        hydrateFocus({
           kind: "entity",
           id: msg.detail.entity.iri,
           source: "inspector",
@@ -124,7 +125,7 @@ export function EntityInspectorPanel(_props?: WorkspaceProps): JSX.Element {
     };
     window.addEventListener("message", handler);
     return () => window.removeEventListener("message", handler);
-  }, [host, setFocus, setPlugins, resetFormState]);
+  }, [host, hydrateFocus, setPlugins, resetFormState]);
 
   if (!detail) {
     return (
@@ -807,7 +808,10 @@ export function EntityInspectorPanel(_props?: WorkspaceProps): JSX.Element {
                 entityIri={entity.iri}
                 chains={axioms
                   .filter((a) => a.kind === "property_chain")
-                  .map((a) => ({ display: a.display, properties: [] }))}
+                  .map((a) => ({
+                    display: a.display,
+                    properties: a.properties ?? [],
+                  }))}
                 propertyOptions={chainPropertyOptions}
                 preview={editPreview}
                 onPreview={(patches) => apply(patches, true)}

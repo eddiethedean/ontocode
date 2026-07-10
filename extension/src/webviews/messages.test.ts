@@ -131,4 +131,18 @@ describe("parseApplyPatchMessage", () => {
     );
     assert.ok(parsed);
   });
+
+  it("accepts import patches without entity context", () => {
+    const importPatch = {
+      op: "add_import",
+      ontology_iri: "http://example.org/ont",
+      import_iri: "http://example.org/other",
+    };
+    const parsed = parseApplyPatchMessage(
+      { type: "applyPatch", patches: [importPatch], previewOnly: false },
+      undefined
+    );
+    assert.ok(parsed);
+    assert.equal(parsed?.patches[0]?.op, "add_import");
+  });
 });

@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import type { Entity, OntologyDocument } from "../lsp/protocol";
 import {
+  AMBIGUOUS_ONTOLOGY_HEADER_MESSAGE,
   entityBelongsToDocument,
   MISSING_ONTOLOGY_HEADER_MESSAGE,
   resolveOntologyIri,
@@ -70,6 +71,50 @@ describe("resolveOntologyIri", () => {
     const document = doc({ base_iri: "http://example.org/foo#" });
     assert.equal(resolveOntologyIri(document, []), undefined);
   });
+
+  it("prefers ontology matching document base_iri when multiple exist", () => {
+    const document = doc({
+      id: "doc-multi",
+      base_iri: "http://example.org/primary",
+    });
+    const entities = [
+      entity({
+        iri: "http://example.org/aaa-secondary",
+        kind: "ontology",
+        short_name: "aaa-secondary",
+        ontology_id: "doc-multi",
+      }),
+      entity({
+        iri: "http://example.org/primary",
+        kind: "ontology",
+        short_name: "primary",
+        ontology_id: "doc-multi",
+      }),
+    ];
+    assert.equal(resolveOntologyIri(document, entities), "http://example.org/primary");
+  });
+
+  it("returns undefined when multiple ontologies and none match base_iri", () => {
+    const document = doc({
+      id: "doc-multi",
+      base_iri: "http://example.org/unrelated",
+    });
+    const entities = [
+      entity({
+        iri: "http://example.org/aaa",
+        kind: "ontology",
+        short_name: "aaa",
+        ontology_id: "doc-multi",
+      }),
+      entity({
+        iri: "http://example.org/zzz",
+        kind: "ontology",
+        short_name: "zzz",
+        ontology_id: "doc-multi",
+      }),
+    ];
+    assert.equal(resolveOntologyIri(document, entities), undefined);
+  });
 });
 
 describe("entityBelongsToDocument", () => {
@@ -87,5 +132,6 @@ describe("entityBelongsToDocument", () => {
 describe("MISSING_ONTOLOGY_HEADER_MESSAGE", () => {
   it("is non-empty guidance", () => {
     assert.match(MISSING_ONTOLOGY_HEADER_MESSAGE, /owl:Ontology/);
+    assert.match(AMBIGUOUS_ONTOLOGY_HEADER_MESSAGE, /multiple/);
   });
 });

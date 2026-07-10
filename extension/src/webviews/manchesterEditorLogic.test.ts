@@ -1,4 +1,8 @@
-import { buildManchesterPatch, buildManchesterPatches } from "./manchesterEditorLogic";
+import {
+  buildManchesterPatch,
+  buildManchesterPatches,
+  resolveManchesterApplyMode,
+} from "./manchesterEditorLogic";
 import assert from "node:assert/strict";
 import { test } from "node:test";
 
@@ -45,4 +49,26 @@ test("buildManchesterPatches for equivalent edit is single set", () => {
   );
   assert.equal(patches.length, 1);
   assert.equal(patches[0].op, "set_equivalent_class");
+});
+
+test("resolveManchesterApplyMode forces add when axiom kind changes", () => {
+  const resolved = resolveManchesterApplyMode(
+    "equivalent_class",
+    "sub_class_of",
+    "edit",
+    "ex:Agent"
+  );
+  assert.equal(resolved.mode, "add");
+  assert.equal(resolved.initialExpression, undefined);
+});
+
+test("resolveManchesterApplyMode keeps edit options when kind matches", () => {
+  const resolved = resolveManchesterApplyMode(
+    "sub_class_of",
+    "sub_class_of",
+    "edit",
+    "ex:Agent"
+  );
+  assert.equal(resolved.mode, "edit");
+  assert.equal(resolved.initialExpression, "ex:Agent");
 });

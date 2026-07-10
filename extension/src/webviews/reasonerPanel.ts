@@ -21,35 +21,40 @@ export class ReasonerPanel {
       ReasonerPanel.current = undefined;
     });
     this.panel.webview.onDidReceiveMessage(async (msg) => {
-      if (!msg || typeof msg !== "object" || typeof msg.command !== "string") {
-        return;
-      }
-      if (msg.command === "ready") {
-        this.webviewReady = true;
-        this.flushPending();
-        return;
-      }
-      if (msg.command === "run") {
-        const runId =
-          typeof msg.runId === "number" ? msg.runId : ++this.runId;
-        const profile = typeof msg.profile === "string" ? msg.profile : "el";
-        const autoDetect = msg.autoDetect !== false;
-        await this.run(profile, autoDetect, runId);
-      }
-      if (msg.command === "explain" && typeof msg.classIri === "string") {
-        const profile =
-          this.lastResult?.profile_used ?? focusRelay.getReasoning()?.profile;
-        await vscode.commands.executeCommand(
-          "ontocode.showExplanation",
-          msg.classIri,
-          profile
-        );
-      }
-      if (msg.command === "showInferred") {
-        await vscode.workspace
-          .getConfiguration("ontocode")
-          .update("hierarchy.mode", "combined", vscode.ConfigurationTarget.Workspace);
-        void vscode.commands.executeCommand("ontocode.refreshExplorer");
+      try {
+        if (!msg || typeof msg !== "object" || typeof msg.command !== "string") {
+          return;
+        }
+        if (msg.command === "ready") {
+          this.webviewReady = true;
+          this.flushPending();
+          return;
+        }
+        if (msg.command === "run") {
+          const runId =
+            typeof msg.runId === "number" ? msg.runId : ++this.runId;
+          const profile = typeof msg.profile === "string" ? msg.profile : "el";
+          const autoDetect = msg.autoDetect !== false;
+          await this.run(profile, autoDetect, runId);
+        }
+        if (msg.command === "explain" && typeof msg.classIri === "string") {
+          const profile =
+            this.lastResult?.profile_used ?? focusRelay.getReasoning()?.profile;
+          await vscode.commands.executeCommand(
+            "ontocode.showExplanation",
+            msg.classIri,
+            profile
+          );
+        }
+        if (msg.command === "showInferred") {
+          await vscode.workspace
+            .getConfiguration("ontocode")
+            .update("hierarchy.mode", "combined", vscode.ConfigurationTarget.Workspace);
+          void vscode.commands.executeCommand("ontocode.refreshExplorer");
+        }
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        void vscode.window.showErrorMessage(`OntoCode: ${message}`);
       }
     });
     this.panel.webview.html = this.renderHtml();

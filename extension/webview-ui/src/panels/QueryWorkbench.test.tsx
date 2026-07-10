@@ -278,4 +278,32 @@ describe("QueryWorkbenchPanel", () => {
     const textarea = screen.getByRole("textbox");
     expect((textarea as HTMLTextAreaElement).value).toContain("property_iri");
   });
+
+  it("records history from the query text at run time, not result time", async () => {
+    const user = userEvent.setup();
+    const { useWorkspaceStore } = await import("../store/workspaceStore");
+    useWorkspaceStore.getState().reset();
+
+    renderWithProviders(<QueryWorkbenchPanel />);
+    const editor = screen.getByRole("textbox");
+    await user.clear(editor);
+    await user.type(editor, "SELECT * FROM classes");
+    await user.click(screen.getByRole("button", { name: "Run" }));
+    const runId = (lastPostedMessage() as { runId: number }).runId;
+
+    await user.clear(editor);
+    await user.type(editor, "SELECT * FROM properties");
+
+    postHostMessage({
+      type: "queryResult",
+      runId,
+      result: queryResult,
+    });
+
+    await waitFor(() => {
+      const history = useWorkspaceStore.getState().query.history;
+      expect(history.some((h) => h.text === "SELECT * FROM classes")).toBe(true);
+      expect(history.some((h) => h.text === "SELECT * FROM properties")).toBe(false);
+    });
+  });
 });

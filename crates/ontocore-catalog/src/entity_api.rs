@@ -40,6 +40,9 @@ pub struct EntityAxiomSummary {
     pub parent_iri: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub other_iri: Option<String>,
+    /// Ordered member property IRIs for `property_chain` axioms.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub properties: Vec<String>,
     pub editable: bool,
 }
 
@@ -228,6 +231,15 @@ fn axiom_summary(a: &ontocore_core::Axiom, editable: bool) -> EntityAxiomSummary
     } else {
         None
     };
+    let properties = if a.axiom_kind == AXIOM_KIND_PROPERTY_CHAIN {
+        a.object
+            .split(" o ")
+            .map(|s| s.trim().to_string())
+            .filter(|s| !s.is_empty())
+            .collect()
+    } else {
+        Vec::new()
+    };
     let kind_label = match a.axiom_kind.as_str() {
         AXIOM_KIND_EQUIVALENT_CLASS => "EquivalentClasses",
         AXIOM_KIND_DISJOINT_CLASS => "DisjointClasses",
@@ -246,6 +258,7 @@ fn axiom_summary(a: &ontocore_core::Axiom, editable: bool) -> EntityAxiomSummary
         manchester,
         parent_iri,
         other_iri,
+        properties,
         editable: axiom_editable,
     }
 }
@@ -387,5 +400,39 @@ mod tests {
         assert!(detail.editable);
         assert!(!detail.axioms.is_empty());
         assert!(detail.axioms.iter().all(|a| a.editable));
+    }
+
+    #[test]
+    fn property_chain_axiom_summary_includes_member_iris() {
+        let dir = tempfile::tempdir().expect("tempdir");
+        let ttl_path = dir.path().join("chains.ttl");
+        std::fs::write(
+            &ttl_path,
+            concat!(
+                "@prefix ex: <http://example.org/org#> .\n",
+                "@prefix owl: <http://www.w3.org/2002/07/owl#> .\n",
+                "@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n\n",
+                "ex:chases a owl:ObjectProperty .\n",
+                "ex:composed a owl:ObjectProperty ;\n",
+                "    owl:propertyChainAxiom ( ex:chases ex:chases ) .\n"
+            ),
+        )
+        .expect("write ttl");
+        let catalog = IndexBuilder::new().workspace(dir.path()).build().expect("build");
+        let detail = catalog
+            .entity_detail("http://example.org/org#composed")
+            .expect("composed detail");
+        let chain = detail
+            .axioms
+            .iter()
+            .find(|a| a.kind == AXIOM_KIND_PROPERTY_CHAIN)
+            .expect("property_chain axiom");
+        assert_eq!(
+            chain.properties,
+            vec![
+                "http://example.org/org#chases".to_string(),
+                "http://example.org/org#chases".to_string()
+            ]
+        );
     }
 }

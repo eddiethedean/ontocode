@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Make OBO `atomic_write` Windows-safe with temp cleanup on failure, matching Turtle replace behavior ([#64](https://github.com/eddiethedean/ontocode/issues/64), [#165](https://github.com/eddiethedean/ontocode/issues/165))
+- Use format-aware writers for refactor disk rollback and surface rollback I/O errors from axiom-patch and refactor apply ([#63](https://github.com/eddiethedean/ontocode/issues/63), [#76](https://github.com/eddiethedean/ontocode/issues/76), [#93](https://github.com/eddiethedean/ontocode/issues/93))
 - Encode LSP semantic-token `delta_line`/`delta_start` from absolute previous positions so highlighting no longer drifts on multi-line Turtle/OBO ([#137](https://github.com/eddiethedean/ontocode/issues/137))
 - Preserve `obo_id` when merging duplicate entity IRIs across documents so OBO write-back keeps `term_id` ([#138](https://github.com/eddiethedean/ontocode/issues/138))
 - Align Auto explain backends: report the concrete classify engine in `profile_used` and route CLI/LSP explanations through that engine ([#139](https://github.com/eddiethedean/ontocode/issues/139))

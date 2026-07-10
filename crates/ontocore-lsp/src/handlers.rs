@@ -1363,10 +1363,12 @@ pub fn handle_apply_axiom_patch(
                 }
                 if state.is_document_open(&document_path) {
                     if let Err(e) = state.set_document_text(document_path.clone(), text.clone()) {
-                        if format == OntologyFormat::Obo {
-                            let _ = ontocore_obo::atomic_write(&document_path, &source);
-                        } else {
-                            let _ = ontocore_owl::atomic_write(&document_path, &source);
+                        if let Err(rollback_err) =
+                            atomic_write_for_format(format, &document_path, &source)
+                        {
+                            return Err(LspErrorPayload::patch_invalid(format!(
+                                "buffer update failed ({e}); disk rollback also failed: {rollback_err}"
+                            )));
                         }
                         return Err(LspErrorPayload::patch_invalid(e));
                     }
@@ -1934,16 +1936,26 @@ pub fn handle_apply_refactor(
                     if let Err(e) =
                         state.set_document_text(change.path.clone(), change.preview_text.clone())
                     {
+                        let mut rollback_errors = Vec::new();
                         for rollback in &server_plan.changes {
                             if rollback.preview_text != rollback.original_text {
-                                let _ = ontocore_owl::atomic_write(
+                                if let Err(re) = atomic_write_for_path(
                                     &rollback.path,
                                     &rollback.original_text,
-                                );
+                                ) {
+                                    rollback_errors
+                                        .push(format!("{}: {re}", rollback.path.display()));
+                                }
                             }
                         }
                         for (path, text) in buffer_snapshots {
                             let _ = state.set_document_text(path, text);
+                        }
+                        if !rollback_errors.is_empty() {
+                            return Err(LspErrorPayload::refactor_failed(format!(
+                                "buffer update failed ({e}); disk rollback also failed: {}",
+                                rollback_errors.join("; ")
+                            )));
                         }
                         return Err(LspErrorPayload::refactor_failed(e));
                     }
@@ -2098,6 +2110,26 @@ fn full_document_workspace_edit(
     new_text: &str,
 ) -> Option<WorkspaceEdit> {
     full_document_workspace_edit_labeled(state, path, new_text, "OntoCode semantic edit")
+}
+
+/// Format-aware atomic write used by apply and rollback paths.
+fn atomic_write_for_format(
+    format: OntologyFormat,
+    path: &std::path::Path,
+    contents: &str,
+) -> Result<(), String> {
+    if format == OntologyFormat::Obo {
+        ontocore_obo::atomic_write(path, contents).map_err(|e| e.to_string())
+    } else {
+        ontocore_owl::atomic_write(path, contents).map_err(|e| e.to_string())
+    }
+}
+
+fn atomic_write_for_path(path: &std::path::Path, contents: &str) -> Result<(), String> {
+    let format = OntologyFormat::from_extension(
+        path.extension().and_then(|e| e.to_str()).unwrap_or(""),
+    );
+    atomic_write_for_format(format, path, contents)
 }
 
 fn full_document_workspace_edit_labeled(
@@ -2692,5 +2724,24 @@ mod tests {
             "/tmp/evil-results".to_string(),
         ];
         assert!(jail_robot_path_args(&roots, &args).is_err());
+    }
+
+    #[test]
+    fn atomic_write_for_path_dispatches_obo_and_turtle() {
+        let dir = tempfile::tempdir().unwrap();
+        let obo = dir.path().join("term.obo");
+        let ttl = dir.path().join("ont.ttl");
+        std::fs::write(&obo, "format-version: 1.2\nold\n").unwrap();
+        std::fs::write(&ttl, "@prefix owl: <http://www.w3.org/2002/07/owl#> .\nold\n").unwrap();
+
+        atomic_write_for_path(&obo, "format-version: 1.2\nontology: new\n").expect("obo write");
+        atomic_write_for_path(
+            &ttl,
+            "@prefix owl: <http://www.w3.org/2002/07/owl#> .\n<http://ex.org> a owl:Ontology .\n",
+        )
+        .expect("ttl write");
+
+        assert!(std::fs::read_to_string(&obo).unwrap().contains("ontology: new"));
+        assert!(std::fs::read_to_string(&ttl).unwrap().contains("owl:Ontology"));
     }
 }

@@ -67,6 +67,9 @@ fn execute_select(catalog: &OntologyCatalog, select: Box<Select>) -> Result<Quer
     if group_by_present(&select.group_by) {
         return Err(QueryError::Sql("GROUP BY is not supported".to_string()));
     }
+    if select.having.is_some() {
+        return Err(QueryError::Sql("HAVING is not supported".to_string()));
+    }
     if select.from.len() > 1 {
         return Err(QueryError::Sql("JOIN is not supported".to_string()));
     }
@@ -540,6 +543,14 @@ mod tests {
         let catalog = fixture_catalog();
         let err = run_sql(&catalog, "SELECT short_name FROM classes LIMIT 1").unwrap_err();
         assert!(matches!(err, crate::QueryError::Sql(msg) if msg.contains("LIMIT")));
+    }
+
+    #[test]
+    fn unsupported_having_returns_error() {
+        let catalog = fixture_catalog();
+        let err = run_sql(&catalog, "SELECT short_name FROM classes HAVING short_name = 'Person'")
+            .unwrap_err();
+        assert!(matches!(err, crate::QueryError::Sql(msg) if msg.contains("HAVING")));
     }
 
     #[test]

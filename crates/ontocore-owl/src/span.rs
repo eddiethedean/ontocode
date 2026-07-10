@@ -59,19 +59,24 @@ pub fn namespaces_for_text(
 
 fn subject_needles(
     iri: &str,
-    short_name: &str,
+    _short_name: &str,
     namespaces: &BTreeMap<String, String>,
 ) -> Vec<String> {
     let mut needles = vec![format!("<{iri}>")];
-    // Only match default-prefix form when the empty prefix is bound to this IRI's namespace.
+    // Default prefix (`:Local`) — only when the empty prefix is bound and the suffix is PN_LOCAL.
     if let Some(default_ns) = namespaces.get("") {
         if iri.starts_with(default_ns.as_str()) {
-            needles.push(format!(":{short_name}"));
+            let local = &iri[default_ns.len()..];
+            if crate::patch::is_valid_pn_local(local) {
+                needles.push(format!(":{local}"));
+            }
         }
     }
-    for (prefix, ns) in namespaces {
-        if iri.starts_with(ns.as_str()) && !prefix.is_empty() {
-            needles.push(format!("{prefix}:{short_name}"));
+    // Prefixed CURIE — longest namespace match + valid PN_LOCAL (same rules as write-back).
+    if let Some((prefix, ns)) = crate::patch::best_namespace_match(iri, namespaces) {
+        let local = &iri[ns.len()..];
+        if crate::patch::is_valid_pn_local(local) {
+            needles.push(format!("{prefix}:{local}"));
         }
     }
     needles
@@ -705,5 +710,56 @@ mod tests {
         let block = &ttl[..end];
         assert!(block.contains("Dr. Smith"));
         assert!(block.trim_end().ends_with('.'));
+    }
+
+    #[test]
+    fn subject_needles_use_longest_namespace_local_not_short_name() {
+        let ns = BTreeMap::from([("ex".into(), "http://example.org/".into())]);
+        let iri = "http://example.org/foo/Person";
+        let needles = subject_needles(iri, "Person", &ns);
+        assert!(needles.contains(&format!("<{iri}>")));
+        assert!(
+            !needles.iter().any(|n| n == "ex:Person"),
+            "must not emit CURIE that expands to a different IRI: {needles:?}"
+        );
+        // `foo/Person` is not a valid PN_LOCAL, so no prefixed needle.
+        assert!(!needles.iter().any(|n| n.starts_with("ex:")));
+    }
+
+    #[test]
+    fn subject_needles_prefer_longest_prefix_match() {
+        let ns = BTreeMap::from([
+            ("ex".into(), "http://example.org/".into()),
+            ("foo".into(), "http://example.org/foo/".into()),
+        ]);
+        let iri = "http://example.org/foo/Person";
+        let needles = subject_needles(iri, "Person", &ns);
+        assert!(needles.contains(&"foo:Person".to_string()));
+        assert!(
+            !needles.iter().any(|n| n == "ex:Person"),
+            "shorter prefix must not produce a colliding CURIE: {needles:?}"
+        );
+    }
+
+    #[test]
+    fn find_subject_does_not_match_wrong_curie_under_short_prefix() {
+        let ttl = r#"@prefix ex: <http://example.org/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+ex:Person a owl:Class .
+<http://example.org/foo/Person> a owl:Class .
+"#;
+        let ns = BTreeMap::from([
+            ("ex".into(), "http://example.org/".into()),
+            ("owl".into(), "http://www.w3.org/2002/07/owl#".into()),
+        ]);
+        let range = find_subject_statement(ttl, "http://example.org/foo/Person", "Person", &ns)
+            .expect("nested path subject");
+        let line_start = ttl[..range.start as usize].rfind('\n').map(|p| p + 1).unwrap_or(0);
+        let subject_line = &ttl[line_start..];
+        assert!(
+            subject_line.trim_start().starts_with("<http://example.org/foo/Person>"),
+            "must locate the absolute IRI subject, not ex:Person: {subject_line}"
+        );
     }
 }

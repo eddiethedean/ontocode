@@ -1423,11 +1423,19 @@ fn text_contains_entity(
     namespaces: &BTreeMap<String, String>,
 ) -> bool {
     let namespaces = crate::span::namespaces_for_text(text, namespaces);
-    let short = short_name_from_iri(entity_iri);
     let mut needles = vec![entity_iri.to_string(), format!("<{entity_iri}>")];
-    for (prefix, ns) in &namespaces {
-        if entity_iri.starts_with(ns) {
-            needles.push(format!("{prefix}:{short}"));
+    if let Some(default_ns) = namespaces.get("") {
+        if entity_iri.starts_with(default_ns.as_str()) {
+            let local = &entity_iri[default_ns.len()..];
+            if is_valid_pn_local(local) {
+                needles.push(format!(":{local}"));
+            }
+        }
+    }
+    if let Some((prefix, ns)) = best_namespace_match(entity_iri, &namespaces) {
+        let local = &entity_iri[ns.len()..];
+        if is_valid_pn_local(local) {
+            needles.push(format!("{prefix}:{local}"));
         }
     }
     text.lines().any(|line| {
@@ -1457,7 +1465,7 @@ pub(crate) fn is_safe_iri(iri: &str) -> bool {
 }
 
 /// True when `local` is a valid Turtle PN_LOCAL (simplified).
-fn is_valid_pn_local(local: &str) -> bool {
+pub(crate) fn is_valid_pn_local(local: &str) -> bool {
     if local.is_empty() {
         return false;
     }

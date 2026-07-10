@@ -31,7 +31,7 @@ import {
 import { ExplorerTreeProvider, OntologyTreeItem } from "../treeviews/explorer";
 import { resolveEntityIri } from "../utils/resolveEntityIri";
 import { byteColToUtf16 } from "../utils/positions";
-import { documentUriInWorkspace, openWorkspaceTextDocument } from "../utils/workspacePath";
+import { documentUriInWorkspace, isPathUnderFolder, openWorkspaceTextDocument } from "../utils/workspacePath";
 import { refreshPluginCommands } from "./pluginCommands";
 import { WorkflowPanel } from "../webviews/workflowPanel";
 import { PluginViewPanel } from "../webviews/pluginViewPanel";
@@ -772,7 +772,7 @@ async function createEntity(
     const folder = vscode.workspace.getWorkspaceFolder(activeEditor.document.uri);
     if (folder) {
       const prefix = folder.uri.fsPath;
-      const inFolder = ttlDocs.filter((d) => d.path.startsWith(prefix));
+      const inFolder = ttlDocs.filter((d) => isPathUnderFolder(d.path, prefix));
       if (inFolder.length > 0) {
         ttlDocs = inFolder;
       }

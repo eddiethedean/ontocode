@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Update `@PREFIX` / SPARQL-style `PREFIX` declarations during namespace migrate and copy them into extract-module headers ([#79](https://github.com/eddiethedean/ontocode/issues/79), [#80](https://github.com/eddiethedean/ontocode/issues/80))
+- Escape extract-module stub path comments for Turtle and type Ontology stubs as `owl:Ontology` ([#25](https://github.com/eddiethedean/ontocode/issues/25), [#147](https://github.com/eddiethedean/ontocode/issues/147))
 - Make OBO `atomic_write` Windows-safe with temp cleanup on failure, matching Turtle replace behavior ([#64](https://github.com/eddiethedean/ontocode/issues/64), [#165](https://github.com/eddiethedean/ontocode/issues/165))
 - Use format-aware writers for refactor disk rollback and surface rollback I/O errors from axiom-patch and refactor apply ([#63](https://github.com/eddiethedean/ontocode/issues/63), [#76](https://github.com/eddiethedean/ontocode/issues/76), [#93](https://github.com/eddiethedean/ontocode/issues/93))
 - Encode LSP semantic-token `delta_line`/`delta_start` from absolute previous positions so highlighting no longer drifts on multi-line Turtle/OBO ([#137](https://github.com/eddiethedean/ontocode/issues/137))

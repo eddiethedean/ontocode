@@ -334,32 +334,60 @@ pub fn preview_migrate_namespace(
     Ok(RefactorPlan { changes: changes.into_values().collect(), warnings })
 }
 
+fn is_prefix_declaration_line(line: &str) -> bool {
+    let keyword = line.trim_start().split_whitespace().next().unwrap_or("");
+    keyword.eq_ignore_ascii_case("@prefix") || keyword.eq_ignore_ascii_case("PREFIX")
+}
+
+fn prefix_declaration_name(line: &str) -> Option<&str> {
+    let mut parts = line.trim_start().split_whitespace();
+    let keyword = parts.next()?;
+    if !(keyword.eq_ignore_ascii_case("@prefix") || keyword.eq_ignore_ascii_case("PREFIX")) {
+        return None;
+    }
+    parts.next()?.strip_suffix(':')
+}
+
 fn replace_prefix_uri(
     text: &str,
     prefix: &str,
     old_uri: &str,
     new_uri: &str,
 ) -> (String, Vec<(usize, usize, String, String)>) {
-    let old_decl = format!("@prefix {prefix}: <{old_uri}>");
-    let new_decl = format!("@prefix {prefix}: <{new_uri}>");
-    let result = text.replacements(old_decl.as_str(), new_decl.as_str());
+    let old_term = format!("<{old_uri}>");
+    let new_term = format!("<{new_uri}>");
+    let mut out = String::with_capacity(text.len());
     let mut hunks = Vec::new();
-    if result != text {
-        if let Some(pos) = text.find(&old_decl) {
-            hunks.push((pos, pos + old_decl.len(), old_decl, new_decl.clone()));
+    let mut offset = 0usize;
+    for line in text.split_inclusive('\n') {
+        let updated = if prefix_declaration_name(line) == Some(prefix) && line.contains(&old_term)
+        {
+            line.replacen(&old_term, &new_term, 1)
+        } else {
+            line.to_string()
+        };
+        if updated != line {
+            hunks.push((offset, offset + line.len(), line.to_string(), updated.clone()));
+        }
+        out.push_str(&updated);
+        offset += line.len();
+    }
+    (out, hunks)
+}
+
+fn escape_turtle_string(value: &str) -> String {
+    let mut out = String::with_capacity(value.len());
+    for ch in value.chars() {
+        match ch {
+            '\\' => out.push_str("\\\\"),
+            '"' => out.push_str("\\\""),
+            '\n' => out.push_str("\\n"),
+            '\r' => out.push_str("\\r"),
+            '\t' => out.push_str("\\t"),
+            c => out.push(c),
         }
     }
-    (result, hunks)
-}
-
-trait Replacements {
-    fn replacements(&self, from: &str, to: &str) -> String;
-}
-
-impl Replacements for str {
-    fn replacements(&self, from: &str, to: &str) -> String {
-        self.replace(from, to)
-    }
+    out
 }
 
 fn find_usages_in_catalog(
@@ -406,7 +434,8 @@ fn owl_type_for_kind(kind: EntityKind) -> &'static str {
         EntityKind::DataProperty => "owl:DatatypeProperty",
         EntityKind::AnnotationProperty => "owl:AnnotationProperty",
         EntityKind::Individual => "owl:NamedIndividual",
-        EntityKind::Ontology | EntityKind::Other => "owl:Class",
+        EntityKind::Ontology => "owl:Ontology",
+        EntityKind::Other => "owl:Class",
     }
 }
 
@@ -595,7 +624,7 @@ pub fn preview_extract_module(
         };
         source_texts.insert(doc.path.clone(), text.clone());
         for line in text.lines() {
-            if line.trim_start().starts_with("@prefix") {
+            if is_prefix_declaration_line(line) {
                 prefix_lines.insert(line.trim().to_string());
             }
         }
@@ -612,10 +641,10 @@ pub fn preview_extract_module(
             entity_blocks.push(block);
             let replacement = if leave_stub && idx == 0 {
                 let owl_type = owl_type_for_kind(entity.kind);
+                let moved_path = escape_turtle_string(&output_file.display().to_string());
                 format!(
-                    "{} a {owl_type} ;\n    owl:deprecated true ;\n    rdfs:comment \"Moved to {}\" .\n",
+                    "{} a {owl_type} ;\n    owl:deprecated true ;\n    rdfs:comment \"Moved to {moved_path}\" .\n",
                     prefixed_curie(iri, &namespaces),
-                    output_file.display()
                 )
             } else {
                 String::new()
@@ -706,3 +735,39 @@ pub fn preview_extract_module(
 
     Ok(RefactorPlan { changes, warnings })
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn replace_prefix_uri_updates_at_prefix_uppercase() {
+        let text = "@PREFIX ex: <http://example.org/org#> .\nex:Person a owl:Class .\n";
+        let (out, hunks) =
+            replace_prefix_uri(text, "ex", "http://example.org/org#", "http://example.org/v2/org#");
+        assert!(out.contains("@PREFIX ex: <http://example.org/v2/org#>"));
+        assert!(!out.contains("@PREFIX ex: <http://example.org/org#>"));
+        assert!(!hunks.is_empty());
+    }
+
+    #[test]
+    fn replace_prefix_uri_updates_sparql_style_prefix() {
+        let text = "PREFIX ex: <http://example.org/org#>\nex:Person a owl:Class .\n";
+        let (out, _) =
+            replace_prefix_uri(text, "ex", "http://example.org/org#", "http://example.org/v2/org#");
+        assert!(out.contains("PREFIX ex: <http://example.org/v2/org#>"));
+    }
+
+    #[test]
+    fn owl_type_for_kind_maps_ontology() {
+        assert_eq!(owl_type_for_kind(EntityKind::Ontology), "owl:Ontology");
+        assert_eq!(owl_type_for_kind(EntityKind::Other), "owl:Class");
+        assert_eq!(owl_type_for_kind(EntityKind::Class), "owl:Class");
+    }
+
+    #[test]
+    fn escape_turtle_string_escapes_path_specials() {
+        assert_eq!(escape_turtle_string(r#"C:\ontology\mod"ule.ttl"#), r#"C:\\ontology\\mod\"ule.ttl"#);
+    }
+}
+

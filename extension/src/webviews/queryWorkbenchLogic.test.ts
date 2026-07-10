@@ -15,6 +15,14 @@ test("exportResultCsv escapes commas", () => {
   assert.ok(csv.includes('"hello, world"'));
 });
 
+test("exportResultCsv quotes cells with newlines", () => {
+  const csv = exportResultCsv({
+    columns: ["label"],
+    rows: [{ label: "line1\nline2" }],
+  });
+  assert.ok(csv.includes('"line1\nline2"'));
+});
+
 test("mergeHistory caps entries", () => {
   const history = mergeHistory(
     [{ name: "old", mode: "sql", text: "SELECT 1" }],

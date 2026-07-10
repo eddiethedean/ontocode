@@ -662,7 +662,8 @@ pub fn handle_create_ontology(
         .format
         .as_deref()
         .unwrap_or_else(|| path.extension().and_then(|e| e.to_str()).unwrap_or("ttl"));
-    let content = match format {
+    let format_key = format.to_ascii_lowercase();
+    let content = match format_key.as_str() {
         "obo" => {
             let mut s = format!("format-version: 1.2\nontology: {}\n", params.ontology_iri);
             if let Some(v) = &params.version_iri {
@@ -671,7 +672,7 @@ pub fn handle_create_ontology(
             s.push('\n');
             s
         }
-        _ => {
+        "ttl" | "turtle" => {
             let mut s = String::from(
                 "@prefix owl: <http://www.w3.org/2002/07/owl#> .\n\
                  @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .\n\
@@ -690,6 +691,11 @@ pub fn handle_create_ontology(
             }
             s.push_str(" .\n");
             s
+        }
+        other => {
+            return Err(LspErrorPayload::invalid_params(format!(
+                "unsupported createOntology format {other:?}; supported: ttl, turtle, obo"
+            )));
         }
     };
     let mut file =

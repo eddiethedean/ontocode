@@ -28,9 +28,7 @@ export function exportResultCsv(result: TabularQueryResult): string {
       .map((col) => {
         const val = row[col] ?? "";
         const escaped = val.replace(/"/g, '""');
-        return val.includes(",") || val.includes('"')
-          ? `"${escaped}"`
-          : escaped;
+        return /[",\n\r]/.test(val) ? `"${escaped}"` : escaped;
       })
       .join(",")
   );

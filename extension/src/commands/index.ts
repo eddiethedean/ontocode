@@ -258,6 +258,12 @@ export function registerCommands(
         const editor = await vscode.window.showTextDocument(doc);
         if (diagnostic.line != null) {
           const line = Math.max(0, diagnostic.line - 1);
+          if (line >= doc.lineCount) {
+            void vscode.window.showWarningMessage(
+              `OntoCode: diagnostic line ${diagnostic.line} is out of range`
+            );
+            return;
+          }
           const lineText = doc.lineAt(line).text;
           const col = byteColToUtf16(lineText, diagnostic.column ?? 0);
           const pos = new vscode.Position(line, col);
@@ -292,10 +298,14 @@ export function registerCommands(
             return;
           }
           const editor = await vscode.window.showTextDocument(doc);
-          const lineText = doc.lineAt(
-            Math.max(0, detail.source.line - 1)
-          ).text;
           const line = Math.max(0, detail.source.line - 1);
+          if (line >= doc.lineCount) {
+            void vscode.window.showWarningMessage(
+              `OntoCode: source line ${detail.source.line} is out of range for ${iri}`
+            );
+            return;
+          }
+          const lineText = doc.lineAt(line).text;
           const col = byteColToUtf16(lineText, Math.max(0, detail.source.column));
           const pos = new vscode.Position(line, col);
           editor.selection = new vscode.Selection(pos, pos);

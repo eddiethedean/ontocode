@@ -57,7 +57,7 @@ export function registerV017Commands(
   command("ontocode.newOntology", async () => {
     const target = await vscode.window.showSaveDialog({
       title: "New Ontology",
-      filters: ONTOLOGY_FILTERS,
+      filters: { "Ontology files": ["ttl", "obo"] },
       defaultUri: defaultWorkspaceUri("ontology.ttl"),
     });
     if (!target) return;
@@ -214,14 +214,21 @@ export function registerV017Commands(
       panel: "prefixManager",
       onMessage: async (message, panel) => {
         if (message.type !== "submitPrefix") return;
+        const namespaces = document.namespaces ?? {};
         const patch: PatchOp =
           message.action === "remove"
             ? { op: "remove_prefix", prefix: message.prefix }
-            : {
-                op: "add_prefix",
-                prefix: message.prefix,
-                namespace_iri: message.namespaceIri ?? "",
-              };
+            : Object.prototype.hasOwnProperty.call(namespaces, message.prefix)
+              ? {
+                  op: "set_prefix",
+                  prefix: message.prefix,
+                  namespace_iri: message.namespaceIri ?? "",
+                }
+              : {
+                  op: "add_prefix",
+                  prefix: message.prefix,
+                  namespace_iri: message.namespaceIri ?? "",
+                };
         await applyDocumentPatches(document, [patch]);
         await refresh?.();
         panel.dispose();
@@ -415,6 +422,13 @@ async function runExport(saveAs: boolean): Promise<void> {
   if (result.success) {
     void vscode.window.showInformationMessage(
       `OntoCode: exported ${path.basename(result.output_path)}`
+    );
+  } else {
+    const detail = result.logs?.trim();
+    void vscode.window.showErrorMessage(
+      detail
+        ? `OntoCode: export failed — ${detail.slice(0, 300)}`
+        : `OntoCode: export failed for ${path.basename(result.output_path)}`
     );
   }
 }

@@ -1,13 +1,13 @@
 use crate::handlers::{
-    handle_apply_axiom_patch, handle_apply_refactor, handle_find_usages,
+    handle_apply_axiom_patch, handle_apply_refactor, handle_delete_impact, handle_find_usages,
     handle_get_catalog_snapshot, handle_get_entity, handle_goto_definition, handle_hover,
     handle_query, handle_references, handle_sparql, handle_standard_request,
     handle_workspace_symbol, StandardRequestOutcome,
 };
 use crate::index_worker::IndexWorker;
 use crate::protocol::{
-    ApplyAxiomPatchParams, ApplyRefactorParams, FindUsagesParams, GetEntityParams, QueryParams,
-    SparqlParams,
+    ApplyAxiomPatchParams, ApplyRefactorParams, DeleteImpactParams, FindUsagesParams,
+    GetEntityParams, QueryParams, SparqlParams,
 };
 use crate::state::{path_to_uri, ServerState};
 use crossbeam_channel::unbounded;
@@ -148,6 +148,34 @@ fn find_usages_returns_person_references() {
     )
     .expect("find usages");
     assert!(!result.usages.is_empty());
+}
+
+#[test]
+fn delete_impact_lists_referencing_entities() {
+    let state = indexed_state();
+    let result = handle_delete_impact(
+        &state,
+        DeleteImpactParams { entity_iri: "http://example.org/people#Thing".to_string() },
+    )
+    .expect("delete impact");
+    assert!(result.usage_count > 0, "Thing should have usages");
+    assert!(
+        result.referencing_entities.iter().any(|iri| iri == "http://example.org/people#Person"),
+        "Person subclasses Thing; got {:?}",
+        result.referencing_entities
+    );
+    assert!(
+        result
+            .referencing_entities
+            .iter()
+            .any(|iri| iri == "http://example.org/people#Organization"),
+        "Organization subclasses Thing; got {:?}",
+        result.referencing_entities
+    );
+    assert!(
+        !result.referencing_entities.iter().any(|iri| iri == "http://example.org/people#Thing"),
+        "target itself must not appear in referencing_entities"
+    );
 }
 
 #[test]

@@ -746,7 +746,12 @@ pub fn handle_delete_impact(
     let mut referencing = std::collections::BTreeSet::new();
     let mut warnings = Vec::new();
     for u in &usages {
-        if u.referenced_iri != params.entity_iri {
+        // `referenced_iri` is always the search target; `iri` is the referencer (or the
+        // target itself for declarations / subject-side axioms). Collect distinct
+        // referencers, excluding the entity's own declaration and self-usages.
+        if !matches!(u.kind, ontocore_refactor::UsageKind::EntityDeclaration)
+            && u.iri != params.entity_iri
+        {
             referencing.insert(u.iri.clone());
         }
         if matches!(u.kind, ontocore_refactor::UsageKind::Import) {

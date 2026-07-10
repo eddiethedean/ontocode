@@ -211,10 +211,7 @@ fn apply_one_patch(
     match patch {
         PatchOp::AddPrefix { prefix, namespace_iri } => add_prefix(text, prefix, namespace_iri),
         PatchOp::RemovePrefix { prefix } => remove_prefix(text, prefix),
-        PatchOp::SetPrefix { prefix, namespace_iri } => {
-            remove_prefix(text, prefix)?;
-            add_prefix(text, prefix, namespace_iri)
-        }
+        PatchOp::SetPrefix { prefix, namespace_iri } => set_prefix(text, prefix, namespace_iri),
         PatchOp::SetOntologyIri { ontology_iri } => set_ontology_iri(text, ontology_iri),
         PatchOp::SetVersionIri { ontology_iri, version_iri } => {
             let version_term = iri_to_turtle_term(version_iri, namespaces)?;
@@ -416,10 +413,28 @@ fn apply_one_patch(
 
 fn prefix_declaration_name(line: &str) -> Option<&str> {
     let mut parts = line.split_whitespace();
-    if parts.next()? != "@prefix" {
+    let keyword = parts.next()?;
+    if !(keyword.eq_ignore_ascii_case("@prefix") || keyword.eq_ignore_ascii_case("PREFIX")) {
         return None;
     }
     parts.next()?.strip_suffix(':')
+}
+
+fn prefix_declaration_keyword(line: &str) -> Option<&str> {
+    let keyword = line.split_whitespace().next()?;
+    if keyword.eq_ignore_ascii_case("@prefix") || keyword.eq_ignore_ascii_case("PREFIX") {
+        Some(keyword)
+    } else {
+        None
+    }
+}
+
+fn format_prefix_declaration(keyword: &str, prefix: &str, namespace_iri: &str) -> String {
+    if keyword.eq_ignore_ascii_case("PREFIX") && !keyword.starts_with('@') {
+        format!("PREFIX {prefix}: <{namespace_iri}>")
+    } else {
+        format!("{keyword} {prefix}: <{namespace_iri}> .")
+    }
 }
 
 fn validate_prefix(prefix: &str, namespace_iri: &str) -> Result<()> {
@@ -476,6 +491,24 @@ fn remove_prefix(text: &mut String, prefix: &str) -> Result<()> {
     }
     *text = rewritten;
     Ok(())
+}
+
+fn set_prefix(text: &mut String, prefix: &str, namespace_iri: &str) -> Result<()> {
+    validate_prefix(prefix, namespace_iri)?;
+    let mut offset = 0;
+    for line in text.split_inclusive('\n') {
+        if prefix_declaration_name(line) == Some(prefix) {
+            let keyword = prefix_declaration_keyword(line).unwrap_or("@prefix");
+            let mut replacement = format_prefix_declaration(keyword, prefix, namespace_iri);
+            if line.ends_with('\n') {
+                replacement.push('\n');
+            }
+            text.replace_range(offset..offset + line.len(), &replacement);
+            return Ok(());
+        }
+        offset += line.len();
+    }
+    add_prefix(text, prefix, namespace_iri)
 }
 
 fn set_ontology_iri(text: &mut String, ontology_iri: &str) -> Result<()> {
@@ -2011,5 +2044,83 @@ ex:Cat a owl:Class .
         assert!(!preview.contains("@prefix ex:"));
         assert!(preview.contains("@prefix owl:"));
         assert!(preview.contains("ex:Thing a owl:Class"));
+    }
+
+    #[test]
+    fn set_prefix_updates_uppercase_at_prefix_in_place() {
+        let ttl = "@PREFIX ex: <http://old.example/> .\n@prefix owl: <http://www.w3.org/2002/07/owl#> .\n\nex:Thing a owl:Class .\n";
+        let result = apply_patches_to_text(
+            ttl,
+            &[PatchOp::SetPrefix {
+                prefix: "ex".to_string(),
+                namespace_iri: "http://new.example/".to_string(),
+            }],
+            true,
+            &BTreeMap::new(),
+        )
+        .expect("set prefix");
+        let preview = result.preview_text.expect("preview");
+        assert!(preview.contains("@PREFIX ex: <http://new.example/> ."));
+        assert!(!preview.contains("http://old.example/"));
+        assert_eq!(preview.matches("ex:").count(), 2); // declaration + CURIE use
+        assert!(!preview.contains("@prefix ex:"));
+    }
+
+    #[test]
+    fn set_prefix_updates_sparql_style_prefix_in_place() {
+        let ttl = "PREFIX ex: <http://old.example/>\n@prefix owl: <http://www.w3.org/2002/07/owl#> .\n\nex:Thing a owl:Class .\n";
+        let result = apply_patches_to_text(
+            ttl,
+            &[PatchOp::SetPrefix {
+                prefix: "ex".to_string(),
+                namespace_iri: "http://new.example/".to_string(),
+            }],
+            true,
+            &BTreeMap::new(),
+        )
+        .expect("set prefix");
+        let preview = result.preview_text.expect("preview");
+        assert!(preview.contains("PREFIX ex: <http://new.example/>"));
+        assert!(!preview.contains("http://old.example/"));
+        assert!(!preview.contains("@prefix ex:"));
+    }
+
+    #[test]
+    fn remove_prefix_recognizes_uppercase_and_sparql_forms() {
+        let ttl = "@PREFIX ex: <http://example.org/test#> .\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\n\nex:Thing a owl:Class .\n";
+        let result = apply_patches_to_text(
+            ttl,
+            &[
+                PatchOp::RemovePrefix { prefix: "ex".to_string() },
+                PatchOp::RemovePrefix { prefix: "owl".to_string() },
+            ],
+            true,
+            &BTreeMap::new(),
+        )
+        .expect("remove prefixes");
+        let preview = result.preview_text.expect("preview");
+        assert!(!preview.contains("@PREFIX ex:"));
+        assert!(!preview.contains("PREFIX owl:"));
+        assert!(preview.contains("ex:Thing a owl:Class"));
+    }
+
+    #[test]
+    fn add_prefix_detects_duplicate_uppercase_declaration() {
+        let ttl = "@PREFIX ex: <http://example.org/test#> .\n\nex:Thing a owl:Class .\n";
+        let result = apply_patches_to_text(
+            ttl,
+            &[PatchOp::AddPrefix {
+                prefix: "ex".to_string(),
+                namespace_iri: "http://other.example/".to_string(),
+            }],
+            true,
+            &BTreeMap::new(),
+        )
+        .expect("apply returns diagnostics on validation failure");
+        assert!(!result.applied);
+        assert!(result
+            .diagnostics
+            .iter()
+            .any(|d| d.message.contains("duplicate prefix already present: ex")));
     }
 }

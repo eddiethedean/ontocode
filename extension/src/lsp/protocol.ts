@@ -72,6 +72,8 @@ export interface CatalogSnapshot {
   hierarchy: ClassHierarchy;
   diagnostics: DiagnosticSummary[];
   reasoner?: ReasonerSnapshot;
+  stats?: CatalogStats;
+  active_ontology_id?: string;
 }
 
 export type HierarchyMode = "asserted" | "inferred" | "combined";
@@ -247,6 +249,13 @@ export interface RunRobotResult {
 }
 
 export type PatchOp =
+  | { op: "add_prefix"; prefix: string; namespace_iri: string }
+  | { op: "remove_prefix"; prefix: string }
+  | { op: "set_prefix"; prefix: string; namespace_iri: string }
+  | { op: "set_ontology_iri"; ontology_iri: string }
+  | { op: "set_version_iri"; ontology_iri: string; version_iri: string }
+  | { op: "add_ontology_annotation"; ontology_iri: string; predicate: string; value: string }
+  | { op: "remove_ontology_annotation"; ontology_iri: string; predicate: string; value: string }
   | { op: "create_entity"; entity_iri: string; kind: PatchEntityKind }
   | { op: "delete_entity"; entity_iri: string }
   | { op: "set_label"; entity_iri: string; value: string }
@@ -329,7 +338,7 @@ export interface ApplyAxiomPatchClientResult extends ApplyPatchResult {
 
 export interface ApplyAxiomPatchParams {
   document_uri: string;
-  patches: PatchOp[];
+  patches: Array<PatchOp | ({ op: string } & Record<string, unknown>)>;
   preview_only?: boolean;
 }
 
@@ -402,6 +411,8 @@ export interface RefactorPlan {
 
 export type RefactorRequest =
   | { kind: "rename_iri"; from_iri: string; to_iri: string }
+  | { kind: "merge_entities"; keep_iri: string; merge_iri: string }
+  | { kind: "replace_entity"; from_iri: string; to_iri: string }
   | { kind: "migrate_namespace"; from_base: string; to_base: string }
   | { kind: "move_entity"; entity_iri: string; target_file: string }
   | {
@@ -511,6 +522,117 @@ export interface LspTextDocumentEdit {
 
 export interface LspWorkspaceEdit {
   document_changes?: LspTextDocumentEdit[];
+  change_annotations?: Record<
+    string,
+    { label: string; needs_confirmation?: boolean; description?: string }
+  >;
+}
+
+export type CommandEnablement =
+  | "always"
+  | "has_ontology"
+  | "is_dirty"
+  | "has_selection"
+  | "reasoner_running"
+  | "reasoner_idle"
+  | "can_edit_selection";
+
+export interface CommandDescriptor {
+  id: string;
+  title: string;
+  category: string;
+  enablement?: CommandEnablement[];
+  undo_label?: string;
+  dialog_id?: string;
+}
+
+export interface ListCommandsResult {
+  commands: CommandDescriptor[];
+}
+
+export interface WorkspaceUiStateParams {
+  selection_iri?: string;
+  dirty_document_count?: number;
+  active_ontology_id?: string;
+}
+
+export interface WorkspaceUiState {
+  has_ontology: boolean;
+  ontology_count: number;
+  is_dirty: boolean;
+  has_selection: boolean;
+  selection_iri?: string;
+  selection_editable: boolean;
+  reasoner_running: boolean;
+  reasoner_dirty: boolean;
+  reasoner_consistent?: boolean;
+  active_ontology_id?: string;
+  stats?: CatalogStats;
+}
+
+export interface DialogFieldSchema {
+  id: string;
+  label: string;
+  field_type: string;
+  required: boolean;
+  placeholder?: string;
+  validation?: string[];
+}
+
+export interface DialogSchema {
+  id: string;
+  title: string;
+  fields: DialogFieldSchema[];
+  primary_action: string;
+}
+
+export interface GetDialogSchemaResult {
+  schema: DialogSchema;
+}
+
+export interface CreateOntologyParams {
+  path: string;
+  ontology_iri: string;
+  version_iri?: string;
+  format?: string;
+  prefixes?: Record<string, string>;
+}
+
+export interface CreateOntologyResult {
+  path: string;
+  ontology_iri: string;
+}
+
+export interface ExportOntologyParams {
+  source_path: string;
+  output_path: string;
+  format?: string;
+}
+
+export interface ExportOntologyResult {
+  output_path: string;
+  success: boolean;
+  logs?: string;
+}
+
+export interface SetActiveOntologyParams {
+  ontology_id: string;
+}
+
+export interface SetActiveOntologyResult {
+  active_ontology_id: string;
+}
+
+export interface DeleteImpactParams {
+  entity_iri: string;
+}
+
+export interface DeleteImpactResult {
+  entity_iri: string;
+  usage_count: number;
+  axiom_count: number;
+  referencing_entities: string[];
+  warnings: string[];
 }
 
 export interface PluginCommandContribution {

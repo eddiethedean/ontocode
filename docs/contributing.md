@@ -27,6 +27,15 @@ The root Cargo package `ontocode` is unpublished and hosts workspace integration
 
 **New contributors:** start with [internals.md](internals.md) for role-based paths (Rust, extension, docs, LSP).
 
+### First PR in ~60 minutes
+
+1. Install **Rust 1.88+** and **Node 20+**.
+2. `git clone https://github.com/eddiethedean/ontocode.git && cd ontocode`
+3. `cargo test -p ontocore-core --lib` (fast smoke) or `cargo test --workspace` (full).
+4. For extension work: `cargo build -p ontocore-lsp --bins` then `cd extension && npm ci && ONTOCORE_LSP_BIN=../target/debug/ontocore-lsp npm test`.
+5. Make a small, focused change; update docs if behavior changes.
+6. Before opening a PR: `./scripts/run-ci-local.sh` (or at least `./scripts/check-doc-versions.sh` for docs-only PRs).
+
 ### Plugin contributors (v0.14+)
 
 | Task | Start here |
@@ -206,9 +215,13 @@ This runs rustfmt, `./scripts/check-doc-versions.sh`, clippy, workspace tests, M
 | Audience | Where to write |
 |----------|----------------|
 | New users (install, SQL, LSP) | `docs/` |
-| Product vision, roadmap, ADRs | `docs/design/` |
-| Architecture decisions | `docs/design/adr/` only (do not add `adrs/`) |
+| Product vision / platform roadmap | Root `VISION.md` / `ROADMAP.md` **and** mirrors under `docs/` (edit both) |
+| Product & platform ADRs | `docs/adr/` |
+| Engineering ADRs (crate/design decisions) | `docs/design/adr/` (do not add a top-level `adrs/` folder) |
+| Engineering specs / dependency matrix | `docs/design/` |
 | Extension settings and commands | `extension/README.md` |
+
+**Mirror policy:** Root `VISION.md`, `ARCHITECTURE.md`, `ROADMAP.md`, `SECURITY.md`, `CONTRIBUTING.md`, and `CHANGELOG.md` are mirrored under `docs/` for Read the Docs. When you change platform-facing content, update **both** copies (or expect `./scripts/check-doc-versions.sh` to fail).
 
 ### Adding dependencies
 

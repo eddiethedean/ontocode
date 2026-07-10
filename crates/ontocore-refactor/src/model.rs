@@ -57,6 +57,14 @@ pub enum RefactorRequest {
         from_iri: String,
         to_iri: String,
     },
+    MergeEntities {
+        keep_iri: String,
+        merge_iri: String,
+    },
+    ReplaceEntity {
+        from_iri: String,
+        to_iri: String,
+    },
     MigrateNamespace {
         from_base: String,
         to_base: String,

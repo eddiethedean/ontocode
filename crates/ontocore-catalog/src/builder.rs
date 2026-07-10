@@ -13,9 +13,9 @@ use ontocore_core::{
 use ontocore_diagnostics::{collect_diagnostics_with_config, find_config, DiagnosticInput};
 use ontocore_owl::{load_owx_text, load_turtle_text, supports_horned_load};
 use ontocore_parser::{parse_ontology_file, parse_ontology_text, ParsedOntology};
-use oxigraph::model::Quad;
+use oxigraph::model::{BlankNode, GraphName, Quad, Subject, Term, Triple};
 use oxigraph::store::Store;
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use thiserror::Error;
 
@@ -159,7 +159,6 @@ impl IndexBuilder {
         let mut document_snapshots = HashMap::new();
         let mut reused = 0usize;
         let mut reparsed = 0usize;
-        let mut loaded_content_hashes = HashSet::new();
 
         let disk_cache = DiskCache::enabled(self.disk_cache, &self.workspace);
         let mut merged_previous = previous_snapshots.cloned().unwrap_or_default();
@@ -211,7 +210,6 @@ impl IndexBuilder {
                             &mut triple_count,
                             &store,
                             &mut bridge_diagnostics,
-                            &mut loaded_content_hashes,
                         )?;
                         document_snapshots.insert(lookup_path, snap);
                         reused += 1;
@@ -243,13 +241,7 @@ impl IndexBuilder {
 
             // Load quads even when parse_status is Error (partial recovery after a trailing fault).
             if !parsed.quads().is_empty() {
-                load_quads_into_store(
-                    &store,
-                    parsed.quads(),
-                    &mut triple_count,
-                    &effective_hash,
-                    &mut loaded_content_hashes,
-                )?;
+                load_quads_into_store(&store, parsed.quads(), &mut triple_count, &doc_id)?;
             }
 
             documents.push(OntologyDocument {
@@ -390,7 +382,6 @@ impl IndexBuilder {
                             &mut triple_count,
                             &store,
                             &mut bridge_diagnostics,
-                            &mut loaded_content_hashes,
                         )?;
                         document_snapshots.insert(lookup_path, snap);
                         reused += 1;
@@ -414,13 +405,7 @@ impl IndexBuilder {
 
             // Load quads even when parse_status is Error (partial recovery after a trailing fault).
             if !parsed.quads().is_empty() {
-                load_quads_into_store(
-                    &store,
-                    parsed.quads(),
-                    &mut triple_count,
-                    &effective_hash,
-                    &mut loaded_content_hashes,
-                )?;
+                load_quads_into_store(&store, parsed.quads(), &mut triple_count, &doc_id)?;
             }
 
             documents.push(OntologyDocument {
@@ -603,7 +588,6 @@ fn apply_document_snapshot(
     triple_count: &mut usize,
     store: &Store,
     bridge_diagnostics: &mut Vec<Diagnostic>,
-    loaded_content_hashes: &mut HashSet<String>,
 ) -> Result<()> {
     if snap.triple_count != snap.quads.len() {
         return Err(CatalogError::Core(ontocore_core::OntoCoreError::Scanner(
@@ -611,13 +595,7 @@ fn apply_document_snapshot(
         )));
     }
     if !snap.quads.is_empty() {
-        load_quads_into_store(
-            store,
-            &snap.quads,
-            triple_count,
-            &snap.content_hash,
-            loaded_content_hashes,
-        )?;
+        load_quads_into_store(store, &snap.quads, triple_count, doc_id)?;
     }
 
     documents.push(snap.document.clone());
@@ -775,18 +753,15 @@ fn semantics_for_document(
     }
 }
 
+/// Insert document quads into the shared Oxigraph store, remapping blank nodes so
+/// parser-local IDs (often `b0`, `b1`, …) cannot collide across files.
 fn load_quads_into_store(
     store: &Store,
     quads: &[Quad],
     triple_count: &mut usize,
-    content_hash: &str,
-    loaded_hashes: &mut HashSet<String>,
+    doc_id: &str,
 ) -> Result<()> {
-    if !loaded_hashes.insert(content_hash.to_string()) {
-        // Duplicate content (identical file body): quads already in the store.
-        return Ok(());
-    }
-
+    let mut blank_map = HashMap::new();
     let mut file_triples = 0usize;
     for quad in quads {
         file_triples += 1;
@@ -801,9 +776,86 @@ fn load_quads_into_store(
                 "workspace exceeds maximum of {MAX_TOTAL_TRIPLES} triples"
             ))));
         }
-        store.insert(quad).map_err(|e| CatalogError::Store(e.to_string()))?;
+        let remapped = remap_quad(quad, doc_id, &mut blank_map);
+        store.insert(&remapped).map_err(|e| CatalogError::Store(e.to_string()))?;
     }
     Ok(())
+}
+
+fn blank_id_prefix(doc_id: &str) -> String {
+    let sanitized: String = doc_id
+        .chars()
+        .map(|c| if c.is_ascii_alphanumeric() { c } else { '_' })
+        .collect();
+    if sanitized.is_empty() { "doc".to_string() } else { sanitized }
+}
+
+fn remap_blank_node(
+    node: &BlankNode,
+    doc_id: &str,
+    blank_map: &mut HashMap<BlankNode, BlankNode>,
+) -> BlankNode {
+    blank_map
+        .entry(node.clone())
+        .or_insert_with(|| {
+            let id = format!("{}_{}", blank_id_prefix(doc_id), node.as_str());
+            BlankNode::new_unchecked(id)
+        })
+        .clone()
+}
+
+fn remap_quad(quad: &Quad, doc_id: &str, blank_map: &mut HashMap<BlankNode, BlankNode>) -> Quad {
+    Quad {
+        subject: remap_subject(&quad.subject, doc_id, blank_map),
+        predicate: quad.predicate.clone(),
+        object: remap_term(&quad.object, doc_id, blank_map),
+        graph_name: remap_graph_name(&quad.graph_name, doc_id, blank_map),
+    }
+}
+
+fn remap_subject(
+    subject: &Subject,
+    doc_id: &str,
+    blank_map: &mut HashMap<BlankNode, BlankNode>,
+) -> Subject {
+    match subject {
+        Subject::NamedNode(n) => Subject::NamedNode(n.clone()),
+        Subject::BlankNode(b) => Subject::BlankNode(remap_blank_node(b, doc_id, blank_map)),
+        Subject::Triple(t) => Subject::Triple(Box::new(remap_triple(t, doc_id, blank_map))),
+    }
+}
+
+fn remap_term(term: &Term, doc_id: &str, blank_map: &mut HashMap<BlankNode, BlankNode>) -> Term {
+    match term {
+        Term::NamedNode(n) => Term::NamedNode(n.clone()),
+        Term::BlankNode(b) => Term::BlankNode(remap_blank_node(b, doc_id, blank_map)),
+        Term::Literal(l) => Term::Literal(l.clone()),
+        Term::Triple(t) => Term::Triple(Box::new(remap_triple(t, doc_id, blank_map))),
+    }
+}
+
+fn remap_triple(
+    triple: &Triple,
+    doc_id: &str,
+    blank_map: &mut HashMap<BlankNode, BlankNode>,
+) -> Triple {
+    Triple {
+        subject: remap_subject(&triple.subject, doc_id, blank_map),
+        predicate: triple.predicate.clone(),
+        object: remap_term(&triple.object, doc_id, blank_map),
+    }
+}
+
+fn remap_graph_name(
+    graph: &GraphName,
+    doc_id: &str,
+    blank_map: &mut HashMap<BlankNode, BlankNode>,
+) -> GraphName {
+    match graph {
+        GraphName::NamedNode(n) => GraphName::NamedNode(n.clone()),
+        GraphName::BlankNode(b) => GraphName::BlankNode(remap_blank_node(b, doc_id, blank_map)),
+        GraphName::DefaultGraph => GraphName::DefaultGraph,
+    }
 }
 
 fn verified_snapshot_source(
@@ -850,6 +902,92 @@ pub(crate) fn merge_scan_roots(workspace: &Path, extra_roots: &[PathBuf]) -> Vec
         roots.push(root.clone());
     }
     roots
+}
+
+#[cfg(test)]
+mod blank_remap_tests {
+    use super::*;
+    use oxigraph::model::NamedNode;
+
+    #[test]
+    fn remap_blank_nodes_are_scoped_per_document() {
+        let blank = BlankNode::new_unchecked("b0");
+        let mut map_a = HashMap::new();
+        let mut map_b = HashMap::new();
+        let a = remap_blank_node(&blank, "doc-1", &mut map_a);
+        let b = remap_blank_node(&blank, "doc-2", &mut map_b);
+        assert_ne!(a.as_str(), b.as_str());
+        assert!(a.as_str().starts_with("doc_1_"));
+        assert!(b.as_str().starts_with("doc_2_"));
+        assert_eq!(remap_blank_node(&blank, "doc-1", &mut map_a).as_str(), a.as_str());
+    }
+
+    #[test]
+    fn multi_file_restrictions_do_not_fuse_in_store() {
+        let dir = tempfile::tempdir().unwrap();
+        std::fs::write(
+            dir.path().join("a.ttl"),
+            r#"@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix ex: <http://ex.org/a#> .
+ex:A a owl:Class ;
+  rdfs:subClassOf [ a owl:Restriction ; owl:onProperty ex:p1 ; owl:someValuesFrom ex:B ] .
+ex:B a owl:Class .
+ex:p1 a owl:ObjectProperty .
+"#,
+        )
+        .unwrap();
+        std::fs::write(
+            dir.path().join("b.ttl"),
+            r#"@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix ex: <http://ex.org/b#> .
+ex:X a owl:Class ;
+  rdfs:subClassOf [ a owl:Restriction ; owl:onProperty ex:p2 ; owl:someValuesFrom ex:Y ] .
+ex:Y a owl:Class .
+ex:p2 a owl:ObjectProperty .
+"#,
+        )
+        .unwrap();
+
+        let catalog = IndexBuilder::new().workspace(dir.path()).build().expect("build");
+        let store = catalog.store();
+        let on_property = NamedNode::new_unchecked("http://www.w3.org/2002/07/owl#onProperty");
+        let some_values = NamedNode::new_unchecked("http://www.w3.org/2002/07/owl#someValuesFrom");
+        let p1 = NamedNode::new_unchecked("http://ex.org/a#p1");
+        let filler_b = NamedNode::new_unchecked("http://ex.org/a#B");
+        let filler_y = NamedNode::new_unchecked("http://ex.org/b#Y");
+
+        let mut fused = 0usize;
+        let mut intact_a = 0usize;
+        for quad in store.quads_for_pattern(None, Some(on_property.as_ref()), Some(p1.as_ref().into()), None)
+        {
+            let quad = quad.expect("store iterate");
+            let fused_quad = Quad {
+                subject: quad.subject.clone(),
+                predicate: some_values.clone(),
+                object: filler_y.clone().into(),
+                graph_name: GraphName::DefaultGraph,
+            };
+            if store.contains(&fused_quad).unwrap_or(false) {
+                fused += 1;
+            }
+            let intact_quad = Quad {
+                subject: quad.subject.clone(),
+                predicate: some_values.clone(),
+                object: filler_b.clone().into(),
+                graph_name: GraphName::DefaultGraph,
+            };
+            if store.contains(&intact_quad).unwrap_or(false) {
+                intact_a += 1;
+            }
+        }
+        assert_eq!(
+            fused, 0,
+            "cross-file blank collision would fuse a#p1 with b#Y on one restriction"
+        );
+        assert_eq!(intact_a, 1, "file A restriction should remain intact");
+    }
 }
 
 #[cfg(test)]

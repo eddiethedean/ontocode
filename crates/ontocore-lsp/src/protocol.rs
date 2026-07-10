@@ -54,6 +54,160 @@ pub struct CatalogSnapshot {
     pub diagnostics: Vec<DiagnosticSummary>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub reasoner: Option<ReasonerSnapshot>,
+    /// Workspace catalog statistics (same shape as `indexWorkspace` stats).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub stats: Option<CatalogStats>,
+    /// Active ontology document id (path or ontology IRI) when set by the client.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub active_ontology_id: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+#[serde(rename_all = "snake_case")]
+pub enum CommandEnablement {
+    Always,
+    HasOntology,
+    IsDirty,
+    HasSelection,
+    ReasonerRunning,
+    ReasonerIdle,
+    CanEditSelection,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct CommandDescriptor {
+    pub id: String,
+    pub title: String,
+    pub category: String,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub enablement: Vec<CommandEnablement>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub undo_label: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub dialog_id: Option<String>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct ListCommandsResult {
+    pub commands: Vec<CommandDescriptor>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct WorkspaceUiStateParams {
+    /// Optional focused entity IRI from the client.
+    #[serde(default)]
+    pub selection_iri: Option<String>,
+    /// Client-reported dirty document count.
+    #[serde(default)]
+    pub dirty_document_count: u32,
+    /// Active ontology id preferred by the client.
+    #[serde(default)]
+    pub active_ontology_id: Option<String>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct WorkspaceUiState {
+    pub has_ontology: bool,
+    pub ontology_count: usize,
+    pub is_dirty: bool,
+    pub has_selection: bool,
+    pub selection_iri: Option<String>,
+    pub selection_editable: bool,
+    pub reasoner_running: bool,
+    pub reasoner_dirty: bool,
+    pub reasoner_consistent: Option<bool>,
+    pub active_ontology_id: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub stats: Option<CatalogStats>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct GetDialogSchemaParams {
+    pub dialog_id: String,
+}
+
+#[derive(Debug, Serialize)]
+pub struct DialogFieldSchema {
+    pub id: String,
+    pub label: String,
+    pub field_type: String,
+    #[serde(default)]
+    pub required: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub placeholder: Option<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub validation: Vec<String>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct DialogSchema {
+    pub id: String,
+    pub title: String,
+    pub fields: Vec<DialogFieldSchema>,
+    pub primary_action: String,
+}
+
+#[derive(Debug, Serialize)]
+pub struct GetDialogSchemaResult {
+    pub schema: DialogSchema,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct CreateOntologyParams {
+    pub path: String,
+    pub ontology_iri: String,
+    #[serde(default)]
+    pub version_iri: Option<String>,
+    #[serde(default)]
+    pub format: Option<String>,
+    #[serde(default)]
+    pub prefixes: Option<BTreeMap<String, String>>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct CreateOntologyResult {
+    pub path: String,
+    pub ontology_iri: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct ExportOntologyParams {
+    pub source_path: String,
+    pub output_path: String,
+    #[serde(default)]
+    pub format: Option<String>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct ExportOntologyResult {
+    pub output_path: String,
+    pub success: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub logs: Option<String>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct SetActiveOntologyParams {
+    pub ontology_id: String,
+}
+
+#[derive(Debug, Serialize)]
+pub struct SetActiveOntologyResult {
+    pub active_ontology_id: String,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct DeleteImpactParams {
+    pub entity_iri: String,
+}
+
+#[derive(Debug, Serialize)]
+pub struct DeleteImpactResult {
+    pub entity_iri: String,
+    pub usage_count: usize,
+    pub axiom_count: usize,
+    pub referencing_entities: Vec<String>,
+    pub warnings: Vec<String>,
 }
 
 #[derive(Debug, Deserialize)]

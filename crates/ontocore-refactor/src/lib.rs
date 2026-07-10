@@ -18,7 +18,7 @@ pub use apply::{
 pub use error::{RefactorError, Result};
 pub use model::{FileChange, Hunk, RefactorPlan, RefactorRequest, Usage, UsageKind};
 pub use rename::{
-    preview_extract_module, preview_migrate_namespace, preview_move_entity, preview_refactor,
-    preview_rename_iri,
+    preview_extract_module, preview_merge_entities, preview_migrate_namespace, preview_move_entity,
+    preview_refactor, preview_rename_iri, preview_replace_entity,
 };
 pub use usages::{find_usages, find_usages_with_overrides};

@@ -7,7 +7,7 @@ hide:
 <div class="oc-hero">
 
 <div class="oc-hero-badges">
-  <span class="oc-badge oc-badge--accent">v0.16.0</span>
+  <span class="oc-badge oc-badge--accent">v0.17.0</span>
   <span class="oc-badge">VS Code</span>
   <span class="oc-badge">CLI · LSP</span>
   <span class="oc-badge">Plugins</span>
@@ -40,7 +40,7 @@ Index and explore OWL/RDF/OBO, run queries, refactors, and reasoning — in VS C
 
 <div class="oc-callout" markdown>
 
-**What's new in v0.16?** Preferences pages + context actions for plugins, plus imports/layout polish — [Migration v0.15 → v0.16](migration/v0.16.md).
+**What's new in v0.17?** Protégé-shell menus, dialogs, named perspectives, and layout persistence — [Migration v0.16 → v0.17](migration/v0.17.md).
 
 **Not sure where to begin?** Pick a path:
 
@@ -137,7 +137,7 @@ You do **not** need to clone this repo to use the extension or `cargo install on
 
 ## What ships today
 
-**v0.16.0 highlights:** Plugin preferences pages and context actions wired in the extension, plugin commands via `ontocore/runPlugin`, imports reload and layout reset — on top of v0.15 plugin permissions/views and v0.14 plugin host MVP.
+**v0.17.0 highlights:** Plugin preferences pages and context actions wired in the extension, plugin commands via `ontocore/runPlugin`, imports reload and layout reset — on top of v0.15 plugin permissions/views and v0.14 plugin host MVP.
 
 Full matrix: **[What ships today](SHIPPED.md)** (canonical — do not rely on this summary alone).
 
@@ -184,7 +184,7 @@ Full matrix: **[What ships today](SHIPPED.md)** (canonical — do not rely on th
 | **OntoCode extension** | [ontocode/vscode-extension.md](ontocode/vscode-extension.md) |
 | **Rust & CLI** | [guides/rust-crates.md](guides/rust-crates.md) |
 | **What ships today (canonical)** | [SHIPPED.md](SHIPPED.md) |
-| Pick a task (all paths) | [guides/start-here.md](guides/start-here.md) |
+| Start here (all paths) | [start.md](start.md) |
 | Which artifact do I need? | [guides/which-artifact.md](guides/which-artifact.md) |
 | First success tutorial | [guides/first-success.md](guides/first-success.md) |
 | Feature tour | [ontocode/feature-tour.md](ontocode/feature-tour.md) |

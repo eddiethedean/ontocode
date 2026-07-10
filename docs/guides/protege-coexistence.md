@@ -1,6 +1,6 @@
 # Protégé coexistence
 
-Guide for teams using Protégé today and evaluating OntoCode **v0.14**. A [first-week migration guide](protege-migration.md) ships today; extended OWL/XML-heavy playbooks remain **v1.0 targets**.
+Guide for teams using Protégé today and evaluating OntoCode **v0.17**. A [first-week migration guide](protege-migration.md) ships today; extended OWL/XML-heavy playbooks remain **v1.0 targets**.
 
 Canonical capability matrix: [What ships today](../SHIPPED.md). Decision matrix: [Protégé vs OntoCode](protege-decision.md). Gap analysis: [Protégé parity matrix](../design/PROTEGE_PARITY.md).
 

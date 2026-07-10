@@ -13,13 +13,13 @@
 >
 > **Contributor crate layout:** [Implementation architecture](docs/design/ARCHITECTURE.md) (internal modules, not a user capability list).
 >
-> **v0.16 ships today:** OntoCode (VS Code), OntoCore (CLI/LSP/library), Turtle + OBO write-back, property chain editing, OWL/XML read-only catalog, DL explanations (with alternatives and staleness), semantic diff, incremental indexing, Ontologos reasoning, ROBOT CLI wrappers, **plugin host** (manifests, permissions, UI views/commands/**preferences/context actions**, reference validators/exporters, CLI/LSP hooks, owlmake workflow scaffold), **graph asserted/inferred/combined modes**, **imports reload + layout reset**.
+> **v0.17 ships today:** OntoCode (VS Code), OntoCore (CLI/LSP/library), Turtle + OBO write-back, property chain editing, OWL/XML read-only catalog, DL explanations (with alternatives and staleness), semantic diff, incremental indexing, Ontologos reasoning, ROBOT CLI wrappers, **plugin host** (manifests, permissions, UI views/commands/**preferences/context actions**, reference validators/exporters, CLI/LSP hooks, owlmake workflow scaffold), **graph asserted/inferred/combined modes**, **imports reload + layout reset**.
 > **Planned v1.0 (not installable yet):** stable plugin API, language SDKs, MCP server, full owlmake integration.
 > **Planned post-1.0:** OntoStudio desktop, AI-native workflows — [UI roadmap mapping](docs/ui/ROADMAP_MAPPING.md).
 > Canonical capability matrix: [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/).
 
 ```
-External Workflow Plugins (v0.16)  ← subprocess workflow plugins; API v1 (permissions, views, preferences)
+External Workflow Plugins (v0.17)  ← subprocess workflow plugins; API v1 (permissions, views, preferences)
 ├── owlmake (reference design)
 ├── ROBOT / ODK workflow adapters
 └── Future build, validation, doc plugins
@@ -71,15 +71,22 @@ Reasoning algorithms and semantic inference. OntoCore delegates classification, 
 
 ### OntoCore
 
-Reusable semantic workspace platform: index, query, diagnostics, refactoring, and semantic diff. Consumed by the VS Code extension, CLI, and Rust library. **Plugin hosting is a v1.0 design** — not installable yet. OntoCore is **not** a workflow engine; build, release, and QC automation will live in external plugins when the host ships.
+Reusable semantic workspace platform: index, query, diagnostics, refactoring, and semantic diff. Consumed by the VS Code extension, CLI, and Rust library.
+
+**Plugin platform status:**
+
+- **Shipped (v0.14–v0.17):** plugin host MVP — workspace manifest discovery, reference plugins, CLI/LSP hooks, subprocess workflow runner, UI views/commands, and (v0.16+) preferences pages + context actions (see [Plugin authoring](https://ontocode-vs.readthedocs.io/en/latest/guides/plugins/)).
+- **Planned (v1.0+):** semver-stable plugin API, hardened permissions/sandboxing, and marketplace/discovery.
+
+OntoCore is **not** a workflow engine; build, release, and QC automation should live in external tools and workflow plugins rather than becoming core engine dependencies.
 
 ### External workflow plugins (e.g. owlmake)
 
-**Planned v1.0.** [owlmake](https://github.com/INCATools/owlmake) is the reference workflow plugin design — ROBOT/ODK-style pipelines without becoming a core OntoCore dependency. Today, ROBOT interop is the `ontocore robot` CLI wrapper only.
+**Host ships today; full owlmake integration is v1.0.** [owlmake](https://github.com/INCATools/owlmake) is the reference workflow plugin design — ROBOT/ODK-style pipelines without becoming a core OntoCore dependency. Today, ROBOT interop is the `ontocore robot` CLI wrapper plus the subprocess workflow scaffold.
 
 ### OntoCode
 
-Reference IDE on top of OntoCore. Presents editing, reasoning, and diagnostics in VS Code. Workflow actions (build, release) via plugins are a v1.0 target.
+Reference IDE on top of OntoCore. Presents editing, reasoning, and diagnostics in VS Code. Plugin views, commands, preferences, and context actions ship today; marketplace-scale workflow automation remains a v1.0 target.
 
 ## Design Philosophy
 

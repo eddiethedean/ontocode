@@ -6,14 +6,14 @@ import {
   isPatchFullySynced,
   patchFailureMessage,
 } from "../lsp/patchFeedback";
-import { Entity, OntologyDocument, PatchOp } from "../lsp/protocol";
+import { Entity, OntologyDocument } from "../lsp/protocol";
 import { documentUriInWorkspace } from "../utils/workspacePath";
 import {
   MISSING_ONTOLOGY_HEADER_MESSAGE,
   resolveOntologyIri,
 } from "./importsOntology";
 import { PanelHost } from "./panelHost";
-import type { ImportsDocumentPayload, WebviewMessage } from "./messages";
+import type { ImportsDocumentPayload, PatchOp, WebviewMessage } from "./messages";
 
 type RefreshFn = () => Promise<void>;
 

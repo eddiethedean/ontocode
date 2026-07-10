@@ -35,7 +35,7 @@ After 1.0, the roadmap shifts from parity to modernization.
 | [PRODUCT_ROADMAP_2.0.md](docs/ui/PRODUCT_ROADMAP_2.0.md) | UI phases with milestone acceptance criteria |
 | [ui/README.md](docs/ui/README.md) | Product design specification pack (UX, design system, OntoStudio target) |
 
-**Current release:** v0.16.0
+**Current release:** v0.17.0
 
 ---
 
@@ -44,7 +44,7 @@ After 1.0, the roadmap shifts from parity to modernization.
 ### Timeline
 
 ```text
-SHIPPED (v0.1–v0.14) ─────────────────────────────────────────────────►
+SHIPPED (v0.1–v0.17) ─────────────────────────────────────────────────►
 v0.1–v0.4          v0.5–v0.8              v0.9–v0.12           v0.13–v0.14
 Engine foundation    IDE depth                Platform & authoring   OntoUI + plugins
   │                    │                        │                      │
@@ -52,8 +52,8 @@ Engine foundation    IDE depth                Platform & authoring   OntoUI + pl
   Explorer, diag,      graphs, refactor,        OBO write-back,      focus relay,
   write-back           Manchester               OWL/XML catalog      plugin host MVP
 
-PLANNED (v0.17–v1.0) ─────────────────────────────────────────────────►
-v0.15–v0.18                                                          v1.0
+PLANNED (v0.18–v1.0) ─────────────────────────────────────────────────►
+v0.18                                                                 v1.0
 Protégé parity closeout                                              1.0 exit
 ```
 
@@ -65,7 +65,7 @@ Protégé parity closeout                                              1.0 exit
 | **B — IDE depth** | v0.5–v0.8 | Shipped | Query, reason, visualize, refactor |
 | **C — Platform & authoring** | v0.9–v0.12 | Shipped | OntoCore identity, semantic workspace, authoring parity |
 | **D — OntoUI platform** | v0.13–v0.14 | Shipped | v0.13: WorkspaceStore, focus relay; v0.14: plugin host MVP |
-| **E — Pre-1.0 Protégé parity** | v0.15–v0.18 | Planned | Close remaining Protégé Desktop parity gaps |
+| **E — Pre-1.0 Protégé parity** | v0.15–v0.18 | In progress | v0.15–v0.17 shipped; close remaining Protégé Desktop parity gaps |
 | **F — Protégé replacement** | v1.0 | Planned | Daily OWL/OBO engineering without Protégé |
 | **G — Ecosystem** | v1.1–v1.2+ | Planned | SDKs, AI, toolchain & collaboration |
 
@@ -87,7 +87,7 @@ Protégé parity closeout                                              1.0 exit
 | 14 | v0.14 | D | Shipped | 8 | Plugin host MVP |
 | 15 | v0.15 | E | Shipped (partial) | 4†, 5†, 8† | Plugin API + visualization + explanations |
 | 16 | v0.16 | E | Shipped (partial) | 1†, 2† | Workspace layouts + preferences + imports polish |
-| 17 | v0.17 | E | Planned | — | Menu/toolbar/dialog parity + keyboard workflows |
+| 17 | v0.17 | E | Shipped (partial) | — | Menu/toolbar/dialog parity + keyboard workflows |
 | 18 | v0.18 | E | Planned | — | Protégé Desktop parity gate + migration readiness |
 | 19 | v1.0 | F | Planned | 1–6 exit, 9† | Protégé-competitive release |
 | 20 | v1.1 | G | Planned | 7, 2†, 3†, 4†, 8†, 9† | Language bindings & AI primitives |
@@ -119,7 +119,7 @@ OntoUI work uses **UI phases 0–12** from [Product Roadmap 2.0](docs/ui/PRODUCT
 
 ---
 
-## Shipped releases (v0.1–v0.14)
+## Shipped releases (v0.1–v0.17)
 
 ### Era A — Engine foundation (v0.1–v0.4)
 
@@ -386,7 +386,7 @@ Sub-phases: **v0.7a** (React foundation) → **v0.7** (graphs + inspector) → *
 
 ---
 
-## Planned releases (v0.17 → v1.2+)
+## Planned releases (v0.18 → v1.2+)
 
 ---
 
@@ -438,7 +438,9 @@ See [migration/v0.16.md](docs/migration/v0.16.md) and [SHIPPED.md](docs/SHIPPED.
 
 ---
 
-### v0.17 — Menus/toolbars/dialog parity + keyboard-first workflows (planned)
+### v0.17 — Menus/toolbars/dialog parity + keyboard-first workflows (shipped, partial)
+
+**Released:** v0.17.0 (2026-07-10)
 
 **Theme:** Make every Protégé “menu action” and common dialog-driven workflow available in OntoCode’s command system with strong keyboard and context-menu affordances.
 
@@ -456,6 +458,8 @@ See [migration/v0.16.md](docs/migration/v0.16.md) and [SHIPPED.md](docs/SHIPPED.
 **Exit criteria:**
 - Every high-frequency Protégé action in the reverse-engineered checklists is accessible via **command palette + menus/toolbars**, with correct enablement and keyboard shortcuts.
 - Critical dialogs support live validation and do not allow invalid IRIs/prefixes/imports to be persisted.
+
+See [migration/v0.17.md](docs/migration/v0.17.md) and [SHIPPED.md](docs/SHIPPED.md).
 
 ---
 

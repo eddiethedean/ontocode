@@ -1,18 +1,21 @@
-# Plugin authoring (v0.15)
+# Plugin authoring (v0.16+)
 
-OntoCore v0.15 extends the v0.14 plugin host with **permissions**, **versioned API** (`api_version = "1"`), and **UI views/commands**. Manifests may also declare `preferences_pages` and `context_actions` — those are **schema-only** in v0.15 (not yet hosted in the VS Code extension).
+> **Implement against this page today:** workspace TOML manifests + subprocess JSON contract.
+> The React/TypeScript [Plugin API spec](../ui/PLUGIN_API_SPEC.md) describes a **future** OntoUI host contract — not the shipped VS Code integration.
 
-## UI contribution matrix (v0.15)
+OntoCore’s plugin host (MVP since v0.14) supports **permissions**, **versioned API** (`api_version = "1"`), and **UI contributions**. Since **v0.16**, the OntoCode extension hosts `preferences_pages` and `context_actions` (not schema-only).
+
+## UI contribution matrix (v0.16+)
 
 | Manifest field | VS Code | CLI / LSP | Status |
 |----------------|---------|-----------|--------|
 | `[[ui.commands]]` | Command palette (**Plugins: Run Command…**) | `ontocore/runPlugin` | **Shipped** |
 | `[[ui.views]]` | Dockable panel (**Plugins: Open View…**) | `ontocore/runPlugin` with `action: "ui_view"` | **Shipped** |
 | `[[ui.inspector_cards]]` | Entity Inspector cards | Via validate/index | **Shipped** (v0.14) |
-| `[[ui.preferences_pages]]` | — | — | **Schema only** |
-| `[[ui.context_actions]]` | — | — | **Schema only** |
+| `[[ui.preferences_pages]]` | **Plugins: Open Preferences…** | Via `listPlugins` metadata | **Shipped** (v0.16) |
+| `[[ui.context_actions]]` | Entity / ontology context menus | Via `listPlugins` metadata | **Shipped** (v0.16) |
 
-## Permissions (v0.15)
+## Permissions
 
 Declare in `[plugin]`:
 
@@ -143,7 +146,9 @@ ontocore workflow --plugin owlmake --step qc /path/to/workspace
 - `ontocore/runPlugin` — run validate/export/workflow actions (and `ui_view` for views)
 - OntoCode command **Plugins: Run Command…** — browse plugin commands
 - OntoCode command **Plugins: Open View…** — open plugin-contributed views
+- OntoCode command **Plugins: Open Preferences…** — open plugin preference pages (v0.16+)
 - OntoCode command **Run Workflow (owlmake)** — workflow scaffold output channel
+- Context menus — plugin `context_actions` on entities/ontologies (v0.16+)
 
 ## Stability
 

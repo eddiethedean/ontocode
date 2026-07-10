@@ -16,6 +16,10 @@ export class SemanticDiffPanel {
     });
   }
 
+  public dispose(): void {
+    this.host.panel.dispose();
+  }
+
   public static async show(
     extensionUri: vscode.Uri,
     params: { leftRef?: string; rightRef?: string; reasoner?: boolean }

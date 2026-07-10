@@ -2,7 +2,7 @@
   "name": "ontocode",
   "displayName": "OntoCode",
   "description": "Ontology IDE for VS Code powered by OntoCore. Browse, edit Turtle, query, reason (EL–DL), validate, and diff OWL/RDF/OBO ontologies from the IDE or CI.",
-  "version": "0.16.0",
+  "version": "0.17.0",
   "publisher": "ontocode",
   "license": "MIT",
   "repository": {
@@ -253,6 +253,187 @@
       {
         "command": "ontocode.extractModule",
         "title": "OntoCode: Extract Module"
+      },
+      {
+        "command": "ontocode.newOntology",
+        "title": "OntoCode: New Ontology",
+        "icon": "$(new-file)"
+      },
+      {
+        "command": "ontocode.openOntology",
+        "title": "OntoCode: Open Ontology"
+      },
+      {
+        "command": "ontocode.openRecent",
+        "title": "OntoCode: Open Recent"
+      },
+      {
+        "command": "ontocode.save",
+        "title": "OntoCode: Save"
+      },
+      {
+        "command": "ontocode.saveAll",
+        "title": "OntoCode: Save All"
+      },
+      {
+        "command": "ontocode.undo",
+        "title": "OntoCode: Undo"
+      },
+      {
+        "command": "ontocode.redo",
+        "title": "OntoCode: Redo"
+      },
+      {
+        "command": "ontocode.saveAs",
+        "title": "OntoCode: Save Ontology As…"
+      },
+      {
+        "command": "ontocode.exportOntology",
+        "title": "OntoCode: Export Ontology…"
+      },
+      {
+        "command": "ontocode.closeProject",
+        "title": "OntoCode: Close Project"
+      },
+      {
+        "command": "ontocode.searchEntities",
+        "title": "OntoCode: Search Entities",
+        "icon": "$(search)"
+      },
+      {
+        "command": "ontocode.openPreferences",
+        "title": "OntoCode: Open Preferences",
+        "icon": "$(settings-gear)"
+      },
+      {
+        "command": "ontocode.copyEntityIri",
+        "title": "OntoCode: Copy Entity IRI"
+      },
+      {
+        "command": "ontocode.copyEntityShortForm",
+        "title": "OntoCode: Copy Entity Short Form"
+      },
+      {
+        "command": "ontocode.setActiveOntology",
+        "title": "OntoCode: Set Active Ontology"
+      },
+      {
+        "command": "ontocode.editOntologyMetadata",
+        "title": "OntoCode: Edit Ontology Metadata"
+      },
+      {
+        "command": "ontocode.managePrefixes",
+        "title": "OntoCode: Manage Prefixes"
+      },
+      {
+        "command": "ontocode.showMetrics",
+        "title": "OntoCode: Show Metrics",
+        "icon": "$(graph)"
+      },
+      {
+        "command": "ontocode.mergeEntities",
+        "title": "OntoCode: Merge Entities"
+      },
+      {
+        "command": "ontocode.replaceEntity",
+        "title": "OntoCode: Replace Entity"
+      },
+      {
+        "command": "ontocode.startReasoner",
+        "title": "OntoCode: Start Reasoner"
+      },
+      {
+        "command": "ontocode.stopReasoner",
+        "title": "OntoCode: Stop Reasoner"
+      },
+      {
+        "command": "ontocode.synchronizeReasoner",
+        "title": "OntoCode: Synchronize Reasoner",
+        "icon": "$(sync)"
+      },
+      {
+        "command": "ontocode.classifyOntology",
+        "title": "OntoCode: Classify Ontology"
+      },
+      {
+        "command": "ontocode.checkConsistency",
+        "title": "OntoCode: Check Consistency"
+      },
+      {
+        "command": "ontocode.configureReasoner",
+        "title": "OntoCode: Configure Reasoner"
+      },
+      {
+        "command": "ontocode.validateWorkspace",
+        "title": "OntoCode: Validate Workspace"
+      },
+      {
+        "command": "ontocode.runBatchTools",
+        "title": "OntoCode: Run Batch Tools"
+      },
+      {
+        "command": "ontocode.switchPerspective",
+        "title": "OntoCode: Switch Perspective"
+      },
+      {
+        "command": "ontocode.savePerspective",
+        "title": "OntoCode: Save Perspective"
+      },
+      {
+        "command": "ontocode.showInspectorPanel",
+        "title": "OntoCode: Show Inspector Panel"
+      },
+      {
+        "command": "ontocode.showQueryPanel",
+        "title": "OntoCode: Show Query Panel"
+      },
+      {
+        "command": "ontocode.showReasonerPanel",
+        "title": "OntoCode: Show Reasoner Panel"
+      },
+      {
+        "command": "ontocode.showExplanationPanel",
+        "title": "OntoCode: Show Explanation Panel"
+      },
+      {
+        "command": "ontocode.showGraphPanel",
+        "title": "OntoCode: Show Graph Panel"
+      },
+      {
+        "command": "ontocode.showSemanticDiffPanel",
+        "title": "OntoCode: Show Semantic Diff Panel"
+      },
+      {
+        "command": "ontocode.showImportsPanel",
+        "title": "OntoCode: Show Imports Panel"
+      },
+      {
+        "command": "ontocode.showAbout",
+        "title": "OntoCode: About"
+      },
+      {
+        "command": "ontocode.showPluginInfo",
+        "title": "OntoCode: Plugin Information"
+      },
+      {
+        "command": "ontocode.openErrorLog",
+        "title": "OntoCode: Open Error Log"
+      },
+      {
+        "command": "ontocode.exportDiagnostics",
+        "title": "OntoCode: Export Diagnostics"
+      },
+      {
+        "command": "ontocode.openDocumentation",
+        "title": "OntoCode: Open Documentation"
+      },
+      {
+        "command": "ontocode.openSupport",
+        "title": "OntoCode: Open Support"
+      },
+      {
+        "command": "ontocode.openKeyboardShortcuts",
+        "title": "OntoCode: Open Keyboard Shortcuts"
       }
     ],
     "menus": {
@@ -261,6 +442,31 @@
           "command": "ontocode.refreshExplorer",
           "when": "view =~ /^ontocode\\.explorer\\./",
           "group": "navigation"
+        },
+        {
+          "command": "ontocode.newOntology",
+          "when": "view =~ /^ontocode\\.explorer\\./",
+          "group": "navigation@1"
+        },
+        {
+          "command": "ontocode.searchEntities",
+          "when": "view =~ /^ontocode\\.explorer\\./ && ontocode:hasOntology",
+          "group": "navigation@2"
+        },
+        {
+          "command": "ontocode.synchronizeReasoner",
+          "when": "view =~ /^ontocode\\.explorer\\./ && ontocode:hasOntology",
+          "group": "navigation@3"
+        },
+        {
+          "command": "ontocode.showMetrics",
+          "when": "view =~ /^ontocode\\.explorer\\./ && ontocode:hasOntology",
+          "group": "navigation@4"
+        },
+        {
+          "command": "ontocode.openPreferences",
+          "when": "view =~ /^ontocode\\.explorer\\./",
+          "group": "navigation@5"
         }
       ],
       "view/item/context": [
@@ -318,9 +524,142 @@
           "command": "ontocode.createProperty",
           "when": "view == ontocode.explorer.properties",
           "group": "navigation"
+        },
+        {
+          "command": "ontocode.copyEntityIri",
+          "when": "view =~ /^ontocode\\.explorer\\./ && viewItem == ontocodeEntity",
+          "group": "3_copy"
+        },
+        {
+          "command": "ontocode.copyEntityShortForm",
+          "when": "view =~ /^ontocode\\.explorer\\./ && viewItem == ontocodeEntity",
+          "group": "3_copy"
+        },
+        {
+          "command": "ontocode.mergeEntities",
+          "when": "view =~ /^ontocode\\.explorer\\./ && viewItem == ontocodeEntity",
+          "group": "2_edit"
+        },
+        {
+          "command": "ontocode.replaceEntity",
+          "when": "view =~ /^ontocode\\.explorer\\./ && viewItem == ontocodeEntity",
+          "group": "2_edit"
+        }
+      ],
+      "editor/title": [
+        {
+          "command": "ontocode.newOntology",
+          "group": "navigation@1"
+        },
+        {
+          "command": "ontocode.searchEntities",
+          "when": "ontocode:hasOntology",
+          "group": "navigation@2"
+        },
+        {
+          "command": "ontocode.synchronizeReasoner",
+          "when": "ontocode:hasOntology",
+          "group": "navigation@3"
+        },
+        {
+          "command": "ontocode.showMetrics",
+          "when": "ontocode:hasOntology",
+          "group": "navigation@4"
+        },
+        {
+          "command": "ontocode.openPreferences",
+          "group": "navigation@5"
+        }
+      ],
+      "explorer/context": [
+        {
+          "command": "ontocode.openOntology",
+          "group": "ontocode@1"
+        },
+        {
+          "command": "ontocode.newOntology",
+          "group": "ontocode@2"
+        }
+      ],
+      "commandPalette": [
+        {
+          "command": "ontocode.saveAs",
+          "when": "ontocode:hasOntology"
+        },
+        {
+          "command": "ontocode.exportOntology",
+          "when": "ontocode:hasOntology"
+        },
+        {
+          "command": "ontocode.searchEntities",
+          "when": "ontocode:hasOntology"
+        },
+        {
+          "command": "ontocode.copyEntityIri",
+          "when": "ontocode:hasSelection"
+        },
+        {
+          "command": "ontocode.copyEntityShortForm",
+          "when": "ontocode:hasSelection"
+        },
+        {
+          "command": "ontocode.mergeEntities",
+          "when": "ontocode:hasSelection && ontocode:canEditSelection"
+        },
+        {
+          "command": "ontocode.replaceEntity",
+          "when": "ontocode:hasSelection && ontocode:canEditSelection"
+        },
+        {
+          "command": "ontocode.stopReasoner",
+          "when": "ontocode:reasonerRunning"
+        },
+        {
+          "command": "ontocode.startReasoner",
+          "when": "ontocode:hasOntology && !ontocode:reasonerRunning"
+        },
+        {
+          "command": "ontocode.validateWorkspace",
+          "when": "ontocode:hasOntology"
+        },
+        {
+          "command": "ontocode.exportDiagnostics",
+          "when": "ontocode:hasOntology"
         }
       ]
     },
+    "keybindings": [
+      {
+        "command": "ontocode.searchEntities",
+        "key": "ctrl+k ctrl+e",
+        "mac": "cmd+k cmd+e",
+        "when": "ontocode:hasOntology"
+      },
+      {
+        "command": "ontocode.openClassGraph",
+        "key": "ctrl+g",
+        "mac": "cmd+g",
+        "when": "ontocode:hasOntology"
+      },
+      {
+        "command": "ontocode.showExplanation",
+        "key": "ctrl+e",
+        "mac": "cmd+e",
+        "when": "ontocode:hasSelection"
+      },
+      {
+        "command": "ontocode.synchronizeReasoner",
+        "key": "ctrl+shift+r",
+        "mac": "cmd+shift+r",
+        "when": "ontocode:hasOntology"
+      },
+      {
+        "command": "ontocode.showEntityInspector",
+        "key": "ctrl+3",
+        "mac": "cmd+3",
+        "when": "ontocode:hasOntology"
+      }
+    ],
     "configuration": {
       "title": "OntoCode",
       "properties": {

@@ -57,7 +57,7 @@ Or download the two files from [fixtures/](https://github.com/eddiethedean/ontoc
 
 Then **File → Open Folder…** and select `ontocode-tutorial` (or your own ontology folder).
 
-When VS Code asks, choose **Trust** the workspace. OntoCode uses its **bundled** `ontocore-lsp` binary in both trusted and Restricted Mode. In **Restricted Mode**, custom settings such as `ontocode.lspPath` and `ontocode.robotPath` are ignored. If the explorer stays empty after 30 seconds, trust the folder and run **OntoCode: Index Workspace**.
+OntoCode’s **bundled** language server runs in trusted and Restricted Mode. **Trust the workspace** only if you set custom `ontocode.lspPath` or `ontocode.robotPath` — those settings are ignored when the folder is untrusted. If the explorer stays empty after 30 seconds, run **OntoCode: Index Workspace** (and Trust the folder if you use a custom LSP path).
 
 ### 3. Browse the explorer
 
@@ -166,7 +166,7 @@ Guide: [OBO workflow](../guides/obo-workflow.md).
 To catch lint and parse errors in CI or locally:
 
 ```bash
-cargo install ontocore-cli --locked --version 0.16.0
+cargo install ontocore-cli --locked --version 0.17.0
 ontocore validate /path/to/your/ontology/folder
 ```
 
@@ -192,6 +192,12 @@ Guide: [Semantic diff](../ontocode/semantic-diff.md).
 More help: [Troubleshooting](../troubleshooting.md) · [FAQ](../faq.md).
 
 ## Next steps
+
+Suggested order after first success:
+
+1. **Query** — [Query Workbench](../ontocode/query-workbench.md) then [SQL reference](../sql-reference.md)
+2. **Reason** — [Reasoner guide](../guides/reasoner.md)
+3. **Refactor / CI** — [Refactoring](../guides/refactoring.md) then [CI integration](../ci-integration.md)
 
 | Goal | Document |
 |------|----------|

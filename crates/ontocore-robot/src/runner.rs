@@ -10,7 +10,7 @@ pub struct RobotOutput {
 }
 
 const ALLOWED_SUBCOMMANDS: &[&str] =
-    &["validate-profile", "validate", "merge", "report", "reason", "query"];
+    &["validate-profile", "validate", "merge", "report", "reason", "query", "convert"];
 
 /// Resolve a ROBOT executable. Explicit paths must be named `robot` / `robot.cmd` / `robot.bat`.
 pub fn detect_robot(explicit_path: Option<&str>) -> Result<String> {
@@ -74,6 +74,19 @@ pub fn robot_validate(robot_path: Option<&str>, ontology_path: &Path) -> Result<
     )
 }
 
+pub fn robot_convert(robot_path: Option<&str>, input: &Path, output: &Path) -> Result<RobotOutput> {
+    run_robot(
+        robot_path,
+        &[
+            "convert".into(),
+            "--input".into(),
+            input.display().to_string(),
+            "--output".into(),
+            output.display().to_string(),
+        ],
+    )
+}
+
 pub fn robot_merge(
     robot_path: Option<&str>,
     inputs: &[String],
@@ -113,14 +126,14 @@ mod tests {
 
     #[test]
     fn rejects_disallowed_robot_subcommand() {
-        let err = match run_robot(Some("/definitely/not/robot"), &[String::from("convert")]) {
+        let err = match run_robot(Some("/definitely/not/robot"), &[String::from("diff")]) {
             Err(e) => e,
             Ok(output) => panic!("expected disallowed subcommand error, got {output:?}"),
         };
         match err {
             RobotError::Run(msg) => {
                 assert!(msg.contains("not allowed"));
-                assert!(msg.contains("convert"));
+                assert!(msg.contains("diff"));
             }
             other => panic!("expected Run error, got {other:?}"),
         }
@@ -140,7 +153,8 @@ mod tests {
 
     #[test]
     fn allows_known_subcommands_in_validation() {
-        for sub in ["validate-profile", "validate", "merge", "report", "reason", "query"] {
+        for sub in ["validate-profile", "validate", "merge", "report", "reason", "query", "convert"]
+        {
             let result = run_robot(Some("/definitely/not/robot"), &[String::from(sub)]);
             match result {
                 Err(RobotError::Run(ref msg)) if msg.contains("not allowed") => {

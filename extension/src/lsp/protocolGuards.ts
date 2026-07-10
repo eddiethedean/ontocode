@@ -93,9 +93,16 @@ export function isCatalogSnapshot(value: unknown): value is CatalogSnapshot {
     snapshot.diagnostics === undefined ||
     (Array.isArray(snapshot.diagnostics) &&
       snapshot.diagnostics.every(isDiagnosticSummary));
+  const statsOk =
+    snapshot.stats === undefined ||
+    (typeof snapshot.stats === "object" &&
+      snapshot.stats !== null &&
+      typeof (snapshot.stats as Record<string, unknown>).ontology_count ===
+        "number");
 
   return (
     diagnosticsOk &&
+    statsOk &&
     Array.isArray(h.edges) &&
     h.edges.every(isHierarchyEdge) &&
     typeof h.parents === "object" &&

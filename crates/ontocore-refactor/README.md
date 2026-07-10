@@ -21,7 +21,7 @@ CLI: `ontocore refactor usages|rename|migrate-namespace|move|extract`.
 ## Install
 
 ```toml
-ontocore-refactor = "0.16"
+ontocore-refactor = "0.17"
 ```
 
 ## Documentation

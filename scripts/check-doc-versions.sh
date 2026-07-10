@@ -440,7 +440,7 @@ fi
 check_file_contains "docs/guides/production-readiness.md" "${MINOR_VERSION}\.x \\(current\\)" "production-readiness current minor"
 check_file_contains "docs/ontocore/index.md" "v${VERSION}" "ontocore index version"
 check_file_contains "docs/ontocore/rust-api.md" "ontocore = \"${MINOR_VERSION}\"" "rust-api version pin"
-check_file_contains "docs/ontocore/crate-map.md" 'ontocore = "0.14"' "crate-map version pin"
+check_file_contains "docs/ontocore/crate-map.md" "ontocore = \"${MINOR_VERSION}\"" "crate-map version pin"
 check_file_contains "docs/ontocode/manage-imports.md" "Manage Imports" "manage-imports guide"
 check_file_contains "mkdocs.yml" "ontocode/manage-imports.md" "mkdocs manage-imports guide"
 check_file_contains "mkdocs.yml" "migration/v0.14.md" "mkdocs v0.14 migration guide"
@@ -454,7 +454,7 @@ check_file_contains "mkdocs.yml" "guides/plugins.md" "mkdocs plugins guide"
 check_file_contains "mkdocs.yml" "guides/docs-export.md" "mkdocs docs export guide"
 check_file_contains "mkdocs.yml" "design/adr/README.md" "mkdocs ADR index"
 check_file_contains "mkdocs.yml" "Reference:" "mkdocs Reference tab"
-check_file_contains "docs/guides/rust-crates.md" 'ontocore = "0.14"' "rust-crates version pin"
+check_file_contains "docs/guides/rust-crates.md" "ontocore = \"${MINOR_VERSION}\"" "rust-crates version pin"
 
 # Stale protege-coexistence version banner
 if grep -qE 'evaluating OntoCode \*\*v0\.6\*\*|v0\.6 support' docs/guides/protege-coexistence.md; then
@@ -572,8 +572,8 @@ for pair in "VISION.md:docs/vision.md:Build the modern open-source platform" \
   fi
 done
 
-check_file_contains "docs/roadmap.md" "Shipped releases \\(v0.1–v0.14\\)" "docs roadmap shipped section"
-check_file_contains "ROADMAP.md" "Shipped releases \\(v0.1–v0.14\\)" "ROADMAP.md shipped section"
+check_file_contains "docs/roadmap.md" "Shipped releases \\(v0.1–v0.17\\)" "docs roadmap shipped section"
+check_file_contains "ROADMAP.md" "Shipped releases \\(v0.1–v0.17\\)" "ROADMAP.md shipped section"
 check_file_contains "ROADMAP.md" "v0.14 — Plugin host MVP \\(shipped\\)" "ROADMAP.md v0.14 shipped section"
 check_file_contains "ROADMAP.md" "v1.2 — Ontology Toolchain Platform" "roadmap v1.2 toolchain milestone"
 check_file_contains "docs/roadmap.md" "v1.2 — Ontology Toolchain Platform" "docs roadmap v1.2 milestone"
@@ -630,6 +630,34 @@ if rg -q 'ontocore = "0\.11"' "${CRATE_PIN_PATHS[@]}" --glob '!**/migration/**' 
 else
   echo "ok: no stale ontocore = \"0.11\" user-facing pins"
 fi
+
+# Stale crate pins for previous minors (0.14–0.16) when current is newer
+PREV_MINOR_MAJOR="${MINOR_VERSION%%.*}"
+PREV_MINOR_MINOR="${MINOR_VERSION#*.}"
+if [[ "$PREV_MINOR_MAJOR" == "0" ]] && [[ "$PREV_MINOR_MINOR" -ge 17 ]]; then
+  for stale in 14 15 16; do
+    if rg -q "ontocore = \"0\\.${stale}\"" "${CRATE_PIN_PATHS[@]}" --glob '!**/migration/**' --glob '!**/design/**' --glob '!**/changelog.md' --glob '!**/CHANGELOG.md' 2>/dev/null; then
+      echo "FAIL: stale ontocore = \"0.${stale}\" pin found outside migration/design/changelog" >&2
+      rg -n "ontocore = \"0\\.${stale}\"" "${CRATE_PIN_PATHS[@]}" --glob '!**/migration/**' --glob '!**/design/**' --glob '!**/changelog.md' --glob '!**/CHANGELOG.md' 2>/dev/null || true
+      fail=1
+    fi
+  done
+  if [[ "$fail" -eq 0 ]]; then
+    echo "ok: no stale ontocore = \"0.14\"/\"0.15\"/\"0.16\" user-facing pins"
+  fi
+fi
+
+# Stale release-tag guidance (must say current minor, not an older one)
+if rg -q 'latest \*\*v0\.15\.x\*\* tag|latest \*\*v0\.14\.x\*\* tag|latest \*\*v0\.16\.x\*\* tag' docs/getting-started.md docs/guides README.md extension 2>/dev/null; then
+  echo "FAIL: stale v0.14/v0.15/v0.16 release tag reference in install docs (expected v${MINOR_VERSION}.x)" >&2
+  rg -n 'latest \*\*v0\.1[4-6]\.x\*\* tag' docs/getting-started.md docs/guides README.md extension 2>/dev/null || true
+  fail=1
+else
+  echo "ok: no stale v0.14–v0.16 release tag references"
+fi
+check_file_contains "docs/getting-started.md" "latest \\*\\*v${MINOR_VERSION}\\.x\\*\\* tag" "getting-started Path D current tag"
+check_file_contains "docs/guides/which-artifact.md" "ontocore = \"${MINOR_VERSION}\"" "which-artifact crate pin"
+check_file_contains "docs/guides/api-stability.md" "Published crates use \\*\\*${MINOR_VERSION}\\.x\\*\\*" "api-stability published crates minor"
 if grep -qE 'semantic diff\) is the v1\.0 goal|Full Protégé parity \(.*semantic diff\)' docs/faq.md 2>/dev/null; then
   echo "FAIL: docs/faq.md contradicts SHIPPED on semantic diff" >&2
   fail=1
@@ -637,12 +665,12 @@ else
   echo "ok: faq semantic diff status"
 fi
 
-# start-here must not list multi-root support under 'When not to use'
-if grep -A20 'When not to use OntoCode' docs/guides/start-here.md | grep -qE 'Multi-root VS Code workspaces are supported'; then
-  echo "FAIL: docs/guides/start-here.md lists multi-root under 'When not to use'" >&2
+# start.md must not list multi-root support under 'When not to use'
+if grep -A20 'When not to use OntoCode' docs/start.md | grep -qE 'Multi-root VS Code workspaces are supported'; then
+  echo "FAIL: docs/start.md lists multi-root under 'When not to use'" >&2
   fail=1
 else
-  echo "ok: start-here multi-root placement"
+  echo "ok: start.md multi-root placement"
 fi
 
 check_file_contains "docs/ui/ROADMAP_MAPPING.md" "Master checklist" "ui roadmap master checklist"
@@ -682,8 +710,8 @@ else
 fi
 
 # Architecture banner must reference current release ships today
-check_file_contains "ARCHITECTURE.md" "v0\.16 ships today" "ARCHITECTURE.md v0.16 banner"
-check_file_contains "docs/architecture.md" "v0\.16 ships today" "docs/architecture.md v0.16 banner"
+check_file_contains "ARCHITECTURE.md" "v0\.17 ships today" "ARCHITECTURE.md v0.17 banner"
+check_file_contains "docs/architecture.md" "v0\.17 ships today" "docs/architecture.md v0.17 banner"
 
 # Stale CLI alias notes
 if rg -q 'ontocore alias is planned' docs --glob '!**/migration/**' --glob '!**/design/**' 2>/dev/null; then
@@ -760,12 +788,12 @@ check_file_contains "mkdocs.yml" "adr/README.md" "mkdocs product adr"
 check_file_contains "docs/ui/README.md" "OntoUI" "ui readme OntoUI term"
 
 check_file_contains "mkdocs.yml" "guides/owl-xml-workflow.md" "mkdocs owl-xml workflow guide"
-check_file_contains "mkdocs.yml" "targets, not shipped" "mkdocs platform planning under contribute"
+check_file_contains "mkdocs.yml" "Design \\(not shipped" "mkdocs Design (not shipped) section"
 check_file_contains "mkdocs.yml" "v0\\.14 → v0\\.15" "mkdocs v0.15 migration in Help nav"
 check_file_contains "docs/guides/owl-xml-workflow.md" "read-only catalog" "owl-xml workflow guide"
 check_file_contains "docs/ontocore/rust-api.md" "Book ↔ docs.rs crosswalk" "rust-api docs.rs crosswalk"
 check_file_contains "docs/troubleshooting.md" "Where to start" "troubleshooting decision tree"
-check_file_contains "docs/platform/OVERVIEW.md" "v0.16 foundation shipped" "platform overview shipped banner"
+check_file_contains "docs/platform/OVERVIEW.md" "v0.17 foundation shipped" "platform overview shipped banner"
 
 # vision.md must reference current shipped release (not v0.11 or v0.12)
 for file in docs/vision.md VISION.md; do

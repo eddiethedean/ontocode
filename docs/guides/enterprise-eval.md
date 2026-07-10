@@ -1,6 +1,6 @@
 # Evaluating OntoCode for your organization
 
-This page helps security, platform, and ontology teams decide whether OntoCode **v0.16.0** fits your workflow. It is honest about **what ships today** vs the v1.0 Protégé-competitive target.
+This page helps security, platform, and ontology teams decide whether OntoCode **v0.17.0** fits your workflow. It is honest about **what ships today** vs the v1.0 Protégé-competitive target.
 
 Canonical capability matrix: [What ships today](../SHIPPED.md).
 
@@ -25,9 +25,9 @@ Prefer Protégé or other tools (or wait for v1.0) if you need:
 | [Release timeline (non-commitment)](release-timeline.md) | Planning — v0.9/v1.0 goals without fixed dates |
 | [LGPL compliance](lgpl-compliance.md) | Legal — horned-owl obligations |
 | [Protégé coexistence](protege-coexistence.md) | Ontology teams — split workflow with Protégé |
-| [Plugin authoring](plugins.md) | Platform — v0.15 plugin API (permissions, views), manifests, subprocess plugins |
+| [Plugin authoring](plugins.md) | Platform — v0.16+ plugin API (permissions, views, preferences, context actions), manifests, subprocess plugins |
 
-## What ships today (v0.16.0)
+## What ships today (v0.17.0)
 
 | Capability | Status |
 |------------|--------|
@@ -77,7 +77,7 @@ Full gap analysis: [Protégé parity matrix](../design/PROTEGE_PARITY.md).
 | `ontocode.lspPath` | Trusted workspaces only; ignored in VS Code Restricted Mode |
 | Resource limits | [workspace-limits.md](../workspace-limits.md) — file count, size, triple caps |
 | Telemetry | **No telemetry**. AI features are opt-in per [ADR-0010](../design/adr/0010-ai-features-opt-in.md) (not shipped) |
-| Supply chain | SHA256 checksums on release artifacts; `cargo audit` in CI. Code signing planned — not shipped yet |
+| Supply chain | SHA256 checksums on release artifacts; `cargo audit` in CI. **Code signing not shipped.** Open VSX publish is automated on release; **VS Code Marketplace publish is manual** ([releasing](../releasing.md)). |
 
 ## Licensing
 

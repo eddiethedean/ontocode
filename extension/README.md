@@ -5,7 +5,7 @@
 
 **Ontology IDE for VS Code** — powered by **OntoCore** (`ontocore-lsp` language server).
 
-**Current release: v0.16.0** — see [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) and [migration v0.16](https://ontocode-vs.readthedocs.io/en/latest/migration/v0.16/).
+**Current release: v0.17.0** — see [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) and [migration v0.17](https://ontocode-vs.readthedocs.io/en/latest/migration/v0.17/).
 
 > **New here?** [First success (~10 min)](https://ontocode-vs.readthedocs.io/en/latest/guides/first-success/) · [Migrating from Protégé?](https://ontocode-vs.readthedocs.io/en/latest/guides/protege-migration/) · [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) · [Migration v0.14](https://ontocode-vs.readthedocs.io/en/latest/migration/v0.14/) · [Full extension docs](https://ontocode-vs.readthedocs.io/en/latest/ontocode/vscode-extension/) · [FAQ](https://ontocode-vs.readthedocs.io/en/latest/faq/)
 
@@ -17,9 +17,11 @@
 
 1. **Install** OntoCode from the [Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) or [Open VSX](https://open-vsx.org/extension/ontocode/ontocode) (Cursor).
 2. **File → Open Folder…** and choose a project that contains ontology files.
-3. If VS Code asks, **Trust** the workspace (required for the bundled language server).
+3. OntoCode’s **bundled** language server runs in trusted and Restricted Mode. **Trust the workspace** only if you set custom `ontocode.lspPath` or `ontocode.robotPath` — those settings are ignored when the folder is untrusted.
 4. Click the **OntoCode** icon in the **Activity Bar** (left edge of the window).
 5. Open **Classes**, **Properties**, or **Individuals** and **click an entity name** to open the Entity Inspector.
+
+Edit **Turtle (`.ttl`)** and **OBO (`.obo`)** in the Entity Inspector. RDF/XML and OWL/XML are indexed for browse/query; write-back support differs by format — see [Supported formats](https://ontocode-vs.readthedocs.io/en/latest/supported-formats/).
 
 New to OntoCode? Follow the [first success tutorial](https://ontocode-vs.readthedocs.io/en/latest/guides/first-success/) on Read the Docs.
 
@@ -99,7 +101,7 @@ Open a `.ttl` (or other supported) file and use standard VS Code navigation:
 | Rename symbol | `F2` | `F2` |
 | Find references | `Shift+F12` | `Shift+F12` |
 | Turtle completion (prefix, QName, IRI) | `Ctrl+Space` | `Ctrl+Space` |
-| Diagnostic quick fixes | lightbulb / `Ctrl+.` | lightbulb / `Cmd+.` |
+| Diagnostic quick fixes | lightbulb / `Cmd+.` | lightbulb / `Ctrl+.` |
 | Document outline (symbols) | `Cmd+Shift+O` | `Ctrl+Shift+O` |
 | Workspace symbol search | `Cmd+T` | `Ctrl+T` |
 
@@ -163,16 +165,18 @@ Indexing is driven by the language server on startup; `ontocode.autoIndexOnOpen`
 | Empty **Classes** after indexing | **Output → OntoCore Language Server** for errors; run **Index Workspace** again |
 | No items under **Diagnostics** | Index must complete first; check **Problems** panel for the same issues |
 | Cannot edit in inspector | Write-back is **Turtle (`.ttl`) and OBO (`.obo`)**; OWL/XML and RDF/XML are read-only in the inspector |
-| Workspace is Restricted | **Trust** the folder — `ontocode.lspPath` is ignored in Restricted Mode |
+| Workspace is Restricted | Bundled LSP still runs; **Trust** only if you need custom `ontocode.lspPath` / `ontocode.robotPath` (ignored when untrusted) |
 | Multi-root workspace | All workspace folders are indexed; use **Index Workspace** after adding folders |
 
 More detail: [Installation & troubleshooting](https://ontocode-vs.readthedocs.io/en/latest/vscode-install/) · [FAQ](https://ontocode-vs.readthedocs.io/en/latest/faq/)
 
 ---
 
-## What's included in v0.16.0
+## What's included in v0.17.0
 
-**New in v0.16:** plugin preferences pages and context actions wired in the extension; plugin `ui.commands` execute via LSP `ontocore/runPlugin`; **Reload Imports** and **Reset Layout** commands.
+**New in v0.17:** Protégé-shell menus, toolbars, and dialogs; named perspectives and layout persistence; command registry / workspace UI state via LSP.
+
+**Also in recent minors:** plugin preferences pages and context actions (v0.16); plugin `ui.commands` via LSP `ontocore/runPlugin`; **Reload Imports** and **Reset Layout**.
 
 **Shipped:** explorer; **React** entity inspector (panel routing fix), graph panels, Query Workbench, Manchester editor, Refactor Preview, **Manage Imports**, and **Semantic Diff** panel; workspace refactor (rename IRI, migrate namespace, move, extract); EL/RL/RDFS/DL/auto reasoner (OntoLogos 1.x); **Turtle and OBO write-back** (engine v0.12; inspector v0.13); diagnostics with **quick fixes**; Turtle **completion**; LSP navigation (hover, go-to-definition, find references, rename); multi-root workspaces; optional index disk cache; **plugin host** (`ontocore plugins`, workflow scaffold, inspector plugin cards, dockable views); [Open VSX](https://open-vsx.org/extension/ontocode/ontocode) for Cursor.
 

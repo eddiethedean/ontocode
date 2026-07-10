@@ -118,6 +118,10 @@ export class PanelHost {
       if (data.type === "ready" && data.panel === options.panel) {
         host.onWebviewReady();
       }
+      if (data.type === "closeDialog") {
+        panel.dispose();
+        return;
+      }
       if (data.type === "setFocus") {
         focusRelay.setFocus(data.focus, { broadcast: true });
       }

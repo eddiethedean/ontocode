@@ -198,6 +198,10 @@ export class RefactorPreviewPanel {
     });
   }
 
+  public dispose(): void {
+    this.host.panel.dispose();
+  }
+
   public static async show(
     extensionUri: vscode.Uri,
     plan: RefactorPlan,

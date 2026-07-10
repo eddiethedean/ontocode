@@ -1,8 +1,16 @@
-# Start here (strict path)
+# Start here
 
-You can be successful with OntoCode/OntoCore in **5–15 minutes** if you follow one of the two paths below.
+You can be successful with OntoCode/OntoCore in **5–15 minutes** if you follow one path below.
 
 If you’re not sure what to install, start with [Which artifact do I need?](guides/which-artifact.md).
+
+## When not to use OntoCode (today)
+
+- You need **OWL/XML or RDF/XML in-place write-back** — edit as Turtle/OBO or use Protégé.
+- You need **full SQL** (JOINs, `ORDER BY`, `LIKE`) — use SQL-like virtual tables or SPARQL instead.
+- You need a **stable, semver-guaranteed plugin API** or production owlmake integration without subprocess scaffolding — plugin host **MVP shipped in v0.14** ([Plugin authoring](guides/plugins.md)); ecosystem hardening is **v1.0**.
+
+Canonical matrix: [What ships today](SHIPPED.md).
 
 ## Path A — VS Code IDE (recommended for most users)
 
@@ -16,7 +24,10 @@ Do these steps in order. Do not skip ahead.
    - Reasoning: [Reasoner guide](guides/reasoner.md)
    - Imports: [Manage Imports](ontocode/manage-imports.md)
 
+**Then (optional):** [Feature tour](ontocode/feature-tour.md) · [Install options](vscode-install.md) · [Manchester editor](ontocode/manchester-editor.md) · [Refactoring](guides/refactoring.md)
+
 If something doesn’t work, go straight to:
+
 - [Troubleshooting](troubleshooting.md)
 - [FAQ](faq.md)
 - [Support and contact](support.md)
@@ -32,14 +43,19 @@ If something doesn’t work, go straight to:
 5. **Decide what’s safe to automate:** [Automation and stability](automation-stability.md)
 
 If you plan to embed OntoCore or integrate via LSP:
+
 - Rust: [Rust library guide](guides/rust-library.md)
 - LSP: [LSP API](lsp-api.md) (and [schema](lsp-protocol.schema.json))
 
 ## If you’re evaluating adoption
 
 Read these in order:
+
 1. [What ships today](SHIPPED.md)
 2. [Enterprise evaluation](guides/enterprise-eval.md)
 3. [Production readiness](guides/production-readiness.md)
 4. [Security policy](security.md)
 
+## Supported since v0.10+
+
+- **Multi-root workspaces:** All workspace folders are indexed on open. Manual **Index Workspace** may prompt you to pick a folder when multiple roots are open.

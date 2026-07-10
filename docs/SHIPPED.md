@@ -1,8 +1,8 @@
-# What ships today (v0.16.0)
+# What ships today (v0.17.0)
 
 > **Canonical capability matrix.** Update this page on every release. Design specs under [Project](design/README.md) may describe future targets — check here for what is actually available.
 
-**Current release:** v0.16.0 · [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) · [Migration from v0.15](migration/v0.16.md)
+**Current release:** v0.17.0 · [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) · [Migration from v0.16](migration/v0.17.md)
 
 ## Products
 
@@ -25,6 +25,11 @@
 | Generic annotation assertions | Yes (Turtle) | `ontocore patch` |
 | OBO term edit (name, synonym, def, is_a, …) | Yes (inspector) | `ontocore patch` |
 | Find usages / rename IRI / namespace migration / move / extract module | Yes (preview + apply) | `ontocore refactor` |
+| Merge entities / replace entity references | Yes (preview + apply) | `ontocore refactor` |
+| New ontology scaffold / export (ROBOT convert or copy) | Yes | `ontocore new` / export LSP |
+| Prefix manager / ontology metadata patches | Yes | `ontocore patch` |
+| Active ontology selector | Yes | LSP `setActiveOntology` |
+| Menus / toolbars / keybindings / perspectives | Yes | — |
 | SQL-like queries | Query Workbench (React) + schema browser | `ontocore query` |
 | SPARQL | Query Workbench (React) | `ontocore sparql` |
 | Graph visualization (class, property, import, neighborhood) | Yes (React; asserted/inferred/combined modes, layouts, search) | LSP `ontocore/getGraph` |
@@ -58,6 +63,19 @@
 | Index / query | Yes | Yes | Yes (Horned catalog) | Yes |
 | Write-back (inspector, patches, refactor) | Yes | Yes | Read-only | Read-only |
 | Rich OBO metadata (synonyms, defs, xrefs) | — | Yes | — | — |
+
+## New in v0.17.0
+
+| Capability | Status |
+|------------|--------|
+| Protégé-style File, Edit, Active Ontology, Refactor, Reasoner, Tools, Window, and Help menus | Yes |
+| High-frequency toolbar actions with context-sensitive enablement | Yes |
+| Shared React dialog shell with keyboard handling and live IRI/prefix validation | Yes |
+| New Ontology, Prefix Manager, Metrics, and About webview dialogs | Yes |
+| Central command registry, platform-aware keybindings, and conflict detection | Yes |
+| Persistent layouts and named Modeling, Reasoning, and Review perspectives | Yes |
+| Help, plugin information, error log, diagnostics export, and support surfaces | Yes |
+| Engine support for prefix/metadata patches, create/export, active ontology, merge/replace, and reasoner workflows | Yes |
 
 ## New in v0.16.0
 

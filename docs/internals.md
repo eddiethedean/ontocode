@@ -31,7 +31,7 @@ Design documents, ADRs, and backlogs live under [design/](design/README.md). **P
 ### LSP / custom editor integrators
 
 1. [LSP hello world](guides/lsp-hello-world.md) — minimal stdio client
-2. [LSP API reference](lsp-api.md) — shipped v0.15 methods
+2. [LSP API reference](lsp-api.md) — shipped methods through v0.17
 3. Do **not** use [design/LSP_SPEC.md](design/LSP_SPEC.md) for current behavior (future target)
 
 ## Start here for contributors

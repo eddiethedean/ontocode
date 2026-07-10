@@ -40,6 +40,10 @@ export class ManchesterEditorPanel {
     });
   }
 
+  public dispose(): void {
+    this.host.panel.dispose();
+  }
+
   public static async show(
     extensionUri: vscode.Uri,
     options: ManchesterEditorOptions

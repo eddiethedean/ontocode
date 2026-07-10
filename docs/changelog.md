@@ -4,6 +4,10 @@ Canonical source: [CHANGELOG.md on GitHub](https://github.com/eddiethedean/ontoc
 
 Migration guides: [Migration index](migration/README.md)
 
+## [0.17.0] - 2026-07-10
+
+**v0.17.0** — Protégé shell parity: menus/toolbars/keybindings, command registry with enablement, DialogShell flows (new ontology, prefixes, metrics, about), layout persistence and named perspectives, help/error-log surfaces, plus OntoCore APIs for create/export, prefix/metadata patches, merge/replace, delete impact, and reasoner lifecycle. See [CHANGELOG.md](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) and [migration/v0.17.md](migration/v0.17.md).
+
 ## [0.16.0] - 2026-07-09
 
 **v0.16.0** — Plugin preferences pages + context actions wired in the extension, plugin command execution via `ontocore/runPlugin`, imports reload + layout reset. Includes OBO idspace IRI normalization ([#111](https://github.com/eddiethedean/ontocode/issues/111)) and OBO patch newline/token validation ([#112](https://github.com/eddiethedean/ontocode/issues/112)). See [CHANGELOG.md](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) and [migration/v0.16.md](migration/v0.16.md).

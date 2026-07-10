@@ -312,40 +312,40 @@ Dialogs should return structured results rather than directly mutating applicati
 
 Project
 
-- [ ] New ontology
-- [ ] Open
-- [ ] Save As
-- [ ] Import
-- [ ] Export
+- [x] New ontology
+- [x] Open
+- [x] Save As
+- [x] Import
+- [x] Export
 
 Entity
 
-- [ ] Create entity
-- [ ] Rename
-- [ ] Delete confirmation
+- [x] Create entity
+- [x] Rename
+- [x] Delete confirmation
 
 Ontology
 
-- [ ] Prefix manager
-- [ ] Metadata editor
-- [ ] Import manager
+- [x] Prefix manager
+- [x] Metadata editor
+- [x] Import manager
 
 Configuration
 
-- [ ] Preferences
-- [ ] Reasoner settings
+- [x] Preferences
+- [x] Reasoner settings
 
 Utilities
 
-- [ ] Search
-- [ ] Metrics
+- [x] Search
+- [x] Metrics
 
 Platform
 
-- [ ] Validation
-- [ ] Keyboard support
-- [ ] Accessibility
-- [ ] Plugin dialogs
+- [x] Validation
+- [x] Keyboard support
+- [x] Accessibility
+- [x] Plugin dialogs
 
 ---
 

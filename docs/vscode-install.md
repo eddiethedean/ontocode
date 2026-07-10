@@ -8,7 +8,7 @@
 ## Prerequisites
 
 - **VS Code 1.85+** (see [platform compatibility](guides/platform-compatibility.md))
-- **Trust** the workspace folder when prompted (required for bundled language server and custom `ontocode.lspPath`)
+- OntoCode’s **bundled** language server runs in trusted and Restricted Mode. **Trust the workspace** only if you set custom `ontocode.lspPath` or `ontocode.robotPath` — those settings are ignored when the folder is untrusted.
 
 ## Install matrix
 
@@ -24,9 +24,9 @@ CLI install options (separate from the extension): [getting started (CLI)](getti
 
 ## Option A — VS Code Marketplace (recommended)
 
-1. Install [OntoCode from the Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) (v0.16.0+).
+1. Install [OntoCode from the Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) (v0.17.0+).
 2. **File → Open Folder…** and choose a directory with ontology files.
-3. **Trust** the workspace when prompted.
+3. OntoCode’s **bundled** language server runs without Trust; **Trust** only if you need custom `ontocode.lspPath` / `ontocode.robotPath`.
 4. Open the **OntoCode** activity bar and browse ontologies, classes, properties, individuals, and **Diagnostics**.
 
 For a full walkthrough, see [First success in 10 minutes](guides/first-success.md).

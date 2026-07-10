@@ -46,7 +46,7 @@ Follow the [first success core path](../guides/first-success.md) if anything is 
 Add a pipeline gate so Protégé-only mistakes are caught before merge:
 
 ```yaml
-- run: cargo install ontocore-cli --locked --version 0.16.0
+- run: cargo install ontocore-cli --locked --version 0.17.0
 - run: ontocore validate ./src/ontologies
 ```
 

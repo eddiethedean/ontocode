@@ -1,6 +1,6 @@
-# OntoCore LSP API (v0.16)
+# OntoCore LSP API (v0.17)
 
-> **Status:** Documents behavior in **OntoCore v0.16.0**. Pre-1.0 APIs may change.
+> **Status:** Documents behavior in **OntoCore v0.17.0**. Pre-1.0 APIs may change.
 > Canonical feature list: [What ships today](SHIPPED.md).
 
 This document describes **what ships today** in `ontocore-lsp`. For the **v1.0 target** (extended plugin methods), see [LSP_SPEC.md](design/LSP_SPEC.md).
@@ -9,14 +9,14 @@ This document describes **what ships today** in `ontocore-lsp`. For the **v1.0 t
 
 If you are integrating OntoCore outside VS Code (custom editor, scripts, automation), treat the JSON schema as the **canonical, machine-readable contract** for this release:
 
-- **LSP JSON Schema (v0.16):** [`lsp-protocol.schema.json`](lsp-protocol.schema.json)
+- **LSP JSON Schema (v0.17):** [`lsp-protocol.schema.json`](lsp-protocol.schema.json)
 
 ### Versioning and pinning (pre-1.0)
 
 Until v1.0, minor releases may change request/response fields.
 For stable integrations:
 
-- **Pin OntoCore** (CLI/LSP) to an exact version (e.g. `0.16.0`) in your tooling.
+- **Pin OntoCore** (CLI/LSP) to an exact version (e.g. `0.17.0`) in your tooling.
 - Prefer consuming `lsp-protocol.schema.json` from the same tagged release you deploy.
 
 ## Wire format
@@ -26,7 +26,7 @@ LSP JSON uses **snake_case** for enums serialized from Rust (`EntityKind`, `Pars
 **Reference links (implementation):**
 
 - Types: [`protocol.rs` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/crates/ontocore-lsp/src/protocol.rs)
-- JSON Schema (v0.16): [`lsp-protocol.schema.json`](lsp-protocol.schema.json) — query, patch, reasoner, refactor, graph, semantic diff, schema browser, PR summary, plugin payloads, explanation alternatives.
+- JSON Schema (v0.17): [`lsp-protocol.schema.json`](lsp-protocol.schema.json) — query, patch, reasoner, refactor, graph, semantic diff, schema browser, PR summary, plugin payloads, explanation alternatives.
 - Handlers: [`handlers.rs` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/crates/ontocore-lsp/src/handlers.rs)
 - Extension client: [`client.ts` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/extension/src/lsp/client.ts)
 
@@ -155,6 +155,8 @@ Return documents, entities, and class hierarchy for the explorer UI.
 | `documents` | `OntologyDocument[]` | Indexed files (`id`, `path`, `format`, `parse_status`, …) |
 | `entities` | `Entity[]` | All extracted entities |
 | `hierarchy` | `ClassHierarchy` | `edges`, `parents`, `children` maps (asserted) |
+| `stats` | `CatalogStats`? | **(v0.17+)** Same counts as `indexWorkspace` (when catalog is indexed) |
+| `active_ontology_id` | string? | **(v0.17+)** Active ontology id when set via `setActiveOntology` |
 | `diagnostics` | `DiagnosticSummary[]` | Lint summaries for explorer |
 | `reasoner` | `ReasonerSnapshot` (optional) | Last reasoner run — inferred hierarchy, unsatisfiable classes |
 
@@ -472,6 +474,91 @@ Returns discovered workspace plugins from `.ontocore/plugins/*.toml` plus built-
 | `in_process` | boolean | `true` for built-in reference plugins |
 
 **Errors:** `NOT_INDEXED`, `INDEX_FAILED` (discovery/host failure)
+
+### `ontocore/listCommands` (v0.17+)
+
+Return stable command metadata for menus, toolbars, and enablement.
+
+**Params:** none
+
+**Result:** `{ "commands": CommandDescriptor[] }`
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | string | Command id (e.g. `ontocode.newOntology`) |
+| `title` | string | Display title |
+| `category` | string | Menu category (`File`, `Edit`, …) |
+| `enablement` | string[] | Predicates: `always`, `has_ontology`, `is_dirty`, `has_selection`, `reasoner_running`, `reasoner_idle`, `can_edit_selection` |
+| `undo_label` | string? | Semantic undo label for edits |
+| `dialog_id` | string? | Associated dialog schema id |
+
+**Errors:** none (empty `commands` if the server has no registered descriptors)
+
+### `ontocore/getWorkspaceUiState` (v0.17+)
+
+Return enablement inputs for the command registry.
+
+**Params:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `selection_iri` | string? | Focused entity IRI from the client |
+| `dirty_document_count` | number | Client-reported dirty document count |
+| `active_ontology_id` | string? | Preferred active ontology id |
+
+**Result:** `WorkspaceUiState` (`has_ontology`, `is_dirty`, `has_selection`, `selection_editable`, `reasoner_*`, `active_ontology_id`, optional `stats`)
+
+**Errors:** none
+
+### `ontocore/getDialogSchema` (v0.17+)
+
+**Params:** `{ "dialog_id": string }`
+
+**Result:** `{ "schema": DialogSchema }` with `id`, `title`, `fields[]`, `primary_action`.
+
+Known dialog ids include `new_ontology`, `export_ontology`, `save_as`, `prefix_manager`, `ontology_metadata`, `search`, `metrics`, `delete_entity`, `reasoner_settings`, `preferences`, `import`, `rename`.
+
+**Errors:** `INVALID_PARAMS` (unknown `dialog_id`)
+
+### `ontocore/createOntology` (v0.17+)
+
+Scaffold a new Turtle or OBO ontology file under the workspace.
+
+**Params:** `{ "path", "ontology_iri", "version_iri"?, "format"?, "prefixes"? }`
+
+**Result:** `{ "path", "ontology_iri" }`
+
+**Errors:** `INVALID_PARAMS` (workspace not initialized, path outside roots, file already exists, unsafe path), `INDEX_FAILED` (I/O failure creating the file)
+
+### `ontocore/exportOntology` (v0.17+)
+
+Export/convert an ontology via ROBOT `convert`, with same-format copy fallback when ROBOT is unavailable.
+
+**Params:** `{ "source_path", "output_path", "format"? }`
+
+**Result:** `{ "output_path", "success", "logs"? }` — `success` may be `false` when ROBOT exits non-zero (still an LSP success response).
+
+**Errors:** `INVALID_PARAMS` (path outside workspace), `ROBOT_FAILED` (ROBOT unavailable and formats differ, or copy failure)
+
+### `ontocore/setActiveOntology` (v0.17+)
+
+Set the active ontology id used for new-axiom targeting.
+
+**Params:** `{ "ontology_id": string }` (document id, path, or base IRI)
+
+**Result:** `{ "active_ontology_id": string }`
+
+**Errors:** `NOT_FOUND` (id not in the indexed catalog), `NOT_INDEXED`
+
+### `ontocore/deleteImpact` (v0.17+)
+
+Preview delete impact for an entity.
+
+**Params:** `{ "entity_iri": string }`
+
+**Result:** `{ "entity_iri", "usage_count", "axiom_count", "referencing_entities", "warnings" }`
+
+**Errors:** `NOT_INDEXED`
 
 ### `ontocore/runPlugin` (v0.14+, views v0.15)
 

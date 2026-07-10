@@ -16,7 +16,11 @@ function panelFromQuery(): PanelKind {
     panel === "queryWorkbench" ||
     panel === "manchesterEditor" ||
     panel === "semanticDiff" ||
-    panel === "imports"
+    panel === "imports" ||
+    panel === "metrics" ||
+    panel === "about" ||
+    panel === "newOntology" ||
+    panel === "prefixManager"
   ) {
     return panel;
   }

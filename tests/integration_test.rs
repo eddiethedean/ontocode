@@ -274,6 +274,62 @@ fn sparql_malformed_query_returns_error() {
 }
 
 #[test]
+fn sparql_multi_file_blank_nodes_do_not_collide() {
+    let dir = tempfile::tempdir().unwrap();
+    std::fs::write(
+        dir.path().join("a.ttl"),
+        r#"@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix ex: <http://ex.org/a#> .
+ex:A a owl:Class ;
+  rdfs:subClassOf [ a owl:Restriction ; owl:onProperty ex:p1 ; owl:someValuesFrom ex:B ] .
+ex:B a owl:Class .
+ex:p1 a owl:ObjectProperty .
+"#,
+    )
+    .unwrap();
+    std::fs::write(
+        dir.path().join("b.ttl"),
+        r#"@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix ex: <http://ex.org/b#> .
+ex:X a owl:Class ;
+  rdfs:subClassOf [ a owl:Restriction ; owl:onProperty ex:p2 ; owl:someValuesFrom ex:Y ] .
+ex:Y a owl:Class .
+ex:p2 a owl:ObjectProperty .
+"#,
+    )
+    .unwrap();
+
+    let catalog = IndexBuilder::new().workspace(dir.path()).build().expect("build");
+
+    let fused = sparql_catalog(
+        &catalog,
+        r#"ASK {
+  ?r <http://www.w3.org/2002/07/owl#onProperty> <http://ex.org/a#p1> .
+  ?r <http://www.w3.org/2002/07/owl#someValuesFrom> <http://ex.org/b#Y> .
+}"#,
+    )
+    .expect("sparql ask fused");
+    assert_eq!(
+        fused.rows[0].get("boolean").map(String::as_str),
+        Some("false"),
+        "restrictions from different files must not share blank nodes"
+    );
+
+    let intact = sparql_catalog(
+        &catalog,
+        r#"ASK {
+  <http://ex.org/a#A> <http://www.w3.org/2000/01/rdf-schema#subClassOf> ?r .
+  ?r <http://www.w3.org/2002/07/owl#onProperty> <http://ex.org/a#p1> .
+  ?r <http://www.w3.org/2002/07/owl#someValuesFrom> <http://ex.org/a#B> .
+}"#,
+    )
+    .expect("sparql ask intact");
+    assert_eq!(intact.rows[0].get("boolean").map(String::as_str), Some("true"));
+}
+
+#[test]
 fn sql_json_and_csv_export() {
     let catalog = fixture_catalog();
     let result = query_catalog(&catalog, "SELECT short_name FROM classes").expect("query");

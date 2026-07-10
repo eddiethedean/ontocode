@@ -24,17 +24,18 @@ import {
   extractModule,
   migrateNamespace,
   moveEntity,
+  RefactorPreviewPanel,
   renameEntityIri,
   showEntityUsages,
 } from "../webviews/refactorPreview";
-import { ExplorerTreeProvider } from "../treeviews/explorer";
+import { ExplorerTreeProvider, OntologyTreeItem } from "../treeviews/explorer";
 import { resolveEntityIri } from "../utils/resolveEntityIri";
 import { byteColToUtf16 } from "../utils/positions";
 import { documentUriInWorkspace, openWorkspaceTextDocument } from "../utils/workspacePath";
 import { refreshPluginCommands } from "./pluginCommands";
 import { WorkflowPanel } from "../webviews/workflowPanel";
 import { PluginViewPanel } from "../webviews/pluginViewPanel";
-import { QueryWorkbenchPanel } from "../webviews/queryWorkbenchReact";
+import { registerV017Commands } from "./v017Commands";
 
 export function registerCommands(
   context: vscode.ExtensionContext,
@@ -334,8 +335,22 @@ export function registerCommands(
       if (!iri) {
         return;
       }
+      let impactSummary = `Delete entity ${iri}?`;
+      try {
+        const { deleteImpact } = await import("../lsp/client");
+        const impact = await deleteImpact({ entity_iri: iri });
+        const refs = impact.referencing_entities.slice(0, 5).join(", ");
+        impactSummary =
+          `Delete entity ${iri}?\n\n` +
+          `Usages: ${impact.usage_count}\n` +
+          `Axioms: ${impact.axiom_count}\n` +
+          (refs ? `Referencing: ${refs}\n` : "") +
+          (impact.warnings.length ? `Warnings: ${impact.warnings.join("; ")}\n` : "");
+      } catch {
+        // Fall back to simple confirm when impact API is unavailable.
+      }
       const confirm = await vscode.window.showWarningMessage(
-        `Delete entity ${iri}?`,
+        impactSummary,
         { modal: true },
         "Delete"
       );
@@ -656,6 +671,7 @@ export function registerCommands(
       });
     })
   );
+  registerV017Commands(context, () => refreshExplorer(providers));
 }
 
 async function runIndexAndRefresh(

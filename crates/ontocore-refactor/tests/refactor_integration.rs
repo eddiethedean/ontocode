@@ -1,8 +1,8 @@
 use ontocore_catalog::IndexBuilder;
 use ontocore_refactor::{
     apply_refactor_plan, apply_refactor_plan_checked, find_usages, preview_extract_module,
-    preview_migrate_namespace, preview_move_entity, preview_rename_iri,
-    validate_refactor_plan_paths, RefactorError,
+    preview_merge_entities, preview_migrate_namespace, preview_move_entity, preview_rename_iri,
+    preview_replace_entity, validate_refactor_plan_paths, RefactorError,
 };
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
@@ -64,6 +64,117 @@ fn rename_iri_across_workspace() {
     let org_text = std::fs::read_to_string(ws.join("org.ttl")).unwrap();
     assert!(org_text.contains("ex:Human"));
     assert!(!org_text.contains("ex:Person"));
+}
+
+#[test]
+fn merge_entities_rewrites_references_and_removes_merged_declaration() {
+    let tmp = TempDir::new().unwrap();
+    let ws = tmp.path();
+    std::fs::write(
+        ws.join("merge.ttl"),
+        concat!(
+            "@prefix ex: <http://example.org#> .\n",
+            "@prefix owl: <http://www.w3.org/2002/07/owl#> .\n",
+            "@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n\n",
+            "ex:Keep a owl:Class .\n",
+            "ex:Merge a owl:Class .\n",
+            "ex:Child a owl:Class ; rdfs:subClassOf ex:Merge .\n",
+        ),
+    )
+    .unwrap();
+    let catalog = build_catalog(ws);
+
+    let plan = preview_merge_entities(
+        &catalog,
+        "http://example.org#Keep",
+        "http://example.org#Merge",
+        &empty_overrides(),
+    )
+    .expect("merge plan");
+    let preview = &plan.changes[0].preview_text;
+    assert!(preview.contains("ex:Keep a owl:Class"));
+    assert!(preview.contains("rdfs:subClassOf ex:Keep"));
+    assert!(!preview.contains("ex:Merge a owl:Class"));
+    assert!(plan.warnings.is_empty());
+}
+
+#[test]
+fn merge_entities_warns_when_an_entity_is_missing() {
+    let tmp = TempDir::new().unwrap();
+    let ws = tmp.path();
+    std::fs::write(
+        ws.join("merge.ttl"),
+        "@prefix ex: <http://example.org#> .\nex:Child ex:relatedTo ex:Missing .\n",
+    )
+    .unwrap();
+    let catalog = build_catalog(ws);
+
+    let plan = preview_merge_entities(
+        &catalog,
+        "http://example.org#Keep",
+        "http://example.org#Missing",
+        &empty_overrides(),
+    )
+    .expect("merge plan with warnings");
+    assert_eq!(plan.warnings.iter().filter(|warning| warning.contains("not found")).count(), 2);
+}
+
+#[test]
+fn replace_entity_preserves_source_declaration_when_target_exists() {
+    let tmp = TempDir::new().unwrap();
+    let ws = tmp.path();
+    std::fs::write(
+        ws.join("replace.ttl"),
+        concat!(
+            "@prefix ex: <http://example.org#> .\n",
+            "@prefix owl: <http://www.w3.org/2002/07/owl#> .\n",
+            "@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n\n",
+            "ex:From a owl:Class .\n",
+            "ex:To a owl:Class .\n",
+            "ex:Child a owl:Class ; rdfs:subClassOf ex:From .\n",
+        ),
+    )
+    .unwrap();
+    let catalog = build_catalog(ws);
+
+    let plan = preview_replace_entity(
+        &catalog,
+        "http://example.org#From",
+        "http://example.org#To",
+        &empty_overrides(),
+    )
+    .expect("replace plan");
+    let preview = &plan.changes[0].preview_text;
+    assert!(preview.contains("ex:From a owl:Class"));
+    assert!(preview.contains("ex:To a owl:Class"));
+    assert!(preview.contains("rdfs:subClassOf ex:To"));
+}
+
+#[test]
+fn replace_entity_renames_declaration_when_target_is_missing() {
+    let tmp = TempDir::new().unwrap();
+    let ws = tmp.path();
+    std::fs::write(
+        ws.join("replace.ttl"),
+        concat!(
+            "@prefix ex: <http://example.org#> .\n",
+            "@prefix owl: <http://www.w3.org/2002/07/owl#> .\n",
+            "ex:From a owl:Class .\n",
+        ),
+    )
+    .unwrap();
+    let catalog = build_catalog(ws);
+
+    let plan = preview_replace_entity(
+        &catalog,
+        "http://example.org#From",
+        "http://example.org#To",
+        &empty_overrides(),
+    )
+    .expect("replace plan");
+    let preview = &plan.changes[0].preview_text;
+    assert!(preview.contains("ex:To a owl:Class"));
+    assert!(!preview.contains("ex:From a owl:Class"));
 }
 
 #[test]

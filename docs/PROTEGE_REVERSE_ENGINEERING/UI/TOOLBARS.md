@@ -290,40 +290,40 @@ Toolbar buttons should contain:
 
 ## Project
 
-- [ ] New
-- [ ] Open
-- [ ] Save
-- [ ] Save All
+- [x] New
+- [x] Open
+- [x] Save
+- [x] Save All
 
 ## Editing
 
-- [ ] Undo
-- [ ] Redo
+- [x] Undo
+- [x] Redo
 
 ## Search
 
-- [ ] Entity Search
-- [ ] Global Search
+- [x] Entity Search
+- [x] Global Search
 
 ## Reasoning
 
-- [ ] Start
-- [ ] Stop
-- [ ] Synchronize
-- [ ] Classify
+- [x] Start
+- [x] Stop
+- [x] Synchronize
+- [x] Classify
 
 ## Preferences
 
-- [ ] Preferences Button
+- [x] Preferences Button
 
 ## Framework
 
-- [ ] Dynamic enablement
-- [ ] Plugin contributions
-- [ ] Keyboard shortcuts
-- [ ] Accessible tooltips
-- [ ] Overflow handling
-- [ ] Responsive layout
+- [x] Dynamic enablement
+- [x] Plugin contributions
+- [x] Keyboard shortcuts
+- [x] Accessible tooltips
+- [x] Overflow handling
+- [x] Responsive layout
 
 ---
 

@@ -5,11 +5,11 @@ import {
   isPatchFullySynced,
   patchFailureMessage,
 } from "../lsp/patchFeedback";
-import { EntityDetail, PatchOp } from "../lsp/protocol";
+import { EntityDetail } from "../lsp/protocol";
 import { entityKindLabel } from "../utils/iri";
 import { documentUriInWorkspace } from "../utils/workspacePath";
 import { PanelHost } from "./panelHost";
-import type { EntityDetailPayload, WebviewMessage } from "./messages";
+import type { EntityDetailPayload, PatchOp, WebviewMessage } from "./messages";
 import { GraphPanel } from "./graphPanel";
 import { acceptInspectorRevealRequest } from "./inspectorReveal";
 
@@ -144,7 +144,7 @@ export class EntityInspectorPanel {
           inspector_cards: p.ui.inspector_cards.map((c) => ({
             id: c.id,
             title: c.title,
-            applies_to: c.applies_to,
+            applies_to: c.applies_to ?? [],
             command: c.command,
           })),
         })),

@@ -1457,7 +1457,7 @@ pub(crate) fn is_safe_iri(iri: &str) -> bool {
 }
 
 /// True when `local` is a valid Turtle PN_LOCAL (simplified).
-fn is_valid_pn_local(local: &str) -> bool {
+pub(crate) fn is_valid_pn_local(local: &str) -> bool {
     if local.is_empty() {
         return false;
     }

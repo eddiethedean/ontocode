@@ -510,10 +510,13 @@ export function registerCommands(
             }),
           ]);
           if (token.isCancellationRequested) {
+            panel.cancelActiveRun();
             void vscode.window.showWarningMessage(
-              "OntoCode: reasoner run cancelled (result will be ignored if it completes)"
+              "OntoCode: reasoner run cancelled (in-flight result will be ignored)"
             );
           }
+          // Ensure we don't leave an unhandled rejection if cancel won the race.
+          void run.catch(() => undefined);
         }
       );
     }),
@@ -552,7 +555,7 @@ export function registerCommands(
     }),
     vscode.commands.registerCommand(
       "ontocode.showExplanation",
-      async (classIri?: string) => {
+      async (classIri?: string, profile?: string) => {
         if (!classIri) {
           classIri = await vscode.window.showInputBox({
             prompt: "Unsatisfiable class IRI",
@@ -562,7 +565,7 @@ export function registerCommands(
           return;
         }
         try {
-          await ExplanationPanel.show(classIri);
+          await ExplanationPanel.show(classIri, profile);
         } catch (err) {
           const message = err instanceof Error ? err.message : String(err);
           void vscode.window.showErrorMessage(

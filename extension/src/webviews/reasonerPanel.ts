@@ -37,9 +37,12 @@ export class ReasonerPanel {
         await this.run(profile, autoDetect, runId);
       }
       if (msg.command === "explain" && typeof msg.classIri === "string") {
+        const profile =
+          this.lastResult?.profile_used ?? focusRelay.getReasoning()?.profile;
         await vscode.commands.executeCommand(
           "ontocode.showExplanation",
-          msg.classIri
+          msg.classIri,
+          profile
         );
       }
       if (msg.command === "showInferred") {
@@ -92,6 +95,20 @@ export class ReasonerPanel {
     const profile = cfg.get<string>("reasoner.default") ?? "el";
     const autoDetect = cfg.get<boolean>("reasoner.autoProfile") ?? true;
     await this.run(profile, autoDetect, ++this.runId);
+  }
+
+  /** Invalidate in-flight runs so late RPC results are ignored (#141). */
+  public cancelActiveRun(): void {
+    this.runId += 1;
+    this.postToWebview({ command: "syncRunId", runId: this.runId });
+    const prev = focusRelay.getReasoning();
+    focusRelay.setReasoningState({
+      profile: this.lastResult?.profile_used ?? prev?.profile ?? "el",
+      unsatisfiable: this.lastResult?.unsatisfiable ?? prev?.unsatisfiable ?? [],
+      lastRunAt: prev?.lastRunAt ?? 0,
+      dirty: prev?.dirty ?? true,
+      running: false,
+    });
   }
 
   private async run(profile: string, autoDetect: boolean, runId: number): Promise<void> {

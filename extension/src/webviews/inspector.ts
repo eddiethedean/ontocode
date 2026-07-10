@@ -46,6 +46,7 @@ export class EntityInspectorPanel {
   private classOptions: string[] = [];
   private objectPropertyOptions: string[] = [];
   private activeRequestId = 0;
+  private applying = false;
 
   private constructor(
     host: PanelHost,
@@ -226,16 +227,23 @@ export class EntityInspectorPanel {
     this.reveal(detail, this.classOptions, this.objectPropertyOptions, requestId);
   }
 
+  private postPatchError(message: string): void {
+    this.host.postMessage({ type: "error", message });
+    void vscode.window.showErrorMessage(message);
+  }
+
   private async runPatch(
     patches: PatchOp[],
     previewOnly: boolean
   ): Promise<void> {
-    if (!this.documentUri) {
-      void vscode.window.showErrorMessage(
-        "No editable document for this entity"
-      );
+    if (this.applying) {
       return;
     }
+    if (!this.documentUri) {
+      this.postPatchError("No editable document for this entity");
+      return;
+    }
+    this.applying = true;
     const iriAtStart = this.iri;
     const requestId = ++this.activeRequestId;
     try {
@@ -249,7 +257,7 @@ export class EntityInspectorPanel {
       }
       if (previewOnly) {
         if (hasPatchFailureDiagnostics(result)) {
-          void vscode.window.showErrorMessage(patchFailureMessage(result));
+          this.postPatchError(patchFailureMessage(result));
           return;
         }
         if (result.preview_text) {
@@ -258,12 +266,10 @@ export class EntityInspectorPanel {
         return;
       }
       if (!result.applied) {
-        void vscode.window.showErrorMessage(patchFailureMessage(result));
+        this.postPatchError(patchFailureMessage(result));
         return;
       }
-      if (!isPatchFullySynced(result)) {
-        return;
-      }
+      // Disk write succeeded — refresh inspector even if editor sync was cancelled (#119).
       const deleted = patches.some((p) => p.op === "delete_entity");
       if (deleted) {
         this.host.panel.dispose();
@@ -294,10 +300,15 @@ export class EntityInspectorPanel {
       if (this.onRefresh) {
         await this.onRefresh();
       }
-      void vscode.window.showInformationMessage("OntoCode: changes applied");
+      if (isPatchFullySynced(result)) {
+        void vscode.window.showInformationMessage("OntoCode: changes applied");
+      }
+      // editor_synced:false already warned in applyAxiomPatch client helper
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
-      void vscode.window.showErrorMessage(`OntoCode: patch failed — ${msg}`);
+      this.postPatchError(`OntoCode: patch failed — ${msg}`);
+    } finally {
+      this.applying = false;
     }
   }
 

@@ -811,7 +811,19 @@ fn semantics_for_document(
                     axioms: parsed.axioms.clone(),
                     namespace_rows: parsed.namespace_rows.clone(),
                     imports: parsed.import_rows.clone(),
-                    bridge_warning: None,
+                    bridge_warning: Some(Diagnostic {
+                        code: DiagnosticCode::OwlBridgeFailed,
+                        severity: DiagnosticSeverity::Warning,
+                        message: format!(
+                            "Horned-OWL OWL/XML bridge failed; using parser-only entities and axioms: {e}"
+                        ),
+                        file: path.to_path_buf(),
+                        range: SourceLocation::default(),
+                        entity_iri: None,
+                        quick_fix: None,
+                        plugin_id: None,
+                        plugin_code: None,
+                    }),
                     rdf_quads: Vec::new(),
                 })
             }
@@ -1305,5 +1317,32 @@ mod incremental_tests {
             }
         }
         assert!(found, "expected Department IRI in Oxigraph store");
+    }
+
+    #[test]
+    fn owx_horned_load_failure_surfaces_bridge_diagnostic() {
+        let dir = tempfile::tempdir().unwrap();
+        // Recognized as OWL/XML by extension; Horned OWX reader must fail.
+        std::fs::write(
+            dir.path().join("broken.owx"),
+            "<?xml version=\"1.0\"?>\n<NotAnOntology>garbage</NotAnOntology>\n",
+        )
+        .unwrap();
+
+        let catalog = IndexBuilder::new().workspace(dir.path()).build().expect("build");
+        let has_bridge = catalog.data().diagnostics.iter().any(|d| {
+            d.code == DiagnosticCode::OwlBridgeFailed
+                && d.file.file_name().and_then(|n| n.to_str()) == Some("broken.owx")
+        });
+        assert!(
+            has_bridge,
+            "OWX Horned failure must emit OwlBridgeFailed; got {:?}",
+            catalog
+                .data()
+                .diagnostics
+                .iter()
+                .map(|d| (&d.code, d.message.as_str()))
+                .collect::<Vec<_>>()
+        );
     }
 }

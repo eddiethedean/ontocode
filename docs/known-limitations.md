@@ -35,7 +35,11 @@ Published crates are **0.17.x**. Library APIs, LSP JSON, and SQL table columns m
 
 ## Reasoning
 
-EL / RL / RDFS / DL classification ships via **Ontologos**. Explanations are **EL-first**; DL clash traces are partial. See [Reasoner guide](guides/reasoner.md).
+EL / RL / RDFS / DL classification ships via **Ontologos**. Explanations are **EL-first**; DL clash traces are partial. In VS Code, Start / Synchronize / Classify / Consistency share one classify path; Stop clears UI state only. See [Reasoner guide](guides/reasoner.md).
+
+## Layout persistence
+
+Webview **tabs** survive VS Code reload via serializers; transient panel payloads (selected entity, query text, refactor plan) are **not** restored — reopen panels from OntoCode commands. Named perspectives open a fixed panel set.
 
 ## When not to use OntoCode today
 

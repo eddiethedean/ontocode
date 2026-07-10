@@ -16,10 +16,11 @@ use lsp_types::{
     CodeActionProviderCapability, CompletionOptions, DocumentChanges, DocumentSymbol,
     DocumentSymbolParams, DocumentSymbolResponse, GotoDefinitionParams, GotoDefinitionResponse,
     Hover, HoverContents, HoverParams, HoverProviderCapability, InitializeParams, InitializeResult,
-    Location, MarkupContent, MarkupKind, OneOf, Position, Range, ReferenceParams, RenameParams,
-    SemanticTokensParams, SemanticTokensServerCapabilities, ServerCapabilities, SymbolInformation,
-    SymbolKind, TextDocumentEdit, TextDocumentSyncCapability, TextDocumentSyncKind, TextEdit, Uri,
-    WorkspaceEdit, WorkspaceFoldersServerCapabilities, WorkspaceServerCapabilities,
+    Location, MarkupContent, MarkupKind, OneOf, Position, PrepareRenameResponse, Range,
+    ReferenceParams, RenameOptions, RenameParams, SemanticTokensParams,
+    SemanticTokensServerCapabilities, ServerCapabilities, SymbolInformation, SymbolKind,
+    TextDocumentEdit, TextDocumentPositionParams, TextDocumentSyncCapability, TextDocumentSyncKind,
+    TextEdit, Uri, WorkspaceEdit, WorkspaceFoldersServerCapabilities, WorkspaceServerCapabilities,
     WorkspaceSymbolParams, WorkspaceSymbolResponse,
 };
 use ontocore_catalog::{GraphBuilder, GraphRequest, IndexBuilder, OntologyCatalog};
@@ -70,7 +71,10 @@ pub fn handle_initialize(state: &ServerState, params: InitializeParams) -> Initi
             document_symbol_provider: Some(OneOf::Left(true)),
             workspace_symbol_provider: Some(OneOf::Left(true)),
             references_provider: Some(OneOf::Left(true)),
-            rename_provider: Some(OneOf::Left(true)),
+            rename_provider: Some(OneOf::Right(RenameOptions {
+                prepare_provider: Some(true),
+                work_done_progress_options: Default::default(),
+            })),
             completion_provider: Some(CompletionOptions {
                 trigger_characters: Some(vec![":".to_string(), "<".to_string(), "@".to_string()]),
                 ..Default::default()
@@ -2059,6 +2063,16 @@ pub fn handle_rename(
     Ok(Some(edit))
 }
 
+pub fn handle_prepare_rename(
+    state: &ServerState,
+    params: TextDocumentPositionParams,
+) -> Option<PrepareRenameResponse> {
+    let path = lsp_document_path(state, &params.text_document.uri)?;
+    let content = state.document_text(&path)?;
+    let (range, placeholder) = rename_range_at_position(&content, params.position)?;
+    Some(PrepareRenameResponse::RangeWithPlaceholder { range, placeholder })
+}
+
 fn validate_refactor_plan_any_roots(
     roots: &[PathBuf],
     plan: &ontocore_refactor::RefactorPlan,
@@ -2479,6 +2493,17 @@ pub fn handle_standard_request(
                 Err(err) => StandardRequestOutcome::LspError(err),
             }
         }
+        "textDocument/prepareRename" => {
+            let Ok(params) = serde_json::from_value(params.unwrap_or(Value::Null)) else {
+                return StandardRequestOutcome::InvalidParams(invalid_params("prepareRename"));
+            };
+            match handle_prepare_rename(state, params) {
+                Some(resp) => serde_json::to_value(resp)
+                    .map(StandardRequestOutcome::Ok)
+                    .unwrap_or(StandardRequestOutcome::Ok(Value::Null)),
+                None => StandardRequestOutcome::Ok(Value::Null),
+            }
+        }
         "textDocument/completion" => {
             let Ok(params) = serde_json::from_value(params.unwrap_or(Value::Null)) else {
                 return StandardRequestOutcome::InvalidParams(invalid_params("completion"));
@@ -2578,6 +2603,12 @@ fn entity_kind_to_symbol_kind(kind: EntityKind) -> SymbolKind {
 }
 
 fn iri_at_position(content: &str, position: Position) -> Option<String> {
+    let (_, token) = rename_range_at_position(content, position)?;
+    expand_iri_token(content, &token)
+}
+
+/// Returns the UTF-16 range of the renameable token under the cursor and its text placeholder.
+fn rename_range_at_position(content: &str, position: Position) -> Option<(Range, String)> {
     let lines: Vec<&str> = content.lines().collect();
     let line = lines.get(position.line as usize)?;
     let byte_col = utf16_offset_to_byte(line, position.character);
@@ -2586,17 +2617,22 @@ fn iri_at_position(content: &str, position: Position) -> Option<String> {
         return None;
     }
 
-    let token = extract_token_at(line, byte_col);
+    let (start, end, token) = extract_token_span_at(line, byte_col);
     if token.is_empty() {
         return None;
     }
-    if token.contains(':') || token.starts_with("http") {
-        return expand_iri_token(content, &token);
+    if !(token.contains(':') || token.starts_with("http")) {
+        return None;
     }
-    None
+    let _iri = expand_iri_token(content, &token)?;
+    let range = Range {
+        start: Position { line: position.line, character: byte_col_to_utf16(line, start) },
+        end: Position { line: position.line, character: byte_col_to_utf16(line, end) },
+    };
+    Some((range, token))
 }
 
-fn extract_token_at(line: &str, ch: usize) -> String {
+fn extract_token_span_at(line: &str, ch: usize) -> (usize, usize, String) {
     let bytes = line.as_bytes();
     let mut start = ch.min(bytes.len());
     let mut end = ch.min(bytes.len());
@@ -2608,7 +2644,7 @@ fn extract_token_at(line: &str, ch: usize) -> String {
         end += 1;
     }
 
-    line[start..end].to_string()
+    (start, end, line[start..end].to_string())
 }
 
 fn is_iri_char(b: u8) -> bool {
@@ -2668,6 +2704,27 @@ mod tests {
         let pos = Position { line: 1, character: 3 };
         let iri = iri_at_position(content, pos).expect("iri");
         assert_eq!(iri, "http://example.org/people#Person");
+    }
+
+    #[test]
+    fn prepare_rename_returns_range_on_qname() {
+        let content = "@prefix ex: <http://example.org/people#> .\nex:Person a owl:Class ;";
+        let pos = Position { line: 1, character: 3 };
+        let (range, placeholder) = rename_range_at_position(content, pos).expect("range");
+        assert_eq!(placeholder, "ex:Person");
+        assert_eq!(range.start.line, 1);
+        assert_eq!(range.start.character, 0);
+        assert_eq!(range.end.character, "ex:Person".len() as u32);
+    }
+
+    #[test]
+    fn prepare_rename_rejects_non_iri_token() {
+        let content = "@prefix ex: <http://example.org/people#> .\nex:Person a owl:Class ;";
+        let pos = Position { line: 1, character: 12 }; // on "owl"
+                                                       // "owl:Class" is a QName — move to "a"
+        let pos_a = Position { line: 1, character: 10 };
+        assert!(rename_range_at_position(content, pos_a).is_none());
+        let _ = pos;
     }
 
     #[test]

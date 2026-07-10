@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Encode LSP semantic-token `delta_line`/`delta_start` from absolute previous positions so highlighting no longer drifts on multi-line Turtle/OBO ([#137](https://github.com/eddiethedean/ontocode/issues/137))
 - Preserve `obo_id` when merging duplicate entity IRIs across documents so OBO write-back keeps `term_id` ([#138](https://github.com/eddiethedean/ontocode/issues/138))
 - Align Auto explain backends: report the concrete classify engine in `profile_used` and route CLI/LSP explanations through that engine ([#139](https://github.com/eddiethedean/ontocode/issues/139))
 - Use jailed resolved paths for `createOntology` / `exportOntology` I/O so relative paths write under the workspace, not the LSP process CWD ([#123](https://github.com/eddiethedean/ontocode/issues/123))

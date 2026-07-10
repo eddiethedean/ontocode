@@ -190,16 +190,12 @@ fn push_token(out: &mut Vec<SemanticToken>, line: u32, start_char: u32, length: 
     if length == 0 {
         return;
     }
-    let delta_line = if out.is_empty() {
-        line
-    } else {
-        let prev = out.last().unwrap();
-        line.saturating_sub(prev.delta_line)
-    };
+    let (prev_line, prev_start) = absolute_position_of_last(out);
+    let delta_line = line.saturating_sub(prev_line);
     let delta_start = if out.is_empty() || delta_line > 0 {
         start_char
     } else {
-        start_char.saturating_sub(out.last().unwrap().delta_start)
+        start_char.saturating_sub(prev_start)
     };
     out.push(SemanticToken {
         delta_line,
@@ -208,6 +204,40 @@ fn push_token(out: &mut Vec<SemanticToken>, line: u32, start_char: u32, length: 
         token_type: kind,
         token_modifiers_bitset: 0,
     });
+}
+
+/// Reconstruct the absolute `(line, start_char)` of the last encoded token.
+fn absolute_position_of_last(tokens: &[SemanticToken]) -> (u32, u32) {
+    let mut line = 0u32;
+    let mut start = 0u32;
+    for token in tokens {
+        if token.delta_line > 0 {
+            line += token.delta_line;
+            start = token.delta_start;
+        } else {
+            start += token.delta_start;
+        }
+    }
+    (line, start)
+}
+
+/// Decode LSP semantic-token deltas back to absolute `(line, start_char, length, type)`.
+fn decode_absolute_positions(tokens: &[SemanticToken]) -> Vec<(u32, u32, u32, u32)> {
+    let mut line = 0u32;
+    let mut start = 0u32;
+    let mut out = Vec::with_capacity(tokens.len());
+    for token in tokens {
+        if token.delta_line > 0 {
+            line += token.delta_line;
+            start = token.delta_start;
+        } else if out.is_empty() {
+            start = token.delta_start;
+        } else {
+            start += token.delta_start;
+        }
+        out.push((line, start, token.length, token.token_type));
+    }
+    out
 }
 
 #[cfg(test)]
@@ -222,6 +252,55 @@ mod tests {
         assert!(tokens.iter().any(|t| t.token_type == TOKEN_COMMENT));
         assert!(tokens.iter().any(|t| t.token_type == TOKEN_NAMESPACE));
         assert!(tokens.iter().any(|t| t.token_type == TOKEN_KEYWORD));
+    }
+
+    #[test]
+    fn semantic_token_deltas_decode_to_absolute_spans() {
+        let text = "@prefix ex: <http://ex/> .\n\nex:A a ex:B .\n\n# trailing";
+        let tokens = tokenize_turtle(text);
+        let absolute = decode_absolute_positions(&tokens);
+
+        // First token is `@prefix` on line 0.
+        assert_eq!(absolute[0].0, 0);
+        assert_eq!(absolute[0].3, TOKEN_KEYWORD);
+
+        // Tokens after the blank line must stay on line 2, not drift forward.
+        let line2: Vec<_> = absolute.iter().filter(|t| t.0 == 2).collect();
+        assert!(
+            !line2.is_empty(),
+            "expected tokens on line 2, got absolute={absolute:?} deltas={tokens:?}"
+        );
+        assert!(
+            absolute.iter().any(|t| t.0 == 2 && t.3 == TOKEN_NAMESPACE),
+            "expected namespace token on line 2: {absolute:?}"
+        );
+        assert!(
+            absolute.iter().any(|t| t.0 == 4 && t.3 == TOKEN_COMMENT),
+            "expected comment on line 4: {absolute:?}"
+        );
+        assert!(
+            absolute.iter().all(|t| t.0 <= 4),
+            "decoded lines drifted past document end: {absolute:?}"
+        );
+    }
+
+    #[test]
+    fn push_token_deltas_use_absolute_previous_position() {
+        let mut out = Vec::new();
+        push_token(&mut out, 0, 0, 7, TOKEN_KEYWORD); // line 0
+        push_token(&mut out, 2, 0, 3, TOKEN_NAMESPACE); // line 2
+        push_token(&mut out, 2, 4, 1, TOKEN_KEYWORD); // same line
+        push_token(&mut out, 5, 0, 1, TOKEN_COMMENT); // line 5
+
+        assert_eq!(
+            decode_absolute_positions(&out),
+            vec![
+                (0, 0, 7, TOKEN_KEYWORD),
+                (2, 0, 3, TOKEN_NAMESPACE),
+                (2, 4, 1, TOKEN_KEYWORD),
+                (5, 0, 1, TOKEN_COMMENT),
+            ]
+        );
     }
 
     #[test]

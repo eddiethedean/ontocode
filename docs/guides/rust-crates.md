@@ -38,7 +38,7 @@ No clone required. Release binaries: [release integrity](../release-integrity.md
 
 Primary dependency: `ontocore = "0.14"`.
 
-**Install pinning:** `cargo install ontocore-cli --locked` tracks the latest compatible crates.io release. For reproducible CI or audits, pin the patch: `cargo install ontocore-cli --locked --version 0.16.0`. See [API stability](api-stability.md) and [Rust API reference](../ontocore/rust-api.md).
+**Install pinning:** `cargo install ontocore-cli --locked` tracks the latest compatible crates.io release. For reproducible CI or audits, pin the patch: `cargo install ontocore-cli --locked --version 0.17.0`. See [API stability](api-stability.md) and [Rust API reference](../ontocore/rust-api.md).
 
 ## LSP integration
 

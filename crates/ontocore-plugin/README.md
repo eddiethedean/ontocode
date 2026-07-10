@@ -8,13 +8,13 @@ Plugin host foundation for OntoCore:
 - Discovery of manifests under `.ontocore/plugins/*.toml`
 
 ```toml
-ontocore-plugin = "0.16"
+ontocore-plugin = "0.17"
 ```
 
 Enable via the `ontocore` façade feature:
 
 ```toml
-ontocore = { version = "0.16", features = ["plugins"] }
+ontocore = { version = "0.17", features = ["plugins"] }
 ```
 
-**Current version: 0.16.0**
+**Current version: 0.17.0**

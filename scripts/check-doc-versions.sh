@@ -682,8 +682,8 @@ else
 fi
 
 # Architecture banner must reference current release ships today
-check_file_contains "ARCHITECTURE.md" "v0\.16 ships today" "ARCHITECTURE.md v0.16 banner"
-check_file_contains "docs/architecture.md" "v0\.16 ships today" "docs/architecture.md v0.16 banner"
+check_file_contains "ARCHITECTURE.md" "v0\.17 ships today" "ARCHITECTURE.md v0.17 banner"
+check_file_contains "docs/architecture.md" "v0\.17 ships today" "docs/architecture.md v0.17 banner"
 
 # Stale CLI alias notes
 if rg -q 'ontocore alias is planned' docs --glob '!**/migration/**' --glob '!**/design/**' 2>/dev/null; then
@@ -765,7 +765,7 @@ check_file_contains "mkdocs.yml" "v0\\.14 → v0\\.15" "mkdocs v0.15 migration i
 check_file_contains "docs/guides/owl-xml-workflow.md" "read-only catalog" "owl-xml workflow guide"
 check_file_contains "docs/ontocore/rust-api.md" "Book ↔ docs.rs crosswalk" "rust-api docs.rs crosswalk"
 check_file_contains "docs/troubleshooting.md" "Where to start" "troubleshooting decision tree"
-check_file_contains "docs/platform/OVERVIEW.md" "v0.16 foundation shipped" "platform overview shipped banner"
+check_file_contains "docs/platform/OVERVIEW.md" "v0.17 foundation shipped" "platform overview shipped banner"
 
 # vision.md must reference current shipped release (not v0.11 or v0.12)
 for file in docs/vision.md VISION.md; do

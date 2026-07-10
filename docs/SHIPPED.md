@@ -25,6 +25,11 @@
 | Generic annotation assertions | Yes (Turtle) | `ontocore patch` |
 | OBO term edit (name, synonym, def, is_a, …) | Yes (inspector) | `ontocore patch` |
 | Find usages / rename IRI / namespace migration / move / extract module | Yes (preview + apply) | `ontocore refactor` |
+| Merge entities / replace entity references | Yes (preview + apply) | `ontocore refactor` |
+| New ontology scaffold / export (ROBOT convert or copy) | Yes | `ontocore new` / export LSP |
+| Prefix manager / ontology metadata patches | Yes | `ontocore patch` |
+| Active ontology selector | Yes | LSP `setActiveOntology` |
+| Menus / toolbars / keybindings / perspectives | Yes | — |
 | SQL-like queries | Query Workbench (React) + schema browser | `ontocore query` |
 | SPARQL | Query Workbench (React) | `ontocore sparql` |
 | Graph visualization (class, property, import, neighborhood) | Yes (React; asserted/inferred/combined modes, layouts, search) | LSP `ontocore/getGraph` |

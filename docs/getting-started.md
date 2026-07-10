@@ -64,7 +64,7 @@ The `fixtures/` directory is included in the repository for examples and tests.
 cargo install ontocore-cli --locked
 ```
 
-**Version pinning:** Use `--locked` for reproducible installs from crates.io (recommended). Pin an exact release in CI with `cargo install ontocore-cli --locked --version 0.16.0` — see [API stability](guides/api-stability.md) and [release integrity](release-integrity.md).
+**Version pinning:** Use `--locked` for reproducible installs from crates.io (recommended). Pin an exact release in CI with `cargo install ontocore-cli --locked --version 0.17.0` — see [API stability](guides/api-stability.md) and [release integrity](release-integrity.md).
 
 Use **your own ontology directory** — there is no `fixtures/` folder outside a clone:
 
@@ -82,10 +82,10 @@ ontocore validate /path/to/your/ontologies
 2. **For CLI on Linux x64:** download `ontocore-v<version>-x86_64-unknown-linux-gnu.tar.gz`.
 3. **For VS Code (any supported OS):** download `ontocode-<version>.vsix` — see [vscode-install.md](vscode-install.md).
 4. Verify with `SHA256SUMS` — see [release-integrity.md](release-integrity.md).
-5. Extract and run (Linux example; replace `0.16.0` with your tag):
+5. Extract and run (Linux example; replace `0.17.0` with your tag):
 
 ```bash
-VERSION=0.16.0
+VERSION=0.17.0
 ASSET="ontocore-v${VERSION}-x86_64-unknown-linux-gnu.tar.gz"
 BIN="ontocore-v${VERSION}-x86_64-unknown-linux-gnu"
 tar xzf "${ASSET}"

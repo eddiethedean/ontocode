@@ -155,6 +155,8 @@ Return documents, entities, and class hierarchy for the explorer UI.
 | `documents` | `OntologyDocument[]` | Indexed files (`id`, `path`, `format`, `parse_status`, …) |
 | `entities` | `Entity[]` | All extracted entities |
 | `hierarchy` | `ClassHierarchy` | `edges`, `parents`, `children` maps (asserted) |
+| `stats` | `CatalogStats`? | **(v0.17+)** Same counts as `indexWorkspace` (when catalog is indexed) |
+| `active_ontology_id` | string? | **(v0.17+)** Active ontology id when set via `setActiveOntology` |
 | `diagnostics` | `DiagnosticSummary[]` | Lint summaries for explorer |
 | `reasoner` | `ReasonerSnapshot` (optional) | Last reasoner run — inferred hierarchy, unsatisfiable classes |
 
@@ -472,6 +474,77 @@ Returns discovered workspace plugins from `.ontocore/plugins/*.toml` plus built-
 | `in_process` | boolean | `true` for built-in reference plugins |
 
 **Errors:** `NOT_INDEXED`, `INDEX_FAILED` (discovery/host failure)
+
+### `ontocore/listCommands` (v0.17+)
+
+Return stable command metadata for menus, toolbars, and enablement.
+
+**Params:** none
+
+**Result:** `{ "commands": CommandDescriptor[] }`
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | string | Command id (e.g. `ontocode.newOntology`) |
+| `title` | string | Display title |
+| `category` | string | Menu category (`File`, `Edit`, …) |
+| `enablement` | string[] | Predicates: `always`, `has_ontology`, `is_dirty`, `has_selection`, `reasoner_running`, `reasoner_idle`, `can_edit_selection` |
+| `undo_label` | string? | Semantic undo label for edits |
+| `dialog_id` | string? | Associated dialog schema id |
+
+### `ontocore/getWorkspaceUiState` (v0.17+)
+
+Return enablement inputs for the command registry.
+
+**Params:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `selection_iri` | string? | Focused entity IRI from the client |
+| `dirty_document_count` | number | Client-reported dirty document count |
+| `active_ontology_id` | string? | Preferred active ontology id |
+
+**Result:** `WorkspaceUiState` (`has_ontology`, `is_dirty`, `has_selection`, `selection_editable`, `reasoner_*`, `active_ontology_id`, optional `stats`)
+
+### `ontocore/getDialogSchema` (v0.17+)
+
+**Params:** `{ "dialog_id": string }`
+
+**Result:** `{ "schema": DialogSchema }` with `id`, `title`, `fields[]`, `primary_action`.
+
+Known dialog ids include `new_ontology`, `export_ontology`, `save_as`, `prefix_manager`, `ontology_metadata`, `search`, `metrics`, `delete_entity`, `reasoner_settings`, `preferences`, `import`, `rename`.
+
+### `ontocore/createOntology` (v0.17+)
+
+Scaffold a new Turtle or OBO ontology file under the workspace.
+
+**Params:** `{ "path", "ontology_iri", "version_iri"?, "format"?, "prefixes"? }`
+
+**Result:** `{ "path", "ontology_iri" }`
+
+### `ontocore/exportOntology` (v0.17+)
+
+Export/convert an ontology via ROBOT `convert`, with same-format copy fallback when ROBOT is unavailable.
+
+**Params:** `{ "source_path", "output_path", "format"? }`
+
+**Result:** `{ "output_path", "success", "logs"? }`
+
+### `ontocore/setActiveOntology` (v0.17+)
+
+Set the active ontology id used for new-axiom targeting.
+
+**Params:** `{ "ontology_id": string }` (document id, path, or base IRI)
+
+**Result:** `{ "active_ontology_id": string }`
+
+### `ontocore/deleteImpact` (v0.17+)
+
+Preview delete impact for an entity.
+
+**Params:** `{ "entity_iri": string }`
+
+**Result:** `{ "entity_iri", "usage_count", "axiom_count", "referencing_entities", "warnings" }`
 
 ### `ontocore/runPlugin` (v0.14+, views v0.15)
 

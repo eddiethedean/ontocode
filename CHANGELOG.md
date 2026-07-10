@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Detect `WITH … INSERT/DELETE` SPARQL updates, fail CLI patch on index errors, cap patch JSON reads, and reject partial ApplyPatch code actions ([#114](https://github.com/eddiethedean/ontocode/issues/114), [#115](https://github.com/eddiethedean/ontocode/issues/115), [#34](https://github.com/eddiethedean/ontocode/issues/34), [#116](https://github.com/eddiethedean/ontocode/issues/116))
 - Always include `obo_id` in SQL entity rows and detect `Self` restrictions by token, not substring ([#83](https://github.com/eddiethedean/ontocode/issues/83), [#140](https://github.com/eddiethedean/ontocode/issues/140))
 - Preserve the query engine `truncated` flag in CLI SQL/SPARQL output ([#77](https://github.com/eddiethedean/ontocode/issues/77))
 - Update `@PREFIX` / SPARQL-style `PREFIX` declarations during namespace migrate and copy them into extract-module headers ([#79](https://github.com/eddiethedean/ontocode/issues/79), [#80](https://github.com/eddiethedean/ontocode/issues/80))

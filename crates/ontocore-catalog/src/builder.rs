@@ -653,6 +653,11 @@ fn merge_entity(existing: &mut Entity, incoming: &Entity) {
     if existing.short_name.is_empty() {
         existing.short_name = incoming.short_name.clone();
     }
+    // Preserve OBO term ids across multi-document IRI merges. Prefer an existing
+    // value when both sides set one (first-wins); otherwise take the non-empty side.
+    if existing.obo_id.is_none() {
+        existing.obo_id = incoming.obo_id.clone();
+    }
 }
 
 struct DocumentSemantics {
@@ -902,6 +907,83 @@ pub(crate) fn merge_scan_roots(workspace: &Path, extra_roots: &[PathBuf]) -> Vec
         roots.push(root.clone());
     }
     roots
+}
+
+#[cfg(test)]
+mod merge_entity_tests {
+    use super::*;
+    use ontocore_core::EntityKind;
+
+    fn entity(obo_id: Option<&str>) -> Entity {
+        Entity {
+            iri: "http://example.org/A".into(),
+            short_name: "A".into(),
+            kind: EntityKind::Class,
+            ontology_id: "doc".into(),
+            obo_id: obo_id.map(str::to_string),
+            ..Default::default()
+        }
+    }
+
+    #[test]
+    fn merge_entity_takes_incoming_obo_id_when_missing() {
+        let mut existing = entity(None);
+        merge_entity(&mut existing, &entity(Some("TEST:0000001")));
+        assert_eq!(existing.obo_id.as_deref(), Some("TEST:0000001"));
+    }
+
+    #[test]
+    fn merge_entity_keeps_existing_obo_id_when_incoming_missing() {
+        let mut existing = entity(Some("TEST:0000001"));
+        merge_entity(&mut existing, &entity(None));
+        assert_eq!(existing.obo_id.as_deref(), Some("TEST:0000001"));
+    }
+
+    #[test]
+    fn merge_entity_keeps_first_obo_id_on_conflict() {
+        let mut existing = entity(Some("TEST:0000001"));
+        merge_entity(&mut existing, &entity(Some("TEST:0000002")));
+        assert_eq!(existing.obo_id.as_deref(), Some("TEST:0000001"));
+    }
+
+    #[test]
+    fn index_merge_preserves_obo_id_from_later_document() {
+        let dir = tempfile::tempdir().unwrap();
+        // Turtle declares the IRI first without an OBO id.
+        std::fs::write(
+            dir.path().join("a.ttl"),
+            r#"@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+<http://purl.obolibrary.org/obo/TEST_0000001> a owl:Class ;
+    rdfs:label "From Turtle" .
+"#,
+        )
+        .unwrap();
+        // OBO document contributes the same IRI with an obo_id.
+        std::fs::write(
+            dir.path().join("b.obo"),
+            "format-version: 1.2\nontology: test\n\n[Term]\nid: TEST:0000001\nname: From OBO\n",
+        )
+        .unwrap();
+
+        let catalog = IndexBuilder::new().workspace(dir.path()).build().expect("build");
+        let entity = catalog
+            .data()
+            .entities
+            .iter()
+            .find(|e| e.iri.contains("TEST_0000001") || e.obo_id.as_deref() == Some("TEST:0000001"))
+            .expect("merged entity");
+        assert_eq!(
+            entity.obo_id.as_deref(),
+            Some("TEST:0000001"),
+            "merged catalog entity must retain obo_id from the OBO document"
+        );
+        assert!(
+            entity.labels.iter().any(|l| l == "From Turtle" || l == "From OBO"),
+            "labels should still merge: {:?}",
+            entity.labels
+        );
+    }
 }
 
 #[cfg(test)]

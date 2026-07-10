@@ -25,8 +25,8 @@ use lsp_types::{
 use ontocore_catalog::{GraphBuilder, GraphRequest, IndexBuilder, OntologyCatalog};
 use ontocore_core::{validate_workspace_scope_any, EntityKind, OntologyFormat};
 use ontocore_diff::{
-    apply_unsat_diff, catalog_at_git_ref, diff_catalogs, diff_directories, diff_git_refs,
-    discover_repo_root, format_diff_pr_summary, DiffResult,
+    apply_unsat_diff, catalog_at_git_ref, catalog_at_worktree, diff_catalogs,
+    diff_git_refs_with_catalogs, discover_repo_root, format_diff_pr_summary, DiffResult,
 };
 use ontocore_reasoner::{
     classify, explain_alternatives, ExplanationRequest, ReasonerId, ReasonerSnapshot,
@@ -887,67 +887,105 @@ pub fn handle_semantic_diff(
         return Err(LspErrorPayload::invalid_params("workspace not initialized".to_string()));
     }
 
-    let mut diff = if let (Some(left), Some(right)) = (&params.left_path, &params.right_path) {
+    if let (Some(left), Some(right)) = (&params.left_path, &params.right_path) {
         let left = validate_workspace_scope_any(Path::new(left), &roots)
             .map_err(LspErrorPayload::invalid_params)?;
         let right = validate_workspace_scope_any(Path::new(right), &roots)
             .map_err(LspErrorPayload::invalid_params)?;
-        diff_directories(&left, &right)
-            .map_err(|e| LspErrorPayload::invalid_params(e.to_string()))?
-    } else {
-        let left_ref = params.left_ref.as_deref().unwrap_or("HEAD");
-        let right_ref = params.right_ref.as_deref().unwrap_or("WORKTREE");
-        let repo_root = discover_repo_root(&roots).ok_or_else(|| {
-            LspErrorPayload::invalid_params("no git repository found in workspace".to_string())
+        let left_cat = IndexBuilder::new()
+            .workspace(&left)
+            .build()
+            .map_err(|e| LspErrorPayload::invalid_params(e.to_string()))?;
+        let right_cat = IndexBuilder::new()
+            .workspace(&right)
+            .build()
+            .map_err(|e| LspErrorPayload::invalid_params(e.to_string()))?;
+        let mut diff = diff_catalogs(&left_cat, &right_cat);
+        if params.reasoner {
+            enrich_diff_with_reasoner(state, &mut diff, &left_cat, &right_cat)?;
+        }
+        return Ok(semantic_diff_result(diff, params.format.as_deref()));
+    }
+
+    let left_ref = params.left_ref.as_deref().unwrap_or("HEAD");
+    let right_ref = params.right_ref.as_deref().unwrap_or("WORKTREE");
+    let repo_root = discover_repo_root(&roots).ok_or_else(|| {
+        LspErrorPayload::invalid_params("no git repository found in workspace".to_string())
+    })?;
+
+    if ontocore_diff::is_indexed_catalog_ref(left_ref)
+        && ontocore_diff::is_worktree_ref(right_ref)
+    {
+        return state
+            .with_catalog(|head| {
+                let worktree = build_lsp_worktree_catalog(state)?;
+                let mut diff = diff_catalogs(head, &worktree);
+                if params.reasoner {
+                    enrich_diff_with_reasoner(state, &mut diff, head, &worktree)?;
+                }
+                Ok(semantic_diff_result(diff, params.format.as_deref()))
+            })
+            .ok_or_else(LspErrorPayload::not_indexed)?;
+    }
+
+    if ontocore_diff::is_indexed_catalog_ref(left_ref)
+        && ontocore_diff::is_indexed_catalog_ref(right_ref)
+    {
+        return state
+            .with_catalog(|catalog| {
+                let mut diff = diff_catalogs(catalog, catalog);
+                if params.reasoner {
+                    enrich_diff_with_reasoner(state, &mut diff, catalog, catalog)?;
+                }
+                Ok(semantic_diff_result(diff, params.format.as_deref()))
+            })
+            .ok_or_else(LspErrorPayload::not_indexed)?;
+    }
+
+    if ontocore_diff::is_indexed_catalog_ref(left_ref) {
+        let other = catalog_at_git_ref(&repo_root, right_ref)
+            .map_err(|e| LspErrorPayload::invalid_params(e.to_string()))?;
+        return state
+            .with_catalog(|indexed| {
+                let mut diff = diff_catalogs(&other, indexed);
+                if params.reasoner {
+                    enrich_diff_with_reasoner(state, &mut diff, &other, indexed)?;
+                }
+                Ok(semantic_diff_result(diff, params.format.as_deref()))
+            })
+            .ok_or_else(LspErrorPayload::not_indexed)?;
+    }
+
+    if ontocore_diff::is_indexed_catalog_ref(right_ref) {
+        let base = catalog_at_git_ref(&repo_root, left_ref)
+            .map_err(|e| LspErrorPayload::invalid_params(e.to_string()))?;
+        return state
+            .with_catalog(|indexed| {
+                let mut diff = diff_catalogs(&base, indexed);
+                if params.reasoner {
+                    enrich_diff_with_reasoner(state, &mut diff, &base, indexed)?;
+                }
+                Ok(semantic_diff_result(diff, params.format.as_deref()))
+            })
+            .ok_or_else(LspErrorPayload::not_indexed)?;
+    }
+
+    let (mut diff, left_cat, right_cat) = if ontocore_diff::is_worktree_ref(right_ref) {
+        let left = catalog_at_git_ref(&repo_root, left_ref)
+            .map_err(|e| LspErrorPayload::invalid_params(e.to_string()))?;
+        let right = build_lsp_worktree_catalog(state).or_else(|_| {
+            catalog_at_worktree(&repo_root)
+                .map_err(|e| LspErrorPayload::invalid_params(e.to_string()))
         })?;
-        if ontocore_diff::is_indexed_catalog_ref(left_ref)
-            && ontocore_diff::is_worktree_ref(right_ref)
-        {
-            return state
-                .with_catalog(|head| {
-                    let worktree = build_lsp_worktree_catalog(state)?;
-                    let mut diff = diff_catalogs(head, &worktree);
-                    if params.reasoner {
-                        enrich_diff_with_reasoner(state, &mut diff, head, &worktree)?;
-                    }
-                    Ok(semantic_diff_result(diff, params.format.as_deref()))
-                })
-                .ok_or_else(LspErrorPayload::not_indexed)?;
-        }
-        if ontocore_diff::is_indexed_catalog_ref(left_ref) {
-            state
-                .with_catalog(|head| {
-                    if ontocore_diff::is_indexed_catalog_ref(right_ref) {
-                        Ok(diff_catalogs(head, head))
-                    } else {
-                        let base = catalog_at_git_ref(&repo_root, right_ref)
-                            .map_err(|e| LspErrorPayload::invalid_params(e.to_string()))?;
-                        Ok(diff_catalogs(&base, head))
-                    }
-                })
-                .ok_or_else(LspErrorPayload::not_indexed)??
-        } else if ontocore_diff::is_indexed_catalog_ref(right_ref) {
-            state
-                .with_catalog(|head| {
-                    let base = catalog_at_git_ref(&repo_root, left_ref)
-                        .map_err(|e| LspErrorPayload::invalid_params(e.to_string()))?;
-                    Ok(diff_catalogs(&base, head))
-                })
-                .ok_or_else(LspErrorPayload::not_indexed)??
-        } else {
-            diff_git_refs(&repo_root, left_ref, right_ref)
-                .map_err(|e| LspErrorPayload::invalid_params(e.to_string()))?
-        }
+        let diff = diff_catalogs(&left, &right);
+        (diff, left, right)
+    } else {
+        diff_git_refs_with_catalogs(&repo_root, left_ref, right_ref)
+            .map_err(|e| LspErrorPayload::invalid_params(e.to_string()))?
     };
 
     if params.reasoner {
-        if let Ok(worktree) = build_lsp_worktree_catalog(state) {
-            if let Some(result) = state
-                .with_catalog(|head| enrich_diff_with_reasoner(state, &mut diff, head, &worktree))
-            {
-                result?;
-            }
-        }
+        enrich_diff_with_reasoner(state, &mut diff, &left_cat, &right_cat)?;
     }
 
     Ok(semantic_diff_result(diff, params.format.as_deref()))

@@ -3,6 +3,7 @@ import { semanticDiff } from "../lsp/client";
 import { PanelHost } from "./panelHost";
 import type { DiffPayload, WebviewMessage } from "./messages";
 import { isDiffPayload } from "../lsp/protocolGuards";
+import { formatSemanticDiffMarkdown } from "./semanticDiffMarkdown";
 
 export class SemanticDiffPanel {
   public static current: SemanticDiffPanel | undefined;
@@ -56,14 +57,7 @@ export class SemanticDiffPanel {
         void vscode.window.showWarningMessage("OntoCode: no diff to copy");
         return;
       }
-      const lines = ["# Ontology semantic diff", ""];
-      if (diff.breaking_changes.length > 0) {
-        lines.push("## Breaking changes", "");
-        for (const b of diff.breaking_changes) {
-          lines.push(`- **${b.reason}**: ${b.message}`);
-        }
-      }
-      await vscode.env.clipboard.writeText(lines.join("\n"));
+      await vscode.env.clipboard.writeText(formatSemanticDiffMarkdown(diff));
       void vscode.window.showInformationMessage("OntoCode: diff Markdown copied to clipboard");
     }
   }

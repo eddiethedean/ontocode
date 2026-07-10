@@ -7,7 +7,7 @@ hide:
 <div class="oc-hero">
 
 <div class="oc-hero-badges">
-  <span class="oc-badge oc-badge--accent">v0.16.0</span>
+  <span class="oc-badge oc-badge--accent">v0.17.0</span>
   <span class="oc-badge">VS Code</span>
   <span class="oc-badge">CLI · LSP</span>
   <span class="oc-badge">Plugins</span>
@@ -137,7 +137,7 @@ You do **not** need to clone this repo to use the extension or `cargo install on
 
 ## What ships today
 
-**v0.16.0 highlights:** Plugin preferences pages and context actions wired in the extension, plugin commands via `ontocore/runPlugin`, imports reload and layout reset — on top of v0.15 plugin permissions/views and v0.14 plugin host MVP.
+**v0.17.0 highlights:** Plugin preferences pages and context actions wired in the extension, plugin commands via `ontocore/runPlugin`, imports reload and layout reset — on top of v0.15 plugin permissions/views and v0.14 plugin host MVP.
 
 Full matrix: **[What ships today](SHIPPED.md)** (canonical — do not rely on this summary alone).
 

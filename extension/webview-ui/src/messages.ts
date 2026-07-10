@@ -18,7 +18,27 @@ export type PanelKind =
   | "queryWorkbench"
   | "manchesterEditor"
   | "semanticDiff"
-  | "imports";
+  | "imports"
+  | "metrics"
+  | "about"
+  | "newOntology"
+  | "prefixManager";
+
+export interface CatalogStats {
+  ontology_count: number;
+  class_count: number;
+  object_property_count: number;
+  data_property_count: number;
+  annotation_property_count: number;
+  individual_count: number;
+  axiom_count: number;
+  annotation_count: number;
+  triple_count: number;
+  error_count: number;
+  diagnostic_error_count: number;
+  diagnostic_warning_count: number;
+  diagnostic_info_count: number;
+}
 
 export interface SqlTableSchema {
   name: string;
@@ -282,6 +302,9 @@ export interface ImportsDocumentPayload {
 /** Host → React */
 export type HostMessage =
   | { type: "init"; panel: PanelKind }
+  | { type: "loadMetrics"; stats: CatalogStats }
+  | { type: "loadNewOntology"; path: string; defaultIri: string }
+  | { type: "loadPrefixes"; path: string; prefixes: Record<string, string> }
   | { type: "focusState"; focus: CurrentFocus }
   | { type: "reasoningState"; reasoning: ReasoningStatePayload }
   | { type: "loadEntity"; detail: EntityDetailPayload; classOptions: string[]; objectPropertyOptions?: string[] }
@@ -315,6 +338,14 @@ export type HostMessage =
 /** React → Host */
 export type WebviewMessage =
   | { type: "ready"; panel: PanelKind }
+  | { type: "closeDialog" }
+  | { type: "submitNewOntology"; ontologyIri: string; versionIri?: string }
+  | {
+      type: "submitPrefix";
+      action: "add" | "remove";
+      prefix: string;
+      namespaceIri?: string;
+    }
   | { type: "applyPatch"; patches: PatchOp[]; previewOnly: boolean }
   | { type: "jumpToSource" }
   | { type: "openManchester"; axiom: { kind: string; manchester?: string } }

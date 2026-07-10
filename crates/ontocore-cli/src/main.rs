@@ -26,7 +26,7 @@ use std::path::{Path, PathBuf};
 #[command(
     name = "ontocore",
     version,
-    about = "Local-first ontology index and query engine (OntoCode v0.16)"
+    about = "Local-first ontology index and query engine (OntoCode v0.17)"
 )]
 struct Cli {
     #[command(subcommand)]
@@ -35,6 +35,16 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
+    /// Create a minimal ontology file
+    New {
+        /// Output path (.ttl or .obo)
+        path: PathBuf,
+        /// Ontology IRI
+        #[arg(long)]
+        ontology_iri: String,
+        #[arg(long)]
+        version_iri: Option<String>,
+    },
     /// Scan and index ontology files in a workspace
     Index {
         /// Workspace directory
@@ -324,6 +334,10 @@ enum OutputFormat {
 fn main() -> Result<()> {
     let cli = Cli::parse();
     match cli.command {
+        Commands::New { path, ontology_iri, version_iri } => {
+            write_new_ontology(&path, &ontology_iri, version_iri.as_deref())?;
+            println!("Created {}", path.display());
+        }
         Commands::Index { workspace, format } => {
             let catalog = build_catalog(&workspace)?;
             print_stats(&catalog.data().stats(), format)?;
@@ -723,6 +737,37 @@ fn main() -> Result<()> {
         }
     }
     Ok(())
+}
+
+fn write_new_ontology(path: &Path, ontology_iri: &str, version_iri: Option<&str>) -> Result<()> {
+    let extension = path.extension().and_then(|ext| ext.to_str()).unwrap_or_default();
+    let contents = match extension.to_ascii_lowercase().as_str() {
+        "ttl" => {
+            let declaration = match version_iri {
+                Some(version_iri) => format!(
+                    "<{ontology_iri}> a owl:Ontology ;\n    owl:versionIRI <{version_iri}> ."
+                ),
+                None => format!("<{ontology_iri}> a owl:Ontology ."),
+            };
+            format!(
+                "@prefix owl: <http://www.w3.org/2002/07/owl#> .\n\
+                 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .\n\
+                 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n\
+                 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n\n\
+                 {declaration}\n"
+            )
+        }
+        "obo" => {
+            let mut contents = format!("format-version: 1.2\nontology: {ontology_iri}\n");
+            if let Some(version_iri) = version_iri {
+                contents.push_str(&format!("data-version: {version_iri}\n"));
+            }
+            contents
+        }
+        _ => bail!("new ontology path must have a .ttl or .obo extension"),
+    };
+    std::fs::write(path, contents)
+        .with_context(|| format!("failed to create ontology file {}", path.display()))
 }
 
 fn run_refactor_plan(

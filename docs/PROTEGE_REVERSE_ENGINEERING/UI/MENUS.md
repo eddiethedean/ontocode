@@ -124,19 +124,19 @@ Closes the Protégé application.
 
 ## OntoCode Parity Requirements
 
-- [ ] New ontology command
-- [ ] Open ontology command
-- [ ] Recent projects list
-- [ ] Save
-- [ ] Save as
-- [ ] Save all
-- [ ] Close project
-- [ ] Import ontology
-- [ ] Export ontology
-- [ ] Dirty-state tracking
-- [ ] Unsaved-changes warning
-- [ ] Serialization format selection
-- [ ] File recovery support
+- [x] New ontology command
+- [x] Open ontology command
+- [x] Recent projects list
+- [x] Save
+- [x] Save as
+- [x] Save all
+- [x] Close project
+- [x] Import ontology
+- [x] Export ontology
+- [x] Dirty-state tracking
+- [x] Unsaved-changes warning
+- [x] Serialization format selection
+- [x] File recovery support
 
 ## OntoCode Modernization Opportunities
 
@@ -217,15 +217,15 @@ Preference categories may include:
 
 ## OntoCode Parity Requirements
 
-- [ ] Undo
-- [ ] Redo
-- [ ] Clipboard support
-- [ ] Delete selected object
-- [ ] Global search
-- [ ] Preferences dialog
-- [ ] Context-sensitive enablement
-- [ ] Text-field editing support
-- [ ] Entity-aware copy/paste
+- [x] Undo
+- [x] Redo
+- [x] Clipboard support
+- [x] Delete selected object
+- [x] Global search
+- [x] Preferences dialog
+- [x] Context-sensitive enablement
+- [x] Text-field editing support
+- [x] Entity-aware copy/paste
 
 ## OntoCode Modernization Opportunities
 
@@ -316,15 +316,15 @@ In multi-ontology projects, determines where new axioms and entities are added.
 
 ## OntoCode Parity Requirements
 
-- [ ] Active ontology selector
-- [ ] Ontology annotation editor
-- [ ] Prefix editor
-- [ ] Import manager
-- [ ] Ontology metrics
-- [ ] Logical/physical IRI mapping
-- [ ] Editable import support
-- [ ] Missing import diagnostics
-- [ ] Reload imports
+- [x] Active ontology selector
+- [x] Ontology annotation editor
+- [x] Prefix editor
+- [x] Import manager
+- [x] Ontology metrics
+- [x] Logical/physical IRI mapping
+- [x] Editable import support
+- [x] Missing import diagnostics
+- [x] Reload imports
 
 ## OntoCode Modernization Opportunities
 
@@ -414,15 +414,15 @@ Potential module strategies:
 
 ## OntoCode Parity Requirements
 
-- [ ] Rename entity
-- [ ] Move entity
-- [ ] Merge entities
-- [ ] Safe delete
-- [ ] Replace entity
-- [ ] Extract module
-- [ ] Preview refactor impact
-- [ ] Undoable refactors
-- [ ] Refactor conflict warnings
+- [x] Rename entity
+- [x] Move entity
+- [x] Merge entities
+- [x] Safe delete
+- [x] Replace entity
+- [x] Extract module
+- [x] Preview refactor impact
+- [x] Undoable refactors
+- [x] Refactor conflict warnings
 
 ## OntoCode Modernization Opportunities
 
@@ -505,16 +505,16 @@ Settings may include:
 
 ## OntoCode Parity Requirements
 
-- [ ] Reasoner selection
-- [ ] Reasoner lifecycle management
-- [ ] Synchronize reasoner
-- [ ] Classify ontology
-- [ ] Consistency checking
-- [ ] Unsatisfiable class detection
-- [ ] Inferred hierarchy views
-- [ ] Explanation integration
-- [ ] Reasoner configuration
-- [ ] Long-running task cancellation
+- [x] Reasoner selection
+- [x] Reasoner lifecycle management
+- [x] Synchronize reasoner
+- [x] Classify ontology
+- [x] Consistency checking
+- [x] Unsatisfiable class detection
+- [x] Inferred hierarchy views
+- [x] Explanation integration
+- [x] Reasoner configuration
+- [x] Long-running task cancellation
 
 ## OntoCode Modernization Opportunities
 
@@ -582,12 +582,12 @@ Plugins may contribute arbitrary tool commands.
 
 ## OntoCode Parity Requirements
 
-- [ ] Tool command registry
-- [ ] Plugin-contributed tools
-- [ ] Metrics command
-- [ ] Validation command
-- [ ] Visualization launch commands
-- [ ] Batch operation support
+- [x] Tool command registry
+- [x] Plugin-contributed tools
+- [x] Metrics command
+- [x] Validation command
+- [x] Visualization launch commands
+- [x] Batch operation support
 
 ## OntoCode Modernization Opportunities
 
@@ -637,13 +637,13 @@ Some configurations may allow saved workspace layouts or perspectives.
 
 ## OntoCode Parity Requirements
 
-- [ ] Show/hide panels
-- [ ] Reset layout
-- [ ] Switch tabs
-- [ ] Persist layout
-- [ ] Restore default workspace
-- [ ] Plugin-contributed views
-- [ ] Floating and docked panel support
+- [x] Show/hide panels
+- [x] Reset layout
+- [x] Switch tabs
+- [x] Persist layout
+- [x] Restore default workspace
+- [x] Plugin-contributed views
+- [x] Floating and docked panel support
 
 ## OntoCode Modernization Opportunities
 
@@ -700,13 +700,13 @@ Displays installed plugins and versions.
 
 ## OntoCode Parity Requirements
 
-- [ ] Documentation links
-- [ ] About dialog
-- [ ] Version information
-- [ ] Plugin list
-- [ ] Error log viewer
-- [ ] Diagnostic export
-- [ ] Support links
+- [x] Documentation links
+- [x] About dialog
+- [x] Version information
+- [x] Plugin list
+- [x] Error log viewer
+- [x] Diagnostic export
+- [x] Support links
 
 ## OntoCode Modernization Opportunities
 
@@ -760,12 +760,12 @@ They are essential because many Protégé workflows start from hierarchy trees, 
 
 ## OntoCode Parity Requirements
 
-- [ ] Entity-aware context menus
-- [ ] Axiom-aware context menus
-- [ ] Tree context menus
-- [ ] Search result context menus
-- [ ] Plugin-contributed context commands
-- [ ] Keyboard-accessible context actions
+- [x] Entity-aware context menus
+- [x] Axiom-aware context menus
+- [x] Tree context menus
+- [x] Search result context menus
+- [x] Plugin-contributed context commands
+- [x] Keyboard-accessible context actions
 
 ## OntoCode Modernization Opportunities
 
@@ -798,13 +798,13 @@ Export should be enabled when an ontology project is loaded.
 
 ## OntoCode Requirements
 
-- [ ] Central command registry
-- [ ] Declarative enablement rules
-- [ ] Context-aware action state
-- [ ] Read-only import protection
-- [ ] Dirty-state awareness
-- [ ] Reasoner-state awareness
-- [ ] Selection-state awareness
+- [x] Central command registry
+- [x] Declarative enablement rules
+- [x] Context-aware action state
+- [x] Read-only import protection
+- [x] Dirty-state awareness
+- [x] Reasoner-state awareness
+- [x] Selection-state awareness
 
 ---
 
@@ -827,12 +827,12 @@ Keyboard shortcuts make menu actions available to power users.
 
 ## OntoCode Requirements
 
-- [ ] Shortcut registry
-- [ ] User-customizable keybindings
-- [ ] Conflict detection
-- [ ] Command palette integration
-- [ ] Keyboard shortcut documentation
-- [ ] Platform-aware defaults
+- [x] Shortcut registry
+- [x] User-customizable keybindings
+- [x] Conflict detection
+- [x] Command palette integration
+- [x] Keyboard shortcut documentation
+- [x] Platform-aware defaults
 
 ## Modernization Opportunity
 
@@ -870,13 +870,13 @@ Protégé plugins can extend the UI by contributing menu actions, views, tabs, r
 
 ## OntoCode Requirements
 
-- [ ] Plugin command contribution API
-- [ ] Plugin view contribution API
-- [ ] Plugin menu placement rules
-- [ ] Permission or trust model
-- [ ] Plugin diagnostics
-- [ ] Plugin enable/disable support
-- [ ] Plugin version compatibility checks
+- [x] Plugin command contribution API
+- [x] Plugin view contribution API
+- [x] Plugin menu placement rules
+- [x] Permission or trust model
+- [x] Plugin diagnostics
+- [x] Plugin enable/disable support
+- [x] Plugin version compatibility checks
 
 ## Modernization Opportunity
 
@@ -991,82 +991,82 @@ Benefits:
 
 ## File
 
-- [ ] New ontology
-- [ ] Open ontology
-- [ ] Open recent
-- [ ] Save
-- [ ] Save as
-- [ ] Save all
-- [ ] Close project
-- [ ] Import ontology
-- [ ] Export ontology
-- [ ] Exit application
+- [x] New ontology
+- [x] Open ontology
+- [x] Open recent
+- [x] Save
+- [x] Save as
+- [x] Save all
+- [x] Close project
+- [x] Import ontology
+- [x] Export ontology
+- [x] Exit application
 
 ## Edit
 
-- [ ] Undo
-- [ ] Redo
-- [ ] Cut
-- [ ] Copy
-- [ ] Paste
-- [ ] Delete
-- [ ] Find
-- [ ] Preferences
+- [x] Undo
+- [x] Redo
+- [x] Cut
+- [x] Copy
+- [x] Paste
+- [x] Delete
+- [x] Find
+- [x] Preferences
 
 ## Active Ontology / Ontology
 
-- [ ] Ontology annotations
-- [ ] Prefix management
-- [ ] Import management
-- [ ] Ontology metrics
-- [ ] Active ontology selection
-- [ ] Physical IRI mapping
+- [x] Ontology annotations
+- [x] Prefix management
+- [x] Import management
+- [x] Ontology metrics
+- [x] Active ontology selection
+- [x] Physical IRI mapping
 
 ## Refactor
 
-- [ ] Rename entity
-- [ ] Move entity
-- [ ] Merge entities
-- [ ] Safe delete
-- [ ] Replace entity
-- [ ] Extract module
+- [x] Rename entity
+- [x] Move entity
+- [x] Merge entities
+- [x] Safe delete
+- [x] Replace entity
+- [x] Extract module
 
 ## Reasoner
 
-- [ ] Select reasoner
-- [ ] Start reasoner
-- [ ] Stop reasoner
-- [ ] Synchronize reasoner
-- [ ] Classify
-- [ ] Check consistency
-- [ ] Explain inconsistency
-- [ ] Configure reasoner
+- [x] Select reasoner
+- [x] Start reasoner
+- [x] Stop reasoner
+- [x] Synchronize reasoner
+- [x] Classify
+- [x] Check consistency
+- [x] Explain inconsistency
+- [x] Configure reasoner
 
 ## Tools
 
-- [ ] Metrics
-- [ ] Validation
-- [ ] Visualization
-- [ ] Batch tools
-- [ ] Plugin tools
+- [x] Metrics
+- [x] Validation
+- [x] Visualization
+- [x] Batch tools
+- [x] Plugin tools
 
 ## Window / View
 
-- [ ] Show views
-- [ ] Hide views
-- [ ] Reset layout
-- [ ] Switch tabs
-- [ ] Save layout
-- [ ] Restore layout
+- [x] Show views
+- [x] Hide views
+- [x] Reset layout
+- [x] Switch tabs
+- [x] Save layout
+- [x] Restore layout
 
 ## Help
 
-- [ ] Documentation
-- [ ] About
-- [ ] Plugin list
-- [ ] Error log
-- [ ] Diagnostics
-- [ ] Release notes
+- [x] Documentation
+- [x] About
+- [x] Plugin list
+- [x] Error log
+- [x] Diagnostics
+- [x] Release notes
 
 ---
 

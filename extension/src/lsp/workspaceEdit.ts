@@ -5,12 +5,23 @@ type DocChange = {
   textDocument?: { uri?: string; version?: number | null };
   text_document?: { uri?: string; version?: number | null };
   edits?: Array<{
-    range: {
+    range?: {
       start: { line: number; character: number };
       end: { line: number; character: number };
     };
     newText?: string;
     new_text?: string;
+    /** AnnotatedTextEdit may nest the TextEdit. */
+    text_edit?: {
+      range: {
+        start: { line: number; character: number };
+        end: { line: number; character: number };
+      };
+      newText?: string;
+      new_text?: string;
+    };
+    annotationId?: string;
+    annotation_id?: string;
   }>;
 };
 
@@ -69,7 +80,8 @@ export async function applyLspWorkspaceEdit(
     }
     const document = await vscode.workspace.openTextDocument(uri);
     for (const rawEdit of docChange.edits ?? []) {
-      const range = rawEdit.range;
+      const nested = rawEdit.text_edit;
+      const range = rawEdit.range ?? nested?.range;
       if (!range?.start || !range?.end) {
         return false;
       }
@@ -91,7 +103,12 @@ export async function applyLspWorkspaceEdit(
         endLine,
         endCharacter
       );
-      const newText = rawEdit.newText ?? rawEdit.new_text ?? "";
+      const newText =
+        rawEdit.newText ??
+        rawEdit.new_text ??
+        nested?.newText ??
+        nested?.new_text ??
+        "";
       workspaceEdit.replace(uri, vscodeRange, newText);
     }
   }

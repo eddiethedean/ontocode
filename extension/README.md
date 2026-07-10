@@ -5,7 +5,7 @@
 
 **Ontology IDE for VS Code** — powered by **OntoCore** (`ontocore-lsp` language server).
 
-**Current release: v0.16.0** — see [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) and [migration v0.16](https://ontocode-vs.readthedocs.io/en/latest/migration/v0.16/).
+**Current release: v0.17.0** — see [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) and [migration v0.17](https://ontocode-vs.readthedocs.io/en/latest/migration/v0.17/).
 
 > **New here?** [First success (~10 min)](https://ontocode-vs.readthedocs.io/en/latest/guides/first-success/) · [Migrating from Protégé?](https://ontocode-vs.readthedocs.io/en/latest/guides/protege-migration/) · [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) · [Migration v0.14](https://ontocode-vs.readthedocs.io/en/latest/migration/v0.14/) · [Full extension docs](https://ontocode-vs.readthedocs.io/en/latest/ontocode/vscode-extension/) · [FAQ](https://ontocode-vs.readthedocs.io/en/latest/faq/)
 
@@ -170,7 +170,7 @@ More detail: [Installation & troubleshooting](https://ontocode-vs.readthedocs.io
 
 ---
 
-## What's included in v0.16.0
+## What's included in v0.17.0
 
 **New in v0.16:** plugin preferences pages and context actions wired in the extension; plugin `ui.commands` execute via LSP `ontocore/runPlugin`; **Reload Imports** and **Reset Layout** commands.
 

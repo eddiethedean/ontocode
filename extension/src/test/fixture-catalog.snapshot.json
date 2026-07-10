@@ -699,5 +699,20 @@
         "http://example.org/reasoner-unsat#B"
       ]
     }
+  },
+  "stats": {
+    "annotation_count": 28,
+    "annotation_property_count": 1,
+    "axiom_count": 36,
+    "class_count": 18,
+    "data_property_count": 1,
+    "diagnostic_error_count": 0,
+    "diagnostic_info_count": 0,
+    "diagnostic_warning_count": 0,
+    "error_count": 0,
+    "individual_count": 2,
+    "object_property_count": 5,
+    "ontology_count": 6,
+    "triple_count": 106
   }
 }

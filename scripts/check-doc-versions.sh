@@ -572,8 +572,8 @@ for pair in "VISION.md:docs/vision.md:Build the modern open-source platform" \
   fi
 done
 
-check_file_contains "docs/roadmap.md" "Shipped releases \\(v0.1–v0.14\\)" "docs roadmap shipped section"
-check_file_contains "ROADMAP.md" "Shipped releases \\(v0.1–v0.14\\)" "ROADMAP.md shipped section"
+check_file_contains "docs/roadmap.md" "Shipped releases \\(v0.1–v0.17\\)" "docs roadmap shipped section"
+check_file_contains "ROADMAP.md" "Shipped releases \\(v0.1–v0.17\\)" "ROADMAP.md shipped section"
 check_file_contains "ROADMAP.md" "v0.14 — Plugin host MVP \\(shipped\\)" "ROADMAP.md v0.14 shipped section"
 check_file_contains "ROADMAP.md" "v1.2 — Ontology Toolchain Platform" "roadmap v1.2 toolchain milestone"
 check_file_contains "docs/roadmap.md" "v1.2 — Ontology Toolchain Platform" "docs roadmap v1.2 milestone"

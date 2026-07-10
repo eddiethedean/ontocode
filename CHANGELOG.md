@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.17.0] - 2026-07-10
+
+### Added
+
+- Protégé-style menus, toolbar actions, context commands, and platform-aware keybindings backed by the centralized command registry
+- React dialogs for New Ontology, Prefix Manager, Ontology Metrics, and About, using the shared `DialogShell` with keyboard handling and live IRI/prefix validation
+- Persistent panel layouts, named perspectives, help/support surfaces, error logging, and diagnostic export
+- Engine and LSP support for ontology creation/export, prefix and metadata patches, active ontology state, merge/replace refactors, and distinct reasoner workflows
+
+### Changed
+
+- Workspace package and all `ontocore-*` crates bumped to **0.17.0**; extension marketplace and webview UI **0.17.0**
+- Protégé parity checklists now record the v0.17 menu, toolbar, and dialog closeout
+
 ## [0.16.0] - 2026-07-09
 
 ### Added

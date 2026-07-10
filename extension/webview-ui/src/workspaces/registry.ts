@@ -6,6 +6,10 @@ import { RefactorPreviewPanel } from "../panels/RefactorPreview";
 import { ManchesterEditorPanel } from "../panels/ManchesterEditor";
 import { SemanticDiffPanel } from "../panels/SemanticDiffPanel";
 import { ImportsPanel } from "../panels/ImportsPanel";
+import { MetricsPanel } from "../panels/MetricsPanel";
+import { AboutPanel } from "../panels/AboutPanel";
+import { NewOntologyDialog } from "../panels/NewOntologyDialog";
+import { PrefixManagerDialog } from "../panels/PrefixManagerDialog";
 import { SmokePanel } from "../panels/SmokePanel";
 import type { WorkspaceDefinition } from "./types";
 
@@ -75,6 +79,30 @@ function bootRegistry(): void {
       title: "Manage Imports",
       panelKind: "imports",
       component: ImportsPanel,
+    },
+    {
+      id: "metrics",
+      title: "Ontology Metrics",
+      panelKind: "metrics",
+      component: MetricsPanel,
+    },
+    {
+      id: "about",
+      title: "About OntoCode",
+      panelKind: "about",
+      component: AboutPanel,
+    },
+    {
+      id: "newOntology",
+      title: "New Ontology",
+      panelKind: "newOntology",
+      component: NewOntologyDialog,
+    },
+    {
+      id: "prefixManager",
+      title: "Prefix Manager",
+      panelKind: "prefixManager",
+      component: PrefixManagerDialog,
     },
     {
       id: "smoke",

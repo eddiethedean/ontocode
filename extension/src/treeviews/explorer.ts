@@ -249,6 +249,7 @@ export class ExplorerTreeProvider implements vscode.TreeDataProvider<OntologyTre
       undefined,
       diagnostic.file,
       undefined,
+      undefined,
       diagnostic
     );
   }

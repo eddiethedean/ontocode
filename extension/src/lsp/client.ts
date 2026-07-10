@@ -52,6 +52,18 @@ import {
   ListPluginsResult,
   RunPluginParams,
   RunPluginResult,
+  ListCommandsResult,
+  WorkspaceUiStateParams,
+  WorkspaceUiState,
+  GetDialogSchemaResult,
+  CreateOntologyParams,
+  CreateOntologyResult,
+  ExportOntologyParams,
+  ExportOntologyResult,
+  SetActiveOntologyParams,
+  SetActiveOntologyResult,
+  DeleteImpactParams,
+  DeleteImpactResult,
 } from "./protocol";
 import { focusRelay } from "../focus/focusRelay";
 import {
@@ -212,6 +224,51 @@ export async function getCatalogSnapshot(): Promise<CatalogSnapshot> {
     null
   );
   return assertCatalogSnapshot(result);
+}
+
+export async function listCommands(): Promise<ListCommandsResult> {
+  return ontcoreRequest<ListCommandsResult>("ontocore/listCommands", null);
+}
+
+export async function getWorkspaceUiState(
+  params: WorkspaceUiStateParams = {}
+): Promise<WorkspaceUiState> {
+  return ontcoreRequest<WorkspaceUiState>("ontocore/getWorkspaceUiState", params);
+}
+
+export async function getDialogSchema(
+  dialogId: string
+): Promise<GetDialogSchemaResult> {
+  return ontcoreRequest<GetDialogSchemaResult>("ontocore/getDialogSchema", {
+    dialog_id: dialogId,
+  });
+}
+
+export async function createOntology(
+  params: CreateOntologyParams
+): Promise<CreateOntologyResult> {
+  return ontcoreRequest<CreateOntologyResult>("ontocore/createOntology", params);
+}
+
+export async function exportOntology(
+  params: ExportOntologyParams
+): Promise<ExportOntologyResult> {
+  return ontcoreRequest<ExportOntologyResult>("ontocore/exportOntology", params);
+}
+
+export async function setActiveOntology(
+  params: SetActiveOntologyParams
+): Promise<SetActiveOntologyResult> {
+  return ontcoreRequest<SetActiveOntologyResult>(
+    "ontocore/setActiveOntology",
+    params
+  );
+}
+
+export async function deleteImpact(
+  params: DeleteImpactParams
+): Promise<DeleteImpactResult> {
+  return ontcoreRequest<DeleteImpactResult>("ontocore/deleteImpact", params);
 }
 
 export async function listPlugins(): Promise<ListPluginsResult> {

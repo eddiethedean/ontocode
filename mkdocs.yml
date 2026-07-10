@@ -96,6 +96,7 @@ nav:
       - Install VS Code: vscode-install.md
       - What ships today: SHIPPED.md
       - Glossary: glossary.md
+      - "What's new in v0.17": migration/v0.17.md
       - "What's new in v0.16": migration/v0.16.md
       - "What's new in v0.15": migration/v0.15.md
       - "What's new in v0.14": migration/v0.14.md
@@ -180,6 +181,7 @@ nav:
       - Changelog: changelog.md
       - Migrations:
           - Migration index: migration/README.md
+          - v0.16 → v0.17: migration/v0.17.md
           - v0.15 → v0.16: migration/v0.16.md
           - v0.14 → v0.15: migration/v0.15.md
           - v0.13 → v0.14: migration/v0.14.md

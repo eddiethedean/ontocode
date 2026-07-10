@@ -143,6 +143,8 @@ pub fn build_catalog_snapshot(
         hierarchy: catalog.class_hierarchy(),
         diagnostics,
         reasoner: None,
+        stats: Some(catalog.data().stats()),
+        active_ontology_id: None,
     }
 }
 
@@ -160,11 +162,614 @@ pub fn handle_get_catalog_snapshot(
     state: &ServerState,
 ) -> Result<CatalogSnapshot, LspErrorPayload> {
     let plugin_diags = state.plugin_diagnostics();
-    state
+    let mut snapshot = state
         .with_catalog_and_reasoner(|catalog, reasoner| {
             build_catalog_snapshot_with_reasoner(catalog, reasoner.cloned(), &plugin_diags)
         })
-        .ok_or_else(LspErrorPayload::not_indexed)
+        .ok_or_else(LspErrorPayload::not_indexed)?;
+    snapshot.active_ontology_id = state.active_ontology_id();
+    Ok(snapshot)
+}
+
+fn builtin_command_descriptors() -> Vec<crate::protocol::CommandDescriptor> {
+    use crate::protocol::{CommandDescriptor, CommandEnablement};
+    let e = |id: &str,
+             title: &str,
+             category: &str,
+             enablement: Vec<CommandEnablement>,
+             undo: Option<&str>,
+             dialog: Option<&str>| {
+        CommandDescriptor {
+            id: id.to_string(),
+            title: title.to_string(),
+            category: category.to_string(),
+            enablement,
+            undo_label: undo.map(str::to_string),
+            dialog_id: dialog.map(str::to_string),
+        }
+    };
+    vec![
+        e(
+            "ontocode.newOntology",
+            "New Ontology",
+            "File",
+            vec![CommandEnablement::Always],
+            None,
+            Some("new_ontology"),
+        ),
+        e(
+            "ontocode.openOntology",
+            "Open Ontology",
+            "File",
+            vec![CommandEnablement::Always],
+            None,
+            None,
+        ),
+        e(
+            "ontocode.saveAs",
+            "Save Ontology As…",
+            "File",
+            vec![CommandEnablement::HasOntology],
+            None,
+            Some("save_as"),
+        ),
+        e(
+            "ontocode.exportOntology",
+            "Export Ontology…",
+            "File",
+            vec![CommandEnablement::HasOntology],
+            None,
+            Some("export_ontology"),
+        ),
+        e(
+            "ontocode.manageImports",
+            "Manage Imports",
+            "File",
+            vec![CommandEnablement::HasOntology],
+            None,
+            Some("import"),
+        ),
+        e(
+            "ontocode.reloadImports",
+            "Reload Imports",
+            "File",
+            vec![CommandEnablement::HasOntology],
+            None,
+            None,
+        ),
+        e(
+            "ontocode.searchEntities",
+            "Search Entities",
+            "Edit",
+            vec![CommandEnablement::HasOntology],
+            None,
+            Some("search"),
+        ),
+        e(
+            "ontocode.openPreferences",
+            "Preferences",
+            "Edit",
+            vec![CommandEnablement::Always],
+            None,
+            Some("preferences"),
+        ),
+        e(
+            "ontocode.deleteEntity",
+            "Delete Entity",
+            "Edit",
+            vec![CommandEnablement::HasSelection, CommandEnablement::CanEditSelection],
+            Some("Delete entity"),
+            Some("delete_entity"),
+        ),
+        e(
+            "ontocode.copyEntityIri",
+            "Copy Entity IRI",
+            "Edit",
+            vec![CommandEnablement::HasSelection],
+            None,
+            None,
+        ),
+        e(
+            "ontocode.setActiveOntology",
+            "Set Active Ontology",
+            "Active Ontology",
+            vec![CommandEnablement::HasOntology],
+            None,
+            None,
+        ),
+        e(
+            "ontocode.editOntologyMetadata",
+            "Ontology Metadata",
+            "Active Ontology",
+            vec![CommandEnablement::HasOntology],
+            Some("Edit ontology metadata"),
+            Some("ontology_metadata"),
+        ),
+        e(
+            "ontocode.managePrefixes",
+            "Manage Prefixes",
+            "Active Ontology",
+            vec![CommandEnablement::HasOntology],
+            Some("Edit prefixes"),
+            Some("prefix_manager"),
+        ),
+        e(
+            "ontocode.showMetrics",
+            "Ontology Metrics",
+            "Active Ontology",
+            vec![CommandEnablement::HasOntology],
+            None,
+            Some("metrics"),
+        ),
+        e(
+            "ontocode.renameEntityIri",
+            "Rename Entity IRI",
+            "Refactor",
+            vec![CommandEnablement::HasSelection],
+            Some("Rename entity"),
+            Some("rename"),
+        ),
+        e(
+            "ontocode.mergeEntities",
+            "Merge Entities",
+            "Refactor",
+            vec![CommandEnablement::HasSelection],
+            Some("Merge entities"),
+            None,
+        ),
+        e(
+            "ontocode.replaceEntity",
+            "Replace Entity",
+            "Refactor",
+            vec![CommandEnablement::HasSelection],
+            Some("Replace entity"),
+            None,
+        ),
+        e(
+            "ontocode.startReasoner",
+            "Start Reasoner",
+            "Reasoner",
+            vec![CommandEnablement::HasOntology, CommandEnablement::ReasonerIdle],
+            None,
+            None,
+        ),
+        e(
+            "ontocode.stopReasoner",
+            "Stop Reasoner",
+            "Reasoner",
+            vec![CommandEnablement::ReasonerRunning],
+            None,
+            None,
+        ),
+        e(
+            "ontocode.synchronizeReasoner",
+            "Synchronize Reasoner",
+            "Reasoner",
+            vec![CommandEnablement::HasOntology],
+            None,
+            None,
+        ),
+        e(
+            "ontocode.classifyOntology",
+            "Classify Ontology",
+            "Reasoner",
+            vec![CommandEnablement::HasOntology],
+            None,
+            None,
+        ),
+        e(
+            "ontocode.checkConsistency",
+            "Check Consistency",
+            "Reasoner",
+            vec![CommandEnablement::HasOntology],
+            None,
+            None,
+        ),
+        e(
+            "ontocode.configureReasoner",
+            "Configure Reasoner",
+            "Reasoner",
+            vec![CommandEnablement::Always],
+            None,
+            Some("reasoner_settings"),
+        ),
+        e(
+            "ontocode.validateWorkspace",
+            "Validate Workspace",
+            "Tools",
+            vec![CommandEnablement::HasOntology],
+            None,
+            None,
+        ),
+        e(
+            "ontocode.runBatchTools",
+            "Run Batch Tools",
+            "Tools",
+            vec![CommandEnablement::HasOntology],
+            None,
+            None,
+        ),
+        e(
+            "ontocode.resetLayout",
+            "Reset Layout",
+            "Window",
+            vec![CommandEnablement::Always],
+            None,
+            None,
+        ),
+        e(
+            "ontocode.switchPerspective",
+            "Switch Perspective",
+            "Window",
+            vec![CommandEnablement::Always],
+            None,
+            None,
+        ),
+        e(
+            "ontocode.savePerspective",
+            "Save Perspective",
+            "Window",
+            vec![CommandEnablement::Always],
+            None,
+            None,
+        ),
+        e(
+            "ontocode.showAbout",
+            "About OntoCode",
+            "Help",
+            vec![CommandEnablement::Always],
+            None,
+            None,
+        ),
+        e(
+            "ontocode.showPluginInfo",
+            "Plugin Information",
+            "Help",
+            vec![CommandEnablement::Always],
+            None,
+            None,
+        ),
+        e(
+            "ontocode.openErrorLog",
+            "Error Log",
+            "Help",
+            vec![CommandEnablement::Always],
+            None,
+            None,
+        ),
+        e(
+            "ontocode.exportDiagnostics",
+            "Export Diagnostics",
+            "Help",
+            vec![CommandEnablement::HasOntology],
+            None,
+            None,
+        ),
+        e(
+            "ontocode.openDocumentation",
+            "Documentation",
+            "Help",
+            vec![CommandEnablement::Always],
+            None,
+            None,
+        ),
+    ]
+}
+
+pub fn handle_list_commands() -> crate::protocol::ListCommandsResult {
+    crate::protocol::ListCommandsResult { commands: builtin_command_descriptors() }
+}
+
+pub fn handle_get_workspace_ui_state(
+    state: &ServerState,
+    params: crate::protocol::WorkspaceUiStateParams,
+) -> Result<crate::protocol::WorkspaceUiState, LspErrorPayload> {
+    let (has_ontology, ontology_count, stats, selection_editable) = state
+        .with_catalog(|catalog| {
+            let stats = catalog.data().stats();
+            let editable = params
+                .selection_iri
+                .as_ref()
+                .map(|iri| {
+                    catalog.find_entity(iri).is_some()
+                        && catalog
+                            .entity_document(iri)
+                            .map(|d| {
+                                d.format == OntologyFormat::Turtle
+                                    || d.format == OntologyFormat::Obo
+                            })
+                            .unwrap_or(false)
+                })
+                .unwrap_or(false);
+            (stats.ontology_count > 0, stats.ontology_count, Some(stats), editable)
+        })
+        .unwrap_or((false, 0, None, false));
+    let reasoner = state.with_catalog_and_reasoner(|_, r| r.cloned()).flatten();
+    Ok(crate::protocol::WorkspaceUiState {
+        has_ontology,
+        ontology_count,
+        is_dirty: params.dirty_document_count > 0,
+        has_selection: params.selection_iri.is_some(),
+        selection_iri: params.selection_iri.clone(),
+        selection_editable,
+        reasoner_running: false,
+        reasoner_dirty: false,
+        reasoner_consistent: reasoner.as_ref().map(|r| r.consistent),
+        active_ontology_id: params.active_ontology_id.or_else(|| state.active_ontology_id()),
+        stats,
+    })
+}
+
+pub fn handle_get_dialog_schema(
+    params: crate::protocol::GetDialogSchemaParams,
+) -> Result<crate::protocol::GetDialogSchemaResult, LspErrorPayload> {
+    use crate::protocol::{DialogFieldSchema, DialogSchema};
+    let field = |id: &str, label: &str, field_type: &str, required: bool, validation: &[&str]| {
+        DialogFieldSchema {
+            id: id.to_string(),
+            label: label.to_string(),
+            field_type: field_type.to_string(),
+            required,
+            placeholder: None,
+            validation: validation.iter().map(|s| (*s).to_string()).collect(),
+        }
+    };
+    let schema = match params.dialog_id.as_str() {
+        "new_ontology" => DialogSchema {
+            id: "new_ontology".into(),
+            title: "New Ontology".into(),
+            primary_action: "Create".into(),
+            fields: vec![
+                field("path", "File path", "path", true, &["required"]),
+                field("ontology_iri", "Ontology IRI", "iri", true, &["required", "iri"]),
+                field("version_iri", "Version IRI", "iri", false, &["iri"]),
+                field("format", "Format", "enum", true, &[]),
+            ],
+        },
+        "export_ontology" | "save_as" => DialogSchema {
+            id: params.dialog_id.clone(),
+            title: if params.dialog_id == "save_as" {
+                "Save As".into()
+            } else {
+                "Export Ontology".into()
+            },
+            primary_action: "Export".into(),
+            fields: vec![
+                field("source_path", "Source", "path", true, &["required"]),
+                field("output_path", "Output path", "path", true, &["required"]),
+                field("format", "Format", "enum", false, &[]),
+            ],
+        },
+        "prefix_manager" => DialogSchema {
+            id: "prefix_manager".into(),
+            title: "Prefix Manager".into(),
+            primary_action: "Apply".into(),
+            fields: vec![
+                field("prefix", "Prefix", "string", true, &["required", "prefix"]),
+                field("namespace_iri", "Namespace IRI", "iri", true, &["required", "iri"]),
+            ],
+        },
+        "ontology_metadata" => DialogSchema {
+            id: "ontology_metadata".into(),
+            title: "Ontology Metadata".into(),
+            primary_action: "Save".into(),
+            fields: vec![
+                field("ontology_iri", "Ontology IRI", "iri", true, &["required", "iri"]),
+                field("version_iri", "Version IRI", "iri", false, &["iri"]),
+                field("label", "Label", "string", false, &[]),
+                field("comment", "Comment", "string", false, &[]),
+            ],
+        },
+        "search" => DialogSchema {
+            id: "search".into(),
+            title: "Search Entities".into(),
+            primary_action: "Search".into(),
+            fields: vec![field("query", "Query", "string", true, &["required"])],
+        },
+        "metrics" => DialogSchema {
+            id: "metrics".into(),
+            title: "Ontology Metrics".into(),
+            primary_action: "Close".into(),
+            fields: vec![],
+        },
+        "delete_entity" => DialogSchema {
+            id: "delete_entity".into(),
+            title: "Delete Entity".into(),
+            primary_action: "Delete".into(),
+            fields: vec![field("entity_iri", "Entity IRI", "iri", true, &["required", "iri"])],
+        },
+        "reasoner_settings" => DialogSchema {
+            id: "reasoner_settings".into(),
+            title: "Reasoner Settings".into(),
+            primary_action: "Save".into(),
+            fields: vec![
+                field("profile", "Profile", "enum", true, &[]),
+                field("auto_profile", "Auto profile warnings", "boolean", false, &[]),
+            ],
+        },
+        "preferences" => DialogSchema {
+            id: "preferences".into(),
+            title: "Preferences".into(),
+            primary_action: "Close".into(),
+            fields: vec![],
+        },
+        "import" => DialogSchema {
+            id: "import".into(),
+            title: "Import Ontology".into(),
+            primary_action: "Add Import".into(),
+            fields: vec![
+                field("ontology_iri", "Ontology IRI", "iri", true, &["required", "iri"]),
+                field("import_iri", "Import IRI", "iri", true, &["required", "iri"]),
+            ],
+        },
+        "rename" => DialogSchema {
+            id: "rename".into(),
+            title: "Rename Entity".into(),
+            primary_action: "Rename".into(),
+            fields: vec![
+                field("from_iri", "Current IRI", "iri", true, &["required", "iri"]),
+                field("to_iri", "New IRI", "iri", true, &["required", "iri"]),
+            ],
+        },
+        other => {
+            return Err(LspErrorPayload::invalid_params(format!("unknown dialog: {other}")));
+        }
+    };
+    Ok(crate::protocol::GetDialogSchemaResult { schema })
+}
+
+pub fn handle_create_ontology(
+    state: &ServerState,
+    params: crate::protocol::CreateOntologyParams,
+) -> Result<crate::protocol::CreateOntologyResult, LspErrorPayload> {
+    use std::io::Write;
+    let path = std::path::PathBuf::from(&params.path);
+    let roots = state.workspace_roots();
+    if roots.is_empty() {
+        return Err(LspErrorPayload::invalid_params("workspace not initialized".into()));
+    }
+    validate_workspace_scope_any(&path, &roots).map_err(LspErrorPayload::invalid_params)?;
+    if path.exists() {
+        return Err(LspErrorPayload::invalid_params(format!(
+            "file already exists: {}",
+            path.display()
+        )));
+    }
+    if let Some(parent) = path.parent() {
+        std::fs::create_dir_all(parent)
+            .map_err(|e| LspErrorPayload::index_failed(e.to_string()))?;
+    }
+    let format = params
+        .format
+        .as_deref()
+        .unwrap_or_else(|| path.extension().and_then(|e| e.to_str()).unwrap_or("ttl"));
+    let content = match format {
+        "obo" => {
+            let mut s = format!("format-version: 1.2\nontology: {}\n", params.ontology_iri);
+            if let Some(v) = &params.version_iri {
+                s.push_str(&format!("data-version: {v}\n"));
+            }
+            s.push('\n');
+            s
+        }
+        _ => {
+            let mut s = String::from(
+                "@prefix owl: <http://www.w3.org/2002/07/owl#> .\n\
+                 @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .\n\
+                 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n\
+                 @prefix xsd: <http://www.w3.org/2001/XMLSchema#> .\n\n",
+            );
+            if let Some(prefixes) = &params.prefixes {
+                for (p, iri) in prefixes {
+                    s.push_str(&format!("@prefix {p}: <{iri}> .\n"));
+                }
+                s.push('\n');
+            }
+            s.push_str(&format!("<{}> a owl:Ontology", params.ontology_iri));
+            if let Some(v) = &params.version_iri {
+                s.push_str(&format!(" ;\n    owl:versionIRI <{v}>"));
+            }
+            s.push_str(" .\n");
+            s
+        }
+    };
+    let mut file =
+        std::fs::File::create(&path).map_err(|e| LspErrorPayload::index_failed(e.to_string()))?;
+    file.write_all(content.as_bytes()).map_err(|e| LspErrorPayload::index_failed(e.to_string()))?;
+    Ok(crate::protocol::CreateOntologyResult {
+        path: path.display().to_string(),
+        ontology_iri: params.ontology_iri,
+    })
+}
+
+pub fn handle_export_ontology(
+    state: &ServerState,
+    params: crate::protocol::ExportOntologyParams,
+) -> Result<crate::protocol::ExportOntologyResult, LspErrorPayload> {
+    let source = std::path::PathBuf::from(&params.source_path);
+    let output = std::path::PathBuf::from(&params.output_path);
+    let roots = state.workspace_roots();
+    validate_workspace_scope_any(&source, &roots).map_err(LspErrorPayload::invalid_params)?;
+    validate_workspace_scope_any(&output, &roots).map_err(LspErrorPayload::invalid_params)?;
+    match ontocore_robot::robot_convert(None, &source, &output) {
+        Ok(out) => Ok(crate::protocol::ExportOntologyResult {
+            output_path: output.display().to_string(),
+            success: out.exit_code == 0,
+            logs: Some(format!("{}\n{}", out.stdout, out.stderr)),
+        }),
+        Err(e) => {
+            // Fallback: copy Turtle/OBO as-is when ROBOT is unavailable.
+            if source.extension() == output.extension() {
+                std::fs::copy(&source, &output)
+                    .map_err(|err| LspErrorPayload::robot_failed(err.to_string()))?;
+                Ok(crate::protocol::ExportOntologyResult {
+                    output_path: output.display().to_string(),
+                    success: true,
+                    logs: Some(format!("ROBOT unavailable ({e}); copied source to output")),
+                })
+            } else {
+                Err(LspErrorPayload::robot_failed(e.to_string()))
+            }
+        }
+    }
+}
+
+pub fn handle_set_active_ontology(
+    state: &ServerState,
+    params: crate::protocol::SetActiveOntologyParams,
+) -> Result<crate::protocol::SetActiveOntologyResult, LspErrorPayload> {
+    let found = state
+        .with_catalog(|catalog| {
+            catalog.data().documents.iter().any(|d| {
+                d.id == params.ontology_id
+                    || d.path.as_os_str() == std::ffi::OsStr::new(params.ontology_id.as_str())
+                    || d.base_iri.as_deref() == Some(params.ontology_id.as_str())
+            })
+        })
+        .unwrap_or(false);
+    if !found {
+        return Err(LspErrorPayload::not_found(&params.ontology_id));
+    }
+    state.set_active_ontology_id(Some(params.ontology_id.clone()));
+    Ok(crate::protocol::SetActiveOntologyResult { active_ontology_id: params.ontology_id })
+}
+
+pub fn handle_delete_impact(
+    state: &ServerState,
+    params: crate::protocol::DeleteImpactParams,
+) -> Result<crate::protocol::DeleteImpactResult, LspErrorPayload> {
+    let usages = state
+        .with_catalog_and_overrides(|catalog, overrides| {
+            ontocore_refactor::find_usages_with_overrides(catalog, &params.entity_iri, overrides)
+        })
+        .ok_or_else(LspErrorPayload::not_indexed)?;
+    let mut referencing = std::collections::BTreeSet::new();
+    let mut warnings = Vec::new();
+    for u in &usages {
+        if u.referenced_iri != params.entity_iri {
+            referencing.insert(u.iri.clone());
+        }
+        if matches!(u.kind, ontocore_refactor::UsageKind::Import) {
+            warnings.push("Entity appears in import-related references".into());
+        }
+    }
+    let axiom_count = state
+        .with_catalog(|catalog| {
+            catalog
+                .data()
+                .axioms
+                .iter()
+                .filter(|a| a.subject == params.entity_iri || a.object == params.entity_iri)
+                .count()
+        })
+        .unwrap_or(0);
+    Ok(crate::protocol::DeleteImpactResult {
+        entity_iri: params.entity_iri,
+        usage_count: usages.len(),
+        axiom_count,
+        referencing_entities: referencing.into_iter().collect(),
+        warnings,
+    })
 }
 
 pub fn handle_list_plugins(state: &ServerState) -> Result<ListPluginsResult, LspErrorPayload> {
@@ -578,9 +1183,16 @@ pub fn handle_apply_axiom_patch(
                         entity_iri.clone()
                     }
                     ontocore_owl::PatchOp::AddImport { ontology_iri, .. }
-                    | ontocore_owl::PatchOp::RemoveImport { ontology_iri, .. } => {
+                    | ontocore_owl::PatchOp::RemoveImport { ontology_iri, .. }
+                    | ontocore_owl::PatchOp::SetOntologyIri { ontology_iri }
+                    | ontocore_owl::PatchOp::SetVersionIri { ontology_iri, .. }
+                    | ontocore_owl::PatchOp::AddOntologyAnnotation { ontology_iri, .. }
+                    | ontocore_owl::PatchOp::RemoveOntologyAnnotation { ontology_iri, .. } => {
                         ontology_iri.clone()
                     }
+                    ontocore_owl::PatchOp::AddPrefix { .. }
+                    | ontocore_owl::PatchOp::RemovePrefix { .. }
+                    | ontocore_owl::PatchOp::SetPrefix { .. } => String::new(),
                 })
             },
         )
@@ -1404,21 +2016,45 @@ fn full_document_workspace_edit(
     path: &std::path::Path,
     new_text: &str,
 ) -> Option<WorkspaceEdit> {
+    full_document_workspace_edit_labeled(state, path, new_text, "OntoCode semantic edit")
+}
+
+fn full_document_workspace_edit_labeled(
+    state: &ServerState,
+    path: &std::path::Path,
+    new_text: &str,
+    label: &str,
+) -> Option<WorkspaceEdit> {
+    use lsp_types::{ChangeAnnotation, ChangeAnnotationIdentifier};
+    use std::collections::HashMap;
     let uri = path_to_lsp_uri(path)?;
     let version = state.document_version(path);
+    let annotation_id = ChangeAnnotationIdentifier::from("ontocode.edit");
+    let mut annotations = HashMap::new();
+    annotations.insert(
+        annotation_id.clone(),
+        ChangeAnnotation {
+            label: label.to_string(),
+            needs_confirmation: Some(false),
+            description: Some(label.to_string()),
+        },
+    );
     Some(WorkspaceEdit {
         changes: None,
         document_changes: Some(DocumentChanges::Edits(vec![TextDocumentEdit {
             text_document: lsp_types::OptionalVersionedTextDocumentIdentifier { uri, version },
-            edits: vec![OneOf::Left(TextEdit {
-                range: Range {
-                    start: Position { line: 0, character: 0 },
-                    end: Position { line: u32::MAX, character: 0 },
+            edits: vec![OneOf::Right(lsp_types::AnnotatedTextEdit {
+                text_edit: TextEdit {
+                    range: Range {
+                        start: Position { line: 0, character: 0 },
+                        end: Position { line: u32::MAX, character: 0 },
+                    },
+                    new_text: new_text.to_string(),
                 },
-                new_text: new_text.to_string(),
+                annotation_id,
             })],
         }])),
-        change_annotations: None,
+        change_annotations: Some(annotations),
     })
 }
 
@@ -1426,7 +2062,10 @@ fn plan_to_workspace_edit(
     state: &ServerState,
     plan: &ontocore_refactor::RefactorPlan,
 ) -> Option<WorkspaceEdit> {
+    use lsp_types::{ChangeAnnotation, ChangeAnnotationIdentifier};
+    use std::collections::HashMap;
     let mut document_changes = Vec::new();
+    let annotation_id = ChangeAnnotationIdentifier::from("ontocode.refactor");
     for change in &plan.changes {
         if change.preview_text == change.original_text {
             continue;
@@ -1435,22 +2074,34 @@ fn plan_to_workspace_edit(
         let version = state.document_version(&change.path);
         document_changes.push(TextDocumentEdit {
             text_document: lsp_types::OptionalVersionedTextDocumentIdentifier { uri, version },
-            edits: vec![OneOf::Left(TextEdit {
-                range: Range {
-                    start: Position { line: 0, character: 0 },
-                    end: Position { line: u32::MAX, character: 0 },
+            edits: vec![OneOf::Right(lsp_types::AnnotatedTextEdit {
+                text_edit: TextEdit {
+                    range: Range {
+                        start: Position { line: 0, character: 0 },
+                        end: Position { line: u32::MAX, character: 0 },
+                    },
+                    new_text: change.preview_text.clone(),
                 },
-                new_text: change.preview_text.clone(),
+                annotation_id: annotation_id.clone(),
             })],
         });
     }
     if document_changes.is_empty() {
         return None;
     }
+    let mut annotations = HashMap::new();
+    annotations.insert(
+        annotation_id,
+        ChangeAnnotation {
+            label: "OntoCode refactor".to_string(),
+            needs_confirmation: Some(false),
+            description: Some("Semantic refactor applied by OntoCore".to_string()),
+        },
+    );
     Some(WorkspaceEdit {
         changes: None,
         document_changes: Some(DocumentChanges::Edits(document_changes)),
-        change_annotations: None,
+        change_annotations: Some(annotations),
     })
 }
 
@@ -1559,6 +2210,41 @@ pub fn handle_custom_request(
             let params: RunPluginParams = parse_custom_params(params)?;
             let result = handle_run_plugin(state, params)?;
             serde_json::to_value(result).map_err(|e| LspErrorPayload::index_failed(e.to_string()))
+        }
+        "ontocore/listCommands" => {
+            let result = handle_list_commands();
+            serde_json::to_value(result).map_err(|e| LspErrorPayload::index_failed(e.to_string()))
+        }
+        "ontocore/getWorkspaceUiState" => {
+            let params: crate::protocol::WorkspaceUiStateParams = parse_custom_params(params)?;
+            let result = handle_get_workspace_ui_state(state, params)?;
+            serde_json::to_value(result).map_err(|e| LspErrorPayload::index_failed(e.to_string()))
+        }
+        "ontocore/getDialogSchema" => {
+            let params: crate::protocol::GetDialogSchemaParams = parse_custom_params(params)?;
+            let result = handle_get_dialog_schema(params)?;
+            serde_json::to_value(result).map_err(|e| LspErrorPayload::index_failed(e.to_string()))
+        }
+        "ontocore/createOntology" => {
+            let params: crate::protocol::CreateOntologyParams = parse_custom_params(params)?;
+            let result = handle_create_ontology(state, params)?;
+            serde_json::to_value(result).map_err(|e| LspErrorPayload::index_failed(e.to_string()))
+        }
+        "ontocore/exportOntology" => {
+            let params: crate::protocol::ExportOntologyParams = parse_custom_params(params)?;
+            let result = handle_export_ontology(state, params)?;
+            serde_json::to_value(result).map_err(|e| LspErrorPayload::robot_failed(e.to_string()))
+        }
+        "ontocore/setActiveOntology" => {
+            let params: crate::protocol::SetActiveOntologyParams = parse_custom_params(params)?;
+            let result = handle_set_active_ontology(state, params)?;
+            serde_json::to_value(result).map_err(|e| LspErrorPayload::index_failed(e.to_string()))
+        }
+        "ontocore/deleteImpact" => {
+            let params: crate::protocol::DeleteImpactParams = parse_custom_params(params)?;
+            let result = handle_delete_impact(state, params)?;
+            serde_json::to_value(result)
+                .map_err(|e| LspErrorPayload::refactor_failed(e.to_string()))
         }
         _ => Err(LspErrorPayload::invalid_params(format!("unknown method: {method}"))),
     }

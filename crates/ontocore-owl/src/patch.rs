@@ -15,6 +15,13 @@ use std::time::{SystemTime, UNIX_EPOCH};
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(tag = "op", rename_all = "snake_case")]
 pub enum PatchOp {
+    AddPrefix { prefix: String, namespace_iri: String },
+    RemovePrefix { prefix: String },
+    SetPrefix { prefix: String, namespace_iri: String },
+    SetOntologyIri { ontology_iri: String },
+    SetVersionIri { ontology_iri: String, version_iri: String },
+    AddOntologyAnnotation { ontology_iri: String, predicate: String, value: String },
+    RemoveOntologyAnnotation { ontology_iri: String, predicate: String, value: String },
     CreateEntity { entity_iri: String, kind: PatchEntityKind },
     DeleteEntity { entity_iri: String },
     SetLabel { entity_iri: String, value: String },
@@ -202,6 +209,23 @@ fn apply_one_patch(
     namespaces: &BTreeMap<String, String>,
 ) -> Result<()> {
     match patch {
+        PatchOp::AddPrefix { prefix, namespace_iri } => add_prefix(text, prefix, namespace_iri),
+        PatchOp::RemovePrefix { prefix } => remove_prefix(text, prefix),
+        PatchOp::SetPrefix { prefix, namespace_iri } => {
+            remove_prefix(text, prefix)?;
+            add_prefix(text, prefix, namespace_iri)
+        }
+        PatchOp::SetOntologyIri { ontology_iri } => set_ontology_iri(text, ontology_iri),
+        PatchOp::SetVersionIri { ontology_iri, version_iri } => {
+            let version_term = iri_to_turtle_term(version_iri, namespaces)?;
+            add_object_triple(text, ontology_iri, "owl:versionIRI", &version_term, namespaces)
+        }
+        PatchOp::AddOntologyAnnotation { ontology_iri, predicate, value } => {
+            add_annotation_value(text, ontology_iri, predicate, value, namespaces)
+        }
+        PatchOp::RemoveOntologyAnnotation { ontology_iri, predicate, value } => {
+            remove_annotation_value(text, ontology_iri, predicate, value, namespaces)
+        }
         PatchOp::CreateEntity { entity_iri, kind } => {
             create_entity(text, entity_iri, *kind, namespaces)
         }
@@ -382,33 +406,154 @@ fn apply_one_patch(
             remove_predicate_object_any_statement(text, entity_iri, &prop, &object, namespaces)
         }
         PatchOp::AddAnnotation { entity_iri, predicate, value } => {
-            if predicate == "rdfs:label" || predicate.ends_with("#label") {
-                add_annotation_triple(text, entity_iri, "rdfs:label", value, namespaces)
-            } else if predicate == "rdfs:comment" || predicate.ends_with("#comment") {
-                add_annotation_triple(text, entity_iri, "rdfs:comment", value, namespaces)
-            } else if value.starts_with("http://") || value.starts_with("https://") {
-                let pred = predicate_to_term(predicate, namespaces)?;
-                let obj = iri_to_turtle_term(value, namespaces)?;
-                add_object_triple(text, entity_iri, &pred, &obj, namespaces)
-            } else {
-                let pred = predicate_to_term(predicate, namespaces)?;
-                add_annotation_triple(text, entity_iri, &pred, value, namespaces)
-            }
+            add_annotation_value(text, entity_iri, predicate, value, namespaces)
         }
         PatchOp::RemoveAnnotation { entity_iri, predicate, value } => {
-            if predicate == "rdfs:label" || predicate.ends_with("#label") {
-                remove_matching_predicate_any(text, entity_iri, "rdfs:label", value, namespaces)
-            } else if predicate == "rdfs:comment" || predicate.ends_with("#comment") {
-                remove_matching_predicate_any(text, entity_iri, "rdfs:comment", value, namespaces)
-            } else if value.starts_with("http://") || value.starts_with("https://") {
-                let pred = predicate_to_term(predicate, namespaces)?;
-                let obj = iri_to_turtle_term(value, namespaces)?;
-                remove_predicate_object_any_statement(text, entity_iri, &pred, &obj, namespaces)
-            } else {
-                let pred = predicate_to_term(predicate, namespaces)?;
-                remove_matching_predicate_any(text, entity_iri, &pred, value, namespaces)
+            remove_annotation_value(text, entity_iri, predicate, value, namespaces)
+        }
+    }
+}
+
+fn prefix_declaration_name(line: &str) -> Option<&str> {
+    let mut parts = line.split_whitespace();
+    if parts.next()? != "@prefix" {
+        return None;
+    }
+    parts.next()?.strip_suffix(':')
+}
+
+fn validate_prefix(prefix: &str, namespace_iri: &str) -> Result<()> {
+    if prefix.is_empty() || !prefix.chars().all(|c| c.is_ascii_alphanumeric() || c == '_') {
+        return Err(OwlError::PatchInvalid(format!(
+            "prefix must contain only letters, numbers, or underscores: {prefix:?}"
+        )));
+    }
+    if !(namespace_iri.starts_with("http://") || namespace_iri.starts_with("https://"))
+        || !is_safe_iri(namespace_iri)
+    {
+        return Err(OwlError::PatchInvalid(format!(
+            "prefix namespace IRI must be a valid http(s) IRI: {namespace_iri:?}"
+        )));
+    }
+    Ok(())
+}
+
+fn add_prefix(text: &mut String, prefix: &str, namespace_iri: &str) -> Result<()> {
+    validate_prefix(prefix, namespace_iri)?;
+    if text.lines().any(|line| prefix_declaration_name(line) == Some(prefix)) {
+        return Err(OwlError::PatchInvalid(format!("duplicate prefix already present: {prefix}")));
+    }
+
+    let mut offset = 0;
+    let mut insertion_at = 0;
+    for line in text.split_inclusive('\n') {
+        offset += line.len();
+        if prefix_declaration_name(line).is_some() {
+            insertion_at = offset;
+        }
+    }
+
+    let declaration = format!("@prefix {prefix}: <{namespace_iri}> .\n");
+    if insertion_at > 0 && !text[..insertion_at].ends_with('\n') {
+        text.insert_str(insertion_at, &format!("\n{declaration}"));
+    } else {
+        text.insert_str(insertion_at, &declaration);
+    }
+    Ok(())
+}
+
+fn remove_prefix(text: &mut String, prefix: &str) -> Result<()> {
+    if prefix.is_empty() || !prefix.chars().all(|c| c.is_ascii_alphanumeric() || c == '_') {
+        return Err(OwlError::PatchInvalid(format!(
+            "prefix must contain only letters, numbers, or underscores: {prefix:?}"
+        )));
+    }
+    let mut rewritten = String::with_capacity(text.len());
+    for line in text.split_inclusive('\n') {
+        if prefix_declaration_name(line) != Some(prefix) {
+            rewritten.push_str(line);
+        }
+    }
+    *text = rewritten;
+    Ok(())
+}
+
+fn set_ontology_iri(text: &mut String, ontology_iri: &str) -> Result<()> {
+    if !is_safe_iri(ontology_iri) {
+        return Err(OwlError::PatchInvalid(format!(
+            "IRI contains characters that cannot be safely written to Turtle: {ontology_iri:?}"
+        )));
+    }
+
+    let mut offset = 0;
+    let mut declaration_subject = None;
+    for line in text.split_inclusive('\n') {
+        let leading = line.len() - line.trim_start().len();
+        let trimmed = line.trim_start();
+        if let Some(subject_end) = trimmed.find('>') {
+            let subject = &trimmed[..=subject_end];
+            let remainder = &trimmed[subject_end + 1..];
+            if subject.starts_with('<') && remainder.trim_start().starts_with("a owl:Ontology") {
+                declaration_subject = Some((offset + leading, subject.len()));
+                break;
             }
         }
+        offset += line.len();
+    }
+    if let Some((start, len)) = declaration_subject {
+        text.replace_range(start..start + len, &format!("<{ontology_iri}>"));
+        return Ok(());
+    }
+
+    if !text.is_empty() && !text.ends_with('\n') {
+        text.push('\n');
+    }
+    if !text.is_empty() && !text.ends_with("\n\n") {
+        text.push('\n');
+    }
+    text.push_str(&format!("<{ontology_iri}> a owl:Ontology .\n"));
+    Ok(())
+}
+
+fn add_annotation_value(
+    text: &mut String,
+    entity_iri: &str,
+    predicate: &str,
+    value: &str,
+    namespaces: &BTreeMap<String, String>,
+) -> Result<()> {
+    if predicate == "rdfs:label" || predicate.ends_with("#label") {
+        add_annotation_triple(text, entity_iri, "rdfs:label", value, namespaces)
+    } else if predicate == "rdfs:comment" || predicate.ends_with("#comment") {
+        add_annotation_triple(text, entity_iri, "rdfs:comment", value, namespaces)
+    } else if value.starts_with("http://") || value.starts_with("https://") {
+        let pred = predicate_to_term(predicate, namespaces)?;
+        let obj = iri_to_turtle_term(value, namespaces)?;
+        add_object_triple(text, entity_iri, &pred, &obj, namespaces)
+    } else {
+        let pred = predicate_to_term(predicate, namespaces)?;
+        add_annotation_triple(text, entity_iri, &pred, value, namespaces)
+    }
+}
+
+fn remove_annotation_value(
+    text: &mut String,
+    entity_iri: &str,
+    predicate: &str,
+    value: &str,
+    namespaces: &BTreeMap<String, String>,
+) -> Result<()> {
+    if predicate == "rdfs:label" || predicate.ends_with("#label") {
+        remove_matching_predicate_any(text, entity_iri, "rdfs:label", value, namespaces)
+    } else if predicate == "rdfs:comment" || predicate.ends_with("#comment") {
+        remove_matching_predicate_any(text, entity_iri, "rdfs:comment", value, namespaces)
+    } else if value.starts_with("http://") || value.starts_with("https://") {
+        let pred = predicate_to_term(predicate, namespaces)?;
+        let obj = iri_to_turtle_term(value, namespaces)?;
+        remove_predicate_object_any_statement(text, entity_iri, &pred, &obj, namespaces)
+    } else {
+        let pred = predicate_to_term(predicate, namespaces)?;
+        remove_matching_predicate_any(text, entity_iri, &pred, value, namespaces)
     }
 }
 
@@ -1831,5 +1976,40 @@ ex:Cat a owl:Class .
         .expect("set functional");
         let preview = result.preview_text.expect("preview");
         assert!(preview.contains("owl:FunctionalProperty"));
+    }
+
+    #[test]
+    fn add_prefix_after_existing_prefixes() {
+        let ttl = "@prefix owl: <http://www.w3.org/2002/07/owl#> .\n\n<http://example.org/test> a owl:Ontology .\n";
+        let result = apply_patches_to_text(
+            ttl,
+            &[PatchOp::AddPrefix {
+                prefix: "ex".to_string(),
+                namespace_iri: "http://example.org/test#".to_string(),
+            }],
+            true,
+            &BTreeMap::new(),
+        )
+        .expect("add prefix");
+        let preview = result.preview_text.expect("preview");
+        assert!(preview.starts_with(
+            "@prefix owl: <http://www.w3.org/2002/07/owl#> .\n@prefix ex: <http://example.org/test#> .\n"
+        ));
+    }
+
+    #[test]
+    fn remove_prefix_leaves_other_prefixes() {
+        let ttl = "@prefix ex: <http://example.org/test#> .\n@prefix owl: <http://www.w3.org/2002/07/owl#> .\n\nex:Thing a owl:Class .\n";
+        let result = apply_patches_to_text(
+            ttl,
+            &[PatchOp::RemovePrefix { prefix: "ex".to_string() }],
+            true,
+            &BTreeMap::new(),
+        )
+        .expect("remove prefix");
+        let preview = result.preview_text.expect("preview");
+        assert!(!preview.contains("@prefix ex:"));
+        assert!(preview.contains("@prefix owl:"));
+        assert!(preview.contains("ex:Thing a owl:Class"));
     }
 }

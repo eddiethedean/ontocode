@@ -31,7 +31,7 @@
 
 ## Master checklist — Product Roadmap 2.0
 
-Every item from [PRODUCT_ROADMAP_2.0.md](PRODUCT_ROADMAP_2.0.md), with release assignment. **Shipped** = available in the current release unless noted (v0.16.0).
+Every item from [PRODUCT_ROADMAP_2.0.md](PRODUCT_ROADMAP_2.0.md), with release assignment. **Shipped** = available in the current release unless noted (v0.17.0).
 
 | UI phase | Deliverable | Status | Target release | Spec |
 |----------|-------------|--------|----------------|------|
@@ -128,7 +128,7 @@ Every item from [PRODUCT_ROADMAP_2.0.md](PRODUCT_ROADMAP_2.0.md), with release a
 | Visual design system | Planned | v0.13 | [VISUAL_DESIGN_SYSTEM.md](VISUAL_DESIGN_SYSTEM.md) |
 | Human interface guidelines | Planned | v1.0 | [HUMAN_INTERFACE_GUIDELINES.md](HUMAN_INTERFACE_GUIDELINES.md) |
 | Interaction principles | Reference | — | [INTERACTION_PRINCIPLES.md](INTERACTION_PRINCIPLES.md) |
-| Keyboard shortcuts catalog | Planned | v1.0 | [KEYBOARD_SHORTCUTS.md](KEYBOARD_SHORTCUTS.md) |
+| Keyboard shortcuts catalog | Shipped | v0.17 | [KEYBOARD_SHORTCUTS.md](KEYBOARD_SHORTCUTS.md) |
 | Accessibility (WCAG) | Partial | v0.13 / v1.0 | [ACCESSIBILITY_SPEC.md](ACCESSIBILITY_SPEC.md) · migrated panels v0.13 |
 | Telemetry / analytics | Not planned (opt-in only) | — | [TELEMETRY_ANALYTICS.md](TELEMETRY_ANALYTICS.md) |
 | Documentation workspace UX | Partial | v1.0 | [PRODUCT_DESIGN_SPECIFICATION.md](PRODUCT_DESIGN_SPECIFICATION.md) §4.6 |

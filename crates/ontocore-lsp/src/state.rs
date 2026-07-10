@@ -39,6 +39,8 @@ struct InnerState {
     published_diagnostic_uris: BTreeSet<String>,
     /// Persist `.ontocore/cache/` during indexing when enabled via `ontocore/indexWorkspace`.
     index_disk_cache: bool,
+    /// Active ontology document id (path or ontology IRI) for new-axiom targeting.
+    active_ontology_id: Option<String>,
 }
 
 impl ServerState {
@@ -58,8 +60,19 @@ impl ServerState {
                 plugin_diagnostics: Vec::new(),
                 published_diagnostic_uris: BTreeSet::new(),
                 index_disk_cache: false,
+                active_ontology_id: None,
             })),
             ops_lock: Arc::new(Mutex::new(())),
+        }
+    }
+
+    pub fn active_ontology_id(&self) -> Option<String> {
+        self.inner.read().ok()?.active_ontology_id.clone()
+    }
+
+    pub fn set_active_ontology_id(&self, id: Option<String>) {
+        if let Ok(mut guard) = self.inner.write() {
+            guard.active_ontology_id = id;
         }
     }
 
@@ -411,6 +424,7 @@ fn clear_workspace_state_inner(guard: &mut InnerState) {
     guard.reasoner_cache.invalidate();
     guard.reasoner_snapshot = None;
     guard.plugin_diagnostics.clear();
+    guard.active_ontology_id = None;
 }
 
 fn on_workspace_roots_changed_inner(guard: &mut InnerState, new_roots: &[PathBuf]) {

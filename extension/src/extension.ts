@@ -14,6 +14,8 @@ import {
   stopLanguageClient,
 } from "./lsp/client";
 import { ExplorerTreeProvider } from "./treeviews/explorer";
+import { registerWebviewPanelSerializers } from "./webviews/layoutPersistence";
+import { registerErrorLog } from "./logging/errorLog";
 
 let providers: {
   ontologies: ExplorerTreeProvider;
@@ -82,6 +84,8 @@ export async function activate(
     );
 
     registerCommands(context, providers);
+    registerErrorLog(context);
+    registerWebviewPanelSerializers(context);
 
     context.subscriptions.push(
       vscode.workspace.onDidChangeConfiguration((e) => {

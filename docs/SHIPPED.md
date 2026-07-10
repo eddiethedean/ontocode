@@ -1,8 +1,8 @@
-# What ships today (v0.16.0)
+# What ships today (v0.17.0)
 
 > **Canonical capability matrix.** Update this page on every release. Design specs under [Project](design/README.md) may describe future targets — check here for what is actually available.
 
-**Current release:** v0.16.0 · [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) · [Migration from v0.15](migration/v0.16.md)
+**Current release:** v0.17.0 · [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) · [Migration from v0.16](migration/v0.17.md)
 
 ## Products
 
@@ -58,6 +58,19 @@
 | Index / query | Yes | Yes | Yes (Horned catalog) | Yes |
 | Write-back (inspector, patches, refactor) | Yes | Yes | Read-only | Read-only |
 | Rich OBO metadata (synonyms, defs, xrefs) | — | Yes | — | — |
+
+## New in v0.17.0
+
+| Capability | Status |
+|------------|--------|
+| Protégé-style File, Edit, Active Ontology, Refactor, Reasoner, Tools, Window, and Help menus | Yes |
+| High-frequency toolbar actions with context-sensitive enablement | Yes |
+| Shared React dialog shell with keyboard handling and live IRI/prefix validation | Yes |
+| New Ontology, Prefix Manager, Metrics, and About webview dialogs | Yes |
+| Central command registry, platform-aware keybindings, and conflict detection | Yes |
+| Persistent layouts and named Modeling, Reasoning, and Review perspectives | Yes |
+| Help, plugin information, error log, diagnostics export, and support surfaces | Yes |
+| Engine support for prefix/metadata patches, create/export, active ontology, merge/replace, and reasoner workflows | Yes |
 
 ## New in v0.16.0
 

@@ -50,11 +50,15 @@ fn namespaces_for_path(state: &ServerState, path: &PathBuf) -> BTreeMap<String, 
                 .data()
                 .documents
                 .iter()
-                .find(|d| d.path == *path)
+                .find(|d| paths_equal(&d.path, path))
                 .map(|d| d.namespaces.clone())
                 .unwrap_or_default()
         })
         .unwrap_or_default()
+}
+
+fn paths_equal(a: &Path, b: &Path) -> bool {
+    a == b || a.canonicalize().ok().zip(b.canonicalize().ok()).is_some_and(|(x, y)| x == y)
 }
 
 fn quick_fix_to_action(
@@ -78,13 +82,7 @@ fn quick_fix_to_action(
             Some(code_action_with_edit(label, path, vec![edit]))
         }
         QuickFix::RemoveLine { label, line } => {
-            let line_idx = line.saturating_sub(1) as u32;
-            let mut lines: Vec<&str> = content.lines().collect();
-            if line_idx as usize >= lines.len() {
-                return None;
-            }
-            lines.remove(line_idx as usize);
-            let new_text = if lines.is_empty() { String::new() } else { lines.join("\n") + "\n" };
+            let new_text = remove_line_preserving_endings(content, *line)?;
             Some(code_action_with_edit(label, path, vec![full_document_edit(content, &new_text)]))
         }
         QuickFix::ApplyPatch { label, document_path: _, patches } => {
@@ -110,6 +108,43 @@ fn quick_fix_to_action(
             ))
         }
     }
+}
+
+/// Remove a 1-based line while preserving CRLF vs LF endings and trailing newline shape.
+fn remove_line_preserving_endings(content: &str, line_1based: usize) -> Option<String> {
+    let target = line_1based.saturating_sub(1);
+    let bytes = content.as_bytes();
+    let mut ranges: Vec<(usize, usize)> = Vec::new();
+    let mut start = 0usize;
+    let mut i = 0usize;
+    while i < bytes.len() {
+        if bytes[i] == b'\r' && bytes.get(i + 1) == Some(&b'\n') {
+            ranges.push((start, i + 2));
+            i += 2;
+            start = i;
+        } else if bytes[i] == b'\n' {
+            ranges.push((start, i + 1));
+            i += 1;
+            start = i;
+        } else {
+            i += 1;
+        }
+    }
+    if start < bytes.len() {
+        ranges.push((start, bytes.len()));
+    } else if content.is_empty() {
+        ranges.push((0, 0));
+    }
+    if target >= ranges.len() {
+        return None;
+    }
+    let mut out = String::with_capacity(content.len());
+    for (idx, (s, e)) in ranges.iter().enumerate() {
+        if idx != target {
+            out.push_str(&content[*s..*e]);
+        }
+    }
+    Some(out)
 }
 
 fn full_document_edit(old: &str, new_text: &str) -> TextEdit {
@@ -266,5 +301,27 @@ mod tests {
             quick_fix_to_action(&fix, &path, content, &namespaces).is_none(),
             "malformed ops must not yield a partial ApplyPatch code action"
         );
+    }
+
+    #[test]
+    fn remove_line_preserves_crlf_endings() {
+        let path = PathBuf::from("/tmp/crlf.ttl");
+        let content = "line1\r\nline2\r\nline3\r\n";
+        let fix = QuickFix::RemoveLine { label: "Remove line2".to_string(), line: 2 };
+        let action = quick_fix_to_action(&fix, &path, content, &BTreeMap::new()).expect("action");
+        let edit = action
+            .edit
+            .expect("edit")
+            .changes
+            .expect("changes")
+            .into_values()
+            .next()
+            .expect("edits")
+            .into_iter()
+            .next()
+            .expect("text edit");
+        assert_eq!(edit.new_text, "line1\r\nline3\r\n");
+        assert!(!edit.new_text.contains('\n') || edit.new_text.contains("\r\n"));
+        assert!(!edit.new_text.replace("\r\n", "").contains('\n'));
     }
 }

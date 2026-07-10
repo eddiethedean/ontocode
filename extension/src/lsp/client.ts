@@ -74,6 +74,8 @@ import {
 
 let client: LanguageClient | undefined;
 let starting: Promise<LanguageClient> | undefined;
+/** Bumped on stop so in-flight startups do not publish a superseded client (#91). */
+let startGeneration = 0;
 
 export function getClient(): LanguageClient | undefined {
   return client;
@@ -89,52 +91,63 @@ export async function startLanguageClient(
     return starting;
   }
 
+  const generation = ++startGeneration;
   starting = (async () => {
-  const serverPath = resolveServerPath(context);
-  const serverOptions: ServerOptions = {
-    run: { command: serverPath, transport: TransportKind.stdio },
-    debug: { command: serverPath, transport: TransportKind.stdio },
-  };
+    const serverPath = resolveServerPath(context);
+    const serverOptions: ServerOptions = {
+      run: { command: serverPath, transport: TransportKind.stdio },
+      debug: { command: serverPath, transport: TransportKind.stdio },
+    };
 
-  const clientOptions: LanguageClientOptions = {
-    documentSelector: [
-      { scheme: "file", language: "turtle" },
-      { scheme: "file", language: "obo" },
-      { scheme: "file", pattern: "**/*.{ttl,owl,rdf,jsonld,json-ld,nt,nq,trig,obo}" },
-    ],
-    synchronize: {
-      fileEvents: vscode.workspace.createFileSystemWatcher(
-        "**/*.{ttl,owl,rdf,jsonld,json-ld,nt,nq,trig,obo}"
-      ),
-    },
-    outputChannelName: "OntoCore Language Server",
-  };
+    const clientOptions: LanguageClientOptions = {
+      documentSelector: [
+        { scheme: "file", language: "turtle" },
+        { scheme: "file", language: "obo" },
+        { scheme: "file", pattern: "**/*.{ttl,owl,rdf,jsonld,json-ld,nt,nq,trig,obo}" },
+      ],
+      synchronize: {
+        fileEvents: vscode.workspace.createFileSystemWatcher(
+          "**/*.{ttl,owl,rdf,jsonld,json-ld,nt,nq,trig,obo}"
+        ),
+      },
+      outputChannelName: "OntoCore Language Server",
+    };
 
-  client = new LanguageClient(
-    "ontocore-lsp",
-    "OntoCore Language Server",
-    serverOptions,
-    clientOptions
-  );
-
-  context.subscriptions.push({
-    dispose: () => {
-      void stopLanguageClient();
-    },
-  });
-
-  try {
-    // vscode-languageclient v9: await start() — onReady() was removed.
-    await client.start();
-  } catch (err) {
-    client = undefined;
-    const detail = err instanceof Error ? err.message : String(err);
-    throw new Error(
-      `${detail} (server: ${serverPath}). See Output → OntoCore Language Server.`
+    const created = new LanguageClient(
+      "ontocore-lsp",
+      "OntoCore Language Server",
+      serverOptions,
+      clientOptions
     );
-  }
 
-  return client;
+    context.subscriptions.push({
+      dispose: () => {
+        void stopLanguageClient();
+      },
+    });
+
+    try {
+      // vscode-languageclient v9: await start() — onReady() was removed.
+      await created.start();
+      if (generation !== startGeneration) {
+        try {
+          await created.stop();
+        } catch {
+          // Best-effort cleanup of a superseded startup.
+        }
+        throw new Error("OntoCore language server startup was cancelled");
+      }
+      client = created;
+      return created;
+    } catch (err) {
+      if (client === created) {
+        client = undefined;
+      }
+      const detail = err instanceof Error ? err.message : String(err);
+      throw new Error(
+        `${detail} (server: ${serverPath}). See Output → OntoCore Language Server.`
+      );
+    }
   })();
 
   try {
@@ -145,10 +158,21 @@ export async function startLanguageClient(
 }
 
 export async function stopLanguageClient(): Promise<void> {
+  startGeneration += 1;
+  const inFlight = starting;
   starting = undefined;
+  if (inFlight) {
+    try {
+      const created = await inFlight;
+      await created.stop();
+    } catch {
+      // Startup failed or was cancelled — nothing to stop.
+    }
+  }
   if (client) {
-    await client.stop();
+    const active = client;
     client = undefined;
+    await active.stop();
   }
 }
 

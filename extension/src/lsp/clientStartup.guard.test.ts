@@ -17,7 +17,16 @@ describe("language client startup guard", () => {
   });
 
   it("awaits LanguageClient.start() before returning the client", () => {
-    assert.match(clientSource, /await client\.start\(\)/);
+    assert.match(clientSource, /await created\.start\(\)/);
+  });
+
+  it("assigns the module client only after a successful start", () => {
+    assert.match(clientSource, /await created\.start\(\)[\s\S]*client = created/);
+  });
+
+  it("awaits in-flight startup before stopLanguageClient finishes", () => {
+    assert.match(clientSource, /const inFlight = starting/);
+    assert.match(clientSource, /await inFlight/);
   });
 
   it("does not push client.start() promise onto subscriptions without awaiting", () => {
@@ -34,7 +43,7 @@ describe("language client startup guard", () => {
     );
     const dist = fs.readFileSync(distBundle, "utf8");
     assert.doesNotMatch(dist, /\.onReady\s*\(/);
-    assert.match(dist, /await client\.start\(\)/);
+    assert.match(dist, /await \w+\.start\(\)/);
   });
 });
 

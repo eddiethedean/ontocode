@@ -2590,15 +2590,19 @@ fn iri_at_position(content: &str, position: Position) -> Option<String> {
     let lines: Vec<&str> = content.lines().collect();
     let line = lines.get(position.line as usize)?;
     let byte_col = utf16_offset_to_byte(line, position.character);
+    // Past end-of-line or not on a token: do not fall back to the first QName on the line (#13).
     if byte_col > line.len() {
-        return extract_iri_from_line(line);
+        return None;
     }
 
     let token = extract_token_at(line, byte_col);
+    if token.is_empty() {
+        return None;
+    }
     if token.contains(':') || token.starts_with("http") {
         return expand_iri_token(content, &token);
     }
-    extract_iri_from_line(line)
+    None
 }
 
 fn extract_token_at(line: &str, ch: usize) -> String {
@@ -2618,19 +2622,6 @@ fn extract_token_at(line: &str, ch: usize) -> String {
 
 fn is_iri_char(b: u8) -> bool {
     b.is_ascii_alphanumeric() || matches!(b, b':' | b'#' | b'/' | b'_' | b'-')
-}
-
-fn extract_iri_from_line(line: &str) -> Option<String> {
-    for token in line.split_whitespace() {
-        let cleaned = token.trim_matches(|c: char| c == ';' || c == '.' || c == ',');
-        if cleaned.starts_with("http://") || cleaned.starts_with("https://") {
-            return Some(cleaned.to_string());
-        }
-        if cleaned.contains(':') && !cleaned.starts_with('@') {
-            return Some(cleaned.to_string());
-        }
-    }
-    None
 }
 
 fn expand_iri_token(content: &str, token: &str) -> Option<String> {
@@ -2663,6 +2654,31 @@ mod tests {
     fn expand_prefixed_iri() {
         let content = "@prefix ex: <http://example.org/people#> .\nex:Person a owl:Class .";
         let iri = expand_iri_token(content, "ex:Person").expect("expanded");
+        assert_eq!(iri, "http://example.org/people#Person");
+    }
+
+    #[test]
+    fn iri_at_position_returns_none_past_line_end() {
+        let content = "ex:Person a owl:Class ;";
+        let pos = Position { line: 0, character: 80 };
+        assert!(iri_at_position(content, pos).is_none());
+    }
+
+    #[test]
+    fn iri_at_position_returns_none_on_trailing_whitespace() {
+        let content = "ex:Person a owl:Class ;  ";
+        let pos = Position {
+            line: 0,
+            character: (content.len() - 1) as u32,
+        };
+        assert!(iri_at_position(content, pos).is_none());
+    }
+
+    #[test]
+    fn iri_at_position_resolves_token_under_cursor() {
+        let content = "@prefix ex: <http://example.org/people#> .\nex:Person a owl:Class ;";
+        let pos = Position { line: 1, character: 3 };
+        let iri = iri_at_position(content, pos).expect("iri");
         assert_eq!(iri, "http://example.org/people#Person");
     }
 

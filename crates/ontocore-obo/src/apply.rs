@@ -143,7 +143,8 @@ fn apply_one(text: &mut String, patch: &OboPatchOp) -> Result<()> {
             set_single_line(text, term_id, "name:", value, false)
         }
         OboPatchOp::AddSynonym { term_id, value, scope } => {
-            let line = format!("synonym: \"{value}\" {scope} []");
+            let escaped = value.replace('"', "\\\"");
+            let line = format!("synonym: \"{escaped}\" {scope} []");
             add_line_in_term(text, term_id, &line)
         }
         OboPatchOp::RemoveSynonym { term_id, value } => remove_synonym_line(text, term_id, value),
@@ -740,5 +741,21 @@ name: B
         assert!(!tmp.exists());
         let bak = tmp.with_extension("bak");
         assert!(!bak.exists(), "backup must not be left behind");
+    }
+
+    #[test]
+    fn add_synonym_escapes_embedded_quotes() {
+        let result = apply_patches_to_text(
+            SAMPLE,
+            &[OboPatchOp::AddSynonym {
+                term_id: "EX:001".into(),
+                value: r#"foo "bar""#.into(),
+                scope: "EXACT".into(),
+            }],
+            true,
+        )
+        .expect("add synonym");
+        let text = result.preview_text.expect("preview");
+        assert!(text.contains(r#"synonym: "foo \"bar\"" EXACT []"#));
     }
 }

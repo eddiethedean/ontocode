@@ -7,8 +7,8 @@ use crate::OntologyCatalogData;
 use ontocore_core::{
     limits::{MAX_ENTITIES, MAX_TOTAL_TRIPLES, MAX_TRIPLES_PER_FILE},
     read_to_string_capped, Annotation, Axiom, Diagnostic, DiagnosticCode, DiagnosticSeverity,
-    Entity, Import, Namespace, OntologyDocument, OntologyFormat, ParseStatus, SourceLocation,
-    WorkspaceScanner, MAX_FILE_BYTES,
+    Entity, EntityKind, Import, Namespace, OntologyDocument, OntologyFormat, ParseStatus,
+    SourceLocation, WorkspaceScanner, MAX_FILE_BYTES,
 };
 use ontocore_diagnostics::{collect_diagnostics_with_config, find_config, DiagnosticInput};
 use ontocore_owl::{load_owx_text, load_turtle_text, supports_horned_load};
@@ -328,7 +328,19 @@ impl IndexBuilder {
                 doc.content_hash = stored_hash.clone();
             }
             if let Some(ref cache) = disk_cache {
-                let _ = cache.store(&snapshot);
+                if let Err(e) = cache.store(&snapshot) {
+                    bridge_diagnostics.push(Diagnostic {
+                        code: DiagnosticCode::IoReadError,
+                        severity: DiagnosticSeverity::Warning,
+                        message: format!("disk cache write failed: {e}"),
+                        file: lookup_path.clone(),
+                        range: SourceLocation::default(),
+                        entity_iri: None,
+                        quick_fix: None,
+                        plugin_id: None,
+                        plugin_code: None,
+                    });
+                }
             }
             document_snapshots.insert(lookup_path, snapshot);
         }
@@ -485,7 +497,20 @@ impl IndexBuilder {
 
             document_snapshots.insert(lookup_path.clone(), snapshot);
             if let Some(ref cache) = disk_cache {
-                let _ = cache.store(document_snapshots.get(&lookup_path).expect("snapshot"));
+                if let Err(e) = cache.store(document_snapshots.get(&lookup_path).expect("snapshot"))
+                {
+                    bridge_diagnostics.push(Diagnostic {
+                        code: DiagnosticCode::IoReadError,
+                        severity: DiagnosticSeverity::Warning,
+                        message: format!("disk cache write failed: {e}"),
+                        file: lookup_path.clone(),
+                        range: SourceLocation::default(),
+                        entity_iri: None,
+                        quick_fix: None,
+                        plugin_id: None,
+                        plugin_code: None,
+                    });
+                }
             }
         }
 
@@ -658,6 +683,35 @@ fn merge_entity(existing: &mut Entity, incoming: &Entity) {
     if existing.obo_id.is_none() {
         existing.obo_id = incoming.obo_id.clone();
     }
+    // OR-merge property characteristics declared across documents.
+    existing.characteristics.functional |= incoming.characteristics.functional;
+    existing.characteristics.inverse_functional |= incoming.characteristics.inverse_functional;
+    existing.characteristics.transitive |= incoming.characteristics.transitive;
+    existing.characteristics.symmetric |= incoming.characteristics.symmetric;
+    existing.characteristics.asymmetric |= incoming.characteristics.asymmetric;
+    existing.characteristics.reflexive |= incoming.characteristics.reflexive;
+    existing.characteristics.irreflexive |= incoming.characteristics.irreflexive;
+    // Prefer a more specific kind when the existing entry is Other.
+    if existing.kind == EntityKind::Other && incoming.kind != EntityKind::Other {
+        existing.kind = incoming.kind;
+    }
+    if existing.source_location.line.is_none() && incoming.source_location.line.is_some() {
+        existing.source_location = incoming.source_location.clone();
+    }
+}
+
+fn incomplete_bridge_warning(path: &Path, message: String) -> Diagnostic {
+    Diagnostic {
+        code: DiagnosticCode::OwlBridgeFailed,
+        severity: DiagnosticSeverity::Warning,
+        message,
+        file: path.to_path_buf(),
+        range: SourceLocation::default(),
+        entity_iri: None,
+        quick_fix: None,
+        plugin_id: None,
+        plugin_code: None,
+    }
 }
 
 struct DocumentSemantics {
@@ -701,7 +755,9 @@ fn semantics_for_document(
                 axioms: owl.bridge.axioms,
                 namespace_rows: owl.bridge.namespace_rows,
                 imports: owl.bridge.imports,
-                bridge_warning: None,
+                bridge_warning: owl
+                    .load_warning
+                    .map(|message| incomplete_bridge_warning(path, message)),
             }),
             Err(e) => {
                 eprintln!(
@@ -727,7 +783,9 @@ fn semantics_for_document(
             axioms: owl.bridge.axioms,
             namespace_rows: owl.bridge.namespace_rows,
             imports: owl.bridge.imports,
-            bridge_warning: None,
+            bridge_warning: owl
+                .load_warning
+                .map(|message| incomplete_bridge_warning(path, message)),
         }),
         Err(e) => {
             eprintln!(
@@ -944,6 +1002,36 @@ mod merge_entity_tests {
         let mut existing = entity(Some("TEST:0000001"));
         merge_entity(&mut existing, &entity(Some("TEST:0000002")));
         assert_eq!(existing.obo_id.as_deref(), Some("TEST:0000001"));
+    }
+
+    #[test]
+    fn merge_entity_or_merges_property_characteristics() {
+        let mut existing = Entity {
+            iri: "http://example.org/p".into(),
+            short_name: "p".into(),
+            kind: EntityKind::ObjectProperty,
+            ontology_id: "doc-a".into(),
+            characteristics: ontocore_core::PropertyCharacteristics {
+                functional: true,
+                ..Default::default()
+            },
+            ..Default::default()
+        };
+        let incoming = Entity {
+            iri: "http://example.org/p".into(),
+            short_name: "p".into(),
+            kind: EntityKind::ObjectProperty,
+            ontology_id: "doc-b".into(),
+            characteristics: ontocore_core::PropertyCharacteristics {
+                transitive: true,
+                ..Default::default()
+            },
+            ..Default::default()
+        };
+        merge_entity(&mut existing, &incoming);
+        assert!(existing.characteristics.functional);
+        assert!(existing.characteristics.transitive);
+        assert!(!existing.characteristics.symmetric);
     }
 
     #[test]

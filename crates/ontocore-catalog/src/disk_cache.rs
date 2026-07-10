@@ -58,7 +58,7 @@ impl DiskCache {
 
     pub(crate) fn load(&self, content_hash: &str) -> Option<DocumentSnapshot> {
         let path = self.snapshot_path(content_hash).with_extension("json");
-        let bytes = fs::read(path).ok()?;
+        let bytes = ontocore_core::read_file_capped(&path, ontocore_core::MAX_FILE_BYTES).ok()?;
         let stored: StoredSnapshot = serde_json::from_slice(&bytes).ok()?;
         if stored.content_hash != content_hash {
             return None;
@@ -311,6 +311,16 @@ mod tests {
         cache.store(&snap).expect("store");
         let loaded = cache.load("deadbeef").expect("load");
         assert_eq!(loaded.entities[0].iri, "http://ex#A");
+    }
+
+    #[test]
+    fn load_returns_none_for_corrupt_snapshot_json() {
+        let dir = tempfile::tempdir().unwrap();
+        let cache = DiskCache::for_workspace(dir.path());
+        let snap_dir = dir.path().join(".ontocore/cache/snapshots");
+        std::fs::create_dir_all(&snap_dir).unwrap();
+        std::fs::write(snap_dir.join("corrupt.json"), b"{not-json").unwrap();
+        assert!(cache.load("corrupt").is_none());
     }
 
     #[test]

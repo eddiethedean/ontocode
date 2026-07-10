@@ -25,6 +25,9 @@ pub enum ParseError {
 
     #[error("limit exceeded: {0}")]
     LimitExceeded(String),
+
+    #[error("invalid UTF-8: {0}")]
+    InvalidUtf8(String),
 }
 
 pub type Result<T> = std::result::Result<T, ParseError>;
@@ -68,14 +71,18 @@ pub fn parse_ontology_file(
     if format == OntologyFormat::OwlXml {
         let content = read_file_capped(path, MAX_FILE_BYTES)
             .map_err(|e| ParseError::LimitExceeded(e.to_string()))?;
-        let _source_text = String::from_utf8_lossy(&content).into_owned();
+        let _source_text = String::from_utf8(content).map_err(|e| {
+            ParseError::InvalidUtf8(format!("invalid UTF-8 in {}: {e}", path.display()))
+        })?;
         return Ok(empty_parsed_ontology(ontology_id));
     }
     let _ = (content_hash, modified_time);
     let content = read_file_capped(path, MAX_FILE_BYTES)
         .map_err(|e| ParseError::LimitExceeded(e.to_string()))?;
-    let source_text = String::from_utf8_lossy(&content).into_owned();
-    parse_ontology_text(path, format, ontology_id, &source_text, &content)
+    let source_text = String::from_utf8(content).map_err(|e| {
+        ParseError::InvalidUtf8(format!("invalid UTF-8 in {}: {e}", path.display()))
+    })?;
+    parse_ontology_text(path, format, ontology_id, &source_text, source_text.as_bytes())
 }
 
 /// Parse ontology source text (used for LSP open buffers and file parsing).
@@ -838,6 +845,15 @@ mod tests {
         )
         .unwrap_err();
         assert!(matches!(err, ParseError::LimitExceeded(_)));
+    }
+
+    #[test]
+    fn rejects_invalid_utf8_ontology_file() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("bad.ttl");
+        std::fs::write(&path, b"@prefix ex: <http://ex/> .\n\xff\xfe\n").unwrap();
+        let err = parse_ontology_file(&path, OntologyFormat::Turtle, "doc-1", "h", 0).unwrap_err();
+        assert!(matches!(err, ParseError::InvalidUtf8(_)));
     }
 
     #[test]

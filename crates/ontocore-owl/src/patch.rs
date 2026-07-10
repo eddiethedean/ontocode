@@ -214,6 +214,7 @@ fn apply_one_patch(
         PatchOp::SetPrefix { prefix, namespace_iri } => set_prefix(text, prefix, namespace_iri),
         PatchOp::SetOntologyIri { ontology_iri } => set_ontology_iri(text, ontology_iri),
         PatchOp::SetVersionIri { ontology_iri, version_iri } => {
+            remove_all_predicate_any_statement(text, ontology_iri, "owl:versionIRI", namespaces)?;
             let version_term = iri_to_turtle_term(version_iri, namespaces)?;
             add_object_triple(text, ontology_iri, "owl:versionIRI", &version_term, namespaces)
         }
@@ -2384,6 +2385,72 @@ ex:Foo a owl:Class .
         assert!(preview.contains("<http://example.org/new> a owl:Ontology ."));
         assert!(preview.contains("ex:Foo a owl:Class"));
         assert_eq!(preview.matches("a owl:Ontology").count(), 1);
+    }
+
+    #[test]
+    fn set_version_iri_replaces_existing() {
+        let ttl = r#"@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+<http://example.org/ont> a owl:Ontology ;
+    owl:versionIRI <http://example.org/ont/1> .
+"#;
+        let result = apply_patches_to_text(
+            ttl,
+            &[PatchOp::SetVersionIri {
+                ontology_iri: "http://example.org/ont".to_string(),
+                version_iri: "http://example.org/ont/2".to_string(),
+            }],
+            true,
+            &BTreeMap::new(),
+        )
+        .expect("set version iri");
+        let preview = result.preview_text.expect("preview");
+        assert!(
+            preview.contains("owl:versionIRI <http://example.org/ont/2>"),
+            "expected new version IRI: {preview}"
+        );
+        assert!(
+            !preview.contains("http://example.org/ont/1"),
+            "old version IRI must be removed: {preview}"
+        );
+        assert_eq!(
+            preview.matches("owl:versionIRI").count(),
+            1,
+            "must keep exactly one versionIRI: {preview}"
+        );
+    }
+
+    #[test]
+    fn set_version_iri_repeated_does_not_accumulate() {
+        let ttl = r#"@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+<http://example.org/ont> a owl:Ontology .
+"#;
+        let first = apply_patches_to_text(
+            ttl,
+            &[PatchOp::SetVersionIri {
+                ontology_iri: "http://example.org/ont".to_string(),
+                version_iri: "http://example.org/ont/1".to_string(),
+            }],
+            true,
+            &BTreeMap::new(),
+        )
+        .expect("first set");
+        let after_first = first.preview_text.expect("preview");
+        let second = apply_patches_to_text(
+            &after_first,
+            &[PatchOp::SetVersionIri {
+                ontology_iri: "http://example.org/ont".to_string(),
+                version_iri: "http://example.org/ont/2".to_string(),
+            }],
+            true,
+            &BTreeMap::new(),
+        )
+        .expect("second set");
+        let preview = second.preview_text.expect("preview");
+        assert!(preview.contains("owl:versionIRI <http://example.org/ont/2>"));
+        assert!(!preview.contains("http://example.org/ont/1"));
+        assert_eq!(preview.matches("owl:versionIRI").count(), 1);
     }
 
     #[test]

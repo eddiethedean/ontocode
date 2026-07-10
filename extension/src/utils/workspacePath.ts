@@ -1,5 +1,7 @@
 import * as vscode from "vscode";
 
+export { isPathUnderFolder } from "./pathUnder";
+
 /** True when a file URI belongs to an open workspace folder. */
 export function isUriInWorkspace(uri: vscode.Uri): boolean {
   if (uri.scheme !== "file") {

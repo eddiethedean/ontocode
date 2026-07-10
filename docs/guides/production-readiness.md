@@ -12,11 +12,11 @@ Canonical capability matrix: [What ships today](../SHIPPED.md).
 | **Stable CI gates** | 0.17.x | `ontocore validate`, `ontocore classify`, and `ontocore diff` are documented for CI — see [workspace limits](../workspace-limits.md). |
 | **v1.0 target** | Planned | Protégé-competitive OWL 2 DL + OBO in VS Code per [Protégé parity](../design/PROTEGE_PARITY.md). |
 
-OntoCode v0.16 is **not** documented as a general-availability replacement for Protégé for every advanced OWL 2 DL workflow (e.g. full Manchester axiom coverage for all formats, OWL/XML write-back).
+OntoCode v0.17 is **not** documented as a general-availability replacement for Protégé for every advanced OWL 2 DL workflow (e.g. full Manchester axiom coverage for all formats, OWL/XML write-back).
 
 ## Approved use cases (pilot or production)
 
-| Use case | v0.15 readiness | Notes |
+| Use case | v0.17 readiness | Notes |
 |----------|----------------|-------|
 | CI lint gate on ontology repos | **Suitable** | `ontocore validate` — [CI integration](../ci-integration.md) |
 | CI consistency gate (EL profile) | **Suitable** | `ontocore classify --profile el` — profile must match ontology |
@@ -60,7 +60,7 @@ Pin CLI version in CI: release binary with `VERSION=0.17.0` or `cargo install on
 
 ## Support and incident response
 
-| Topic | v0.16 policy |
+| Topic | v0.17 policy |
 |-------|-------------|
 | Commercial support | **Not offered** — community / GitHub issues |
 | Security reports | [GitHub Security Advisories](https://github.com/eddiethedean/ontocode/security/advisories/new) — not public issues |

@@ -89,7 +89,7 @@ markdown_extensions:
 nav:
   - Home: index.md
   - Get started:
-      - Start here (strict path): start.md
+      - Start here: start.md
       - "First success (~10 min core path)": guides/first-success.md
       - Which artifact do I need?: guides/which-artifact.md
       - "Getting started (all paths)": getting-started.md
@@ -100,7 +100,6 @@ nav:
       - "What's new in v0.16": migration/v0.16.md
       - "What's new in v0.15": migration/v0.15.md
       - "What's new in v0.14": migration/v0.14.md
-      - Pick a task: guides/start-here.md
       - Ontology concepts: concepts.md
       - Migrating from Protégé: guides/protege-migration.md
   - Use OntoCode:
@@ -255,7 +254,7 @@ nav:
           - ADRs:
               - Index (all ADRs): design/adr/README.md
       - Documentation index: documentation-index.md
-      - "Platform planning (targets, not shipped)":
+      - "Design (not shipped — targets & specs)":
           - Platform overview: platform/OVERVIEW.md
           - UX audit (v0.13): ui/UX_AUDIT_v0.13.md
           - OntoUI: platform/ONTOUI.md
@@ -277,6 +276,7 @@ nav:
               - "0005 Capability providers": adr/0005-capability-provider-plugin-model.md
               - "0006 AI preview before apply": adr/0006-ai-preview-before-apply.md
               - "0007 OntoStudio reuse": adr/0007-ontostudio-shares-platform.md
+          - Protégé reverse engineering: PROTEGE_REVERSE_ENGINEERING/README.md
           - Cursor prompts:
               - Index: cursor-prompts/README.md
               - "01 OntoUI platform": cursor-prompts/01-build-ontoui-workspace-platform.md

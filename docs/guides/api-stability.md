@@ -1,10 +1,10 @@
 # API stability (pre-1.0)
 
-OntoCode and OntoCore are **pre-1.0**. Published crates use **0.15.x** semver, but minor releases may add or change APIs until v1.0.0. This page tiers surfaces by stability so integrators can assess risk.
+OntoCode and OntoCore are **pre-1.0**. Published crates use **0.17.x** semver, but minor releases may add or change APIs until v1.0.0. This page tiers surfaces by stability so integrators can assess risk.
 
 **Canonical capabilities:** [What ships today](../SHIPPED.md)
 
-## v0.15 API freeze scope (path to 1.0)
+## v0.17 API freeze scope (path to 1.0)
 
 The following modules are **documented and intended to stabilize** toward 1.0:
 
@@ -30,7 +30,7 @@ The following modules are **documented and intended to stabilize** toward 1.0:
 | **A — Stable enough for CI** | `ontocore validate`, `query`, `sparql`, `classify`, `diff`, `docs`, `patch`, `robot`, `plugins`, `workflow` CLI | High for **commands and exit codes** | Pin with `cargo install ontocore-cli --locked --version 0.17.0`. Exit codes documented in [workspace limits](../workspace-limits.md). |
 | **B — Documented, may evolve** | LSP custom methods (`ontocore/*`) | Medium | Wire format in [LSP API](../lsp-api.md) and [JSON Schema](../lsp-protocol.schema.json). Minor releases may add fields or methods. |
 | **C — Library APIs** | `ontocore` and `ontocore-*` Rust crates | Medium-low | Public types used by CLI/LSP are more stable than internal modules. Pin exact versions in `Cargo.toml`. |
-| **D — Experimental** | Plugin author traits, SHACL full validation, MCP, Python/TS SDKs | Low | Plugin host **shipped v0.14–v0.15** — see [Plugin authoring](plugins.md). Stable ecosystem API is **v1.0**. |
+| **D — Experimental** | Plugin author traits, SHACL full validation, MCP, Python/TS SDKs | Low | Plugin host **shipped v0.14–v0.17** — see [Plugin authoring](plugins.md). Stable ecosystem API is **v1.0**. |
 
 ## What we commit to before v1.0
 
@@ -40,7 +40,7 @@ The following modules are **documented and intended to stabilize** toward 1.0:
 
 ## What may change between minors
 
-- Rust public API on `ontocore-*` crates (prefer pinning `0.15` in Cargo.toml).
+- Rust public API on `ontocore-*` crates (prefer pinning `0.17` in Cargo.toml).
 - LSP request/response fields (clients should tolerate unknown fields).
 - SQL virtual table columns (check [sql-reference](../sql-reference.md) per release).
 - Webview `postMessage` payloads (extension + webview-ui ship together in the VSIX).
@@ -57,8 +57,8 @@ cargo install ontocore-cli --locked --version 0.17.0
 **Rust embedding:**
 
 ```toml
-ontocore = "0.15"
-ontocore-core = "0.15"
+ontocore = "0.17"
+ontocore-core = "0.17"
 ```
 
 **VS Code:** install OntoCode **0.17.0** from Marketplace, Open VSX, or a release VSIX — the bundled `ontocore-lsp` matches the extension version.

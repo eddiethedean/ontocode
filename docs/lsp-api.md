@@ -492,6 +492,8 @@ Return stable command metadata for menus, toolbars, and enablement.
 | `undo_label` | string? | Semantic undo label for edits |
 | `dialog_id` | string? | Associated dialog schema id |
 
+**Errors:** none (empty `commands` if the server has no registered descriptors)
+
 ### `ontocore/getWorkspaceUiState` (v0.17+)
 
 Return enablement inputs for the command registry.
@@ -506,6 +508,8 @@ Return enablement inputs for the command registry.
 
 **Result:** `WorkspaceUiState` (`has_ontology`, `is_dirty`, `has_selection`, `selection_editable`, `reasoner_*`, `active_ontology_id`, optional `stats`)
 
+**Errors:** none
+
 ### `ontocore/getDialogSchema` (v0.17+)
 
 **Params:** `{ "dialog_id": string }`
@@ -513,6 +517,8 @@ Return enablement inputs for the command registry.
 **Result:** `{ "schema": DialogSchema }` with `id`, `title`, `fields[]`, `primary_action`.
 
 Known dialog ids include `new_ontology`, `export_ontology`, `save_as`, `prefix_manager`, `ontology_metadata`, `search`, `metrics`, `delete_entity`, `reasoner_settings`, `preferences`, `import`, `rename`.
+
+**Errors:** `INVALID_PARAMS` (unknown `dialog_id`)
 
 ### `ontocore/createOntology` (v0.17+)
 
@@ -522,13 +528,17 @@ Scaffold a new Turtle or OBO ontology file under the workspace.
 
 **Result:** `{ "path", "ontology_iri" }`
 
+**Errors:** `INVALID_PARAMS` (workspace not initialized, path outside roots, file already exists, unsafe path), `INDEX_FAILED` (I/O failure creating the file)
+
 ### `ontocore/exportOntology` (v0.17+)
 
 Export/convert an ontology via ROBOT `convert`, with same-format copy fallback when ROBOT is unavailable.
 
 **Params:** `{ "source_path", "output_path", "format"? }`
 
-**Result:** `{ "output_path", "success", "logs"? }`
+**Result:** `{ "output_path", "success", "logs"? }` — `success` may be `false` when ROBOT exits non-zero (still an LSP success response).
+
+**Errors:** `INVALID_PARAMS` (path outside workspace), `ROBOT_FAILED` (ROBOT unavailable and formats differ, or copy failure)
 
 ### `ontocore/setActiveOntology` (v0.17+)
 
@@ -538,6 +548,8 @@ Set the active ontology id used for new-axiom targeting.
 
 **Result:** `{ "active_ontology_id": string }`
 
+**Errors:** `NOT_FOUND` (id not in the indexed catalog), `NOT_INDEXED`
+
 ### `ontocore/deleteImpact` (v0.17+)
 
 Preview delete impact for an entity.
@@ -545,6 +557,8 @@ Preview delete impact for an entity.
 **Params:** `{ "entity_iri": string }`
 
 **Result:** `{ "entity_iri", "usage_count", "axiom_count", "referencing_entities", "warnings" }`
+
+**Errors:** `NOT_INDEXED`
 
 ### `ontocore/runPlugin` (v0.14+, views v0.15)
 

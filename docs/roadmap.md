@@ -395,7 +395,7 @@ Sub-phases: **v0.7a** (React foundation) → **v0.7** (graphs + inspector) → *
 | **OntoCode** | Plugin UI views (dockable panels); plugin commands; explanation staleness warnings |
 | **Ecosystem** | `demo-ui-view.toml` fixture; updated [Plugin authoring guide](guides/plugins.md) |
 
-**Exit criteria (partial):** dockable plugin views + commands shipped; graph modes + explanation alternatives shipped; preferences/context actions remain schema-only.
+**Exit criteria (partial):** dockable plugin views + commands shipped; graph modes + explanation alternatives shipped; preferences/context actions **shipped in v0.16**.
 
 See [migration/v0.15.md](migration/v0.15.md) and [SHIPPED.md](SHIPPED.md).
 

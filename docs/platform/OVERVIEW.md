@@ -2,7 +2,9 @@
 
 > **v0.17 foundation shipped.** For evaluator-facing capabilities, read [What ships today](../SHIPPED.md) first.
 >
-> **Status:** OntoUI runtime + focus relay **shipped v0.13**; plugin host MVP **shipped v0.14**; plugin permissions/views **shipped v0.15** · **Terms:** [Glossary](../glossary.md)
+> **This section is design/implementation planning.** Items below may be shipped, partial, or planned — always cross-check [SHIPPED.md](../SHIPPED.md).
+>
+> **Status:** OntoUI runtime + focus relay **shipped v0.13**; plugin host MVP **shipped v0.14**; plugin permissions/views **shipped v0.15**; preferences/context actions **shipped v0.16**; Protégé-shell menus/dialogs/perspectives **shipped v0.17** · **Terms:** [Glossary](../glossary.md)
 
 ## Scope
 
@@ -27,7 +29,7 @@ OntoCore (semantic engine)      — Implemented
 ├── Reasoning (Ontologos)
 ├── Refactoring, diff (--pr-summary), docs export
 ├── LSP + CLI (semantic tokens, listSqlSchema)
-└── Plugin runtime (shipped v0.14–v0.15)
+└── Plugin runtime (shipped v0.14–v0.17)
 
 Storage / integration
 ├── File system, Git

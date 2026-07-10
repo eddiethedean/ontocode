@@ -1,12 +1,14 @@
-# Webview message protocol (v0.13)
+# Webview message protocol (v0.13 foundation; v0.17 panels)
 
 Typed messages between the VS Code extension host (`extension/src/webviews/`) and the React app (`extension/webview-ui/`).
+
+> **Scope:** This page documents the **focus-relay and panel `postMessage` contract** introduced in v0.13. v0.17 adds DialogShell panels (new ontology, prefix manager, metrics, about, etc.) that reuse the same host ↔ React channel patterns; treat new panel ids as additive. For shipped UI capabilities, see [SHIPPED.md](SHIPPED.md).
 
 ## Panel selection
 
 Webviews load `webview-ui/dist` with query param `?panel=`:
 
-`inspector` | `graph` | `smoke` | `refactorPreview` | `queryWorkbench` | `manchesterEditor` | `semanticDiff` | `imports`
+`inspector` | `graph` | `smoke` | `refactorPreview` | `queryWorkbench` | `manchesterEditor` | `semanticDiff` | `imports` | `prefixManager` | `newOntology` | `metrics` | `about` (and other DialogShell panels)
 
 ## Host → React (v0.13 focus relay)
 

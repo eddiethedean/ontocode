@@ -77,18 +77,18 @@ Reusable semantic workspace platform: index, query, diagnostics, refactoring, an
 
 **Plugin platform status:**
 
-- **Shipped (v0.14):** plugin host MVP — workspace manifest discovery, reference plugins, CLI/LSP hooks, and a subprocess workflow runner (see [Plugin authoring](guides/plugins.md)).
+- **Shipped (v0.14–v0.17):** plugin host MVP — workspace manifest discovery, reference plugins, CLI/LSP hooks, subprocess workflow runner, UI views/commands, and (v0.16+) preferences pages + context actions (see [Plugin authoring](guides/plugins.md)).
 - **Planned (v1.0+):** semver-stable plugin API, hardened permissions/sandboxing, and marketplace/discovery.
 
 OntoCore is **not** a workflow engine; build, release, and QC automation should live in external tools and workflow plugins rather than becoming core engine dependencies.
 
 ### External workflow plugins (e.g. owlmake)
 
-**Planned v1.0.** [owlmake](https://github.com/INCATools/owlmake) is the reference workflow plugin design — ROBOT/ODK-style pipelines without becoming a core OntoCore dependency. Today, ROBOT interop is the `ontocore robot` CLI wrapper only.
+**Host ships today; full owlmake integration is v1.0.** [owlmake](https://github.com/INCATools/owlmake) is the reference workflow plugin design — ROBOT/ODK-style pipelines without becoming a core OntoCore dependency. Today, ROBOT interop is the `ontocore robot` CLI wrapper plus the subprocess workflow scaffold.
 
 ### OntoCode
 
-Reference IDE on top of OntoCore. Presents editing, reasoning, and diagnostics in VS Code. Workflow actions (build, release) via plugins are a v1.0 target.
+Reference IDE on top of OntoCore. Presents editing, reasoning, and diagnostics in VS Code. Plugin views, commands, preferences, and context actions ship today; marketplace-scale workflow automation remains a v1.0 target.
 
 ## Design Philosophy
 

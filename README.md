@@ -48,7 +48,7 @@ Release CLI tarballs are **Linux x64 only**; macOS/Windows use `cargo install` o
 
 ## Quick start
 
-**VS Code:** Install [OntoCode](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) → open a folder with ontology files → **Trust** workspace → **OntoCode** activity bar.
+**VS Code:** Install [OntoCode](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) → open a folder with ontology files → click the **OntoCode** activity bar. Edit **Turtle (`.ttl`)** and **OBO (`.obo`)** in the Entity Inspector. RDF/XML and OWL/XML are indexed for browse/query; write-back support differs by format — see [Supported formats](https://ontocode-vs.readthedocs.io/en/latest/supported-formats/). OntoCode’s **bundled** language server runs in trusted and Restricted Mode; **Trust** only if you set custom `ontocode.lspPath` or `ontocode.robotPath`.
 
 **CLI (install):**
 
@@ -73,8 +73,8 @@ cargo run -- validate fixtures
 
 ```text
 ┌──────────────────────────────────────────────────────────────┐
-│  Shipped v0.16: plugin preferences/actions, imports/layout,   │
-│  graph modes · Planned v1.0+: stable plugin API + Protégé exit │
+│  Shipped v0.17: Protégé-shell menus, dialogs, perspectives,  │
+│  layout persistence · Planned v1.0+: stable plugin API       │
 └────────────────────────────┬─────────────────────────────────┘
                              │ ontocore-lsp (stdio)
 ┌────────────────────────────▼─────────────────────────────────┐
@@ -96,7 +96,7 @@ cargo run -- validate fixtures
 
 Platform docs: [Vision](https://ontocode-vs.readthedocs.io/en/latest/vision/) · [Architecture](ARCHITECTURE.md) · [Roadmap](ROADMAP.md) · [Protégé parity](https://ontocode-vs.readthedocs.io/en/latest/design/PROTEGE_PARITY/)
 
-**OntoCode 1.0** targets a Protégé-competitive OWL + OBO IDE in VS Code, with CLI gates for CI. **v0.15** extends the v0.14 plugin host with permissions, UI views, explanation alternatives, and graph asserted/inferred modes. See [SHIPPED matrix](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) and [What's new in v0.15](docs/migration/v0.15.md).
+**OntoCode 1.0** targets a Protégé-competitive OWL + OBO IDE in VS Code, with CLI gates for CI. **v0.17** adds Protégé-shell menus, dialogs, named perspectives, and layout persistence on top of the v0.14–v0.16 plugin host. See [SHIPPED matrix](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) and [What's new in v0.17](docs/migration/v0.17.md).
 
 ## Development
 

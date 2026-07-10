@@ -24,6 +24,7 @@ import {
   assertListPluginsResult,
   assertRunPluginResult,
 } from "./protocolGuards";
+import { patchSyncCancelledMessage } from "./patchFeedback";
 import {
   ApplyAxiomPatchClientResult,
   ApplyAxiomPatchParams,
@@ -306,9 +307,7 @@ export async function applyAxiomPatch(
     const { applyLspWorkspaceEdit } = await import("./workspaceEdit");
     const synced = await applyLspWorkspaceEdit(patch.workspace_edit);
     if (!synced) {
-      void vscode.window.showWarningMessage(
-        "OntoCode: changes written to disk but editor sync was cancelled"
-      );
+      void vscode.window.showWarningMessage(patchSyncCancelledMessage());
       return { ...patch, editor_synced: false };
     }
     return { ...patch, editor_synced: true };

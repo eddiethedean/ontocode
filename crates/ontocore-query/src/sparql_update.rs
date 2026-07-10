@@ -24,6 +24,13 @@ pub fn is_sparql_update(sparql: &str) -> bool {
             rest = skip_sparql_prologue_decl(rest);
             continue;
         }
+        // Skip WITH <graph> so WITH … INSERT/DELETE is still classified as an update.
+        if upper.starts_with("WITH")
+            && upper.as_bytes().get(4).is_none_or(|b| b.is_ascii_whitespace() || *b == b'<')
+        {
+            rest = skip_with_clause(rest);
+            continue;
+        }
         return UPDATE_VERBS.iter().any(|verb| {
             upper.starts_with(verb)
                 && upper
@@ -51,6 +58,14 @@ fn skip_sparql_prologue_decl(rest: &str) -> &str {
         return rest.split_once('\n').map_or("", |(_, tail)| tail);
     }
     rest
+}
+
+/// Advance past `WITH <graph>` (optionally followed by more prologue before the update verb).
+fn skip_with_clause(rest: &str) -> &str {
+    if let Some(gt) = rest.find('>') {
+        return rest[gt + 1..].trim_start();
+    }
+    rest.split_once('\n').map_or("", |(_, tail)| tail)
 }
 
 #[cfg(test)]
@@ -90,6 +105,25 @@ mod tests {
     #[test]
     fn allows_select_after_base() {
         let q = "BASE <http://example.org/>\nSELECT ?s WHERE { ?s ?p ?o }";
+        assert!(!is_sparql_update(q));
+    }
+
+    #[test]
+    fn rejects_insert_after_with() {
+        let q = "WITH <http://example.org/graph>\nINSERT DATA { <http://ex/s> <http://ex/p> <http://ex/o> }";
+        assert!(is_sparql_update(q));
+    }
+
+    #[test]
+    fn rejects_delete_after_prefix_and_with() {
+        let q = "PREFIX ex: <http://example.org/>\nWITH <http://example.org/g>\nDELETE DATA { ex:s ex:p ex:o }";
+        assert!(is_sparql_update(q));
+    }
+
+    #[test]
+    fn allows_select_when_with_is_not_prologue() {
+        // "WITHIN" must not be treated as a WITH clause.
+        let q = "SELECT ?within WHERE { ?s ?p ?within }";
         assert!(!is_sparql_update(q));
     }
 }

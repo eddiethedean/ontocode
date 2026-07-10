@@ -442,19 +442,20 @@ fn main() -> Result<()> {
             }
         }
         Commands::Patch { document, patch_file, preview } => {
-            let patch_bytes = std::fs::read(&patch_file)?;
+            let patch_bytes = ontocore_core::read_file_capped(&patch_file, ontocore_core::MAX_FILE_BYTES)
+                .with_context(|| format!("failed to read patch file {}", patch_file.display()))?;
             let ext =
                 document.extension().and_then(|e| e.to_str()).unwrap_or("").to_ascii_lowercase();
             let catalog = IndexBuilder::new()
                 .workspace(document.parent().unwrap_or(std::path::Path::new(".")))
                 .build()
-                .ok();
+                .context("failed to index workspace for patch namespaces")?;
             let namespaces = catalog
-                .as_ref()
-                .and_then(|c| {
-                    c.data().documents.iter().find(|d| {
-                        d.path.canonicalize().ok().as_ref() == document.canonicalize().ok().as_ref()
-                    })
+                .data()
+                .documents
+                .iter()
+                .find(|d| {
+                    d.path.canonicalize().ok().as_ref() == document.canonicalize().ok().as_ref()
                 })
                 .map(|d| d.namespaces.clone())
                 .unwrap_or_default();

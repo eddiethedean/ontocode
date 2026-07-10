@@ -88,8 +88,11 @@ fn quick_fix_to_action(
             Some(code_action_with_edit(label, path, vec![full_document_edit(content, &new_text)]))
         }
         QuickFix::ApplyPatch { label, document_path: _, patches } => {
-            let patch_ops: Vec<PatchOp> =
-                patches.iter().filter_map(|v| serde_json::from_value(v.clone()).ok()).collect();
+            let patch_ops: Vec<PatchOp> = patches
+                .iter()
+                .map(|v| serde_json::from_value(v.clone()))
+                .collect::<Result<Vec<_>, _>>()
+                .ok()?;
             if patch_ops.is_empty() {
                 return None;
             }
@@ -234,5 +237,34 @@ mod tests {
             .to_string();
         assert_eq!(uri, path_to_uri(&open_path));
         assert_ne!(uri, path_to_uri(&forged_path));
+    }
+
+    #[test]
+    fn apply_patch_quick_fix_skipped_when_any_op_is_malformed() {
+        let path = PathBuf::from("/tmp/live.ttl");
+        let content = "@prefix ex: <http://example.org/ex#> .\n@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n\nex:Bad a owl:Class .\n";
+        let fix = QuickFix::ApplyPatch {
+            label: "Partial patch".to_string(),
+            document_path: path.display().to_string(),
+            patches: vec![
+                serde_json::json!({
+                    "op": "add_label",
+                    "entity_iri": "http://example.org/ex#Bad",
+                    "value": "Bad",
+                }),
+                serde_json::json!({
+                    "op": "add_label",
+                    "entity_iri": "http://example.org/ex#Bad"
+                    // missing required "value"
+                }),
+            ],
+        };
+        let mut namespaces = BTreeMap::new();
+        namespaces.insert("ex".to_string(), "http://example.org/ex#".to_string());
+        namespaces.insert("rdfs".to_string(), "http://www.w3.org/2000/01/rdf-schema#".to_string());
+        assert!(
+            quick_fix_to_action(&fix, &path, content, &namespaces).is_none(),
+            "malformed ops must not yield a partial ApplyPatch code action"
+        );
     }
 }

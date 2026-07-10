@@ -32,7 +32,7 @@ mod handlers_test;
 
 use crate::positions::utf16_offset_to_byte;
 use crossbeam_channel::Sender;
-use diagnostics::publish_diagnostics_for_state;
+use diagnostics::{publish_diagnostics_for_state, publish_empty_diagnostics};
 use handlers::{
     handle_custom_request, handle_initialize, handle_standard_request, StandardRequestOutcome,
 };
@@ -95,7 +95,7 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
                 if notif.method == Exit::METHOD {
                     break;
                 }
-                handle_notification(&state, &pending_reindex, notif);
+                handle_notification(&state, &pending_reindex, &connection.sender, notif);
                 publish_pending_diagnostics(
                     &connection.sender,
                     &state,
@@ -165,6 +165,7 @@ fn handle_lsp_request(
 fn handle_notification(
     state: &ServerState,
     pending_reindex: &Arc<Mutex<Option<PendingReindex>>>,
+    sender: &Sender<Message>,
     notif: Notification,
 ) {
     match notif.method.as_str() {
@@ -253,7 +254,8 @@ fn handle_notification(
                     }
                 }
                 if roots.is_empty() {
-                    state.clear_workspace_state();
+                    let stale = state.clear_workspace_state();
+                    publish_empty_diagnostics(sender, &stale);
                     eprintln!("ontocore-lsp: all workspace folders removed");
                 } else if let Err(err) = state.set_workspace_roots(roots) {
                     eprintln!("ontocore-lsp: failed to update workspace roots: {err}");

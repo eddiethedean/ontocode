@@ -519,10 +519,10 @@ pub fn resolve_workspace_for_index(
     }
 }
 
-/// Resolve a workspace folder URI for multi-root folder add/remove events.
+/// Resolve a workspace folder URI for multi-root folder **remove** events.
 ///
-/// When `existing_roots` is non-empty, the folder must lie under at least one root
-/// (same rule as document paths). Empty roots accept the first folder as initial root.
+/// When `existing_roots` is non-empty, the folder must match or lie under at least one root.
+/// Empty roots accept the path as an initial root.
 pub fn resolve_workspace_folder_uri(
     uri: &str,
     existing_roots: &[PathBuf],
@@ -532,6 +532,15 @@ pub fn resolve_workspace_folder_uri(
         return Ok(path);
     }
     validate_workspace_scope_any(&path, existing_roots)
+}
+
+/// Resolve a workspace folder URI for multi-root folder **add** events.
+///
+/// Peer folders (siblings of existing roots) are accepted — the same rule as
+/// `initialize` with multiple `workspaceFolders`. Document paths remain jailed
+/// via [`validate_workspace_scope_any`].
+pub fn resolve_workspace_folder_add(uri: &str) -> Result<PathBuf, String> {
+    ontocore_core::workspace_uri_to_path(uri)
 }
 
 pub(crate) fn canonical_roots_match(a: &Path, b: &Path) -> bool {
@@ -613,6 +622,20 @@ mod tests {
             url::Url::from_file_path(outside.path().canonicalize().unwrap()).unwrap().to_string();
 
         assert!(resolve_workspace_folder_uri(&outside_uri, &[root]).is_err());
+    }
+
+    #[test]
+    fn resolve_workspace_folder_add_accepts_peer_root() {
+        let root_a = tempfile::tempdir().unwrap();
+        let root_b = tempfile::tempdir().unwrap();
+        let peer_uri =
+            url::Url::from_file_path(root_b.path().canonicalize().unwrap()).unwrap().to_string();
+
+        let resolved = resolve_workspace_folder_add(&peer_uri).expect("peer add");
+        assert_eq!(resolved, root_b.path().canonicalize().unwrap());
+        // Remove still requires the folder to be under/equal an existing root.
+        let root = root_a.path().canonicalize().unwrap();
+        assert!(resolve_workspace_folder_uri(&peer_uri, &[root]).is_err());
     }
 
     #[test]

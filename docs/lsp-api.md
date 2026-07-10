@@ -45,7 +45,7 @@ LSP JSON uses **snake_case** for enums serialized from Rust (`EntityKind`, `Pars
 | Diagnostics | **Implemented** — server pushes `textDocument/publishDiagnostics` after each reindex |
 | `textDocument/completion` | **Implemented (v0.11)** — Turtle prefix, QName, and IRI contexts |
 | `textDocument/codeAction` | **Implemented (v0.11)** — diagnostic quick fixes |
-| Rename | **Implemented** — `textDocument/rename` (no `prepareRename` yet) |
+| Rename | **Implemented** — `textDocument/rename` + `textDocument/prepareRename` |
 | Find references | **Implemented** — `textDocument/references` |
 
 ### `textDocument/completion` (v0.11)
@@ -596,4 +596,4 @@ Custom method failures return `LspErrorPayload` in the JSON-RPC error `data` fie
 
 ## Not implemented yet (see LSP_SPEC)
 
-`prepareRename` and additional LSP features remain planned — see [LSP_SPEC.md](design/LSP_SPEC.md). `textDocument/completion` for Turtle shipped in v0.11; semantic tokens and `listSqlSchema` shipped in v0.13. For semantic diff UX in VS Code, see [Semantic diff guide](ontocode/semantic-diff.md).
+`textDocument/prepareRename` returns a range when the cursor is on a renameable IRI/QName. Additional LSP features remain planned — see [LSP_SPEC.md](design/LSP_SPEC.md). `textDocument/completion` for Turtle shipped in v0.11; semantic tokens and `listSqlSchema` shipped in v0.13. For semantic diff UX in VS Code, see [Semantic diff guide](ontocode/semantic-diff.md).

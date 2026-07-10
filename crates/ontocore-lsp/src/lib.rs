@@ -47,7 +47,9 @@ use lsp_types::{
     InitializeParams, MessageType, ShowMessageParams,
 };
 use serde_json::Value;
-use state::{canonical_roots_match, resolve_workspace_folder_uri, ServerState};
+use state::{
+    canonical_roots_match, resolve_workspace_folder_add, resolve_workspace_folder_uri, ServerState,
+};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 use std::thread;
@@ -262,7 +264,7 @@ fn handle_notification(
                     }
                 }
                 for added in params.event.added {
-                    if let Ok(path) = resolve_workspace_folder_uri(added.uri.as_str(), &roots) {
+                    if let Ok(path) = resolve_workspace_folder_add(added.uri.as_str()) {
                         if !roots.iter().any(|r| canonical_roots_match(r, &path)) {
                             roots.push(path);
                         }

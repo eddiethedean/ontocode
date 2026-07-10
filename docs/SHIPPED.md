@@ -73,9 +73,9 @@
 | Shared React dialog shell with keyboard handling and live IRI/prefix validation | Yes |
 | New Ontology, Prefix Manager, Metrics, and About webview dialogs | Yes |
 | Central command registry, platform-aware keybindings, and conflict detection | Yes |
-| Persistent layouts and named Modeling, Reasoning, and Review perspectives | Yes |
+| Persistent layouts and named Modeling, Reasoning, and Review perspectives | Partial — serializers keep webview tabs; transient panel state is not restored (reopen from commands). Perspectives open a fixed panel set |
 | Help, plugin information, error log, diagnostics export, and support surfaces | Yes |
-| Engine support for prefix/metadata patches, create/export, active ontology, merge/replace, and reasoner workflows | Yes |
+| Engine support for prefix/metadata patches, create/export, active ontology, merge/replace, and reasoner workflows | Yes — Start / Synchronize / Classify / Consistency share the same classify path; Stop clears UI only (in-flight LSP request is not cancelled) |
 
 ## New in v0.16.0
 
@@ -206,7 +206,7 @@
 
 | Limitation | Notes |
 |------------|-------|
-| Multi-root VS Code workspaces | **All folders indexed** (v0.10+). Manual **Index Workspace** may prompt when multiple roots are open |
+| Multi-root VS Code workspaces | **All folders indexed** (v0.10+), including peer folders added after open. Manual **Index Workspace** may prompt when multiple roots are open |
 | Write-back | **Turtle (`.ttl`) and OBO (`.obo`)**; RDF/XML, OWL/XML, JSON-LD, N-Triples read-only |
 | Refactoring | **Turtle (`.ttl`) only**; extract module uses direct-reference closure |
 | Class hierarchy tree | Named-parent edges; **inferred/combined** after reasoner run |
@@ -216,7 +216,7 @@
 
 ## What's next
 
-Forward milestones (v0.15 plugin API → v1.0 Protégé replacement): **[Platform roadmap](roadmap.md)**.
+Forward milestones (stable plugin API, OWL/XML write-back, Protégé-competitive IDE → **v1.0**): **[Platform roadmap](roadmap.md)** · **[Known limitations](known-limitations.md)**.
 
 ## Where to learn more
 

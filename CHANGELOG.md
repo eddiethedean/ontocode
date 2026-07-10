@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Validate annotation predicate CURIEs against known prefixes and PN_LOCAL rules so Turtle injection via `AddAnnotation` / `AddOntologyAnnotation` is rejected ([#127](https://github.com/eddiethedean/ontocode/issues/127))
 - Remap blank nodes per document when merging into the shared SPARQL store so multi-file workspaces no longer fuse unrelated restrictions ([#160](https://github.com/eddiethedean/ontocode/issues/160))
 - Reject unknown SQL column identifiers instead of coercing them to empty strings ([#159](https://github.com/eddiethedean/ontocode/issues/159))
 - Recognize `@PREFIX` and SPARQL-style `PREFIX` in prefix patch ops so Prefix Manager updates replace existing declarations ([#158](https://github.com/eddiethedean/ontocode/issues/158))

@@ -42,8 +42,9 @@ use lsp_types::{
     notification::Notification as _,
     notification::{
         DidChangeTextDocument, DidCloseTextDocument, DidOpenTextDocument, Exit, Initialized,
+        ShowMessage,
     },
-    InitializeParams,
+    InitializeParams, MessageType, ShowMessageParams,
 };
 use serde_json::Value;
 use state::{canonical_roots_match, resolve_workspace_folder_uri, ServerState};
@@ -216,10 +217,24 @@ fn handle_notification(
                             }
                         }
                     } else {
+                        // Invalid incremental edit — drop the stale buffer and ask the user to
+                        // reopen so client/server text cannot silently diverge (#90).
                         eprintln!(
                             "ontocore-lsp: rejected document change: invalid edit range for {}",
                             params.text_document.uri.as_str()
                         );
+                        state.remove_document(&path);
+                        let params = ShowMessageParams {
+                            typ: MessageType::ERROR,
+                            message: format!(
+                                "OntoCore: document sync failed for {}; reopen the file to resync the language server buffer",
+                                path.display()
+                            ),
+                        };
+                        let _ = sender.send(Message::Notification(Notification {
+                            method: ShowMessage::METHOD.to_string(),
+                            params: serde_json::to_value(params).unwrap_or_default(),
+                        }));
                     }
                 }
             }
@@ -420,5 +435,15 @@ mod debounce_tests {
         let taken = take_due_reindex_workspace(&pending);
         assert_eq!(taken, Some(ws));
         assert!(pending.lock().unwrap().is_none());
+    }
+
+    #[test]
+    fn apply_text_change_rejects_inverted_range() {
+        let text = "ex:Person a owl:Class .\n";
+        let range = lsp_types::Range {
+            start: lsp_types::Position { line: 0, character: 10 },
+            end: lsp_types::Position { line: 0, character: 2 },
+        };
+        assert!(apply_text_change(text, &range, "X").is_none());
     }
 }

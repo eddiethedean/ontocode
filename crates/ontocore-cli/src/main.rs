@@ -209,10 +209,10 @@ enum PluginCommands {
     },
     /// Run a plugin action
     Run {
-        #[arg(default_value = ".")]
-        workspace: PathBuf,
         /// Plugin id
         plugin_id: String,
+        #[arg(default_value = ".")]
+        workspace: PathBuf,
         /// Action: validate, export, workflow
         #[arg(long, default_value = "validate")]
         action: String,
@@ -1005,4 +1005,34 @@ fn print_query_result(
         }
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use clap::Parser;
+
+    #[test]
+    fn plugins_run_accepts_required_plugin_id_before_optional_workspace() {
+        let cli = Cli::try_parse_from([
+            "ontocore",
+            "plugins",
+            "run",
+            "ontocode.naming-validator",
+            ".",
+            "--action",
+            "validate",
+        ])
+        .expect("plugins run should parse with plugin_id first");
+        match cli.command {
+            Commands::Plugins {
+                command: PluginCommands::Run { plugin_id, workspace, action, .. },
+            } => {
+                assert_eq!(plugin_id, "ontocode.naming-validator");
+                assert_eq!(workspace, PathBuf::from("."));
+                assert_eq!(action, "validate");
+            }
+            _ => panic!("expected plugins run"),
+        }
+    }
 }

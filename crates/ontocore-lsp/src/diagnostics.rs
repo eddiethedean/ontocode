@@ -96,6 +96,13 @@ fn send_empty_publish(sender: &Sender<Message>, uri: &str) {
     let _ = sender.send(Message::Notification(notif));
 }
 
+/// Clear previously published diagnostics for the given URIs (e.g. after workspace wipe).
+pub fn publish_empty_diagnostics(sender: &Sender<Message>, uris: &BTreeSet<String>) {
+    for uri in uris {
+        send_empty_publish(sender, uri);
+    }
+}
+
 fn to_lsp_diagnostic(
     diag: &ontocore_core::Diagnostic,
     document_text: &dyn Fn(&Path) -> Option<String>,

@@ -45,6 +45,8 @@ struct InnerState {
     reasoner_cache: ReasonerCacheStore,
     reasoner_snapshot: Option<ReasonerSnapshot>,
     explanation_cache: HashMap<(String, String, String), ontocore_reasoner::ExplanationResult>,
+    /// Insertion order for explanation cache eviction (oldest first).
+    explanation_cache_order: Vec<(String, String, String)>,
     /// Diagnostics from workspace plugins (merged at publish time).
     plugin_diagnostics: Vec<Diagnostic>,
     /// URIs that received `publishDiagnostics` (for stale clears).
@@ -54,6 +56,9 @@ struct InnerState {
     /// Active ontology document id (path or ontology IRI) for new-axiom targeting.
     active_ontology_id: Option<String>,
 }
+
+/// Cap explanation results similarly to the reasoner classification cache.
+const MAX_EXPLANATION_CACHE_ENTRIES: usize = 8;
 
 impl ServerState {
     pub fn new() -> Self {
@@ -69,6 +74,7 @@ impl ServerState {
                 reasoner_cache: ReasonerCacheStore::new(),
                 reasoner_snapshot: None,
                 explanation_cache: HashMap::new(),
+                explanation_cache_order: Vec::new(),
                 plugin_diagnostics: Vec::new(),
                 published_diagnostic_uris: BTreeSet::new(),
                 index_disk_cache: false,
@@ -100,7 +106,7 @@ impl ServerState {
         }
         let mut guard = self.inner.write().map_err(|e| e.to_string())?;
         if canonical.is_empty() {
-            clear_workspace_state_inner(&mut guard);
+            let _ = clear_workspace_state_inner(&mut guard);
             return Ok(());
         }
         let primary = canonical[0].clone();
@@ -111,10 +117,13 @@ impl ServerState {
     }
 
     /// Drop all indexed state and open buffers (e.g. when every workspace folder is removed).
-    pub fn clear_workspace_state(&self) {
+    /// Returns previously published diagnostic URIs so the caller can clear the Problems panel.
+    pub fn clear_workspace_state(&self) -> BTreeSet<String> {
         let _ops = self.ops_lock.lock().ok();
         if let Ok(mut guard) = self.inner.write() {
-            clear_workspace_state_inner(&mut guard);
+            clear_workspace_state_inner(&mut guard)
+        } else {
+            BTreeSet::new()
         }
     }
 
@@ -125,7 +134,7 @@ impl ServerState {
         if let Ok(mut guard) = self.inner.write() {
             let roots = guard.workspace_roots.clone();
             if roots.is_empty() {
-                clear_workspace_state_inner(&mut guard);
+                let _ = clear_workspace_state_inner(&mut guard);
             } else {
                 on_workspace_roots_changed_inner(&mut guard, &roots);
             }
@@ -197,6 +206,7 @@ impl ServerState {
         guard.reasoner_cache.invalidate();
         guard.reasoner_snapshot = None;
         guard.explanation_cache.clear();
+        guard.explanation_cache_order.clear();
         guard.plugin_diagnostics = plugin_diags;
 
         Ok((stats, indexed_at))
@@ -223,10 +233,24 @@ impl ServerState {
         result: ontocore_reasoner::ExplanationResult,
     ) {
         if let Ok(mut guard) = self.inner.write() {
-            guard.explanation_cache.insert(
-                (content_hash.to_string(), profile.to_string(), class_iri.to_string()),
-                result,
-            );
+            let key =
+                (content_hash.to_string(), profile.to_string(), class_iri.to_string());
+            let updating = guard.explanation_cache.contains_key(&key);
+            if let Some(pos) = guard.explanation_cache_order.iter().position(|k| k == &key) {
+                guard.explanation_cache_order.remove(pos);
+            }
+            if !updating {
+                while guard.explanation_cache.len() >= MAX_EXPLANATION_CACHE_ENTRIES
+                    && !guard.explanation_cache_order.is_empty()
+                {
+                    if let Some(old) = guard.explanation_cache_order.first().cloned() {
+                        guard.explanation_cache_order.remove(0);
+                        guard.explanation_cache.remove(&old);
+                    }
+                }
+            }
+            guard.explanation_cache_order.push(key.clone());
+            guard.explanation_cache.insert(key, result);
         }
     }
 
@@ -436,7 +460,7 @@ impl ServerState {
     }
 }
 
-fn clear_workspace_state_inner(guard: &mut InnerState) {
+fn clear_workspace_state_inner(guard: &mut InnerState) -> BTreeSet<String> {
     guard.catalog = None;
     guard.workspace_roots.clear();
     guard.workspace = None;
@@ -447,7 +471,10 @@ fn clear_workspace_state_inner(guard: &mut InnerState) {
     guard.reasoner_cache.invalidate();
     guard.reasoner_snapshot = None;
     guard.plugin_diagnostics.clear();
+    guard.explanation_cache.clear();
+    guard.explanation_cache_order.clear();
     guard.active_ontology_id = None;
+    std::mem::take(&mut guard.published_diagnostic_uris)
 }
 
 fn on_workspace_roots_changed_inner(guard: &mut InnerState, new_roots: &[PathBuf]) {
@@ -456,6 +483,9 @@ fn on_workspace_roots_changed_inner(guard: &mut InnerState, new_roots: &[PathBuf
     guard.reasoner_cache.invalidate();
     guard.reasoner_snapshot = None;
     guard.plugin_diagnostics.clear();
+    guard.explanation_cache.clear();
+    guard.explanation_cache_order.clear();
+    guard.active_ontology_id = None;
     if let Some(ref indexed) = guard.indexed_workspace {
         if !is_path_within_any(new_roots, indexed) {
             guard.indexed_workspace = None;
@@ -646,5 +676,64 @@ mod tests {
             write_elapsed < Duration::from_millis(100),
             "document write blocked for {write_elapsed:?}; catalog lock likely held across build"
         );
+    }
+
+    #[test]
+    fn explanation_cache_evicts_oldest_beyond_cap() {
+        let state = ServerState::new();
+        for i in 0..10 {
+            let iri = format!("http://example.org/C{i}");
+            state.put_cached_explanation(
+                "hash",
+                "elk",
+                &iri,
+                ontocore_reasoner::ExplanationResult {
+                    class_iri: iri.clone(),
+                    steps: vec![],
+                    text: String::new(),
+                },
+            );
+        }
+        assert!(state.get_cached_explanation("hash", "elk", "http://example.org/C0").is_none());
+        assert!(state.get_cached_explanation("hash", "elk", "http://example.org/C1").is_none());
+        assert!(state.get_cached_explanation("hash", "elk", "http://example.org/C2").is_some());
+        assert!(state.get_cached_explanation("hash", "elk", "http://example.org/C9").is_some());
+    }
+
+    #[test]
+    fn set_workspace_roots_clears_active_ontology_id() {
+        let dir_a = tempfile::tempdir().unwrap();
+        let dir_b = tempfile::tempdir().unwrap();
+        let root_a = dir_a.path().canonicalize().unwrap();
+        let root_b = dir_b.path().canonicalize().unwrap();
+        let state = ServerState::new();
+        state.set_workspace_roots(vec![root_a]).expect("set roots A");
+        state.set_active_ontology_id(Some("http://example.org/a".into()));
+        assert_eq!(state.active_ontology_id().as_deref(), Some("http://example.org/a"));
+        state.set_workspace_roots(vec![root_b]).expect("set roots B");
+        assert!(state.active_ontology_id().is_none());
+    }
+
+    #[test]
+    fn clear_workspace_state_returns_published_uris_and_clears_explanations() {
+        let state = ServerState::new();
+        let mut uris = BTreeSet::new();
+        uris.insert("file:///tmp/stale.ttl".into());
+        let _ = state.replace_published_diagnostic_uris(uris);
+        state.put_cached_explanation(
+            "hash",
+            "elk",
+            "http://example.org/C",
+            ontocore_reasoner::ExplanationResult {
+                class_iri: "http://example.org/C".into(),
+                steps: vec![],
+                text: String::new(),
+            },
+        );
+
+        let stale = state.clear_workspace_state();
+        assert!(stale.contains("file:///tmp/stale.ttl"));
+        assert!(state.get_cached_explanation("hash", "elk", "http://example.org/C").is_none());
+        assert!(state.replace_published_diagnostic_uris(BTreeSet::new()).is_empty());
     }
 }

@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Always include `obo_id` in SQL entity rows and detect `Self` restrictions by token, not substring ([#83](https://github.com/eddiethedean/ontocode/issues/83), [#140](https://github.com/eddiethedean/ontocode/issues/140))
+- Preserve the query engine `truncated` flag in CLI SQL/SPARQL output ([#77](https://github.com/eddiethedean/ontocode/issues/77))
 - Update `@PREFIX` / SPARQL-style `PREFIX` declarations during namespace migrate and copy them into extract-module headers ([#79](https://github.com/eddiethedean/ontocode/issues/79), [#80](https://github.com/eddiethedean/ontocode/issues/80))
 - Escape extract-module stub path comments for Turtle and type Ontology stubs as `owl:Ontology` ([#25](https://github.com/eddiethedean/ontocode/issues/25), [#147](https://github.com/eddiethedean/ontocode/issues/147))
 - Make OBO `atomic_write` Windows-safe with temp cleanup on failure, matching Turtle replace behavior ([#64](https://github.com/eddiethedean/ontocode/issues/64), [#165](https://github.com/eddiethedean/ontocode/issues/165))

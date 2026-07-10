@@ -559,9 +559,8 @@ fn add_annotation_value(
         add_annotation_triple(text, entity_iri, "rdfs:label", value, namespaces)
     } else if predicate == "rdfs:comment" || predicate.ends_with("#comment") {
         add_annotation_triple(text, entity_iri, "rdfs:comment", value, namespaces)
-    } else if value.starts_with("http://") || value.starts_with("https://") {
+    } else if let Some(obj) = explicit_iri_annotation_term(value, namespaces)? {
         let pred = predicate_to_term(predicate, namespaces)?;
-        let obj = iri_to_turtle_term(value, namespaces)?;
         add_object_triple(text, entity_iri, &pred, &obj, namespaces)
     } else {
         let pred = predicate_to_term(predicate, namespaces)?;
@@ -580,14 +579,44 @@ fn remove_annotation_value(
         remove_matching_predicate_any(text, entity_iri, "rdfs:label", value, namespaces)
     } else if predicate == "rdfs:comment" || predicate.ends_with("#comment") {
         remove_matching_predicate_any(text, entity_iri, "rdfs:comment", value, namespaces)
-    } else if value.starts_with("http://") || value.starts_with("https://") {
+    } else if let Some(obj) = explicit_iri_annotation_term(value, namespaces)? {
         let pred = predicate_to_term(predicate, namespaces)?;
-        let obj = iri_to_turtle_term(value, namespaces)?;
         remove_predicate_object_any_statement(text, entity_iri, &pred, &obj, namespaces)
     } else {
         let pred = predicate_to_term(predicate, namespaces)?;
         remove_matching_predicate_any(text, entity_iri, &pred, value, namespaces)
     }
+}
+
+/// Treat annotation values as IRI objects only when explicitly marked (`<iri>`) or a known CURIE.
+/// URL-shaped plain strings default to quoted literals.
+fn explicit_iri_annotation_term(
+    value: &str,
+    namespaces: &BTreeMap<String, String>,
+) -> Result<Option<String>> {
+    let trimmed = value.trim();
+    if let Some(inner) = trimmed.strip_prefix('<').and_then(|s| s.strip_suffix('>')) {
+        let iri = inner.trim();
+        if iri.is_empty() {
+            return Err(OwlError::PatchInvalid(
+                "empty IRI in annotation value <>".to_string(),
+            ));
+        }
+        return Ok(Some(iri_to_turtle_term(iri, namespaces)?));
+    }
+    if let Some((prefix, local)) = trimmed.split_once(':') {
+        if !prefix.is_empty()
+            && !local.is_empty()
+            && !prefix.eq_ignore_ascii_case("http")
+            && !prefix.eq_ignore_ascii_case("https")
+            && namespaces.contains_key(prefix)
+            && prefix.chars().all(|c| c.is_ascii_alphanumeric() || c == '_')
+            && is_valid_pn_local(local)
+        {
+            return Ok(Some(trimmed.to_string()));
+        }
+    }
+    Ok(None)
 }
 
 fn create_entity(
@@ -1991,6 +2020,94 @@ ex:Cat a owl:Class .
         .expect("add annotation");
         let preview = result.preview_text.expect("preview");
         assert!(preview.contains("skos:definition \"A feline animal\""));
+    }
+
+    #[test]
+    fn url_shaped_annotation_value_is_literal_not_iri() {
+        let ttl = r#"@prefix ex: <http://example.org/org#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+ex:Cat a owl:Class .
+"#;
+        let mut ns = org_ns();
+        ns.insert("skos".to_string(), "http://www.w3.org/2004/02/skos/core#".to_string());
+        let result = apply_patches_to_text(
+            ttl,
+            &[PatchOp::AddAnnotation {
+                entity_iri: "http://example.org/org#Cat".to_string(),
+                predicate: "skos:note".to_string(),
+                value: "https://example.org/docs/guide".to_string(),
+            }],
+            true,
+            &ns,
+        )
+        .expect("add url-shaped annotation");
+        let preview = result.preview_text.expect("preview");
+        assert!(
+            preview.contains("skos:note \"https://example.org/docs/guide\""),
+            "URL-shaped strings must be quoted literals: {preview}"
+        );
+        assert!(
+            !preview.contains("skos:note <https://example.org/docs/guide>"),
+            "must not write URL-shaped strings as IRI objects: {preview}"
+        );
+    }
+
+    #[test]
+    fn bracketed_iri_annotation_value_is_object() {
+        let ttl = r#"@prefix ex: <http://example.org/org#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+ex:Cat a owl:Class .
+"#;
+        let mut ns = org_ns();
+        ns.insert("skos".to_string(), "http://www.w3.org/2004/02/skos/core#".to_string());
+        let result = apply_patches_to_text(
+            ttl,
+            &[PatchOp::AddAnnotation {
+                entity_iri: "http://example.org/org#Cat".to_string(),
+                predicate: "skos:exactMatch".to_string(),
+                value: "<https://example.org/other#Cat>".to_string(),
+            }],
+            true,
+            &ns,
+        )
+        .expect("add bracketed IRI annotation");
+        let preview = result.preview_text.expect("preview");
+        assert!(
+            preview.contains("skos:exactMatch <https://example.org/other#Cat>")
+                || preview.contains("skos:exactMatch ex:"),
+            "bracketed values should write as IRI objects: {preview}"
+        );
+        assert!(!preview.contains("skos:exactMatch \"<https://"));
+    }
+
+    #[test]
+    fn remove_url_shaped_literal_annotation() {
+        let ttl = r#"@prefix ex: <http://example.org/org#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+ex:Cat a owl:Class ;
+    skos:note "https://example.org/docs/guide" .
+"#;
+        let mut ns = org_ns();
+        ns.insert("skos".to_string(), "http://www.w3.org/2004/02/skos/core#".to_string());
+        let result = apply_patches_to_text(
+            ttl,
+            &[PatchOp::RemoveAnnotation {
+                entity_iri: "http://example.org/org#Cat".to_string(),
+                predicate: "skos:note".to_string(),
+                value: "https://example.org/docs/guide".to_string(),
+            }],
+            true,
+            &ns,
+        )
+        .expect("remove url-shaped literal");
+        let preview = result.preview_text.expect("preview");
+        assert!(!preview.contains("https://example.org/docs/guide"));
     }
 
     #[test]

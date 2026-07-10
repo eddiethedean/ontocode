@@ -391,8 +391,37 @@ pub fn atomic_write(path: &Path, contents: &str) -> Result<()> {
         file.write_all(contents.as_bytes()).map_err(|e| OboError::Io(e.to_string()))?;
         file.sync_all().map_err(|e| OboError::Io(e.to_string()))?;
     }
-    fs::rename(&tmp_path, path).map_err(|e| OboError::Io(e.to_string()))?;
+    replace_file(&tmp_path, path).map_err(|e| OboError::Io(e.to_string()))?;
     Ok(())
+}
+
+/// Replace `path` with `tmp_path` (tmp is consumed). Works on Windows where `rename` cannot
+/// overwrite an existing destination. Always best-effort cleans up `tmp_path` on failure.
+fn replace_file(tmp_path: &Path, path: &Path) -> std::io::Result<()> {
+    match fs::rename(tmp_path, path) {
+        Ok(()) => Ok(()),
+        Err(_) if path.exists() => {
+            // Windows (and some network FS): rename refuses to replace. Move the existing
+            // file aside, then rename; restore on failure.
+            let bak_path = tmp_path.with_extension("bak");
+            fs::rename(path, &bak_path)?;
+            match fs::rename(tmp_path, path) {
+                Ok(()) => {
+                    let _ = fs::remove_file(&bak_path);
+                    Ok(())
+                }
+                Err(rename_err) => {
+                    let _ = fs::rename(&bak_path, path);
+                    let _ = fs::remove_file(tmp_path);
+                    Err(rename_err)
+                }
+            }
+        }
+        Err(e) => {
+            let _ = fs::remove_file(tmp_path);
+            Err(e)
+        }
+    }
 }
 
 #[cfg(test)]
@@ -668,5 +697,48 @@ name: B
         .expect("patch result");
         assert!(!result.applied);
         assert!(result.diagnostics.iter().any(|d| d.message.contains("whitespace")));
+    }
+
+    #[test]
+    fn atomic_write_overwrites_existing_file() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("term.obo");
+        std::fs::write(&path, "format-version: 1.2\nold\n").unwrap();
+        atomic_write(&path, "format-version: 1.2\nontology: new\n").expect("atomic write");
+        let contents = std::fs::read_to_string(&path).unwrap();
+        assert!(contents.contains("ontology: new"));
+        assert!(!contents.contains("old"));
+        let leftovers: Vec<_> = std::fs::read_dir(dir.path())
+            .unwrap()
+            .filter_map(|e| e.ok())
+            .filter(|e| e.file_name().to_string_lossy().contains(".tmp"))
+            .collect();
+        assert!(leftovers.is_empty(), "temp files left behind: {leftovers:?}");
+    }
+
+    #[test]
+    fn replace_file_removes_tmp_when_rename_fails_and_dest_missing() {
+        let dir = tempfile::tempdir().unwrap();
+        let tmp = dir.path().join(".ontocode-missing.tmp");
+        let dest = dir.path().join("out.obo");
+        // tmp does not exist → rename fails; dest missing → cleanup branch.
+        let err = replace_file(&tmp, &dest);
+        assert!(err.is_err());
+        assert!(!tmp.exists());
+    }
+
+    #[test]
+    fn replace_file_restores_dest_and_cleans_tmp_when_second_rename_fails() {
+        let dir = tempfile::tempdir().unwrap();
+        let dest = dir.path().join("out.obo");
+        std::fs::write(&dest, "original\n").unwrap();
+        let tmp = dir.path().join(".ontocode-out.tmp");
+        // Missing tmp with existing dest exercises bak restore + tmp cleanup.
+        let err = replace_file(&tmp, &dest);
+        assert!(err.is_err());
+        assert_eq!(std::fs::read_to_string(&dest).unwrap(), "original\n");
+        assert!(!tmp.exists());
+        let bak = tmp.with_extension("bak");
+        assert!(!bak.exists(), "backup must not be left behind");
     }
 }

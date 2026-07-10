@@ -21,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - End OBO term blocks at the next stanza header (`[Typedef]`, `[Instance]`, …), not only at the next `[Term]` ([#144](https://github.com/eddiethedean/ontocode/issues/144))
 - Drop the catalog `RwLock` before incremental reindex so document sync is not blocked for the whole build ([#162](https://github.com/eddiethedean/ontocode/issues/162))
 - Jail in-process `runPlugin` / `plugins run` export output under the workspace (default `.ontocore/plugin-out`) instead of process CWD ([#136](https://github.com/eddiethedean/ontocode/issues/136))
+- Target ApplyPatch code-action WorkspaceEdits at the open document path, not diagnostic `document_path` ([#135](https://github.com/eddiethedean/ontocode/issues/135))
 
 ## [0.17.0] - 2026-07-10
 

@@ -87,13 +87,14 @@ fn quick_fix_to_action(
             let new_text = if lines.is_empty() { String::new() } else { lines.join("\n") + "\n" };
             Some(code_action_with_edit(label, path, vec![full_document_edit(content, &new_text)]))
         }
-        QuickFix::ApplyPatch { label, document_path, patches } => {
+        QuickFix::ApplyPatch { label, document_path: _, patches } => {
             let patch_ops: Vec<PatchOp> =
                 patches.iter().filter_map(|v| serde_json::from_value(v.clone()).ok()).collect();
             if patch_ops.is_empty() {
                 return None;
             }
-            let doc_path = PathBuf::from(document_path);
+            // Always target the open/jailed document used for patch computation — never trust
+            // diagnostic `document_path`, which can redirect the WorkspaceEdit to another file.
             let result = apply_patches_to_text(content, &patch_ops, true, namespaces).ok()?;
             if !result.diagnostics.is_empty() {
                 return None;
@@ -101,7 +102,7 @@ fn quick_fix_to_action(
             let new_text = result.preview_text?;
             Some(code_action_with_edit(
                 label,
-                &doc_path,
+                path,
                 vec![full_document_edit(content, &new_text)],
             ))
         }
@@ -200,5 +201,38 @@ mod tests {
             quick_fix_to_action(&fix, &path, content, &namespaces).is_none(),
             "missing entity patch must not produce a no-op code action"
         );
+    }
+
+    #[test]
+    fn apply_patch_workspace_edit_targets_open_path_not_diagnostic_document_path() {
+        let open_path = PathBuf::from("/tmp/workspace/a.ttl");
+        let forged_path = PathBuf::from("/tmp/workspace/b.ttl");
+        let content = "@prefix ex: <http://example.org/ex#> .\n@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n\nex:Bad a owl:Class .\n";
+        let fix = QuickFix::ApplyPatch {
+            label: "Add rdfs:label \"Bad\"".to_string(),
+            document_path: forged_path.display().to_string(),
+            patches: vec![serde_json::json!({
+                "op": "add_label",
+                "entity_iri": "http://example.org/ex#Bad",
+                "value": "Bad",
+            })],
+        };
+        let mut namespaces = BTreeMap::new();
+        namespaces.insert("ex".to_string(), "http://example.org/ex#".to_string());
+        namespaces.insert("rdfs".to_string(), "http://www.w3.org/2000/01/rdf-schema#".to_string());
+
+        let action =
+            quick_fix_to_action(&fix, &open_path, content, &namespaces).expect("code action");
+        let uri = action
+            .edit
+            .expect("edit")
+            .changes
+            .expect("changes")
+            .keys()
+            .next()
+            .expect("uri")
+            .to_string();
+        assert_eq!(uri, path_to_uri(&open_path));
+        assert_ne!(uri, path_to_uri(&forged_path));
     }
 }

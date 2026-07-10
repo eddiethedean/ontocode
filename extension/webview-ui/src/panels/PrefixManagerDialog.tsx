@@ -4,7 +4,7 @@ import { FormField, Input, InlineCode, Select } from "../components/ui";
 import { getVsCodeApi } from "../vscodeApi";
 
 const IRI_PATTERN = /^https?:\/\/\S+$/;
-const PREFIX_PATTERN = /^[A-Za-z_][A-Za-z0-9_-]*$/;
+const PREFIX_PATTERN = /^[A-Za-z_][A-Za-z0-9_]*$/;
 
 export function PrefixManagerDialog(): JSX.Element {
   const [path, setPath] = useState("");
@@ -14,7 +14,7 @@ export function PrefixManagerDialog(): JSX.Element {
   const [namespaceIri, setNamespaceIri] = useState("");
   const prefixError = PREFIX_PATTERN.test(prefix)
     ? undefined
-    : "Prefix must start with a letter or underscore and contain only letters, digits, _ or -.";
+    : "Prefix must start with a letter or underscore and contain only letters, digits, or _.";
   const iriError =
     action === "add" && !IRI_PATTERN.test(namespaceIri)
       ? "Namespace IRI must start with http:// or https://."

@@ -691,6 +691,25 @@ fn create_ontology_writes_safe_turtle() {
     assert!(!contents.contains("a owl:Class"));
 }
 
+#[test]
+fn create_ontology_rejects_rdfxml_and_owl_extension() {
+    let dir = tempfile::tempdir().unwrap();
+    let state = ServerState::new();
+    state.set_workspace_roots(vec![dir.path().to_path_buf()]).expect("set workspace");
+    let err = handle_create_ontology(
+        &state,
+        CreateOntologyParams {
+            path: dir.path().join("fresh.owl").display().to_string(),
+            ontology_iri: "http://example.org/ont".into(),
+            version_iri: None,
+            format: Some("rdfxml".into()),
+            prefixes: None,
+        },
+    )
+    .expect_err("rdfxml create must fail");
+    assert!(err.message.contains("unsupported createOntology format"));
+}
+
 struct CwdGuard {
     previous: PathBuf,
 }

@@ -566,6 +566,24 @@ impl IndexBuilder {
         );
         data.diagnostics.extend(bridge_diagnostics);
 
+        if let Some(ref cache) = disk_cache {
+            let live_hashes: std::collections::HashSet<String> =
+                document_snapshots.values().map(|s| s.content_hash.clone()).collect();
+            if let Err(e) = cache.prune(&live_hashes) {
+                data.diagnostics.push(Diagnostic {
+                    code: DiagnosticCode::IoReadError,
+                    severity: DiagnosticSeverity::Warning,
+                    message: format!("disk cache prune failed: {e}"),
+                    file: self.workspace.join(".ontocore/cache/snapshots"),
+                    range: SourceLocation::default(),
+                    entity_iri: None,
+                    quick_fix: None,
+                    plugin_id: None,
+                    plugin_code: None,
+                });
+            }
+        }
+
         Ok((
             OntologyCatalog {
                 workspace: self.workspace,

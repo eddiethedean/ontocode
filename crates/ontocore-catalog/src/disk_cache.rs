@@ -8,7 +8,7 @@ use oxigraph::model::{
     TermRef,
 };
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::path::{Path, PathBuf};
 
@@ -119,6 +119,38 @@ impl DiskCache {
             snap.document.modified_time = modified_time;
             previous.insert(path.to_path_buf(), snap);
         }
+    }
+
+    /// Delete snapshot files whose content hash is not in the live catalog (#166).
+    ///
+    /// Also removes leftover `*.json.tmp` files from interrupted writes.
+    /// Returns the number of snapshot files removed.
+    pub(crate) fn prune(&self, live_hashes: &HashSet<String>) -> std::io::Result<usize> {
+        let dir = self.root.join(SNAPSHOTS_DIR);
+        if !dir.is_dir() {
+            return Ok(0);
+        }
+        let mut removed = 0usize;
+        for entry in fs::read_dir(&dir)? {
+            let entry = entry?;
+            let path = entry.path();
+            let Some(name) = path.file_name().and_then(|n| n.to_str()) else {
+                continue;
+            };
+            if name.ends_with(".json.tmp") {
+                let _ = fs::remove_file(&path);
+                continue;
+            }
+            if !name.ends_with(".json") {
+                continue;
+            }
+            let hash = name.trim_end_matches(".json");
+            if !live_hashes.contains(hash) {
+                fs::remove_file(&path)?;
+                removed += 1;
+            }
+        }
+        Ok(removed)
     }
 
     fn snapshot_path(&self, content_hash: &str) -> PathBuf {
@@ -404,5 +436,123 @@ mod tests {
         };
         assert_eq!(lit.value(), "42");
         assert_eq!(lit.datatype(), integer.as_ref());
+    }
+
+    #[test]
+    fn prune_removes_orphan_snapshots_and_keeps_live() {
+        let dir = tempfile::tempdir().unwrap();
+        let cache = DiskCache::for_workspace(dir.path());
+
+        let make_snap = |hash: &str| DocumentSnapshot {
+            content_hash: hash.to_string(),
+            document: OntologyDocument {
+                id: "doc-1".to_string(),
+                path: dir.path().join("a.ttl"),
+                format: OntologyFormat::Turtle,
+                base_iri: None,
+                imports: vec![],
+                namespaces: Default::default(),
+                parse_status: ParseStatus::Ok,
+                content_hash: hash.to_string(),
+                modified_time: 0,
+                parse_message: None,
+                parse_error_location: None,
+            },
+            entities: vec![],
+            annotations: vec![],
+            axioms: vec![],
+            namespace_rows: vec![],
+            imports: vec![],
+            quads: vec![],
+            triple_count: 0,
+            bridge_warning: None,
+        };
+
+        cache.store(&make_snap("livehash")).expect("store live");
+        cache.store(&make_snap("stalehash")).expect("store stale");
+        let snap_dir = dir.path().join(".ontocore/cache/snapshots");
+        std::fs::write(snap_dir.join("orphan.json.tmp"), b"partial").unwrap();
+
+        let live = HashSet::from(["livehash".to_string()]);
+        let removed = cache.prune(&live).expect("prune");
+        assert_eq!(removed, 1);
+        assert!(cache.load("livehash").is_some());
+        assert!(cache.load("stalehash").is_none());
+        assert!(!snap_dir.join("orphan.json.tmp").exists());
+        assert!(!snap_dir.join("stalehash.json").exists());
+        assert!(snap_dir.join("livehash.json").exists());
+    }
+
+    #[test]
+    fn prune_is_noop_when_snapshots_dir_missing() {
+        let dir = tempfile::tempdir().unwrap();
+        let cache = DiskCache::for_workspace(dir.path());
+        let removed = cache.prune(&HashSet::new()).expect("prune empty");
+        assert_eq!(removed, 0);
+    }
+
+    #[test]
+    fn index_builder_prunes_stale_disk_cache_after_reindex() {
+        use crate::IndexBuilder;
+
+        let dir = tempfile::tempdir().unwrap();
+        let ttl = dir.path().join("a.ttl");
+        std::fs::write(
+            &ttl,
+            "@prefix owl: <http://www.w3.org/2002/07/owl#> .\n@prefix ex: <http://ex/> .\nex:A a owl:Class .\n",
+        )
+        .unwrap();
+
+        IndexBuilder::new()
+            .workspace(dir.path())
+            .disk_cache(true)
+            .build()
+            .expect("first build");
+
+        let snap_dir = dir.path().join(".ontocore/cache/snapshots");
+        assert!(snap_dir.is_dir());
+        let after_first: Vec<_> = std::fs::read_dir(&snap_dir)
+            .unwrap()
+            .filter_map(|e| e.ok())
+            .filter(|e| e.path().extension().and_then(|x| x.to_str()) == Some("json"))
+            .collect();
+        assert_eq!(after_first.len(), 1);
+        let first_hash = after_first[0]
+            .path()
+            .file_stem()
+            .and_then(|s| s.to_str())
+            .unwrap()
+            .to_string();
+
+        // Plant an orphan snapshot that should be removed on the next index.
+        std::fs::write(snap_dir.join("orphaneddeadbeef.json"), b"{}").unwrap();
+
+        std::fs::write(
+            &ttl,
+            "@prefix owl: <http://www.w3.org/2002/07/owl#> .\n@prefix ex: <http://ex/> .\nex:A a owl:Class .\nex:B a owl:Class .\n",
+        )
+        .unwrap();
+
+        IndexBuilder::new()
+            .workspace(dir.path())
+            .disk_cache(true)
+            .build()
+            .expect("second build");
+
+        let after_second: Vec<_> = std::fs::read_dir(&snap_dir)
+            .unwrap()
+            .filter_map(|e| e.ok())
+            .filter(|e| e.path().extension().and_then(|x| x.to_str()) == Some("json"))
+            .map(|e| e.file_name().to_string_lossy().into_owned())
+            .collect();
+        assert!(
+            !after_second.iter().any(|n| n == "orphaneddeadbeef.json"),
+            "orphan snapshot should be pruned"
+        );
+        assert!(
+            !after_second.iter().any(|n| n.as_str() == format!("{first_hash}.json")),
+            "stale content-hash snapshot should be pruned after edit"
+        );
+        assert_eq!(after_second.len(), 1, "only the live hash should remain");
     }
 }

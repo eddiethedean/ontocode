@@ -604,17 +604,8 @@ fn explicit_iri_annotation_term(
         }
         return Ok(Some(iri_to_turtle_term(iri, namespaces)?));
     }
-    if let Some((prefix, local)) = trimmed.split_once(':') {
-        if !prefix.is_empty()
-            && !local.is_empty()
-            && !prefix.eq_ignore_ascii_case("http")
-            && !prefix.eq_ignore_ascii_case("https")
-            && namespaces.contains_key(prefix)
-            && prefix.chars().all(|c| c.is_ascii_alphanumeric() || c == '_')
-            && is_valid_pn_local(local)
-        {
-            return Ok(Some(trimmed.to_string()));
-        }
+    if let Some(curie) = known_curie_term(trimmed, namespaces) {
+        return Ok(Some(curie.to_string()));
     }
     Ok(None)
 }
@@ -772,11 +763,33 @@ fn remove_disjoint_triple(
 }
 
 fn predicate_to_term(predicate: &str, namespaces: &BTreeMap<String, String>) -> Result<String> {
-    if predicate.contains(':') && !predicate.starts_with("http") {
-        Ok(predicate.to_string())
+    if let Some(curie) = known_curie_term(predicate, namespaces) {
+        Ok(curie.to_string())
     } else {
+        // Full IRIs and non-CURIE terms go through IRI safety checks. Malformed
+        // CURIE-shaped strings (injection payloads) fail `is_safe_iri` here instead
+        // of being emitted verbatim.
         iri_to_turtle_term(predicate, namespaces)
     }
+}
+
+/// Return `term` when it is a known-prefix CURIE with a safe Turtle PN_LOCAL.
+///
+/// Rejects `http:`/`https:` (those are IRIs), unknown prefixes, and locals with
+/// characters that would break out of a Turtle predicate position.
+fn known_curie_term<'a>(term: &'a str, namespaces: &BTreeMap<String, String>) -> Option<&'a str> {
+    let (prefix, local) = term.split_once(':')?;
+    if prefix.is_empty()
+        || local.is_empty()
+        || prefix.eq_ignore_ascii_case("http")
+        || prefix.eq_ignore_ascii_case("https")
+        || !namespaces.contains_key(prefix)
+        || !prefix.chars().all(|c| c.is_ascii_alphanumeric() || c == '_')
+        || !is_valid_pn_local(local)
+    {
+        return None;
+    }
+    Some(term)
 }
 
 fn set_property_characteristic(
@@ -2116,6 +2129,94 @@ ex:Cat a owl:Class ;
         .expect("remove url-shaped literal");
         let preview = result.preview_text.expect("preview");
         assert!(!preview.contains("https://example.org/docs/guide"));
+    }
+
+    #[test]
+    fn adversarial_curie_annotation_predicate_is_rejected() {
+        let ttl = r#"@prefix ex: <http://example.org/org#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+ex:Cat a owl:Class .
+"#;
+        let evil = "x:y> a owl:Class . <http://ex.org/z";
+        let result = apply_patches_to_text(
+            ttl,
+            &[PatchOp::AddAnnotation {
+                entity_iri: "http://example.org/org#Cat".to_string(),
+                predicate: evil.to_string(),
+                value: "safe".to_string(),
+            }],
+            true,
+            &org_ns(),
+        )
+        .expect("patch call succeeds with diagnostics");
+        assert!(!result.diagnostics.is_empty());
+        assert_eq!(result.preview_text.as_deref(), Some(ttl));
+        assert!(!ttl.contains("owl:Class . <http://ex.org/z"));
+        let preview = result.preview_text.as_deref().unwrap_or("");
+        assert!(
+            !preview.contains("a owl:Class . <http://ex.org/z"),
+            "predicate breakout must not be written: {preview}"
+        );
+    }
+
+    #[test]
+    fn adversarial_curie_ontology_annotation_predicate_is_rejected() {
+        let ttl = r#"@prefix ex: <http://example.org/org#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+<http://example.org/org> a owl:Ontology .
+"#;
+        let evil = "evil:x> ; owl:imports <http://evil>";
+        let result = apply_patches_to_text(
+            ttl,
+            &[PatchOp::AddOntologyAnnotation {
+                ontology_iri: "http://example.org/org".to_string(),
+                predicate: evil.to_string(),
+                value: "note".to_string(),
+            }],
+            true,
+            &org_ns(),
+        )
+        .expect("patch call succeeds with diagnostics");
+        assert!(!result.diagnostics.is_empty());
+        assert_eq!(result.preview_text.as_deref(), Some(ttl));
+        let preview = result.preview_text.as_deref().unwrap_or("");
+        assert!(
+            !preview.contains("owl:imports <http://evil>"),
+            "ontology annotation breakout must not be written: {preview}"
+        );
+    }
+
+    #[test]
+    fn full_iri_annotation_predicate_still_works() {
+        let ttl = r#"@prefix ex: <http://example.org/org#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+ex:Cat a owl:Class .
+"#;
+        let mut ns = org_ns();
+        ns.insert("skos".to_string(), "http://www.w3.org/2004/02/skos/core#".to_string());
+        let result = apply_patches_to_text(
+            ttl,
+            &[PatchOp::AddAnnotation {
+                entity_iri: "http://example.org/org#Cat".to_string(),
+                predicate: "http://www.w3.org/2004/02/skos/core#definition".to_string(),
+                value: "A feline animal".to_string(),
+            }],
+            true,
+            &ns,
+        )
+        .expect("add full-IRI annotation predicate");
+        let preview = result.preview_text.expect("preview");
+        assert!(
+            preview.contains("skos:definition \"A feline animal\"")
+                || preview.contains(
+                    "<http://www.w3.org/2004/02/skos/core#definition> \"A feline animal\""
+                ),
+            "full IRI predicates must still write safely: {preview}"
+        );
     }
 
     #[test]

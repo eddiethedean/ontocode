@@ -561,8 +561,8 @@ mod tests {
     #[test]
     fn unsupported_join_keyword_returns_error() {
         let catalog = fixture_catalog();
-        let err = run_sql(&catalog, "SELECT short_name FROM classes JOIN ontologies ON 1=1")
-            .unwrap_err();
+        let err =
+            run_sql(&catalog, "SELECT short_name FROM classes JOIN ontologies ON 1=1").unwrap_err();
         assert!(matches!(err, crate::QueryError::Sql(msg) if msg.contains("JOIN")));
     }
 
@@ -602,8 +602,8 @@ mod tests {
     #[test]
     fn unknown_where_column_returns_error() {
         let catalog = fixture_catalog();
-        let err = run_sql(&catalog, "SELECT short_name FROM classes WHERE nonexistent = ''")
-            .unwrap_err();
+        let err =
+            run_sql(&catalog, "SELECT short_name FROM classes WHERE nonexistent = ''").unwrap_err();
         assert!(matches!(err, crate::QueryError::Sql(msg) if msg.contains("unknown column")));
     }
 

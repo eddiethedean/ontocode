@@ -890,11 +890,13 @@ fn load_quads_into_store(
 }
 
 fn blank_id_prefix(doc_id: &str) -> String {
-    let sanitized: String = doc_id
-        .chars()
-        .map(|c| if c.is_ascii_alphanumeric() { c } else { '_' })
-        .collect();
-    if sanitized.is_empty() { "doc".to_string() } else { sanitized }
+    let sanitized: String =
+        doc_id.chars().map(|c| if c.is_ascii_alphanumeric() { c } else { '_' }).collect();
+    if sanitized.is_empty() {
+        "doc".to_string()
+    } else {
+        sanitized
+    }
 }
 
 fn remap_blank_node(
@@ -1174,8 +1176,12 @@ ex:p2 a owl:ObjectProperty .
 
         let mut fused = 0usize;
         let mut intact_a = 0usize;
-        for quad in store.quads_for_pattern(None, Some(on_property.as_ref()), Some(p1.as_ref().into()), None)
-        {
+        for quad in store.quads_for_pattern(
+            None,
+            Some(on_property.as_ref()),
+            Some(p1.as_ref().into()),
+            None,
+        ) {
             let quad = quad.expect("store iterate");
             let fused_quad = Quad {
                 subject: quad.subject.clone(),

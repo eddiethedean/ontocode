@@ -8,7 +8,7 @@ use lsp_types::{
 use ontocore_core::QuickFix;
 use ontocore_owl::patch::{apply_patches_to_text, PatchOp};
 use std::collections::BTreeMap;
-use std::path::{Path, PathBuf};
+use std::path::Path;
 use std::str::FromStr;
 
 pub fn handle_code_action(
@@ -43,7 +43,7 @@ pub fn handle_code_action(
     }
 }
 
-fn namespaces_for_path(state: &ServerState, path: &PathBuf) -> BTreeMap<String, String> {
+fn namespaces_for_path(state: &ServerState, path: &Path) -> BTreeMap<String, String> {
     state
         .with_catalog(|catalog| {
             catalog
@@ -101,11 +101,7 @@ fn quick_fix_to_action(
                 return None;
             }
             let new_text = result.preview_text?;
-            Some(code_action_with_edit(
-                label,
-                path,
-                vec![full_document_edit(content, &new_text)],
-            ))
+            Some(code_action_with_edit(label, path, vec![full_document_edit(content, &new_text)]))
         }
     }
 }

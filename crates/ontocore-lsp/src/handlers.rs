@@ -913,8 +913,7 @@ pub fn handle_semantic_diff(
         LspErrorPayload::invalid_params("no git repository found in workspace".to_string())
     })?;
 
-    if ontocore_diff::is_indexed_catalog_ref(left_ref)
-        && ontocore_diff::is_worktree_ref(right_ref)
+    if ontocore_diff::is_indexed_catalog_ref(left_ref) && ontocore_diff::is_worktree_ref(right_ref)
     {
         return state
             .with_catalog(|head| {
@@ -1096,16 +1095,10 @@ fn jail_robot_path_args(
 
     fn path_expect_for_long_flag(flag: &str) -> Option<PathExpect> {
         match flag {
-            "--input"
-            | "--output"
-            | "--report"
-            | "--catalog"
-            | "--ontology"
-            | "--left"
-            | "--right"
-            | "--merge-input"
-            | "--output-dir"
-            | "--update" => Some(PathExpect { min: 1, max: 1 }),
+            "--input" | "--output" | "--report" | "--catalog" | "--ontology" | "--left"
+            | "--right" | "--merge-input" | "--output-dir" | "--update" => {
+                Some(PathExpect { min: 1, max: 1 })
+            }
             // ROBOT: --query/--select/--construct take query file + output file.
             "--query" | "--select" | "--construct" => Some(PathExpect { min: 1, max: 2 }),
             // ROBOT: --queries takes one or more query files until the next flag.
@@ -1983,10 +1976,9 @@ pub fn handle_apply_refactor(
                         let mut rollback_errors = Vec::new();
                         for rollback in &server_plan.changes {
                             if rollback.preview_text != rollback.original_text {
-                                if let Err(re) = atomic_write_for_path(
-                                    &rollback.path,
-                                    &rollback.original_text,
-                                ) {
+                                if let Err(re) =
+                                    atomic_write_for_path(&rollback.path, &rollback.original_text)
+                                {
                                     rollback_errors
                                         .push(format!("{}: {re}", rollback.path.display()));
                                 }
@@ -2170,9 +2162,8 @@ fn atomic_write_for_format(
 }
 
 fn atomic_write_for_path(path: &std::path::Path, contents: &str) -> Result<(), String> {
-    let format = OntologyFormat::from_extension(
-        path.extension().and_then(|e| e.to_str()).unwrap_or(""),
-    );
+    let format =
+        OntologyFormat::from_extension(path.extension().and_then(|e| e.to_str()).unwrap_or(""));
     atomic_write_for_format(format, path, contents)
 }
 
@@ -2667,10 +2658,7 @@ mod tests {
     #[test]
     fn iri_at_position_returns_none_on_trailing_whitespace() {
         let content = "ex:Person a owl:Class ;  ";
-        let pos = Position {
-            line: 0,
-            character: (content.len() - 1) as u32,
-        };
+        let pos = Position { line: 0, character: (content.len() - 1) as u32 };
         assert!(iri_at_position(content, pos).is_none());
     }
 
@@ -2714,10 +2702,7 @@ mod tests {
             "--query=/tmp/evil.sparql".to_string(),
         ];
         let err = jail_robot_path_args(&roots, &args).unwrap_err();
-        assert!(
-            err.contains("outside") || err.contains("workspace"),
-            "unexpected error: {err}"
-        );
+        assert!(err.contains("outside") || err.contains("workspace"), "unexpected error: {err}");
     }
 
     #[test]

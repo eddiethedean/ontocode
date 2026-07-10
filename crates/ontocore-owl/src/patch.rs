@@ -630,9 +630,7 @@ fn explicit_iri_annotation_term(
     if let Some(inner) = trimmed.strip_prefix('<').and_then(|s| s.strip_suffix('>')) {
         let iri = inner.trim();
         if iri.is_empty() {
-            return Err(OwlError::PatchInvalid(
-                "empty IRI in annotation value <>".to_string(),
-            ));
+            return Err(OwlError::PatchInvalid("empty IRI in annotation value <>".to_string()));
         }
         return Ok(Some(iri_to_turtle_term(iri, namespaces)?));
     }
@@ -2296,9 +2294,7 @@ ex:Cat a owl:Class .
 "#;
         let result = apply_patches_to_text(
             ttl,
-            &[PatchOp::SetOntologyIri {
-                ontology_iri: "http://example.org/new".to_string(),
-            }],
+            &[PatchOp::SetOntologyIri { ontology_iri: "http://example.org/new".to_string() }],
             true,
             &BTreeMap::new(),
         )
@@ -2318,9 +2314,7 @@ ex:ont a owl:Ontology .
 "#;
         let result = apply_patches_to_text(
             ttl,
-            &[PatchOp::SetOntologyIri {
-                ontology_iri: "http://example.org/new".to_string(),
-            }],
+            &[PatchOp::SetOntologyIri { ontology_iri: "http://example.org/new".to_string() }],
             true,
             &BTreeMap::from([("ex".to_string(), "http://example.org/".to_string())]),
         )
@@ -2351,9 +2345,7 @@ ex:ont a owl:Ontology ;
 "#;
         let result = apply_patches_to_text(
             ttl,
-            &[PatchOp::SetOntologyIri {
-                ontology_iri: "http://example.org/new".to_string(),
-            }],
+            &[PatchOp::SetOntologyIri { ontology_iri: "http://example.org/new".to_string() }],
             true,
             &BTreeMap::from([("ex".to_string(), "http://example.org/".to_string())]),
         )
@@ -2374,9 +2366,7 @@ ex:Foo a owl:Class .
 "#;
         let result = apply_patches_to_text(
             ttl,
-            &[PatchOp::SetOntologyIri {
-                ontology_iri: "http://example.org/new".to_string(),
-            }],
+            &[PatchOp::SetOntologyIri { ontology_iri: "http://example.org/new".to_string() }],
             true,
             &BTreeMap::new(),
         )

@@ -30,12 +30,7 @@ fn new_refuses_overwrite_without_force() {
     std::fs::write(&path, "KEEP\n").unwrap();
 
     let output = support::ontocore_cmd()
-        .args([
-            "new",
-            path.to_str().expect("path"),
-            "--ontology-iri",
-            "http://example.org/ont",
-        ])
+        .args(["new", path.to_str().expect("path"), "--ontology-iri", "http://example.org/ont"])
         .output()
         .expect("spawn ontocore new");
 

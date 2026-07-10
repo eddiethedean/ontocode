@@ -233,8 +233,7 @@ impl ServerState {
         result: ontocore_reasoner::ExplanationResult,
     ) {
         if let Ok(mut guard) = self.inner.write() {
-            let key =
-                (content_hash.to_string(), profile.to_string(), class_iri.to_string());
+            let key = (content_hash.to_string(), profile.to_string(), class_iri.to_string());
             let updating = guard.explanation_cache.contains_key(&key);
             if let Some(pos) = guard.explanation_cache_order.iter().position(|k| k == &key) {
                 guard.explanation_cache_order.remove(pos);

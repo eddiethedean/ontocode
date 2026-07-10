@@ -82,7 +82,9 @@ pub fn format_diff_markdown(diff: &DiffResult, breaking_only: bool) -> String {
         out.push_str("## Entity changes\n\n");
         for e in &diff.entity_changes {
             match &e.previous_iri {
-                Some(prev) => out.push_str(&format!("- **{:?}** `{}` ← `{}`\n", e.kind, e.iri, prev)),
+                Some(prev) => {
+                    out.push_str(&format!("- **{:?}** `{}` ← `{}`\n", e.kind, e.iri, prev))
+                }
                 None => out.push_str(&format!("- **{:?}** `{}`\n", e.kind, e.iri)),
             }
         }

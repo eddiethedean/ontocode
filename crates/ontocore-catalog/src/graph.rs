@@ -641,12 +641,7 @@ mod tests {
         )
         .expect("write");
         let catalog = IndexBuilder::new().workspace(dir.path()).build().expect("build");
-        let ont_id = catalog
-            .data()
-            .documents
-            .first()
-            .map(|d| d.id.clone())
-            .expect("doc");
+        let ont_id = catalog.data().documents.first().map(|d| d.id.clone()).expect("doc");
         let unfiltered = GraphBuilder::new(&catalog)
             .build(&GraphRequest {
                 graph_kind: "class".to_string(),
@@ -657,10 +652,7 @@ mod tests {
             })
             .expect("unfiltered");
         assert!(
-            unfiltered
-                .nodes
-                .iter()
-                .any(|n| n.id == "http://external.example/Parent"),
+            unfiltered.nodes.iter().any(|n| n.id == "http://external.example/Parent"),
             "unknown parent should appear without ontology filter"
         );
 
@@ -670,17 +662,11 @@ mod tests {
                 root_iri: None,
                 depth: 2,
                 include_inferred: false,
-                filters: GraphFilters {
-                    ontology_iri: Some(ont_id),
-                    hide_deprecated: false,
-                },
+                filters: GraphFilters { ontology_iri: Some(ont_id), hide_deprecated: false },
             })
             .expect("filtered");
         assert!(
-            filtered
-                .nodes
-                .iter()
-                .all(|n| n.id != "http://external.example/Parent"),
+            filtered.nodes.iter().all(|n| n.id != "http://external.example/Parent"),
             "unknown parent must not bypass ontology_iri filter"
         );
         assert!(

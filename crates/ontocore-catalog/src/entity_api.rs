@@ -232,11 +232,7 @@ fn axiom_summary(a: &ontocore_core::Axiom, editable: bool) -> EntityAxiomSummary
         None
     };
     let properties = if a.axiom_kind == AXIOM_KIND_PROPERTY_CHAIN {
-        a.object
-            .split(" o ")
-            .map(|s| s.trim().to_string())
-            .filter(|s| !s.is_empty())
-            .collect()
+        a.object.split(" o ").map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect()
     } else {
         Vec::new()
     };
@@ -419,9 +415,8 @@ mod tests {
         )
         .expect("write ttl");
         let catalog = IndexBuilder::new().workspace(dir.path()).build().expect("build");
-        let detail = catalog
-            .entity_detail("http://example.org/org#composed")
-            .expect("composed detail");
+        let detail =
+            catalog.entity_detail("http://example.org/org#composed").expect("composed detail");
         let chain = detail
             .axioms
             .iter()

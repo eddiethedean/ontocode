@@ -442,8 +442,11 @@ fn main() -> Result<()> {
             }
         }
         Commands::Patch { document, patch_file, preview } => {
-            let patch_bytes = ontocore_core::read_file_capped(&patch_file, ontocore_core::MAX_FILE_BYTES)
-                .with_context(|| format!("failed to read patch file {}", patch_file.display()))?;
+            let patch_bytes =
+                ontocore_core::read_file_capped(&patch_file, ontocore_core::MAX_FILE_BYTES)
+                    .with_context(|| {
+                        format!("failed to read patch file {}", patch_file.display())
+                    })?;
             let ext =
                 document.extension().and_then(|e| e.to_str()).unwrap_or("").to_ascii_lowercase();
             let catalog = IndexBuilder::new()
@@ -750,21 +753,14 @@ fn write_new_ontology(
     force: bool,
 ) -> Result<()> {
     if path.exists() && !force {
-        bail!(
-            "file already exists: {} (use --force to overwrite)",
-            path.display()
-        );
+        bail!("file already exists: {} (use --force to overwrite)", path.display());
     }
     if !ontocore_owl::is_safe_iri(ontology_iri) {
-        bail!(
-            "ontology IRI contains characters that cannot be safely written: {ontology_iri:?}"
-        );
+        bail!("ontology IRI contains characters that cannot be safely written: {ontology_iri:?}");
     }
     if let Some(version_iri) = version_iri {
         if !ontocore_owl::is_safe_iri(version_iri) {
-            bail!(
-                "version IRI contains characters that cannot be safely written: {version_iri:?}"
-            );
+            bail!("version IRI contains characters that cannot be safely written: {version_iri:?}");
         }
     }
     let extension = path.extension().and_then(|ext| ext.to_str()).unwrap_or_default();

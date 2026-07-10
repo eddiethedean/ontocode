@@ -643,10 +643,7 @@ fn create_ontology_rejects_unsafe_prefix_iri() {
     state.set_workspace_roots(vec![dir.path().to_path_buf()]).expect("set workspace");
     let path = dir.path().join("evil-prefix.ttl");
     let mut prefixes = std::collections::BTreeMap::new();
-    prefixes.insert(
-        "ex".to_string(),
-        "http://ex.org/x> . <http://ex.org/y".to_string(),
-    );
+    prefixes.insert("ex".to_string(), "http://ex.org/x> . <http://ex.org/y".to_string());
     let err = handle_create_ontology(
         &state,
         CreateOntologyParams {
@@ -733,9 +730,7 @@ fn create_ontology_writes_under_workspace_not_cwd() {
     let workspace = tempfile::tempdir().unwrap();
     let cwd = tempfile::tempdir().unwrap();
     let state = ServerState::new();
-    state
-        .set_workspace_roots(vec![workspace.path().to_path_buf()])
-        .expect("set workspace");
+    state.set_workspace_roots(vec![workspace.path().to_path_buf()]).expect("set workspace");
 
     let _cwd = CwdGuard::enter(cwd.path());
     let result = handle_create_ontology(
@@ -779,9 +774,7 @@ fn export_ontology_writes_under_workspace_not_cwd() {
     .unwrap();
 
     let state = ServerState::new();
-    state
-        .set_workspace_roots(vec![workspace.path().to_path_buf()])
-        .expect("set workspace");
+    state.set_workspace_roots(vec![workspace.path().to_path_buf()]).expect("set workspace");
 
     let _cwd = CwdGuard::enter(cwd.path());
     let result = handle_export_ontology(
@@ -804,12 +797,6 @@ fn export_ontology_writes_under_workspace_not_cwd() {
         exported.display(),
         root.display()
     );
-    assert!(
-        !cwd.path().join("exported.ttl").exists(),
-        "must not write export against process CWD"
-    );
-    assert!(
-        !cwd.path().join("source.ttl").exists(),
-        "must not resolve source against process CWD"
-    );
+    assert!(!cwd.path().join("exported.ttl").exists(), "must not write export against process CWD");
+    assert!(!cwd.path().join("source.ttl").exists(), "must not resolve source against process CWD");
 }

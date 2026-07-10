@@ -385,7 +385,8 @@ mod tests {
         assert_eq!(restored_lang.language(), Some("en"));
 
         // Legacy single-caret snapshots from older OntoCore builds.
-        let legacy = parse_term("\"7\"^<http://www.w3.org/2001/XMLSchema#integer>").expect("legacy");
+        let legacy =
+            parse_term("\"7\"^<http://www.w3.org/2001/XMLSchema#integer>").expect("legacy");
         let Term::Literal(restored_legacy) = legacy else {
             panic!("expected literal");
         };
@@ -503,11 +504,7 @@ mod tests {
         )
         .unwrap();
 
-        IndexBuilder::new()
-            .workspace(dir.path())
-            .disk_cache(true)
-            .build()
-            .expect("first build");
+        IndexBuilder::new().workspace(dir.path()).disk_cache(true).build().expect("first build");
 
         let snap_dir = dir.path().join(".ontocore/cache/snapshots");
         assert!(snap_dir.is_dir());
@@ -517,12 +514,8 @@ mod tests {
             .filter(|e| e.path().extension().and_then(|x| x.to_str()) == Some("json"))
             .collect();
         assert_eq!(after_first.len(), 1);
-        let first_hash = after_first[0]
-            .path()
-            .file_stem()
-            .and_then(|s| s.to_str())
-            .unwrap()
-            .to_string();
+        let first_hash =
+            after_first[0].path().file_stem().and_then(|s| s.to_str()).unwrap().to_string();
 
         // Plant an orphan snapshot that should be removed on the next index.
         std::fs::write(snap_dir.join("orphaneddeadbeef.json"), b"{}").unwrap();
@@ -533,11 +526,7 @@ mod tests {
         )
         .unwrap();
 
-        IndexBuilder::new()
-            .workspace(dir.path())
-            .disk_cache(true)
-            .build()
-            .expect("second build");
+        IndexBuilder::new().workspace(dir.path()).disk_cache(true).build().expect("second build");
 
         let after_second: Vec<_> = std::fs::read_dir(&snap_dir)
             .unwrap()

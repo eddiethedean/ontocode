@@ -168,18 +168,10 @@ mod tests {
     #[test]
     fn loads_owx_with_rdf_quads_for_sparql() {
         let owx = include_str!("../../../examples/protege-roundtrip/example.owx");
-        let result = load_owx_text(
-            Path::new("example.owx"),
-            "doc-owx",
-            owx,
-            &BTreeMap::new(),
-        )
-        .expect("load owx");
+        let result = load_owx_text(Path::new("example.owx"), "doc-owx", owx, &BTreeMap::new())
+            .expect("load owx");
         assert!(result.bridge.entities.iter().any(|e| e.short_name == "Department"));
-        assert!(
-            !result.quads.is_empty(),
-            "OWL/XML load must project RDF quads for SPARQL"
-        );
+        assert!(!result.quads.is_empty(), "OWL/XML load must project RDF quads for SPARQL");
         assert!(
             result.quads.iter().any(|q| {
                 q.subject.to_string().contains("Department")
@@ -195,13 +187,8 @@ mod tests {
     #[test]
     fn owx_prefixes_merged_into_bridge_namespaces() {
         let owx = include_str!("../../../examples/protege-roundtrip/example.owx");
-        let result = load_owx_text(
-            Path::new("example.owx"),
-            "doc-owx",
-            owx,
-            &BTreeMap::new(),
-        )
-        .expect("load owx");
+        let result = load_owx_text(Path::new("example.owx"), "doc-owx", owx, &BTreeMap::new())
+            .expect("load owx");
         assert!(
             result
                 .bridge

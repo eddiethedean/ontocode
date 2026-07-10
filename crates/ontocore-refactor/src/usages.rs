@@ -45,7 +45,8 @@ pub fn find_usages_with_overrides(
 
     for axiom in &data.axioms {
         if axiom.subject == target_iri {
-            if let Some(doc) = document_for_ontology_id(data.documents.as_slice(), &axiom.ontology_id)
+            if let Some(doc) =
+                document_for_ontology_id(data.documents.as_slice(), &axiom.ontology_id)
             {
                 let key = (doc.path.clone(), UsageKind::AxiomSubject, axiom.id.clone());
                 if seen.insert(key) {
@@ -59,7 +60,8 @@ pub fn find_usages_with_overrides(
             }
         }
         if axiom.object == target_iri || is_named_ref(&axiom.object, target_iri) {
-            if let Some(doc) = document_for_ontology_id(data.documents.as_slice(), &axiom.ontology_id)
+            if let Some(doc) =
+                document_for_ontology_id(data.documents.as_slice(), &axiom.ontology_id)
             {
                 let key = (doc.path.clone(), UsageKind::AxiomObject, axiom.id.clone());
                 if seen.insert(key) {
@@ -76,7 +78,8 @@ pub fn find_usages_with_overrides(
 
     for ann in &data.annotations {
         if ann.subject == target_iri {
-            if let Some(doc) = document_for_ontology_id(data.documents.as_slice(), &ann.ontology_id) {
+            if let Some(doc) = document_for_ontology_id(data.documents.as_slice(), &ann.ontology_id)
+            {
                 let key = (doc.path.clone(), UsageKind::AnnotationSubject, ann.subject.clone());
                 if seen.insert(key) {
                     usages.push(Usage {
@@ -94,7 +97,8 @@ pub fn find_usages_with_overrides(
             }
         }
         if ann.object == target_iri {
-            if let Some(doc) = document_for_ontology_id(data.documents.as_slice(), &ann.ontology_id) {
+            if let Some(doc) = document_for_ontology_id(data.documents.as_slice(), &ann.ontology_id)
+            {
                 let key = (
                     doc.path.clone(),
                     UsageKind::AnnotationObject,
@@ -119,7 +123,8 @@ pub fn find_usages_with_overrides(
 
     for imp in &data.imports {
         if imp.import_iri == target_iri {
-            if let Some(doc) = document_for_ontology_id(data.documents.as_slice(), &imp.ontology_id) {
+            if let Some(doc) = document_for_ontology_id(data.documents.as_slice(), &imp.ontology_id)
+            {
                 let key = (doc.path.clone(), UsageKind::Import, imp.import_iri.clone());
                 if seen.insert(key) {
                     usages.push(Usage {

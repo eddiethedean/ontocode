@@ -293,9 +293,6 @@ mod tests {
             local_name_for_prefix_namespaces("http://example.org/people#Person", &ns).as_deref(),
             Some("Person")
         );
-        assert_eq!(
-            local_name_for_prefix_namespaces("http://other.org/clinic#Person", &ns),
-            None
-        );
+        assert_eq!(local_name_for_prefix_namespaces("http://other.org/clinic#Person", &ns), None);
     }
 }

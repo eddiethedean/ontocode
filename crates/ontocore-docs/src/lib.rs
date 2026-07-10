@@ -397,7 +397,8 @@ mod tests {
             .entities
             .iter()
             .filter(|e| {
-                document_for_entity(&catalog.data().documents, e).is_some_and(|d| d.id == example.id)
+                document_for_entity(&catalog.data().documents, e)
+                    .is_some_and(|d| d.id == example.id)
             })
             .count();
         assert!(entity_count > 0, "fixture entities should match example.ttl via ontology IRI");

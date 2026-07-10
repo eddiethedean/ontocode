@@ -335,12 +335,12 @@ pub fn preview_migrate_namespace(
 }
 
 fn is_prefix_declaration_line(line: &str) -> bool {
-    let keyword = line.trim_start().split_whitespace().next().unwrap_or("");
+    let keyword = line.split_whitespace().next().unwrap_or("");
     keyword.eq_ignore_ascii_case("@prefix") || keyword.eq_ignore_ascii_case("PREFIX")
 }
 
 fn prefix_declaration_name(line: &str) -> Option<&str> {
-    let mut parts = line.trim_start().split_whitespace();
+    let mut parts = line.split_whitespace();
     let keyword = parts.next()?;
     if !(keyword.eq_ignore_ascii_case("@prefix") || keyword.eq_ignore_ascii_case("PREFIX")) {
         return None;
@@ -360,8 +360,7 @@ fn replace_prefix_uri(
     let mut hunks = Vec::new();
     let mut offset = 0usize;
     for line in text.split_inclusive('\n') {
-        let updated = if prefix_declaration_name(line) == Some(prefix) && line.contains(&old_term)
-        {
+        let updated = if prefix_declaration_name(line) == Some(prefix) && line.contains(&old_term) {
             line.replacen(&old_term, &new_term, 1)
         } else {
             line.to_string()
@@ -767,7 +766,9 @@ mod tests {
 
     #[test]
     fn escape_turtle_string_escapes_path_specials() {
-        assert_eq!(escape_turtle_string(r#"C:\ontology\mod"ule.ttl"#), r#"C:\\ontology\\mod\"ule.ttl"#);
+        assert_eq!(
+            escape_turtle_string(r#"C:\ontology\mod"ule.ttl"#),
+            r#"C:\\ontology\\mod\"ule.ttl"#
+        );
     }
 }
-

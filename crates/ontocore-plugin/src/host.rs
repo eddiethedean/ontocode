@@ -450,11 +450,9 @@ mod tests {
         let _restore = RestoreCwd(prev);
         std::env::set_current_dir(cwd.path()).unwrap();
 
-        let options = jail_export_options(
-            &workspace,
-            ExportOptions::markdown(DEFAULT_PLUGIN_EXPORT_DIR),
-        )
-        .expect("jail default export dir");
+        let options =
+            jail_export_options(&workspace, ExportOptions::markdown(DEFAULT_PLUGIN_EXPORT_DIR))
+                .expect("jail default export dir");
 
         let root = workspace.canonicalize().unwrap();
         assert!(is_path_within(&root, &options.output_dir));

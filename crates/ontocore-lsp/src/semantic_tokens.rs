@@ -221,28 +221,28 @@ fn absolute_position_of_last(tokens: &[SemanticToken]) -> (u32, u32) {
     (line, start)
 }
 
-/// Decode LSP semantic-token deltas back to absolute `(line, start_char, length, type)`.
-fn decode_absolute_positions(tokens: &[SemanticToken]) -> Vec<(u32, u32, u32, u32)> {
-    let mut line = 0u32;
-    let mut start = 0u32;
-    let mut out = Vec::with_capacity(tokens.len());
-    for token in tokens {
-        if token.delta_line > 0 {
-            line += token.delta_line;
-            start = token.delta_start;
-        } else if out.is_empty() {
-            start = token.delta_start;
-        } else {
-            start += token.delta_start;
-        }
-        out.push((line, start, token.length, token.token_type));
-    }
-    out
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    /// Decode LSP semantic-token deltas back to absolute `(line, start_char, length, type)`.
+    fn decode_absolute_positions(tokens: &[SemanticToken]) -> Vec<(u32, u32, u32, u32)> {
+        let mut line = 0u32;
+        let mut start = 0u32;
+        let mut out = Vec::with_capacity(tokens.len());
+        for token in tokens {
+            if token.delta_line > 0 {
+                line += token.delta_line;
+                start = token.delta_start;
+            } else if out.is_empty() {
+                start = token.delta_start;
+            } else {
+                start += token.delta_start;
+            }
+            out.push((line, start, token.length, token.token_type));
+        }
+        out
+    }
 
     #[test]
     fn turtle_tokens_include_comment_and_prefix() {

@@ -71,7 +71,7 @@ describe("workspaceStore", () => {
 
   it("hydrateFocus updates slices without navigation push", () => {
     const store = useWorkspaceStore.getState();
-    store.setFocus({ kind: "entity", id: "A", source: "panel" });
+    store.setFocus({ kind: "entity", id: "A", source: "panel", timestamp: 50 });
     const stackLen = useWorkspaceStore.getState().navigation.stack.length;
     store.hydrateFocus({
       kind: "entity",
@@ -82,6 +82,23 @@ describe("workspaceStore", () => {
     expect(useWorkspaceStore.getState().focus?.id).toBe("http://example.org#Relayed");
     expect(useWorkspaceStore.getState().inspector.entityIri).toBe("http://example.org#Relayed");
     expect(useWorkspaceStore.getState().navigation.stack.length).toBe(stackLen);
+  });
+
+  it("hydrateFocus ignores older timestamps", () => {
+    const store = useWorkspaceStore.getState();
+    store.setFocus({
+      kind: "entity",
+      id: "http://example.org#Newer",
+      source: "panel",
+      timestamp: 100,
+    });
+    store.hydrateFocus({
+      kind: "entity",
+      id: "http://example.org#Stale",
+      source: "explorer",
+      timestamp: 50,
+    });
+    expect(useWorkspaceStore.getState().focus?.id).toBe("http://example.org#Newer");
   });
 
   it("setQueryResult emits QueryExecuted", () => {

@@ -13,6 +13,7 @@ export interface GraphPanelOptions {
 
 export class GraphPanel {
   public static currentPanel: GraphPanel | undefined;
+  private refreshGeneration = 0;
 
   private constructor(
     private readonly host: PanelHost,
@@ -79,6 +80,7 @@ export class GraphPanel {
   }
 
   private async refresh(): Promise<void> {
+    const generation = ++this.refreshGeneration;
     try {
       const result = await getGraph({
         graph_kind: this.options.graphKind,
@@ -87,12 +89,18 @@ export class GraphPanel {
         include_inferred: this.options.includeInferred ?? false,
         filters: this.options.filters,
       });
+      if (generation !== this.refreshGeneration) {
+        return;
+      }
       this.host.postMessage({
         type: "graphData",
         graph: result.graph,
         rootIri: this.options.rootIri,
       });
     } catch (err) {
+      if (generation !== this.refreshGeneration) {
+        return;
+      }
       const msg = err instanceof Error ? err.message : String(err);
       this.host.postMessage({ type: "error", message: msg });
     }

@@ -10,11 +10,39 @@ use crate::result::{
     build_inferred_hierarchy, detect_unsatisfiable_classes, new_inferences, taxonomy_to_iri_edges,
     unsatisfiable_iris, ClassificationResult, ExplanationRequest, ExplanationResult,
 };
-use ontologos_core::{Profile, Reasoner};
+use ontologos_core::{EngineKind, Ontology, Profile, Reasoner};
 use ontologos_facade::ClassifyOutcome;
 use std::time::Instant;
 
 pub struct AutoAdapter;
+
+/// Resolve OntoLogos Auto routing to the concrete OntoCore reasoner id.
+///
+/// Used by classify (`profile_used`) and by both CLI/LSP explain paths so they
+/// share the same backend for a given ontology.
+pub(crate) fn resolve_auto_reasoner_id(ontology: &Ontology) -> Result<ReasonerId> {
+    let route = ontologos_profile::resolve_route(Profile::Auto, ontology)
+        .map_err(|e| ReasonerError::Classify(e.to_string()))?;
+    Ok(match route.kind {
+        EngineKind::El => ReasonerId::El,
+        EngineKind::Rl => ReasonerId::Rl,
+        EngineKind::Rdfs => ReasonerId::Rdfs,
+        EngineKind::Alc | EngineKind::Dl | EngineKind::Swrl | EngineKind::Hybrid => ReasonerId::Dl,
+    })
+}
+
+fn explain_for_concrete(
+    concrete: ReasonerId,
+    ontology: &Ontology,
+    class_iri: &str,
+) -> Result<ExplanationResult> {
+    match concrete {
+        ReasonerId::Dl => explain_unsatisfiable_dl(ontology, class_iri),
+        ReasonerId::Rdfs => explain_unsatisfiable_rdfs(ontology, class_iri),
+        ReasonerId::Rl => explain_unsatisfiable_rl(ontology, class_iri),
+        ReasonerId::El | ReasonerId::Auto => explain_unsatisfiable_el(ontology, class_iri),
+    }
+}
 
 impl ReasonerAdapter for AutoAdapter {
     fn id(&self) -> ReasonerId {
@@ -43,9 +71,10 @@ impl ReasonerAdapter for AutoAdapter {
                 let inferred =
                     build_inferred_hierarchy(&iri_edges, &unsatisfiable, &input.asserted_hierarchy);
                 let new_inferences = new_inferences(&input.asserted_hierarchy, &inferred.edges);
+                let profile_used = resolve_auto_reasoner_id(&input.ontology)?.as_str().to_string();
 
                 Ok(ClassificationResult {
-                    profile_used: "auto".to_string(),
+                    profile_used,
                     consistent: unsatisfiable.is_empty(),
                     unsatisfiable: unsatisfiable.clone(),
                     inferred,
@@ -109,13 +138,7 @@ impl ReasonerAdapter for AutoAdapter {
         input: &ReasonerInput,
         request: &ExplanationRequest,
     ) -> Result<ExplanationResult> {
-        // Match the profile Auto classification actually selected.
-        let classification = self.classify(input)?;
-        match classification.profile_used.as_str() {
-            "dl" => explain_unsatisfiable_dl(&input.ontology, &request.class_iri),
-            "rdfs" => explain_unsatisfiable_rdfs(&input.ontology, &request.class_iri),
-            "rl" => explain_unsatisfiable_rl(&input.ontology, &request.class_iri),
-            _ => explain_unsatisfiable_el(&input.ontology, &request.class_iri),
-        }
+        let concrete = resolve_auto_reasoner_id(&input.ontology)?;
+        explain_for_concrete(concrete, &input.ontology, &request.class_iri)
     }
 }

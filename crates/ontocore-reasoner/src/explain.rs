@@ -25,8 +25,10 @@ pub fn explain_unsatisfiable_alternatives(
         crate::adapter::ReasonerId::Rdfs => vec![explain_unsatisfiable_rdfs(ontology, class_iri)?],
         crate::adapter::ReasonerId::Dl => vec![explain_unsatisfiable_dl(ontology, class_iri)?],
         crate::adapter::ReasonerId::Auto => {
-            // Auto falls back to the same trace-based explanations as DL.
-            vec![explain_unsatisfiable_dl(ontology, class_iri)?]
+            // Match CLI AutoAdapter::explain: use the concrete engine Auto classify selects.
+            let concrete = crate::auto::resolve_auto_reasoner_id(ontology)
+                .map_err(|e| ReasonerError::Explain(e.to_string()))?;
+            return explain_unsatisfiable_alternatives(concrete, ontology, class_iri, max);
         }
     };
 

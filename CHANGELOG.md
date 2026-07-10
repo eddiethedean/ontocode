@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Preserve `obo_id` when merging duplicate entity IRIs across documents so OBO write-back keeps `term_id` ([#138](https://github.com/eddiethedean/ontocode/issues/138))
 - Align Auto explain backends: report the concrete classify engine in `profile_used` and route CLI/LSP explanations through that engine ([#139](https://github.com/eddiethedean/ontocode/issues/139))
 - Use jailed resolved paths for `createOntology` / `exportOntology` I/O so relative paths write under the workspace, not the LSP process CWD ([#123](https://github.com/eddiethedean/ontocode/issues/123))
 - Reject unsafe ontology/version/prefix IRIs in `createOntology` and `ontocore new`, and refuse CLI overwrite unless `--force` ([#124](https://github.com/eddiethedean/ontocode/issues/124))

@@ -11,6 +11,7 @@ import {
   runReasoner,
   setActiveOntology,
 } from "../lsp/client";
+import { requirePatchFullySynced } from "../lsp/patchFeedback";
 import type {
   OntologyDocument,
   PatchOp,
@@ -453,12 +454,7 @@ async function applyDocumentPatches(
     patches,
     preview_only: false,
   });
-  if (!result.applied) {
-    throw new Error(
-      result.diagnostics?.map((diagnostic) => diagnostic.message).join("; ") ||
-        "ontology update was not applied"
-    );
-  }
+  requirePatchFullySynced(result);
 }
 
 async function runEntityRefactor(

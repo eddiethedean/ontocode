@@ -17,3 +17,21 @@ export function hasPatchFailureDiagnostics(result: ApplyPatchResult): boolean {
 export function isPatchFullySynced(result: ApplyAxiomPatchClientResult): boolean {
   return result.applied && result.editor_synced;
 }
+
+/** User-facing message when disk write succeeded but workspace-edit sync was cancelled. */
+export function patchSyncCancelledMessage(): string {
+  return "OntoCode: changes written to disk but editor sync was cancelled";
+}
+
+/**
+ * Throw when a patch did not fully apply, including cancelled editor sync.
+ * Callers that refresh UI / close panels should use this instead of checking `applied` alone.
+ */
+export function requirePatchFullySynced(result: ApplyAxiomPatchClientResult): void {
+  if (!result.applied) {
+    throw new Error(patchFailureMessage(result));
+  }
+  if (!isPatchFullySynced(result)) {
+    throw new Error(patchSyncCancelledMessage());
+  }
+}

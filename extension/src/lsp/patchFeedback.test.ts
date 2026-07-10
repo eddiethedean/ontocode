@@ -4,6 +4,8 @@ import {
   hasPatchFailureDiagnostics,
   isPatchFullySynced,
   patchFailureMessage,
+  patchSyncCancelledMessage,
+  requirePatchFullySynced,
 } from "./patchFeedback";
 import type { ApplyAxiomPatchClientResult, ApplyPatchResult } from "./protocol";
 
@@ -42,5 +44,35 @@ describe("patchFeedback", () => {
     assert.equal(isPatchFullySynced(synced), true);
     assert.equal(isPatchFullySynced(cancelled), false);
     assert.equal(isPatchFullySynced(failed), false);
+  });
+
+  it("requirePatchFullySynced throws when editor sync was cancelled", () => {
+    const cancelled: ApplyAxiomPatchClientResult = {
+      applied: true,
+      editor_synced: false,
+    };
+    assert.throws(
+      () => requirePatchFullySynced(cancelled),
+      (error: unknown) =>
+        error instanceof Error &&
+        error.message === patchSyncCancelledMessage()
+    );
+  });
+
+  it("requirePatchFullySynced throws when patch was not applied", () => {
+    const failed: ApplyAxiomPatchClientResult = {
+      applied: false,
+      editor_synced: false,
+      diagnostics: [{ severity: "error", message: "duplicate prefix" }],
+    };
+    assert.throws(
+      () => requirePatchFullySynced(failed),
+      (error: unknown) =>
+        error instanceof Error && error.message === "duplicate prefix"
+    );
+  });
+
+  it("requirePatchFullySynced accepts fully synced results", () => {
+    requirePatchFullySynced({ applied: true, editor_synced: true });
   });
 });

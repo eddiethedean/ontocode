@@ -82,6 +82,92 @@ describe("EntityInspectorPanel", () => {
       ],
       previewOnly: false,
     });
+    // Keep typed text until host confirms success via loadEntity (#41).
+    expect(labelInput).toHaveValue("New label");
+  });
+
+  it("resets form pickers when navigating to another entity", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<EntityInspectorPanel />);
+    postHostMessage({ type: "loadEntity", detail: entityDetail, classOptions });
+    await screen.findByRole("heading", { name: "Person" });
+
+    await user.selectOptions(screen.getByLabelText("Add parent"), "http://example.org#Agent");
+    expect(screen.getByLabelText("Add parent")).toHaveValue("http://example.org#Agent");
+
+    postHostMessage({
+      type: "loadEntity",
+      detail: {
+        ...entityDetail,
+        entity: {
+          ...entityDetail.entity,
+          iri: "http://example.org#Student",
+          short_name: "Student",
+          labels: ["Student"],
+        },
+      },
+      classOptions,
+    });
+    await screen.findByRole("heading", { name: "Student" });
+    expect(screen.getByLabelText("Add parent")).toHaveValue("");
+  });
+
+  it("detects Turtle and OBO extensions case-insensitively", async () => {
+    renderWithProviders(<EntityInspectorPanel />);
+    postHostMessage({
+      type: "loadEntity",
+      detail: { ...entityDetail, document_path: "/workspace/ontology.TTL" },
+      classOptions,
+    });
+    await screen.findByRole("heading", { name: "Person" });
+    expect(screen.getByText("Edit")).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Edit in Manchester" })).toBeInTheDocument();
+  });
+
+  it("hides property characteristics when not editable", async () => {
+    renderWithProviders(<EntityInspectorPanel />);
+    postHostMessage({
+      type: "loadEntity",
+      detail: {
+        ...entityDetail,
+        editable: false,
+        entity: { ...entityDetail.entity, kind: "object_property", labels: ["hasPart"] },
+        characteristics: { functional: true },
+      },
+      classOptions,
+    });
+    await screen.findByRole("heading", { name: "hasPart" });
+    expect(screen.queryByText("Property characteristics")).not.toBeInTheDocument();
+  });
+
+  it("previews property characteristic changes instead of live-applying", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<EntityInspectorPanel />);
+    postHostMessage({
+      type: "loadEntity",
+      detail: {
+        ...entityDetail,
+        entity: { ...entityDetail.entity, kind: "object_property", labels: ["hasPart"] },
+        characteristics: { functional: false },
+      },
+      classOptions,
+    });
+    await screen.findByRole("heading", { name: "hasPart" });
+
+    await user.click(screen.getByLabelText("Functional"));
+    await user.click(screen.getAllByRole("button", { name: "Preview" })[0]);
+
+    expect(lastPostedMessage()).toEqual({
+      type: "applyPatch",
+      patches: [
+        {
+          op: "set_functional",
+          entity_iri: "http://example.org#Person",
+          value: true,
+        },
+      ],
+      previewOnly: true,
+    });
   });
 
   it("posts jumpToSource from sticky actions", async () => {

@@ -138,10 +138,6 @@ impl OntologyCatalog {
                 ontocore_core::OntologyFormat::Turtle | ontocore_core::OntologyFormat::Obo
             ) && d.parse_status == ontocore_core::ParseStatus::Ok
         });
-        let turtle_axioms = doc.is_some_and(|d| {
-            d.format == ontocore_core::OntologyFormat::Turtle
-                && d.parse_status == ontocore_core::ParseStatus::Ok
-        });
         let document_path = doc.map(|d| d.path.display().to_string());
 
         let axioms: Vec<EntityAxiomSummary> = self
@@ -149,7 +145,7 @@ impl OntologyCatalog {
             .axioms
             .iter()
             .filter(|a| a.subject == iri)
-            .map(|a| axiom_summary(a, turtle_axioms))
+            .map(|a| axiom_summary(a, editable))
             .collect();
 
         const PROMOTED: &[&str] = &[
@@ -358,5 +354,38 @@ mod tests {
             + 1;
         assert_eq!(source.line, entity_line as u64);
         assert_eq!(source.column, 0);
+    }
+
+    #[test]
+    fn obo_entity_detail_marks_axioms_editable() {
+        let dir = tempfile::tempdir().expect("tempdir");
+        let obo_path = dir.path().join("demo.obo");
+        std::fs::write(
+            &obo_path,
+            concat!(
+                "format-version: 1.2\n",
+                "ontology: demo\n\n",
+                "[Term]\n",
+                "id: DEMO:0001\n",
+                "name: child\n",
+                "is_a: DEMO:0002\n\n",
+                "[Term]\n",
+                "id: DEMO:0002\n",
+                "name: parent\n",
+            ),
+        )
+        .expect("write obo");
+
+        let catalog = IndexBuilder::new().workspace(dir.path()).build().expect("build catalog");
+        let child = catalog
+            .data()
+            .entities
+            .iter()
+            .find(|e| e.obo_id.as_deref() == Some("DEMO:0001"))
+            .expect("child term");
+        let detail = catalog.entity_detail(&child.iri).expect("child detail");
+        assert!(detail.editable);
+        assert!(!detail.axioms.is_empty());
+        assert!(detail.axioms.iter().all(|a| a.editable));
     }
 }

@@ -1,6 +1,6 @@
 use crate::OntologyCatalog;
 use ontocore_core::{
-    document_matches_entity, read_to_string_capped, Entity, EntityKind, PropertyCharacteristics,
+    document_for_entity, read_to_string_capped, Entity, EntityKind, PropertyCharacteristics,
     AXIOM_KIND_CLASS_ASSERTION, AXIOM_KIND_DATA_PROPERTY_ASSERTION, AXIOM_KIND_DISJOINT_CLASS,
     AXIOM_KIND_DOMAIN, AXIOM_KIND_EQUIVALENT_CLASS, AXIOM_KIND_OBJECT_PROPERTY_ASSERTION,
     AXIOM_KIND_PROPERTY_CHAIN, AXIOM_KIND_RANGE, AXIOM_KIND_SUB_CLASS_OF, MAX_FILE_BYTES,
@@ -76,7 +76,7 @@ impl OntologyCatalog {
         }
 
         let entity = self.find_entity(iri)?;
-        self.data().documents.iter().find(|d| document_matches_entity(entity, d))
+        document_for_entity(&self.data().documents, entity)
     }
 
     pub fn class_hierarchy(&self) -> ClassHierarchy {

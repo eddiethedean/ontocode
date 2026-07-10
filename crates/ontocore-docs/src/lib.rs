@@ -2,7 +2,7 @@
 
 use minijinja::{context, AutoEscape, Environment};
 use ontocore_catalog::OntologyCatalog;
-use ontocore_core::{document_matches_entity, document_matches_ontology_id, EntityKind};
+use ontocore_core::{document_for_entity, document_matches_ontology_id, EntityKind};
 use std::collections::{BTreeMap, BTreeSet};
 use std::fs;
 use std::path::PathBuf;
@@ -78,7 +78,8 @@ pub fn export_workspace(catalog: &OntologyCatalog, options: ExportOptions) -> Re
         }
         let mut entities = Vec::new();
         for entity in &catalog.data().entities {
-            if !document_matches_entity(entity, doc) {
+            if document_for_entity(&catalog.data().documents, entity).is_none_or(|d| d.id != doc.id)
+            {
                 continue;
             }
             let parents = hierarchy.parents.get(&entity.iri).cloned().unwrap_or_default();
@@ -357,8 +358,14 @@ mod tests {
             .iter()
             .find(|d| d.path.file_name().and_then(|n| n.to_str()) == Some("example.ttl"))
             .expect("example.ttl indexed");
-        let entity_count =
-            catalog.data().entities.iter().filter(|e| document_matches_entity(e, example)).count();
+        let entity_count = catalog
+            .data()
+            .entities
+            .iter()
+            .filter(|e| {
+                document_for_entity(&catalog.data().documents, e).is_some_and(|d| d.id == example.id)
+            })
+            .count();
         assert!(entity_count > 0, "fixture entities should match example.ttl via ontology IRI");
 
         let dir = tempfile::tempdir().unwrap();

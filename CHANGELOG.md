@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Jail ROBOT `query`/`update` path flags (`--query`, `--update`, `--output-dir`, …) in `runRobot` so `--query=/outside/...` cannot escape the workspace ([#155](https://github.com/eddiethedean/ontocode/issues/155))
 - Treat cancelled editor sync as failure in v0.17 Prefix Manager / metadata `applyDocumentPatches` ([#150](https://github.com/eddiethedean/ontocode/issues/150))
 - Emit Turtle subject CURIE needles from the longest namespace match + PN_LOCAL suffix (not entity `short_name`) ([#146](https://github.com/eddiethedean/ontocode/issues/146))
+- Resolve entity→document ownership by exact ontology id first, then longest matching `base_iri` (not first prefix match) ([#145](https://github.com/eddiethedean/ontocode/issues/145))
 
 ## [0.17.0] - 2026-07-10
 

@@ -10,6 +10,18 @@ use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex, RwLock};
 use std::time::{SystemTime, UNIX_EPOCH};
 
+#[cfg(test)]
+use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
+
+/// Test-only: after snapshotting the previous catalog (lock released), sleep this many ms
+/// before `build_incremental` so concurrent writers can prove they are not blocked.
+#[cfg(test)]
+pub(crate) static TEST_INCREMENTAL_BUILD_PAUSE_MS: AtomicU64 = AtomicU64::new(0);
+
+/// Test-only: set while [`TEST_INCREMENTAL_BUILD_PAUSE_MS`] sleep is in progress.
+#[cfg(test)]
+pub(crate) static TEST_INCREMENTAL_BUILD_IN_PAUSE: AtomicBool = AtomicBool::new(false);
+
 #[derive(Clone)]
 pub struct ServerState {
     inner: Arc<RwLock<InnerState>>,
@@ -18,7 +30,7 @@ pub struct ServerState {
 }
 
 struct InnerState {
-    catalog: Option<OntologyCatalog>,
+    catalog: Option<Arc<OntologyCatalog>>,
     /// All LSP workspace folder roots (multi-root).
     workspace_roots: Vec<PathBuf>,
     /// Primary workspace root (first folder) for backward-compatible APIs.
@@ -144,20 +156,31 @@ impl ServerState {
         validate_workspace_scope_any(&workspace, &roots)?;
 
         let disk_cache = self.inner.read().map(|g| g.index_disk_cache).unwrap_or(false);
-        let catalog = {
-            let overrides = self.open_documents_snapshot();
-            let builder = IndexBuilder::new()
-                .workspace(workspace.clone())
-                .scan_roots(roots.clone())
-                .document_overrides(overrides)
-                .disk_cache(disk_cache);
+        let previous = {
             let guard = self.inner.read().map_err(|e| e.to_string())?;
-            if let Some(prev) = guard.catalog.as_ref() {
-                builder.build_incremental(prev).map_err(|e| e.to_string())?
-            } else {
-                drop(guard);
-                builder.build().map_err(|e| e.to_string())?
+            guard.catalog.clone()
+        };
+        let overrides = self.open_documents_snapshot();
+        let builder = IndexBuilder::new()
+            .workspace(workspace.clone())
+            .scan_roots(roots.clone())
+            .document_overrides(overrides)
+            .disk_cache(disk_cache);
+        // Build without holding `inner`: writers (`set_document_text`, etc.) must not block
+        // for the duration of scan/parse. `ops_lock` already serializes index jobs.
+        #[cfg(test)]
+        if previous.is_some() {
+            let pause_ms = TEST_INCREMENTAL_BUILD_PAUSE_MS.load(Ordering::SeqCst);
+            if pause_ms > 0 {
+                TEST_INCREMENTAL_BUILD_IN_PAUSE.store(true, Ordering::SeqCst);
+                std::thread::sleep(std::time::Duration::from_millis(pause_ms));
+                TEST_INCREMENTAL_BUILD_IN_PAUSE.store(false, Ordering::SeqCst);
             }
+        }
+        let catalog = if let Some(prev) = previous.as_deref() {
+            builder.build_incremental(prev).map_err(|e| e.to_string())?
+        } else {
+            builder.build().map_err(|e| e.to_string())?
         };
 
         let stats = catalog.data().stats();
@@ -168,7 +191,7 @@ impl ServerState {
             .unwrap_or_default();
 
         let mut guard = self.inner.write().map_err(|e| e.to_string())?;
-        guard.catalog = Some(catalog);
+        guard.catalog = Some(Arc::new(catalog));
         guard.indexed_workspace = Some(workspace);
         guard.indexed_at = Some(indexed_at);
         guard.reasoner_cache.invalidate();
@@ -223,7 +246,7 @@ impl ServerState {
         f: impl FnOnce(&OntologyCatalog, Option<&ReasonerSnapshot>) -> T,
     ) -> Option<T> {
         let guard = self.inner.read().ok()?;
-        let catalog = guard.catalog.as_ref()?;
+        let catalog = guard.catalog.as_deref()?;
         Some(f(catalog, guard.reasoner_snapshot.as_ref()))
     }
 
@@ -233,7 +256,7 @@ impl ServerState {
         f: impl FnOnce(&OntologyCatalog, &HashMap<PathBuf, String>) -> T,
     ) -> Option<T> {
         let guard = self.inner.read().ok()?;
-        let catalog = guard.catalog.as_ref()?;
+        let catalog = guard.catalog.as_deref()?;
         Some(f(catalog, &guard.open_documents))
     }
 
@@ -258,7 +281,7 @@ impl ServerState {
     /// Clone catalog documents and diagnostics for publishing outside the read lock.
     pub fn catalog_diagnostic_snapshot(&self) -> Option<CatalogDiagnosticSnapshot> {
         let guard = self.inner.read().ok()?;
-        let catalog = guard.catalog.as_ref()?;
+        let catalog = guard.catalog.as_deref()?;
         Some(CatalogDiagnosticSnapshot {
             documents: catalog.data().documents.clone(),
             diagnostics: {
@@ -301,7 +324,7 @@ impl ServerState {
                 return None;
             }
         };
-        guard.catalog.as_ref().map(f)
+        guard.catalog.as_deref().map(f)
     }
 
     pub fn workspace_root(&self) -> Option<PathBuf> {
@@ -574,5 +597,54 @@ mod tests {
         let resolved =
             resolve_workspace_folder_uri(&sub_uri, &[root]).expect("subfolder under root");
         assert!(is_path_within(&root_dir.path().canonicalize().unwrap(), &resolved));
+    }
+
+    #[test]
+    fn incremental_reindex_does_not_hold_inner_lock_across_build() {
+        use std::thread;
+        use std::time::{Duration, Instant};
+
+        let dir = tempfile::tempdir().unwrap();
+        let root = dir.path().canonicalize().unwrap();
+        std::fs::write(
+            root.join("doc.ttl"),
+            "@prefix ex: <http://example.org#> .\nex:C a <http://www.w3.org/2002/07/owl#Class> .\n",
+        )
+        .unwrap();
+
+        let state = ServerState::new();
+        state.set_workspace_roots(vec![root.clone()]).expect("set workspace");
+        state.index_workspace(root.clone()).expect("initial index");
+
+        TEST_INCREMENTAL_BUILD_IN_PAUSE.store(false, Ordering::SeqCst);
+        TEST_INCREMENTAL_BUILD_PAUSE_MS.store(200, Ordering::SeqCst);
+        let state_index = state.clone();
+        let root_index = root.clone();
+        let indexer = thread::spawn(move || {
+            state_index.index_workspace(root_index).expect("incremental reindex");
+        });
+
+        let deadline = Instant::now() + Duration::from_secs(5);
+        while !TEST_INCREMENTAL_BUILD_IN_PAUSE.load(Ordering::SeqCst) {
+            assert!(Instant::now() < deadline, "indexer never entered build pause");
+            thread::sleep(Duration::from_millis(1));
+        }
+
+        let write_start = Instant::now();
+        state
+            .set_document_text(
+                root.join("doc.ttl"),
+                "@prefix ex: <http://example.org#> .\nex:C a <http://www.w3.org/2002/07/owl#Class> .\n"
+                    .to_string(),
+            )
+            .expect("document write during reindex pause");
+        let write_elapsed = write_start.elapsed();
+        TEST_INCREMENTAL_BUILD_PAUSE_MS.store(0, Ordering::SeqCst);
+
+        indexer.join().expect("indexer thread");
+        assert!(
+            write_elapsed < Duration::from_millis(100),
+            "document write blocked for {write_elapsed:?}; catalog lock likely held across build"
+        );
     }
 }

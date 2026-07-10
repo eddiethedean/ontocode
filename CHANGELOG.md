@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Align Auto explain backends: report the concrete classify engine in `profile_used` and route CLI/LSP explanations through that engine ([#139](https://github.com/eddiethedean/ontocode/issues/139))
 - Use jailed resolved paths for `createOntology` / `exportOntology` I/O so relative paths write under the workspace, not the LSP process CWD ([#123](https://github.com/eddiethedean/ontocode/issues/123))
 - Reject unsafe ontology/version/prefix IRIs in `createOntology` and `ontocore new`, and refuse CLI overwrite unless `--force` ([#124](https://github.com/eddiethedean/ontocode/issues/124))
 - Replace existing `owl:versionIRI` in `SetVersionIri` instead of appending another statement ([#125](https://github.com/eddiethedean/ontocode/issues/125))

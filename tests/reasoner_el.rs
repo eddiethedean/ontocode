@@ -40,10 +40,9 @@ fn auto_profile_classifies_el_fixture_workspace() {
     let input = WorkspaceInputLoader::new(&workspace).load().expect("load");
     let result = classify(ReasonerId::Auto, &input, false).expect("classify");
 
-    assert!(
-        matches!(result.profile_used.as_str(), "auto" | "el" | "dl" | "rl" | "rdfs"),
-        "unexpected profile_used: {}",
-        result.profile_used
+    assert_eq!(
+        result.profile_used, "el",
+        "Auto should report the concrete engine used for an EL ontology"
     );
     assert!(result.consistent);
 }

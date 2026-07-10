@@ -523,13 +523,9 @@ fn set_ontology_iri(text: &mut String, ontology_iri: &str) -> Result<()> {
     for line in text.split_inclusive('\n') {
         let leading = line.len() - line.trim_start().len();
         let trimmed = line.trim_start();
-        if let Some(subject_end) = trimmed.find('>') {
-            let subject = &trimmed[..=subject_end];
-            let remainder = &trimmed[subject_end + 1..];
-            if subject.starts_with('<') && remainder.trim_start().starts_with("a owl:Ontology") {
-                declaration_subject = Some((offset + leading, subject.len()));
-                break;
-            }
+        if let Some(len) = ontology_declaration_subject_len(trimmed) {
+            declaration_subject = Some((offset + leading, len));
+            break;
         }
         offset += line.len();
     }
@@ -546,6 +542,41 @@ fn set_ontology_iri(text: &mut String, ontology_iri: &str) -> Result<()> {
     }
     text.push_str(&format!("<{ontology_iri}> a owl:Ontology .\n"));
     Ok(())
+}
+
+/// Byte length of the subject token on a line that declares `a owl:Ontology`.
+///
+/// Accepts absolute IRI subjects (`<…>`) and prefixed names (`ex:ont`, `:ont`).
+fn ontology_declaration_subject_len(trimmed: &str) -> Option<usize> {
+    if trimmed.is_empty() || trimmed.starts_with('#') || trimmed.starts_with('@') {
+        return None;
+    }
+    // SPARQL-style PREFIX lines (no leading @).
+    if trimmed.len() >= 6 && trimmed[..6].eq_ignore_ascii_case("prefix") {
+        return None;
+    }
+
+    let (subject, remainder) = if trimmed.starts_with('<') {
+        let end = trimmed.find('>')?;
+        (&trimmed[..=end], &trimmed[end + 1..])
+    } else {
+        let end = trimmed.find(char::is_whitespace)?;
+        let subject = &trimmed[..end];
+        // Prefixed name / default-prefix CURIE / blank-node label.
+        if !subject.contains(':') {
+            return None;
+        }
+        (subject, &trimmed[end..])
+    };
+
+    if subject.is_empty() {
+        return None;
+    }
+    if remainder.trim_start().starts_with("a owl:Ontology") {
+        Some(subject.len())
+    } else {
+        None
+    }
 }
 
 fn add_annotation_value(
@@ -2254,6 +2285,105 @@ ex:Cat a owl:Class .
         assert!(preview.starts_with(
             "@prefix owl: <http://www.w3.org/2002/07/owl#> .\n@prefix ex: <http://example.org/test#> .\n"
         ));
+    }
+
+    #[test]
+    fn set_ontology_iri_rewrites_angle_bracket_subject() {
+        let ttl = r#"@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+<http://example.org/old> a owl:Ontology .
+"#;
+        let result = apply_patches_to_text(
+            ttl,
+            &[PatchOp::SetOntologyIri {
+                ontology_iri: "http://example.org/new".to_string(),
+            }],
+            true,
+            &BTreeMap::new(),
+        )
+        .expect("set ontology iri");
+        let preview = result.preview_text.expect("preview");
+        assert!(preview.contains("<http://example.org/new> a owl:Ontology"));
+        assert!(!preview.contains("<http://example.org/old>"));
+        assert_eq!(preview.matches("a owl:Ontology").count(), 1);
+    }
+
+    #[test]
+    fn set_ontology_iri_rewrites_curie_subject_in_place() {
+        let ttl = r#"@prefix ex: <http://example.org/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+ex:ont a owl:Ontology .
+"#;
+        let result = apply_patches_to_text(
+            ttl,
+            &[PatchOp::SetOntologyIri {
+                ontology_iri: "http://example.org/new".to_string(),
+            }],
+            true,
+            &BTreeMap::from([("ex".to_string(), "http://example.org/".to_string())]),
+        )
+        .expect("set ontology iri");
+        let preview = result.preview_text.expect("preview");
+        assert!(
+            preview.contains("<http://example.org/new> a owl:Ontology"),
+            "expected rewritten subject: {preview}"
+        );
+        assert!(
+            !preview.contains("ex:ont a owl:Ontology"),
+            "original CURIE declaration must be replaced: {preview}"
+        );
+        assert_eq!(
+            preview.matches("a owl:Ontology").count(),
+            1,
+            "must not append a second ontology declaration: {preview}"
+        );
+    }
+
+    #[test]
+    fn set_ontology_iri_rewrites_curie_in_multiline_ontology_block() {
+        let ttl = r#"@prefix ex: <http://example.org/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+ex:ont a owl:Ontology ;
+    owl:versionIRI <http://example.org/ont/1.0> .
+"#;
+        let result = apply_patches_to_text(
+            ttl,
+            &[PatchOp::SetOntologyIri {
+                ontology_iri: "http://example.org/new".to_string(),
+            }],
+            true,
+            &BTreeMap::from([("ex".to_string(), "http://example.org/".to_string())]),
+        )
+        .expect("set ontology iri");
+        let preview = result.preview_text.expect("preview");
+        assert!(preview.contains("<http://example.org/new> a owl:Ontology ;"));
+        assert!(preview.contains("owl:versionIRI <http://example.org/ont/1.0>"));
+        assert!(!preview.contains("ex:ont a owl:Ontology"));
+        assert_eq!(preview.matches("a owl:Ontology").count(), 1);
+    }
+
+    #[test]
+    fn set_ontology_iri_appends_only_when_no_declaration() {
+        let ttl = r#"@prefix ex: <http://example.org/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+ex:Foo a owl:Class .
+"#;
+        let result = apply_patches_to_text(
+            ttl,
+            &[PatchOp::SetOntologyIri {
+                ontology_iri: "http://example.org/new".to_string(),
+            }],
+            true,
+            &BTreeMap::new(),
+        )
+        .expect("set ontology iri");
+        let preview = result.preview_text.expect("preview");
+        assert!(preview.contains("<http://example.org/new> a owl:Ontology ."));
+        assert!(preview.contains("ex:Foo a owl:Class"));
+        assert_eq!(preview.matches("a owl:Ontology").count(), 1);
     }
 
     #[test]

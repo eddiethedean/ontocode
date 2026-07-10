@@ -60,6 +60,8 @@ export interface EntityAxiomSummary {
   manchester?: string;
   parent_iri?: string;
   other_iri?: string;
+  /** Member property IRIs for property_chain axioms (ordered). */
+  properties?: string[];
   editable: boolean;
 }
 

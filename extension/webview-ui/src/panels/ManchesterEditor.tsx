@@ -67,6 +67,9 @@ export function ManchesterEditorPanel(): JSX.Element {
         setAxiomKind(msg.axiomKind);
         setExpression(msg.expression);
         setCompletions(msg.completions);
+        setValidation(null);
+        setError("");
+        setPreview("");
       }
       if (msg.type === "manchesterValidation") {
         if (msg.seq !== seqRef.current) {

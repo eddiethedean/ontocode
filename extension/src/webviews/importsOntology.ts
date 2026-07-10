@@ -23,16 +23,38 @@ export function entityBelongsToDocument(
   return false;
 }
 
-/** Resolve the owl:Ontology subject IRI declared in a Turtle document. */
+/**
+ * Resolve the owl:Ontology subject IRI declared in a Turtle document.
+ * Prefers the ontology matching `doc.base_iri` when multiple are present (#118).
+ */
 export function resolveOntologyIri(
   doc: OntologyDocument,
   entities: Entity[]
 ): string | undefined {
-  const candidates = entities
-    .filter((e) => e.kind === "ontology" && entityBelongsToDocument(e, doc))
-    .sort((a, b) => a.iri.localeCompare(b.iri));
-  return candidates[0]?.iri;
+  const candidates = entities.filter(
+    (e) => e.kind === "ontology" && entityBelongsToDocument(e, doc)
+  );
+  if (candidates.length === 0) {
+    return undefined;
+  }
+  if (candidates.length === 1) {
+    return candidates[0]?.iri;
+  }
+  if (doc.base_iri) {
+    const normalizedBase = normalizeOntologyIri(doc.base_iri);
+    const baseMatch = candidates.find(
+      (e) => normalizeOntologyIri(e.iri) === normalizedBase
+    );
+    if (baseMatch) {
+      return baseMatch.iri;
+    }
+  }
+  // Ambiguous multi-ontology file without a clear base match — refuse to guess.
+  return undefined;
 }
 
 export const MISSING_ONTOLOGY_HEADER_MESSAGE =
   "This file has no owl:Ontology declaration. Add an ontology header before managing imports.";
+
+export const AMBIGUOUS_ONTOLOGY_HEADER_MESSAGE =
+  "This file declares multiple owl:Ontology subjects and none match the document base IRI. Manage imports requires a single primary ontology.";

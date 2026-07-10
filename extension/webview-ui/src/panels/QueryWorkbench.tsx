@@ -39,6 +39,9 @@ export function QueryWorkbenchPanel(_props?: WorkspaceProps): JSX.Element {
   const [error, setError] = useState("");
   const [runId, setRunId] = useState(0);
   const runIdRef = useRef(0);
+  const pendingRunsRef = useRef(
+    new Map<number, { mode: "sql" | "sparql"; text: string }>()
+  );
   const result = useWorkspaceStore((s) => s.query.lastResult);
 
   useEffect(() => {
@@ -78,15 +81,20 @@ export function QueryWorkbenchPanel(_props?: WorkspaceProps): JSX.Element {
             truncated: msg.result.truncated,
           };
           setQueryResult(snapshot);
-          addQueryHistory({ language: mode, text });
+          const ran = pendingRunsRef.current.get(msg.runId);
+          pendingRunsRef.current.delete(msg.runId);
+          if (ran) {
+            addQueryHistory({ language: ran.mode, text: ran.text });
+          }
         } else {
           setQueryResult(null);
+          pendingRunsRef.current.delete(msg.runId);
         }
       }
     };
     window.addEventListener("message", handler);
     return () => window.removeEventListener("message", handler);
-  }, [host, mode, text, setQueryResult, addQueryHistory]);
+  }, [host, setQueryResult, addQueryHistory]);
 
   const run = useCallback(() => {
     const id = runIdRef.current + 1;
@@ -94,6 +102,7 @@ export function QueryWorkbenchPanel(_props?: WorkspaceProps): JSX.Element {
     setRunId(id);
     setError("");
     setQueryResult(null);
+    pendingRunsRef.current.set(id, { mode, text });
     host.postToCore({
       type: "runQuery",
       mode,

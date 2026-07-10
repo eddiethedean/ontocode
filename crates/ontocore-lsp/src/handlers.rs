@@ -623,12 +623,12 @@ pub fn handle_create_ontology(
     params: crate::protocol::CreateOntologyParams,
 ) -> Result<crate::protocol::CreateOntologyResult, LspErrorPayload> {
     use std::io::Write;
-    let path = std::path::PathBuf::from(&params.path);
     let roots = state.workspace_roots();
     if roots.is_empty() {
         return Err(LspErrorPayload::invalid_params("workspace not initialized".into()));
     }
-    validate_workspace_scope_any(&path, &roots).map_err(LspErrorPayload::invalid_params)?;
+    let path = validate_workspace_scope_any(std::path::Path::new(&params.path), &roots)
+        .map_err(LspErrorPayload::invalid_params)?;
     if path.exists() {
         return Err(LspErrorPayload::invalid_params(format!(
             "file already exists: {}",
@@ -705,11 +705,14 @@ pub fn handle_export_ontology(
     state: &ServerState,
     params: crate::protocol::ExportOntologyParams,
 ) -> Result<crate::protocol::ExportOntologyResult, LspErrorPayload> {
-    let source = std::path::PathBuf::from(&params.source_path);
-    let output = std::path::PathBuf::from(&params.output_path);
     let roots = state.workspace_roots();
-    validate_workspace_scope_any(&source, &roots).map_err(LspErrorPayload::invalid_params)?;
-    validate_workspace_scope_any(&output, &roots).map_err(LspErrorPayload::invalid_params)?;
+    if roots.is_empty() {
+        return Err(LspErrorPayload::invalid_params("workspace not initialized".into()));
+    }
+    let source = validate_workspace_scope_any(std::path::Path::new(&params.source_path), &roots)
+        .map_err(LspErrorPayload::invalid_params)?;
+    let output = validate_workspace_scope_any(std::path::Path::new(&params.output_path), &roots)
+        .map_err(LspErrorPayload::invalid_params)?;
     match ontocore_robot::robot_convert(None, &source, &output) {
         Ok(out) => Ok(crate::protocol::ExportOntologyResult {
             output_path: output.display().to_string(),
@@ -719,6 +722,10 @@ pub fn handle_export_ontology(
         Err(e) => {
             // Fallback: copy Turtle/OBO as-is when ROBOT is unavailable.
             if source.extension() == output.extension() {
+                if let Some(parent) = output.parent() {
+                    std::fs::create_dir_all(parent)
+                        .map_err(|err| LspErrorPayload::robot_failed(err.to_string()))?;
+                }
                 std::fs::copy(&source, &output)
                     .map_err(|err| LspErrorPayload::robot_failed(err.to_string()))?;
                 Ok(crate::protocol::ExportOntologyResult {

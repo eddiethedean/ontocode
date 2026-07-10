@@ -315,9 +315,47 @@ pub fn explain_unsatisfiable_dl(ontology: &Ontology, class_iri: &str) -> Result<
     if !taxonomy.unsatisfiable.contains(&class_id) {
         return Err(ReasonerError::ExplanationUnavailable(class_iri.to_string()));
     }
-    let mut result = explain_unsatisfiable_el(ontology, class_iri)
-        .or_else(|_| explain_unsatisfiable_rl(ontology, class_iri))
-        .or_else(|_| explain_unsatisfiable_rdfs(ontology, class_iri))?;
-    result.text = format!("DL profile justification (via Ontologos traces)\n\n{}", result.text);
-    Ok(result)
+    // DL classify has no Ontologos proof traces; fall back to weaker engines and label the
+    // actual profile that produced the justification (#66).
+    let (result, via) = if let Ok(r) = explain_unsatisfiable_el(ontology, class_iri) {
+        (r, "EL")
+    } else if let Ok(r) = explain_unsatisfiable_rl(ontology, class_iri) {
+        (r, "RL")
+    } else if let Ok(r) = explain_unsatisfiable_rdfs(ontology, class_iri) {
+        (r, "RDFS")
+    } else {
+        return Err(ReasonerError::ExplanationUnavailable(format!(
+            "{class_iri}: DL reports unsatisfiable but no EL/RL/RDFS justification trace is available"
+        )));
+    };
+    Ok(annotate_dl_fallback_explanation(result, via))
+}
+
+fn annotate_dl_fallback_explanation(mut result: ExplanationResult, via: &str) -> ExplanationResult {
+    result.text = format!(
+        "DL classification (unsatisfiable); justification via {via} Ontologos traces\n\n{}",
+        result.text
+    );
+    result
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn dl_fallback_annotation_names_actual_profile() {
+        let result = annotate_dl_fallback_explanation(
+            ExplanationResult {
+                class_iri: "http://ex#A".into(),
+                steps: vec![],
+                text: "A SubClassOf owl:Nothing".into(),
+            },
+            "EL",
+        );
+        assert!(result.text.starts_with(
+            "DL classification (unsatisfiable); justification via EL Ontologos traces"
+        ));
+        assert!(!result.text.contains("DL profile justification"));
+    }
 }

@@ -1,11 +1,11 @@
 import * as vscode from "vscode";
+import { focusRelay } from "../focus/focusRelay";
 import { getExplanation } from "../lsp/client";
+import { resolveExplanationProfile } from "./explanationPanelLogic";
 
 export class ExplanationPanel {
   public static current: ExplanationPanel | undefined;
   private readonly panel: vscode.WebviewPanel;
-  private lastContentHash: string | undefined;
-  private lastIndexedAt: number | undefined;
 
   private constructor(panel: vscode.WebviewPanel) {
     this.panel = panel;
@@ -32,14 +32,18 @@ export class ExplanationPanel {
     this.panel.dispose();
   }
 
-  public static async show(classIri: string): Promise<void> {
+  public static async show(classIri: string, profileOverride?: string): Promise<void> {
     const cfg = vscode.workspace.getConfiguration("ontocode");
-    const profile = cfg.get<string>("reasoner.default") ?? "el";
+    const profile = resolveExplanationProfile({
+      explicit: profileOverride,
+      lastRunProfile: focusRelay.getReasoning()?.profile,
+      settingsDefault: cfg.get<string>("reasoner.default"),
+    });
     const result = await getExplanation({ class_iri: classIri, profile });
 
     if (ExplanationPanel.current) {
       ExplanationPanel.current.panel.reveal(vscode.ViewColumn.Beside);
-      ExplanationPanel.current.setContent(classIri, result);
+      ExplanationPanel.current.setContent(classIri, result, profile);
       return;
     }
 
@@ -51,12 +55,13 @@ export class ExplanationPanel {
     );
     const view = new ExplanationPanel(panel);
     ExplanationPanel.current = view;
-    view.setContent(classIri, result);
+    view.setContent(classIri, result, profile);
   }
 
   private setContent(
     classIri: string,
-    result: import("../lsp/protocol").GetExplanationResult
+    result: import("../lsp/protocol").GetExplanationResult,
+    profile: string
   ): void {
     const justifications = [
       { title: "Justification 1", steps: result.steps, text: result.text },
@@ -67,13 +72,9 @@ export class ExplanationPanel {
       })),
     ];
 
-    const stale =
-      this.lastContentHash !== undefined &&
-      (this.lastContentHash !== result.content_hash ||
-        this.lastIndexedAt !== result.indexed_at);
-
-    this.lastContentHash = result.content_hash;
-    this.lastIndexedAt = result.indexed_at;
+    // Fresh getExplanation results are never stale (#148). Stale would only apply if we
+    // compared a previously shown fingerprint to a later catalog fingerprint without refetching.
+    const stale = false;
 
     this.panel.webview.html = `<!DOCTYPE html>
 <html><head><meta charset="UTF-8" />
@@ -93,7 +94,7 @@ ${stale ? `<div class="stale"><strong>Stale explanation</strong><div class="mute
 <div class="row">
   <label for="justification">Justification</label>
   <select id="justification"></select>
-  <span class="muted">indexed_at=${result.indexed_at} • content_hash=${escapeHtml(result.content_hash)}</span>
+  <span class="muted">profile=${escapeHtml(profile)} • indexed_at=${result.indexed_at} • content_hash=${escapeHtml(result.content_hash)}</span>
 </div>
 <ol id="steps"></ol>
 <pre id="text"></pre>

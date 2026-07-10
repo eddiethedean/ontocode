@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Reject unknown SQL column identifiers instead of coercing them to empty strings ([#159](https://github.com/eddiethedean/ontocode/issues/159))
 - Recognize `@PREFIX` and SPARQL-style `PREFIX` in prefix patch ops so Prefix Manager updates replace existing declarations ([#158](https://github.com/eddiethedean/ontocode/issues/158))
 - Write URL-shaped annotation values as string literals unless explicitly marked as IRIs (`<…>` or a known CURIE) ([#157](https://github.com/eddiethedean/ontocode/issues/157))
+- Preserve typed RDF literal datatypes across disk-cache round-trips (`^^<datatype>` serialization) ([#156](https://github.com/eddiethedean/ontocode/issues/156))
 
 ## [0.17.0] - 2026-07-10
 

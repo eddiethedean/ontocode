@@ -52,6 +52,8 @@ jobs:
         run: pip install -r docs/requirements.txt
 
       - name: Build documentation
+        env:
+          DISABLE_MKDOCS_2_WARNING: "true"
         run: mkdocs build --strict
 
       - name: Webview UI tests

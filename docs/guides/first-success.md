@@ -4,6 +4,9 @@ This is the **canonical tutorial** for new OntoCode users. You do not need to cl
 
 **Prerequisites:** VS Code **1.85+**; network access to download tutorial files (step 2); optional [Ontology concepts](../concepts.md) skim if you are new to OWL/RDF.
 
+!!! warning "Write-back formats"
+    Entity Inspector edits apply only to **`.ttl` and `.obo`**. If your corpus is mostly `.owl` / RDF/XML, you can browse and query now; convert or dual-maintain Turtle for editing — see [Supported formats](../supported-formats.md) and [Known limitations](../known-limitations.md).
+
 New to OWL/RDF? Skim [Ontology concepts](../concepts.md) first (IRIs, Turtle, classes).
 
 > **Multi-root workspaces (v0.10+):** All workspace folders are indexed on open. **OntoCode: Index Workspace** may prompt you to pick a folder when multiple roots are open.
@@ -111,7 +114,9 @@ Full editing reference: [Authoring guide](../authoring.md).
 ### Query the workspace
 
 1. Run **OntoCode: Open Query Workbench** from the Command Palette.
-2. Choose **SQL** mode and run `SELECT short_name FROM classes`.
+2. Choose **Catalog SQL (subset)** mode and run `SELECT short_name FROM classes`.
+   !!! note
+       Not full SQL — no `JOIN`, `ORDER BY`, or `LIMIT`. See [SQL reference](../sql-reference.md).
 3. Confirm rows appear (e.g. classes from your `.ttl` files).
 4. Switch to **SPARQL** and run `SELECT ?s ?p ?o WHERE { ?s ?p ?o } LIMIT 10`.
 

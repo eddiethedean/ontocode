@@ -1,8 +1,10 @@
-# OntoCode feature tour
+# OntoCode feature tour (current: v0.17)
 
-A visual and structural overview of the OntoCode VS Code IDE (**v0.13**). For hands-on setup, start with [First success (~10 min core path)](../guides/first-success.md).
+A visual and structural overview of the OntoCode VS Code IDE. For hands-on setup, start with [First success (~10 min)](../guides/first-success.md).
 
-Canonical capability list: [What ships today](../SHIPPED.md). **New in v0.13:** [Migration guide](../migration/v0.13.md).
+Capability truth: [What ships today](../SHIPPED.md) · [Known limitations](../known-limitations.md).
+
+![Explorer and Entity Inspector](../assets/screenshots/explorer-inspector.png)
 
 ## Activity bar and explorer
 
@@ -16,33 +18,29 @@ The **OntoCode** activity bar hosts five tree views:
 | **Individuals** | Named individuals |
 | **Diagnostics** | Lint summaries grouped by severity |
 
-Explorer sidebar (Ontologies, Classes, Properties, Individuals, Diagnostics) and the React **Entity Inspector** open when you click an entity (e.g. `Person` in `example.ttl`).
-
-**Typical flow:** expand **Classes** → click an entity name → **Entity Inspector** opens on the right. With Inspector and Graph panels open, the same entity stays in sync (**focus relay**, v0.13).
+**Typical flow:** expand **Classes** → click an entity name → **Entity Inspector** opens on the right. With Inspector and Graph panels open, the same entity stays in sync (**focus relay**).
 
 ## Entity Inspector (React)
 
-The inspector shows IRI, kind, labels, comments, parents, children, and axioms. For **`.ttl`** files, the **Edit** section supports:
+The inspector shows IRI, kind, labels, comments, parents, children, and axioms. For **`.ttl`** and **`.obo`** files, the **Edit** section supports labels, parents, delete, and Manchester axioms.
 
-- Add or change labels and comments
-- Add named parent classes
-- Delete entity
-- **Edit in Manchester** / **Add Manchester axiom** for complex expressions
-
-Turtle (`.ttl`) and OBO (`.obo`) support write-back in the inspector. RDF/XML, OWL/XML, and JSON-LD are **read-only** — index and browse only.
+!!! warning "Write-back formats"
+    Turtle (`.ttl`) and OBO (`.obo`) support write-back. RDF/XML, OWL/XML (`.owl`, `.owx`), and JSON-LD are **read-only** — index and browse only.
 
 Guide: [Inspector](inspector.md) · [Authoring](../authoring.md)
 
 ## Query Workbench (React)
 
+![Query Workbench](../assets/screenshots/query-workbench.png)
+
 Command Palette → **OntoCode: Open Query Workbench**
 
-- **SQL mode** — catalog virtual tables (`classes`, `properties`, `diagnostics`, Horned-OWL axiom tables, …)
+- **Catalog SQL (subset)** — virtual tables (`classes`, `properties`, `diagnostics`, …). Not full SQL — no `JOIN` / `ORDER BY` / `LIMIT`.
 - **SPARQL mode** — graph patterns over indexed triples
-- **Schema browser** (v0.13) — browse tables/columns from LSP `listSqlSchema`; insert names into the editor
+- **Schema browser** — browse tables/columns; insert names into the editor
 - Export results to CSV or JSON; history and saved queries
 
-Guide: [Query Workbench](query-workbench.md)
+Guide: [Query Workbench](query-workbench.md) · [SQL reference](../sql-reference.md)
 
 ## Manchester editor (React)
 
@@ -65,6 +63,8 @@ Guide: [Graph view](graph-view.md)
 
 ## Reasoner and explanation
 
+![Reasoner panel](../assets/screenshots/reasoner.png)
+
 | Panel | Purpose |
 |-------|---------|
 | **Reasoner Results** | Profile used, consistency, unsatisfiable classes, warnings |
@@ -76,6 +76,8 @@ Guide: [Reasoner](../guides/reasoner.md)
 
 ## Refactor preview and semantic diff (React)
 
+![Semantic Diff](../assets/screenshots/semantic-diff.png)
+
 | Panel | Purpose |
 |-------|---------|
 | **Refactor Preview** | Diff before rename, migrate, move, or extract module |
@@ -83,22 +85,20 @@ Guide: [Reasoner](../guides/reasoner.md)
 
 Guides: [Refactoring](../guides/refactoring.md) · [Semantic diff](semantic-diff.md)
 
-## Manage Imports (v0.11)
+## Manage Imports
 
 Right-click a `.ttl` file in **Ontologies** → **Manage Imports** to add or remove `owl:imports` declarations with preview and apply.
 
 Guide: [Manage Imports](manage-imports.md)
 
-## Turtle semantic highlighting and diagnostics config (v0.13)
+## Turtle semantic highlighting and diagnostics
 
 In `.ttl` and `.obo` editors:
 
-- **Semantic tokens** — namespaces, IRIs, keywords, comments (LSP `textDocument/semanticTokens/full`)
-- **Configurable diagnostics** — `.ontocore/diagnostics.toml` at workspace root or `ontocode.diagnostics.rules` setting
+- **Semantic tokens** — namespaces, IRIs, keywords, comments
+- **Configurable diagnostics** — `.ontocore/diagnostics.toml` or `ontocode.diagnostics.rules`
 
-Guide: [Migration v0.13](../migration/v0.13.md) · [LSP API](../lsp-api.md)
-
-## Turtle completion and quick fixes (v0.11)
+## Turtle completion and quick fixes
 
 In `.ttl` editors:
 
@@ -109,13 +109,7 @@ Guide: [Authoring](../authoring.md) · [LSP API](../lsp-api.md)
 
 ## Editor integration
 
-Open any supported ontology file (`.ttl`, `.owl`, `.obo`, …) for:
-
-- Hover on IRIs
-- Go to definition (`F12`)
-- Document outline (`Ctrl+Shift+O` / `Cmd+Shift+O`)
-- Workspace symbol search (`Ctrl+T` / `Cmd+T`)
-- Inline diagnostics in the **Problems** panel
+Open any supported ontology file (`.ttl`, `.owl`, `.obo`, …) for hover, go to definition, outline, workspace symbols, and Problems-panel diagnostics.
 
 ## Settings worth knowing
 
@@ -125,7 +119,7 @@ Open any supported ontology file (`.ttl`, `.owl`, `.obo`, …) for:
 | `ontocode.hierarchy.mode` | `asserted` | Switch after reasoner for inferred tree |
 | `ontocode.reasoner.default` | `el` | Default profile for **Run Reasoner** |
 | `ontocode.indexCache` | `false` | Optional `.ontocore/cache/` disk index |
-| `ontocode.diagnostics.rules` | `{}` | Per-rule enable/severity (overridden by `.ontocore/diagnostics.toml`) |
+| `ontocode.diagnostics.rules` | `{}` | Per-rule enable/severity |
 
 Full list: [Install VS Code](../vscode-install.md#settings)
 
@@ -136,3 +130,4 @@ Full list: [Install VS Code](../vscode-install.md#settings)
 | Complete the tutorial | [First success](../guides/first-success.md) |
 | From Protégé | [Migrating from Protégé](../guides/protege-migration.md) |
 | CLI / CI without VS Code | [OntoCore overview](../ontocore/index.md) |
+| Limits | [Known limitations](../known-limitations.md) |

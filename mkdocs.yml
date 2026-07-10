@@ -6,13 +6,15 @@ site_description: Ontology-as-code for Git and VS Code — OntoCore engine and O
 site_url: https://ontocode-vs.readthedocs.io/
 repo_url: https://github.com/eddiethedean/ontocode
 repo_name: eddiethedean/ontocode
-edit_uri: edit/main/docs/
+edit_uri: edit/main/docs/  # default branch (main); RTD "Edit this page" opens main
 copyright: OntoCode documentation · <a href="SHIPPED/">What ships today</a> (canonical capability matrix)
 
 docs_dir: docs
 strict: true
+# Only the GitHub entrypoint at docs/README.md — do not exclude nested */README.md
+# (those are real pages; excluding them floods the build with broken-link noise).
 exclude_docs: |
-  README.md
+  /README.md
 
 validation:
   nav:
@@ -59,8 +61,12 @@ plugins:
   - search
   - git-revision-date-localized:
       type: timeago
-      enable_creation_date: true
+      # Creation dates compare first vs last commit and warn on new/untracked pages.
+      enable_creation_date: false
       fallback_to_build_date: true
+      enable_git_follow: false
+      # "No git logs" for brand-new pages must not fail `mkdocs build --strict`.
+      strict: false
   - minify:
       minify_html: true
   - redirects:
@@ -90,16 +96,14 @@ nav:
   - Home: index.md
   - Get started:
       - Start here: start.md
-      - "First success (~10 min core path)": guides/first-success.md
+      - "First success (~10 min)": guides/first-success.md
       - Which artifact do I need?: guides/which-artifact.md
-      - "Getting started (all paths)": getting-started.md
       - Install VS Code: vscode-install.md
+      - Getting started (CLI): getting-started.md
       - What ships today: SHIPPED.md
+      - Known limitations: known-limitations.md
       - Glossary: glossary.md
       - "What's new in v0.17": migration/v0.17.md
-      - "What's new in v0.16": migration/v0.16.md
-      - "What's new in v0.15": migration/v0.15.md
-      - "What's new in v0.14": migration/v0.14.md
       - Ontology concepts: concepts.md
       - Migrating from Protégé: guides/protege-migration.md
   - Use OntoCode:
@@ -142,7 +146,7 @@ nav:
   - Reference:
       - CLI reference: cli-reference.md
       - Rust API: ontocore/rust-api.md
-      - SQL virtual tables: sql-reference.md
+      - "Catalog SQL (subset)": sql-reference.md
       - SPARQL: sparql-reference.md
       - Patch JSON: patch-reference.md
       - LSP API: lsp-api.md
@@ -160,7 +164,6 @@ nav:
       - Architecture: architecture.md
       - Roadmap hub: roadmap-hub.md
       - Platform roadmap: roadmap.md
-      - OntoCore roadmap (pointer): ontocore/roadmap.md
       - API stability (pre-1.0): guides/api-stability.md
       - Enterprise evaluation: guides/enterprise-eval.md
       - Protégé vs OntoCode: guides/protege-decision.md
@@ -176,6 +179,7 @@ nav:
   - Help:
       - FAQ: faq.md
       - Troubleshooting: troubleshooting.md
+      - Known limitations: known-limitations.md
       - Support and contact: support.md
       - Changelog: changelog.md
       - Migrations:
@@ -192,106 +196,13 @@ nav:
       - Debugging: debugging.md
       - Releasing: releasing.md
       - Marketplace publish: marketplace-publish.md
-      - Internals (design targets): internals.md
-      - Engineering specs:
-          - Design overview: design/README.md
-          - "Milestones (shipped)": design/ROADMAP.md
-          - "Implementation architecture": design/ARCHITECTURE.md
-          - Protégé parity: design/PROTEGE_PARITY.md
-          - Dependency matrix: design/DEPENDENCY_MATRIX.md
-          - Licenses: design/LICENSES.md
-          - Plugin model (v1.0 target): ontocore/plugin-model.md
-          - Product design (UI):
-              - UI spec index: ui/README.md
-              - UI roadmap mapping: ui/ROADMAP_MAPPING.md
-              - Product Roadmap 2.0: ui/PRODUCT_ROADMAP_2.0.md
-              - Product design spec: ui/PRODUCT_DESIGN_SPECIFICATION.md
-              - Platform architecture (UI): ui/PLATFORM_ARCHITECTURE.md
-              - Design philosophy: ui/DESIGN_PHILOSOPHY.md
-              - Visual design system: ui/VISUAL_DESIGN_SYSTEM.md
-              - Human interface guidelines: ui/HUMAN_INTERFACE_GUIDELINES.md
-              - Interaction principles: ui/INTERACTION_PRINCIPLES.md
-              - Information architecture: ui/INFORMATION_ARCHITECTURE.md
-              - Workspace model: ui/WORKSPACE_MODEL.md
-              - State management: ui/STATE_MANAGEMENT.md
-              - UX patterns: ui/UX_PATTERNS.md
-              - Component library: ui/COMPONENT_LIBRARY.md
-              - Component interfaces: ui/COMPONENT_INTERFACES.md
-              - Design tokens: ui/DESIGN_TOKENS.md
-              - Workspace wireframes: ui/WORKSPACE_WIREFRAMES.md
-              - Entity editor: ui/ENTITY_EDITOR_SPEC.md
-              - Query workbench UX: ui/QUERY_WORKBENCH.md
-              - Graph workspace: ui/GRAPH_WORKSPACE.md
-              - Graph rendering: ui/GRAPH_RENDERING_ARCHITECTURE.md
-              - Reasoning experience: ui/REASONING_EXPERIENCE.md
-              - Semantic refactoring UX: ui/SEMANTIC_REFACTORING.md
-              - Collaboration: ui/COLLABORATION.md
-              - AI experience: ui/AI_EXPERIENCE.md
-              - AI orchestration: ui/AI_ORCHESTRATION_ARCHITECTURE.md
-              - Plugin platform UX: ui/PLUGIN_PLATFORM.md
-              - Plugin API spec: ui/PLUGIN_API_SPEC.md
-              - OntoStudio desktop: ui/ONTOSTUDIO_DESKTOP.md
-              - Event sequences: ui/EVENT_SEQUENCE_DIAGRAMS.md
-              - Keyboard shortcuts: ui/KEYBOARD_SHORTCUTS.md
-              - Accessibility: ui/ACCESSIBILITY_SPEC.md
-              - Testing strategy: ui/TESTING_STRATEGY.md
-              - Telemetry: ui/TELEMETRY_ANALYTICS.md
-          - Specs (planned features):
-              - Product plan: design/PLAN.md
-              - Technical spec: design/SPEC.md
-              - LSP (target): design/LSP_SPEC.md
-              - OWL authoring: design/OWL_AUTHORING_SPEC.md
-              - Reasoner: design/REASONER_SPEC.md
-              - Semantic diff: design/SEMANTIC_DIFF_SPEC.md
-              - SHACL: design/SHACL_SPEC.md
-              - OBO / ROBOT: design/OBO_ROBOT_SPEC.md
-              - Plugins: design/PLUGIN_SPEC.md
-              - UI wireframes: design/UI_WIREFRAMES.md
-              - React UI plan: design/OntoCode_React_UI_Integration_Plan.md
-          - Backlogs:
-              - v1.0 backlog: design/v1.0_BACKLOG.md
-              - MVP backlog: design/MVP_BACKLOG.md
-          - ADRs:
-              - Index (all ADRs): design/adr/README.md
+      - Internals: internals.md
+      - Protégé parity: design/PROTEGE_PARITY.md
+      - Licenses: design/LICENSES.md
+      - Plugin model: ontocore/plugin-model.md
+      - Engineering ADRs: design/adr/0001-use-rust-for-ontocore.md
+      - Engineering docs (GitHub): engineering.md
       - Documentation index: documentation-index.md
-      - "Design (not shipped — targets & specs)":
-          - Platform overview: platform/OVERVIEW.md
-          - UX audit (v0.13): ui/UX_AUDIT_v0.13.md
-          - OntoUI: platform/ONTOUI.md
-          - Workspace runtime: platform/WORKSPACE_RUNTIME.md
-          - Capability providers: platform/CAPABILITY_PROVIDERS.md
-          - AI orchestration: platform/AI_ORCHESTRATION.md
-          - Semantic refactoring: platform/SEMANTIC_REFACTORING.md
-          - Reasoning compiler: platform/REASONING_COMPILER.md
-          - Graph architecture: platform/GRAPH_ARCHITECTURE.md
-          - Query workbench architecture: platform/QUERY_WORKBENCH_ARCHITECTURE.md
-          - OntoStudio reuse: platform/ONTOSTUDIO_REUSE.md
-          - Milestone template: platform/MILESTONE_TEMPLATE.md
-          - Product ADRs:
-              - Index: adr/README.md
-              - "0001 OntoUI platform": adr/0001-ontoui-shared-react-platform.md
-              - "0002 Workspace model": adr/0002-workspace-over-panel-model.md
-              - "0003 Current Focus": adr/0003-current-focus-central-ux.md
-              - "0004 WorkspaceStore": adr/0004-workspacestore-ui-source-of-truth.md
-              - "0005 Capability providers": adr/0005-capability-provider-plugin-model.md
-              - "0006 AI preview before apply": adr/0006-ai-preview-before-apply.md
-              - "0007 OntoStudio reuse": adr/0007-ontostudio-shares-platform.md
-          - Protégé reverse engineering: PROTEGE_REVERSE_ENGINEERING/README.md
-          - Cursor prompts:
-              - Index: cursor-prompts/README.md
-              - "01 OntoUI platform": cursor-prompts/01-build-ontoui-workspace-platform.md
-              - "02 WorkspaceStore": cursor-prompts/02-add-workspacestore.md
-              - "03 WorkspaceRegistry": cursor-prompts/03-add-workspaceregistry.md
-              - "04 Migrate panels": cursor-prompts/04-migrate-panels-to-workspaces.md
-              - "05 Current Focus": cursor-prompts/05-implement-current-focus.md
-              - "06 Entity workspace": cursor-prompts/06-improve-entity-workspace.md
-              - "07 Graph workspace": cursor-prompts/07-improve-graph-workspace.md
-              - "08 Query workbench": cursor-prompts/08-improve-query-workbench.md
-              - "09 AI lifecycle": cursor-prompts/09-add-ai-action-lifecycle.md
-              - "10 Capability providers": cursor-prompts/10-add-capability-provider-interfaces.md
-              - "11 Refactoring preview": cursor-prompts/11-semantic-refactoring-preview-workflow.md
-              - "12 Reasoning diagnostics": cursor-prompts/12-reasoning-diagnostics-workflow.md
-              - "13 Design tokens": cursor-prompts/13-design-tokens-component-library.md
 
 extra:
   social:

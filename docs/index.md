@@ -22,38 +22,35 @@ Index and explore OWL/RDF/OBO, run queries, refactors, and reasoning — in VS C
 </p>
 
 <p class="oc-hero-ctas">
-  <a class="oc-hero-cta" href="guides/first-success/">First success →</a>
-  <a class="oc-hero-cta" href="vscode-install/" style="margin-left:0.75rem">Install extension →</a>
-  <a class="oc-hero-cta" href="getting-started/" style="margin-left:0.75rem">Install CLI →</a>
+  <a class="oc-hero-cta" href="guides/first-success/">First success (~10 min) →</a>
+  <a class="oc-hero-cta" href="getting-started/" style="margin-left:0.75rem">CLI / CI →</a>
 </p>
 
-<p class="oc-hero-subcta"><a href="start/">Not sure? Start here</a></p>
+<p class="oc-hero-subcta"><a href="SHIPPED/">What ships today</a> · <a href="known-limitations/">Known limitations</a></p>
 
 <div class="oc-hero-links">
-  <a href="documentation-index/">Documentation map</a>
+  <a href="ontocode/feature-tour/">Feature tour</a>
   <a href="glossary/">Glossary</a>
-  <a href="SHIPPED/">What ships today</a>
-  <a href="vision/">Vision</a>
+  <a href="vscode-install/">Install extension</a>
 </div>
 
 </div>
 
 <div class="oc-callout" markdown>
 
-**What's new in v0.17?** Protégé-shell menus, dialogs, named perspectives, and layout persistence — [Migration v0.16 → v0.17](migration/v0.17.md).
+**Primary path:** **[First success (~10 min)](guides/first-success.md)** — install the extension, open sample ontologies, browse and edit. No clone required.
 
-**Not sure where to begin?** Pick a path:
+**Also:** [CLI / CI](getting-started.md) · [Known limitations](known-limitations.md) · [What ships today](SHIPPED.md) · [Feature tour](ontocode/feature-tour.md)
 
-- **[First success (~10 min core path)](guides/first-success.md)** — install the extension, open sample ontologies, browse and edit.
-- **[Feature tour](ontocode/feature-tour.md)** — visual overview of explorer, inspector, and React panels.
-- **[VS Code extension](ontocode/vscode-extension.md)** — [Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) or [Open VSX](https://open-vsx.org/extension/ontocode/ontocode) (Cursor); explorer, inspector, Query Workbench (no Rust required).
-- **[CLI / Rust](ontocore/index.md)** — `ontocore` CLI, crates, CI and embedding.
+!!! warning "Editable formats"
+    Entity Inspector write-back applies to **`.ttl` and `.obo` only**. Other formats index and query as read-only.
 
-You do **not** need to clone this repo to use the extension or `cargo install ontocore-cli`.
+!!! note "Catalog SQL (subset)"
+    Query Workbench SQL mode is **not** full SQL (no `JOIN` / `ORDER BY` / `LIMIT`). Prefer SPARQL for graph patterns — [SQL reference](sql-reference.md).
 
-**Building or evaluating the doc set?** Start with the [Documentation index](documentation-index.md) and [Glossary](glossary.md).
+> **Names:** **OntoCode** = VS Code extension. **OntoCore** = Rust engine (CLI + language server). **Ontologos** = external reasoner.
 
-> **Names in 30 seconds:** **OntoCode** = VS Code extension. **OntoCore** = Rust engine (CLI + language server). **Ontologos** = external reasoner. Elsewhere, “extension”, “CLI”, and “language server” are enough.
+![OntoCode product tour](assets/screenshots/product-tour.gif)
 
 </div>
 
@@ -170,47 +167,25 @@ Full matrix: **[What ships today](SHIPPED.md)** (canonical — do not rely on th
 
 | I need… | Read |
 |---------|------|
-| Product / ecosystem overview | [architecture.md](architecture.md) |
-| Crate layout (contributors) | [design/ARCHITECTURE.md](design/ARCHITECTURE.md) |
-| OntoUI runtime (implementers) | [platform/OVERVIEW.md](platform/OVERVIEW.md) |
-| Plugin authoring (v0.14) | [guides/plugins.md](guides/plugins.md) |
+| 10-minute tutorial | [First success](guides/first-success.md) |
+| Honest limits | [Known limitations](known-limitations.md) |
+| Capability matrix | [SHIPPED.md](SHIPPED.md) |
+| Product overview | [architecture.md](architecture.md) |
+| Plugin authoring | [guides/plugins.md](guides/plugins.md) |
+| Engineering specs (GitHub) | [engineering.md](engineering.md) |
 
 | Topic | Link |
 |-------|------|
 | **Vision** | [vision.md](vision.md) |
 | **Architecture** | [architecture.md](architecture.md) |
 | **Roadmap** | [roadmap.md](roadmap.md) |
-| **OntoCore (platform)** | [ontocore/index.md](ontocore/index.md) |
+| **OntoCore** | [ontocore/index.md](ontocore/index.md) |
 | **OntoCode extension** | [ontocode/vscode-extension.md](ontocode/vscode-extension.md) |
-| **Rust & CLI** | [guides/rust-crates.md](guides/rust-crates.md) |
-| **What ships today (canonical)** | [SHIPPED.md](SHIPPED.md) |
-| Start here (all paths) | [start.md](start.md) |
-| Which artifact do I need? | [guides/which-artifact.md](guides/which-artifact.md) |
-| First success tutorial | [guides/first-success.md](guides/first-success.md) |
 | Feature tour | [ontocode/feature-tour.md](ontocode/feature-tour.md) |
 | Migrating from Protégé | [guides/protege-migration.md](guides/protege-migration.md) |
-| Rust API reference | [ontocore/rust-api.md](ontocore/rust-api.md) |
-| Reasoner | [guides/reasoner.md](guides/reasoner.md) |
-| Query Workbench | [ontocode/query-workbench.md](ontocode/query-workbench.md) |
-| Manchester editor | [ontocode/manchester-editor.md](ontocode/manchester-editor.md) |
-| Manage Imports | [ontocode/manage-imports.md](ontocode/manage-imports.md) |
-| Install VS Code | [vscode-install.md](vscode-install.md) |
-| Getting started (CLI) | [getting-started.md](getting-started.md) |
-| CLI reference | [cli-reference.md](cli-reference.md) |
-| Troubleshooting | [troubleshooting.md](troubleshooting.md) |
-| SQL virtual tables | [sql-reference.md](sql-reference.md) |
+| Catalog SQL (subset) | [sql-reference.md](sql-reference.md) |
 | SPARQL | [sparql-reference.md](sparql-reference.md) |
-| Graph visualization | [ontocode/graph-view.md](ontocode/graph-view.md) |
-| Refactoring | [guides/refactoring.md](guides/refactoring.md) |
-| OBO workflows | [guides/obo-workflow.md](guides/obo-workflow.md) |
-| ROBOT interop | [guides/robot-interop.md](guides/robot-interop.md) |
-| Webview protocol | [webview-protocol.md](webview-protocol.md) |
-| LSP API | [lsp-api.md](lsp-api.md) |
-| Errors reference | [errors.md](errors.md) |
-| Patch JSON | [patch-reference.md](patch-reference.md) |
-| CI integration | [ci-integration.md](ci-integration.md) |
-| Examples | [examples/queries.md](examples/queries.md) |
-| Design specs & roadmap | [design/README.md](design/README.md) |
+| Troubleshooting | [troubleshooting.md](troubleshooting.md) |
 | Contributing | [contributing.md](contributing.md) |
 
 Release notes: [CHANGELOG on GitHub](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md)

@@ -10,17 +10,17 @@ For quick answers, see also [FAQ](faq.md).
 |---------|--------------|------------|
 | Explorer empty or stale | Not indexed, wrong folder, unsupported format | [Explorer empty](#vs-code-explorer-empty-or-stale) |
 | Language server failed to start | Untrusted workspace, bad `lspPath`, duplicate extension | [LSP failed](#vs-code-language-server-failed-to-start) |
-| Cannot edit in inspector | Wrong format (`.owl`/`.owx`/JSON-LD read-only), wrong file | [Cannot edit](#vs-code-cannot-edit-in-inspector) |
+| Cannot edit in inspector | Wrong format (`.owl`/`.owx`/JSON-LD read-only), wrong file | [Cannot edit](#vs-code-cannot-edit-in-inspector) · [Known limitations](known-limitations.md) |
 | Patch / Manchester did not stick | Buffer vs disk conflict, stale index | [Patch did not stick](#vs-code-patch-or-manchester-apply-did-not-stick) |
 | `fixtures/` path fails in CLI | Using clone-only paths after `cargo install` | [CLI fixtures](#cli-ontocore-query-fixtures-fails) |
 | `validate` exits non-zero | Diagnostic errors in ontology | [Validate exit](#cli-validate-exits-non-zero) |
 | Query returns no rows | Stale index, wrong table/column names | [Query empty](#queries-return-no-rows-or-wrong-data) |
-| Reasoner errors or empty hierarchy | Profile mismatch, OntoLogos, unsat classes | [Reasoner](#reasoner) |
+| Reasoner errors or empty hierarchy | Profile mismatch, Ontologos, unsat classes | [Reasoner](#reasoner) |
 | Cannot edit `.obo` | Pre-v0.12 extension or term not in `.obo` file | [Graphs, OBO, ROBOT](#graphs-obo-robot-and-semantic-diff) |
 | Semantic diff / graph missing | No git repo, not indexed | [Graphs, OBO, ROBOT](#graphs-obo-robot-and-semantic-diff) |
 | Inspector and graph show different entities | Panels opened before v0.13 or focus relay disabled | Re-open panels; click entity in explorer — [migration v0.13](migration/v0.13.md) |
-| Schema browser empty in Query Workbench | Workspace not indexed or SPARQL mode selected | Index workspace; switch to SQL mode — [Query Workbench](ontocode/query-workbench.md) |
-| OWL/XML visible but not editable | Read-only by design (v0.12+) | [OWL/XML workflow](guides/owl-xml-workflow.md) |
+| Schema browser empty in Query Workbench | Workspace not indexed or SPARQL mode selected | Index workspace; switch to catalog SQL mode — [Query Workbench](ontocode/query-workbench.md) |
+| OWL/XML visible but not editable | Read-only by design (v0.12+) | [OWL/XML workflow](guides/owl-xml-workflow.md) · [Known limitations](known-limitations.md) |
 
 Need help beyond this page? See [Support and contact](support.md).
 

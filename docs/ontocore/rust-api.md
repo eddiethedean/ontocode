@@ -75,7 +75,7 @@ let ws = Workspace::open("./ontologies")?;
 let stats = ws.stats();
 println!("{} classes", stats.class_count);
 
-// SQL virtual tables
+// Catalog SQL (subset) — not full SQL; see sql-reference.md
 let result = ws.query("SELECT short_name, labels FROM classes")?;
 
 // SPARQL over indexed triples
@@ -89,6 +89,8 @@ for d in ws.diagnostics() {
 // Entity search by IRI fragment, short name, or label
 let hits = ws.search("Person");
 ```
+
+`Workspace::open` returns `Result<Workspace, ontocore::Error>`. Map failure modes with [Errors reference](../errors.md) and [Known limitations](../known-limitations.md).
 
 ### `WorkspaceOptions`
 

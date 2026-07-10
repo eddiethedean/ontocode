@@ -171,7 +171,7 @@ if [[ "$PARALLEL" == "0" ]]; then
   run_step "cargo audit" cargo audit
   run_step "mkdocs strict build" bash -c '
     pip install -q -r docs/requirements.txt
-    mkdocs build --strict
+    DISABLE_MKDOCS_2_WARNING=true mkdocs build --strict
   '
 else
   # Overlap cheap / non-cargo jobs with the shared-target Rust pipeline.
@@ -180,7 +180,7 @@ else
   run_bg_step "cargo audit" "cargo-audit" cargo audit
   run_bg_step "mkdocs strict build" "mkdocs" bash -c '
     pip install -q -r docs/requirements.txt
-    mkdocs build --strict
+    DISABLE_MKDOCS_2_WARNING=true mkdocs build --strict
   '
 
   run_rust_and_extension_steps

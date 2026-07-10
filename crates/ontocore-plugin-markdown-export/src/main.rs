@@ -13,7 +13,7 @@ struct Cli {
     action: String,
     #[arg(long)]
     workspace: PathBuf,
-    #[arg(long, default_value = "plugin-out")]
+    #[arg(long, default_value = ".ontocore/plugin-out")]
     output: PathBuf,
 }
 

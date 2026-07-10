@@ -70,7 +70,7 @@ fn execute_select(catalog: &OntologyCatalog, select: Box<Select>) -> Result<Quer
     if select.having.is_some() {
         return Err(QueryError::Sql("HAVING is not supported".to_string()));
     }
-    if select.from.len() > 1 {
+    if select.from.len() > 1 || select.from.iter().any(|t| !t.joins.is_empty()) {
         return Err(QueryError::Sql("JOIN is not supported".to_string()));
     }
     let table_name = table_name_from_select(&select)?;
@@ -551,6 +551,21 @@ mod tests {
         let err = run_sql(&catalog, "SELECT short_name FROM classes HAVING short_name = 'Person'")
             .unwrap_err();
         assert!(matches!(err, crate::QueryError::Sql(msg) if msg.contains("HAVING")));
+    }
+
+    #[test]
+    fn unsupported_join_keyword_returns_error() {
+        let catalog = fixture_catalog();
+        let err = run_sql(&catalog, "SELECT short_name FROM classes JOIN ontologies ON 1=1")
+            .unwrap_err();
+        assert!(matches!(err, crate::QueryError::Sql(msg) if msg.contains("JOIN")));
+    }
+
+    #[test]
+    fn unsupported_comma_join_returns_error() {
+        let catalog = fixture_catalog();
+        let err = run_sql(&catalog, "SELECT * FROM classes, ontologies").unwrap_err();
+        assert!(matches!(err, crate::QueryError::Sql(msg) if msg.contains("JOIN")));
     }
 
     #[test]

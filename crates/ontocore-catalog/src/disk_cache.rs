@@ -216,7 +216,7 @@ fn literal_to_string(l: LiteralRef<'_>) -> String {
     } else if l.datatype() == xsd::STRING {
         format!("\"{}\"", l.value())
     } else {
-        format!("\"{}\"^<{}>", l.value(), l.datatype().as_str())
+        format!("\"{}\"^^<{}>", l.value(), l.datatype().as_str())
     }
 }
 
@@ -246,7 +246,12 @@ fn parse_term(raw: &str) -> Option<Term> {
                     inner, lang,
                 )));
             }
-            if let Some(dt) = tail.strip_prefix("^^<").and_then(|s| s.strip_suffix('>')) {
+            // Accept canonical `^^<iri>` and legacy single-caret `^<iri>` from older caches.
+            if let Some(dt) = tail
+                .strip_prefix("^^<")
+                .or_else(|| tail.strip_prefix("^<"))
+                .and_then(|s| s.strip_suffix('>'))
+            {
                 return NamedNode::new(dt)
                     .ok()
                     .map(|dt| Term::Literal(Literal::new_typed_literal(inner, dt)));
@@ -306,5 +311,88 @@ mod tests {
         cache.store(&snap).expect("store");
         let loaded = cache.load("deadbeef").expect("load");
         assert_eq!(loaded.entities[0].iri, "http://ex#A");
+    }
+
+    #[test]
+    fn roundtrip_preserves_typed_and_language_literals() {
+        let integer = NamedNode::new_unchecked("http://www.w3.org/2001/XMLSchema#integer");
+        let typed = Literal::new_typed_literal("42", integer.clone());
+        let lang = Literal::new_language_tagged_literal_unchecked("hello", "en");
+        let plain = Literal::new_simple_literal("plain");
+
+        assert_eq!(
+            literal_to_string(typed.as_ref()),
+            "\"42\"^^<http://www.w3.org/2001/XMLSchema#integer>"
+        );
+        assert_eq!(literal_to_string(lang.as_ref()), "\"hello\"@en");
+        assert_eq!(literal_to_string(plain.as_ref()), "\"plain\"");
+
+        let typed_term = parse_term(&literal_to_string(typed.as_ref())).expect("typed");
+        let Term::Literal(restored_typed) = typed_term else {
+            panic!("expected literal");
+        };
+        assert_eq!(restored_typed.value(), "42");
+        assert_eq!(restored_typed.datatype(), integer.as_ref());
+        assert!(restored_typed.language().is_none());
+
+        let lang_term = parse_term(&literal_to_string(lang.as_ref())).expect("lang");
+        let Term::Literal(restored_lang) = lang_term else {
+            panic!("expected literal");
+        };
+        assert_eq!(restored_lang.value(), "hello");
+        assert_eq!(restored_lang.language(), Some("en"));
+
+        // Legacy single-caret snapshots from older OntoCore builds.
+        let legacy = parse_term("\"7\"^<http://www.w3.org/2001/XMLSchema#integer>").expect("legacy");
+        let Term::Literal(restored_legacy) = legacy else {
+            panic!("expected literal");
+        };
+        assert_eq!(restored_legacy.value(), "7");
+        assert_eq!(restored_legacy.datatype(), integer.as_ref());
+    }
+
+    #[test]
+    fn disk_cache_roundtrip_keeps_typed_quad_datatype() {
+        let dir = tempfile::tempdir().unwrap();
+        let cache = DiskCache::for_workspace(dir.path());
+        let integer = NamedNode::new_unchecked("http://www.w3.org/2001/XMLSchema#integer");
+        let quad = Quad {
+            subject: NamedNode::new_unchecked("http://ex#A").into(),
+            predicate: NamedNode::new_unchecked("http://ex#count"),
+            object: Literal::new_typed_literal("42", integer.clone()).into(),
+            graph_name: GraphName::DefaultGraph,
+        };
+        let snap = DocumentSnapshot {
+            content_hash: "typedquad".to_string(),
+            document: OntologyDocument {
+                id: "doc-1".to_string(),
+                path: dir.path().join("a.ttl"),
+                format: OntologyFormat::Turtle,
+                base_iri: None,
+                imports: vec![],
+                namespaces: Default::default(),
+                parse_status: ParseStatus::Ok,
+                content_hash: "typedquad".to_string(),
+                modified_time: 0,
+                parse_message: None,
+                parse_error_location: None,
+            },
+            entities: vec![],
+            annotations: vec![],
+            axioms: vec![],
+            namespace_rows: vec![],
+            imports: vec![],
+            quads: vec![quad.clone()],
+            triple_count: 1,
+            bridge_warning: None,
+        };
+        cache.store(&snap).expect("store");
+        let loaded = cache.load("typedquad").expect("load");
+        assert_eq!(loaded.quads.len(), 1);
+        let Term::Literal(lit) = &loaded.quads[0].object else {
+            panic!("expected literal object");
+        };
+        assert_eq!(lit.value(), "42");
+        assert_eq!(lit.datatype(), integer.as_ref());
     }
 }

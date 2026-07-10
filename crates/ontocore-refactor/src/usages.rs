@@ -2,7 +2,7 @@ use crate::model::{Usage, UsageKind};
 use crate::source::read_source_text;
 use crate::text::is_token_match_at;
 use ontocore_catalog::OntologyCatalog;
-use ontocore_core::{OntologyFormat, ParseStatus};
+use ontocore_core::{document_matches_ontology_id, OntologyDocument, OntologyFormat, ParseStatus};
 use ontocore_owl::{namespaces_for_text, short_name_from_iri};
 use std::collections::{BTreeSet, HashMap};
 use std::path::PathBuf;
@@ -45,7 +45,8 @@ pub fn find_usages_with_overrides(
 
     for axiom in &data.axioms {
         if axiom.subject == target_iri {
-            if let Some(doc) = data.documents.iter().find(|d| d.id == axiom.ontology_id) {
+            if let Some(doc) = document_for_ontology_id(data.documents.as_slice(), &axiom.ontology_id)
+            {
                 let key = (doc.path.clone(), UsageKind::AxiomSubject, axiom.id.clone());
                 if seen.insert(key) {
                     usages.push(usage_from_axiom(
@@ -58,7 +59,8 @@ pub fn find_usages_with_overrides(
             }
         }
         if axiom.object == target_iri || is_named_ref(&axiom.object, target_iri) {
-            if let Some(doc) = data.documents.iter().find(|d| d.id == axiom.ontology_id) {
+            if let Some(doc) = document_for_ontology_id(data.documents.as_slice(), &axiom.ontology_id)
+            {
                 let key = (doc.path.clone(), UsageKind::AxiomObject, axiom.id.clone());
                 if seen.insert(key) {
                     usages.push(usage_from_axiom(
@@ -74,7 +76,7 @@ pub fn find_usages_with_overrides(
 
     for ann in &data.annotations {
         if ann.subject == target_iri {
-            if let Some(doc) = data.documents.iter().find(|d| d.id == ann.ontology_id) {
+            if let Some(doc) = document_for_ontology_id(data.documents.as_slice(), &ann.ontology_id) {
                 let key = (doc.path.clone(), UsageKind::AnnotationSubject, ann.subject.clone());
                 if seen.insert(key) {
                     usages.push(Usage {
@@ -92,7 +94,7 @@ pub fn find_usages_with_overrides(
             }
         }
         if ann.object == target_iri {
-            if let Some(doc) = data.documents.iter().find(|d| d.id == ann.ontology_id) {
+            if let Some(doc) = document_for_ontology_id(data.documents.as_slice(), &ann.ontology_id) {
                 let key = (
                     doc.path.clone(),
                     UsageKind::AnnotationObject,
@@ -117,7 +119,7 @@ pub fn find_usages_with_overrides(
 
     for imp in &data.imports {
         if imp.import_iri == target_iri {
-            if let Some(doc) = data.documents.iter().find(|d| d.id == imp.ontology_id) {
+            if let Some(doc) = document_for_ontology_id(data.documents.as_slice(), &imp.ontology_id) {
                 let key = (doc.path.clone(), UsageKind::Import, imp.import_iri.clone());
                 if seen.insert(key) {
                     usages.push(Usage {
@@ -256,6 +258,13 @@ fn usage_from_axiom(
 
 fn is_named_ref(object: &str, target_iri: &str) -> bool {
     object == target_iri || object == format!("<{target_iri}>")
+}
+
+fn document_for_ontology_id<'a>(
+    documents: &'a [OntologyDocument],
+    ontology_id: &str,
+) -> Option<&'a OntologyDocument> {
+    documents.iter().find(|d| document_matches_ontology_id(ontology_id, d))
 }
 
 #[cfg(test)]

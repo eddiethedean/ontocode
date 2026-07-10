@@ -44,6 +44,9 @@ enum Commands {
         ontology_iri: String,
         #[arg(long)]
         version_iri: Option<String>,
+        /// Overwrite the target file if it already exists
+        #[arg(long)]
+        force: bool,
     },
     /// Scan and index ontology files in a workspace
     Index {
@@ -334,8 +337,8 @@ enum OutputFormat {
 fn main() -> Result<()> {
     let cli = Cli::parse();
     match cli.command {
-        Commands::New { path, ontology_iri, version_iri } => {
-            write_new_ontology(&path, &ontology_iri, version_iri.as_deref())?;
+        Commands::New { path, ontology_iri, version_iri, force } => {
+            write_new_ontology(&path, &ontology_iri, version_iri.as_deref(), force)?;
             println!("Created {}", path.display());
         }
         Commands::Index { workspace, format } => {
@@ -739,7 +742,30 @@ fn main() -> Result<()> {
     Ok(())
 }
 
-fn write_new_ontology(path: &Path, ontology_iri: &str, version_iri: Option<&str>) -> Result<()> {
+fn write_new_ontology(
+    path: &Path,
+    ontology_iri: &str,
+    version_iri: Option<&str>,
+    force: bool,
+) -> Result<()> {
+    if path.exists() && !force {
+        bail!(
+            "file already exists: {} (use --force to overwrite)",
+            path.display()
+        );
+    }
+    if !ontocore_owl::is_safe_iri(ontology_iri) {
+        bail!(
+            "ontology IRI contains characters that cannot be safely written: {ontology_iri:?}"
+        );
+    }
+    if let Some(version_iri) = version_iri {
+        if !ontocore_owl::is_safe_iri(version_iri) {
+            bail!(
+                "version IRI contains characters that cannot be safely written: {version_iri:?}"
+            );
+        }
+    }
     let extension = path.extension().and_then(|ext| ext.to_str()).unwrap_or_default();
     let contents = match extension.to_ascii_lowercase().as_str() {
         "ttl" => {

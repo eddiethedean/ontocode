@@ -438,7 +438,7 @@ fn format_prefix_declaration(keyword: &str, prefix: &str, namespace_iri: &str) -
     }
 }
 
-fn validate_prefix(prefix: &str, namespace_iri: &str) -> Result<()> {
+pub fn validate_prefix(prefix: &str, namespace_iri: &str) -> Result<()> {
     if prefix.is_empty() || !prefix.chars().all(|c| c.is_ascii_alphanumeric() || c == '_') {
         return Err(OwlError::PatchInvalid(format!(
             "prefix must contain only letters, numbers, or underscores: {prefix:?}"
@@ -1498,7 +1498,7 @@ fn line_starts_with_subject(trimmed: &str, subject: &str) -> bool {
 }
 
 /// Reject IRIs that would break Turtle `<...>` terms or inject syntax.
-pub(crate) fn is_safe_iri(iri: &str) -> bool {
+pub fn is_safe_iri(iri: &str) -> bool {
     if iri.is_empty() {
         return false;
     }

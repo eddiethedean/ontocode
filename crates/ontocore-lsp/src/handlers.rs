@@ -1004,77 +1004,127 @@ pub fn handle_run_robot(
 
 /// Reject ROBOT file operands that escape the workspace jail.
 ///
-/// Handles separate `--input path`, `--input=path`, and attached short forms (`-i/path`).
+/// Handles separate `--input path`, `--input=path`, attached short forms (`-i/path`),
+/// and multi-operand flags such as `--query <query> <output>`.
 fn jail_robot_path_args(
     workspace_roots: &[std::path::PathBuf],
     args: &[String],
 ) -> Result<(), String> {
-    let long_path_flags = [
-        "--input",
-        "--output",
-        "--report",
-        "--catalog",
-        "--ontology",
-        "--left",
-        "--right",
-        "--merge-input",
-    ];
-    let short_path_flags = ["-i", "-o", "-c"];
-    let mut expect_path = false;
-    for arg in args.iter().skip(1) {
-        if expect_path {
-            expect_path = false;
-            ontocore_core::validate_workspace_scope_any(
-                std::path::Path::new(arg),
-                workspace_roots,
-            )?;
-            continue;
+    /// How many path operands a flag still requires / may accept.
+    #[derive(Clone, Copy)]
+    struct PathExpect {
+        /// Must still consume this many paths before the next flag or end.
+        min: usize,
+        /// May still consume this many paths (consecutive non-flag args).
+        max: usize,
+    }
+
+    fn path_expect_for_long_flag(flag: &str) -> Option<PathExpect> {
+        match flag {
+            "--input"
+            | "--output"
+            | "--report"
+            | "--catalog"
+            | "--ontology"
+            | "--left"
+            | "--right"
+            | "--merge-input"
+            | "--output-dir"
+            | "--update" => Some(PathExpect { min: 1, max: 1 }),
+            // ROBOT: --query/--select/--construct take query file + output file.
+            "--query" | "--select" | "--construct" => Some(PathExpect { min: 1, max: 2 }),
+            // ROBOT: --queries takes one or more query files until the next flag.
+            "--queries" => Some(PathExpect { min: 1, max: usize::MAX }),
+            _ => None,
         }
-        if let Some((flag, value)) = arg.split_once('=') {
-            if long_path_flags.contains(&flag) {
-                ontocore_core::validate_workspace_scope_any(
-                    std::path::Path::new(value),
-                    workspace_roots,
-                )?;
+    }
+
+    fn path_expect_for_short_flag(flag: &str) -> Option<PathExpect> {
+        match flag {
+            "-i" | "-o" | "-c" | "-u" => Some(PathExpect { min: 1, max: 1 }),
+            "-q" => Some(PathExpect { min: 1, max: 2 }),
+            _ => None,
+        }
+    }
+
+    fn jail_path(workspace_roots: &[std::path::PathBuf], value: &str) -> Result<(), String> {
+        ontocore_core::validate_workspace_scope_any(std::path::Path::new(value), workspace_roots)
+            .map(|_| ())
+    }
+
+    let mut expect: Option<PathExpect> = None;
+    for arg in args.iter().skip(1) {
+        if let Some(pending) = expect.as_mut() {
+            if arg.starts_with('-') {
+                if pending.min > 0 {
+                    return Err("ROBOT path flag is missing a path argument".to_string());
+                }
+                expect = None;
+            } else {
+                jail_path(workspace_roots, arg)?;
+                pending.min = pending.min.saturating_sub(1);
+                pending.max = pending.max.saturating_sub(1);
+                if pending.max == 0 {
+                    expect = None;
+                }
                 continue;
             }
         }
-        if long_path_flags.contains(&arg.as_str()) || short_path_flags.contains(&arg.as_str()) {
-            expect_path = true;
+
+        if let Some((flag, value)) = arg.split_once('=') {
+            if path_expect_for_long_flag(flag).is_some() {
+                jail_path(workspace_roots, value)?;
+                continue;
+            }
+        }
+
+        if let Some(pending) = path_expect_for_long_flag(arg) {
+            expect = Some(pending);
             continue;
         }
-        let attached_short = short_path_flags.iter().find_map(|flag| {
+        if let Some(pending) = path_expect_for_short_flag(arg) {
+            expect = Some(pending);
+            continue;
+        }
+
+        let attached_short = ["-i", "-o", "-c", "-u", "-q"].iter().find_map(|flag| {
             if arg.starts_with(flag)
                 && arg.len() > flag.len()
                 && !arg[flag.len()..].starts_with('-')
             {
-                Some(&arg[flag.len()..])
+                Some((*flag, &arg[flag.len()..]))
             } else {
                 None
             }
         });
-        if let Some(value) = attached_short {
-            ontocore_core::validate_workspace_scope_any(
-                std::path::Path::new(value),
-                workspace_roots,
-            )?;
+        if let Some((flag, value)) = attached_short {
+            jail_path(workspace_roots, value)?;
+            // Attached short form supplies the first path; optional second path may follow.
+            if let Some(mut pending) = path_expect_for_short_flag(flag) {
+                pending.min = pending.min.saturating_sub(1);
+                pending.max = pending.max.saturating_sub(1);
+                if pending.max > 0 {
+                    expect = Some(pending);
+                }
+            }
             continue;
         }
+
         // Positional path-like args (contain / or end with ontology extensions).
         let looks_like_path = arg.contains('/')
             || arg.contains('\\')
             || arg.ends_with(".ttl")
             || arg.ends_with(".owl")
             || arg.ends_with(".obo")
-            || arg.ends_with(".rdf");
+            || arg.ends_with(".rdf")
+            || arg.ends_with(".sparql")
+            || arg.ends_with(".rq")
+            || arg.ends_with(".ru");
         if looks_like_path && !arg.starts_with('-') {
-            ontocore_core::validate_workspace_scope_any(
-                std::path::Path::new(arg),
-                workspace_roots,
-            )?;
+            jail_path(workspace_roots, arg)?;
         }
     }
-    if expect_path {
+    if expect.is_some_and(|e| e.min > 0) {
         return Err("ROBOT path flag is missing a path argument".to_string());
     }
     Ok(())
@@ -2527,5 +2577,89 @@ mod tests {
         let escaped = escape_markdown("[click](https://evil.example)");
         assert!(!escaped.contains("](https://"));
         assert!(escaped.contains("\\["));
+    }
+
+    #[test]
+    fn jail_robot_rejects_query_equals_outside_workspace() {
+        let dir = tempfile::tempdir().unwrap();
+        let roots = vec![dir.path().to_path_buf()];
+        let input = dir.path().join("in.ttl");
+        std::fs::write(&input, "").unwrap();
+        let args = vec![
+            "query".to_string(),
+            format!("--input={}", input.display()),
+            "--query=/tmp/evil.sparql".to_string(),
+        ];
+        let err = jail_robot_path_args(&roots, &args).unwrap_err();
+        assert!(
+            err.contains("outside") || err.contains("workspace"),
+            "unexpected error: {err}"
+        );
+    }
+
+    #[test]
+    fn jail_robot_rejects_update_equals_outside_workspace() {
+        let dir = tempfile::tempdir().unwrap();
+        let roots = vec![dir.path().to_path_buf()];
+        let input = dir.path().join("in.ttl");
+        std::fs::write(&input, "").unwrap();
+        let args = vec![
+            "query".to_string(),
+            format!("--input={}", input.display()),
+            "--update=/tmp/evil.ru".to_string(),
+        ];
+        assert!(jail_robot_path_args(&roots, &args).is_err());
+    }
+
+    #[test]
+    fn jail_robot_rejects_query_pair_outside_workspace() {
+        let dir = tempfile::tempdir().unwrap();
+        let roots = vec![dir.path().to_path_buf()];
+        let input = dir.path().join("in.ttl");
+        let query = dir.path().join("q.sparql");
+        std::fs::write(&input, "").unwrap();
+        std::fs::write(&query, "").unwrap();
+        let args = vec![
+            "query".to_string(),
+            format!("--input={}", input.display()),
+            "--query".to_string(),
+            query.display().to_string(),
+            "/tmp/evil-out.csv".to_string(),
+        ];
+        assert!(jail_robot_path_args(&roots, &args).is_err());
+    }
+
+    #[test]
+    fn jail_robot_accepts_in_workspace_query_pair() {
+        let dir = tempfile::tempdir().unwrap();
+        let roots = vec![dir.path().to_path_buf()];
+        let input = dir.path().join("in.ttl");
+        let query = dir.path().join("q.sparql");
+        let output = dir.path().join("out.csv");
+        std::fs::write(&input, "").unwrap();
+        std::fs::write(&query, "").unwrap();
+        let args = vec![
+            "query".to_string(),
+            format!("--input={}", input.display()),
+            "--query".to_string(),
+            query.display().to_string(),
+            output.display().to_string(),
+        ];
+        jail_robot_path_args(&roots, &args).expect("in-workspace query pair");
+    }
+
+    #[test]
+    fn jail_robot_rejects_output_dir_outside_workspace() {
+        let dir = tempfile::tempdir().unwrap();
+        let roots = vec![dir.path().to_path_buf()];
+        let input = dir.path().join("in.ttl");
+        std::fs::write(&input, "").unwrap();
+        let args = vec![
+            "query".to_string(),
+            format!("--input={}", input.display()),
+            "--output-dir".to_string(),
+            "/tmp/evil-results".to_string(),
+        ];
+        assert!(jail_robot_path_args(&roots, &args).is_err());
     }
 }

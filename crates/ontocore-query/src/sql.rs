@@ -282,7 +282,16 @@ fn is_restriction_expr(expr: &str) -> bool {
         || lower.contains(" value ")
         || lower.contains(" min ")
         || lower.contains(" max ")
-        || lower.contains("self")
+        || has_self_restriction_token(&lower)
+}
+
+/// Match a `Self` / `ObjectHasSelf` restriction token, not IRI local names like `Myself`.
+fn has_self_restriction_token(lower: &str) -> bool {
+    lower == "self"
+        || lower.starts_with("self ")
+        || lower.ends_with(" self")
+        || lower.contains(" self ")
+        || lower.contains("objecthasself")
 }
 
 fn parse_restriction_header(expr: &str) -> (String, String) {
@@ -293,9 +302,8 @@ fn parse_restriction_header(expr: &str) -> (String, String) {
             let property = trimmed[..idx].trim().to_string();
             return (property, kind.to_string());
         }
-        if trimmed.to_ascii_lowercase().ends_with(kind) && kind == "self" {
-            let property =
-                trimmed.trim_end_matches("self").trim().trim_end_matches("and").trim().to_string();
+        if trimmed.to_ascii_lowercase().ends_with(" self") && kind == "self" {
+            let property = trimmed[..trimmed.len() - " self".len()].trim().to_string();
             return (property, kind.to_string());
         }
     }
@@ -311,9 +319,7 @@ fn entity_to_row(entity: &ontocore_core::Entity) -> Row {
     row.insert("labels".into(), entity.labels.join("; "));
     row.insert("comments".into(), entity.comments.join("; "));
     row.insert("deprecated".into(), entity.deprecated.to_string());
-    if let Some(ref obo_id) = entity.obo_id {
-        row.insert("obo_id".into(), obo_id.clone());
-    }
+    row.insert("obo_id".into(), entity.obo_id.clone().unwrap_or_default());
     row
 }
 
@@ -442,8 +448,7 @@ fn eval_expr(expr: &Expr, row: &Row) -> Result<String> {
     match expr {
         Expr::Identifier(ident) => {
             let key = ident.value.to_ascii_lowercase();
-            // Optional schema columns (e.g. obo_id) may be absent on a given row.
-            // Unknown identifiers are rejected earlier via schema validation.
+            // Schema columns (e.g. obo_id) are always present; missing values are empty.
             Ok(row.get(&key).cloned().unwrap_or_default())
         }
         Expr::Value(Value::SingleQuotedString(s) | Value::DoubleQuotedString(s)) => Ok(s.clone()),
@@ -608,5 +613,34 @@ mod tests {
         let result = run_sql(&catalog, "SELECT obo_id FROM classes").expect("obo_id projection");
         assert!(!result.rows.is_empty());
         assert!(result.rows.iter().all(|r| r.contains_key("obo_id")));
+    }
+
+    #[test]
+    fn select_star_always_includes_obo_id_column() {
+        let catalog = fixture_catalog();
+        let result = run_sql(&catalog, "SELECT * FROM entities").expect("select *");
+        assert!(result.columns.iter().any(|c| c == "obo_id"));
+        assert!(result.rows.iter().all(|r| r.contains_key("obo_id")));
+    }
+
+    #[test]
+    fn self_substring_class_names_are_not_restrictions() {
+        assert!(!is_restriction_expr("ex:Myself"));
+        assert!(!is_restriction_expr("http://example.org/self#Thing"));
+        assert!(!is_restriction_expr("ex:selfish"));
+        assert!(is_restriction_expr("ex:partOf Self"));
+        assert!(is_restriction_expr("ex:partOf some ex:Organ"));
+        assert!(is_restriction_expr("ObjectHasSelf(ex:partOf)"));
+    }
+
+    #[test]
+    fn json_export_preserves_truncated_flag() {
+        let result = QueryResult {
+            columns: vec!["iri".into()],
+            rows: vec![BTreeMap::from([("iri".into(), "http://example.org/A".into())])],
+            truncated: true,
+        };
+        let json = to_json(&result).expect("json");
+        assert!(json.contains("\"truncated\": true"));
     }
 }

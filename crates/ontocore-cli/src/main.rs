@@ -348,14 +348,14 @@ fn main() -> Result<()> {
         Commands::Query { workspace, sql, format } => {
             let catalog = build_catalog(&workspace)?;
             let result = query_catalog(&catalog, &sql).context("query failed")?;
-            print_query_result(&result.columns, &result.rows, format)?;
+            print_query_result(&result.columns, &result.rows, result.truncated, format)?;
         }
         Commands::Sparql { workspace, query, format } => {
             let catalog = build_catalog(&workspace)?;
             let result = sparql_catalog(&catalog, &query).context("sparql failed")?;
             match format {
                 OutputFormat::Json => println!("{}", sparql_to_json(&result)?),
-                _ => print_query_result(&result.columns, &result.rows, format)?,
+                _ => print_query_result(&result.columns, &result.rows, result.truncated, format)?,
             }
         }
         Commands::Validate { workspace } => {
@@ -979,12 +979,13 @@ fn print_stats(stats: &CatalogStats, format: OutputFormat) -> Result<()> {
 fn print_query_result(
     columns: &[String],
     rows: &[std::collections::BTreeMap<String, String>],
+    truncated: bool,
     format: OutputFormat,
 ) -> Result<()> {
     let result = ontocore_query::sql::QueryResult {
         columns: columns.to_vec(),
         rows: rows.to_vec(),
-        truncated: false,
+        truncated,
     };
     match format {
         OutputFormat::Json => println!("{}", sql_to_json(&result)?),

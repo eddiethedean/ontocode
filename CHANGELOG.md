@@ -7,8 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.17.0] - 2026-07-10
+
+### Added
+
+- Protégé-style menus, toolbar actions, context commands, and platform-aware keybindings backed by the centralized command registry
+- React dialogs for New Ontology, Prefix Manager, Ontology Metrics, and About, using the shared `DialogShell` with keyboard handling and live IRI/prefix validation
+- Panel serializers that keep OntoCode webview tabs across reloads, named Modeling/Reasoning/Review perspectives, help/support surfaces, error logging, and diagnostic export (transient panel state is not restored)
+- Engine and LSP support for ontology creation/export, prefix and metadata patches, active ontology state, merge/replace refactors, and reasoner Start/Synchronize/Classify/Consistency (shared classify path; Stop clears UI only)
+
+### Changed
+
+- Workspace package and all `ontocore-*` crates bumped to **0.17.0**; extension marketplace and webview UI **0.17.0**
+- Protégé parity checklists now record the v0.17 menu, toolbar, and dialog closeout
+
 ### Fixed
 
+- Accept peer multi-root folder adds after open, surface `OwlBridgeFailed` when OWX Horned load fails, implement `textDocument/prepareRename`, and harden the undefined-prefix stripper for empty/escaped prefixes ([#209](https://github.com/eddiethedean/ontocode/pull/209))
 - Scope Turtle QName completions to the typed prefix namespace, return no IRI when the cursor is past the line end, drop the open buffer and show an error on invalid `didChange` ranges, and harden LSP client start/stop against races ([#7](https://github.com/eddiethedean/ontocode/issues/7), [#13](https://github.com/eddiethedean/ontocode/issues/13), [#90](https://github.com/eddiethedean/ontocode/issues/90), [#91](https://github.com/eddiethedean/ontocode/issues/91))
 - Require `owl:sameAs` (not shared labels alone) for semantic-diff renames, enrich reasoner diffs with the actual left/right catalogs, and copy full Markdown sections from Semantic Diff ([#20](https://github.com/eddiethedean/ontocode/issues/20), [#56](https://github.com/eddiethedean/ontocode/issues/56), [#149](https://github.com/eddiethedean/ontocode/issues/149))
 - Guard graph refresh with a generation counter, exclude unknown IRIs from `ontology_iri` graph filters, keep class/property graphs from switching to neighborhood on entity focus, and ignore older `hydrateFocus` timestamps ([#33](https://github.com/eddiethedean/ontocode/issues/33), [#117](https://github.com/eddiethedean/ontocode/issues/117), [#154](https://github.com/eddiethedean/ontocode/issues/154), [#161](https://github.com/eddiethedean/ontocode/issues/161))
@@ -49,19 +64,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Reject SQL `HAVING` as unsupported instead of silently returning unfiltered rows ([#134](https://github.com/eddiethedean/ontocode/issues/134))
 - Reject SQL `JOIN` (including `FROM a JOIN b`) instead of silently returning the left table only ([#133](https://github.com/eddiethedean/ontocode/issues/133))
 - Populate `deleteImpact.referencing_entities` from usage referencers (and resolve axiom docs by ontology IRI) so delete confirmation lists dependents ([#128](https://github.com/eddiethedean/ontocode/issues/128))
-## [0.17.0] - 2026-07-10
-
-### Added
-
-- Protégé-style menus, toolbar actions, context commands, and platform-aware keybindings backed by the centralized command registry
-- React dialogs for New Ontology, Prefix Manager, Ontology Metrics, and About, using the shared `DialogShell` with keyboard handling and live IRI/prefix validation
-- Persistent panel layouts, named perspectives, help/support surfaces, error logging, and diagnostic export
-- Engine and LSP support for ontology creation/export, prefix and metadata patches, active ontology state, merge/replace refactors, and distinct reasoner workflows
-
-### Changed
-
-- Workspace package and all `ontocore-*` crates bumped to **0.17.0**; extension marketplace and webview UI **0.17.0**
-- Protégé parity checklists now record the v0.17 menu, toolbar, and dialog closeout
 
 ## [0.16.0] - 2026-07-09
 

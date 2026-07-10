@@ -6,7 +6,7 @@ Migration guides: [Migration index](migration/README.md)
 
 ## [0.17.0] - 2026-07-10
 
-**v0.17.0** — Protégé shell parity: menus/toolbars/keybindings, command registry with enablement, DialogShell flows (new ontology, prefixes, metrics, about), layout persistence and named perspectives, help/error-log surfaces, plus OntoCore APIs for create/export, prefix/metadata patches, merge/replace, delete impact, and reasoner lifecycle. See [CHANGELOG.md](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) and [migration/v0.17.md](migration/v0.17.md).
+**v0.17.0** — Protégé shell parity: menus/toolbars/keybindings, command registry with enablement, DialogShell flows (new ontology, prefixes, metrics, about), webview tab persistence and named perspectives, help/error-log surfaces, plus OntoCore APIs for create/export, prefix/metadata patches, merge/replace, delete impact, and reasoner classify (Start/Sync/Classify/Consistency share one path; Stop is UI-only). Includes the v0.17 bugfix cluster and LSP honesty fixes ([#209](https://github.com/eddiethedean/ontocode/pull/209)). See [CHANGELOG.md](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) and [migration/v0.17.md](migration/v0.17.md).
 
 ## [0.16.0] - 2026-07-09
 

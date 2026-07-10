@@ -47,6 +47,7 @@
   "activationEvents": [
     "workspaceContains:**/*.ttl",
     "workspaceContains:**/*.owl",
+    "workspaceContains:**/*.owx",
     "workspaceContains:**/*.rdf",
     "workspaceContains:**/*.jsonld",
     "workspaceContains:**/*.json-ld",

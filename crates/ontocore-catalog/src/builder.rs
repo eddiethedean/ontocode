@@ -269,6 +269,16 @@ impl IndexBuilder {
                 self.document_override_text(&file.path),
             )?;
 
+            // OWL/XML produces no parser quads; load Horned RDF projection for SPARQL (#75).
+            let snapshot_quads = if !parsed.quads().is_empty() {
+                parsed.quads().to_vec()
+            } else if !semantics.rdf_quads.is_empty() {
+                load_quads_into_store(&store, &semantics.rdf_quads, &mut triple_count, &doc_id)?;
+                semantics.rdf_quads.clone()
+            } else {
+                Vec::new()
+            };
+
             let stored_hash = if override_text.is_some() {
                 effective_hash.clone()
             } else {
@@ -282,8 +292,8 @@ impl IndexBuilder {
                 axioms: semantics.axioms.clone(),
                 namespace_rows: semantics.namespace_rows.clone(),
                 imports: semantics.imports.clone(),
-                quads: parsed.quads().to_vec(),
-                triple_count: parsed.triple_count,
+                quads: snapshot_quads.clone(),
+                triple_count: snapshot_quads.len(),
                 bridge_warning: semantics.bridge_warning.clone(),
             };
 
@@ -445,6 +455,15 @@ impl IndexBuilder {
                 Some(override_text),
             )?;
 
+            let snapshot_quads = if !parsed.quads().is_empty() {
+                parsed.quads().to_vec()
+            } else if !semantics.rdf_quads.is_empty() {
+                load_quads_into_store(&store, &semantics.rdf_quads, &mut triple_count, &doc_id)?;
+                semantics.rdf_quads.clone()
+            } else {
+                Vec::new()
+            };
+
             let snapshot = DocumentSnapshot {
                 content_hash: effective_hash.clone(),
                 document: documents.last().cloned().expect("document"),
@@ -453,8 +472,8 @@ impl IndexBuilder {
                 axioms: semantics.axioms.clone(),
                 namespace_rows: semantics.namespace_rows.clone(),
                 imports: semantics.imports.clone(),
-                quads: parsed.quads().to_vec(),
-                triple_count: parsed.triple_count,
+                quads: snapshot_quads.clone(),
+                triple_count: snapshot_quads.len(),
                 bridge_warning: semantics.bridge_warning.clone(),
             };
 
@@ -721,6 +740,8 @@ struct DocumentSemantics {
     namespace_rows: Vec<Namespace>,
     imports: Vec<Import>,
     bridge_warning: Option<Diagnostic>,
+    /// Extra RDF quads when the parser produced none (OWL/XML → Horned RDF projection).
+    rdf_quads: Vec<oxigraph::model::Quad>,
 }
 
 fn semantics_for_document(
@@ -738,6 +759,7 @@ fn semantics_for_document(
             namespace_rows: parsed.namespace_rows.clone(),
             imports: parsed.import_rows.clone(),
             bridge_warning: None,
+            rdf_quads: Vec::new(),
         });
     }
 
@@ -758,6 +780,7 @@ fn semantics_for_document(
                 bridge_warning: owl
                     .load_warning
                     .map(|message| incomplete_bridge_warning(path, message)),
+                rdf_quads: owl.quads,
             }),
             Err(e) => {
                 eprintln!(
@@ -771,6 +794,7 @@ fn semantics_for_document(
                     namespace_rows: parsed.namespace_rows.clone(),
                     imports: parsed.import_rows.clone(),
                     bridge_warning: None,
+                    rdf_quads: Vec::new(),
                 })
             }
         };
@@ -786,6 +810,7 @@ fn semantics_for_document(
             bridge_warning: owl
                 .load_warning
                 .map(|message| incomplete_bridge_warning(path, message)),
+            rdf_quads: Vec::new(),
         }),
         Err(e) => {
             eprintln!(
@@ -811,6 +836,7 @@ fn semantics_for_document(
                     plugin_id: None,
                     plugin_code: None,
                 }),
+                rdf_quads: Vec::new(),
             })
         }
     }
@@ -1229,5 +1255,31 @@ mod incremental_tests {
             second.data().entities.len() > first.data().entities.len(),
             "edited ontology should add entities"
         );
+    }
+
+    #[test]
+    fn owx_workspace_populates_sparql_store() {
+        let dir = tempfile::tempdir().unwrap();
+        let owx = include_str!("../../../examples/protege-roundtrip/example.owx");
+        std::fs::write(dir.path().join("example.owx"), owx).unwrap();
+
+        let catalog = IndexBuilder::new().workspace(dir.path()).build().expect("build owx");
+        assert!(catalog.find_entity("http://example.org/org#Department").is_some());
+        assert!(
+            catalog.data().stats().triple_count > 0,
+            "OWL/XML workspace must load RDF quads into the SPARQL store"
+        );
+
+        let mut found = false;
+        for quad in catalog.store().quads_for_pattern(None, None, None, None) {
+            let q = quad.expect("quad");
+            if q.subject.to_string().contains("Department")
+                || q.object.to_string().contains("Department")
+            {
+                found = true;
+                break;
+            }
+        }
+        assert!(found, "expected Department IRI in Oxigraph store");
     }
 }

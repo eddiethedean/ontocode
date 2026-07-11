@@ -17,8 +17,8 @@ pub use manchester::{
     parse_class_expression, ManchesterDiagnostic, ManchesterParseOutput,
 };
 pub use patch::{
-    apply_patches, apply_patches_to_text, atomic_write, ApplyPatchResult, PatchDiagnostic,
-    PatchEntityKind, PatchOp,
+    apply_patches, apply_patches_to_text, atomic_write, is_safe_iri, validate_prefix,
+    ApplyPatchResult, PatchDiagnostic, PatchEntityKind, PatchOp,
 };
 pub use span::{
     all_entity_statement_ranges, entity_block_range, entity_primary_block_range,

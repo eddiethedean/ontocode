@@ -85,6 +85,7 @@ export interface EntityDetailPayload {
     manchester?: string;
     parent_iri?: string;
     other_iri?: string;
+    properties?: string[];
     editable: boolean;
   }>;
   annotations?: Array<{

@@ -1,6 +1,6 @@
 use crate::OntologyCatalog;
 use ontocore_core::{
-    document_matches_entity, read_to_string_capped, Entity, EntityKind, PropertyCharacteristics,
+    document_for_entity, read_to_string_capped, Entity, EntityKind, PropertyCharacteristics,
     AXIOM_KIND_CLASS_ASSERTION, AXIOM_KIND_DATA_PROPERTY_ASSERTION, AXIOM_KIND_DISJOINT_CLASS,
     AXIOM_KIND_DOMAIN, AXIOM_KIND_EQUIVALENT_CLASS, AXIOM_KIND_OBJECT_PROPERTY_ASSERTION,
     AXIOM_KIND_PROPERTY_CHAIN, AXIOM_KIND_RANGE, AXIOM_KIND_SUB_CLASS_OF, MAX_FILE_BYTES,
@@ -40,6 +40,9 @@ pub struct EntityAxiomSummary {
     pub parent_iri: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub other_iri: Option<String>,
+    /// Ordered member property IRIs for `property_chain` axioms.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub properties: Vec<String>,
     pub editable: bool,
 }
 
@@ -76,7 +79,7 @@ impl OntologyCatalog {
         }
 
         let entity = self.find_entity(iri)?;
-        self.data().documents.iter().find(|d| document_matches_entity(entity, d))
+        document_for_entity(&self.data().documents, entity)
     }
 
     pub fn class_hierarchy(&self) -> ClassHierarchy {
@@ -138,10 +141,6 @@ impl OntologyCatalog {
                 ontocore_core::OntologyFormat::Turtle | ontocore_core::OntologyFormat::Obo
             ) && d.parse_status == ontocore_core::ParseStatus::Ok
         });
-        let turtle_axioms = doc.is_some_and(|d| {
-            d.format == ontocore_core::OntologyFormat::Turtle
-                && d.parse_status == ontocore_core::ParseStatus::Ok
-        });
         let document_path = doc.map(|d| d.path.display().to_string());
 
         let axioms: Vec<EntityAxiomSummary> = self
@@ -149,7 +148,7 @@ impl OntologyCatalog {
             .axioms
             .iter()
             .filter(|a| a.subject == iri)
-            .map(|a| axiom_summary(a, turtle_axioms))
+            .map(|a| axiom_summary(a, editable))
             .collect();
 
         const PROMOTED: &[&str] = &[
@@ -232,6 +231,11 @@ fn axiom_summary(a: &ontocore_core::Axiom, editable: bool) -> EntityAxiomSummary
     } else {
         None
     };
+    let properties = if a.axiom_kind == AXIOM_KIND_PROPERTY_CHAIN {
+        a.object.split(" o ").map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect()
+    } else {
+        Vec::new()
+    };
     let kind_label = match a.axiom_kind.as_str() {
         AXIOM_KIND_EQUIVALENT_CLASS => "EquivalentClasses",
         AXIOM_KIND_DISJOINT_CLASS => "DisjointClasses",
@@ -250,6 +254,7 @@ fn axiom_summary(a: &ontocore_core::Axiom, editable: bool) -> EntityAxiomSummary
         manchester,
         parent_iri,
         other_iri,
+        properties,
         editable: axiom_editable,
     }
 }
@@ -358,5 +363,71 @@ mod tests {
             + 1;
         assert_eq!(source.line, entity_line as u64);
         assert_eq!(source.column, 0);
+    }
+
+    #[test]
+    fn obo_entity_detail_marks_axioms_editable() {
+        let dir = tempfile::tempdir().expect("tempdir");
+        let obo_path = dir.path().join("demo.obo");
+        std::fs::write(
+            &obo_path,
+            concat!(
+                "format-version: 1.2\n",
+                "ontology: demo\n\n",
+                "[Term]\n",
+                "id: DEMO:0001\n",
+                "name: child\n",
+                "is_a: DEMO:0002\n\n",
+                "[Term]\n",
+                "id: DEMO:0002\n",
+                "name: parent\n",
+            ),
+        )
+        .expect("write obo");
+
+        let catalog = IndexBuilder::new().workspace(dir.path()).build().expect("build catalog");
+        let child = catalog
+            .data()
+            .entities
+            .iter()
+            .find(|e| e.obo_id.as_deref() == Some("DEMO:0001"))
+            .expect("child term");
+        let detail = catalog.entity_detail(&child.iri).expect("child detail");
+        assert!(detail.editable);
+        assert!(!detail.axioms.is_empty());
+        assert!(detail.axioms.iter().all(|a| a.editable));
+    }
+
+    #[test]
+    fn property_chain_axiom_summary_includes_member_iris() {
+        let dir = tempfile::tempdir().expect("tempdir");
+        let ttl_path = dir.path().join("chains.ttl");
+        std::fs::write(
+            &ttl_path,
+            concat!(
+                "@prefix ex: <http://example.org/org#> .\n",
+                "@prefix owl: <http://www.w3.org/2002/07/owl#> .\n",
+                "@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n\n",
+                "ex:chases a owl:ObjectProperty .\n",
+                "ex:composed a owl:ObjectProperty ;\n",
+                "    owl:propertyChainAxiom ( ex:chases ex:chases ) .\n"
+            ),
+        )
+        .expect("write ttl");
+        let catalog = IndexBuilder::new().workspace(dir.path()).build().expect("build");
+        let detail =
+            catalog.entity_detail("http://example.org/org#composed").expect("composed detail");
+        let chain = detail
+            .axioms
+            .iter()
+            .find(|a| a.kind == AXIOM_KIND_PROPERTY_CHAIN)
+            .expect("property_chain axiom");
+        assert_eq!(
+            chain.properties,
+            vec![
+                "http://example.org/org#chases".to_string(),
+                "http://example.org/org#chases".to_string()
+            ]
+        );
     }
 }

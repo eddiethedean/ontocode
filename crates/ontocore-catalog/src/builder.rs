@@ -7,8 +7,8 @@ use crate::OntologyCatalogData;
 use ontocore_core::{
     limits::{MAX_ENTITIES, MAX_TOTAL_TRIPLES, MAX_TRIPLES_PER_FILE},
     read_to_string_capped, Annotation, Axiom, Diagnostic, DiagnosticCode, DiagnosticSeverity,
-    Entity, Import, Namespace, OntologyDocument, OntologyFormat, ParseStatus, SourceLocation,
-    WorkspaceScanner, MAX_FILE_BYTES,
+    Entity, EntityKind, Import, Namespace, OntologyDocument, OntologyFormat, ParseStatus,
+    SourceLocation, WorkspaceScanner, MAX_FILE_BYTES,
 };
 use ontocore_diagnostics::{collect_diagnostics_with_config, find_config, DiagnosticInput};
 use ontocore_owl::{load_owx_text, load_turtle_text, supports_horned_load};
@@ -269,6 +269,16 @@ impl IndexBuilder {
                 self.document_override_text(&file.path),
             )?;
 
+            // OWL/XML produces no parser quads; load Horned RDF projection for SPARQL (#75).
+            let snapshot_quads = if !parsed.quads().is_empty() {
+                parsed.quads().to_vec()
+            } else if !semantics.rdf_quads.is_empty() {
+                load_quads_into_store(&store, &semantics.rdf_quads, &mut triple_count, &doc_id)?;
+                semantics.rdf_quads.clone()
+            } else {
+                Vec::new()
+            };
+
             let stored_hash = if override_text.is_some() {
                 effective_hash.clone()
             } else {
@@ -282,8 +292,8 @@ impl IndexBuilder {
                 axioms: semantics.axioms.clone(),
                 namespace_rows: semantics.namespace_rows.clone(),
                 imports: semantics.imports.clone(),
-                quads: parsed.quads().to_vec(),
-                triple_count: parsed.triple_count,
+                quads: snapshot_quads.clone(),
+                triple_count: snapshot_quads.len(),
                 bridge_warning: semantics.bridge_warning.clone(),
             };
 
@@ -328,7 +338,19 @@ impl IndexBuilder {
                 doc.content_hash = stored_hash.clone();
             }
             if let Some(ref cache) = disk_cache {
-                let _ = cache.store(&snapshot);
+                if let Err(e) = cache.store(&snapshot) {
+                    bridge_diagnostics.push(Diagnostic {
+                        code: DiagnosticCode::IoReadError,
+                        severity: DiagnosticSeverity::Warning,
+                        message: format!("disk cache write failed: {e}"),
+                        file: lookup_path.clone(),
+                        range: SourceLocation::default(),
+                        entity_iri: None,
+                        quick_fix: None,
+                        plugin_id: None,
+                        plugin_code: None,
+                    });
+                }
             }
             document_snapshots.insert(lookup_path, snapshot);
         }
@@ -433,6 +455,15 @@ impl IndexBuilder {
                 Some(override_text),
             )?;
 
+            let snapshot_quads = if !parsed.quads().is_empty() {
+                parsed.quads().to_vec()
+            } else if !semantics.rdf_quads.is_empty() {
+                load_quads_into_store(&store, &semantics.rdf_quads, &mut triple_count, &doc_id)?;
+                semantics.rdf_quads.clone()
+            } else {
+                Vec::new()
+            };
+
             let snapshot = DocumentSnapshot {
                 content_hash: effective_hash.clone(),
                 document: documents.last().cloned().expect("document"),
@@ -441,8 +472,8 @@ impl IndexBuilder {
                 axioms: semantics.axioms.clone(),
                 namespace_rows: semantics.namespace_rows.clone(),
                 imports: semantics.imports.clone(),
-                quads: parsed.quads().to_vec(),
-                triple_count: parsed.triple_count,
+                quads: snapshot_quads.clone(),
+                triple_count: snapshot_quads.len(),
                 bridge_warning: semantics.bridge_warning.clone(),
             };
 
@@ -485,7 +516,20 @@ impl IndexBuilder {
 
             document_snapshots.insert(lookup_path.clone(), snapshot);
             if let Some(ref cache) = disk_cache {
-                let _ = cache.store(document_snapshots.get(&lookup_path).expect("snapshot"));
+                if let Err(e) = cache.store(document_snapshots.get(&lookup_path).expect("snapshot"))
+                {
+                    bridge_diagnostics.push(Diagnostic {
+                        code: DiagnosticCode::IoReadError,
+                        severity: DiagnosticSeverity::Warning,
+                        message: format!("disk cache write failed: {e}"),
+                        file: lookup_path.clone(),
+                        range: SourceLocation::default(),
+                        entity_iri: None,
+                        quick_fix: None,
+                        plugin_id: None,
+                        plugin_code: None,
+                    });
+                }
             }
         }
 
@@ -521,6 +565,24 @@ impl IndexBuilder {
             diag_config.as_ref(),
         );
         data.diagnostics.extend(bridge_diagnostics);
+
+        if let Some(ref cache) = disk_cache {
+            let live_hashes: std::collections::HashSet<String> =
+                document_snapshots.values().map(|s| s.content_hash.clone()).collect();
+            if let Err(e) = cache.prune(&live_hashes) {
+                data.diagnostics.push(Diagnostic {
+                    code: DiagnosticCode::IoReadError,
+                    severity: DiagnosticSeverity::Warning,
+                    message: format!("disk cache prune failed: {e}"),
+                    file: self.workspace.join(".ontocore/cache/snapshots"),
+                    range: SourceLocation::default(),
+                    entity_iri: None,
+                    quick_fix: None,
+                    plugin_id: None,
+                    plugin_code: None,
+                });
+            }
+        }
 
         Ok((
             OntologyCatalog {
@@ -653,6 +715,40 @@ fn merge_entity(existing: &mut Entity, incoming: &Entity) {
     if existing.short_name.is_empty() {
         existing.short_name = incoming.short_name.clone();
     }
+    // Preserve OBO term ids across multi-document IRI merges. Prefer an existing
+    // value when both sides set one (first-wins); otherwise take the non-empty side.
+    if existing.obo_id.is_none() {
+        existing.obo_id = incoming.obo_id.clone();
+    }
+    // OR-merge property characteristics declared across documents.
+    existing.characteristics.functional |= incoming.characteristics.functional;
+    existing.characteristics.inverse_functional |= incoming.characteristics.inverse_functional;
+    existing.characteristics.transitive |= incoming.characteristics.transitive;
+    existing.characteristics.symmetric |= incoming.characteristics.symmetric;
+    existing.characteristics.asymmetric |= incoming.characteristics.asymmetric;
+    existing.characteristics.reflexive |= incoming.characteristics.reflexive;
+    existing.characteristics.irreflexive |= incoming.characteristics.irreflexive;
+    // Prefer a more specific kind when the existing entry is Other.
+    if existing.kind == EntityKind::Other && incoming.kind != EntityKind::Other {
+        existing.kind = incoming.kind;
+    }
+    if existing.source_location.line.is_none() && incoming.source_location.line.is_some() {
+        existing.source_location = incoming.source_location.clone();
+    }
+}
+
+fn incomplete_bridge_warning(path: &Path, message: String) -> Diagnostic {
+    Diagnostic {
+        code: DiagnosticCode::OwlBridgeFailed,
+        severity: DiagnosticSeverity::Warning,
+        message,
+        file: path.to_path_buf(),
+        range: SourceLocation::default(),
+        entity_iri: None,
+        quick_fix: None,
+        plugin_id: None,
+        plugin_code: None,
+    }
 }
 
 struct DocumentSemantics {
@@ -662,6 +758,8 @@ struct DocumentSemantics {
     namespace_rows: Vec<Namespace>,
     imports: Vec<Import>,
     bridge_warning: Option<Diagnostic>,
+    /// Extra RDF quads when the parser produced none (OWL/XML → Horned RDF projection).
+    rdf_quads: Vec<oxigraph::model::Quad>,
 }
 
 fn semantics_for_document(
@@ -679,6 +777,7 @@ fn semantics_for_document(
             namespace_rows: parsed.namespace_rows.clone(),
             imports: parsed.import_rows.clone(),
             bridge_warning: None,
+            rdf_quads: Vec::new(),
         });
     }
 
@@ -696,7 +795,10 @@ fn semantics_for_document(
                 axioms: owl.bridge.axioms,
                 namespace_rows: owl.bridge.namespace_rows,
                 imports: owl.bridge.imports,
-                bridge_warning: None,
+                bridge_warning: owl
+                    .load_warning
+                    .map(|message| incomplete_bridge_warning(path, message)),
+                rdf_quads: owl.quads,
             }),
             Err(e) => {
                 eprintln!(
@@ -709,7 +811,20 @@ fn semantics_for_document(
                     axioms: parsed.axioms.clone(),
                     namespace_rows: parsed.namespace_rows.clone(),
                     imports: parsed.import_rows.clone(),
-                    bridge_warning: None,
+                    bridge_warning: Some(Diagnostic {
+                        code: DiagnosticCode::OwlBridgeFailed,
+                        severity: DiagnosticSeverity::Warning,
+                        message: format!(
+                            "Horned-OWL OWL/XML bridge failed; using parser-only entities and axioms: {e}"
+                        ),
+                        file: path.to_path_buf(),
+                        range: SourceLocation::default(),
+                        entity_iri: None,
+                        quick_fix: None,
+                        plugin_id: None,
+                        plugin_code: None,
+                    }),
+                    rdf_quads: Vec::new(),
                 })
             }
         };
@@ -722,7 +837,10 @@ fn semantics_for_document(
             axioms: owl.bridge.axioms,
             namespace_rows: owl.bridge.namespace_rows,
             imports: owl.bridge.imports,
-            bridge_warning: None,
+            bridge_warning: owl
+                .load_warning
+                .map(|message| incomplete_bridge_warning(path, message)),
+            rdf_quads: Vec::new(),
         }),
         Err(e) => {
             eprintln!(
@@ -748,6 +866,7 @@ fn semantics_for_document(
                     plugin_id: None,
                     plugin_code: None,
                 }),
+                rdf_quads: Vec::new(),
             })
         }
     }
@@ -783,11 +902,13 @@ fn load_quads_into_store(
 }
 
 fn blank_id_prefix(doc_id: &str) -> String {
-    let sanitized: String = doc_id
-        .chars()
-        .map(|c| if c.is_ascii_alphanumeric() { c } else { '_' })
-        .collect();
-    if sanitized.is_empty() { "doc".to_string() } else { sanitized }
+    let sanitized: String =
+        doc_id.chars().map(|c| if c.is_ascii_alphanumeric() { c } else { '_' }).collect();
+    if sanitized.is_empty() {
+        "doc".to_string()
+    } else {
+        sanitized
+    }
 }
 
 fn remap_blank_node(
@@ -905,6 +1026,113 @@ pub(crate) fn merge_scan_roots(workspace: &Path, extra_roots: &[PathBuf]) -> Vec
 }
 
 #[cfg(test)]
+mod merge_entity_tests {
+    use super::*;
+    use ontocore_core::EntityKind;
+
+    fn entity(obo_id: Option<&str>) -> Entity {
+        Entity {
+            iri: "http://example.org/A".into(),
+            short_name: "A".into(),
+            kind: EntityKind::Class,
+            ontology_id: "doc".into(),
+            obo_id: obo_id.map(str::to_string),
+            ..Default::default()
+        }
+    }
+
+    #[test]
+    fn merge_entity_takes_incoming_obo_id_when_missing() {
+        let mut existing = entity(None);
+        merge_entity(&mut existing, &entity(Some("TEST:0000001")));
+        assert_eq!(existing.obo_id.as_deref(), Some("TEST:0000001"));
+    }
+
+    #[test]
+    fn merge_entity_keeps_existing_obo_id_when_incoming_missing() {
+        let mut existing = entity(Some("TEST:0000001"));
+        merge_entity(&mut existing, &entity(None));
+        assert_eq!(existing.obo_id.as_deref(), Some("TEST:0000001"));
+    }
+
+    #[test]
+    fn merge_entity_keeps_first_obo_id_on_conflict() {
+        let mut existing = entity(Some("TEST:0000001"));
+        merge_entity(&mut existing, &entity(Some("TEST:0000002")));
+        assert_eq!(existing.obo_id.as_deref(), Some("TEST:0000001"));
+    }
+
+    #[test]
+    fn merge_entity_or_merges_property_characteristics() {
+        let mut existing = Entity {
+            iri: "http://example.org/p".into(),
+            short_name: "p".into(),
+            kind: EntityKind::ObjectProperty,
+            ontology_id: "doc-a".into(),
+            characteristics: ontocore_core::PropertyCharacteristics {
+                functional: true,
+                ..Default::default()
+            },
+            ..Default::default()
+        };
+        let incoming = Entity {
+            iri: "http://example.org/p".into(),
+            short_name: "p".into(),
+            kind: EntityKind::ObjectProperty,
+            ontology_id: "doc-b".into(),
+            characteristics: ontocore_core::PropertyCharacteristics {
+                transitive: true,
+                ..Default::default()
+            },
+            ..Default::default()
+        };
+        merge_entity(&mut existing, &incoming);
+        assert!(existing.characteristics.functional);
+        assert!(existing.characteristics.transitive);
+        assert!(!existing.characteristics.symmetric);
+    }
+
+    #[test]
+    fn index_merge_preserves_obo_id_from_later_document() {
+        let dir = tempfile::tempdir().unwrap();
+        // Turtle declares the IRI first without an OBO id.
+        std::fs::write(
+            dir.path().join("a.ttl"),
+            r#"@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+<http://purl.obolibrary.org/obo/TEST_0000001> a owl:Class ;
+    rdfs:label "From Turtle" .
+"#,
+        )
+        .unwrap();
+        // OBO document contributes the same IRI with an obo_id.
+        std::fs::write(
+            dir.path().join("b.obo"),
+            "format-version: 1.2\nontology: test\n\n[Term]\nid: TEST:0000001\nname: From OBO\n",
+        )
+        .unwrap();
+
+        let catalog = IndexBuilder::new().workspace(dir.path()).build().expect("build");
+        let entity = catalog
+            .data()
+            .entities
+            .iter()
+            .find(|e| e.iri.contains("TEST_0000001") || e.obo_id.as_deref() == Some("TEST:0000001"))
+            .expect("merged entity");
+        assert_eq!(
+            entity.obo_id.as_deref(),
+            Some("TEST:0000001"),
+            "merged catalog entity must retain obo_id from the OBO document"
+        );
+        assert!(
+            entity.labels.iter().any(|l| l == "From Turtle" || l == "From OBO"),
+            "labels should still merge: {:?}",
+            entity.labels
+        );
+    }
+}
+
+#[cfg(test)]
 mod blank_remap_tests {
     use super::*;
     use oxigraph::model::NamedNode;
@@ -960,8 +1188,12 @@ ex:p2 a owl:ObjectProperty .
 
         let mut fused = 0usize;
         let mut intact_a = 0usize;
-        for quad in store.quads_for_pattern(None, Some(on_property.as_ref()), Some(p1.as_ref().into()), None)
-        {
+        for quad in store.quads_for_pattern(
+            None,
+            Some(on_property.as_ref()),
+            Some(p1.as_ref().into()),
+            None,
+        ) {
             let quad = quad.expect("store iterate");
             let fused_quad = Quad {
                 subject: quad.subject.clone(),
@@ -1058,6 +1290,59 @@ mod incremental_tests {
         assert!(
             second.data().entities.len() > first.data().entities.len(),
             "edited ontology should add entities"
+        );
+    }
+
+    #[test]
+    fn owx_workspace_populates_sparql_store() {
+        let dir = tempfile::tempdir().unwrap();
+        let owx = include_str!("../../../examples/protege-roundtrip/example.owx");
+        std::fs::write(dir.path().join("example.owx"), owx).unwrap();
+
+        let catalog = IndexBuilder::new().workspace(dir.path()).build().expect("build owx");
+        assert!(catalog.find_entity("http://example.org/org#Department").is_some());
+        assert!(
+            catalog.data().stats().triple_count > 0,
+            "OWL/XML workspace must load RDF quads into the SPARQL store"
+        );
+
+        let mut found = false;
+        for quad in catalog.store().quads_for_pattern(None, None, None, None) {
+            let q = quad.expect("quad");
+            if q.subject.to_string().contains("Department")
+                || q.object.to_string().contains("Department")
+            {
+                found = true;
+                break;
+            }
+        }
+        assert!(found, "expected Department IRI in Oxigraph store");
+    }
+
+    #[test]
+    fn owx_horned_load_failure_surfaces_bridge_diagnostic() {
+        let dir = tempfile::tempdir().unwrap();
+        // Recognized as OWL/XML by extension; Horned OWX reader must fail.
+        std::fs::write(
+            dir.path().join("broken.owx"),
+            "<?xml version=\"1.0\"?>\n<NotAnOntology>garbage</NotAnOntology>\n",
+        )
+        .unwrap();
+
+        let catalog = IndexBuilder::new().workspace(dir.path()).build().expect("build");
+        let has_bridge = catalog.data().diagnostics.iter().any(|d| {
+            d.code == DiagnosticCode::OwlBridgeFailed
+                && d.file.file_name().and_then(|n| n.to_str()) == Some("broken.owx")
+        });
+        assert!(
+            has_bridge,
+            "OWX Horned failure must emit OwlBridgeFailed; got {:?}",
+            catalog
+                .data()
+                .diagnostics
+                .iter()
+                .map(|d| (&d.code, d.message.as_str()))
+                .collect::<Vec<_>>()
         );
     }
 }

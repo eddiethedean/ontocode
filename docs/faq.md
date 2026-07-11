@@ -25,7 +25,7 @@ See [What ships today](SHIPPED.md) for the canonical capability matrix.
 
 **Is OntoCode production-ready?**
 
-**Pilot-ready for many OWL/OBO workflows in VS Code and CI** — not a full Protégé replacement for every profile. Use [What ships today](SHIPPED.md) for the capability matrix, [Production readiness](guides/production-readiness.md) for pilot vs production tiers, and [Protégé decision guide](guides/protege-decision.md) for gap analysis. Pin releases in CI (`--version 0.17.0`) and review [API stability](guides/api-stability.md) before embedding Rust libraries.
+**Pilot-ready for many OWL/OBO workflows in VS Code and CI** — not a full Protégé replacement for every profile. Use [What ships today](SHIPPED.md) and [Known limitations](known-limitations.md) for the capability matrix, [Production readiness](guides/production-readiness.md) for pilot vs production tiers, and [Protégé decision guide](guides/protege-decision.md) for gap analysis. Pin releases in CI (`--version 0.17.0`) and review [API stability](guides/api-stability.md) before embedding Rust libraries.
 
 ## Installation
 
@@ -86,7 +86,7 @@ It is a legacy setting. Indexing is driven by the language server on workspace o
 
 **What SQL is supported?**
 
-A subset: single-table `SELECT`, `FROM`, `WHERE` with `=`, `!=`, `AND`, `OR`, and boolean columns. No `JOIN`, `GROUP BY`, `ORDER BY`, or `LIMIT`. See [sql-reference.md](sql-reference.md).
+A **catalog SQL (subset)**: single-table `SELECT`, `FROM`, `WHERE` with `=`, `!=`, `AND`, `OR`, and boolean columns. No `JOIN`, `GROUP BY`, `ORDER BY`, or `LIMIT`. See [sql-reference.md](sql-reference.md) and [Known limitations](known-limitations.md).
 
 **How do I run SPARQL?**
 
@@ -144,7 +144,7 @@ Exits non-zero when unsatisfiable classes are found. See [CI integration](ci-int
 
 **Why does `dl` or `auto` fail?**
 
-If classification fails, check that your ontology is within [workspace limits](workspace-limits.md) and that constructs are supported by OntoLogos 1.x for the selected profile. Use `el`, `rl`, or `rdfs` for lighter-weight profiles when DL is not required.
+If classification fails, check that your ontology is within [workspace limits](workspace-limits.md) and that constructs are supported by **Ontologos** 1.x for the selected profile. Use `el`, `rl`, or `rdfs` for lighter-weight profiles when DL is not required.
 
 **Why is explanation empty for a class?**
 
@@ -154,7 +154,7 @@ Explanations require an unsatisfiable class and a prior reasoner run (or success
 
 **When did full DL reasoning ship?**
 
-EL/RL/RDFS shipped in **v0.6.0** (OntoLogos 0.9.0). Full OWL 2 DL classification (`dl` / `auto`) is **available in v0.9.0+** via **OntoLogos 1.x** (HermiT parity). Explanations remain EL-first. See [Reasoner guide](guides/reasoner.md).
+EL/RL/RDFS shipped in **v0.6.0** (Ontologos 0.9.0). Full OWL 2 DL classification (`dl` / `auto`) is **available in v0.9.0+** via **Ontologos** 1.x (HermiT parity). Explanations remain EL-first. See [Reasoner guide](guides/reasoner.md).
 
 **How does this compare to Protégé?**
 

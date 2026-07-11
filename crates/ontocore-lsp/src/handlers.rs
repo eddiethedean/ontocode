@@ -16,17 +16,18 @@ use lsp_types::{
     CodeActionProviderCapability, CompletionOptions, DocumentChanges, DocumentSymbol,
     DocumentSymbolParams, DocumentSymbolResponse, GotoDefinitionParams, GotoDefinitionResponse,
     Hover, HoverContents, HoverParams, HoverProviderCapability, InitializeParams, InitializeResult,
-    Location, MarkupContent, MarkupKind, OneOf, Position, Range, ReferenceParams, RenameParams,
-    SemanticTokensParams, SemanticTokensServerCapabilities, ServerCapabilities, SymbolInformation,
-    SymbolKind, TextDocumentEdit, TextDocumentSyncCapability, TextDocumentSyncKind, TextEdit, Uri,
-    WorkspaceEdit, WorkspaceFoldersServerCapabilities, WorkspaceServerCapabilities,
+    Location, MarkupContent, MarkupKind, OneOf, Position, PrepareRenameResponse, Range,
+    ReferenceParams, RenameOptions, RenameParams, SemanticTokensParams,
+    SemanticTokensServerCapabilities, ServerCapabilities, SymbolInformation, SymbolKind,
+    TextDocumentEdit, TextDocumentPositionParams, TextDocumentSyncCapability, TextDocumentSyncKind,
+    TextEdit, Uri, WorkspaceEdit, WorkspaceFoldersServerCapabilities, WorkspaceServerCapabilities,
     WorkspaceSymbolParams, WorkspaceSymbolResponse,
 };
 use ontocore_catalog::{GraphBuilder, GraphRequest, IndexBuilder, OntologyCatalog};
 use ontocore_core::{validate_workspace_scope_any, EntityKind, OntologyFormat};
 use ontocore_diff::{
-    apply_unsat_diff, catalog_at_git_ref, diff_catalogs, diff_directories, diff_git_refs,
-    discover_repo_root, format_diff_pr_summary, DiffResult,
+    apply_unsat_diff, catalog_at_git_ref, catalog_at_worktree, diff_catalogs,
+    diff_git_refs_with_catalogs, discover_repo_root, format_diff_pr_summary, DiffResult,
 };
 use ontocore_reasoner::{
     classify, explain_alternatives, ExplanationRequest, ReasonerId, ReasonerSnapshot,
@@ -70,7 +71,10 @@ pub fn handle_initialize(state: &ServerState, params: InitializeParams) -> Initi
             document_symbol_provider: Some(OneOf::Left(true)),
             workspace_symbol_provider: Some(OneOf::Left(true)),
             references_provider: Some(OneOf::Left(true)),
-            rename_provider: Some(OneOf::Left(true)),
+            rename_provider: Some(OneOf::Right(RenameOptions {
+                prepare_provider: Some(true),
+                work_done_progress_options: Default::default(),
+            })),
             completion_provider: Some(CompletionOptions {
                 trigger_characters: Some(vec![":".to_string(), "<".to_string(), "@".to_string()]),
                 ..Default::default()
@@ -623,17 +627,36 @@ pub fn handle_create_ontology(
     params: crate::protocol::CreateOntologyParams,
 ) -> Result<crate::protocol::CreateOntologyResult, LspErrorPayload> {
     use std::io::Write;
-    let path = std::path::PathBuf::from(&params.path);
     let roots = state.workspace_roots();
     if roots.is_empty() {
         return Err(LspErrorPayload::invalid_params("workspace not initialized".into()));
     }
-    validate_workspace_scope_any(&path, &roots).map_err(LspErrorPayload::invalid_params)?;
+    let path = validate_workspace_scope_any(std::path::Path::new(&params.path), &roots)
+        .map_err(LspErrorPayload::invalid_params)?;
     if path.exists() {
         return Err(LspErrorPayload::invalid_params(format!(
             "file already exists: {}",
             path.display()
         )));
+    }
+    if !ontocore_owl::is_safe_iri(&params.ontology_iri) {
+        return Err(LspErrorPayload::invalid_params(format!(
+            "ontology IRI contains characters that cannot be safely written: {:?}",
+            params.ontology_iri
+        )));
+    }
+    if let Some(version_iri) = &params.version_iri {
+        if !ontocore_owl::is_safe_iri(version_iri) {
+            return Err(LspErrorPayload::invalid_params(format!(
+                "version IRI contains characters that cannot be safely written: {version_iri:?}"
+            )));
+        }
+    }
+    if let Some(prefixes) = &params.prefixes {
+        for (prefix, iri) in prefixes {
+            ontocore_owl::validate_prefix(prefix, iri)
+                .map_err(|e| LspErrorPayload::invalid_params(e.to_string()))?;
+        }
     }
     if let Some(parent) = path.parent() {
         std::fs::create_dir_all(parent)
@@ -643,7 +666,8 @@ pub fn handle_create_ontology(
         .format
         .as_deref()
         .unwrap_or_else(|| path.extension().and_then(|e| e.to_str()).unwrap_or("ttl"));
-    let content = match format {
+    let format_key = format.to_ascii_lowercase();
+    let content = match format_key.as_str() {
         "obo" => {
             let mut s = format!("format-version: 1.2\nontology: {}\n", params.ontology_iri);
             if let Some(v) = &params.version_iri {
@@ -652,7 +676,7 @@ pub fn handle_create_ontology(
             s.push('\n');
             s
         }
-        _ => {
+        "ttl" | "turtle" => {
             let mut s = String::from(
                 "@prefix owl: <http://www.w3.org/2002/07/owl#> .\n\
                  @prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .\n\
@@ -672,6 +696,11 @@ pub fn handle_create_ontology(
             s.push_str(" .\n");
             s
         }
+        other => {
+            return Err(LspErrorPayload::invalid_params(format!(
+                "unsupported createOntology format {other:?}; supported: ttl, turtle, obo"
+            )));
+        }
     };
     let mut file =
         std::fs::File::create(&path).map_err(|e| LspErrorPayload::index_failed(e.to_string()))?;
@@ -686,11 +715,14 @@ pub fn handle_export_ontology(
     state: &ServerState,
     params: crate::protocol::ExportOntologyParams,
 ) -> Result<crate::protocol::ExportOntologyResult, LspErrorPayload> {
-    let source = std::path::PathBuf::from(&params.source_path);
-    let output = std::path::PathBuf::from(&params.output_path);
     let roots = state.workspace_roots();
-    validate_workspace_scope_any(&source, &roots).map_err(LspErrorPayload::invalid_params)?;
-    validate_workspace_scope_any(&output, &roots).map_err(LspErrorPayload::invalid_params)?;
+    if roots.is_empty() {
+        return Err(LspErrorPayload::invalid_params("workspace not initialized".into()));
+    }
+    let source = validate_workspace_scope_any(std::path::Path::new(&params.source_path), &roots)
+        .map_err(LspErrorPayload::invalid_params)?;
+    let output = validate_workspace_scope_any(std::path::Path::new(&params.output_path), &roots)
+        .map_err(LspErrorPayload::invalid_params)?;
     match ontocore_robot::robot_convert(None, &source, &output) {
         Ok(out) => Ok(crate::protocol::ExportOntologyResult {
             output_path: output.display().to_string(),
@@ -700,6 +732,10 @@ pub fn handle_export_ontology(
         Err(e) => {
             // Fallback: copy Turtle/OBO as-is when ROBOT is unavailable.
             if source.extension() == output.extension() {
+                if let Some(parent) = output.parent() {
+                    std::fs::create_dir_all(parent)
+                        .map_err(|err| LspErrorPayload::robot_failed(err.to_string()))?;
+                }
                 std::fs::copy(&source, &output)
                     .map_err(|err| LspErrorPayload::robot_failed(err.to_string()))?;
                 Ok(crate::protocol::ExportOntologyResult {
@@ -746,7 +782,12 @@ pub fn handle_delete_impact(
     let mut referencing = std::collections::BTreeSet::new();
     let mut warnings = Vec::new();
     for u in &usages {
-        if u.referenced_iri != params.entity_iri {
+        // `referenced_iri` is always the search target; `iri` is the referencer (or the
+        // target itself for declarations / subject-side axioms). Collect distinct
+        // referencers, excluding the entity's own declaration and self-usages.
+        if !matches!(u.kind, ontocore_refactor::UsageKind::EntityDeclaration)
+            && u.iri != params.entity_iri
+        {
             referencing.insert(u.iri.clone());
         }
         if matches!(u.kind, ontocore_refactor::UsageKind::Import) {
@@ -850,67 +891,104 @@ pub fn handle_semantic_diff(
         return Err(LspErrorPayload::invalid_params("workspace not initialized".to_string()));
     }
 
-    let mut diff = if let (Some(left), Some(right)) = (&params.left_path, &params.right_path) {
+    if let (Some(left), Some(right)) = (&params.left_path, &params.right_path) {
         let left = validate_workspace_scope_any(Path::new(left), &roots)
             .map_err(LspErrorPayload::invalid_params)?;
         let right = validate_workspace_scope_any(Path::new(right), &roots)
             .map_err(LspErrorPayload::invalid_params)?;
-        diff_directories(&left, &right)
-            .map_err(|e| LspErrorPayload::invalid_params(e.to_string()))?
-    } else {
-        let left_ref = params.left_ref.as_deref().unwrap_or("HEAD");
-        let right_ref = params.right_ref.as_deref().unwrap_or("WORKTREE");
-        let repo_root = discover_repo_root(&roots).ok_or_else(|| {
-            LspErrorPayload::invalid_params("no git repository found in workspace".to_string())
+        let left_cat = IndexBuilder::new()
+            .workspace(&left)
+            .build()
+            .map_err(|e| LspErrorPayload::invalid_params(e.to_string()))?;
+        let right_cat = IndexBuilder::new()
+            .workspace(&right)
+            .build()
+            .map_err(|e| LspErrorPayload::invalid_params(e.to_string()))?;
+        let mut diff = diff_catalogs(&left_cat, &right_cat);
+        if params.reasoner {
+            enrich_diff_with_reasoner(state, &mut diff, &left_cat, &right_cat)?;
+        }
+        return Ok(semantic_diff_result(diff, params.format.as_deref()));
+    }
+
+    let left_ref = params.left_ref.as_deref().unwrap_or("HEAD");
+    let right_ref = params.right_ref.as_deref().unwrap_or("WORKTREE");
+    let repo_root = discover_repo_root(&roots).ok_or_else(|| {
+        LspErrorPayload::invalid_params("no git repository found in workspace".to_string())
+    })?;
+
+    if ontocore_diff::is_indexed_catalog_ref(left_ref) && ontocore_diff::is_worktree_ref(right_ref)
+    {
+        return state
+            .with_catalog(|head| {
+                let worktree = build_lsp_worktree_catalog(state)?;
+                let mut diff = diff_catalogs(head, &worktree);
+                if params.reasoner {
+                    enrich_diff_with_reasoner(state, &mut diff, head, &worktree)?;
+                }
+                Ok(semantic_diff_result(diff, params.format.as_deref()))
+            })
+            .ok_or_else(LspErrorPayload::not_indexed)?;
+    }
+
+    if ontocore_diff::is_indexed_catalog_ref(left_ref)
+        && ontocore_diff::is_indexed_catalog_ref(right_ref)
+    {
+        return state
+            .with_catalog(|catalog| {
+                let mut diff = diff_catalogs(catalog, catalog);
+                if params.reasoner {
+                    enrich_diff_with_reasoner(state, &mut diff, catalog, catalog)?;
+                }
+                Ok(semantic_diff_result(diff, params.format.as_deref()))
+            })
+            .ok_or_else(LspErrorPayload::not_indexed)?;
+    }
+
+    if ontocore_diff::is_indexed_catalog_ref(left_ref) {
+        let other = catalog_at_git_ref(&repo_root, right_ref)
+            .map_err(|e| LspErrorPayload::invalid_params(e.to_string()))?;
+        return state
+            .with_catalog(|indexed| {
+                let mut diff = diff_catalogs(&other, indexed);
+                if params.reasoner {
+                    enrich_diff_with_reasoner(state, &mut diff, &other, indexed)?;
+                }
+                Ok(semantic_diff_result(diff, params.format.as_deref()))
+            })
+            .ok_or_else(LspErrorPayload::not_indexed)?;
+    }
+
+    if ontocore_diff::is_indexed_catalog_ref(right_ref) {
+        let base = catalog_at_git_ref(&repo_root, left_ref)
+            .map_err(|e| LspErrorPayload::invalid_params(e.to_string()))?;
+        return state
+            .with_catalog(|indexed| {
+                let mut diff = diff_catalogs(&base, indexed);
+                if params.reasoner {
+                    enrich_diff_with_reasoner(state, &mut diff, &base, indexed)?;
+                }
+                Ok(semantic_diff_result(diff, params.format.as_deref()))
+            })
+            .ok_or_else(LspErrorPayload::not_indexed)?;
+    }
+
+    let (mut diff, left_cat, right_cat) = if ontocore_diff::is_worktree_ref(right_ref) {
+        let left = catalog_at_git_ref(&repo_root, left_ref)
+            .map_err(|e| LspErrorPayload::invalid_params(e.to_string()))?;
+        let right = build_lsp_worktree_catalog(state).or_else(|_| {
+            catalog_at_worktree(&repo_root)
+                .map_err(|e| LspErrorPayload::invalid_params(e.to_string()))
         })?;
-        if ontocore_diff::is_indexed_catalog_ref(left_ref)
-            && ontocore_diff::is_worktree_ref(right_ref)
-        {
-            return state
-                .with_catalog(|head| {
-                    let worktree = build_lsp_worktree_catalog(state)?;
-                    let mut diff = diff_catalogs(head, &worktree);
-                    if params.reasoner {
-                        enrich_diff_with_reasoner(state, &mut diff, head, &worktree)?;
-                    }
-                    Ok(semantic_diff_result(diff, params.format.as_deref()))
-                })
-                .ok_or_else(LspErrorPayload::not_indexed)?;
-        }
-        if ontocore_diff::is_indexed_catalog_ref(left_ref) {
-            state
-                .with_catalog(|head| {
-                    if ontocore_diff::is_indexed_catalog_ref(right_ref) {
-                        Ok(diff_catalogs(head, head))
-                    } else {
-                        let base = catalog_at_git_ref(&repo_root, right_ref)
-                            .map_err(|e| LspErrorPayload::invalid_params(e.to_string()))?;
-                        Ok(diff_catalogs(&base, head))
-                    }
-                })
-                .ok_or_else(LspErrorPayload::not_indexed)??
-        } else if ontocore_diff::is_indexed_catalog_ref(right_ref) {
-            state
-                .with_catalog(|head| {
-                    let base = catalog_at_git_ref(&repo_root, left_ref)
-                        .map_err(|e| LspErrorPayload::invalid_params(e.to_string()))?;
-                    Ok(diff_catalogs(&base, head))
-                })
-                .ok_or_else(LspErrorPayload::not_indexed)??
-        } else {
-            diff_git_refs(&repo_root, left_ref, right_ref)
-                .map_err(|e| LspErrorPayload::invalid_params(e.to_string()))?
-        }
+        let diff = diff_catalogs(&left, &right);
+        (diff, left, right)
+    } else {
+        diff_git_refs_with_catalogs(&repo_root, left_ref, right_ref)
+            .map_err(|e| LspErrorPayload::invalid_params(e.to_string()))?
     };
 
     if params.reasoner {
-        if let Ok(worktree) = build_lsp_worktree_catalog(state) {
-            if let Some(result) = state
-                .with_catalog(|head| enrich_diff_with_reasoner(state, &mut diff, head, &worktree))
-            {
-                result?;
-            }
-        }
+        enrich_diff_with_reasoner(state, &mut diff, &left_cat, &right_cat)?;
     }
 
     Ok(semantic_diff_result(diff, params.format.as_deref()))
@@ -1004,77 +1082,121 @@ pub fn handle_run_robot(
 
 /// Reject ROBOT file operands that escape the workspace jail.
 ///
-/// Handles separate `--input path`, `--input=path`, and attached short forms (`-i/path`).
+/// Handles separate `--input path`, `--input=path`, attached short forms (`-i/path`),
+/// and multi-operand flags such as `--query <query> <output>`.
 fn jail_robot_path_args(
     workspace_roots: &[std::path::PathBuf],
     args: &[String],
 ) -> Result<(), String> {
-    let long_path_flags = [
-        "--input",
-        "--output",
-        "--report",
-        "--catalog",
-        "--ontology",
-        "--left",
-        "--right",
-        "--merge-input",
-    ];
-    let short_path_flags = ["-i", "-o", "-c"];
-    let mut expect_path = false;
-    for arg in args.iter().skip(1) {
-        if expect_path {
-            expect_path = false;
-            ontocore_core::validate_workspace_scope_any(
-                std::path::Path::new(arg),
-                workspace_roots,
-            )?;
-            continue;
+    /// How many path operands a flag still requires / may accept.
+    #[derive(Clone, Copy)]
+    struct PathExpect {
+        /// Must still consume this many paths before the next flag or end.
+        min: usize,
+        /// May still consume this many paths (consecutive non-flag args).
+        max: usize,
+    }
+
+    fn path_expect_for_long_flag(flag: &str) -> Option<PathExpect> {
+        match flag {
+            "--input" | "--output" | "--report" | "--catalog" | "--ontology" | "--left"
+            | "--right" | "--merge-input" | "--output-dir" | "--update" => {
+                Some(PathExpect { min: 1, max: 1 })
+            }
+            // ROBOT: --query/--select/--construct take query file + output file.
+            "--query" | "--select" | "--construct" => Some(PathExpect { min: 1, max: 2 }),
+            // ROBOT: --queries takes one or more query files until the next flag.
+            "--queries" => Some(PathExpect { min: 1, max: usize::MAX }),
+            _ => None,
         }
-        if let Some((flag, value)) = arg.split_once('=') {
-            if long_path_flags.contains(&flag) {
-                ontocore_core::validate_workspace_scope_any(
-                    std::path::Path::new(value),
-                    workspace_roots,
-                )?;
+    }
+
+    fn path_expect_for_short_flag(flag: &str) -> Option<PathExpect> {
+        match flag {
+            "-i" | "-o" | "-c" | "-u" => Some(PathExpect { min: 1, max: 1 }),
+            "-q" => Some(PathExpect { min: 1, max: 2 }),
+            _ => None,
+        }
+    }
+
+    fn jail_path(workspace_roots: &[std::path::PathBuf], value: &str) -> Result<(), String> {
+        ontocore_core::validate_workspace_scope_any(std::path::Path::new(value), workspace_roots)
+            .map(|_| ())
+    }
+
+    let mut expect: Option<PathExpect> = None;
+    for arg in args.iter().skip(1) {
+        if let Some(pending) = expect.as_mut() {
+            if arg.starts_with('-') {
+                if pending.min > 0 {
+                    return Err("ROBOT path flag is missing a path argument".to_string());
+                }
+                expect = None;
+            } else {
+                jail_path(workspace_roots, arg)?;
+                pending.min = pending.min.saturating_sub(1);
+                pending.max = pending.max.saturating_sub(1);
+                if pending.max == 0 {
+                    expect = None;
+                }
                 continue;
             }
         }
-        if long_path_flags.contains(&arg.as_str()) || short_path_flags.contains(&arg.as_str()) {
-            expect_path = true;
+
+        if let Some((flag, value)) = arg.split_once('=') {
+            if path_expect_for_long_flag(flag).is_some() {
+                jail_path(workspace_roots, value)?;
+                continue;
+            }
+        }
+
+        if let Some(pending) = path_expect_for_long_flag(arg) {
+            expect = Some(pending);
             continue;
         }
-        let attached_short = short_path_flags.iter().find_map(|flag| {
+        if let Some(pending) = path_expect_for_short_flag(arg) {
+            expect = Some(pending);
+            continue;
+        }
+
+        let attached_short = ["-i", "-o", "-c", "-u", "-q"].iter().find_map(|flag| {
             if arg.starts_with(flag)
                 && arg.len() > flag.len()
                 && !arg[flag.len()..].starts_with('-')
             {
-                Some(&arg[flag.len()..])
+                Some((*flag, &arg[flag.len()..]))
             } else {
                 None
             }
         });
-        if let Some(value) = attached_short {
-            ontocore_core::validate_workspace_scope_any(
-                std::path::Path::new(value),
-                workspace_roots,
-            )?;
+        if let Some((flag, value)) = attached_short {
+            jail_path(workspace_roots, value)?;
+            // Attached short form supplies the first path; optional second path may follow.
+            if let Some(mut pending) = path_expect_for_short_flag(flag) {
+                pending.min = pending.min.saturating_sub(1);
+                pending.max = pending.max.saturating_sub(1);
+                if pending.max > 0 {
+                    expect = Some(pending);
+                }
+            }
             continue;
         }
+
         // Positional path-like args (contain / or end with ontology extensions).
         let looks_like_path = arg.contains('/')
             || arg.contains('\\')
             || arg.ends_with(".ttl")
             || arg.ends_with(".owl")
             || arg.ends_with(".obo")
-            || arg.ends_with(".rdf");
+            || arg.ends_with(".rdf")
+            || arg.ends_with(".sparql")
+            || arg.ends_with(".rq")
+            || arg.ends_with(".ru");
         if looks_like_path && !arg.starts_with('-') {
-            ontocore_core::validate_workspace_scope_any(
-                std::path::Path::new(arg),
-                workspace_roots,
-            )?;
+            jail_path(workspace_roots, arg)?;
         }
     }
-    if expect_path {
+    if expect.is_some_and(|e| e.min > 0) {
         return Err("ROBOT path flag is missing a path argument".to_string());
     }
     Ok(())
@@ -1282,10 +1404,12 @@ pub fn handle_apply_axiom_patch(
                 }
                 if state.is_document_open(&document_path) {
                     if let Err(e) = state.set_document_text(document_path.clone(), text.clone()) {
-                        if format == OntologyFormat::Obo {
-                            let _ = ontocore_obo::atomic_write(&document_path, &source);
-                        } else {
-                            let _ = ontocore_owl::atomic_write(&document_path, &source);
+                        if let Err(rollback_err) =
+                            atomic_write_for_format(format, &document_path, &source)
+                        {
+                            return Err(LspErrorPayload::patch_invalid(format!(
+                                "buffer update failed ({e}); disk rollback also failed: {rollback_err}"
+                            )));
                         }
                         return Err(LspErrorPayload::patch_invalid(e));
                     }
@@ -1853,16 +1977,25 @@ pub fn handle_apply_refactor(
                     if let Err(e) =
                         state.set_document_text(change.path.clone(), change.preview_text.clone())
                     {
+                        let mut rollback_errors = Vec::new();
                         for rollback in &server_plan.changes {
                             if rollback.preview_text != rollback.original_text {
-                                let _ = ontocore_owl::atomic_write(
-                                    &rollback.path,
-                                    &rollback.original_text,
-                                );
+                                if let Err(re) =
+                                    atomic_write_for_path(&rollback.path, &rollback.original_text)
+                                {
+                                    rollback_errors
+                                        .push(format!("{}: {re}", rollback.path.display()));
+                                }
                             }
                         }
                         for (path, text) in buffer_snapshots {
                             let _ = state.set_document_text(path, text);
+                        }
+                        if !rollback_errors.is_empty() {
+                            return Err(LspErrorPayload::refactor_failed(format!(
+                                "buffer update failed ({e}); disk rollback also failed: {}",
+                                rollback_errors.join("; ")
+                            )));
                         }
                         return Err(LspErrorPayload::refactor_failed(e));
                     }
@@ -1928,6 +2061,16 @@ pub fn handle_rename(
         LspErrorPayload::refactor_failed("rename produced no file changes".to_string())
     })?;
     Ok(Some(edit))
+}
+
+pub fn handle_prepare_rename(
+    state: &ServerState,
+    params: TextDocumentPositionParams,
+) -> Option<PrepareRenameResponse> {
+    let path = lsp_document_path(state, &params.text_document.uri)?;
+    let content = state.document_text(&path)?;
+    let (range, placeholder) = rename_range_at_position(&content, params.position)?;
+    Some(PrepareRenameResponse::RangeWithPlaceholder { range, placeholder })
 }
 
 fn validate_refactor_plan_any_roots(
@@ -2017,6 +2160,25 @@ fn full_document_workspace_edit(
     new_text: &str,
 ) -> Option<WorkspaceEdit> {
     full_document_workspace_edit_labeled(state, path, new_text, "OntoCode semantic edit")
+}
+
+/// Format-aware atomic write used by apply and rollback paths.
+fn atomic_write_for_format(
+    format: OntologyFormat,
+    path: &std::path::Path,
+    contents: &str,
+) -> Result<(), String> {
+    if format == OntologyFormat::Obo {
+        ontocore_obo::atomic_write(path, contents).map_err(|e| e.to_string())
+    } else {
+        ontocore_owl::atomic_write(path, contents).map_err(|e| e.to_string())
+    }
+}
+
+fn atomic_write_for_path(path: &std::path::Path, contents: &str) -> Result<(), String> {
+    let format =
+        OntologyFormat::from_extension(path.extension().and_then(|e| e.to_str()).unwrap_or(""));
+    atomic_write_for_format(format, path, contents)
 }
 
 fn full_document_workspace_edit_labeled(
@@ -2331,6 +2493,17 @@ pub fn handle_standard_request(
                 Err(err) => StandardRequestOutcome::LspError(err),
             }
         }
+        "textDocument/prepareRename" => {
+            let Ok(params) = serde_json::from_value(params.unwrap_or(Value::Null)) else {
+                return StandardRequestOutcome::InvalidParams(invalid_params("prepareRename"));
+            };
+            match handle_prepare_rename(state, params) {
+                Some(resp) => serde_json::to_value(resp)
+                    .map(StandardRequestOutcome::Ok)
+                    .unwrap_or(StandardRequestOutcome::Ok(Value::Null)),
+                None => StandardRequestOutcome::Ok(Value::Null),
+            }
+        }
         "textDocument/completion" => {
             let Ok(params) = serde_json::from_value(params.unwrap_or(Value::Null)) else {
                 return StandardRequestOutcome::InvalidParams(invalid_params("completion"));
@@ -2430,21 +2603,36 @@ fn entity_kind_to_symbol_kind(kind: EntityKind) -> SymbolKind {
 }
 
 fn iri_at_position(content: &str, position: Position) -> Option<String> {
+    let (_, token) = rename_range_at_position(content, position)?;
+    expand_iri_token(content, &token)
+}
+
+/// Returns the UTF-16 range of the renameable token under the cursor and its text placeholder.
+fn rename_range_at_position(content: &str, position: Position) -> Option<(Range, String)> {
     let lines: Vec<&str> = content.lines().collect();
     let line = lines.get(position.line as usize)?;
     let byte_col = utf16_offset_to_byte(line, position.character);
+    // Past end-of-line or not on a token: do not fall back to the first QName on the line (#13).
     if byte_col > line.len() {
-        return extract_iri_from_line(line);
+        return None;
     }
 
-    let token = extract_token_at(line, byte_col);
-    if token.contains(':') || token.starts_with("http") {
-        return expand_iri_token(content, &token);
+    let (start, end, token) = extract_token_span_at(line, byte_col);
+    if token.is_empty() {
+        return None;
     }
-    extract_iri_from_line(line)
+    if !(token.contains(':') || token.starts_with("http")) {
+        return None;
+    }
+    let _iri = expand_iri_token(content, &token)?;
+    let range = Range {
+        start: Position { line: position.line, character: byte_col_to_utf16(line, start) },
+        end: Position { line: position.line, character: byte_col_to_utf16(line, end) },
+    };
+    Some((range, token))
 }
 
-fn extract_token_at(line: &str, ch: usize) -> String {
+fn extract_token_span_at(line: &str, ch: usize) -> (usize, usize, String) {
     let bytes = line.as_bytes();
     let mut start = ch.min(bytes.len());
     let mut end = ch.min(bytes.len());
@@ -2456,24 +2644,11 @@ fn extract_token_at(line: &str, ch: usize) -> String {
         end += 1;
     }
 
-    line[start..end].to_string()
+    (start, end, line[start..end].to_string())
 }
 
 fn is_iri_char(b: u8) -> bool {
     b.is_ascii_alphanumeric() || matches!(b, b':' | b'#' | b'/' | b'_' | b'-')
-}
-
-fn extract_iri_from_line(line: &str) -> Option<String> {
-    for token in line.split_whitespace() {
-        let cleaned = token.trim_matches(|c: char| c == ';' || c == '.' || c == ',');
-        if cleaned.starts_with("http://") || cleaned.starts_with("https://") {
-            return Some(cleaned.to_string());
-        }
-        if cleaned.contains(':') && !cleaned.starts_with('@') {
-            return Some(cleaned.to_string());
-        }
-    }
-    None
 }
 
 fn expand_iri_token(content: &str, token: &str) -> Option<String> {
@@ -2510,6 +2685,49 @@ mod tests {
     }
 
     #[test]
+    fn iri_at_position_returns_none_past_line_end() {
+        let content = "ex:Person a owl:Class ;";
+        let pos = Position { line: 0, character: 80 };
+        assert!(iri_at_position(content, pos).is_none());
+    }
+
+    #[test]
+    fn iri_at_position_returns_none_on_trailing_whitespace() {
+        let content = "ex:Person a owl:Class ;  ";
+        let pos = Position { line: 0, character: (content.len() - 1) as u32 };
+        assert!(iri_at_position(content, pos).is_none());
+    }
+
+    #[test]
+    fn iri_at_position_resolves_token_under_cursor() {
+        let content = "@prefix ex: <http://example.org/people#> .\nex:Person a owl:Class ;";
+        let pos = Position { line: 1, character: 3 };
+        let iri = iri_at_position(content, pos).expect("iri");
+        assert_eq!(iri, "http://example.org/people#Person");
+    }
+
+    #[test]
+    fn prepare_rename_returns_range_on_qname() {
+        let content = "@prefix ex: <http://example.org/people#> .\nex:Person a owl:Class ;";
+        let pos = Position { line: 1, character: 3 };
+        let (range, placeholder) = rename_range_at_position(content, pos).expect("range");
+        assert_eq!(placeholder, "ex:Person");
+        assert_eq!(range.start.line, 1);
+        assert_eq!(range.start.character, 0);
+        assert_eq!(range.end.character, "ex:Person".len() as u32);
+    }
+
+    #[test]
+    fn prepare_rename_rejects_non_iri_token() {
+        let content = "@prefix ex: <http://example.org/people#> .\nex:Person a owl:Class ;";
+        let pos = Position { line: 1, character: 12 }; // on "owl"
+                                                       // "owl:Class" is a QName — move to "a"
+        let pos_a = Position { line: 1, character: 10 };
+        assert!(rename_range_at_position(content, pos_a).is_none());
+        let _ = pos;
+    }
+
+    #[test]
     fn expand_iri_token_ignores_prefix_in_comment() {
         let content = "# @prefix ex: <http://evil/> .\n@prefix ex: <http://example.org/people#> .\nex:Person a owl:Class .";
         let iri = expand_iri_token(content, "ex:Person").expect("expanded");
@@ -2527,5 +2745,105 @@ mod tests {
         let escaped = escape_markdown("[click](https://evil.example)");
         assert!(!escaped.contains("](https://"));
         assert!(escaped.contains("\\["));
+    }
+
+    #[test]
+    fn jail_robot_rejects_query_equals_outside_workspace() {
+        let dir = tempfile::tempdir().unwrap();
+        let roots = vec![dir.path().to_path_buf()];
+        let input = dir.path().join("in.ttl");
+        std::fs::write(&input, "").unwrap();
+        let args = vec![
+            "query".to_string(),
+            format!("--input={}", input.display()),
+            "--query=/tmp/evil.sparql".to_string(),
+        ];
+        let err = jail_robot_path_args(&roots, &args).unwrap_err();
+        assert!(err.contains("outside") || err.contains("workspace"), "unexpected error: {err}");
+    }
+
+    #[test]
+    fn jail_robot_rejects_update_equals_outside_workspace() {
+        let dir = tempfile::tempdir().unwrap();
+        let roots = vec![dir.path().to_path_buf()];
+        let input = dir.path().join("in.ttl");
+        std::fs::write(&input, "").unwrap();
+        let args = vec![
+            "query".to_string(),
+            format!("--input={}", input.display()),
+            "--update=/tmp/evil.ru".to_string(),
+        ];
+        assert!(jail_robot_path_args(&roots, &args).is_err());
+    }
+
+    #[test]
+    fn jail_robot_rejects_query_pair_outside_workspace() {
+        let dir = tempfile::tempdir().unwrap();
+        let roots = vec![dir.path().to_path_buf()];
+        let input = dir.path().join("in.ttl");
+        let query = dir.path().join("q.sparql");
+        std::fs::write(&input, "").unwrap();
+        std::fs::write(&query, "").unwrap();
+        let args = vec![
+            "query".to_string(),
+            format!("--input={}", input.display()),
+            "--query".to_string(),
+            query.display().to_string(),
+            "/tmp/evil-out.csv".to_string(),
+        ];
+        assert!(jail_robot_path_args(&roots, &args).is_err());
+    }
+
+    #[test]
+    fn jail_robot_accepts_in_workspace_query_pair() {
+        let dir = tempfile::tempdir().unwrap();
+        let roots = vec![dir.path().to_path_buf()];
+        let input = dir.path().join("in.ttl");
+        let query = dir.path().join("q.sparql");
+        let output = dir.path().join("out.csv");
+        std::fs::write(&input, "").unwrap();
+        std::fs::write(&query, "").unwrap();
+        let args = vec![
+            "query".to_string(),
+            format!("--input={}", input.display()),
+            "--query".to_string(),
+            query.display().to_string(),
+            output.display().to_string(),
+        ];
+        jail_robot_path_args(&roots, &args).expect("in-workspace query pair");
+    }
+
+    #[test]
+    fn jail_robot_rejects_output_dir_outside_workspace() {
+        let dir = tempfile::tempdir().unwrap();
+        let roots = vec![dir.path().to_path_buf()];
+        let input = dir.path().join("in.ttl");
+        std::fs::write(&input, "").unwrap();
+        let args = vec![
+            "query".to_string(),
+            format!("--input={}", input.display()),
+            "--output-dir".to_string(),
+            "/tmp/evil-results".to_string(),
+        ];
+        assert!(jail_robot_path_args(&roots, &args).is_err());
+    }
+
+    #[test]
+    fn atomic_write_for_path_dispatches_obo_and_turtle() {
+        let dir = tempfile::tempdir().unwrap();
+        let obo = dir.path().join("term.obo");
+        let ttl = dir.path().join("ont.ttl");
+        std::fs::write(&obo, "format-version: 1.2\nold\n").unwrap();
+        std::fs::write(&ttl, "@prefix owl: <http://www.w3.org/2002/07/owl#> .\nold\n").unwrap();
+
+        atomic_write_for_path(&obo, "format-version: 1.2\nontology: new\n").expect("obo write");
+        atomic_write_for_path(
+            &ttl,
+            "@prefix owl: <http://www.w3.org/2002/07/owl#> .\n<http://ex.org> a owl:Ontology .\n",
+        )
+        .expect("ttl write");
+
+        assert!(std::fs::read_to_string(&obo).unwrap().contains("ontology: new"));
+        assert!(std::fs::read_to_string(&ttl).unwrap().contains("owl:Ontology"));
     }
 }

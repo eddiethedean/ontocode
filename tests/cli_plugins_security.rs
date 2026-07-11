@@ -193,3 +193,53 @@ export = true
     let root = workspace.canonicalize().expect("canonical root");
     assert!(is_path_within(&root, &p), "output path must be jailed within workspace");
 }
+
+#[test]
+fn in_process_export_default_writes_under_workspace_not_cwd() {
+    let dir = tempfile::tempdir().expect("tempdir");
+    let workspace = dir.path().join("ws");
+    std::fs::create_dir_all(workspace.join(".ontocore/plugins")).expect("plugins dir");
+    std::fs::write(
+        workspace.join("demo.ttl"),
+        "@prefix ex: <http://ex/> .\nex:Ok a <http://www.w3.org/2002/07/owl#Class> .\n",
+    )
+    .expect("write demo.ttl");
+    std::fs::write(
+        workspace.join(".ontocore/plugins/markdown-export.toml"),
+        include_str!("../crates/ontocore-plugin/fixtures/builtin-markdown.toml"),
+    )
+    .expect("write markdown export manifest");
+
+    let cwd = tempfile::tempdir().expect("cwd tempdir");
+    let prev = std::env::current_dir().expect("cwd");
+    struct RestoreCwd(std::path::PathBuf);
+    impl Drop for RestoreCwd {
+        fn drop(&mut self) {
+            let _ = std::env::set_current_dir(&self.0);
+        }
+    }
+    let _restore = RestoreCwd(prev);
+    std::env::set_current_dir(cwd.path()).expect("chdir outside workspace");
+
+    let catalog =
+        IndexBuilder::new().workspace(workspace.clone()).build().expect("index workspace");
+    let host = load_plugin_host(&workspace).expect("load plugin host");
+    let result = host
+        .run_plugin_action("ontocode.markdown-export", "export", Some(&catalog), None, None, None)
+        .expect("run markdown export");
+    assert!(result.success);
+
+    let expected = workspace.join(".ontocore/plugin-out");
+    assert!(
+        expected.join("index.md").is_file(),
+        "export should land under workspace/.ontocore/plugin-out"
+    );
+    assert!(
+        !cwd.path().join("plugin-out").exists(),
+        "must not write relative plugin-out under process CWD"
+    );
+    assert!(
+        !cwd.path().join(".ontocore/plugin-out").exists(),
+        "must not write .ontocore/plugin-out under process CWD"
+    );
+}

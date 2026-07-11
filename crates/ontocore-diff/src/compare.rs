@@ -100,13 +100,13 @@ fn detect_renames(result: &mut DiffResult) {
             if drop_added.contains(&a.iri) {
                 continue;
             }
-            let label_match = !r.labels.is_empty() && r.labels == a.labels;
+            // Require a structural link — shared labels alone are not enough (#20).
             let sameas = result.annotation_changes.iter().any(|ann| {
                 (ann.predicate.contains("sameAs") || ann.predicate.ends_with("#sameAs"))
                     && ((ann.subject == r.iri && ann.object == a.iri)
                         || (ann.subject == a.iri && ann.object == r.iri))
             });
-            if sameas || label_match {
+            if sameas {
                 result.entity_changes.push(EntityChange {
                     kind: EntityChangeKind::Renamed,
                     iri: a.iri.clone(),

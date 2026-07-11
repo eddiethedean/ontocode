@@ -22,13 +22,17 @@ Canonical terminology for OntoCode, OntoCore, OntoUI, and the Ontologos platform
 | Avoid | Use instead |
 |-------|-------------|
 | "VS Code workspace" when meaning product UI | **Workspace** (product) or "VS Code workspace folder" |
-| "Shared React UI" / "Frontend platform" | **OntoUI** |
+| "Shared React UI" / "Frontend platform" | **OntoUI** (implementers); say "OntoCode panels" for end users |
+| "SQL" without qualification | **catalog SQL (subset)** |
 | "Plugin" (generic) | **Capability Provider** when referring to extensibility interfaces |
 | "Panel" (long-term) | **Workspace** (product surface); "panel" OK for current webview implementation |
 | `cargo install ontocode` | `cargo install ontocore-cli` (repo is `ontocode`; CLI crate is `ontocore-cli`) |
+| OntoIndex / `ontoindex` | **OntoCore** / `ontocore` (renamed in v0.9) |
+| OntoLogos (alternate casing) | **Ontologos** |
 
 ## See also
 
-- [Platform overview](platform/OVERVIEW.md)
+- [Known limitations](known-limitations.md)
 - [What ships today](SHIPPED.md)
+- [Engineering docs (GitHub)](engineering.md)
 - [Documentation index](documentation-index.md)

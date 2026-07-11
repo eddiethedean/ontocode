@@ -32,7 +32,7 @@ mod handlers_test;
 
 use crate::positions::utf16_offset_to_byte;
 use crossbeam_channel::Sender;
-use diagnostics::publish_diagnostics_for_state;
+use diagnostics::{publish_diagnostics_for_state, publish_empty_diagnostics};
 use handlers::{
     handle_custom_request, handle_initialize, handle_standard_request, StandardRequestOutcome,
 };
@@ -42,11 +42,14 @@ use lsp_types::{
     notification::Notification as _,
     notification::{
         DidChangeTextDocument, DidCloseTextDocument, DidOpenTextDocument, Exit, Initialized,
+        ShowMessage,
     },
-    InitializeParams,
+    InitializeParams, MessageType, ShowMessageParams,
 };
 use serde_json::Value;
-use state::{canonical_roots_match, resolve_workspace_folder_uri, ServerState};
+use state::{
+    canonical_roots_match, resolve_workspace_folder_add, resolve_workspace_folder_uri, ServerState,
+};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 use std::thread;
@@ -95,7 +98,7 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
                 if notif.method == Exit::METHOD {
                     break;
                 }
-                handle_notification(&state, &pending_reindex, notif);
+                handle_notification(&state, &pending_reindex, &connection.sender, notif);
                 publish_pending_diagnostics(
                     &connection.sender,
                     &state,
@@ -165,6 +168,7 @@ fn handle_lsp_request(
 fn handle_notification(
     state: &ServerState,
     pending_reindex: &Arc<Mutex<Option<PendingReindex>>>,
+    sender: &Sender<Message>,
     notif: Notification,
 ) {
     match notif.method.as_str() {
@@ -215,10 +219,24 @@ fn handle_notification(
                             }
                         }
                     } else {
+                        // Invalid incremental edit — drop the stale buffer and ask the user to
+                        // reopen so client/server text cannot silently diverge (#90).
                         eprintln!(
                             "ontocore-lsp: rejected document change: invalid edit range for {}",
                             params.text_document.uri.as_str()
                         );
+                        state.remove_document(&path);
+                        let params = ShowMessageParams {
+                            typ: MessageType::ERROR,
+                            message: format!(
+                                "OntoCore: document sync failed for {}; reopen the file to resync the language server buffer",
+                                path.display()
+                            ),
+                        };
+                        let _ = sender.send(Message::Notification(Notification {
+                            method: ShowMessage::METHOD.to_string(),
+                            params: serde_json::to_value(params).unwrap_or_default(),
+                        }));
                     }
                 }
             }
@@ -246,14 +264,15 @@ fn handle_notification(
                     }
                 }
                 for added in params.event.added {
-                    if let Ok(path) = resolve_workspace_folder_uri(added.uri.as_str(), &roots) {
+                    if let Ok(path) = resolve_workspace_folder_add(added.uri.as_str()) {
                         if !roots.iter().any(|r| canonical_roots_match(r, &path)) {
                             roots.push(path);
                         }
                     }
                 }
                 if roots.is_empty() {
-                    state.clear_workspace_state();
+                    let stale = state.clear_workspace_state();
+                    publish_empty_diagnostics(sender, &stale);
                     eprintln!("ontocore-lsp: all workspace folders removed");
                 } else if let Err(err) = state.set_workspace_roots(roots) {
                     eprintln!("ontocore-lsp: failed to update workspace roots: {err}");
@@ -418,5 +437,15 @@ mod debounce_tests {
         let taken = take_due_reindex_workspace(&pending);
         assert_eq!(taken, Some(ws));
         assert!(pending.lock().unwrap().is_none());
+    }
+
+    #[test]
+    fn apply_text_change_rejects_inverted_range() {
+        let text = "ex:Person a owl:Class .\n";
+        let range = lsp_types::Range {
+            start: lsp_types::Position { line: 0, character: 10 },
+            end: lsp_types::Position { line: 0, character: 2 },
+        };
+        assert!(apply_text_change(text, &range, "X").is_none());
     }
 }

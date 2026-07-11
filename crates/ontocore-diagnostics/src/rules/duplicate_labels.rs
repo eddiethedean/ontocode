@@ -25,9 +25,11 @@ pub fn duplicate_labels(
             continue;
         }
         for entity in entities {
-            let doc = document_for_entity(data.documents, entity);
-            let file = doc.map(|d| d.path.clone()).unwrap_or_else(|| Path::new(".").to_path_buf());
-            let namespaces = doc.map(|d| &d.namespaces).cloned().unwrap_or_default();
+            let Some(doc) = document_for_entity(data.documents, entity) else {
+                continue;
+            };
+            let file = doc.path.clone();
+            let namespaces = doc.namespaces.clone();
             let text = source(&file);
             let needles = entity_needles(&entity.iri, &entity.short_name, &namespaces);
             let range = find_in_source(&text, &needles);

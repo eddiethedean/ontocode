@@ -9,6 +9,8 @@ import {
 import { Entity, OntologyDocument } from "../lsp/protocol";
 import { documentUriInWorkspace } from "../utils/workspacePath";
 import {
+  AMBIGUOUS_ONTOLOGY_HEADER_MESSAGE,
+  entityBelongsToDocument,
   MISSING_ONTOLOGY_HEADER_MESSAGE,
   resolveOntologyIri,
 } from "./importsOntology";
@@ -16,6 +18,25 @@ import { PanelHost } from "./panelHost";
 import type { ImportsDocumentPayload, PatchOp, WebviewMessage } from "./messages";
 
 type RefreshFn = () => Promise<void>;
+
+const IMPORT_PATCH_OPS = new Set(["add_import", "remove_import"]);
+
+function ontologyErrorForDocument(
+  doc: OntologyDocument,
+  entities: Entity[],
+  selfIri: string | undefined
+): string | undefined {
+  if (selfIri) {
+    return undefined;
+  }
+  const belonging = entities.filter(
+    (e) => e.kind === "ontology" && entityBelongsToDocument(e, doc)
+  );
+  if (belonging.length > 1) {
+    return AMBIGUOUS_ONTOLOGY_HEADER_MESSAGE;
+  }
+  return MISSING_ONTOLOGY_HEADER_MESSAGE;
+}
 
 function buildPayload(
   doc: OntologyDocument,
@@ -44,7 +65,7 @@ function buildPayload(
     path: doc.path,
     ontology_iri: selfIri,
     imports_editable: selfIri !== undefined,
-    error: selfIri ? undefined : MISSING_ONTOLOGY_HEADER_MESSAGE,
+    error: ontologyErrorForDocument(doc, entities, selfIri),
     imports: doc.imports ?? [],
     options,
   };
@@ -191,6 +212,19 @@ export class ImportsPanel {
     if (!parsed) {
       void vscode.window.showErrorMessage(
         "OntoCode: ignored invalid applyPatch message from imports panel"
+      );
+      return;
+    }
+    if (
+      !parsed.patches.every(
+        (p) =>
+          IMPORT_PATCH_OPS.has(p.op) &&
+          typeof p.ontology_iri === "string" &&
+          p.ontology_iri === this.ontologyIri
+      )
+    ) {
+      void vscode.window.showErrorMessage(
+        "OntoCode: ignored non-import patch from imports panel"
       );
       return;
     }

@@ -6,7 +6,7 @@ use horned_owl::model::{RcAnnotatedComponent, RcStr};
 use horned_owl::ontology::component_mapped::ComponentMappedOntology;
 use horned_owl::ontology::set::SetOntology;
 use ontocore_core::OntologyFormat;
-use oxigraph::io::{RdfFormat, RdfSerializer};
+use oxigraph::io::{RdfFormat, RdfParser, RdfSerializer};
 use oxigraph::model::Quad;
 use std::collections::BTreeMap;
 use std::io::Cursor;
@@ -18,6 +18,8 @@ pub struct OwlLoadResult {
     pub bridge: OwlBridgeResult,
     pub incomplete: bool,
     pub load_warning: Option<String>,
+    /// RDF quads for the Oxigraph SPARQL store (empty for Turtle — caller already has quads).
+    pub quads: Vec<Quad>,
 }
 
 /// Load Turtle source via Oxigraph quads → RDF/XML → Horned-OWL.
@@ -40,6 +42,7 @@ pub fn load_turtle_text(
                 } else {
                     None
                 },
+                quads: Vec::new(),
             })
         }
         Err(e) => Err(e),
@@ -71,7 +74,25 @@ fn quads_to_rdf_xml(quads: &[Quad]) -> std::result::Result<Vec<u8>, String> {
     serializer.finish().map_err(|e| e.to_string())
 }
 
+/// Project a Horned ontology to Oxigraph quads (N-Triples via Horned RDF writer).
+fn ontology_to_quads(
+    ont: &ComponentMappedOntology<RcStr, RcAnnotatedComponent>,
+) -> Result<Vec<Quad>> {
+    let mut buf = Vec::new();
+    horned_owl::io::rdf::writer::write_to_rdf_format(&mut buf, ont, "ttl")
+        .map_err(|e| OwlError::LoadFailed(e.to_string()))?;
+    let parser = RdfParser::from_format(RdfFormat::NTriples);
+    parser
+        .for_reader(buf.as_slice())
+        .collect::<std::result::Result<Vec<_>, _>>()
+        .map_err(|e| OwlError::LoadFailed(e.to_string()))
+}
+
 /// Load OWL/XML (`.owx`) source via Horned-OWL.
+///
+/// Horned's OWX reader does not expose RDF `IncompleteParse`. After a successful OWX load we
+/// project the ontology to RDF for the SPARQL store and propagate incompleteness from that
+/// RDF round-trip (analogous to Turtle `load_from_quads`).
 pub fn load_owx_text(
     path: &Path,
     ontology_id: &str,
@@ -81,11 +102,34 @@ pub fn load_owx_text(
     let _ = path;
     use horned_owl::io::owx::reader::read as read_owx;
     let mut cursor = Cursor::new(source_text.as_bytes());
-    let (set_ont, _mapping): (SetOntology<RcStr>, _) = read_owx(&mut cursor, Default::default())
+    let (set_ont, mapping): (SetOntology<RcStr>, _) = read_owx(&mut cursor, Default::default())
         .map_err(|e| OwlError::LoadFailed(e.to_string()))?;
+
+    let mut merged_ns = namespaces.clone();
+    for (prefix, iri) in mapping.mappings() {
+        merged_ns.entry(prefix.clone()).or_insert_with(|| iri.clone());
+    }
+
     let mapped: ComponentMappedOntology<RcStr, RcAnnotatedComponent> = set_ont.into();
-    let bridge = bridge_ontology(mapped, ontology_id, source_text, namespaces);
-    Ok(OwlLoadResult { bridge, incomplete: false, load_warning: None })
+    let quads = ontology_to_quads(&mapped)?;
+    let incomplete = match load_from_quads(&quads) {
+        Ok((_, incomplete)) => incomplete,
+        Err(_) => {
+            // Projection produced quads Horned cannot re-parse as RDF/XML — treat as incomplete.
+            true
+        }
+    };
+    let bridge = bridge_ontology(mapped, ontology_id, source_text, &merged_ns);
+    Ok(OwlLoadResult {
+        bridge,
+        incomplete,
+        load_warning: if incomplete {
+            Some("Horned-OWL reported incomplete RDF projection of OWL/XML".to_string())
+        } else {
+            None
+        },
+        quads,
+    })
 }
 
 /// Whether Horned-OWL loading is supported for this format.
@@ -118,5 +162,41 @@ mod tests {
             .expect("load");
         assert!(!result.bridge.entities.is_empty());
         assert!(result.bridge.entities.iter().any(|e| e.short_name == "Person"));
+        assert!(result.quads.is_empty());
+    }
+
+    #[test]
+    fn loads_owx_with_rdf_quads_for_sparql() {
+        let owx = include_str!("../../../examples/protege-roundtrip/example.owx");
+        let result = load_owx_text(Path::new("example.owx"), "doc-owx", owx, &BTreeMap::new())
+            .expect("load owx");
+        assert!(result.bridge.entities.iter().any(|e| e.short_name == "Department"));
+        assert!(!result.quads.is_empty(), "OWL/XML load must project RDF quads for SPARQL");
+        assert!(
+            result.quads.iter().any(|q| {
+                q.subject.to_string().contains("Department")
+                    || q.object.to_string().contains("Department")
+            }),
+            "expected Department IRI in projected quads"
+        );
+        // Well-formed OWX projects cleanly; incompleteness is computed (not hardcoded false).
+        assert!(!result.incomplete);
+        assert!(result.load_warning.is_none());
+    }
+
+    #[test]
+    fn owx_prefixes_merged_into_bridge_namespaces() {
+        let owx = include_str!("../../../examples/protege-roundtrip/example.owx");
+        let result = load_owx_text(Path::new("example.owx"), "doc-owx", owx, &BTreeMap::new())
+            .expect("load owx");
+        assert!(
+            result
+                .bridge
+                .namespace_rows
+                .iter()
+                .any(|n| n.prefix == "ex" && n.iri.contains("example.org/org")),
+            "expected ex: prefix from OWX PrefixMapping, got {:?}",
+            result.bridge.namespace_rows
+        );
     }
 }

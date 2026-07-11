@@ -66,3 +66,50 @@ fn new_deprecation_reported() {
         "expected deprecation change"
     );
 }
+
+#[test]
+fn shared_label_alone_is_not_a_rename() {
+    let dir = tempfile::tempdir().unwrap();
+    let base_path = dir.path().join("base.ttl");
+    std::fs::write(
+        &base_path,
+        "@prefix ex: <http://ex/> .\n\
+         @prefix owl: <http://www.w3.org/2002/07/owl#> .\n\
+         @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n\
+         ex:Old a owl:Class ; rdfs:label \"SharedLabel\" .\n",
+    )
+    .unwrap();
+    let head_path = dir.path().join("head.ttl");
+    std::fs::write(
+        &head_path,
+        "@prefix ex: <http://ex/> .\n\
+         @prefix owl: <http://www.w3.org/2002/07/owl#> .\n\
+         @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n\
+         ex:New a owl:Class ; rdfs:label \"SharedLabel\" .\n",
+    )
+    .unwrap();
+    let base = IndexBuilder::new()
+        .workspace(dir.path())
+        .only_paths(vec![base_path])
+        .build()
+        .expect("base");
+    let head = IndexBuilder::new()
+        .workspace(dir.path())
+        .only_paths(vec![head_path])
+        .build()
+        .expect("head");
+    let diff = diff_catalogs(&base, &head);
+    assert!(
+        !diff.entity_changes.iter().any(|c| c.kind == EntityChangeKind::Renamed),
+        "shared labels must not be treated as renames: {:?}",
+        diff.entity_changes
+    );
+    assert!(
+        diff.entity_changes.iter().any(|c| c.kind == EntityChangeKind::Removed),
+        "expected removed Old"
+    );
+    assert!(
+        diff.entity_changes.iter().any(|c| c.kind == EntityChangeKind::Added),
+        "expected added New"
+    );
+}

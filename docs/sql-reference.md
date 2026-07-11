@@ -1,7 +1,10 @@
-# SQL query reference (OntoCore v0.17)
+# Catalog SQL query reference (OntoCore v0.17)
 
 > **Status:** Documents behavior in **OntoCore v0.17.0**. Pre-1.0 APIs may change.
-> Canonical feature list: [What ships today](SHIPPED.md).
+> Canonical feature list: [What ships today](SHIPPED.md) · [Known limitations](known-limitations.md).
+
+!!! warning "Not full SQL"
+    OntoCore exposes indexed ontology data as **virtual tables** queried with a **catalog SQL (subset)**. There is **no** `JOIN`, `GROUP BY`, `ORDER BY`, `LIMIT`, or subqueries. Prefer [SPARQL](sparql-reference.md) for graph patterns.
 
 OntoCore exposes indexed ontology data as **virtual tables** queried with a SQL-like `SELECT` syntax. The CLI (`ontocore query`) and Rust API (`query_catalog`) use the same engine.
 

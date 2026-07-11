@@ -8,7 +8,7 @@ use oxigraph::model::{
     TermRef,
 };
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use std::fs;
 use std::path::{Path, PathBuf};
 
@@ -58,7 +58,7 @@ impl DiskCache {
 
     pub(crate) fn load(&self, content_hash: &str) -> Option<DocumentSnapshot> {
         let path = self.snapshot_path(content_hash).with_extension("json");
-        let bytes = fs::read(path).ok()?;
+        let bytes = ontocore_core::read_file_capped(&path, ontocore_core::MAX_FILE_BYTES).ok()?;
         let stored: StoredSnapshot = serde_json::from_slice(&bytes).ok()?;
         if stored.content_hash != content_hash {
             return None;
@@ -119,6 +119,38 @@ impl DiskCache {
             snap.document.modified_time = modified_time;
             previous.insert(path.to_path_buf(), snap);
         }
+    }
+
+    /// Delete snapshot files whose content hash is not in the live catalog (#166).
+    ///
+    /// Also removes leftover `*.json.tmp` files from interrupted writes.
+    /// Returns the number of snapshot files removed.
+    pub(crate) fn prune(&self, live_hashes: &HashSet<String>) -> std::io::Result<usize> {
+        let dir = self.root.join(SNAPSHOTS_DIR);
+        if !dir.is_dir() {
+            return Ok(0);
+        }
+        let mut removed = 0usize;
+        for entry in fs::read_dir(&dir)? {
+            let entry = entry?;
+            let path = entry.path();
+            let Some(name) = path.file_name().and_then(|n| n.to_str()) else {
+                continue;
+            };
+            if name.ends_with(".json.tmp") {
+                let _ = fs::remove_file(&path);
+                continue;
+            }
+            if !name.ends_with(".json") {
+                continue;
+            }
+            let hash = name.trim_end_matches(".json");
+            if !live_hashes.contains(hash) {
+                fs::remove_file(&path)?;
+                removed += 1;
+            }
+        }
+        Ok(removed)
     }
 
     fn snapshot_path(&self, content_hash: &str) -> PathBuf {
@@ -216,7 +248,7 @@ fn literal_to_string(l: LiteralRef<'_>) -> String {
     } else if l.datatype() == xsd::STRING {
         format!("\"{}\"", l.value())
     } else {
-        format!("\"{}\"^<{}>", l.value(), l.datatype().as_str())
+        format!("\"{}\"^^<{}>", l.value(), l.datatype().as_str())
     }
 }
 
@@ -246,7 +278,12 @@ fn parse_term(raw: &str) -> Option<Term> {
                     inner, lang,
                 )));
             }
-            if let Some(dt) = tail.strip_prefix("^^<").and_then(|s| s.strip_suffix('>')) {
+            // Accept canonical `^^<iri>` and legacy single-caret `^<iri>` from older caches.
+            if let Some(dt) = tail
+                .strip_prefix("^^<")
+                .or_else(|| tail.strip_prefix("^<"))
+                .and_then(|s| s.strip_suffix('>'))
+            {
                 return NamedNode::new(dt)
                     .ok()
                     .map(|dt| Term::Literal(Literal::new_typed_literal(inner, dt)));
@@ -306,5 +343,205 @@ mod tests {
         cache.store(&snap).expect("store");
         let loaded = cache.load("deadbeef").expect("load");
         assert_eq!(loaded.entities[0].iri, "http://ex#A");
+    }
+
+    #[test]
+    fn load_returns_none_for_corrupt_snapshot_json() {
+        let dir = tempfile::tempdir().unwrap();
+        let cache = DiskCache::for_workspace(dir.path());
+        let snap_dir = dir.path().join(".ontocore/cache/snapshots");
+        std::fs::create_dir_all(&snap_dir).unwrap();
+        std::fs::write(snap_dir.join("corrupt.json"), b"{not-json").unwrap();
+        assert!(cache.load("corrupt").is_none());
+    }
+
+    #[test]
+    fn roundtrip_preserves_typed_and_language_literals() {
+        let integer = NamedNode::new_unchecked("http://www.w3.org/2001/XMLSchema#integer");
+        let typed = Literal::new_typed_literal("42", integer.clone());
+        let lang = Literal::new_language_tagged_literal_unchecked("hello", "en");
+        let plain = Literal::new_simple_literal("plain");
+
+        assert_eq!(
+            literal_to_string(typed.as_ref()),
+            "\"42\"^^<http://www.w3.org/2001/XMLSchema#integer>"
+        );
+        assert_eq!(literal_to_string(lang.as_ref()), "\"hello\"@en");
+        assert_eq!(literal_to_string(plain.as_ref()), "\"plain\"");
+
+        let typed_term = parse_term(&literal_to_string(typed.as_ref())).expect("typed");
+        let Term::Literal(restored_typed) = typed_term else {
+            panic!("expected literal");
+        };
+        assert_eq!(restored_typed.value(), "42");
+        assert_eq!(restored_typed.datatype(), integer.as_ref());
+        assert!(restored_typed.language().is_none());
+
+        let lang_term = parse_term(&literal_to_string(lang.as_ref())).expect("lang");
+        let Term::Literal(restored_lang) = lang_term else {
+            panic!("expected literal");
+        };
+        assert_eq!(restored_lang.value(), "hello");
+        assert_eq!(restored_lang.language(), Some("en"));
+
+        // Legacy single-caret snapshots from older OntoCore builds.
+        let legacy =
+            parse_term("\"7\"^<http://www.w3.org/2001/XMLSchema#integer>").expect("legacy");
+        let Term::Literal(restored_legacy) = legacy else {
+            panic!("expected literal");
+        };
+        assert_eq!(restored_legacy.value(), "7");
+        assert_eq!(restored_legacy.datatype(), integer.as_ref());
+    }
+
+    #[test]
+    fn disk_cache_roundtrip_keeps_typed_quad_datatype() {
+        let dir = tempfile::tempdir().unwrap();
+        let cache = DiskCache::for_workspace(dir.path());
+        let integer = NamedNode::new_unchecked("http://www.w3.org/2001/XMLSchema#integer");
+        let quad = Quad {
+            subject: NamedNode::new_unchecked("http://ex#A").into(),
+            predicate: NamedNode::new_unchecked("http://ex#count"),
+            object: Literal::new_typed_literal("42", integer.clone()).into(),
+            graph_name: GraphName::DefaultGraph,
+        };
+        let snap = DocumentSnapshot {
+            content_hash: "typedquad".to_string(),
+            document: OntologyDocument {
+                id: "doc-1".to_string(),
+                path: dir.path().join("a.ttl"),
+                format: OntologyFormat::Turtle,
+                base_iri: None,
+                imports: vec![],
+                namespaces: Default::default(),
+                parse_status: ParseStatus::Ok,
+                content_hash: "typedquad".to_string(),
+                modified_time: 0,
+                parse_message: None,
+                parse_error_location: None,
+            },
+            entities: vec![],
+            annotations: vec![],
+            axioms: vec![],
+            namespace_rows: vec![],
+            imports: vec![],
+            quads: vec![quad.clone()],
+            triple_count: 1,
+            bridge_warning: None,
+        };
+        cache.store(&snap).expect("store");
+        let loaded = cache.load("typedquad").expect("load");
+        assert_eq!(loaded.quads.len(), 1);
+        let Term::Literal(lit) = &loaded.quads[0].object else {
+            panic!("expected literal object");
+        };
+        assert_eq!(lit.value(), "42");
+        assert_eq!(lit.datatype(), integer.as_ref());
+    }
+
+    #[test]
+    fn prune_removes_orphan_snapshots_and_keeps_live() {
+        let dir = tempfile::tempdir().unwrap();
+        let cache = DiskCache::for_workspace(dir.path());
+
+        let make_snap = |hash: &str| DocumentSnapshot {
+            content_hash: hash.to_string(),
+            document: OntologyDocument {
+                id: "doc-1".to_string(),
+                path: dir.path().join("a.ttl"),
+                format: OntologyFormat::Turtle,
+                base_iri: None,
+                imports: vec![],
+                namespaces: Default::default(),
+                parse_status: ParseStatus::Ok,
+                content_hash: hash.to_string(),
+                modified_time: 0,
+                parse_message: None,
+                parse_error_location: None,
+            },
+            entities: vec![],
+            annotations: vec![],
+            axioms: vec![],
+            namespace_rows: vec![],
+            imports: vec![],
+            quads: vec![],
+            triple_count: 0,
+            bridge_warning: None,
+        };
+
+        cache.store(&make_snap("livehash")).expect("store live");
+        cache.store(&make_snap("stalehash")).expect("store stale");
+        let snap_dir = dir.path().join(".ontocore/cache/snapshots");
+        std::fs::write(snap_dir.join("orphan.json.tmp"), b"partial").unwrap();
+
+        let live = HashSet::from(["livehash".to_string()]);
+        let removed = cache.prune(&live).expect("prune");
+        assert_eq!(removed, 1);
+        assert!(cache.load("livehash").is_some());
+        assert!(cache.load("stalehash").is_none());
+        assert!(!snap_dir.join("orphan.json.tmp").exists());
+        assert!(!snap_dir.join("stalehash.json").exists());
+        assert!(snap_dir.join("livehash.json").exists());
+    }
+
+    #[test]
+    fn prune_is_noop_when_snapshots_dir_missing() {
+        let dir = tempfile::tempdir().unwrap();
+        let cache = DiskCache::for_workspace(dir.path());
+        let removed = cache.prune(&HashSet::new()).expect("prune empty");
+        assert_eq!(removed, 0);
+    }
+
+    #[test]
+    fn index_builder_prunes_stale_disk_cache_after_reindex() {
+        use crate::IndexBuilder;
+
+        let dir = tempfile::tempdir().unwrap();
+        let ttl = dir.path().join("a.ttl");
+        std::fs::write(
+            &ttl,
+            "@prefix owl: <http://www.w3.org/2002/07/owl#> .\n@prefix ex: <http://ex/> .\nex:A a owl:Class .\n",
+        )
+        .unwrap();
+
+        IndexBuilder::new().workspace(dir.path()).disk_cache(true).build().expect("first build");
+
+        let snap_dir = dir.path().join(".ontocore/cache/snapshots");
+        assert!(snap_dir.is_dir());
+        let after_first: Vec<_> = std::fs::read_dir(&snap_dir)
+            .unwrap()
+            .filter_map(|e| e.ok())
+            .filter(|e| e.path().extension().and_then(|x| x.to_str()) == Some("json"))
+            .collect();
+        assert_eq!(after_first.len(), 1);
+        let first_hash =
+            after_first[0].path().file_stem().and_then(|s| s.to_str()).unwrap().to_string();
+
+        // Plant an orphan snapshot that should be removed on the next index.
+        std::fs::write(snap_dir.join("orphaneddeadbeef.json"), b"{}").unwrap();
+
+        std::fs::write(
+            &ttl,
+            "@prefix owl: <http://www.w3.org/2002/07/owl#> .\n@prefix ex: <http://ex/> .\nex:A a owl:Class .\nex:B a owl:Class .\n",
+        )
+        .unwrap();
+
+        IndexBuilder::new().workspace(dir.path()).disk_cache(true).build().expect("second build");
+
+        let after_second: Vec<_> = std::fs::read_dir(&snap_dir)
+            .unwrap()
+            .filter_map(|e| e.ok())
+            .filter(|e| e.path().extension().and_then(|x| x.to_str()) == Some("json"))
+            .map(|e| e.file_name().to_string_lossy().into_owned())
+            .collect();
+        assert!(
+            !after_second.iter().any(|n| n == "orphaneddeadbeef.json"),
+            "orphan snapshot should be pruned"
+        );
+        assert!(
+            !after_second.iter().any(|n| n.as_str() == format!("{first_hash}.json")),
+            "stale content-hash snapshot should be pruned after edit"
+        );
+        assert_eq!(after_second.len(), 1, "only the live hash should remain");
     }
 }

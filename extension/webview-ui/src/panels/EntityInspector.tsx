@@ -32,7 +32,7 @@ import type { WorkspaceProps } from "../workspaces/types";
 
 export function EntityInspectorPanel(_props?: WorkspaceProps): JSX.Element {
   const host = useWorkspaceHost();
-  const setFocus = useWorkspaceStore((s) => s.setFocus);
+  const hydrateFocus = useWorkspaceStore((s) => s.hydrateFocus);
   const focusIri = useWorkspaceStore((s) => s.inspector.entityIri);
   const installedPlugins = useWorkspaceStore((s) => s.plugins.installed);
   const setPlugins = useWorkspaceStore((s) => s.setPlugins);
@@ -52,6 +52,24 @@ export function EntityInspectorPanel(_props?: WorkspaceProps): JSX.Element {
   const [oboDef, setOboDef] = useState("");
   const [oboParent, setOboParent] = useState("");
   const [editPreview, setEditPreview] = useState("");
+  const [charDraft, setCharDraft] = useState<PropertyCharacteristics | null>(null);
+
+  const resetFormState = useCallback(() => {
+    setPreview("");
+    setEditPreview("");
+    setNewLabel("");
+    setNewComment("");
+    setParentPick("");
+    setDomainPick("");
+    setRangePick("");
+    setAnnotationPredicate("");
+    setAnnotationValue("");
+    setOboName("");
+    setOboSynonym("");
+    setOboDef("");
+    setOboParent("");
+    setCharDraft(null);
+  }, []);
 
   const openEntity = useCallback(
     (iri: string) => {
@@ -80,9 +98,9 @@ export function EntityInspectorPanel(_props?: WorkspaceProps): JSX.Element {
         setDetail(msg.detail);
         setClassOptions(msg.classOptions);
         setObjectPropertyOptions(msg.objectPropertyOptions ?? []);
-        setPreview("");
-        setEditPreview("");
-        setFocus({
+        resetFormState();
+        // Host-driven loads must not push navigation history (#92).
+        hydrateFocus({
           kind: "entity",
           id: msg.detail.entity.iri,
           source: "inspector",
@@ -107,7 +125,7 @@ export function EntityInspectorPanel(_props?: WorkspaceProps): JSX.Element {
     };
     window.addEventListener("message", handler);
     return () => window.removeEventListener("message", handler);
-  }, [host, setFocus, setPlugins]);
+  }, [host, hydrateFocus, setPlugins, resetFormState]);
 
   if (!detail) {
     return (
@@ -126,8 +144,8 @@ export function EntityInspectorPanel(_props?: WorkspaceProps): JSX.Element {
     )
   );
 
-  const isObo = document_path?.endsWith(".obo") ?? false;
-  const isTurtle = document_path?.endsWith(".ttl") ?? false;
+  const isObo = Boolean(document_path?.match(/\.obo$/i));
+  const isTurtle = Boolean(document_path?.match(/\.ttl$/i));
   const isReadOnlyOwl =
     !editable &&
     Boolean(document_path?.match(/\.(owl|owx|rdf)$/i));
@@ -164,6 +182,35 @@ export function EntityInspectorPanel(_props?: WorkspaceProps): JSX.Element {
   };
   const parentOptions = classOptions.filter((c) => c !== entity.iri);
   const chainPropertyOptions = objectPropertyOptions.filter((p) => p !== entity.iri);
+  const displayedCharacteristics = charDraft ?? characteristics;
+  const characteristicKeys = [
+    ["functional", "Functional"],
+    ["inverse_functional", "Inverse functional"],
+    ["transitive", "Transitive"],
+    ["symmetric", "Symmetric"],
+    ["asymmetric", "Asymmetric"],
+    ["reflexive", "Reflexive"],
+    ["irreflexive", "Irreflexive"],
+  ] as const;
+
+  const characteristicPatches = (): PatchOp[] => {
+    if (!characteristics || !displayedCharacteristics) {
+      return [];
+    }
+    const patches: PatchOp[] = [];
+    for (const [key] of characteristicKeys) {
+      const next = Boolean(displayedCharacteristics[key]);
+      const prev = Boolean(characteristics[key]);
+      if (next !== prev) {
+        patches.push({
+          op: `set_${key}`,
+          entity_iri: entity.iri,
+          value: next,
+        } as PatchOp);
+      }
+    }
+    return patches;
+  };
 
   return (
     <Panel>
@@ -224,7 +271,7 @@ export function EntityInspectorPanel(_props?: WorkspaceProps): JSX.Element {
         title="Axioms"
         card
         action={
-          editable && entity.kind === "class" ? (
+          editable && isTurtle && entity.kind === "class" ? (
             <button
               type="button"
               className="secondary"
@@ -247,6 +294,7 @@ export function EntityInspectorPanel(_props?: WorkspaceProps): JSX.Element {
                     <li key={`${kind}-${idx}`} className="oc-axiom-item">
                       <InlineCode>{a.display}</InlineCode>
                       {editable &&
+                      isTurtle &&
                       entity.kind === "class" &&
                       a.editable &&
                       kind !== "property_chain" ? (
@@ -270,6 +318,7 @@ export function EntityInspectorPanel(_props?: WorkspaceProps): JSX.Element {
                         </button>
                       ) : null}
                       {editable &&
+                      isTurtle &&
                       entity.kind === "individual" &&
                       a.kind === "class_assertion" &&
                       a.editable &&
@@ -318,41 +367,40 @@ export function EntityInspectorPanel(_props?: WorkspaceProps): JSX.Element {
         </Section>
       ) : null}
 
-      {isTurtle &&
+      {editable &&
+      isTurtle &&
       (entity.kind === "object_property" || entity.kind === "data_property") &&
-      characteristics ? (
+      displayedCharacteristics ? (
         <Section title="Property characteristics" card>
-          {(
-            [
-              ["functional", "Functional"],
-              ["inverse_functional", "Inverse functional"],
-              ["transitive", "Transitive"],
-              ["symmetric", "Symmetric"],
-              ["asymmetric", "Asymmetric"],
-              ["reflexive", "Reflexive"],
-              ["irreflexive", "Irreflexive"],
-            ] as const
-          ).map(([key, label]) => (
+          {characteristicKeys.map(([key, label]) => (
             <label key={key} className="oc-checkbox">
               <input
                 type="checkbox"
-                checked={Boolean(characteristics[key as keyof PropertyCharacteristics])}
+                checked={Boolean(displayedCharacteristics[key])}
                 onChange={(e) =>
-                  apply(
-                    [
-                      {
-                        op: `set_${key}`,
-                        entity_iri: entity.iri,
-                        value: e.target.checked,
-                      } as PatchOp,
-                    ],
-                    false
-                  )
+                  setCharDraft({
+                    ...(displayedCharacteristics as PropertyCharacteristics),
+                    [key]: e.target.checked,
+                  })
                 }
               />
               {label}
             </label>
           ))}
+          <PreviewApplyBar
+            preview={editPreview}
+            disabled={characteristicPatches().length === 0}
+            onPreview={() => {
+              const patches = characteristicPatches();
+              if (patches.length === 0) return;
+              apply(patches, true);
+            }}
+            onApply={() => {
+              const patches = characteristicPatches();
+              if (patches.length === 0) return;
+              apply(patches, false);
+            }}
+          />
         </Section>
       ) : null}
 
@@ -379,7 +427,6 @@ export function EntityInspectorPanel(_props?: WorkspaceProps): JSX.Element {
                     [{ op: "set_name", term_id: entity.obo_id, value: oboName.trim() }],
                     false
                   );
-                  setOboName("");
                 }}
               />
               <FormField label="Synonym">
@@ -415,7 +462,6 @@ export function EntityInspectorPanel(_props?: WorkspaceProps): JSX.Element {
                     ],
                     false
                   );
-                  setOboSynonym("");
                 }}
               />
               <FormField label="Definition">
@@ -437,7 +483,6 @@ export function EntityInspectorPanel(_props?: WorkspaceProps): JSX.Element {
                     [{ op: "add_def", term_id: entity.obo_id, value: oboDef.trim() }],
                     false
                   );
-                  setOboDef("");
                 }}
               />
               <FormField label="is_a parent">
@@ -471,7 +516,6 @@ export function EntityInspectorPanel(_props?: WorkspaceProps): JSX.Element {
                     ],
                     false
                   );
-                  setOboParent("");
                 }}
               />
             </>
@@ -499,7 +543,6 @@ export function EntityInspectorPanel(_props?: WorkspaceProps): JSX.Element {
                   [{ op: "add_label", entity_iri: entity.iri, value: newLabel.trim() }],
                   false
                 );
-                setNewLabel("");
               }}
             />
 
@@ -537,7 +580,6 @@ export function EntityInspectorPanel(_props?: WorkspaceProps): JSX.Element {
                   ],
                   false
                 );
-                setNewComment("");
               }}
             />
 
@@ -585,7 +627,6 @@ export function EntityInspectorPanel(_props?: WorkspaceProps): JSX.Element {
                     ],
                     false
                   );
-                  setParentPick("");
                 }}
               />
             ) : null}
@@ -630,7 +671,6 @@ export function EntityInspectorPanel(_props?: WorkspaceProps): JSX.Element {
                       ],
                       false
                     );
-                    setDomainPick("");
                   }}
                 />
                 <FormField label="Range">
@@ -668,7 +708,6 @@ export function EntityInspectorPanel(_props?: WorkspaceProps): JSX.Element {
                       ],
                       false
                     );
-                    setRangePick("");
                   }}
                 />
               </>
@@ -714,7 +753,6 @@ export function EntityInspectorPanel(_props?: WorkspaceProps): JSX.Element {
                       ],
                       false
                     );
-                    setParentPick("");
                   }}
                 />
               </>
@@ -762,8 +800,6 @@ export function EntityInspectorPanel(_props?: WorkspaceProps): JSX.Element {
                   ],
                   false
                 );
-                setAnnotationPredicate("");
-                setAnnotationValue("");
               }}
             />
 
@@ -772,7 +808,10 @@ export function EntityInspectorPanel(_props?: WorkspaceProps): JSX.Element {
                 entityIri={entity.iri}
                 chains={axioms
                   .filter((a) => a.kind === "property_chain")
-                  .map((a) => ({ display: a.display, properties: [] }))}
+                  .map((a) => ({
+                    display: a.display,
+                    properties: a.properties ?? [],
+                  }))}
                 propertyOptions={chainPropertyOptions}
                 preview={editPreview}
                 onPreview={(patches) => apply(patches, true)}

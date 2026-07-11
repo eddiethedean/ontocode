@@ -143,7 +143,8 @@ fn apply_one(text: &mut String, patch: &OboPatchOp) -> Result<()> {
             set_single_line(text, term_id, "name:", value, false)
         }
         OboPatchOp::AddSynonym { term_id, value, scope } => {
-            let line = format!("synonym: \"{value}\" {scope} []");
+            let escaped = value.replace('"', "\\\"");
+            let line = format!("synonym: \"{escaped}\" {scope} []");
             add_line_in_term(text, term_id, &line)
         }
         OboPatchOp::RemoveSynonym { term_id, value } => remove_synonym_line(text, term_id, value),
@@ -177,9 +178,35 @@ fn term_block_range(text: &str, term_id: &str) -> Result<(usize, usize)> {
     let id_line_start = find_term_id_line_start(text, term_id)
         .ok_or_else(|| OboError::TermNotFound(term_id.to_string()))?;
     let block_start = text[..id_line_start].rfind("[Term]").unwrap_or(id_line_start);
-    let rest = &text[id_line_start..];
-    let next_term = rest[1..].find("\n[Term]").map(|i| id_line_start + 1 + i).unwrap_or(text.len());
-    Ok((block_start, next_term))
+    let block_end = next_stanza_offset(text, id_line_start).unwrap_or(text.len());
+    Ok((block_start, block_end))
+}
+
+/// Byte offset of the next OBO stanza header (`[Term]`, `[Typedef]`, `[Instance]`, …)
+/// at or after `from`, or `None` if this is the last stanza.
+fn next_stanza_offset(text: &str, from: usize) -> Option<usize> {
+    let mut offset = from;
+    let mut skip_current_line = true;
+    for line in text[from..].split_inclusive('\n') {
+        if skip_current_line {
+            skip_current_line = false;
+            offset += line.len();
+            continue;
+        }
+        if is_obo_stanza_header(line.trim_end_matches(['\n', '\r'])) {
+            return Some(offset);
+        }
+        offset += line.len();
+    }
+    None
+}
+
+fn is_obo_stanza_header(line: &str) -> bool {
+    let trimmed = line.trim();
+    let Some(name) = trimmed.strip_prefix('[').and_then(|s| s.strip_suffix(']')) else {
+        return false;
+    };
+    !name.is_empty() && name.chars().all(|c| c.is_ascii_alphabetic())
 }
 
 fn find_term_id_line_start(text: &str, term_id: &str) -> Option<usize> {
@@ -365,8 +392,37 @@ pub fn atomic_write(path: &Path, contents: &str) -> Result<()> {
         file.write_all(contents.as_bytes()).map_err(|e| OboError::Io(e.to_string()))?;
         file.sync_all().map_err(|e| OboError::Io(e.to_string()))?;
     }
-    fs::rename(&tmp_path, path).map_err(|e| OboError::Io(e.to_string()))?;
+    replace_file(&tmp_path, path).map_err(|e| OboError::Io(e.to_string()))?;
     Ok(())
+}
+
+/// Replace `path` with `tmp_path` (tmp is consumed). Works on Windows where `rename` cannot
+/// overwrite an existing destination. Always best-effort cleans up `tmp_path` on failure.
+fn replace_file(tmp_path: &Path, path: &Path) -> std::io::Result<()> {
+    match fs::rename(tmp_path, path) {
+        Ok(()) => Ok(()),
+        Err(_) if path.exists() => {
+            // Windows (and some network FS): rename refuses to replace. Move the existing
+            // file aside, then rename; restore on failure.
+            let bak_path = tmp_path.with_extension("bak");
+            fs::rename(path, &bak_path)?;
+            match fs::rename(tmp_path, path) {
+                Ok(()) => {
+                    let _ = fs::remove_file(&bak_path);
+                    Ok(())
+                }
+                Err(rename_err) => {
+                    let _ = fs::rename(&bak_path, path);
+                    let _ = fs::remove_file(tmp_path);
+                    Err(rename_err)
+                }
+            }
+        }
+        Err(e) => {
+            let _ = fs::remove_file(tmp_path);
+            Err(e)
+        }
+    }
 }
 
 #[cfg(test)]
@@ -491,6 +547,105 @@ name: one
     }
 
     #[test]
+    fn term_block_range_stops_before_typedef_stanza() {
+        const MIXED: &str = r#"format-version: 1.2
+ontology: ex
+
+[Term]
+id: EX:001
+name: A
+
+[Typedef]
+id: EX:rel
+name: related
+
+[Term]
+id: EX:002
+name: B
+"#;
+
+        let (start, end) = term_block_range(MIXED, "EX:001").expect("term block");
+        let block = &MIXED[start..end];
+        assert!(block.contains("id: EX:001"));
+        assert!(block.contains("name: A"));
+        assert!(
+            !block.contains("[Typedef]"),
+            "Typedef must not be part of the preceding Term block: {block}"
+        );
+        assert!(!block.contains("EX:rel"));
+        assert!(!block.contains("id: EX:002"));
+    }
+
+    #[test]
+    fn set_name_preserves_intervening_typedef() {
+        const MIXED: &str = r#"format-version: 1.2
+ontology: ex
+
+[Term]
+id: EX:001
+name: A
+
+[Typedef]
+id: EX:rel
+name: related
+
+[Term]
+id: EX:002
+name: B
+"#;
+
+        let result = apply_patches_to_text(
+            MIXED,
+            &[OboPatchOp::SetName { term_id: "EX:001".into(), value: "A renamed".into() }],
+            true,
+        )
+        .expect("set name");
+        let text = result.preview_text.expect("preview");
+        assert!(text.contains("name: A renamed"));
+        assert!(
+            text.contains("[Typedef]\nid: EX:rel\nname: related"),
+            "Typedef stanza must survive term edit: {text}"
+        );
+        assert!(text.contains("id: EX:002\nname: B"));
+    }
+
+    #[test]
+    fn add_synonym_preserves_intervening_instance_stanza() {
+        const MIXED: &str = r#"format-version: 1.2
+ontology: ex
+
+[Term]
+id: EX:001
+name: A
+
+[Instance]
+id: EX:inst
+name: sample
+
+[Term]
+id: EX:002
+name: B
+"#;
+
+        let result = apply_patches_to_text(
+            MIXED,
+            &[OboPatchOp::AddSynonym {
+                term_id: "EX:001".into(),
+                value: "alias".into(),
+                scope: "EXACT".into(),
+            }],
+            true,
+        )
+        .expect("add synonym");
+        let text = result.preview_text.expect("preview");
+        assert!(text.contains("synonym: \"alias\" EXACT"));
+        assert!(
+            text.contains("[Instance]\nid: EX:inst\nname: sample"),
+            "Instance stanza must survive term edit: {text}"
+        );
+    }
+
+    #[test]
     fn remove_is_a_errors_when_parent_missing() {
         let err = apply_patches_to_text(
             SAMPLE,
@@ -543,5 +698,64 @@ name: one
         .expect("patch result");
         assert!(!result.applied);
         assert!(result.diagnostics.iter().any(|d| d.message.contains("whitespace")));
+    }
+
+    #[test]
+    fn atomic_write_overwrites_existing_file() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("term.obo");
+        std::fs::write(&path, "format-version: 1.2\nold\n").unwrap();
+        atomic_write(&path, "format-version: 1.2\nontology: new\n").expect("atomic write");
+        let contents = std::fs::read_to_string(&path).unwrap();
+        assert!(contents.contains("ontology: new"));
+        assert!(!contents.contains("old"));
+        let leftovers: Vec<_> = std::fs::read_dir(dir.path())
+            .unwrap()
+            .filter_map(|e| e.ok())
+            .filter(|e| e.file_name().to_string_lossy().contains(".tmp"))
+            .collect();
+        assert!(leftovers.is_empty(), "temp files left behind: {leftovers:?}");
+    }
+
+    #[test]
+    fn replace_file_removes_tmp_when_rename_fails_and_dest_missing() {
+        let dir = tempfile::tempdir().unwrap();
+        let tmp = dir.path().join(".ontocode-missing.tmp");
+        let dest = dir.path().join("out.obo");
+        // tmp does not exist → rename fails; dest missing → cleanup branch.
+        let err = replace_file(&tmp, &dest);
+        assert!(err.is_err());
+        assert!(!tmp.exists());
+    }
+
+    #[test]
+    fn replace_file_restores_dest_and_cleans_tmp_when_second_rename_fails() {
+        let dir = tempfile::tempdir().unwrap();
+        let dest = dir.path().join("out.obo");
+        std::fs::write(&dest, "original\n").unwrap();
+        let tmp = dir.path().join(".ontocode-out.tmp");
+        // Missing tmp with existing dest exercises bak restore + tmp cleanup.
+        let err = replace_file(&tmp, &dest);
+        assert!(err.is_err());
+        assert_eq!(std::fs::read_to_string(&dest).unwrap(), "original\n");
+        assert!(!tmp.exists());
+        let bak = tmp.with_extension("bak");
+        assert!(!bak.exists(), "backup must not be left behind");
+    }
+
+    #[test]
+    fn add_synonym_escapes_embedded_quotes() {
+        let result = apply_patches_to_text(
+            SAMPLE,
+            &[OboPatchOp::AddSynonym {
+                term_id: "EX:001".into(),
+                value: r#"foo "bar""#.into(),
+                scope: "EXACT".into(),
+            }],
+            true,
+        )
+        .expect("add synonym");
+        let text = result.preview_text.expect("preview");
+        assert!(text.contains(r#"synonym: "foo \"bar\"" EXACT []"#));
     }
 }

@@ -31,7 +31,7 @@ import {
 import { ExplorerTreeProvider, OntologyTreeItem } from "../treeviews/explorer";
 import { resolveEntityIri } from "../utils/resolveEntityIri";
 import { byteColToUtf16 } from "../utils/positions";
-import { documentUriInWorkspace, openWorkspaceTextDocument } from "../utils/workspacePath";
+import { documentUriInWorkspace, isPathUnderFolder, openWorkspaceTextDocument } from "../utils/workspacePath";
 import { refreshPluginCommands } from "./pluginCommands";
 import { WorkflowPanel } from "../webviews/workflowPanel";
 import { PluginViewPanel } from "../webviews/pluginViewPanel";
@@ -258,6 +258,12 @@ export function registerCommands(
         const editor = await vscode.window.showTextDocument(doc);
         if (diagnostic.line != null) {
           const line = Math.max(0, diagnostic.line - 1);
+          if (line >= doc.lineCount) {
+            void vscode.window.showWarningMessage(
+              `OntoCode: diagnostic line ${diagnostic.line} is out of range`
+            );
+            return;
+          }
           const lineText = doc.lineAt(line).text;
           const col = byteColToUtf16(lineText, diagnostic.column ?? 0);
           const pos = new vscode.Position(line, col);
@@ -292,10 +298,14 @@ export function registerCommands(
             return;
           }
           const editor = await vscode.window.showTextDocument(doc);
-          const lineText = doc.lineAt(
-            Math.max(0, detail.source.line - 1)
-          ).text;
           const line = Math.max(0, detail.source.line - 1);
+          if (line >= doc.lineCount) {
+            void vscode.window.showWarningMessage(
+              `OntoCode: source line ${detail.source.line} is out of range for ${iri}`
+            );
+            return;
+          }
+          const lineText = doc.lineAt(line).text;
           const col = byteColToUtf16(lineText, Math.max(0, detail.source.column));
           const pos = new vscode.Position(line, col);
           editor.selection = new vscode.Selection(pos, pos);
@@ -500,10 +510,13 @@ export function registerCommands(
             }),
           ]);
           if (token.isCancellationRequested) {
+            panel.cancelActiveRun();
             void vscode.window.showWarningMessage(
-              "OntoCode: reasoner run cancelled (result will be ignored if it completes)"
+              "OntoCode: reasoner run cancelled (in-flight result will be ignored)"
             );
           }
+          // Ensure we don't leave an unhandled rejection if cancel won the race.
+          void run.catch(() => undefined);
         }
       );
     }),
@@ -542,7 +555,7 @@ export function registerCommands(
     }),
     vscode.commands.registerCommand(
       "ontocode.showExplanation",
-      async (classIri?: string) => {
+      async (classIri?: string, profile?: string) => {
         if (!classIri) {
           classIri = await vscode.window.showInputBox({
             prompt: "Unsatisfiable class IRI",
@@ -552,7 +565,7 @@ export function registerCommands(
           return;
         }
         try {
-          await ExplanationPanel.show(classIri);
+          await ExplanationPanel.show(classIri, profile);
         } catch (err) {
           const message = err instanceof Error ? err.message : String(err);
           void vscode.window.showErrorMessage(
@@ -759,7 +772,7 @@ async function createEntity(
     const folder = vscode.workspace.getWorkspaceFolder(activeEditor.document.uri);
     if (folder) {
       const prefix = folder.uri.fsPath;
-      const inFolder = ttlDocs.filter((d) => d.path.startsWith(prefix));
+      const inFolder = ttlDocs.filter((d) => isPathUnderFolder(d.path, prefix));
       if (inFolder.length > 0) {
         ttlDocs = inFolder;
       }

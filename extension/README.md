@@ -5,11 +5,15 @@
 
 **Ontology IDE for VS Code** — powered by **OntoCore** (`ontocore-lsp` language server).
 
-**Current release: v0.17.0** — see [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) and [migration v0.17](https://ontocode-vs.readthedocs.io/en/latest/migration/v0.17/).
+**Current release: v0.17.0** — [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) · [Known limitations](https://ontocode-vs.readthedocs.io/en/latest/known-limitations/) · [What's new in v0.17](https://ontocode-vs.readthedocs.io/en/latest/migration/v0.17/)
 
-> **New here?** [First success (~10 min)](https://ontocode-vs.readthedocs.io/en/latest/guides/first-success/) · [Migrating from Protégé?](https://ontocode-vs.readthedocs.io/en/latest/guides/protege-migration/) · [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) · [Migration v0.14](https://ontocode-vs.readthedocs.io/en/latest/migration/v0.14/) · [Full extension docs](https://ontocode-vs.readthedocs.io/en/latest/ontocode/vscode-extension/) · [FAQ](https://ontocode-vs.readthedocs.io/en/latest/faq/)
+> **New here?** **[First success (~10 min)](https://ontocode-vs.readthedocs.io/en/latest/guides/first-success/)** · [Migrating from Protégé?](https://ontocode-vs.readthedocs.io/en/latest/guides/protege-migration/) · [Feature tour](https://ontocode-vs.readthedocs.io/en/latest/ontocode/feature-tour/) · [FAQ](https://ontocode-vs.readthedocs.io/en/latest/faq/)
 
 > **CLI or Rust crates?** See the [Rust & CLI documentation path](https://ontocode-vs.readthedocs.io/en/latest/guides/rust-crates/).
+
+![OntoCode product tour](media/screenshots/product-tour.gif)
+
+> **Editable today:** Turtle (`.ttl`) and OBO (`.obo`) only. OWL/XML and RDF/XML index and query as read-only — [Known limitations](https://ontocode-vs.readthedocs.io/en/latest/known-limitations/).
 
 ---
 
@@ -33,16 +37,15 @@ The language server indexes supported files automatically when the workspace ope
 
 OntoCode activates when your workspace contains any of:
 
-| Extension | Format |
-|-----------|--------|
-| `.ttl` | Turtle (editable) |
-| `.owl`, `.rdf` | RDF/XML |
-| `.jsonld`, `.json-ld` | JSON-LD |
-| `.nt`, `.nq` | N-Triples / N-Quads |
-| `.trig` | TriG |
-| `.obo` | OBO Format (index, syntax highlighting, and inspector write-back since v0.13) |
-
-Write-back in the inspector is **Turtle (`.ttl`) and OBO (`.obo`)**.
+| Extension | Format | Write-back |
+|-----------|--------|------------|
+| `.ttl` | Turtle | **Yes** |
+| `.obo` | OBO Format | **Yes** |
+| `.owl`, `.owx` | OWL/XML | Read-only |
+| `.rdf`, `.xml` | RDF/XML | Read-only |
+| `.jsonld`, `.json-ld` | JSON-LD | Read-only |
+| `.nt`, `.nq` | N-Triples / N-Quads | Read-only |
+| `.trig` | TriG | Read-only |
 
 You can also open the **OntoCode → Ontologies** view to force activation.
 

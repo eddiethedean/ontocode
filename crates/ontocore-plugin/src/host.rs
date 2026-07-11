@@ -4,12 +4,15 @@ use crate::protocol::{jail_output_paths, plugin_diagnostic, PluginOutput};
 use crate::subprocess::{run_plugin_subprocess, SubprocessError, SubprocessRequest};
 use crate::traits::{ExporterPlugin, ValidatorPlugin, WorkflowPlugin, WorkflowRequest};
 use ontocore_catalog::OntologyCatalog;
-use ontocore_core::{Diagnostic, DiagnosticSeverity};
+use ontocore_core::{validate_workspace_scope, Diagnostic, DiagnosticSeverity};
 use ontocore_docs::ExportOptions;
 use serde::Serialize;
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
 use thiserror::Error;
+
+/// Default in-process export directory (relative to the workspace root).
+const DEFAULT_PLUGIN_EXPORT_DIR: &str = ".ontocore/plugin-out";
 
 #[derive(Debug, Error)]
 pub enum PluginHostError {
@@ -235,6 +238,7 @@ impl PluginHost {
         if !plugin.manifest.capabilities.export {
             return Err(PluginHostError::UnsupportedAction(plugin_id.to_string(), "export".into()));
         }
+        let options = jail_export_options(&self.workspace, options)?;
         if let Some(e) = self.exporters.get(plugin_id) {
             let paths = e
                 .export(catalog, &self.workspace, options)
@@ -356,8 +360,8 @@ impl PluginHost {
                         "export (no catalog)".into(),
                     )
                 })?;
-                let options =
-                    export_options.unwrap_or_else(|| ExportOptions::markdown("plugin-out"));
+                let options = export_options
+                    .unwrap_or_else(|| ExportOptions::markdown(DEFAULT_PLUGIN_EXPORT_DIR));
                 self.run_export_plugin(plugin_id, catalog, options)
             }
             "workflow" => self.run_workflow_plugin(plugin_id, step.unwrap_or("qc")),
@@ -400,6 +404,17 @@ fn wire_to_diagnostics(plugin_id: &str, workspace: &Path, output: PluginOutput) 
     output.diagnostics.into_iter().map(|d| d.into_diagnostic(plugin_id, workspace)).collect()
 }
 
+/// Resolve export output under the workspace root (relative paths join the root, not process CWD).
+fn jail_export_options(
+    workspace: &Path,
+    mut options: ExportOptions,
+) -> Result<ExportOptions, PluginHostError> {
+    let jailed = validate_workspace_scope(&options.output_dir, workspace)
+        .map_err(PluginHostError::Export)?;
+    options.output_dir = jailed;
+    Ok(options)
+}
+
 pub fn merge_plugin_diagnostics(base: &mut Vec<Diagnostic>, plugin: Vec<Diagnostic>) {
     base.extend(plugin);
 }
@@ -412,4 +427,47 @@ pub fn manifest_for_builtin(id: &str) -> Option<PluginManifest> {
         _ => return None,
     };
     crate::manifest::parse_manifest(text).ok()
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use ontocore_core::is_path_within;
+
+    #[test]
+    fn jail_export_options_joins_relative_to_workspace_not_cwd() {
+        let dir = tempfile::tempdir().unwrap();
+        let workspace = dir.path().join("ws");
+        std::fs::create_dir_all(&workspace).unwrap();
+        let cwd = tempfile::tempdir().unwrap();
+        let prev = std::env::current_dir().unwrap();
+        struct RestoreCwd(std::path::PathBuf);
+        impl Drop for RestoreCwd {
+            fn drop(&mut self) {
+                let _ = std::env::set_current_dir(&self.0);
+            }
+        }
+        let _restore = RestoreCwd(prev);
+        std::env::set_current_dir(cwd.path()).unwrap();
+
+        let options =
+            jail_export_options(&workspace, ExportOptions::markdown(DEFAULT_PLUGIN_EXPORT_DIR))
+                .expect("jail default export dir");
+
+        let root = workspace.canonicalize().unwrap();
+        assert!(is_path_within(&root, &options.output_dir));
+        assert!(options.output_dir.ends_with(".ontocore/plugin-out"));
+        assert!(!cwd.path().join("plugin-out").exists());
+        assert!(!cwd.path().join(".ontocore/plugin-out").exists());
+    }
+
+    #[test]
+    fn jail_export_options_rejects_absolute_outside_workspace() {
+        let dir = tempfile::tempdir().unwrap();
+        let workspace = dir.path().join("ws");
+        std::fs::create_dir_all(&workspace).unwrap();
+        let outside = dir.path().join("outside-out");
+        let err = jail_export_options(&workspace, ExportOptions::markdown(&outside)).unwrap_err();
+        assert!(matches!(err, PluginHostError::Export(_)));
+    }
 }

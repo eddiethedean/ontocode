@@ -15,7 +15,10 @@ pub fn file_uri_for_path(path: &std::path::Path) -> String {
     }
 }
 
-/// Whether `entity` belongs to `doc` (handles ontology IRI vs `doc-N` id mismatch).
+/// Whether `entity` is owned by `doc` via exact ontology id / ontology IRI equality.
+///
+/// Does **not** use entity-IRI `starts_with(base_iri)` — that is ambiguous when multiple
+/// documents have nested bases. Use [`document_for_entity`] to resolve ownership among a set.
 pub fn document_matches_entity(entity: &Entity, doc: &OntologyDocument) -> bool {
     if entity.ontology_id == doc.id {
         return true;
@@ -24,11 +27,17 @@ pub fn document_matches_entity(entity: &Entity, doc: &OntologyDocument) -> bool 
         if normalize_iri(base) == normalize_iri(&entity.ontology_id) {
             return true;
         }
-        if entity.iri.starts_with(base) {
-            return true;
-        }
     }
     false
+}
+
+fn base_iri_prefix_len(entity: &Entity, doc: &OntologyDocument) -> Option<usize> {
+    let base = doc.base_iri.as_ref()?;
+    if entity.iri.starts_with(base.as_str()) {
+        Some(base.len())
+    } else {
+        None
+    }
 }
 
 /// Whether an import ontology id matches a document.
@@ -44,12 +53,31 @@ pub fn document_matches_ontology_id(ontology_id: &str, doc: &OntologyDocument) -
     false
 }
 
-/// Find the document that owns an entity by ontology id.
+/// Find the document that owns an entity.
+///
+/// Preference order:
+/// 1. Exact `entity.ontology_id == doc.id`
+/// 2. Normalized ontology IRI equality with `doc.base_iri`
+/// 3. Longest `doc.base_iri` that is a string prefix of `entity.iri` (nested-base fallback)
 pub fn document_for_entity<'a>(
     documents: &'a [OntologyDocument],
     entity: &Entity,
 ) -> Option<&'a OntologyDocument> {
-    documents.iter().find(|d| document_matches_entity(entity, d))
+    if let Some(doc) = documents.iter().find(|d| entity.ontology_id == d.id) {
+        return Some(doc);
+    }
+    if let Some(doc) = documents.iter().find(|d| {
+        d.base_iri
+            .as_ref()
+            .is_some_and(|base| normalize_iri(base) == normalize_iri(&entity.ontology_id))
+    }) {
+        return Some(doc);
+    }
+    documents
+        .iter()
+        .filter_map(|d| base_iri_prefix_len(entity, d).map(|len| (d, len)))
+        .max_by_key(|(_, len)| *len)
+        .map(|(d, _)| d)
 }
 
 /// Find the document for an import's owning ontology id.
@@ -67,13 +95,12 @@ mod tests {
     use std::collections::BTreeMap;
     use std::path::Path;
 
-    #[test]
-    fn matches_entity_by_ontology_iri() {
-        let doc = OntologyDocument {
-            id: "doc-1".to_string(),
-            path: Path::new("people.ttl").to_path_buf(),
+    fn doc(id: &str, base_iri: Option<&str>) -> OntologyDocument {
+        OntologyDocument {
+            id: id.to_string(),
+            path: Path::new(&format!("{id}.ttl")).to_path_buf(),
             format: OntologyFormat::Turtle,
-            base_iri: Some("http://example.org/people".to_string()),
+            base_iri: base_iri.map(str::to_string),
             imports: vec![],
             namespaces: BTreeMap::new(),
             parse_status: ParseStatus::Ok,
@@ -81,19 +108,67 @@ mod tests {
             modified_time: 0,
             parse_message: None,
             parse_error_location: None,
-        };
-        let entity = Entity {
-            iri: "http://example.org/people#Person".to_string(),
-            short_name: "Person".to_string(),
+        }
+    }
+
+    fn entity(iri: &str, ontology_id: &str) -> Entity {
+        Entity {
+            iri: iri.to_string(),
+            short_name: iri.rsplit(['#', '/']).next().unwrap_or(iri).to_string(),
             kind: EntityKind::Class,
-            ontology_id: "http://example.org/people".to_string(),
+            ontology_id: ontology_id.to_string(),
             source_location: Default::default(),
             labels: vec![],
             comments: vec![],
             deprecated: false,
             obo_id: None,
             characteristics: Default::default(),
-        };
-        assert!(document_matches_entity(&entity, &doc));
+        }
+    }
+
+    #[test]
+    fn matches_entity_by_ontology_iri() {
+        let document = doc("doc-1", Some("http://example.org/people"));
+        let ent = entity("http://example.org/people#Person", "http://example.org/people");
+        assert!(document_matches_entity(&ent, &document));
+    }
+
+    #[test]
+    fn broader_base_iri_does_not_match_when_ontology_id_differs() {
+        let broad = doc("doc-A", Some("http://example.org/"));
+        let ent = entity("http://example.org/people#Person", "doc-B");
+        assert!(!document_matches_entity(&ent, &broad));
+    }
+
+    #[test]
+    fn document_for_entity_prefers_exact_ontology_id_over_broader_base() {
+        let broad = doc("doc-A", Some("http://example.org/"));
+        let specific = doc("doc-B", Some("http://example.org/people#"));
+        let ent = entity("http://example.org/people#Person", "doc-B");
+        // Broader document listed first — must still resolve to the owning doc.
+        let documents = vec![broad, specific];
+        let found = document_for_entity(&documents, &ent).expect("owner");
+        assert_eq!(found.id, "doc-B");
+    }
+
+    #[test]
+    fn document_for_entity_longest_base_iri_wins_without_ontology_id_match() {
+        let broad = doc("doc-A", Some("http://example.org/"));
+        let specific = doc("doc-B", Some("http://example.org/people#"));
+        // ontology_id matches neither doc id / base equality — fall back to longest prefix.
+        let ent = entity("http://example.org/people#Person", "unknown");
+        let documents = vec![broad, specific];
+        let found = document_for_entity(&documents, &ent).expect("owner");
+        assert_eq!(found.id, "doc-B");
+    }
+
+    #[test]
+    fn document_for_entity_longest_base_iri_wins_when_broad_is_second() {
+        let specific = doc("doc-B", Some("http://example.org/people#"));
+        let broad = doc("doc-A", Some("http://example.org/"));
+        let ent = entity("http://example.org/people#Person", "unknown");
+        let documents = vec![specific, broad];
+        let found = document_for_entity(&documents, &ent).expect("owner");
+        assert_eq!(found.id, "doc-B");
     }
 }

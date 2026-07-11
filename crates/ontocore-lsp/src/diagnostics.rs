@@ -96,6 +96,13 @@ fn send_empty_publish(sender: &Sender<Message>, uri: &str) {
     let _ = sender.send(Message::Notification(notif));
 }
 
+/// Clear previously published diagnostics for the given URIs (e.g. after workspace wipe).
+pub fn publish_empty_diagnostics(sender: &Sender<Message>, uris: &BTreeSet<String>) {
+    for uri in uris {
+        send_empty_publish(sender, uri);
+    }
+}
+
 fn to_lsp_diagnostic(
     diag: &ontocore_core::Diagnostic,
     document_text: &dyn Fn(&Path) -> Option<String>,
@@ -103,6 +110,9 @@ fn to_lsp_diagnostic(
     let line_idx = diag.range.line.unwrap_or(1).saturating_sub(1) as u32;
     let byte_col = diag.range.column.unwrap_or(0) as usize;
     let line_text = document_text(&diag.file)
+        .or_else(|| {
+            ontocore_core::read_to_string_capped(&diag.file, ontocore_core::MAX_FILE_BYTES).ok()
+        })
         .and_then(|text| text.lines().nth(line_idx as usize).map(|s| s.to_string()));
     let character =
         line_text.as_deref().map(|l| byte_col_to_utf16(l, byte_col)).unwrap_or(byte_col as u32);
@@ -151,6 +161,29 @@ mod tests {
         assert_eq!(lsp.range.start.line, 1);
         assert_eq!(lsp.range.start.character, 4);
         assert_eq!(lsp.code, Some(NumberOrString::String("broken_import".to_string())));
+    }
+
+    #[test]
+    fn converts_byte_col_from_disk_when_buffer_missing() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("emoji.ttl");
+        // Emoji is 4 UTF-8 bytes / 2 UTF-16 units. Mid-sequence byte column 5
+        // must convert via the line text (→ 4), not cast the byte offset (→ 5).
+        std::fs::write(&path, "# 😀\nex:A a owl:Class .\n").unwrap();
+        let diag = ontocore_core::Diagnostic {
+            code: DiagnosticCode::MissingLabel,
+            severity: DiagnosticSeverity::Warning,
+            message: "test".to_string(),
+            file: path.clone(),
+            range: SourceLocation::at_line_col(1, 5),
+            entity_iri: None,
+            quick_fix: None,
+            plugin_id: None,
+            plugin_code: None,
+        };
+        let lsp = to_lsp_diagnostic(&diag, &|_| None);
+        assert_eq!(lsp.range.start.line, 0);
+        assert_eq!(lsp.range.start.character, 4);
     }
 
     #[test]

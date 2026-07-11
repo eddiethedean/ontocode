@@ -1,13 +1,13 @@
-# Supported ontology formats (v0.14)
+# Supported ontology formats (v0.17)
 
 This page is the canonical reference for **what OntoCode/OntoCore can do with each file format** today.
 
-If you are deciding whether to adopt OntoCode, cross-check this page with **[What ships today](SHIPPED.md)**.
+If you are deciding whether to adopt OntoCode, cross-check this page with **[What ships today](SHIPPED.md)** and **[Known limitations](known-limitations.md)**.
 
 ## Quick summary
 
 - **Write-back (edit in OntoCode / patch)**: **Turtle (`.ttl`)** and **OBO (`.obo`)**
-- **Read-only (index/query/browse)**: OWL/RDF serializations including **OWL/XML** and **RDF/XML**
+- **Read-only (index/query/browse)**: OWL/RDF serializations including **OWL/XML** (`.owl`, `.owx`) and **RDF/XML**
 
 ## Capability matrix
 

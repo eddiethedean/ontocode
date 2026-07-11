@@ -87,16 +87,23 @@ fn strip_comments_and_strings(text: &str) -> String {
                 out.push(' ');
             }
             '"' => {
-                if chars.peek() == Some(&'"') && chars.nth(1) == Some('"') {
-                    while let Some(ch) = chars.next() {
-                        if ch == '"' && chars.peek() == Some(&'"') {
-                            let _ = chars.next();
-                            if chars.peek() == Some(&'"') {
-                                chars.next();
-                                break;
+                // Long string """...""" — only enter after confirming three quotes without
+                // consuming past a short empty `""` into following tokens.
+                if chars.peek() == Some(&'"') {
+                    chars.next(); // second "
+                    if chars.peek() == Some(&'"') {
+                        chars.next(); // third "
+                        while let Some(ch) = chars.next() {
+                            if ch == '"' && chars.peek() == Some(&'"') {
+                                let _ = chars.next();
+                                if chars.peek() == Some(&'"') {
+                                    chars.next();
+                                    break;
+                                }
                             }
                         }
                     }
+                    // else: empty "" — both quotes already consumed
                 } else {
                     #[allow(clippy::while_let_on_iterator)]
                     while let Some(ch) = chars.next() {
@@ -115,6 +122,9 @@ fn strip_comments_and_strings(text: &str) -> String {
                 while let Some(ch) = chars.next() {
                     if ch == '\'' {
                         break;
+                    }
+                    if ch == '\\' {
+                        chars.next();
                     }
                 }
                 out.push(' ');
@@ -214,5 +224,64 @@ mod tests {
         };
         let diags = undefined_prefixes(&input, &|_| text.to_string());
         assert!(diags.is_empty(), "commented qname should not lint: {diags:?}");
+    }
+
+    #[test]
+    fn strip_does_not_eat_past_empty_double_quotes() {
+        let stripped = strip_comments_and_strings(r#"""ex:Bad a owl:Class ."#);
+        assert!(
+            stripped.contains("ex:Bad"),
+            "empty \"\" must not consume following QName: {stripped:?}"
+        );
+    }
+
+    #[test]
+    fn strip_handles_escaped_double_quotes() {
+        let stripped =
+            strip_comments_and_strings(r#"ex:Ok rdfs:label "a\"b" . un:Bad a owl:Class ."#);
+        assert!(!stripped.contains("a\\\"b") && !stripped.contains(r#"a"b"#));
+        assert!(
+            stripped.contains("un:Bad"),
+            "qname after escaped string must remain: {stripped:?}"
+        );
+    }
+
+    #[test]
+    fn strip_handles_escaped_single_quotes() {
+        let stripped =
+            strip_comments_and_strings(r#"ex:Ok rdfs:label 'a\'b' . un:Bad a owl:Class ."#);
+        assert!(stripped.contains("un:Bad"), "qname after escaped ': {stripped:?}");
+    }
+
+    #[test]
+    fn ignores_qname_inside_empty_and_escaped_strings() {
+        let text = r#"@prefix ex: <http://ex/> .
+ex:Ok rdfs:label "" .
+ex:Ok2 rdfs:label "say \"hi\"" .
+ex:Ok3 rdfs:label 'say \'hi\'' .
+"#;
+        let documents = vec![OntologyDocument {
+            id: "doc-1".to_string(),
+            path: Path::new("ok.ttl").to_path_buf(),
+            format: OntologyFormat::Turtle,
+            base_iri: Some("http://ex/".to_string()),
+            imports: vec![],
+            namespaces: BTreeMap::from([("ex".to_string(), "http://ex/".to_string())]),
+            parse_status: ParseStatus::Ok,
+            content_hash: "h".to_string(),
+            modified_time: 0,
+            parse_message: None,
+            parse_error_location: None,
+        }];
+        let input = DiagnosticInput {
+            documents: &documents,
+            entities: &[],
+            annotations: &[],
+            axioms: &[],
+            namespaces: &[],
+            imports: &[],
+        };
+        let diags = undefined_prefixes(&input, &|_| text.to_string());
+        assert!(diags.is_empty(), "string contents should not lint: {diags:?}");
     }
 }

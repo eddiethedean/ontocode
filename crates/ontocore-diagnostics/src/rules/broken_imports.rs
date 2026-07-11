@@ -1,5 +1,5 @@
 use crate::input::DiagnosticInput;
-use crate::location::find_in_source;
+use crate::location::find_import_in_source;
 use ontocore_core::{
     document_for_ontology_id, file_uri_for_path, normalize_iri, Diagnostic, DiagnosticCode,
     DiagnosticSeverity, QuickFix,
@@ -24,12 +24,13 @@ pub fn broken_imports(
         if known_normalized.contains(&normalize_iri(&imp.import_iri)) {
             continue;
         }
-        let doc = document_for_ontology_id(data.documents, &imp.ontology_id);
-        let file = doc.map(|d| d.path.clone()).unwrap_or_else(|| Path::new(".").to_path_buf());
+        let Some(doc) = document_for_ontology_id(data.documents, &imp.ontology_id) else {
+            continue;
+        };
+        let file = doc.path.clone();
 
         let text = source(&file);
-        let range =
-            find_in_source(&text, &[imp.import_iri.clone(), format!("<{}>", imp.import_iri)]);
+        let range = find_import_in_source(&text, &imp.import_iri);
 
         let quick_fix = range.line.and_then(|line| {
             QuickFix::RemoveLine {

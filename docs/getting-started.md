@@ -19,7 +19,7 @@ VS Code extension (bundled language server on Linux, macOS, and Windows): [vscod
 [![VS Code Marketplace](https://vsmarketplacebadges.dev/version/ontocode.ontocode.svg?label=marketplace)](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode)
 
 !!! note "SQL-like queries"
-    `ontocore query` uses **SQL-like virtual tables** (single-table `SELECT`, limited `WHERE`). Not full SQL — see [SQL reference](sql-reference.md).
+    `ontocore query` uses **catalog SQL (subset)** — single-table `SELECT`, limited `WHERE`. Not full SQL — see [SQL reference](sql-reference.md) and [Known limitations](known-limitations.md).
 
 ## Prerequisites
 
@@ -28,7 +28,7 @@ VS Code extension (bundled language server on Linux, macOS, and Windows): [vscod
 | Minimum VS Code | **1.85+** — see [platform compatibility guide](guides/platform-compatibility.md) |
 | `cargo install` CLI | Rust 1.88+; `~/.cargo/bin` on your `PATH` |
 | Git clone + `cargo run` | Rust 1.88+ |
-| Release CLI binaries | No Rust; **Linux x64 only** (download from GitHub Releases) |
+| Release CLI binaries | No Rust; **Linux x64 only** (download from GitHub Releases). macOS/Windows: use `cargo install` or the VS Code extension. |
 
 After `cargo install`, ensure `~/.cargo/bin` is on your `PATH`. If you see `ontocore: command not found`, run:
 

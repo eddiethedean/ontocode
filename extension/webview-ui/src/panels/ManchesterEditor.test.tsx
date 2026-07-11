@@ -237,6 +237,43 @@ describe("ManchesterEditorPanel", () => {
     expect(screen.queryByText("stale ttl")).not.toBeInTheDocument();
   });
 
+  it("clears validation state when switching entities via manchesterInit", async () => {
+    render(<ManchesterEditorPanel />);
+    postHostMessage({
+      type: "manchesterInit",
+      entityIri: "http://example.org#Person",
+      axiomKind: "sub_class_of",
+      expression: "Agent",
+      completions: manchesterCompletions,
+    });
+    await screen.findByText("http://example.org#Person");
+
+    await userEvent.setup().click(screen.getByRole("button", { name: "Validate" }));
+    postHostMessage({
+      type: "manchesterValidation",
+      seq: (lastPostedMessage() as { seq: number }).seq,
+      result: {
+        normalized: "Agent",
+        turtle_fragment: "rdfs:subClassOf ex:Agent ;",
+        tree: { kind: "class" },
+        diagnostics: [{ severity: "warning", message: "from entity A" }],
+      },
+    });
+    expect(await screen.findByText("from entity A")).toBeInTheDocument();
+
+    postHostMessage({
+      type: "manchesterInit",
+      entityIri: "http://example.org#Other",
+      axiomKind: "sub_class_of",
+      expression: "",
+      completions: manchesterCompletions,
+    });
+
+    expect(await screen.findByText("http://example.org#Other")).toBeInTheDocument();
+    expect(screen.queryByText("from entity A")).not.toBeInTheDocument();
+    expect(screen.queryByText("rdfs:subClassOf ex:Agent ;")).not.toBeInTheDocument();
+  });
+
   it("shows validation error callout from host", async () => {
     render(<ManchesterEditorPanel />);
     postHostMessage({

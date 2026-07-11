@@ -156,11 +156,19 @@ pub fn run_plugin_subprocess(
                 if Instant::now() >= deadline {
                     let _ = child.kill();
                     let _ = child.wait();
+                    let _ = out_handle.join();
+                    let _ = err_handle.join();
                     return Err(SubprocessError::TimedOut(DEFAULT_TIMEOUT_SECS));
                 }
                 thread::sleep(Duration::from_millis(25));
             }
-            Err(e) => return Err(SubprocessError::RunFailed(e.to_string())),
+            Err(e) => {
+                let _ = child.kill();
+                let _ = child.wait();
+                let _ = out_handle.join();
+                let _ = err_handle.join();
+                return Err(SubprocessError::RunFailed(e.to_string()));
+            }
         }
     }
 }

@@ -9,7 +9,7 @@ use std::path::{Path, PathBuf};
 use std::time::UNIX_EPOCH;
 
 const ONTOLOGY_EXTENSIONS: &[&str] =
-    &["ttl", "rdf", "owl", "jsonld", "json-ld", "nt", "nq", "trig", "obo"];
+    &["ttl", "rdf", "owl", "owx", "jsonld", "json-ld", "nt", "nq", "trig", "obo"];
 
 #[derive(Debug, Clone)]
 pub struct OntologyFile {
@@ -158,6 +158,20 @@ mod tests {
         assert_eq!(files.len(), 1);
         assert_eq!(files[0].format, OntologyFormat::Turtle);
         assert!(!files[0].content_hash.is_empty());
+    }
+
+    #[test]
+    fn scan_finds_owx_files() {
+        let dir = tempfile::tempdir().unwrap();
+        fs::write(
+            dir.path().join("example.owx"),
+            r#"<?xml version="1.0"?><Ontology xmlns="http://www.w3.org/2002/07/owl#" ontologyIRI="http://ex.org"/>"#,
+        )
+        .unwrap();
+        let scanner = WorkspaceScanner::new(dir.path());
+        let files = scanner.scan().unwrap();
+        assert_eq!(files.len(), 1);
+        assert_eq!(files[0].format, OntologyFormat::OwlXml);
     }
 
     #[test]

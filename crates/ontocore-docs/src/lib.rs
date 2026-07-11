@@ -2,7 +2,7 @@
 
 use minijinja::{context, AutoEscape, Environment};
 use ontocore_catalog::OntologyCatalog;
-use ontocore_core::{document_matches_entity, document_matches_ontology_id, EntityKind};
+use ontocore_core::{document_for_entity, document_matches_ontology_id, EntityKind};
 use std::collections::{BTreeMap, BTreeSet};
 use std::fs;
 use std::path::PathBuf;
@@ -69,6 +69,7 @@ pub fn export_workspace(catalog: &OntologyCatalog, options: ExportOptions) -> Re
 
     let hierarchy = catalog.class_hierarchy();
     let mut ontologies: Vec<OntologyDoc> = Vec::new();
+    let mut used_slugs = BTreeSet::new();
 
     for doc in &catalog.data().documents {
         if let Some(filter) = &options.ontology_id {
@@ -78,7 +79,8 @@ pub fn export_workspace(catalog: &OntologyCatalog, options: ExportOptions) -> Re
         }
         let mut entities = Vec::new();
         for entity in &catalog.data().entities {
-            if !document_matches_entity(entity, doc) {
+            if document_for_entity(&catalog.data().documents, entity).is_none_or(|d| d.id != doc.id)
+            {
                 continue;
             }
             let parents = hierarchy.parents.get(&entity.iri).cloned().unwrap_or_default();
@@ -94,7 +96,7 @@ pub fn export_workspace(catalog: &OntologyCatalog, options: ExportOptions) -> Re
         entities.sort_by(|a, b| a.short_name.cmp(&b.short_name));
         ontologies.push(OntologyDoc {
             id: doc.id.clone(),
-            slug: slugify(&doc.id),
+            slug: allocate_slug(&doc.id, &mut used_slugs),
             path: doc.path.display().to_string(),
             imports: doc.imports.clone(),
             entities,
@@ -122,13 +124,46 @@ pub fn export_workspace(catalog: &OntologyCatalog, options: ExportOptions) -> Re
 }
 
 fn slugify(iri: &str) -> String {
-    iri.chars()
+    let slug: String = iri
+        .chars()
         .map(|c| if c.is_ascii_alphanumeric() { c } else { '_' })
         .collect::<String>()
         .trim_matches('_')
         .chars()
         .take(80)
-        .collect()
+        .collect();
+    if slug.is_empty() {
+        "ontology".to_string()
+    } else {
+        slug
+    }
+}
+
+/// Stable 8-hex FNV-1a tag so colliding readable slugs stay unique (#24).
+fn iri_tag(iri: &str) -> String {
+    let mut hash: u64 = 0xcbf29ce484222325;
+    for byte in iri.as_bytes() {
+        hash ^= u64::from(*byte);
+        hash = hash.wrapping_mul(0x100000001b3);
+    }
+    format!("{hash:016x}")[..8].to_string()
+}
+
+/// Allocate a filesystem-safe slug unique within one export run.
+fn allocate_slug(iri: &str, used: &mut BTreeSet<String>) -> String {
+    let base = slugify(iri);
+    if used.insert(base.clone()) {
+        return base;
+    }
+    let tag = iri_tag(iri);
+    let truncated: String = base.chars().take(71).collect();
+    let mut candidate = format!("{truncated}_{tag}");
+    let mut n = 2u32;
+    while !used.insert(candidate.clone()) {
+        candidate = format!("{truncated}_{tag}_{n}");
+        n = n.saturating_add(1);
+    }
+    candidate
 }
 
 fn render_index(
@@ -357,14 +392,21 @@ mod tests {
             .iter()
             .find(|d| d.path.file_name().and_then(|n| n.to_str()) == Some("example.ttl"))
             .expect("example.ttl indexed");
-        let entity_count =
-            catalog.data().entities.iter().filter(|e| document_matches_entity(e, example)).count();
+        let entity_count = catalog
+            .data()
+            .entities
+            .iter()
+            .filter(|e| {
+                document_for_entity(&catalog.data().documents, e)
+                    .is_some_and(|d| d.id == example.id)
+            })
+            .count();
         assert!(entity_count > 0, "fixture entities should match example.ttl via ontology IRI");
 
         let dir = tempfile::tempdir().unwrap();
         export_workspace(&catalog, ExportOptions::markdown(dir.path())).expect("export");
         let index = fs::read_to_string(dir.path().join("index.md")).expect("index.md");
-        let doc_slug = slugify(&example.id);
+        let doc_slug = allocate_slug(&example.id, &mut BTreeSet::new());
         let detail_path = dir.path().join(format!("{doc_slug}.md"));
         assert!(detail_path.exists(), "expected per-ontology export file");
         let detail = fs::read_to_string(detail_path).expect("ontology markdown");
@@ -374,6 +416,67 @@ mod tests {
             index.contains(&format!("{entity_count} entities")),
             "index should report exported entity count for example.ttl"
         );
+    }
+
+    #[test]
+    fn slugify_collisions_are_disambiguated() {
+        assert_eq!(slugify("http://a.com/x/1"), slugify("http://a.com/x_1"));
+        let mut used = BTreeSet::new();
+        let first = allocate_slug("http://a.com/x/1", &mut used);
+        let second = allocate_slug("http://a.com/x_1", &mut used);
+        assert_ne!(first, second);
+        assert_eq!(first, slugify("http://a.com/x/1"));
+        assert!(second.contains('_'), "collision should append a disambiguating tag");
+        assert_eq!(used.len(), 2);
+    }
+
+    #[test]
+    fn export_keeps_both_files_when_ontology_ids_slug_collide() {
+        let dir = tempfile::tempdir().unwrap();
+        let a = dir.path().join("a.ttl");
+        let b = dir.path().join("b.ttl");
+        // Distinct ontology IRIs that collapse to the same slugify() result.
+        fs::write(
+            &a,
+            concat!(
+                "@prefix owl: <http://www.w3.org/2002/07/owl#> .\n",
+                "<http://a.com/x/1> a owl:Ontology .\n",
+                "<http://a.com/x/1#A> a owl:Class .\n",
+            ),
+        )
+        .unwrap();
+        fs::write(
+            &b,
+            concat!(
+                "@prefix owl: <http://www.w3.org/2002/07/owl#> .\n",
+                "<http://a.com/x_1> a owl:Ontology .\n",
+                "<http://a.com/x_1#B> a owl:Class .\n",
+            ),
+        )
+        .unwrap();
+
+        let catalog = IndexBuilder::new().workspace(dir.path()).build().expect("index");
+        let out = tempfile::tempdir().unwrap();
+        export_workspace(&catalog, ExportOptions::markdown(out.path())).expect("export");
+
+        let md_files: Vec<_> = fs::read_dir(out.path())
+            .unwrap()
+            .filter_map(|e| e.ok())
+            .map(|e| e.file_name().to_string_lossy().into_owned())
+            .filter(|n| n.ends_with(".md") && n != "index.md")
+            .collect();
+        assert_eq!(
+            md_files.len(),
+            2,
+            "both colliding ontology IRIs must produce distinct export files, got {md_files:?}"
+        );
+
+        let bodies: Vec<_> = md_files
+            .iter()
+            .map(|name| fs::read_to_string(out.path().join(name)).expect("read"))
+            .collect();
+        assert!(bodies.iter().any(|b| b.contains("http://a.com/x/1")));
+        assert!(bodies.iter().any(|b| b.contains("http://a.com/x_1")));
     }
 
     #[test]

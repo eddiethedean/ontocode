@@ -211,6 +211,16 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
   },
 
   hydrateFocus(focus) {
+    const current = get().focus;
+    if (
+      focus &&
+      current &&
+      typeof focus.timestamp === "number" &&
+      typeof current.timestamp === "number" &&
+      focus.timestamp < current.timestamp
+    ) {
+      return;
+    }
     set({ focus });
     if (focus?.kind === "entity") {
       set({

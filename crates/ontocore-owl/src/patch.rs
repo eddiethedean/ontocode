@@ -211,12 +211,10 @@ fn apply_one_patch(
     match patch {
         PatchOp::AddPrefix { prefix, namespace_iri } => add_prefix(text, prefix, namespace_iri),
         PatchOp::RemovePrefix { prefix } => remove_prefix(text, prefix),
-        PatchOp::SetPrefix { prefix, namespace_iri } => {
-            remove_prefix(text, prefix)?;
-            add_prefix(text, prefix, namespace_iri)
-        }
+        PatchOp::SetPrefix { prefix, namespace_iri } => set_prefix(text, prefix, namespace_iri),
         PatchOp::SetOntologyIri { ontology_iri } => set_ontology_iri(text, ontology_iri),
         PatchOp::SetVersionIri { ontology_iri, version_iri } => {
+            remove_all_predicate_any_statement(text, ontology_iri, "owl:versionIRI", namespaces)?;
             let version_term = iri_to_turtle_term(version_iri, namespaces)?;
             add_object_triple(text, ontology_iri, "owl:versionIRI", &version_term, namespaces)
         }
@@ -416,13 +414,31 @@ fn apply_one_patch(
 
 fn prefix_declaration_name(line: &str) -> Option<&str> {
     let mut parts = line.split_whitespace();
-    if parts.next()? != "@prefix" {
+    let keyword = parts.next()?;
+    if !(keyword.eq_ignore_ascii_case("@prefix") || keyword.eq_ignore_ascii_case("PREFIX")) {
         return None;
     }
     parts.next()?.strip_suffix(':')
 }
 
-fn validate_prefix(prefix: &str, namespace_iri: &str) -> Result<()> {
+fn prefix_declaration_keyword(line: &str) -> Option<&str> {
+    let keyword = line.split_whitespace().next()?;
+    if keyword.eq_ignore_ascii_case("@prefix") || keyword.eq_ignore_ascii_case("PREFIX") {
+        Some(keyword)
+    } else {
+        None
+    }
+}
+
+fn format_prefix_declaration(keyword: &str, prefix: &str, namespace_iri: &str) -> String {
+    if keyword.eq_ignore_ascii_case("PREFIX") && !keyword.starts_with('@') {
+        format!("PREFIX {prefix}: <{namespace_iri}>")
+    } else {
+        format!("{keyword} {prefix}: <{namespace_iri}> .")
+    }
+}
+
+pub fn validate_prefix(prefix: &str, namespace_iri: &str) -> Result<()> {
     if prefix.is_empty() || !prefix.chars().all(|c| c.is_ascii_alphanumeric() || c == '_') {
         return Err(OwlError::PatchInvalid(format!(
             "prefix must contain only letters, numbers, or underscores: {prefix:?}"
@@ -478,6 +494,24 @@ fn remove_prefix(text: &mut String, prefix: &str) -> Result<()> {
     Ok(())
 }
 
+fn set_prefix(text: &mut String, prefix: &str, namespace_iri: &str) -> Result<()> {
+    validate_prefix(prefix, namespace_iri)?;
+    let mut offset = 0;
+    for line in text.split_inclusive('\n') {
+        if prefix_declaration_name(line) == Some(prefix) {
+            let keyword = prefix_declaration_keyword(line).unwrap_or("@prefix");
+            let mut replacement = format_prefix_declaration(keyword, prefix, namespace_iri);
+            if line.ends_with('\n') {
+                replacement.push('\n');
+            }
+            text.replace_range(offset..offset + line.len(), &replacement);
+            return Ok(());
+        }
+        offset += line.len();
+    }
+    add_prefix(text, prefix, namespace_iri)
+}
+
 fn set_ontology_iri(text: &mut String, ontology_iri: &str) -> Result<()> {
     if !is_safe_iri(ontology_iri) {
         return Err(OwlError::PatchInvalid(format!(
@@ -490,13 +524,9 @@ fn set_ontology_iri(text: &mut String, ontology_iri: &str) -> Result<()> {
     for line in text.split_inclusive('\n') {
         let leading = line.len() - line.trim_start().len();
         let trimmed = line.trim_start();
-        if let Some(subject_end) = trimmed.find('>') {
-            let subject = &trimmed[..=subject_end];
-            let remainder = &trimmed[subject_end + 1..];
-            if subject.starts_with('<') && remainder.trim_start().starts_with("a owl:Ontology") {
-                declaration_subject = Some((offset + leading, subject.len()));
-                break;
-            }
+        if let Some(len) = ontology_declaration_subject_len(trimmed) {
+            declaration_subject = Some((offset + leading, len));
+            break;
         }
         offset += line.len();
     }
@@ -515,6 +545,41 @@ fn set_ontology_iri(text: &mut String, ontology_iri: &str) -> Result<()> {
     Ok(())
 }
 
+/// Byte length of the subject token on a line that declares `a owl:Ontology`.
+///
+/// Accepts absolute IRI subjects (`<…>`) and prefixed names (`ex:ont`, `:ont`).
+fn ontology_declaration_subject_len(trimmed: &str) -> Option<usize> {
+    if trimmed.is_empty() || trimmed.starts_with('#') || trimmed.starts_with('@') {
+        return None;
+    }
+    // SPARQL-style PREFIX lines (no leading @).
+    if trimmed.len() >= 6 && trimmed[..6].eq_ignore_ascii_case("prefix") {
+        return None;
+    }
+
+    let (subject, remainder) = if trimmed.starts_with('<') {
+        let end = trimmed.find('>')?;
+        (&trimmed[..=end], &trimmed[end + 1..])
+    } else {
+        let end = trimmed.find(char::is_whitespace)?;
+        let subject = &trimmed[..end];
+        // Prefixed name / default-prefix CURIE / blank-node label.
+        if !subject.contains(':') {
+            return None;
+        }
+        (subject, &trimmed[end..])
+    };
+
+    if subject.is_empty() {
+        return None;
+    }
+    if remainder.trim_start().starts_with("a owl:Ontology") {
+        Some(subject.len())
+    } else {
+        None
+    }
+}
+
 fn add_annotation_value(
     text: &mut String,
     entity_iri: &str,
@@ -526,9 +591,8 @@ fn add_annotation_value(
         add_annotation_triple(text, entity_iri, "rdfs:label", value, namespaces)
     } else if predicate == "rdfs:comment" || predicate.ends_with("#comment") {
         add_annotation_triple(text, entity_iri, "rdfs:comment", value, namespaces)
-    } else if value.starts_with("http://") || value.starts_with("https://") {
+    } else if let Some(obj) = explicit_iri_annotation_term(value, namespaces)? {
         let pred = predicate_to_term(predicate, namespaces)?;
-        let obj = iri_to_turtle_term(value, namespaces)?;
         add_object_triple(text, entity_iri, &pred, &obj, namespaces)
     } else {
         let pred = predicate_to_term(predicate, namespaces)?;
@@ -547,14 +611,33 @@ fn remove_annotation_value(
         remove_matching_predicate_any(text, entity_iri, "rdfs:label", value, namespaces)
     } else if predicate == "rdfs:comment" || predicate.ends_with("#comment") {
         remove_matching_predicate_any(text, entity_iri, "rdfs:comment", value, namespaces)
-    } else if value.starts_with("http://") || value.starts_with("https://") {
+    } else if let Some(obj) = explicit_iri_annotation_term(value, namespaces)? {
         let pred = predicate_to_term(predicate, namespaces)?;
-        let obj = iri_to_turtle_term(value, namespaces)?;
         remove_predicate_object_any_statement(text, entity_iri, &pred, &obj, namespaces)
     } else {
         let pred = predicate_to_term(predicate, namespaces)?;
         remove_matching_predicate_any(text, entity_iri, &pred, value, namespaces)
     }
+}
+
+/// Treat annotation values as IRI objects only when explicitly marked (`<iri>`) or a known CURIE.
+/// URL-shaped plain strings default to quoted literals.
+fn explicit_iri_annotation_term(
+    value: &str,
+    namespaces: &BTreeMap<String, String>,
+) -> Result<Option<String>> {
+    let trimmed = value.trim();
+    if let Some(inner) = trimmed.strip_prefix('<').and_then(|s| s.strip_suffix('>')) {
+        let iri = inner.trim();
+        if iri.is_empty() {
+            return Err(OwlError::PatchInvalid("empty IRI in annotation value <>".to_string()));
+        }
+        return Ok(Some(iri_to_turtle_term(iri, namespaces)?));
+    }
+    if let Some(curie) = known_curie_term(trimmed, namespaces) {
+        return Ok(Some(curie.to_string()));
+    }
+    Ok(None)
 }
 
 fn create_entity(
@@ -710,11 +793,33 @@ fn remove_disjoint_triple(
 }
 
 fn predicate_to_term(predicate: &str, namespaces: &BTreeMap<String, String>) -> Result<String> {
-    if predicate.contains(':') && !predicate.starts_with("http") {
-        Ok(predicate.to_string())
+    if let Some(curie) = known_curie_term(predicate, namespaces) {
+        Ok(curie.to_string())
     } else {
+        // Full IRIs and non-CURIE terms go through IRI safety checks. Malformed
+        // CURIE-shaped strings (injection payloads) fail `is_safe_iri` here instead
+        // of being emitted verbatim.
         iri_to_turtle_term(predicate, namespaces)
     }
+}
+
+/// Return `term` when it is a known-prefix CURIE with a safe Turtle PN_LOCAL.
+///
+/// Rejects `http:`/`https:` (those are IRIs), unknown prefixes, and locals with
+/// characters that would break out of a Turtle predicate position.
+fn known_curie_term<'a>(term: &'a str, namespaces: &BTreeMap<String, String>) -> Option<&'a str> {
+    let (prefix, local) = term.split_once(':')?;
+    if prefix.is_empty()
+        || local.is_empty()
+        || prefix.eq_ignore_ascii_case("http")
+        || prefix.eq_ignore_ascii_case("https")
+        || !namespaces.contains_key(prefix)
+        || !prefix.chars().all(|c| c.is_ascii_alphanumeric() || c == '_')
+        || !is_valid_pn_local(local)
+    {
+        return None;
+    }
+    Some(term)
 }
 
 fn set_property_characteristic(
@@ -1361,11 +1466,19 @@ fn text_contains_entity(
     namespaces: &BTreeMap<String, String>,
 ) -> bool {
     let namespaces = crate::span::namespaces_for_text(text, namespaces);
-    let short = short_name_from_iri(entity_iri);
     let mut needles = vec![entity_iri.to_string(), format!("<{entity_iri}>")];
-    for (prefix, ns) in &namespaces {
-        if entity_iri.starts_with(ns) {
-            needles.push(format!("{prefix}:{short}"));
+    if let Some(default_ns) = namespaces.get("") {
+        if entity_iri.starts_with(default_ns.as_str()) {
+            let local = &entity_iri[default_ns.len()..];
+            if is_valid_pn_local(local) {
+                needles.push(format!(":{local}"));
+            }
+        }
+    }
+    if let Some((prefix, ns)) = best_namespace_match(entity_iri, &namespaces) {
+        let local = &entity_iri[ns.len()..];
+        if is_valid_pn_local(local) {
+            needles.push(format!("{prefix}:{local}"));
         }
     }
     text.lines().any(|line| {
@@ -1383,7 +1496,7 @@ fn line_starts_with_subject(trimmed: &str, subject: &str) -> bool {
 }
 
 /// Reject IRIs that would break Turtle `<...>` terms or inject syntax.
-pub(crate) fn is_safe_iri(iri: &str) -> bool {
+pub fn is_safe_iri(iri: &str) -> bool {
     if iri.is_empty() {
         return false;
     }
@@ -1395,7 +1508,7 @@ pub(crate) fn is_safe_iri(iri: &str) -> bool {
 }
 
 /// True when `local` is a valid Turtle PN_LOCAL (simplified).
-fn is_valid_pn_local(local: &str) -> bool {
+pub(crate) fn is_valid_pn_local(local: &str) -> bool {
     if local.is_empty() {
         return false;
     }
@@ -1961,6 +2074,182 @@ ex:Cat a owl:Class .
     }
 
     #[test]
+    fn url_shaped_annotation_value_is_literal_not_iri() {
+        let ttl = r#"@prefix ex: <http://example.org/org#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+ex:Cat a owl:Class .
+"#;
+        let mut ns = org_ns();
+        ns.insert("skos".to_string(), "http://www.w3.org/2004/02/skos/core#".to_string());
+        let result = apply_patches_to_text(
+            ttl,
+            &[PatchOp::AddAnnotation {
+                entity_iri: "http://example.org/org#Cat".to_string(),
+                predicate: "skos:note".to_string(),
+                value: "https://example.org/docs/guide".to_string(),
+            }],
+            true,
+            &ns,
+        )
+        .expect("add url-shaped annotation");
+        let preview = result.preview_text.expect("preview");
+        assert!(
+            preview.contains("skos:note \"https://example.org/docs/guide\""),
+            "URL-shaped strings must be quoted literals: {preview}"
+        );
+        assert!(
+            !preview.contains("skos:note <https://example.org/docs/guide>"),
+            "must not write URL-shaped strings as IRI objects: {preview}"
+        );
+    }
+
+    #[test]
+    fn bracketed_iri_annotation_value_is_object() {
+        let ttl = r#"@prefix ex: <http://example.org/org#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+ex:Cat a owl:Class .
+"#;
+        let mut ns = org_ns();
+        ns.insert("skos".to_string(), "http://www.w3.org/2004/02/skos/core#".to_string());
+        let result = apply_patches_to_text(
+            ttl,
+            &[PatchOp::AddAnnotation {
+                entity_iri: "http://example.org/org#Cat".to_string(),
+                predicate: "skos:exactMatch".to_string(),
+                value: "<https://example.org/other#Cat>".to_string(),
+            }],
+            true,
+            &ns,
+        )
+        .expect("add bracketed IRI annotation");
+        let preview = result.preview_text.expect("preview");
+        assert!(
+            preview.contains("skos:exactMatch <https://example.org/other#Cat>")
+                || preview.contains("skos:exactMatch ex:"),
+            "bracketed values should write as IRI objects: {preview}"
+        );
+        assert!(!preview.contains("skos:exactMatch \"<https://"));
+    }
+
+    #[test]
+    fn remove_url_shaped_literal_annotation() {
+        let ttl = r#"@prefix ex: <http://example.org/org#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+ex:Cat a owl:Class ;
+    skos:note "https://example.org/docs/guide" .
+"#;
+        let mut ns = org_ns();
+        ns.insert("skos".to_string(), "http://www.w3.org/2004/02/skos/core#".to_string());
+        let result = apply_patches_to_text(
+            ttl,
+            &[PatchOp::RemoveAnnotation {
+                entity_iri: "http://example.org/org#Cat".to_string(),
+                predicate: "skos:note".to_string(),
+                value: "https://example.org/docs/guide".to_string(),
+            }],
+            true,
+            &ns,
+        )
+        .expect("remove url-shaped literal");
+        let preview = result.preview_text.expect("preview");
+        assert!(!preview.contains("https://example.org/docs/guide"));
+    }
+
+    #[test]
+    fn adversarial_curie_annotation_predicate_is_rejected() {
+        let ttl = r#"@prefix ex: <http://example.org/org#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+ex:Cat a owl:Class .
+"#;
+        let evil = "x:y> a owl:Class . <http://ex.org/z";
+        let result = apply_patches_to_text(
+            ttl,
+            &[PatchOp::AddAnnotation {
+                entity_iri: "http://example.org/org#Cat".to_string(),
+                predicate: evil.to_string(),
+                value: "safe".to_string(),
+            }],
+            true,
+            &org_ns(),
+        )
+        .expect("patch call succeeds with diagnostics");
+        assert!(!result.diagnostics.is_empty());
+        assert_eq!(result.preview_text.as_deref(), Some(ttl));
+        assert!(!ttl.contains("owl:Class . <http://ex.org/z"));
+        let preview = result.preview_text.as_deref().unwrap_or("");
+        assert!(
+            !preview.contains("a owl:Class . <http://ex.org/z"),
+            "predicate breakout must not be written: {preview}"
+        );
+    }
+
+    #[test]
+    fn adversarial_curie_ontology_annotation_predicate_is_rejected() {
+        let ttl = r#"@prefix ex: <http://example.org/org#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+<http://example.org/org> a owl:Ontology .
+"#;
+        let evil = "evil:x> ; owl:imports <http://evil>";
+        let result = apply_patches_to_text(
+            ttl,
+            &[PatchOp::AddOntologyAnnotation {
+                ontology_iri: "http://example.org/org".to_string(),
+                predicate: evil.to_string(),
+                value: "note".to_string(),
+            }],
+            true,
+            &org_ns(),
+        )
+        .expect("patch call succeeds with diagnostics");
+        assert!(!result.diagnostics.is_empty());
+        assert_eq!(result.preview_text.as_deref(), Some(ttl));
+        let preview = result.preview_text.as_deref().unwrap_or("");
+        assert!(
+            !preview.contains("owl:imports <http://evil>"),
+            "ontology annotation breakout must not be written: {preview}"
+        );
+    }
+
+    #[test]
+    fn full_iri_annotation_predicate_still_works() {
+        let ttl = r#"@prefix ex: <http://example.org/org#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
+
+ex:Cat a owl:Class .
+"#;
+        let mut ns = org_ns();
+        ns.insert("skos".to_string(), "http://www.w3.org/2004/02/skos/core#".to_string());
+        let result = apply_patches_to_text(
+            ttl,
+            &[PatchOp::AddAnnotation {
+                entity_iri: "http://example.org/org#Cat".to_string(),
+                predicate: "http://www.w3.org/2004/02/skos/core#definition".to_string(),
+                value: "A feline animal".to_string(),
+            }],
+            true,
+            &ns,
+        )
+        .expect("add full-IRI annotation predicate");
+        let preview = result.preview_text.expect("preview");
+        assert!(
+            preview.contains("skos:definition \"A feline animal\"")
+                || preview.contains(
+                    "<http://www.w3.org/2004/02/skos/core#definition> \"A feline animal\""
+                ),
+            "full IRI predicates must still write safely: {preview}"
+        );
+    }
+
+    #[test]
     fn set_functional_property() {
         let ttl = include_str!("../../../fixtures/disjoint-classes.ttl");
         let ns = org_ns();
@@ -1998,6 +2287,163 @@ ex:Cat a owl:Class .
     }
 
     #[test]
+    fn set_ontology_iri_rewrites_angle_bracket_subject() {
+        let ttl = r#"@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+<http://example.org/old> a owl:Ontology .
+"#;
+        let result = apply_patches_to_text(
+            ttl,
+            &[PatchOp::SetOntologyIri { ontology_iri: "http://example.org/new".to_string() }],
+            true,
+            &BTreeMap::new(),
+        )
+        .expect("set ontology iri");
+        let preview = result.preview_text.expect("preview");
+        assert!(preview.contains("<http://example.org/new> a owl:Ontology"));
+        assert!(!preview.contains("<http://example.org/old>"));
+        assert_eq!(preview.matches("a owl:Ontology").count(), 1);
+    }
+
+    #[test]
+    fn set_ontology_iri_rewrites_curie_subject_in_place() {
+        let ttl = r#"@prefix ex: <http://example.org/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+ex:ont a owl:Ontology .
+"#;
+        let result = apply_patches_to_text(
+            ttl,
+            &[PatchOp::SetOntologyIri { ontology_iri: "http://example.org/new".to_string() }],
+            true,
+            &BTreeMap::from([("ex".to_string(), "http://example.org/".to_string())]),
+        )
+        .expect("set ontology iri");
+        let preview = result.preview_text.expect("preview");
+        assert!(
+            preview.contains("<http://example.org/new> a owl:Ontology"),
+            "expected rewritten subject: {preview}"
+        );
+        assert!(
+            !preview.contains("ex:ont a owl:Ontology"),
+            "original CURIE declaration must be replaced: {preview}"
+        );
+        assert_eq!(
+            preview.matches("a owl:Ontology").count(),
+            1,
+            "must not append a second ontology declaration: {preview}"
+        );
+    }
+
+    #[test]
+    fn set_ontology_iri_rewrites_curie_in_multiline_ontology_block() {
+        let ttl = r#"@prefix ex: <http://example.org/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+ex:ont a owl:Ontology ;
+    owl:versionIRI <http://example.org/ont/1.0> .
+"#;
+        let result = apply_patches_to_text(
+            ttl,
+            &[PatchOp::SetOntologyIri { ontology_iri: "http://example.org/new".to_string() }],
+            true,
+            &BTreeMap::from([("ex".to_string(), "http://example.org/".to_string())]),
+        )
+        .expect("set ontology iri");
+        let preview = result.preview_text.expect("preview");
+        assert!(preview.contains("<http://example.org/new> a owl:Ontology ;"));
+        assert!(preview.contains("owl:versionIRI <http://example.org/ont/1.0>"));
+        assert!(!preview.contains("ex:ont a owl:Ontology"));
+        assert_eq!(preview.matches("a owl:Ontology").count(), 1);
+    }
+
+    #[test]
+    fn set_ontology_iri_appends_only_when_no_declaration() {
+        let ttl = r#"@prefix ex: <http://example.org/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+ex:Foo a owl:Class .
+"#;
+        let result = apply_patches_to_text(
+            ttl,
+            &[PatchOp::SetOntologyIri { ontology_iri: "http://example.org/new".to_string() }],
+            true,
+            &BTreeMap::new(),
+        )
+        .expect("set ontology iri");
+        let preview = result.preview_text.expect("preview");
+        assert!(preview.contains("<http://example.org/new> a owl:Ontology ."));
+        assert!(preview.contains("ex:Foo a owl:Class"));
+        assert_eq!(preview.matches("a owl:Ontology").count(), 1);
+    }
+
+    #[test]
+    fn set_version_iri_replaces_existing() {
+        let ttl = r#"@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+<http://example.org/ont> a owl:Ontology ;
+    owl:versionIRI <http://example.org/ont/1> .
+"#;
+        let result = apply_patches_to_text(
+            ttl,
+            &[PatchOp::SetVersionIri {
+                ontology_iri: "http://example.org/ont".to_string(),
+                version_iri: "http://example.org/ont/2".to_string(),
+            }],
+            true,
+            &BTreeMap::new(),
+        )
+        .expect("set version iri");
+        let preview = result.preview_text.expect("preview");
+        assert!(
+            preview.contains("owl:versionIRI <http://example.org/ont/2>"),
+            "expected new version IRI: {preview}"
+        );
+        assert!(
+            !preview.contains("http://example.org/ont/1"),
+            "old version IRI must be removed: {preview}"
+        );
+        assert_eq!(
+            preview.matches("owl:versionIRI").count(),
+            1,
+            "must keep exactly one versionIRI: {preview}"
+        );
+    }
+
+    #[test]
+    fn set_version_iri_repeated_does_not_accumulate() {
+        let ttl = r#"@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+<http://example.org/ont> a owl:Ontology .
+"#;
+        let first = apply_patches_to_text(
+            ttl,
+            &[PatchOp::SetVersionIri {
+                ontology_iri: "http://example.org/ont".to_string(),
+                version_iri: "http://example.org/ont/1".to_string(),
+            }],
+            true,
+            &BTreeMap::new(),
+        )
+        .expect("first set");
+        let after_first = first.preview_text.expect("preview");
+        let second = apply_patches_to_text(
+            &after_first,
+            &[PatchOp::SetVersionIri {
+                ontology_iri: "http://example.org/ont".to_string(),
+                version_iri: "http://example.org/ont/2".to_string(),
+            }],
+            true,
+            &BTreeMap::new(),
+        )
+        .expect("second set");
+        let preview = second.preview_text.expect("preview");
+        assert!(preview.contains("owl:versionIRI <http://example.org/ont/2>"));
+        assert!(!preview.contains("http://example.org/ont/1"));
+        assert_eq!(preview.matches("owl:versionIRI").count(), 1);
+    }
+
+    #[test]
     fn remove_prefix_leaves_other_prefixes() {
         let ttl = "@prefix ex: <http://example.org/test#> .\n@prefix owl: <http://www.w3.org/2002/07/owl#> .\n\nex:Thing a owl:Class .\n";
         let result = apply_patches_to_text(
@@ -2011,5 +2457,83 @@ ex:Cat a owl:Class .
         assert!(!preview.contains("@prefix ex:"));
         assert!(preview.contains("@prefix owl:"));
         assert!(preview.contains("ex:Thing a owl:Class"));
+    }
+
+    #[test]
+    fn set_prefix_updates_uppercase_at_prefix_in_place() {
+        let ttl = "@PREFIX ex: <http://old.example/> .\n@prefix owl: <http://www.w3.org/2002/07/owl#> .\n\nex:Thing a owl:Class .\n";
+        let result = apply_patches_to_text(
+            ttl,
+            &[PatchOp::SetPrefix {
+                prefix: "ex".to_string(),
+                namespace_iri: "http://new.example/".to_string(),
+            }],
+            true,
+            &BTreeMap::new(),
+        )
+        .expect("set prefix");
+        let preview = result.preview_text.expect("preview");
+        assert!(preview.contains("@PREFIX ex: <http://new.example/> ."));
+        assert!(!preview.contains("http://old.example/"));
+        assert_eq!(preview.matches("ex:").count(), 2); // declaration + CURIE use
+        assert!(!preview.contains("@prefix ex:"));
+    }
+
+    #[test]
+    fn set_prefix_updates_sparql_style_prefix_in_place() {
+        let ttl = "PREFIX ex: <http://old.example/>\n@prefix owl: <http://www.w3.org/2002/07/owl#> .\n\nex:Thing a owl:Class .\n";
+        let result = apply_patches_to_text(
+            ttl,
+            &[PatchOp::SetPrefix {
+                prefix: "ex".to_string(),
+                namespace_iri: "http://new.example/".to_string(),
+            }],
+            true,
+            &BTreeMap::new(),
+        )
+        .expect("set prefix");
+        let preview = result.preview_text.expect("preview");
+        assert!(preview.contains("PREFIX ex: <http://new.example/>"));
+        assert!(!preview.contains("http://old.example/"));
+        assert!(!preview.contains("@prefix ex:"));
+    }
+
+    #[test]
+    fn remove_prefix_recognizes_uppercase_and_sparql_forms() {
+        let ttl = "@PREFIX ex: <http://example.org/test#> .\nPREFIX owl: <http://www.w3.org/2002/07/owl#>\n\nex:Thing a owl:Class .\n";
+        let result = apply_patches_to_text(
+            ttl,
+            &[
+                PatchOp::RemovePrefix { prefix: "ex".to_string() },
+                PatchOp::RemovePrefix { prefix: "owl".to_string() },
+            ],
+            true,
+            &BTreeMap::new(),
+        )
+        .expect("remove prefixes");
+        let preview = result.preview_text.expect("preview");
+        assert!(!preview.contains("@PREFIX ex:"));
+        assert!(!preview.contains("PREFIX owl:"));
+        assert!(preview.contains("ex:Thing a owl:Class"));
+    }
+
+    #[test]
+    fn add_prefix_detects_duplicate_uppercase_declaration() {
+        let ttl = "@PREFIX ex: <http://example.org/test#> .\n\nex:Thing a owl:Class .\n";
+        let result = apply_patches_to_text(
+            ttl,
+            &[PatchOp::AddPrefix {
+                prefix: "ex".to_string(),
+                namespace_iri: "http://other.example/".to_string(),
+            }],
+            true,
+            &BTreeMap::new(),
+        )
+        .expect("apply returns diagnostics on validation failure");
+        assert!(!result.applied);
+        assert!(result
+            .diagnostics
+            .iter()
+            .any(|d| d.message.contains("duplicate prefix already present: ex")));
     }
 }

@@ -136,7 +136,12 @@ export class PanelHost {
         }
       }
       if (options.onMessage) {
-        await options.onMessage(data, panel);
+        try {
+          await options.onMessage(data, panel);
+        } catch (err) {
+          const message = err instanceof Error ? err.message : String(err);
+          void vscode.window.showErrorMessage(`OntoCode: ${message}`);
+        }
       }
     });
 

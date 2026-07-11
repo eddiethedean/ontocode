@@ -44,6 +44,9 @@ enum Commands {
         ontology_iri: String,
         #[arg(long)]
         version_iri: Option<String>,
+        /// Overwrite the target file if it already exists
+        #[arg(long)]
+        force: bool,
     },
     /// Scan and index ontology files in a workspace
     Index {
@@ -206,10 +209,10 @@ enum PluginCommands {
     },
     /// Run a plugin action
     Run {
-        #[arg(default_value = ".")]
-        workspace: PathBuf,
         /// Plugin id
         plugin_id: String,
+        #[arg(default_value = ".")]
+        workspace: PathBuf,
         /// Action: validate, export, workflow
         #[arg(long, default_value = "validate")]
         action: String,
@@ -334,8 +337,8 @@ enum OutputFormat {
 fn main() -> Result<()> {
     let cli = Cli::parse();
     match cli.command {
-        Commands::New { path, ontology_iri, version_iri } => {
-            write_new_ontology(&path, &ontology_iri, version_iri.as_deref())?;
+        Commands::New { path, ontology_iri, version_iri, force } => {
+            write_new_ontology(&path, &ontology_iri, version_iri.as_deref(), force)?;
             println!("Created {}", path.display());
         }
         Commands::Index { workspace, format } => {
@@ -345,14 +348,14 @@ fn main() -> Result<()> {
         Commands::Query { workspace, sql, format } => {
             let catalog = build_catalog(&workspace)?;
             let result = query_catalog(&catalog, &sql).context("query failed")?;
-            print_query_result(&result.columns, &result.rows, format)?;
+            print_query_result(&result.columns, &result.rows, result.truncated, format)?;
         }
         Commands::Sparql { workspace, query, format } => {
             let catalog = build_catalog(&workspace)?;
             let result = sparql_catalog(&catalog, &query).context("sparql failed")?;
             match format {
                 OutputFormat::Json => println!("{}", sparql_to_json(&result)?),
-                _ => print_query_result(&result.columns, &result.rows, format)?,
+                _ => print_query_result(&result.columns, &result.rows, result.truncated, format)?,
             }
         }
         Commands::Validate { workspace } => {
@@ -439,19 +442,23 @@ fn main() -> Result<()> {
             }
         }
         Commands::Patch { document, patch_file, preview } => {
-            let patch_bytes = std::fs::read(&patch_file)?;
+            let patch_bytes =
+                ontocore_core::read_file_capped(&patch_file, ontocore_core::MAX_FILE_BYTES)
+                    .with_context(|| {
+                        format!("failed to read patch file {}", patch_file.display())
+                    })?;
             let ext =
                 document.extension().and_then(|e| e.to_str()).unwrap_or("").to_ascii_lowercase();
             let catalog = IndexBuilder::new()
                 .workspace(document.parent().unwrap_or(std::path::Path::new(".")))
                 .build()
-                .ok();
+                .context("failed to index workspace for patch namespaces")?;
             let namespaces = catalog
-                .as_ref()
-                .and_then(|c| {
-                    c.data().documents.iter().find(|d| {
-                        d.path.canonicalize().ok().as_ref() == document.canonicalize().ok().as_ref()
-                    })
+                .data()
+                .documents
+                .iter()
+                .find(|d| {
+                    d.path.canonicalize().ok().as_ref() == document.canonicalize().ok().as_ref()
                 })
                 .map(|d| d.namespaces.clone())
                 .unwrap_or_default();
@@ -739,7 +746,23 @@ fn main() -> Result<()> {
     Ok(())
 }
 
-fn write_new_ontology(path: &Path, ontology_iri: &str, version_iri: Option<&str>) -> Result<()> {
+fn write_new_ontology(
+    path: &Path,
+    ontology_iri: &str,
+    version_iri: Option<&str>,
+    force: bool,
+) -> Result<()> {
+    if path.exists() && !force {
+        bail!("file already exists: {} (use --force to overwrite)", path.display());
+    }
+    if !ontocore_owl::is_safe_iri(ontology_iri) {
+        bail!("ontology IRI contains characters that cannot be safely written: {ontology_iri:?}");
+    }
+    if let Some(version_iri) = version_iri {
+        if !ontocore_owl::is_safe_iri(version_iri) {
+            bail!("version IRI contains characters that cannot be safely written: {version_iri:?}");
+        }
+    }
     let extension = path.extension().and_then(|ext| ext.to_str()).unwrap_or_default();
     let contents = match extension.to_ascii_lowercase().as_str() {
         "ttl" => {
@@ -953,12 +976,13 @@ fn print_stats(stats: &CatalogStats, format: OutputFormat) -> Result<()> {
 fn print_query_result(
     columns: &[String],
     rows: &[std::collections::BTreeMap<String, String>],
+    truncated: bool,
     format: OutputFormat,
 ) -> Result<()> {
     let result = ontocore_query::sql::QueryResult {
         columns: columns.to_vec(),
         rows: rows.to_vec(),
-        truncated: false,
+        truncated,
     };
     match format {
         OutputFormat::Json => println!("{}", sql_to_json(&result)?),
@@ -977,4 +1001,34 @@ fn print_query_result(
         }
     }
     Ok(())
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use clap::Parser;
+
+    #[test]
+    fn plugins_run_accepts_required_plugin_id_before_optional_workspace() {
+        let cli = Cli::try_parse_from([
+            "ontocore",
+            "plugins",
+            "run",
+            "ontocode.naming-validator",
+            ".",
+            "--action",
+            "validate",
+        ])
+        .expect("plugins run should parse with plugin_id first");
+        match cli.command {
+            Commands::Plugins {
+                command: PluginCommands::Run { plugin_id, workspace, action, .. },
+            } => {
+                assert_eq!(plugin_id, "ontocode.naming-validator");
+                assert_eq!(workspace, PathBuf::from("."));
+                assert_eq!(action, "validate");
+            }
+            _ => panic!("expected plugins run"),
+        }
+    }
 }

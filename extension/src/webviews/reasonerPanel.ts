@@ -21,32 +21,40 @@ export class ReasonerPanel {
       ReasonerPanel.current = undefined;
     });
     this.panel.webview.onDidReceiveMessage(async (msg) => {
-      if (!msg || typeof msg !== "object" || typeof msg.command !== "string") {
-        return;
-      }
-      if (msg.command === "ready") {
-        this.webviewReady = true;
-        this.flushPending();
-        return;
-      }
-      if (msg.command === "run") {
-        const runId =
-          typeof msg.runId === "number" ? msg.runId : ++this.runId;
-        const profile = typeof msg.profile === "string" ? msg.profile : "el";
-        const autoDetect = msg.autoDetect !== false;
-        await this.run(profile, autoDetect, runId);
-      }
-      if (msg.command === "explain" && typeof msg.classIri === "string") {
-        await vscode.commands.executeCommand(
-          "ontocode.showExplanation",
-          msg.classIri
-        );
-      }
-      if (msg.command === "showInferred") {
-        await vscode.workspace
-          .getConfiguration("ontocode")
-          .update("hierarchy.mode", "combined", vscode.ConfigurationTarget.Workspace);
-        void vscode.commands.executeCommand("ontocode.refreshExplorer");
+      try {
+        if (!msg || typeof msg !== "object" || typeof msg.command !== "string") {
+          return;
+        }
+        if (msg.command === "ready") {
+          this.webviewReady = true;
+          this.flushPending();
+          return;
+        }
+        if (msg.command === "run") {
+          const runId =
+            typeof msg.runId === "number" ? msg.runId : ++this.runId;
+          const profile = typeof msg.profile === "string" ? msg.profile : "el";
+          const autoDetect = msg.autoDetect !== false;
+          await this.run(profile, autoDetect, runId);
+        }
+        if (msg.command === "explain" && typeof msg.classIri === "string") {
+          const profile =
+            this.lastResult?.profile_used ?? focusRelay.getReasoning()?.profile;
+          await vscode.commands.executeCommand(
+            "ontocode.showExplanation",
+            msg.classIri,
+            profile
+          );
+        }
+        if (msg.command === "showInferred") {
+          await vscode.workspace
+            .getConfiguration("ontocode")
+            .update("hierarchy.mode", "combined", vscode.ConfigurationTarget.Workspace);
+          void vscode.commands.executeCommand("ontocode.refreshExplorer");
+        }
+      } catch (err) {
+        const message = err instanceof Error ? err.message : String(err);
+        void vscode.window.showErrorMessage(`OntoCode: ${message}`);
       }
     });
     this.panel.webview.html = this.renderHtml();
@@ -92,6 +100,20 @@ export class ReasonerPanel {
     const profile = cfg.get<string>("reasoner.default") ?? "el";
     const autoDetect = cfg.get<boolean>("reasoner.autoProfile") ?? true;
     await this.run(profile, autoDetect, ++this.runId);
+  }
+
+  /** Invalidate in-flight runs so late RPC results are ignored (#141). */
+  public cancelActiveRun(): void {
+    this.runId += 1;
+    this.postToWebview({ command: "syncRunId", runId: this.runId });
+    const prev = focusRelay.getReasoning();
+    focusRelay.setReasoningState({
+      profile: this.lastResult?.profile_used ?? prev?.profile ?? "el",
+      unsatisfiable: this.lastResult?.unsatisfiable ?? prev?.unsatisfiable ?? [],
+      lastRunAt: prev?.lastRunAt ?? 0,
+      dirty: prev?.dirty ?? true,
+      running: false,
+    });
   }
 
   private async run(profile: string, autoDetect: boolean, runId: number): Promise<void> {

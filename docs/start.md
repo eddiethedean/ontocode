@@ -2,19 +2,19 @@
 
 You can be successful with OntoCode/OntoCore in **5–15 minutes** if you follow one path below.
 
-If you’re not sure what to install, start with [Which artifact do I need?](guides/which-artifact.md).
+**Primary path for most users:** [First success (~10 min)](guides/first-success.md).
+
+If you’re not sure what to install, see [Which artifact do I need?](guides/which-artifact.md). Read [Known limitations](known-limitations.md) before a large evaluation.
 
 ## When not to use OntoCode (today)
 
 - You need **OWL/XML or RDF/XML in-place write-back** — edit as Turtle/OBO or use Protégé.
-- You need **full SQL** (JOINs, `ORDER BY`, `LIKE`) — use SQL-like virtual tables or SPARQL instead.
+- You need **full SQL** (JOINs, `ORDER BY`, `LIKE`) — use catalog SQL (subset) or SPARQL instead.
 - You need a **stable, semver-guaranteed plugin API** or production owlmake integration without subprocess scaffolding — plugin host **MVP shipped in v0.14** ([Plugin authoring](guides/plugins.md)); ecosystem hardening is **v1.0**.
 
-Canonical matrix: [What ships today](SHIPPED.md).
+Canonical matrix: [What ships today](SHIPPED.md) · [Known limitations](known-limitations.md).
 
 ## Path A — VS Code IDE (recommended for most users)
-
-Do these steps in order. Do not skip ahead.
 
 1. **Complete the tutorial:** [First success (~10 min)](guides/first-success.md)
 2. **Confirm your formats:** [Supported formats](supported-formats.md)
@@ -26,7 +26,7 @@ Do these steps in order. Do not skip ahead.
 
 **Then (optional):** [Feature tour](ontocode/feature-tour.md) · [Install options](vscode-install.md) · [Manchester editor](ontocode/manchester-editor.md) · [Refactoring](guides/refactoring.md)
 
-If something doesn’t work, go straight to:
+If something doesn’t work:
 
 - [Troubleshooting](troubleshooting.md)
 - [FAQ](faq.md)
@@ -52,9 +52,10 @@ If you plan to embed OntoCore or integrate via LSP:
 Read these in order:
 
 1. [What ships today](SHIPPED.md)
-2. [Enterprise evaluation](guides/enterprise-eval.md)
-3. [Production readiness](guides/production-readiness.md)
-4. [Security policy](security.md)
+2. [Known limitations](known-limitations.md)
+3. [Enterprise evaluation](guides/enterprise-eval.md)
+4. [Production readiness](guides/production-readiness.md)
+5. [Security policy](security.md)
 
 ## Supported since v0.10+
 

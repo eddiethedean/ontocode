@@ -444,7 +444,7 @@ check_file_contains "docs/ontocore/crate-map.md" "ontocore = \"${MINOR_VERSION}\
 check_file_contains "docs/ontocode/manage-imports.md" "Manage Imports" "manage-imports guide"
 check_file_contains "mkdocs.yml" "ontocode/manage-imports.md" "mkdocs manage-imports guide"
 check_file_contains "mkdocs.yml" "migration/v0.14.md" "mkdocs v0.14 migration guide"
-check_file_contains "mkdocs.yml" "What's new in v0.16" "mkdocs v0.16 migration in Get started"
+check_file_contains "mkdocs.yml" "What's new in v0.17" "mkdocs v0.17 migration in Get started"
 check_file_contains "mkdocs.yml" "v0\\.15 → v0\\.16" "mkdocs v0.16 migration in Help nav"
 check_file_contains "docs/guides/production-readiness.md" "v${VERSION}" "production-readiness version"
 check_file_contains "mkdocs.yml" "ontocore/rust-api.md" "mkdocs Rust API reference"
@@ -452,7 +452,8 @@ check_file_contains "mkdocs.yml" "guides/protege-migration.md" "mkdocs Protégé
 check_file_contains "mkdocs.yml" "ontocode/feature-tour.md" "mkdocs feature tour"
 check_file_contains "mkdocs.yml" "guides/plugins.md" "mkdocs plugins guide"
 check_file_contains "mkdocs.yml" "guides/docs-export.md" "mkdocs docs export guide"
-check_file_contains "mkdocs.yml" "design/adr/README.md" "mkdocs ADR index"
+check_file_contains "mkdocs.yml" "design/adr/0001-use-rust-for-ontocore.md" "mkdocs ADR entry"
+check_file_contains "mkdocs.yml" "known-limitations.md" "mkdocs known limitations"
 check_file_contains "mkdocs.yml" "Reference:" "mkdocs Reference tab"
 check_file_contains "docs/guides/rust-crates.md" "ontocore = \"${MINOR_VERSION}\"" "rust-crates version pin"
 
@@ -674,7 +675,6 @@ else
 fi
 
 check_file_contains "docs/ui/ROADMAP_MAPPING.md" "Master checklist" "ui roadmap master checklist"
-check_file_contains "mkdocs.yml" "ui/ROADMAP_MAPPING.md" "mkdocs ui roadmap mapping"
 check_file_contains "mkdocs.yml" "guides/which-artifact.md" "mkdocs which-artifact guide"
 check_file_contains "docs/guides/which-artifact.md" "Which artifact do I need" "which-artifact guide title"
 
@@ -782,13 +782,13 @@ check_file_contains "docs/adr/README.md" "Product & platform ADRs" "product adr 
 check_file_contains "docs/glossary.md" "OntoUI" "glossary OntoUI term"
 check_file_contains "docs/documentation-index.md" "Documentation index" "docs documentation index"
 check_file_contains "docs/documentation-index.md" "v${VERSION}" "documentation-index current release"
-check_file_contains "mkdocs.yml" "platform/OVERVIEW.md" "mkdocs platform overview"
-check_file_contains "mkdocs.yml" "cursor-prompts/README.md" "mkdocs cursor prompts"
-check_file_contains "mkdocs.yml" "adr/README.md" "mkdocs product adr"
+check_file_contains "mkdocs.yml" "engineering.md" "mkdocs engineering docs pointer"
+check_file_contains "mkdocs.yml" "Catalog SQL" "mkdocs catalog SQL reference label"
+check_file_contains "docs/engineering.md" "Engineering docs \\(GitHub\\)" "engineering pointer page"
+check_file_contains "docs/known-limitations.md" "Known limitations" "known limitations page"
 check_file_contains "docs/ui/README.md" "OntoUI" "ui readme OntoUI term"
 
 check_file_contains "mkdocs.yml" "guides/owl-xml-workflow.md" "mkdocs owl-xml workflow guide"
-check_file_contains "mkdocs.yml" "Design \\(not shipped" "mkdocs Design (not shipped) section"
 check_file_contains "mkdocs.yml" "v0\\.14 → v0\\.15" "mkdocs v0.15 migration in Help nav"
 check_file_contains "docs/guides/owl-xml-workflow.md" "read-only catalog" "owl-xml workflow guide"
 check_file_contains "docs/ontocore/rust-api.md" "Book ↔ docs.rs crosswalk" "rust-api docs.rs crosswalk"

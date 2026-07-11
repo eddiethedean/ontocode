@@ -14,7 +14,7 @@ cargo run -p ontocode --example workspace_operations
 ```
 
 ```rust
-use ontocore::workspace::Workspace;
+use ontocore::Workspace;
 
 // Point at any directory of ontology files (use your path, not a repo-only fixtures folder).
 let ws = Workspace::open(".")?;
@@ -24,12 +24,13 @@ for row in &result.rows {
 }
 ```
 
+Errors are crate `thiserror` types — see [Errors reference](../errors.md) for CLI/LSP codes that map to common failure modes.
+
 In-repo examples use `fixtures/` only when you clone this repository:
 
 ```bash
 cargo run -p ontocode --example ontocore_workspace
 ```
-
 ## Lower-level: index and query
 
 ```bash

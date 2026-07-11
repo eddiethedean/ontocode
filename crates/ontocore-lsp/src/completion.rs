@@ -136,12 +136,29 @@ fn qname_local_items(
 
     state
         .with_catalog(|catalog| {
+            // Resolve namespace IRIs bound to this prefix across the catalog (#7).
+            let mut ns_iris = BTreeSet::new();
+            for doc in &catalog.data().documents {
+                if let Some(ns) = doc.namespaces.get(qprefix) {
+                    ns_iris.insert(ns.clone());
+                }
+            }
+            if ns_iris.is_empty() {
+                return Vec::new();
+            }
+
             let mut items = Vec::new();
+            let mut seen_locals = BTreeSet::new();
             for entity in &catalog.data().entities {
-                let local = entity.short_name.as_str();
+                let Some(local) = local_name_for_prefix_namespaces(&entity.iri, &ns_iris) else {
+                    continue;
+                };
                 if !partial.is_empty()
                     && !local.to_ascii_lowercase().starts_with(&partial.to_ascii_lowercase())
                 {
+                    continue;
+                }
+                if !seen_locals.insert(local.clone()) {
                     continue;
                 }
                 let insert = format!("{qprefix}:{local}");
@@ -165,6 +182,23 @@ fn qname_local_items(
             items
         })
         .unwrap_or_default()
+}
+
+/// Local name under a typed prefix when the entity IRI expands with one of the prefix namespaces.
+fn local_name_for_prefix_namespaces(iri: &str, ns_iris: &BTreeSet<String>) -> Option<String> {
+    for ns in ns_iris {
+        if let Some(rest) = iri.strip_prefix(ns.as_str()) {
+            if rest.is_empty() {
+                continue;
+            }
+            // Reject if the remainder still looks like a path segment beyond PN_LOCAL.
+            if rest.contains('/') || rest.contains('#') {
+                continue;
+            }
+            return Some(rest.to_string());
+        }
+    }
+    None
 }
 
 fn iri_bracket_items(prefix: &str, state: &ServerState) -> Vec<CompletionItem> {
@@ -249,5 +283,16 @@ mod tests {
         let line = "ex:Per";
         let prefix = "ex:Per";
         assert_eq!(detect_context(line, prefix.len(), prefix), CompletionContext::QNameLocal);
+    }
+
+    #[test]
+    fn local_name_requires_prefix_namespace_match() {
+        let mut ns = BTreeSet::new();
+        ns.insert("http://example.org/people#".to_string());
+        assert_eq!(
+            local_name_for_prefix_namespaces("http://example.org/people#Person", &ns).as_deref(),
+            Some("Person")
+        );
+        assert_eq!(local_name_for_prefix_namespaces("http://other.org/clinic#Person", &ns), None);
     }
 }

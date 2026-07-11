@@ -60,6 +60,26 @@ export function buildManchesterPatch(
   };
 }
 
+/**
+ * When the webview changes axiom kind after open, ignore frozen edit-mode
+ * options so we do not remove/set the wrong axiom (#29).
+ */
+export function resolveManchesterApplyMode(
+  requestedKind: string,
+  openedKind: string | undefined,
+  openedMode: "add" | "edit" | undefined,
+  openedInitialExpression: string | undefined
+): { mode: "add" | "edit"; initialExpression?: string } {
+  const kind = openedKind ?? "sub_class_of";
+  if (requestedKind !== kind) {
+    return { mode: "add", initialExpression: undefined };
+  }
+  return {
+    mode: openedMode ?? "add",
+    initialExpression: openedInitialExpression,
+  };
+}
+
 /** Build patch list for apply (handles SubClassOf edit as remove+add). */
 export function buildManchesterPatches(
   axiomKind: ManchesterAxiomKind,

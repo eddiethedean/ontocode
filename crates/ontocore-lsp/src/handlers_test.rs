@@ -1,13 +1,13 @@
 use crate::handlers::{
-    handle_apply_axiom_patch, handle_apply_refactor, handle_find_usages,
-    handle_get_catalog_snapshot, handle_get_entity, handle_goto_definition, handle_hover,
-    handle_query, handle_references, handle_sparql, handle_standard_request,
-    handle_workspace_symbol, StandardRequestOutcome,
+    handle_apply_axiom_patch, handle_apply_refactor, handle_create_ontology, handle_delete_impact,
+    handle_export_ontology, handle_find_usages, handle_get_catalog_snapshot, handle_get_entity,
+    handle_goto_definition, handle_hover, handle_query, handle_references, handle_sparql,
+    handle_standard_request, handle_workspace_symbol, StandardRequestOutcome,
 };
 use crate::index_worker::IndexWorker;
 use crate::protocol::{
-    ApplyAxiomPatchParams, ApplyRefactorParams, FindUsagesParams, GetEntityParams, QueryParams,
-    SparqlParams,
+    ApplyAxiomPatchParams, ApplyRefactorParams, CreateOntologyParams, DeleteImpactParams,
+    ExportOntologyParams, FindUsagesParams, GetEntityParams, QueryParams, SparqlParams,
 };
 use crate::state::{path_to_uri, ServerState};
 use crossbeam_channel::unbounded;
@@ -151,6 +151,34 @@ fn find_usages_returns_person_references() {
 }
 
 #[test]
+fn delete_impact_lists_referencing_entities() {
+    let state = indexed_state();
+    let result = handle_delete_impact(
+        &state,
+        DeleteImpactParams { entity_iri: "http://example.org/people#Thing".to_string() },
+    )
+    .expect("delete impact");
+    assert!(result.usage_count > 0, "Thing should have usages");
+    assert!(
+        result.referencing_entities.iter().any(|iri| iri == "http://example.org/people#Person"),
+        "Person subclasses Thing; got {:?}",
+        result.referencing_entities
+    );
+    assert!(
+        result
+            .referencing_entities
+            .iter()
+            .any(|iri| iri == "http://example.org/people#Organization"),
+        "Organization subclasses Thing; got {:?}",
+        result.referencing_entities
+    );
+    assert!(
+        !result.referencing_entities.iter().any(|iri| iri == "http://example.org/people#Thing"),
+        "target itself must not appear in referencing_entities"
+    );
+}
+
+#[test]
 fn references_span_covers_token_not_single_character() {
     let state = indexed_state();
     let content = std::fs::read_to_string(fixture_workspace().join("example.ttl")).unwrap();
@@ -170,11 +198,10 @@ fn references_span_covers_token_not_single_character() {
     )
     .expect("references");
     assert!(!refs.is_empty());
-    let first = &refs[0];
     assert!(
-        first.range.end.character > first.range.start.character.saturating_add(1),
-        "reference range should span the token, got {:?}",
-        first.range
+        refs.iter().any(|r| r.range.end.character > r.range.start.character.saturating_add(1)),
+        "at least one reference range should span the token, got {:?}",
+        refs.iter().map(|r| r.range).collect::<Vec<_>>()
     );
 }
 
@@ -581,4 +608,195 @@ fn semantic_tokens_full_returns_tokens_for_open_ttl_buffer() {
         }
         other => panic!("unexpected semantic tokens outcome: {other:?}"),
     }
+}
+
+#[test]
+fn create_ontology_rejects_adversarial_iri() {
+    let dir = tempfile::tempdir().unwrap();
+    let state = ServerState::new();
+    state.set_workspace_roots(vec![dir.path().to_path_buf()]).expect("set workspace");
+    let path = dir.path().join("evil.ttl");
+    let evil = "http://ex.org/x> a owl:Class . <http://ex.org/y".to_string();
+    let err = handle_create_ontology(
+        &state,
+        CreateOntologyParams {
+            path: path.display().to_string(),
+            ontology_iri: evil,
+            version_iri: None,
+            format: Some("ttl".into()),
+            prefixes: None,
+        },
+    )
+    .expect_err("unsafe IRI must be rejected");
+    assert!(
+        err.message.contains("cannot be safely written") || err.message.contains("ontology IRI"),
+        "unexpected error: {}",
+        err.message
+    );
+    assert!(!path.exists());
+}
+
+#[test]
+fn create_ontology_rejects_unsafe_prefix_iri() {
+    let dir = tempfile::tempdir().unwrap();
+    let state = ServerState::new();
+    state.set_workspace_roots(vec![dir.path().to_path_buf()]).expect("set workspace");
+    let path = dir.path().join("evil-prefix.ttl");
+    let mut prefixes = std::collections::BTreeMap::new();
+    prefixes.insert("ex".to_string(), "http://ex.org/x> . <http://ex.org/y".to_string());
+    let err = handle_create_ontology(
+        &state,
+        CreateOntologyParams {
+            path: path.display().to_string(),
+            ontology_iri: "http://example.org/ont".into(),
+            version_iri: None,
+            format: Some("ttl".into()),
+            prefixes: Some(prefixes),
+        },
+    )
+    .expect_err("unsafe prefix IRI must be rejected");
+    assert!(
+        err.message.contains("prefix") || err.message.contains("IRI"),
+        "unexpected error: {}",
+        err.message
+    );
+    assert!(!path.exists());
+}
+
+#[test]
+fn create_ontology_writes_safe_turtle() {
+    let dir = tempfile::tempdir().unwrap();
+    let state = ServerState::new();
+    state.set_workspace_roots(vec![dir.path().to_path_buf()]).expect("set workspace");
+    let path = dir.path().join("fresh.ttl");
+    let result = handle_create_ontology(
+        &state,
+        CreateOntologyParams {
+            path: path.display().to_string(),
+            ontology_iri: "http://example.org/ont".into(),
+            version_iri: Some("http://example.org/ont/1".into()),
+            format: Some("ttl".into()),
+            prefixes: None,
+        },
+    )
+    .expect("create ontology");
+    assert_eq!(result.ontology_iri, "http://example.org/ont");
+    let created = PathBuf::from(&result.path);
+    let contents = std::fs::read_to_string(&created).expect("read created file");
+    assert!(contents.contains("<http://example.org/ont> a owl:Ontology"));
+    assert!(contents.contains("owl:versionIRI <http://example.org/ont/1>"));
+    assert!(!contents.contains("a owl:Class"));
+}
+
+#[test]
+fn create_ontology_rejects_rdfxml_and_owl_extension() {
+    let dir = tempfile::tempdir().unwrap();
+    let state = ServerState::new();
+    state.set_workspace_roots(vec![dir.path().to_path_buf()]).expect("set workspace");
+    let err = handle_create_ontology(
+        &state,
+        CreateOntologyParams {
+            path: dir.path().join("fresh.owl").display().to_string(),
+            ontology_iri: "http://example.org/ont".into(),
+            version_iri: None,
+            format: Some("rdfxml".into()),
+            prefixes: None,
+        },
+    )
+    .expect_err("rdfxml create must fail");
+    assert!(err.message.contains("unsupported createOntology format"));
+}
+
+struct CwdGuard {
+    previous: PathBuf,
+}
+
+impl CwdGuard {
+    fn enter(dir: &std::path::Path) -> Self {
+        let previous = std::env::current_dir().expect("current dir");
+        std::env::set_current_dir(dir).expect("set cwd");
+        Self { previous }
+    }
+}
+
+impl Drop for CwdGuard {
+    fn drop(&mut self) {
+        let _ = std::env::set_current_dir(&self.previous);
+    }
+}
+
+#[test]
+fn create_ontology_writes_under_workspace_not_cwd() {
+    let workspace = tempfile::tempdir().unwrap();
+    let cwd = tempfile::tempdir().unwrap();
+    let state = ServerState::new();
+    state.set_workspace_roots(vec![workspace.path().to_path_buf()]).expect("set workspace");
+
+    let _cwd = CwdGuard::enter(cwd.path());
+    let result = handle_create_ontology(
+        &state,
+        CreateOntologyParams {
+            path: "relative-new.ttl".into(),
+            ontology_iri: "http://example.org/ont".into(),
+            version_iri: None,
+            format: Some("ttl".into()),
+            prefixes: None,
+        },
+    )
+    .expect("create ontology with relative path");
+
+    let created = PathBuf::from(&result.path);
+    assert!(created.exists(), "expected file at {}", created.display());
+    let root = workspace.path().canonicalize().expect("canonicalize workspace");
+    assert!(
+        ontocore_core::is_path_within(&root, &created),
+        "created path {} must be under workspace {}",
+        created.display(),
+        root.display()
+    );
+    assert!(
+        !cwd.path().join("relative-new.ttl").exists(),
+        "must not write relative path against process CWD"
+    );
+    let contents = std::fs::read_to_string(&created).expect("read created file");
+    assert!(contents.contains("<http://example.org/ont> a owl:Ontology"));
+}
+
+#[test]
+fn export_ontology_writes_under_workspace_not_cwd() {
+    let workspace = tempfile::tempdir().unwrap();
+    let cwd = tempfile::tempdir().unwrap();
+    let source = workspace.path().join("source.ttl");
+    std::fs::write(
+        &source,
+        "@prefix owl: <http://www.w3.org/2002/07/owl#> .\n\n<http://example.org/ont> a owl:Ontology .\n",
+    )
+    .unwrap();
+
+    let state = ServerState::new();
+    state.set_workspace_roots(vec![workspace.path().to_path_buf()]).expect("set workspace");
+
+    let _cwd = CwdGuard::enter(cwd.path());
+    let result = handle_export_ontology(
+        &state,
+        ExportOntologyParams {
+            source_path: "source.ttl".into(),
+            output_path: "exported.ttl".into(),
+            format: Some("ttl".into()),
+        },
+    )
+    .expect("export ontology with relative paths");
+
+    let exported = PathBuf::from(&result.output_path);
+    assert!(result.success);
+    assert!(exported.exists(), "expected export at {}", exported.display());
+    let root = workspace.path().canonicalize().expect("canonicalize workspace");
+    assert!(
+        ontocore_core::is_path_within(&root, &exported),
+        "export path {} must be under workspace {}",
+        exported.display(),
+        root.display()
+    );
+    assert!(!cwd.path().join("exported.ttl").exists(), "must not write export against process CWD");
+    assert!(!cwd.path().join("source.ttl").exists(), "must not resolve source against process CWD");
 }

@@ -10,6 +10,18 @@ use std::path::{Path, PathBuf};
 use std::sync::{Arc, Mutex, RwLock};
 use std::time::{SystemTime, UNIX_EPOCH};
 
+#[cfg(test)]
+use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
+
+/// Test-only: after snapshotting the previous catalog (lock released), sleep this many ms
+/// before `build_incremental` so concurrent writers can prove they are not blocked.
+#[cfg(test)]
+pub(crate) static TEST_INCREMENTAL_BUILD_PAUSE_MS: AtomicU64 = AtomicU64::new(0);
+
+/// Test-only: set while [`TEST_INCREMENTAL_BUILD_PAUSE_MS`] sleep is in progress.
+#[cfg(test)]
+pub(crate) static TEST_INCREMENTAL_BUILD_IN_PAUSE: AtomicBool = AtomicBool::new(false);
+
 #[derive(Clone)]
 pub struct ServerState {
     inner: Arc<RwLock<InnerState>>,
@@ -18,7 +30,7 @@ pub struct ServerState {
 }
 
 struct InnerState {
-    catalog: Option<OntologyCatalog>,
+    catalog: Option<Arc<OntologyCatalog>>,
     /// All LSP workspace folder roots (multi-root).
     workspace_roots: Vec<PathBuf>,
     /// Primary workspace root (first folder) for backward-compatible APIs.
@@ -33,6 +45,8 @@ struct InnerState {
     reasoner_cache: ReasonerCacheStore,
     reasoner_snapshot: Option<ReasonerSnapshot>,
     explanation_cache: HashMap<(String, String, String), ontocore_reasoner::ExplanationResult>,
+    /// Insertion order for explanation cache eviction (oldest first).
+    explanation_cache_order: Vec<(String, String, String)>,
     /// Diagnostics from workspace plugins (merged at publish time).
     plugin_diagnostics: Vec<Diagnostic>,
     /// URIs that received `publishDiagnostics` (for stale clears).
@@ -42,6 +56,9 @@ struct InnerState {
     /// Active ontology document id (path or ontology IRI) for new-axiom targeting.
     active_ontology_id: Option<String>,
 }
+
+/// Cap explanation results similarly to the reasoner classification cache.
+const MAX_EXPLANATION_CACHE_ENTRIES: usize = 8;
 
 impl ServerState {
     pub fn new() -> Self {
@@ -57,6 +74,7 @@ impl ServerState {
                 reasoner_cache: ReasonerCacheStore::new(),
                 reasoner_snapshot: None,
                 explanation_cache: HashMap::new(),
+                explanation_cache_order: Vec::new(),
                 plugin_diagnostics: Vec::new(),
                 published_diagnostic_uris: BTreeSet::new(),
                 index_disk_cache: false,
@@ -88,7 +106,7 @@ impl ServerState {
         }
         let mut guard = self.inner.write().map_err(|e| e.to_string())?;
         if canonical.is_empty() {
-            clear_workspace_state_inner(&mut guard);
+            let _ = clear_workspace_state_inner(&mut guard);
             return Ok(());
         }
         let primary = canonical[0].clone();
@@ -99,10 +117,13 @@ impl ServerState {
     }
 
     /// Drop all indexed state and open buffers (e.g. when every workspace folder is removed).
-    pub fn clear_workspace_state(&self) {
+    /// Returns previously published diagnostic URIs so the caller can clear the Problems panel.
+    pub fn clear_workspace_state(&self) -> BTreeSet<String> {
         let _ops = self.ops_lock.lock().ok();
         if let Ok(mut guard) = self.inner.write() {
-            clear_workspace_state_inner(&mut guard);
+            clear_workspace_state_inner(&mut guard)
+        } else {
+            BTreeSet::new()
         }
     }
 
@@ -113,7 +134,7 @@ impl ServerState {
         if let Ok(mut guard) = self.inner.write() {
             let roots = guard.workspace_roots.clone();
             if roots.is_empty() {
-                clear_workspace_state_inner(&mut guard);
+                let _ = clear_workspace_state_inner(&mut guard);
             } else {
                 on_workspace_roots_changed_inner(&mut guard, &roots);
             }
@@ -144,20 +165,31 @@ impl ServerState {
         validate_workspace_scope_any(&workspace, &roots)?;
 
         let disk_cache = self.inner.read().map(|g| g.index_disk_cache).unwrap_or(false);
-        let catalog = {
-            let overrides = self.open_documents_snapshot();
-            let builder = IndexBuilder::new()
-                .workspace(workspace.clone())
-                .scan_roots(roots.clone())
-                .document_overrides(overrides)
-                .disk_cache(disk_cache);
+        let previous = {
             let guard = self.inner.read().map_err(|e| e.to_string())?;
-            if let Some(prev) = guard.catalog.as_ref() {
-                builder.build_incremental(prev).map_err(|e| e.to_string())?
-            } else {
-                drop(guard);
-                builder.build().map_err(|e| e.to_string())?
+            guard.catalog.clone()
+        };
+        let overrides = self.open_documents_snapshot();
+        let builder = IndexBuilder::new()
+            .workspace(workspace.clone())
+            .scan_roots(roots.clone())
+            .document_overrides(overrides)
+            .disk_cache(disk_cache);
+        // Build without holding `inner`: writers (`set_document_text`, etc.) must not block
+        // for the duration of scan/parse. `ops_lock` already serializes index jobs.
+        #[cfg(test)]
+        if previous.is_some() {
+            let pause_ms = TEST_INCREMENTAL_BUILD_PAUSE_MS.load(Ordering::SeqCst);
+            if pause_ms > 0 {
+                TEST_INCREMENTAL_BUILD_IN_PAUSE.store(true, Ordering::SeqCst);
+                std::thread::sleep(std::time::Duration::from_millis(pause_ms));
+                TEST_INCREMENTAL_BUILD_IN_PAUSE.store(false, Ordering::SeqCst);
             }
+        }
+        let catalog = if let Some(prev) = previous.as_deref() {
+            builder.build_incremental(prev).map_err(|e| e.to_string())?
+        } else {
+            builder.build().map_err(|e| e.to_string())?
         };
 
         let stats = catalog.data().stats();
@@ -168,12 +200,13 @@ impl ServerState {
             .unwrap_or_default();
 
         let mut guard = self.inner.write().map_err(|e| e.to_string())?;
-        guard.catalog = Some(catalog);
+        guard.catalog = Some(Arc::new(catalog));
         guard.indexed_workspace = Some(workspace);
         guard.indexed_at = Some(indexed_at);
         guard.reasoner_cache.invalidate();
         guard.reasoner_snapshot = None;
         guard.explanation_cache.clear();
+        guard.explanation_cache_order.clear();
         guard.plugin_diagnostics = plugin_diags;
 
         Ok((stats, indexed_at))
@@ -200,10 +233,23 @@ impl ServerState {
         result: ontocore_reasoner::ExplanationResult,
     ) {
         if let Ok(mut guard) = self.inner.write() {
-            guard.explanation_cache.insert(
-                (content_hash.to_string(), profile.to_string(), class_iri.to_string()),
-                result,
-            );
+            let key = (content_hash.to_string(), profile.to_string(), class_iri.to_string());
+            let updating = guard.explanation_cache.contains_key(&key);
+            if let Some(pos) = guard.explanation_cache_order.iter().position(|k| k == &key) {
+                guard.explanation_cache_order.remove(pos);
+            }
+            if !updating {
+                while guard.explanation_cache.len() >= MAX_EXPLANATION_CACHE_ENTRIES
+                    && !guard.explanation_cache_order.is_empty()
+                {
+                    if let Some(old) = guard.explanation_cache_order.first().cloned() {
+                        guard.explanation_cache_order.remove(0);
+                        guard.explanation_cache.remove(&old);
+                    }
+                }
+            }
+            guard.explanation_cache_order.push(key.clone());
+            guard.explanation_cache.insert(key, result);
         }
     }
 
@@ -223,7 +269,7 @@ impl ServerState {
         f: impl FnOnce(&OntologyCatalog, Option<&ReasonerSnapshot>) -> T,
     ) -> Option<T> {
         let guard = self.inner.read().ok()?;
-        let catalog = guard.catalog.as_ref()?;
+        let catalog = guard.catalog.as_deref()?;
         Some(f(catalog, guard.reasoner_snapshot.as_ref()))
     }
 
@@ -233,7 +279,7 @@ impl ServerState {
         f: impl FnOnce(&OntologyCatalog, &HashMap<PathBuf, String>) -> T,
     ) -> Option<T> {
         let guard = self.inner.read().ok()?;
-        let catalog = guard.catalog.as_ref()?;
+        let catalog = guard.catalog.as_deref()?;
         Some(f(catalog, &guard.open_documents))
     }
 
@@ -258,7 +304,7 @@ impl ServerState {
     /// Clone catalog documents and diagnostics for publishing outside the read lock.
     pub fn catalog_diagnostic_snapshot(&self) -> Option<CatalogDiagnosticSnapshot> {
         let guard = self.inner.read().ok()?;
-        let catalog = guard.catalog.as_ref()?;
+        let catalog = guard.catalog.as_deref()?;
         Some(CatalogDiagnosticSnapshot {
             documents: catalog.data().documents.clone(),
             diagnostics: {
@@ -301,7 +347,7 @@ impl ServerState {
                 return None;
             }
         };
-        guard.catalog.as_ref().map(f)
+        guard.catalog.as_deref().map(f)
     }
 
     pub fn workspace_root(&self) -> Option<PathBuf> {
@@ -413,7 +459,7 @@ impl ServerState {
     }
 }
 
-fn clear_workspace_state_inner(guard: &mut InnerState) {
+fn clear_workspace_state_inner(guard: &mut InnerState) -> BTreeSet<String> {
     guard.catalog = None;
     guard.workspace_roots.clear();
     guard.workspace = None;
@@ -424,7 +470,10 @@ fn clear_workspace_state_inner(guard: &mut InnerState) {
     guard.reasoner_cache.invalidate();
     guard.reasoner_snapshot = None;
     guard.plugin_diagnostics.clear();
+    guard.explanation_cache.clear();
+    guard.explanation_cache_order.clear();
     guard.active_ontology_id = None;
+    std::mem::take(&mut guard.published_diagnostic_uris)
 }
 
 fn on_workspace_roots_changed_inner(guard: &mut InnerState, new_roots: &[PathBuf]) {
@@ -433,6 +482,9 @@ fn on_workspace_roots_changed_inner(guard: &mut InnerState, new_roots: &[PathBuf
     guard.reasoner_cache.invalidate();
     guard.reasoner_snapshot = None;
     guard.plugin_diagnostics.clear();
+    guard.explanation_cache.clear();
+    guard.explanation_cache_order.clear();
+    guard.active_ontology_id = None;
     if let Some(ref indexed) = guard.indexed_workspace {
         if !is_path_within_any(new_roots, indexed) {
             guard.indexed_workspace = None;
@@ -467,10 +519,10 @@ pub fn resolve_workspace_for_index(
     }
 }
 
-/// Resolve a workspace folder URI for multi-root folder add/remove events.
+/// Resolve a workspace folder URI for multi-root folder **remove** events.
 ///
-/// When `existing_roots` is non-empty, the folder must lie under at least one root
-/// (same rule as document paths). Empty roots accept the first folder as initial root.
+/// When `existing_roots` is non-empty, the folder must match or lie under at least one root.
+/// Empty roots accept the path as an initial root.
 pub fn resolve_workspace_folder_uri(
     uri: &str,
     existing_roots: &[PathBuf],
@@ -480,6 +532,15 @@ pub fn resolve_workspace_folder_uri(
         return Ok(path);
     }
     validate_workspace_scope_any(&path, existing_roots)
+}
+
+/// Resolve a workspace folder URI for multi-root folder **add** events.
+///
+/// Peer folders (siblings of existing roots) are accepted — the same rule as
+/// `initialize` with multiple `workspaceFolders`. Document paths remain jailed
+/// via [`validate_workspace_scope_any`].
+pub fn resolve_workspace_folder_add(uri: &str) -> Result<PathBuf, String> {
+    ontocore_core::workspace_uri_to_path(uri)
 }
 
 pub(crate) fn canonical_roots_match(a: &Path, b: &Path) -> bool {
@@ -564,6 +625,20 @@ mod tests {
     }
 
     #[test]
+    fn resolve_workspace_folder_add_accepts_peer_root() {
+        let root_a = tempfile::tempdir().unwrap();
+        let root_b = tempfile::tempdir().unwrap();
+        let peer_uri =
+            url::Url::from_file_path(root_b.path().canonicalize().unwrap()).unwrap().to_string();
+
+        let resolved = resolve_workspace_folder_add(&peer_uri).expect("peer add");
+        assert_eq!(resolved, root_b.path().canonicalize().unwrap());
+        // Remove still requires the folder to be under/equal an existing root.
+        let root = root_a.path().canonicalize().unwrap();
+        assert!(resolve_workspace_folder_uri(&peer_uri, &[root]).is_err());
+    }
+
+    #[test]
     fn resolve_workspace_folder_uri_accepts_subdirectory_of_root() {
         let root_dir = tempfile::tempdir().unwrap();
         let sub = root_dir.path().join("ontologies");
@@ -574,5 +649,113 @@ mod tests {
         let resolved =
             resolve_workspace_folder_uri(&sub_uri, &[root]).expect("subfolder under root");
         assert!(is_path_within(&root_dir.path().canonicalize().unwrap(), &resolved));
+    }
+
+    #[test]
+    fn incremental_reindex_does_not_hold_inner_lock_across_build() {
+        use std::thread;
+        use std::time::{Duration, Instant};
+
+        let dir = tempfile::tempdir().unwrap();
+        let root = dir.path().canonicalize().unwrap();
+        std::fs::write(
+            root.join("doc.ttl"),
+            "@prefix ex: <http://example.org#> .\nex:C a <http://www.w3.org/2002/07/owl#Class> .\n",
+        )
+        .unwrap();
+
+        let state = ServerState::new();
+        state.set_workspace_roots(vec![root.clone()]).expect("set workspace");
+        state.index_workspace(root.clone()).expect("initial index");
+
+        TEST_INCREMENTAL_BUILD_IN_PAUSE.store(false, Ordering::SeqCst);
+        TEST_INCREMENTAL_BUILD_PAUSE_MS.store(200, Ordering::SeqCst);
+        let state_index = state.clone();
+        let root_index = root.clone();
+        let indexer = thread::spawn(move || {
+            state_index.index_workspace(root_index).expect("incremental reindex");
+        });
+
+        let deadline = Instant::now() + Duration::from_secs(5);
+        while !TEST_INCREMENTAL_BUILD_IN_PAUSE.load(Ordering::SeqCst) {
+            assert!(Instant::now() < deadline, "indexer never entered build pause");
+            thread::sleep(Duration::from_millis(1));
+        }
+
+        let write_start = Instant::now();
+        state
+            .set_document_text(
+                root.join("doc.ttl"),
+                "@prefix ex: <http://example.org#> .\nex:C a <http://www.w3.org/2002/07/owl#Class> .\n"
+                    .to_string(),
+            )
+            .expect("document write during reindex pause");
+        let write_elapsed = write_start.elapsed();
+        TEST_INCREMENTAL_BUILD_PAUSE_MS.store(0, Ordering::SeqCst);
+
+        indexer.join().expect("indexer thread");
+        assert!(
+            write_elapsed < Duration::from_millis(100),
+            "document write blocked for {write_elapsed:?}; catalog lock likely held across build"
+        );
+    }
+
+    #[test]
+    fn explanation_cache_evicts_oldest_beyond_cap() {
+        let state = ServerState::new();
+        for i in 0..10 {
+            let iri = format!("http://example.org/C{i}");
+            state.put_cached_explanation(
+                "hash",
+                "elk",
+                &iri,
+                ontocore_reasoner::ExplanationResult {
+                    class_iri: iri.clone(),
+                    steps: vec![],
+                    text: String::new(),
+                },
+            );
+        }
+        assert!(state.get_cached_explanation("hash", "elk", "http://example.org/C0").is_none());
+        assert!(state.get_cached_explanation("hash", "elk", "http://example.org/C1").is_none());
+        assert!(state.get_cached_explanation("hash", "elk", "http://example.org/C2").is_some());
+        assert!(state.get_cached_explanation("hash", "elk", "http://example.org/C9").is_some());
+    }
+
+    #[test]
+    fn set_workspace_roots_clears_active_ontology_id() {
+        let dir_a = tempfile::tempdir().unwrap();
+        let dir_b = tempfile::tempdir().unwrap();
+        let root_a = dir_a.path().canonicalize().unwrap();
+        let root_b = dir_b.path().canonicalize().unwrap();
+        let state = ServerState::new();
+        state.set_workspace_roots(vec![root_a]).expect("set roots A");
+        state.set_active_ontology_id(Some("http://example.org/a".into()));
+        assert_eq!(state.active_ontology_id().as_deref(), Some("http://example.org/a"));
+        state.set_workspace_roots(vec![root_b]).expect("set roots B");
+        assert!(state.active_ontology_id().is_none());
+    }
+
+    #[test]
+    fn clear_workspace_state_returns_published_uris_and_clears_explanations() {
+        let state = ServerState::new();
+        let mut uris = BTreeSet::new();
+        uris.insert("file:///tmp/stale.ttl".into());
+        let _ = state.replace_published_diagnostic_uris(uris);
+        state.put_cached_explanation(
+            "hash",
+            "elk",
+            "http://example.org/C",
+            ontocore_reasoner::ExplanationResult {
+                class_iri: "http://example.org/C".into(),
+                steps: vec![],
+                text: String::new(),
+            },
+        );
+
+        let stale = state.clear_workspace_state();
+        assert!(stale.contains("file:///tmp/stale.ttl"));
+        assert!(state.get_cached_explanation("hash", "elk", "http://example.org/C").is_none());
+        assert!(state.replace_published_diagnostic_uris(BTreeSet::new()).is_empty());
     }
 }

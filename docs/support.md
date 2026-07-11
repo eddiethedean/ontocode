@@ -4,10 +4,13 @@ OntoCode / OntoCore is an open-source project. Support is provided on a best-eff
 
 ## Where to ask questions
 
-- **How do I…? / usage questions:** GitHub Issues (use the closest template) and link to the doc page you followed.
-- **Bug reports:** GitHub Issues with reproduction steps, sample ontology (if possible), and logs.
+| Kind | Where |
+|------|--------|
+| **How do I…? / usage questions** | [GitHub Discussions](https://github.com/eddiethedean/ontocode/discussions) (Q&A) |
+| **Bug reports** | [GitHub Issues](https://github.com/eddiethedean/ontocode/issues) with reproduction steps, sample ontology (if possible), and logs |
+| **Feature ideas** | [GitHub Discussions](https://github.com/eddiethedean/ontocode/discussions) (Ideas) or an issue if you already have a concrete proposal |
 
-Project issue tracker: `https://github.com/eddiethedean/ontocode/issues`
+Please prefer **Discussions** for questions so Issues stay focused on defects. Link the doc page you followed when asking.
 
 ## What to include in a report
 
@@ -18,6 +21,12 @@ Include:
 - Whether the workspace is trusted (VS Code Restricted Mode changes behavior)
 - Output logs from **View → Output → OntoCore Language Server** (VS Code)
 - A minimal reproduction (ideally a small `.ttl` or `.obo` file)
+
+## Before you ask
+
+- [Known limitations](known-limitations.md)
+- [Troubleshooting](troubleshooting.md)
+- [FAQ](faq.md)
 
 ## Security reports
 
@@ -32,4 +41,3 @@ See also: [Security policy](security.md)
 
 - **No SLA** is provided.
 - Security advisories are handled per the published policy.
-

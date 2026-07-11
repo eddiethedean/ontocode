@@ -78,6 +78,52 @@ pub fn format_diff_markdown(diff: &DiffResult, breaking_only: bool) -> String {
         diff.inference_changes.len(),
         diff.breaking_changes.len(),
     ));
+    if !diff.entity_changes.is_empty() {
+        out.push_str("## Entity changes\n\n");
+        for e in &diff.entity_changes {
+            match &e.previous_iri {
+                Some(prev) => {
+                    out.push_str(&format!("- **{:?}** `{}` ← `{}`\n", e.kind, e.iri, prev))
+                }
+                None => out.push_str(&format!("- **{:?}** `{}`\n", e.kind, e.iri)),
+            }
+        }
+        out.push('\n');
+    }
+    if !diff.axiom_changes.is_empty() {
+        out.push_str("## Axiom changes\n\n");
+        for a in &diff.axiom_changes {
+            out.push_str(&format!(
+                "- **{}** `{}` — {} {} {}\n",
+                a.change, a.axiom_kind, a.subject, a.predicate, a.object
+            ));
+        }
+        out.push('\n');
+    }
+    if !diff.annotation_changes.is_empty() {
+        out.push_str("## Annotation changes\n\n");
+        for a in &diff.annotation_changes {
+            out.push_str(&format!(
+                "- **{}** `{}` {} {}\n",
+                a.change, a.subject, a.predicate, a.object
+            ));
+        }
+        out.push('\n');
+    }
+    if !diff.import_changes.is_empty() {
+        out.push_str("## Import changes\n\n");
+        for i in &diff.import_changes {
+            out.push_str(&format!("- **{}** {}\n", i.change, i.import_iri));
+        }
+        out.push('\n');
+    }
+    if !diff.inference_changes.is_empty() {
+        out.push_str("## Inference changes\n\n");
+        for i in &diff.inference_changes {
+            out.push_str(&format!("- **{}** `{}` — {}\n", i.change, i.class_iri, i.detail));
+        }
+        out.push('\n');
+    }
     out
 }
 
@@ -204,6 +250,34 @@ mod tests {
         };
         let md = format_diff_pr_summary(&diff);
         assert!(md.contains("### Axioms"));
+        assert!(md.contains("SubClassOf"));
+    }
+
+    #[test]
+    fn markdown_includes_entity_and_axiom_sections() {
+        let diff = DiffResult {
+            entity_changes: vec![EntityChange {
+                iri: "http://ex#A".into(),
+                kind: EntityChangeKind::Added,
+                previous_iri: None,
+                labels: vec![],
+            }],
+            axiom_changes: vec![AxiomChange {
+                change: "added".into(),
+                axiom_kind: "SubClassOf".into(),
+                subject: "http://ex#Child".into(),
+                predicate: "rdfs:subClassOf".into(),
+                object: "http://ex#Parent".into(),
+            }],
+            annotation_changes: vec![],
+            import_changes: vec![],
+            inference_changes: vec![],
+            breaking_changes: vec![],
+        };
+        let md = format_diff_markdown(&diff, false);
+        assert!(md.contains("## Entity changes"));
+        assert!(md.contains("http://ex#A"));
+        assert!(md.contains("## Axiom changes"));
         assert!(md.contains("SubClassOf"));
     }
 }

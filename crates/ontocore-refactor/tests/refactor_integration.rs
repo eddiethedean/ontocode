@@ -368,6 +368,119 @@ fn extract_module_preserves_existing_output_content() {
 }
 
 #[test]
+fn migrate_namespace_updates_at_prefix_uppercase_declaration() {
+    let tmp = TempDir::new().unwrap();
+    let ws = tmp.path();
+    std::fs::create_dir_all(ws).unwrap();
+    // Disk uses lowercase @prefix so the catalog parses; override uses @PREFIX (invalid for
+    // rio, but common in the wild) to exercise replace_prefix_uri case handling.
+    let path = ws.join("upper.ttl");
+    let on_disk = r#"@prefix ex: <http://example.org/org#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+ex:Person a owl:Class .
+"#;
+    let unsaved = r#"@PREFIX ex: <http://example.org/org#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+ex:Person a owl:Class .
+"#;
+    std::fs::write(&path, on_disk).unwrap();
+    let catalog = build_catalog(ws);
+    let mut overrides = HashMap::new();
+    overrides.insert(path.canonicalize().unwrap(), unsaved.to_string());
+    let plan = preview_migrate_namespace(
+        &catalog,
+        "http://example.org/org#",
+        "http://example.org/v2/org#",
+        &overrides,
+    )
+    .expect("plan");
+    let preview = plan.changes.iter().find(|c| c.path.ends_with("upper.ttl")).expect("change");
+    assert!(preview.preview_text.contains("@PREFIX ex: <http://example.org/v2/org#>"));
+    assert!(!preview.preview_text.contains("@PREFIX ex: <http://example.org/org#>"));
+}
+
+#[test]
+fn migrate_namespace_updates_sparql_style_prefix_declaration() {
+    let tmp = TempDir::new().unwrap();
+    let ws = tmp.path();
+    std::fs::create_dir_all(ws).unwrap();
+    let ttl = r#"PREFIX ex: <http://example.org/org#>
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+ex:Person a owl:Class .
+"#;
+    std::fs::write(ws.join("sparql_prefix.ttl"), ttl).unwrap();
+    let catalog = build_catalog(ws);
+    let plan = preview_migrate_namespace(
+        &catalog,
+        "http://example.org/org#",
+        "http://example.org/v2/org#",
+        &empty_overrides(),
+    )
+    .expect("plan");
+    let preview =
+        plan.changes.iter().find(|c| c.path.ends_with("sparql_prefix.ttl")).expect("change");
+    assert!(preview.preview_text.contains("PREFIX ex: <http://example.org/v2/org#>"));
+    assert!(!preview.preview_text.contains("PREFIX ex: <http://example.org/org#>"));
+}
+
+#[test]
+fn extract_module_copies_at_prefix_uppercase_declarations() {
+    let tmp = TempDir::new().unwrap();
+    let ws = tmp.path();
+    std::fs::create_dir_all(ws).unwrap();
+    // Trailing @PREFIX keeps earlier triples parseable while still requiring case-insensitive
+    // prefix collection for the extracted module header.
+    let ttl = r#"@prefix ex: <http://example.org/org#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+ex:Person a owl:Class .
+
+@PREFIX other: <http://example.org/other#> .
+"#;
+    std::fs::write(ws.join("people.ttl"), ttl).unwrap();
+    let catalog = build_catalog(ws);
+    let out = ws.join("module.ttl");
+    let plan = preview_extract_module(
+        &catalog,
+        &["http://example.org/org#Person".to_string()],
+        &out,
+        false,
+        &empty_overrides(),
+        &workspace_roots(ws),
+    )
+    .expect("plan");
+    let out_change = plan.changes.iter().find(|c| c.path == out).expect("output change");
+    assert!(out_change.preview_text.contains("@PREFIX other: <http://example.org/other#>"));
+}
+
+#[test]
+fn extract_module_stub_escapes_path_special_chars() {
+    let tmp = TempDir::new().unwrap();
+    let ws = tmp.path();
+    std::fs::create_dir_all(ws).unwrap();
+    std::fs::copy(fixture_dir().join("people.ttl"), ws.join("people.ttl")).unwrap();
+    let catalog = build_catalog(ws);
+    let out = ws.join(r#"mod"ule\path.ttl"#);
+    let plan = preview_extract_module(
+        &catalog,
+        &["http://example.org/org#Person".to_string()],
+        &out,
+        true,
+        &empty_overrides(),
+        &workspace_roots(ws),
+    )
+    .expect("plan");
+    let source_change =
+        plan.changes.iter().find(|c| c.path.ends_with("people.ttl")).expect("source change");
+    assert!(source_change.preview_text.contains(r#"mod\"ule\\path.ttl"#));
+    let raw_comment = format!("Moved to {}", out.display());
+    assert!(!source_change.preview_text.contains(&raw_comment));
+}
+
+#[test]
 fn extract_module_leave_stub_uses_prefixed_curie() {
     let tmp = TempDir::new().unwrap();
     let ws = tmp.path();

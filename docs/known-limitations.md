@@ -1,6 +1,6 @@
 # Known limitations (v0.18)
 
-Honest limits for evaluators and new users. Capability matrix: [What ships today](SHIPPED.md). Desktop parity gate: [v0.18 assessment](PROTEGE_REVERSE_ENGINEERING/ONTOCODE_PARITY/ONTOCODE_0.18_PROTEGE_PARITY_ASSESSMENT.md).
+Honest limits for evaluators and new users. Capability matrix: [What ships today](SHIPPED.md). Desktop parity gate: [v0.18 assessment on GitHub](https://github.com/eddiethedean/ontocode/blob/main/docs/PROTEGE_REVERSE_ENGINEERING/ONTOCODE_PARITY/ONTOCODE_0.18_PROTEGE_PARITY_ASSESSMENT.md).
 
 ## Editable formats
 

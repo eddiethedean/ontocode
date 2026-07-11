@@ -36,7 +36,7 @@ Or install from the [VS Code Marketplace](https://marketplace.visualstudio.com/i
 
 For offline or air-gapped environments, use a release VSIX instead — see [Install VS Code](../vscode-install.md).
 
-### 2. Open a folder and trust the workspace
+### 2. Open a folder
 
 Download a minimal tutorial pack if you do not already have ontology files:
 
@@ -60,7 +60,8 @@ Or download the two files from [fixtures/](https://github.com/eddiethedean/ontoc
 
 Then **File → Open Folder…** and select `ontocode-tutorial` (or your own ontology folder).
 
-OntoCode’s **bundled** language server runs in trusted and Restricted Mode. **Trust the workspace** only if you set custom `ontocode.lspPath` or `ontocode.robotPath` — those settings are ignored when the folder is untrusted. If the explorer stays empty after 30 seconds, run **OntoCode: Index Workspace** (and Trust the folder if you use a custom LSP path).
+OntoCode’s **bundled** language server works in trusted and Restricted Mode.
+Use **Workspace Trust** only when you set custom `ontocode.lspPath` or `ontocode.robotPath` — those settings are ignored when the folder is untrusted.
 
 ### 3. Browse the explorer
 
@@ -72,16 +73,16 @@ OntoCode’s **bundled** language server runs in trusted and Restricted Mode. **
 - **Classes** contains `Person` (from `example.ttl`).
 - **Ontologies** lists `example.ttl` and `complex-classes.ttl` with no parse errors.
 
-For the tutorial pack (~2 files), this usually takes a few seconds. To confirm progress, open **View → Output**, select **OntoCore Language Server**, and look for index completion messages. If trees stay empty after 30 seconds, run **OntoCode: Index Workspace** and confirm the workspace is trusted.
+For the tutorial pack (~2 files), this usually takes a few seconds. To confirm progress, open **View → Output**, select **OntoCore Language Server**, and look for index completion messages. If trees stay empty after 30 seconds, run **OntoCode: Index Workspace**.
 3. Expand **Ontologies** to see indexed files and parse status.
 4. Expand **Classes**, **Properties**, or **Individuals** to browse entities.
 5. **Click an entity name** (e.g. `Person`) to open the **Entity Inspector**.
 
 If views stay empty:
 
-1. Confirm the workspace is **trusted** (step 2).
+1. Run **OntoCode: Index Workspace** from the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`).
 2. Open **View → Output**, choose **OntoCore Language Server** in the dropdown (top-right of the Output panel), and look for errors.
-3. Run **OntoCode: Index Workspace** from the Command Palette (`Ctrl+Shift+P` / `Cmd+Shift+P`).
+3. If you set a custom `ontocode.lspPath` or `ontocode.robotPath`, **Trust** the workspace so those settings apply.
 
 See the [feature tour](../ontocode/feature-tour.md) for a visual overview of the sidebar and inspector.
 

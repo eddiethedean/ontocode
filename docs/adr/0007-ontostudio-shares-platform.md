@@ -6,7 +6,7 @@ Accepted — **planned post v1.0**
 
 ## Context
 
-OntoStudio is specified as a standalone desktop IDE ([ui/ONTOSTUDIO_DESKTOP.md](../ui/ONTOSTUDIO_DESKTOP.md)). Forking UI or OntoCore would double maintenance.
+OntoStudio is specified as a standalone desktop IDE ([ui/ONTOSTUDIO_DESKTOP.md](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/ONTOSTUDIO_DESKTOP.md)). Forking UI or OntoCore would double maintenance.
 
 ## Decision
 
@@ -26,5 +26,5 @@ OntoStudio implements **WorkspaceHost** for Electron/Tauri; it does not use VS C
 
 ## References
 
-- [platform/ONTOSTUDIO_REUSE.md](../platform/ONTOSTUDIO_REUSE.md)
+- [platform/ONTOSTUDIO_REUSE.md](https://github.com/eddiethedean/ontocode/blob/main/docs/platform/ONTOSTUDIO_REUSE.md)
 - [adr/0001-ontoui-shared-react-platform.md](0001-ontoui-shared-react-platform.md)

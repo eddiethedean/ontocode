@@ -14,7 +14,7 @@ Thank you for contributing. This repository contains:
 | Architecture | [ARCHITECTURE.md](https://github.com/eddiethedean/ontocode/blob/main/ARCHITECTURE.md) | [architecture.md](architecture.md) |
 | Platform roadmap | [ROADMAP.md](https://github.com/eddiethedean/ontocode/blob/main/ROADMAP.md) | [roadmap.md](roadmap.md) |
 | Engineering specs | — | [design/README.md](design/README.md) |
-| Platform planning (v0.14+) | — | [platform/OVERVIEW.md](platform/OVERVIEW.md) |
+| Platform planning (v0.14+) | — | [platform/OVERVIEW.md](https://github.com/eddiethedean/ontocode/blob/main/docs/platform/OVERVIEW.md) |
 | Product ADRs | — | [adr/README.md](adr/README.md) |
 | Engineering ADRs | — | [design/adr/README.md](design/adr/README.md) |
 | Documentation map | — | [documentation-index.md](documentation-index.md) |
@@ -44,7 +44,7 @@ The root Cargo package `ontocode` is unpublished and hosts workspace integration
 | Understand host traits and manifest schema | [ontocore/plugin-model.md](ontocore/plugin-model.md), [PLUGIN_SPEC.md](design/PLUGIN_SPEC.md) |
 | Reference implementation | `crates/ontocore-plugin-naming/`, `examples/plugin-workspace/` |
 | Wire LSP / CLI integration | [lsp-api.md](lsp-api.md), `crates/ontocore-lsp/` |
-| OntoUI inspector plugin cards | [platform/CAPABILITY_PROVIDERS.md](platform/CAPABILITY_PROVIDERS.md), `extension/webview-ui/src/capabilities/` |
+| OntoUI inspector plugin cards | [platform/CAPABILITY_PROVIDERS.md](https://github.com/eddiethedean/ontocode/blob/main/docs/platform/CAPABILITY_PROVIDERS.md), `extension/webview-ui/src/capabilities/` |
 
 Run `./scripts/run-ci-local.sh` before PRs that touch plugin host, reference plugins, or extension capability registry.
 

@@ -1,7 +1,7 @@
 # Plugin authoring (v0.16+)
 
 > **Implement against this page today:** workspace TOML manifests + subprocess JSON contract.
-> The React/TypeScript [Plugin API spec](../ui/PLUGIN_API_SPEC.md) describes a **future** OntoUI host contract — not the shipped VS Code integration.
+> The React/TypeScript [Plugin API spec](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/PLUGIN_API_SPEC.md) describes a **future** OntoUI host contract — not the shipped VS Code integration.
 
 OntoCore’s plugin host (MVP since v0.14) supports **permissions**, **versioned API** (`api_version = "1"`), and **UI contributions**. Since **v0.16**, the OntoCode extension hosts `preferences_pages` and `context_actions` (not schema-only).
 

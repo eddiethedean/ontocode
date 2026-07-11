@@ -24,6 +24,6 @@ Product and contributor **user guides** live on this Read the Docs site. Deeper 
 - [Protégé parity matrix](design/PROTEGE_PARITY.md)
 - [Plugin model](ontocore/plugin-model.md)
 - [Licenses](design/LICENSES.md)
-- [Documentation index](documentation-index.md)
+- [Documentation index](https://github.com/eddiethedean/ontocode/blob/main/docs/documentation-index.md) (GitHub reading-order map)
 
 Capability truth for adopters: **[What ships today](SHIPPED.md)** and **[Known limitations](known-limitations.md)**.

@@ -98,6 +98,13 @@ chmod +x "${BIN}"
 
 For VS Code, install the `ontocode-*.vsix` from the same release.
 
+### Air-gapped / offline install
+
+1. Download `ontocode-<version>.vsix` (and optional Linux CLI tarball) from [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) on a connected machine.
+2. Transfer the VSIX (and `SHA256SUMS` / `NOTICES`) to the offline environment.
+3. In VS Code: **Extensions → … → Install from VSIX…**
+4. For CLI without crates.io: use the Linux tarball (Path D) or vendor a `cargo vendor` / internal crates mirror — see [Enterprise deployment](guides/enterprise-deployment.md).
+
 ## Next steps
 
 | Goal | Document |

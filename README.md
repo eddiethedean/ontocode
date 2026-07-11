@@ -88,7 +88,7 @@ cargo run -- validate fixtures
 
 Platform docs: [Vision](https://ontocode-vs.readthedocs.io/en/latest/vision/) · [Architecture](ARCHITECTURE.md) · [Roadmap](ROADMAP.md) · [Protégé parity](https://ontocode-vs.readthedocs.io/en/latest/design/PROTEGE_PARITY/)
 
-**v0.17** adds Protégé-shell menus, dialogs, named perspectives, and layout persistence. See [SHIPPED](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) and [What's new in v0.17](docs/migration/v0.17.md).
+**v0.18.0** ships the Protégé Desktop parity gate: distinct reasoner Start / Synchronize / Classify / Consistency, client-side Stop cancel, explanation stale detection, layout reopen-with-context, and expanded round-trip fixtures. See [SHIPPED](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) and [What's new in v0.18](docs/migration/v0.18.md). (v0.17 introduced Protégé-shell menus, perspectives, and layout persistence.)
 
 ## Development
 

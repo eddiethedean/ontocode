@@ -29,13 +29,13 @@ After 1.0, the roadmap shifts from parity to modernization.
 | Document | Role |
 |----------|------|
 | [What ships today](SHIPPED.md) | **Canonical capability matrix** — what is available in the current release |
-| [UI roadmap mapping](ui/ROADMAP_MAPPING.md) | **UI specs ↔ releases** — master checklist for all Product Roadmap 2.0 items |
+| [UI roadmap mapping](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/ROADMAP_MAPPING.md) | **UI specs ↔ releases** — master checklist for all Product Roadmap 2.0 items |
 | [Milestones (shipped)](design/ROADMAP.md) | Per-crate engineering detail for **shipped** v0.1–v0.11 milestones |
 | [Protégé parity matrix](design/PROTEGE_PARITY.md) | **v1.0 exit bar** — P0 / P1 / P2 parity tiers |
 | [v1.0 backlog](design/v1.0_BACKLOG.md) | Implementation checklist toward v1.0 |
-| [Platform overview](platform/OVERVIEW.md) | OntoUI / WorkspaceStore architecture (foundation shipped v0.13) |
-| [Product Roadmap 2.0](ui/PRODUCT_ROADMAP_2.0.md) | UI phases with milestone acceptance criteria |
-| [Product design (UI)](ui/README.md) | Product design specification pack (UX, design system, OntoStudio target) |
+| [Platform overview](https://github.com/eddiethedean/ontocode/blob/main/docs/platform/OVERVIEW.md) | OntoUI / WorkspaceStore architecture (foundation shipped v0.13) |
+| [Product Roadmap 2.0](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/PRODUCT_ROADMAP_2.0.md) | UI phases with milestone acceptance criteria |
+| [Product design (UI)](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/README.md) | Product design specification pack (UX, design system, OntoStudio target) |
 
 **Current release:** v0.18.0
 
@@ -89,11 +89,11 @@ PLANNED (v1.0+) ─────────────────────�
 | 17 | v1.1 | F | Planned | 7, 2†, 3†, 4†, 8†, 9† | Language bindings & AI primitives |
 | 18 | v1.2+ | F | Planned | 9, 10, 11 | Ontology toolchain platform |
 
-†Partial scope in this release (remainder in later releases). Full mapping: [ROADMAP_MAPPING.md](ui/ROADMAP_MAPPING.md).
+†Partial scope in this release (remainder in later releases). Full mapping: [ROADMAP_MAPPING.md](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/ROADMAP_MAPPING.md).
 
 ### UI phase reference (Product Roadmap 2.0)
 
-OntoUI work uses **UI phases 0–12** from [Product Roadmap 2.0](ui/PRODUCT_ROADMAP_2.0.md). They are integrated into release phases above — not a separate track.
+OntoUI work uses **UI phases 0–12** from [Product Roadmap 2.0](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/PRODUCT_ROADMAP_2.0.md). They are integrated into release phases above — not a separate track.
 
 | UI phase | Name | Primary releases |
 |----------|------|------------------|
@@ -333,13 +333,13 @@ Sub-phases: **v0.7a** (React foundation) → **v0.7** (graphs + inspector) → *
 
 **Theme:** OntoUI platform foundation + OntoCore hardening for plugins (v0.14) and Protégé polish (v1.0).
 
-**UI phases delivered:** **0**, **1**, partial **3** (schema browser), partial **5** (reasoning store integration), partial **9** (PR summary CLI). Checklist: [ROADMAP_MAPPING.md § v0.13](ui/ROADMAP_MAPPING.md)
+**UI phases delivered:** **0**, **1**, partial **3** (schema browser), partial **5** (reasoning store integration), partial **9** (PR summary CLI). Checklist: [ROADMAP_MAPPING.md § v0.13](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/ROADMAP_MAPPING.md)
 
 | Area | Deliverables |
 |------|--------------|
 | **OntoUI** | `WorkspaceHost` adapter; Zustand `WorkspaceStore` + event bus; Current Focus + `FocusChanged`; `WorkspaceRegistry`; design tokens + shared primitives; extension-host `FocusRelayService`; Entity Inspector, Graph, Query Workbench, and Refactor Preview on store; schema browser in Query Workbench; refactor + reasoning store slices |
 | **OntoCore** | Horned-OWL SQL virtual tables (`restrictions`, `equivalent_class_axioms`, `disjoint_class_axioms`, `domain_axioms`, `range_axioms`); LSP `ontocore/listSqlSchema`; `ontocore diff --pr-summary`; `.ontocore/diagnostics.toml`; LSP semantic tokens (Turtle/OBO); `ontocore docs` class hierarchy + property index; API stability policy; benchmark smoke tests (`tests/bench_index.rs`) |
-| **OntoCode** | Cross-panel focus sync (explorer → inspector + graph); Vitest + extension integration tests for focus relay, schema browser, and store slices; UX audit ([UX_AUDIT_v0.13.md](ui/UX_AUDIT_v0.13.md)) |
+| **OntoCode** | Cross-panel focus sync (explorer → inspector + graph); Vitest + extension integration tests for focus relay, schema browser, and store slices; UX audit ([UX_AUDIT_v0.13.md](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/UX_AUDIT_v0.13.md)) |
 
 **Exit criteria (met):**
 
@@ -364,7 +364,7 @@ Sub-phases: **v0.7a** (React foundation) → **v0.7** (graphs + inspector) → *
 
 **Theme:** External extensibility without embedding workflow engines in core.
 
-**UI phases delivered:** **8** (plugin platform MVP). Milestone: [Product Roadmap 2.0 phase 8](ui/PRODUCT_ROADMAP_2.0.md).
+**UI phases delivered:** **8** (plugin platform MVP). Milestone: [Product Roadmap 2.0 phase 8](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/PRODUCT_ROADMAP_2.0.md).
 
 | Area | Deliverables |
 |------|--------------|
@@ -434,7 +434,7 @@ See [v0.17 scope](design/v0.17_SCOPE.md), [migration/v0.17.md](migration/v0.17.m
 
 **Theme:** Finish last-mile Desktop parity and ship a verifiable “Protégé not required” path before the 1.0 push.
 
-**Scope (docs/audit-first):** [v0.18_SCOPE.md](design/v0.18_SCOPE.md) · [0.18 parity assessment](PROTEGE_REVERSE_ENGINEERING/ONTOCODE_PARITY/ONTOCODE_0.18_PROTEGE_PARITY_ASSESSMENT.md)
+**Scope (docs/audit-first):** [v0.18_SCOPE.md](design/v0.18_SCOPE.md) · [0.18 parity assessment](https://github.com/eddiethedean/ontocode/blob/main/docs/PROTEGE_REVERSE_ENGINEERING/ONTOCODE_PARITY/ONTOCODE_0.18_PROTEGE_PARITY_ASSESSMENT.md)
 
 Canonical detail: root [ROADMAP.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/ROADMAP.md) § v0.18. See [migration/v0.18.md](migration/v0.18.md).
 
@@ -450,17 +450,17 @@ Canonical detail: root [ROADMAP.md on GitHub](https://github.com/eddiethedean/on
 
 **Theme:** Production-ready Protégé replacement in VS Code.
 
-**UI phases:** **1–6** exit polish, partial **9** (review workspace). Milestones: [Product Roadmap 2.0 phases 2–6](ui/PRODUCT_ROADMAP_2.0.md). Wireframes: [WORKSPACE_WIREFRAMES.md](ui/WORKSPACE_WIREFRAMES.md).
+**UI phases:** **1–6** exit polish, partial **9** (review workspace). Milestones: [Product Roadmap 2.0 phases 2–6](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/PRODUCT_ROADMAP_2.0.md). Wireframes: [WORKSPACE_WIREFRAMES.md](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/WORKSPACE_WIREFRAMES.md).
 
 | Area | Deliverables |
 |------|--------------|
 | **OntoCore** | All [PROTEGE_PARITY.md](design/PROTEGE_PARITY.md) **P0** items green; all **P1** items green or documented known gaps; stable CLI/API/LSP semver 1.0; `examples/protege-roundtrip/` ontology set with workflow doc; performance benchmarks published |
-| **OntoUI** | **[1]** Persistent tabs + bottom dock ([WORKSPACE_WIREFRAMES](ui/WORKSPACE_WIREFRAMES.md)). **[2]** Relationship cards, references view, metadata view; entity workspace diagnostics integration ([ENTITY_EDITOR_SPEC](ui/ENTITY_EDITOR_SPEC.md)). **[4]** Graph saved layouts, filters, reasoning overlays ([GRAPH_WORKSPACE](ui/GRAPH_WORKSPACE.md)). **[5]** Semantic build pipeline UI; entity-level reasoning cards; reasoning history; Problems ↔ reasoning integration ([REASONING_EXPERIENCE](ui/REASONING_EXPERIENCE.md)). **[6]** Merge classes; batch label normalization; undo/redo on refactor and patch writes ([SEMANTIC_REFACTORING](ui/SEMANTIC_REFACTORING.md)). **[9]** Review workspace MVP ([COLLABORATION](ui/COLLABORATION.md)). Supporting: HIG + keyboard shortcuts ([HUMAN_INTERFACE_GUIDELINES](ui/HUMAN_INTERFACE_GUIDELINES.md), [KEYBOARD_SHORTCUTS](ui/KEYBOARD_SHORTCUTS.md)) |
+| **OntoUI** | **[1]** Persistent tabs + bottom dock ([WORKSPACE_WIREFRAMES](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/WORKSPACE_WIREFRAMES.md)). **[2]** Relationship cards, references view, metadata view; entity workspace diagnostics integration ([ENTITY_EDITOR_SPEC](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/ENTITY_EDITOR_SPEC.md)). **[4]** Graph saved layouts, filters, reasoning overlays ([GRAPH_WORKSPACE](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/GRAPH_WORKSPACE.md)). **[5]** Semantic build pipeline UI; entity-level reasoning cards; reasoning history; Problems ↔ reasoning integration ([REASONING_EXPERIENCE](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/REASONING_EXPERIENCE.md)). **[6]** Merge classes; batch label normalization; undo/redo on refactor and patch writes ([SEMANTIC_REFACTORING](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/SEMANTIC_REFACTORING.md)). **[9]** Review workspace MVP ([COLLABORATION](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/COLLABORATION.md)). Supporting: HIG + keyboard shortcuts ([HUMAN_INTERFACE_GUIDELINES](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/HUMAN_INTERFACE_GUIDELINES.md), [KEYBOARD_SHORTCUTS](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/KEYBOARD_SHORTCUTS.md)) |
 | **OntoCode** | Complete hybrid authoring loop (forms + Manchester + Turtle/OBO); full IDE surface (explorer, search, diagnostics, refactoring, query workbench, visualization, reasoning); React webview hardening; VS Code Marketplace + Open VSX publish as 1.0 |
 | **Toolchain** | ODK project layout recognition (`src/ontology/`, catalog files, import structure); ODK QC and release workflow surfacing; ROBOT-compatible operations where practical; import existing ODK/ROBOT/owlmake workflows (Makefile, GitHub Actions); Protégé migration guide with honest parity table |
 | **Ecosystem** | Ontologos 1.0.0 reasoner gate satisfied; published `ontocore` + `ontocore-*` 1.0.0 on crates.io |
 
-**Already shipped (v0.5–v0.15):** entity editor MVP, query workbench, graph canvas (with asserted/inferred modes in v0.15), reasoner panel, refactoring preview, semantic diff, WorkspaceStore + focus relay, schema browser, plugin host MVP + plugin permissions/views — see [ROADMAP_MAPPING.md](ui/ROADMAP_MAPPING.md).
+**Already shipped (v0.5–v0.15):** entity editor MVP, query workbench, graph canvas (with asserted/inferred modes in v0.15), reasoner panel, refactoring preview, semantic diff, WorkspaceStore + focus relay, schema browser, plugin host MVP + plugin permissions/views — see [ROADMAP_MAPPING.md](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/ROADMAP_MAPPING.md).
 
 **Exit criteria:**
 
@@ -469,7 +469,7 @@ Canonical detail: root [ROADMAP.md on GitHub](https://github.com/eddiethedean/on
 
 Track implementation: [v1.0_BACKLOG.md](design/v1.0_BACKLOG.md)
 
-**Dependencies:** Ontologos 1.0.0; `react` / `vite` (extension `webview-ui`); [cursor-prompts/](cursor-prompts/README.md) 06–07, 11–12
+**Dependencies:** Ontologos 1.0.0; `react` / `vite` (extension `webview-ui`); [cursor-prompts/](https://github.com/eddiethedean/ontocode/blob/main/docs/cursor-prompts/README.md) 06–07, 11–12
 
 #### OntoCode 1.0 — Modern Protégé replacement
 
@@ -509,20 +509,20 @@ Ontologos provides **reasoning**. OntoCore provides the **workspace platform** a
 
 **Theme:** Cross-language integration and AI-native tooling foundations.
 
-**UI phases:** **7** (primary), deferred AI from **2**, **3**, **4**, **8**, **9**. Milestone: [Product Roadmap 2.0 phase 7](ui/PRODUCT_ROADMAP_2.0.md). [ADR-0010](design/adr/0010-ai-features-opt-in.md).
+**UI phases:** **7** (primary), deferred AI from **2**, **3**, **4**, **8**, **9**. Milestone: [Product Roadmap 2.0 phase 7](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/PRODUCT_ROADMAP_2.0.md). [ADR-0010](design/adr/0010-ai-features-opt-in.md).
 
 Former roadmap labels **v0.17 (Language Bindings)** and **v0.18 (AI Platform)** are consolidated here.
 
 | Area | Deliverables |
 |------|--------------|
 | **OntoCore** | Python SDK (workspace index, query, validate, diff); TypeScript SDK (LSP client helpers, webview protocol types); MCP server exposing workspace context (entities, axioms, diagnostics, query results) |
-| **OntoUI** | **[7]** AI sidebar; inline suggestions; review ontology; repair diagnostics; project-wide AI tasks; MCP context bridge ([AI_EXPERIENCE](ui/AI_EXPERIENCE.md), [AI_ORCHESTRATION_ARCHITECTURE](ui/AI_ORCHESTRATION_ARCHITECTURE.md)). **[2†]** AI explain entity. **[3†]** AI query generation. **[4†]** AI graph explanations. **[8†]** AI provider API ([PLUGIN_API_SPEC](ui/PLUGIN_API_SPEC.md)). **[9†]** AI review ([COLLABORATION](ui/COLLABORATION.md)). All AI: read-only suggestions with preview/approval |
+| **OntoUI** | **[7]** AI sidebar; inline suggestions; review ontology; repair diagnostics; project-wide AI tasks; MCP context bridge ([AI_EXPERIENCE](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/AI_EXPERIENCE.md), [AI_ORCHESTRATION_ARCHITECTURE](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/AI_ORCHESTRATION_ARCHITECTURE.md)). **[2†]** AI explain entity. **[3†]** AI query generation. **[4†]** AI graph explanations. **[8†]** AI provider API ([PLUGIN_API_SPEC](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/PLUGIN_API_SPEC.md)). **[9†]** AI review ([COLLABORATION](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/COLLABORATION.md)). All AI: read-only suggestions with preview/approval |
 | **OntoCode** | MCP-driven semantic context for external AI tools; documentation generation hooks (extends v0.11 `ontocore docs`) |
 | **Ecosystem** | Published SDK packages; MCP server installable via `cargo install` or pip |
 
 **Exit criteria:** Python and TypeScript consumers can index and query ontologies without shelling to CLI; MCP clients can retrieve structured ontology context from an open workspace.
 
-**Dependencies:** MCP protocol; PyO3 or subprocess bridge TBD in ADR; [cursor-prompts/09-add-ai-action-lifecycle.md](cursor-prompts/09-add-ai-action-lifecycle.md)
+**Dependencies:** MCP protocol; PyO3 or subprocess bridge TBD in ADR; [cursor-prompts/09-add-ai-action-lifecycle.md](https://github.com/eddiethedean/ontocode/blob/main/docs/cursor-prompts/09-add-ai-action-lifecycle.md)
 
 ---
 
@@ -530,12 +530,12 @@ Former roadmap labels **v0.17 (Language Bindings)** and **v0.18 (AI Platform)** 
 
 **Theme:** Mature external workflow integration beyond the reference owlmake plugin.
 
-**UI phases:** **9**, **10**, **11**. Milestones: [Product Roadmap 2.0 phases 9 + 11](ui/PRODUCT_ROADMAP_2.0.md).
+**UI phases:** **9**, **10**, **11**. Milestones: [Product Roadmap 2.0 phases 9 + 11](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/PRODUCT_ROADMAP_2.0.md).
 
 | Area | Deliverables |
 |------|--------------|
 | **OntoCore** | Build API (compile/merge/materialize); Release API (version, tag, publish artifacts); Validation API (plug-in QC pipelines); plugin discovery and install from registry; semver-compatible plugin contracts |
-| **OntoUI** | **[9]** GitHub integration; semantic PR summaries (UI panel); merge checks ([COLLABORATION](ui/COLLABORATION.md)). **[10, 11]** Public plugin registry + marketplace UI; sample domain plugins ([PLUGIN_PLATFORM](ui/PLUGIN_PLATFORM.md), [PLUGIN_SPEC](design/PLUGIN_SPEC.md)). **[11]** Community templates. Workflow / QC status dashboard |
+| **OntoUI** | **[9]** GitHub integration; semantic PR summaries (UI panel); merge checks ([COLLABORATION](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/COLLABORATION.md)). **[10, 11]** Public plugin registry + marketplace UI; sample domain plugins ([PLUGIN_PLATFORM](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/PLUGIN_PLATFORM.md), [PLUGIN_SPEC](design/PLUGIN_SPEC.md)). **[11]** Community templates. Workflow / QC status dashboard |
 | **OntoCode** | Production-ready owlmake plugin integration; QC reports (HTML/Markdown/JSON) in IDE |
 | **Ecosystem** | Official GitHub Actions for ontology CI/CD; plugin marketplace; third-party workflow plugins |
 
@@ -547,12 +547,12 @@ Former roadmap labels **v0.17 (Language Bindings)** and **v0.18 (AI Platform)** 
 
 **Theme:** Shift from Protégé parity to ecosystem leadership.
 
-**UI phases:** **10**, **12**, plus collaboration items from **9**. Milestones: [Product Roadmap 2.0 phases 10–12](ui/PRODUCT_ROADMAP_2.0.md).
+**UI phases:** **10**, **12**, plus collaboration items from **9**. Milestones: [Product Roadmap 2.0 phases 10–12](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/PRODUCT_ROADMAP_2.0.md).
 
 | Area | Deliverables |
 |------|--------------|
 | **OntoCore** | Semantic workspace APIs (persistent semantic databases); plugin marketplace maturity; advanced graph analytics |
-| **OntoUI** | **[10]** OntoStudio Tauri app shell; shared React UI (OntoCode + OntoStudio); native graph performance; local AI support; enterprise packaging ([ONTOSTUDIO_DESKTOP](ui/ONTOSTUDIO_DESKTOP.md), [GRAPH_RENDERING_ARCHITECTURE](ui/GRAPH_RENDERING_ARCHITECTURE.md), [COMPONENT_LIBRARY](ui/COMPONENT_LIBRARY.md)). **[12]** Browser client; cloud sync; team workspaces; distributed reasoning; shared semantic canvases; governance workflows ([PLATFORM_ARCHITECTURE](ui/PLATFORM_ARCHITECTURE.md), [COLLABORATION](ui/COLLABORATION.md), [GRAPH_WORKSPACE](ui/GRAPH_WORKSPACE.md), [governance](guides/governance.md)). **[9, 12]** Live collaboration; ontology PR review; advanced visualization (large-graph layout, temporal diff) |
+| **OntoUI** | **[10]** OntoStudio Tauri app shell; shared React UI (OntoCode + OntoStudio); native graph performance; local AI support; enterprise packaging ([ONTOSTUDIO_DESKTOP](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/ONTOSTUDIO_DESKTOP.md), [GRAPH_RENDERING_ARCHITECTURE](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/GRAPH_RENDERING_ARCHITECTURE.md), [COMPONENT_LIBRARY](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/COMPONENT_LIBRARY.md)). **[12]** Browser client; cloud sync; team workspaces; distributed reasoning; shared semantic canvases; governance workflows ([PLATFORM_ARCHITECTURE](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/PLATFORM_ARCHITECTURE.md), [COLLABORATION](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/COLLABORATION.md), [GRAPH_WORKSPACE](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/GRAPH_WORKSPACE.md), [governance](guides/governance.md)). **[9, 12]** Live collaboration; ontology PR review; advanced visualization (large-graph layout, temporal diff) |
 | **OntoCode** | AI-assisted ontology engineering (modeling suggestions, axiom completion); live collaboration; ontology review in pull requests |
 | **Ecosystem** | Enterprise governance tooling; knowledge graph tooling integrations; documentation generators via plugin APIs |
 

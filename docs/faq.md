@@ -73,9 +73,9 @@ Since **v0.10**, the language server indexes **all workspace folders** on open. 
 
 **`failed to start language server`**
 
-- Trust the workspace.
-- Uninstall duplicate OntoCode versions.
-- Set `ontocode.lspPath` to a local `ontocore-lsp` binary (`cargo install ontocore-lsp`).
+- Check **Output → OntoCore Language Server** and uninstall duplicate OntoCode versions.
+- OntoCode’s **bundled** language server works in trusted and Restricted Mode. **Trust** only if you set custom `ontocode.lspPath` or `ontocode.robotPath`.
+- Set `ontocode.lspPath` to a local `ontocore-lsp` binary (`cargo install ontocore-lsp`) when debugging a custom build — trusted workspaces only.
 - See [vscode-install.md](vscode-install.md) and [troubleshooting.md](troubleshooting.md).
 
 **Does `ontocode.autoIndexOnOpen` do anything?**

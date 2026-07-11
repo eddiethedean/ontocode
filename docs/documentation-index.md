@@ -4,6 +4,8 @@ Master index for OntoCode / OntoCore planning, architecture, and user documentat
 
 **Current release:** v0.18.0 · **Canonical capabilities:** [What ships today](SHIPPED.md) · **Limits:** [Known limitations](known-limitations.md) · **Terms:** [Glossary](glossary.md)
 
+The public site navigation is defined in [`mkdocs.yml`](https://github.com/eddiethedean/ontocode/blob/main/mkdocs.yml). This page is a reading-order map — not a second nav.
+
 ## Recommended reading order
 
 ### Evaluators and adopters
@@ -35,9 +37,23 @@ Master index for OntoCode / OntoCore planning, architecture, and user documentat
 |-------|----------|---------|
 | **Shipped (this site)** | [SHIPPED.md](SHIPPED.md), guides, reference | What works today |
 | **Evaluate** | Vision, architecture, enterprise pack | Adoption decisions |
-| **Engineering (GitHub)** | [engineering.md](engineering.md) | Specs, ADRs, UI, prompts — not in public nav |
+| **Engineering (GitHub)** | [engineering.md](engineering.md) | Specs, ADRs, UI, prompts — not in public MkDocs search |
 
-Deep planning docs (`docs/ui/`, `docs/platform/`, `docs/cursor-prompts/`, `docs/PROTEGE_REVERSE_ENGINEERING/`) remain in the repository and are linked from [Engineering docs (GitHub)](engineering.md).
+Deep planning docs (`docs/ui/`, `docs/platform/`, `docs/cursor-prompts/`, `docs/PROTEGE_REVERSE_ENGINEERING/`) remain in the repository and are linked from [Engineering docs (GitHub)](engineering.md). They are **excluded from the public MkDocs build**.
+
+---
+
+## Site map (public)
+
+| Section | Start here |
+|---------|------------|
+| **Get started** | [start.md](start.md) → [first-success](guides/first-success.md) or [getting-started](getting-started.md) |
+| **Use OntoCode** | [Feature tour](ontocode/feature-tour.md) |
+| **Use OntoCore** | [OntoCore overview](ontocore/index.md) · [Examples](examples/index.md) |
+| **Reference** | [CLI](cli-reference.md) · [Rust API](ontocore/rust-api.md) · [LSP API](lsp-api.md) · [docs.rs ontocore](https://docs.rs/ontocore) |
+| **Evaluate** | [Architecture](architecture.md) · [Enterprise eval](guides/enterprise-eval.md) |
+| **Help** | [FAQ](faq.md) · [Troubleshooting](troubleshooting.md) · [Migrations](migration/README.md) |
+| **Contribute** | [Contributing](contributing.md) · [Engineering](engineering.md) |
 
 ---
 

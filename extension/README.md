@@ -177,11 +177,13 @@ More detail: [Installation & troubleshooting](https://ontocode-vs.readthedocs.io
 
 ## What's included in v0.18.0
 
-**New in v0.17:** Protégé-shell menus, toolbars, and dialogs; named perspectives and layout persistence; command registry / workspace UI state via LSP.
+**New in v0.18:** Protégé Desktop parity gate — distinct reasoner **Start / Synchronize / Classify / Consistency**, client-side **Stop** cancel, explanation **stale** detection, layout **reopen-with-context**, expanded Protégé round-trip fixtures. See [What's new in v0.18](https://ontocode-vs.readthedocs.io/en/latest/migration/v0.18/).
+
+**From v0.17:** Protégé-shell menus, toolbars, and dialogs; named perspectives and layout persistence; command registry / workspace UI state via LSP.
 
 **Also in recent minors:** plugin preferences pages and context actions (v0.16); plugin `ui.commands` via LSP `ontocore/runPlugin`; **Reload Imports** and **Reset Layout**.
 
-**Shipped:** explorer; **React** entity inspector (panel routing fix), graph panels, Query Workbench, Manchester editor, Refactor Preview, **Manage Imports**, and **Semantic Diff** panel; workspace refactor (rename IRI, migrate namespace, move, extract); EL/RL/RDFS/DL/auto reasoner (OntoLogos 1.x); **Turtle and OBO write-back** (engine v0.12; inspector v0.13); diagnostics with **quick fixes**; Turtle **completion**; LSP navigation (hover, go-to-definition, find references, rename); multi-root workspaces; optional index disk cache; **plugin host** (`ontocore plugins`, workflow scaffold, inspector plugin cards, dockable views); [Open VSX](https://open-vsx.org/extension/ontocode/ontocode) for Cursor.
+**Shipped:** explorer; **React** entity inspector, graph panels, Query Workbench, Manchester editor, Refactor Preview, **Manage Imports**, **Semantic Diff**, and **Reasoner / Explanation** panels; workspace refactor (rename IRI, migrate namespace, move, extract); EL/RL/RDFS/DL/auto reasoner (OntoLogos 1.x); **Turtle and OBO write-back**; diagnostics with **quick fixes**; Turtle **completion**; LSP navigation (hover, go-to-definition, find references, rename); multi-root workspaces; optional index disk cache; **plugin host** (`ontocore plugins`, workflow scaffold, inspector plugin cards, dockable views); [Open VSX](https://open-vsx.org/extension/ontocode/ontocode) for Cursor.
 
 **Planned:** stable plugin ecosystem API and full owlmake integration (**v1.0**). Full Protégé parity (OWL/XML write-back) is a **v1.0** goal — see [Protégé parity matrix](https://ontocode-vs.readthedocs.io/en/latest/design/PROTEGE_PARITY/).
 

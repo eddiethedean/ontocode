@@ -16,6 +16,7 @@ Upgrade notes between OntoCode / OntoCore releases.
 | v0.14 → v0.15 | [Migration v0.14 → v0.15](v0.15.md) — plugin permissions, UI views, explanation alternatives, graph modes |
 | v0.15 → v0.16 | [Migration v0.15 → v0.16](v0.16.md) — plugin preferences, context actions, imports and layout polish |
 | v0.16 → v0.17 | [Migration v0.16 → v0.17](v0.17.md) — menus, dialogs, keyboard workflows, layouts, and perspectives |
+| v0.17 → v0.18 | [Migration v0.17 → v0.18](v0.18.md) — Protégé Desktop parity gate, reasoner cancel, stale explanations, layout reopen |
 
 Pre-1.0: library APIs, LSP JSON, and SQL virtual table columns may change between minor releases. See [API stability](../guides/api-stability.md) and [workspace limits](../workspace-limits.md).
 

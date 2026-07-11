@@ -1,6 +1,6 @@
 # Migrating from Protégé — first week
 
-This guide helps ontology teams adopt OntoCode **v0.18** alongside or instead of [Protégé](https://protege.stanford.edu/). For a capability comparison, see [Protégé vs OntoCode](protege-decision.md), [What ships today](../SHIPPED.md), and the [v0.18 Desktop parity assessment](../PROTEGE_REVERSE_ENGINEERING/ONTOCODE_PARITY/ONTOCODE_0.18_PROTEGE_PARITY_ASSESSMENT.md).
+This guide helps ontology teams adopt OntoCode **v0.18** alongside or instead of [Protégé](https://protege.stanford.edu/). For a capability comparison, see [Protégé vs OntoCode](protege-decision.md), [What ships today](../SHIPPED.md), and the [v0.18 Desktop parity assessment on GitHub](https://github.com/eddiethedean/ontocode/blob/main/docs/PROTEGE_REVERSE_ENGINEERING/ONTOCODE_PARITY/ONTOCODE_0.18_PROTEGE_PARITY_ASSESSMENT.md).
 
 ## Before you start
 

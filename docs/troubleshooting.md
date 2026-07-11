@@ -49,9 +49,9 @@ flowchart TD
 
 ## VS Code: language server failed to start
 
-1. **Trust** the workspace (Restricted Mode blocks custom `ontocode.lspPath`).
+1. Check **Output → OntoCore Language Server** for the exact error.
 2. Uninstall duplicate OntoCode extension versions.
-3. Check **Output → OntoCore Language Server** for the exact error.
+3. OntoCode’s **bundled** language server works in trusted and Restricted Mode. **Trust** the workspace only if you set custom `ontocode.lspPath` or `ontocode.robotPath` (Restricted Mode ignores those settings).
 4. Set `ontocode.lspPath` to a local `ontocore-lsp` binary (`cargo install ontocore-lsp`) — trusted workspaces only.
 5. See [Install VS Code](vscode-install.md#troubleshooting).
 
@@ -127,7 +127,7 @@ Indexing may fail above [workspace limits](workspace-limits.md) (file count, siz
 | Problem | What to try |
 |---------|-------------|
 | Semantic diff: `no git repository` | Open a git checkout; or use CLI `ontocore diff --left-ref ./a --right-ref ./b` |
-| Semantic diff panel empty | Trust workspace; run **Index Workspace**; see [Semantic diff](ontocode/semantic-diff.md) |
+| Semantic diff panel empty | Run **Index Workspace**; see [Semantic diff](ontocode/semantic-diff.md) |
 | Graph commands missing | Run **Index Workspace** first — [Graph view](ontocode/graph-view.md) |
 | Cannot edit `.obo` in inspector | Confirm OntoCode **v0.12.0+**; entity must be in an indexed `.obo` file — [OBO guide](guides/obo-workflow.md) |
 | `robot` not found | Install Java + ROBOT; set `ontocode.robotPath` — [ROBOT guide](guides/robot-interop.md) |
@@ -136,7 +136,7 @@ Indexing may fail above [workspace limits](workspace-limits.md) (file count, siz
 
 | Problem | What to try |
 |---------|-------------|
-| Reasoner command missing or greyed out | Trust workspace; run **Index Workspace** first |
+| Reasoner command missing or greyed out | Run **Index Workspace** first; Trust only if using custom `lspPath` |
 | `OntoLogos` / classify errors | Confirm ontology fits [workspace limits](workspace-limits.md); try lighter profile (`el`, `rl`, `rdfs`) |
 | `dl` or `auto` profile fails | DL requires supported constructs; check Output panel; try `el` for EL-only ontologies; see [Reasoner guide](guides/reasoner.md) |
 | Reasoner runs but no inferred edges | Run **OntoCode: Run Reasoner**, then **Set Hierarchy Mode** → inferred or combined |

@@ -13,7 +13,7 @@
 >
 > **Contributor crate layout:** [Implementation architecture](docs/design/ARCHITECTURE.md) (internal modules, not a user capability list).
 >
-> **v0.17 ships today:** OntoCode (VS Code), OntoCore (CLI/LSP/library), Turtle + OBO write-back, property chain editing, OWL/XML read-only catalog, DL explanations (with alternatives and staleness), semantic diff, incremental indexing, Ontologos reasoning, ROBOT CLI wrappers, **plugin host** (manifests, permissions, UI views/commands/**preferences/context actions**, reference validators/exporters, CLI/LSP hooks, owlmake workflow scaffold), **graph asserted/inferred/combined modes**, **imports reload + layout reset**.
+> **v0.18 ships today:** OntoCode (VS Code), OntoCore (CLI/LSP/library), Turtle + OBO write-back, property chain editing, OWL/XML read-only catalog, DL explanations (with alternatives and staleness), semantic diff, incremental indexing, Ontologos reasoning, ROBOT CLI wrappers, **plugin host** (manifests, permissions, UI views/commands/**preferences/context actions**, reference validators/exporters, CLI/LSP hooks, owlmake workflow scaffold), **graph asserted/inferred/combined modes**, **imports reload + layout reset**, **reasoner cancel + distinct lifecycle**, **layout reopen-with-context**, Protégé Desktop parity gate.
 > **Planned v1.0 (not installable yet):** stable plugin API, language SDKs, MCP server, full owlmake integration.
 > **Planned post-1.0:** OntoStudio desktop, AI-native workflows — [UI roadmap mapping](docs/ui/ROADMAP_MAPPING.md).
 > Canonical capability matrix: [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/).

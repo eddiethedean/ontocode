@@ -56,7 +56,7 @@ describe("GraphPanel", () => {
       graph: { ...graphPayload, truncated: true },
     });
 
-    expect(await screen.findByText("Truncated")).toBeInTheDocument();
+    expect(await screen.findByText("Truncated (large ontology)")).toBeInTheDocument();
   });
 
   it("shows error empty state on host error", async () => {

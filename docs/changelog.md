@@ -4,6 +4,10 @@ Canonical source: [CHANGELOG.md on GitHub](https://github.com/eddiethedean/ontoc
 
 Migration guides: [Migration index](migration/README.md)
 
+## [0.18.0] - 2026-07-11
+
+**v0.18.0** — Protégé Desktop parity gate: distinct reasoner lifecycle + client cancel, explanation stale UX, layout reopen-with-context, expanded protege-roundtrip fixtures, migration guide + honest known gaps. See [CHANGELOG.md](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) and [migration/v0.18.md](migration/v0.18.md).
+
 ## [0.17.0] - 2026-07-10
 
 **v0.17.0** — Protégé shell parity: menus/toolbars/keybindings, command registry with enablement, DialogShell flows (new ontology, prefixes, metrics, about), webview tab persistence and named perspectives, help/error-log surfaces, plus OntoCore APIs for create/export, prefix/metadata patches, merge/replace, delete impact, and reasoner classify (Start/Sync/Classify/Consistency share one path; Stop is UI-only). Includes the v0.17 bugfix cluster and LSP honesty fixes ([#209](https://github.com/eddiethedean/ontocode/pull/209)). See [CHANGELOG.md](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) and [migration/v0.17.md](migration/v0.17.md).

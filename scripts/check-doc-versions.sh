@@ -710,8 +710,9 @@ else
 fi
 
 # Architecture banner must reference current release ships today
-check_file_contains "ARCHITECTURE.md" "v0\.17 ships today" "ARCHITECTURE.md v0.17 banner"
-check_file_contains "docs/architecture.md" "v0\.17 ships today" "docs/architecture.md v0.17 banner"
+MINOR="${VERSION%.*}"
+check_file_contains "ARCHITECTURE.md" "v${MINOR} ships today" "ARCHITECTURE.md v${MINOR} banner"
+check_file_contains "docs/architecture.md" "v${MINOR} ships today" "docs/architecture.md v${MINOR} banner"
 
 # Stale CLI alias notes
 if rg -q 'ontocore alias is planned' docs --glob '!**/migration/**' --glob '!**/design/**' 2>/dev/null; then

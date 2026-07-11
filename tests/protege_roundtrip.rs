@@ -1,7 +1,9 @@
-//! Protégé-style round-trip tests (OWL_AUTHORING_SPEC §5).
+//! Protégé-style round-trip tests (OWL_AUTHORING_SPEC §5) + v0.18 workflow fixtures.
 
 use ontocore::Workspace;
+use ontocore_core::DiagnosticCode;
 use ontocore_owl::{apply_patches_to_text, PatchOp};
+use ontocore_reasoner::{classify, ReasonerId, WorkspaceInputLoader};
 use std::collections::BTreeMap;
 use std::path::PathBuf;
 
@@ -48,6 +50,44 @@ fn protege_roundtrip_individuals_indexed() {
 }
 
 #[test]
+fn protege_roundtrip_people_classes_and_labels() {
+    let dir = roundtrip_dir();
+    let ws = Workspace::open(&dir).expect("open workspace");
+    let person = ws.catalog().entity_detail("http://example.org/people#Person").expect("Person");
+    assert_eq!(person.entity.short_name, "Person");
+    assert!(
+        !person.entity.labels.is_empty(),
+        "expected Person label, got {:?}",
+        person.entity.labels
+    );
+    assert!(ws.catalog().find_entity("http://example.org/people#worksFor").is_some());
+}
+
+#[test]
+fn protege_roundtrip_property_chains_indexed() {
+    let dir = roundtrip_dir();
+    let ws = Workspace::open(&dir).expect("open workspace");
+    let detail = ws
+        .catalog()
+        .entity_detail("http://example.org/chains#hasGrandparent")
+        .expect("hasGrandparent");
+    assert!(
+        detail.axioms.iter().any(|a| a.kind == "property_chain"),
+        "expected property_chain axiom, got {:?}",
+        detail.axioms.iter().map(|a| &a.kind).collect::<Vec<_>>()
+    );
+}
+
+#[test]
+fn protege_roundtrip_annotations_indexed() {
+    let dir = roundtrip_dir();
+    let ws = Workspace::open(&dir).expect("open workspace");
+    let detail = ws.catalog().entity_detail("http://example.org/ann#Concept").expect("Concept");
+    assert!(!detail.annotations.is_empty() || !detail.axioms.is_empty());
+    assert!(ws.catalog().find_entity("http://example.org/ann#seeAlso").is_some());
+}
+
+#[test]
 fn protege_roundtrip_owl_rdfxml_horned() {
     let dir = roundtrip_dir();
     let ws = Workspace::open(&dir).expect("open workspace");
@@ -63,4 +103,32 @@ fn protege_roundtrip_owx_horned() {
         .entity_detail("http://example.org/org#Department")
         .expect("Department from example.owx");
     assert_eq!(detail.entity.short_name, "Department");
+}
+
+#[test]
+fn protege_workflow_classify_people_el() {
+    let dir = roundtrip_dir();
+    let input = WorkspaceInputLoader::new(&dir).load().expect("load reasoner input");
+    let result = classify(ReasonerId::El, &input, false).expect("classify");
+    assert!(result.consistent, "people fixture should be consistent");
+    assert!(!input.content_hash.is_empty());
+}
+
+#[test]
+fn protege_workflow_broken_import_fixture_diagnosed() {
+    let fixtures = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/diagnostics");
+    let broken = fixtures.join("lint-broken-import.ttl");
+    if !broken.exists() {
+        return;
+    }
+    let ws = Workspace::open(&fixtures).expect("open diagnostics fixtures");
+    let diags = ws.diagnostics();
+    assert!(
+        diags.iter().any(|d| {
+            matches!(d.code, DiagnosticCode::BrokenImport)
+                || d.message.to_lowercase().contains("import")
+        }),
+        "expected broken import diagnostic, got {:?}",
+        diags.iter().map(|d| (&d.code, &d.message)).collect::<Vec<_>>()
+    );
 }

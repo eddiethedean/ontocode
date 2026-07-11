@@ -7,6 +7,7 @@ import {
   parseRunQueryMessage,
   parseSaveQueryMessage,
 } from "./messages";
+import { rememberPanelRestoreState } from "./layoutPersistence";
 import {
   SQL_TABLES,
   exportResultCsv,
@@ -42,6 +43,10 @@ export class QueryWorkbenchPanel {
   }
 
   public static async show(context: vscode.ExtensionContext): Promise<QueryWorkbenchPanel> {
+    void rememberPanelRestoreState("ontocodeQueryWorkbench", {
+      command: "ontocode.openQueryWorkbench",
+      title: "OntoCode Query Workbench",
+    });
     if (QueryWorkbenchPanel.current) {
       QueryWorkbenchPanel.current.host.panel.reveal(vscode.ViewColumn.Beside);
       await QueryWorkbenchPanel.current.bootstrap();

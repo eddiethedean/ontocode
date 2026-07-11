@@ -2,6 +2,7 @@ import * as path from "path";
 import * as vscode from "vscode";
 import {
   applyAxiomPatch,
+  cancelActiveReasonerRequest,
   createOntology,
   exportOntology,
   getCatalogSnapshot,
@@ -144,14 +145,53 @@ export function registerV017Commands(
   command("ontocode.openPreferences", async () => {
     const choice = await vscode.window.showQuickPick(
       [
-        { label: "OntoCode Settings", value: "settings" },
-        { label: "Plugin Preferences", value: "plugins" },
+        {
+          label: "General OntoCode Settings",
+          description: "Index, hierarchy, diagnostics, LSP",
+          value: "settings",
+        },
+        {
+          label: "Reasoner Settings",
+          description: "Default profile and auto-detect",
+          value: "reasoner",
+        },
+        {
+          label: "Query Settings",
+          description: "History limit and workbench defaults",
+          value: "query",
+        },
+        {
+          label: "Plugin Preferences",
+          description: "Pages contributed by workspace plugins",
+          value: "plugins",
+        },
+        {
+          label: "Keyboard Shortcuts",
+          description: "OntoCode keybindings",
+          value: "keys",
+        },
       ],
-      { title: "OntoCode Preferences" }
+      { title: "OntoCode Preferences", matchOnDescription: true }
     );
-    if (choice?.value === "plugins") {
+    if (!choice) return;
+    if (choice.value === "plugins") {
       await vscode.commands.executeCommand("ontocode.plugins.openPreferences");
-    } else if (choice) {
+    } else if (choice.value === "keys") {
+      await vscode.commands.executeCommand(
+        "workbench.action.openGlobalKeybindings",
+        "ontocode"
+      );
+    } else if (choice.value === "reasoner") {
+      await vscode.commands.executeCommand(
+        "workbench.action.openSettings",
+        "@ext:ontocode.ontocode ontocode.reasoner"
+      );
+    } else if (choice.value === "query") {
+      await vscode.commands.executeCommand(
+        "workbench.action.openSettings",
+        "@ext:ontocode.ontocode ontocode.query"
+      );
+    } else {
       await vscode.commands.executeCommand(
         "workbench.action.openSettings",
         "@ext:ontocode.ontocode"
@@ -289,9 +329,11 @@ export function registerV017Commands(
     }
   });
   command("ontocode.stopReasoner", () => {
+    cancelActiveReasonerRequest();
+    ReasonerPanel.current?.cancelActiveRun();
     focusRelay.setReasoningRunning(false);
     void vscode.window.showInformationMessage(
-      "OntoCode: reasoner UI stopped; an in-flight server request cannot be cancelled"
+      "OntoCode: reasoner cancelled; late server results will be ignored"
     );
   });
   command("ontocode.configureReasoner", () =>
@@ -491,33 +533,80 @@ async function runEntityRefactor(
   await RefactorPreviewPanel.show(context.extensionUri, plan, request, refresh);
 }
 
-async function runReasoning(_action: string): Promise<RunReasonerResult | undefined> {
+async function runReasoning(action: string): Promise<RunReasonerResult | undefined> {
   const config = vscode.workspace.getConfiguration("ontocode");
   const profile = config.get<string>("reasoner.default", "el");
-  focusRelay.setReasoningState({
-    profile,
-    unsatisfiable: [],
-    lastRunAt: Date.now(),
-    running: true,
-    dirty: false,
-  });
-  try {
-    const result = await runReasoner({
-      profile,
-      auto_detect: config.get<boolean>("reasoner.autoProfile", true),
-    });
-    focusRelay.setReasoningState({
-      profile: result.profile_used,
-      unsatisfiable: result.unsatisfiable,
-      lastRunAt: Date.now(),
-      running: false,
-      dirty: false,
-    });
-    return result;
-  } catch (error) {
-    focusRelay.setReasoningRunning(false);
-    throw error;
+  const autoDetect = config.get<boolean>("reasoner.autoProfile", true);
+  const titles: Record<string, string> = {
+    start: "OntoCode: Starting reasoner",
+    synchronize: "OntoCode: Synchronizing reasoner",
+    classify: "OntoCode: Classifying ontology",
+    consistency: "OntoCode: Checking consistency",
+  };
+  const title = titles[action] ?? "OntoCode: Running reasoner";
+
+  if (action === "start") {
+    ReasonerPanel.show();
   }
+
+  return vscode.window.withProgress(
+    {
+      location: vscode.ProgressLocation.Notification,
+      title,
+      cancellable: true,
+    },
+    async (progress, token) => {
+      focusRelay.setReasoningState({
+        profile,
+        unsatisfiable: focusRelay.getReasoning()?.unsatisfiable ?? [],
+        lastRunAt: Date.now(),
+        running: true,
+        dirty: false,
+      });
+      try {
+        if (action === "synchronize") {
+          progress.report({ message: "Reindexing workspace…" });
+          await indexWorkspace();
+          if (token.isCancellationRequested) {
+            cancelActiveReasonerRequest();
+            focusRelay.setReasoningRunning(false);
+            return undefined;
+          }
+        }
+        progress.report({
+          message:
+            action === "consistency" ? "Checking consistency…" : "Classifying…",
+        });
+        const result = await runReasoner(
+          { profile, auto_detect: autoDetect },
+          token
+        );
+        if (token.isCancellationRequested) {
+          ReasonerPanel.current?.cancelActiveRun();
+          focusRelay.setReasoningRunning(false);
+          return undefined;
+        }
+        focusRelay.setReasoningState({
+          profile: result.profile_used,
+          unsatisfiable: result.unsatisfiable,
+          lastRunAt: Date.now(),
+          running: false,
+          dirty: false,
+        });
+        if (action === "start" || action === "classify" || action === "synchronize") {
+          ReasonerPanel.show();
+        }
+        void vscode.commands.executeCommand("ontocode.refreshExplorer");
+        return result;
+      } catch (error) {
+        focusRelay.setReasoningRunning(false);
+        if (token.isCancellationRequested) {
+          return undefined;
+        }
+        throw error;
+      }
+    }
+  );
 }
 
 const PANEL_CHOICES = [

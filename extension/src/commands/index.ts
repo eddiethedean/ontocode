@@ -502,6 +502,7 @@ export function registerCommands(
           cancellable: true,
         },
         async (_progress, token) => {
+          const { cancelActiveReasonerRequest } = await import("../lsp/client");
           const run = panel.runWithDefaults();
           await Promise.race([
             run,
@@ -510,9 +511,10 @@ export function registerCommands(
             }),
           ]);
           if (token.isCancellationRequested) {
+            cancelActiveReasonerRequest();
             panel.cancelActiveRun();
             void vscode.window.showWarningMessage(
-              "OntoCode: reasoner run cancelled (in-flight result will be ignored)"
+              "OntoCode: reasoner run cancelled (late server results will be ignored)"
             );
           }
           // Ensure we don't leave an unhandled rejection if cancel won the race.

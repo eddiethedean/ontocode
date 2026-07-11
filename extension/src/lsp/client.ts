@@ -226,7 +226,13 @@ export async function indexWorkspace(
     workspace_uri: uri,
     disk_cache: diskCache,
   });
-  return assertIndexWorkspaceResult(result) as IndexWorkspaceResult;
+  const indexed = assertIndexWorkspaceResult(result) as IndexWorkspaceResult;
+  const { focusRelay } = await import("../focus/focusRelay");
+  focusRelay.setCatalogFingerprint({
+    indexedAt: indexed.indexed_at,
+    contentHash: focusRelay.getCatalogFingerprint()?.contentHash,
+  });
+  return indexed;
 }
 
 async function pickWorkspaceFolderUri(): Promise<string | undefined> {
@@ -385,11 +391,46 @@ export async function parseManchester(
   return assertParseManchesterResult(result);
 }
 
+/** Active reasoner RPC cancellation (Stop / progress Cancel). */
+let reasonerCancelSource: vscode.CancellationTokenSource | undefined;
+
+export function cancelActiveReasonerRequest(): void {
+  reasonerCancelSource?.cancel();
+  reasonerCancelSource?.dispose();
+  reasonerCancelSource = undefined;
+}
+
+export function isReasonerRequestActive(): boolean {
+  return reasonerCancelSource !== undefined;
+}
+
 export async function runReasoner(
-  params: RunReasonerParams
+  params: RunReasonerParams,
+  token?: vscode.CancellationToken
 ): Promise<RunReasonerResult> {
-  const result = await ontcoreRequest<unknown>("ontocore/runReasoner", params);
-  return assertRunReasonerResult(result);
+  cancelActiveReasonerRequest();
+  const source = new vscode.CancellationTokenSource();
+  reasonerCancelSource = source;
+  if (token) {
+    if (token.isCancellationRequested) {
+      source.cancel();
+    } else {
+      token.onCancellationRequested(() => source.cancel());
+    }
+  }
+  try {
+    const result = await ontcoreRequest<unknown>(
+      "ontocore/runReasoner",
+      params,
+      source.token
+    );
+    return assertRunReasonerResult(result);
+  } finally {
+    if (reasonerCancelSource === source) {
+      reasonerCancelSource = undefined;
+    }
+    source.dispose();
+  }
 }
 
 export async function getExplanation(
@@ -399,7 +440,13 @@ export async function getExplanation(
     "ontocore/getExplanation",
     params
   );
-  return assertGetExplanationResult(result);
+  const explained = assertGetExplanationResult(result);
+  const { focusRelay } = await import("../focus/focusRelay");
+  focusRelay.setCatalogFingerprint({
+    indexedAt: explained.indexed_at,
+    contentHash: explained.content_hash,
+  });
+  return explained;
 }
 
 export async function getGraph(params: GetGraphParams): Promise<GetGraphResult> {
@@ -488,8 +535,15 @@ function formatOntocoreRpcError(err: unknown): Error {
   return new Error(String(err));
 }
 
-async function ontcoreRequest<T>(method: string, params: unknown): Promise<T> {
+async function ontcoreRequest<T>(
+  method: string,
+  params: unknown,
+  token?: vscode.CancellationToken
+): Promise<T> {
   try {
+    if (token) {
+      return await requireClient().sendRequest<T>(method, params, token);
+    }
     return await requireClient().sendRequest<T>(method, params);
   } catch (err) {
     throw formatOntocoreRpcError(err);

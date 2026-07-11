@@ -57,8 +57,8 @@ Maintainer checklist for publishing crates, binaries, and the VS Code extension.
 Push a tag matching `[workspace.package].version` in `Cargo.toml`:
 
 ```bash
-git tag v0.17.0   # must match [workspace.package].version in Cargo.toml
-git push origin v0.17.0
+git tag v0.18.0   # must match [workspace.package].version in Cargo.toml
+git push origin v0.18.0
 ```
 
 The [release workflow on GitHub](https://github.com/eddiethedean/ontocode/blob/main/.github/workflows/release.yml):

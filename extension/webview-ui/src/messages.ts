@@ -363,6 +363,7 @@ export type WebviewMessage =
   | { type: "runQuery"; mode: "sql" | "sparql"; text: string; runId: number }
   | { type: "saveQuery"; name: string; mode: "sql" | "sparql"; text: string }
   | { type: "exportQueryResult"; format: "csv" | "json"; runId?: number }
+  | { type: "exportGraph"; format: "json" | "csv"; payload: string; suggestedName?: string }
   | { type: "validateManchester"; expression: string; axiomKind: string; seq: number }
   | { type: "applyManchester"; expression: string; axiomKind: string; previewOnly: boolean }
   | { type: "copyMarkdown" }

@@ -7,7 +7,7 @@ Install the [VS Code extension](https://marketplace.visualstudio.com/items?itemN
 **Editable today:** Turtle (`.ttl`) and OBO (`.obo`). Other formats index and query as read-only — see [Known limitations](https://ontocode-vs.readthedocs.io/en/latest/known-limitations/).
 **Catalog SQL (subset):** not full SQL — prefer SPARQL for graph patterns.
 
-**Current release: v0.17.0** · [10-minute tutorial](https://ontocode-vs.readthedocs.io/en/latest/guides/first-success/) · [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) · [Changelog](CHANGELOG.md) · [Docs](https://ontocode-vs.readthedocs.io/en/latest/)
+**Current release: v0.18.0** · [10-minute tutorial](https://ontocode-vs.readthedocs.io/en/latest/guides/first-success/) · [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) · [Changelog](CHANGELOG.md) · [Docs](https://ontocode-vs.readthedocs.io/en/latest/)
 
 [![CI](https://github.com/eddiethedean/ontocode/actions/workflows/ci.yml/badge.svg)](https://github.com/eddiethedean/ontocode/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue)](https://github.com/eddiethedean/ontocode/blob/main/LICENSE-MIT)

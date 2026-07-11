@@ -259,6 +259,7 @@ export type WebviewMessage =
   | { type: "runQuery"; mode: "sql" | "sparql"; text: string; runId: number }
   | { type: "saveQuery"; name: string; mode: "sql" | "sparql"; text: string }
   | { type: "exportQueryResult"; format: "csv" | "json"; runId?: number }
+  | { type: "exportGraph"; format: "json" | "csv"; payload: string; suggestedName?: string }
   | { type: "validateManchester"; expression: string; axiomKind: string; seq: number }
   | { type: "applyManchester"; expression: string; axiomKind: string; previewOnly: boolean }
   | { type: "copyMarkdown" }
@@ -320,6 +321,12 @@ export function isWebviewMessage(data: unknown): data is WebviewMessage {
       return (
         (msg.format === "csv" || msg.format === "json") &&
         (msg.runId === undefined || typeof msg.runId === "number")
+      );
+    case "exportGraph":
+      return (
+        (msg.format === "csv" || msg.format === "json") &&
+        typeof msg.payload === "string" &&
+        (msg.suggestedName === undefined || typeof msg.suggestedName === "string")
       );
     case "copyMarkdown":
     case "jumpToSource":

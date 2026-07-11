@@ -1,6 +1,6 @@
-# Known limitations (v0.17)
+# Known limitations (v0.18)
 
-Honest limits for evaluators and new users. Capability matrix: [What ships today](SHIPPED.md).
+Honest limits for evaluators and new users. Capability matrix: [What ships today](SHIPPED.md). Desktop parity gate: [v0.18 assessment](PROTEGE_REVERSE_ENGINEERING/ONTOCODE_PARITY/ONTOCODE_0.18_PROTEGE_PARITY_ASSESSMENT.md).
 
 ## Editable formats
 
@@ -31,20 +31,25 @@ Plugin host **MVP shipped** (manifest, permissions, views, preferences, context 
 
 ## API stability (pre-1.0)
 
-Published crates are **0.17.x**. Library APIs, LSP JSON, and SQL table columns may change between minor releases until v1.0. Pin in CI: `cargo install ontocore-cli --locked --version 0.17.0`.
+Published crates are **0.18.x**. Library APIs, LSP JSON, and SQL table columns may change between minor releases until v1.0. Pin in CI: `cargo install ontocore-cli --locked --version 0.18.0`.
 
 ## Reasoning
 
-EL / RL / RDFS / DL classification ships via **Ontologos**. Explanations are **EL-first**; DL clash traces are partial. In VS Code, Start / Synchronize / Classify / Consistency share one classify path; Stop clears UI state only. See [Reasoner guide](guides/reasoner.md).
+EL / RL / RDFS / DL classification ships via **Ontologos**. Explanations are **EL-first**; DL clash traces are partial. Start / Synchronize / Classify / Consistency are distinct client workflows; **Stop** cancels the in-flight client request and ignores late results (the server may still finish CPU-bound classify). See [Reasoner guide](guides/reasoner.md).
 
 ## Layout persistence
 
-Webview **tabs** survive VS Code reload via serializers; transient panel payloads (selected entity, query text, refactor plan) are **not** restored — reopen panels from OntoCode commands. Named perspectives open a fixed panel set.
+Webview **tabs** survive VS Code reload. Restored tabs offer **Reopen panel** using the last saved command + context. Full Protégé-style dock/layout serialization remains a **v1.0** IDE-shell item. Named perspectives open a fixed panel set.
+
+## Large ontologies
+
+Graphs may be **truncated** (badge in the Graph panel). Prefer narrower search, lower neighborhood depth, or asserted-only mode. See [workspace limits](workspace-limits.md).
 
 ## When not to use OntoCode today
 
 - You need **in-place OWL/XML or RDF/XML write-back** — use Turtle/OBO or Protégé.
 - You need **full SQL analytics** — use SPARQL or an external store.
 - You need a **stable plugin marketplace API** without scaffolding — wait for v1.0 or keep Protégé plugins.
+- You need **WebProtégé collaboration** — out of scope until post-1.0.
 
-More: [Start here](start.md) · [Protégé decision](guides/protege-decision.md) · [FAQ](faq.md)
+More: [Start here](start.md) · [Protégé migration](guides/protege-migration.md) · [Protégé decision](guides/protege-decision.md) · [FAQ](faq.md)

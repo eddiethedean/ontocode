@@ -5,7 +5,7 @@
 
 **Ontology IDE for VS Code** — powered by **OntoCore** (`ontocore-lsp` language server).
 
-**Current release: v0.17.0** — [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) · [Known limitations](https://ontocode-vs.readthedocs.io/en/latest/known-limitations/) · [What's new in v0.17](https://ontocode-vs.readthedocs.io/en/latest/migration/v0.17/)
+**Current release: v0.18.0** — [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) · [Known limitations](https://ontocode-vs.readthedocs.io/en/latest/known-limitations/) · [What's new in v0.18](https://ontocode-vs.readthedocs.io/en/latest/migration/v0.18/)
 
 > **New here?** **[First success (~10 min)](https://ontocode-vs.readthedocs.io/en/latest/guides/first-success/)** · [Migrating from Protégé?](https://ontocode-vs.readthedocs.io/en/latest/guides/protege-migration/) · [Feature tour](https://ontocode-vs.readthedocs.io/en/latest/ontocode/feature-tour/) · [FAQ](https://ontocode-vs.readthedocs.io/en/latest/faq/)
 
@@ -175,7 +175,7 @@ More detail: [Installation & troubleshooting](https://ontocode-vs.readthedocs.io
 
 ---
 
-## What's included in v0.17.0
+## What's included in v0.18.0
 
 **New in v0.17:** Protégé-shell menus, toolbars, and dialogs; named perspectives and layout persistence; command registry / workspace UI state via LSP.
 

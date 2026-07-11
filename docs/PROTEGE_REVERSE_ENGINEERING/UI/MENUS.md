@@ -514,7 +514,7 @@ Settings may include:
 - [x] Inferred hierarchy views
 - [x] Explanation integration
 - [x] Reasoner configuration
-- [x] Long-running task cancellation
+- [x] Long-running task cancellation (v0.18: client cancel + ignore late results; in-flight classify may still finish on server)
 
 ## OntoCode Modernization Opportunities
 
@@ -640,7 +640,7 @@ Some configurations may allow saved workspace layouts or perspectives.
 - [x] Show/hide panels
 - [x] Reset layout
 - [x] Switch tabs
-- [x] Persist layout
+- [x] Persist layout (v0.18: restore reopen commands + panel context)
 - [x] Restore default workspace
 - [x] Plugin-contributed views
 - [x] Floating and docked panel support
@@ -1035,7 +1035,7 @@ Benefits:
 
 - [x] Select reasoner
 - [x] Start reasoner
-- [x] Stop reasoner
+- [x] Stop reasoner (v0.18: cancel in-flight client request)
 - [x] Synchronize reasoner
 - [x] Classify
 - [x] Check consistency
@@ -1056,8 +1056,8 @@ Benefits:
 - [x] Hide views
 - [x] Reset layout
 - [x] Switch tabs
-- [x] Save layout
-- [x] Restore layout
+- [x] Save layout (v0.18: persist reopen command + context per view type)
+- [x] Restore layout (v0.18: deserialize reopens panel with saved context)
 
 ## Help
 

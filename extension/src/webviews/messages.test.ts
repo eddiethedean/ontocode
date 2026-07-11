@@ -17,6 +17,15 @@ describe("isWebviewMessage", () => {
       true
     );
     assert.equal(isWebviewMessage({ type: "copyMarkdown" }), true);
+    assert.equal(
+      isWebviewMessage({
+        type: "exportGraph",
+        format: "json",
+        payload: "{}",
+        suggestedName: "g.json",
+      }),
+      true
+    );
   });
 
   it("rejects applyPatch with empty patches", () => {

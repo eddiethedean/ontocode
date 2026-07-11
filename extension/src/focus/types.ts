@@ -24,3 +24,9 @@ export interface ReasoningStatePayload {
   /** True while a reasoner run is in-flight. */
   running?: boolean;
 }
+
+/** Catalog fingerprint used for explanation staleness checks. */
+export interface CatalogFingerprint {
+  contentHash?: string;
+  indexedAt: number;
+}

@@ -22,7 +22,7 @@ cargo install ontocore-lsp --locked
 - [Install VS Code](https://ontocode-vs.readthedocs.io/en/latest/vscode-install/)
 - [docs.rs](https://docs.rs/ontocore-lsp)
 
-**Current version: 0.17.0**
+**Current version: 0.18.0**
 
 ## License
 

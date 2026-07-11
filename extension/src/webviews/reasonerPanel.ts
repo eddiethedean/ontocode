@@ -6,6 +6,8 @@ import {
   AVAILABLE_PROFILES,
   summarizeResult,
 } from "./reasonerPanelLogic";
+import { rememberPanelRestoreState } from "./layoutPersistence";
+import { cancelActiveReasonerRequest } from "../lsp/client";
 
 export class ReasonerPanel {
   public static current: ReasonerPanel | undefined;
@@ -81,6 +83,10 @@ export class ReasonerPanel {
   }
 
   public static show(): ReasonerPanel {
+    void rememberPanelRestoreState("ontocodeReasoner", {
+      command: "ontocode.classifyOntology",
+      title: "OntoCode Reasoner",
+    });
     if (ReasonerPanel.current) {
       ReasonerPanel.current.panel.reveal(vscode.ViewColumn.Beside);
       return ReasonerPanel.current;
@@ -104,6 +110,7 @@ export class ReasonerPanel {
 
   /** Invalidate in-flight runs so late RPC results are ignored (#141). */
   public cancelActiveRun(): void {
+    cancelActiveReasonerRequest();
     this.runId += 1;
     this.postToWebview({ command: "syncRunId", runId: this.runId });
     const prev = focusRelay.getReasoning();
@@ -174,7 +181,7 @@ export class ReasonerPanel {
         `<option value="${p.id}" ${p.enabled ? "" : "disabled"} title="${p.hint ?? ""}">${p.label}${p.hint ? ` (${p.hint})` : ""}</option>`
     ).join("");
     return `<!DOCTYPE html>
-<html><head><meta charset="UTF-8" />
+<html lang="en"><head><meta charset="UTF-8" />
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline';" />
 <style>
 body { font-family: var(--vscode-font-family); padding: 12px; color: var(--vscode-foreground); }
@@ -185,16 +192,21 @@ select { margin-right: 8px; }
 section { margin-top: 12px; }
 ul { padding-left: 18px; }
 li button { font-size: 0.9em; }
+button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--vscode-focusBorder); outline-offset: 2px; }
 </style></head><body>
-<h2>Reasoner</h2>
-<label>Profile <select id="profile">${profiles}</select></label>
+<main aria-label="Reasoner panel">
+<h2 id="reasoner-heading">Reasoner</h2>
+<label for="profile">Profile <select id="profile" aria-labelledby="reasoner-heading">${profiles}</select></label>
 <label><input type="checkbox" id="auto" checked /> Profile warnings</label>
-<button id="run">Run Reasoner</button>
-<button id="inferred">Show Inferred Hierarchy</button>
-<div id="status"></div>
-<section><h3>Unsatisfiable</h3><ul id="unsat"></ul></section>
-<section><h3>Inferred Changes</h3><ul id="inferences"></ul></section>
-<section><h3>Warnings</h3><ul id="warnings"></ul></section>
+<div role="toolbar" aria-label="Reasoner actions">
+<button id="run" type="button">Run Reasoner</button>
+<button id="inferred" type="button">Show Inferred Hierarchy</button>
+</div>
+<div id="status" role="status" aria-live="polite"></div>
+<section aria-labelledby="unsat-heading"><h3 id="unsat-heading">Unsatisfiable</h3><ul id="unsat"></ul></section>
+<section aria-labelledby="inf-heading"><h3 id="inf-heading">Inferred Changes</h3><ul id="inferences"></ul></section>
+<section aria-labelledby="warn-heading"><h3 id="warn-heading">Warnings</h3><ul id="warnings"></ul></section>
+</main>
 <script>
 const vscode = acquireVsCodeApi();
 vscode.postMessage({ command: 'ready' });

@@ -1,16 +1,31 @@
 import * as vscode from "vscode";
 import { focusRelay } from "../focus/focusRelay";
 import { getExplanation } from "../lsp/client";
-import { resolveExplanationProfile } from "./explanationPanelLogic";
+import type { GetExplanationResult } from "../lsp/protocol";
+import {
+  isExplanationStale,
+  resolveExplanationProfile,
+} from "./explanationPanelLogic";
+import { rememberPanelRestoreState } from "./layoutPersistence";
 
 export class ExplanationPanel {
   public static current: ExplanationPanel | undefined;
   private readonly panel: vscode.WebviewPanel;
+  private classIri = "";
+  private profile = "el";
+  private lastResult: GetExplanationResult | undefined;
+  private unsubscribeCatalog?: () => void;
 
   private constructor(panel: vscode.WebviewPanel) {
     this.panel = panel;
     this.panel.onDidDispose(() => {
+      this.unsubscribeCatalog?.();
       ExplanationPanel.current = undefined;
+    });
+    this.unsubscribeCatalog = focusRelay.subscribeCatalog(() => {
+      if (this.lastResult) {
+        this.render(this.classIri, this.lastResult, this.profile);
+      }
     });
     this.panel.webview.onDidReceiveMessage(async (msg) => {
       if (!msg || typeof msg !== "object" || typeof msg.command !== "string") {
@@ -21,6 +36,9 @@ export class ExplanationPanel {
       }
       if (msg.command === "rerun") {
         await vscode.commands.executeCommand("ontocode.runReasoner");
+        if (this.classIri) {
+          await ExplanationPanel.show(this.classIri, this.profile);
+        }
       }
       if (msg.command === "openEntity" && typeof (msg as { iri?: unknown }).iri === "string") {
         await vscode.commands.executeCommand("ontocode.openEntity", (msg as { iri: string }).iri);
@@ -60,7 +78,23 @@ export class ExplanationPanel {
 
   private setContent(
     classIri: string,
-    result: import("../lsp/protocol").GetExplanationResult,
+    result: GetExplanationResult,
+    profile: string
+  ): void {
+    this.classIri = classIri;
+    this.profile = profile;
+    this.lastResult = result;
+    void rememberPanelRestoreState("ontocodeExplanation", {
+      command: "ontocode.showExplanation",
+      args: [classIri, profile],
+      title: `Explanation: ${classIri.split(/[#/]/).pop() ?? classIri}`,
+    });
+    this.render(classIri, result, profile);
+  }
+
+  private render(
+    classIri: string,
+    result: GetExplanationResult,
     profile: string
   ): void {
     const justifications = [
@@ -72,12 +106,16 @@ export class ExplanationPanel {
       })),
     ];
 
-    // Fresh getExplanation results are never stale (#148). Stale would only apply if we
-    // compared a previously shown fingerprint to a later catalog fingerprint without refetching.
-    const stale = false;
+    const catalog = focusRelay.getCatalogFingerprint();
+    const stale = isExplanationStale({
+      shownContentHash: result.content_hash,
+      shownIndexedAt: result.indexed_at,
+      currentContentHash: catalog?.contentHash ?? result.content_hash,
+      currentIndexedAt: catalog?.indexedAt ?? result.indexed_at,
+    });
 
     this.panel.webview.html = `<!DOCTYPE html>
-<html><head><meta charset="UTF-8" />
+<html lang="en"><head><meta charset="UTF-8" />
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline';" />
 <style>
 body { font-family: var(--vscode-font-family); padding: 12px; }
@@ -87,21 +125,24 @@ a:hover { text-decoration: underline; }
 .stale { background: var(--vscode-inputValidation-warningBackground); padding: 8px; border-radius: 6px; margin: 8px 0; }
 .row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .muted { opacity: 0.8; font-size: 12px; }
+button:focus-visible, select:focus-visible, a:focus-visible { outline: 2px solid var(--vscode-focusBorder); outline-offset: 2px; }
 </style></head><body>
-<h2>Explanation</h2>
+<main aria-label="Explanation panel">
+<h2 id="explanation-heading">Explanation</h2>
 <p><code>${escapeHtml(classIri)}</code></p>
-${stale ? `<div class="stale"><strong>Stale explanation</strong><div class="muted">Ontology or reasoner state changed since this explanation was generated. Re-generate to ensure correctness.</div></div>` : ""}
+${stale ? `<div class="stale" role="status" aria-live="polite"><strong>Stale explanation</strong><div class="muted">Ontology or reasoner state changed since this explanation was generated. Re-generate to ensure correctness.</div></div>` : ""}
 <div class="row">
   <label for="justification">Justification</label>
-  <select id="justification"></select>
+  <select id="justification" aria-labelledby="explanation-heading"></select>
   <span class="muted">profile=${escapeHtml(profile)} • indexed_at=${result.indexed_at} • content_hash=${escapeHtml(result.content_hash)}</span>
 </div>
-<ol id="steps"></ol>
-<pre id="text"></pre>
-<div class="row">
-  <button id="copy">Copy</button>
-  <button id="rerun">Re-run Reasoner</button>
+<ol id="steps" aria-label="Justification steps"></ol>
+<pre id="text" aria-label="Explanation text"></pre>
+<div class="row" role="toolbar" aria-label="Explanation actions">
+  <button id="copy" type="button">Copy</button>
+  <button id="rerun" type="button">Re-run Reasoner</button>
 </div>
+</main>
 <script>
 const vscode = acquireVsCodeApi();
 const justifications = ${JSON.stringify(justifications)};

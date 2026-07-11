@@ -37,7 +37,7 @@ After 1.0, the roadmap shifts from parity to modernization.
 | [Product Roadmap 2.0](ui/PRODUCT_ROADMAP_2.0.md) | UI phases with milestone acceptance criteria |
 | [Product design (UI)](ui/README.md) | Product design specification pack (UX, design system, OntoStudio target) |
 
-**Current release:** v0.17.0
+**Current release:** v0.18.0
 
 ---
 
@@ -420,11 +420,31 @@ See [migration/v0.16.md](migration/v0.16.md) and [SHIPPED.md](SHIPPED.md).
 
 ---
 
+### v0.17 — Menus/toolbars/dialog parity (shipped, partial)
+
+**Released:** v0.18.0
+
+See [v0.17 scope](design/v0.17_SCOPE.md), [migration/v0.17.md](migration/v0.17.md), and root [ROADMAP.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/ROADMAP.md).
+
+---
+
+### v0.18 — Protégé Desktop parity gate + migration readiness (shipped)
+
+**Released:** v0.18.0 (2026-07-11)
+
+**Theme:** Finish last-mile Desktop parity and ship a verifiable “Protégé not required” path before the 1.0 push.
+
+**Scope (docs/audit-first):** [v0.18_SCOPE.md](design/v0.18_SCOPE.md) · [0.18 parity assessment](PROTEGE_REVERSE_ENGINEERING/ONTOCODE_PARITY/ONTOCODE_0.18_PROTEGE_PARITY_ASSESSMENT.md)
+
+Canonical detail: root [ROADMAP.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/ROADMAP.md) § v0.18. See [migration/v0.18.md](migration/v0.18.md).
+
+---
+
 ## Planned releases (v1.0 → v1.2+)
 
 ---
 
-### Era E — Protégé replacement (v1.0)
+### Era F — Protégé replacement (v1.0)
 
 ### v1.0 — Protégé-competitive release (planned)
 

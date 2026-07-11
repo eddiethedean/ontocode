@@ -1,18 +1,26 @@
 import * as vscode from "vscode";
 import { appendError } from "../logging/errorLog";
+import {
+  DEFAULT_REOPEN,
+  PERSPECTIVES,
+  resolvePanelRestoreState,
+  type PanelRestoreState,
+  type Perspective,
+} from "./layoutPersistenceLogic";
 
-export interface Perspective {
-  name: string;
-  panels: string[];
-}
+export type { PanelRestoreState, Perspective };
+export { PERSPECTIVES };
 
 const PERSPECTIVE_KEY = "ontocode.perspectives";
+const PANEL_STATE_KEY = "ontocode.panelRestoreState";
 
-export const PERSPECTIVES: readonly Perspective[] = [
-  { name: "Modeling", panels: ["inspector", "query"] },
-  { name: "Reasoning", panels: ["reasoner", "explanation", "graph"] },
-  { name: "Review", panels: ["semanticDiff", "imports"] },
-];
+let extensionContext: vscode.ExtensionContext | undefined;
+
+export function bindLayoutPersistenceContext(
+  context: vscode.ExtensionContext
+): void {
+  extensionContext = context;
+}
 
 export async function persistPerspective(
   context: vscode.ExtensionContext,
@@ -40,46 +48,99 @@ export function loadPerspective(
   );
 }
 
-const SERIALIZED_VIEWS = [
-  "ontocodeInspector",
-  "ontocodeGraph",
-  "ontocodeQueryWorkbench",
-  "ontocodeImports",
-  "ontocodeReasoner",
-  "ontocodeRefactorPreview",
-  "ontocodeExplanation",
-  "ontocodeSemanticDiff",
-  "ontocodeManchesterEditor",
-] as const;
+export async function rememberPanelRestoreState(
+  viewType: string,
+  state: PanelRestoreState
+): Promise<void> {
+  if (!extensionContext) {
+    return;
+  }
+  const all =
+    extensionContext.workspaceState.get<Record<string, PanelRestoreState>>(
+      PANEL_STATE_KEY
+    ) ?? {};
+  all[viewType] = state;
+  await extensionContext.workspaceState.update(PANEL_STATE_KEY, all);
+}
+
+export function getPanelRestoreState(
+  context: vscode.ExtensionContext,
+  viewType: string
+): PanelRestoreState | undefined {
+  const all =
+    context.workspaceState.get<Record<string, PanelRestoreState>>(PANEL_STATE_KEY) ??
+    {};
+  return resolvePanelRestoreState(all, viewType);
+}
+
+const SERIALIZED_VIEWS = Object.keys(DEFAULT_REOPEN);
 
 export function registerWebviewPanelSerializers(
   context: vscode.ExtensionContext
 ): void {
+  bindLayoutPersistenceContext(context);
   for (const viewType of SERIALIZED_VIEWS) {
     context.subscriptions.push(
       vscode.window.registerWebviewPanelSerializer(viewType, {
         async deserializeWebviewPanel(panel): Promise<void> {
-          // Stateful panels need an ontology/entity/refactor payload before they can
-          // safely resume. Keep the tab and provide a useful recovery action.
-          panel.webview.html = restoredPanelHtml(viewType);
-          panel.webview.onDidReceiveMessage((message) => {
+          const restore = getPanelRestoreState(context, viewType);
+          panel.webview.html = restoredPanelHtml(viewType, restore);
+          panel.webview.onDidReceiveMessage(async (message) => {
             if (message?.command === "close") {
               panel.dispose();
+              return;
+            }
+            if (message?.command === "reopen" && restore?.command) {
+              try {
+                await vscode.commands.executeCommand(
+                  restore.command,
+                  ...(restore.args ?? [])
+                );
+                panel.dispose();
+              } catch (err) {
+                const detail = err instanceof Error ? err.message : String(err);
+                appendError(
+                  `Failed to restore ${viewType}: ${detail}`,
+                  "layout"
+                );
+                void vscode.window.showErrorMessage(
+                  `OntoCode: could not restore panel — ${detail}`
+                );
+              }
             }
           });
-          appendError(`Restored ${viewType} without transient panel state`, "layout");
+          appendError(
+            `Restored ${viewType}; reopen via ${restore?.command ?? "commands"}`,
+            "layout"
+          );
         },
       })
     );
   }
 }
 
-function restoredPanelHtml(viewType: string): string {
-  return `<!doctype html><html><body style="font-family:var(--vscode-font-family);padding:16px">
+function restoredPanelHtml(
+  viewType: string,
+  restore: PanelRestoreState | undefined
+): string {
+  const label = restore?.title ?? viewType;
+  const canReopen = Boolean(restore?.command);
+  return `<!doctype html><html lang="en"><body style="font-family:var(--vscode-font-family);padding:16px">
+<main aria-label="Restored OntoCode panel">
 <h2>OntoCode panel restored</h2>
-<p>The transient state for <code>${escapeHtml(viewType)}</code> is no longer available. Reopen the panel from the OntoCode commands.</p>
-<button id="close">Close</button>
-<script>const vscode=acquireVsCodeApi();document.getElementById('close').onclick=()=>vscode.postMessage({command:'close'});</script>
+<p>The previous session tab for <code>${escapeHtml(label)}</code> was recovered.</p>
+<p>${canReopen ? "Reopen to reload live ontology context." : "Reopen the panel from the OntoCode commands."}</p>
+<div role="toolbar" aria-label="Restore actions" style="display:flex;gap:8px;flex-wrap:wrap">
+${canReopen ? `<button id="reopen" type="button" autofocus>Reopen panel</button>` : ""}
+<button id="close" type="button">Close</button>
+</div>
+</main>
+<script>
+const vscode=acquireVsCodeApi();
+const reopen=document.getElementById('reopen');
+if(reopen){reopen.onclick=()=>vscode.postMessage({command:'reopen'});}
+document.getElementById('close').onclick=()=>vscode.postMessage({command:'close'});
+</script>
 </body></html>`;
 }
 

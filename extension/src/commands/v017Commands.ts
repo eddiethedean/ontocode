@@ -315,11 +315,11 @@ export function registerV017Commands(
     runEntityRefactor(context, "replace_entity", refresh)
   );
 
-  command("ontocode.startReasoner", () => runReasoning("start"));
-  command("ontocode.synchronizeReasoner", () => runReasoning("synchronize"));
-  command("ontocode.classifyOntology", () => runReasoning("classify"));
+  command("ontocode.startReasoner", () => runReasoning(context, "start"));
+  command("ontocode.synchronizeReasoner", () => runReasoning(context, "synchronize"));
+  command("ontocode.classifyOntology", () => runReasoning(context, "classify"));
   command("ontocode.checkConsistency", async () => {
-    const result = await runReasoning("consistency");
+    const result = await runReasoning(context, "consistency");
     if (result) {
       void vscode.window.showInformationMessage(
         result.consistent
@@ -378,7 +378,7 @@ export function registerV017Commands(
       })),
       { title: "Switch OntoCode Perspective" }
     );
-    if (picked) await openPerspective(picked.perspective);
+    if (picked) await openPerspective(context, picked.perspective);
   });
   command("ontocode.savePerspective", async () => {
     const name = await requiredInput("Perspective name");
@@ -394,7 +394,9 @@ export function registerV017Commands(
     });
   });
   for (const panel of PANEL_CHOICES) {
-    command(`ontocode.show${panel.commandSuffix}`, () => openPanel(panel.value));
+    command(`ontocode.show${panel.commandSuffix}`, () =>
+      openPanel(context, panel.value)
+    );
   }
 
   command("ontocode.showAbout", () => {
@@ -533,7 +535,10 @@ async function runEntityRefactor(
   await RefactorPreviewPanel.show(context.extensionUri, plan, request, refresh);
 }
 
-async function runReasoning(action: string): Promise<RunReasonerResult | undefined> {
+async function runReasoning(
+  context: vscode.ExtensionContext,
+  action: string
+): Promise<RunReasonerResult | undefined> {
   const config = vscode.workspace.getConfiguration("ontocode");
   const profile = config.get<string>("reasoner.default", "el");
   const autoDetect = config.get<boolean>("reasoner.autoProfile", true);
@@ -546,7 +551,7 @@ async function runReasoning(action: string): Promise<RunReasonerResult | undefin
   const title = titles[action] ?? "OntoCode: Running reasoner";
 
   if (action === "start") {
-    ReasonerPanel.show();
+    ReasonerPanel.show(context.extensionUri);
   }
 
   return vscode.window.withProgress(
@@ -594,7 +599,8 @@ async function runReasoning(action: string): Promise<RunReasonerResult | undefin
           dirty: false,
         });
         if (action === "start" || action === "classify" || action === "synchronize") {
-          ReasonerPanel.show();
+          const panel = ReasonerPanel.show(context.extensionUri);
+          panel.presentResult(result);
         }
         void vscode.commands.executeCommand("ontocode.refreshExplorer");
         return result;
@@ -619,13 +625,19 @@ const PANEL_CHOICES = [
   { label: "Imports", value: "imports", commandSuffix: "ImportsPanel" },
 ] as const;
 
-async function openPerspective(perspective: Perspective): Promise<void> {
-  for (const panel of perspective.panels) await openPanel(panel);
+async function openPerspective(
+  context: vscode.ExtensionContext,
+  perspective: Perspective
+): Promise<void> {
+  for (const panel of perspective.panels) await openPanel(context, panel);
 }
 
-async function openPanel(panel: string): Promise<void> {
+async function openPanel(
+  context: vscode.ExtensionContext,
+  panel: string
+): Promise<void> {
   if (panel === "reasoner") {
-    ReasonerPanel.show();
+    ReasonerPanel.show(context.extensionUri);
     return;
   }
   const commandByPanel: Record<string, string> = {

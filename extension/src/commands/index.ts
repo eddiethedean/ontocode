@@ -494,7 +494,7 @@ export function registerCommands(
       }
     ),
     vscode.commands.registerCommand("ontocode.runReasoner", async () => {
-      const panel = ReasonerPanel.show();
+      const panel = ReasonerPanel.show(context.extensionUri);
       await vscode.window.withProgress(
         {
           location: vscode.ProgressLocation.Notification,
@@ -567,7 +567,7 @@ export function registerCommands(
           return;
         }
         try {
-          await ExplanationPanel.show(classIri, profile);
+          await ExplanationPanel.show(context.extensionUri, classIri, profile);
         } catch (err) {
           const message = err instanceof Error ? err.message : String(err);
           void vscode.window.showErrorMessage(

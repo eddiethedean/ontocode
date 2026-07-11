@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { DialogShell } from "../components/DialogShell";
-import { Callout, Section } from "../components/ui";
+import { LoadingState, Section } from "../components/ui";
 import type { CatalogStats } from "../messages";
 import { getVsCodeApi } from "../vscodeApi";
 
@@ -54,7 +54,7 @@ export function MetricsPanel(): JSX.Element {
           </dl>
         </Section>
       ) : (
-        <Callout>Loading catalog statistics…</Callout>
+        <LoadingState label="Loading catalog statistics…" />
       )}
     </DialogShell>
   );

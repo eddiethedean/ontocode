@@ -266,11 +266,12 @@ export function GraphPanel(_props?: WorkspaceProps): JSX.Element {
             />
           </label>
           <ButtonBar>
-            <button type="button" onClick={requestGraph}>
+            <button type="button" aria-label="Refresh graph" onClick={requestGraph}>
               Refresh graph
             </button>
             <button
               type="button"
+              aria-label="Expand graph depth"
               onClick={() => {
                 setDepth((d) => Math.min(5, d + 1));
               }}
@@ -279,6 +280,7 @@ export function GraphPanel(_props?: WorkspaceProps): JSX.Element {
             </button>
             <button
               type="button"
+              aria-label="Copy graph JSON"
               onClick={async () => {
                 if (!graph) {
                   return;
@@ -291,6 +293,7 @@ export function GraphPanel(_props?: WorkspaceProps): JSX.Element {
             </button>
             <button
               type="button"
+              aria-label="Export graph as JSON"
               onClick={() => {
                 if (!graph) {
                   return;
@@ -307,6 +310,7 @@ export function GraphPanel(_props?: WorkspaceProps): JSX.Element {
             </button>
             <button
               type="button"
+              aria-label="Export graph as CSV"
               onClick={() => {
                 if (!graph) {
                   return;

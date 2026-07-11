@@ -54,6 +54,18 @@ describe("App", () => {
     expect(screen.getByText("No graph data")).toBeInTheDocument();
   });
 
+  it("routes to reasoner panel", () => {
+    setPanelQuery("reasoner");
+    renderApp();
+    expect(screen.getByRole("heading", { name: "Reasoner" })).toBeInTheDocument();
+  });
+
+  it("routes to explanation panel", () => {
+    setPanelQuery("explanation");
+    renderApp();
+    expect(screen.getByRole("status")).toHaveTextContent("Loading explanation…");
+  });
+
   it("falls back to smoke for unknown panel param", () => {
     setPanelQuery("unknown");
     renderApp();

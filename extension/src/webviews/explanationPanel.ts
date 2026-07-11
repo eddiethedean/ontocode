@@ -7,50 +7,40 @@ import {
   resolveExplanationProfile,
 } from "./explanationPanelLogic";
 import { rememberPanelRestoreState } from "./layoutPersistence";
+import type { ExplanationPayload, WebviewMessage } from "./messages";
+import { PanelHost } from "./panelHost";
 
 export class ExplanationPanel {
   public static current: ExplanationPanel | undefined;
-  private readonly panel: vscode.WebviewPanel;
   private classIri = "";
   private profile = "el";
   private lastResult: GetExplanationResult | undefined;
   private unsubscribeCatalog?: () => void;
 
-  private constructor(panel: vscode.WebviewPanel) {
-    this.panel = panel;
-    this.panel.onDidDispose(() => {
+  private constructor(
+    private readonly host: PanelHost,
+    private readonly extensionUri: vscode.Uri
+  ) {
+    this.host.panel.onDidDispose(() => {
       this.unsubscribeCatalog?.();
       ExplanationPanel.current = undefined;
     });
     this.unsubscribeCatalog = focusRelay.subscribeCatalog(() => {
       if (this.lastResult) {
-        this.render(this.classIri, this.lastResult, this.profile);
-      }
-    });
-    this.panel.webview.onDidReceiveMessage(async (msg) => {
-      if (!msg || typeof msg !== "object" || typeof msg.command !== "string") {
-        return;
-      }
-      if (msg.command === "copy" && typeof msg.text === "string") {
-        await vscode.env.clipboard.writeText(msg.text);
-      }
-      if (msg.command === "rerun") {
-        await vscode.commands.executeCommand("ontocode.runReasoner");
-        if (this.classIri) {
-          await ExplanationPanel.show(this.classIri, this.profile);
-        }
-      }
-      if (msg.command === "openEntity" && typeof (msg as { iri?: unknown }).iri === "string") {
-        await vscode.commands.executeCommand("ontocode.openEntity", (msg as { iri: string }).iri);
+        this.pushContent(this.classIri, this.lastResult, this.profile);
       }
     });
   }
 
   public dispose(): void {
-    this.panel.dispose();
+    this.host.panel.dispose();
   }
 
-  public static async show(classIri: string, profileOverride?: string): Promise<void> {
+  public static async show(
+    extensionUri: vscode.Uri,
+    classIri: string,
+    profileOverride?: string
+  ): Promise<void> {
     const cfg = vscode.workspace.getConfiguration("ontocode");
     const profile = resolveExplanationProfile({
       explicit: profileOverride,
@@ -60,20 +50,43 @@ export class ExplanationPanel {
     const result = await getExplanation({ class_iri: classIri, profile });
 
     if (ExplanationPanel.current) {
-      ExplanationPanel.current.panel.reveal(vscode.ViewColumn.Beside);
+      ExplanationPanel.current.host.panel.reveal(vscode.ViewColumn.Beside);
       ExplanationPanel.current.setContent(classIri, result, profile);
       return;
     }
 
-    const panel = vscode.window.createWebviewPanel(
-      "ontocodeExplanation",
-      `Explanation: ${classIri.split(/[#/]/).pop() ?? classIri}`,
-      vscode.ViewColumn.Beside,
-      { enableScripts: true, retainContextWhenHidden: true }
-    );
-    const view = new ExplanationPanel(panel);
+    const host = PanelHost.create(extensionUri, {
+      viewType: "ontocodeExplanation",
+      title: `Explanation: ${classIri.split(/[#/]/).pop() ?? classIri}`,
+      panel: "explanation",
+      onMessage: async (message: WebviewMessage) => {
+        const panel = ExplanationPanel.current;
+        if (!panel) {
+          return;
+        }
+        await panel.handleMessage(message);
+      },
+    });
+    const view = new ExplanationPanel(host, extensionUri);
     ExplanationPanel.current = view;
     view.setContent(classIri, result, profile);
+  }
+
+  private async handleMessage(message: WebviewMessage): Promise<void> {
+    if (message.type === "copyText") {
+      await vscode.env.clipboard.writeText(message.text);
+      return;
+    }
+    if (message.type === "rerunReasoner") {
+      await vscode.commands.executeCommand("ontocode.runReasoner");
+      if (this.classIri) {
+        await ExplanationPanel.show(this.extensionUri, this.classIri, this.profile);
+      }
+      return;
+    }
+    if (message.type === "openEntity") {
+      await vscode.commands.executeCommand("ontocode.openEntity", message.iri);
+    }
   }
 
   private setContent(
@@ -89,23 +102,15 @@ export class ExplanationPanel {
       args: [classIri, profile],
       title: `Explanation: ${classIri.split(/[#/]/).pop() ?? classIri}`,
     });
-    this.render(classIri, result, profile);
+    this.host.panel.title = `Explanation: ${classIri.split(/[#/]/).pop() ?? classIri}`;
+    this.pushContent(classIri, result, profile);
   }
 
-  private render(
+  private pushContent(
     classIri: string,
     result: GetExplanationResult,
     profile: string
   ): void {
-    const justifications = [
-      { title: "Justification 1", steps: result.steps, text: result.text },
-      ...(result.alternatives ?? []).map((a, i) => ({
-        title: `Justification ${i + 2}`,
-        steps: a.steps,
-        text: a.text,
-      })),
-    ];
-
     const catalog = focusRelay.getCatalogFingerprint();
     const stale = isExplanationStale({
       shownContentHash: result.content_hash,
@@ -114,92 +119,21 @@ export class ExplanationPanel {
       currentIndexedAt: catalog?.indexedAt ?? result.indexed_at,
     });
 
-    this.panel.webview.html = `<!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8" />
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'unsafe-inline'; script-src 'unsafe-inline';" />
-<style>
-body { font-family: var(--vscode-font-family); padding: 12px; }
-pre { white-space: pre-wrap; background: var(--vscode-textBlockQuote-background); padding: 8px; }
-a { color: var(--vscode-textLink-foreground); text-decoration: none; }
-a:hover { text-decoration: underline; }
-.stale { background: var(--vscode-inputValidation-warningBackground); padding: 8px; border-radius: 6px; margin: 8px 0; }
-.row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
-.muted { opacity: 0.8; font-size: 12px; }
-button:focus-visible, select:focus-visible, a:focus-visible { outline: 2px solid var(--vscode-focusBorder); outline-offset: 2px; }
-</style></head><body>
-<main aria-label="Explanation panel">
-<h2 id="explanation-heading">Explanation</h2>
-<p><code>${escapeHtml(classIri)}</code></p>
-${stale ? `<div class="stale" role="status" aria-live="polite"><strong>Stale explanation</strong><div class="muted">Ontology or reasoner state changed since this explanation was generated. Re-generate to ensure correctness.</div></div>` : ""}
-<div class="row">
-  <label for="justification">Justification</label>
-  <select id="justification" aria-labelledby="explanation-heading"></select>
-  <span class="muted">profile=${escapeHtml(profile)} • indexed_at=${result.indexed_at} • content_hash=${escapeHtml(result.content_hash)}</span>
-</div>
-<ol id="steps" aria-label="Justification steps"></ol>
-<pre id="text" aria-label="Explanation text"></pre>
-<div class="row" role="toolbar" aria-label="Explanation actions">
-  <button id="copy" type="button">Copy</button>
-  <button id="rerun" type="button">Re-run Reasoner</button>
-</div>
-</main>
-<script>
-const vscode = acquireVsCodeApi();
-const justifications = ${JSON.stringify(justifications)};
-const select = document.getElementById('justification');
-const stepsEl = document.getElementById('steps');
-const textEl = document.getElementById('text');
-
-function escapeHtml(s) {
-  return String(s).replaceAll('&','&amp;').replaceAll('<','&lt;').replaceAll('>','&gt;');
-}
-
-function render(idx) {
-  const j = justifications[idx];
-  textEl.textContent = j.text;
-  stepsEl.innerHTML = '';
-  for (const step of j.steps) {
-    const li = document.createElement('li');
-    const text = step.display ?? '';
-    li.innerHTML = escapeHtml(text);
-    if (step.subject_iri) {
-      const a = document.createElement('a');
-      a.href = '#';
-      a.textContent = ' subject';
-      a.onclick = (e) => { e.preventDefault(); vscode.postMessage({ command: 'openEntity', iri: step.subject_iri }); };
-      li.appendChild(document.createTextNode(' '));
-      li.appendChild(a);
-    }
-    if (step.object_iri) {
-      const a = document.createElement('a');
-      a.href = '#';
-      a.textContent = ' object';
-      a.onclick = (e) => { e.preventDefault(); vscode.postMessage({ command: 'openEntity', iri: step.object_iri }); };
-      li.appendChild(document.createTextNode(' '));
-      li.appendChild(a);
-    }
-    stepsEl.appendChild(li);
+    const payload: ExplanationPayload = {
+      classIri,
+      profile,
+      stale,
+      indexed_at: result.indexed_at,
+      content_hash: result.content_hash,
+      justifications: [
+        { title: "Justification 1", steps: result.steps, text: result.text },
+        ...(result.alternatives ?? []).map((a, i) => ({
+          title: `Justification ${i + 2}`,
+          steps: a.steps,
+          text: a.text,
+        })),
+      ],
+    };
+    this.host.postMessage({ type: "loadExplanation", payload });
   }
-}
-
-for (let i = 0; i < justifications.length; i++) {
-  const opt = document.createElement('option');
-  opt.value = String(i);
-  opt.textContent = justifications[i].title;
-  select.appendChild(opt);
-}
-select.onchange = () => render(Number(select.value));
-render(0);
-
-document.getElementById('copy').onclick = () => vscode.postMessage({ command: 'copy', text: textEl.textContent });
-document.getElementById('rerun').onclick = () => vscode.postMessage({ command: 'rerun' });
-</script></body></html>`;
-  }
-}
-
-function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
 }

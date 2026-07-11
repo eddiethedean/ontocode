@@ -17,6 +17,7 @@ import {
   InlineCode,
   Input,
   IriList,
+  LoadingSkeleton,
   LoadingState,
   Panel,
   PanelHeader,
@@ -76,6 +77,12 @@ describe("ui components", () => {
     render(<EmptyState title="No data" detail="Try refreshing." />);
     expect(screen.getByText("No data")).toBeInTheDocument();
     expect(screen.getByText("Try refreshing.")).toBeInTheDocument();
+  });
+
+  it("renders loading skeleton rows", () => {
+    render(<LoadingSkeleton rows={2} label="Preparing…" />);
+    expect(screen.getByRole("status", { name: "Preparing…" })).toBeInTheDocument();
+    expect(document.querySelectorAll(".oc-skeleton-row")).toHaveLength(2);
   });
 
   it("renders stat grid with danger variant", () => {

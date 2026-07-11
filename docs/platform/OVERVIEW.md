@@ -1,10 +1,10 @@
 # Platform overview
 
-> **v0.17 foundation shipped.** For evaluator-facing capabilities, read [What ships today](../SHIPPED.md) first.
+> **v0.18 foundation shipped** (Protégé Desktop parity gate on top of the v0.13–v0.17 OntoUI / plugin / shell stack). For evaluator-facing capabilities, read [What ships today](../SHIPPED.md) first.
 >
 > **This section is design/implementation planning.** Items below may be shipped, partial, or planned — always cross-check [SHIPPED.md](../SHIPPED.md).
 >
-> **Status:** OntoUI runtime + focus relay **shipped v0.13**; plugin host MVP **shipped v0.14**; plugin permissions/views **shipped v0.15**; preferences/context actions **shipped v0.16**; Protégé-shell menus/dialogs/perspectives **shipped v0.17** · **Terms:** [Glossary](../glossary.md)
+> **Status:** OntoUI runtime + focus relay **shipped v0.13**; plugin host MVP **shipped v0.14**; plugin permissions/views **shipped v0.15**; preferences/context actions **shipped v0.16**; Protégé-shell menus/dialogs/perspectives **shipped v0.17**; reasoner cancel, stale explanations, layout reopen-with-context **shipped v0.18** · **Terms:** [Glossary](../glossary.md)
 
 ## Scope
 

@@ -1,6 +1,8 @@
-# Protégé round-trip fixtures (v0.12)
+# Protégé round-trip fixtures (v0.18)
 
-This directory holds Protégé-style ontology exports used by `cargo test protege_roundtrip`.
+This directory holds Protégé-style ontology exports used by `cargo test protege_roundtrip` and for manual coexistence checks with OntoCode **v0.18**.
+
+Fixtures were introduced in v0.12 and expanded through the v0.18 Protégé Desktop parity gate.
 
 ## Fixtures
 
@@ -24,3 +26,5 @@ This directory holds Protégé-style ontology exports used by `cargo test proteg
 ## Round-trip goal
 
 Semantic equivalence after patch + reindex (entity IRIs and axiom sets match; Turtle formatting may differ).
+
+OWL/XML and RDF/XML remain **read-only** for write-back — see [Known limitations](../../docs/known-limitations.md) and [What's new in v0.18](../../docs/migration/v0.18.md).

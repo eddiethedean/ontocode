@@ -43,8 +43,8 @@ Press **F5** in VS Code with the `extension/` folder open (or use **Run Extensio
 | LSP / webview debugging | [debugging.md](../debugging.md) |
 | Host ↔ React messages | [webview-protocol.md](../webview-protocol.md) |
 | Custom LSP methods | [lsp-api.md](../lsp-api.md) |
-| OntoUI platform | [platform/OVERVIEW.md](../platform/OVERVIEW.md) |
-| UI specs | [ui/README.md](../ui/README.md) |
+| OntoUI platform | [platform/OVERVIEW.md](https://github.com/eddiethedean/ontocode/blob/main/docs/platform/OVERVIEW.md) |
+| UI specs | [ui/README.md](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/README.md) |
 
 ## Pre-PR checks
 
@@ -61,7 +61,7 @@ cd extension && ONTOCORE_LSP_BIN=../target/debug/ontocore-lsp npm ci && npm run 
 
 For full CI parity (Rust, docs, packaging, VS Code e2e): `./scripts/run-ci-local.sh` — see [Contributing](../contributing.md).
 
-Plugin UI work: see [Capability providers](../platform/CAPABILITY_PROVIDERS.md) and `extension/webview-ui/src/capabilities/`.
+Plugin UI work: see [Capability providers](https://github.com/eddiethedean/ontocode/blob/main/docs/platform/CAPABILITY_PROVIDERS.md) and `extension/webview-ui/src/capabilities/`.
 
 ## Related
 

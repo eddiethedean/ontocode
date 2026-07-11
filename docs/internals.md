@@ -4,7 +4,7 @@
 >
 > For product capabilities, use **[What ships today](SHIPPED.md)**. For a 10-minute tutorial, use **[First success](guides/first-success.md)**.
 
-Design documents, ADRs, and backlogs live under [design/](design/README.md). **Platform implementation architecture:** [platform/OVERVIEW.md](platform/OVERVIEW.md). Product UX specs: [ui/README.md](ui/README.md) — mapped to releases in [ROADMAP_MAPPING.md](ui/ROADMAP_MAPPING.md). **Product ADRs:** [adr/README.md](adr/README.md). **Cursor prompts:** [cursor-prompts/README.md](cursor-prompts/README.md). Always cross-check [SHIPPED.md](SHIPPED.md). See also [Roadmap hub](roadmap-hub.md) and [Glossary](glossary.md).
+Design documents, ADRs, and backlogs live under [design/](design/README.md). **Platform implementation architecture:** [platform/OVERVIEW.md](https://github.com/eddiethedean/ontocode/blob/main/docs/platform/OVERVIEW.md). Product UX specs: [ui/README.md](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/README.md) — mapped to releases in [ROADMAP_MAPPING.md](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/ROADMAP_MAPPING.md). **Product ADRs:** [adr/README.md](adr/README.md). **Cursor prompts:** [cursor-prompts/README.md](https://github.com/eddiethedean/ontocode/blob/main/docs/cursor-prompts/README.md). Always cross-check [SHIPPED.md](SHIPPED.md). See also [Roadmap hub](roadmap-hub.md) and [Glossary](glossary.md).
 
 ## Contributor paths by role
 
@@ -38,14 +38,14 @@ Design documents, ADRs, and backlogs live under [design/](design/README.md). **P
 
 - [Documentation index](documentation-index.md)
 - [Glossary](glossary.md)
-- [Platform architecture](platform/OVERVIEW.md)
+- [Platform architecture](https://github.com/eddiethedean/ontocode/blob/main/docs/platform/OVERVIEW.md)
 - [Contributing guide](contributing.md)
 - [Extension development](guides/extension-development.md)
 - [Debugging guide](debugging.md)
-- [Cursor implementation prompts](cursor-prompts/README.md)
+- [Cursor implementation prompts](https://github.com/eddiethedean/ontocode/blob/main/docs/cursor-prompts/README.md)
 - [Design overview](design/README.md)
-- [Product design / UI specs](ui/README.md)
-- [UI roadmap mapping](ui/ROADMAP_MAPPING.md)
+- [Product design / UI specs](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/README.md)
+- [UI roadmap mapping](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/ROADMAP_MAPPING.md)
 - [OntoCore implementation architecture](design/ARCHITECTURE.md)
 - [Product ADRs](adr/README.md)
 - [Engineering ADRs](design/adr/README.md)

@@ -29,5 +29,5 @@ No silent apply. Opt-in required for AI features at workspace or org level.
 
 ## References
 
-- [platform/AI_ORCHESTRATION.md](../platform/AI_ORCHESTRATION.md)
-- [platform/SEMANTIC_REFACTORING.md](../platform/SEMANTIC_REFACTORING.md)
+- [platform/AI_ORCHESTRATION.md](https://github.com/eddiethedean/ontocode/blob/main/docs/platform/AI_ORCHESTRATION.md)
+- [platform/SEMANTIC_REFACTORING.md](https://github.com/eddiethedean/ontocode/blob/main/docs/platform/SEMANTIC_REFACTORING.md)

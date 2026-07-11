@@ -1,6 +1,6 @@
 # Modernizing the Ontology Ecosystem
 
-> **Long-term vision.** For what ships in **v0.17**, see [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/). Plugin host MVP and owlmake workflow scaffold **shipped in v0.14**; stable plugin ecosystem API is a **v1.0 target**.
+> **Long-term vision.** For what ships in **v0.18**, see [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/). Plugin host MVP and owlmake workflow scaffold **shipped in v0.14**; stable plugin ecosystem API is a **v1.0 target**.
 
 ## Mission
 

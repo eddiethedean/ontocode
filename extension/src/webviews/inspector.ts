@@ -12,6 +12,7 @@ import { PanelHost } from "./panelHost";
 import type { EntityDetailPayload, PatchOp, WebviewMessage } from "./messages";
 import { GraphPanel } from "./graphPanel";
 import { acceptInspectorRevealRequest } from "./inspectorReveal";
+import { rememberPanelRestoreState } from "./layoutPersistence";
 
 type RefreshFn = () => Promise<void>;
 
@@ -72,6 +73,11 @@ export class EntityInspectorPanel {
     onRefresh?: RefreshFn,
     requestId?: number
   ): EntityInspectorPanel {
+    void rememberPanelRestoreState("ontocodeInspector", {
+      command: "ontocode.openEntity",
+      args: [detail.entity.iri],
+      title: panelTitle(detail),
+    });
     if (EntityInspectorPanel.currentPanel) {
       const existing = EntityInspectorPanel.currentPanel;
       if (!existing.isWebviewReady()) {

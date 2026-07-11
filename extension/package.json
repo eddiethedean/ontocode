@@ -2,7 +2,7 @@
   "name": "ontocode",
   "displayName": "OntoCode",
   "description": "Ontology IDE for VS Code powered by OntoCore. Browse, edit Turtle, query, reason (EL–DL), validate, and diff OWL/RDF/OBO ontologies from the IDE or CI.",
-  "version": "0.17.0",
+  "version": "0.18.0",
   "publisher": "ontocode",
   "license": "MIT",
   "repository": {
@@ -112,6 +112,33 @@
         }
       ]
     },
+    "viewsWelcome": [
+      {
+        "view": "ontocode.explorer.ontologies",
+        "contents": "Index the workspace to browse ontology documents.\n[Index Workspace](command:ontocode.indexWorkspace)",
+        "when": "!ontocode:hasOntology"
+      },
+      {
+        "view": "ontocode.explorer.classes",
+        "contents": "Index the workspace to browse classes.\n[Index Workspace](command:ontocode.indexWorkspace)",
+        "when": "!ontocode:hasOntology"
+      },
+      {
+        "view": "ontocode.explorer.properties",
+        "contents": "Index the workspace to browse properties.\n[Index Workspace](command:ontocode.indexWorkspace)",
+        "when": "!ontocode:hasOntology"
+      },
+      {
+        "view": "ontocode.explorer.individuals",
+        "contents": "Index the workspace to browse individuals.\n[Index Workspace](command:ontocode.indexWorkspace)",
+        "when": "!ontocode:hasOntology"
+      },
+      {
+        "view": "ontocode.explorer.diagnostics",
+        "contents": "Index the workspace to see ontology diagnostics.\n[Index Workspace](command:ontocode.indexWorkspace)",
+        "when": "!ontocode:hasOntology"
+      }
+    ],
     "commands": [
       {
         "command": "ontocode.indexWorkspace",

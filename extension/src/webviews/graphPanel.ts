@@ -2,6 +2,7 @@ import * as vscode from "vscode";
 import { getGraph } from "../lsp/client";
 import { PanelHost } from "./panelHost";
 import type { GraphFilters, WebviewMessage } from "./messages";
+import { rememberPanelRestoreState } from "./layoutPersistence";
 
 export interface GraphPanelOptions {
   graphKind: string;
@@ -33,6 +34,11 @@ export class GraphPanel {
     options: GraphPanelOptions,
     title = "OntoCode Graph"
   ): Promise<GraphPanel> {
+    void rememberPanelRestoreState("ontocodeGraph", {
+      command: "ontocode.openClassGraph",
+      args: options.rootIri ? [options.rootIri] : undefined,
+      title,
+    });
     if (GraphPanel.currentPanel) {
       GraphPanel.currentPanel.host.panel.reveal(vscode.ViewColumn.Beside);
       GraphPanel.currentPanel.options = options;
@@ -76,6 +82,29 @@ export class GraphPanel {
     }
     if (message.type === "selectNode") {
       await vscode.commands.executeCommand("ontocode.openEntity", message.iri);
+    }
+    if (message.type === "exportGraph") {
+      const filters: Record<string, string[]> = {
+        JSON: ["json"],
+        CSV: ["csv"],
+      };
+      const defaultExt = message.format === "csv" ? "csv" : "json";
+      const uri = await vscode.window.showSaveDialog({
+        defaultUri: vscode.Uri.file(
+          message.suggestedName ?? `ontocode-graph.${defaultExt}`
+        ),
+        filters,
+      });
+      if (!uri) {
+        return;
+      }
+      await vscode.workspace.fs.writeFile(
+        uri,
+        Buffer.from(message.payload, "utf8")
+      );
+      void vscode.window.showInformationMessage(
+        `OntoCode: graph exported to ${uri.fsPath}`
+      );
     }
   }
 

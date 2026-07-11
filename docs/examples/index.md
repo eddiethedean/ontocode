@@ -33,7 +33,8 @@ From a git clone, prefix commands with `cargo run --` (e.g. `cargo run -- query 
 | [`fixtures/` on GitHub](https://github.com/eddiethedean/ontocode/tree/main/fixtures) | Primary tutorial corpus (`example.ttl`, `complex-classes.ttl`, …) |
 | [Fixtures README](https://github.com/eddiethedean/ontocode/blob/main/fixtures/README.md) | Per-file purpose and smoke commands |
 | [`examples/obo-workflow/`](https://github.com/eddiethedean/ontocode/tree/main/examples/obo-workflow) | Minimal OBO workspace — see [OBO workflow guide](../guides/obo-workflow.md) |
-| [`examples/protege-roundtrip/`](https://github.com/eddiethedean/ontocode/tree/main/examples/protege-roundtrip) | Turtle + OWL/XML import scenario |
+| [`examples/protege-roundtrip/`](https://github.com/eddiethedean/ontocode/tree/main/examples/protege-roundtrip) | Protégé-style Turtle + OWL/XML / RDF/XML fixtures (v0.18) |
+| [`examples/plugin-workspace/`](https://github.com/eddiethedean/ontocode/tree/main/examples/plugin-workspace) | Sample plugin manifests — see [Plugin authoring](../guides/plugins.md) |
 
 Download tutorial files without cloning:
 

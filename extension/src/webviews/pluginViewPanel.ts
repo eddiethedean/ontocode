@@ -60,12 +60,46 @@ function wrapHtml(title: string, body: string, _extensionUri: vscode.Uri): strin
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>${escapeHtml(title)}</title>
     <style>
-      body { font-family: -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif; padding: 12px; }
-      pre { white-space: pre-wrap; }
+      :root {
+        color-scheme: light dark;
+      }
+      body {
+        margin: 0;
+        padding: 16px;
+        font-family: var(--vscode-font-family);
+        font-size: var(--vscode-font-size);
+        line-height: 1.5;
+        color: var(--vscode-foreground);
+        background: var(--vscode-editor-background);
+      }
+      h1, h2, h3 {
+        margin: 0 0 12px;
+        font-weight: 650;
+        letter-spacing: -0.01em;
+      }
+      a { color: var(--vscode-textLink-foreground); }
+      pre {
+        white-space: pre-wrap;
+        margin: 0;
+        padding: 12px;
+        border-radius: 8px;
+        background: var(--vscode-textBlockQuote-background, var(--vscode-editorWidget-background));
+        border: 1px solid var(--vscode-widget-border, transparent);
+        font-family: var(--vscode-editor-font-family, ui-monospace, monospace);
+      }
+      button:focus-visible, a:focus-visible {
+        outline: 2px solid var(--vscode-focusBorder);
+        outline-offset: 2px;
+      }
     </style>
   </head>
   <body>
-    ${body}
+    <header style="margin-bottom:12px">
+      <h1 style="font-size:1.25rem">${escapeHtml(title)}</h1>
+    </header>
+    <main aria-label="${escapeHtml(title)}">
+      ${body}
+    </main>
   </body>
 </html>`;
 }

@@ -1,8 +1,8 @@
-# OntoCode feature tour (current: v0.17)
+# OntoCode feature tour (current: v0.18)
 
 A visual and structural overview of the OntoCode VS Code IDE. For hands-on setup, start with [First success (~10 min)](../guides/first-success.md).
 
-Capability truth: [What ships today](../SHIPPED.md) · [Known limitations](../known-limitations.md).
+Capability truth: [What ships today](../SHIPPED.md) · [Known limitations](../known-limitations.md) · [What's new in v0.18](../migration/v0.18.md).
 
 ![Explorer and Entity Inspector](../assets/screenshots/explorer-inspector.png)
 
@@ -20,6 +20,18 @@ The **OntoCode** activity bar hosts five tree views:
 
 **Typical flow:** expand **Classes** → click an entity name → **Entity Inspector** opens on the right. With Inspector and Graph panels open, the same entity stays in sync (**focus relay**).
 
+## Protégé-style shell (menus, perspectives, layout)
+
+v0.17+ adds a Protégé-inspired command surface without leaving VS Code:
+
+| Feature | What you get |
+|---------|----------------|
+| **Menus & dialogs** | New Ontology, Prefix Manager, Metrics, About, and related commands |
+| **Named perspectives** | Switch or save panel layouts (Modeling / Reasoning / Review) |
+| **Layout persistence** | Panels reopen with context after reload (v0.18) |
+
+Guide: [VS Code extension](vscode-extension.md) · [What's new in v0.17](../migration/v0.17.md)
+
 ## Entity Inspector (React)
 
 The inspector shows IRI, kind, labels, comments, parents, children, and axioms. For **`.ttl`** and **`.obo`** files, the **Edit** section supports labels, parents, delete, and Manchester axioms.
@@ -35,7 +47,7 @@ Guide: [Inspector](inspector.md) · [Authoring](../authoring.md)
 
 Command Palette → **OntoCode: Open Query Workbench**
 
-- **Catalog SQL (subset)** — virtual tables (`classes`, `properties`, `diagnostics`, …). Not full SQL — no `JOIN` / `ORDER BY` / `LIMIT`.
+- **Catalog SQL (subset)** — virtual tables (`classes`, `properties`, `diagnostics`, …). Not full SQL — no `JOIN` / `ORDER BY` / `LIMIT`. Prefer **SPARQL** for graph patterns.
 - **SPARQL mode** — graph patterns over indexed triples
 - **Schema browser** — browse tables/columns; insert names into the editor
 - Export results to CSV or JSON; history and saved queries
@@ -57,7 +69,7 @@ Guide: [Manchester editor](manchester-editor.md)
 | **Open Import Graph** | Ontology import dependencies |
 | **Open Neighborhood Graph** | Mixed entity neighborhood |
 
-Click nodes to jump back to the Entity Inspector.
+Click nodes to jump back to the Entity Inspector. Export graph JSON/CSV from the sidebar; Expand refreshes depth for large neighborhoods.
 
 Guide: [Graph view](graph-view.md)
 
@@ -67,12 +79,14 @@ Guide: [Graph view](graph-view.md)
 
 | Panel | Purpose |
 |-------|---------|
-| **Reasoner Results** | Profile used, consistency, unsatisfiable classes, warnings |
+| **Reasoner** | Profile, consistency, unsatisfiable classes, inferred changes, warnings |
 | **Explanation** | EL-first justification for unsatisfiable classes (after reasoner run) |
+
+**Reasoner actions (v0.18):** distinct **Start**, **Synchronize**, **Classify**, and **Consistency** commands. **Stop** cancels the in-flight client LSP request (late server results are ignored). Explanations show a **stale** badge when the catalog fingerprint changes while the panel stays open.
 
 After classification, use **Set Hierarchy Mode** (`asserted` / `inferred` / `combined`) to update the **Classes** tree.
 
-Guide: [Reasoner](../guides/reasoner.md)
+Guide: [Reasoner](../guides/reasoner.md) · [What's new in v0.18](../migration/v0.18.md)
 
 ## Refactor preview and semantic diff (React)
 
@@ -81,7 +95,7 @@ Guide: [Reasoner](../guides/reasoner.md)
 | Panel | Purpose |
 |-------|---------|
 | **Refactor Preview** | Diff before rename, migrate, move, or extract module |
-| **Semantic Diff** | Compare versions, directories, or workspace snapshots — axiom-level changes and breaking-change flags |
+| **Semantic Diff** | Compare versions, refs, or workspace snapshots — axiom-level changes and breaking-change flags |
 
 Guides: [Refactoring](../guides/refactoring.md) · [Semantic diff](semantic-diff.md)
 
@@ -90,6 +104,12 @@ Guides: [Refactoring](../guides/refactoring.md) · [Semantic diff](semantic-diff
 Right-click a `.ttl` file in **Ontologies** → **Manage Imports** to add or remove `owl:imports` declarations with preview and apply.
 
 Guide: [Manage Imports](manage-imports.md)
+
+## Plugins and preferences
+
+Installed workspace plugins can contribute inspector cards, UI views, and preferences (v0.14–v0.16+). Open plugin views from the Command Palette; preferences appear in the OntoCode preferences hub.
+
+Guide: [Plugins](../guides/plugins.md)
 
 ## Turtle semantic highlighting and diagnostics
 

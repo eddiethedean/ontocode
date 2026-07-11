@@ -4,6 +4,7 @@ import {
   Callout,
   FormField,
   InlineCode,
+  LoadingState,
   Panel,
   PanelHeader,
   Section,
@@ -53,7 +54,7 @@ export function ImportsPanel(): JSX.Element {
     return (
       <Panel>
         <PanelHeader title="Manage Imports" />
-        <Callout>Loading ontology imports…</Callout>
+        <LoadingState label="Loading ontology imports…" />
       </Panel>
     );
   }

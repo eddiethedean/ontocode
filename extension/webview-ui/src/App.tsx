@@ -20,7 +20,9 @@ function panelFromQuery(): PanelKind {
     panel === "metrics" ||
     panel === "about" ||
     panel === "newOntology" ||
-    panel === "prefixManager"
+    panel === "prefixManager" ||
+    panel === "reasoner" ||
+    panel === "explanation"
   ) {
     return panel;
   }

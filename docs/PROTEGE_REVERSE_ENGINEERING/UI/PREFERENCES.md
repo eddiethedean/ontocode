@@ -337,32 +337,32 @@ Recommended enhancements:
 
 General
 
-- [ ] Startup behavior
-- [ ] Auto-save
-- [ ] Recent projects
+- [ ] Startup behavior (`autoIndexOnOpen` is a documented no-op)
+- [ ] Auto-save (VS Code native)
+- [ ] Recent projects (VS Code native)
 
 Appearance
 
-- [ ] Theme
-- [ ] Fonts
-- [ ] Scaling
+- [x] Theme (VS Code theme)
+- [x] Fonts (VS Code font settings)
+- [x] Scaling (VS Code zoom)
 
 Editing
 
-- [ ] Delete confirmation
+- [x] Delete confirmation (impact summary)
 - [ ] Default namespace
 - [ ] Label generation
 
 Reasoning
 
-- [ ] Default reasoner
+- [x] Default reasoner (`ontocode.reasoner.default` + Preferences hub)
 - [ ] Incremental reasoning
 - [ ] Timeouts
 
 Rendering
 
-- [ ] Label vs IRI
-- [ ] Prefix rendering
+- [ ] Label vs IRI (prefix manager exists; no rendering strategy prefs)
+- [x] Prefix rendering (Prefix Manager)
 
 Search
 

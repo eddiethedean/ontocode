@@ -103,10 +103,12 @@ export function EmptyState({
   title,
   detail,
   icon,
+  action,
 }: {
   title: string;
   detail?: string;
   icon?: ReactNode;
+  action?: ReactNode;
 }): JSX.Element {
   return (
     <div className="oc-empty">
@@ -115,6 +117,7 @@ export function EmptyState({
       </div>
       <p className="oc-empty-title">{title}</p>
       {detail ? <p className="oc-empty-detail">{detail}</p> : null}
+      {action ? <div className="oc-empty-action">{action}</div> : null}
     </div>
   );
 }
@@ -124,6 +127,26 @@ export function LoadingState({ label = "Loading…" }: { label?: string }): JSX.
     <div className="oc-loading" role="status" aria-live="polite">
       <span className="oc-spinner" aria-hidden="true" />
       <span className="oc-loading-label">{label}</span>
+    </div>
+  );
+}
+
+/** Placeholder blocks for predictable panel layouts while content loads. */
+export function LoadingSkeleton({
+  rows = 3,
+  label = "Loading…",
+}: {
+  rows?: number;
+  label?: string;
+}): JSX.Element {
+  return (
+    <div className="oc-skeleton" role="status" aria-live="polite" aria-label={label}>
+      {Array.from({ length: rows }, (_, i) => (
+        <div
+          key={i}
+          className={`oc-skeleton-row${i === 0 ? " oc-skeleton-row--wide" : ""}`}
+        />
+      ))}
     </div>
   );
 }

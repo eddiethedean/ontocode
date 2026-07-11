@@ -1,6 +1,6 @@
 # Modernizing the Ontology Ecosystem
 
-> **Long-term vision.** For what ships in **v0.17**, see [What ships today](SHIPPED.md). Plugin host MVP and owlmake workflow scaffold **shipped in v0.14**; stable plugin ecosystem API is a **v1.0 target**.
+> **Long-term vision.** For what ships in **v0.18**, see [What ships today](SHIPPED.md). Plugin host MVP and owlmake workflow scaffold **shipped in v0.14**; stable plugin ecosystem API is a **v1.0 target**.
 
 ## Mission
 
@@ -15,7 +15,7 @@ Three foundational projects work together:
 - **Ontologos** — Rust-native reasoning engine.
 - **OntoCore** — Semantic workspace engine and reusable platform.
 - **OntoCode** — Flagship VS Code IDE powered by OntoCore.
-- **OntoUI** — Shared React UI platform ([platform/ONTOUI.md](platform/ONTOUI.md)) — **v0.13 foundation shipped** (WorkspaceStore, focus relay, design tokens); **OntoStudio** reuses it (planned).
+- **OntoUI** — Shared React UI platform ([platform/ONTOUI.md](https://github.com/eddiethedean/ontocode/blob/main/docs/platform/ONTOUI.md)) — **v0.13 foundation shipped** (WorkspaceStore, focus relay, design tokens); **OntoStudio** reuses it (planned).
 
 Together they enable modern workflows including AI-assisted development, CI/CD, team collaboration on version-controlled ontology files, Python and TypeScript integration, and high-performance local tooling.
 

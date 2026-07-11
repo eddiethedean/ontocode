@@ -35,7 +35,7 @@ After 1.0, the roadmap shifts from parity to modernization.
 | [PRODUCT_ROADMAP_2.0.md](docs/ui/PRODUCT_ROADMAP_2.0.md) | UI phases with milestone acceptance criteria |
 | [ui/README.md](docs/ui/README.md) | Product design specification pack (UX, design system, OntoStudio target) |
 
-**Current release:** v0.17.0
+**Current release:** v0.18.0
 
 ---
 
@@ -44,17 +44,17 @@ After 1.0, the roadmap shifts from parity to modernization.
 ### Timeline
 
 ```text
-SHIPPED (v0.1–v0.17) ─────────────────────────────────────────────────►
-v0.1–v0.4          v0.5–v0.8              v0.9–v0.12           v0.13–v0.14
-Engine foundation    IDE depth                Platform & authoring   OntoUI + plugins
+SHIPPED (v0.1–v0.18) ─────────────────────────────────────────────────►
+v0.1–v0.4          v0.5–v0.8              v0.9–v0.12           v0.13–v0.18
+Engine foundation    IDE depth                Platform & authoring   OntoUI → parity gate
   │                    │                        │                      │
   Foundation           Query, reason,           Identity, diff,      WorkspaceStore,
-  Explorer, diag,      graphs, refactor,        OBO write-back,      focus relay,
-  write-back           Manchester               OWL/XML catalog      plugin host MVP
+  Explorer, diag,      graphs, refactor,        OBO write-back,      plugins, menus,
+  write-back           Manchester               OWL/XML catalog      Desktop parity
 
-PLANNED (v0.18–v1.0) ─────────────────────────────────────────────────►
-v0.18                                                                 v1.0
-Protégé parity closeout                                              1.0 exit
+PLANNED (v1.0+) ──────────────────────────────────────────────────────►
+v1.0
+1.0 exit / Protégé replacement
 ```
 
 ### Phase index
@@ -65,7 +65,7 @@ Protégé parity closeout                                              1.0 exit
 | **B — IDE depth** | v0.5–v0.8 | Shipped | Query, reason, visualize, refactor |
 | **C — Platform & authoring** | v0.9–v0.12 | Shipped | OntoCore identity, semantic workspace, authoring parity |
 | **D — OntoUI platform** | v0.13–v0.14 | Shipped | v0.13: WorkspaceStore, focus relay; v0.14: plugin host MVP |
-| **E — Pre-1.0 Protégé parity** | v0.15–v0.18 | In progress | v0.15–v0.17 shipped; close remaining Protégé Desktop parity gaps |
+| **E — Pre-1.0 Protégé parity** | v0.15–v0.18 | Shipped | Desktop parity gate closed in v0.18; v1.0 polish remains |
 | **F — Protégé replacement** | v1.0 | Planned | Daily OWL/OBO engineering without Protégé |
 | **G — Ecosystem** | v1.1–v1.2+ | Planned | SDKs, AI, toolchain & collaboration |
 
@@ -85,10 +85,10 @@ Protégé parity closeout                                              1.0 exit
 | 12 | v0.12 | C | Shipped | 2 (P0 exit) | Authoring parity |
 | 13 | v0.13 | D | Shipped | 0, 1, 3†, 5†, 9† | Platform hardening |
 | 14 | v0.14 | D | Shipped | 8 | Plugin host MVP |
-| 15 | v0.15 | E | Shipped (partial) | 4†, 5†, 8† | Plugin API + visualization + explanations |
-| 16 | v0.16 | E | Shipped (partial) | 1†, 2† | Workspace layouts + preferences + imports polish |
-| 17 | v0.17 | E | Shipped (partial) | — | Menu/toolbar/dialog parity + keyboard workflows |
-| 18 | v0.18 | E | Planned | — | Protégé Desktop parity gate + migration readiness |
+| 15 | v0.15 | E | Shipped | 4†, 5†, 8† | Plugin API + visualization + explanations |
+| 16 | v0.16 | E | Shipped | 1†, 2† | Workspace layouts + preferences + imports polish |
+| 17 | v0.17 | E | Shipped | — | Menu/toolbar/dialog parity + keyboard workflows |
+| 18 | v0.18 | E | Shipped | — | Protégé Desktop parity gate + migration readiness |
 | 19 | v1.0 | F | Planned | 1–6 exit, 9† | Protégé-competitive release |
 | 20 | v1.1 | G | Planned | 7, 2†, 3†, 4†, 8†, 9† | Language bindings & AI primitives |
 | 21 | v1.2+ | G | Planned | 9, 10, 11 | Ontology toolchain platform |
@@ -119,7 +119,7 @@ OntoUI work uses **UI phases 0–12** from [Product Roadmap 2.0](docs/ui/PRODUCT
 
 ---
 
-## Shipped releases (v0.1–v0.17)
+## Shipped releases (v0.1–v0.18)
 
 ### Era A — Engine foundation (v0.1–v0.4)
 
@@ -386,7 +386,7 @@ Sub-phases: **v0.7a** (React foundation) → **v0.7** (graphs + inspector) → *
 
 ---
 
-## Planned releases (v0.18 → v1.2+)
+## Pre-1.0 closeout + planned releases (v0.15 → v1.2+)
 
 ---
 
@@ -394,7 +394,7 @@ Sub-phases: **v0.7a** (React foundation) → **v0.7** (graphs + inspector) → *
 
 > **Scope note:** These phases target **Protégé Desktop parity** only. WebProtégé parity (live collaboration, permissions, notifications, etc.) remains post-1.0.
 
-### v0.15 — Plugin API + visualization parity + explanation workspace (shipped, partial)
+### v0.15 — Plugin API + visualization parity + explanation workspace (shipped)
 
 **Released:** v0.15.0 (2026-07-08)
 
@@ -419,7 +419,7 @@ Sub-phases: **v0.7a** (React foundation) → **v0.7** (graphs + inspector) → *
 
 ---
 
-### v0.16 — Workspace layouts + preferences + imports polish (shipped, partial)
+### v0.16 — Workspace layouts + preferences + imports polish (shipped)
 
 **Released:** v0.16.0 (2026-07-09)
 
@@ -438,7 +438,7 @@ See [migration/v0.16.md](docs/migration/v0.16.md) and [SHIPPED.md](docs/SHIPPED.
 
 ---
 
-### v0.17 — Menus/toolbars/dialog parity + keyboard-first workflows (shipped, partial)
+### v0.17 — Menus/toolbars/dialog parity + keyboard-first workflows (shipped)
 
 **Released:** v0.17.0 (2026-07-10)
 
@@ -463,9 +463,13 @@ See [migration/v0.17.md](docs/migration/v0.17.md) and [SHIPPED.md](docs/SHIPPED.
 
 ---
 
-### v0.18 — Protégé Desktop parity gate + 1.0 migration readiness (planned)
+### v0.18 — Protégé Desktop parity gate + 1.0 migration readiness (shipped)
+
+**Released:** v0.18.0 (2026-07-11)
 
 **Theme:** Finish the last-mile parity items and ship a verifiable “Protégé not required” desktop experience before the 1.0 stabilization push.
+
+**Scope (docs/audit-first):** [v0.18_SCOPE.md](docs/design/v0.18_SCOPE.md) · [0.18 parity assessment](docs/PROTEGE_REVERSE_ENGINEERING/ONTOCODE_PARITY/ONTOCODE_0.18_PROTEGE_PARITY_ASSESSMENT.md)
 
 | Area | Deliverables |
 |------|--------------|
@@ -475,6 +479,8 @@ See [migration/v0.17.md](docs/migration/v0.17.md) and [SHIPPED.md](docs/SHIPPED.
 **Exit criteria:**
 - **Protégé Desktop parity = 100%** for the agreed pre-1.0 scope (desktop only), backed by the reverse-engineering specs and fixture-driven regression checks.
 - A working “Protégé → OntoCode” migration path is documented for common workflows (modeling, reasoning, explanations, visualization, imports, preferences).
+
+See [migration/v0.18.md](docs/migration/v0.18.md) and [SHIPPED.md](docs/SHIPPED.md).
 
 ---
 

@@ -1,4 +1,4 @@
-# CLI reference (OntoCore v0.17)
+# CLI reference (OntoCore v0.18)
 
 The `ontocore` binary indexes ontology workspaces and exposes query, validation, patch, and reasoning commands.
 

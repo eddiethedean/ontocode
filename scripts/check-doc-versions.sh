@@ -444,7 +444,8 @@ check_file_contains "docs/ontocore/crate-map.md" "ontocore = \"${MINOR_VERSION}\
 check_file_contains "docs/ontocode/manage-imports.md" "Manage Imports" "manage-imports guide"
 check_file_contains "mkdocs.yml" "ontocode/manage-imports.md" "mkdocs manage-imports guide"
 check_file_contains "mkdocs.yml" "migration/v0.14.md" "mkdocs v0.14 migration guide"
-check_file_contains "mkdocs.yml" "What's new in v0.17" "mkdocs v0.17 migration in Get started"
+check_file_contains "mkdocs.yml" "migration/v0.17.md" "mkdocs v0.17 migration guide"
+check_file_contains "mkdocs.yml" "migration/v0.18.md" "mkdocs v0.18 migration guide"
 check_file_contains "mkdocs.yml" "v0\\.15 → v0\\.16" "mkdocs v0.16 migration in Help nav"
 check_file_contains "docs/guides/production-readiness.md" "v${VERSION}" "production-readiness version"
 check_file_contains "mkdocs.yml" "ontocore/rust-api.md" "mkdocs Rust API reference"
@@ -556,7 +557,6 @@ check_file_contains "crates/ontocore-cli/src/main.rs" "OntoCode v${VERSION%.*}" 
 check_file_contains "docs/changelog.md" "v${VERSION}" "docs changelog current release"
 
 for pair in "VISION.md:docs/vision.md:Build the modern open-source platform" \
-              "ARCHITECTURE.md:docs/architecture.md:Ontologos thinks" \
               "ROADMAP.md:docs/roadmap.md:v0.11 — Editor depth & distribution"; do
   root_file="${pair%%:*}"
   rest="${pair#*:}"
@@ -573,8 +573,12 @@ for pair in "VISION.md:docs/vision.md:Build the modern open-source platform" \
   fi
 done
 
-check_file_contains "docs/roadmap.md" "Shipped releases \\(v0.1–v0.17\\)" "docs roadmap shipped section"
-check_file_contains "ROADMAP.md" "Shipped releases \\(v0.1–v0.17\\)" "ROADMAP.md shipped section"
+# ARCHITECTURE.md is a root pointer; canonical body lives in docs/architecture.md
+check_file_contains "ARCHITECTURE.md" "docs/architecture.md" "ARCHITECTURE.md points to canonical docs copy"
+check_file_contains "docs/architecture.md" "Ontologos thinks" "docs architecture responsibility line"
+
+check_file_contains "docs/roadmap.md" "Shipped releases \\(v0.1–v0.18\\)" "docs roadmap shipped section"
+check_file_contains "ROADMAP.md" "Shipped releases \\(v0.1–v0.18\\)" "ROADMAP.md shipped section"
 check_file_contains "ROADMAP.md" "v0.14 — Plugin host MVP \\(shipped\\)" "ROADMAP.md v0.14 shipped section"
 check_file_contains "ROADMAP.md" "v1.2 — Ontology Toolchain Platform" "roadmap v1.2 toolchain milestone"
 check_file_contains "docs/roadmap.md" "v1.2 — Ontology Toolchain Platform" "docs roadmap v1.2 milestone"
@@ -675,7 +679,7 @@ else
 fi
 
 check_file_contains "docs/ui/ROADMAP_MAPPING.md" "Master checklist" "ui roadmap master checklist"
-check_file_contains "mkdocs.yml" "guides/which-artifact.md" "mkdocs which-artifact guide"
+check_file_contains "docs/start.md" "guides/which-artifact.md" "start.md links which-artifact detail"
 check_file_contains "docs/guides/which-artifact.md" "Which artifact do I need" "which-artifact guide title"
 
 # SHIPPED known limitations must reflect Turtle + OBO write-back (v0.12)
@@ -710,8 +714,9 @@ else
 fi
 
 # Architecture banner must reference current release ships today
-check_file_contains "ARCHITECTURE.md" "v0\.17 ships today" "ARCHITECTURE.md v0.17 banner"
-check_file_contains "docs/architecture.md" "v0\.17 ships today" "docs/architecture.md v0.17 banner"
+MINOR="${VERSION%.*}"
+check_file_contains "ARCHITECTURE.md" "v${MINOR} ships today" "ARCHITECTURE.md v${MINOR} banner"
+check_file_contains "docs/architecture.md" "v${MINOR} ships today" "docs/architecture.md v${MINOR} banner"
 
 # Stale CLI alias notes
 if rg -q 'ontocore alias is planned' docs --glob '!**/migration/**' --glob '!**/design/**' 2>/dev/null; then
@@ -731,9 +736,12 @@ else
   echo "ok: no directory-only ui/ markdown links"
 fi
 
-# design/ARCHITECTURE.md must not freeze shipped banner at v0.11
-if grep -qE 'Shipped through v0\.11:' docs/design/ARCHITECTURE.md 2>/dev/null; then
-  echo "FAIL: docs/design/ARCHITECTURE.md shipped banner still says through v0.11" >&2
+# design/ARCHITECTURE.md must not freeze shipped banner at an old minor
+if grep -qE 'Shipped through v0\.(1[0-7]|[0-9]):' docs/design/ARCHITECTURE.md 2>/dev/null; then
+  echo "FAIL: docs/design/ARCHITECTURE.md shipped banner still says through an older minor (expected v${MINOR_VERSION})" >&2
+  fail=1
+elif ! grep -qE "Shipped through v${MINOR_VERSION}:" docs/design/ARCHITECTURE.md 2>/dev/null; then
+  echo "FAIL: docs/design/ARCHITECTURE.md must say Shipped through v${MINOR_VERSION}:" >&2
   fail=1
 else
   echo "ok: design ARCHITECTURE shipped banner"
@@ -793,7 +801,7 @@ check_file_contains "mkdocs.yml" "v0\\.14 → v0\\.15" "mkdocs v0.15 migration i
 check_file_contains "docs/guides/owl-xml-workflow.md" "read-only catalog" "owl-xml workflow guide"
 check_file_contains "docs/ontocore/rust-api.md" "Book ↔ docs.rs crosswalk" "rust-api docs.rs crosswalk"
 check_file_contains "docs/troubleshooting.md" "Where to start" "troubleshooting decision tree"
-check_file_contains "docs/platform/OVERVIEW.md" "v0.17 foundation shipped" "platform overview shipped banner"
+check_file_contains "docs/platform/OVERVIEW.md" "v0.18 foundation shipped" "platform overview shipped banner"
 
 # vision.md must reference current shipped release (not v0.11 or v0.12)
 for file in docs/vision.md VISION.md; do
@@ -839,6 +847,32 @@ check_file_contains "docs/SHIPPED.md" "Current release:.*v${VERSION}" "SHIPPED c
 # FAQ and LSP API must pin current release (not stale minors)
 check_file_contains "docs/faq.md" "version ${VERSION}" "faq CI version pin"
 check_file_contains "docs/lsp-api.md" "OntoCore v${VERSION}" "lsp-api status banner version"
+
+# Feature tour and LSP title must match current minor (not previous release)
+check_file_contains "docs/ontocode/feature-tour.md" "^# OntoCode feature tour \\(current: v${MINOR_VERSION}\\)" "feature-tour current minor"
+check_file_contains "docs/lsp-api.md" "^# OntoCore LSP API \\(v${MINOR_VERSION}\\)" "lsp-api title minor"
+
+# rust-library crates claim must match current minor (catches stale 0.11.x etc.)
+if ! grep -qE "Crates are at \\*\\*${MINOR_VERSION}\\.x\\*\\*" docs/guides/rust-library.md; then
+  echo "FAIL: docs/guides/rust-library.md crates version must be **${MINOR_VERSION}.x**" >&2
+  fail=1
+else
+  echo "ok: rust-library crates version ${MINOR_VERSION}.x"
+fi
+
+# Reject feature-tour / LSP titles pinned to the previous minor
+PREV_MINOR_MINOR="${MINOR_VERSION##*.}"
+if [[ "$PREV_MINOR_MINOR" =~ ^[0-9]+$ ]] && [[ "$PREV_MINOR_MINOR" -gt 0 ]]; then
+  STALE_MINOR="${MINOR_VERSION%%.*}.$((PREV_MINOR_MINOR - 1))"
+  if grep -qE "feature tour \\(current: v${STALE_MINOR}\\)" docs/ontocode/feature-tour.md 2>/dev/null; then
+    echo "FAIL: feature-tour still says current: v${STALE_MINOR}" >&2
+    fail=1
+  fi
+  if grep -qE "^# OntoCore LSP API \\(v${STALE_MINOR}\\)" docs/lsp-api.md 2>/dev/null; then
+    echo "FAIL: lsp-api title still says v${STALE_MINOR}" >&2
+    fail=1
+  fi
+fi
 
 # Enterprise eval capability table header must match release
 check_file_contains "docs/guides/enterprise-eval.md" "What ships today \\(v${VERSION}\\)" "enterprise-eval capability table version"

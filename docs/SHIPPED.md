@@ -1,8 +1,8 @@
-# What ships today (v0.17.0)
+# What ships today (v0.18.0)
 
 > **Canonical capability matrix.** Update this page on every release. Design specs under [Project](design/README.md) may describe future targets — check here for what is actually available.
 
-**Current release:** v0.17.0 · [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) · [Migration from v0.16](migration/v0.17.md)
+**Current release:** v0.18.0 · [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) · [Migration from v0.17](migration/v0.18.md)
 
 ## Products
 
@@ -32,7 +32,7 @@
 | Menus / toolbars / keybindings / perspectives | Yes | — |
 | SQL-like queries | Query Workbench (React) + schema browser | `ontocore query` |
 | SPARQL | Query Workbench (React) | `ontocore sparql` |
-| Graph visualization (class, property, import, neighborhood) | Yes (React; asserted/inferred/combined modes, layouts, search) | LSP `ontocore/getGraph` |
+| Graph visualization (class, property, import, neighborhood) | Yes (React; asserted/inferred/combined; export JSON/CSV; expand depth) | LSP `ontocore/getGraph` |
 | OWL EL classification (`el` profile) | Reasoner panel + hierarchy toggle | `ontocore classify` |
 | RL / RDFS classification | Reasoner panel | `ontocore classify --profile rl\|rdfs` |
 | OWL 2 DL classification (`dl` profile) | Reasoner panel + hierarchy toggle | `ontocore classify --profile dl` |
@@ -64,6 +64,21 @@
 | Write-back (inspector, patches, refactor) | Yes | Yes | Read-only | Read-only |
 | Rich OBO metadata (synonyms, defs, xrefs) | — | Yes | — | — |
 
+## New in v0.18.0
+
+| Capability | Status |
+|------------|--------|
+| Distinct reasoner Start / Synchronize / Classify / Consistency workflows | Yes |
+| Stop reasoner cancels in-flight client request; late results ignored | Yes (server may still finish CPU-bound classify) |
+| Explanation stale banner wired to catalog fingerprint after reindex | Yes |
+| Layout restore: recovered tabs offer Reopen with saved command + context | Yes |
+| Graph truncation messaging for large ontologies | Yes |
+| Graph export (JSON / CSV) + Expand refreshes neighborhood depth | Yes |
+| Accessibility basics on Explanation / Reasoner / restore chrome | Yes |
+| Expanded `protege-roundtrip` + workflow fixtures | Yes |
+| Protégé migration guide + honest desktop known-gap list | Yes |
+| Desktop parity assessment + checklist honesty (MENUS false greens) | Yes |
+
 ## New in v0.17.0
 
 | Capability | Status |
@@ -73,9 +88,9 @@
 | Shared React dialog shell with keyboard handling and live IRI/prefix validation | Yes |
 | New Ontology, Prefix Manager, Metrics, and About webview dialogs | Yes |
 | Central command registry, platform-aware keybindings, and conflict detection | Yes |
-| Persistent layouts and named Modeling, Reasoning, and Review perspectives | Partial — serializers keep webview tabs; transient panel state is not restored (reopen from commands). Perspectives open a fixed panel set |
+| Persistent layouts and named Modeling, Reasoning, and Review perspectives | Partial in v0.17 — tabs only; reopen+context completed in v0.18 |
 | Help, plugin information, error log, diagnostics export, and support surfaces | Yes |
-| Engine support for prefix/metadata patches, create/export, active ontology, merge/replace, and reasoner workflows | Yes — Start / Synchronize / Classify / Consistency share the same classify path; Stop clears UI only (in-flight LSP request is not cancelled) |
+| Engine support for prefix/metadata patches, create/export, active ontology, merge/replace, and reasoner workflows | Yes — lifecycle fidelity completed in v0.18 |
 
 ## New in v0.16.0
 
@@ -216,7 +231,7 @@
 
 ## What's next
 
-Forward milestones (stable plugin API, OWL/XML write-back, Protégé-competitive IDE → **v1.0**): **[Platform roadmap](roadmap.md)** · **[Known limitations](known-limitations.md)**.
+Forward milestones (stable plugin API, OWL/XML write-back, Protégé-competitive IDE → **v1.0**): **[Platform roadmap](roadmap.md)** · **[Known limitations](known-limitations.md)** · [v0.18 scope](design/v0.18_SCOPE.md).
 
 ## Where to learn more
 

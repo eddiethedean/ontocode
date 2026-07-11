@@ -73,7 +73,10 @@ export function SemanticDiffPanel(): JSX.Element {
   if (!diff) {
     return (
       <div className="semantic-diff">
-        <EmptyState title="No diff data" />
+        <EmptyState
+          title="No diff data"
+          detail="Run Semantic Diff with left and right refs to compare ontology versions."
+        />
       </div>
     );
   }

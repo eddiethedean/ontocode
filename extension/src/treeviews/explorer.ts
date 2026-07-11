@@ -99,13 +99,8 @@ export class ExplorerTreeProvider implements vscode.TreeDataProvider<OntologyTre
 
   getChildren(element?: OntologyTreeItem): OntologyTreeItem[] {
     if (!this.snapshot) {
-      return [
-        new OntologyTreeItem(
-          "placeholder",
-          "Index workspace to browse ontologies",
-          vscode.TreeItemCollapsibleState.None
-        ),
-      ];
+      // Empty tree so package.json viewsWelcome can show the index CTA.
+      return [];
     }
 
     const hierarchyMode = hierarchyModeFromConfig(
@@ -119,20 +114,22 @@ export class ExplorerTreeProvider implements vscode.TreeDataProvider<OntologyTre
     switch (this.viewKind) {
       case "ontologies":
         return this.snapshot.documents.map((doc) => {
-          const status =
-            doc.parse_status === "ok"
-              ? "$(check)"
-              : doc.parse_status === "warning"
-                ? "$(warning)"
-                : "$(error)";
           const item = new OntologyTreeItem(
             "document",
-            `${status} ${path.basename(doc.path)}`,
+            path.basename(doc.path),
             vscode.TreeItemCollapsibleState.None,
             undefined,
             doc.path
           );
           item.description = doc.base_iri;
+          item.iconPath = new vscode.ThemeIcon(
+            doc.parse_status === "ok"
+              ? "check"
+              : doc.parse_status === "warning"
+                ? "warning"
+                : "error"
+          );
+          item.tooltip = `${doc.path}\nParse status: ${doc.parse_status}`;
           if (doc.format === "turtle") {
             item.contextValue = "ontocodeTurtleDocument";
           }
@@ -260,20 +257,61 @@ export class ExplorerTreeProvider implements vscode.TreeDataProvider<OntologyTre
     hierarchyMode: import("../lsp/protocol").HierarchyMode = "asserted"
   ): OntologyTreeItem {
     const label = entityDisplayLabel(entity);
-    const unsat = this.snapshot && isUnsatisfiable(this.snapshot, entity.iri);
-    const displayLabel = unsat ? `${label} (unsat)` : label;
+    const unsat = Boolean(this.snapshot && isUnsatisfiable(this.snapshot, entity.iri));
     const item = new OntologyTreeItem(
       "entity",
-      displayLabel,
+      label,
       expandable
         ? vscode.TreeItemCollapsibleState.Collapsed
         : vscode.TreeItemCollapsibleState.None,
       entity.iri
     );
-    item.description = entityKindLabel(entity.kind);
-    if (entity.deprecated) {
-      item.iconPath = new vscode.ThemeIcon("warning");
-    }
+    const kind = entityKindLabel(entity.kind);
+    const flags = [
+      unsat ? "unsatisfiable" : undefined,
+      entity.deprecated ? "deprecated" : undefined,
+    ].filter(Boolean);
+    item.description = flags.length > 0 ? `${kind} · ${flags.join(" · ")}` : kind;
+    item.iconPath = entityThemeIcon(entity, unsat);
+    item.tooltip = [
+      entity.iri,
+      `Kind: ${kind}`,
+      unsat ? "Unsatisfiable" : undefined,
+      entity.deprecated ? "Deprecated" : undefined,
+    ]
+      .filter(Boolean)
+      .join("\n");
     return item;
+  }
+}
+
+function entityThemeIcon(entity: Entity, unsat: boolean): vscode.ThemeIcon {
+  if (unsat) {
+    return new vscode.ThemeIcon(
+      "error",
+      new vscode.ThemeColor("list.errorForeground")
+    );
+  }
+  if (entity.deprecated) {
+    return new vscode.ThemeIcon(
+      "warning",
+      new vscode.ThemeColor("list.warningForeground")
+    );
+  }
+  switch (entity.kind) {
+    case "class":
+      return new vscode.ThemeIcon("symbol-class");
+    case "object_property":
+      return new vscode.ThemeIcon("symbol-method");
+    case "data_property":
+      return new vscode.ThemeIcon("symbol-field");
+    case "annotation_property":
+      return new vscode.ThemeIcon("tag");
+    case "individual":
+      return new vscode.ThemeIcon("symbol-variable");
+    case "ontology":
+      return new vscode.ThemeIcon("file-code");
+    default:
+      return new vscode.ThemeIcon("symbol-misc");
   }
 }

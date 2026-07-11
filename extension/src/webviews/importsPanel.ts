@@ -8,6 +8,7 @@ import {
 } from "../lsp/patchFeedback";
 import { Entity, OntologyDocument } from "../lsp/protocol";
 import { documentUriInWorkspace } from "../utils/workspacePath";
+import { rememberPanelRestoreState } from "./layoutPersistence";
 import {
   AMBIGUOUS_ONTOLOGY_HEADER_MESSAGE,
   entityBelongsToDocument,
@@ -108,6 +109,10 @@ export class ImportsPanel {
     filePath: string,
     onRefresh?: RefreshFn
   ): Promise<ImportsPanel> {
+    void rememberPanelRestoreState("ontocodeImports", {
+      command: "ontocode.manageImports",
+      title: "Manage Imports",
+    });
     if (ImportsPanel.current) {
       ImportsPanel.current.host.panel.reveal(vscode.ViewColumn.Beside);
       await ImportsPanel.current.load(filePath);

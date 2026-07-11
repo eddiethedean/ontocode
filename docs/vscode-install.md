@@ -24,7 +24,7 @@ CLI install options (separate from the extension): [getting started (CLI)](getti
 
 ## Option A — VS Code Marketplace (recommended)
 
-1. Install [OntoCode from the Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) (v0.17.0+).
+1. Install [OntoCode from the Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) (v0.18.0+).
 2. **File → Open Folder…** and choose a directory with ontology files.
 3. OntoCode’s **bundled** language server runs without Trust; **Trust** only if you need custom `ontocode.lspPath` / `ontocode.robotPath`.
 4. Open the **OntoCode** activity bar and browse ontologies, classes, properties, individuals, and **Diagnostics**.
@@ -73,7 +73,7 @@ Set **OntoCode: Lsp Path** (`ontocode.lspPath`) to the absolute path of your `on
 
 1. Open **Extensions** in Cursor and search for **OntoCode** (publisher `ontocode`).
 2. Install **OntoCode** (`ontocode.ontocode`).
-3. Open a folder with ontology files and **Trust** the workspace.
+3. Open a folder with ontology files. OntoCode’s **bundled** language server works in trusted and Restricted Mode — **Trust** only if you set custom `ontocode.lspPath` or `ontocode.robotPath`.
 
 If OntoCode does not appear in search (before v0.11 or if Open VSX sync is delayed):
 
@@ -136,10 +136,10 @@ Indexing runs on workspace open. `ontocode.autoIndexOnOpen` is a legacy setting 
 | Symptom | Fix |
 |---------|-----|
 | Extension does not activate | Open a supported ontology file or the **OntoCode → Ontologies** view |
-| `failed to start language server` | **Trust** the workspace; check **Output → OntoCore Language Server**; uninstall duplicate OntoCode versions |
+| `failed to start language server` | Check **Output → OntoCore Language Server**; uninstall duplicate OntoCode versions; if using custom `ontocode.lspPath`, **Trust** the workspace |
 | `spawn ... ontocore-lsp EACCES` (macOS/Linux) | Upgrade to OntoCode ≥ 0.4.0. Manual: `chmod +x` on the bundled binary path from the error |
 | `couldn't create connection to server` | Check **Output → OntoCore Language Server**. Reinstall the extension or download a fresh VSIX from [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) |
-| Empty explorer after open | **Trust** the workspace; run **OntoCode: Index Workspace**; check **Output → OntoCore Language Server** |
+| Empty explorer after open | Run **OntoCode: Index Workspace**; check **Output → OntoCore Language Server**; Trust only if using custom `lspPath`/`robotPath` |
 | Inspector has no edit controls | Entity must be in a **Turtle (`.ttl`) or OBO (`.obo`)** file; RDF/XML, OWL/XML, and JSON-LD are read-only in the inspector |
 
 ### Developers (building from source)

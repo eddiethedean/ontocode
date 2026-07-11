@@ -141,6 +141,14 @@ export function GraphPanel(_props?: WorkspaceProps): JSX.Element {
     }
   }, [rootIri, requestGraph]);
 
+  // Depth / mode / filter changes should refresh (incremental expansion).
+  useEffect(() => {
+    if (!hasGraphData.current) {
+      return;
+    }
+    requestGraph();
+  }, [depth, graphMode, hideDeprecated, requestGraph]);
+
   useEffect(() => {
     if (!graph) {
       return;
@@ -204,7 +212,9 @@ export function GraphPanel(_props?: WorkspaceProps): JSX.Element {
           <div className="oc-badge-row">
             <Badge variant="kind">{graphKind}</Badge>
             {graph?.truncated ? (
-              <Badge variant="warning">Truncated</Badge>
+              <Badge variant="warning" title="Graph capped for large ontologies; narrow search or reduce depth">
+                Truncated (large ontology)
+              </Badge>
             ) : null}
           </div>
         </Section>
@@ -256,11 +266,12 @@ export function GraphPanel(_props?: WorkspaceProps): JSX.Element {
             />
           </label>
           <ButtonBar>
-            <button type="button" onClick={requestGraph}>
+            <button type="button" aria-label="Refresh graph" onClick={requestGraph}>
               Refresh graph
             </button>
             <button
               type="button"
+              aria-label="Expand graph depth"
               onClick={() => {
                 setDepth((d) => Math.min(5, d + 1));
               }}
@@ -269,6 +280,7 @@ export function GraphPanel(_props?: WorkspaceProps): JSX.Element {
             </button>
             <button
               type="button"
+              aria-label="Copy graph JSON"
               onClick={async () => {
                 if (!graph) {
                   return;
@@ -278,6 +290,53 @@ export function GraphPanel(_props?: WorkspaceProps): JSX.Element {
               }}
             >
               Copy JSON
+            </button>
+            <button
+              type="button"
+              aria-label="Export graph as JSON"
+              onClick={() => {
+                if (!graph) {
+                  return;
+                }
+                host.postToCore({
+                  type: "exportGraph",
+                  format: "json",
+                  payload: JSON.stringify(graph, null, 2),
+                  suggestedName: `ontocode-${graphKind}-graph.json`,
+                });
+              }}
+            >
+              Export JSON…
+            </button>
+            <button
+              type="button"
+              aria-label="Export graph as CSV"
+              onClick={() => {
+                if (!graph) {
+                  return;
+                }
+                const header = "row_kind,id,label,node_kind,source,target,inferred\n";
+                const nodeRows = graph.nodes
+                  .map(
+                    (n) =>
+                      `node,${csvCell(n.id)},${csvCell(n.label ?? "")},${csvCell(n.kind)},,,`
+                  )
+                  .join("\n");
+                const edgeRows = graph.edges
+                  .map(
+                    (e) =>
+                      `edge,,,,${csvCell(e.source)},${csvCell(e.target)},${e.inferred ? "true" : "false"}`
+                  )
+                  .join("\n");
+                host.postToCore({
+                  type: "exportGraph",
+                  format: "csv",
+                  payload: `${header}${nodeRows}\n${edgeRows}\n`,
+                  suggestedName: `ontocode-${graphKind}-graph.csv`,
+                });
+              }}
+            >
+              Export CSV…
             </button>
             <button
               type="button"
@@ -401,4 +460,11 @@ function toFlowEdges(
       animated: e.inferred,
       className: e.inferred ? "oc-graph-edge oc-graph-edge--inferred" : "oc-graph-edge",
     }));
+}
+
+function csvCell(value: string): string {
+  if (/[",\n]/.test(value)) {
+    return `"${value.replace(/"/g, '""')}"`;
+  }
+  return value;
 }

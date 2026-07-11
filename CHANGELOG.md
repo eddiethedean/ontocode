@@ -7,9 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.18.0] - 2026-07-11
+
+### Added
+
+- Protégé Desktop parity gate: distinct reasoner Start / Synchronize / Classify / Consistency workflows; Stop cancels the in-flight client request and ignores late results
+- Explanation stale banner wired to catalog fingerprint (`content_hash` / `indexed_at`) after reindex while the panel stays open
+- Layout restore: recovered webview tabs offer **Reopen panel** using the last saved command + context
+- Expanded `examples/protege-roundtrip/` workflow fixtures and `tests/protege_roundtrip.rs` coverage
+- Desktop parity assessment, refreshed Protégé migration guide, and honest known-gap list ([migration/v0.18.md](docs/migration/v0.18.md))
+
+### Changed
+
+- Workspace package and all `ontocore-*` crates bumped to **0.18.0**; extension marketplace and webview UI **0.18.0**
+- MENUS checklist honesty: Persist layout / Stop reasoner / cancellation marked Partial until v0.18 closeout
+- Graph truncation messaging and basic ARIA/focus affordances on Explanation, Reasoner, and restore chrome
+- Extension UI polish: React Reasoner and Explanation panels on the shared `oc-*` shell, explorer ThemeIcons, unified Loading/Empty states
+- Docs adoption pass: version freshness, MkDocs IA (exclude engineering corpus, redirect maps), Trust messaging, known-limitations honesty
+
 ### Fixed
 
 - Remap blank nodes per document when merging into the shared SPARQL store so multi-file workspaces no longer fuse unrelated restrictions ([#160](https://github.com/eddiethedean/ontocode/issues/160))
+- Graph **Expand** refreshes after depth changes; Preferences hub covers reasoner/query/keys/plugins categories
+- Graph **Export JSON/CSV** via save dialog (v0.15 visualization remainder)
 
 ## [0.17.0] - 2026-07-10
 
@@ -345,6 +365,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SPARQL update guard bypass after `PREFIX` or comment lines
 - Capped file reads in parser, catalog semantics, and refactor preview/backup paths
 
+[0.18.0]: https://github.com/eddiethedean/ontocode/releases/tag/v0.18.0
 [0.17.0]: https://github.com/eddiethedean/ontocode/releases/tag/v0.17.0
 [0.16.0]: https://github.com/eddiethedean/ontocode/releases/tag/v0.16.0
 [0.15.0]: https://github.com/eddiethedean/ontocode/releases/tag/v0.15.0

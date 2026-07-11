@@ -24,6 +24,6 @@ Introduce **OntoUI** as the named shared React platform:
 
 ## References
 
-- [platform/ONTOUI.md](../platform/ONTOUI.md)
+- [platform/ONTOUI.md](https://github.com/eddiethedean/ontocode/blob/main/docs/platform/ONTOUI.md)
 - [design/adr/0017-react-webview-ui.md](../design/adr/0017-react-webview-ui.md)
 - [glossary.md](../glossary.md)

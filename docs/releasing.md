@@ -43,6 +43,11 @@ Maintainer checklist for publishing crates, binaries, and the VS Code extension.
 - [ ] [docs/migration/v0.12.md](migration/v0.12.md) — authoring parity upgrade notes when applicable
 - [ ] [docs/migration/v0.13.md](migration/v0.13.md) — OntoUI platform upgrade notes when applicable
 - [ ] [docs/migration/v0.14.md](migration/v0.14.md) — plugin host MVP upgrade notes when applicable
+- [ ] [docs/migration/v0.15.md](migration/v0.15.md) — plugin permissions / UI views when applicable
+- [ ] [docs/migration/v0.16.md](migration/v0.16.md) — plugin preferences / layout polish when applicable
+- [ ] [docs/migration/v0.17.md](migration/v0.17.md) — Protégé-shell menus / perspectives when applicable
+- [ ] [docs/migration/v0.18.md](migration/v0.18.md) — Protégé Desktop parity gate when applicable
+- [ ] [docs/ontocode/feature-tour.md](ontocode/feature-tour.md) — retitle to current release
 - [ ] [ROADMAP.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/ROADMAP.md) and [docs/roadmap.md](roadmap.md) — keep shipped/planned sections in sync
 - [ ] [docs/guides/plugins.md](guides/plugins.md) — plugin authoring when plugin surface changes
 - [ ] [docs/design/PROTEGE_PARITY.md](design/PROTEGE_PARITY.md) — status columns if features shipped
@@ -57,8 +62,8 @@ Maintainer checklist for publishing crates, binaries, and the VS Code extension.
 Push a tag matching `[workspace.package].version` in `Cargo.toml`:
 
 ```bash
-git tag v0.17.0   # must match [workspace.package].version in Cargo.toml
-git push origin v0.17.0
+git tag v0.18.0   # must match [workspace.package].version in Cargo.toml
+git push origin v0.18.0
 ```
 
 The [release workflow on GitHub](https://github.com/eddiethedean/ontocode/blob/main/.github/workflows/release.yml):

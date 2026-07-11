@@ -1,6 +1,6 @@
 # Evaluating OntoCode for your organization
 
-This page helps security, platform, and ontology teams decide whether OntoCode **v0.17.0** fits your workflow. It is honest about **what ships today** vs the v1.0 Protégé-competitive target.
+This page helps security, platform, and ontology teams decide whether OntoCode **v0.18.0** fits your workflow. It is honest about **what ships today** vs the v1.0 Protégé-competitive target.
 
 Canonical capability matrix: [What ships today](../SHIPPED.md).
 
@@ -27,7 +27,7 @@ Prefer Protégé or other tools (or wait for v1.0) if you need:
 | [Protégé coexistence](protege-coexistence.md) | Ontology teams — split workflow with Protégé |
 | [Plugin authoring](plugins.md) | Platform — v0.16+ plugin API (permissions, views, preferences, context actions), manifests, subprocess plugins |
 
-## What ships today (v0.17.0)
+## What ships today (v0.18.0)
 
 | Capability | Status |
 |------------|--------|

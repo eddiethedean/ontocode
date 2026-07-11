@@ -12,7 +12,9 @@ export type PanelKind =
   | "metrics"
   | "about"
   | "newOntology"
-  | "prefixManager";
+  | "prefixManager"
+  | "reasoner"
+  | "explanation";
 
 export interface CatalogStats {
   ontology_count: number;
@@ -192,6 +194,39 @@ export interface DiffPayload {
   };
 }
 
+export interface ReasonerResultPayload {
+  profile_used: string;
+  consistent: boolean;
+  unsatisfiable: string[];
+  inferred_edge_count: number;
+  new_inferences: Array<{ child: string; parent: string }>;
+  warnings: Array<{ code: string; message: string; suggested_profile?: string }>;
+  duration_ms: number;
+}
+
+export interface ExplanationStepPayload {
+  index: number;
+  rule: string;
+  display: string;
+  subject_iri?: string;
+  object_iri?: string;
+}
+
+export interface ExplanationJustification {
+  title: string;
+  steps: ExplanationStepPayload[];
+  text: string;
+}
+
+export interface ExplanationPayload {
+  classIri: string;
+  profile: string;
+  stale: boolean;
+  justifications: ExplanationJustification[];
+  indexed_at: number;
+  content_hash: string;
+}
+
 import type { CurrentFocus, ReasoningStatePayload } from "../focus/types";
 
 /** Host → React */
@@ -228,6 +263,15 @@ export type HostMessage =
         }>;
       }>;
     }
+  | { type: "reasonerSyncRunId"; runId: number }
+  | {
+      type: "reasonerResult";
+      runId: number;
+      result?: ReasonerResultPayload;
+      summary?: string;
+      error?: string;
+    }
+  | { type: "loadExplanation"; payload: ExplanationPayload }
   | { type: "error"; message: string };
 
 /** React → Host */
@@ -259,11 +303,17 @@ export type WebviewMessage =
   | { type: "runQuery"; mode: "sql" | "sparql"; text: string; runId: number }
   | { type: "saveQuery"; name: string; mode: "sql" | "sparql"; text: string }
   | { type: "exportQueryResult"; format: "csv" | "json"; runId?: number }
+  | { type: "exportGraph"; format: "json" | "csv"; payload: string; suggestedName?: string }
   | { type: "validateManchester"; expression: string; axiomKind: string; seq: number }
   | { type: "applyManchester"; expression: string; axiomKind: string; previewOnly: boolean }
   | { type: "copyMarkdown" }
   | { type: "setFocus"; focus: CurrentFocus }
-  | { type: "showNotification"; message: string; level?: "info" | "warning" | "error" };
+  | { type: "showNotification"; message: string; level?: "info" | "warning" | "error" }
+  | { type: "runReasoner"; profile: string; autoDetect: boolean; runId: number }
+  | { type: "explainUnsat"; classIri: string }
+  | { type: "showInferredHierarchy" }
+  | { type: "copyText"; text: string }
+  | { type: "rerunReasoner" };
 
 export function isWebviewMessage(data: unknown): data is WebviewMessage {
   if (typeof data !== "object" || data === null || !("type" in data)) {
@@ -321,6 +371,12 @@ export function isWebviewMessage(data: unknown): data is WebviewMessage {
         (msg.format === "csv" || msg.format === "json") &&
         (msg.runId === undefined || typeof msg.runId === "number")
       );
+    case "exportGraph":
+      return (
+        (msg.format === "csv" || msg.format === "json") &&
+        typeof msg.payload === "string" &&
+        (msg.suggestedName === undefined || typeof msg.suggestedName === "string")
+      );
     case "copyMarkdown":
     case "jumpToSource":
     case "addManchesterAxiom":
@@ -329,7 +385,19 @@ export function isWebviewMessage(data: unknown): data is WebviewMessage {
     case "renameIri":
     case "applyRefactor":
     case "cancelRefactor":
+    case "showInferredHierarchy":
+    case "rerunReasoner":
       return true;
+    case "runReasoner":
+      return (
+        typeof msg.profile === "string" &&
+        typeof msg.autoDetect === "boolean" &&
+        typeof msg.runId === "number"
+      );
+    case "explainUnsat":
+      return typeof msg.classIri === "string";
+    case "copyText":
+      return typeof msg.text === "string";
     case "setFocus": {
       const focus = (data as { focus?: unknown }).focus;
       return (

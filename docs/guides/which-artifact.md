@@ -7,8 +7,8 @@ OntoCode is a product family. You usually need **one** primary artifact — not 
 | I want to… | Install | Docs |
 |------------|---------|------|
 | Browse and edit ontologies in VS Code | [OntoCode extension](../vscode-install.md) (Marketplace or Open VSX) | [First success (~10 min)](first-success.md) |
-| Validate, query, or classify ontologies in CI | `cargo install ontocore-cli --locked --version 0.17.0` | [Getting started](../getting-started.md) · [CI integration](../ci-integration.md) |
-| Embed indexing/query in a Rust application | `ontocore = "0.17"` in `Cargo.toml` | [Rust library guide](rust-library.md) |
+| Validate, query, or classify ontologies in CI | `cargo install ontocore-cli --locked --version 0.18.0` | [Getting started](../getting-started.md) · [CI integration](../ci-integration.md) |
+| Embed indexing/query in a Rust application | `ontocore = "0.18"` in `Cargo.toml` | [Rust library guide](rust-library.md) |
 | Build a custom editor on the language server | Bundle or spawn `ontocore-lsp` | [LSP API](../lsp-api.md) |
 | Run OWL reasoning (classification, explanations) | Included via OntoCore — no separate install | [Reasoner guide](reasoner.md) |
 

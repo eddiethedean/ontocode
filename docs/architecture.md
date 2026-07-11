@@ -8,16 +8,16 @@
 > |-----------|------|
 > | **This page** (`architecture.md`) | Product/ecosystem overview — Ontologos, OntoCore, OntoCode |
 > | [Implementation architecture](design/ARCHITECTURE.md) | Contributor crate layout and internal modules |
-> | [Product design / UI platform](ui/PLATFORM_ARCHITECTURE.md) | Shared **OntoUI**, OntoStudio target, design system |
-> | [Platform architecture (implementation)](platform/OVERVIEW.md) | OntoUI, WorkspaceStore, plugin host — **shipped v0.13–v0.17** |
-| [Plugin authoring](guides/plugins.md) | Workspace manifests, reference plugins, subprocess workflows (v0.17) |
+> | [Product design / UI platform](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/PLATFORM_ARCHITECTURE.md) | Shared **OntoUI**, OntoStudio target, design system |
+> | [Platform architecture (implementation)](https://github.com/eddiethedean/ontocode/blob/main/docs/platform/OVERVIEW.md) | OntoUI, WorkspaceStore, plugin host — **shipped v0.13–v0.17** |
+> | [Plugin authoring](guides/plugins.md) | Workspace manifests, reference plugins, subprocess workflows (v0.17) |
 > | [OntoCore architecture](ontocore/architecture.md) | Short OntoCore stack summary (links here for detail) |
 >
 > **Contributor crate layout:** [Implementation architecture](design/ARCHITECTURE.md) (internal modules only).
 >
-> **v0.17 ships today:** OntoCode (VS Code), OntoCore (CLI/LSP/library), Turtle + OBO write-back, property chain editing, OWL/XML read-only catalog, DL explanations (with alternatives and staleness), semantic diff (`--pr-summary`), incremental indexing, Ontologos reasoning, ROBOT CLI wrappers, **WorkspaceStore + cross-panel focus sync**, **Query Workbench schema browser**, **configurable diagnostics**, **LSP semantic tokens** (Turtle/OBO), **plugin host** (manifests, permissions, UI views/commands/**preferences/context actions**, reference plugins, CLI/LSP hooks, owlmake scaffold), **graph asserted/inferred/combined modes**, **imports reload + layout reset**.
+> **v0.18 ships today:** OntoCode (VS Code), OntoCore (CLI/LSP/library), Turtle + OBO write-back, property chain editing, OWL/XML read-only catalog, DL explanations (with alternatives and staleness), semantic diff (`--pr-summary`), incremental indexing, Ontologos reasoning, ROBOT CLI wrappers, **WorkspaceStore + cross-panel focus sync**, **Query Workbench schema browser**, **configurable diagnostics**, **LSP semantic tokens** (Turtle/OBO), **plugin host** (manifests, permissions, UI views/commands/**preferences/context actions**, reference plugins, CLI/LSP hooks, owlmake scaffold), **graph asserted/inferred/combined modes**, **imports reload + layout reset**, **reasoner cancel + distinct lifecycle**, **layout reopen-with-context**, Protégé Desktop parity gate.
 > **Planned v1.0:** stable plugin API, full workflow plugin integration, language SDKs, MCP server. See [Platform roadmap](roadmap.md).
-> **Planned post-1.0:** OntoStudio desktop, AI-native workflows — [UI roadmap mapping](ui/ROADMAP_MAPPING.md).
+> **Planned post-1.0:** OntoStudio desktop, AI-native workflows — [UI roadmap mapping](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/ROADMAP_MAPPING.md).
 > Canonical capability matrix: [What ships today](SHIPPED.md).
 
 ```
@@ -29,7 +29,7 @@ External Workflow Plugins (v0.17)  ← subprocess workflow plugins; API v1 (perm
           ▼
 Applications
 ├── OntoCode (VS Code)             ← ships today
-├── OntoStudio (desktop)           ← planned post v1.0 ([UI spec](ui/ONTOSTUDIO_DESKTOP.md))
+├── OntoStudio (desktop)           ← planned post v1.0 ([UI spec](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/ONTOSTUDIO_DESKTOP.md))
 ├── CLI                            ← ships today
 ├── GitHub Actions (via CLI)       ← ships today
 ├── Python / TypeScript SDKs       ← planned

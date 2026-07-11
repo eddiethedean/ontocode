@@ -11,6 +11,8 @@ import { AboutPanel } from "../panels/AboutPanel";
 import { NewOntologyDialog } from "../panels/NewOntologyDialog";
 import { PrefixManagerDialog } from "../panels/PrefixManagerDialog";
 import { SmokePanel } from "../panels/SmokePanel";
+import { ReasonerPanel } from "../panels/ReasonerPanel";
+import { ExplanationPanel } from "../panels/ExplanationPanel";
 import type { WorkspaceDefinition } from "./types";
 
 const definitions = new Map<string, WorkspaceDefinition>();
@@ -103,6 +105,18 @@ function bootRegistry(): void {
       title: "Prefix Manager",
       panelKind: "prefixManager",
       component: PrefixManagerDialog,
+    },
+    {
+      id: "reasoner",
+      title: "Reasoner",
+      panelKind: "reasoner",
+      component: ReasonerPanel,
+    },
+    {
+      id: "explanation",
+      title: "Explanation",
+      panelKind: "explanation",
+      component: ExplanationPanel,
     },
     {
       id: "smoke",

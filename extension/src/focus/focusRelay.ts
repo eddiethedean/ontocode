@@ -1,13 +1,20 @@
 import type { PanelHost } from "../webviews/panelHost";
-import type { CurrentFocus, ReasoningStatePayload } from "./types";
+import type {
+  CatalogFingerprint,
+  CurrentFocus,
+  ReasoningStatePayload,
+} from "./types";
 
 type FocusListener = (focus: CurrentFocus | null) => void;
+type CatalogListener = (fingerprint: CatalogFingerprint | null) => void;
 
 class FocusRelayService {
   private focus: CurrentFocus | null = null;
   private reasoning: ReasoningStatePayload | null = null;
+  private catalog: CatalogFingerprint | null = null;
   private hosts = new Set<PanelHost>();
   private listeners = new Set<FocusListener>();
+  private catalogListeners = new Set<CatalogListener>();
 
   getFocus(): CurrentFocus | null {
     return this.focus;
@@ -15,6 +22,10 @@ class FocusRelayService {
 
   getReasoning(): ReasoningStatePayload | null {
     return this.reasoning;
+  }
+
+  getCatalogFingerprint(): CatalogFingerprint | null {
+    return this.catalog;
   }
 
   registerHost(host: PanelHost): () => void {
@@ -27,6 +38,11 @@ class FocusRelayService {
   subscribe(listener: FocusListener): () => void {
     this.listeners.add(listener);
     return () => this.listeners.delete(listener);
+  }
+
+  subscribeCatalog(listener: CatalogListener): () => void {
+    this.catalogListeners.add(listener);
+    return () => this.catalogListeners.delete(listener);
   }
 
   setFocus(
@@ -54,6 +70,13 @@ class FocusRelayService {
   setReasoningState(state: ReasoningStatePayload): void {
     this.reasoning = state;
     this.broadcastReasoning();
+  }
+
+  setCatalogFingerprint(fingerprint: CatalogFingerprint): void {
+    this.catalog = fingerprint;
+    for (const listener of this.catalogListeners) {
+      listener(fingerprint);
+    }
   }
 
   markReasoningDirty(): void {
@@ -110,8 +133,10 @@ class FocusRelayService {
   resetForTests(): void {
     this.focus = null;
     this.reasoning = null;
+    this.catalog = null;
     this.hosts.clear();
     this.listeners.clear();
+    this.catalogListeners.clear();
   }
 }
 

@@ -44,17 +44,17 @@ After 1.0, the roadmap shifts from parity to modernization.
 ### Timeline
 
 ```text
-SHIPPED (v0.1–v0.17) ─────────────────────────────────────────────────►
-v0.1–v0.4          v0.5–v0.8              v0.9–v0.12           v0.13–v0.14
-Engine foundation    IDE depth                Platform & authoring   OntoUI + plugins
+SHIPPED (v0.1–v0.18) ─────────────────────────────────────────────────►
+v0.1–v0.4          v0.5–v0.8              v0.9–v0.12           v0.13–v0.18
+Engine foundation    IDE depth                Platform & authoring   OntoUI → parity gate
   │                    │                        │                      │
   Foundation           Query, reason,           Identity, diff,      WorkspaceStore,
-  Explorer, diag,      graphs, refactor,        OBO write-back,      focus relay,
-  write-back           Manchester               OWL/XML catalog      plugin host MVP
+  Explorer, diag,      graphs, refactor,        OBO write-back,      plugins, menus,
+  write-back           Manchester               OWL/XML catalog      Desktop parity
 
-PLANNED (v0.18–v1.0) ─────────────────────────────────────────────────►
-v0.18                                                                 v1.0
-Protégé parity closeout                                              1.0 exit
+PLANNED (v1.0+) ──────────────────────────────────────────────────────►
+v1.0
+1.0 exit / Protégé replacement
 ```
 
 ### Phase index
@@ -119,7 +119,7 @@ OntoUI work uses **UI phases 0–12** from [Product Roadmap 2.0](docs/ui/PRODUCT
 
 ---
 
-## Shipped releases (v0.1–v0.17)
+## Shipped releases (v0.1–v0.18)
 
 ### Era A — Engine foundation (v0.1–v0.4)
 

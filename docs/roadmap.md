@@ -46,13 +46,13 @@ After 1.0, the roadmap shifts from parity to modernization.
 ### Timeline
 
 ```text
-SHIPPED (v0.1–v0.14) ─────────────────────────────────────────────────►
-v0.1–v0.4          v0.5–v0.8              v0.9–v0.12           v0.13–v0.14
-Engine foundation    IDE depth                Platform & authoring   OntoUI + plugins
+SHIPPED (v0.1–v0.18) ─────────────────────────────────────────────────►
+v0.1–v0.4          v0.5–v0.8              v0.9–v0.12           v0.13–v0.18
+Engine foundation    IDE depth                Platform & authoring   OntoUI → parity gate
   │                    │                        │                      │
   Foundation           Query, reason,           Identity, diff,      WorkspaceStore,
-  Explorer, diag,      graphs, refactor,        OBO write-back,      focus relay,
-  write-back           Manchester               OWL/XML catalog      plugin host MVP
+  Explorer, diag,      graphs, refactor,        OBO write-back,      plugins, menus,
+  write-back           Manchester               OWL/XML catalog      Desktop parity
 
 PLANNED (v1.0+) ──────────────────────────────────────────────────────►
 ```
@@ -65,8 +65,9 @@ PLANNED (v1.0+) ─────────────────────�
 | **B — IDE depth** | v0.5–v0.8 | Shipped | Query, reason, visualize, refactor |
 | **C — Platform & authoring** | v0.9–v0.12 | Shipped | OntoCore identity, semantic workspace, authoring parity |
 | **D — OntoUI platform** | v0.13–v0.14 | Shipped | v0.13: WorkspaceStore, focus relay; v0.14: plugin host MVP |
-| **E — Protégé replacement** | v1.0 | Planned | Daily OWL/OBO engineering without Protégé |
-| **F — Ecosystem** | v1.1–v1.2+ | Planned | SDKs, AI, toolchain & collaboration |
+| **E — Pre-1.0 Protégé parity** | v0.15–v0.18 | Shipped | Desktop parity gate closed in v0.18; v1.0 polish remains |
+| **F — Protégé replacement** | v1.0 | Planned | Daily OWL/OBO engineering without Protégé |
+| **G — Ecosystem** | v1.1–v1.2+ | Planned | SDKs, AI, toolchain & collaboration |
 
 | Phase | Version | Era | Status | UI phases | Theme |
 |-------|---------|-----|--------|-----------|-------|
@@ -115,7 +116,7 @@ OntoUI work uses **UI phases 0–12** from [Product Roadmap 2.0](https://github.
 
 ---
 
-## Shipped releases (v0.1–v0.17)
+## Shipped releases (v0.1–v0.18)
 
 ### Era A — Engine foundation (v0.1–v0.4)
 
@@ -422,7 +423,7 @@ See [migration/v0.16.md](migration/v0.16.md) and [SHIPPED.md](SHIPPED.md).
 
 ### v0.17 — Menus/toolbars/dialog parity (shipped, partial)
 
-**Released:** v0.18.0
+**Released:** v0.17.0 (2026-07-10)
 
 See [v0.17 scope](design/v0.17_SCOPE.md), [migration/v0.17.md](migration/v0.17.md), and root [ROADMAP.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/ROADMAP.md).
 

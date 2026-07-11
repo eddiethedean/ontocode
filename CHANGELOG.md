@@ -22,6 +22,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Workspace package and all `ontocore-*` crates bumped to **0.18.0**; extension marketplace and webview UI **0.18.0**
 - MENUS checklist honesty: Persist layout / Stop reasoner / cancellation marked Partial until v0.18 closeout
 - Graph truncation messaging and basic ARIA/focus affordances on Explanation, Reasoner, and restore chrome
+- Extension UI polish: React Reasoner and Explanation panels on the shared `oc-*` shell, explorer ThemeIcons, unified Loading/Empty states
+- Docs adoption pass: version freshness, MkDocs IA (exclude engineering corpus, redirect maps), Trust messaging, known-limitations honesty
 
 ### Fixed
 

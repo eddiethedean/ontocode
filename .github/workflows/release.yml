@@ -17,6 +17,21 @@ jobs:
     steps:
       - uses: actions/checkout@v6
 
+      # Same reclaim as CI test/MSRV jobs — clippy --all-features + workspace
+      # tests otherwise exhaust the ~14GB runner disk (v0.18.0 release failure).
+      - name: Free disk space
+        run: |
+          set -euo pipefail
+          echo "Disk before cleanup:"
+          df -h
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+          sudo docker image prune --all --force || true
+          echo "Disk after cleanup:"
+          df -h
+
       - uses: dtolnay/rust-toolchain@stable
         with:
           components: rustfmt, clippy
@@ -36,6 +51,13 @@ jobs:
 
       - name: clippy
         run: cargo clippy --workspace --all-targets --all-features -- -D warnings
+
+      # Drop the all-features clippy tree before test profile rebuilds.
+      - name: Reclaim disk after clippy
+        run: |
+          set -euo pipefail
+          cargo clean
+          df -h
 
       - name: Build core binaries (cached for tests)
         run: cargo build -p ontocore-lsp -p ontocore-cli --bins

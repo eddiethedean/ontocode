@@ -2,7 +2,7 @@
 
 Master index for OntoCode / OntoCore planning, architecture, and user documentation.
 
-**Current release:** v0.18.0 · **Canonical capabilities:** [What ships today](SHIPPED.md) · **Limits:** [Known limitations](known-limitations.md) · **Terms:** [Glossary](glossary.md)
+**Current release:** v0.18.1 · **Canonical capabilities:** [What ships today](SHIPPED.md) · **Limits:** [Known limitations](known-limitations.md) · **Terms:** [Glossary](glossary.md)
 
 The public site navigation is defined in [`mkdocs.yml`](https://github.com/eddiethedean/ontocode/blob/main/mkdocs.yml). This page is a reading-order map — not a second nav.
 

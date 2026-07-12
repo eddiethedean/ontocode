@@ -37,7 +37,7 @@ After 1.0, the roadmap shifts from parity to modernization.
 | [Product Roadmap 2.0](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/PRODUCT_ROADMAP_2.0.md) | UI phases with milestone acceptance criteria |
 | [Product design (UI)](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/README.md) | Product design specification pack (UX, design system, OntoStudio target) |
 
-**Current release:** v0.18.0
+**Current release:** v0.18.1
 
 ---
 
@@ -431,7 +431,7 @@ See [v0.17 scope](design/v0.17_SCOPE.md), [migration/v0.17.md](migration/v0.17.m
 
 ### v0.18 — Protégé Desktop parity gate + migration readiness (shipped)
 
-**Released:** v0.18.0 (2026-07-11)
+**Released:** v0.18.0 (2026-07-11); patch **v0.18.1** (2026-07-11)
 
 **Theme:** Finish last-mile Desktop parity and ship a verifiable “Protégé not required” path before the 1.0 push.
 

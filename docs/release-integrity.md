@@ -22,7 +22,7 @@ On Linux you may use `sha256sum -c SHA256SUMS` instead.
 ## Worked example (Linux x64 CLI)
 
 ```bash
-VERSION=0.18.0   # replace with the release tag you are verifying
+VERSION=0.18.1   # replace with the release tag you are verifying
 curl -fsSLO "https://github.com/eddiethedean/ontocode/releases/download/v${VERSION}/SHA256SUMS"
 curl -fsSLO "https://github.com/eddiethedean/ontocode/releases/download/v${VERSION}/ontocore-v${VERSION}-x86_64-unknown-linux-gnu.tar.gz"
 sha256sum -c SHA256SUMS

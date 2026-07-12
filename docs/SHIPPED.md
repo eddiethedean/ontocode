@@ -1,8 +1,8 @@
-# What ships today (v0.18.0)
+# What ships today (v0.18.1)
 
 > **Canonical capability matrix.** Update this page on every release. Design specs under [Project](design/README.md) may describe future targets — check here for what is actually available.
 
-**Current release:** v0.18.0 · [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) · [Migration from v0.17](migration/v0.18.md)
+**Current release:** v0.18.1 · [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) · [Migration from v0.17](migration/v0.18.md) · [Patch notes](migration/v0.18.1.md)
 
 ## Products
 
@@ -63,6 +63,13 @@
 | Index / query | Yes | Yes | Yes (Horned catalog) | Yes |
 | Write-back (inspector, patches, refactor) | Yes | Yes | Read-only | Read-only |
 | Rich OBO metadata (synonyms, defs, xrefs) | — | Yes | — | — |
+
+## New in v0.18.1
+
+| Capability | Status |
+|------------|--------|
+| Named unsatisfiable expansion (classes ⊑ `owl:Nothing` and descendants in reasoner `unsatisfiable` / `consistent`) | Yes |
+| Stronger reasoner / Protégé / diff / path-jail / OBO and LSP workflow test oracles | Yes |
 
 ## New in v0.18.0
 

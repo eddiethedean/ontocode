@@ -4,6 +4,10 @@ Canonical source: [CHANGELOG.md on GitHub](https://github.com/eddiethedean/ontoc
 
 Migration guides: [Migration index](migration/README.md)
 
+## [0.18.1] - 2026-07-11
+
+**v0.18.1** — Patch: named unsatisfiable expansion for classes ⊑ `owl:Nothing` (and descendants); stronger reasoner/Protégé/diff/path-jail/OBO and LSP workflow tests. See [CHANGELOG.md](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) and [migration/v0.18.1.md](migration/v0.18.1.md).
+
 ## [0.18.0] - 2026-07-11
 
 **v0.18.0** — Protégé Desktop parity gate: distinct reasoner lifecycle + client cancel, explanation stale UX, layout reopen-with-context, expanded protege-roundtrip fixtures, migration guide + honest known gaps; plus extension UI polish (React Reasoner/Explanation) and docs adoption (version freshness, MkDocs IA, Trust). See [CHANGELOG.md](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) and [migration/v0.18.md](migration/v0.18.md).

@@ -1,6 +1,6 @@
 # Errors reference (OntoCore v0.18)
 
-Unified catalog of error codes, exit behavior, and failure modes for OntoCore **v0.18.0**.
+Unified catalog of error codes, exit behavior, and failure modes for OntoCore **v0.18.1**.
 
 ## CLI exit codes
 

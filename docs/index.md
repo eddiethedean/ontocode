@@ -7,7 +7,7 @@ hide:
 <div class="oc-hero">
 
 <div class="oc-hero-badges">
-  <span class="oc-badge oc-badge--accent">v0.18.0</span>
+  <span class="oc-badge oc-badge--accent">v0.18.1</span>
   <span class="oc-badge">VS Code</span>
   <span class="oc-badge">CLI · LSP</span>
   <span class="oc-badge">Plugins</span>
@@ -134,7 +134,7 @@ Index and explore OWL/RDF/OBO, run queries, refactors, and reasoning — in VS C
 
 ## What ships today
 
-**v0.18.0 highlights:** Protégé Desktop parity gate — distinct reasoner lifecycle + client cancel, explanation stale UX, layout reopen-with-context, expanded protege-roundtrip fixtures, and a refreshed Protégé migration guide with honest known gaps.
+**v0.18.1 highlights:** Named unsatisfiable expansion for classes ⊑ `owl:Nothing` (and descendants); stronger reasoner/Protégé/diff and LSP workflow tests. Built on the v0.18 Protégé Desktop parity gate.
 
 Full matrix: **[What ships today](SHIPPED.md)** (canonical — do not rely on this summary alone).
 

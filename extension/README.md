@@ -5,7 +5,7 @@
 
 **Ontology IDE for VS Code** — powered by **OntoCore** (`ontocore-lsp` language server).
 
-**Current release: v0.18.0** — [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) · [Known limitations](https://ontocode-vs.readthedocs.io/en/latest/known-limitations/) · [What's new in v0.18](https://ontocode-vs.readthedocs.io/en/latest/migration/v0.18/)
+**Current release: v0.18.1** — [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) · [Known limitations](https://ontocode-vs.readthedocs.io/en/latest/known-limitations/) · [What's new in v0.18](https://ontocode-vs.readthedocs.io/en/latest/migration/v0.18/)
 
 > **New here?** **[First success (~10 min)](https://ontocode-vs.readthedocs.io/en/latest/guides/first-success/)** · [Migrating from Protégé?](https://ontocode-vs.readthedocs.io/en/latest/guides/protege-migration/) · [Feature tour](https://ontocode-vs.readthedocs.io/en/latest/ontocode/feature-tour/) · [FAQ](https://ontocode-vs.readthedocs.io/en/latest/faq/)
 
@@ -175,9 +175,11 @@ More detail: [Installation & troubleshooting](https://ontocode-vs.readthedocs.io
 
 ---
 
-## What's included in v0.18.0
+## What's included in v0.18.1
 
-**New in v0.18:** Protégé Desktop parity gate — distinct reasoner **Start / Synchronize / Classify / Consistency**, client-side **Stop** cancel, explanation **stale** detection, layout **reopen-with-context**, expanded Protégé round-trip fixtures. See [What's new in v0.18](https://ontocode-vs.readthedocs.io/en/latest/migration/v0.18/).
+**New in v0.18.1:** Named unsatisfiable expansion (classes ⊑ `owl:Nothing` and descendants). See [v0.18.1 migration](https://ontocode-vs.readthedocs.io/en/latest/migration/v0.18.1/).
+
+**In v0.18:** Protégé Desktop parity gate — distinct reasoner **Start / Synchronize / Classify / Consistency**, client-side **Stop** cancel, explanation **stale** detection, layout **reopen-with-context**, expanded Protégé round-trip fixtures. See [What's new in v0.18](https://ontocode-vs.readthedocs.io/en/latest/migration/v0.18/).
 
 **From v0.17:** Protégé-shell menus, toolbars, and dialogs; named perspectives and layout persistence; command registry / workspace UI state via LSP.
 

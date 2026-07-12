@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Extension authoring safety: workspace path guards on create entity, Manchester apply, and inspector/imports apply; honest error toasts when `documentUri` is outside the workspace ([#213](https://github.com/eddiethedean/ontocode/issues/213), [#230](https://github.com/eddiethedean/ontocode/issues/230), [#239](https://github.com/eddiethedean/ontocode/issues/239))
+- Create/delete entity refreshes the explorer when disk apply succeeds but editor sync is cancelled ([#236](https://github.com/eddiethedean/ontocode/issues/236))
+- Imports panel opens from the command palette and Review perspective; session restore persists `filePath` ([#227](https://github.com/eddiethedean/ontocode/issues/227))
+- Graph panel updates title and restores the correct graph kind after reload ([#229](https://github.com/eddiethedean/ontocode/issues/229))
+- Manchester editor session restore persists `iri` and `documentUri` ([#235](https://github.com/eddiethedean/ontocode/issues/235))
+
 ## [0.18.1] - 2026-07-12
 
 ### Fixed

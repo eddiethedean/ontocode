@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
   PERSPECTIVES,
+  graphRestoreState,
   resolvePanelRestoreState,
   type PanelRestoreState,
 } from "./layoutPersistenceLogic";
@@ -28,6 +29,32 @@ describe("layoutPersistenceLogic", () => {
     assert.deepEqual(
       resolvePanelRestoreState({ ontocodeExplanation: saved }, "ontocodeExplanation"),
       saved
+    );
+  });
+
+  it("graphRestoreState maps graphKind to restore commands", () => {
+    assert.deepEqual(graphRestoreState({ graphKind: "class" }, "Class Graph"), {
+      command: "ontocode.openClassGraph",
+      title: "Class Graph",
+    });
+    assert.deepEqual(graphRestoreState({ graphKind: "property" }, "Property Graph"), {
+      command: "ontocode.openPropertyGraph",
+      title: "Property Graph",
+    });
+    assert.deepEqual(graphRestoreState({ graphKind: "import" }, "Import Graph"), {
+      command: "ontocode.openImportGraph",
+      title: "Import Graph",
+    });
+    assert.deepEqual(
+      graphRestoreState(
+        { graphKind: "neighborhood", rootIri: "http://ex.org#Person" },
+        "Neighborhood"
+      ),
+      {
+        command: "ontocode.openNeighborhoodGraph",
+        args: ["http://ex.org#Person"],
+        title: "Neighborhood",
+      }
     );
   });
 });

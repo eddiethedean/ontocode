@@ -6,7 +6,7 @@ import {
   indexWorkspace,
   listPlugins,
 } from "../lsp/client";
-import { isPatchFullySynced, patchFailureMessage } from "../lsp/patchFeedback";
+import { isPatchFullySynced, patchFailureMessage, patchSyncCancelledMessage } from "../lsp/patchFeedback";
 import { PatchEntityKind, PatchOp } from "../lsp/protocol";
 import { EntityInspectorPanel } from "../webviews/inspector";
 import { focusRelay } from "../focus/focusRelay";
@@ -31,7 +31,14 @@ import {
 import { ExplorerTreeProvider, OntologyTreeItem } from "../treeviews/explorer";
 import { resolveEntityIri } from "../utils/resolveEntityIri";
 import { byteColToUtf16 } from "../utils/positions";
-import { documentUriInWorkspace, isPathUnderFolder, openWorkspaceTextDocument } from "../utils/workspacePath";
+import { resolveTurtleFilePath } from "../utils/resolveTurtleDocument";
+import {
+  documentUriInWorkspace,
+  isPathUnderFolder,
+  openWorkspaceTextDocument,
+  resolveWorkspaceDocumentUri,
+  WORKSPACE_DOCUMENT_OUTSIDE_MESSAGE,
+} from "../utils/workspacePath";
 import { refreshPluginCommands } from "./pluginCommands";
 import { WorkflowPanel } from "../webviews/workflowPanel";
 import { PluginViewPanel } from "../webviews/pluginViewPanel";
@@ -389,10 +396,11 @@ export function registerCommands(
           void vscode.window.showErrorMessage(patchFailureMessage(result));
           return;
         }
+        await refreshExplorer(providers);
         if (!isPatchFullySynced(result)) {
+          void vscode.window.showWarningMessage(patchSyncCancelledMessage());
           return;
         }
-        await refreshExplorer(providers);
         void vscode.window.showInformationMessage("Entity deleted");
       } catch (err) {
         const message = err instanceof Error ? err.message : String(err);
@@ -476,6 +484,10 @@ export function registerCommands(
           void vscode.window.showErrorMessage(
             "OntoCode: Manchester editor requires entity IRI and document URI"
           );
+          return;
+        }
+        if (!resolveWorkspaceDocumentUri(arg.documentUri)) {
+          void vscode.window.showErrorMessage(WORKSPACE_DOCUMENT_OUTSIDE_MESSAGE);
           return;
         }
         await ManchesterEditorPanel.show(context.extensionUri, {
@@ -608,15 +620,21 @@ export function registerCommands(
     }),
     vscode.commands.registerCommand(
       "ontocode.manageImports",
-      async (item?: OntologyTreeItem) => {
-        const filePath = item?.filePath;
-        if (!filePath) {
-          void vscode.window.showErrorMessage(
-            "OntoCode: select a Turtle ontology in the Ontologies tree"
-          );
-          return;
-        }
+      async (item?: OntologyTreeItem | string) => {
+        const explicit =
+          typeof item === "string" ? item : item?.filePath;
         try {
+          const snapshot = await getCatalogSnapshot();
+          const filePath = await resolveTurtleFilePath({
+            filePath: explicit,
+            turtleDocuments: snapshot.documents,
+          });
+          if (!filePath) {
+            void vscode.window.showErrorMessage(
+              "OntoCode: open a Turtle (.ttl) file in the workspace or select one in the Ontologies tree"
+            );
+            return;
+          }
           await ImportsPanel.show(
             context.extensionUri,
             filePath,
@@ -630,6 +648,9 @@ export function registerCommands(
         }
       }
     ),
+    vscode.commands.registerCommand("ontocode.showImportsPanel", async () => {
+      await vscode.commands.executeCommand("ontocode.manageImports");
+    }),
     vscode.commands.registerCommand("ontocode.reloadImports", async () => {
       await runIndexAndRefresh(context, providers);
       if (ImportsPanel.current) {
@@ -808,8 +829,13 @@ async function createEntity(
     { op: "add_label", entity_iri, value: localName.trim() },
   ];
   try {
+    const documentUri = documentUriInWorkspace(docPick.path);
+    if (!documentUri) {
+      void vscode.window.showErrorMessage(WORKSPACE_DOCUMENT_OUTSIDE_MESSAGE);
+      return;
+    }
     const result = await applyAxiomPatch({
-      document_uri: vscode.Uri.file(docPick.path).toString(),
+      document_uri: documentUri,
       patches,
       preview_only: false,
     });
@@ -817,10 +843,11 @@ async function createEntity(
       void vscode.window.showErrorMessage(patchFailureMessage(result));
       return;
     }
+    await refreshExplorer(providers);
     if (!isPatchFullySynced(result)) {
+      void vscode.window.showWarningMessage(patchSyncCancelledMessage());
       return;
     }
-    await refreshExplorer(providers);
     await openInspector(
       context.extensionUri,
       entity_iri,

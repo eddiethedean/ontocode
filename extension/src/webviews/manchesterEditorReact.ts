@@ -8,6 +8,7 @@ import {
   hasPatchFailureDiagnostics,
   isPatchFullySynced,
   patchFailureMessage,
+  patchSyncCancelledMessage,
 } from "../lsp/patchFeedback";
 import { PanelHost } from "./panelHost";
 import type { WebviewMessage } from "./messages";
@@ -16,6 +17,11 @@ import {
   buildManchesterPatches,
   resolveManchesterApplyMode,
 } from "./manchesterEditorLogic";
+import { rememberPanelRestoreState } from "./layoutPersistence";
+import {
+  resolveWorkspaceDocumentUri,
+  WORKSPACE_DOCUMENT_OUTSIDE_MESSAGE,
+} from "../utils/workspacePath";
 
 export interface ManchesterEditorOptions {
   iri: string;
@@ -49,18 +55,26 @@ export class ManchesterEditorPanel {
     extensionUri: vscode.Uri,
     options: ManchesterEditorOptions
   ): Promise<ManchesterEditorPanel> {
+    const documentUri = resolveWorkspaceDocumentUri(options.documentUri);
+    if (!documentUri) {
+      void vscode.window.showErrorMessage(WORKSPACE_DOCUMENT_OUTSIDE_MESSAGE);
+      throw new Error(WORKSPACE_DOCUMENT_OUTSIDE_MESSAGE);
+    }
+    const safeOptions = { ...options, documentUri };
+
     if (ManchesterEditorPanel.current) {
-      ManchesterEditorPanel.current.options = options;
+      ManchesterEditorPanel.current.options = safeOptions;
       ManchesterEditorPanel.current.host.panel.title = `Manchester: ${
-        options.iri.split(/[#/]/).pop() ?? "entity"
+        safeOptions.iri.split(/[#/]/).pop() ?? "entity"
       }`;
       ManchesterEditorPanel.current.host.panel.reveal(vscode.ViewColumn.Beside);
       await ManchesterEditorPanel.current.bootstrap();
+      ManchesterEditorPanel.current.persistRestoreState();
       return ManchesterEditorPanel.current;
     }
     const host = PanelHost.create(extensionUri, {
       viewType: "ontocodeManchesterEditor",
-      title: `Manchester: ${options.iri.split(/[#/]/).pop() ?? "entity"}`,
+      title: `Manchester: ${safeOptions.iri.split(/[#/]/).pop() ?? "entity"}`,
       panel: "manchesterEditor",
       onMessage: async (message: WebviewMessage) => {
         const panel = ManchesterEditorPanel.current;
@@ -70,10 +84,27 @@ export class ManchesterEditorPanel {
         await panel.handleMessage(message);
       },
     });
-    const instance = new ManchesterEditorPanel(host, options);
+    const instance = new ManchesterEditorPanel(host, safeOptions);
     ManchesterEditorPanel.current = instance;
     await instance.bootstrap();
+    instance.persistRestoreState();
     return instance;
+  }
+
+  private persistRestoreState(): void {
+    void rememberPanelRestoreState("ontocodeManchesterEditor", {
+      command: "ontocode.openManchesterEditor",
+      args: [
+        {
+          iri: this.options.iri,
+          documentUri: this.options.documentUri,
+          axiomKind: this.options.axiomKind,
+          initialExpression: this.options.initialExpression,
+          mode: this.options.mode,
+        },
+      ],
+      title: this.host.panel.title,
+    });
   }
 
   private async bootstrap(): Promise<void> {
@@ -215,8 +246,13 @@ export class ManchesterEditorPanel {
       );
     }
     try {
+      const documentUri = resolveWorkspaceDocumentUri(this.options.documentUri);
+      if (!documentUri) {
+        void vscode.window.showErrorMessage(WORKSPACE_DOCUMENT_OUTSIDE_MESSAGE);
+        return;
+      }
       const result = await applyAxiomPatch({
-        document_uri: this.options.documentUri,
+        document_uri: documentUri,
         patches,
         preview_only: previewOnly,
       });
@@ -234,16 +270,17 @@ export class ManchesterEditorPanel {
         void vscode.window.showErrorMessage(patchFailureMessage(result));
         return;
       }
-      if (!isPatchFullySynced(result)) {
-        return;
-      }
       if (this.options.onRefresh) {
         await this.options.onRefresh();
       }
       this.options.initialExpression = expression;
-      void vscode.window.showInformationMessage(
-        "OntoCode: Manchester axiom applied"
-      );
+      if (isPatchFullySynced(result)) {
+        void vscode.window.showInformationMessage(
+          "OntoCode: Manchester axiom applied"
+        );
+      } else {
+        void vscode.window.showWarningMessage(patchSyncCancelledMessage());
+      }
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       void vscode.window.showErrorMessage(`OntoCode: ${message}`);

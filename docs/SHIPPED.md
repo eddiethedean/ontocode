@@ -69,6 +69,7 @@
 | Capability | Status |
 |------------|--------|
 | Named unsatisfiable expansion (classes ⊑ `owl:Nothing` and descendants in reasoner `unsatisfiable` / `consistent`) | Yes |
+| Composed explanations for expansion-only unsats (`composed_subclass_chain` to ancestor / `owl:Nothing`) | Yes |
 | Stronger reasoner / Protégé / diff / path-jail / OBO and LSP workflow test oracles | Yes |
 
 ## New in v0.18.0

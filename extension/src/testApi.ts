@@ -1,7 +1,16 @@
 import * as vscode from "vscode";
-import type { OntoCodeTestHooks } from "./api";
+import type {
+  DialogPanelKind,
+  InjectablePanelKind,
+  OntoCodeTestHooks,
+} from "./api";
+import {
+  openNewOntologyDialog as openNewOntologyDialogAt,
+  openPrefixManager as openPrefixManagerAt,
+} from "./commands/v017Commands";
 import { focusRelay } from "./focus/focusRelay";
 import { EntityInspectorPanel } from "./webviews/inspector";
+import { PanelHost } from "./webviews/panelHost";
 import { QueryWorkbenchPanel } from "./webviews/queryWorkbenchReact";
 import { assertWebviewHtmlRoutesPanel } from "./webviews/webviewBootstrap";
 import type { PanelKind } from "./webviews/messages";
@@ -22,6 +31,14 @@ async function waitForWebviewReady(
     await sleep(100);
   }
   throw new Error("webview did not report ready before timeout");
+}
+
+function requireDialogHost(panel: DialogPanelKind): PanelHost {
+  const host = PanelHost.getOpen(panel);
+  if (!host || host.isDisposed) {
+    throw new Error(`${panel} webview is not open`);
+  }
+  return host;
 }
 
 /** Test hooks exposed when ONTOCODE_TEST_FIXTURES is set (VS Code e2e). */
@@ -115,9 +132,46 @@ export function createOntoCodeTestHooks(): OntoCodeTestHooks {
       return focusRelay.getFocus();
     },
 
+    async openNewOntologyDialog(targetPath: string): Promise<void> {
+      openNewOntologyDialogAt(targetPath);
+    },
+
+    async openPrefixManager(documentPath: string): Promise<void> {
+      await openPrefixManagerAt(documentPath);
+    },
+
+    async postWebviewMessage(
+      panel: InjectablePanelKind,
+      msg: unknown
+    ): Promise<void> {
+      const host = PanelHost.getOpen(panel);
+      if (!host || host.isDisposed) {
+        throw new Error(`${panel} webview is not open`);
+      }
+      await host.deliverMessageForTests(msg);
+    },
+
+    async waitForPanelReady(
+      panel: DialogPanelKind,
+      timeoutMs = 20_000
+    ): Promise<void> {
+      const host = requireDialogHost(panel);
+      await waitForWebviewReady(() => host.isWebviewReady(), timeoutMs);
+    },
+
+    getPanelHtml(panel: DialogPanelKind): string | undefined {
+      return PanelHost.getOpen(panel)?.getWebviewHtml();
+    },
+
+    async disposePanel(panel: DialogPanelKind): Promise<void> {
+      PanelHost.disposeKinds([panel]);
+      await sleep(50);
+    },
+
     async disposeAllPanels(): Promise<void> {
       EntityInspectorPanel.currentPanel?.disposeForTests();
       QueryWorkbenchPanel.current?.disposeForTests();
+      PanelHost.disposeKinds(["newOntology", "prefixManager"]);
       await sleep(100);
     },
 

@@ -7,17 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.18.1] - 2026-07-11
+## [0.18.1] - 2026-07-12
 
 ### Fixed
 
 - Expand named unsatisfiable classes that are ⊑ `owl:Nothing` (and their descendants) so reasoner `unsatisfiable` / `consistent` report classes such as `Invalid` and `B`, not only `owl:Nothing` itself
+- Compose honest explanations for expansion-only unsatisfiable classes: subclass chain to an ancestor with a bottom proof (or to `owl:Nothing`), marked `composed_subclass_chain`, when Ontologos has no direct `C ⊑ ⊥` trace
 
 ### Changed
 
 - Workspace package and all `ontocore-*` crates bumped to **0.18.1**; extension marketplace and webview UI **0.18.1**
 - Stronger behavioral test oracles for reasoner hierarchy, Protégé round-trip, semantic diff breaking changes, path jail, and OBO patch round-trip
-- Extension: real LSP write-back and reasoner workflow tests; ImportsPanel Vitest; remove source-regex client startup guards
+- OWL patch success paths: Horned/`IndexBuilder` reparse oracles (`tests/owl_patch_oracles.rs`) for the top ten write-back ops
+- Extension: real LSP write-back and reasoner workflow tests; New Ontology / Prefix Manager / Property Chain VS Code e2e; ImportsPanel Vitest; remove source-regex client startup guards
+- Optional `cargo-mutants` baseline for `path_jail` + OWL `patch` (manual/nightly; see `docs/mutants-baseline.md`)
 
 ## [0.18.0] - 2026-07-11
 

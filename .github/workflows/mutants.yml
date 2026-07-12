@@ -1,0 +1,48 @@
+# Optional mutation testing — manual / schedule only (not a PR gate).
+name: Mutants
+
+on:
+  workflow_dispatch:
+  schedule:
+    # Weekly Sunday 06:00 UTC
+    - cron: "0 6 * * 0"
+
+concurrency:
+  group: mutants-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  CARGO_INCREMENTAL: 0
+
+permissions:
+  contents: read
+
+jobs:
+  mutants:
+    name: path_jail + patch mutants
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Install cargo-mutants
+        run: cargo install cargo-mutants --locked
+
+      - name: Run mutants (path_jail + patch)
+        run: |
+          chmod +x scripts/run-mutants.sh
+          ./scripts/run-mutants.sh --timeout 120 --jobs 2
+
+      - name: Upload mutants.out
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mutants-out
+          path: mutants.out/
+          if-no-files-found: ignore
+          retention-days: 14

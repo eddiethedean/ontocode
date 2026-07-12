@@ -1,4 +1,5 @@
 use crate::error::{ReasonerError, Result};
+use crate::hierarchy::asserted_hierarchy_from_ontology;
 use crate::result::{ExplanationResult, ExplanationStep};
 use ontologos_core::{
     EntityId, EntityKind, InferenceTrace, Ontology, TraceConclusion, TracePremise, TraceStep,
@@ -8,7 +9,7 @@ use ontologos_el::ElClassifier;
 use ontologos_explain::{build_proof_graph, render_text, ProofGraph};
 use ontologos_rl::rdfs::RdfsEngine;
 use ontologos_rl::RlEngine;
-use std::collections::{HashSet, VecDeque};
+use std::collections::{HashMap, HashSet, VecDeque};
 
 pub fn explain_unsatisfiable_alternatives(
     profile: crate::adapter::ReasonerId,
@@ -50,12 +51,13 @@ pub fn explain_unsatisfiable_el(ontology: &Ontology, class_iri: &str) -> Result<
         .classify_with_options(ontology, true)
         .map_err(|e| ReasonerError::Explain(e.to_string()))?;
 
-    let bottom = find_bottom_subsumption(ontology, class_id, &report.trace)
-        .ok_or_else(|| ReasonerError::ExplanationUnavailable(class_iri.to_string()))?;
+    if let Some(bottom) = find_bottom_subsumption(ontology, class_id, &report.trace) {
+        let graph = explain_unsatisfiable_trace(ontology, class_id, bottom, &report.trace)
+            .map_err(|e| ReasonerError::Explain(e.to_string()))?;
+        return map_proof_graph(ontology, class_iri, graph);
+    }
 
-    let graph = explain_unsatisfiable_trace(ontology, class_id, bottom, &report.trace)
-        .map_err(|e| ReasonerError::Explain(e.to_string()))?;
-    map_proof_graph(ontology, class_iri, graph)
+    explain_via_composed_ancestor(ontology, class_iri, &report.trace)
 }
 
 pub fn explain_unsatisfiable_el_alternatives(
@@ -71,8 +73,10 @@ pub fn explain_unsatisfiable_el_alternatives(
         .classify_with_options(ontology, true)
         .map_err(|e| ReasonerError::Explain(e.to_string()))?;
 
-    let bottom = find_bottom_subsumption(ontology, class_id, &report.trace)
-        .ok_or_else(|| ReasonerError::ExplanationUnavailable(class_iri.to_string()))?;
+    let Some(bottom) = find_bottom_subsumption(ontology, class_id, &report.trace) else {
+        // Expansion-only unsat: compose a single honest justification.
+        return Ok(vec![explain_via_composed_ancestor(ontology, class_iri, &report.trace)?]);
+    };
 
     let target_idxs: Vec<usize> = report
         .trace
@@ -113,11 +117,12 @@ pub fn explain_unsatisfiable_rl(ontology: &Ontology, class_iri: &str) -> Result<
         .saturate(&mut mutable)
         .map_err(|e| ReasonerError::Explain(e.to_string()))?
         .trace;
-    let bottom = find_bottom_subsumption(&mutable, class_id, &trace)
-        .ok_or_else(|| ReasonerError::ExplanationUnavailable(class_iri.to_string()))?;
-    let graph = explain_unsatisfiable_trace(&mutable, class_id, bottom, &trace)
-        .map_err(|e| ReasonerError::Explain(e.to_string()))?;
-    map_proof_graph(ontology, class_iri, graph)
+    if let Some(bottom) = find_bottom_subsumption(&mutable, class_id, &trace) {
+        let graph = explain_unsatisfiable_trace(&mutable, class_id, bottom, &trace)
+            .map_err(|e| ReasonerError::Explain(e.to_string()))?;
+        return map_proof_graph(ontology, class_iri, graph);
+    }
+    explain_via_composed_ancestor(&mutable, class_iri, &trace)
 }
 
 pub fn explain_unsatisfiable_rdfs(
@@ -133,11 +138,12 @@ pub fn explain_unsatisfiable_rdfs(
         .materialize(&mut mutable)
         .map_err(|e| ReasonerError::Explain(e.to_string()))?
         .trace;
-    let bottom = find_bottom_subsumption(&mutable, class_id, &trace)
-        .ok_or_else(|| ReasonerError::ExplanationUnavailable(class_iri.to_string()))?;
-    let graph = explain_unsatisfiable_trace(&mutable, class_id, bottom, &trace)
-        .map_err(|e| ReasonerError::Explain(e.to_string()))?;
-    map_proof_graph(ontology, class_iri, graph)
+    if let Some(bottom) = find_bottom_subsumption(&mutable, class_id, &trace) {
+        let graph = explain_unsatisfiable_trace(&mutable, class_id, bottom, &trace)
+            .map_err(|e| ReasonerError::Explain(e.to_string()))?;
+        return map_proof_graph(ontology, class_iri, graph);
+    }
+    explain_via_composed_ancestor(&mutable, class_iri, &trace)
 }
 
 fn explain_unsatisfiable_trace(
@@ -249,6 +255,154 @@ fn find_bottom_subsumption(
     })
 }
 
+/// When Ontologos has no direct `C ⊑ ⊥` trace (common for expansion-only unsats),
+/// walk asserted parents to the nearest ancestor `U` that has a bottom proof, or to
+/// `owl:Nothing`, and compose an honest subclass-chain justification.
+fn explain_via_composed_ancestor(
+    ontology: &Ontology,
+    class_iri: &str,
+    trace: &InferenceTrace,
+) -> Result<ExplanationResult> {
+    match find_composed_ancestor(ontology, class_iri, trace) {
+        Some(ComposeTarget::ViaAncestor { chain, ancestor_iri, ancestor_id, bottom }) => {
+            let graph = explain_unsatisfiable_trace(ontology, ancestor_id, bottom, trace)
+                .map_err(|e| ReasonerError::Explain(e.to_string()))?;
+            let ancestor_result = map_proof_graph(ontology, &ancestor_iri, graph)?;
+            Ok(compose_subclass_chain_explanation(class_iri, chain, Some(ancestor_result)))
+        }
+        Some(ComposeTarget::ToNothing { chain }) => {
+            Ok(compose_subclass_chain_explanation(class_iri, chain, None))
+        }
+        None => Err(ReasonerError::ExplanationUnavailable(class_iri.to_string())),
+    }
+}
+
+enum ComposeTarget {
+    /// Named ancestor with an Ontologos `U ⊑ ⊥` trace.
+    ViaAncestor {
+        chain: Vec<(String, String)>,
+        ancestor_iri: String,
+        ancestor_id: EntityId,
+        bottom: EntityId,
+    },
+    /// Asserted path reaches `owl:Nothing` (no Ontologos justification available).
+    ToNothing { chain: Vec<(String, String)> },
+}
+
+/// BFS parents from `class_iri`; prefer a named ancestor with a bottom trace, else `owl:Nothing`.
+fn find_composed_ancestor(
+    ontology: &Ontology,
+    class_iri: &str,
+    trace: &InferenceTrace,
+) -> Option<ComposeTarget> {
+    let hierarchy = asserted_hierarchy_from_ontology(ontology);
+    let mut queue = VecDeque::from([class_iri.to_string()]);
+    let mut visited = HashSet::from([class_iri.to_string()]);
+    // parent → child we came from (first reach)
+    let mut came_from: HashMap<String, String> = HashMap::new();
+    let mut nothing_path: Option<Vec<(String, String)>> = None;
+
+    while let Some(current) = queue.pop_front() {
+        let Some(parents) = hierarchy.parents.get(&current) else {
+            continue;
+        };
+        for parent in parents {
+            if !visited.insert(parent.clone()) {
+                continue;
+            }
+            came_from.insert(parent.clone(), current.clone());
+
+            if is_owl_nothing(parent) {
+                if nothing_path.is_none() {
+                    nothing_path = reconstruct_subclass_chain(&came_from, class_iri, parent);
+                }
+                continue;
+            }
+
+            if let Some(parent_id) = ontology.lookup_entity(parent) {
+                if let Some(bottom) = find_bottom_subsumption(ontology, parent_id, trace) {
+                    let chain = reconstruct_subclass_chain(&came_from, class_iri, parent)?;
+                    return Some(ComposeTarget::ViaAncestor {
+                        chain,
+                        ancestor_iri: parent.clone(),
+                        ancestor_id: parent_id,
+                        bottom,
+                    });
+                }
+            }
+            queue.push_back(parent.clone());
+        }
+    }
+
+    nothing_path.map(|chain| ComposeTarget::ToNothing { chain })
+}
+
+fn reconstruct_subclass_chain(
+    came_from: &HashMap<String, String>,
+    start: &str,
+    goal: &str,
+) -> Option<Vec<(String, String)>> {
+    let mut edges = Vec::new();
+    let mut cur = goal.to_string();
+    while cur != start {
+        let prev = came_from.get(&cur)?.clone();
+        edges.push((prev.clone(), cur.clone()));
+        cur = prev;
+    }
+    edges.reverse();
+    Some(edges)
+}
+
+fn compose_subclass_chain_explanation(
+    class_iri: &str,
+    chain: Vec<(String, String)>,
+    ancestor: Option<ExplanationResult>,
+) -> ExplanationResult {
+    let chain_to_nothing = ancestor.is_none() && ancestor_is_nothing_chain(&chain);
+    let mut steps =
+        Vec::with_capacity(chain.len() + ancestor.as_ref().map_or(0, |a| a.steps.len()));
+    let mut text_lines = Vec::new();
+
+    for (child, parent) in &chain {
+        let index = steps.len() + 1;
+        steps.push(ExplanationStep {
+            index,
+            rule: "composed_subclass_chain".into(),
+            display: format!("{child} SubClassOf {parent}"),
+            subject_iri: Some(child.clone()),
+            object_iri: Some(parent.clone()),
+        });
+        text_lines.push(format!("{child} SubClassOf {parent}"));
+    }
+
+    if let Some(ancestor) = ancestor {
+        let offset = steps.len();
+        for mut step in ancestor.steps {
+            step.index += offset;
+            steps.push(step);
+        }
+        if !ancestor.text.is_empty() {
+            text_lines.push(ancestor.text);
+        }
+    }
+
+    let header = if chain_to_nothing {
+        "Composed justification (asserted subclass chain to owl:Nothing)"
+    } else {
+        "Composed justification (subclass chain to unsatisfiable ancestor)"
+    };
+
+    ExplanationResult {
+        class_iri: class_iri.to_string(),
+        steps,
+        text: format!("{header}\n\n{}", text_lines.join("\n")),
+    }
+}
+
+fn ancestor_is_nothing_chain(chain: &[(String, String)]) -> bool {
+    chain.last().is_some_and(|(_, parent)| is_owl_nothing(parent))
+}
+
 fn map_proof_graph(
     ontology: &Ontology,
     class_iri: &str,
@@ -342,6 +496,8 @@ fn annotate_dl_fallback_explanation(mut result: ExplanationResult, via: &str) ->
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::input::WorkspaceInputLoader;
+    use std::path::PathBuf;
 
     #[test]
     fn dl_fallback_annotation_names_actual_profile() {
@@ -357,5 +513,57 @@ mod tests {
             "DL classification (unsatisfiable); justification via EL Ontologos traces"
         ));
         assert!(!result.text.contains("DL profile justification"));
+    }
+
+    fn unsat_ontology() -> Ontology {
+        let dir = tempfile::tempdir().expect("tempdir");
+        let src =
+            PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../fixtures/reasoner-unsat.ttl");
+        std::fs::copy(&src, dir.path().join("reasoner-unsat.ttl")).expect("copy");
+        WorkspaceInputLoader::new(dir.path()).load().expect("load").ontology
+    }
+
+    #[test]
+    fn explain_el_chain_to_nothing_for_b() {
+        let ontology = unsat_ontology();
+        let b = "http://example.org/reasoner-unsat#B";
+        let nothing = "http://www.w3.org/2002/07/owl#Nothing";
+        let result = explain_unsatisfiable_el(&ontology, b).expect("explain B");
+        assert_eq!(result.class_iri, b);
+        assert!(
+            result.steps.iter().any(|s| s.rule == "composed_subclass_chain"
+                && s.subject_iri.as_deref() == Some(b)
+                && s.object_iri.as_deref() == Some(nothing)),
+            "expected composed B ⊑ owl:Nothing (Ontologos traces empty for this fixture): {:?}",
+            result.steps
+        );
+    }
+
+    #[test]
+    fn explain_el_composes_chain_for_invalid() {
+        let ontology = unsat_ontology();
+        let invalid = "http://example.org/reasoner-unsat#Invalid";
+        let b = "http://example.org/reasoner-unsat#B";
+        let nothing = "http://www.w3.org/2002/07/owl#Nothing";
+        let result = explain_unsatisfiable_el(&ontology, invalid).expect("explain Invalid");
+        assert_eq!(result.class_iri, invalid);
+        assert!(
+            result.steps.iter().any(|s| s.rule == "composed_subclass_chain"
+                && s.subject_iri.as_deref() == Some(invalid)
+                && s.object_iri.as_deref() == Some(b)),
+            "expected composed Invalid ⊑ B step, got {:?}",
+            result.steps
+        );
+        assert!(
+            result.steps.iter().any(|s| s.object_iri.as_deref() == Some(nothing)),
+            "expected chain to reach owl:Nothing, got {:?}",
+            result.steps
+        );
+        assert!(
+            result.steps.len() >= 2,
+            "composed explanation must include chain through B to ⊥: {:?}",
+            result.steps
+        );
+        assert!(result.text.contains("Composed justification"));
     }
 }

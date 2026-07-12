@@ -9,6 +9,9 @@ import {
 import type { PanelKind } from "./webviews/messages";
 import type { CurrentFocus } from "./focus/types";
 
+export type DialogPanelKind = "newOntology" | "prefixManager";
+export type InjectablePanelKind = DialogPanelKind | "inspector";
+
 /** VS Code integration test hooks (only when ONTOCODE_TEST_FIXTURES is set). */
 export interface OntoCodeTestHooks {
   openEntityInspector(iri: string): Promise<void>;
@@ -27,6 +30,15 @@ export interface OntoCodeTestHooks {
   waitForInspectorIri(iri: string, timeoutMs?: number): Promise<void>;
   getInspectorPanelRef(): object | undefined;
   getCanonicalFocus(): CurrentFocus | null;
+  /** Open New Ontology dialog for `targetPath` without showSaveDialog. */
+  openNewOntologyDialog(targetPath: string): Promise<void>;
+  /** Open Prefix Manager for an indexed document path without multi-doc pick. */
+  openPrefixManager(documentPath: string): Promise<void>;
+  /** Inject a webview→host message into the open panel's validated handler. */
+  postWebviewMessage(panel: InjectablePanelKind, msg: unknown): Promise<void>;
+  waitForPanelReady(panel: DialogPanelKind, timeoutMs?: number): Promise<void>;
+  getPanelHtml(panel: DialogPanelKind): string | undefined;
+  disposePanel(panel: DialogPanelKind): Promise<void>;
 }
 
 /** Extension activation API (used by VS Code integration tests). */

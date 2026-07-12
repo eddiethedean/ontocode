@@ -1572,41 +1572,8 @@ mod tests {
         ])
     }
 
-    #[test]
-    fn add_and_remove_import() {
-        let ttl = r#"@prefix owl: <http://www.w3.org/2002/07/owl#> .
-@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
-
-<http://example.org/people> a owl:Ontology ;
-    rdfs:label "People" .
-"#;
-        let ns = ex_ns();
-        let add = apply_patches_to_text(
-            ttl,
-            &[PatchOp::AddImport {
-                ontology_iri: "http://example.org/people".to_string(),
-                import_iri: "http://example.org/org".to_string(),
-            }],
-            true,
-            &ns,
-        )
-        .expect("add import");
-        let with_import = add.preview_text.expect("preview");
-        assert!(with_import.contains("owl:imports <http://example.org/org>"));
-
-        let remove = apply_patches_to_text(
-            &with_import,
-            &[PatchOp::RemoveImport {
-                ontology_iri: "http://example.org/people".to_string(),
-                import_iri: "http://example.org/org".to_string(),
-            }],
-            true,
-            &ns,
-        )
-        .expect("remove import");
-        let cleaned = remove.preview_text.expect("preview");
-        assert!(!cleaned.contains("owl:imports"));
-    }
+    // Catalog/Horned reparse oracles for success-path patches live in
+    // tests/owl_patch_oracles.rs (apply_and_reindex).
 
     #[test]
     fn add_label_to_existing_class() {
@@ -1721,28 +1688,6 @@ ex:Foo a owl:Class ;
     }
 
     #[test]
-    fn set_deprecated_false_removes_trailing_flag() {
-        let ttl = r#"@prefix ex: <http://example.org/people#> .
-@prefix owl: <http://www.w3.org/2002/07/owl#> .
-
-ex:Person a owl:Class .
-ex:Person owl:deprecated true .
-"#;
-        let result = apply_patches_to_text(
-            ttl,
-            &[PatchOp::SetDeprecated {
-                entity_iri: "http://example.org/people#Person".to_string(),
-                value: false,
-            }],
-            true,
-            &ex_ns(),
-        )
-        .expect("clear deprecated");
-        let preview = result.preview_text.expect("preview");
-        assert!(!preview.contains("owl:deprecated"));
-    }
-
-    #[test]
     fn remove_comment_with_period_in_literal() {
         let ttl = r#"@prefix ex: <http://example.org/people#> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
@@ -1810,52 +1755,6 @@ ex:Person a owl:Class ;
         assert!(!result.diagnostics.is_empty());
         assert_eq!(result.preview_text.as_deref(), Some(ttl));
         assert!(!result.applied);
-    }
-
-    fn clinic_ns() -> BTreeMap<String, String> {
-        BTreeMap::from([
-            ("ex".to_string(), "http://example.org/clinic#".to_string()),
-            ("owl".to_string(), "http://www.w3.org/2002/07/owl#".to_string()),
-            ("rdfs".to_string(), "http://www.w3.org/2000/01/rdf-schema#".to_string()),
-        ])
-    }
-
-    #[test]
-    fn remove_complex_subclass_keeps_named_parent() {
-        let ttl = include_str!("../../../fixtures/complex-classes.ttl");
-        let patches = vec![PatchOp::RemoveComplexSubClassOf {
-            entity_iri: "http://example.org/clinic#Patient".to_string(),
-            manchester: "ex:hasRecord some ex:MedicalRecord".to_string(),
-        }];
-        let result = apply_patches_to_text(ttl, &patches, true, &clinic_ns()).expect("patch");
-        let preview = result.preview_text.expect("preview");
-        assert!(!preview.contains("owl:someValuesFrom"));
-        assert!(preview.contains("rdfs:subClassOf ex:ClinicPerson"));
-    }
-
-    #[test]
-    fn remove_subclass_from_trailing_triple() {
-        let ttl = include_str!("../../../fixtures/example.ttl");
-        let patches = vec![PatchOp::RemoveSubClassOf {
-            entity_iri: "http://example.org/people#Person".to_string(),
-            parent_iri: "http://example.org/people#Thing".to_string(),
-        }];
-        let result = apply_patches_to_text(ttl, &patches, true, &ex_ns()).expect("patch");
-        let preview = result.preview_text.expect("preview");
-        assert!(!preview.contains("ex:Person rdfs:subClassOf ex:Thing"));
-        assert!(preview.contains("ex:Person a owl:Class"));
-    }
-
-    #[test]
-    fn delete_entity_removes_all_statements() {
-        let ttl = include_str!("../../../fixtures/example.ttl");
-        let patches = vec![PatchOp::DeleteEntity {
-            entity_iri: "http://example.org/people#Person".to_string(),
-        }];
-        let result = apply_patches_to_text(ttl, &patches, true, &ex_ns()).expect("patch");
-        let preview = result.preview_text.expect("preview");
-        assert!(!preview.contains("ex:Person a owl:Class"));
-        assert!(!preview.contains("ex:Person rdfs:subClassOf"));
     }
 
     #[test]
@@ -1960,59 +1859,6 @@ ex:Person a owl:Class ;
     }
 
     #[test]
-    fn add_and_remove_domain() {
-        let ttl = include_str!("../../../fixtures/disjoint-classes.ttl");
-        let ns = org_ns();
-        let add = apply_patches_to_text(
-            ttl,
-            &[PatchOp::AddDomain {
-                entity_iri: "http://example.org/org#chases".to_string(),
-                class_iri: "http://example.org/org#Cat".to_string(),
-            }],
-            true,
-            &ns,
-        )
-        .expect("add domain");
-        let with_domain = add.preview_text.expect("preview");
-        assert!(with_domain.contains("rdfs:domain"));
-
-        let remove = apply_patches_to_text(
-            &with_domain,
-            &[PatchOp::RemoveDomain {
-                entity_iri: "http://example.org/org#chases".to_string(),
-                class_iri: "http://example.org/org#Dog".to_string(),
-            }],
-            true,
-            &ns,
-        )
-        .expect("remove domain");
-        let preview = remove.preview_text.expect("preview");
-        assert!(!preview.contains("rdfs:domain ex:Dog"));
-        assert!(preview.contains("rdfs:domain ex:Cat"));
-    }
-
-    #[test]
-    fn add_property_chain() {
-        let ttl = include_str!("../../../fixtures/disjoint-classes.ttl");
-        let ns = org_ns();
-        let result = apply_patches_to_text(
-            ttl,
-            &[PatchOp::AddPropertyChain {
-                entity_iri: "http://example.org/org#chases".to_string(),
-                properties: vec![
-                    "http://example.org/org#chases".to_string(),
-                    "http://example.org/org#composed".to_string(),
-                ],
-            }],
-            true,
-            &ns,
-        )
-        .expect("add chain");
-        let preview = result.preview_text.expect("preview");
-        assert!(preview.contains("owl:propertyChainAxiom"));
-    }
-
-    #[test]
     fn add_property_chain_rejects_class_iris() {
         let ttl = include_str!("../../../fixtures/disjoint-classes.ttl");
         let ns = org_ns();
@@ -2031,55 +1877,6 @@ ex:Person a owl:Class ;
         .expect("patch result");
         assert!(!result.diagnostics.is_empty());
         assert!(result.diagnostics[0].message.contains("owl:Class"));
-    }
-
-    #[test]
-    fn add_class_assertion_to_individual() {
-        let ttl = r#"@prefix ex: <http://example.org/org#> .
-@prefix owl: <http://www.w3.org/2002/07/owl#> .
-
-ex:Alice a owl:NamedIndividual .
-ex:Person a owl:Class .
-"#;
-        let ns = org_ns();
-        let result = apply_patches_to_text(
-            ttl,
-            &[PatchOp::AddClassAssertion {
-                entity_iri: "http://example.org/org#Alice".to_string(),
-                class_iri: "http://example.org/org#Person".to_string(),
-            }],
-            true,
-            &ns,
-        )
-        .expect("add class assertion");
-        let preview = result.preview_text.expect("preview");
-        assert!(preview.contains("ex:Person"));
-    }
-
-    #[test]
-    fn add_generic_annotation() {
-        let ttl = r#"@prefix ex: <http://example.org/org#> .
-@prefix owl: <http://www.w3.org/2002/07/owl#> .
-@prefix skos: <http://www.w3.org/2004/02/skos/core#> .
-
-ex:Cat a owl:Class .
-"#;
-        let ns = org_ns();
-        let mut ns = ns;
-        ns.insert("skos".to_string(), "http://www.w3.org/2004/02/skos/core#".to_string());
-        let result = apply_patches_to_text(
-            ttl,
-            &[PatchOp::AddAnnotation {
-                entity_iri: "http://example.org/org#Cat".to_string(),
-                predicate: "skos:definition".to_string(),
-                value: "A feline animal".to_string(),
-            }],
-            true,
-            &ns,
-        )
-        .expect("add annotation");
-        let preview = result.preview_text.expect("preview");
-        assert!(preview.contains("skos:definition \"A feline animal\""));
     }
 
     #[test]
@@ -2256,24 +2053,6 @@ ex:Cat a owl:Class .
                 ),
             "full IRI predicates must still write safely: {preview}"
         );
-    }
-
-    #[test]
-    fn set_functional_property() {
-        let ttl = include_str!("../../../fixtures/disjoint-classes.ttl");
-        let ns = org_ns();
-        let result = apply_patches_to_text(
-            ttl,
-            &[PatchOp::SetFunctional {
-                entity_iri: "http://example.org/org#chases".to_string(),
-                value: true,
-            }],
-            true,
-            &ns,
-        )
-        .expect("set functional");
-        let preview = result.preview_text.expect("preview");
-        assert!(preview.contains("owl:FunctionalProperty"));
     }
 
     #[test]

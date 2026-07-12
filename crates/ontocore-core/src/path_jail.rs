@@ -406,6 +406,105 @@ mod tests {
 
         let resolved = validate_workspace_scope_any(&file_in_b, &[root_a.clone(), root_b.clone()])
             .expect("under second root");
-        assert!(is_path_within_any(&[root_a, root_b], &resolved));
+        assert!(is_path_within_any(&[root_a.clone(), root_b.clone()], &resolved));
+        assert!(
+            resolved.ends_with("module.ttl"),
+            "must return the scoped file path, not an empty default: {resolved:?}"
+        );
+        assert!(is_path_within(&root_b, &resolved));
+    }
+
+    #[test]
+    fn is_path_within_any_rejects_outside_all_roots() {
+        let a = tempfile::tempdir().unwrap();
+        let b = tempfile::tempdir().unwrap();
+        let outside = tempfile::tempdir().unwrap();
+        let root_a = canonical_workspace_root(a.path()).unwrap();
+        let root_b = canonical_workspace_root(b.path()).unwrap();
+        let secret = outside.path().join("secret.ttl");
+        std::fs::write(&secret, "@prefix ex: <http://ex/> .").unwrap();
+        let secret = secret.canonicalize().unwrap();
+
+        assert!(
+            !is_path_within_any(&[root_a.clone(), root_b.clone()], &secret),
+            "path outside every root must be rejected"
+        );
+        let err = validate_workspace_scope_any(&secret, &[root_a, root_b]).expect_err("outside");
+        assert!(err.contains("outside") || err.contains("escapes"), "unexpected error: {err}");
+    }
+
+    #[test]
+    fn resolve_lsp_document_path_any_rejects_outside() {
+        let a = tempfile::tempdir().unwrap();
+        let outside = tempfile::tempdir().unwrap();
+        let root_a = canonical_workspace_root(a.path()).unwrap();
+        let secret = outside.path().join("secret.ttl");
+        std::fs::write(&secret, "@prefix ex: <http://ex/> .").unwrap();
+        let uri = url::Url::from_file_path(&secret).unwrap().to_string();
+        let err = resolve_lsp_document_path_any(&uri, &[root_a]).expect_err("outside");
+        assert!(err.contains("outside"), "unexpected error: {err}");
+    }
+
+    #[test]
+    fn workspace_uri_to_path_rejects_non_file_scheme() {
+        let err = workspace_uri_to_path("https://example.org/ws").expect_err("scheme");
+        assert!(!err.is_empty());
+    }
+
+    #[test]
+    fn path_has_parent_escape_detects_dotdot() {
+        assert!(path_has_parent_escape(Path::new("a/../b")));
+        assert!(!path_has_parent_escape(Path::new("a/b")));
+    }
+
+    #[test]
+    fn ensure_extract_path_within_accepts_nested_relative() {
+        let dir = tempfile::tempdir().unwrap();
+        let nested = ensure_extract_path_within(dir.path(), "ontologies/ex.ttl").expect("nested");
+        assert_eq!(nested.file_name().and_then(|s| s.to_str()), Some("ex.ttl"));
+        assert!(is_path_within_lexical(&canonical_workspace_root(dir.path()).unwrap(), &nested));
+    }
+
+    #[test]
+    fn ensure_extract_path_within_rejects_parent_escape() {
+        let dir = tempfile::tempdir().unwrap();
+        let err = ensure_extract_path_within(dir.path(), "../outside.ttl").expect_err("..");
+        assert!(
+            err.contains("escapes via ..") || err.contains("invalid path"),
+            "unexpected error: {err}"
+        );
+    }
+
+    #[test]
+    fn ensure_extract_path_within_rejects_absolute() {
+        let dir = tempfile::tempdir().unwrap();
+        let err = ensure_extract_path_within(dir.path(), "/etc/passwd").expect_err("absolute");
+        assert!(
+            err.contains("invalid path component") || err.contains("outside"),
+            "unexpected error: {err}"
+        );
+    }
+
+    #[test]
+    fn ensure_extract_path_within_rejects_empty() {
+        let dir = tempfile::tempdir().unwrap();
+        let err = ensure_extract_path_within(dir.path(), "").expect_err("empty");
+        assert!(err.contains("empty"), "unexpected error: {err}");
+    }
+
+    #[test]
+    fn discover_git_repo_root_finds_nested_workspace() {
+        let dir = tempfile::tempdir().unwrap();
+        fs::create_dir_all(dir.path().join(".git")).unwrap();
+        let nested = dir.path().join("ontologies");
+        fs::create_dir_all(&nested).unwrap();
+        let found = discover_git_repo_root(&[nested]).expect("git root");
+        assert_eq!(found, dir.path().canonicalize().unwrap());
+    }
+
+    #[test]
+    fn discover_git_repo_root_none_without_git() {
+        let dir = tempfile::tempdir().unwrap();
+        assert!(discover_git_repo_root(&[dir.path().to_path_buf()]).is_none());
     }
 }

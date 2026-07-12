@@ -20,6 +20,7 @@ async function main(): Promise<void> {
     vscodeExecutablePath: vscodeCliPath,
     extensionDevelopmentPath: extensionRoot,
     extensionTestsPath,
+    launchArgs: [fixturesPath],
     extensionTestsEnv: {
       ONTOCODE_TEST_FIXTURES: fixturesPath,
     },

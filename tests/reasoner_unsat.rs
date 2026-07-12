@@ -71,10 +71,13 @@ fn auto_cli_and_lsp_explain_match_concrete_engine() {
 
     // CLI path (adapter explain) and LSP path (explain_alternatives) must agree,
     // and both must match the concrete engine Auto selected — not a hard-coded DL path.
-    let cli = explain(ReasonerId::Auto, &input, &request);
-    let lsp = explain_alternatives(ReasonerId::Auto, &input, &request, 5);
-    let via_concrete_explain = explain(concrete, &input, &request);
-    let via_concrete_alts = explain_alternatives(concrete, &input, &request, 5);
+    let cli = explain(ReasonerId::Auto, &input, &request).expect("CLI Auto explain Invalid");
+    let lsp = explain_alternatives(ReasonerId::Auto, &input, &request, 5)
+        .expect("LSP Auto explain_alternatives Invalid");
+    let via_concrete_explain =
+        explain(concrete, &input, &request).expect("concrete explain Invalid");
+    let via_concrete_alts = explain_alternatives(concrete, &input, &request, 5)
+        .expect("concrete explain_alternatives Invalid");
 
     assert_eq!(
         format!("{cli:?}"),
@@ -87,19 +90,32 @@ fn auto_cli_and_lsp_explain_match_concrete_engine() {
         "LSP Auto explain_alternatives must match the concrete engine Auto classified with"
     );
 
-    match (&cli, &lsp) {
-        (Ok(cli_result), Ok(alts)) => {
-            assert!(!alts.is_empty());
-            assert_eq!(cli_result.class_iri, INVALID);
-            assert_eq!(alts[0].class_iri, INVALID);
-            assert!(!cli_result.steps.is_empty() || !cli_result.text.is_empty());
-            assert_eq!(cli_result.text, alts[0].text);
-        }
-        (Err(cli_err), Err(lsp_err)) => {
-            // Ontologos may lack a justification trace for expansion-only unsats;
-            // CLI and LSP must still agree on the failure.
-            assert_eq!(format!("{cli_err}"), format!("{lsp_err}"));
-        }
-        _ => panic!("CLI explain and LSP explain_alternatives diverged: cli={cli:?} lsp={lsp:?}"),
-    }
+    assert!(!lsp.is_empty());
+    assert_eq!(cli.class_iri, INVALID);
+    assert_eq!(lsp[0].class_iri, INVALID);
+    assert!(
+        cli.steps.iter().any(|s| s.rule == "composed_subclass_chain"),
+        "Invalid is expansion-only; expected composed subclass chain, got {:?}",
+        cli.steps
+    );
+    assert!(
+        cli.steps.len() >= 2,
+        "composed explanation must include chain through ancestor to ⊥: {:?}",
+        cli.steps
+    );
+    assert!(!cli.text.is_empty());
+    assert_eq!(cli.text, lsp[0].text);
+
+    let direct_b =
+        explain(ReasonerId::El, &input, &ExplanationRequest { class_iri: B.to_string() })
+            .expect("explain B");
+    assert!(
+        direct_b
+            .steps
+            .iter()
+            .any(|s| s.object_iri.as_deref() == Some("http://www.w3.org/2002/07/owl#Nothing")),
+        "B explanation must reach owl:Nothing: {:?}",
+        direct_b.steps
+    );
+    assert!(!direct_b.steps.is_empty());
 }

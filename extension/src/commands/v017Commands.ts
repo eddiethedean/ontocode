@@ -37,10 +37,16 @@ const ONTOLOGY_FILTERS: Record<string, string[]> = {
   "Ontology files": ["ttl", "owl", "rdf", "jsonld", "json-ld", "nt", "nq", "trig", "obo"],
 };
 
+/** Module context for test hooks that open dialogs without native pickers. */
+let dialogRuntime:
+  | { extensionUri: vscode.Uri; refresh?: () => Promise<void> }
+  | undefined;
+
 export function registerV017Commands(
   context: vscode.ExtensionContext,
   refresh?: () => Promise<void>
 ): void {
+  dialogRuntime = { extensionUri: context.extensionUri, refresh };
   const registry = new CommandRegistry(context);
   const command = (id: string, handler: (...args: never[]) => unknown): void => {
     registry.register(id, async (...args) => {
@@ -62,32 +68,8 @@ export function registerV017Commands(
       defaultUri: defaultWorkspaceUri("ontology.ttl"),
     });
     if (!target) return;
-    const host = PanelHost.create(context.extensionUri, {
-      viewType: "ontocode.newOntology",
-      title: "New Ontology",
-      panel: "newOntology",
-      onMessage: async (message, panel) => {
-        if (message.type !== "submitNewOntology") return;
-        const result = await createOntology({
-          path: target.fsPath,
-          ontology_iri: message.ontologyIri,
-          version_iri: message.versionIri,
-          format: formatForPath(target.fsPath),
-        });
-        await refresh?.();
-        panel.dispose();
-        await vscode.window.showTextDocument(
-          await vscode.workspace.openTextDocument(result.path)
-        );
-      },
-    });
-    host.postMessage({
-      type: "loadNewOntology",
-      path: target.fsPath,
-      defaultIri: "https://example.org/ontology",
-    });
+    openNewOntologyPanel(context.extensionUri, target.fsPath, refresh);
   });
-
   command("ontocode.openOntology", async () => {
     const selected = await vscode.window.showOpenDialog({
       canSelectMany: false,
@@ -248,39 +230,8 @@ export function registerV017Commands(
   command("ontocode.managePrefixes", async () => {
     const document = await pickOntologyDocument("Manage Prefixes");
     if (!document) return;
-    const host = PanelHost.create(context.extensionUri, {
-      viewType: "ontocode.prefixManager",
-      title: "Prefix Manager",
-      panel: "prefixManager",
-      onMessage: async (message, panel) => {
-        if (message.type !== "submitPrefix") return;
-        const namespaces = document.namespaces ?? {};
-        const patch: PatchOp =
-          message.action === "remove"
-            ? { op: "remove_prefix", prefix: message.prefix }
-            : Object.prototype.hasOwnProperty.call(namespaces, message.prefix)
-              ? {
-                  op: "set_prefix",
-                  prefix: message.prefix,
-                  namespace_iri: message.namespaceIri ?? "",
-                }
-              : {
-                  op: "add_prefix",
-                  prefix: message.prefix,
-                  namespace_iri: message.namespaceIri ?? "",
-                };
-        await applyDocumentPatches(document, [patch]);
-        await refresh?.();
-        panel.dispose();
-      },
-    });
-    host.postMessage({
-      type: "loadPrefixes",
-      path: document.path,
-      prefixes: document.namespaces ?? {},
-    });
+    openPrefixManagerPanel(context.extensionUri, document, refresh);
   });
-
   command("ontocode.showMetrics", async () => {
     const snapshot = await getCatalogSnapshot();
     const host = PanelHost.create(context.extensionUri, {
@@ -445,6 +396,115 @@ export function registerV017Commands(
   );
 
   registry.startContextSync();
+}
+
+/**
+ * Open New Ontology dialog for a concrete path (skips showSaveDialog).
+ * Used by VS Code e2e hooks when ONTOCODE_TEST_FIXTURES is set.
+ */
+export function openNewOntologyDialog(targetPath: string): void {
+  if (!dialogRuntime) {
+    throw new Error("OntoCode dialog commands are not registered");
+  }
+  openNewOntologyPanel(
+    dialogRuntime.extensionUri,
+    targetPath,
+    dialogRuntime.refresh
+  );
+}
+
+/**
+ * Open Prefix Manager for a catalog document path (skips multi-doc quick pick).
+ * Used by VS Code e2e hooks when ONTOCODE_TEST_FIXTURES is set.
+ */
+export async function openPrefixManager(documentPath: string): Promise<void> {
+  if (!dialogRuntime) {
+    throw new Error("OntoCode dialog commands are not registered");
+  }
+  const snapshot = await getCatalogSnapshot();
+  const normalized = path.resolve(documentPath);
+  const document = snapshot.documents.find(
+    (doc) => path.resolve(doc.path) === normalized
+  );
+  if (!document) {
+    throw new Error(`No indexed ontology document at ${documentPath}`);
+  }
+  openPrefixManagerPanel(
+    dialogRuntime.extensionUri,
+    document,
+    dialogRuntime.refresh
+  );
+}
+
+function openNewOntologyPanel(
+  extensionUri: vscode.Uri,
+  targetPath: string,
+  refresh?: () => Promise<void>
+): PanelHost {
+  const host = PanelHost.create(extensionUri, {
+    viewType: "ontocode.newOntology",
+    title: "New Ontology",
+    panel: "newOntology",
+    onMessage: async (message, panel) => {
+      if (message.type !== "submitNewOntology") return;
+      const result = await createOntology({
+        path: targetPath,
+        ontology_iri: message.ontologyIri,
+        version_iri: message.versionIri,
+        format: formatForPath(targetPath),
+      });
+      await refresh?.();
+      panel.dispose();
+      await vscode.window.showTextDocument(
+        await vscode.workspace.openTextDocument(result.path)
+      );
+    },
+  });
+  host.postMessage({
+    type: "loadNewOntology",
+    path: targetPath,
+    defaultIri: "https://example.org/ontology",
+  });
+  return host;
+}
+
+function openPrefixManagerPanel(
+  extensionUri: vscode.Uri,
+  document: OntologyDocument,
+  refresh?: () => Promise<void>
+): PanelHost {
+  const host = PanelHost.create(extensionUri, {
+    viewType: "ontocode.prefixManager",
+    title: "Prefix Manager",
+    panel: "prefixManager",
+    onMessage: async (message, panel) => {
+      if (message.type !== "submitPrefix") return;
+      const namespaces = document.namespaces ?? {};
+      const patch: PatchOp =
+        message.action === "remove"
+          ? { op: "remove_prefix", prefix: message.prefix }
+          : Object.prototype.hasOwnProperty.call(namespaces, message.prefix)
+            ? {
+                op: "set_prefix",
+                prefix: message.prefix,
+                namespace_iri: message.namespaceIri ?? "",
+              }
+            : {
+                op: "add_prefix",
+                prefix: message.prefix,
+                namespace_iri: message.namespaceIri ?? "",
+              };
+      await applyDocumentPatches(document, [patch]);
+      await refresh?.();
+      panel.dispose();
+    },
+  });
+  host.postMessage({
+    type: "loadPrefixes",
+    path: document.path,
+    prefixes: document.namespaces ?? {},
+  });
+  return host;
 }
 
 async function runExport(saveAs: boolean): Promise<void> {

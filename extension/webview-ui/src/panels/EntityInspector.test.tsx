@@ -458,6 +458,115 @@ describe("EntityInspectorPanel", () => {
     expect(chainOptions.queryByRole("option", { name: "Agent" })).not.toBeInTheDocument();
   });
 
+  it("posts add_property_chain applyPatch from property chain editor", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<EntityInspectorPanel />);
+    postHostMessage({
+      type: "loadEntity",
+      detail: {
+        ...entityDetail,
+        entity: {
+          ...entityDetail.entity,
+          kind: "object_property",
+          iri: "http://example.org#worksFor",
+          short_name: "worksFor",
+          labels: ["works for"],
+        },
+        axioms: [],
+      },
+      classOptions: [],
+      objectPropertyOptions: [
+        "http://example.org#worksFor",
+        "http://example.org#knows",
+        "http://example.org#relatedTo",
+      ],
+    });
+    await screen.findByRole("button", { name: "Add property to chain" });
+    const chainSection = screen
+      .getByRole("button", { name: "Add property to chain" })
+      .closest(".oc-section") as HTMLElement;
+
+    const selects = within(chainSection).getAllByRole("combobox");
+    await user.selectOptions(selects[0], "http://example.org#knows");
+    await user.click(
+      within(chainSection).getByRole("button", { name: "Add property to chain" })
+    );
+    const selectsAfter = within(chainSection).getAllByRole("combobox");
+    await user.selectOptions(selectsAfter[1], "http://example.org#relatedTo");
+    await user.click(within(chainSection).getByRole("button", { name: "Apply" }));
+
+    expect(lastPostedMessage()).toEqual({
+      type: "applyPatch",
+      patches: [
+        {
+          op: "add_property_chain",
+          entity_iri: "http://example.org#worksFor",
+          properties: [
+            "http://example.org#knows",
+            "http://example.org#relatedTo",
+          ],
+        },
+      ],
+      previewOnly: false,
+    });
+  });
+
+  it("posts remove_property_chain applyPatch from existing chain", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<EntityInspectorPanel />);
+    postHostMessage({
+      type: "loadEntity",
+      detail: {
+        ...entityDetail,
+        entity: {
+          ...entityDetail.entity,
+          kind: "object_property",
+          iri: "http://example.org#worksFor",
+          short_name: "worksFor",
+          labels: ["works for"],
+        },
+        axioms: [
+          {
+            kind: "property_chain",
+            display: "knows ∘ relatedTo",
+            properties: [
+              "http://example.org#knows",
+              "http://example.org#relatedTo",
+            ],
+            editable: true,
+          },
+        ],
+      },
+      classOptions: [],
+      objectPropertyOptions: [
+        "http://example.org#worksFor",
+        "http://example.org#knows",
+        "http://example.org#relatedTo",
+      ],
+    });
+    await screen.findByRole("button", { name: "Add property to chain" });
+    const chainSection = screen
+      .getByRole("button", { name: "Add property to chain" })
+      .closest(".oc-section") as HTMLElement;
+
+    await user.click(within(chainSection).getByRole("button", { name: "Remove" }));
+
+    expect(lastPostedMessage()).toEqual({
+      type: "applyPatch",
+      patches: [
+        {
+          op: "remove_property_chain",
+          entity_iri: "http://example.org#worksFor",
+          properties: [
+            "http://example.org#knows",
+            "http://example.org#relatedTo",
+          ],
+        },
+      ],
+      previewOnly: false,
+    });
+  });
+
   it("shows Edit disjoint label for disjoint_class axioms", async () => {
     renderWithProviders(<EntityInspectorPanel />);
     postHostMessage({

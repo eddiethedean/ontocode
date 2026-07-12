@@ -4,9 +4,9 @@ Canonical source: [CHANGELOG.md on GitHub](https://github.com/eddiethedean/ontoc
 
 Migration guides: [Migration index](migration/README.md)
 
-## [0.18.1] - 2026-07-11
+## [0.18.1] - 2026-07-12
 
-**v0.18.1** — Patch: named unsatisfiable expansion for classes ⊑ `owl:Nothing` (and descendants); stronger reasoner/Protégé/diff/path-jail/OBO and LSP workflow tests. See [CHANGELOG.md](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) and [migration/v0.18.1.md](migration/v0.18.1.md).
+**v0.18.1** — Patch: named unsatisfiable expansion; composed explanations for expansion-only unsats; Horned patch oracles; dialog e2e; stronger tests. See [CHANGELOG.md](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) and [migration/v0.18.1.md](migration/v0.18.1.md).
 
 ## [0.18.0] - 2026-07-11
 

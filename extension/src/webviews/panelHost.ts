@@ -14,9 +14,12 @@ export interface PanelHostOptions {
 }
 
 export class PanelHost {
+  private static openByKind = new Map<PanelKind, PanelHost>();
+
   private disposed = false;
   private webviewReady = false;
   private pendingMessages: HostMessage[] = [];
+  private processMessage?: (data: unknown) => Promise<void>;
 
   constructor(
     public readonly panel: vscode.WebviewPanel,
@@ -26,6 +29,9 @@ export class PanelHost {
     panel.onDidDispose(() => {
       this.disposed = true;
       this.unregisterFocus?.();
+      if (PanelHost.openByKind.get(this.panelKind) === this) {
+        PanelHost.openByKind.delete(this.panelKind);
+      }
     });
     this.unregisterFocus = focusRelay.registerHost(this);
   }
@@ -78,6 +84,32 @@ export class PanelHost {
     this.flushPending();
   }
 
+  /** Open host for a panel kind, if any. */
+  static getOpen(kind: PanelKind): PanelHost | undefined {
+    return PanelHost.openByKind.get(kind);
+  }
+
+  /** Dispose registered hosts for the given kinds (no-op if not open). */
+  static disposeKinds(kinds: PanelKind[]): void {
+    for (const kind of kinds) {
+      const host = PanelHost.openByKind.get(kind);
+      if (host && !host.isDisposed) {
+        host.panel.dispose();
+      }
+    }
+  }
+
+  /**
+   * Deliver a message into the same validation + handler path as
+   * `webview.onDidReceiveMessage` (VS Code e2e injection).
+   */
+  async deliverMessageForTests(data: unknown): Promise<void> {
+    if (!this.processMessage) {
+      throw new Error(`PanelHost(${this.panelKind}) has no message processor`);
+    }
+    await this.processMessage(data);
+  }
+
   static create(
     extensionUri: vscode.Uri,
     options: PanelHostOptions
@@ -110,8 +142,9 @@ export class PanelHost {
     );
 
     const host = new PanelHost(panel, extensionUri, options.panel);
+    PanelHost.openByKind.set(options.panel, host);
 
-    panel.webview.onDidReceiveMessage(async (data: unknown) => {
+    const processMessage = async (data: unknown): Promise<void> => {
       if (!isWebviewMessage(data)) {
         return;
       }
@@ -143,6 +176,11 @@ export class PanelHost {
           void vscode.window.showErrorMessage(`OntoCode: ${message}`);
         }
       }
+    };
+
+    host.processMessage = processMessage;
+    panel.webview.onDidReceiveMessage((data: unknown) => {
+      void processMessage(data);
     });
 
     return host;

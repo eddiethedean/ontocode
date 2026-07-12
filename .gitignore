@@ -13,3 +13,6 @@ extension/server/
 extension/*.vsix
 /site/
 .ci-local-run.log
+/mutants.out/
+/mutants.out.old/
+.cursor/

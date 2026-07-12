@@ -1,4 +1,6 @@
 use ontocore_catalog::{IndexBuilder, OntologyCatalog};
+use ontocore_owl::PatchOp;
+use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
@@ -9,6 +11,33 @@ pub fn fixture_workspace() -> PathBuf {
 #[allow(dead_code)]
 pub fn fixture_catalog() -> OntologyCatalog {
     IndexBuilder::new().workspace(fixture_workspace()).build().expect("index fixtures")
+}
+
+/// Write `ttl` to a temp workspace, apply patches to disk, reindex via Horned/`IndexBuilder`.
+#[allow(dead_code)]
+pub fn apply_and_reindex(
+    ttl: &str,
+    patches: &[PatchOp],
+    namespaces: &BTreeMap<String, String>,
+) -> (tempfile::TempDir, PathBuf, OntologyCatalog) {
+    let dir = tempfile::tempdir().expect("tempdir");
+    let path = dir.path().join("patched.ttl");
+    std::fs::write(&path, ttl).expect("write ttl");
+    let catalog = reapply_and_reindex(dir.path(), &path, patches, namespaces);
+    (dir, path, catalog)
+}
+
+/// Apply further patches on an existing workspace file and reindex.
+#[allow(dead_code)]
+pub fn reapply_and_reindex(
+    workspace: &Path,
+    path: &Path,
+    patches: &[PatchOp],
+    namespaces: &BTreeMap<String, String>,
+) -> OntologyCatalog {
+    let result = ontocore_owl::apply_patches(path, patches, false, namespaces).expect("apply");
+    assert!(result.applied, "expected patches applied; diagnostics={:?}", result.diagnostics);
+    IndexBuilder::new().workspace(workspace).build().expect("reindex")
 }
 
 #[allow(dead_code)]

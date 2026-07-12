@@ -1,3 +1,6 @@
+import { execFile } from "child_process";
+import * as path from "path";
+import { promisify } from "util";
 import * as vscode from "vscode";
 import type {
   DialogPanelKind,
@@ -12,8 +15,12 @@ import { focusRelay } from "./focus/focusRelay";
 import { EntityInspectorPanel } from "./webviews/inspector";
 import { PanelHost } from "./webviews/panelHost";
 import { QueryWorkbenchPanel } from "./webviews/queryWorkbenchReact";
+import { ReasonerPanel } from "./webviews/reasonerPanel";
+import { SemanticDiffPanel } from "./webviews/semanticDiffPanel";
 import { assertWebviewHtmlRoutesPanel } from "./webviews/webviewBootstrap";
 import type { PanelKind } from "./webviews/messages";
+
+const execFileAsync = promisify(execFile);
 
 function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -33,12 +40,22 @@ async function waitForWebviewReady(
   throw new Error("webview did not report ready before timeout");
 }
 
-function requireDialogHost(panel: DialogPanelKind): PanelHost {
+function requireHost(
+  panel: DialogPanelKind | "reasoner" | "semanticDiff" | "queryWorkbench"
+): PanelHost {
   const host = PanelHost.getOpen(panel);
   if (!host || host.isDisposed) {
     throw new Error(`${panel} webview is not open`);
   }
   return host;
+}
+
+function extensionUri(): vscode.Uri {
+  const ext = vscode.extensions.getExtension("ontocode.ontocode");
+  if (!ext) {
+    throw new Error("OntoCode extension is not loaded");
+  }
+  return ext.extensionUri;
 }
 
 /** Test hooks exposed when ONTOCODE_TEST_FIXTURES is set (VS Code e2e). */
@@ -152,10 +169,10 @@ export function createOntoCodeTestHooks(): OntoCodeTestHooks {
     },
 
     async waitForPanelReady(
-      panel: DialogPanelKind,
+      panel: DialogPanelKind | "reasoner" | "semanticDiff" | "queryWorkbench",
       timeoutMs = 20_000
     ): Promise<void> {
-      const host = requireDialogHost(panel);
+      const host = requireHost(panel);
       await waitForWebviewReady(() => host.isWebviewReady(), timeoutMs);
     },
 
@@ -171,8 +188,40 @@ export function createOntoCodeTestHooks(): OntoCodeTestHooks {
     async disposeAllPanels(): Promise<void> {
       EntityInspectorPanel.currentPanel?.disposeForTests();
       QueryWorkbenchPanel.current?.disposeForTests();
+      ReasonerPanel.current?.dispose();
+      SemanticDiffPanel.current?.dispose();
       PanelHost.disposeKinds(["newOntology", "prefixManager"]);
       await sleep(100);
+    },
+
+    async openReasonerPanel(): Promise<void> {
+      ReasonerPanel.show(extensionUri());
+    },
+
+    async runReasonerDefaults(): Promise<void> {
+      const panel = ReasonerPanel.current ?? ReasonerPanel.show(extensionUri());
+      await panel.runWithDefaults();
+    },
+
+    async openSemanticDiff(leftRef: string, rightRef: string): Promise<void> {
+      await SemanticDiffPanel.show(extensionUri(), { leftRef, rightRef });
+    },
+
+    async captureScreenshot(name: string): Promise<void> {
+      const script = process.env.ONTOCODE_CAPTURE_SCRIPT;
+      const dir = process.env.ONTOCODE_SCREENSHOT_DIR;
+      if (!script || !dir) {
+        throw new Error(
+          "ONTOCODE_CAPTURE_SCRIPT and ONTOCODE_SCREENSHOT_DIR must be set"
+        );
+      }
+      const safe = name.replace(/[^a-zA-Z0-9._-]/g, "_");
+      const out = path.join(dir, `${safe}.png`);
+      await execFileAsync(script, [out], { timeout: 30_000 });
+    },
+
+    async settle(ms = 800): Promise<void> {
+      await sleep(ms);
     },
 
     assertWebviewHtmlRoutesPanel(html: string, panel: PanelKind): void {

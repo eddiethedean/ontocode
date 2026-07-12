@@ -10,7 +10,12 @@ import type { PanelKind } from "./webviews/messages";
 import type { CurrentFocus } from "./focus/types";
 
 export type DialogPanelKind = "newOntology" | "prefixManager";
-export type InjectablePanelKind = DialogPanelKind | "inspector";
+export type InjectablePanelKind =
+  | DialogPanelKind
+  | "inspector"
+  | "queryWorkbench"
+  | "reasoner"
+  | "semanticDiff";
 
 /** VS Code integration test hooks (only when ONTOCODE_TEST_FIXTURES is set). */
 export interface OntoCodeTestHooks {
@@ -36,9 +41,25 @@ export interface OntoCodeTestHooks {
   openPrefixManager(documentPath: string): Promise<void>;
   /** Inject a webview→host message into the open panel's validated handler. */
   postWebviewMessage(panel: InjectablePanelKind, msg: unknown): Promise<void>;
-  waitForPanelReady(panel: DialogPanelKind, timeoutMs?: number): Promise<void>;
+  waitForPanelReady(
+    panel: DialogPanelKind | "reasoner" | "semanticDiff" | "queryWorkbench",
+    timeoutMs?: number
+  ): Promise<void>;
   getPanelHtml(panel: DialogPanelKind): string | undefined;
   disposePanel(panel: DialogPanelKind): Promise<void>;
+  /** Open Reasoner panel (no run). */
+  openReasonerPanel(): Promise<void>;
+  /** Run reasoner with workspace defaults; resolves when RPC finishes. */
+  runReasonerDefaults(): Promise<void>;
+  /** Open Semantic Diff for left/right refs (skips input boxes). */
+  openSemanticDiff(leftRef: string, rightRef: string): Promise<void>;
+  /**
+   * Capture the VS Code window via ONTOCODE_CAPTURE_SCRIPT into
+   * ONTOCODE_SCREENSHOT_DIR/<name>.png (macOS screenshot pipeline).
+   */
+  captureScreenshot(name: string): Promise<void>;
+  /** Brief UI settle delay for animations / layout. */
+  settle(ms?: number): Promise<void>;
 }
 
 /** Extension activation API (used by VS Code integration tests). */

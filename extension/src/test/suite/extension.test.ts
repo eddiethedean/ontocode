@@ -53,7 +53,11 @@ suite("OntoCode in VS Code", () => {
 
     const result = await api.indexWorkspace(workspaceUri);
     assert.equal(result.stats.error_count, 0);
-    assert.ok(result.stats.class_count >= 3);
+    // fixtures/ currently ships 18 classes across example + reasoner + clinic ontologies
+    assert.ok(
+      result.stats.class_count >= 15,
+      `expected at least 15 classes in fixtures, got ${result.stats.class_count}`
+    );
 
     const snapshot = await api.getCatalogSnapshot();
     const person = snapshot.entities.find(
@@ -61,6 +65,10 @@ suite("OntoCode in VS Code", () => {
     );
     assert.ok(person, "Person class should be in catalog");
     assert.equal(person?.kind, "class");
+    assert.ok(
+      snapshot.entities.some((e) => e.iri.includes("reasoner-el#Dog")),
+      "Dog from reasoner-el fixture must be indexed"
+    );
   });
 
   test("runs SQL query against indexed workspace", async function () {

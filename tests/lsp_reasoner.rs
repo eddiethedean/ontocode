@@ -114,12 +114,25 @@ fn lsp_run_reasoner_el_profile() {
         panic!("auto runReasoner error: {auto_resp}");
     }
     let auto_result = auto_resp.get("result").expect("auto result");
-    let profile_used = auto_result.get("profile_used").and_then(|v| v.as_str()).unwrap_or("");
-    assert!(
-        matches!(profile_used, "auto" | "el" | "dl" | "rl" | "rdfs"),
-        "unexpected auto profile_used: {profile_used}"
+    assert_eq!(
+        auto_result.get("profile_used").and_then(|v| v.as_str()),
+        Some("el"),
+        "Auto must report concrete EL engine for EL-only workspace"
     );
     assert_eq!(auto_result.get("consistent").and_then(|v| v.as_bool()), Some(true));
+    let edges = auto_result
+        .pointer("/snapshot/inferred/combined/edges")
+        .or_else(|| auto_result.pointer("/inferred/combined/edges"))
+        .and_then(|v| v.as_array())
+        .cloned()
+        .unwrap_or_default();
+    assert!(
+        edges.iter().any(|e| {
+            e.get("child").and_then(|c| c.as_str()).is_some_and(|c| c.ends_with("#Dog"))
+                && e.get("parent").and_then(|p| p.as_str()).is_some_and(|p| p.ends_with("#Mammal"))
+        }),
+        "expected Dog ⊑ Mammal after auto classify: {edges:?}"
+    );
 
     send_request(&mut stdin, 7, "shutdown", serde_json::json!(null));
     let _ = wait_for_id(&rx, 7, Duration::from_secs(5));

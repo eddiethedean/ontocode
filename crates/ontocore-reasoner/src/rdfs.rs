@@ -29,10 +29,9 @@ impl ReasonerAdapter for RdfsAdapter {
             .map_err(|e| ReasonerError::Classify(e.to_string()))?;
 
         let iri_edges = subclass_edges_from_ontology(&ontology, &input.asserted_hierarchy);
-        let unsatisfiable =
-            detect_unsatisfiable_classes(&ontology).map_err(ReasonerError::Classify)?;
-        let inferred =
-            build_inferred_hierarchy(&iri_edges, &unsatisfiable, &input.asserted_hierarchy);
+        let reported = detect_unsatisfiable_classes(&ontology).map_err(ReasonerError::Classify)?;
+        let inferred = build_inferred_hierarchy(&iri_edges, &reported, &input.asserted_hierarchy);
+        let unsatisfiable = inferred.unsatisfiable.clone();
         let new_inferences = new_inferences(&input.asserted_hierarchy, &inferred.edges);
 
         Ok(ClassificationResult {

@@ -306,23 +306,107 @@ mod tests {
     use git2::{Repository, Signature};
 
     #[test]
-    fn parse_triple_dot_range() {
-        let (left, right) = parse_git_range("main...feature").unwrap();
-        assert_eq!(left, "main...feature");
-        assert_eq!(right, "TRIPLE_DOT");
-    }
-
-    #[test]
-    fn parse_two_dot_range() {
+    fn parse_two_dot_range_splits_refs() {
         let (left, right) = parse_git_range("main..feature").unwrap();
         assert_eq!(left, "main");
         assert_eq!(right, "feature");
     }
 
     #[test]
+    fn parse_single_ref_defaults_right_to_worktree() {
+        let (left, right) = parse_git_range("HEAD").unwrap();
+        assert_eq!(left, "HEAD");
+        assert_eq!(right, "WORKTREE");
+    }
+
+    #[test]
+    fn triple_dot_diff_compares_merge_base_to_feature() {
+        // History:
+        //   base -- main (adds MainOnly)
+        //       \-- feature (adds FeatureOnly)
+        // main...feature must equal merge-base..feature, so MainOnly must NOT appear
+        // as an "added on left / removed on right" relative to feature-only tip.
+        let dir = tempfile::tempdir().unwrap();
+        let root = dir.path();
+        let ttl = |name: &str| {
+            format!(
+                "@prefix ex: <http://example.org#> .\n\
+                 @prefix owl: <http://www.w3.org/2002/07/owl#> .\n\
+                 ex:{name} a owl:Class .\n"
+            )
+        };
+
+        let repo = Repository::init(root).expect("git init");
+        let sig = Signature::now("OntoCode Test", "test@example.com").expect("signature");
+
+        std::fs::write(root.join("onto.ttl"), ttl("Base")).unwrap();
+        let mut index = repo.index().expect("index");
+        index.add_path(Path::new("onto.ttl")).unwrap();
+        index.write().unwrap();
+        let tree_id = index.write_tree().unwrap();
+        let tree = repo.find_tree(tree_id).unwrap();
+        let base_oid =
+            repo.commit(Some("HEAD"), &sig, &sig, "base", &tree, &[]).expect("base commit");
+        let base_commit = repo.find_commit(base_oid).unwrap();
+
+        // main diverges
+        std::fs::write(root.join("onto.ttl"), ttl("MainOnly")).unwrap();
+        let mut index = repo.index().unwrap();
+        index.add_path(Path::new("onto.ttl")).unwrap();
+        index.write().unwrap();
+        let tree_id = index.write_tree().unwrap();
+        let tree = repo.find_tree(tree_id).unwrap();
+        repo.commit(Some("HEAD"), &sig, &sig, "main tip", &tree, &[&base_commit])
+            .expect("main commit");
+        repo.branch("main", &repo.head().unwrap().peel_to_commit().unwrap(), true).ok();
+
+        // feature from base
+        repo.set_head_detached(base_oid).unwrap();
+        repo.checkout_head(Some(git2::build::CheckoutBuilder::new().force())).unwrap();
+        std::fs::write(root.join("onto.ttl"), ttl("FeatureOnly")).unwrap();
+        let mut index = repo.index().unwrap();
+        index.add_path(Path::new("onto.ttl")).unwrap();
+        index.write().unwrap();
+        let tree_id = index.write_tree().unwrap();
+        let tree = repo.find_tree(tree_id).unwrap();
+        let feature_oid = repo
+            .commit(Some("refs/heads/feature"), &sig, &sig, "feature tip", &tree, &[&base_commit])
+            .expect("feature commit");
+        let _ = feature_oid;
+
+        let (left, right) = parse_git_range("main...feature").unwrap();
+        let (diff, left_cat, right_cat) =
+            diff_git_refs_with_catalogs(root, &left, &right).expect("triple-dot diff");
+
+        let left_iris: Vec<_> = left_cat.data().entities.iter().map(|e| e.iri.as_str()).collect();
+        let right_iris: Vec<_> = right_cat.data().entities.iter().map(|e| e.iri.as_str()).collect();
+        assert!(
+            left_iris.iter().any(|i| i.contains("Base")),
+            "merge-base catalog should contain Base, got {left_iris:?}"
+        );
+        assert!(
+            !left_iris.iter().any(|i| i.contains("MainOnly")),
+            "merge-base must not be main tip (MainOnly): {left_iris:?}"
+        );
+        assert!(
+            right_iris.iter().any(|i| i.contains("FeatureOnly")),
+            "right catalog should be feature tip: {right_iris:?}"
+        );
+        assert!(
+            diff.entity_changes.iter().any(|c| c.iri.contains("FeatureOnly")),
+            "diff should mention FeatureOnly: {:?}",
+            diff.entity_changes
+        );
+    }
+
+    #[test]
     fn reject_escape_path() {
         let dir = tempfile::tempdir().unwrap();
-        assert!(ensure_extract_path_within(dir.path(), "../outside.ttl").is_err());
+        let err = ensure_extract_path_within(dir.path(), "../outside.ttl").expect_err("escape");
+        assert!(
+            err.contains("..") || err.contains("escapes") || err.contains("outside"),
+            "unexpected error: {err}"
+        );
     }
 
     #[test]

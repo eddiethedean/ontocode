@@ -535,9 +535,9 @@
       "short_name": "B",
       "source_location": {
         "column": 0,
-        "end_byte": 372,
-        "line": 11,
-        "start_byte": 295
+        "end_byte": 510,
+        "line": 13,
+        "start_byte": 437
       }
     },
     {
@@ -552,9 +552,9 @@
       "short_name": "Invalid",
       "source_location": {
         "column": 0,
-        "end_byte": 459,
-        "line": 15,
-        "start_byte": 374
+        "end_byte": 597,
+        "line": 17,
+        "start_byte": 512
       }
     }
   ],
@@ -588,6 +588,9 @@
       ],
       "http://example.org/reasoner-unsat#B": [
         "http://example.org/reasoner-unsat#Invalid"
+      ],
+      "http://www.w3.org/2002/07/owl#Nothing": [
+        "http://example.org/reasoner-unsat#B"
       ],
       "http://www.w3.org/2002/07/owl#Thing": [
         "http://example.org/org#Cat",
@@ -654,6 +657,10 @@
       {
         "child": "http://example.org/reasoner-unsat#Invalid",
         "parent": "http://example.org/reasoner-unsat#B"
+      },
+      {
+        "child": "http://example.org/reasoner-unsat#B",
+        "parent": "http://www.w3.org/2002/07/owl#Nothing"
       }
     ],
     "parents": {
@@ -694,6 +701,9 @@
       "http://example.org/reasoner-el#Mammal": [
         "http://example.org/reasoner-el#Animal"
       ],
+      "http://example.org/reasoner-unsat#B": [
+        "http://www.w3.org/2002/07/owl#Nothing"
+      ],
       "http://example.org/reasoner-unsat#Invalid": [
         "http://example.org/reasoner-unsat#A",
         "http://example.org/reasoner-unsat#B"
@@ -703,7 +713,7 @@
   "stats": {
     "annotation_count": 28,
     "annotation_property_count": 1,
-    "axiom_count": 36,
+    "axiom_count": 35,
     "class_count": 18,
     "data_property_count": 1,
     "diagnostic_error_count": 0,

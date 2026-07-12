@@ -8,9 +8,11 @@
 ex:A a owl:Class ;
     rdfs:label "A" .
 
+# Named class explicitly ⊑ ⊥ so adapters can expand descendants even when
+# Ontologos only reports owl:Nothing in taxonomy.unsatisfiable.
 ex:B a owl:Class ;
     rdfs:label "B" ;
-    owl:equivalentClass owl:Nothing .
+    rdfs:subClassOf owl:Nothing .
 
 ex:Invalid a owl:Class ;
     rdfs:label "Invalid" ;

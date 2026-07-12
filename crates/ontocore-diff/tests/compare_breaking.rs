@@ -28,10 +28,31 @@ fn removed_subclass_emits_breaking() {
         .build()
         .expect("head");
     let diff = diff_catalogs(&base, &head);
+    let breaking: Vec<_> = diff
+        .breaking_changes
+        .iter()
+        .filter(|b| matches!(b.reason, BreakingReason::RemovedSuperclass))
+        .collect();
+    assert_eq!(
+        breaking.len(),
+        1,
+        "expected exactly one RemovedSuperclass breaking change, got {:?}",
+        diff.breaking_changes
+    );
     assert!(
-        diff.breaking_changes.iter().any(|b| matches!(b.reason, BreakingReason::RemovedSuperclass))
-            || diff.axiom_changes.iter().any(|a| a.axiom_kind == AXIOM_KIND_SUB_CLASS_OF),
-        "expected subclass removal in diff"
+        breaking[0].entity_iri.as_deref() == Some("http://ex/A")
+            || breaking[0].message.contains("A"),
+        "breaking change should reference class A: {:?}",
+        breaking[0]
+    );
+    assert!(
+        diff.axiom_changes.iter().any(|a| {
+            a.axiom_kind == AXIOM_KIND_SUB_CLASS_OF
+                && a.change == "removed"
+                && a.subject.contains("A")
+        }),
+        "subclass axiom removal must appear in axiom_changes: {:?}",
+        diff.axiom_changes
     );
 }
 

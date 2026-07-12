@@ -28,16 +28,16 @@ impl ReasonerAdapter for ElAdapter {
 
         let iri_edges =
             taxonomy_to_iri_edges(&input.ontology, &taxonomy).map_err(ReasonerError::Classify)?;
-        let unsatisfiable =
+        let reported =
             unsatisfiable_iris(&input.ontology, &taxonomy).map_err(ReasonerError::Classify)?;
-        let inferred =
-            build_inferred_hierarchy(&iri_edges, &unsatisfiable, &input.asserted_hierarchy);
+        let inferred = build_inferred_hierarchy(&iri_edges, &reported, &input.asserted_hierarchy);
+        let unsatisfiable = inferred.unsatisfiable.clone();
         let new_inferences = new_inferences(&input.asserted_hierarchy, &inferred.edges);
 
         Ok(ClassificationResult {
             profile_used: "el".to_string(),
             consistent: unsatisfiable.is_empty(),
-            unsatisfiable: unsatisfiable.clone(),
+            unsatisfiable,
             inferred,
             new_inferences,
             warnings: Vec::new(),

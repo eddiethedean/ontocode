@@ -20,20 +20,24 @@ pub fn ontocore_binary() -> PathBuf {
         }
     }
 
-    let target_dir = std::env::var("CARGO_TARGET_DIR")
-        .map(PathBuf::from)
-        .unwrap_or_else(|_| Path::new(env!("CARGO_MANIFEST_DIR")).join("target"));
+    let mut target_dirs = Vec::new();
+    if let Ok(dir) = std::env::var("CARGO_TARGET_DIR") {
+        target_dirs.push(PathBuf::from(dir));
+    }
+    target_dirs.push(Path::new(env!("CARGO_MANIFEST_DIR")).join("target"));
 
-    for subdir in ["debug", "release"] {
-        let candidate = target_dir.join(subdir).join("ontocore");
-        if candidate.exists() {
-            return candidate;
+    for target_dir in &target_dirs {
+        for subdir in ["debug", "release"] {
+            let candidate = target_dir.join(subdir).join("ontocore");
+            if candidate.exists() {
+                return candidate;
+            }
         }
     }
 
     panic!(
-        "ontocore binary not found under {} (run `cargo build -p ontocore-cli` first, or add ontocore-cli as a dev-dependency)",
-        target_dir.display()
+        "ontocore binary not found under {:?} (run `cargo build -p ontocore-cli` first, or add ontocore-cli as a dev-dependency)",
+        target_dirs
     );
 }
 

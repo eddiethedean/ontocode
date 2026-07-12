@@ -92,6 +92,34 @@ pub struct ExplanationResult {
     pub text: String,
 }
 
+const OWL_NOTHING: &str = "http://www.w3.org/2002/07/owl#Nothing";
+
+/// Expand taxonomy unsatisfiable IRIs to **named** classes that are ⊑ ⊥.
+///
+/// Ontologos sometimes reports only `owl:Nothing` itself. User-facing consistency
+/// (see [`ClassificationResult::consistent`]) must reflect named classes that are
+/// unsatisfiable via asserted/inferred ⊑ `owl:Nothing` (and descendants of any
+/// unsatisfiable class).
+pub fn expand_named_unsatisfiable(reported: &[String], hierarchy: &ClassHierarchy) -> Vec<String> {
+    let mut unsat: BTreeSet<String> = reported.iter().cloned().collect();
+    for edge in &hierarchy.edges {
+        if edge.parent == OWL_NOTHING {
+            unsat.insert(edge.child.clone());
+        }
+    }
+    let mut changed = true;
+    while changed {
+        changed = false;
+        for edge in &hierarchy.edges {
+            if unsat.contains(&edge.parent) && unsat.insert(edge.child.clone()) {
+                changed = true;
+            }
+        }
+    }
+    unsat.remove(OWL_NOTHING);
+    unsat.into_iter().collect()
+}
+
 pub fn build_inferred_hierarchy(
     taxonomy_edges: &[(String, String)],
     unsatisfiable: &[String],
@@ -118,7 +146,8 @@ pub fn build_inferred_hierarchy(
     }
 
     let combined = hierarchy_from_edges(combined_edges);
-    InferredHierarchy { edges: inferred_edges, unsatisfiable: unsatisfiable.to_vec(), combined }
+    let expanded = expand_named_unsatisfiable(unsatisfiable, &combined);
+    InferredHierarchy { edges: inferred_edges, unsatisfiable: expanded, combined }
 }
 
 pub fn new_inferences(asserted: &ClassHierarchy, inferred: &[SubclassEdge]) -> Vec<SubclassEdge> {
@@ -190,4 +219,22 @@ pub fn detect_unsatisfiable_classes(
     let taxonomy =
         ElClassifier::new().classify(ontology).map_err(|e| format!("unsat detection: {e}"))?;
     unsatisfiable_iris(ontology, &taxonomy)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use ontocore_catalog::SubclassEdge;
+
+    #[test]
+    fn expand_named_unsatisfiable_includes_descendants_of_nothing() {
+        let hierarchy = hierarchy_from_edges(vec![
+            SubclassEdge { child: "http://ex/B".into(), parent: OWL_NOTHING.into() },
+            SubclassEdge { child: "http://ex/Invalid".into(), parent: "http://ex/B".into() },
+        ]);
+        let expanded = expand_named_unsatisfiable(&[OWL_NOTHING.to_string()], &hierarchy);
+        assert!(expanded.iter().any(|i| i == "http://ex/B"));
+        assert!(expanded.iter().any(|i| i == "http://ex/Invalid"));
+        assert!(!expanded.iter().any(|i| i == OWL_NOTHING));
+    }
 }

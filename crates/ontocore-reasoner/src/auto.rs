@@ -66,17 +66,18 @@ impl ReasonerAdapter for AutoAdapter {
             ClassifyOutcome::Taxonomy(taxonomy) => {
                 let iri_edges = taxonomy_to_iri_edges(&input.ontology, &taxonomy)
                     .map_err(ReasonerError::Classify)?;
-                let unsatisfiable = unsatisfiable_iris(&input.ontology, &taxonomy)
+                let reported = unsatisfiable_iris(&input.ontology, &taxonomy)
                     .map_err(ReasonerError::Classify)?;
                 let inferred =
-                    build_inferred_hierarchy(&iri_edges, &unsatisfiable, &input.asserted_hierarchy);
+                    build_inferred_hierarchy(&iri_edges, &reported, &input.asserted_hierarchy);
+                let unsatisfiable = inferred.unsatisfiable.clone();
                 let new_inferences = new_inferences(&input.asserted_hierarchy, &inferred.edges);
                 let profile_used = resolve_auto_reasoner_id(&input.ontology)?.as_str().to_string();
 
                 Ok(ClassificationResult {
                     profile_used,
                     consistent: unsatisfiable.is_empty(),
-                    unsatisfiable: unsatisfiable.clone(),
+                    unsatisfiable,
                     inferred,
                     new_inferences,
                     warnings: Vec::new(),
@@ -88,10 +89,11 @@ impl ReasonerAdapter for AutoAdapter {
             ClassifyOutcome::Rdfs(report) => {
                 let ontology = reasoner.ontology();
                 let iri_edges = subclass_edges_from_ontology(ontology, &input.asserted_hierarchy);
-                let unsatisfiable =
+                let reported =
                     detect_unsatisfiable_classes(ontology).map_err(ReasonerError::Classify)?;
                 let inferred =
-                    build_inferred_hierarchy(&iri_edges, &unsatisfiable, &input.asserted_hierarchy);
+                    build_inferred_hierarchy(&iri_edges, &reported, &input.asserted_hierarchy);
+                let unsatisfiable = inferred.unsatisfiable.clone();
                 let new_inferences = new_inferences(&input.asserted_hierarchy, &inferred.edges);
 
                 Ok(ClassificationResult {
@@ -109,10 +111,11 @@ impl ReasonerAdapter for AutoAdapter {
             ClassifyOutcome::Rl(report) => {
                 let ontology = reasoner.ontology();
                 let iri_edges = subclass_edges_from_ontology(ontology, &input.asserted_hierarchy);
-                let unsatisfiable =
+                let reported =
                     detect_unsatisfiable_classes(ontology).map_err(ReasonerError::Classify)?;
                 let inferred =
-                    build_inferred_hierarchy(&iri_edges, &unsatisfiable, &input.asserted_hierarchy);
+                    build_inferred_hierarchy(&iri_edges, &reported, &input.asserted_hierarchy);
+                let unsatisfiable = inferred.unsatisfiable.clone();
                 let new_inferences = new_inferences(&input.asserted_hierarchy, &inferred.edges);
 
                 Ok(ClassificationResult {

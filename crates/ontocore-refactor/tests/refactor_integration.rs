@@ -31,7 +31,11 @@ fn build_catalog(dir: &std::path::Path) -> ontocore_catalog::OntologyCatalog {
 fn find_usages_across_files() {
     let catalog = build_catalog(&fixture_dir());
     let usages = find_usages(&catalog, "http://example.org/org#Person");
-    assert!(!usages.is_empty());
+    assert!(
+        usages.len() >= 2,
+        "Person should be referenced in both org.ttl and people.ttl, got {:?}",
+        usages
+    );
     assert!(usages.iter().any(|u| u.file.ends_with("org.ttl")));
     assert!(usages.iter().any(|u| u.file.ends_with("people.ttl")));
 }
@@ -64,6 +68,15 @@ fn rename_iri_across_workspace() {
     let org_text = std::fs::read_to_string(ws.join("org.ttl")).unwrap();
     assert!(org_text.contains("ex:Human"));
     assert!(!org_text.contains("ex:Person"));
+    let reindexed = build_catalog(ws);
+    assert!(
+        reindexed.find_entity("http://example.org/org#Human").is_some(),
+        "renamed IRI must appear after reindex"
+    );
+    assert!(
+        reindexed.find_entity("http://example.org/org#Person").is_none(),
+        "old IRI must be gone after reindex"
+    );
 }
 
 #[test]

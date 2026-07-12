@@ -320,7 +320,8 @@ mod tests {
 
         let root = canonical_workspace_root(dir.path()).unwrap();
         let uri = url::Url::from_file_path(&ttl).unwrap().to_string();
-        assert!(resolve_document_path(&uri, &root).is_err());
+        let err = resolve_document_path(&uri, &root).expect_err("must reject outside path");
+        assert!(err.contains("outside the indexed workspace"), "unexpected error: {err}");
     }
 
     #[test]
@@ -334,11 +335,17 @@ mod tests {
         let root = canonical_workspace_root(dir.path()).unwrap();
         let target = link.join("pwn.ttl");
         let uri = url::Url::from_file_path(&target).unwrap().to_string();
+        let err = resolve_lsp_document_path(&uri, &root)
+            .expect_err("must reject create-through-symlink escape");
         assert!(
-            resolve_lsp_document_path(&uri, &root).is_err(),
-            "must reject create-through-symlink escape"
+            err.contains("outside") || err.contains("escapes") || err.contains("symlink"),
+            "unexpected error: {err}"
         );
-        assert!(validate_workspace_scope(&target, &root).is_err());
+        let scope_err = validate_workspace_scope(&target, &root).expect_err("scope");
+        assert!(
+            scope_err.contains("outside") || scope_err.contains("escapes"),
+            "unexpected scope error: {scope_err}"
+        );
         assert!(!is_path_within(&root, &target));
     }
 
@@ -352,7 +359,20 @@ mod tests {
 
         let root = canonical_workspace_root(dir.path()).unwrap();
         let target = link.join("nested").join("pwn.ttl");
-        assert!(validate_workspace_scope(&target, &root).is_err());
+        let err = validate_workspace_scope(&target, &root).expect_err("must reject");
+        assert!(err.contains("outside") || err.contains("escapes"), "unexpected error: {err}");
+    }
+
+    #[test]
+    fn rejects_parent_escape_components() {
+        let dir = tempfile::tempdir().unwrap();
+        let root = canonical_workspace_root(dir.path()).unwrap();
+        let escaped = dir.path().join("sub").join("..").join("..").join("etc").join("passwd");
+        let err = validate_workspace_scope(&escaped, &root).expect_err("must reject .. escape");
+        assert!(
+            err.contains("escapes workspace via ..") || err.contains("outside"),
+            "unexpected error: {err}"
+        );
     }
 
     #[test]

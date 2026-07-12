@@ -1891,7 +1891,16 @@ ex:Person a owl:Class ;
         assert!(!result.applied);
         assert!(!result.diagnostics.is_empty());
         assert_eq!(result.preview_text.as_deref(), Some(ttl));
-        assert!(!ttl.contains("ex:Pwned"));
+        // Injection must not appear in any produced text (preview equals original).
+        let produced = result.preview_text.as_deref().unwrap_or("");
+        assert!(
+            !produced.contains("ex:Pwned") && !produced.contains("Pwned"),
+            "malicious local name must not be written: {produced}"
+        );
+        assert!(
+            result.diagnostics.iter().any(|d| d.severity == "error"),
+            "expected error diagnostic for angle-bracket IRI injection"
+        );
     }
 
     #[test]

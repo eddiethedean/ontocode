@@ -21,7 +21,7 @@ pub use cache::{ReasonerCache, ReasonerCacheStore};
 pub use error::{ReasonerError, Result};
 pub use input::{ReasonerInput, WorkspaceInputLoader};
 pub use result::{
-    ClassificationResult, ConsistencyResult, ExplanationRequest, ExplanationResult,
-    ExplanationStep, InferredHierarchy, ReasonerSnapshot, ReasonerWarning,
+    expand_named_unsatisfiable, ClassificationResult, ConsistencyResult, ExplanationRequest,
+    ExplanationResult, ExplanationStep, InferredHierarchy, ReasonerSnapshot, ReasonerWarning,
 };
 pub use runner::{classify, explain, explain_alternatives};

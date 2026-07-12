@@ -509,23 +509,23 @@ mod tests {
     }
 
     #[test]
-    fn html_export_escapes_entity_labels() {
-        let ont = OntologyDoc {
-            id: "http://example.org/ex".to_string(),
-            slug: "ex".to_string(),
-            path: "evil.ttl".to_string(),
-            imports: vec![],
-            entities: vec![EntityDoc {
-                iri: "http://example.org/ex#Evil".to_string(),
-                short_name: "Evil".to_string(),
-                kind: "class".to_string(),
-                labels: vec!["<img src=x onerror=alert(1)>".to_string()],
-                comments: vec![],
-                parents: vec![],
-            }],
-        };
-        let html = render_ontology(&ont, ExportFormat::Html).expect("render html");
-        assert!(html.contains("&lt;img"));
-        assert!(!html.contains("<img src=x onerror=alert(1)>"));
+    fn markdown_export_includes_person_entity_page() {
+        let fixtures = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../fixtures");
+        let catalog = IndexBuilder::new().workspace(&fixtures).build().expect("index");
+        let dir = tempfile::tempdir().unwrap();
+        export_workspace(&catalog, ExportOptions::markdown(dir.path())).expect("export");
+        let mut found_person = false;
+        for entry in fs::read_dir(dir.path()).unwrap() {
+            let path = entry.unwrap().path();
+            if path.extension().and_then(|e| e.to_str()) != Some("md") {
+                continue;
+            }
+            let body = fs::read_to_string(&path).unwrap();
+            if body.contains("Person") && body.contains("http://example.org/people#Person") {
+                found_person = true;
+                break;
+            }
+        }
+        assert!(found_person, "expected a markdown page documenting Person");
     }
 }

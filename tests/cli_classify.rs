@@ -19,6 +19,18 @@ fn cli_classify_el_json() {
     let json: serde_json::Value = serde_json::from_str(stdout.trim()).expect("json output");
     assert_eq!(json.get("profile_used").and_then(|v| v.as_str()), Some("el"));
     assert_eq!(json.get("consistent").and_then(|v| v.as_bool()), Some(true));
+    let edges = json
+        .pointer("/inferred/combined/edges")
+        .and_then(|v| v.as_array())
+        .cloned()
+        .unwrap_or_default();
+    assert!(
+        edges.iter().any(|e| {
+            e.get("child").and_then(|c| c.as_str()).is_some_and(|c| c.ends_with("#Dog"))
+                && e.get("parent").and_then(|p| p.as_str()).is_some_and(|p| p.ends_with("#Mammal"))
+        }),
+        "expected Dog ⊑ Mammal: {edges:?}"
+    );
 }
 
 #[test]
@@ -59,10 +71,22 @@ fn cli_auto_profile_classifies_json() {
     assert!(output.status.success(), "stderr: {}", String::from_utf8_lossy(&output.stderr));
     let stdout = String::from_utf8_lossy(&output.stdout);
     let json: serde_json::Value = serde_json::from_str(stdout.trim()).expect("json output");
-    let profile_used = json.get("profile_used").and_then(|v| v.as_str()).unwrap_or("");
-    assert!(
-        matches!(profile_used, "auto" | "el" | "dl" | "rl" | "rdfs"),
-        "unexpected profile_used: {profile_used}"
+    assert_eq!(
+        json.get("profile_used").and_then(|v| v.as_str()),
+        Some("el"),
+        "Auto must report the concrete engine for an EL-only workspace"
     );
     assert_eq!(json.get("consistent").and_then(|v| v.as_bool()), Some(true));
+    let edges = json
+        .pointer("/inferred/combined/edges")
+        .and_then(|v| v.as_array())
+        .cloned()
+        .unwrap_or_default();
+    assert!(
+        edges.iter().any(|e| {
+            e.get("child").and_then(|c| c.as_str()).is_some_and(|c| c.ends_with("#Dog"))
+                && e.get("parent").and_then(|p| p.as_str()).is_some_and(|p| p.ends_with("#Mammal"))
+        }),
+        "expected Dog ⊑ Mammal in combined edges: {edges:?}"
+    );
 }

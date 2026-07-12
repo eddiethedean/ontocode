@@ -1,8 +1,9 @@
 //! Protégé-style round-trip tests (OWL_AUTHORING_SPEC §5) + v0.18 workflow fixtures.
 
 use ontocore::Workspace;
+use ontocore_catalog::IndexBuilder;
 use ontocore_core::DiagnosticCode;
-use ontocore_owl::{apply_patches_to_text, PatchOp};
+use ontocore_owl::{apply_patches, apply_patches_to_text, PatchOp};
 use ontocore_reasoner::{classify, ReasonerId, WorkspaceInputLoader};
 use std::collections::BTreeMap;
 use std::path::PathBuf;
@@ -13,31 +14,70 @@ fn roundtrip_dir() -> PathBuf {
 
 #[test]
 fn protege_roundtrip_properties_domain_range() {
-    let dir = roundtrip_dir();
-    let ws = Workspace::open(&dir).expect("open workspace");
-    let path = dir.join("properties.ttl");
-    let text = std::fs::read_to_string(&path).expect("read ttl");
+    let dir = tempfile::tempdir().expect("tempdir");
+    let workspace = dir.path();
+    let path = workspace.join("properties.ttl");
+    std::fs::copy(roundtrip_dir().join("properties.ttl"), &path).expect("copy properties.ttl");
+
     let ns = BTreeMap::from([
         ("ex".to_string(), "http://example.org/props#".to_string()),
         ("owl".to_string(), "http://www.w3.org/2002/07/owl#".to_string()),
         ("rdfs".to_string(), "http://www.w3.org/2000/01/rdf-schema#".to_string()),
         ("xsd".to_string(), "http://www.w3.org/2001/XMLSchema#".to_string()),
     ]);
-    let result = apply_patches_to_text(
-        &text,
+    let has_age = "http://example.org/props#hasAge";
+    let person = "http://example.org/props#Person";
+    let xsd_integer = "http://www.w3.org/2001/XMLSchema#integer";
+
+    let preview = apply_patches_to_text(
+        &std::fs::read_to_string(&path).expect("read"),
         &[PatchOp::AddComment {
-            entity_iri: "http://example.org/props#hasAge".to_string(),
+            entity_iri: has_age.to_string(),
             value: "Age in years".to_string(),
         }],
         true,
         &ns,
     )
-    .expect("patch");
-    assert!(result.preview_text.is_some());
-    let detail =
-        ws.catalog().entity_detail("http://example.org/props#hasAge").expect("hasAge detail");
-    assert!(detail.axioms.iter().any(|a| a.kind == "domain"));
-    let _ = detail.characteristics.functional;
+    .expect("preview patch");
+    let preview_text = preview.preview_text.expect("preview text");
+    assert!(
+        preview_text.contains("Age in years"),
+        "comment value must appear in preview: {preview_text}"
+    );
+
+    apply_patches(
+        &path,
+        &[PatchOp::AddComment {
+            entity_iri: has_age.to_string(),
+            value: "Age in years".to_string(),
+        }],
+        false,
+        &ns,
+    )
+    .expect("apply comment");
+
+    let catalog = IndexBuilder::new().workspace(workspace).build().expect("reindex");
+    let detail = catalog.entity_detail(has_age).expect("hasAge detail");
+    assert!(
+        detail.axioms.iter().any(|a| {
+            a.kind == "domain" && (a.display.contains(person) || a.display.contains("Person"))
+        }),
+        "expected domain Person, got {:?}",
+        detail.axioms
+    );
+    assert!(
+        detail.axioms.iter().any(|a| {
+            a.kind == "range" && (a.display.contains(xsd_integer) || a.display.contains("integer"))
+        }),
+        "expected range xsd:integer, got {:?}",
+        detail.axioms
+    );
+    assert!(detail.characteristics.functional, "hasAge is declared owl:FunctionalProperty");
+    assert!(
+        detail.annotations.iter().any(|a| a.value.contains("Age in years"))
+            || std::fs::read_to_string(&path).unwrap().contains("Age in years"),
+        "comment must persist after write-back"
+    );
 }
 
 #[test]
@@ -83,7 +123,20 @@ fn protege_roundtrip_annotations_indexed() {
     let dir = roundtrip_dir();
     let ws = Workspace::open(&dir).expect("open workspace");
     let detail = ws.catalog().entity_detail("http://example.org/ann#Concept").expect("Concept");
-    assert!(!detail.annotations.is_empty() || !detail.axioms.is_empty());
+    assert!(
+        detail.annotations.iter().any(|a| {
+            a.predicate.contains("definition") || a.value.contains("annotated example")
+        }),
+        "expected skos:definition annotation on Concept, got {:?}",
+        detail.annotations
+    );
+    assert!(
+        detail.annotations.iter().any(|a| {
+            a.predicate.ends_with("seeAlso") || a.value.contains("http://example.org/docs")
+        }),
+        "expected seeAlso annotation, got {:?}",
+        detail.annotations
+    );
     assert!(ws.catalog().find_entity("http://example.org/ann#seeAlso").is_some());
 }
 
@@ -107,28 +160,31 @@ fn protege_roundtrip_owx_horned() {
 
 #[test]
 fn protege_workflow_classify_people_el() {
-    let dir = roundtrip_dir();
-    let input = WorkspaceInputLoader::new(&dir).load().expect("load reasoner input");
+    let dir = tempfile::tempdir().expect("tempdir");
+    let workspace = dir.path();
+    std::fs::copy(roundtrip_dir().join("people.ttl"), workspace.join("people.ttl"))
+        .expect("copy people.ttl");
+    let input = WorkspaceInputLoader::new(workspace).load().expect("load reasoner input");
     let result = classify(ReasonerId::El, &input, false).expect("classify");
     assert!(result.consistent, "people fixture should be consistent");
-    assert!(!input.content_hash.is_empty());
+    assert_eq!(result.profile_used, "el");
+    // Hierarchy oracle: at least one asserted class edge must survive classification.
+    assert!(
+        !result.inferred.combined.edges.is_empty() || input.asserted_hierarchy.edges.is_empty(),
+        "combined hierarchy should preserve asserted subclass edges when present"
+    );
 }
 
 #[test]
 fn protege_workflow_broken_import_fixture_diagnosed() {
     let fixtures = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("tests/fixtures/diagnostics");
     let broken = fixtures.join("lint-broken-import.ttl");
-    if !broken.exists() {
-        return;
-    }
+    assert!(broken.exists(), "missing fixture {}; test must not silently skip", broken.display());
     let ws = Workspace::open(&fixtures).expect("open diagnostics fixtures");
     let diags = ws.diagnostics();
     assert!(
-        diags.iter().any(|d| {
-            matches!(d.code, DiagnosticCode::BrokenImport)
-                || d.message.to_lowercase().contains("import")
-        }),
-        "expected broken import diagnostic, got {:?}",
+        diags.iter().any(|d| matches!(d.code, DiagnosticCode::BrokenImport)),
+        "expected DiagnosticCode::BrokenImport, got {:?}",
         diags.iter().map(|d| (&d.code, &d.message)).collect::<Vec<_>>()
     );
 }

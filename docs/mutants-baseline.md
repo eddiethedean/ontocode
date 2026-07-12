@@ -8,9 +8,13 @@ cargo install cargo-mutants --locked
 ./scripts/run-mutants.sh --timeout 120 --jobs 2
 ```
 
-## Baseline (2026-07-11, after oracle + extract-path tests)
+`scripts/run-mutants.sh` runs `ontocore-owl` patch mutants with
+`--test-package ontocore-owl --test-package ontocode` so workspace
+`tests/owl_patch_oracles.rs` participates.
 
-### `ontocore-core` / `path_jail.rs`
+## Baseline
+
+### `ontocore-core` / `path_jail.rs` (2026-07-11 / 2026-07-12)
 
 | Metric | First run | After stronger tests |
 |--------|-----------|----------------------|
@@ -24,10 +28,18 @@ Remaining misses (non-blocking): `||`/`&&` edges in `resolve_path_in_workspace` 
 Critical escape paths covered by unit tests: `ensure_extract_path_within` (`..`, absolute, empty),
 symlink escape, sibling prefix trap, multi-root outside reject, `discover_git_repo_root`.
 
-### `ontocore-owl` / `patch.rs`
+### `ontocore-owl` / `patch.rs` — critical arms (2026-07-12)
 
-Run via `./scripts/run-mutants.sh` (second step). Success-path ops for the ten catalog oracles
-in `tests/owl_patch_oracles.rs` should kill no-op `apply_one_patch` arms; adversarial
-IRI/CURIE string tests remain in `patch.rs` for injection mutants.
+Focused `--examine-re 'is_safe_iri|apply_one_patch'` with oracle package:
+
+| Metric | Value |
+|--------|-------|
+| Mutants tested | 6 |
+| Caught | **6** |
+| Missed | **0** |
+
+Full `patch.rs` has ~401 mutants; nightly/manual full runs via `./scripts/run-mutants.sh`.
+Success-path catalog oracles live in `tests/owl_patch_oracles.rs`; injection/hygiene
+string tests remain in `patch.rs` unit tests.
 
 Artifacts: `mutants.out/` (gitignored locally when present).

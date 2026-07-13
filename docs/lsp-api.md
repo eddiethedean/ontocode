@@ -9,7 +9,7 @@ This document describes **what ships today** in `ontocore-lsp`. For the **v1.0 t
 
 If you are integrating OntoCore outside VS Code (custom editor, scripts, automation), treat the JSON schema as the **canonical, machine-readable contract** for this release:
 
-- **LSP JSON Schema:** [`lsp-protocol.schema.json`](lsp-protocol.schema.json) (ships with product **v0.18.2**)
+- **LSP JSON Schema:** [`lsp-protocol.schema.json`](lsp-protocol.schema.json) (ships with product **v0.19.0**)
 
 ### Schema vs product version
 
@@ -20,7 +20,7 @@ The schema file is the wire contract for the **current product release**. Until 
 Until v1.0, minor releases may change request/response fields.
 For stable integrations:
 
-- **Pin OntoCore** (CLI/LSP) to an exact version (e.g. `0.18.2`) in your tooling.
+- **Pin OntoCore** (CLI/LSP) to an exact version (e.g. `0.19.0`) in your tooling.
 - Prefer consuming `lsp-protocol.schema.json` from the same tagged release you deploy.
 
 ## Wire format

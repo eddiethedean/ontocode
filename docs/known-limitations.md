@@ -31,7 +31,7 @@ Plugin host **MVP shipped** (manifest, permissions, views, preferences, context 
 
 ## API stability (pre-1.0)
 
-Published crates are **0.18.x**. Library APIs, LSP JSON, and SQL table columns may change between minor releases until v1.0. Pin in CI: `cargo install ontocore-cli --locked --version 0.18.2`.
+Published crates are **0.19.x**. Library APIs, LSP JSON, and SQL table columns may change between minor releases until v1.0. Pin in CI: `cargo install ontocore-cli --locked --version 0.19.0`.
 
 ## Reasoning
 

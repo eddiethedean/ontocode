@@ -11,6 +11,7 @@ authors.workspace = true
 readme = "README.md"
 keywords = ["ontology", "owl", "edit", "transaction"]
 categories = ["science"]
+include = ["src/**/*", "tests/**/*", "Cargo.toml", "README.md", "LICENSE-MIT", "LICENSE-APACHE-2.0"]
 
 [dependencies]
 ontocore-core = { workspace = true }

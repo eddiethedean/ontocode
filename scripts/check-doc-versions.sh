@@ -352,6 +352,7 @@ if [[ "$fail" -eq 0 ]]; then
 fi
 
 check_file_contains ".github/workflows/release.yml" "publish_with_pause ontocore-obo" "release.yml publishes ontocore-obo"
+check_file_contains ".github/workflows/release.yml" "publish_with_pause ontocore-edit" "release.yml publishes ontocore-edit"
 check_file_contains ".github/workflows/release.yml" "publish_with_pause ontocore" "release.yml publishes ontocore"
 
 # docs/contributing.md should track root CONTRIBUTING.md (OntoCore branding)

@@ -172,7 +172,7 @@ Guide: [OBO workflow](../guides/obo-workflow.md).
 To catch lint and parse errors in CI or locally:
 
 ```bash
-cargo install ontocore-cli --locked --version 0.18.2
+cargo install ontocore-cli --locked --version 0.19.0
 ontocore validate /path/to/your/ontology/folder
 ```
 

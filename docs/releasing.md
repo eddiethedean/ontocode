@@ -47,6 +47,7 @@ Maintainer checklist for publishing crates, binaries, and the VS Code extension.
 - [ ] [docs/migration/v0.16.md](migration/v0.16.md) — plugin preferences / layout polish when applicable
 - [ ] [docs/migration/v0.17.md](migration/v0.17.md) — Protégé-shell menus / perspectives when applicable
 - [ ] [docs/migration/v0.18.md](migration/v0.18.md) — Protégé Desktop parity gate when applicable
+- [ ] [docs/migration/v0.19.md](migration/v0.19.md) — semantic transaction apply path when applicable
 - [ ] [docs/ontocode/feature-tour.md](ontocode/feature-tour.md) — retitle to current release
 - [ ] [ROADMAP.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/ROADMAP.md) and [docs/roadmap.md](roadmap.md) — keep shipped/planned sections in sync
 - [ ] [docs/guides/plugins.md](guides/plugins.md) — plugin authoring when plugin surface changes
@@ -80,7 +81,7 @@ Requires the `CARGO_REGISTRY_TOKEN` repository secret. For Open VSX (Cursor), se
 
 ## Published crates (dependency order)
 
-`ontocore-core` → `ontocore-parser` → `ontocore-owl` → `ontocore-obo` → `ontocore-diagnostics` → `ontocore-catalog` → `ontocore-diff` → `ontocore-docs` → `ontocore-refactor` → `ontocore-query` → `ontocore-reasoner` → `ontocore-robot` → `ontocore-lsp` → `ontocore-plugin` → `ontocore` → `ontocore-cli`
+`ontocore-core` → `ontocore-parser` → `ontocore-owl` → `ontocore-obo` → `ontocore-edit` → `ontocore-diagnostics` → `ontocore-catalog` → `ontocore-diff` → `ontocore-docs` → `ontocore-refactor` → `ontocore-query` → `ontocore-reasoner` → `ontocore-robot` → `ontocore-plugin` (+ plugin crates) → `ontocore-lsp` → `ontocore` → `ontocore-cli`
 
 ## VS Code Marketplace and Open VSX
 

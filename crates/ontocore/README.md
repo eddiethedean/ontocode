@@ -2,7 +2,7 @@
 
 **OntoCore** is the public façade API for the semantic workspace engine.
 
-This crate re-exports the stable surface of OntoCore for Rust applications. Implementation lives in the `ontocore-*` crates (`ontocore-core`, `ontocore-catalog`, `ontocore-query`, etc.) — use those directly when you need lower-level control.
+This crate re-exports the stable surface of OntoCore for Rust applications. Implementation lives in the `ontocore-*` crates (`ontocore-core`, `ontocore-catalog`, `ontocore-query`, `ontocore-edit`, etc.) — use those directly when you need lower-level control.
 
 ## Quick start
 
@@ -67,4 +67,4 @@ ontocore = { version = "0.17", features = ["lsp"] }
 - [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) · [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md)
 - [docs/ontocore/](https://github.com/eddiethedean/ontocode/tree/main/docs/ontocore) in this repository
 
-**Current version: 0.18.2**
+**Current version: 0.19.0**

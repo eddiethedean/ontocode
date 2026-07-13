@@ -85,21 +85,27 @@ pub fn class_expression_to_manchester(
             let filler = class_expression_to_manchester(bce, namespaces);
             format!("{} only {}", iri_to_manchester_term(&prop, namespaces), filler)
         }
-        ClassExpression::ObjectMinCardinality { n, ope, bce } => {
-            let prop = iri_to_manchester_term(&ope_to_iri(ope), namespaces);
-            let filler = class_expression_to_manchester(bce, namespaces);
-            format!("min {n} {prop} some {filler}")
-        }
-        ClassExpression::ObjectMaxCardinality { n, ope, bce } => {
-            let prop = iri_to_manchester_term(&ope_to_iri(ope), namespaces);
-            let filler = class_expression_to_manchester(bce, namespaces);
-            format!("max {n} {prop} some {filler}")
-        }
-        ClassExpression::ObjectExactCardinality { n, ope, bce } => {
-            let prop = iri_to_manchester_term(&ope_to_iri(ope), namespaces);
-            let filler = class_expression_to_manchester(bce, namespaces);
-            format!("exactly {n} {prop} some {filler}")
-        }
+        ClassExpression::ObjectMinCardinality { n, ope, bce } => cardinality_manchester(
+            &iri_to_manchester_term(&ope_to_iri(ope), namespaces),
+            "min",
+            *n,
+            bce,
+            namespaces,
+        ),
+        ClassExpression::ObjectMaxCardinality { n, ope, bce } => cardinality_manchester(
+            &iri_to_manchester_term(&ope_to_iri(ope), namespaces),
+            "max",
+            *n,
+            bce,
+            namespaces,
+        ),
+        ClassExpression::ObjectExactCardinality { n, ope, bce } => cardinality_manchester(
+            &iri_to_manchester_term(&ope_to_iri(ope), namespaces),
+            "exactly",
+            *n,
+            bce,
+            namespaces,
+        ),
         other => format!("({other:?})"),
     }
 }
@@ -416,6 +422,29 @@ impl ManchesterParser {
             return Ok(inner);
         }
         let name = self.parse_name()?;
+        if matches!(self.peek(), Token::Keyword(Keyword::Min | Keyword::Max | Keyword::Exactly)) {
+            let kind = self.advance();
+            let Token::Number(n) = self.advance() else {
+                return Err("expected cardinality number".to_string());
+            };
+            let filler = if Self::starts_class_term(self.peek()) {
+                self.parse_primary()?
+            } else {
+                ManchesterAst::Class("owl:Thing".to_string())
+            };
+            return Ok(match kind {
+                Token::Keyword(Keyword::Min) => {
+                    ManchesterAst::Min { n, property: name, filler: Box::new(filler) }
+                }
+                Token::Keyword(Keyword::Max) => {
+                    ManchesterAst::Max { n, property: name, filler: Box::new(filler) }
+                }
+                Token::Keyword(Keyword::Exactly) => {
+                    ManchesterAst::Exactly { n, property: name, filler: Box::new(filler) }
+                }
+                _ => return Err("expected min, max, or exactly".to_string()),
+            });
+        }
         if matches!(self.peek(), Token::Keyword(Keyword::Some | Keyword::Only)) {
             let quant = self.advance();
             let filler = self.parse_primary()?;
@@ -441,6 +470,8 @@ impl ManchesterParser {
         let filler = if matches!(self.peek(), Token::Keyword(Keyword::Some)) {
             self.advance();
             self.parse_primary()?
+        } else if Self::starts_class_term(self.peek()) {
+            self.parse_primary()?
         } else {
             ManchesterAst::Class("owl:Thing".to_string())
         };
@@ -456,6 +487,10 @@ impl ManchesterParser {
             }
             _ => return Err("expected min, max, or exactly".to_string()),
         })
+    }
+
+    fn starts_class_term(tok: &Token) -> bool {
+        matches!(tok, Token::Ident(_) | Token::Iri(_) | Token::LParen)
     }
 
     fn parse_name(&mut self) -> std::result::Result<String, String> {
@@ -579,10 +614,36 @@ fn cardinality_turtle(
     writeln!(out, "[").ok();
     writeln!(out, "{inner_pad}a owl:Restriction ;").ok();
     writeln!(out, "{inner_pad}owl:onProperty {prop} ;").ok();
-    writeln!(out, "{inner_pad}{pred} {n} ;").ok();
+    writeln!(
+        out,
+        "{inner_pad}{pred} \"{n}\"^^<http://www.w3.org/2001/XMLSchema#nonNegativeInteger> ;"
+    )
+    .ok();
     writeln!(out, "{inner_pad}owl:onClass {filler}").ok();
     write!(out, "{pad}]").ok();
     Ok(out)
+}
+
+fn is_owl_thing(expr: &ClassExpression<RcStr>) -> bool {
+    matches!(
+        expr,
+        ClassExpression::Class(c) if c.as_ref() == "http://www.w3.org/2002/07/owl#Thing"
+    )
+}
+
+fn cardinality_manchester(
+    prop: &str,
+    keyword: &str,
+    n: u32,
+    bce: &ClassExpression<RcStr>,
+    namespaces: &BTreeMap<String, String>,
+) -> String {
+    if is_owl_thing(bce) {
+        format!("{prop} {keyword} {n}")
+    } else {
+        let filler = class_expression_to_manchester(bce, namespaces);
+        format!("{prop} {keyword} {n} {filler}")
+    }
 }
 
 fn ope_to_iri(ope: &ObjectPropertyExpression<RcStr>) -> String {
@@ -632,6 +693,72 @@ mod tests {
             ("ex".to_string(), "http://example.org/clinic#".to_string()),
             ("owl".to_string(), "http://www.w3.org/2002/07/owl#".to_string()),
         ])
+    }
+
+    fn anatomy_ns() -> BTreeMap<String, String> {
+        BTreeMap::from([
+            ("ex".to_string(), "http://example.org/anatomy#".to_string()),
+            ("owl".to_string(), "http://www.w3.org/2002/07/owl#".to_string()),
+        ])
+    }
+
+    #[test]
+    fn parse_property_first_min_cardinality() {
+        let ns = anatomy_ns();
+        let out = parse_class_expression("ex:hasPart min 1 ex:Organ", &ns).expect("parse");
+        assert!(out.normalized.contains("ex:hasPart min 1 ex:Organ"));
+    }
+
+    #[test]
+    fn parse_property_first_without_filler() {
+        let ns = anatomy_ns();
+        let out = parse_class_expression("ex:hasPart min 1", &ns).expect("parse");
+        assert_eq!(out.normalized, "ex:hasPart min 1");
+        match &out.expression {
+            ClassExpression::ObjectMinCardinality { bce, .. } => {
+                assert!(is_owl_thing(bce));
+            }
+            other => panic!("expected min cardinality, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn parse_keyword_first_cardinality_without_some() {
+        let ns = anatomy_ns();
+        let out = parse_class_expression("min 1 ex:hasPart ex:Organ", &ns).expect("parse");
+        assert!(out.normalized.contains("ex:hasPart min 1 ex:Organ"));
+    }
+
+    #[test]
+    fn cardinality_turtle_emits_typed_literal() {
+        let ns = anatomy_ns();
+        for input in [
+            "ex:hasPart min 1 ex:Organ",
+            "ex:hasPart max 2 ex:Organ",
+            "ex:hasPart exactly 3 ex:Organ",
+        ] {
+            let out = parse_class_expression(input, &ns).expect("parse");
+            let turtle = class_expression_to_turtle_value(&out.expression, &ns, 0).expect("turtle");
+            assert!(
+                turtle.contains("^^<http://www.w3.org/2001/XMLSchema#nonNegativeInteger>"),
+                "expected typed cardinality literal in: {turtle}"
+            );
+            assert!(!turtle.contains("minQualifiedCardinality 1 ;"));
+            assert!(!turtle.contains("maxQualifiedCardinality 2 ;"));
+            assert!(!turtle.contains("qualifiedCardinality 3 ;"));
+        }
+    }
+
+    #[test]
+    fn cardinality_round_trip_property_first() {
+        let ns = anatomy_ns();
+        let out = parse_class_expression("ex:hasPart min 1 ex:Organ", &ns).expect("parse");
+        let turtle = class_expression_to_turtle_fragment(&out.expression, "rdfs:subClassOf", &ns)
+            .expect("turtle");
+        assert!(turtle.contains("owl:Restriction"));
+        assert!(turtle.contains("owl:minQualifiedCardinality"));
+        assert!(turtle.contains("owl:onClass"));
+        assert!(turtle.contains("^^<http://www.w3.org/2001/XMLSchema#nonNegativeInteger>"));
     }
 
     #[test]

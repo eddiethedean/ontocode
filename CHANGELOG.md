@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Manchester parser accepts Protégé-style property-first cardinality (`ex:hasPart min 1 ex:Organ`) and normalizes to the same form ([#226](https://github.com/eddiethedean/ontocode/issues/226))
+- Manchester Turtle emit writes qualified cardinalities as `"N"^^xsd:nonNegativeInteger` per OWL 2 RDF mapping ([#231](https://github.com/eddiethedean/ontocode/issues/231))
 - Find Usages jump guards out-of-range line numbers instead of throwing from `lineAt` ([#228](https://github.com/eddiethedean/ontocode/issues/228))
 - Find Usages text scan matches default-prefix CURIEs (`:Local`) under `@prefix : <…>` ([#232](https://github.com/eddiethedean/ontocode/issues/232))
 - Find Usages lists each annotation subject separately instead of collapsing to one hit per entity ([#237](https://github.com/eddiethedean/ontocode/issues/237))

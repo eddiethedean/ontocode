@@ -49,7 +49,14 @@ export function ReasonerPanel(_props?: WorkspaceProps): JSX.Element {
       }
       const msg = event.data as HostMessage;
       if (msg.type === "reasonerSyncRunId") {
+        // Host sync for start / presentResult — do not clear running (#212).
         setRunId(msg.runId);
+        return;
+      }
+      if (msg.type === "reasonerRunCancelled") {
+        // Stop Reasoner: advance runId and clear spinner (#269).
+        setRunId(msg.runId);
+        setRunning(false);
         return;
       }
       if (msg.type === "reasonerResult") {

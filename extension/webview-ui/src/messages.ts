@@ -371,6 +371,7 @@ export type HostMessage =
       }>;
     }
   | { type: "reasonerSyncRunId"; runId: number }
+  | { type: "reasonerRunCancelled"; runId: number }
   | {
       type: "reasonerResult";
       runId: number;

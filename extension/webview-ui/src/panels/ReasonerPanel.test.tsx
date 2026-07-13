@@ -60,6 +60,20 @@ describe("ReasonerPanel", () => {
     expect(screen.getByText("Running reasoner…")).toBeInTheDocument();
   });
 
+  it("reasonerRunCancelled clears running state (#269)", () => {
+    render(<ReasonerPanel />);
+    fireEvent.click(screen.getAllByRole("button", { name: "Run Reasoner" })[0]);
+    expect(screen.getByText("Running reasoner…")).toBeInTheDocument();
+    fireEvent(
+      window,
+      new MessageEvent("message", {
+        data: { type: "reasonerRunCancelled", runId: 2 },
+      })
+    );
+    expect(screen.queryByText("Running reasoner…")).not.toBeInTheDocument();
+    expect(screen.getAllByRole("button", { name: "Run Reasoner" })[0]).not.toBeDisabled();
+  });
+
   it("shows auto-detect profile checkbox label (#223)", () => {
     render(<ReasonerPanel />);
     expect(screen.getByLabelText("Auto-detect profile")).toBeInTheDocument();

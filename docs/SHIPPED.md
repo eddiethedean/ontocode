@@ -1,8 +1,8 @@
-# What ships today (v0.18.1)
+# What ships today (v0.18.2)
 
 > **Canonical capability matrix.** Update this page on every release. Design specs under [Project](design/README.md) may describe future targets — check here for what is actually available.
 
-**Current release:** v0.18.1 · [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) · [Migration from v0.17](migration/v0.18.md) · [Patch notes](migration/v0.18.1.md)
+**Current release:** v0.18.2 · [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) · [Migration from v0.17](migration/v0.18.md) · [Patch notes](migration/v0.18.2.md)
 
 ## Products
 
@@ -63,6 +63,15 @@
 | Index / query | Yes | Yes | Yes (Horned catalog) | Yes |
 | Write-back (inspector, patches, refactor) | Yes | Yes | Read-only | Read-only |
 | Rich OBO metadata (synonyms, defs, xrefs) | — | Yes | — | — |
+
+## New in v0.18.2
+
+| Capability | Status |
+|------------|--------|
+| Windows verbatim (`\\?\`) path normalization for Prefix Manager / inspector patches | Yes |
+| Reasoner classify releases `ops_lock`; `$/cancelRequest` skips snapshot updates | Yes |
+| Protégé-style property-first Manchester cardinality + typed Turtle emit | Yes |
+| Find Usages default-prefix / annotation / line-guard fixes | Yes |
 
 ## New in v0.18.1
 

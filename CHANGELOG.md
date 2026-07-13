@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.18.2] - 2026-07-13
+
 ### Fixed
 
 - Extension normalizes Windows `\\?\` paths from LSP canonicalize so Prefix Manager and inspector patches resolve workspace documents
@@ -32,6 +34,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Imports panel opens from the command palette and Review perspective; session restore persists `filePath` ([#227](https://github.com/eddiethedean/ontocode/issues/227))
 - Graph panel updates title and restores the correct graph kind after reload ([#229](https://github.com/eddiethedean/ontocode/issues/229))
 - Manchester editor session restore persists `iri` and `documentUri` ([#235](https://github.com/eddiethedean/ontocode/issues/235))
+
+### Changed
+
+- Workspace package and all `ontocore-*` crates bumped to **0.18.2**; extension marketplace and webview UI **0.18.2**
 
 ## [0.18.1] - 2026-07-12
 
@@ -406,6 +412,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - SPARQL update guard bypass after `PREFIX` or comment lines
 - Capped file reads in parser, catalog semantics, and refactor preview/backup paths
 
+[0.18.2]: https://github.com/eddiethedean/ontocode/releases/tag/v0.18.2
+[0.18.1]: https://github.com/eddiethedean/ontocode/releases/tag/v0.18.1
 [0.18.0]: https://github.com/eddiethedean/ontocode/releases/tag/v0.18.0
 [0.17.0]: https://github.com/eddiethedean/ontocode/releases/tag/v0.17.0
 [0.16.0]: https://github.com/eddiethedean/ontocode/releases/tag/v0.16.0

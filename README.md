@@ -7,7 +7,7 @@ Install the [VS Code extension](https://marketplace.visualstudio.com/items?itemN
 **Editable today:** Turtle (`.ttl`) and OBO (`.obo`). Other formats index and query as read-only — see [Known limitations](https://ontocode-vs.readthedocs.io/en/latest/known-limitations/).
 **Catalog SQL (subset):** not full SQL — prefer SPARQL for graph patterns.
 
-**Current release: v0.18.1** · [10-minute tutorial](https://ontocode-vs.readthedocs.io/en/latest/guides/first-success/) · [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) · [Changelog](CHANGELOG.md) · [Docs](https://ontocode-vs.readthedocs.io/en/latest/)
+**Current release: v0.18.2** · [10-minute tutorial](https://ontocode-vs.readthedocs.io/en/latest/guides/first-success/) · [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) · [Changelog](CHANGELOG.md) · [Docs](https://ontocode-vs.readthedocs.io/en/latest/)
 
 [![CI](https://github.com/eddiethedean/ontocode/actions/workflows/ci.yml/badge.svg)](https://github.com/eddiethedean/ontocode/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue)](https://github.com/eddiethedean/ontocode/blob/main/LICENSE-MIT)
@@ -88,7 +88,7 @@ cargo run -- validate fixtures
 
 Platform docs: [Vision](https://ontocode-vs.readthedocs.io/en/latest/vision/) · [Architecture](ARCHITECTURE.md) · [Roadmap](ROADMAP.md) · [Protégé parity](https://ontocode-vs.readthedocs.io/en/latest/design/PROTEGE_PARITY/)
 
-**v0.18.1** patches the Protégé Desktop parity gate with named unsatisfiable expansion (classes ⊑ `owl:Nothing` and descendants). See [SHIPPED](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/), [v0.18.1 migration](docs/migration/v0.18.1.md), and [What's new in v0.18](docs/migration/v0.18.md).
+**v0.18.2** patches the Protégé Desktop parity gate with Windows path normalization, reasoner cancel/`ops_lock`, Manchester cardinality, Find Usages, and panel restore fixes. See [SHIPPED](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/), [v0.18.2 migration](docs/migration/v0.18.2.md), and [What's new in v0.18](docs/migration/v0.18.md).
 
 ## Development
 

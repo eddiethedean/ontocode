@@ -4,6 +4,10 @@ Canonical source: [CHANGELOG.md on GitHub](https://github.com/eddiethedean/ontoc
 
 Migration guides: [Migration index](migration/README.md)
 
+## [0.18.2] - 2026-07-13
+
+**v0.18.2** — Patch: Windows path normalization; reasoner cancel/`ops_lock`; Manchester cardinality; Find Usages/prefixes; Turtle literals; authoring and panel restore fixes. See [CHANGELOG.md](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) and [migration/v0.18.2.md](migration/v0.18.2.md).
+
 ## [0.18.1] - 2026-07-12
 
 **v0.18.1** — Patch: named unsatisfiable expansion; composed explanations for expansion-only unsats; Horned patch oracles; dialog e2e; stronger tests. See [CHANGELOG.md](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) and [migration/v0.18.1.md](migration/v0.18.1.md).

@@ -19,6 +19,7 @@ Upgrade notes between OntoCode / OntoCore releases.
 | v0.17 → v0.18 | [Migration v0.17 → v0.18](v0.18.md) — Protégé Desktop parity gate, reasoner cancel, stale explanations, layout reopen |
 | v0.18.0 → v0.18.1 | [Migration v0.18.0 → v0.18.1](v0.18.1.md) — named unsatisfiable expansion; stronger tests |
 | v0.18.1 → v0.18.2 | [Migration v0.18.1 → v0.18.2](v0.18.2.md) — Windows paths; reasoner cancel; Manchester/Find Usages/Turtle/panel fixes |
+| v0.18.2 → v0.19.0 | [Migration v0.18.2 → v0.19.0](v0.19.md) — semantic transaction apply path; parity manifest skeleton |
 
 Pre-1.0: library APIs, LSP JSON, and SQL virtual table columns may change between minor releases. See [API stability](../guides/api-stability.md) and [workspace limits](../workspace-limits.md).
 

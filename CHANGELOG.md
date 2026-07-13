@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.19.0] - 2026-07-13
+
+### Added
+
+- `ontocore-edit` crate: `SemanticChange`, `Transaction` (compose, validate, invert, serde), Turtle/OBO format adapters
+- ADR 0020: semantic transaction edit model (`docs/design/adr/0020-semantic-transaction-edit-model.md`)
+- Parity manifest `parity/protege-desktop-parity.yaml` with 19 `PAR-*` requirements and CI validator (`scripts/validate-parity-manifest.py`)
+- GitHub epics [#247](https://github.com/eddiethedean/ontocode/issues/247)–[#257](https://github.com/eddiethedean/ontocode/issues/257) for EPIC-001…011
+- Migration guide: [docs/migration/v0.19.md](docs/migration/v0.19.md)
+
+### Changed
+
+- LSP `applyAxiomPatch` and CLI `ontocore patch` apply Turtle/OBO edits through `Transaction` (patch JSON arrays still accepted)
+- Parity scope frozen; protege-parity docs link to `ONTOCODE_CURRENT_PROTEGE_PARITY_AUDIT.md`
+- Workspace package and all `ontocore-*` crates bumped to **0.19.0**; extension marketplace and webview UI **0.19.0**
+
 ## [0.18.2] - 2026-07-13
 
 ### Fixed

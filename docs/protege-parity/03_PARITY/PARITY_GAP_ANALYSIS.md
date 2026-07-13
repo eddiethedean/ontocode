@@ -248,7 +248,7 @@ The parity program is complete when:
 # Related Documents
 
 -   README.md
--   CURRENT_REPOSITORY_AUDIT.md
+-   ONTOCODE_CURRENT_PROTEGE_PARITY_AUDIT.md
 -   CURRENT_LIMITATIONS.md
 -   IMPLEMENTATION_EVIDENCE.md
 -   PARITY_MATRIX.md

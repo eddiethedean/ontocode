@@ -2,7 +2,8 @@
 
 # Protégé Desktop Parity Scope
 
-**Status:** Normative Specification\
+**Status:** Normative Specification (frozen)\
+**Frozen:** 2026-07-13 | Audit baseline: v0.18.2\
 **Target Release:** OntoCode 1.0.0
 
 ------------------------------------------------------------------------
@@ -171,7 +172,7 @@ Scope changes require:
 
 # Related Documents
 
--   CURRENT_REPOSITORY_AUDIT.md
+-   ONTOCODE_CURRENT_PROTEGE_PARITY_AUDIT.md
 -   PARITY_MATRIX.md
 -   PARITY_GAP_ANALYSIS.md
 -   PARITY_ACCEPTANCE_CRITERIA.md

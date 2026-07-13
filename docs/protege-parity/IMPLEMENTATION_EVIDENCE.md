@@ -66,41 +66,77 @@ Every parity feature should reference:
                  lifecycle                      extension                                                    multi-format
                                                                                                              persistence.
 
-  PAR-FMT-001    Turtle       IMPLEMENTED       ontocore-owl        patch.rs         ✓       ✓       ✓       Current
-                 write-back                                                                                  production
-                                                                                                             authoring
-                                                                                                             path.
+  PAR-LIFE-002   Multi-       PARTIAL           extension           WorkspaceStore   ✓       TBD     ✓       Session
+                 ontology                                                                                    restoration
+                                                                                                             gap.
 
-  PAR-FMT-002    OBO          IMPLEMENTED       ontocore-obo        TBD              ✓       ✓       ✓       Verify
-                 write-back                                                                                  round-trip
-                                                                                                             corpus.
+  PAR-FMT-001    Turtle       IMPLEMENTED       ontocore-edit,      transaction.rs,  ✓       ✓       ✓       v0.19:
+                 write-back                     ontocore-owl        adapter.rs,                         transaction
+                                                                                        patch.rs               apply path.
 
-  PAR-FMT-003    RDF/XML      NOT_IMPLEMENTED   ---                 ---              ---     ---     ---     Major 1.0
-                 write-back                                                                                  blocker.
+  PAR-FMT-002    OBO          IMPLEMENTED       ontocore-edit,      transaction.rs,  ✓       ✓       ✓       v0.19:
+                 write-back                     ontocore-obo        adapter.rs,                         transaction
+                                                                                        patch.rs               apply path.
 
-  PAR-FMT-004    OWL/XML      NOT_IMPLEMENTED   ---                 ---              ---     ---     ---     Major 1.0
-                 write-back                                                                                  blocker.
+  PAR-FMT-003    RDF/XML      NOT_IMPLEMENTED   ---                 ---              ---     ---     ---     Target
+                 write-back                                                                                  v0.21.
 
-  PAR-OWL-001    OWL 2        PARTIAL           ontocore-owl        TBD              ✓       TBD     ✓       Complete
-                 authoring                                                                                   structural
-                                                                                                             coverage
-                                                                                                             required.
+  PAR-FMT-004    OWL/XML      NOT_IMPLEMENTED   ---                 ---              ---     ---     ---     Target
+                 write-back                                                                                  v0.21.
 
-  PAR-WS-001     Workspace    PARTIAL           extension           WorkspaceStore   ✓       TBD     ✓       Session
-                 model                                                                                       semantics
-                                                                                                             incomplete.
+  PAR-OWL-001    OWL 2        PARTIAL           ontocore-owl        patch.rs,        ✓       TBD     ✓       Target
+                 authoring                                          manchester.rs                       v0.22.
 
-  PAR-RSN-001    Reasoning    PARTIAL           ontocore-reasoner   TBD              ✓       ✓       ✓       ABox reasoning
-                                                                                                             remains
-                                                                                                             incomplete.
+  PAR-WS-001     Workspace    PARTIAL           extension           WorkspaceStore   ✓       TBD     ✓       Target
+                 model                                                                                       v0.20.
 
-  PAR-SWRL-001   SWRL         NOT_IMPLEMENTED   ---                 ---              ---     ---     ---     Planned for
-                                                                                                             parity.
+  PAR-RSN-001    Reasoning    IMPLEMENTED       ontocore-reasoner   lib.rs           ✓       ✓       ✓       EL
+                 classify                                                                                    classification.
 
-  PAR-PLG-001    Plugin SDK   PARTIAL           ontocore-plugin     TBD              ✓       TBD     ✓       Stabilize
-                                                                                                             public SDK
-                                                                                                             before 1.0.
+  PAR-RSN-002    ABox         PARTIAL           ontocore-reasoner   TBD              ✓       TBD     ✓       Target
+                 reasoning                                                                                   v0.23.
+
+  PAR-RSN-003    DL           PARTIAL           ontocore-reasoner   TBD              ✓       TBD     ✓       Target
+                 explanations                                                                                v0.23.
+
+  PAR-QRY-001    SPARQL       IMPLEMENTED       ontocore-query      lib.rs           ✓       TBD     ✓       Query
+                 query                                                                                       workbench.
+
+  PAR-QRY-002    DL Query     PARTIAL           ---                 ---              ✓       TBD     ✓       Target
+                 workflow                                                                                    v0.24.
+
+  PAR-SWRL-001   SWRL         NOT_IMPLEMENTED   ---                 ---              ---     ---     ---     Target
+                                                                                                             v0.23.
+
+  PAR-REF-001    Semantic     PARTIAL           ontocore-refactor   lib.rs           ✓       TBD     ✓       Target
+                 refactoring                                                                                 v0.24.
+
+  PAR-VIS-001    Graph        PARTIAL           extension           graph webview    ✓       TBD     ✓       Target
+                 visualization                                                                               v0.25.
+
+  PAR-PLG-001    Plugin SDK   PARTIAL           ontocore-plugin     lib.rs           ✓       TBD     ✓       Target
+                                                                                                             v0.25.
+
+  PAR-ACC-001    Accessibility PARTIAL          extension           TBD              ✓       TBD     ✓       Target
+                                                                                                             v0.25.
+
+  PAR-TST-001    Parity       PARTIAL           parity/             protege-desktop- ---     ✓       ✓       v0.19:
+                 verification                   scripts             parity.yaml,                        manifest
+                                                                                        validate-parity-       skeleton +
+                                                                                        manifest.py            CI validator.
   -------------------------------------------------------------------------------------------------------------------------
+
+------------------------------------------------------------------------
+
+# v0.19 Deliverables (EPIC-001 / EPIC-011)
+
+| Deliverable | Evidence |
+|-------------|----------|
+| `ontocore-edit` crate with `Transaction`, `SemanticChange`, invert/compose/validate | `crates/ontocore-edit/` |
+| Turtle/OBO LSP + CLI apply routed through transactions | `crates/ontocore-lsp/src/handlers.rs`, `crates/ontocore-cli/src/main.rs` |
+| ADR for semantic transaction model | `docs/design/adr/0020-semantic-transaction-edit-model.md` |
+| Parity manifest + validator in CI | `parity/protege-desktop-parity.yaml`, `scripts/validate-parity-manifest.py` |
+| GitHub epics EPIC-001…011 | [EPIC_INDEX.md](07_BACKLOG/EPIC_INDEX.md) |
 
 ------------------------------------------------------------------------
 
@@ -123,7 +159,7 @@ Each VERIFIED feature should include:
 
 The initial entries in this registry should be derived from:
 
--   `CURRENT_REPOSITORY_AUDIT.md`
+-   `ONTOCODE_CURRENT_PROTEGE_PARITY_AUDIT.md`
 -   Static source inspection
 -   Existing automated tests
 -   Existing documentation
@@ -161,7 +197,7 @@ Future enhancements may include:
 # Related Documents
 
 -   README.md
--   CURRENT_REPOSITORY_AUDIT.md
+-   ONTOCODE_CURRENT_PROTEGE_PARITY_AUDIT.md
 -   PARITY_SCOPE.md
 -   PARITY_MATRIX.md
 -   PARITY_GAP_ANALYSIS.md

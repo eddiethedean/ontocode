@@ -28,7 +28,7 @@ The parity program has four primary goals:
 ## Foundation
 
 -   `README.md` --- This document.
--   `CURRENT_REPOSITORY_AUDIT.md` --- Evidence-based audit of the
+-   `ONTOCODE_CURRENT_PROTEGE_PARITY_AUDIT.md` --- Evidence-based audit of the
     current repository.
 -   `PARITY_SCOPE.md` --- Defines what "Protégé parity" means.
 -   `IMPLEMENTATION_EVIDENCE.md` --- Maps parity claims to source code

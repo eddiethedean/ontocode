@@ -29,7 +29,7 @@ objective of the phases below.
 
 | Release | P0 phase | Stages | Primary epics | Primary blockers | Status |
 |---------|----------|--------|---------------|------------------|--------|
-| **v0.19** | A + baseline | 0–1 | EPIC-001, EPIC-011 (skeleton) | BLOCKER_01, BLOCKER_11 (manifest skeleton) | Planned |
+| **v0.19** | A + baseline | 0–1 | EPIC-001, EPIC-011 (skeleton) | BLOCKER_01, BLOCKER_11 (manifest skeleton) | Complete |
 | **v0.20** | B | 2 | EPIC-003 | BLOCKER_03 | Planned |
 | **v0.21** | C (formats) | 3 | EPIC-001, EPIC-020 | BLOCKER_01, format audit | Planned |
 | **v0.22** | C (OWL 2) | 4 | EPIC-002 | BLOCKER_02 | Planned |

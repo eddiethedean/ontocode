@@ -9,6 +9,7 @@ pub mod catalog;
 pub mod diagnostics;
 pub mod diff;
 pub mod docs;
+pub mod edit;
 pub mod error;
 pub mod obo;
 pub mod owl;

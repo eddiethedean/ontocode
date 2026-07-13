@@ -24,6 +24,7 @@ path = "src/main.rs"
 [dependencies]
 ontocore-catalog = { workspace = true }
 ontocore-core = { workspace = true }
+ontocore-edit = { workspace = true }
 ontocore-owl = { workspace = true }
 ontocore-obo = { workspace = true }
 ontocore-query = { workspace = true }

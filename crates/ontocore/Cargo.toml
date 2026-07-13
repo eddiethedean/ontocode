@@ -24,6 +24,7 @@ ontocore-core = { workspace = true }
 ontocore-diagnostics = { workspace = true }
 ontocore-diff = { workspace = true }
 ontocore-docs = { workspace = true }
+ontocore-edit = { workspace = true }
 ontocore-lsp = { workspace = true, optional = true }
 ontocore-plugin = { workspace = true, optional = true }
 ontocore-owl = { workspace = true }

@@ -39,6 +39,8 @@ jobs:
       - run: chmod +x scripts/check-doc-versions.sh
       - run: ./scripts/check-doc-versions.sh
 
+      - run: python3 scripts/validate-parity-manifest.py
+
   clippy:
     name: clippy
     runs-on: ubuntu-latest

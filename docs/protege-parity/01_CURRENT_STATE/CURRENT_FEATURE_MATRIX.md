@@ -146,14 +146,14 @@ This matrix is intended to answer:
 
 For detailed implementation evidence, see `IMPLEMENTATION_EVIDENCE.md`.
 
-For the complete audit, see `CURRENT_REPOSITORY_AUDIT.md`.
+For the complete audit, see `ONTOCODE_CURRENT_PROTEGE_PARITY_AUDIT.md`.
 
 ------------------------------------------------------------------------
 
 # Related Documents
 
 -   README.md
--   CURRENT_REPOSITORY_AUDIT.md
+-   ONTOCODE_CURRENT_PROTEGE_PARITY_AUDIT.md
 -   IMPLEMENTATION_EVIDENCE.md
 -   PARITY_SCOPE.md
 -   PARITY_MATRIX.md

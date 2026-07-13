@@ -3,9 +3,9 @@
 # Protégé Desktop Parity Status Dashboard
 
 **Status:** Living Status Report\
-**Repository Baseline:** OntoCode v0.18.2 (audit baseline)\
+**Repository Baseline:** OntoCode v0.19.0\
 **Target Release:** OntoCode 1.0.0\
-**Current phase:** v0.19 (planned) — see [PRE_1_0_PHASES.md](../07_BACKLOG/PRE_1_0_PHASES.md)
+**Current phase:** v0.19 complete — see [PRE_1_0_PHASES.md](../07_BACKLOG/PRE_1_0_PHASES.md)
 
 ------------------------------------------------------------------------
 
@@ -25,13 +25,14 @@ highlights release blockers, and tracks overall readiness.
   Area                      Status
   ------------------------- -----------------
   Repository Audit          ✅ Complete
-  Parity Scope Defined      ✅ Complete
+  Parity Scope Defined      ✅ Complete (frozen 2026-07-13)
   Feature Inventory         ✅ Complete
   Current Feature Audit     ✅ Complete
+  Parity Manifest           ✅ Complete (skeleton)
   Implementation Evidence   🚧 In Progress
-  Parity Matrix             🚧 In Progress
-  Gap Analysis              🚧 In Progress
-  P0 Engineering Work       🚧 Not Complete
+  Parity Matrix             ✅ Complete
+  Gap Analysis              ✅ Complete
+  P0 Engineering Work       🚧 In Progress
   Release Gate              ❌ Not Ready
 
 ------------------------------------------------------------------------
@@ -55,14 +56,14 @@ from the parity manifest.
 
   Blocker                               Status
   ------------------------------------- --------
-  Format-independent semantic editing   Open
+  Format-independent semantic editing   Partial (v0.19: Turtle/OBO transaction routing)
   RDF/XML write-back                    Open
   OWL/XML write-back                    Open
   Complete OWL 2 authoring              Open
   Workspace semantics                   Open
   Full reasoning parity                 Open
   SWRL subsystem                        Open
-  Executable parity verification        Open
+  Executable parity verification        Partial (manifest skeleton + CI validator)
 
 ------------------------------------------------------------------------
 
@@ -93,14 +94,13 @@ from the parity manifest.
 
 # Next Engineering Milestones
 
-1.  Canonical semantic change model
-2.  RDF/XML and OWL/XML write-back
-3.  Complete OWL 2 authoring
-4.  Workspace transaction model
-5.  Reasoning enhancements
-6.  SWRL implementation
-7.  Automated parity validation
-8.  Release readiness review
+1.  RDF/XML and OWL/XML write-back (v0.21)
+2.  Complete OWL 2 authoring (v0.22)
+3.  Workspace transaction model (v0.20)
+4.  Reasoning enhancements (v0.23)
+5.  SWRL implementation (v0.23)
+6.  Full automated parity validation (v0.25)
+7.  Release readiness review
 
 ------------------------------------------------------------------------
 
@@ -131,7 +131,7 @@ Update this report whenever:
 
 -   PRE_1_0_PHASES.md — versioned release phases
 -   README.md
--   CURRENT_REPOSITORY_AUDIT.md
+-   ONTOCODE_CURRENT_PROTEGE_PARITY_AUDIT.md
 -   CURRENT_FEATURE_MATRIX.md
 -   PARITY_MATRIX.md
 -   PARITY_GAP_ANALYSIS.md

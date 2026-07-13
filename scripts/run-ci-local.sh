@@ -167,6 +167,7 @@ run_rust_and_extension_steps() {
 if [[ "$PARALLEL" == "0" ]]; then
   run_step "rustfmt" cargo fmt --all -- --check
   run_step "documentation version sync" ./scripts/check-doc-versions.sh
+  run_step "parity manifest validation" python3 scripts/validate-parity-manifest.py
   run_rust_and_extension_steps
   run_step "cargo audit" cargo audit
   run_step "mkdocs strict build" bash -c '
@@ -177,6 +178,7 @@ else
   # Overlap cheap / non-cargo jobs with the shared-target Rust pipeline.
   run_bg_step "rustfmt" "rustfmt" cargo fmt --all -- --check
   run_bg_step "documentation version sync" "doc-versions" ./scripts/check-doc-versions.sh
+  run_bg_step "parity manifest validation" "parity-manifest" python3 scripts/validate-parity-manifest.py
   run_bg_step "cargo audit" "cargo-audit" cargo audit
   run_bg_step "mkdocs strict build" "mkdocs" bash -c '
     pip install -q -r docs/requirements.txt

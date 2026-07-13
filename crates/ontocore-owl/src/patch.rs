@@ -3,6 +3,7 @@ use crate::manchester::{class_expression_to_turtle_fragment, parse_class_express
 use crate::span::{
     all_entity_statement_ranges, entity_primary_block_range, short_name_from_iri, ByteRange,
 };
+use crate::turtle_lex::{advance_turtle_scan, turtle_literal_lexical_value, TurtleScanState};
 use ontocore_core::{read_to_string_capped, OntologyFormat, MAX_FILE_BYTES};
 use serde::{Deserialize, Serialize};
 use std::collections::BTreeMap;
@@ -1012,9 +1013,22 @@ fn remove_matching_predicate_any(
     value: &str,
     namespaces: &BTreeMap<String, String>,
 ) -> Result<()> {
-    let escaped = escape_turtle_string(value.trim_matches('"'));
-    let object = format!("\"{escaped}\"");
-    remove_predicate_object_any_statement(text, entity_iri, predicate, &object, namespaces)
+    let value = value.trim().trim_matches('"').trim_matches('\'');
+    let ns = crate::span::namespaces_for_text(text, namespaces);
+    let short = short_name_from_iri(entity_iri);
+    let ranges = all_entity_statement_ranges(text, entity_iri, &short, &ns);
+    if ranges.is_empty() {
+        return Err(OwlError::EntityNotFound(entity_iri.to_string()));
+    }
+    for range in ranges {
+        let block = &text[range.start as usize..range.end as usize];
+        if let Some(new_block) = remove_matching_predicate_by_lexical_value(block, predicate, value)
+        {
+            replace_range(text, range, &new_block);
+            return Ok(());
+        }
+    }
+    Err(OwlError::ManchesterInvalid(format!("no matching {predicate} axiom")))
 }
 
 fn remove_all_predicate_any_statement(
@@ -1161,54 +1175,41 @@ fn bracket_end_index(text: &str, bracket_start: usize) -> Option<usize> {
         return None;
     }
     let mut depth = 0i32;
-    let mut in_string = false;
-    let mut in_iri = false;
-    let mut in_comment = false;
-    let mut escape = false;
+    let mut state = TurtleScanState::default();
     let mut i = bracket_start;
     while i < bytes.len() {
-        let b = bytes[i];
-        if in_comment {
-            if b == b'\n' {
-                in_comment = false;
-            }
-            i += 1;
+        if state.in_comment || state.in_string() || state.in_iri {
+            i = advance_turtle_scan(bytes, i, &mut state);
             continue;
         }
-        if in_string {
-            if escape {
-                escape = false;
-            } else if b == b'\\' {
-                escape = true;
-            } else if b == b'"' {
-                in_string = false;
-            }
-            i += 1;
+        if is_turtle_lex_start(bytes, i) {
+            i = advance_turtle_scan(bytes, i, &mut state);
             continue;
         }
-        if in_iri {
-            if b == b'>' {
-                in_iri = false;
+        match bytes[i] {
+            b'[' => {
+                depth += 1;
+                i += 1;
             }
-            i += 1;
-            continue;
-        }
-        match b {
-            b'#' => in_comment = true,
-            b'"' => in_string = true,
-            b'<' => in_iri = true,
-            b'[' => depth += 1,
             b']' => {
                 depth -= 1;
                 if depth == 0 {
                     return Some(i + 1);
                 }
+                i += 1;
             }
-            _ => {}
+            _ => i += 1,
         }
-        i += 1;
     }
     None
+}
+
+fn is_turtle_lex_start(bytes: &[u8], i: usize) -> bool {
+    matches!(
+        bytes.get(i),
+        Some(b'#' | b'"' | b'\'' | b'<')
+    ) || bytes.get(i..i + 3) == Some(br#"""""#)
+        || bytes.get(i..i + 3) == Some(br"'''")
 }
 
 /// Extend removal to cover the object, and the predicate when it would be left empty.
@@ -1279,54 +1280,18 @@ fn find_predicate_token(block: &str, search_from: usize, predicate: &str) -> Opt
         return None;
     }
     let mut i = search_from;
-    let mut in_string = false;
-    let mut in_iri = false;
-    let mut in_comment = false;
-    let mut escape = false;
+    let mut state = TurtleScanState::default();
     let mut bracket_depth = 0i32;
     while i + pred_bytes.len() <= bytes.len() {
-        let b = bytes[i];
-        if in_comment {
-            if b == b'\n' {
-                in_comment = false;
-            }
-            i += 1;
+        if state.in_comment || state.in_string() || state.in_iri {
+            i = advance_turtle_scan(bytes, i, &mut state);
             continue;
         }
-        if in_string {
-            if escape {
-                escape = false;
-            } else if b == b'\\' {
-                escape = true;
-            } else if b == b'"' {
-                in_string = false;
-            }
-            i += 1;
+        if is_turtle_lex_start(bytes, i) {
+            i = advance_turtle_scan(bytes, i, &mut state);
             continue;
         }
-        if in_iri {
-            if b == b'>' {
-                in_iri = false;
-            }
-            i += 1;
-            continue;
-        }
-        match b {
-            b'#' => {
-                in_comment = true;
-                i += 1;
-                continue;
-            }
-            b'"' => {
-                in_string = true;
-                i += 1;
-                continue;
-            }
-            b'<' => {
-                in_iri = true;
-                i += 1;
-                continue;
-            }
+        match bytes[i] {
             b'[' => {
                 bracket_depth += 1;
                 i += 1;
@@ -1363,37 +1328,21 @@ fn find_named_object_end(block: &str, obj_start: usize) -> Option<usize> {
     use crate::span::is_turtle_terminating_dot;
     let bytes = block.as_bytes();
     let mut i = obj_start;
-    let mut in_string = false;
-    let mut in_iri = false;
-    let mut escape = false;
+    let mut state = TurtleScanState::default();
     while i < bytes.len() {
-        let b = bytes[i];
-        if in_string {
-            if escape {
-                escape = false;
-            } else if b == b'\\' {
-                escape = true;
-            } else if b == b'"' {
-                in_string = false;
-            }
-            i += 1;
+        if state.in_comment || state.in_string() || state.in_iri {
+            i = advance_turtle_scan(bytes, i, &mut state);
             continue;
         }
-        if in_iri {
-            if b == b'>' {
-                in_iri = false;
-            }
-            i += 1;
+        if is_turtle_lex_start(bytes, i) {
+            i = advance_turtle_scan(bytes, i, &mut state);
             continue;
         }
-        match b {
-            b'"' => in_string = true,
-            b'<' => in_iri = true,
+        match bytes[i] {
             b',' | b';' => return Some(i),
             b'.' if is_turtle_terminating_dot(bytes, i) => return Some(i),
-            _ => {}
+            _ => i += 1,
         }
-        i += 1;
     }
     Some(block.len())
 }
@@ -1453,6 +1402,32 @@ fn remove_matching_predicate_object(
                 out.push_str(&block[..remove_start]);
                 out.push_str(&block[remove_end..]);
                 return Some(cleanup_block_separators(&out));
+            }
+        }
+        search_from = pred_pos + 1;
+    }
+    None
+}
+
+fn remove_matching_predicate_by_lexical_value(
+    block: &str,
+    predicate: &str,
+    value: &str,
+) -> Option<String> {
+    let norm_value = normalize_ws(value);
+    let mut search_from = 0;
+    while let Some(pred_pos) = find_predicate_token(block, search_from, predicate) {
+        for (obj_start, obj_end) in objects_in_predicate_value(block, pred_pos, predicate) {
+            let obj_text = block[obj_start..obj_end].trim();
+            if let Some(lexical) = turtle_literal_lexical_value(obj_text) {
+                if normalize_ws(&lexical) == norm_value {
+                    let (remove_start, remove_end) =
+                        extend_removal_span(block, pred_pos, predicate, obj_start, obj_end);
+                    let mut out = String::new();
+                    out.push_str(&block[..remove_start]);
+                    out.push_str(&block[remove_end..]);
+                    return Some(cleanup_block_separators(&out));
+                }
             }
         }
         search_from = pred_pos + 1;
@@ -1685,6 +1660,65 @@ ex:Foo a owl:Class ;
         .expect("remove trailing import");
         let preview = result.preview_text.expect("preview");
         assert!(!preview.contains("owl:imports"));
+    }
+
+    #[test]
+    fn remove_label_from_single_quoted_literal() {
+        let ttl = r#"@prefix ex: <http://example.org/people#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+ex:Person a owl:Class ;
+    rdfs:label 'Human' .
+"#;
+        let patches = vec![PatchOp::RemoveLabel {
+            entity_iri: "http://example.org/people#Person".to_string(),
+            value: "Human".to_string(),
+        }];
+        let result = apply_patches_to_text(ttl, &patches, true, &ex_ns()).expect("patch");
+        let preview = result.preview_text.expect("preview");
+        assert!(!preview.contains("rdfs:label 'Human'"));
+        assert!(!preview.contains("'Human'"));
+        assert!(preview.contains("ex:Person a owl:Class"));
+    }
+
+    #[test]
+    fn remove_comment_from_long_single_quoted_literal() {
+        let ttl = r#"@prefix ex: <http://example.org/people#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+ex:Person a owl:Class ;
+    rdfs:comment '''A human being.''' .
+"#;
+        let patches = vec![PatchOp::RemoveComment {
+            entity_iri: "http://example.org/people#Person".to_string(),
+            value: "A human being.".to_string(),
+        }];
+        let result = apply_patches_to_text(ttl, &patches, true, &ex_ns()).expect("patch");
+        let preview = result.preview_text.expect("preview");
+        assert!(!preview.contains("rdfs:comment '''A human being.'''"));
+        assert!(preview.contains("ex:Person a owl:Class"));
+    }
+
+    #[test]
+    fn remove_label_ignores_predicate_inside_long_single_quoted_comment() {
+        let ttl = r#"@prefix ex: <http://example.org/people#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+ex:Person a owl:Class ;
+    rdfs:comment '''see rdfs:label usage''' ;
+    rdfs:label "Name" .
+"#;
+        let patches = vec![PatchOp::RemoveLabel {
+            entity_iri: "http://example.org/people#Person".to_string(),
+            value: "Name".to_string(),
+        }];
+        let result = apply_patches_to_text(ttl, &patches, true, &ex_ns()).expect("patch");
+        let preview = result.preview_text.expect("preview");
+        assert!(preview.contains("see rdfs:label usage"));
+        assert!(!preview.contains("rdfs:label \"Name\""));
     }
 
     #[test]

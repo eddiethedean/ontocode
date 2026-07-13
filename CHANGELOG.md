@@ -9,6 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Turtle literal scanning: honor `\` escapes in long `"""` / `'''` strings for statement bounds ([#210](https://github.com/eddiethedean/ontocode/issues/210))
+- Turtle patch scanners recognize all four string literal forms; RemoveLabel/RemoveComment match lexical values regardless of quoting ([#224](https://github.com/eddiethedean/ontocode/issues/224), [#233](https://github.com/eddiethedean/ontocode/issues/233))
+- Undefined-prefix diagnostic stripper handles `'''` long single-quoted strings and escaped long-string closures ([#214](https://github.com/eddiethedean/ontocode/issues/214))
 - Extension authoring safety: workspace path guards on create entity, Manchester apply, and inspector/imports apply; honest error toasts when `documentUri` is outside the workspace ([#213](https://github.com/eddiethedean/ontocode/issues/213), [#230](https://github.com/eddiethedean/ontocode/issues/230), [#239](https://github.com/eddiethedean/ontocode/issues/239))
 - Create/delete entity refreshes the explorer when disk apply succeeds but editor sync is cancelled ([#236](https://github.com/eddiethedean/ontocode/issues/236))
 - Imports panel opens from the command palette and Review perspective; session restore persists `filePath` ([#227](https://github.com/eddiethedean/ontocode/issues/227))

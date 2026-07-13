@@ -78,6 +78,7 @@ pub fn undefined_prefixes(
 }
 
 fn strip_comments_and_strings(text: &str) -> String {
+    // Keep aligned with ontocore-owl/src/turtle_lex.rs (canonical byte lexer).
     let mut out = String::with_capacity(text.len());
     let mut chars = text.chars().peekable();
     while let Some(c) = chars.next() {
@@ -87,13 +88,20 @@ fn strip_comments_and_strings(text: &str) -> String {
                 out.push(' ');
             }
             '"' => {
-                // Long string """...""" — only enter after confirming three quotes without
-                // consuming past a short empty `""` into following tokens.
                 if chars.peek() == Some(&'"') {
-                    chars.next(); // second "
+                    chars.next();
                     if chars.peek() == Some(&'"') {
-                        chars.next(); // third "
+                        chars.next();
+                        let mut escape = false;
                         while let Some(ch) = chars.next() {
+                            if escape {
+                                escape = false;
+                                continue;
+                            }
+                            if ch == '\\' {
+                                escape = true;
+                                continue;
+                            }
                             if ch == '"' && chars.peek() == Some(&'"') {
                                 let _ = chars.next();
                                 if chars.peek() == Some(&'"') {
@@ -103,7 +111,6 @@ fn strip_comments_and_strings(text: &str) -> String {
                             }
                         }
                     }
-                    // else: empty "" — both quotes already consumed
                 } else {
                     #[allow(clippy::while_let_on_iterator)]
                     while let Some(ch) = chars.next() {
@@ -118,13 +125,38 @@ fn strip_comments_and_strings(text: &str) -> String {
                 out.push(' ');
             }
             '\'' => {
-                #[allow(clippy::while_let_on_iterator)]
-                while let Some(ch) = chars.next() {
-                    if ch == '\'' {
-                        break;
-                    }
-                    if ch == '\\' {
+                if chars.peek() == Some(&'\'') {
+                    chars.next();
+                    if chars.peek() == Some(&'\'') {
                         chars.next();
+                        let mut escape = false;
+                        while let Some(ch) = chars.next() {
+                            if escape {
+                                escape = false;
+                                continue;
+                            }
+                            if ch == '\\' {
+                                escape = true;
+                                continue;
+                            }
+                            if ch == '\'' && chars.peek() == Some(&'\'') {
+                                let _ = chars.next();
+                                if chars.peek() == Some(&'\'') {
+                                    chars.next();
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    #[allow(clippy::while_let_on_iterator)]
+                    while let Some(ch) = chars.next() {
+                        if ch == '\'' {
+                            break;
+                        }
+                        if ch == '\\' {
+                            chars.next();
+                        }
                     }
                 }
                 out.push(' ');
@@ -233,6 +265,44 @@ mod tests {
             stripped.contains("ex:Bad"),
             "empty \"\" must not consume following QName: {stripped:?}"
         );
+    }
+
+    #[test]
+    fn strip_handles_long_single_quoted_strings() {
+        let stripped = strip_comments_and_strings("ex:Ok rdfs:comment '''note about un:Bad''' .");
+        assert!(
+            !stripped.contains("un:Bad"),
+            "qname inside ''' must be stripped: {stripped:?}"
+        );
+        assert!(stripped.contains("ex:Ok"));
+    }
+
+    #[test]
+    fn ignores_undefined_prefix_inside_long_single_quoted_string() {
+        let text = "@prefix ex: <http://ex/> .\nex:Ok rdfs:comment '''note about un:Bad''' .\n";
+        let documents = vec![OntologyDocument {
+            id: "doc-1".to_string(),
+            path: Path::new("ok.ttl").to_path_buf(),
+            format: OntologyFormat::Turtle,
+            base_iri: Some("http://ex/".to_string()),
+            imports: vec![],
+            namespaces: BTreeMap::from([("ex".to_string(), "http://ex/".to_string())]),
+            parse_status: ParseStatus::Ok,
+            content_hash: "h".to_string(),
+            modified_time: 0,
+            parse_message: None,
+            parse_error_location: None,
+        }];
+        let input = DiagnosticInput {
+            documents: &documents,
+            entities: &[],
+            annotations: &[],
+            axioms: &[],
+            namespaces: &[],
+            imports: &[],
+        };
+        let diags = undefined_prefixes(&input, &|_| text.to_string());
+        assert!(diags.is_empty(), "long single-quoted string should not lint: {diags:?}");
     }
 
     #[test]

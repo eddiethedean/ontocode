@@ -1,3 +1,4 @@
+use crate::turtle_lex::{advance_turtle_scan, is_in_comment_or_string_at, TurtleScanState};
 use ontocore_core::{Annotation, Axiom, Entity, SourceLocation};
 use std::collections::BTreeMap;
 
@@ -297,99 +298,13 @@ pub(crate) fn is_turtle_terminating_dot(bytes: &[u8], i: usize) -> bool {
     !(prev_name && next_name)
 }
 
-#[derive(Clone, Copy, PartialEq, Eq)]
-enum TurtleStringKind {
-    ShortDouble,
-    ShortSingle,
-    LongDouble,
-    LongSingle,
-}
 
 /// True when `byte_offset` lies inside a `#` line comment or any Turtle string literal.
 ///
 /// Handles `"…"`, `'…'`, `"""…"""`, and `'''…'''` forms (same lexer rules as
 /// [`statement_end_byte`]).
 pub fn is_in_comment_or_string(text: &str, byte_offset: usize) -> bool {
-    let bytes = text.as_bytes();
-    let mut i = 0usize;
-    let mut string_kind: Option<TurtleStringKind> = None;
-    let mut in_iri = false;
-    let mut line_comment = false;
-    let mut escape = false;
-
-    while i < byte_offset && i < bytes.len() {
-        let b = bytes[i];
-        if line_comment {
-            if b == b'\n' {
-                line_comment = false;
-            }
-            i += 1;
-            continue;
-        }
-        if let Some(kind) = string_kind {
-            match kind {
-                TurtleStringKind::ShortDouble | TurtleStringKind::ShortSingle => {
-                    let quote = if kind == TurtleStringKind::ShortDouble { b'"' } else { b'\'' };
-                    if escape {
-                        escape = false;
-                    } else if b == b'\\' {
-                        escape = true;
-                    } else if b == quote {
-                        string_kind = None;
-                    }
-                    i += 1;
-                    continue;
-                }
-                TurtleStringKind::LongDouble => {
-                    if bytes.get(i..i + 3) == Some(br#"""""#) {
-                        string_kind = None;
-                        i += 3;
-                        continue;
-                    }
-                    i += 1;
-                    continue;
-                }
-                TurtleStringKind::LongSingle => {
-                    if bytes.get(i..i + 3) == Some(br"'''") {
-                        string_kind = None;
-                        i += 3;
-                        continue;
-                    }
-                    i += 1;
-                    continue;
-                }
-            }
-        }
-        if in_iri {
-            if b == b'>' {
-                in_iri = false;
-            }
-            i += 1;
-            continue;
-        }
-
-        if bytes.get(i..i + 3) == Some(br#"""""#) {
-            string_kind = Some(TurtleStringKind::LongDouble);
-            i += 3;
-            continue;
-        }
-        if bytes.get(i..i + 3) == Some(br"'''") {
-            string_kind = Some(TurtleStringKind::LongSingle);
-            i += 3;
-            continue;
-        }
-
-        match b {
-            b'#' => line_comment = true,
-            b'"' => string_kind = Some(TurtleStringKind::ShortDouble),
-            b'\'' => string_kind = Some(TurtleStringKind::ShortSingle),
-            b'<' => in_iri = true,
-            _ => {}
-        }
-        i += 1;
-    }
-
-    string_kind.is_some() || line_comment
+    is_in_comment_or_string_at(text, byte_offset)
 }
 
 /// Walk from subject start to the terminating `.` of this statement.
@@ -405,94 +320,74 @@ pub(crate) fn statement_end_byte(source_text: &str, start: usize) -> Option<usiz
     let mut i = start;
     let mut bracket_depth = 0i32;
     let mut paren_depth = 0i32;
-    let mut string_kind: Option<TurtleStringKind> = None;
-    let mut in_iri = false;
-    let mut in_comment = false;
-    let mut escape = false;
+    let mut state = TurtleScanState::default();
 
     while i < bytes.len() {
-        let b = bytes[i];
-        if in_comment {
-            if b == b'\n' {
-                in_comment = false;
+        if state.in_comment {
+            if bytes[i] == b'\n' {
+                state.in_comment = false;
             }
             i += 1;
             continue;
         }
-        if let Some(kind) = string_kind {
-            match kind {
-                TurtleStringKind::ShortDouble | TurtleStringKind::ShortSingle => {
-                    let quote = match kind {
-                        TurtleStringKind::ShortDouble => b'"',
-                        _ => b'\'',
-                    };
-                    if escape {
-                        escape = false;
-                    } else if b == b'\\' {
-                        escape = true;
-                    } else if b == quote {
-                        string_kind = None;
-                    }
-                    i += 1;
-                    continue;
-                }
-                TurtleStringKind::LongDouble => {
-                    if bytes.get(i..i + 3) == Some(br#"""""#) {
-                        string_kind = None;
-                        i += 3;
-                        continue;
-                    }
-                    i += 1;
-                    continue;
-                }
-                TurtleStringKind::LongSingle => {
-                    if bytes.get(i..i + 3) == Some(br"'''") {
-                        string_kind = None;
-                        i += 3;
-                        continue;
-                    }
-                    i += 1;
-                    continue;
-                }
-            }
-        }
-        if in_iri {
-            if b == b'>' {
-                in_iri = false;
-            }
-            i += 1;
+        if state.in_string() || state.in_iri {
+            i = advance_turtle_scan(bytes, i, &mut state);
             continue;
         }
 
         if bytes.get(i..i + 3) == Some(br#"""""#) {
-            string_kind = Some(TurtleStringKind::LongDouble);
+            state.string_kind = Some(crate::turtle_lex::TurtleStringKind::LongDouble);
             i += 3;
             continue;
         }
         if bytes.get(i..i + 3) == Some(br"'''") {
-            string_kind = Some(TurtleStringKind::LongSingle);
+            state.string_kind = Some(crate::turtle_lex::TurtleStringKind::LongSingle);
             i += 3;
             continue;
         }
 
+        let b = bytes[i];
         match b {
-            b'#' => in_comment = true,
-            b'"' => string_kind = Some(TurtleStringKind::ShortDouble),
-            b'\'' => string_kind = Some(TurtleStringKind::ShortSingle),
-            b'<' => in_iri = true,
-            b'[' => bracket_depth += 1,
-            b']' => bracket_depth = bracket_depth.saturating_sub(1),
-            b'(' => paren_depth += 1,
-            b')' => paren_depth = paren_depth.saturating_sub(1),
+            b'#' => {
+                state.in_comment = true;
+                i += 1;
+            }
+            b'"' => {
+                state.string_kind = Some(crate::turtle_lex::TurtleStringKind::ShortDouble);
+                i += 1;
+            }
+            b'\'' => {
+                state.string_kind = Some(crate::turtle_lex::TurtleStringKind::ShortSingle);
+                i += 1;
+            }
+            b'<' => {
+                state.in_iri = true;
+                i += 1;
+            }
+            b'[' => {
+                bracket_depth += 1;
+                i += 1;
+            }
+            b']' => {
+                bracket_depth = bracket_depth.saturating_sub(1);
+                i += 1;
+            }
+            b'(' => {
+                paren_depth += 1;
+                i += 1;
+            }
+            b')' => {
+                paren_depth = paren_depth.saturating_sub(1);
+                i += 1;
+            }
             b'.' if bracket_depth == 0
                 && paren_depth == 0
                 && is_turtle_terminating_dot(bytes, i) =>
             {
                 return Some(i + 1);
             }
-            _ => {}
+            _ => i += 1,
         }
-        i += 1;
     }
     None
 }
@@ -761,5 +656,26 @@ ex:Person a owl:Class .
             subject_line.trim_start().starts_with("<http://example.org/foo/Person>"),
             "must locate the absolute IRI subject, not ex:Person: {subject_line}"
         );
+    }
+
+    #[test]
+    fn statement_end_includes_single_quoted_label() {
+        let ttl = r#"ex:Person a owl:Class ;
+    rdfs:label 'Human' ."#;
+        let start = ttl.find("ex:Person").unwrap();
+        let end = statement_end_byte(ttl, start).expect("end");
+        assert!(ttl[start..end].contains("'Human'"));
+    }
+
+    #[test]
+    fn statement_end_respects_escaped_triple_quotes_in_long_string() {
+        let ttl = r#"@prefix ex: <http://example.org/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+ex:A a owl:Class ;
+  rdfs:comment """contains \""" quote""" .
+"#;
+        let start = ttl.find("ex:A").unwrap();
+        let end = statement_end_byte(ttl, start).expect("end");
+        assert!(ttl[start..end].contains(r#"\""" quote"""#));
     }
 }

@@ -64,6 +64,16 @@
 | Write-back (inspector, patches, refactor) | Yes | Yes | Read-only | Read-only |
 | Rich OBO metadata (synonyms, defs, xrefs) | — | Yes | — | — |
 
+## New in v0.19.0
+
+| Capability | Status |
+|------------|--------|
+| `ontocore-edit` semantic transactions (`compose`, `validate`, `invert`, serde) | Yes |
+| Turtle / OBO LSP + CLI apply via `Transaction` (legacy patch JSON still accepted) | Yes |
+| Parity manifest (`parity/protege-desktop-parity.yaml`) + CI validator | Yes |
+| Protégé parity GitHub epics EPIC-001…011 | Yes |
+| ADR-0020 semantic transaction edit model | Yes |
+
 ## New in v0.18.2
 
 | Capability | Status |

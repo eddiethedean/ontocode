@@ -46,6 +46,7 @@ Epics are indexed in [EPIC_INDEX.md](EPIC_INDEX.md).
 
 # v0.19 — Semantic foundation + program baseline
 
+**Status:** Complete (v0.19.0, 2026-07-13)\
 **P0 phase:** A (Semantic Foundation)\
 **Stages:** 0–1\
 **Theme:** Freeze parity scope and route all edits through semantic transactions.

@@ -11,7 +11,7 @@ OntoCode and OntoCore publish several roadmap documents. **Use this page to pick
 | See **what ships today** | [What ships today](SHIPPED.md) — canonical capability matrix |
 | Learn **canonical terminology** | [Glossary](glossary.md) |
 | **Implement** OntoUI / workspaces (v0.13–v0.14) | [Platform overview](https://github.com/eddiethedean/ontocode/blob/main/docs/platform/OVERVIEW.md) · [Plugin authoring](guides/plugins.md) · [Cursor prompts](https://github.com/eddiethedean/ontocode/blob/main/docs/cursor-prompts/README.md) |
-| **Implement Protégé parity** (v0.19–1.0) | [Protégé parity program](protege-parity/README.md) · [Pre-1.0 phases](protege-parity/07_BACKLOG/PRE_1_0_PHASES.md) · [Execution order](protege-parity/05_IMPLEMENTATION/EXECUTION_ORDER.md) |
+| **Implement Protégé parity** (v0.20–1.0 next) | [Protégé parity program](protege-parity/README.md) · [Pre-1.0 phases](protege-parity/07_BACKLOG/PRE_1_0_PHASES.md) · [Execution order](protege-parity/05_IMPLEMENTATION/EXECUTION_ORDER.md) |
 | Understand **platform direction** (releases v0.14 → v1.2) | [Platform roadmap](roadmap.md) · [ROADMAP.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/ROADMAP.md) |
 | Map **UI design specs** to release phases | [UI roadmap mapping](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/ROADMAP_MAPPING.md) — master checklist |
 | See **UI phases with milestones** | [Product Roadmap 2.0](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/PRODUCT_ROADMAP_2.0.md) |

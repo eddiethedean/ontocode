@@ -46,22 +46,21 @@ After 1.0, the roadmap shifts from parity to modernization.
 ### Timeline
 
 ```text
-SHIPPED (v0.1–v0.18) ─────────────────────────────────────────────────►
-v0.1–v0.4          v0.5–v0.8              v0.9–v0.12           v0.13–v0.18
-Engine foundation    IDE depth                Platform & authoring   OntoUI → UX shell gate
+SHIPPED (v0.1–v0.19) ─────────────────────────────────────────────────►
+v0.1–v0.4          v0.5–v0.8              v0.9–v0.12           v0.13–v0.19
+Engine foundation    IDE depth                Platform & authoring   OntoUI → parity path start
   │                    │                        │                      │
-  Foundation           Query, reason,           Identity, diff,      WorkspaceStore,
-  Explorer, diag,      graphs, refactor,        OBO write-back,      plugins, menus,
-  write-back           Manchester               OWL/XML catalog      Desktop UX shell
+  Foundation           Query, reason,           Identity, diff,      UX shell gate (v0.18) +
+  Explorer, diag,      graphs, refactor,        OBO write-back,      semantic transactions
+  write-back           Manchester               OWL/XML catalog      (v0.19)
 
-PLANNED (v0.19–1.0) ─────────────────────────────────────────────────►
-v0.19–v0.22        v0.23–v0.24            v0.25                1.0.0-rc → 1.0.0
-Semantic core      Reason + SWRL            Verify + polish      Protégé replacement
+PLANNED (v0.20–1.0) ─────────────────────────────────────────────────►
+v0.20–v0.22        v0.23–v0.24            v0.25                1.0.0-rc → 1.0.0
+Workspace + formats Reason + SWRL            Verify + polish      Protégé replacement
   │                    │                        │                      │
-  Transactions       Reasoning parity         Viz, SDK, a11y       Full parity ship
-  Workspace          Refactor + query         Parity manifest CI
-  Format write-back  DL Query
-  OWL 2 complete
+  Workspace runtime  Reasoning parity         Viz, SDK, a11y       Full parity ship
+  Format write-back  Refactor + query         Full parity CI
+  OWL 2 complete     DL Query
 ```
 
 ### Phase index
@@ -73,7 +72,7 @@ Semantic core      Reason + SWRL            Verify + polish      Protégé repla
 | **C — Platform & authoring** | v0.9–v0.12 | Shipped | OntoCore identity, semantic workspace, authoring parity |
 | **D — OntoUI platform** | v0.13–v0.14 | Shipped | v0.13: WorkspaceStore, focus relay; v0.14: plugin host MVP |
 | **E — Desktop UX shell gate** | v0.15–v0.18 | Shipped | Menus, layouts, workflows, migration readiness (not full parity) |
-| **F — Full Protégé parity path** | v0.19–v0.25 | Planned | Semantic core → formats → OWL 2 → reason/SWRL → services → verify |
+| **F — Full Protégé parity path** | v0.19–v0.25 | In progress (v0.19 shipped) | Semantic core → formats → OWL 2 → reason/SWRL → services → verify |
 | **G — Protégé replacement** | 1.0.0 | Planned | Daily OWL/OBO engineering without Protégé |
 | **H — Ecosystem** | v1.1–v1.2+ | Planned | SDKs, AI, toolchain & collaboration |
 
@@ -97,7 +96,7 @@ Semantic core      Reason + SWRL            Verify + polish      Protégé repla
 | 16 | v0.16 | E | Shipped | 1†, 2† | Workspace layouts + preferences + imports polish |
 | 17 | v0.17 | E | Shipped | — | Menu/toolbar/dialog parity + keyboard workflows |
 | 18 | v0.18 | E | Shipped | — | Desktop UX shell gate + migration readiness |
-| 19 | v0.19 | F | Planned | — | Semantic foundation + program baseline |
+| 19 | v0.19 | F | Shipped | — | Semantic foundation + program baseline |
 | 20 | v0.20 | F | Planned | 1† | Workspace runtime |
 | 21 | v0.21 | F | Planned | — | RDF/XML + OWL/XML write-back |
 | 22 | v0.22 | F | Planned | 2† | Complete OWL 2 authoring |
@@ -504,20 +503,25 @@ See [migration/v0.18.md](docs/migration/v0.18.md) and [SHIPPED.md](docs/SHIPPED.
 
 **Canonical plan:** [PRE_1_0_PHASES.md](docs/protege-parity/07_BACKLOG/PRE_1_0_PHASES.md) · **Sequencing:** [EXECUTION_ORDER.md](docs/protege-parity/05_IMPLEMENTATION/EXECUTION_ORDER.md) · **Status:** [PARITY_STATUS.md](docs/protege-parity/03_PARITY/PARITY_STATUS.md)
 
-v0.18 closed the desktop UX shell gate. v0.19–v0.25 implement the remaining P0 blockers defined in [docs/protege-parity/](docs/protege-parity/README.md).
+v0.18 closed the desktop UX shell gate. **v0.19 shipped** the semantic transaction layer and parity program baseline. v0.20–v0.25 implement the remaining P0 blockers defined in [docs/protege-parity/](docs/protege-parity/README.md).
 
-### v0.19 — Semantic foundation + program baseline (planned)
+### v0.19 — Semantic foundation + program baseline (shipped)
 
-**Theme:** Freeze parity scope; route all edits through semantic transactions.
+**Released:** v0.19.0 (2026-07-13)
+
+**Theme:** Freeze parity scope; route Turtle/OBO edits through semantic transactions.
 
 | Area | Deliverables |
 |------|--------------|
-| **OntoCore** | Canonical semantic change API; transaction composition and inverse ops; Turtle/OBO routed through transactions; parity manifest skeleton |
-| **Docs** | Frozen scope, matrix, gap analysis, implementation evidence |
+| **OntoCore** | `ontocore-edit` crate (`SemanticChange`, `Transaction` compose/validate/invert); Turtle/OBO LSP + CLI apply via transactions; format adapters over existing patch engines |
+| **Parity program** | Frozen scope; machine-readable `parity/protege-desktop-parity.yaml` + CI validator; GitHub epics EPIC-001…011 |
+| **Docs** | ADR-0020; matrix/evidence/status sync; [migration/v0.19.md](docs/migration/v0.19.md) |
 
-**Exit criteria:** All supported edits flow through semantic transactions; Turtle/OBO regression-free; parity status reproducible from evidence.
+**Exit criteria:** All supported Turtle/OBO edits flow through semantic transactions; Turtle/OBO regression-free; parity status reproducible from evidence. *(RDF/XML and OWL/XML write-back remain v0.21.)*
 
-**Blockers:** [BLOCKER_01](docs/protege-parity/04_BLOCKERS/BLOCKER_01_FORMAT_INDEPENDENCE.md), [BLOCKER_11 skeleton](docs/protege-parity/04_BLOCKERS/BLOCKER_11_PARITY_VERIFICATION.md)
+**Blockers addressed:** [BLOCKER_01](docs/protege-parity/04_BLOCKERS/BLOCKER_01_FORMAT_INDEPENDENCE.md) (transaction foundation), [BLOCKER_11](docs/protege-parity/04_BLOCKERS/BLOCKER_11_PARITY_VERIFICATION.md) (manifest skeleton)
+
+See [migration/v0.19.md](docs/migration/v0.19.md) and [SHIPPED.md](docs/SHIPPED.md).
 
 ---
 

@@ -135,4 +135,35 @@ describe("workspaceStore", () => {
     store.setPendingRefactor(null);
     expect(events).toContain("RefactorCleared");
   });
+
+  it("applyReasoningState running preserves lastRunAt (#220)", () => {
+    useWorkspaceStore.getState().setReasoningResult(["http://ex#Bad"], "el");
+    const before = useWorkspaceStore.getState().reasoning.lastRunAt;
+    useWorkspaceStore.getState().applyReasoningState({
+      profile: "rl",
+      unsatisfiable: ["http://ex#Bad"],
+      lastRunAt: before ?? 0,
+      dirty: true,
+      running: true,
+    });
+    const after = useWorkspaceStore.getState().reasoning;
+    expect(after.running).toBe(true);
+    expect(after.lastRunAt).toBe(before);
+    expect(after.profile).toBe("rl");
+  });
+
+  it("applyReasoningState dirty cancel does not emit ReasoningCompleted (#221)", () => {
+    const events: string[] = [];
+    subscribeWorkspaceEvents((e) => events.push(e.type));
+    useWorkspaceStore.getState().applyReasoningState({
+      profile: "el",
+      unsatisfiable: [],
+      lastRunAt: 50,
+      dirty: true,
+      running: false,
+    });
+    expect(events.filter((t) => t === "ReasoningCompleted")).toHaveLength(0);
+    expect(useWorkspaceStore.getState().reasoning.lastRunAt).toBe(50);
+    expect(useWorkspaceStore.getState().reasoning.dirty).toBe(true);
+  });
 });

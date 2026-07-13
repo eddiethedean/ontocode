@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Reasoner panel keeps running state during in-flight classify; `reasonerSyncRunId` no longer clears the spinner at run start ([#212](https://github.com/eddiethedean/ontocode/issues/212))
+- Reasoner `lastRunAt` and `dirty` update only on successful completion; cancel restores pre-run snapshot ([#221](https://github.com/eddiethedean/ontocode/issues/221))
+- Focus sync treats `reasoningState` with `running: true` as in-progress without emitting completion ([#220](https://github.com/eddiethedean/ontocode/issues/220))
+- Explanation panel sequences catalog fingerprint with displayed content; reindex no longer reuses stale content hash ([#219](https://github.com/eddiethedean/ontocode/issues/219))
+- Reasoner checkbox label matches `autoDetect` setting ("Auto-detect profile") ([#223](https://github.com/eddiethedean/ontocode/issues/223))
 - Turtle literal scanning: honor `\` escapes in long `"""` / `'''` strings for statement bounds ([#210](https://github.com/eddiethedean/ontocode/issues/210))
 - Turtle patch scanners recognize all four string literal forms; RemoveLabel/RemoveComment match lexical values regardless of quoting ([#224](https://github.com/eddiethedean/ontocode/issues/224), [#233](https://github.com/eddiethedean/ontocode/issues/233))
 - Undefined-prefix diagnostic stripper handles `'''` long single-quoted strings and escaped long-string closures ([#214](https://github.com/eddiethedean/ontocode/issues/214))

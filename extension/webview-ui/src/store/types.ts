@@ -57,6 +57,8 @@ export interface ReasoningState {
   lastRunAt: number | null;
   unsatisfiable: string[];
   hierarchyMode: "asserted" | "inferred" | "combined";
+  running?: boolean;
+  dirty?: boolean;
 }
 
 export interface RefactoringState {

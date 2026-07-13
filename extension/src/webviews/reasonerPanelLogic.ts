@@ -1,4 +1,5 @@
 import { RunReasonerResult } from "../lsp/protocol";
+import type { ReasoningStatePayload } from "../focus/types";
 
 export type ReasonerProfileId = "el" | "rl" | "rdfs" | "dl" | "auto";
 
@@ -29,4 +30,65 @@ export function shortIri(iri: string): string {
 export function summarizeResult(result: RunReasonerResult): string {
   const status = result.consistent ? "Completed" : "Inconsistent";
   return `${status} · ${result.profile_used} · ${result.duration_ms}ms`;
+}
+
+/** Snapshot relay state before a reasoner run (#221). */
+export function captureReasoningPreRun(
+  current: ReasoningStatePayload | null
+): ReasoningStatePayload {
+  return {
+    profile: current?.profile ?? "el",
+    unsatisfiable: current?.unsatisfiable ?? [],
+    lastRunAt: current?.lastRunAt ?? 0,
+    dirty: current?.dirty ?? true,
+    running: false,
+    hierarchyMode: current?.hierarchyMode,
+  };
+}
+
+export function reasoningStateForRunStart(
+  profile: string,
+  preRun: ReasoningStatePayload
+): ReasoningStatePayload {
+  return {
+    ...preRun,
+    profile,
+    running: true,
+  };
+}
+
+export function reasoningStateForRunSuccess(
+  profile: string,
+  unsatisfiable: string[],
+  preRun: ReasoningStatePayload
+): ReasoningStatePayload {
+  return {
+    profile,
+    unsatisfiable,
+    lastRunAt: Date.now(),
+    dirty: false,
+    running: false,
+    hierarchyMode: preRun.hierarchyMode,
+  };
+}
+
+export function reasoningStateForRunCancel(
+  preRun: ReasoningStatePayload
+): ReasoningStatePayload {
+  return { ...preRun, running: false };
+}
+
+export function reasoningStateForRunError(
+  profile: string,
+  preRun: ReasoningStatePayload,
+  lastResultUnsat: string[] | undefined
+): ReasoningStatePayload {
+  return {
+    profile,
+    unsatisfiable: lastResultUnsat ?? preRun.unsatisfiable,
+    lastRunAt: preRun.lastRunAt,
+    dirty: true,
+    running: false,
+    hierarchyMode: preRun.hierarchyMode,
+  };
 }

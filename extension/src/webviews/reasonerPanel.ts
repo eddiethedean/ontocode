@@ -1,11 +1,19 @@
 import * as vscode from "vscode";
 import { focusRelay } from "../focus/focusRelay";
+import type { ReasoningStatePayload } from "../focus/types";
 import { cancelActiveReasonerRequest, runReasoner } from "../lsp/client";
 import type { RunReasonerResult } from "../lsp/protocol";
 import { rememberPanelRestoreState } from "./layoutPersistence";
 import type { ReasonerResultPayload, WebviewMessage } from "./messages";
 import { PanelHost } from "./panelHost";
-import { summarizeResult } from "./reasonerPanelLogic";
+import {
+  captureReasoningPreRun,
+  reasoningStateForRunCancel,
+  reasoningStateForRunError,
+  reasoningStateForRunStart,
+  reasoningStateForRunSuccess,
+  summarizeResult,
+} from "./reasonerPanelLogic";
 
 function toPayload(result: RunReasonerResult): ReasonerResultPayload {
   return {
@@ -23,6 +31,7 @@ export class ReasonerPanel {
   public static current: ReasonerPanel | undefined;
   private lastResult: RunReasonerResult | undefined;
   private runId = 0;
+  private preRunSnapshot: ReasoningStatePayload | undefined;
 
   private constructor(private readonly host: PanelHost) {
     this.host.panel.onDidDispose(() => {
@@ -84,14 +93,11 @@ export class ReasonerPanel {
     cancelActiveReasonerRequest();
     this.runId += 1;
     this.host.postMessage({ type: "reasonerSyncRunId", runId: this.runId });
-    const prev = focusRelay.getReasoning();
-    focusRelay.setReasoningState({
-      profile: this.lastResult?.profile_used ?? prev?.profile ?? "el",
-      unsatisfiable: this.lastResult?.unsatisfiable ?? prev?.unsatisfiable ?? [],
-      lastRunAt: prev?.lastRunAt ?? 0,
-      dirty: prev?.dirty ?? true,
-      running: false,
-    });
+    const restore =
+      this.preRunSnapshot ??
+      captureReasoningPreRun(focusRelay.getReasoning());
+    this.preRunSnapshot = undefined;
+    focusRelay.setReasoningState(reasoningStateForRunCancel(restore));
   }
 
   private async handleMessage(message: WebviewMessage): Promise<void> {
@@ -123,27 +129,25 @@ export class ReasonerPanel {
     runId: number
   ): Promise<void> {
     this.runId = runId;
-    this.host.postMessage({ type: "reasonerSyncRunId", runId });
+    this.preRunSnapshot = captureReasoningPreRun(focusRelay.getReasoning());
     try {
-      focusRelay.setReasoningState({
-        profile,
-        unsatisfiable: this.lastResult?.unsatisfiable ?? [],
-        lastRunAt: Date.now(),
-        dirty: false,
-        running: true,
-      });
+      focusRelay.setReasoningState(
+        reasoningStateForRunStart(profile, this.preRunSnapshot)
+      );
       const result = await runReasoner({ profile, auto_detect: autoDetect });
       if (runId !== this.runId) {
         return;
       }
       this.lastResult = result;
-      focusRelay.setReasoningState({
-        profile: result.profile_used ?? profile,
-        unsatisfiable: result.unsatisfiable ?? [],
-        lastRunAt: Date.now(),
-        dirty: false,
-        running: false,
-      });
+      const preRun = this.preRunSnapshot ?? captureReasoningPreRun(null);
+      this.preRunSnapshot = undefined;
+      focusRelay.setReasoningState(
+        reasoningStateForRunSuccess(
+          result.profile_used ?? profile,
+          result.unsatisfiable ?? [],
+          preRun
+        )
+      );
       this.host.postMessage({
         type: "reasonerResult",
         runId,
@@ -156,13 +160,11 @@ export class ReasonerPanel {
         return;
       }
       const message = err instanceof Error ? err.message : String(err);
-      focusRelay.setReasoningState({
-        profile,
-        unsatisfiable: this.lastResult?.unsatisfiable ?? [],
-        lastRunAt: Date.now(),
-        dirty: true,
-        running: false,
-      });
+      const preRun = this.preRunSnapshot ?? captureReasoningPreRun(null);
+      this.preRunSnapshot = undefined;
+      focusRelay.setReasoningState(
+        reasoningStateForRunError(profile, preRun, this.lastResult?.unsatisfiable)
+      );
       this.host.postMessage({
         type: "reasonerResult",
         runId,

@@ -30,6 +30,12 @@ import {
 } from "../webviews/layoutPersistence";
 import { RefactorPreviewPanel } from "../webviews/refactorPreview";
 import { ReasonerPanel } from "../webviews/reasonerPanel";
+import {
+  captureReasoningPreRun,
+  reasoningStateForRunCancel,
+  reasoningStateForRunStart,
+  reasoningStateForRunSuccess,
+} from "../webviews/reasonerPanelLogic";
 import { PanelHost } from "../webviews/panelHost";
 
 const ACTIVE_ONTOLOGY_KEY = "ontocode.activeOntology";
@@ -282,7 +288,6 @@ export function registerV017Commands(
   command("ontocode.stopReasoner", () => {
     cancelActiveReasonerRequest();
     ReasonerPanel.current?.cancelActiveRun();
-    focusRelay.setReasoningRunning(false);
     void vscode.window.showInformationMessage(
       "OntoCode: reasoner cancelled; late server results will be ignored"
     );
@@ -621,20 +626,15 @@ async function runReasoning(
       cancellable: true,
     },
     async (progress, token) => {
-      focusRelay.setReasoningState({
-        profile,
-        unsatisfiable: focusRelay.getReasoning()?.unsatisfiable ?? [],
-        lastRunAt: Date.now(),
-        running: true,
-        dirty: false,
-      });
+      const preRun = captureReasoningPreRun(focusRelay.getReasoning());
+      focusRelay.setReasoningState(reasoningStateForRunStart(profile, preRun));
       try {
         if (action === "synchronize") {
           progress.report({ message: "Reindexing workspace…" });
           await indexWorkspace();
           if (token.isCancellationRequested) {
             cancelActiveReasonerRequest();
-            focusRelay.setReasoningRunning(false);
+            focusRelay.setReasoningState(reasoningStateForRunCancel(preRun));
             return undefined;
           }
         }
@@ -648,16 +648,16 @@ async function runReasoning(
         );
         if (token.isCancellationRequested) {
           ReasonerPanel.current?.cancelActiveRun();
-          focusRelay.setReasoningRunning(false);
+          focusRelay.setReasoningState(reasoningStateForRunCancel(preRun));
           return undefined;
         }
-        focusRelay.setReasoningState({
-          profile: result.profile_used,
-          unsatisfiable: result.unsatisfiable,
-          lastRunAt: Date.now(),
-          running: false,
-          dirty: false,
-        });
+        focusRelay.setReasoningState(
+          reasoningStateForRunSuccess(
+            result.profile_used,
+            result.unsatisfiable,
+            preRun
+          )
+        );
         if (action === "start" || action === "classify" || action === "synchronize") {
           const panel = ReasonerPanel.show(context.extensionUri);
           panel.presentResult(result);
@@ -665,10 +665,11 @@ async function runReasoning(
         void vscode.commands.executeCommand("ontocode.refreshExplorer");
         return result;
       } catch (error) {
-        focusRelay.setReasoningRunning(false);
         if (token.isCancellationRequested) {
+          focusRelay.setReasoningState(reasoningStateForRunCancel(preRun));
           return undefined;
         }
+        focusRelay.setReasoningRunning(false);
         throw error;
       }
     }

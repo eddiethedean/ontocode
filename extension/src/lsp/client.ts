@@ -230,7 +230,6 @@ export async function indexWorkspace(
   const { focusRelay } = await import("../focus/focusRelay");
   focusRelay.setCatalogFingerprint({
     indexedAt: indexed.indexed_at,
-    contentHash: focusRelay.getCatalogFingerprint()?.contentHash,
   });
   return indexed;
 }
@@ -441,11 +440,6 @@ export async function getExplanation(
     params
   );
   const explained = assertGetExplanationResult(result);
-  const { focusRelay } = await import("../focus/focusRelay");
-  focusRelay.setCatalogFingerprint({
-    indexedAt: explained.indexed_at,
-    contentHash: explained.content_hash,
-  });
   return explained;
 }
 

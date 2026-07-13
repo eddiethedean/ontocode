@@ -2,7 +2,11 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
   AVAILABLE_PROFILES,
+  captureReasoningPreRun,
   formatInferenceLine,
+  reasoningStateForRunCancel,
+  reasoningStateForRunStart,
+  reasoningStateForRunSuccess,
   shortIri,
   summarizeResult,
 } from "./reasonerPanelLogic";
@@ -48,5 +52,50 @@ describe("reasonerPanelLogic", () => {
       },
     };
     assert.match(summarizeResult(result), /Completed/);
+  });
+
+  it("run start preserves pre-run lastRunAt and dirty (#221)", () => {
+    const preRun = captureReasoningPreRun({
+      profile: "el",
+      unsatisfiable: [],
+      lastRunAt: 42,
+      dirty: true,
+      running: false,
+    });
+    const started = reasoningStateForRunStart("rl", preRun);
+    assert.equal(started.lastRunAt, 42);
+    assert.equal(started.dirty, true);
+    assert.equal(started.running, true);
+    assert.equal(started.profile, "rl");
+  });
+
+  it("cancel restores pre-run snapshot (#221)", () => {
+    const preRun = captureReasoningPreRun({
+      profile: "el",
+      unsatisfiable: ["http://ex#Bad"],
+      lastRunAt: 99,
+      dirty: true,
+      running: false,
+    });
+    const cancelled = reasoningStateForRunCancel(preRun);
+    assert.equal(cancelled.lastRunAt, 99);
+    assert.equal(cancelled.dirty, true);
+    assert.equal(cancelled.running, false);
+  });
+
+  it("success advances lastRunAt and clears dirty (#221)", () => {
+    const preRun = captureReasoningPreRun({
+      profile: "el",
+      unsatisfiable: [],
+      lastRunAt: 10,
+      dirty: true,
+      running: false,
+      hierarchyMode: "inferred",
+    });
+    const done = reasoningStateForRunSuccess("el", ["http://ex#Bad"], preRun);
+    assert.ok(done.lastRunAt > 10);
+    assert.equal(done.dirty, false);
+    assert.equal(done.running, false);
+    assert.equal(done.hierarchyMode, "inferred");
   });
 });

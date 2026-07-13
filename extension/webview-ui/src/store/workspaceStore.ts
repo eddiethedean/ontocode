@@ -45,6 +45,8 @@ export interface WorkspaceStoreActions {
   addQueryHistory: (entry: Omit<QueryHistoryEntry, "id" | "executedAt">) => void;
   setSchemaBrowserExpanded: (expanded: boolean) => void;
   setReasoningProfile: (profile: string) => void;
+  setReasoningRunning: (running: boolean, profile?: string) => void;
+  applyReasoningState: (payload: import("../messages").ReasoningStatePayload) => void;
   setReasoningResult: (unsatisfiable: string[], profile?: string) => void;
   setHierarchyMode: (mode: "asserted" | "inferred" | "combined") => void;
   setPendingRefactor: (plan: RefactorPlanPayload | null) => void;
@@ -156,6 +158,54 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
 
   setReasoningProfile(profile) {
     set((state) => ({ reasoning: { ...state.reasoning, profile } }));
+  },
+
+  setReasoningRunning(running, profile) {
+    set((state) => ({
+      reasoning: {
+        ...state.reasoning,
+        running,
+        ...(profile !== undefined ? { profile } : {}),
+      },
+    }));
+  },
+
+  applyReasoningState(payload) {
+    const reasoning = get().reasoning;
+    const lastRunAt =
+      payload.lastRunAt > 0 ? payload.lastRunAt : reasoning.lastRunAt;
+    const hierarchyMode = payload.hierarchyMode ?? reasoning.hierarchyMode;
+    if (payload.running) {
+      set({
+        reasoning: {
+          ...reasoning,
+          profile: payload.profile,
+          unsatisfiable: payload.unsatisfiable,
+          lastRunAt,
+          dirty: payload.dirty,
+          running: true,
+          hierarchyMode,
+        },
+      });
+      return;
+    }
+    const next = {
+      ...reasoning,
+      profile: payload.profile,
+      unsatisfiable: payload.unsatisfiable,
+      lastRunAt,
+      dirty: payload.dirty,
+      running: false,
+      hierarchyMode,
+    };
+    set({ reasoning: next });
+    if (!payload.dirty) {
+      emitWorkspaceEvent({
+        type: "ReasoningCompleted",
+        profile: next.profile,
+        unsatisfiable: next.unsatisfiable,
+      });
+    }
   },
 
   setReasoningResult(unsatisfiable, profile) {

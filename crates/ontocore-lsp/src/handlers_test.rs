@@ -837,10 +837,8 @@ fn reasoner_classify_releases_ops_lock_during_classify() {
     }
 
     let lock_start = Instant::now();
-    state
-        .ops_lock()
-        .lock()
-        .expect("ops_lock should be available during classify");
+    let ops_lock = state.ops_lock();
+    let _unused = ops_lock.lock().expect("ops_lock should be available during classify");
     let lock_elapsed = lock_start.elapsed();
     TEST_REASONER_CLASSIFY_PAUSE_MS.store(0, Ordering::SeqCst);
 
@@ -863,9 +861,7 @@ fn cancelled_reasoner_run_does_not_update_snapshot() {
     use std::time::{Duration, Instant};
 
     let state = indexed_state();
-    let before = state
-        .with_catalog_and_reasoner(|_, reasoner| reasoner.cloned())
-        .flatten();
+    let before = state.with_catalog_and_reasoner(|_, reasoner| reasoner.cloned()).flatten();
 
     TEST_REASONER_CLASSIFY_IN_PAUSE.store(false, Ordering::SeqCst);
     TEST_REASONER_CLASSIFY_PAUSE_MS.store(200, Ordering::SeqCst);
@@ -899,9 +895,7 @@ fn cancelled_reasoner_run_does_not_update_snapshot() {
     TEST_REASONER_CLASSIFY_PAUSE_MS.store(0, Ordering::SeqCst);
 
     assert!(result.is_err(), "cancelled reasoner should return error");
-    let after = state
-        .with_catalog_and_reasoner(|_, reasoner| reasoner.cloned())
-        .flatten();
+    let after = state.with_catalog_and_reasoner(|_, reasoner| reasoner.cloned()).flatten();
     match (&before, &after) {
         (None, None) => {}
         (Some(b), Some(a)) => assert_eq!(b.profile_used, a.profile_used),

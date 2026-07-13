@@ -1,3 +1,4 @@
+use lsp_server::RequestId;
 use ontocore_catalog::{IndexBuilder, OntologyCatalog};
 use ontocore_core::{
     canonical_workspace_root, is_path_within_any,
@@ -5,10 +6,11 @@ use ontocore_core::{
     validate_workspace_scope, validate_workspace_scope_any, Diagnostic, OntologyDocument,
 };
 use ontocore_reasoner::{ReasonerCacheStore, ReasonerSnapshot};
-use lsp_server::RequestId;
 use std::collections::{BTreeSet, HashMap};
 use std::path::{Path, PathBuf};
-use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
+#[cfg(test)]
+use std::sync::atomic::AtomicBool;
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Arc, Mutex, RwLock};
 use std::time::{SystemTime, UNIX_EPOCH};
 

@@ -648,9 +648,6 @@ export function registerCommands(
         }
       }
     ),
-    vscode.commands.registerCommand("ontocode.showImportsPanel", async () => {
-      await vscode.commands.executeCommand("ontocode.manageImports");
-    }),
     vscode.commands.registerCommand("ontocode.reloadImports", async () => {
       await runIndexAndRefresh(context, providers);
       if (ImportsPanel.current) {

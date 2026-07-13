@@ -34,16 +34,16 @@ use ontocore_reasoner::{
     classify, explain_alternatives, ExplanationRequest, ReasonerId, ReasonerSnapshot,
     WorkspaceInputLoader,
 };
-use serde::Deserialize;
-use std::thread;
-use std::time::Duration;
 use ontocore_refactor::{
     apply_refactor_plan_checked_with_overrides, find_usages_with_overrides, plans_equivalent,
     preview_refactor, preview_rename_iri,
 };
+use serde::Deserialize;
 use serde_json::Value;
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
+use std::thread;
+use std::time::Duration;
 
 #[allow(deprecated)]
 pub fn handle_initialize(state: &ServerState, params: InitializeParams) -> InitializeResult {

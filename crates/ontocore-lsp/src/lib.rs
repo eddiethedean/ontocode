@@ -52,6 +52,7 @@ use serde_json::Value;
 use state::{
     canonical_roots_match, resolve_workspace_folder_add, resolve_workspace_folder_uri, ServerState,
 };
+use std::collections::VecDeque;
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::{Arc, Mutex};
 use std::thread;
@@ -84,7 +85,16 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
         }
     });
 
-    for msg in &connection.receiver {
+    // Messages parked while `ontocore/runReasoner` polls for cancel (see #268).
+    let mut deferred: VecDeque<Message> = VecDeque::new();
+    loop {
+        let msg = match deferred.pop_front() {
+            Some(msg) => msg,
+            None => match connection.receiver.recv() {
+                Ok(msg) => msg,
+                Err(_) => break,
+            },
+        };
         match msg {
             Message::Request(req) => {
                 if connection.handle_shutdown(&req)? {
@@ -95,6 +105,7 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
                     &index_worker,
                     &pending_diagnostic_publish,
                     &connection.receiver,
+                    &mut deferred,
                     req,
                 ) {
                     connection.sender.send(Message::Response(resp))?;
@@ -130,6 +141,7 @@ fn handle_lsp_request(
     index_worker: &IndexWorker,
     pending_diagnostic_publish: &Arc<AtomicBool>,
     message_rx: &Receiver<Message>,
+    deferred: &mut VecDeque<Message>,
     req: Request,
 ) -> Option<Response> {
     let id = req.id.clone();
@@ -156,7 +168,7 @@ fn handle_lsp_request(
             Err(e) => return Some(error_response(id, e)),
         };
         let run_generation = state.begin_reasoner_run(req.id.clone());
-        let result = handle_run_reasoner_lsp(state, params, message_rx, run_generation);
+        let result = handle_run_reasoner_lsp(state, params, message_rx, deferred, run_generation);
         state.clear_active_reasoner_request();
         return match result {
             Ok(value) => match serde_json::to_value(value) {

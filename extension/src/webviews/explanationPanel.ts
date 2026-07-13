@@ -16,6 +16,8 @@ export class ExplanationPanel {
   private profile = "el";
   private lastResult: GetExplanationResult | undefined;
   private unsubscribeCatalog?: () => void;
+  private fetchGeneration = 0;
+  private activeFetchGeneration = 0;
 
   private constructor(
     private readonly host: PanelHost,
@@ -26,6 +28,9 @@ export class ExplanationPanel {
       ExplanationPanel.current = undefined;
     });
     this.unsubscribeCatalog = focusRelay.subscribeCatalog(() => {
+      if (this.activeFetchGeneration !== 0) {
+        return;
+      }
       if (this.lastResult) {
         this.pushContent(this.classIri, this.lastResult, this.profile);
       }
@@ -47,9 +52,20 @@ export class ExplanationPanel {
       lastRunProfile: focusRelay.getReasoning()?.profile,
       settingsDefault: cfg.get<string>("reasoner.default"),
     });
+    const generation = ExplanationPanel.current
+      ? ++ExplanationPanel.current.fetchGeneration
+      : 1;
+    if (ExplanationPanel.current) {
+      ExplanationPanel.current.activeFetchGeneration = generation;
+    }
+
     const result = await getExplanation({ class_iri: classIri, profile });
 
     if (ExplanationPanel.current) {
+      if (ExplanationPanel.current.activeFetchGeneration !== generation) {
+        return;
+      }
+      ExplanationPanel.current.activeFetchGeneration = 0;
       ExplanationPanel.current.host.panel.reveal(vscode.ViewColumn.Beside);
       ExplanationPanel.current.setContent(classIri, result, profile);
       return;
@@ -68,6 +84,7 @@ export class ExplanationPanel {
       },
     });
     const view = new ExplanationPanel(host, extensionUri);
+    view.fetchGeneration = generation;
     ExplanationPanel.current = view;
     view.setContent(classIri, result, profile);
   }
@@ -97,6 +114,10 @@ export class ExplanationPanel {
     this.classIri = classIri;
     this.profile = profile;
     this.lastResult = result;
+    focusRelay.setCatalogFingerprint({
+      indexedAt: result.indexed_at,
+      contentHash: result.content_hash,
+    });
     void rememberPanelRestoreState("ontocodeExplanation", {
       command: "ontocode.showExplanation",
       args: [classIri, profile],

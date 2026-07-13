@@ -50,7 +50,6 @@ export function ReasonerPanel(_props?: WorkspaceProps): JSX.Element {
       const msg = event.data as HostMessage;
       if (msg.type === "reasonerSyncRunId") {
         setRunId(msg.runId);
-        setRunning(false);
         return;
       }
       if (msg.type === "reasonerResult") {
@@ -116,7 +115,7 @@ export function ReasonerPanel(_props?: WorkspaceProps): JSX.Element {
           </Select>
         </FormField>
         <CheckboxRow
-          label="Show profile warnings"
+          label="Auto-detect profile"
           checked={autoDetect}
           onChange={setAutoDetect}
         />

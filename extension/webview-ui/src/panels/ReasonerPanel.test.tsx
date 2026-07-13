@@ -46,4 +46,22 @@ describe("ReasonerPanel", () => {
     expect(screen.getByText("Bad")).toBeInTheDocument();
     expect(screen.getByText(/SubClassOf/)).toBeInTheDocument();
   });
+
+  it("reasonerSyncRunId does not clear running state (#212)", () => {
+    render(<ReasonerPanel />);
+    fireEvent.click(screen.getAllByRole("button", { name: "Run Reasoner" })[0]);
+    expect(screen.getByText("Running reasoner…")).toBeInTheDocument();
+    fireEvent(
+      window,
+      new MessageEvent("message", {
+        data: { type: "reasonerSyncRunId", runId: 99 },
+      })
+    );
+    expect(screen.getByText("Running reasoner…")).toBeInTheDocument();
+  });
+
+  it("shows auto-detect profile checkbox label (#223)", () => {
+    render(<ReasonerPanel />);
+    expect(screen.getByLabelText("Auto-detect profile")).toBeInTheDocument();
+  });
 });

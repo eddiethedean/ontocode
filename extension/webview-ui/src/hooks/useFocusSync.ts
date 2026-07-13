@@ -7,7 +7,7 @@ import { useWorkspaceStore } from "../store";
 export function FocusSyncBootstrap(): null {
   const host = useWorkspaceHost();
   const hydrateFocus = useWorkspaceStore((s) => s.hydrateFocus);
-  const setReasoningResult = useWorkspaceStore((s) => s.setReasoningResult);
+  const applyReasoningState = useWorkspaceStore((s) => s.applyReasoningState);
   const setHierarchyMode = useWorkspaceStore((s) => s.setHierarchyMode);
 
   useEffect(() => {
@@ -19,13 +19,13 @@ export function FocusSyncBootstrap(): null {
         hydrateFocus(data.focus);
       }
       if (data.type === "reasoningState") {
-        setReasoningResult(data.reasoning.unsatisfiable, data.reasoning.profile);
+        applyReasoningState(data.reasoning);
         if (data.reasoning.hierarchyMode) {
           setHierarchyMode(data.reasoning.hierarchyMode);
         }
       }
     });
-  }, [host, hydrateFocus, setReasoningResult, setHierarchyMode]);
+  }, [host, hydrateFocus, applyReasoningState, setHierarchyMode]);
 
   return null;
 }

@@ -1,6 +1,6 @@
 # OntoCore + OntoCode Documentation Package
 
-> **Note:** This folder contains **engineering specs, ADRs, and shipped milestone detail**. Canonical platform direction lives in **[Vision](../vision.md)**, **[Architecture](../architecture.md)**, and **[Roadmap](../roadmap.md)**. For **what ships in v0.19.0**, see [What ships today](../SHIPPED.md).
+> **Note:** This folder contains **engineering specs, ADRs, and shipped milestone detail**. Canonical platform direction lives in **[Vision](../vision.md)**, **[Architecture](../architecture.md)**, and **[Roadmap](../roadmap.md)**. For **what ships in v0.20.0**, see [What ships today](../SHIPPED.md).
 
 ## Documentation layers
 
@@ -65,7 +65,7 @@ Many specs describe **target** behavior. Check the banner at the top of each doc
 - [SHACL_SPEC.md](SHACL_SPEC.md) — SHACL validation (P1)
 - [SEMANTIC_DIFF_SPEC.md](SEMANTIC_DIFF_SPEC.md) — semantic ontology diff
 - [LSP_SPEC.md](LSP_SPEC.md) — target language server (v1.0 methods)
-- [PLUGIN_SPEC.md](PLUGIN_SPEC.md) — plugin system
+- [PLUGIN_SPEC.md](https://github.com/eddiethedean/ontocode/blob/main/docs/design/PLUGIN_SPEC.md) — plugin system
 
 ### UX
 

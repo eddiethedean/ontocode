@@ -11,7 +11,7 @@ Single entry point for security, platform, and legal questionnaires. Start with 
 | Question | Answer |
 |----------|--------|
 | **Production-ready Protégé replacement?** | **No** until 1.0 — pilot/coexistence workflows today |
-| **Latest tagged release** | **v0.19.0** — pin installs; docs on `main` may preview unreleased v0.20 |
+| **Latest tagged release** | **v0.20.0** — pin installs; see [Versions & channels](versions-and-channels.md) for Marketplace lag |
 | **Commercial support** | **Not offered** — community via GitHub issues |
 | **Editable formats** | Turtle + OBO write-back; OWL/XML and RDF/XML read-only |
 | **CLI prebuilds** | Linux x64 only; macOS/Windows use `cargo install` or bundled VSIX LSP |

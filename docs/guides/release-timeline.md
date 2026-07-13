@@ -33,7 +33,7 @@ Pre-1.0: minor releases may change library APIs, LSP JSON, and SQL virtual table
 | **v0.13** | OntoUI platform — WorkspaceStore, focus relay, schema browser, PR summary, semantic tokens | **Shipped** (2026-07-08) |
 | **v0.14** | Plugin host MVP — manifests, reference plugins, CLI/LSP hooks, owlmake scaffold | **Shipped** (2026-07-09) |
 | **v0.19** | Semantic foundation — `ontocore-edit` transactions; parity manifest + CI; epics EPIC-001…011 | **Shipped** (2026-07-13) |
-| **v0.20** | Workspace runtime — multi-ontology registry, dirty/save, session persistence | **In progress** (unreleased) |
+| **v0.20** | Workspace runtime — multi-ontology registry, dirty/save, session persistence | **Shipped** (2026-07-13) |
 | **v1.0** | Protégé-competitive OWL + OBO in VS Code; full axiom catalog; stable plugin API | Planned |
 
 Canonical forward plan: [Platform roadmap](../roadmap.md). Engineering milestone history: [Milestones (shipped)](../design/ROADMAP.md).

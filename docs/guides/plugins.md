@@ -150,6 +150,27 @@ ontocore workflow --plugin owlmake --step qc /path/to/workspace
 - OntoCode command **Run Workflow (owlmake)** — workflow scaffold output channel
 - Context menus — plugin `context_actions` on entities/ontologies (v0.16+)
 
+## Debugging failures
+
+| Symptom | Check |
+|---------|-------|
+| Plugin not listed | Manifest path `.ontocore/plugins/*.toml`; `api_version = "1"`; `ontocore plugins list` |
+| `INDEX_FAILED` on `runPlugin` | Subprocess `entry` on `PATH`; permissions include `external_process`; stdout is valid JSON |
+| No diagnostics in Problems | Plugin returned empty `diagnostics` or validate action was not triggered |
+| Permission denied | Declared `permissions` too narrow for the action |
+
+## Security: `external_process`
+
+Plugins with `entry` and `external_process` run **arbitrary binaries** chosen by the workspace manifest. Treat trust like CI scripts:
+
+- Prefer allowlisting plugin directories in enterprise deployments.
+- Review `entry` paths before opening untrusted ontology repos.
+- Restricted Mode / Workspace Trust still apply to custom LSP/ROBOT paths; plugins that spawn processes need an explicit permission declaration.
+
+Threat-model overview: [Security](../security.md).
+
 ## Stability
 
-Plugin APIs are **pre-1.0** and may change until OntoCore 1.0. **Canonical author guide:** this page. Do **not** implement against the historical trait sketches in [PLUGIN_SPEC.md](../design/PLUGIN_SPEC.md) (background only).
+Plugin APIs are **pre-1.0** and may change until OntoCore 1.0.
+
+**Canonical author guide: this page only.** Historical trait sketches live on GitHub as non-product background ([PLUGIN_SPEC.md](https://github.com/eddiethedean/ontocode/blob/main/docs/design/PLUGIN_SPEC.md)) and are **excluded from public docs search**. The React/TypeScript [Plugin API spec](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/PLUGIN_API_SPEC.md) is a **future** OntoUI target — not the shipped VS Code/CLI contract.

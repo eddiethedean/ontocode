@@ -1,6 +1,8 @@
 # PLUGIN_SPEC.md
 
-> **Historical design spec.** For **authoring plugins today**, use **[Plugin authoring](../guides/plugins.md)** (TOML manifest + subprocess host). This document describes early trait-based plans; the shipped host uses manifest discovery under `.ontocore/plugins/*.toml`.
+> **Historical design spec — not the shipping contract.**  
+> **Authoring plugins today:** [Plugin authoring](https://ontocode-vs.readthedocs.io/en/latest/guides/plugins/) (TOML manifest + subprocess host).  
+> This file is **excluded from the public Read the Docs site** so adopters do not discover the wrong API via search. Trait-based sketches below are background only; the shipped host uses `.ontocore/plugins/*.toml`.
 
 ## 1. Purpose
 

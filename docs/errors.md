@@ -156,20 +156,30 @@ Full limits: [workspace-limits.md](workspace-limits.md).
 
 ## Rust library errors
 
-Integrators using `ontocore-*` crates directly should handle:
+Integrators using crates.io crates should match **method → error type** (not every API returns the unified enum):
 
-| Crate | Error type | Common causes |
-|-------|------------|---------------|
-| `ontocore` (façade) | `ontocore::Error` | Unified enum over catalog, query, graph, reasoner, export, owl, obo |
-| `ontocore-parser` | `ParseError` | Invalid RDF syntax |
-| `ontocore-catalog` | `CatalogError`, `GraphError` | Index build failure, invalid graph request |
-| `ontocore-query` | `QueryError` | Unsupported SQL, SPARQL parse error |
-| `ontocore-owl` | `OwlError` | Patch apply failure |
-| `ontocore-reasoner` | `ReasonerError` | Classify/explain failure, unsupported profile |
+| API | Returns | Typical causes |
+|-----|---------|----------------|
+| `Workspace::open` / `open_with_options` / `reindex*` / `diff_against_path` | `CatalogError` | Path missing, scan/parse limits, I/O |
+| `Workspace::query` / `sparql` | `QueryError` | Unsupported SQL, SPARQL parse, empty catalog edge cases |
+| `Workspace::classify` / `explain` / `reasoner_input` | `ReasonerError` | Profile unsupported, axiom load failure |
+| `import_graph*` | `GraphError` | Invalid depth / request |
+| Owl / OBO patch helpers | `OwlError` / OBO errors | Patch mismatch, write-back format |
+| Façade helpers that `?`-convert | `ontocore::Error` | Unified: `Catalog` / `Query` / `Graph` / `Reasoner` / export / owl / obo variants |
 
-Use `apply_owl_patches` / `apply_obo_patches` when importing both OWL and OBO patch helpers from the façade.
+| Crate | Error type | docs.rs |
+|-------|------------|---------|
+| `ontocore` (façade) | `ontocore::Error` | [Error](https://docs.rs/ontocore/latest/ontocore/enum.Error.html) |
+| `ontocore-core` | `OntoCoreError` | Shared diagnostic/core failures |
+| `ontocore-catalog` | `CatalogError`, `GraphError` | Index / graph |
+| `ontocore-query` | `QueryError` | SQL/SPARQL |
+| `ontocore-owl` | `OwlError` | Turtle patches |
+| `ontocore-reasoner` | `ReasonerError` | Classify/explain |
+| `ontocore-parser` | `ParseError` | RDF syntax |
 
-Example: [`examples/error_handling.rs`](https://github.com/eddiethedean/ontocode/blob/main/examples/error_handling.rs) on GitHub.
+**LSP mapping:** library failures often surface as `INDEX_FAILED`, `QUERY_FAILED`, `REASONER_FAILED`, or `UNSUPPORTED_FORMAT` in the table above.
+
+crates.io tutorial: [Rust library guide](guides/rust-library.md). Clone-only example: [`examples/error_handling.rs`](https://github.com/eddiethedean/ontocode/blob/main/examples/error_handling.rs).
 
 ## Related docs
 

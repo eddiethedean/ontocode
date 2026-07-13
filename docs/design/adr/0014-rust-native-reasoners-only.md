@@ -26,7 +26,7 @@ Full **OWL 2 DL** classification, consistency, and unsatisfiability explanations
    - **`rl`** / **`rdfs`** — `ontologos-rl` / `ontologos-rdfs` where RL/RDFS semantics suffice.
    - **`dl`** — `ontologos-dl` (requires OntoLogos **1.0.0** crates.io publish).
    - **`auto`** — `ontologos-facade` profile routing (1.0.0+).
-3. **Plugin reasoners** must be native binaries or WASM — not JVM subprocesses ([PLUGIN_SPEC.md](../PLUGIN_SPEC.md)).
+3. **Plugin reasoners** must be native binaries or WASM — not JVM subprocesses ([PLUGIN_SPEC.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/docs/design/PLUGIN_SPEC.md)).
 4. **ROBOT** remains an optional external CLI for OBO release pipelines; it is not used for in-IDE classification ([OBO_ROBOT_SPEC.md](../OBO_ROBOT_SPEC.md)).
 
 ## Consequences

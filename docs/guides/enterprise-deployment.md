@@ -25,8 +25,8 @@ Ontology content stays **on disk** — no cloud upload by default ([security pol
 
 ### Option B — Offline / air-gapped (recommended for regulated envs)
 
-1. On a connected staging machine, download from [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) for version **v0.19.0** (or your pinned version):
-   - `ontocode-<version>.vsix`
+1. On a connected staging machine, download from [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) for version **v0.20.0** (or your pinned version):
+   - `ontocode-v0.20.0.vsix` (pattern: `ontocode-v<version>.vsix`)
    - `SHA256SUMS`
    - `NOTICES`
    - Optional: `ontocore-lsp-v<version>-<platform>.tar.gz` per platform if not using bundled VSIX LSP
@@ -60,7 +60,7 @@ Install resulting VSIX internally. Requires Rust + Node toolchains on build host
 
 | Practice | Recommendation |
 |----------|----------------|
-| Version pin | Standardize on one release tag (e.g. `v0.19.0`) across VSIX and CLI |
+| Version pin | Standardize on one release tag (e.g. `v0.20.0`) across VSIX and CLI |
 | Update cadence | Quarterly review of [changelog](../changelog.md) and [SECURITY.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/SECURITY.md) |
 | Staged rollout | Pilot group → department → org (see [production readiness](production-readiness.md)) |
 | Rollback | Keep previous VSIX + CLI tarball in internal registry |

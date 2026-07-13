@@ -6,7 +6,7 @@ Accepted — **shipped v0.14+** (plugin host MVP; ecosystem API still pre-1.0)
 
 ## Context
 
-[design/PLUGIN_SPEC.md](../design/PLUGIN_SPEC.md) and [ui/PLUGIN_PLATFORM.md](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/PLUGIN_PLATFORM.md) describe extensibility but use inconsistent terminology ("plugin", "extension point").
+[PLUGIN_SPEC.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/docs/design/PLUGIN_SPEC.md) and [ui/PLUGIN_PLATFORM.md](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/PLUGIN_PLATFORM.md) describe extensibility but use inconsistent terminology ("plugin", "extension point").
 
 ## Decision
 
@@ -23,4 +23,4 @@ Built-in features (Ontologos reasoner, SQL query) are default providers with sta
 ## References
 
 - [platform/CAPABILITY_PROVIDERS.md](https://github.com/eddiethedean/ontocode/blob/main/docs/platform/CAPABILITY_PROVIDERS.md)
-- [design/PLUGIN_SPEC.md](../design/PLUGIN_SPEC.md)
+- [design/PLUGIN_SPEC.md](https://github.com/eddiethedean/ontocode/blob/main/docs/design/PLUGIN_SPEC.md)

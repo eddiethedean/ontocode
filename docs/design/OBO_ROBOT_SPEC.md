@@ -17,7 +17,7 @@ Enable biomedical ontology maintainers to use OntoCode as a **primary IDE** alon
 | **owlmake** (external) | Rust-native portable ROBOT/ODK-style workflows | **Reference plugin** (v1.0 integration target) |
 | **OntoCore core** | Does **not** reimplement ROBOT merge/template/report or ODK Makefile logic | By design |
 
-OntoCore should integrate with the ontology toolchain, not absorb it. See [PLUGIN_SPEC.md](PLUGIN_SPEC.md).
+OntoCore should integrate with the ontology toolchain, not absorb it. See [PLUGIN_SPEC.md](https://github.com/eddiethedean/ontocode/blob/main/docs/design/PLUGIN_SPEC.md).
 
 ## 3. OBO format (P0)
 
@@ -91,7 +91,7 @@ OntoCore (index, diagnostics, LSP)
 - **OntoCore must not** reimplement all of ROBOT/ODK internally; plugins and CLI wrappers delegate to established semantics.
 - OntoCode **surfaces** workflow actions; OntoCore **hosts** plugin APIs; owlmake **implements** workflow automation.
 
-See [PLUGIN_SPEC.md](PLUGIN_SPEC.md) for `WorkflowPlugin` / `BuildPlugin` interfaces.
+See [PLUGIN_SPEC.md](https://github.com/eddiethedean/ontocode/blob/main/docs/design/PLUGIN_SPEC.md) for `WorkflowPlugin` / `BuildPlugin` interfaces.
 
 ## 6. OBO/ODK project workflow goals (v1.0)
 

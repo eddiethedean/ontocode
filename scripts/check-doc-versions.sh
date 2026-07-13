@@ -999,6 +999,56 @@ fi
 check_file_contains "mkdocs.yml" "migration/v0.16.md" "mkdocs v0.16 migration guide"
 check_file_contains "mkdocs.yml" "migration/v0.15.md" "mkdocs v0.15 migration guide"
 
+# Adoption trust: primary surfaces must not contradict TAGGED_RELEASE
+check_file_contains "docs/index.md" "\\*\\*Latest tagged: v${TAGGED_VERSION}\\.\\*\\*" "docs index What ships today tagged line"
+check_file_contains "ARCHITECTURE.md" "Latest tagged: v${TAGGED_VERSION}" "root ARCHITECTURE tagged banner"
+check_file_contains "docs/architecture.md" "Latest tagged: v${TAGGED_VERSION}" "docs architecture tagged banner"
+check_file_contains "docs/guides/procurement-appendix.md" "\\*\\*v${TAGGED_VERSION}\\*\\*" "procurement latest tagged"
+check_file_contains "docs/guides/release-timeline.md" "Workspace runtime" "release-timeline v0.20 milestone row"
+if ! grep -qE '\*\*v0\.20\*\*.*\*\*Shipped\*\*' docs/guides/release-timeline.md 2>/dev/null; then
+  echo "FAIL: docs/guides/release-timeline.md must mark v0.20 as Shipped" >&2
+  fail=1
+else
+  echo "ok: release-timeline v${TAGGED_MINOR} shipped"
+fi
+
+# Reject stale "latest tagged is older than TAGGED_RELEASE" on primary surfaces
+if [[ "$TAGGED_MINOR" =~ ^[0-9]+\.[0-9]+$ ]]; then
+  PREV_MINOR_PART="${TAGGED_MINOR##*.}"
+  if [[ "$PREV_MINOR_PART" =~ ^[0-9]+$ ]] && [[ "$PREV_MINOR_PART" -gt 0 ]]; then
+    STALE_TAGGED_MINOR="${TAGGED_MINOR%%.*}.$((PREV_MINOR_PART - 1))"
+    for stale_file in docs/index.md ARCHITECTURE.md docs/architecture.md docs/guides/procurement-appendix.md docs/guides/production-readiness.md; do
+      if grep -qE "Latest tagged: v${STALE_TAGGED_MINOR}\\.0" "$stale_file" 2>/dev/null; then
+        echo "FAIL: $stale_file still claims Latest tagged: v${STALE_TAGGED_MINOR}.0 (expected v${TAGGED_VERSION})" >&2
+        fail=1
+      fi
+      if grep -qiE "v${TAGGED_MINOR}.*(unreleased|in progress \\(unreleased\\))" "$stale_file" 2>/dev/null; then
+        echo "FAIL: $stale_file still claims v${TAGGED_MINOR} unreleased (tagged is ${TAGGED_VERSION})" >&2
+        fail=1
+      fi
+    done
+    if grep -qE "\\*\\*v${STALE_TAGGED_MINOR}\\.0\\*\\* — pin installs" docs/guides/procurement-appendix.md 2>/dev/null; then
+      echo "FAIL: procurement-appendix still pins v${STALE_TAGGED_MINOR}.0" >&2
+      fail=1
+    fi
+  fi
+fi
+
+# Crate README Cargo.toml pins must match tagged minor (not a stale older minor)
+STALE_CRATE_PIN_FAIL=0
+while IFS= read -r readme; do
+  if grep -qE '^\s*ontocore[a-z0-9-]*\s*=\s*"0\.[0-9]+"' "$readme" 2>/dev/null; then
+    if ! grep -qE "ontocore[a-z0-9-]* = \"${TAGGED_MINOR}\"" "$readme" 2>/dev/null; then
+      echo "FAIL: $readme crate version pin must use \"${TAGGED_MINOR}\" (from docs/TAGGED_RELEASE)" >&2
+      STALE_CRATE_PIN_FAIL=1
+      fail=1
+    fi
+  fi
+done < <(find crates -name README.md -print)
+if [[ "$STALE_CRATE_PIN_FAIL" -eq 0 ]]; then
+  echo "ok: crate README version pins match tagged minor ${TAGGED_MINOR}"
+fi
+
 if [[ "$fail" -ne 0 ]]; then
   echo "Documentation version check failed." >&2
   exit 1

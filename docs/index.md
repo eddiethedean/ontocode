@@ -85,23 +85,32 @@ Index and explore OWL/RDF/OBO, run queries, refactors, and reasoning — in VS C
 
 ## What ships today
 
-**Latest tagged: v0.19.0** — semantic transactions + parity program baseline. **Unreleased on `main`:** v0.20 workspace runtime and Turtle patch hardening (not on Marketplace/crates.io yet).
-
-Full matrix: **[What ships today](SHIPPED.md)** (canonical — do not rely on this summary alone).
+**Latest tagged: v0.20.0.** Full capability matrix: **[What ships today](SHIPPED.md)**. For channel lag (Marketplace vs crates.io vs docs), see [Versions & channels](guides/versions-and-channels.md).
 
 ## Quick start
 
 === "VS Code"
 
     1. Install **OntoCode** from the [Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) or [Open VSX](https://open-vsx.org/extension/ontocode/ontocode) (Cursor) — not the VS Code editor itself
-    2. **File → Open Folder…** with `.ttl`, `.owl`, `.obo`, or other ontology files
+    2. **File → Open Folder…** with **`.ttl` / `.obo`** (editable) — or `.owl` / RDF/XML for **browse/query only** ([OWL/XML workflow](guides/owl-xml-workflow.md))
     3. OntoCode’s **bundled** language server indexes in Restricted Mode — **Trust** only if you set custom `ontocode.lspPath` or `ontocode.robotPath`
     4. Open the **OntoCode** activity bar → browse **Classes** → click an entity
 
-=== "CLI (install)"
+=== "CLI (Linux x64)"
+
+    Prefer the [release tarball](https://github.com/eddiethedean/ontocode/releases/tag/v0.20.0) — verify `SHA256SUMS`, then:
 
     ```bash
-    cargo install ontocore-cli --locked
+    ontocore query /path/to/ontologies "SELECT * FROM classes"
+    ontocore validate /path/to/ontologies
+    ```
+
+=== "CLI (macOS / Windows — cargo)"
+
+    Requires Rust **1.88+**. Windows: [MSVC Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/). macOS: Xcode Command Line Tools (`xcode-select --install`). First compile: **15–30+ minutes**.
+
+    ```bash
+    cargo install ontocore-cli --locked --version 0.20.0
     ontocore query /path/to/ontologies "SELECT * FROM classes"
     ontocore validate /path/to/ontologies
     ```

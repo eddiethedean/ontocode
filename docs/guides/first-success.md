@@ -43,38 +43,40 @@ For offline or air-gapped environments, use a release VSIX instead — see [Inst
 
 Download a minimal tutorial pack if you do not already have ontology files.
 
-**Offline / air-gapped:** download `ontocode-<version>.vsix` and `ontocode-tutorial.zip` from [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) for the **same tagged version** (e.g. **v0.20.0**). Prefer [Versions and channels](versions-and-channels.md) if Marketplace and GitHub disagree. If the zip is missing for an older tag, use the curl commands below on a connected machine, or clone the repo and open `fixtures/`.
+**Offline / air-gapped:** download `ontocode-v0.20.0.vsix` (pattern: `ontocode-v<version>.vsix`) and `ontocode-tutorial.zip` from [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) for the **same tagged version** (e.g. **v0.20.0**). Prefer [Versions and channels](versions-and-channels.md) if Marketplace and GitHub disagree. If the zip is missing for an older tag, use the curl commands below on a connected machine, or clone the repo and open `fixtures/`.
 
-**Online (curl):**
+**Online (curl from the tagged release):**
 
 === "macOS / Linux"
 
     ```bash
     mkdir ontocode-tutorial && cd ontocode-tutorial
-    curl -fsSLO https://raw.githubusercontent.com/eddiethedean/ontocode/main/fixtures/example.ttl
-    curl -fsSLO https://raw.githubusercontent.com/eddiethedean/ontocode/main/fixtures/complex-classes.ttl
-    curl -fsSLO https://raw.githubusercontent.com/eddiethedean/ontocode/main/examples/obo-workflow/demo.obo
+    curl -fsSLO https://raw.githubusercontent.com/eddiethedean/ontocode/v0.20.0/fixtures/example.ttl
+    curl -fsSLO https://raw.githubusercontent.com/eddiethedean/ontocode/v0.20.0/fixtures/complex-classes.ttl
+    curl -fsSLO https://raw.githubusercontent.com/eddiethedean/ontocode/v0.20.0/examples/obo-workflow/demo.obo
     ```
 
 === "Windows (PowerShell)"
 
     ```powershell
     mkdir ontocode-tutorial; cd ontocode-tutorial
-    Invoke-WebRequest -Uri https://raw.githubusercontent.com/eddiethedean/ontocode/main/fixtures/example.ttl -OutFile example.ttl
-    Invoke-WebRequest -Uri https://raw.githubusercontent.com/eddiethedean/ontocode/main/fixtures/complex-classes.ttl -OutFile complex-classes.ttl
-    Invoke-WebRequest -Uri https://raw.githubusercontent.com/eddiethedean/ontocode/main/examples/obo-workflow/demo.obo -OutFile demo.obo
+    Invoke-WebRequest -Uri https://raw.githubusercontent.com/eddiethedean/ontocode/v0.20.0/fixtures/example.ttl -OutFile example.ttl
+    Invoke-WebRequest -Uri https://raw.githubusercontent.com/eddiethedean/ontocode/v0.20.0/fixtures/complex-classes.ttl -OutFile complex-classes.ttl
+    Invoke-WebRequest -Uri https://raw.githubusercontent.com/eddiethedean/ontocode/v0.20.0/examples/obo-workflow/demo.obo -OutFile demo.obo
     ```
 
-Or download the files from [fixtures/](https://github.com/eddiethedean/ontocode/tree/main/fixtures) and [examples/obo-workflow/](https://github.com/eddiethedean/ontocode/tree/main/examples/obo-workflow) in your browser.
+Or download the files from the [v0.20.0 fixtures](https://github.com/eddiethedean/ontocode/tree/v0.20.0/fixtures) and [obo-workflow](https://github.com/eddiethedean/ontocode/tree/v0.20.0/examples/obo-workflow) trees in your browser.
 
 Then **File → Open Folder…** and select `ontocode-tutorial` (or your own ontology folder).
 
+!!! tip "Corpus is mostly `.owl` / RDF/XML?"
+    Browse and query work; **Entity Inspector write-back does not**. Convert or dual-maintain Turtle/OBO for editing — [OWL/XML and RDF/XML workflow](owl-xml-workflow.md) — before expecting Edit to appear.
 OntoCode’s **bundled** language server works in trusted and Restricted Mode.
 Use **Workspace Trust** only when you set custom `ontocode.lspPath` or `ontocode.robotPath` — those settings are ignored when the folder is untrusted.
 
 ### 3. Browse the explorer
 
-1. Click the **OntoCode** icon in the **Activity Bar** (left edge of the window).
+1. Click the **OntoCode** icon in the **Activity Bar** (left edge of the window — look for the OntoCode logo; or run **OntoCode: Show Entity Inspector** / **OntoCode: Index Workspace** from the Command Palette if the icon is hidden).
 2. Wait for indexing to finish.
 3. Expand **Ontologies** to see indexed files and parse status.
 4. Expand **Classes**, **Properties**, or **Individuals** to browse entities.

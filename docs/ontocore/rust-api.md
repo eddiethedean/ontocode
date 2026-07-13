@@ -114,23 +114,37 @@ let diff = ws.diff_against_path("./baseline")?;
 | `with_scan_roots(vec![...])` | Additional scan roots (primary root is always included) |
 | `with_disk_cache(true)` | Persist parse snapshots under `.ontocore/cache/` |
 
-### Additional `Workspace` methods
+### Workspace method reference
 
-| Method | Purpose |
-|--------|---------|
-| `reindex()` / `reindex_incremental()` | Full or incremental catalog rebuild |
-| `root()` / `scan_roots()` | Primary path and effective scan roots |
-| `catalog()` | Direct `OntologyCatalog` access (advanced) |
-| `import_graph()` / `import_graph_with(request)` | Graph export for visualization (import, class, property, neighborhood) |
-| `classify(profile)` / `explain(profile, request)` | Reasoner integration |
-| `reasoner_input()` | Build reasoner snapshot from workspace |
-| `export_docs(options)` | Markdown/HTML documentation export |
-| `discover_plugins()` | Experimental plugin manifest discovery (`plugins` feature) |
-| `diff(other)` / `diff_against_path(path)` | Semantic catalog comparison |
+Operational contract for the high-level façade. Full type signatures: [`Workspace` on docs.rs](https://docs.rs/ontocore/latest/ontocore/struct.Workspace.html).
 
-Use `apply_owl_patches` / `apply_obo_patches` from `ontocore::owl` and `ontocore::obo` when importing both patch helpers. Unified errors: [`ontocore::Error`](https://docs.rs/ontocore/latest/ontocore/enum.Error.html) — see `examples/error_handling.rs`.
+| Method | Parameters | Returns | Errors | Notes |
+|--------|------------|---------|--------|-------|
+| `open(path)` | Workspace root directory | `Workspace` | `CatalogError` | Full index on open |
+| `open_with_options(opts)` | `WorkspaceOptions` | `Workspace` | `CatalogError` | Disk cache, multi-root scan |
+| `reindex()` | — | `CatalogStats` | `CatalogError` | Full rebuild |
+| `reindex_incremental()` | — | `CatalogStats` | `CatalogError` | Hash-based reuse when possible |
+| `stats()` / `diagnostics()` | — | counts / `Vec<Diagnostic>` | — | From last successful index |
+| `query(sql)` | Catalog SQL (subset) | `QueryResult` | `QueryError` | Rows may truncate at 100k — check limits |
+| `sparql(query)` | SPARQL string | `SparqlResult` | `QueryError` | Same row cap; prefer for graph patterns |
+| `search(needle)` | IRI fragment / short name / label | hits | — | In-memory catalog search |
+| `classify(profile)` | `ReasonerId` | `ClassificationResult` | `ReasonerError` | Does not fail only because classes are unsatisfiable — inspect `consistent` |
+| `explain(profile, request)` | Profile + class/request | `ExplanationResult` | `ReasonerError` | Run after classify when needed |
+| `reasoner_input()` | — | `ReasonerInput` | `ReasonerError` | Snapshot for advanced reasoner use |
+| `diff(other)` | Another `Workspace` | `DiffResult` | — | In-memory catalog compare |
+| `diff_against_path(path)` | Other directory | `DiffResult` | `CatalogError` | Indexes the other path |
+| `import_graph()` / `import_graph_with` | Optional request | graph payload | `GraphError` | For visualization / export |
+| `export_docs(options)` | Format / output options | — | export errors via `Error` | Markdown/HTML |
+| `discover_plugins()` | — | plugin list | host errors | Requires `plugins` feature |
+| `catalog()` / `root()` / `scan_roots()` | — | refs / paths | — | Advanced / introspection |
 
-Refactoring helpers live in [`ontocore::refactor`](https://docs.rs/ontocore/latest/ontocore/refactor/index.html) (`preview_rename_iri`, `apply_refactor_plan_checked`, …). Pass `workspace_root` from `Workspace::root()`.
+**Side effects:** indexing may write under `.ontocore/cache/` when disk cache is enabled. Patch helpers (`ontocore::owl` / `ontocore::obo`) write ontology source files — preview before apply in production tools.
+
+**Unified façade error:** map crate-local errors into [`ontocore::Error`](https://docs.rs/ontocore/latest/ontocore/enum.Error.html) with `?` when your function returns `Result<_, ontocore::Error>`. Crosswalk: [Errors — Rust library](../errors.md#rust-library-errors).
+
+### Additional helpers
+
+Use `apply_owl_patches` / `apply_obo_patches` from `ontocore::owl` and `ontocore::obo` when importing both patch helpers. Refactoring helpers live in [`ontocore::refactor`](https://docs.rs/ontocore/latest/ontocore/refactor/index.html) (`preview_rename_iri`, `apply_refactor_plan_checked`, …). Pass `workspace_root` from `Workspace::root()`.
 
 ## Semantic transactions (`ontocore-edit`, v0.19+)
 

@@ -93,7 +93,7 @@
 | SHACL validation via adapter | [SHACL_SPEC.md](SHACL_SPEC.md) | `rudof` | Scaffold plugin exists; full rudof adapter open |
 | SWRL rule **viewing** (authoring is P2) | [PROTEGE_PARITY.md](PROTEGE_PARITY.md) | in-house | Open |
 | Instance checking | [REASONER_SPEC.md](REASONER_SPEC.md) | OntoLogos `ontologos-abox` (1.0+) | Open |
-| Plugin API stable + 3 reference plugins | [PLUGIN_SPEC.md](PLUGIN_SPEC.md) | — | Host MVP + 3 refs shipped; **semver-stable** API is v1.0 |
+| Plugin API stable + 3 reference plugins | [PLUGIN_SPEC.md](https://github.com/eddiethedean/ontocode/blob/main/docs/design/PLUGIN_SPEC.md) | — | Host MVP + 3 refs shipped; **semver-stable** API is v1.0 |
 | SQL joins and aggregations | [SPEC.md](SPEC.md) | `sqlparser` extend | Open (subset SQL today) |
 | Incremental workspace index | [ARCHITECTURE.md](ARCHITECTURE.md) | — | **Shipped** (v0.9+) |
 | Performance benchmarks (large ontology targets) | [v1.0_BACKLOG.md](v1.0_BACKLOG.md) | — | Open (truncation messaging shipped) |

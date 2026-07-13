@@ -1,10 +1,10 @@
-# Find your path
+# Find your path (optional)
 
-You can be successful with OntoCode/OntoCore in **5–15 minutes** if you follow one path below.
+> **Most users:** go straight to **[First success (~10 min)](guides/first-success.md)**.  
+> **CLI / CI:** **[Getting started](getting-started.md)**.  
+> **Evaluators:** **[What ships today](SHIPPED.md)**.
 
-**Primary path for most users:** [First success (~10 min)](guides/first-success.md).
-
-Choose an install channel: [Versions and channels](guides/versions-and-channels.md).
+This page is a secondary chooser. Prefer the Home CTAs or the **Get started** tab.
 
 ## Which artifact?
 

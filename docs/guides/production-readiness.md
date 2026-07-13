@@ -9,8 +9,8 @@ Canonical capability matrix: [What ships today](../SHIPPED.md).
 | Level | Version | Meaning |
 |-------|---------|---------|
 | **Pre-1.0** | **0.20.x (latest tagged)** | Pin `cargo install ontocore-cli --locked --version 0.20.0` in CI. Library APIs may change until [v1.0](../design/v1.0_BACKLOG.md). |
-| **In development** | **0.20.x (unreleased on `main`)** | Workspace runtime and patch hardening — not on Marketplace/crates.io until tagged. |
-| **Stable CI gates** | 0.19.x | `ontocore validate`, `ontocore classify`, and `ontocore diff` are documented for CI — see [workspace limits](../workspace-limits.md). |
+| **Stable CI gates** | 0.20.x | `ontocore validate`, `ontocore classify`, and `ontocore diff` are documented for CI — see [workspace limits](../workspace-limits.md). |
+| **In development** | Next unreleased minor on `main` | May preview upcoming work — pin installs to [TAGGED_RELEASE](../TAGGED_RELEASE), not workspace `Cargo.toml`. |
 | **v1.0 target** | Planned | Protégé-competitive OWL 2 DL + OBO in VS Code per [Protégé parity](../design/PROTEGE_PARITY.md). |
 
 OntoCode v0.20 is **not** documented as a general-availability replacement for Protégé for every advanced OWL 2 DL workflow (e.g. full Manchester axiom coverage for all formats; RDF/XML and OWL/XML write-back planned **v0.21**).

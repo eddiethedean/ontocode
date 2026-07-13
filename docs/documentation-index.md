@@ -18,10 +18,10 @@ The public site navigation is defined in [`mkdocs.yml`](https://github.com/eddie
 
 ### New users
 
-1. [Start here](start.md)
-2. [First success](guides/first-success.md)
-3. [Feature tour](ontocode/feature-tour.md)
-4. [Supported formats](supported-formats.md)
+1. [First success](guides/first-success.md)
+2. [Feature tour](ontocode/feature-tour.md)
+3. [Supported formats](supported-formats.md)
+4. Optional path chooser: [start.md](start.md)
 
 ### Contributors
 

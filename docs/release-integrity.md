@@ -8,7 +8,7 @@ Each release includes `SHA256SUMS` with SHA-256 hashes of:
 
 - `ontocore-v<version>-x86_64-unknown-linux-gnu.tar.gz` (CLI binary, Linux x64)
 - `ontocore-lsp-v<version>-<platform>.tar.gz` / `.zip` (per-platform LSP)
-- `ontocode-<version>.vsix` (VS Code extension)
+- `ontocode-v<version>.vsix` (VS Code extension; example: `ontocode-v0.20.0.vsix`)
 - `NOTICES` (third-party license summary)
 
 Verify after download:

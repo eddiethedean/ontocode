@@ -22,6 +22,8 @@ exclude_docs: |
   /cursor-prompts/
   /PROTEGE_REVERSE_ENGINEERING/
   /protege-parity/
+  /design/PLUGIN_SPEC.md
+  /hooks/
   /OntoCode_UI_Vision_and_Roadmap.zip
 
 validation:
@@ -88,6 +90,11 @@ plugins:
 extra_css:
   - stylesheets/extra.css
 
+# Local hooks (paths relative to mkdocs.yml / repo root). Fix git-revision stamps
+# before plugins run — see docs/hooks/fix_git_revision_diff_filter.py.
+hooks:
+  - docs/hooks/fix_git_revision_diff_filter.py
+
 markdown_extensions:
   - admonition
   - attr_list
@@ -112,24 +119,28 @@ nav:
       - Install VS Code: vscode-install.md
       - Getting started (CLI / CI): getting-started.md
       - Versions and channels: guides/versions-and-channels.md
-      - Known limitations: known-limitations.md
+      - Path chooser (optional): start.md
   - Use OntoCode:
       - Feature tour: ontocode/feature-tour.md
       - Overview: ontocode/vscode-extension.md
-      - Authoring (Turtle): authoring.md
-      - OBO authoring: ontocode/obo-authoring.md
-      - Manage Imports: ontocode/manage-imports.md
-      - Inspector: ontocode/inspector.md
-      - Query Workbench: ontocode/query-workbench.md
-      - Manchester editor: ontocode/manchester-editor.md
-      - Graph visualization: ontocode/graph-view.md
-      - Refactoring: guides/refactoring.md
-      - Semantic diff: ontocode/semantic-diff.md
-      - Reasoner: guides/reasoner.md
-      - OBO workflows: guides/obo-workflow.md
-      - OWL/XML and RDF/XML (read-only): guides/owl-xml-workflow.md
-      - Protégé coexistence: guides/protege-coexistence.md
-      - Best practices: guides/best-practices.md
+      - Author:
+          - Authoring (Turtle): authoring.md
+          - OBO authoring: ontocode/obo-authoring.md
+          - Manage Imports: ontocode/manage-imports.md
+          - Inspector: ontocode/inspector.md
+          - Manchester editor: ontocode/manchester-editor.md
+      - Query and visualize:
+          - Query Workbench: ontocode/query-workbench.md
+          - Graph visualization: ontocode/graph-view.md
+          - Semantic diff: ontocode/semantic-diff.md
+      - Reason and refactor:
+          - Reasoner: guides/reasoner.md
+          - Refactoring: guides/refactoring.md
+      - Interop:
+          - OBO workflows: guides/obo-workflow.md
+          - OWL/XML and RDF/XML (read-only): guides/owl-xml-workflow.md
+          - Protégé coexistence: guides/protege-coexistence.md
+          - Best practices: guides/best-practices.md
   - Use OntoCore:
       - Overview: ontocore/index.md
       - Rust library: guides/rust-library.md
@@ -172,7 +183,11 @@ nav:
       - What ships today: SHIPPED.md
       - Known limitations: known-limitations.md
       - Protégé vs OntoCode: guides/protege-decision.md
+      - Production readiness: guides/production-readiness.md
+      - Release timeline: guides/release-timeline.md
       - Enterprise evaluation: guides/enterprise-eval.md
+      - Enterprise deployment: guides/enterprise-deployment.md
+      - Performance and sizing: guides/performance-sizing.md
       - Procurement appendix: guides/procurement-appendix.md
       - API stability (pre-1.0): guides/api-stability.md
       - Security: security.md
@@ -180,8 +195,8 @@ nav:
           - Vision: vision.md
           - Architecture: architecture.md
           - Roadmap hub: roadmap-hub.md
+          - Platform roadmap: roadmap.md
   - Help:
-      - Find your path: start.md
       - FAQ: faq.md
       - Glossary: glossary.md
       - Ontology concepts: concepts.md
@@ -200,7 +215,6 @@ nav:
           - v0.15 → v0.16: migration/v0.16.md
           - v0.14 → v0.15: migration/v0.15.md
           - v0.13 → v0.14: migration/v0.14.md
-      - Documentation index: documentation-index.md
       - Which artifact?: guides/which-artifact.md
       - Legacy guide URLs: guides/legacy-guide-urls.md
       - Release integrity: release-integrity.md
@@ -215,6 +229,7 @@ nav:
       - Releasing: releasing.md
       - Marketplace publish: marketplace-publish.md
       - Internals: internals.md
+      - Documentation index: documentation-index.md
       - Licenses: design/LICENSES.md
       - Engineering docs (GitHub): engineering.md
 

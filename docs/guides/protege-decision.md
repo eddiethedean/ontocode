@@ -2,7 +2,7 @@
 
 Use this page to decide **when OntoCode fits**, **when to keep Protégé**, and **when to run both**. It reflects **v0.20.0** (latest tagged) — see [What ships today](../SHIPPED.md). A [first-week migration guide](protege-migration.md) ships today; extended round-trip playbooks are planned for **v1.0**.
 
-!!! note "Non-goals today (v0.19)"
+!!! note "Non-goals today (v0.20)"
     - **WebProtégé-style collaboration** — out of scope until post-1.0
     - **In-place OWL/XML or RDF/XML write-back** — browse/query only; edit Turtle/OBO or use Protégé
     - **Stable semver-guaranteed third-party plugin marketplace API** — plugin host MVP shipped; ecosystem hardening is v1.0
@@ -19,9 +19,9 @@ Use this page to decide **when OntoCode fits**, **when to keep Protégé**, and 
 | Enterprise requires vendor SLA / SOC 2 | **Defer** or run limited CI pilot — [Production readiness](production-readiness.md) |
 | Air-gapped VS Code + internal artifact mirror | **Pilot** — [Enterprise deployment](enterprise-deployment.md) |
 
-## Capability comparison (v0.19 tagged)
+## Capability comparison (v0.20 tagged)
 
-| Capability | Protégé | OntoCode v0.19 | Notes |
+| Capability | Protégé | OntoCode v0.20 | Notes |
 |------------|---------|----------------|-------|
 | OWL 2 DL classification | Yes | Yes (`dl` / `auto` via OntoLogos 1.x) | Explanations EL-first; see [Reasoner guide](reasoner.md) |
 | Turtle authoring | Manual / plugins | Native write-back | OntoCode inspector + patches |

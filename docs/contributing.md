@@ -32,7 +32,7 @@ Platform content: edit [vision.md](vision.md), [roadmap.md](roadmap.md), and [ar
 | Engineering ADRs | — | [design/adr/README.md](design/adr/README.md) |
 | Documentation map | — | [documentation-index.md](documentation-index.md) |
 
-Root `VISION.md`, `ARCHITECTURE.md`, and `ROADMAP.md` are mirrored under `docs/` for Read the Docs. **Prefer editing this `docs/` copy first**, then update root mirrors when platform-facing content changes, or run `./scripts/check-doc-versions.sh` to catch drift.
+Root `VISION.md`, `ARCHITECTURE.md`, and `ROADMAP.md` are mirrored under `docs/` for Read the Docs. **Prefer editing this `docs/` copy first**, then update root mirrors when platform-facing content changes. **Release pin truth** is a single file: [`TAGGED_RELEASE`](TAGGED_RELEASE) — run `./scripts/check-doc-versions.sh` to catch drift (including stale “latest tagged” claims).
 
 - **Specs** — product and architecture docs under `docs/design/` ([DEPENDENCY_MATRIX.md](design/DEPENDENCY_MATRIX.md) for external crates)
 
@@ -66,7 +66,7 @@ See [Testing matrix](guides/testing-matrix.md) for which commands to run by chan
 |------|------------|
 | Author a workspace plugin (manifest, validator, exporter) | **[guides/plugins.md](guides/plugins.md)** — canonical author guide |
 | Reference implementation | `crates/ontocore-plugin-naming/`, `examples/plugin-workspace/` |
-| Historical trait-based design (do not implement from) | [design/PLUGIN_SPEC.md](design/PLUGIN_SPEC.md) |
+| Historical trait-based design (do not implement from) | [PLUGIN_SPEC.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/docs/design/PLUGIN_SPEC.md) (excluded from public docs) |
 | Wire LSP / CLI integration | [lsp-api.md](lsp-api.md), `crates/ontocore-lsp/` |
 
 Run `./scripts/run-ci-local.sh` before PRs that touch plugin host, reference plugins, or extension capability registry.

@@ -84,7 +84,7 @@ Patches write the **source file on disk** first (`.ttl` or `.obo`), then update 
    cargo install ontocore-cli --locked --version 0.20.0
    ```
 
-2. For release tarballs, download assets from the matching tag (e.g. `v0.19.0`), not an unreleased `v0.20.0` URL.
+2. For release tarballs, download assets from the matching tag (e.g. `v0.20.0`). Prefer the tagged release over docs that may preview a future minor on `main`.
 
 3. Ensure `~/.cargo/bin` is on your `PATH` — see [getting started](getting-started.md).
 

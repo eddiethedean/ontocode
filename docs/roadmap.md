@@ -23,7 +23,7 @@ Every feature before 1.0 should answer one question:
 After 1.0, the roadmap shifts from parity to modernization.
 
 !!! warning "Not a Protégé replacement today"
-    **v0.19** supports pilot and coexistence workflows — not org-wide Protégé retirement. See [What ships today](SHIPPED.md) and [Known limitations](known-limitations.md) before planning format or IDE migration.
+    **v0.20** supports pilot and coexistence workflows — not org-wide Protégé retirement. See [What ships today](SHIPPED.md) and [Known limitations](known-limitations.md) before planning format or IDE migration.
 
 ---
 
@@ -79,7 +79,7 @@ Full timeline: [ROADMAP.md on GitHub](https://github.com/eddiethedean/ontocode/b
 |-------|---------|-----|--------|-----------|-------|
 | 1–18 | v0.1–v0.18 | A–E | Shipped | — | See [ROADMAP.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/ROADMAP.md) |
 | 19 | v0.19 | F | Shipped | — | Semantic foundation + program baseline |
-| 20 | v0.20 | F | In progress | 1† | Workspace runtime |
+| 20 | v0.20 | F | Shipped | 1† | Workspace runtime |
 | 21 | v0.21 | F | Planned | — | RDF/XML + OWL/XML write-back |
 | 22 | v0.22 | F | Planned | 2† | Complete OWL 2 authoring |
 | 23 | v0.23 | F | Planned | 5† | Reasoning parity + SWRL |
@@ -264,7 +264,7 @@ Sub-phases: **v0.7a** (React foundation) → **v0.7** (graphs + inspector) → *
 
 | Area | Deliverables |
 |------|--------------|
-| **OntoCore** | Rename `ontoindex-*` → `ontocore-*`; CLI `ontocore`; LSP `ontocore-lsp` with `ontocore/*` methods; `ontocore` façade crate with `Workspace` API; Ontologos 1.0.0 integration (`dl` and `auto` adapters); plugin platform design ([PLUGIN_SPEC.md](design/PLUGIN_SPEC.md)) |
+| **OntoCore** | Rename `ontoindex-*` → `ontocore-*`; CLI `ontocore`; LSP `ontocore-lsp` with `ontocore/*` methods; `ontocore` façade crate with `Workspace` API; Ontologos 1.0.0 integration (`dl` and `auto` adapters); plugin platform design ([PLUGIN_SPEC.md](https://github.com/eddiethedean/ontocode/blob/main/docs/design/PLUGIN_SPEC.md)) |
 | **OntoCode / OntoUI** | Reasoner + explanation panels on React; legacy HTML webviews removed; OntoCore branding |
 
 **Exit criteria:** Contributors and users distinguish OntoCore (engine) from OntoCode (IDE); DL/auto classification enabled.
@@ -379,7 +379,7 @@ Sub-phases: **v0.7a** (React foundation) → **v0.7** (graphs + inspector) → *
 - [x] Third party can ship a validation or export plugin without forking OntoCore (reference plugins + manifest schema)
 - [x] owlmake can be invoked from OntoCode as an external workflow (subprocess scaffold)
 
-**Dependencies:** `ontocore-plugin` crate; reference plugin binaries; [PLUGIN_SPEC.md](design/PLUGIN_SPEC.md)
+**Dependencies:** `ontocore-plugin` crate; reference plugin binaries; [PLUGIN_SPEC.md](https://github.com/eddiethedean/ontocode/blob/main/docs/design/PLUGIN_SPEC.md)
 
 ---
 
@@ -567,7 +567,7 @@ Former roadmap labels **v0.17 (Language Bindings)** and **v0.18 (AI Platform)** 
 | Area | Deliverables |
 |------|--------------|
 | **OntoCore** | Build API (compile/merge/materialize); Release API (version, tag, publish artifacts); Validation API (plug-in QC pipelines); plugin discovery and install from registry; semver-compatible plugin contracts |
-| **OntoUI** | **[9]** GitHub integration; semantic PR summaries (UI panel); merge checks ([COLLABORATION](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/COLLABORATION.md)). **[10, 11]** Public plugin registry + marketplace UI; sample domain plugins ([PLUGIN_PLATFORM](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/PLUGIN_PLATFORM.md), [PLUGIN_SPEC](design/PLUGIN_SPEC.md)). **[11]** Community templates. Workflow / QC status dashboard |
+| **OntoUI** | **[9]** GitHub integration; semantic PR summaries (UI panel); merge checks ([COLLABORATION](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/COLLABORATION.md)). **[10, 11]** Public plugin registry + marketplace UI; sample domain plugins ([PLUGIN_PLATFORM](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/PLUGIN_PLATFORM.md), [PLUGIN_SPEC](https://github.com/eddiethedean/ontocode/blob/main/docs/design/PLUGIN_SPEC.md)). **[11]** Community templates. Workflow / QC status dashboard |
 | **OntoCode** | Production-ready owlmake plugin integration; QC reports (HTML/Markdown/JSON) in IDE |
 | **Ecosystem** | Official GitHub Actions for ontology CI/CD; plugin marketplace; third-party workflow plugins |
 

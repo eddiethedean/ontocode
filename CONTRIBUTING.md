@@ -32,7 +32,7 @@ Platform vision/roadmap/architecture: prefer editing [`docs/vision.md`](docs/vis
 | Engineering ADRs | — | [docs/design/adr/](docs/design/adr/README.md) |
 | Documentation map | — | [docs/documentation-index.md](docs/documentation-index.md) |
 
-Root `VISION.md`, `ARCHITECTURE.md`, and `ROADMAP.md` are mirrored under `docs/` for Read the Docs. **Prefer editing `docs/` copies first**, then update root mirrors when platform-facing content changes, or run `./scripts/check-doc-versions.sh` to catch drift.
+Root `VISION.md`, `ARCHITECTURE.md`, and `ROADMAP.md` are mirrored under `docs/` for Read the Docs. **Prefer editing `docs/` copies first**, then update root mirrors when platform-facing content changes. **Release pin truth** is a single file: [`docs/TAGGED_RELEASE`](docs/TAGGED_RELEASE) — run `./scripts/check-doc-versions.sh` to catch drift (including stale “latest tagged” claims).
 
 - **Specs** — product and architecture docs under `docs/design/` ([DEPENDENCY_MATRIX.md](docs/design/DEPENDENCY_MATRIX.md) for external crates)
 

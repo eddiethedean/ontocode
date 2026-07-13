@@ -32,7 +32,7 @@ OntoCore owns: shape path configuration, data graph selection from catalog/Oxigr
 
 ## 4. Plugin integration
 
-Reference **SHACL validator plugin** per [PLUGIN_SPEC.md](PLUGIN_SPEC.md) — built-in adapter wraps `rudof`.
+Reference **SHACL validator plugin** per [PLUGIN_SPEC.md](https://github.com/eddiethedean/ontocode/blob/main/docs/design/PLUGIN_SPEC.md) — built-in adapter wraps `rudof`.
 
 ## 5. Milestone
 

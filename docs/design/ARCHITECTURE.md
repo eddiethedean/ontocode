@@ -14,9 +14,7 @@
 >
 > **Ecosystem architecture (canonical for users):** [Platform architecture](../architecture.md).
 >
-> **Shipped through v0.19:** workspace scanner, incremental indexing, multi-root workspaces, SQL/SPARQL queries (including Horned-OWL axiom virtual tables), diagnostics (`.ontocore/diagnostics.toml`), CLI, LSP (semantic tokens, `listSqlSchema`), Turtle and OBO write-back, Query Workbench + schema browser, Manchester editor, React webviews with WorkspaceStore + focus relay (inspector, graphs, workbench, refactor preview, semantic diff, imports, reasoner, explanation), EL–DL reasoning (OntoLogos 1.0), OBO index + OBO write-back, OWL/XML read-only catalog, ROBOT CLI wrappers, semantic diff (`--pr-summary`), `ontocore docs` export, Turtle completion, diagnostic quick fixes, property chain editing, DL unsatisfiability explanations (alternatives + stale detection), plugin host (permissions, UI views/commands/preferences/context actions), Protégé-shell menus/perspectives, reasoner cancel + distinct lifecycle, layout reopen-with-context. See [What ships today](../SHIPPED.md).
->
-> **Unreleased on v0.20:** Turtle patch matching hardening (lang-tagged/typed literals, IRI forms, comment-safe types).
+> **Shipped through v0.20:** workspace scanner, incremental indexing, multi-root workspaces, SQL/SPARQL queries (including Horned-OWL axiom virtual tables), diagnostics (`.ontocore/diagnostics.toml`), CLI, LSP (semantic tokens, `listSqlSchema`), Turtle and OBO write-back, Query Workbench + schema browser, Manchester editor, React webviews with WorkspaceStore + focus relay (inspector, graphs, workbench, refactor preview, semantic diff, imports, reasoner, explanation), EL–DL reasoning (OntoLogos 1.0), OBO index + OBO write-back, OWL/XML read-only catalog, ROBOT CLI wrappers, semantic diff (`--pr-summary`), `ontocore docs` export, Turtle completion, diagnostic quick fixes, property chain editing, DL unsatisfiability explanations (alternatives + stale detection), plugin host (permissions, UI views/commands/preferences/context actions), Protégé-shell menus/perspectives, reasoner cancel + distinct lifecycle, layout reopen-with-context, workspace runtime, Turtle patch matching hardening (lang-tagged/typed literals, IRI forms, comment-safe types). See [What ships today](../SHIPPED.md).
 >
 > **Shipped v0.14–v0.17:** plugin host MVP → permissions/views → preferences/context actions → Protégé-shell. **Planned v0.21:** RDF/XML and OWL/XML write-back. **Planned v1.0:** full workflow plugin integration, full DL axiom catalog for all formats. See [Platform roadmap](../roadmap.md).
 >
@@ -78,7 +76,7 @@ External Workflow Plugins (not core)     owlmake · ROBOT/ODK adapters
 
 **Reasoning ([ADR-0015](adr/0015-adopt-ontologos-reasoner.md)):** `ontocore-reasoner` delegates to [OntoLogos](https://github.com/eddiethedean/ontologos) crates (`ontologos-el`, `ontologos-rl`, `ontologos-dl`, etc.). OntoLogos **1.0.0** ships in OntoCore v0.9 for DL/auto profiles.
 
-**Workflow plugins:** [owlmake](https://github.com/INCATools/owlmake) is the reference external workflow plugin — see [PLUGIN_SPEC.md](PLUGIN_SPEC.md), [OBO_ROBOT_SPEC.md](OBO_ROBOT_SPEC.md). OntoCore does not embed workflow engines.
+**Workflow plugins:** [owlmake](https://github.com/INCATools/owlmake) is the reference external workflow plugin — see [PLUGIN_SPEC.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/docs/design/PLUGIN_SPEC.md), [OBO_ROBOT_SPEC.md](OBO_ROBOT_SPEC.md). OntoCore does not embed workflow engines.
 
 **Sync rule ([ADR-0013](adr/0013-dual-stack-oxigraph-horned-owl.md)):** Catalog entities/axioms for edit and diff come from Horned-OWL; triple counts and SPARQL from Oxigraph; CI consistency tests detect drift.
 

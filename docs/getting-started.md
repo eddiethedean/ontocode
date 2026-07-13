@@ -30,6 +30,14 @@ VS Code extension (bundled language server on Linux, macOS, and Windows): [vscod
 | Git clone + `cargo run` | Rust 1.88+ |
 | Release CLI binaries | No Rust; **Linux x64 only** (download from GitHub Releases). macOS/Windows: use `cargo install` or the VS Code extension. |
 
+**Native toolchain (when using cargo):**
+
+| OS | Extra requirement |
+|----|-------------------|
+| **Windows** | [MSVC Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/) (C++ workload) — linkers fail without them |
+| **macOS** | Xcode Command Line Tools: `xcode-select --install` |
+| **Linux** | Usually covered by distro `build-essential` / equivalent |
+
 After `cargo install`, ensure `~/.cargo/bin` is on your `PATH`. If you see `ontocore: command not found`, run:
 
 ```bash
@@ -37,6 +45,9 @@ export PATH="$HOME/.cargo/bin:$PATH"
 ```
 
 Add that line to your shell profile (`~/.bashrc`, `~/.zshrc`, etc.) for persistence. If install fails with an MSRV error, run `rustup update stable` and confirm `rustc --version` is **1.88 or newer**.
+
+!!! note "Editors vs this page"
+    Prefer **[First success](guides/first-success.md)** for the VS Code / Cursor tutorial. This page is the **CLI / CI install matrix**.
 
 ## Path A — VS Code (recommended for browsing and editing)
 
@@ -80,7 +91,7 @@ ontocore validate /path/to/your/ontologies
 
 1. Open [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) for the latest **v0.20.x** tag.
 2. **For CLI on Linux x64:** download `ontocore-v<version>-x86_64-unknown-linux-gnu.tar.gz`.
-3. **For VS Code (any supported OS):** download `ontocode-<version>.vsix` — see [vscode-install.md](vscode-install.md).
+3. **For VS Code (any supported OS):** download `ontocode-v0.20.0.vsix` (pattern: `ontocode-v<version>.vsix`) — see [vscode-install.md](vscode-install.md).
 4. Verify with `SHA256SUMS` — see [release-integrity.md](release-integrity.md).
 5. Extract and run (Linux example; replace `0.20.0` with your tag):
 
@@ -96,11 +107,11 @@ chmod +x "${BIN}"
 
 > **Note:** The extracted binary is versioned (not plain `ontocore`). CLI release tarballs are **Linux x64 only**; macOS/Windows users should use `cargo install ontocore-cli` or the bundled LSP inside the VSIX.
 
-For VS Code, install the `ontocode-*.vsix` from the same release.
+For VS Code, install the `ontocode-v*.vsix` from the same release (example: `ontocode-v0.20.0.vsix`).
 
 ### Air-gapped / offline install
 
-1. Download `ontocode-<version>.vsix` (and optional Linux CLI tarball) from [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) on a connected machine.
+1. Download `ontocode-v0.20.0.vsix` (pattern: `ontocode-v<version>.vsix`) and optional Linux CLI tarball from [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) on a connected machine.
 2. Transfer the VSIX (and `SHA256SUMS` / `NOTICES`) to the offline environment.
 3. In VS Code: **Extensions → … → Install from VSIX…**
 4. For CLI without crates.io: use the Linux tarball (Path D) or vendor a `cargo vendor` / internal crates mirror — see [Enterprise deployment](guides/enterprise-deployment.md).

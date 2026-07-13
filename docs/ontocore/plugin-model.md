@@ -6,7 +6,7 @@ The plugin system allows users and organizations to extend **OntoCore** and **On
 
 Canonical author guide: **[Plugin authoring](../guides/plugins.md)**.
 
-Historical trait-based design (do not implement from): [PLUGIN_SPEC.md](../design/PLUGIN_SPEC.md) — superseded by the shipped manifest + subprocess host in v0.14+.
+Historical trait-based design (do not implement from): [PLUGIN_SPEC.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/docs/design/PLUGIN_SPEC.md) — superseded by the shipped manifest + subprocess host in v0.14+.
 
 ## Architecture
 
@@ -48,7 +48,7 @@ Built-in reasoner adapters (`el`, `rl`, `rdfs`, `dl`, `auto`) ship in `ontocore-
 
 ## Reference interfaces (sketch)
 
-See [Plugin authoring](../guides/plugins.md) for manifest format, permissions, and reference plugins. [PLUGIN_SPEC.md](../design/PLUGIN_SPEC.md) is a historical design doc — do not implement from it.
+See [Plugin authoring](../guides/plugins.md) for manifest format, permissions, and reference plugins. [PLUGIN_SPEC.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/docs/design/PLUGIN_SPEC.md) is a historical design doc — do not implement from it.
 
 ## Manifest (sketch)
 

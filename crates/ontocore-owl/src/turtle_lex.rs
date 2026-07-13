@@ -143,25 +143,96 @@ pub fn is_in_comment_or_string_at(text: &str, byte_offset: usize) -> bool {
     state.in_comment_or_string()
 }
 
-/// Decode a Turtle string literal (`"…"`, `'…'`, `"""…"""`, `'''…'''`) to its lexical value.
-pub(crate) fn turtle_literal_lexical_value(literal: &str) -> Option<String> {
-    let trimmed = literal.trim();
-    if trimmed.len() < 2 {
+/// Quoted span of a Turtle literal object, ignoring trailing `@lang` / `^^datatype`.
+fn turtle_quoted_literal_span(trimmed: &str) -> Option<&str> {
+    let bytes = trimmed.as_bytes();
+    if !matches!(bytes.first(), Some(b'"' | b'\'')) {
         return None;
     }
-    if trimmed.starts_with("\"\"\"") && trimmed.ends_with("\"\"\"") && trimmed.len() >= 6 {
-        return Some(unescape_turtle_string(&trimmed[3..trimmed.len() - 3]));
+    let mut state = TurtleScanState::default();
+    let mut i = 0usize;
+    i = advance_turtle_scan(bytes, i, &mut state);
+    if !state.in_string() {
+        return None;
     }
-    if trimmed.starts_with("'''") && trimmed.ends_with("'''") && trimmed.len() >= 6 {
-        return Some(unescape_turtle_string(&trimmed[3..trimmed.len() - 3]));
+    while i < bytes.len() && state.in_string() {
+        i = advance_turtle_scan(bytes, i, &mut state);
     }
-    if trimmed.starts_with('"') && trimmed.ends_with('"') {
-        return Some(unescape_turtle_string(&trimmed[1..trimmed.len() - 1]));
+    if state.in_string() || i == 0 {
+        return None;
     }
-    if trimmed.starts_with('\'') && trimmed.ends_with('\'') {
-        return Some(unescape_turtle_string(&trimmed[1..trimmed.len() - 1]));
+    Some(&trimmed[..i])
+}
+
+/// Decode a Turtle string literal (`"…"`, `'…'`, `"""…"""`, `'''…'''`) to its lexical value.
+///
+/// Language tags (`"Person"@en`) and datatypes (`"42"^^xsd:integer`) are stripped so
+/// remove-by-lexical-value matches the quoted form.
+pub(crate) fn turtle_literal_lexical_value(literal: &str) -> Option<String> {
+    let trimmed = literal.trim();
+    let quoted = turtle_quoted_literal_span(trimmed).unwrap_or(trimmed);
+    if quoted.len() < 2 {
+        return None;
+    }
+    if quoted.starts_with("\"\"\"") && quoted.ends_with("\"\"\"") && quoted.len() >= 6 {
+        return Some(unescape_turtle_string(&quoted[3..quoted.len() - 3]));
+    }
+    if quoted.starts_with("'''") && quoted.ends_with("'''") && quoted.len() >= 6 {
+        return Some(unescape_turtle_string(&quoted[3..quoted.len() - 3]));
+    }
+    if quoted.starts_with('"') && quoted.ends_with('"') {
+        return Some(unescape_turtle_string(&quoted[1..quoted.len() - 1]));
+    }
+    if quoted.starts_with('\'') && quoted.ends_with('\'') {
+        return Some(unescape_turtle_string(&quoted[1..quoted.len() - 1]));
     }
     None
+}
+
+/// True when `text` contains `token` as a Turtle name token outside comments, strings, and IRIs.
+pub(crate) fn has_turtle_name_token(text: &str, token: &str) -> bool {
+    let bytes = text.as_bytes();
+    let needle = token.as_bytes();
+    if needle.is_empty() {
+        return false;
+    }
+    let mut i = 0usize;
+    let mut state = TurtleScanState::default();
+    while i + needle.len() <= bytes.len() {
+        if state.in_comment || state.in_string() || state.in_iri {
+            i = advance_turtle_scan(bytes, i, &mut state);
+            continue;
+        }
+        if matches!(bytes.get(i), Some(b'#' | b'"' | b'\'' | b'<'))
+            || bytes.get(i..i + 3) == Some(br#"""""#)
+            || bytes.get(i..i + 3) == Some(br"'''")
+        {
+            i = advance_turtle_scan(bytes, i, &mut state);
+            continue;
+        }
+        if bytes[i..].starts_with(needle) {
+            let after = i + needle.len();
+            let before_ok = i == 0
+                || (!bytes[i - 1].is_ascii_alphanumeric()
+                    && bytes[i - 1] != b':'
+                    && bytes[i - 1] != b'_'
+                    && bytes[i - 1] != b'-'
+                    && bytes[i - 1] != b'.');
+            let after_ok = after >= bytes.len()
+                || bytes[after].is_ascii_whitespace()
+                || matches!(bytes[after], b';' | b'.' | b',' | b')' | b']');
+            if before_ok && after_ok {
+                return true;
+            }
+        }
+        i += 1;
+    }
+    false
+}
+
+/// True when a Turtle statement declares `rdf:type` / shorthand `a` as a real predicate.
+pub(crate) fn statement_has_type_predicate(stmt: &str) -> bool {
+    has_turtle_name_token(stmt, "a") || has_turtle_name_token(stmt, "rdf:type")
 }
 
 fn unescape_turtle_string(value: &str) -> String {
@@ -247,9 +318,32 @@ mod tests {
     }
 
     #[test]
+    fn lexical_value_strips_lang_and_datatype() {
+        assert_eq!(turtle_literal_lexical_value(r#""Person"@en"#), Some("Person".to_string()));
+        assert_eq!(
+            turtle_literal_lexical_value(r#""42"^^xsd:integer"#),
+            Some("42".to_string())
+        );
+        assert_eq!(
+            turtle_literal_lexical_value(r#""x"^^<http://www.w3.org/2001/XMLSchema#string>"#),
+            Some("x".to_string())
+        );
+    }
+
+    #[test]
     fn lexical_value_unescapes() {
         assert_eq!(turtle_literal_lexical_value(r#""a\"b""#), Some(r#"a"b"#.to_string()));
         assert_eq!(turtle_literal_lexical_value("'a\\'b'"), Some("a'b".to_string()));
+    }
+
+    #[test]
+    fn type_predicate_ignores_comment_substring() {
+        let stmt = r#"ex:Foo rdfs:comment "was a prototype" ."#;
+        assert!(!statement_has_type_predicate(stmt));
+        let typed = r#"ex:Foo a owl:Class ."#;
+        assert!(statement_has_type_predicate(typed));
+        let rdf_type = r#"ex:Foo rdf:type owl:Class ."#;
+        assert!(statement_has_type_predicate(rdf_type));
     }
 
     #[test]

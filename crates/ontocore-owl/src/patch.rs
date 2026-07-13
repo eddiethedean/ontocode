@@ -253,7 +253,13 @@ fn apply_one_patch(
             add_subclass_triple(text, entity_iri, parent_iri, namespaces)
         }
         PatchOp::RemoveSubClassOf { entity_iri, parent_iri } => {
-            remove_subclass_triple(text, entity_iri, parent_iri, namespaces)
+            remove_predicate_iri_object(
+                text,
+                entity_iri,
+                "rdfs:subClassOf",
+                parent_iri,
+                namespaces,
+            )
         }
         PatchOp::AddComplexSubClassOf { entity_iri, manchester } => {
             add_complex_axiom(text, entity_iri, manchester, "rdfs:subClassOf", namespaces)
@@ -283,43 +289,28 @@ fn apply_one_patch(
             add_object_triple(text, entity_iri, "owl:disjointWith", &other, namespaces)
         }
         PatchOp::RemoveDisjointClass { entity_iri, other_iri } => {
-            remove_disjoint_triple(text, entity_iri, other_iri, namespaces)
+            remove_predicate_iri_object(text, entity_iri, "owl:disjointWith", other_iri, namespaces)
         }
         PatchOp::AddImport { ontology_iri, import_iri } => {
             let import_term = iri_to_turtle_term(import_iri, namespaces)?;
             add_object_triple(text, ontology_iri, "owl:imports", &import_term, namespaces)
         }
         PatchOp::RemoveImport { ontology_iri, import_iri } => {
-            let import_term = iri_to_turtle_term(import_iri, namespaces)?;
-            remove_predicate_object(text, ontology_iri, "owl:imports", &import_term, namespaces)
+            remove_predicate_iri_object(text, ontology_iri, "owl:imports", import_iri, namespaces)
         }
         PatchOp::AddDomain { entity_iri, class_iri } => {
             let class = iri_to_turtle_term(class_iri, namespaces)?;
             add_object_triple(text, entity_iri, "rdfs:domain", &class, namespaces)
         }
         PatchOp::RemoveDomain { entity_iri, class_iri } => {
-            let class = iri_to_turtle_term(class_iri, namespaces)?;
-            remove_predicate_object_any_statement(
-                text,
-                entity_iri,
-                "rdfs:domain",
-                &class,
-                namespaces,
-            )
+            remove_predicate_iri_object(text, entity_iri, "rdfs:domain", class_iri, namespaces)
         }
         PatchOp::AddRange { entity_iri, range_iri } => {
             let range = iri_to_turtle_term(range_iri, namespaces)?;
             add_object_triple(text, entity_iri, "rdfs:range", &range, namespaces)
         }
         PatchOp::RemoveRange { entity_iri, range_iri } => {
-            let range = iri_to_turtle_term(range_iri, namespaces)?;
-            remove_predicate_object_any_statement(
-                text,
-                entity_iri,
-                "rdfs:range",
-                &range,
-                namespaces,
-            )
+            remove_predicate_iri_object(text, entity_iri, "rdfs:range", range_iri, namespaces)
         }
         PatchOp::SetFunctional { entity_iri, value } => set_property_characteristic(
             text,
@@ -381,8 +372,7 @@ fn apply_one_patch(
             add_type_triple(text, entity_iri, &class, namespaces)
         }
         PatchOp::RemoveClassAssertion { entity_iri, class_iri } => {
-            let class = iri_to_turtle_term(class_iri, namespaces)?;
-            remove_type_triple(text, entity_iri, &class, namespaces)
+            remove_rdf_type_iri(text, entity_iri, class_iri, namespaces)
         }
         PatchOp::AddObjectPropertyAssertion { entity_iri, property_iri, target_iri } => {
             let prop = iri_to_turtle_term(property_iri, namespaces)?;
@@ -391,8 +381,7 @@ fn apply_one_patch(
         }
         PatchOp::RemoveObjectPropertyAssertion { entity_iri, property_iri, target_iri } => {
             let prop = iri_to_turtle_term(property_iri, namespaces)?;
-            let target = iri_to_turtle_term(target_iri, namespaces)?;
-            remove_predicate_object_any_statement(text, entity_iri, &prop, &target, namespaces)
+            remove_predicate_iri_object(text, entity_iri, &prop, target_iri, namespaces)
         }
         PatchOp::AddDataPropertyAssertion { entity_iri, property_iri, value } => {
             let prop = iri_to_turtle_term(property_iri, namespaces)?;
@@ -400,9 +389,7 @@ fn apply_one_patch(
         }
         PatchOp::RemoveDataPropertyAssertion { entity_iri, property_iri, value } => {
             let prop = iri_to_turtle_term(property_iri, namespaces)?;
-            let escaped = escape_turtle_string(value);
-            let object = format!("\"{escaped}\"");
-            remove_predicate_object_any_statement(text, entity_iri, &prop, &object, namespaces)
+            remove_matching_predicate_any(text, entity_iri, &prop, value, namespaces)
         }
         PatchOp::AddAnnotation { entity_iri, predicate, value } => {
             add_annotation_value(text, entity_iri, predicate, value, namespaces)
@@ -546,9 +533,10 @@ fn set_ontology_iri(text: &mut String, ontology_iri: &str) -> Result<()> {
     Ok(())
 }
 
-/// Byte length of the subject token on a line that declares `a owl:Ontology`.
+/// Byte length of the subject token on a line that declares an ontology type.
 ///
 /// Accepts absolute IRI subjects (`<…>`) and prefixed names (`ex:ont`, `:ont`).
+/// Recognizes `a` / `rdf:type` with `owl:Ontology` or the absolute Ontology IRI.
 fn ontology_declaration_subject_len(trimmed: &str) -> Option<usize> {
     if trimmed.is_empty() || trimmed.starts_with('#') || trimmed.starts_with('@') {
         return None;
@@ -574,11 +562,37 @@ fn ontology_declaration_subject_len(trimmed: &str) -> Option<usize> {
     if subject.is_empty() {
         return None;
     }
-    if remainder.trim_start().starts_with("a owl:Ontology") {
+    if remainder_declares_owl_ontology(remainder) {
         Some(subject.len())
     } else {
         None
     }
+}
+
+fn remainder_declares_owl_ontology(remainder: &str) -> bool {
+    let r = remainder.trim_start();
+    for pred in ["rdf:type", "a"] {
+        let Some(after_pred) = r.strip_prefix(pred) else {
+            continue;
+        };
+        if !after_pred.starts_with(|c: char| c.is_whitespace()) {
+            continue;
+        }
+        let obj = after_pred.trim_start();
+        for ontology_type in [
+            "owl:Ontology",
+            "<http://www.w3.org/2002/07/owl#Ontology>",
+        ] {
+            if let Some(after) = obj.strip_prefix(ontology_type) {
+                if after.is_empty()
+                    || after.starts_with(|c: char| c.is_whitespace() || matches!(c, ';' | '.' | ','))
+                {
+                    return true;
+                }
+            }
+        }
+    }
+    false
 }
 
 fn add_annotation_value(
@@ -773,26 +787,6 @@ fn add_subclass_triple(
     add_object_triple(text, entity_iri, "rdfs:subClassOf", &parent, namespaces)
 }
 
-fn remove_subclass_triple(
-    text: &mut String,
-    entity_iri: &str,
-    parent_iri: &str,
-    namespaces: &BTreeMap<String, String>,
-) -> Result<()> {
-    let parent = iri_to_turtle_term(parent_iri, namespaces)?;
-    remove_predicate_object_any_statement(text, entity_iri, "rdfs:subClassOf", &parent, namespaces)
-}
-
-fn remove_disjoint_triple(
-    text: &mut String,
-    entity_iri: &str,
-    other_iri: &str,
-    namespaces: &BTreeMap<String, String>,
-) -> Result<()> {
-    let other = iri_to_turtle_term(other_iri, namespaces)?;
-    remove_predicate_object_any_statement(text, entity_iri, "owl:disjointWith", &other, namespaces)
-}
-
 fn predicate_to_term(predicate: &str, namespaces: &BTreeMap<String, String>) -> Result<String> {
     if let Some(curie) = known_curie_term(predicate, namespaces) {
         Ok(curie.to_string())
@@ -850,10 +844,7 @@ fn add_type_triple(
     let ns = crate::span::namespaces_for_text(text, namespaces);
     if let Some(range) = entity_primary_block_range(text, entity_iri, &ns) {
         let block = &text[range.start as usize..range.end as usize];
-        if block.contains(&format!("a {type_term}"))
-            || block.contains(&format!("a owl:NamedIndividual, {type_term}"))
-            || block.contains(&format!(", {type_term}"))
-        {
+        if block_has_type_term(block, type_term) {
             return Ok(());
         }
         let insertion = format!("    a {type_term} ;\n");
@@ -868,13 +859,71 @@ fn add_type_triple(
     Ok(())
 }
 
+/// True when `block` already has `type_term` as an `a` / `rdf:type` object (token-aware).
+fn block_has_type_term(block: &str, type_term: &str) -> bool {
+    let norm = normalize_ws(type_term.trim());
+    for predicate in ["a", "rdf:type"] {
+        let mut search_from = 0;
+        while let Some(pred_pos) = find_predicate_token(block, search_from, predicate) {
+            for (obj_start, obj_end) in objects_in_predicate_value(block, pred_pos, predicate) {
+                if normalize_ws(block[obj_start..obj_end].trim()) == norm {
+                    return true;
+                }
+            }
+            search_from = pred_pos + 1;
+        }
+    }
+    false
+}
+
 fn remove_type_triple(
     text: &mut String,
     entity_iri: &str,
     type_term: &str,
     namespaces: &BTreeMap<String, String>,
 ) -> Result<()> {
-    remove_predicate_object_any_statement(text, entity_iri, "a", type_term, namespaces)
+    let ns = crate::span::namespaces_for_text(text, namespaces);
+    if let Some((prefix, local)) = type_term.split_once(':') {
+        if !prefix.is_empty() {
+            if let Some(base) = ns.get(prefix) {
+                let iri = format!("{base}{local}");
+                return remove_rdf_type_iri(text, entity_iri, &iri, namespaces);
+            }
+        }
+    }
+    if let Some(iri) = type_term.strip_prefix('<').and_then(|s| s.strip_suffix('>')) {
+        return remove_rdf_type_iri(text, entity_iri, iri, namespaces);
+    }
+    let mut last_err = None;
+    for pred in ["a", "rdf:type"] {
+        match remove_predicate_object_any_statement(text, entity_iri, pred, type_term, namespaces) {
+            Ok(()) => return Ok(()),
+            Err(e @ OwlError::EntityNotFound(_)) => return Err(e),
+            Err(e) => last_err = Some(e),
+        }
+    }
+    Err(last_err.unwrap_or_else(|| {
+        OwlError::ManchesterInvalid(format!("no matching type axiom for {type_term}"))
+    }))
+}
+
+fn remove_rdf_type_iri(
+    text: &mut String,
+    entity_iri: &str,
+    type_iri: &str,
+    namespaces: &BTreeMap<String, String>,
+) -> Result<()> {
+    let mut last_err = None;
+    for pred in ["a", "rdf:type"] {
+        match remove_predicate_iri_object(text, entity_iri, pred, type_iri, namespaces) {
+            Ok(()) => return Ok(()),
+            Err(e @ OwlError::EntityNotFound(_)) => return Err(e),
+            Err(e) => last_err = Some(e),
+        }
+    }
+    Err(last_err.unwrap_or_else(|| {
+        OwlError::ManchesterInvalid(format!("no matching type axiom for {type_iri}"))
+    }))
 }
 
 fn add_property_assertion_triple(
@@ -917,18 +966,22 @@ fn entity_declared_as(
     }
     let namespaces = crate::span::namespaces_for_text(text, namespaces);
     let short = short_name_from_iri(entity_iri);
-    let mut needles = vec![entity_iri.to_string(), format!("<{entity_iri}>")];
-    for (prefix, ns) in &namespaces {
-        if entity_iri.starts_with(ns) {
-            needles.push(format!("{prefix}:{short}"));
-        }
-    }
-    text.lines().any(|line| {
-        let trimmed = line.trim_start();
-        let is_subject = needles.iter().any(|needle| line_starts_with_subject(trimmed, needle));
-        is_subject
-            && (trimmed.contains(" a ") || trimmed.contains("\ta"))
-            && trimmed.contains(owl_type)
+    all_entity_statement_ranges(text, entity_iri, &short, &namespaces).into_iter().any(|range| {
+        let block = &text[range.start as usize..range.end as usize];
+        block_has_type_term(block, owl_type)
+            || ({
+                // Also accept absolute Ontology-style type IRIs for common owl:* terms.
+                if let Some((prefix, local)) = owl_type.split_once(':') {
+                    if let Some(base) = namespaces.get(prefix) {
+                        let abs = format!("<{base}{local}>");
+                        block_has_type_term(block, &abs)
+                    } else {
+                        false
+                    }
+                } else {
+                    false
+                }
+            })
     })
 }
 
@@ -1163,6 +1216,73 @@ fn remove_predicate_object_any_statement(
         }
     }
     Err(OwlError::ManchesterInvalid(format!("no matching {predicate} axiom")))
+}
+
+/// Remove a predicate/object where the object is an IRI that may appear as CURIE or `<IRI>`.
+fn remove_predicate_iri_object(
+    text: &mut String,
+    entity_iri: &str,
+    predicate: &str,
+    object_iri: &str,
+    namespaces: &BTreeMap<String, String>,
+) -> Result<()> {
+    let ns = crate::span::namespaces_for_text(text, namespaces);
+    let forms = iri_turtle_term_forms(object_iri, &ns)?;
+    let short = short_name_from_iri(entity_iri);
+    let ranges = all_entity_statement_ranges(text, entity_iri, &short, &ns);
+    if ranges.is_empty() {
+        return Err(OwlError::EntityNotFound(entity_iri.to_string()));
+    }
+    for range in ranges {
+        let block = &text[range.start as usize..range.end as usize];
+        for form in &forms {
+            if let Some(new_block) = remove_matching_predicate_object(block, predicate, form) {
+                replace_range(text, range, &new_block);
+                return Ok(());
+            }
+        }
+    }
+    Err(OwlError::ManchesterInvalid(format!("no matching {predicate} axiom")))
+}
+
+/// Surface forms an IRI may take in Turtle (absolute, CURIE, default-prefix).
+fn iri_turtle_term_forms(
+    iri: &str,
+    namespaces: &BTreeMap<String, String>,
+) -> Result<Vec<String>> {
+    if !is_safe_iri(iri) {
+        return Err(OwlError::PatchInvalid(format!(
+            "IRI contains characters that cannot be safely written to Turtle: {iri:?}"
+        )));
+    }
+    let mut forms = vec![format!("<{iri}>")];
+    if let Some((prefix, ns)) = best_namespace_match(iri, namespaces) {
+        let local = &iri[ns.len()..];
+        if is_valid_pn_local(local) {
+            let curie = format!("{prefix}:{local}");
+            if !forms.iter().any(|f| f == &curie) {
+                forms.push(curie);
+            }
+        }
+    }
+    if let Some(default_ns) = namespaces.get("") {
+        if iri.starts_with(default_ns.as_str()) {
+            let local = &iri[default_ns.len()..];
+            if is_valid_pn_local(local) {
+                let term = format!(":{local}");
+                if !forms.iter().any(|f| f == &term) {
+                    forms.push(term);
+                }
+            }
+        }
+    }
+    if iri == "http://www.w3.org/2002/07/owl#Thing" {
+        let thing = "owl:Thing".to_string();
+        if !forms.iter().any(|f| f == &thing) {
+            forms.push(thing);
+        }
+    }
+    Ok(forms)
 }
 
 fn normalize_ws(s: &str) -> String {
@@ -2355,5 +2475,237 @@ ex:Foo a owl:Class .
             .diagnostics
             .iter()
             .any(|d| d.message.contains("duplicate prefix already present: ex")));
+    }
+
+    #[test]
+    fn remove_label_matches_language_tagged_literal() {
+        let ttl = r#"@prefix ex: <http://example.org/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+ex:Foo a owl:Class ;
+    rdfs:label "Person"@en .
+"#;
+        let ns = BTreeMap::from([
+            ("ex".into(), "http://example.org/".into()),
+            ("owl".into(), "http://www.w3.org/2002/07/owl#".into()),
+            ("rdfs".into(), "http://www.w3.org/2000/01/rdf-schema#".into()),
+        ]);
+        let result = apply_patches_to_text(
+            ttl,
+            &[PatchOp::RemoveLabel {
+                entity_iri: "http://example.org/Foo".into(),
+                value: "Person".into(),
+            }],
+            true,
+            &ns,
+        )
+        .expect("remove lang-tagged label");
+        let preview = result.preview_text.expect("preview");
+        assert!(!preview.contains("rdfs:label"));
+        assert!(!preview.contains("\"Person\"@en"));
+    }
+
+    #[test]
+    fn add_label_ignores_a_substring_inside_comment() {
+        let ttl = r#"@prefix ex: <http://example.org/> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+ex:Foo rdfs:comment "was a prototype" .
+ex:Foo a owl:Class .
+"#;
+        let ns = BTreeMap::from([
+            ("ex".into(), "http://example.org/".into()),
+            ("owl".into(), "http://www.w3.org/2002/07/owl#".into()),
+            ("rdfs".into(), "http://www.w3.org/2000/01/rdf-schema#".into()),
+        ]);
+        let result = apply_patches_to_text(
+            ttl,
+            &[PatchOp::AddLabel {
+                entity_iri: "http://example.org/Foo".into(),
+                value: "L".into(),
+            }],
+            true,
+            &ns,
+        )
+        .expect("add label");
+        let preview = result.preview_text.expect("preview");
+        let class_stmt = preview
+            .lines()
+            .find(|l| l.contains("a owl:Class") || l.contains("rdfs:label \"L\""))
+            .map(str::to_string)
+            .unwrap_or_default();
+        assert!(
+            preview.contains("ex:Foo a owl:Class") && preview.contains("rdfs:label \"L\""),
+            "label must attach to type statement: {preview}"
+        );
+        assert!(
+            !preview.contains("was a prototype\" ;\n    rdfs:label")
+                && !preview.contains("\"was a prototype\" ;\n    rdfs:label"),
+            "label must not insert into comment statement: {preview}\nclass-ish: {class_stmt}"
+        );
+        // Stronger: comment line must not gain a label predicate.
+        for line in preview.lines() {
+            if line.contains("was a prototype") {
+                assert!(
+                    !line.contains("rdfs:label"),
+                    "comment line must stay label-free: {line}"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn remove_import_matches_angle_bracket_when_prefix_exists() {
+        let ttl = r#"@prefix ex: <http://example.org/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+<http://example.org/ont> a owl:Ontology ;
+    owl:imports <http://example.org/other> .
+"#;
+        let ns = BTreeMap::from([
+            ("ex".into(), "http://example.org/".into()),
+            ("owl".into(), "http://www.w3.org/2002/07/owl#".into()),
+        ]);
+        let result = apply_patches_to_text(
+            ttl,
+            &[PatchOp::RemoveImport {
+                ontology_iri: "http://example.org/ont".into(),
+                import_iri: "http://example.org/other".into(),
+            }],
+            true,
+            &ns,
+        )
+        .expect("remove import");
+        let preview = result.preview_text.expect("preview");
+        assert!(!preview.contains("owl:imports"));
+    }
+
+    #[test]
+    fn set_ontology_iri_rewrites_rdf_type_declaration() {
+        let ttl = r#"@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+<http://example.org/old> rdf:type owl:Ontology .
+"#;
+        let result = apply_patches_to_text(
+            ttl,
+            &[PatchOp::SetOntologyIri { ontology_iri: "http://example.org/new".into() }],
+            true,
+            &BTreeMap::new(),
+        )
+        .expect("set ontology iri");
+        let preview = result.preview_text.expect("preview");
+        assert!(
+            preview.contains("<http://example.org/new> rdf:type owl:Ontology"),
+            "expected in-place rewrite: {preview}"
+        );
+        assert!(!preview.contains("<http://example.org/old>"));
+        assert_eq!(
+            preview.matches("owl:Ontology").count(),
+            1,
+            "must not append a second ontology declaration: {preview}"
+        );
+    }
+
+    #[test]
+    fn remove_data_property_assertion_matches_typed_literal() {
+        let ttl = r#"@prefix ex: <http://example.org/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+ex:ind a owl:NamedIndividual ;
+    ex:age "42"^^xsd:integer .
+"#;
+        let ns = BTreeMap::from([
+            ("ex".into(), "http://example.org/".into()),
+            ("owl".into(), "http://www.w3.org/2002/07/owl#".into()),
+            ("xsd".into(), "http://www.w3.org/2001/XMLSchema#".into()),
+        ]);
+        let result = apply_patches_to_text(
+            ttl,
+            &[PatchOp::RemoveDataPropertyAssertion {
+                entity_iri: "http://example.org/ind".into(),
+                property_iri: "http://example.org/age".into(),
+                value: "42".into(),
+            }],
+            true,
+            &ns,
+        )
+        .expect("remove typed data assertion");
+        let preview = result.preview_text.expect("preview");
+        assert!(!preview.contains("ex:age"));
+        assert!(!preview.contains("\"42\""));
+    }
+
+    #[test]
+    fn set_functional_ignores_characteristic_text_inside_comment() {
+        let ttl = r#"@prefix ex: <http://example.org/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+ex:p a owl:ObjectProperty ;
+    rdfs:comment "Not a owl:FunctionalProperty despite the wording" .
+"#;
+        let ns = BTreeMap::from([
+            ("ex".into(), "http://example.org/".into()),
+            ("owl".into(), "http://www.w3.org/2002/07/owl#".into()),
+            ("rdfs".into(), "http://www.w3.org/2000/01/rdf-schema#".into()),
+        ]);
+        let result = apply_patches_to_text(
+            ttl,
+            &[PatchOp::SetFunctional {
+                entity_iri: "http://example.org/p".into(),
+                value: true,
+            }],
+            true,
+            &ns,
+        )
+        .expect("set functional");
+        let preview = result.preview_text.expect("preview");
+        assert!(
+            preview.contains("a owl:FunctionalProperty")
+                || preview.contains("owl:FunctionalProperty ;")
+                || preview.contains("owl:FunctionalProperty\n"),
+            "must insert a real FunctionalProperty type: {preview}"
+        );
+        // Ensure the characteristic is not only inside the comment string.
+        let without_comment = preview
+            .lines()
+            .filter(|l| !l.contains("despite the wording"))
+            .collect::<Vec<_>>()
+            .join("\n");
+        assert!(
+            without_comment.contains("owl:FunctionalProperty"),
+            "FunctionalProperty must appear outside the comment: {preview}"
+        );
+    }
+
+    #[test]
+    fn property_chain_does_not_false_positive_on_short_prefix_curie() {
+        let ttl = r#"@prefix ex: <http://example.org/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+ex:Bar a owl:Class .
+<http://example.org/foo/Bar> a owl:ObjectProperty .
+"#;
+        let ns = BTreeMap::from([
+            ("ex".into(), "http://example.org/".into()),
+            ("owl".into(), "http://www.w3.org/2002/07/owl#".into()),
+        ]);
+        let result = apply_patches_to_text(
+            ttl,
+            &[PatchOp::AddPropertyChain {
+                entity_iri: "http://example.org/foo/Bar".into(),
+                properties: vec!["http://example.org/foo/Bar".into()],
+            }],
+            true,
+            &ns,
+        )
+        .expect("property chain on absolute IRI ObjectProperty");
+        assert!(
+            result.diagnostics.is_empty(),
+            "must not treat colliding short-name Class as the chain member: {:?}",
+            result.diagnostics
+        );
+        let preview = result.preview_text.expect("preview");
+        assert!(preview.contains("owl:propertyChainAxiom"));
     }
 }

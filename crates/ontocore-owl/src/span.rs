@@ -153,7 +153,7 @@ pub fn all_entity_statement_ranges(
         .collect()
 }
 
-/// Prefer the subject statement that declares a type (` a `), e.g. `ex:Foo a owl:Class`.
+/// Prefer the subject statement that declares a type (`a` / `rdf:type`), e.g. `ex:Foo a owl:Class`.
 fn primary_entity_statement_start(
     source_text: &str,
     iri: &str,
@@ -164,7 +164,7 @@ fn primary_entity_statement_start(
     for start in &starts {
         if let Some(end) = statement_end_byte(source_text, start.start as usize) {
             let stmt = &source_text[start.start as usize..end];
-            if stmt.contains(" a ") {
+            if crate::turtle_lex::statement_has_type_predicate(stmt) {
                 return Some(*start);
             }
         }

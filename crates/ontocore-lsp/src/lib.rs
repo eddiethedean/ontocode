@@ -31,10 +31,12 @@ pub fn catalog_snapshot_json(
 mod handlers_test;
 
 use crate::positions::utf16_offset_to_byte;
-use crossbeam_channel::Sender;
+use crate::protocol::RunReasonerParams;
+use crossbeam_channel::{Receiver, Sender};
 use diagnostics::{publish_diagnostics_for_state, publish_empty_diagnostics};
 use handlers::{
-    handle_custom_request, handle_initialize, handle_standard_request, StandardRequestOutcome,
+    handle_custom_request, handle_initialize, handle_run_reasoner_lsp, handle_standard_request,
+    StandardRequestOutcome,
 };
 use index_worker::IndexWorker;
 use lsp_server::{Connection, Message, Notification, Request, RequestId, Response, ResponseError};
@@ -60,6 +62,11 @@ struct PendingReindex {
     scheduled_at: Instant,
 }
 
+#[derive(serde::Deserialize)]
+struct CancelNotificationParams {
+    id: RequestId,
+}
+
 pub fn run() -> Result<(), Box<dyn std::error::Error>> {
     let (connection, io_threads) = Connection::stdio();
     let state = ServerState::new();
@@ -83,9 +90,13 @@ pub fn run() -> Result<(), Box<dyn std::error::Error>> {
                 if connection.handle_shutdown(&req)? {
                     break;
                 }
-                if let Some(resp) =
-                    handle_lsp_request(&state, &index_worker, &pending_diagnostic_publish, req)
-                {
+                if let Some(resp) = handle_lsp_request(
+                    &state,
+                    &index_worker,
+                    &pending_diagnostic_publish,
+                    &connection.receiver,
+                    req,
+                ) {
                     connection.sender.send(Message::Response(resp))?;
                 }
                 publish_pending_diagnostics(
@@ -118,6 +129,7 @@ fn handle_lsp_request(
     state: &ServerState,
     index_worker: &IndexWorker,
     pending_diagnostic_publish: &Arc<AtomicBool>,
+    message_rx: &Receiver<Message>,
     req: Request,
 ) -> Option<Response> {
     let id = req.id.clone();
@@ -136,6 +148,26 @@ fn handle_lsp_request(
 
     if req.method == "shutdown" {
         return Some(ok_response(id, Value::Null));
+    }
+
+    if req.method == "ontocore/runReasoner" {
+        let params: RunReasonerParams = match parse_params(Some(req.params)) {
+            Ok(p) => p,
+            Err(e) => return Some(error_response(id, e)),
+        };
+        let run_generation = state.begin_reasoner_run(req.id.clone());
+        let result = handle_run_reasoner_lsp(state, params, message_rx, run_generation);
+        state.clear_active_reasoner_request();
+        return match result {
+            Ok(value) => match serde_json::to_value(value) {
+                Ok(result) => Some(ok_response(id, result)),
+                Err(e) => Some(ontocore_error_response(
+                    id,
+                    crate::protocol::LspErrorPayload::reasoner_failed(e.to_string()),
+                )),
+            },
+            Err(err) => Some(ontocore_error_response(id, err)),
+        };
     }
 
     if req.method.starts_with("ontocore/") {
@@ -172,6 +204,11 @@ fn handle_notification(
     notif: Notification,
 ) {
     match notif.method.as_str() {
+        "$/cancelRequest" => {
+            if let Ok(params) = serde_json::from_value::<CancelNotificationParams>(notif.params) {
+                state.cancel_reasoner_request(params.id);
+            }
+        }
         Initialized::METHOD => {
             if let Some(workspace) = state.effective_index_root() {
                 schedule_reindex(pending_reindex, workspace, Duration::from_millis(500));

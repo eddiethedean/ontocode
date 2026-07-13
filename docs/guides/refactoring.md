@@ -13,6 +13,8 @@ Canonical capability matrix: [What ships today](../SHIPPED.md).
 | Migrate namespace base | **Migrate Namespace** command | `ontocore refactor migrate-namespace` |
 | Move entity to another file | **Move Entity** command | `ontocore refactor move` |
 | Extract module (subset of entities) | **Extract Module** command | `ontocore refactor extract` |
+| Merge entities | **Merge Entities** command | — (IDE only) |
+| Replace entity references | **Replace Entity** command | — (IDE only) |
 
 **Format policy:** refactoring applies to **Turtle (`.ttl`) only**. RDF/XML, OBO, and other formats are indexed but not modified.
 
@@ -23,6 +25,14 @@ Canonical capability matrix: [What ships today](../SHIPPED.md).
 1. Select an entity in the **Classes**, **Properties**, or **Individuals** view.
 2. Right-click → **Find Entity Usages**, or use the **Find Usages** action in the Entity Inspector.
 3. Review the usage list (file, line, kind, context).
+
+### Merge or replace entities
+
+1. Command Palette → **OntoCode: Merge Entities** or **OntoCode: Replace Entity**.
+2. Enter survivor/duplicate IRIs (merge) or source/target IRIs (replace).
+3. Review the **Refactor Preview** panel and click **Apply**.
+
+These operations apply to **Turtle (`.ttl`)** only and are not available on the CLI yet.
 
 ### Rename, migrate, move, or extract
 
@@ -40,6 +50,10 @@ Standard LSP **Rename** (`F2` on an IRI in a `.ttl` file) also triggers IRI rena
 | **OntoCode: Migrate Namespace** | Replace a namespace base IRI (`@prefix` + term IRIs) |
 | **OntoCode: Move Entity** | Move an entity block to another `.ttl` file |
 | **OntoCode: Extract Module** | Copy selected entities into a new module file |
+| **OntoCode: Merge Entities** | Merge two entities (survivor + duplicate) across Turtle files |
+| **OntoCode: Replace Entity** | Replace references to one IRI with another (preview + apply) |
+
+Merge and Replace are **IDE-only** today — there is no `ontocore refactor merge` CLI subcommand. Use preview before apply in production repos.
 
 After apply, the workspace re-indexes automatically. If re-index fails, you may see `reindex_warning` — run **OntoCode: Index Workspace**.
 

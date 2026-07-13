@@ -1,6 +1,6 @@
 # Known limitations
 
-> **Current release:** v0.19.0 — see [What ships today](SHIPPED.md). **Not a full Protégé replacement today** — coexistence and pilot workflows are the supported path until **1.0**.
+> **Latest tagged release: v0.19.0.** Documentation on `main` may describe unreleased **v0.20** work. Pin CI to a tagged version from [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) or crates.io — see [What ships today](SHIPPED.md). **Not a full Protégé replacement today** — coexistence and pilot workflows are the supported path until **1.0**.
 
 Honest limits for evaluators and new users.
 

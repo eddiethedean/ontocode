@@ -20,7 +20,7 @@ The schema file is the wire contract for the **current product release**. Until 
 Until v1.0, minor releases may change request/response fields.
 For stable integrations:
 
-- **Pin OntoCore** (CLI/LSP) to an exact version (e.g. `0.19.0`) in your tooling.
+- **Pin OntoCore to **0.19.0**`) in your tooling.
 - Prefer consuming `lsp-protocol.schema.json` from the same tagged release you deploy.
 
 ## Wire format

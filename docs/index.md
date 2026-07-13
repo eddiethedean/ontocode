@@ -7,10 +7,10 @@ hide:
 <div class="oc-hero">
 
 <div class="oc-hero-badges">
-  <span class="oc-badge oc-badge--accent">v0.19.0</span>
+  <span class="oc-badge oc-badge--accent">Latest tagged v0.19.0</span>
+  <span class="oc-badge">main → v0.20 unreleased</span>
   <span class="oc-badge">VS Code</span>
   <span class="oc-badge">CLI · LSP</span>
-  <span class="oc-badge">Plugins</span>
 </div>
 
 <p class="oc-hero-kicker">OntoCode documentation</p>
@@ -26,7 +26,7 @@ Index and explore OWL/RDF/OBO, run queries, refactors, and reasoning — in VS C
   <a class="oc-hero-cta" href="getting-started/" style="margin-left:0.75rem">CLI / CI →</a>
 </p>
 
-<p class="oc-hero-subcta"><a href="SHIPPED/">What ships today</a> · <a href="known-limitations/">Known limitations</a></p>
+<p class="oc-hero-subcta"><a href="SHIPPED/">What ships today</a> · <a href="known-limitations/">Known limitations</a> · Latest tagged: <strong>v0.19.0</strong></p>
 
 <div class="oc-hero-links">
   <a href="ontocode/feature-tour/">Feature tour</a>
@@ -86,7 +86,7 @@ Index and explore OWL/RDF/OBO, run queries, refactors, and reasoning — in VS C
 
 ## What ships today
 
-**v0.19.0 highlights:** Semantic transaction apply path (`ontocore-edit`) for Turtle/OBO; Protégé parity manifest and CI validator; GitHub epics for P0 blockers. Built on the v0.18 Protégé Desktop parity gate.
+**Latest tagged: v0.19.0** — semantic transactions + parity program baseline. **Unreleased on `main`:** v0.20 workspace runtime and Turtle patch hardening (not on Marketplace/crates.io yet).
 
 Full matrix: **[What ships today](SHIPPED.md)** (canonical — do not rely on this summary alone).
 

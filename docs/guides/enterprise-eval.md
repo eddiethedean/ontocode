@@ -1,6 +1,6 @@
 # Evaluating OntoCode for your organization
 
-This page helps security, platform, and ontology teams decide whether OntoCode **v0.19.0** fits your workflow. It is honest about **what ships today** vs the v1.0 Protégé-competitive target.
+This page helps security, platform, and ontology teams decide whether OntoCode **v0.19.0** (latest tagged) fits your workflow. It is honest about **what ships today** vs the v1.0 Protégé-competitive target.
 
 Canonical capability matrix: [What ships today](../SHIPPED.md).
 
@@ -12,6 +12,8 @@ Prefer Protégé or other tools (or wait for v1.0) if you need:
 - A **stable, semver-guaranteed plugin API** or production owlmake integration without subprocess scaffolding — plugin host **MVP shipped in v0.14**; stable ecosystem API planned **v1.0**
 
 ## Enterprise documentation pack
+
+**Start here:** [Procurement and enterprise appendix](procurement-appendix.md) — single index for security, legal, deployment, and governance questionnaires.
 
 | Document | Audience |
 |----------|----------|

@@ -1,6 +1,6 @@
 # Supported ontology formats
 
-> **Current release:** v0.19.0 — canonical capability matrix: [What ships today](SHIPPED.md).
+> **Latest tagged release: v0.19.0** — canonical capability matrix: [What ships today](SHIPPED.md).
 
 This page is the canonical reference for **what OntoCode/OntoCore can do with each file format** today.
 
@@ -21,6 +21,8 @@ This page is the canonical reference for **what OntoCode/OntoCore can do with ea
 | N-Triples | `.nt` | Yes | Yes | No (read-only) | No |
 | N-Quads | `.nq` | Yes | Yes | No (read-only) | No |
 | TriG | `.trig` | Yes | Yes | No (read-only) | No |
+
+> **OBO versioning:** patch engine write-back since **v0.12**; Entity Inspector write-back since **v0.13**.
 
 ## Why some formats are read-only
 

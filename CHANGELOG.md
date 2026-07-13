@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Workspace runtime (EPIC-003 / BLOCKER_03): host-owned ontology registry with active targeting and editability rules; per-ontology dirty tracking; `SaveCoordinator` for Save / Save All; `WorkspaceTransactionManager` with semantic undo/redo stacks (`undo_patches` from LSP); host event bus; selection and navigation managers; session persistence (workspace state + `.ontocode/session.json`); external-change recovery (reload / keep / compare); panel restore with semantic args ([#249](https://github.com/eddiethedean/ontocode/issues/249))
+
+### Fixed
+
+- Turtle patch matching for Protégé/ROBOT-style files: lang-tagged/typed literal removes, angle-bracket IRI object removes, `rdf:type` ontology IRI rewrite, comment-safe type/characteristic detection, and property-chain subject needles ([#261](https://github.com/eddiethedean/ontocode/issues/261), [#262](https://github.com/eddiethedean/ontocode/issues/262), [#270](https://github.com/eddiethedean/ontocode/issues/270), [#271](https://github.com/eddiethedean/ontocode/issues/271), [#272](https://github.com/eddiethedean/ontocode/issues/272), [#273](https://github.com/eddiethedean/ontocode/issues/273), [#278](https://github.com/eddiethedean/ontocode/issues/278); [#286](https://github.com/eddiethedean/ontocode/pull/286))
+- OBO apply + transaction invert: Typedef/Instance stanza start bounds, scoped `RemoveSynonym`, CRLF-preserving rewrites, and refuse lossy invert for `RemovePrefix` / OBO synonym-def / boolean clears ([#216](https://github.com/eddiethedean/ontocode/issues/216), [#259](https://github.com/eddiethedean/ontocode/issues/259), [#260](https://github.com/eddiethedean/ontocode/issues/260), [#263](https://github.com/eddiethedean/ontocode/issues/263), [#264](https://github.com/eddiethedean/ontocode/issues/264), [#275](https://github.com/eddiethedean/ontocode/issues/275))
+- Reasoner cancel wait no longer drops concurrent LSP messages; non-`$/cancelRequest` traffic is deferred for the main dispatcher ([#268](https://github.com/eddiethedean/ontocode/issues/268))
+- Prefix/CURIE correctness: Manchester complex patches merge document `@prefix`, unqualified cardinality does not require `owl:`, IRI rename avoids wrong-prefix CURIEs, move-to-new-file copies `@prefix` headers, and `undefined_prefixes` ignores colons inside `<IRI>`s ([#274](https://github.com/eddiethedean/ontocode/issues/274), [#279](https://github.com/eddiethedean/ontocode/issues/279), [#280](https://github.com/eddiethedean/ontocode/issues/280), [#281](https://github.com/eddiethedean/ontocode/issues/281), [#282](https://github.com/eddiethedean/ontocode/issues/282))
+- LSP/edit tooling: transaction envelopes reject cross-format apply, `entity_detail` comes from parsed transactions, reindex invalidates in-flight reasoner runs, code-action full-document ranges cover trailing newlines, ROBOT jails `--prefixes`/`--inputs`/`--add-prefixes`, and `duplicate_labels` ignores same-entity case variants ([#265](https://github.com/eddiethedean/ontocode/issues/265), [#266](https://github.com/eddiethedean/ontocode/issues/266), [#267](https://github.com/eddiethedean/ontocode/issues/267), [#283](https://github.com/eddiethedean/ontocode/issues/283), [#284](https://github.com/eddiethedean/ontocode/issues/284), [#285](https://github.com/eddiethedean/ontocode/issues/285))
+- Stop Reasoner posts `reasonerRunCancelled` so the React panel clears `running` without reintroducing start-flicker sync clears ([#269](https://github.com/eddiethedean/ontocode/issues/269))
+
+### Changed
+
+- Workspace package and all `ontocore-*` crates bumped to **0.20.0** (in progress — not released); extension marketplace and webview UI **0.20.0**
+- Draft migration notes: [docs/migration/v0.20.md](docs/migration/v0.20.md)
+
 ## [0.19.0] - 2026-07-13
 
 ### Added

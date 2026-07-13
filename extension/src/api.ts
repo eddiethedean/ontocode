@@ -60,6 +60,15 @@ export interface OntoCodeTestHooks {
   captureScreenshot(name: string): Promise<void>;
   /** Brief UI settle delay for animations / layout. */
   settle(ms?: number): Promise<void>;
+  /** Host-owned ontology registry snapshot (v0.20 workspace runtime). */
+  getOntologyRegistrySnapshot(): Array<{
+    id: string;
+    path: string;
+    editable: boolean;
+    dirty: boolean;
+    active: boolean;
+  }>;
+  getNavigationStack(): Array<{ kind: string; id: string; source: string }>;
 }
 
 /** Extension activation API (used by VS Code integration tests). */

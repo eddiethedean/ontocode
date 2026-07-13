@@ -5,7 +5,8 @@ Maintainer checklist for publishing crates, binaries, and the VS Code extension.
 ## Version bump
 
 1. Update `[workspace.package].version` in root [Cargo.toml on GitHub](https://github.com/eddiethedean/ontocode/blob/main/Cargo.toml)
-2. Update `extension/package.json` and `extension/webview-ui/package.json` `version`
+2. Update **`docs/TAGGED_RELEASE`** to the new tag (public install pins follow this file until the next release)
+3. Update `extension/package.json` and `extension/webview-ui/package.json` `version`
 3. Update [CHANGELOG.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) and [docs/changelog.md](changelog.md)
 4. Regenerate [NOTICES on GitHub](https://github.com/eddiethedean/ontocode/blob/main/NOTICES) if dependencies changed (`cargo license` recommended)
 5. Sync user-facing docs (see checklist below)
@@ -48,6 +49,7 @@ Maintainer checklist for publishing crates, binaries, and the VS Code extension.
 - [ ] [docs/migration/v0.17.md](migration/v0.17.md) — Protégé-shell menus / perspectives when applicable
 - [ ] [docs/migration/v0.18.md](migration/v0.18.md) — Protégé Desktop parity gate when applicable
 - [ ] [docs/migration/v0.19.md](migration/v0.19.md) — semantic transaction apply path when applicable
+- [ ] [docs/migration/v0.20.md](migration/v0.20.md) — Turtle patch matching hardening when applicable
 - [ ] [docs/ontocode/feature-tour.md](ontocode/feature-tour.md) — retitle to current release
 - [ ] [ROADMAP.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/ROADMAP.md) and [docs/roadmap.md](roadmap.md) — keep shipped/planned sections in sync
 - [ ] [docs/guides/plugins.md](guides/plugins.md) — plugin authoring when plugin surface changes
@@ -56,6 +58,7 @@ Maintainer checklist for publishing crates, binaries, and the VS Code extension.
 - [ ] [docs/design/LICENSES.md](design/LICENSES.md) — dependency sections
 - [ ] Run `./scripts/build-docs.sh` locally before tagging
 - [ ] Run `./scripts/check-doc-versions.sh` (also enforced in CI)
+- [ ] Build tutorial pack: `./scripts/package-tutorial-zip.sh` and attach `ontocode-tutorial.zip` to the GitHub Release
 - [ ] Ensure **CI is green on the release commit** before tagging (the release workflow also re-runs preflight gates including `cargo test --workspace`)
 
 ## Tag and publish
@@ -63,8 +66,8 @@ Maintainer checklist for publishing crates, binaries, and the VS Code extension.
 Push a tag matching `[workspace.package].version` in `Cargo.toml`:
 
 ```bash
-git tag v0.19.0   # must match [workspace.package].version in Cargo.toml
-git push origin v0.19.0
+git tag v0.20.0   # must match [workspace.package].version in Cargo.toml
+git push origin v0.20.0
 ```
 
 The [release workflow on GitHub](https://github.com/eddiethedean/ontocode/blob/main/.github/workflows/release.yml):

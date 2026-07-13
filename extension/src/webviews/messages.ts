@@ -264,6 +264,7 @@ export type HostMessage =
       }>;
     }
   | { type: "reasonerSyncRunId"; runId: number }
+  | { type: "reasonerRunCancelled"; runId: number }
   | {
       type: "reasonerResult";
       runId: number;
@@ -272,6 +273,14 @@ export type HostMessage =
       error?: string;
     }
   | { type: "loadExplanation"; payload: ExplanationPayload }
+  | {
+      type: "workspaceEvent";
+      event: {
+        type: string;
+        payload?: unknown;
+        timestamp: number;
+      };
+    }
   | { type: "error"; message: string };
 
 /** React → Host */

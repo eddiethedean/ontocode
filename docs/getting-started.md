@@ -82,7 +82,7 @@ ontocore validate /path/to/your/ontologies
 2. **For CLI on Linux x64:** download `ontocore-v<version>-x86_64-unknown-linux-gnu.tar.gz`.
 3. **For VS Code (any supported OS):** download `ontocode-<version>.vsix` — see [vscode-install.md](vscode-install.md).
 4. Verify with `SHA256SUMS` — see [release-integrity.md](release-integrity.md).
-5. Extract and run (Linux example; replace `0.19.0` with your tag):
+5. Extract and run (Linux example; replace `0.20.0` with your tag):
 
 ```bash
 VERSION=0.19.0

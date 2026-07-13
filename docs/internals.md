@@ -8,10 +8,13 @@ Design documents, ADRs, and backlogs live under [design/](design/README.md). **P
 
 ## Contributor paths by role
 
+Start with **[Architecture tour](guides/architecture-tour.md)** (~15 min) for a single map of crates, LSP, extension, and webviews.
+
 ### Rust-only (OntoCore crates)
 
 1. [Contributing guide](contributing.md) — build, test, MSRV
-2. [OntoCore crate map](ontocore/crate-map.md) — façade vs `ontocore-*` layout
+2. [Testing matrix](guides/testing-matrix.md) — commands by change type
+3. [OntoCore crate map](ontocore/crate-map.md) — façade vs `ontocore-*` layout
 3. [Design architecture](design/ARCHITECTURE.md) — crate responsibilities
 4. Run `./scripts/run-ci-local.sh` before opening a PR
 
@@ -53,4 +56,4 @@ Design documents, ADRs, and backlogs live under [design/](design/README.md). **P
 
 ## Plugin model
 
-The plugin host **shipped in v0.14** as an MVP (`ontocore-plugin` discovery + `PluginHost` runtime). The API is **not stable** until v1.0. See [plugin model](ontocore/plugin-model.md), [Plugin authoring guide](guides/plugins.md), and [PLUGIN_SPEC.md](design/PLUGIN_SPEC.md).
+The plugin host **shipped in v0.14** as an MVP (`ontocore-plugin` discovery + `PluginHost` runtime). The API is **not stable** until v1.0. See [plugin model](ontocore/plugin-model.md) and **[Plugin authoring guide](guides/plugins.md)** (canonical).

@@ -32,8 +32,8 @@ After 1.0, the roadmap shifts from parity to modernization.
 | Document | Role |
 |----------|------|
 | [What ships today](SHIPPED.md) | **Canonical capability matrix** — what is available in the current release |
-| [Protégé parity program](protege-parity/README.md) | **1.0 engineering program** — scope, blockers, release gates |
-| [Pre-1.0 release phases](protege-parity/07_BACKLOG/PRE_1_0_PHASES.md) | **v0.19–v0.25 → 1.0.0** versioned parity plan |
+| [Protégé parity program](https://github.com/eddiethedean/ontocode/blob/main/docs/protege-parity/README.md) | **1.0 engineering program** — scope, blockers, release gates |
+| [Pre-1.0 release phases](https://github.com/eddiethedean/ontocode/blob/main/docs/protege-parity/07_BACKLOG/PRE_1_0_PHASES.md) | **v0.19–v0.25 → 1.0.0** versioned parity plan |
 | [UI roadmap mapping](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/ROADMAP_MAPPING.md) | **UI specs ↔ releases** — master checklist for all Product Roadmap 2.0 items |
 | [Milestones (shipped)](design/ROADMAP.md) | Per-crate engineering detail for **shipped** v0.1–v0.11 milestones |
 | [Protégé parity matrix](design/PROTEGE_PARITY.md) | Historical v0.18 P0/P1/P2 checklist (superseded for planning) |
@@ -42,7 +42,7 @@ After 1.0, the roadmap shifts from parity to modernization.
 | [Product Roadmap 2.0](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/PRODUCT_ROADMAP_2.0.md) | UI phases with milestone acceptance criteria |
 | [Product design (UI)](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/README.md) | Product design specification pack (UX, design system, OntoStudio target) |
 
-**Current release:** v0.19.0
+**Current release:** v0.20.0 (in progress — unreleased)
 
 ---
 
@@ -60,7 +60,7 @@ v0.20–v0.22        v0.23–v0.24            v0.25                1.0.0-rc → 
 Workspace + formats Reason + SWRL            Verify + polish      Protégé replacement
 ```
 
-Full timeline: [ROADMAP.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/ROADMAP.md). Pre-1.0 phases: [PRE_1_0_PHASES.md](protege-parity/07_BACKLOG/PRE_1_0_PHASES.md).
+Full timeline: [ROADMAP.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/ROADMAP.md). Pre-1.0 phases: [PRE_1_0_PHASES.md](https://github.com/eddiethedean/ontocode/blob/main/docs/protege-parity/07_BACKLOG/PRE_1_0_PHASES.md).
 
 ### Phase index
 
@@ -71,7 +71,7 @@ Full timeline: [ROADMAP.md on GitHub](https://github.com/eddiethedean/ontocode/b
 | **C — Platform & authoring** | v0.9–v0.12 | Shipped | OntoCore identity, semantic workspace, authoring parity |
 | **D — OntoUI platform** | v0.13–v0.14 | Shipped | v0.13: WorkspaceStore, focus relay; v0.14: plugin host MVP |
 | **E — Desktop UX shell gate** | v0.15–v0.18 | Shipped | Menus, layouts, workflows, migration readiness (not full parity) |
-| **F — Full Protégé parity path** | v0.19–v0.25 | In progress (v0.19 shipped) | Semantic core → formats → OWL 2 → reason/SWRL → services → verify |
+| **F — Full Protégé parity path** | v0.19–v0.25 | In progress (v0.19 shipped; v0.20 in progress) | Semantic core → formats → OWL 2 → reason/SWRL → services → verify |
 | **G — Protégé replacement** | 1.0.0 | Planned | Daily OWL/OBO engineering without Protégé |
 | **H — Ecosystem** | v1.1–v1.2+ | Planned | SDKs, AI, toolchain & collaboration |
 
@@ -79,7 +79,7 @@ Full timeline: [ROADMAP.md on GitHub](https://github.com/eddiethedean/ontocode/b
 |-------|---------|-----|--------|-----------|-------|
 | 1–18 | v0.1–v0.18 | A–E | Shipped | — | See [ROADMAP.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/ROADMAP.md) |
 | 19 | v0.19 | F | Shipped | — | Semantic foundation + program baseline |
-| 20 | v0.20 | F | Planned | 1† | Workspace runtime |
+| 20 | v0.20 | F | In progress | 1† | Workspace runtime |
 | 21 | v0.21 | F | Planned | — | RDF/XML + OWL/XML write-back |
 | 22 | v0.22 | F | Planned | 2† | Complete OWL 2 authoring |
 | 23 | v0.23 | F | Planned | 5† | Reasoning parity + SWRL |
@@ -433,7 +433,7 @@ See [v0.17 scope](design/v0.17_SCOPE.md), [migration/v0.17.md](migration/v0.17.m
 
 **Released:** v0.18.0 (2026-07-11); patches **v0.18.1** (2026-07-12), **v0.18.2** (2026-07-13)
 
-**Theme:** Close the desktop UX shell gate (menus, layouts, workflows, migration docs). **Not** full functional Protégé parity — see [PRE_1_0_PHASES.md](protege-parity/07_BACKLOG/PRE_1_0_PHASES.md) for v0.19–v0.25.
+**Theme:** Close the desktop UX shell gate (menus, layouts, workflows, migration docs). **Not** full functional Protégé parity — see [PRE_1_0_PHASES.md](https://github.com/eddiethedean/ontocode/blob/main/docs/protege-parity/07_BACKLOG/PRE_1_0_PHASES.md) for v0.19–v0.25.
 
 **Scope (docs/audit-first):** [v0.18_SCOPE.md](design/v0.18_SCOPE.md) · [0.18 parity assessment](https://github.com/eddiethedean/ontocode/blob/main/docs/PROTEGE_REVERSE_ENGINEERING/ONTOCODE_PARITY/ONTOCODE_0.18_PROTEGE_PARITY_ASSESSMENT.md)
 
@@ -443,7 +443,7 @@ Canonical detail: root [ROADMAP.md on GitHub](https://github.com/eddiethedean/on
 
 ### Era F — Full Protégé parity path (v0.19–v0.25) — in progress
 
-**Canonical plan:** [PRE_1_0_PHASES.md](protege-parity/07_BACKLOG/PRE_1_0_PHASES.md)
+**Canonical plan:** [PRE_1_0_PHASES.md](https://github.com/eddiethedean/ontocode/blob/main/docs/protege-parity/07_BACKLOG/PRE_1_0_PHASES.md)
 
 ### v0.19 — Semantic foundation + program baseline (shipped)
 
@@ -460,9 +460,19 @@ See [migration/v0.19.md](migration/v0.19.md) · [SHIPPED.md](SHIPPED.md) · full
 
 ---
 
+### v0.20 — Workspace runtime (in progress)
+
+**Status:** In progress — **not released**. Packaging version **0.20.0**; latest tagged release **v0.19.0**.
+
+**Theme:** Workspace as central runtime for ontology state and transactions.
+
+See [SHIPPED.md](SHIPPED.md) · full detail in [ROADMAP.md § v0.20](https://github.com/eddiethedean/ontocode/blob/main/ROADMAP.md).
+
+---
+
 ## Planned releases (v0.20 → v1.2+)
 
-**Pre-1.0 parity phases remaining:** [PRE_1_0_PHASES.md](protege-parity/07_BACKLOG/PRE_1_0_PHASES.md) (v0.20–v0.25 → 1.0.0-rc → 1.0.0). Per-release detail: [ROADMAP.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/ROADMAP.md) § Era F.
+**Pre-1.0 parity phases remaining:** [PRE_1_0_PHASES.md](https://github.com/eddiethedean/ontocode/blob/main/docs/protege-parity/07_BACKLOG/PRE_1_0_PHASES.md) (v0.20–v0.25 → 1.0.0-rc → 1.0.0). Per-release detail: [ROADMAP.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/ROADMAP.md) § Era F.
 
 ---
 
@@ -476,7 +486,7 @@ See [migration/v0.19.md](migration/v0.19.md) · [SHIPPED.md](SHIPPED.md) · full
 
 | Area | Deliverables |
 |------|--------------|
-| **OntoCore** | All [protege-parity P0 requirements](protege-parity/03_PARITY/PARITY_RELEASE_GATE.md) green; all **P1** items green or documented known gaps; stable CLI/API/LSP semver 1.0; `examples/protege-roundtrip/` ontology set with workflow doc; performance benchmarks published |
+| **OntoCore** | All [protege-parity P0 requirements](https://github.com/eddiethedean/ontocode/blob/main/docs/protege-parity/03_PARITY/PARITY_RELEASE_GATE.md) green; all **P1** items green or documented known gaps; stable CLI/API/LSP semver 1.0; `examples/protege-roundtrip/` ontology set with workflow doc; performance benchmarks published |
 | **OntoUI** | **[1]** Persistent tabs + bottom dock ([WORKSPACE_WIREFRAMES](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/WORKSPACE_WIREFRAMES.md)). **[2]** Relationship cards, references view, metadata view; entity workspace diagnostics integration ([ENTITY_EDITOR_SPEC](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/ENTITY_EDITOR_SPEC.md)). **[4]** Graph saved layouts, filters, reasoning overlays ([GRAPH_WORKSPACE](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/GRAPH_WORKSPACE.md)). **[5]** Semantic build pipeline UI; entity-level reasoning cards; reasoning history; Problems ↔ reasoning integration ([REASONING_EXPERIENCE](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/REASONING_EXPERIENCE.md)). **[6]** Merge classes; batch label normalization; undo/redo on refactor and patch writes ([SEMANTIC_REFACTORING](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/SEMANTIC_REFACTORING.md)). **[9]** Review workspace MVP ([COLLABORATION](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/COLLABORATION.md)). Supporting: HIG + keyboard shortcuts ([HUMAN_INTERFACE_GUIDELINES](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/HUMAN_INTERFACE_GUIDELINES.md), [KEYBOARD_SHORTCUTS](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/KEYBOARD_SHORTCUTS.md)) |
 | **OntoCode** | Complete hybrid authoring loop (forms + Manchester + Turtle/OBO); full IDE surface (explorer, search, diagnostics, refactoring, query workbench, visualization, reasoning); React webview hardening; VS Code Marketplace + Open VSX publish as 1.0 |
 | **Toolchain** | ODK project layout recognition (`src/ontology/`, catalog files, import structure); ODK QC and release workflow surfacing; ROBOT-compatible operations where practical; import existing ODK/ROBOT/owlmake workflows (Makefile, GitHub Actions); Protégé migration guide with honest parity table |
@@ -487,9 +497,9 @@ See [migration/v0.19.md](migration/v0.19.md) · [SHIPPED.md](SHIPPED.md) · full
 **Exit criteria:**
 
 > Daily ontology engineering (OWL 2 DL + OBO maintenance) is completable in VS Code.
-> Protégé is required only for **P2** features in [PARITY_SCOPE.md](protege-parity/PARITY_SCOPE.md).
+> Protégé is required only for **P2** features in [PARITY_SCOPE.md](https://github.com/eddiethedean/ontocode/blob/main/docs/protege-parity/PARITY_SCOPE.md).
 
-Track implementation: [PRE_1_0_PHASES.md](protege-parity/07_BACKLOG/PRE_1_0_PHASES.md) · [v1.0_BACKLOG.md](design/v1.0_BACKLOG.md)
+Track implementation: [PRE_1_0_PHASES.md](https://github.com/eddiethedean/ontocode/blob/main/docs/protege-parity/07_BACKLOG/PRE_1_0_PHASES.md) · [v1.0_BACKLOG.md](design/v1.0_BACKLOG.md)
 
 **Dependencies:** Ontologos 1.0.0; `react` / `vite` (extension `webview-ui`); [cursor-prompts/](https://github.com/eddiethedean/ontocode/blob/main/docs/cursor-prompts/README.md) 06–07, 11–12
 

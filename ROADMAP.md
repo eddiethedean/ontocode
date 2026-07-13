@@ -39,7 +39,7 @@ After 1.0, the roadmap shifts from parity to modernization.
 | [PRODUCT_ROADMAP_2.0.md](docs/ui/PRODUCT_ROADMAP_2.0.md) | UI phases with milestone acceptance criteria |
 | [ui/README.md](docs/ui/README.md) | Product design specification pack (UX, design system, OntoStudio target) |
 
-**Current release:** v0.19.0
+**Current release:** v0.20.0 (in progress — unreleased)
 
 ---
 
@@ -74,7 +74,7 @@ Workspace + formats Reason + SWRL            Verify + polish      Protégé repl
 | **C — Platform & authoring** | v0.9–v0.12 | Shipped | OntoCore identity, semantic workspace, authoring parity |
 | **D — OntoUI platform** | v0.13–v0.14 | Shipped | v0.13: WorkspaceStore, focus relay; v0.14: plugin host MVP |
 | **E — Desktop UX shell gate** | v0.15–v0.18 | Shipped | Menus, layouts, workflows, migration readiness (not full parity) |
-| **F — Full Protégé parity path** | v0.19–v0.25 | In progress (v0.19 shipped) | Semantic core → formats → OWL 2 → reason/SWRL → services → verify |
+| **F — Full Protégé parity path** | v0.19–v0.25 | In progress (v0.19 shipped; v0.20 in progress) | Semantic core → formats → OWL 2 → reason/SWRL → services → verify |
 | **G — Protégé replacement** | 1.0.0 | Planned | Daily OWL/OBO engineering without Protégé |
 | **H — Ecosystem** | v1.1–v1.2+ | Planned | SDKs, AI, toolchain & collaboration |
 
@@ -99,7 +99,7 @@ Workspace + formats Reason + SWRL            Verify + polish      Protégé repl
 | 17 | v0.17 | E | Shipped | — | Menu/toolbar/dialog parity + keyboard workflows |
 | 18 | v0.18 | E | Shipped | — | Desktop UX shell gate + migration readiness |
 | 19 | v0.19 | F | Shipped | — | Semantic foundation + program baseline |
-| 20 | v0.20 | F | Planned | 1† | Workspace runtime |
+| 20 | v0.20 | F | In progress (branch complete — awaiting tag) | 1† | Workspace runtime |
 | 21 | v0.21 | F | Planned | — | RDF/XML + OWL/XML write-back |
 | 22 | v0.22 | F | Planned | 2† | Complete OWL 2 authoring |
 | 23 | v0.23 | F | Planned | 5† | Reasoning parity + SWRL |
@@ -527,18 +527,23 @@ See [migration/v0.19.md](docs/migration/v0.19.md) and [SHIPPED.md](docs/SHIPPED.
 
 ---
 
-### v0.20 — Workspace runtime (planned)
+### v0.20 — Workspace runtime (in progress — branch complete, awaiting tag)
+
+**Status:** Implemented on `v0.20` — **awaiting tag**. Packaging version is **0.20.0**; latest tagged release remains **v0.19.0**. Canonical RTD copy: [docs/roadmap.md](docs/roadmap.md).
 
 **Theme:** Workspace as central runtime for ontology state and transactions.
 
 | Area | Deliverables |
 |------|--------------|
-| **OntoCore** | Multi-ontology registry; dirty/save state; transaction manager; session persistence; selection/navigation sync |
-| **OntoCode** | Save/Save All; panel restore; external-change recovery |
+| **OntoCore** | `undo_patches` on `applyAxiomPatch`; registry snapshot in `getWorkspaceUiState` |
+| **OntoCode** | Ontology registry; dirty/save coordinator; transaction manager + event bus; selection/navigation; session persistence; external-change recovery |
+| **Also on branch** | Turtle/OBO patch hardening ([#286](https://github.com/eddiethedean/ontocode/pull/286)–#291) |
 
-**Exit criteria:** Multi-ontology workflows pass end-to-end tests; workspace state survives restart.
+**Exit criteria:** Multi-ontology workflows pass end-to-end tests; workspace state survives restart — met on branch.
 
-**Blockers:** [BLOCKER_03](docs/protege-parity/04_BLOCKERS/BLOCKER_03_WORKSPACE.md)
+**Blockers:** [BLOCKER_03](docs/protege-parity/04_BLOCKERS/BLOCKER_03_WORKSPACE.md) — EPIC [#249](https://github.com/eddiethedean/ontocode/issues/249)
+
+See [migration/v0.20.md](docs/migration/v0.20.md).
 
 ---
 

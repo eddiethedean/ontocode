@@ -92,6 +92,19 @@ pub struct ListCommandsResult {
     pub commands: Vec<CommandDescriptor>,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
+pub struct OntologyRegistryEntrySnapshot {
+    pub id: String,
+    pub uri: String,
+    pub path: String,
+    pub format: String,
+    pub role: String,
+    pub editable: bool,
+    pub dirty: bool,
+    pub version: u32,
+    pub active: bool,
+}
+
 #[derive(Debug, Deserialize)]
 pub struct WorkspaceUiStateParams {
     /// Optional focused entity IRI from the client.
@@ -103,6 +116,9 @@ pub struct WorkspaceUiStateParams {
     /// Active ontology id preferred by the client.
     #[serde(default)]
     pub active_ontology_id: Option<String>,
+    /// Host-owned ontology registry snapshot (v0.20 workspace runtime).
+    #[serde(default)]
+    pub ontology_registry: Vec<OntologyRegistryEntrySnapshot>,
 }
 
 #[derive(Debug, Serialize)]
@@ -119,6 +135,8 @@ pub struct WorkspaceUiState {
     pub active_ontology_id: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub stats: Option<CatalogStats>,
+    #[serde(skip_serializing_if = "Vec::is_empty", default)]
+    pub ontology_registry: Vec<OntologyRegistryEntrySnapshot>,
 }
 
 #[derive(Debug, Deserialize)]
@@ -286,6 +304,9 @@ pub struct ApplyAxiomPatchResult {
     /// Full-document edit so the client can sync open editors with disk.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub workspace_edit: Option<lsp_types::WorkspaceEdit>,
+    /// Inverted patch ops for workspace-level semantic undo (v0.20+).
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub undo_patches: Option<serde_json::Value>,
 }
 
 /// LSP JSON error payload for custom `ontocore/*` methods (not [`ontocore_core::OntoCoreError`]).

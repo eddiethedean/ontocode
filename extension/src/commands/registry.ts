@@ -8,6 +8,7 @@ import {
   isOntologyDocument,
 } from "./uiState";
 import { appendError } from "../logging/errorLog";
+import { ontologyRegistry } from "../workspace";
 
 export type CommandHandler = (...args: unknown[]) => unknown;
 
@@ -77,14 +78,19 @@ export class CommandRegistry {
     const refresh = async (): Promise<void> => {
       const currentGeneration = ++generation;
       const selectionIri = getFocusedEntityIri();
-      const dirtyCount = getDirtyOntologyDocumentCount();
+      const dirtyCount = Math.max(
+        getDirtyOntologyDocumentCount(),
+        ontologyRegistry.getDirtyCount()
+      );
+      const registrySnapshot = ontologyRegistry.getSnapshot();
       try {
         const state = await getWorkspaceUiState({
           selection_iri: selectionIri,
           dirty_document_count: dirtyCount,
-          active_ontology_id: context.workspaceState.get<string>(
-            "ontocode.activeOntology"
-          ),
+          active_ontology_id:
+            ontologyRegistry.getActiveId() ??
+            context.workspaceState.get<string>("ontocode.activeOntology"),
+          ontology_registry: registrySnapshot,
         });
         if (!disposed && currentGeneration === generation) {
           await this.syncContext(state);

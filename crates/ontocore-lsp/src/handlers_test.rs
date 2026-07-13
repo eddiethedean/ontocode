@@ -808,6 +808,7 @@ fn reasoner_classify_releases_ops_lock_during_classify() {
     use crate::state::{TEST_REASONER_CLASSIFY_IN_PAUSE, TEST_REASONER_CLASSIFY_PAUSE_MS};
     use crossbeam_channel::unbounded;
     use lsp_server::RequestId;
+    use std::collections::VecDeque;
     use std::sync::atomic::Ordering;
     use std::thread;
     use std::time::{Duration, Instant};
@@ -820,10 +821,12 @@ fn reasoner_classify_releases_ops_lock_during_classify() {
     let (_tx, rx) = unbounded();
     let reasoner = thread::spawn(move || {
         let generation = state_reasoner.begin_reasoner_run(RequestId::from(42i32));
+        let mut deferred = VecDeque::new();
         let result = handle_run_reasoner_lsp(
             &state_reasoner,
             RunReasonerParams { profile: "el".into(), auto_detect: false },
             &rx,
+            &mut deferred,
             generation,
         );
         state_reasoner.clear_active_reasoner_request();
@@ -860,6 +863,7 @@ fn cancelled_reasoner_run_does_not_update_snapshot() {
     use crate::state::{TEST_REASONER_CLASSIFY_IN_PAUSE, TEST_REASONER_CLASSIFY_PAUSE_MS};
     use crossbeam_channel::unbounded;
     use lsp_server::{Message, Notification, RequestId};
+    use std::collections::VecDeque;
     use std::sync::atomic::Ordering;
     use std::thread;
     use std::time::{Duration, Instant};
@@ -874,10 +878,12 @@ fn cancelled_reasoner_run_does_not_update_snapshot() {
     let state_reasoner = state.clone();
     let reasoner = thread::spawn(move || {
         let generation = state_reasoner.begin_reasoner_run(RequestId::from(99i32));
+        let mut deferred = VecDeque::new();
         let result = handle_run_reasoner_lsp(
             &state_reasoner,
             RunReasonerParams { profile: "el".into(), auto_detect: false },
             &rx,
+            &mut deferred,
             generation,
         );
         state_reasoner.clear_active_reasoner_request();
@@ -904,5 +910,133 @@ fn cancelled_reasoner_run_does_not_update_snapshot() {
         (None, None) => {}
         (Some(b), Some(a)) => assert_eq!(b.profile_used, a.profile_used),
         _ => panic!("cancelled run changed reasoner snapshot presence"),
+    }
+}
+
+#[test]
+fn reasoner_cancel_drain_preserves_non_cancel_messages() {
+    use crate::handlers::handle_run_reasoner_lsp;
+    use crate::protocol::RunReasonerParams;
+    use crate::state::{TEST_REASONER_CLASSIFY_IN_PAUSE, TEST_REASONER_CLASSIFY_PAUSE_MS};
+    use crossbeam_channel::unbounded;
+    use lsp_server::{Message, Notification, Request, RequestId};
+    use std::collections::VecDeque;
+    use std::sync::atomic::Ordering;
+    use std::thread;
+    use std::time::{Duration, Instant};
+
+    let state = indexed_state();
+    TEST_REASONER_CLASSIFY_IN_PAUSE.store(false, Ordering::SeqCst);
+    TEST_REASONER_CLASSIFY_PAUSE_MS.store(300, Ordering::SeqCst);
+
+    let (tx, rx) = unbounded();
+    let state_reasoner = state.clone();
+    let reasoner = thread::spawn(move || {
+        let generation = state_reasoner.begin_reasoner_run(RequestId::from(7i32));
+        let mut deferred = VecDeque::new();
+        let result = handle_run_reasoner_lsp(
+            &state_reasoner,
+            RunReasonerParams { profile: "el".into(), auto_detect: false },
+            &rx,
+            &mut deferred,
+            generation,
+        );
+        state_reasoner.clear_active_reasoner_request();
+        (result, deferred)
+    });
+
+    let deadline = Instant::now() + Duration::from_secs(5);
+    while !TEST_REASONER_CLASSIFY_IN_PAUSE.load(Ordering::SeqCst) {
+        assert!(Instant::now() < deadline, "reasoner never entered classify pause");
+        thread::sleep(Duration::from_millis(1));
+    }
+
+    let _ = tx.send(Message::Notification(Notification {
+        method: "textDocument/didChange".into(),
+        params: serde_json::json!({
+            "textDocument": { "uri": "file:///tmp/a.ttl", "version": 2 },
+            "contentChanges": [{ "text": "updated" }]
+        }),
+    }));
+    let _ = tx.send(Message::Request(Request {
+        id: RequestId::from(100i32),
+        method: "ontocore/getCatalogSnapshot".into(),
+        params: serde_json::json!({}),
+    }));
+    let _ = tx.send(Message::Notification(Notification {
+        method: "$/cancelRequest".into(),
+        params: serde_json::json!({ "id": 7 }),
+    }));
+
+    let (result, deferred) = reasoner.join().expect("reasoner thread");
+    TEST_REASONER_CLASSIFY_PAUSE_MS.store(0, Ordering::SeqCst);
+
+    assert!(result.is_err(), "cancelled reasoner should return error");
+    assert_eq!(deferred.len(), 2, "didChange and custom request must survive cancel drain");
+    match &deferred[0] {
+        Message::Notification(n) => assert_eq!(n.method, "textDocument/didChange"),
+        other => panic!("expected didChange first, got {other:?}"),
+    }
+    match &deferred[1] {
+        Message::Request(r) => {
+            assert_eq!(r.method, "ontocore/getCatalogSnapshot");
+            assert_eq!(r.id, RequestId::from(100i32));
+        }
+        other => panic!("expected getCatalogSnapshot second, got {other:?}"),
+    }
+}
+
+#[test]
+fn reindex_during_classify_discards_stale_reasoner_snapshot() {
+    use crate::handlers::handle_run_reasoner_lsp;
+    use crate::protocol::RunReasonerParams;
+    use crate::state::{TEST_REASONER_CLASSIFY_IN_PAUSE, TEST_REASONER_CLASSIFY_PAUSE_MS};
+    use crossbeam_channel::unbounded;
+    use lsp_server::RequestId;
+    use std::collections::VecDeque;
+    use std::sync::atomic::Ordering;
+    use std::thread;
+    use std::time::{Duration, Instant};
+
+    let state = indexed_state();
+    let before = state.with_catalog_and_reasoner(|_, reasoner| reasoner.cloned()).flatten();
+    let ws = state.workspace_root().expect("workspace");
+
+    TEST_REASONER_CLASSIFY_IN_PAUSE.store(false, Ordering::SeqCst);
+    TEST_REASONER_CLASSIFY_PAUSE_MS.store(300, Ordering::SeqCst);
+
+    let (_tx, rx) = unbounded();
+    let state_reasoner = state.clone();
+    let reasoner = thread::spawn(move || {
+        let generation = state_reasoner.begin_reasoner_run(RequestId::from(55i32));
+        let mut deferred = VecDeque::new();
+        let result = handle_run_reasoner_lsp(
+            &state_reasoner,
+            RunReasonerParams { profile: "el".into(), auto_detect: false },
+            &rx,
+            &mut deferred,
+            generation,
+        );
+        state_reasoner.clear_active_reasoner_request();
+        result
+    });
+
+    let deadline = Instant::now() + Duration::from_secs(5);
+    while !TEST_REASONER_CLASSIFY_IN_PAUSE.load(Ordering::SeqCst) {
+        assert!(Instant::now() < deadline, "reasoner never entered classify pause");
+        thread::sleep(Duration::from_millis(1));
+    }
+
+    state.index_workspace(ws).expect("reindex during classify");
+
+    let result = reasoner.join().expect("reasoner thread");
+    TEST_REASONER_CLASSIFY_PAUSE_MS.store(0, Ordering::SeqCst);
+
+    assert!(result.is_err(), "stale reasoner after reindex must not publish: {result:?}");
+    let after = state.with_catalog_and_reasoner(|_, reasoner| reasoner.cloned()).flatten();
+    match (&before, &after) {
+        (None, None) => {}
+        (Some(b), Some(a)) => assert_eq!(b.profile_used, a.profile_used),
+        _ => panic!("reindex-during-classify changed reasoner snapshot presence"),
     }
 }

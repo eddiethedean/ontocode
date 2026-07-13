@@ -39,12 +39,12 @@ completion at a practical level.
 
 ## Workspace
 
--   [ ] Multi-ontology registry
--   [ ] Transaction manager
--   [ ] Event bus
--   [ ] Session persistence
--   [ ] Dirty-state tracking
--   [ ] Navigation manager
+-   [x] Multi-ontology registry
+-   [x] Transaction manager
+-   [x] Event bus
+-   [x] Session persistence
+-   [x] Dirty-state tracking
+-   [x] Navigation manager
 
 ------------------------------------------------------------------------
 

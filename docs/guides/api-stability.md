@@ -1,6 +1,6 @@
 # API stability (pre-1.0)
 
-OntoCode and OntoCore are **pre-1.0**. Published crates use **0.19.x** semver, but minor releases may add or change APIs until v1.0.0. This page tiers surfaces by stability so integrators can assess risk.
+OntoCode and OntoCore are **pre-1.0**. Published crates use **0.19.x** on crates.io (latest tagged); the workspace on `main` may be **0.20.x** unreleased. Minor releases may add or change APIs until v1.0.0.
 
 **Canonical capabilities:** [What ships today](../SHIPPED.md)
 
@@ -61,7 +61,7 @@ ontocore = "0.19"
 ontocore-core = "0.19"
 ```
 
-**VS Code:** install OntoCode **0.19.0** from Marketplace, Open VSX, or a release VSIX — the bundled `ontocore-lsp` matches the extension version.
+**VS Code:** install OntoCode **0.19.0** (latest tagged) from Marketplace, Open VSX, or a release VSIX — the bundled `ontocore-lsp` matches the extension version.
 
 ## Enterprise evaluation
 

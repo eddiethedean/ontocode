@@ -30,7 +30,7 @@ objective of the phases below.
 | Release | P0 phase | Stages | Primary epics | Primary blockers | Status |
 |---------|----------|--------|---------------|------------------|--------|
 | **v0.19** | A + baseline | 0–1 | EPIC-001, EPIC-011 (skeleton) | BLOCKER_01, BLOCKER_11 (manifest skeleton) | Complete |
-| **v0.20** | B | 2 | EPIC-003 | BLOCKER_03 | Planned |
+| **v0.20** | B | 2 | EPIC-003 | BLOCKER_03 | Complete (branch) |
 | **v0.21** | C (formats) | 3 | EPIC-001, EPIC-020 | BLOCKER_01, format audit | Planned |
 | **v0.22** | C (OWL 2) | 4 | EPIC-002 | BLOCKER_02 | Planned |
 | **v0.23** | D (reason + SWRL) | 5–6 | EPIC-004, EPIC-005 | BLOCKER_04, BLOCKER_05 | Planned |
@@ -46,7 +46,7 @@ Epics are indexed in [EPIC_INDEX.md](EPIC_INDEX.md).
 
 # v0.19 — Semantic foundation + program baseline
 
-**Status:** Complete (v0.19.0, 2026-07-13)\
+**Status:** Complete (v0.20.0, 2026-07-13)\
 **P0 phase:** A (Semantic Foundation)\
 **Stages:** 0–1\
 **Theme:** Freeze parity scope and route all edits through semantic transactions.
@@ -91,6 +91,7 @@ stage in one prompt. See [EXECUTION_ORDER.md § Cursor Session Strategy](../05_I
 
 # v0.20 — Workspace runtime
 
+**Status:** Complete on `v0.20` branch (awaiting tag)\
 **P0 phase:** B (Workspace Runtime)\
 **Stage:** 2\
 **Theme:** Make the workspace the central runtime for ontology state.
@@ -358,9 +359,9 @@ See [PARITY_RELEASE_GATE.md](../03_PARITY/PARITY_RELEASE_GATE.md) and
 The next five implementation sessions (from
 [EXECUTION_ORDER.md](../05_IMPLEMENTATION/EXECUTION_ORDER.md)):
 
-1.  Create the machine-readable parity manifest skeleton (v0.19)
-2.  Define the canonical semantic change API (v0.19)
-3.  Route one existing Turtle edit through the new API (v0.19)
+1.  Create the machine-readable parity manifest skeleton (v0.20)
+2.  Define the canonical semantic change API (v0.20)
+3.  Route one existing Turtle edit through the new API (v0.20)
 4.  Add workspace ontology registry and dirty state (v0.20)
 5.  Design and test the first RDF/XML semantic write-back slice (v0.21)
 

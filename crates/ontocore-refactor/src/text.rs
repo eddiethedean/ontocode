@@ -77,9 +77,13 @@ pub fn replace_iri_in_text(
                     .map(|(base, _)| base.to_string())
                     .unwrap_or_default()
             });
-            let new_prefix =
-                prefix_for_namespace(&new_ns, &namespaces).unwrap_or_else(|| prefix.clone());
-            let new_token = format!("{new_prefix}:{new_short}");
+            let new_token = match prefix_for_namespace(&new_ns, &namespaces) {
+                Some(new_prefix) if new_prefix.is_empty() => format!(":{new_short}"),
+                Some(new_prefix) => format!("{new_prefix}:{new_short}"),
+                // Never reuse the old prefix for a different namespace — that would keep the
+                // old IRI expansion. Fall back to an absolute IRI form.
+                None => format!("<{new_iri}>"),
+            };
             if old_token != new_token {
                 replacements.push((old_token, new_token));
             }
@@ -266,5 +270,49 @@ mod tests {
         assert!(!hunks.is_empty());
         assert!(out.contains(":Human a owl:Class"));
         assert!(!out.contains(":Person a owl:Class"));
+    }
+
+    #[test]
+    fn replace_iri_uses_absolute_form_when_target_namespace_undeclared() {
+        let ttl = concat!(
+            "@prefix ex: <http://example.org/v1#> .\n",
+            "@prefix owl: <http://www.w3.org/2002/07/owl#> .\n",
+            "ex:Person a owl:Class .\n"
+        );
+        let ns = BTreeMap::from([("ex".to_string(), "http://example.org/v1#".to_string())]);
+        let (out, hunks) = replace_iri_in_text(
+            ttl,
+            "http://example.org/v1#Person",
+            "http://example.org/v2#Human",
+            &ns,
+        );
+        assert!(!hunks.is_empty());
+        assert!(
+            out.contains("<http://example.org/v2#Human>"),
+            "must not reuse ex: for undeclared v2 namespace: {out}"
+        );
+        assert!(!out.contains("ex:Human"), "ex:Human would still expand under v1#: {out}");
+        assert!(!out.contains("ex:Person a owl:Class"));
+    }
+
+    #[test]
+    fn replace_iri_rewrites_same_local_name_across_namespaces() {
+        let ttl = concat!(
+            "@prefix ex: <http://example.org/v1#> .\n",
+            "@prefix owl: <http://www.w3.org/2002/07/owl#> .\n",
+            "ex:Person a owl:Class .\n"
+        );
+        let ns = BTreeMap::from([("ex".to_string(), "http://example.org/v1#".to_string())]);
+        let (out, _) = replace_iri_in_text(
+            ttl,
+            "http://example.org/v1#Person",
+            "http://example.org/v2#Person",
+            &ns,
+        );
+        assert!(
+            out.contains("<http://example.org/v2#Person>"),
+            "same local name must still rewrite when namespace changes: {out}"
+        );
+        assert!(!out.contains("ex:Person a owl:Class"));
     }
 }

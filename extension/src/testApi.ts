@@ -12,6 +12,7 @@ import {
   openPrefixManager as openPrefixManagerAt,
 } from "./commands/v017Commands";
 import { focusRelay } from "./focus/focusRelay";
+import { navigationManager, ontologyRegistry } from "./workspace";
 import { EntityInspectorPanel } from "./webviews/inspector";
 import { PanelHost } from "./webviews/panelHost";
 import { QueryWorkbenchPanel } from "./webviews/queryWorkbenchReact";
@@ -222,6 +223,20 @@ export function createOntoCodeTestHooks(): OntoCodeTestHooks {
 
     async settle(ms = 800): Promise<void> {
       await sleep(ms);
+    },
+
+    getOntologyRegistrySnapshot() {
+      return ontologyRegistry.getSnapshot().map((entry) => ({
+        id: entry.id,
+        path: entry.path,
+        editable: entry.editable,
+        dirty: entry.dirty,
+        active: entry.active,
+      }));
+    },
+
+    getNavigationStack() {
+      return navigationManager.getStack();
     },
 
     assertWebviewHtmlRoutesPanel(html: string, panel: PanelKind): void {

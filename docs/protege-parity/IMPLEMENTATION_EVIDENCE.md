@@ -66,9 +66,9 @@ Every parity feature should reference:
                  lifecycle                      extension                                                    multi-format
                                                                                                              persistence.
 
-  PAR-LIFE-002   Multi-       PARTIAL           extension           WorkspaceStore   ✓       TBD     ✓       Session
-                 ontology                                                                                    restoration
-                                                                                                             gap.
+  PAR-LIFE-002   Multi-       IMPLEMENTED       extension           ontologyRegistry  ✓       ✓       ✓       v0.20
+                 ontology                       workspace/          sessionPersistence                 registry +
+                                                                                                             session restore
 
   PAR-FMT-001    Turtle       IMPLEMENTED       ontocore-edit,      transaction.rs,  ✓       ✓       ✓       v0.19:
                  write-back                     ontocore-owl        adapter.rs,                         transaction
@@ -87,8 +87,9 @@ Every parity feature should reference:
   PAR-OWL-001    OWL 2        PARTIAL           ontocore-owl        patch.rs,        ✓       TBD     ✓       Target
                  authoring                                          manchester.rs                       v0.22.
 
-  PAR-WS-001     Workspace    PARTIAL           extension           WorkspaceStore   ✓       TBD     ✓       Target
-                 model                                                                                       v0.20.
+  PAR-WS-001     Workspace    IMPLEMENTED       extension           workspaceRuntime ✓       ✓       ✓       v0.20
+                 model                          workspace/          saveCoordinator                  workspace
+                                                                                                             runtime
 
   PAR-RSN-001    Reasoning    IMPLEMENTED       ontocore-reasoner   lib.rs           ✓       ✓       ✓       EL
                  classify                                                                                    classification.

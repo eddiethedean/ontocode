@@ -92,7 +92,9 @@ export class ReasonerPanel {
   public cancelActiveRun(): void {
     cancelActiveReasonerRequest();
     this.runId += 1;
-    this.host.postMessage({ type: "reasonerSyncRunId", runId: this.runId });
+    // Dedicated cancel message: must clear React `running` without using
+    // reasonerSyncRunId (which intentionally does not clear running — #212/#269).
+    this.host.postMessage({ type: "reasonerRunCancelled", runId: this.runId });
     const restore =
       this.preRunSnapshot ??
       captureReasoningPreRun(focusRelay.getReasoning());

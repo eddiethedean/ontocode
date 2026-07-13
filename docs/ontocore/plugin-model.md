@@ -4,7 +4,9 @@
 
 The plugin system allows users and organizations to extend **OntoCore** and **OntoCode** without modifying the core project. **Plugins integrate with OntoCore; they are not part of OntoCore.**
 
-Full specification: [PLUGIN_SPEC.md](../design/PLUGIN_SPEC.md).
+Canonical author guide: **[Plugin authoring](../guides/plugins.md)**.
+
+Historical trait-based design (do not implement from): [PLUGIN_SPEC.md](../design/PLUGIN_SPEC.md) — superseded by the shipped manifest + subprocess host in v0.14+.
 
 ## Architecture
 
@@ -46,7 +48,7 @@ Built-in reasoner adapters (`el`, `rl`, `rdfs`, `dl`, `auto`) ship in `ontocore-
 
 ## Reference interfaces (sketch)
 
-See [PLUGIN_SPEC.md](../design/PLUGIN_SPEC.md) for `BuildPlugin`, `WorkflowPlugin`, `ValidatorPlugin`, and `ExporterPlugin` trait sketches.
+See [Plugin authoring](../guides/plugins.md) for manifest format, permissions, and reference plugins. [PLUGIN_SPEC.md](../design/PLUGIN_SPEC.md) is a historical design doc — do not implement from it.
 
 ## Manifest (sketch)
 

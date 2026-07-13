@@ -12,7 +12,14 @@ if [[ -z "$VERSION" ]]; then
   exit 1
 fi
 
-echo "Checking documentation for version ${VERSION}..."
+TAGGED_VERSION="$(tr -d '[:space:]' < docs/TAGGED_RELEASE)"
+if [[ -z "$TAGGED_VERSION" ]]; then
+  echo "error: docs/TAGGED_RELEASE is empty" >&2
+  exit 1
+fi
+TAGGED_MINOR="${TAGGED_VERSION%.*}"
+
+echo "Checking documentation for workspace ${VERSION} (latest tagged: ${TAGGED_VERSION})..."
 
 fail=0
 
@@ -29,7 +36,19 @@ check_file_contains() {
 }
 
 check_file_contains "README.md" "v${VERSION}" "README header version"
-check_file_contains "docs/index.md" "v${VERSION}" "docs index hero version"
+if ! grep -F -- "--version ${TAGGED_VERSION}" README.md >/dev/null; then
+  echo "FAIL: README public install pin — expected --version ${TAGGED_VERSION}" >&2
+  fail=1
+else
+  echo "ok: README public install pin"
+fi
+if ! grep -F -- "--version ${TAGGED_VERSION}" docs/getting-started.md >/dev/null; then
+  echo "FAIL: getting-started install pin — expected --version ${TAGGED_VERSION}" >&2
+  fail=1
+else
+  echo "ok: getting-started install pin"
+fi
+check_file_contains "docs/index.md" "Latest tagged v${TAGGED_VERSION}" "docs index hero tagged version"
 check_file_contains "extension/README.md" "v${VERSION}" "extension README version"
 check_file_contains "extension/package.json" "\"version\": \"${VERSION}\"" "extension package.json version"
 EXT_LOCK_VERSION="$(grep -m1 -E '"version"' extension/package-lock.json | sed -E 's/.*"([^"]+)".*/\1/')"
@@ -39,20 +58,24 @@ if [[ "$EXT_LOCK_VERSION" != "$VERSION" ]]; then
 else
   echo "ok: extension lockfile version matches package.json"
 fi
-check_file_contains "docs/guides/enterprise-eval.md" "v${VERSION}" "enterprise eval version"
+check_file_contains "docs/guides/enterprise-eval.md" "v${TAGGED_VERSION}" "enterprise eval version"
 MINOR_VERSION="${VERSION%.*}"
-check_file_contains "SECURITY.md" "${MINOR_VERSION}\.x" "SECURITY.md supported versions"
-check_file_contains "docs/release-integrity.md" "VERSION=${VERSION}" "release-integrity example version"
+check_file_contains "SECURITY.md" "${TAGGED_MINOR}\.x" "SECURITY.md tagged supported version"
+if [[ "$VERSION" != "$TAGGED_VERSION" ]]; then
+  check_file_contains "SECURITY.md" "${MINOR_VERSION}\.x.*unreleased" "SECURITY.md unreleased workspace version note"
+fi
+check_file_contains "docs/release-integrity.md" "VERSION=${TAGGED_VERSION}" "release-integrity example version"
+check_file_contains "docs/TAGGED_RELEASE" "${TAGGED_VERSION}" "TAGGED_RELEASE file"
 check_file_contains "mkdocs.yml" "site_url: https://ontocode-vs.readthedocs.io/" "mkdocs site_url matches RTD"
 check_file_contains "README.md" "readthedocs.org/projects/ontocode-vs/badge" "RTD docs badge slug"
 
-# Reference page titles must match current release
+# Reference page titles must match latest tagged release (public install target)
 for file in docs/authoring.md docs/sql-reference.md docs/sparql-reference.md docs/patch-reference.md docs/cli-reference.md docs/errors.md; do
   if grep -qE "^# .+ \(OntoCore v0\.5\)" "$file"; then
     echo "FAIL: stale v0.5 title in $file" >&2
     fail=1
-  elif ! grep -qE "^# .+ \(Onto(Index|Core) v${VERSION%.*}\)" "$file"; then
-    echo "FAIL: reference title in $file should mention OntoCore or OntoCore v${VERSION%.*}" >&2
+  elif ! grep -qE "^# .+ \(Onto(Index|Core) v${TAGGED_MINOR}\)" "$file"; then
+    echo "FAIL: reference title in $file should mention OntoCore v${TAGGED_MINOR} (latest tagged)" >&2
     fail=1
   else
     echo "ok: reference title $file"
@@ -378,12 +401,12 @@ else
   echo "ok: webview-ui version matches extension and lockfile"
 fi
 
-# docs/security.md supported versions must match SECURITY.md for current minor
-if ! grep -q "${MINOR_VERSION}\.x   | Yes" docs/security.md; then
-  echo "FAIL: docs/security.md should list ${MINOR_VERSION}.x as supported (Yes)" >&2
+# docs/security.md supported versions must match SECURITY.md for tagged minor
+if ! grep -q "${TAGGED_MINOR}\.x   | Yes" docs/security.md; then
+  echo "FAIL: docs/security.md should list ${TAGGED_MINOR}.x as supported (Yes)" >&2
   fail=1
 else
-  echo "ok: docs/security.md supported version"
+  echo "ok: docs/security.md tagged supported version"
 fi
 
 # v0.8 docs added in adoption review
@@ -438,17 +461,17 @@ else
   echo "ok: lsp-api codeAction documented"
 fi
 
-check_file_contains "docs/guides/production-readiness.md" "${MINOR_VERSION}\.x \\(current\\)" "production-readiness current minor"
-check_file_contains "docs/ontocore/index.md" "v${VERSION}" "ontocore index version"
-check_file_contains "docs/ontocore/rust-api.md" "ontocore = \"${MINOR_VERSION}\"" "rust-api version pin"
-check_file_contains "docs/ontocore/crate-map.md" "ontocore = \"${MINOR_VERSION}\"" "crate-map version pin"
+check_file_contains "docs/guides/production-readiness.md" "${TAGGED_MINOR}\.x \\(latest tagged\\)" "production-readiness tagged minor"
+check_file_contains "docs/ontocore/index.md" "v${TAGGED_VERSION}" "ontocore index tagged version"
+check_file_contains "docs/ontocore/rust-api.md" "ontocore = \"${TAGGED_MINOR}\"" "rust-api version pin"
+check_file_contains "docs/ontocore/crate-map.md" "ontocore = \"${TAGGED_MINOR}\"" "crate-map version pin"
 check_file_contains "docs/ontocode/manage-imports.md" "Manage Imports" "manage-imports guide"
 check_file_contains "mkdocs.yml" "ontocode/manage-imports.md" "mkdocs manage-imports guide"
 check_file_contains "mkdocs.yml" "migration/v0.14.md" "mkdocs v0.14 migration guide"
 check_file_contains "mkdocs.yml" "migration/v0.17.md" "mkdocs v0.17 migration guide"
 check_file_contains "mkdocs.yml" "migration/v0.18.md" "mkdocs v0.18 migration guide"
 check_file_contains "mkdocs.yml" "v0\\.15 → v0\\.16" "mkdocs v0.16 migration in Help nav"
-check_file_contains "docs/guides/production-readiness.md" "v${VERSION}" "production-readiness version"
+check_file_contains "docs/guides/production-readiness.md" "v${TAGGED_VERSION}" "production-readiness version"
 check_file_contains "mkdocs.yml" "ontocore/rust-api.md" "mkdocs Rust API reference"
 check_file_contains "mkdocs.yml" "guides/protege-migration.md" "mkdocs Protégé migration guide"
 check_file_contains "mkdocs.yml" "ontocode/feature-tour.md" "mkdocs feature tour"
@@ -459,7 +482,7 @@ check_file_contains "mkdocs.yml" "documentation-index.md" "mkdocs documentation 
 check_file_contains "mkdocs.yml" "guides/plugins.md" "mkdocs plugins guide in Contribute"
 check_file_contains "mkdocs.yml" "known-limitations.md" "mkdocs known limitations"
 check_file_contains "mkdocs.yml" "Reference:" "mkdocs Reference tab"
-check_file_contains "docs/guides/rust-crates.md" "ontocore = \"${MINOR_VERSION}\"" "rust-crates version pin"
+check_file_contains "docs/guides/rust-crates.md" "ontocore = \"${TAGGED_MINOR}\"" "rust-crates version pin"
 
 # Stale protege-coexistence version banner
 if grep -qE 'evaluating OntoCode \*\*v0\.6\*\*|v0\.6 support' docs/guides/protege-coexistence.md; then
@@ -678,9 +701,13 @@ if rg -q 'latest \*\*v0\.15\.x\*\* tag|latest \*\*v0\.14\.x\*\* tag|latest \*\*v
 else
   echo "ok: no stale v0.14–v0.16 release tag references"
 fi
-check_file_contains "docs/getting-started.md" "latest \\*\\*v${MINOR_VERSION}\\.x\\*\\* tag" "getting-started Path D current tag"
-check_file_contains "docs/guides/which-artifact.md" "ontocore = \"${MINOR_VERSION}\"" "which-artifact crate pin"
-check_file_contains "docs/guides/api-stability.md" "Published crates use \\*\\*${MINOR_VERSION}\\.x\\*\\*" "api-stability published crates minor"
+check_file_contains "docs/getting-started.md" "latest \\*\\*v${TAGGED_MINOR}\\.x\\*\\* tag" "getting-started Path D current tag"
+check_file_contains "docs/guides/which-artifact.md" "ontocore = \"${TAGGED_MINOR}\"" "which-artifact crate pin"
+check_file_contains "docs/guides/api-stability.md" "Published crates use \\*\\*${TAGGED_MINOR}\\.x\\*\\*" "api-stability published crates minor"
+check_file_contains "docs/ci-integration.md" "VERSION=${TAGGED_VERSION}" "ci-integration release binary pin"
+check_file_contains "docs/faq.md" "version ${TAGGED_VERSION}" "faq CI version pin"
+check_file_contains "docs/known-limitations.md" "Latest tagged release: v${TAGGED_VERSION}" "known-limitations tagged release banner"
+check_file_contains "docs/index.md" "Latest tagged v${TAGGED_VERSION}" "docs index tagged release banner"
 if grep -qE 'semantic diff\) is the v1\.0 goal|Full Protégé parity \(.*semantic diff\)' docs/faq.md 2>/dev/null; then
   echo "FAIL: docs/faq.md contradicts SHIPPED on semantic diff" >&2
   fail=1
@@ -731,10 +758,23 @@ else
   echo "ok: no stale property chains view-only claims"
 fi
 
-# Architecture banner must reference current release ships today
-MINOR="${VERSION%.*}"
-check_file_contains "ARCHITECTURE.md" "v${MINOR} ships today" "ARCHITECTURE.md v${MINOR} banner"
-check_file_contains "docs/architecture.md" "v${MINOR} ships today" "docs/architecture.md v${MINOR} banner"
+# Architecture banner: during an unreleased minor, allow "in progress" wording
+if grep -qE "v${MINOR_VERSION} ships today" ARCHITECTURE.md 2>/dev/null; then
+  echo "ok: ARCHITECTURE.md v${MINOR_VERSION} ships today banner"
+elif grep -qE "v${MINOR_VERSION} in progress" ARCHITECTURE.md 2>/dev/null; then
+  echo "ok: ARCHITECTURE.md v${MINOR_VERSION} in progress banner"
+else
+  echo "FAIL: ARCHITECTURE.md v${MINOR_VERSION} banner — expected 'ships today' or 'in progress'" >&2
+  fail=1
+fi
+if grep -qE "v${MINOR_VERSION} ships today" docs/architecture.md 2>/dev/null; then
+  echo "ok: docs/architecture.md v${MINOR_VERSION} ships today banner"
+elif grep -qE "v${MINOR_VERSION} in progress" docs/architecture.md 2>/dev/null; then
+  echo "ok: docs/architecture.md v${MINOR_VERSION} in progress banner"
+else
+  echo "FAIL: docs/architecture.md v${MINOR_VERSION} banner — expected 'ships today' or 'in progress'" >&2
+  fail=1
+fi
 
 # Stale CLI alias notes
 if rg -q 'ontocore alias is planned' docs --glob '!**/migration/**' --glob '!**/design/**' 2>/dev/null; then
@@ -754,15 +794,23 @@ else
   echo "ok: no directory-only ui/ markdown links"
 fi
 
-# design/ARCHITECTURE.md must not freeze shipped banner at an old minor
-if grep -qE 'Shipped through v0\.(1[0-7]|[0-9]):' docs/design/ARCHITECTURE.md 2>/dev/null; then
-  echo "FAIL: docs/design/ARCHITECTURE.md shipped banner still says through an older minor (expected v${MINOR_VERSION})" >&2
-  fail=1
-elif ! grep -qE "Shipped through v${MINOR_VERSION}:" docs/design/ARCHITECTURE.md 2>/dev/null; then
-  echo "FAIL: docs/design/ARCHITECTURE.md must say Shipped through v${MINOR_VERSION}:" >&2
+# design/ARCHITECTURE.md shipped banner: current minor if released, else previous tagged minor
+PREV_MINOR_VERSION="$(python3 - <<PY
+maj, minor, *_ = "${VERSION}".split(".")
+print(f"{maj}.{int(minor)-1}")
+PY
+)"
+if grep -qE "Shipped through v${MINOR_VERSION}:" docs/design/ARCHITECTURE.md 2>/dev/null; then
+  echo "ok: design ARCHITECTURE shipped banner (current minor)"
+elif grep -qE "Shipped through v${PREV_MINOR_VERSION}:" docs/design/ARCHITECTURE.md 2>/dev/null \
+  && grep -qE "Unreleased on v${MINOR_VERSION}" docs/design/ARCHITECTURE.md 2>/dev/null; then
+  echo "ok: design ARCHITECTURE shipped banner (previous minor + unreleased note)"
+elif grep -qE 'Shipped through v0\.(1[0-7]|[0-9]):' docs/design/ARCHITECTURE.md 2>/dev/null; then
+  echo "FAIL: docs/design/ARCHITECTURE.md shipped banner still says through an older minor (expected v${MINOR_VERSION} or v${PREV_MINOR_VERSION} + unreleased)" >&2
   fail=1
 else
-  echo "ok: design ARCHITECTURE shipped banner"
+  echo "FAIL: docs/design/ARCHITECTURE.md must say Shipped through v${MINOR_VERSION}: (or v${PREV_MINOR_VERSION}: with Unreleased on v${MINOR_VERSION})" >&2
+  fail=1
 fi
 
 # LSP API must document OBO write-back alongside Turtle
@@ -807,8 +855,15 @@ check_file_contains "docs/platform/ONTOUI.md" "OntoUI" "platform OntoUI doc"
 check_file_contains "docs/adr/README.md" "Product & platform ADRs" "product adr index"
 check_file_contains "docs/glossary.md" "OntoUI" "glossary OntoUI term"
 check_file_contains "docs/documentation-index.md" "Documentation index" "docs documentation index"
-check_file_contains "docs/documentation-index.md" "v${VERSION}" "documentation-index current release"
-check_file_contains "mkdocs.yml" "engineering.md" "mkdocs engineering docs pointer"
+check_file_contains "docs/documentation-index.md" "v${TAGGED_VERSION}" "documentation-index tagged release"
+check_file_contains "mkdocs.yml" "guides/architecture-tour.md" "mkdocs architecture tour"
+check_file_contains "mkdocs.yml" "guides/testing-matrix.md" "mkdocs testing matrix"
+check_file_contains "mkdocs.yml" "guides/procurement-appendix.md" "mkdocs procurement appendix"
+check_file_contains "mkdocs.yml" "design/adr/README.md" "mkdocs engineering ADRs"
+check_file_contains "mkdocs.yml" "adr/README.md" "mkdocs product ADRs"
+check_file_contains "docs/guides/architecture-tour.md" "Architecture tour" "architecture tour page"
+check_file_contains "docs/guides/testing-matrix.md" "Contributor testing matrix" "testing matrix page"
+check_file_contains "docs/design/adr/README.md" "0020-semantic-transaction" "ADR-0020 in index"
 check_file_contains "mkdocs.yml" "Catalog SQL" "mkdocs catalog SQL reference label"
 check_file_contains "docs/engineering.md" "Engineering docs \\(GitHub\\)" "engineering pointer page"
 check_file_contains "docs/known-limitations.md" "Known limitations" "known limitations page"
@@ -836,10 +891,10 @@ else
   echo "ok: vision banner sync v${VERSION%.*}"
 fi
 
-check_file_contains "docs/glossary.md" "\\*\\*Implemented\\*\\* \\(v${VERSION%.*}\\)" "glossary OntoCore/OntoCode version"
-check_file_contains "docs/glossary.md" "\\*\\*Shipped\\*\\* \\(v${VERSION%.*}\\)" "glossary WorkspaceStore shipped"
+check_file_contains "docs/glossary.md" "\\*\\*Implemented\\*\\* \\(v${TAGGED_MINOR}\\)" "glossary OntoCore/OntoCode version"
+check_file_contains "docs/glossary.md" "\\*\\*Shipped\\*\\* \\(v${TAGGED_MINOR}\\)" "glossary WorkspaceStore shipped"
 check_file_contains "docs/vscode-install.md" "1.85" "vscode-install minimum VS Code version"
-check_file_contains "docs/documentation-index.md" "Shipped v${VERSION%.*}" "documentation-index OntoUI shipped"
+check_file_contains "docs/documentation-index.md" "Shipped v${TAGGED_MINOR}" "documentation-index OntoUI shipped"
 if grep -q 'Turtle (`.ttl`) only' extension/README.md 2>/dev/null; then
   echo "FAIL: extension/README.md troubleshooting still says Turtle-only inspector" >&2
   fail=1
@@ -857,47 +912,86 @@ check_file_contains "crates/ontocore-plugin/README.md" "Experimental" "plugin RE
 check_file_contains "crates/ontocore-obo/README.md" "ontocore-obo" "ontocore-obo README"
 
 # errors.md must reference current release
-check_file_contains "docs/errors.md" "v${VERSION}" "errors reference version"
+check_file_contains "docs/errors.md" "v${TAGGED_VERSION}" "errors reference version"
 
-# Canonical SHIPPED matrix must match workspace version
-check_file_contains "docs/SHIPPED.md" "What ships today \\(v${VERSION}\\)" "SHIPPED header version"
-check_file_contains "docs/SHIPPED.md" "Current release:.*v${VERSION}" "SHIPPED current release line"
+# Canonical SHIPPED matrix must match latest tagged release
+check_file_contains "docs/SHIPPED.md" "What ships today \\(v${TAGGED_VERSION}" "SHIPPED header tagged version"
+check_file_contains "docs/SHIPPED.md" "Latest tagged: v${TAGGED_VERSION}" "SHIPPED latest tagged line"
 
-# FAQ and LSP API must pin current release (not stale minors)
-check_file_contains "docs/faq.md" "version ${VERSION}" "faq CI version pin"
-check_file_contains "docs/lsp-api.md" "OntoCore v${VERSION}" "lsp-api status banner version"
+# LSP API title matches tagged minor; banner may mention workspace when ahead of tag
+check_file_contains "docs/lsp-api.md" "^# OntoCore LSP API \\(v${TAGGED_MINOR}\\)" "lsp-api title minor"
+check_file_contains "docs/ontocode/feature-tour.md" "^# OntoCode feature tour \\(current: v${TAGGED_MINOR}\\)" "feature-tour tagged minor"
 
-# Feature tour and LSP title must match current minor (not previous release)
-check_file_contains "docs/ontocode/feature-tour.md" "^# OntoCode feature tour \\(current: v${MINOR_VERSION}\\)" "feature-tour current minor"
-check_file_contains "docs/lsp-api.md" "^# OntoCore LSP API \\(v${MINOR_VERSION}\\)" "lsp-api title minor"
-
-# rust-library crates claim must match current minor (catches stale 0.11.x etc.)
-if ! grep -qE "Crates are at \\*\\*${MINOR_VERSION}\\.x\\*\\*" docs/guides/rust-library.md; then
-  echo "FAIL: docs/guides/rust-library.md crates version must be **${MINOR_VERSION}.x**" >&2
+# rust-library crates claim must match tagged minor
+if ! grep -qE "Crates are at \\*\\*${TAGGED_MINOR}\\.x\\*\\*" docs/guides/rust-library.md; then
+  echo "FAIL: docs/guides/rust-library.md crates version must be **${TAGGED_MINOR}.x**" >&2
   fail=1
 else
-  echo "ok: rust-library crates version ${MINOR_VERSION}.x"
+  echo "ok: rust-library crates version ${TAGGED_MINOR}.x"
 fi
 
-# Reject feature-tour / LSP titles pinned to the previous minor
-PREV_MINOR_MINOR="${MINOR_VERSION##*.}"
-if [[ "$PREV_MINOR_MINOR" =~ ^[0-9]+$ ]] && [[ "$PREV_MINOR_MINOR" -gt 0 ]]; then
-  STALE_MINOR="${MINOR_VERSION%%.*}.$((PREV_MINOR_MINOR - 1))"
-  if grep -qE "feature tour \\(current: v${STALE_MINOR}\\)" docs/ontocode/feature-tour.md 2>/dev/null; then
-    echo "FAIL: feature-tour still says current: v${STALE_MINOR}" >&2
+# Public install pins must not target unreleased workspace version
+INSTALL_PIN_EXCLUDE_GLOBS=(--glob '!**/changelog.md' --glob '!**/CHANGELOG.md' --glob '!**/migration/**' --glob '!**/design/**' --glob '!**/releasing.md' --glob '!**/TAGGED_RELEASE')
+if [[ "$VERSION" != "$TAGGED_VERSION" ]]; then
+  if rg -q "--version ${VERSION}" README.md docs extension crates .github "${INSTALL_PIN_EXCLUDE_GLOBS[@]}" 2>/dev/null; then
+    echo "FAIL: public --version ${VERSION} install pin (use ${TAGGED_VERSION} from docs/TAGGED_RELEASE)" >&2
+    rg -n "--version ${VERSION}" README.md docs extension crates .github "${INSTALL_PIN_EXCLUDE_GLOBS[@]}" 2>/dev/null || true
     fail=1
+  else
+    echo "ok: no public --version ${VERSION} install pins"
   fi
-  if grep -qE "^# OntoCore LSP API \\(v${STALE_MINOR}\\)" docs/lsp-api.md 2>/dev/null; then
-    echo "FAIL: lsp-api title still says v${STALE_MINOR}" >&2
+  if rg -q "VERSION=${VERSION}" README.md docs extension .github "${INSTALL_PIN_EXCLUDE_GLOBS[@]}" 2>/dev/null; then
+    echo "FAIL: public VERSION=${VERSION} install pin (use VERSION=${TAGGED_VERSION})" >&2
+    rg -n "VERSION=${VERSION}" README.md docs extension .github "${INSTALL_PIN_EXCLUDE_GLOBS[@]}" 2>/dev/null || true
     fail=1
+  else
+    echo "ok: no public VERSION=${VERSION} install pins"
+  fi
+  if rg -q "ontocore = \"${MINOR_VERSION}\"" README.md docs extension crates CONTRIBUTING.md "${INSTALL_PIN_EXCLUDE_GLOBS[@]}" 2>/dev/null; then
+    echo "FAIL: public ontocore = \"${MINOR_VERSION}\" pin (use \"${TAGGED_MINOR}\" for tagged release)" >&2
+    fail=1
+  else
+    echo "ok: no unreleased ontocore crate pins in user docs"
   fi
 fi
 
-# Enterprise eval capability table header must match release
-check_file_contains "docs/guides/enterprise-eval.md" "What ships today \\(v${VERSION}\\)" "enterprise-eval capability table version"
+# Reject feature-tour / LSP titles pinned to an older minor than tagged (only when workspace == tagged)
+if [[ "$VERSION" == "$TAGGED_VERSION" ]]; then
+  PREV_MINOR_MINOR="${TAGGED_MINOR##*.}"
+  if [[ "$PREV_MINOR_MINOR" =~ ^[0-9]+$ ]] && [[ "$PREV_MINOR_MINOR" -gt 0 ]]; then
+    STALE_MINOR="${TAGGED_MINOR%%.*}.$((PREV_MINOR_MINOR - 1))"
+    if grep -qE "feature tour \\(current: v${STALE_MINOR}\\)" docs/ontocode/feature-tour.md 2>/dev/null; then
+      echo "FAIL: feature-tour still says current: v${STALE_MINOR}" >&2
+      fail=1
+    fi
+    if grep -qE "^# OntoCore LSP API \\(v${STALE_MINOR}\\)" docs/lsp-api.md 2>/dev/null; then
+      echo "FAIL: lsp-api title still says v${STALE_MINOR}" >&2
+      fail=1
+    fi
+  fi
+fi
 
-# Governance must list current minor as supported
-check_file_contains "docs/guides/governance.md" "\\*\\*${MINOR_VERSION}\\.x\\*\\* \\| Yes — current release" "governance current release stream"
+# Enterprise eval capability table header must match tagged release
+check_file_contains "docs/guides/enterprise-eval.md" "What ships today \\(v${TAGGED_VERSION}" "enterprise-eval capability table version"
+
+# Governance must list tagged minor as current supported stream
+if grep -qE "\\*\\*${TAGGED_MINOR}\\.x\\*\\* \\| Yes — current tagged release" docs/guides/governance.md 2>/dev/null; then
+  echo "ok: governance tagged release stream"
+elif grep -qE "\\*\\*${TAGGED_MINOR}\\.x\\*\\* \\| Yes" docs/guides/governance.md 2>/dev/null; then
+  echo "ok: governance tagged release stream"
+else
+  echo "FAIL: governance must list **${TAGGED_MINOR}.x** as current tagged release" >&2
+  fail=1
+fi
+# Unreleased workspace minor (when ahead of tag) may appear as in-progress
+if [[ "$VERSION" != "$TAGGED_VERSION" ]]; then
+  if grep -qE "\\*\\*${MINOR_VERSION}\\.x\\*\\* \\| In progress \\(unreleased\\)" docs/guides/governance.md 2>/dev/null; then
+    echo "ok: governance in-progress development stream"
+  else
+    echo "FAIL: governance must list **${MINOR_VERSION}.x** as In progress (unreleased) when workspace > tagged" >&2
+    fail=1
+  fi
+fi
 
 # MkDocs must surface v0.15 migration in Get started / Help
 check_file_contains "mkdocs.yml" "migration/v0.16.md" "mkdocs v0.16 migration guide"

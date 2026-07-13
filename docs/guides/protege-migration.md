@@ -20,7 +20,9 @@ This guide helps ontology teams adopt OntoCode **v0.19** alongside or instead of
 
 Many teams use **both**: Protégé for heavy axiom authoring in OWL/XML, OntoCode for browse, lint, diff, reasoning, and CI. See [Protégé coexistence](protege-coexistence.md).
 
-## Honest desktop known gaps (v0.19)
+## Honest desktop known gaps (v0.19 tagged)
+
+See [Unreleased on main](../SHIPPED.md#unreleased-on-main-v020-not-tagged) for v0.20 branch items not yet on Marketplace.
 
 | Gap | Status |
 |-----|--------|
@@ -57,7 +59,7 @@ Follow the [first success core path](../guides/first-success.md) if anything is 
 | Imports | **Manage Imports** panel |
 | Preferences | OntoCode settings + plugin preference pages |
 | Active ontology | **Active Ontology** selector (multi-root supported) |
-| Refactor / move axioms | **Rename**, **Migrate Namespace**, **Move**, **Extract Module**, **Merge**, **Replace** |
+| Refactor / move axioms | **Rename**, **Migrate Namespace**, **Move**, **Extract Module** (CLI); **Merge**, **Replace** (IDE only) |
 | Diff between versions | **Semantic Diff** panel or `ontocore diff` in CI |
 | Layout / perspectives | Named **Modeling / Reasoning / Review** perspectives; restored tabs offer **Reopen panel** |
 

@@ -7,7 +7,7 @@ Install the [VS Code extension](https://marketplace.visualstudio.com/items?itemN
 **Editable today:** Turtle (`.ttl`) and OBO (`.obo`). Other formats index and query as read-only — see [Known limitations](https://ontocode-vs.readthedocs.io/en/latest/known-limitations/).
 **Catalog SQL (subset):** not full SQL — prefer SPARQL for graph patterns.
 
-**Current release: v0.19.0** · [10-minute tutorial](https://ontocode-vs.readthedocs.io/en/latest/guides/first-success/) · [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) · [Changelog](CHANGELOG.md) · [Docs](https://ontocode-vs.readthedocs.io/en/latest/)
+**Current release: v0.20.0 (in progress — unreleased)** · Latest tagged: **v0.19.0** · [10-minute tutorial](https://ontocode-vs.readthedocs.io/en/latest/guides/first-success/) · [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) · [Changelog](CHANGELOG.md) · [Docs](https://ontocode-vs.readthedocs.io/en/latest/)
 
 [![CI](https://github.com/eddiethedean/ontocode/actions/workflows/ci.yml/badge.svg)](https://github.com/eddiethedean/ontocode/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue)](https://github.com/eddiethedean/ontocode/blob/main/LICENSE-MIT)
@@ -26,6 +26,7 @@ Install the [VS Code extension](https://marketplace.visualstudio.com/items?itemN
 | Validate or query in CI | `cargo install ontocore-cli --locked --version 0.19.0` → [CI guide](https://ontocode-vs.readthedocs.io/en/latest/ci-integration/) (first compile: 15–30+ min) |
 | Decide if it fits | [Known limitations](https://ontocode-vs.readthedocs.io/en/latest/known-limitations/) · [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) |
 | Embed in Rust | [Rust library guide](https://ontocode-vs.readthedocs.io/en/latest/guides/rust-library/) |
+| Contribute | [CONTRIBUTING.md](CONTRIBUTING.md) |
 
 Full documentation: **[Read the Docs](https://ontocode-vs.readthedocs.io/en/latest/)**. You do not need to clone this repo to use the extension or installed CLI.
 
@@ -88,7 +89,7 @@ cargo run -- validate fixtures
 
 Platform docs: [Vision](https://ontocode-vs.readthedocs.io/en/latest/vision/) · [Architecture](ARCHITECTURE.md) · [Roadmap hub](https://ontocode-vs.readthedocs.io/en/latest/roadmap-hub/) · [Protégé vs OntoCode](https://ontocode-vs.readthedocs.io/en/latest/guides/protege-decision/)
 
-**v0.19.0** adds the semantic transaction apply path (`ontocore-edit`) and Protégé parity program baseline. See [SHIPPED](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/), [v0.19 migration](docs/migration/v0.19.md), and [What's new in v0.18](docs/migration/v0.18.md).
+**v0.20.0 (in progress)** includes Turtle patch matching hardening for Protégé/ROBOT-style files on this branch (not tagged yet). Latest tagged release is **v0.19.0**. See [SHIPPED](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/), draft [v0.20 migration](docs/migration/v0.20.md), and [What's new in v0.19](docs/migration/v0.19.md).
 
 ## Development
 

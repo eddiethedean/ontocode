@@ -95,6 +95,14 @@ wait_bg_steps() {
   BG_LOGS=()
 }
 
+wait_bg_steps_if_pending() {
+  if ((${#BG_PIDS[@]} > 0)); then
+    echo ""
+    echo "Waiting for background jobs before extension LSP tests (avoid CPU/IO contention)..."
+    wait_bg_steps
+  fi
+}
+
 run_rust_and_extension_steps() {
   run_step "clippy" \
     cargo clippy --workspace --all-targets --all-features -- -D warnings
@@ -130,6 +138,9 @@ run_rust_and_extension_steps() {
     cargo publish -p ontocore-robot --dry-run --allow-dirty
     cargo build -p ontocore-obo -p ontocore-diagnostics -p ontocore-owl -p ontocore-cli -p ontocore
   '
+
+  # mkdocs/audit in PARALLEL=1 mode can starve ontocore-lsp cold starts (>20s initialize).
+  wait_bg_steps_if_pending
 
   run_step "extension jobs (unit + e2e)" bash -c "
     set -euo pipefail
@@ -186,7 +197,6 @@ else
   '
 
   run_rust_and_extension_steps
-  wait_bg_steps
 fi
 
 # MSRV uses a different toolchain; run after the main pipeline to avoid lock contention.

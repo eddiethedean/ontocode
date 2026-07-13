@@ -39,7 +39,7 @@ Product code (LSP `applyAxiomPatch`, CLI `ontocore patch`) routes through `Trans
 - Extra indirection layer until serializers consume a richer semantic model
 - Some `Set*` patch ops are not invertible without prior-value capture (documented; `invert()` returns error)
 
-## Non-goals (v0.19)
+## Non-goals (v0.20)
 
 - Rewriting Turtle/OBO text engines
 - Workspace transaction manager (v0.20)
@@ -49,5 +49,5 @@ Product code (LSP `applyAxiomPatch`, CLI `ontocore patch`) routes through `Trans
 
 - [ADR-0006](0006-patch-based-write-back.md) — patch write-back
 - [ADR-0019](0019-obo-write-back.md) — OBO patches
-- [BLOCKER_01](../../protege-parity/04_BLOCKERS/BLOCKER_01_FORMAT_INDEPENDENCE.md)
-- [PRE_1_0_PHASES](../../protege-parity/07_BACKLOG/PRE_1_0_PHASES.md) § v0.19
+- [BLOCKER_01](https://github.com/eddiethedean/ontocode/blob/main/docs/protege-parity/04_BLOCKERS/BLOCKER_01_FORMAT_INDEPENDENCE.md)
+- [PRE_1_0_PHASES](https://github.com/eddiethedean/ontocode/blob/main/docs/protege-parity/07_BACKLOG/PRE_1_0_PHASES.md) § v0.19

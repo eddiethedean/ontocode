@@ -1,7 +1,6 @@
 import * as path from "path";
 import * as vscode from "vscode";
 import {
-  applyAxiomPatch,
   cancelActiveReasonerRequest,
   createOntology,
   exportOntology,
@@ -10,7 +9,6 @@ import {
   listPlugins,
   previewRefactor,
   runReasoner,
-  setActiveOntology,
 } from "../lsp/client";
 import { requirePatchFullySynced } from "../lsp/patchFeedback";
 import type {
@@ -30,6 +28,11 @@ import {
   persistPerspective,
   type Perspective,
 } from "../webviews/layoutPersistence";
+import {
+  ontologyRegistry,
+  saveCoordinator,
+  workspaceTransactionManager,
+} from "../workspace";
 import { RefactorPreviewPanel } from "../webviews/refactorPreview";
 import { ReasonerPanel } from "../webviews/reasonerPanel";
 import {
@@ -40,7 +43,6 @@ import {
 } from "../webviews/reasonerPanelLogic";
 import { PanelHost } from "../webviews/panelHost";
 
-const ACTIVE_ONTOLOGY_KEY = "ontocode.activeOntology";
 const ONTOLOGY_FILTERS: Record<string, string[]> = {
   "Ontology files": ["ttl", "owl", "rdf", "jsonld", "json-ld", "nt", "nq", "trig", "obo"],
 };
@@ -85,26 +87,35 @@ export function registerV017Commands(
       openLabel: "Open Ontology",
     });
     if (selected?.[0]) {
-      await vscode.window.showTextDocument(
-        await vscode.workspace.openTextDocument(selected[0])
-      );
+      await ontologyRegistry.open(selected[0]);
+      await refresh?.();
     }
   });
   command("ontocode.openRecent", () =>
     vscode.commands.executeCommand("workbench.action.openRecent")
   );
-  command("ontocode.save", () =>
-    vscode.commands.executeCommand("workbench.action.files.save")
-  );
-  command("ontocode.saveAll", () =>
-    vscode.commands.executeCommand("workbench.action.files.saveAll")
-  );
-  command("ontocode.undo", () =>
-    vscode.commands.executeCommand("undo")
-  );
-  command("ontocode.redo", () =>
-    vscode.commands.executeCommand("redo")
-  );
+  command("ontocode.save", async () => {
+    await saveCoordinator.saveActive();
+    await refresh?.();
+  });
+  command("ontocode.saveAll", async () => {
+    await saveCoordinator.saveAll();
+    await refresh?.();
+  });
+  command("ontocode.undo", async () => {
+    if (await workspaceTransactionManager.undo()) {
+      await refresh?.();
+      return;
+    }
+    await vscode.commands.executeCommand("undo");
+  });
+  command("ontocode.redo", async () => {
+    if (await workspaceTransactionManager.redo()) {
+      await refresh?.();
+      return;
+    }
+    await vscode.commands.executeCommand("redo");
+  });
   command("ontocode.closeProject", () =>
     vscode.commands.executeCommand("workbench.action.closeFolder")
   );
@@ -195,14 +206,8 @@ export function registerV017Commands(
   command("ontocode.setActiveOntology", async () => {
     const document = await pickOntologyDocument("Set Active Ontology");
     if (!document) return;
-    const result = await setActiveOntology({ ontology_id: document.id });
-    await context.workspaceState.update(
-      ACTIVE_ONTOLOGY_KEY,
-      result.active_ontology_id
-    );
-    void vscode.window.showInformationMessage(
-      `OntoCode: active ontology set to ${document.base_iri ?? path.basename(document.path)}`
-    );
+    await ontologyRegistry.activate(document.id);
+    await refresh?.();
   });
 
   command("ontocode.editOntologyMetadata", async () => {
@@ -554,8 +559,9 @@ async function copyFocused(shortForm: boolean): Promise<void> {
 }
 
 async function pickOntologyDocument(title: string): Promise<OntologyDocument | undefined> {
+  await ontologyRegistry.syncFromCatalog();
   const snapshot = await getCatalogSnapshot();
-  const active = snapshot.active_ontology_id;
+  const active = ontologyRegistry.getActiveId() ?? snapshot.active_ontology_id;
   if (snapshot.documents.length === 1) return snapshot.documents[0];
   const picked = await vscode.window.showQuickPick(
     snapshot.documents.map((document) => ({
@@ -577,11 +583,11 @@ async function applyDocumentPatches(
   if (!documentUri) {
     throw new Error(`document path is outside the workspace: ${document.path}`);
   }
-  const result = await applyAxiomPatch({
-    document_uri: documentUri,
-    patches,
-    preview_only: false,
-  });
+  const result = await workspaceTransactionManager.apply(
+    documentUri,
+    document.path,
+    patches
+  );
   requirePatchFullySynced(result);
 }
 

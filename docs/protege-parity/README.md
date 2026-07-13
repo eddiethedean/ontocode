@@ -1,5 +1,7 @@
 # Protégé Parity Program
 
+> **Engineering program (GitHub only).** This tree is **excluded from the public Read the Docs site**. Evaluators should use [What ships today](../SHIPPED.md) and [Known limitations](../known-limitations.md) — not parity drafts — for adoption decisions.
+
 This directory contains the engineering specifications, audits, and
 implementation plans that drive **OntoCode 1.0.0** toward **full
 functional parity with Protégé Desktop**.
@@ -25,47 +27,45 @@ The parity program has four primary goals:
 
 # Documentation Structure
 
+Paths below are relative to this directory (`docs/protege-parity/`).
+
 ## Foundation
 
--   `README.md` --- This document.
--   `ONTOCODE_CURRENT_PROTEGE_PARITY_AUDIT.md` --- Evidence-based audit of the
+-   `README.md` — This document.
+-   `ONTOCODE_CURRENT_PROTEGE_PARITY_AUDIT.md` — Evidence-based audit of the
     current repository.
--   `PARITY_SCOPE.md` --- Defines what "Protégé parity" means.
--   `IMPLEMENTATION_EVIDENCE.md` --- Maps parity claims to source code
-    and tests.
+-   `PARITY_SCOPE.md` — Defines what "Protégé parity" means.
+-   `IMPLEMENTATION_EVIDENCE.md` — Maps parity claims to source code
+    and tests (canonical registry — do not duplicate under `05_IMPLEMENTATION/`).
 
-## Current State
+## Current State (`01_CURRENT_STATE/`)
 
-Documents describing the current implementation:
+-   `01_CURRENT_STATE/CURRENT_FEATURE_MATRIX.md`
+-   `01_CURRENT_STATE/CURRENT_ARCHITECTURE.md`
+-   `01_CURRENT_STATE/CURRENT_LIMITATIONS.md`
+-   `01_CURRENT_STATE/SHIPPED_CAPABILITIES.md`
 
--   `CURRENT_FEATURE_MATRIX.md`
--   `CURRENT_ARCHITECTURE.md`
--   `CURRENT_LIMITATIONS.md`
--   `SHIPPED_CAPABILITIES.md`
+## Protégé Audit (`02_PROTEGE_AUDIT/`)
 
-## Protégé Audit
+-   `02_PROTEGE_AUDIT/PROTEGE_FEATURE_INVENTORY.md`
+-   `02_PROTEGE_AUDIT/PROTEGE_MENU_AUDIT.md`
+-   `02_PROTEGE_AUDIT/PROTEGE_VIEW_AUDIT.md`
+-   `02_PROTEGE_AUDIT/PROTEGE_WORKFLOW_AUDIT.md`
+-   `02_PROTEGE_AUDIT/PROTEGE_PLUGIN_AUDIT.md`
+-   `02_PROTEGE_AUDIT/PROTEGE_REASONER_AUDIT.md`
+-   `02_PROTEGE_AUDIT/PROTEGE_FILE_FORMAT_AUDIT.md`
+-   `02_PROTEGE_AUDIT/PROTEGE_UI_AUDIT.md`
 
-Documents describing the Protégé baseline:
+## Parity Tracking (`03_PARITY/`)
 
--   `PROTEGE_FEATURE_INVENTORY.md`
--   `PROTEGE_MENU_AUDIT.md`
--   `PROTEGE_VIEW_AUDIT.md`
--   `PROTEGE_WORKFLOW_AUDIT.md`
--   `PROTEGE_PLUGIN_AUDIT.md`
--   `PROTEGE_REASONER_AUDIT.md`
--   `PROTEGE_FILE_FORMAT_AUDIT.md`
--   `PROTEGE_UI_AUDIT.md`
+-   `03_PARITY/PARITY_MATRIX.md`
+-   `03_PARITY/PARITY_GAP_ANALYSIS.md`
+-   `03_PARITY/PARITY_STATUS.md`
+-   `03_PARITY/PARITY_ACCEPTANCE_CRITERIA.md`
+-   `03_PARITY/PARITY_TEST_PLAN.md`
+-   `03_PARITY/PARITY_RELEASE_GATE.md`
 
-## Parity Tracking
-
--   `PARITY_MATRIX.md`
--   `PARITY_GAP_ANALYSIS.md`
--   `PARITY_STATUS.md`
--   `PARITY_ACCEPTANCE_CRITERIA.md`
--   `PARITY_TEST_PLAN.md`
--   `PARITY_RELEASE_GATE.md`
-
-## Engineering Blockers
+## Engineering Blockers (`04_BLOCKERS/`)
 
 The implementation roadmap is organized around blockers rather than
 subsystems:
@@ -78,16 +78,16 @@ subsystems:
 6.  Advanced ontology operations
 7.  Parity verification
 
-## Implementation Planning
+## Implementation Planning (`05_IMPLEMENTATION/`)
 
--   `IMPLEMENTATION_PLAN.md`
--   `EXECUTION_ORDER.md`
--   `DEPENDENCY_GRAPH.md`
--   `P0_IMPLEMENTATION_PLAN.md`
--   `P1_IMPLEMENTATION_PLAN.md`
--   `RISK_REGISTER.md`
+-   `05_IMPLEMENTATION/IMPLEMENTATION_PLAN.md`
+-   `05_IMPLEMENTATION/EXECUTION_ORDER.md`
+-   `05_IMPLEMENTATION/DEPENDENCY_GRAPH.md`
+-   `05_IMPLEMENTATION/P0_IMPLEMENTATION_PLAN.md`
+-   `05_IMPLEMENTATION/P1_IMPLEMENTATION_PLAN.md`
+-   `05_IMPLEMENTATION/RISK_REGISTER.md`
 
-## Subsystem Specifications
+## Subsystem Specifications (`06_SUBSYSTEMS/`)
 
 Detailed implementation specifications for authoring, formats,
 workspace, reasoning, SWRL, refactoring, querying, visualization,
@@ -100,8 +100,8 @@ plugins, UI workflows, and testing.
 1.  Read [PRE_1_0_PHASES.md](07_BACKLOG/PRE_1_0_PHASES.md) for the versioned release plan (v0.19–1.0).
 2.  Read `ONTOCODE_CURRENT_PROTEGE_PARITY_AUDIT.md` or `01_CURRENT_STATE/` audit docs.
 3.  Read `PARITY_SCOPE.md`.
-4.  Review `PARITY_MATRIX.md` and `PARITY_GAP_ANALYSIS.md`.
-5.  Read the blocker documents in order.
+4.  Review `03_PARITY/PARITY_MATRIX.md` and `03_PARITY/PARITY_GAP_ANALYSIS.md`.
+5.  Read the blocker documents in `04_BLOCKERS/` in order.
 6.  Execute work from [EXECUTION_ORDER.md](05_IMPLEMENTATION/EXECUTION_ORDER.md) and backlog.
 7.  Validate progress using the acceptance criteria and test plan.
 8.  Ship only after every release gate has been satisfied.
@@ -137,7 +137,7 @@ when:
 
 Whenever implementation changes:
 
-1.  Update implementation evidence.
+1.  Update [IMPLEMENTATION_EVIDENCE.md](IMPLEMENTATION_EVIDENCE.md).
 2.  Update the parity matrix.
 3.  Reassess the gap analysis.
 4.  Update the roadmap and backlog.

@@ -2,10 +2,10 @@
 
 The `ontocore` binary indexes ontology workspaces and exposes query, validation, patch, and reasoning commands.
 
-Install:
+Install (pin latest tagged release):
 
 ```bash
-cargo install ontocore-cli --locked
+cargo install ontocore-cli --locked --version 0.19.0
 ```
 
 From a git clone, use `cargo run --` instead of `ontocore`.
@@ -15,6 +15,24 @@ From a git clone, use `cargo run --` instead of `ontocore`.
 Several commands accept `--format text|json|csv` (where noted). Default is `text`.
 
 ## Commands
+
+### `new`
+
+Create a new Turtle or OBO ontology file with `owl:Ontology` header metadata.
+
+```bash
+ontocore new ./people.ttl --ontology-iri 'http://example.org/people'
+ontocore new ./terms.obo --ontology-iri 'http://purl.obolibrary.org/obo/demo.owl' --force
+```
+
+| Flag | Description |
+|------|-------------|
+| `path` | Output path (`.ttl` or `.obo`) |
+| `--ontology-iri` | Ontology IRI (required) |
+| `--version-iri` | Optional version IRI |
+| `--force` | Overwrite existing file |
+
+**Exit:** 0 on success; non-zero if the path exists (without `--force`) or IRI validation fails.
 
 ### `index`
 

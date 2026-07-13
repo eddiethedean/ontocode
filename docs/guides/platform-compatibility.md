@@ -1,6 +1,6 @@
 # Platform and VS Code compatibility
 
-Supported platforms and environments for OntoCode **v0.19.0**. This page states **what is documented and tested in project CI** — not a formal certification.
+Supported platforms and environments for OntoCode **v0.19.0** (latest tagged). This page states **what is documented and tested in project CI** — not a formal certification.
 
 Canonical matrix: [What ships today](../SHIPPED.md).
 

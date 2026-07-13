@@ -17,4 +17,4 @@ Enable via the `ontocore` façade feature:
 ontocore = { version = "0.19", features = ["plugins"] }
 ```
 
-**Current version: 0.19.0**
+**Current version: 0.20.0**

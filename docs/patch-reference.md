@@ -5,7 +5,7 @@
 
 Patch write-back (Turtle and OBO) uses a JSON array of patch operations. The CLI (`ontocore patch`) and LSP (`ontocore/applyAxiomPatch`) accept the same envelope; operation sets differ by file extension.
 
-**Apply path (v0.19):** inbound patch JSON is wrapped as an `ontocore_edit::Transaction` and applied through format adapters (`TurtleAdapter` / `OboAdapter`) before the existing `apply_patches_to_text` engines run. Legacy patch arrays remain accepted; an optional forward envelope `{ "transaction": { "changes": [...] } }` is also supported.
+**Apply path (v0.20):** inbound patch JSON is wrapped as an `ontocore_edit::Transaction` and applied through format adapters (`TurtleAdapter` / `OboAdapter`) before the existing `apply_patches_to_text` engines run. Legacy patch arrays remain accepted; an optional forward envelope `{ "transaction": { "changes": [...] } }` is also supported.
 
 **Source of truth:** [`patch.rs` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/crates/ontocore-owl/src/patch.rs)
 

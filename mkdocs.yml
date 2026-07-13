@@ -21,6 +21,7 @@ exclude_docs: |
   /platform/
   /cursor-prompts/
   /PROTEGE_REVERSE_ENGINEERING/
+  /protege-parity/
   /OntoCode_UI_Vision_and_Roadmap.zip
 
 validation:
@@ -162,24 +163,20 @@ nav:
       - Errors: errors.md
       - Workspace limits: workspace-limits.md
       - Supported formats: supported-formats.md
-      - Automation and stability: automation-stability.md
       - OntoCore SQL views: ontocore/sql-views.md
+      - Architecture decisions:
+          - Engineering ADRs: design/adr/README.md
+          - Product ADRs: adr/README.md
   - Evaluate:
       - What ships today: SHIPPED.md
+      - Known limitations: known-limitations.md
+      - Protégé vs OntoCode: guides/protege-decision.md
+      - Enterprise evaluation: guides/enterprise-eval.md
+      - Procurement appendix: guides/procurement-appendix.md
       - Vision: vision.md
       - Architecture: architecture.md
       - Roadmap hub: roadmap-hub.md
       - API stability (pre-1.0): guides/api-stability.md
-      - Enterprise evaluation: guides/enterprise-eval.md
-      - Protégé vs OntoCode: guides/protege-decision.md
-      - Production readiness: guides/production-readiness.md
-      - Production evidence protocol: guides/production-evidence.md
-      - Enterprise deployment: guides/enterprise-deployment.md
-      - Platform compatibility: guides/platform-compatibility.md
-      - Performance and sizing: guides/performance-sizing.md
-      - Governance: guides/governance.md
-      - Release timeline: guides/release-timeline.md
-      - LGPL compliance: guides/lgpl-compliance.md
       - Security: security.md
   - Help:
       - Start here: start.md
@@ -194,6 +191,7 @@ nav:
       - Changelog: changelog.md
       - Migrations:
           - Migration index: migration/README.md
+          - v0.19.0 → v0.20.0: migration/v0.20.md
           - v0.18.2 → v0.19.0: migration/v0.19.md
           - v0.18.1 → v0.18.2: migration/v0.18.2.md
           - v0.18.0 → v0.18.1: migration/v0.18.1.md
@@ -206,9 +204,12 @@ nav:
       - Release integrity: release-integrity.md
   - Contribute:
       - Guide: contributing.md
+      - Architecture tour: guides/architecture-tour.md
+      - Testing matrix: guides/testing-matrix.md
       - Extension development: guides/extension-development.md
       - Plugin authoring: guides/plugins.md
       - Debugging: debugging.md
+      - Automation and stability: automation-stability.md
       - Releasing: releasing.md
       - Marketplace publish: marketplace-publish.md
       - Internals: internals.md

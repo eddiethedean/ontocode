@@ -1,7 +1,7 @@
 use crate::input::DiagnosticInput;
 use crate::location::{entity_needles, find_in_source};
 use ontocore_core::{document_for_entity, Diagnostic, DiagnosticCode, DiagnosticSeverity};
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
 
 pub fn duplicate_labels(
@@ -21,10 +21,13 @@ pub fn duplicate_labels(
 
     let mut diagnostics = Vec::new();
     for (label, entities) in by_label {
-        if entities.len() < 2 {
+        let mut seen = BTreeSet::new();
+        let unique: Vec<_> =
+            entities.into_iter().filter(|entity| seen.insert(entity.iri.as_str())).collect();
+        if unique.len() < 2 {
             continue;
         }
-        for entity in entities {
+        for entity in unique {
             let Some(doc) = document_for_entity(data.documents, entity) else {
                 continue;
             };
@@ -122,5 +125,44 @@ mod tests {
         assert!(diags.iter().all(|d| d.code == DiagnosticCode::DuplicateLabel));
         assert!(diags.iter().all(|d| d.severity == DiagnosticSeverity::Warning));
         assert!(diags[0].message.contains("shared"));
+    }
+
+    #[test]
+    fn ignores_case_variant_labels_on_same_entity() {
+        let documents = vec![OntologyDocument {
+            id: "doc-1".to_string(),
+            path: Path::new("dup.ttl").to_path_buf(),
+            format: OntologyFormat::Turtle,
+            base_iri: Some("http://example.org/dup".to_string()),
+            imports: vec![],
+            namespaces: BTreeMap::new(),
+            parse_status: ParseStatus::Ok,
+            content_hash: "h".to_string(),
+            modified_time: 0,
+            parse_message: None,
+            parse_error_location: None,
+        }];
+        let entities = vec![Entity {
+            iri: "http://example.org/dup#Person".to_string(),
+            short_name: "Person".to_string(),
+            kind: EntityKind::Class,
+            ontology_id: "http://example.org/dup".to_string(),
+            source_location: Default::default(),
+            labels: vec!["\"Person\"".to_string(), "\"person\"".to_string()],
+            comments: vec![],
+            deprecated: false,
+            obo_id: None,
+            characteristics: Default::default(),
+        }];
+        let input = DiagnosticInput {
+            documents: &documents,
+            entities: &entities,
+            annotations: &[],
+            axioms: &[],
+            namespaces: &[],
+            imports: &[],
+        };
+        let diags = duplicate_labels(&input, &empty_source);
+        assert!(diags.is_empty(), "same-entity case-variant labels must not warn: {diags:?}");
     }
 }

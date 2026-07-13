@@ -12,7 +12,7 @@ For quick answers, see also [FAQ](faq.md).
 | Language server failed to start | Untrusted workspace, bad `lspPath`, duplicate extension | [LSP failed](#vs-code-language-server-failed-to-start) |
 | Cannot edit in inspector | Wrong format (`.owl`/`.owx`/JSON-LD read-only), wrong file | [Cannot edit](#vs-code-cannot-edit-in-inspector) · [Known limitations](known-limitations.md) |
 | Patch / Manchester did not stick | Buffer vs disk conflict, stale index | [Patch did not stick](#vs-code-patch-or-manchester-apply-did-not-stick) |
-| `fixtures/` path fails in CLI | Using clone-only paths after `cargo install` | [CLI fixtures](#cli-ontocore-query-fixtures-fails) |
+| `cargo install` / `ontocore: command not found` after install | PATH, wrong version pin, docs ahead of release | [Install / version pin](#cli-install-or-version-not-found) |
 | `validate` exits non-zero | Diagnostic errors in ontology | [Validate exit](#cli-validate-exits-non-zero) |
 | Query returns no rows | Stale index, wrong table/column names | [Query empty](#queries-return-no-rows-or-wrong-data) |
 | Reasoner errors or empty hierarchy | Profile mismatch, Ontologos, unsat classes | [Reasoner](#reasoner) |
@@ -69,6 +69,26 @@ Patches write the **source file on disk** first (`.ttl` or `.obo`), then update 
 2. If you had **unsaved** local edits that conflicted, review the file on disk — the server applied against its buffer/disk snapshot.
 3. If re-index fails after a successful write, the catalog may be stale. Run **OntoCode: Index Workspace**.
 4. Check **View → Output → OntoCore Language Server** and [errors reference](errors.md).
+
+## CLI: install or version not found
+
+**Symptom:** `cargo install ontocore-cli --locked --version X.Y.Z` fails with “could not find version” or GitHub Release curl returns 404.
+
+**Cause:** Documentation on `main` may describe an **unreleased** minor while crates.io and GitHub Releases only publish **tagged** versions.
+
+**Fix:**
+
+1. Pin the latest tagged release from [docs/TAGGED_RELEASE](https://github.com/eddiethedean/ontocode/blob/main/docs/TAGGED_RELEASE) (currently **0.19.0**):
+
+   ```bash
+   cargo install ontocore-cli --locked --version 0.19.0
+   ```
+
+2. For release tarballs, download assets from the matching tag (e.g. `v0.19.0`), not an unreleased `v0.20.0` URL.
+
+3. Ensure `~/.cargo/bin` is on your `PATH` — see [getting started](getting-started.md).
+
+Marketplace / Open VSX extension versions may also lag `main` — check the extension version in VS Code **Extensions** view.
 
 ## CLI: `ontocore query ./fixtures` fails
 

@@ -31,7 +31,7 @@ Two related products:
 
 ## v1.0 exit bar
 
-**[protege-parity program](../protege-parity/README.md)** — authoritative 1.0 engineering plan ([PRE_1_0_PHASES.md](../protege-parity/07_BACKLOG/PRE_1_0_PHASES.md)). **[PROTEGE_PARITY.md](PROTEGE_PARITY.md)** — historical v0.18 P0/P1/P2 checklist. Forward plan: [Roadmap § OntoCode 1.0](../roadmap.md#ontocode-10-modern-protege-replacement).
+**[protege-parity program](https://github.com/eddiethedean/ontocode/blob/main/docs/protege-parity/README.md)** — authoritative 1.0 engineering plan ([PRE_1_0_PHASES.md](https://github.com/eddiethedean/ontocode/blob/main/docs/protege-parity/07_BACKLOG/PRE_1_0_PHASES.md)). **[PROTEGE_PARITY.md](PROTEGE_PARITY.md)** — historical v0.18 P0/P1/P2 checklist. Forward plan: [Roadmap § OntoCode 1.0](../roadmap.md#ontocode-10-modern-protege-replacement).
 
 ## Document status
 
@@ -51,7 +51,7 @@ Many specs describe **target** behavior. Check the banner at the top of each doc
 - [ROADMAP.md](ROADMAP.md) — **engineering milestones v0.1–v0.11 (shipped detail)**
 - [DEPENDENCY_MATRIX.md](DEPENDENCY_MATRIX.md) — **external crate inventory**
 - [LICENSES.md](LICENSES.md) — third-party license summary
-- [protege-parity program](../protege-parity/README.md) — **1.0 engineering program**
+- [protege-parity program](https://github.com/eddiethedean/ontocode/blob/main/docs/protege-parity/README.md) — **1.0 engineering program**
 - [PROTEGE_PARITY.md](PROTEGE_PARITY.md) — historical v0.18 compete checklist
 - [v1.0_BACKLOG.md](v1.0_BACKLOG.md) — implementation backlog
 

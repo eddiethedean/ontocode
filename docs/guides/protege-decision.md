@@ -1,6 +1,6 @@
 # Protégé vs OntoCode decision matrix
 
-Use this page to decide **when OntoCode fits**, **when to keep Protégé**, and **when to run both**. It reflects **v0.19.0** — see [What ships today](../SHIPPED.md). A [first-week migration guide](protege-migration.md) ships today; extended round-trip playbooks are planned for **v1.0**.
+Use this page to decide **when OntoCode fits**, **when to keep Protégé**, and **when to run both**. It reflects **v0.19.0** (latest tagged) — see [What ships today](../SHIPPED.md). Unreleased v0.20 items on `main` are listed in SHIPPED under **Unreleased on main**. A [first-week migration guide](protege-migration.md) ships today; extended round-trip playbooks are planned for **v1.0**.
 
 !!! note "Non-goals today (v0.19)"
     - **WebProtégé-style collaboration** — out of scope until post-1.0
@@ -15,17 +15,17 @@ Use this page to decide **when OntoCode fits**, **when to keep Protégé**, and 
 | VS Code + Turtle-primary ontologies | **Adopt OntoCode** (pilot IDE + CI) |
 | CI lint/consistency gates without desktop Protégé | **Adopt OntoCore CLI** (`ontocore validate` / `classify`) |
 | Full OWL 2 DL axiom catalog + OWL/XML write-back | **Split workflow** — use OntoCode for Turtle/OBO authoring and DL classification; keep Protégé for OWL/XML-heavy modules until [v0.21](../roadmap.md) |
-| OBO release pipelines with in-editor OBO write-back | **Adopt OntoCode** (v0.13+) for OBO inspector + `ontocore patch`; validate with ROBOT in CI |
+| OBO release pipelines with in-editor OBO write-back | **Adopt OntoCode** (inspector since v0.13; patch engine since v0.12) for OBO inspector + `ontocore patch`; validate with ROBOT in CI |
 | Enterprise requires vendor SLA / SOC 2 | **Defer** or run limited CI pilot — [Production readiness](production-readiness.md) |
 | Air-gapped VS Code + internal artifact mirror | **Pilot** — [Enterprise deployment](enterprise-deployment.md) |
 
-## Capability comparison (v0.19)
+## Capability comparison (v0.19 tagged)
 
 | Capability | Protégé | OntoCode v0.19 | Notes |
 |------------|---------|----------------|-------|
 | OWL 2 DL classification | Yes | Yes (`dl` / `auto` via OntoLogos 1.x) | Explanations EL-first; see [Reasoner guide](reasoner.md) |
 | Turtle authoring | Manual / plugins | Native write-back | OntoCode inspector + patches |
-| OBO authoring | Native | Native write-back (v0.12) | Inspector + `ontocore patch` |
+| OBO authoring | Native | Native write-back | Patch engine since v0.12; Entity Inspector since v0.13 |
 | RDF/XML in-place editing | Yes | Read-only index | Write-back Turtle and OBO |
 | Manchester axiom editing | Full | MVP subset | Disjoint + property chains shipped (v0.12) |
 | Disjoint classes | Yes | Yes (v0.9) | Via Manchester / patch JSON |

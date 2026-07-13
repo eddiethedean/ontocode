@@ -8,8 +8,10 @@ pub fn invert_patch_op(op: &PatchOp) -> Result<PatchOp> {
         PatchOp::AddPrefix { prefix, namespace_iri: _ } => {
             PatchOp::RemovePrefix { prefix: prefix.clone() }
         }
-        PatchOp::RemovePrefix { prefix } => {
-            PatchOp::AddPrefix { prefix: prefix.clone(), namespace_iri: String::new() }
+        PatchOp::RemovePrefix { .. } => {
+            return Err(EditError::NotInvertible(
+                "remove_prefix inverse requires prior namespace IRI".into(),
+            ));
         }
         PatchOp::SetPrefix { .. } => {
             return Err(EditError::NotInvertible("set_prefix requires prior value".into()));
@@ -85,7 +87,13 @@ pub fn invert_patch_op(op: &PatchOp) -> Result<PatchOp> {
             manchester: manchester.clone(),
         },
         PatchOp::SetDeprecated { entity_iri, value } => {
-            PatchOp::SetDeprecated { entity_iri: entity_iri.clone(), value: !value }
+            if !*value {
+                return Err(EditError::NotInvertible(
+                    "set_deprecated false inverse would invent deprecation without prior state"
+                        .into(),
+                ));
+            }
+            PatchOp::SetDeprecated { entity_iri: entity_iri.clone(), value: false }
         }
         PatchOp::AddDisjointClass { entity_iri, other_iri } => PatchOp::RemoveDisjointClass {
             entity_iri: entity_iri.clone(),
@@ -121,30 +129,48 @@ pub fn invert_patch_op(op: &PatchOp) -> Result<PatchOp> {
         | PatchOp::SetSymmetric { .. }
         | PatchOp::SetAsymmetric { .. }
         | PatchOp::SetReflexive { .. }
-        | PatchOp::SetIrreflexive { .. } => match op {
-            PatchOp::SetFunctional { entity_iri, value } => {
-                PatchOp::SetFunctional { entity_iri: entity_iri.clone(), value: !value }
+        | PatchOp::SetIrreflexive { .. } => {
+            let value = match op {
+                PatchOp::SetFunctional { value, .. }
+                | PatchOp::SetInverseFunctional { value, .. }
+                | PatchOp::SetTransitive { value, .. }
+                | PatchOp::SetSymmetric { value, .. }
+                | PatchOp::SetAsymmetric { value, .. }
+                | PatchOp::SetReflexive { value, .. }
+                | PatchOp::SetIrreflexive { value, .. } => *value,
+                _ => unreachable!(),
+            };
+            if !value {
+                return Err(EditError::NotInvertible(
+                    "clearing a property characteristic is not invertible without prior state"
+                        .into(),
+                ));
             }
-            PatchOp::SetInverseFunctional { entity_iri, value } => {
-                PatchOp::SetInverseFunctional { entity_iri: entity_iri.clone(), value: !value }
+            match op {
+                PatchOp::SetFunctional { entity_iri, .. } => {
+                    PatchOp::SetFunctional { entity_iri: entity_iri.clone(), value: false }
+                }
+                PatchOp::SetInverseFunctional { entity_iri, .. } => {
+                    PatchOp::SetInverseFunctional { entity_iri: entity_iri.clone(), value: false }
+                }
+                PatchOp::SetTransitive { entity_iri, .. } => {
+                    PatchOp::SetTransitive { entity_iri: entity_iri.clone(), value: false }
+                }
+                PatchOp::SetSymmetric { entity_iri, .. } => {
+                    PatchOp::SetSymmetric { entity_iri: entity_iri.clone(), value: false }
+                }
+                PatchOp::SetAsymmetric { entity_iri, .. } => {
+                    PatchOp::SetAsymmetric { entity_iri: entity_iri.clone(), value: false }
+                }
+                PatchOp::SetReflexive { entity_iri, .. } => {
+                    PatchOp::SetReflexive { entity_iri: entity_iri.clone(), value: false }
+                }
+                PatchOp::SetIrreflexive { entity_iri, .. } => {
+                    PatchOp::SetIrreflexive { entity_iri: entity_iri.clone(), value: false }
+                }
+                _ => unreachable!(),
             }
-            PatchOp::SetTransitive { entity_iri, value } => {
-                PatchOp::SetTransitive { entity_iri: entity_iri.clone(), value: !value }
-            }
-            PatchOp::SetSymmetric { entity_iri, value } => {
-                PatchOp::SetSymmetric { entity_iri: entity_iri.clone(), value: !value }
-            }
-            PatchOp::SetAsymmetric { entity_iri, value } => {
-                PatchOp::SetAsymmetric { entity_iri: entity_iri.clone(), value: !value }
-            }
-            PatchOp::SetReflexive { entity_iri, value } => {
-                PatchOp::SetReflexive { entity_iri: entity_iri.clone(), value: !value }
-            }
-            PatchOp::SetIrreflexive { entity_iri, value } => {
-                PatchOp::SetIrreflexive { entity_iri: entity_iri.clone(), value: !value }
-            }
-            _ => unreachable!(),
-        },
+        }
         PatchOp::AddPropertyChain { entity_iri, properties } => PatchOp::RemovePropertyChain {
             entity_iri: entity_iri.clone(),
             properties: properties.clone(),
@@ -207,16 +233,20 @@ pub fn invert_obo_patch_op(op: &OboPatchOp) -> Result<OboPatchOp> {
         OboPatchOp::SetName { .. } | OboPatchOp::SetNamespace { .. } => {
             return Err(EditError::NotInvertible("obo set_* requires prior value".into()));
         }
-        OboPatchOp::AddSynonym { term_id, value, scope: _ } => {
-            OboPatchOp::RemoveSynonym { term_id: term_id.clone(), value: value.clone() }
-        }
-        OboPatchOp::RemoveSynonym { term_id, value } => OboPatchOp::AddSynonym {
+        OboPatchOp::AddSynonym { term_id, value, scope } => OboPatchOp::RemoveSynonym {
             term_id: term_id.clone(),
             value: value.clone(),
-            scope: "exact".into(),
+            scope: Some(scope.clone()),
         },
-        OboPatchOp::AddDef { term_id, value: _ } => {
-            OboPatchOp::RemoveDef { term_id: term_id.clone() }
+        OboPatchOp::RemoveSynonym { .. } => {
+            return Err(EditError::NotInvertible(
+                "remove_synonym inverse requires recorded prior scope".into(),
+            ));
+        }
+        OboPatchOp::AddDef { .. } => {
+            return Err(EditError::NotInvertible(
+                "add_def may replace a prior def; inverse requires prior value".into(),
+            ));
         }
         OboPatchOp::RemoveDef { term_id: _ } => {
             return Err(EditError::NotInvertible("remove_def inverse requires prior def".into()));
@@ -228,7 +258,13 @@ pub fn invert_obo_patch_op(op: &OboPatchOp) -> Result<OboPatchOp> {
             OboPatchOp::AddXref { term_id: term_id.clone(), xref: xref.clone() }
         }
         OboPatchOp::SetDeprecated { term_id, value } => {
-            OboPatchOp::SetDeprecated { term_id: term_id.clone(), value: !value }
+            if !*value {
+                return Err(EditError::NotInvertible(
+                    "set_deprecated false inverse would invent obsolescence without prior state"
+                        .into(),
+                ));
+            }
+            OboPatchOp::SetDeprecated { term_id: term_id.clone(), value: false }
         }
         OboPatchOp::AddIsA { term_id, parent_id } => {
             OboPatchOp::RemoveIsA { term_id: term_id.clone(), parent_id: parent_id.clone() }
@@ -248,4 +284,103 @@ pub fn invert_change(change: &SemanticChange) -> Result<SemanticChange> {
             SemanticChange::Obo { change: invert_obo_patch_op(change)? }
         }
     })
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn remove_prefix_is_not_invertible() {
+        let err = invert_patch_op(&PatchOp::RemovePrefix { prefix: "ex".into() }).unwrap_err();
+        assert!(matches!(err, EditError::NotInvertible(_)));
+    }
+
+    #[test]
+    fn add_synonym_inverts_to_scoped_remove() {
+        let inverted = invert_obo_patch_op(&OboPatchOp::AddSynonym {
+            term_id: "EX:1".into(),
+            value: "alias".into(),
+            scope: "RELATED".into(),
+        })
+        .expect("invert");
+        assert_eq!(
+            inverted,
+            OboPatchOp::RemoveSynonym {
+                term_id: "EX:1".into(),
+                value: "alias".into(),
+                scope: Some("RELATED".into()),
+            }
+        );
+    }
+
+    #[test]
+    fn remove_synonym_and_add_def_are_not_invertible() {
+        assert!(matches!(
+            invert_obo_patch_op(&OboPatchOp::RemoveSynonym {
+                term_id: "EX:1".into(),
+                value: "alias".into(),
+                scope: Some("RELATED".into()),
+            }),
+            Err(EditError::NotInvertible(_))
+        ));
+        assert!(matches!(
+            invert_obo_patch_op(&OboPatchOp::AddDef {
+                term_id: "EX:1".into(),
+                value: "new".into(),
+            }),
+            Err(EditError::NotInvertible(_))
+        ));
+    }
+
+    #[test]
+    fn set_deprecated_false_is_not_invertible() {
+        assert!(matches!(
+            invert_patch_op(&PatchOp::SetDeprecated {
+                entity_iri: "http://example.org/A".into(),
+                value: false,
+            }),
+            Err(EditError::NotInvertible(_))
+        ));
+        assert!(matches!(
+            invert_obo_patch_op(&OboPatchOp::SetDeprecated {
+                term_id: "EX:1".into(),
+                value: false,
+            }),
+            Err(EditError::NotInvertible(_))
+        ));
+    }
+
+    #[test]
+    fn set_deprecated_true_inverts_to_false() {
+        let inverted = invert_patch_op(&PatchOp::SetDeprecated {
+            entity_iri: "http://example.org/A".into(),
+            value: true,
+        })
+        .expect("invert");
+        assert_eq!(
+            inverted,
+            PatchOp::SetDeprecated { entity_iri: "http://example.org/A".into(), value: false }
+        );
+    }
+
+    #[test]
+    fn clearing_boolean_characteristic_is_not_invertible() {
+        assert!(matches!(
+            invert_patch_op(&PatchOp::SetFunctional {
+                entity_iri: "http://example.org/p".into(),
+                value: false,
+            }),
+            Err(EditError::NotInvertible(_))
+        ));
+        let inverted = invert_patch_op(&PatchOp::SetFunctional {
+            entity_iri: "http://example.org/p".into(),
+            value: true,
+        })
+        .expect("invert set true");
+        assert_eq!(
+            inverted,
+            PatchOp::SetFunctional { entity_iri: "http://example.org/p".into(), value: false }
+        );
+    }
 }

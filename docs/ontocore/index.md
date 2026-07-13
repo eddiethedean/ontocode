@@ -2,7 +2,7 @@
 
 **OntoCore** is the semantic workspace engine for ontology development. It lives in the [OntoCode repository](https://github.com/eddiethedean/ontocode) and powers the OntoCode VS Code IDE.
 
-**Current release: v0.19.0** · [crates.io search](https://crates.io/search?q=ontocore)
+**Latest tagged: v0.19.0** · [crates.io search](https://crates.io/search?q=ontocore)
 
 [![ontocore](https://img.shields.io/badge/ontocore-0.19.0-blue)](https://crates.io/crates/ontocore)
 [![core](https://img.shields.io/badge/core-0.19.0-blue)](https://crates.io/crates/ontocore-core)

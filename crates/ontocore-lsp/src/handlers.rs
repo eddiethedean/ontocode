@@ -13,6 +13,7 @@ use crate::protocol::{
 use crate::state::{path_to_uri, resolve_workspace_for_index, ServerState};
 use crossbeam_channel::Receiver;
 use lsp_server::{Message, RequestId, ResponseError};
+use std::collections::VecDeque;
 use lsp_types::{
     CodeActionProviderCapability, CompletionOptions, DocumentChanges, DocumentSymbol,
     DocumentSymbolParams, DocumentSymbolResponse, GotoDefinitionParams, GotoDefinitionResponse,
@@ -1519,6 +1520,7 @@ pub fn handle_run_reasoner_lsp(
     state: &ServerState,
     params: RunReasonerParams,
     message_rx: &Receiver<Message>,
+    deferred: &mut VecDeque<Message>,
     run_generation: u64,
 ) -> Result<RunReasonerResult, LspErrorPayload> {
     let profile = ReasonerId::parse(&params.profile)
@@ -1559,7 +1561,7 @@ pub fn handle_run_reasoner_lsp(
         if !state.reasoner_run_is_current(run_generation) {
             break;
         }
-        drain_reasoner_cancel_notifications(message_rx, state);
+        drain_reasoner_cancel_notifications(message_rx, deferred, state);
         thread::sleep(Duration::from_millis(5));
     }
 
@@ -1606,7 +1608,15 @@ struct CancelParams {
     id: RequestId,
 }
 
-fn drain_reasoner_cancel_notifications(rx: &Receiver<Message>, state: &ServerState) {
+/// Poll the LSP inbox for `$/cancelRequest` while classify runs.
+///
+/// Non-cancel messages must not be dropped: the main loop is blocked in this wait, so
+/// anything else is parked in `deferred` and processed when the dispatcher resumes.
+fn drain_reasoner_cancel_notifications(
+    rx: &Receiver<Message>,
+    deferred: &mut VecDeque<Message>,
+    state: &ServerState,
+) {
     while let Ok(msg) = rx.try_recv() {
         match msg {
             Message::Notification(notif) if notif.method == "$/cancelRequest" => {
@@ -1614,7 +1624,7 @@ fn drain_reasoner_cancel_notifications(rx: &Receiver<Message>, state: &ServerSta
                     state.cancel_reasoner_request(params.id);
                 }
             }
-            _ => {}
+            other => deferred.push_back(other),
         }
     }
 }

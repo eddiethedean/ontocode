@@ -33,3 +33,30 @@ export function resolvePanelRestoreState(
 ): PanelRestoreState | undefined {
   return saved?.[viewType] ?? DEFAULT_REOPEN[viewType];
 }
+
+export interface GraphRestoreOptions {
+  graphKind: string;
+  rootIri?: string;
+}
+
+/** Map active graph mode to the layout-restore command + args. */
+export function graphRestoreState(
+  options: GraphRestoreOptions,
+  title?: string
+): PanelRestoreState {
+  switch (options.graphKind) {
+    case "class":
+      return { command: "ontocode.openClassGraph", title };
+    case "property":
+      return { command: "ontocode.openPropertyGraph", title };
+    case "import":
+      return { command: "ontocode.openImportGraph", title };
+    case "neighborhood":
+    default:
+      return {
+        command: "ontocode.openNeighborhoodGraph",
+        args: options.rootIri ? [options.rootIri] : undefined,
+        title,
+      };
+  }
+}

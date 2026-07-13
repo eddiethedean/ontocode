@@ -3,6 +3,7 @@ import { getGraph } from "../lsp/client";
 import { PanelHost } from "./panelHost";
 import type { GraphFilters, WebviewMessage } from "./messages";
 import { rememberPanelRestoreState } from "./layoutPersistence";
+import { graphRestoreState } from "./layoutPersistenceLogic";
 
 export interface GraphPanelOptions {
   graphKind: string;
@@ -34,13 +35,13 @@ export class GraphPanel {
     options: GraphPanelOptions,
     title = "OntoCode Graph"
   ): Promise<GraphPanel> {
-    void rememberPanelRestoreState("ontocodeGraph", {
-      command: "ontocode.openClassGraph",
-      args: options.rootIri ? [options.rootIri] : undefined,
-      title,
-    });
+    void rememberPanelRestoreState(
+      "ontocodeGraph",
+      graphRestoreState(options, title)
+    );
     if (GraphPanel.currentPanel) {
       GraphPanel.currentPanel.host.panel.reveal(vscode.ViewColumn.Beside);
+      GraphPanel.currentPanel.host.panel.title = title;
       GraphPanel.currentPanel.options = options;
       await GraphPanel.currentPanel.refresh();
       return GraphPanel.currentPanel;

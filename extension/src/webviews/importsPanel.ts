@@ -5,9 +5,13 @@ import {
   hasPatchFailureDiagnostics,
   isPatchFullySynced,
   patchFailureMessage,
+  patchSyncCancelledMessage,
 } from "../lsp/patchFeedback";
 import { Entity, OntologyDocument } from "../lsp/protocol";
-import { documentUriInWorkspace } from "../utils/workspacePath";
+import {
+  documentUriInWorkspace,
+  WORKSPACE_DOCUMENT_OUTSIDE_MESSAGE,
+} from "../utils/workspacePath";
 import { rememberPanelRestoreState } from "./layoutPersistence";
 import {
   AMBIGUOUS_ONTOLOGY_HEADER_MESSAGE,
@@ -111,7 +115,8 @@ export class ImportsPanel {
   ): Promise<ImportsPanel> {
     void rememberPanelRestoreState("ontocodeImports", {
       command: "ontocode.manageImports",
-      title: "Manage Imports",
+      args: [filePath],
+      title: `Imports: ${path.basename(filePath)}`,
     });
     if (ImportsPanel.current) {
       ImportsPanel.current.host.panel.reveal(vscode.ViewColumn.Beside);
@@ -187,14 +192,21 @@ export class ImportsPanel {
     const payload = buildPayload(doc, snapshot.documents, snapshot.entities);
     this.documentUri = documentUriInWorkspace(doc.path);
     this.ontologyIri = payload.ontology_iri;
-    this.importsEditable = payload.imports_editable;
+    this.importsEditable =
+      payload.imports_editable && this.documentUri !== undefined;
 
     if (generation !== this.loadGeneration) {
       return;
     }
 
     this.host.panel.title = `Imports: ${path.basename(doc.path)}`;
-    this.host.postMessage({ type: "loadImports", payload });
+    this.host.postMessage({
+      type: "loadImports",
+      payload: {
+        ...payload,
+        imports_editable: this.importsEditable,
+      },
+    });
   }
 
   private clearEditableState(): void {
@@ -204,12 +216,19 @@ export class ImportsPanel {
   }
 
   private async handleMessage(message: WebviewMessage): Promise<void> {
-    if (
-      message.type !== "applyPatch" ||
-      !this.documentUri ||
-      !this.ontologyIri ||
-      !this.importsEditable
-    ) {
+    if (message.type !== "applyPatch") {
+      return;
+    }
+    if (!this.documentUri) {
+      const msg = WORKSPACE_DOCUMENT_OUTSIDE_MESSAGE;
+      this.host.postMessage({ type: "error", message: msg });
+      void vscode.window.showErrorMessage(msg);
+      return;
+    }
+    if (!this.ontologyIri || !this.importsEditable) {
+      const msg = "OntoCode: imports are not editable for this document";
+      this.host.postMessage({ type: "error", message: msg });
+      void vscode.window.showErrorMessage(msg);
       return;
     }
     const { parseApplyPatchMessage } = await import("./messages");
@@ -263,25 +282,32 @@ export class ImportsPanel {
         void vscode.window.showErrorMessage(patchFailureMessage(result));
         return;
       }
-      if (!isPatchFullySynced(result)) {
-        return;
-      }
       if (result.reindex_warning) {
         void vscode.window.showWarningMessage(
           `OntoCode: changes saved but reindex failed — ${result.reindex_warning}`
         );
       }
-      void vscode.window.showInformationMessage("OntoCode: imports updated");
       if (this.onRefresh) {
         await this.onRefresh();
       }
       const snapshot = await getCatalogSnapshot();
       const doc = snapshot.documents.find((d) => d.path === this.filePath);
       if (doc) {
+        const payload = buildPayload(doc, snapshot.documents, snapshot.entities);
+        this.importsEditable =
+          payload.imports_editable && this.documentUri !== undefined;
         this.host.postMessage({
           type: "loadImports",
-          payload: buildPayload(doc, snapshot.documents, snapshot.entities),
+          payload: {
+            ...payload,
+            imports_editable: this.importsEditable,
+          },
         });
+      }
+      if (isPatchFullySynced(result)) {
+        void vscode.window.showInformationMessage("OntoCode: imports updated");
+      } else {
+        void vscode.window.showWarningMessage(patchSyncCancelledMessage());
       }
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);

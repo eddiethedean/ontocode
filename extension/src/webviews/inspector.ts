@@ -7,7 +7,7 @@ import {
 } from "../lsp/patchFeedback";
 import { EntityDetail } from "../lsp/protocol";
 import { entityKindLabel } from "../utils/iri";
-import { documentUriInWorkspace } from "../utils/workspacePath";
+import { documentUriInWorkspace, WORKSPACE_DOCUMENT_OUTSIDE_MESSAGE } from "../utils/workspacePath";
 import { PanelHost } from "./panelHost";
 import type { EntityDetailPayload, PatchOp, WebviewMessage } from "./messages";
 import { GraphPanel } from "./graphPanel";
@@ -16,7 +16,10 @@ import { rememberPanelRestoreState } from "./layoutPersistence";
 
 type RefreshFn = () => Promise<void>;
 
-function toPayload(detail: EntityDetail): EntityDetailPayload {
+function toPayload(
+  detail: EntityDetail,
+  documentInWorkspace: boolean
+): EntityDetailPayload {
   return {
     entity: {
       iri: detail.entity.iri,
@@ -32,7 +35,7 @@ function toPayload(detail: EntityDetail): EntityDetailPayload {
     axioms: detail.axioms,
     annotations: detail.annotations,
     characteristics: detail.characteristics,
-    editable: detail.editable,
+    editable: documentInWorkspace && detail.editable,
     document_path: detail.document_path,
   };
 }
@@ -131,7 +134,7 @@ export class EntityInspectorPanel {
     this.host.panel.title = panelTitle(detail);
     this.host.postMessage({
       type: "loadEntity",
-      detail: toPayload(detail),
+      detail: toPayload(detail, this.documentUri !== undefined),
       classOptions,
       objectPropertyOptions,
     });
@@ -165,7 +168,11 @@ export class EntityInspectorPanel {
     if (message.type === "jumpToSource" && this.iri) {
       await vscode.commands.executeCommand("ontocode.jumpToSource", this.iri);
     }
-    if (message.type === "applyPatch" && this.documentUri) {
+    if (message.type === "applyPatch") {
+      if (!this.documentUri) {
+        this.postPatchError(WORKSPACE_DOCUMENT_OUTSIDE_MESSAGE);
+        return;
+      }
       const { parseApplyPatchMessage } = await import("./messages");
       const parsed = parseApplyPatchMessage(message, this.iri, this.oboId);
       if (!parsed) {
@@ -246,7 +253,7 @@ export class EntityInspectorPanel {
       return;
     }
     if (!this.documentUri) {
-      this.postPatchError("No editable document for this entity");
+      this.postPatchError(WORKSPACE_DOCUMENT_OUTSIDE_MESSAGE);
       return;
     }
     this.applying = true;

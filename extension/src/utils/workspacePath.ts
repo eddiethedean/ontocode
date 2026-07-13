@@ -32,3 +32,21 @@ export function documentUriInWorkspace(documentPath: string): string | undefined
   }
   return uri.toString();
 }
+
+/** User-facing message when an LSP document path is outside workspace folders. */
+export const WORKSPACE_DOCUMENT_OUTSIDE_MESSAGE =
+  "OntoCode: entity document path is outside the workspace";
+
+/** Resolve a file path or `file://` URI to a workspace document URI string. */
+export function resolveWorkspaceDocumentUri(
+  uriOrPath: string
+): string | undefined {
+  if (uriOrPath.startsWith("file:")) {
+    try {
+      return documentUriInWorkspace(vscode.Uri.parse(uriOrPath).fsPath);
+    } catch {
+      return undefined;
+    }
+  }
+  return documentUriInWorkspace(uriOrPath);
+}

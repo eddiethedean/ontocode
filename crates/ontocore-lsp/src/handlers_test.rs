@@ -985,3 +985,58 @@ fn reasoner_cancel_drain_preserves_non_cancel_messages() {
         other => panic!("expected getCatalogSnapshot second, got {other:?}"),
     }
 }
+
+#[test]
+fn reindex_during_classify_discards_stale_reasoner_snapshot() {
+    use crate::handlers::handle_run_reasoner_lsp;
+    use crate::protocol::RunReasonerParams;
+    use crate::state::{TEST_REASONER_CLASSIFY_IN_PAUSE, TEST_REASONER_CLASSIFY_PAUSE_MS};
+    use crossbeam_channel::unbounded;
+    use lsp_server::RequestId;
+    use std::collections::VecDeque;
+    use std::sync::atomic::Ordering;
+    use std::thread;
+    use std::time::{Duration, Instant};
+
+    let state = indexed_state();
+    let before = state.with_catalog_and_reasoner(|_, reasoner| reasoner.cloned()).flatten();
+    let ws = state.workspace_root().expect("workspace");
+
+    TEST_REASONER_CLASSIFY_IN_PAUSE.store(false, Ordering::SeqCst);
+    TEST_REASONER_CLASSIFY_PAUSE_MS.store(300, Ordering::SeqCst);
+
+    let (_tx, rx) = unbounded();
+    let state_reasoner = state.clone();
+    let reasoner = thread::spawn(move || {
+        let generation = state_reasoner.begin_reasoner_run(RequestId::from(55i32));
+        let mut deferred = VecDeque::new();
+        let result = handle_run_reasoner_lsp(
+            &state_reasoner,
+            RunReasonerParams { profile: "el".into(), auto_detect: false },
+            &rx,
+            &mut deferred,
+            generation,
+        );
+        state_reasoner.clear_active_reasoner_request();
+        result
+    });
+
+    let deadline = Instant::now() + Duration::from_secs(5);
+    while !TEST_REASONER_CLASSIFY_IN_PAUSE.load(Ordering::SeqCst) {
+        assert!(Instant::now() < deadline, "reasoner never entered classify pause");
+        thread::sleep(Duration::from_millis(1));
+    }
+
+    state.index_workspace(ws).expect("reindex during classify");
+
+    let result = reasoner.join().expect("reasoner thread");
+    TEST_REASONER_CLASSIFY_PAUSE_MS.store(0, Ordering::SeqCst);
+
+    assert!(result.is_err(), "stale reasoner after reindex must not publish: {result:?}");
+    let after = state.with_catalog_and_reasoner(|_, reasoner| reasoner.cloned()).flatten();
+    match (&before, &after) {
+        (None, None) => {}
+        (Some(b), Some(a)) => assert_eq!(b.profile_used, a.profile_used),
+        _ => panic!("reindex-during-classify changed reasoner snapshot presence"),
+    }
+}

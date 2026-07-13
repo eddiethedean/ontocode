@@ -81,6 +81,58 @@ fn legacy_patch_array_parses_as_transaction() {
 }
 
 #[test]
+fn turtle_envelope_with_raw_ops_parses() {
+    let value = serde_json::json!({
+        "transaction": {
+            "changes": [{
+                "op": "add_label",
+                "entity_iri": "http://example.org/A",
+                "value": "X"
+            }]
+        }
+    });
+    let txn = ontocore_edit::parse_turtle_input(value).expect("parse");
+    assert_eq!(txn.changes.len(), 1);
+    assert!(matches!(txn.changes[0], SemanticChange::Turtle { .. }));
+}
+
+#[test]
+fn turtle_path_rejects_obo_envelope() {
+    let value = serde_json::json!({
+        "transaction": {
+            "changes": [{
+                "format": "obo",
+                "change": {
+                    "op": "set_name",
+                    "term_id": "EX:1",
+                    "value": "x"
+                }
+            }]
+        }
+    });
+    let err = ontocore_edit::parse_turtle_input(value).expect_err("must reject OBO on turtle path");
+    assert!(err.to_string().contains("OBO") || err.to_string().contains("Turtle"));
+}
+
+#[test]
+fn obo_path_rejects_turtle_envelope() {
+    let value = serde_json::json!({
+        "transaction": {
+            "changes": [{
+                "format": "turtle",
+                "change": {
+                    "op": "add_label",
+                    "entity_iri": "http://example.org/A",
+                    "value": "X"
+                }
+            }]
+        }
+    });
+    let err = ontocore_edit::parse_obo_input(value).expect_err("must reject Turtle on obo path");
+    assert!(err.to_string().contains("Turtle") || err.to_string().contains("OBO"));
+}
+
+#[test]
 fn adapter_matches_direct_patch_apply() {
     let patches = vec![PatchOp::AddComment {
         entity_iri: "http://example.org/A".into(),

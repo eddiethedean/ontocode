@@ -123,18 +123,52 @@ impl Transaction {
 }
 
 /// Parse legacy patch JSON (array) or `{ "transaction": { ... } }` envelope.
+///
+/// Envelope `changes` may be either raw Turtle ops (documented wire format) or
+/// tagged [`SemanticChange`] values. Rejects envelopes whose changes are not Turtle.
 pub fn parse_turtle_input(value: serde_json::Value) -> Result<Transaction> {
     if let Some(txn) = value.get("transaction") {
-        return Ok(serde_json::from_value(txn.clone())?);
+        if let Some(changes) = txn.get("changes") {
+            if let Ok(patches) = serde_json::from_value::<Vec<PatchOp>>(changes.clone()) {
+                let mut parsed = Transaction::from_turtle(patches);
+                parsed.id = txn.get("id").and_then(|v| v.as_str()).map(str::to_string);
+                parsed.label = txn.get("label").and_then(|v| v.as_str()).map(str::to_string);
+                return Ok(parsed);
+            }
+        }
+        let parsed: Transaction = serde_json::from_value(txn.clone())?;
+        match parsed.format()? {
+            EditFormat::Turtle => Ok(parsed),
+            EditFormat::Obo => Err(EditError::Validation(
+                "transaction contains OBO changes; refuse Turtle apply path".into(),
+            )),
+        }
+    } else {
+        let patches: Vec<PatchOp> = serde_json::from_value(value)?;
+        Ok(Transaction::from_turtle(patches))
     }
-    let patches: Vec<PatchOp> = serde_json::from_value(value)?;
-    Ok(Transaction::from_turtle(patches))
 }
 
+/// Parse legacy OBO patch JSON (array) or `{ "transaction": { ... } }` envelope.
 pub fn parse_obo_input(value: serde_json::Value) -> Result<Transaction> {
     if let Some(txn) = value.get("transaction") {
-        return Ok(serde_json::from_value(txn.clone())?);
+        if let Some(changes) = txn.get("changes") {
+            if let Ok(patches) = serde_json::from_value::<Vec<OboPatchOp>>(changes.clone()) {
+                let mut parsed = Transaction::from_obo(patches);
+                parsed.id = txn.get("id").and_then(|v| v.as_str()).map(str::to_string);
+                parsed.label = txn.get("label").and_then(|v| v.as_str()).map(str::to_string);
+                return Ok(parsed);
+            }
+        }
+        let parsed: Transaction = serde_json::from_value(txn.clone())?;
+        match parsed.format()? {
+            EditFormat::Obo => Ok(parsed),
+            EditFormat::Turtle => Err(EditError::Validation(
+                "transaction contains Turtle changes; refuse OBO apply path".into(),
+            )),
+        }
+    } else {
+        let patches: Vec<OboPatchOp> = serde_json::from_value(value)?;
+        Ok(Transaction::from_obo(patches))
     }
-    let patches: Vec<OboPatchOp> = serde_json::from_value(value)?;
-    Ok(Transaction::from_obo(patches))
 }

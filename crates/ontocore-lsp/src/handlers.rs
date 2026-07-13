@@ -1345,14 +1345,14 @@ pub fn handle_apply_axiom_patch(
             let transaction = ontocore_edit::parse_turtle_input(params.patches).map_err(|e| {
                 LspErrorPayload::patch_invalid(format!("invalid Turtle patch JSON: {e}"))
             })?;
-            let result = transaction.apply_to_text(&source, params.preview_only, &namespaces).map_err(
-                |e| match e {
+            let result = transaction
+                .apply_to_text(&source, params.preview_only, &namespaces)
+                .map_err(|e| match e {
                     ontocore_edit::EditError::UnsupportedFormat(m) => {
                         LspErrorPayload::unsupported_format(m)
                     }
                     _ => LspErrorPayload::patch_invalid(e.to_string()),
-                },
-            )?;
+                })?;
             (result.applied, result.preview_text, result.diagnostics)
         } else {
             return Err(LspErrorPayload::unsupported_format(format!(

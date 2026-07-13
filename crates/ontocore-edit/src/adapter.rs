@@ -51,7 +51,8 @@ pub fn apply_transaction_to_text(
     match transaction.format()? {
         EditFormat::Turtle => {
             let patches: Vec<PatchOp> = transaction.turtle_patches()?;
-            Ok(ontocore_owl::apply_patches_to_text(source, &patches, preview_only, namespaces)?.into())
+            Ok(ontocore_owl::apply_patches_to_text(source, &patches, preview_only, namespaces)?
+                .into())
         }
         EditFormat::Obo => {
             let patches: Vec<OboPatchOp> = transaction.obo_patches()?;

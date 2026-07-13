@@ -89,9 +89,8 @@ fn adapter_matches_direct_patch_apply() {
     let namespaces = std::collections::BTreeMap::new();
     let direct =
         ontocore_owl::apply_patches_to_text(TURTLE_FIXTURE, &patches, true, &namespaces).unwrap();
-    let via_txn = Transaction::from_turtle(patches)
-        .apply_to_text(TURTLE_FIXTURE, true, &namespaces)
-        .unwrap();
+    let via_txn =
+        Transaction::from_turtle(patches).apply_to_text(TURTLE_FIXTURE, true, &namespaces).unwrap();
     assert_eq!(direct.preview_text, via_txn.preview_text);
     assert_eq!(direct.applied, via_txn.applied);
 }

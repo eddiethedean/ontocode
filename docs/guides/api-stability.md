@@ -1,6 +1,6 @@
 # API stability (pre-1.0)
 
-OntoCode and OntoCore are **pre-1.0**. Published crates use **0.18.x** semver, but minor releases may add or change APIs until v1.0.0. This page tiers surfaces by stability so integrators can assess risk.
+OntoCode and OntoCore are **pre-1.0**. Published crates use **0.19.x** semver, but minor releases may add or change APIs until v1.0.0. This page tiers surfaces by stability so integrators can assess risk.
 
 **Canonical capabilities:** [What ships today](../SHIPPED.md)
 

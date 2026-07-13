@@ -80,11 +80,7 @@ impl Transaction {
         for change in self.changes.iter().rev() {
             inverted.push(invert_change(change)?);
         }
-        Ok(Self {
-            id: self.id.clone(),
-            label: self.label.clone(),
-            changes: inverted,
-        })
+        Ok(Self { id: self.id.clone(), label: self.label.clone(), changes: inverted })
     }
 
     pub fn validate(&self) -> Result<()> {

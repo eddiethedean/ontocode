@@ -4,7 +4,9 @@ pub mod error;
 pub mod invert;
 pub mod transaction;
 
-pub use adapter::{apply_transaction_to_path, apply_transaction_to_text, ApplyTextResult, EditFormat};
+pub use adapter::{
+    apply_transaction_to_path, apply_transaction_to_text, ApplyTextResult, EditFormat,
+};
 pub use change::SemanticChange;
 pub use error::{EditError, Result};
 pub use invert::{invert_change, invert_obo_patch_op, invert_patch_op};

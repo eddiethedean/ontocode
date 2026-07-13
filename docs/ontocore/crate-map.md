@@ -10,7 +10,7 @@ OntoCore is currently implemented by the `ontocore-*` crates. The [`ontocore`](h
 
 ```toml
 [dependencies]
-ontocore = "0.18"
+ontocore = "0.19"
 # Optional: ontocore = { version = "0.17", features = ["lsp", "plugins"] }
 ```
 

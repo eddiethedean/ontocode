@@ -1,8 +1,8 @@
-# What ships today (v0.18.2)
+# What ships today (v0.19.0)
 
 > **Canonical capability matrix.** Update this page on every release. Design specs under [Project](design/README.md) may describe future targets — check here for what is actually available.
 
-**Current release:** v0.18.2 · [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) · [Migration from v0.17](migration/v0.18.md) · [Patch notes](migration/v0.18.2.md)
+**Current release:** v0.19.0 · [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) · [Migration from v0.18.2](migration/v0.19.md) · [v0.18.2 patch notes](migration/v0.18.2.md)
 
 ## Products
 

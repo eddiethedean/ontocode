@@ -39,7 +39,7 @@ After 1.0, the roadmap shifts from parity to modernization.
 | [Product Roadmap 2.0](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/PRODUCT_ROADMAP_2.0.md) | UI phases with milestone acceptance criteria |
 | [Product design (UI)](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/README.md) | Product design specification pack (UX, design system, OntoStudio target) |
 
-**Current release:** v0.18.2
+**Current release:** v0.19.0
 
 ---
 
@@ -113,7 +113,7 @@ OntoUI work uses **UI phases 0–12** from [Product Roadmap 2.0](https://github.
 
 ---
 
-## Shipped releases (v0.1–v0.18)
+## Shipped releases (v0.1–v0.19)
 
 ### Era A — Engine foundation (v0.1–v0.4)
 

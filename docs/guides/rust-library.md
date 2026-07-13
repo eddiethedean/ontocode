@@ -100,7 +100,7 @@ Uses `OntoCoreError` from `ontocore-core` (re-exported as `ontocore::OntoCoreErr
 
 ## API stability
 
-- Crates are at **0.18.x** on crates.io (`ontocore = "0.18"`)
+- Crates are at **0.19.x** on crates.io (`ontocore = "0.18"`)
 - Prefer the `Workspace` API for new code; see [Rust API](../ontocore/rust-api.md)
 - `Workspace` and `WorkspaceOptions` are **stable since v0.10** (pre-1.0 policy still applies to other crates)
 - LSP wire JSON: [LSP API](../lsp-api.md)

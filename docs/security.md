@@ -6,7 +6,8 @@ OntoCore and OntoCode are **local-first** tools: they index and parse files on d
 
 | Version | Supported |
 |---------|-----------|
-| 0.18.x   | Yes       |
+| 0.19.x   | Yes       |
+| 0.18.x  | Yes       |
 | 0.16.x   | Yes       |
 | 0.15.x   | Yes       |
 | 0.14.x   | Best effort |

@@ -16,7 +16,7 @@
 >
 > **Shipped through v0.19:** workspace scanner, incremental indexing, multi-root workspaces, SQL/SPARQL queries (including Horned-OWL axiom virtual tables), diagnostics (`.ontocore/diagnostics.toml`), CLI, LSP (semantic tokens, `listSqlSchema`), Turtle and OBO write-back, Query Workbench + schema browser, Manchester editor, React webviews with WorkspaceStore + focus relay (inspector, graphs, workbench, refactor preview, semantic diff, imports, reasoner, explanation), EL–DL reasoning (OntoLogos 1.0), OBO index + OBO write-back, OWL/XML read-only catalog, ROBOT CLI wrappers, semantic diff (`--pr-summary`), `ontocore docs` export, Turtle completion, diagnostic quick fixes, property chain editing, DL unsatisfiability explanations (alternatives + stale detection), plugin host (permissions, UI views/commands/preferences/context actions), Protégé-shell menus/perspectives, reasoner cancel + distinct lifecycle, layout reopen-with-context. See [What ships today](../SHIPPED.md).
 >
-> **Shipped v0.14–v0.17:** plugin host MVP → permissions/views → preferences/context actions → Protégé-shell. **Planned v1.0:** full workflow plugin integration, OWL/XML write-back, full DL axiom catalog for all formats. See [Platform roadmap](../roadmap.md).
+> **Shipped v0.14–v0.17:** plugin host MVP → permissions/views → preferences/context actions → Protégé-shell. **Planned v0.21:** RDF/XML and OWL/XML write-back. **Planned v1.0:** full workflow plugin integration, full DL axiom catalog for all formats. See [Platform roadmap](../roadmap.md).
 >
 > **Reference:** [lsp-api.md](../lsp-api.md), [adr/README.md](adr/README.md), [DEPENDENCY_MATRIX.md](DEPENDENCY_MATRIX.md).
 
@@ -92,6 +92,8 @@ Full crate map with dependency edges: [crate-map.md](../ontocore/crate-map.md).
 | `ontocore-core` | Types, scanner, limits, path jail | `ignore` |
 | `ontocore-parser` | RDF parse, entity extraction | `oxigraph` |
 | `ontocore-owl` | OWL axiom facade, patch write-back | `horned-owl` |
+| `ontocore-obo` | OBO patch write-back | `fastobo` |
+| `ontocore-edit` | Semantic transactions (`compose`, `validate`, `invert`) | — |
 | `ontocore-catalog` | Index builder, entity API | — |
 | `ontocore-query` | SQL virtual tables, SPARQL | `sqlparser`, `oxigraph` |
 | `ontocore-diagnostics` | Lint rules, LSP diagnostics | `regex`, `fastobo-validator` |
@@ -101,6 +103,8 @@ Full crate map with dependency edges: [crate-map.md](../ontocore/crate-map.md).
 | `ontocore-refactor` | Workspace refactoring | — |
 | `ontocore-robot` | ROBOT CLI wrappers | ROBOT CLI (external) |
 | `ontocore-lsp` | Language server + diagnostics + patch apply | `lsp-server`, `lsp-types` |
+| `ontocore-plugin` | Plugin manifest discovery and host runtime | — |
+| `ontocore-plugin-*` | Reference plugins (naming, markdown-export, shacl, builtins) | — |
 | `ontocore-cli` | `ontocore` binary | composes above |
 
 ## 4. OntoCore Internal Modules
@@ -173,8 +177,8 @@ Explorer (asserted/inferred toggle), diagnostics, query history.
 | Entity inspector | **Shipped** (v0.4) | Legacy HTML → **React** (v0.7) |
 | Query workbench | **Shipped** (v0.5) | Legacy HTML → **React** (v0.8) |
 | Manchester axiom editor | **Shipped** (v0.5 MVP) | Legacy HTML → **React** (v0.8) |
-| Reasoner panel | **Shipped** (v0.6) | Legacy HTML (React migration planned) |
-| Explanation panel | **Shipped** (v0.6 EL) | Legacy HTML (React migration planned) |
+| Reasoner panel | **Shipped** (v0.6) | **React** (v0.7+) |
+| Explanation panel | **Shipped** (v0.6 EL) | **React** (v0.7+; stale UX v0.18) |
 | Graph visualization | **Shipped** (v0.7 React) | Extend filters / layout |
 | Semantic diff | **Shipped** (v0.10) | **React** |
 | Manage Imports | **Shipped** (v0.11) | **React** |

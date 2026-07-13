@@ -11,7 +11,7 @@ OntoCore is currently implemented by the `ontocore-*` crates. The [`ontocore`](h
 ```toml
 [dependencies]
 ontocore = "0.19"
-# Optional: ontocore = { version = "0.17", features = ["lsp", "plugins"] }
+# Optional: ontocore = { version = "0.19", features = ["lsp", "plugins"] }
 ```
 
 ```rust
@@ -29,6 +29,7 @@ use ontocore::catalog::IndexBuilder;  // lower-level
 | `ontocore-query` | SQL virtual tables, SPARQL |
 | `ontocore-owl` | Horned-OWL facade, patches, Manchester |
 | `ontocore-obo` | OBO Format 1.4 patch write-back |
+| `ontocore-edit` | Semantic transaction apply path (v0.19) |
 | `ontocore-diagnostics` | Lint rules |
 | `ontocore-reasoner` | OntoLogos classification facade |
 | `ontocore-refactor` | Workspace refactoring |
@@ -36,7 +37,11 @@ use ontocore::catalog::IndexBuilder;  // lower-level
 | `ontocore-docs` | Markdown/HTML documentation export |
 | `ontocore-robot` | ROBOT CLI wrappers |
 | `ontocore-lsp` | Language server binary + protocol types |
-| `ontocore-plugin` | Plugin manifest discovery (v0.14 host foundation) |
+| `ontocore-plugin` | Plugin manifest discovery and host runtime (v0.14+) |
+| `ontocore-plugin-naming` | Reference naming validator plugin |
+| `ontocore-plugin-markdown-export` | Reference Markdown export plugin |
+| `ontocore-plugin-shacl` | SHACL validator scaffold plugin |
+| `ontocore-plugin-builtins` | Built-in plugin wiring for CLI/LSP |
 | `ontocore-cli` | `ontocore` binary |
 
 `ontocore-robot` is not re-exported by `ontocore` — use `ontocore-robot` or the CLI directly for ROBOT interop.
@@ -52,6 +57,7 @@ use ontocore::catalog::IndexBuilder;  // lower-level
 | `parser` | `ontocore-parser` |
 | `owl` | `ontocore-owl` |
 | `obo` | `ontocore-obo` |
+| `edit` | `ontocore-edit` |
 | `reasoner` | `ontocore-reasoner` |
 | `refactor` | `ontocore-refactor` |
 | `diff` | `ontocore-diff` |

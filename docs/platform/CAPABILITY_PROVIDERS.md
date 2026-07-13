@@ -1,6 +1,6 @@
 # Capability providers
 
-> **Status:** Planned (v0.14 plugin host MVP) · **ADR:** [0005-capability-provider-plugin-model.md](../adr/0005-capability-provider-plugin-model.md)
+> **Historical architecture note.** Built-in capabilities ship in v0.14–v0.19 (reasoner, query, refactor, diagnostics, docs, plugin host). For **plugin authors**, start at **[Plugin authoring](../guides/plugins.md)** — not this page.
 
 ## Scope
 

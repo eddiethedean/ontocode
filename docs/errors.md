@@ -54,7 +54,7 @@ Custom `ontocore/*` method failures return JSON-RPC errors with `data` containin
 | `NOT_INDEXED` | Catalog methods called before first index | Run OntoCode: Index Workspace |
 | `ENTITY_NOT_FOUND` | `getEntity` IRI not in catalog | Check IRI spelling / re-index |
 | `PATCH_INVALID` | Patch JSON invalid or entity missing | Check patch parameters and entity IRIs |
-| `UNSUPPORTED_FORMAT` | Write-back on non-Turtle file | Save as Turtle (.ttl) for write-back |
+| `UNSUPPORTED_FORMAT` | Write-back on read-only format | Edit **Turtle (`.ttl`)** or **OBO (`.obo`)** files, or convert — see [supported-formats](supported-formats.md) |
 | `INDEX_FAILED` | Indexing failed (parse, limits, I/O) **or plugin host failure** (`listPlugins`, `runPlugin`) | Check ontology files; verify plugin manifest and subprocess entry |
 | `QUERY_FAILED` | SQL or SPARQL query failed | Check query syntax and [sql-reference](sql-reference.md) |
 | `MANCHESTER_INVALID` | Manchester expression parse failed | Fix expression; see [Manchester editor](ontocode/manchester-editor.md) |

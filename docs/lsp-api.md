@@ -271,6 +271,8 @@ Apply patch operations to Turtle (`.ttl`) or OBO (`.obo`) documents. See [author
 
 **Params:** `ApplyAxiomPatchParams`
 
+Legacy patch array (unchanged since v0.11):
+
 ```json
 {
   "document_uri": "file:///path/to/ontology.ttl",
@@ -280,6 +282,22 @@ Apply patch operations to Turtle (`.ttl`) or OBO (`.obo`) documents. See [author
   "preview_only": false
 }
 ```
+
+**v0.19+ transaction envelope (optional):** same operations wrapped for `ontocore-edit` apply path. Legacy `patches` arrays remain accepted.
+
+```json
+{
+  "document_uri": "file:///path/to/ontology.obo",
+  "transaction": {
+    "changes": [
+      { "op": "add_label", "entity_iri": "http://ex#Person", "value": "Human" }
+    ]
+  },
+  "preview_only": false
+}
+```
+
+Either `patches` or `transaction.changes` may be supplied (not both required). See [migration v0.19](migration/v0.19.md).
 
 **Result:** `ApplyAxiomPatchResult` (flattened patch result + optional entity):
 

@@ -22,6 +22,9 @@ Every feature before 1.0 should answer one question:
 
 After 1.0, the roadmap shifts from parity to modernization.
 
+!!! warning "Not a Protégé replacement today"
+    **v0.19** supports pilot and coexistence workflows — not org-wide Protégé retirement. See [What ships today](SHIPPED.md) and [Known limitations](known-limitations.md) before planning format or IDE migration.
+
 ---
 
 ## How to read this document

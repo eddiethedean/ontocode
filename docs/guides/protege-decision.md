@@ -8,14 +8,14 @@ Use this page to decide **when OntoCode fits**, **when to keep Protégé**, and 
 |----------------|----------------|
 | VS Code + Turtle-primary ontologies | **Adopt OntoCode** (pilot IDE + CI) |
 | CI lint/consistency gates without desktop Protégé | **Adopt OntoCore CLI** (`ontocore validate` / `classify`) |
-| Full OWL 2 DL axiom catalog + OWL/XML write-back | **Split workflow** — use OntoCode for Turtle/OBO authoring and DL classification; keep Protégé for OWL/XML-heavy modules until v1.0 |
-| OBO release pipelines with in-editor OBO write-back | **Adopt OntoCode** (v0.12+) for OBO inspector + `ontocore patch`; validate with ROBOT in CI |
+| Full OWL 2 DL axiom catalog + OWL/XML write-back | **Split workflow** — use OntoCode for Turtle/OBO authoring and DL classification; keep Protégé for OWL/XML-heavy modules until [v0.21](../roadmap.md) |
+| OBO release pipelines with in-editor OBO write-back | **Adopt OntoCode** (v0.13+) for OBO inspector + `ontocore patch`; validate with ROBOT in CI |
 | Enterprise requires vendor SLA / SOC 2 | **Defer** or run limited CI pilot — [Production readiness](production-readiness.md) |
 | Air-gapped VS Code + internal artifact mirror | **Pilot** — [Enterprise deployment](enterprise-deployment.md) |
 
-## Capability comparison (v0.14)
+## Capability comparison (v0.19)
 
-| Capability | Protégé | OntoCode v0.14 | Notes |
+| Capability | Protégé | OntoCode v0.19 | Notes |
 |------------|---------|----------------|-------|
 | OWL 2 DL classification | Yes | Yes (`dl` / `auto` via OntoLogos 1.x) | Explanations EL-first; see [Reasoner guide](reasoner.md) |
 | Turtle authoring | Manual / plugins | Native write-back | OntoCode inspector + patches |
@@ -59,8 +59,8 @@ Do **not** plan org-wide Protégé retirement on v0.9 documentation alone. Re-ev
 
 ## When OntoCode is a poor fit
 
-- Ontology program **requires OWL 2 DL** reasoning as the primary gate
-- Primary artifacts are **OWL/XML or OBO** with no Turtle migration plan
+- Ontology program **requires OWL 2 DL** reasoning as the **only** gate with no CI alternative
+- Primary artifacts are **OWL/XML or RDF/XML** with no Turtle/OBO migration plan
 - Workspaces exceed [workspace limits](../workspace-limits.md) without split-repo strategy
 - Legal cannot accept **LGPL** (`horned-owl`) for desktop distribution — [LGPL compliance](lgpl-compliance.md)
 - Procurement requires **SOC 2, HIPAA BAA, or vendor SLA**

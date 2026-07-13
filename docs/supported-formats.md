@@ -1,8 +1,8 @@
-# Supported ontology formats (v0.17)
+# Supported ontology formats
+
+> **Current release:** v0.19.0 — canonical capability matrix: [What ships today](SHIPPED.md).
 
 This page is the canonical reference for **what OntoCode/OntoCore can do with each file format** today.
-
-If you are deciding whether to adopt OntoCode, cross-check this page with **[What ships today](SHIPPED.md)** and **[Known limitations](known-limitations.md)**.
 
 ## Quick summary
 

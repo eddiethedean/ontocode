@@ -20,7 +20,10 @@ Recent documented releases (see [changelog](../changelog.md)):
 
 | Version | Date (changelog) |
 |---------|------------------|
-| 0.18.0 | 2026-07-09 |
+| 0.19.0 | 2026-07-13 |
+| 0.18.2 | 2026-07-13 |
+| 0.18.1 | 2026-07-12 |
+| 0.18.0 | 2026-07-11 |
 | 0.15.0 | 2026-07-08 |
 | 0.14.0 | 2026-07-09 |
 | 0.13.0 | 2026-07-08 |
@@ -37,7 +40,7 @@ Recent documented releases (see [changelog](../changelog.md)):
 
 Pre-1.0 releases may ship frequently. **No committed future cadence** is documented.
 
-Maintainers follow [releasing.md](../releasing.md): version bump, CHANGELOG, SHIPPED matrix, `mkdocs build --strict`, `./scripts/check-doc-versions.sh`, GitHub Release artifacts with `SHA256SUMS` and `NOTICES`.
+Maintainers follow [releasing.md](../releasing.md): version bump, CHANGELOG, SHIPPED matrix, `./scripts/build-docs.sh`, `./scripts/check-doc-versions.sh`, GitHub Release artifacts with `SHA256SUMS` and `NOTICES`.
 
 ## Version support policy
 

@@ -144,7 +144,7 @@ Full matrix: **[What ships today](SHIPPED.md)** (canonical — do not rely on th
 
     1. Install **OntoCode** from the [Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) or [Open VSX](https://open-vsx.org/extension/ontocode/ontocode) (Cursor) — not the VS Code editor itself
     2. **File → Open Folder…** with `.ttl`, `.owl`, `.obo`, or other ontology files
-    3. When prompted, **Trust** the workspace (required for indexing)
+    3. OntoCode’s **bundled** language server indexes in Restricted Mode — **Trust** only if you set custom `ontocode.lspPath` or `ontocode.robotPath`
     4. Open the **OntoCode** activity bar → browse **Classes** → click an entity
 
 === "CLI (install)"

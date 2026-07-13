@@ -18,7 +18,7 @@ Pin dependencies in `Cargo.toml`:
 ontocore = "0.19"
 ```
 
-For CI and reproducible builds: `cargo install ontocore-cli --locked --version 0.18.0`.
+For CI and reproducible builds: `cargo install ontocore-cli --locked --version 0.19.0`.
 
 ## docs.rs
 

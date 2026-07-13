@@ -1,6 +1,6 @@
 # Migrating from Protégé — first week
 
-This guide helps ontology teams adopt OntoCode **v0.18** alongside or instead of [Protégé](https://protege.stanford.edu/). For a capability comparison, see [Protégé vs OntoCode](protege-decision.md), [What ships today](../SHIPPED.md), and the [v0.18 Desktop parity assessment on GitHub](https://github.com/eddiethedean/ontocode/blob/main/docs/PROTEGE_REVERSE_ENGINEERING/ONTOCODE_PARITY/ONTOCODE_0.18_PROTEGE_PARITY_ASSESSMENT.md).
+This guide helps ontology teams adopt OntoCode **v0.19** alongside or instead of [Protégé](https://protege.stanford.edu/). For a capability comparison, see [Protégé vs OntoCode](protege-decision.md) and [What ships today](../SHIPPED.md).
 
 ## Before you start
 
@@ -20,11 +20,11 @@ This guide helps ontology teams adopt OntoCode **v0.18** alongside or instead of
 
 Many teams use **both**: Protégé for heavy axiom authoring in OWL/XML, OntoCode for browse, lint, diff, reasoning, and CI. See [Protégé coexistence](protege-coexistence.md).
 
-## Honest desktop known gaps (v0.18)
+## Honest desktop known gaps (v0.19)
 
 | Gap | Status |
 |-----|--------|
-| OWL/XML · RDF/XML write-back | Deferred to **v1.0** |
+| OWL/XML · RDF/XML write-back | Planned **v0.21** — [roadmap](../roadmap.md) |
 | Multi-step semantic undo | Deferred to **v1.0** |
 | Full OntoGraf filter/layout suite | Partial graphs shipped; polish → **v1.0** |
 | Explain all inference kinds (not only unsat) | Unsat explanations shipped |
@@ -37,7 +37,7 @@ Full matrix: [known-limitations](../known-limitations.md) · [SHIPPED](../SHIPPE
 
 1. Install [OntoCode from the Marketplace](../vscode-install.md) or [Open VSX](https://open-vsx.org/extension/ontocode/ontocode).
 2. **File → Open Folder…** and select your ontology repository (not a single file).
-3. **Trust** the workspace when prompted.
+3. OntoCode’s **bundled** language server works in Restricted Mode — **Trust** only if you set custom `ontocode.lspPath` or `ontocode.robotPath`.
 4. Open the **OntoCode** activity bar and confirm **Ontologies** lists your `.ttl` / `.owl` files.
 5. Expand **Classes** and click an entity to open the **Entity Inspector**.
 
@@ -45,7 +45,7 @@ Follow the [first success core path](../guides/first-success.md) if anything is 
 
 ## Day 2 — Map Protégé habits to OntoCode
 
-| In Protégé | In OntoCode v0.18 |
+| In Protégé | In OntoCode v0.19 |
 |------------|-------------------|
 | Class hierarchy tab | **Classes** explorer; toggle **asserted / inferred / combined** after reasoner |
 | Entity editor (labels, parents) | **Entity Inspector** (`.ttl` and `.obo`) |

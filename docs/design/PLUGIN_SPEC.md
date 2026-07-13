@@ -1,5 +1,7 @@
 # PLUGIN_SPEC.md
 
+> **Historical design spec.** For **authoring plugins today**, use **[Plugin authoring](../guides/plugins.md)** (TOML manifest + subprocess host). This document describes early trait-based plans; the shipped host uses manifest discovery under `.ontocore/plugins/*.toml`.
+
 ## 1. Purpose
 
 The plugin system allows users and organizations to extend OntoCore and OntoCode **without modifying the core project**. Plugins expose **Capability Providers** — see [platform/CAPABILITY_PROVIDERS.md](https://github.com/eddiethedean/ontocode/blob/main/docs/platform/CAPABILITY_PROVIDERS.md) and [adr/0005](../adr/0005-capability-provider-plugin-model.md).

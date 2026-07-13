@@ -9,14 +9,14 @@ Canonical capability matrix: [What ships today](../SHIPPED.md).
 | Level | Version | Meaning |
 |-------|---------|---------|
 | **Pre-1.0** | **0.19.x (current)** | Active development. Library APIs, LSP JSON, and SQL virtual table columns may change between minor releases until [v1.0](../design/v1.0_BACKLOG.md). |
-| **Stable CI gates** | 0.18.x | `ontocore validate`, `ontocore classify`, and `ontocore diff` are documented for CI — see [workspace limits](../workspace-limits.md). |
+| **Stable CI gates** | 0.19.x | `ontocore validate`, `ontocore classify`, and `ontocore diff` are documented for CI — see [workspace limits](../workspace-limits.md). |
 | **v1.0 target** | Planned | Protégé-competitive OWL 2 DL + OBO in VS Code per [Protégé parity](../design/PROTEGE_PARITY.md). |
 
-OntoCode v0.18 is **not** documented as a general-availability replacement for Protégé for every advanced OWL 2 DL workflow (e.g. full Manchester axiom coverage for all formats, OWL/XML write-back).
+OntoCode v0.19 is **not** documented as a general-availability replacement for Protégé for every advanced OWL 2 DL workflow (e.g. full Manchester axiom coverage for all formats; RDF/XML and OWL/XML write-back planned **v0.21**).
 
 ## Approved use cases (pilot or production)
 
-| Use case | v0.17 readiness | Notes |
+| Use case | v0.19 readiness | Notes |
 |----------|----------------|-------|
 | CI lint gate on ontology repos | **Suitable** | `ontocore validate` — [CI integration](../ci-integration.md) |
 | CI consistency gate (EL profile) | **Suitable** | `ontocore classify --profile el` — profile must match ontology |
@@ -27,7 +27,7 @@ OntoCode v0.18 is **not** documented as a general-availability replacement for P
 | Ontology browse/query in VS Code | **Pilot** | Local-first; multi-root supported — [enterprise deployment](enterprise-deployment.md) |
 | Air-gapped VS Code install | **Pilot** | VSIX + SHA256 — [enterprise deployment](enterprise-deployment.md) |
 | OBO index + write-back + ROBOT CLI in CI | **Pilot** | Index and edit `.obo`; `ontocore robot validate` — requires Java + `robot` on PATH — [ROBOT interop](robot-interop.md) |
-| Replace Protégé for full OWL 2 DL engineering | **Not supported** | DL classification shipped; full axiom catalog for all formats and OWL/XML write-back remain v1.0 — [Protégé coexistence](protege-coexistence.md) |
+| Replace Protégé for full OWL 2 DL engineering | **Not supported** | DL classification shipped; full axiom catalog for all formats remains v1.0; RDF/XML and OWL/XML write-back planned **v0.21** — [Protégé coexistence](protege-coexistence.md) |
 | Org-wide mandatory IDE standard | **Defer** | Complete pilot + legal review first |
 
 ## Pilot criteria (recommended before wider rollout)
@@ -46,7 +46,7 @@ Suggested pilot duration: **4–8 weeks** with 3–10 engineers on one ontology 
 
 ## What is stable enough for automation
 
-| Surface | Stability (v0.17) |
+| Surface | Stability (v0.19) |
 |---------|-------------------|
 | `ontocore validate` exit codes | Documented for CI |
 | `ontocore classify` exit codes | Documented for CI |
@@ -60,13 +60,13 @@ Pin CLI version in CI: release binary with `VERSION=0.19.0` or `cargo install on
 
 ## Support and incident response
 
-| Topic | v0.17 policy |
+| Topic | v0.19 policy |
 |-------|-------------|
 | Commercial support | **Not offered** — community / GitHub issues |
 | Security reports | [GitHub Security Advisories](https://github.com/eddiethedean/ontocode/security/advisories/new) — not public issues |
 | Acknowledgment target | Within a few business days ([SECURITY.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/SECURITY.md)) |
 | Patch SLA | **No committed SLA** — track [GitHub Security Advisories](https://github.com/eddiethedean/ontocode/security/advisories) for your version |
-| Supported versions | 0.18.x ([security policy](../security.md)) |
+| Supported versions | 0.19.x ([security policy](../security.md)) |
 
 Enterprises requiring contractual SLAs should treat OntoCode as **internal OSS adoption** with your own escalation path to maintainers via GitHub.
 

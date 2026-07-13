@@ -5,7 +5,7 @@
 
 **Ontology IDE for VS Code** — powered by **OntoCore** (`ontocore-lsp` language server).
 
-**Current release: v0.19.0** — [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) · [Known limitations](https://ontocode-vs.readthedocs.io/en/latest/known-limitations/) · [What's new in v0.18](https://ontocode-vs.readthedocs.io/en/latest/migration/v0.18/)
+**Current release: v0.19.0** — [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) · [Known limitations](https://ontocode-vs.readthedocs.io/en/latest/known-limitations/) · [Migration v0.19](https://ontocode-vs.readthedocs.io/en/latest/migration/v0.19/)
 
 > **New here?** **[First success (~10 min)](https://ontocode-vs.readthedocs.io/en/latest/guides/first-success/)** · [Migrating from Protégé?](https://ontocode-vs.readthedocs.io/en/latest/guides/protege-migration/) · [Feature tour](https://ontocode-vs.readthedocs.io/en/latest/ontocode/feature-tour/) · [FAQ](https://ontocode-vs.readthedocs.io/en/latest/faq/)
 
@@ -179,7 +179,7 @@ More detail: [Installation & troubleshooting](https://ontocode-vs.readthedocs.io
 
 **New in v0.19.0:** Semantic transaction apply path for Turtle/OBO; parity manifest + CI validator. See [v0.19 migration](https://ontocode-vs.readthedocs.io/en/latest/migration/v0.19/).
 
-**In v0.18:** Protégé Desktop parity gate — distinct reasoner **Start / Synchronize / Classify / Consistency**, client-side **Stop** cancel, explanation **stale** detection, layout **reopen-with-context**, expanded Protégé round-trip fixtures. See [What's new in v0.18](https://ontocode-vs.readthedocs.io/en/latest/migration/v0.18/).
+**In v0.19:** Semantic transaction apply path for Turtle/OBO patches; Protégé parity program baseline. See [Migration v0.19](https://ontocode-vs.readthedocs.io/en/latest/migration/v0.19/).
 
 **From v0.17:** Protégé-shell menus, toolbars, and dialogs; named perspectives and layout persistence; command registry / workspace UI state via LSP.
 

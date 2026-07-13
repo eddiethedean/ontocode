@@ -12,7 +12,7 @@ The extension talks to the bundled **OntoCore LSP** (`ontocore-lsp`) — you do 
 ## Quick start
 
 1. Install OntoCode from the [Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) or [Open VSX](https://open-vsx.org/extension/ontocode/ontocode) (Cursor).
-2. Open a folder with `.ttl`, `.owl`, or other ontology files and **Trust** the workspace.
+2. Open a folder with `.ttl`, `.obo`, `.owl`, or other ontology files. Bundled language server works in Restricted Mode — **Trust** only if you set custom `ontocode.lspPath` or `ontocode.robotPath`.
 3. Open the **OntoCode** activity bar → **Classes** → click an entity.
 
 [:octicons-arrow-right-24: First success in 10 minutes](../guides/first-success.md)

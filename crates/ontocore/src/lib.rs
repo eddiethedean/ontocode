@@ -4,6 +4,34 @@
 //! SQL, SPARQL, reasoning integration, and LSP services.
 //!
 //! Implementation is provided by the `ontocore-*` crates.
+//!
+//! # Quick start
+//!
+//! ```no_run
+//! use ontocore::Workspace;
+//!
+//! # fn demo() -> Result<(), ontocore::Error> {
+//! let workspace = Workspace::open(".")?;
+//! let result = workspace.query("SELECT short_name, labels FROM classes")?;
+//! for row in &result.rows {
+//!     println!("{:?}", row);
+//! }
+//! # Ok(())
+//! # }
+//! ```
+//!
+//! # Validate
+//!
+//! ```no_run
+//! use ontocore::Workspace;
+//!
+//! # fn demo() -> Result<(), ontocore::Error> {
+//! let workspace = Workspace::open(".")?;
+//! let diagnostics = workspace.diagnostics();
+//! println!("{} diagnostics", diagnostics.len());
+//! # Ok(())
+//! # }
+//! ```
 
 pub mod catalog;
 pub mod diagnostics;

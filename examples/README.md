@@ -10,6 +10,29 @@ cargo run -- validate fixtures
 cargo run -p ontocode --example index_and_query
 ```
 
+## End-to-end workflow (clone)
+
+Edit → validate → classify → diff on the bundled `fixtures/` tree:
+
+```bash
+# 1. Index and inspect
+cargo run -- inspect fixtures
+
+# 2. Lint gate (CI-style)
+cargo run -- validate fixtures
+
+# 3. EL consistency gate
+cargo run -- classify fixtures --profile el --format json
+
+# 4. Semantic diff (requires git checkout)
+cargo run -- diff HEAD..WORKTREE --format markdown
+
+# 5. Optional: patch preview on Turtle
+cargo run -- patch fixtures/example.ttl '[]' --preview
+```
+
+VS Code equivalent: [First success (~10 min)](../docs/guides/first-success.md) → edit in inspector → **Index Workspace** → Reasoner → Semantic Diff panel.
+
 ## Contents
 
 | Path | Description |

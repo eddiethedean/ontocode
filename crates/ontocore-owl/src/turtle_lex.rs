@@ -91,11 +91,7 @@ fn advance_inside_string(
     let b = bytes[i];
     match kind {
         TurtleStringKind::ShortDouble | TurtleStringKind::ShortSingle => {
-            let quote = if kind == TurtleStringKind::ShortDouble {
-                b'"'
-            } else {
-                b'\''
-            };
+            let quote = if kind == TurtleStringKind::ShortDouble { b'"' } else { b'\'' };
             if state.escape {
                 state.escape = false;
             } else if b == b'\\' {
@@ -244,34 +240,16 @@ mod tests {
 
     #[test]
     fn lexical_value_all_quote_forms() {
-        assert_eq!(
-            turtle_literal_lexical_value(r#""Hello""#),
-            Some("Hello".to_string())
-        );
-        assert_eq!(
-            turtle_literal_lexical_value("'Hello'"),
-            Some("Hello".to_string())
-        );
-        assert_eq!(
-            turtle_literal_lexical_value(r#""""Hello""""#),
-            Some("Hello".to_string())
-        );
-        assert_eq!(
-            turtle_literal_lexical_value("'''Hello'''"),
-            Some("Hello".to_string())
-        );
+        assert_eq!(turtle_literal_lexical_value(r#""Hello""#), Some("Hello".to_string()));
+        assert_eq!(turtle_literal_lexical_value("'Hello'"), Some("Hello".to_string()));
+        assert_eq!(turtle_literal_lexical_value(r#""""Hello""""#), Some("Hello".to_string()));
+        assert_eq!(turtle_literal_lexical_value("'''Hello'''"), Some("Hello".to_string()));
     }
 
     #[test]
     fn lexical_value_unescapes() {
-        assert_eq!(
-            turtle_literal_lexical_value(r#""a\"b""#),
-            Some(r#"a"b"#.to_string())
-        );
-        assert_eq!(
-            turtle_literal_lexical_value("'a\\'b'"),
-            Some("a'b".to_string())
-        );
+        assert_eq!(turtle_literal_lexical_value(r#""a\"b""#), Some(r#"a"b"#.to_string()));
+        assert_eq!(turtle_literal_lexical_value("'a\\'b'"), Some("a'b".to_string()));
     }
 
     #[test]

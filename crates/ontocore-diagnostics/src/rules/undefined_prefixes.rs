@@ -270,10 +270,7 @@ mod tests {
     #[test]
     fn strip_handles_long_single_quoted_strings() {
         let stripped = strip_comments_and_strings("ex:Ok rdfs:comment '''note about un:Bad''' .");
-        assert!(
-            !stripped.contains("un:Bad"),
-            "qname inside ''' must be stripped: {stripped:?}"
-        );
+        assert!(!stripped.contains("un:Bad"), "qname inside ''' must be stripped: {stripped:?}");
         assert!(stripped.contains("ex:Ok"));
     }
 

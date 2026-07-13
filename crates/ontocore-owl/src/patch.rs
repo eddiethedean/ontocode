@@ -1205,10 +1205,8 @@ fn bracket_end_index(text: &str, bracket_start: usize) -> Option<usize> {
 }
 
 fn is_turtle_lex_start(bytes: &[u8], i: usize) -> bool {
-    matches!(
-        bytes.get(i),
-        Some(b'#' | b'"' | b'\'' | b'<')
-    ) || bytes.get(i..i + 3) == Some(br#"""""#)
+    matches!(bytes.get(i), Some(b'#' | b'"' | b'\'' | b'<'))
+        || bytes.get(i..i + 3) == Some(br#"""""#)
         || bytes.get(i..i + 3) == Some(br"'''")
 }
 

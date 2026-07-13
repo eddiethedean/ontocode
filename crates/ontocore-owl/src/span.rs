@@ -298,7 +298,6 @@ pub(crate) fn is_turtle_terminating_dot(bytes: &[u8], i: usize) -> bool {
     !(prev_name && next_name)
 }
 
-
 /// True when `byte_offset` lies inside a `#` line comment or any Turtle string literal.
 ///
 /// Handles `"…"`, `'…'`, `"""…"""`, and `'''…'''` forms (same lexer rules as

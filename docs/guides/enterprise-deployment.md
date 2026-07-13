@@ -74,7 +74,7 @@ Pre-1.0: expect **minor** release API changes — test CI and integrators before
 Download pinned release binary — fastest cold start:
 
 ```bash
-VERSION=0.19.0
+VERSION=0.20.0
 ASSET="ontocore-v${VERSION}-x86_64-unknown-linux-gnu.tar.gz"
 BIN="ontocore-v${VERSION}-x86_64-unknown-linux-gnu"
 curl -fsSL -o "${ASSET}" \
@@ -91,7 +91,7 @@ Verify against `SHA256SUMS` in production pipelines ([ci-integration](../ci-inte
 | Platform | Release CLI binary | Alternatives |
 |----------|-------------------|--------------|
 | Linux x64 | **Yes** | — |
-| macOS | **No** | `cargo install ontocore-cli --locked --version 0.19.0` (requires Rust on agent) |
+| macOS | **No** | `cargo install ontocore-cli --locked --version 0.20.0` (requires Rust on agent) |
 | Windows | **No** | Same, or WSL/Linux job for validate |
 
 Cache `~/.cargo` or an internal cargo registry mirror to reduce `cargo install` time.

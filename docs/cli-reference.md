@@ -1,11 +1,11 @@
-# CLI reference (OntoCore v0.19)
+# CLI reference (OntoCore v0.20)
 
 The `ontocore` binary indexes ontology workspaces and exposes query, validation, patch, and reasoning commands.
 
 Install (pin latest tagged release):
 
 ```bash
-cargo install ontocore-cli --locked --version 0.19.0
+cargo install ontocore-cli --locked --version 0.20.0
 ```
 
 From a git clone, use `cargo run --` instead of `ontocore`.
@@ -170,6 +170,8 @@ ontocore explain . --class 'http://example.org#Invalid' --format json
 ### `refactor`
 
 Workspace-wide Turtle refactoring. See [Refactoring guide](guides/refactoring.md).
+
+> **IDE-only:** **Merge entities** and **replace entity references** are available in the OntoCode extension (refactor preview). There is **no** `ontocore refactor merge` / `replace` CLI subcommand — see [What ships today](SHIPPED.md).
 
 #### `refactor usages`
 

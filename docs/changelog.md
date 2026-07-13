@@ -6,7 +6,9 @@ Migration guides: [Migration index](migration/README.md)
 
 ## [Unreleased]
 
-**v0.20.0 (in progress)** — Turtle patch matching for Protégé/ROBOT-style files; workspace runtime epic open. Not tagged yet. See [CHANGELOG.md](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) and draft [migration/v0.20.md](migration/v0.20.md).
+## [0.20.0] - 2026-07-13
+
+**v0.20.0** — Workspace runtime (registry, save, transactions, session); Turtle patch matching for Protégé/ROBOT-style files. See [CHANGELOG.md](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) and [migration/v0.20.md](migration/v0.20.md).
 
 ## [0.19.0] - 2026-07-13
 

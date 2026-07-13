@@ -7,8 +7,7 @@ hide:
 <div class="oc-hero">
 
 <div class="oc-hero-badges">
-  <span class="oc-badge oc-badge--accent">Latest tagged v0.19.0</span>
-  <span class="oc-badge">main → v0.20 unreleased</span>
+  <span class="oc-badge oc-badge--accent">Latest tagged v0.20.0</span>
   <span class="oc-badge">VS Code</span>
   <span class="oc-badge">CLI · LSP</span>
 </div>
@@ -26,7 +25,7 @@ Index and explore OWL/RDF/OBO, run queries, refactors, and reasoning — in VS C
   <a class="oc-hero-cta" href="getting-started/" style="margin-left:0.75rem">CLI / CI →</a>
 </p>
 
-<p class="oc-hero-subcta"><a href="SHIPPED/">What ships today</a> · <a href="known-limitations/">Known limitations</a> · Latest tagged: <strong>v0.19.0</strong></p>
+<p class="oc-hero-subcta"><a href="SHIPPED/">What ships today</a> · <a href="guides/versions-and-channels/">Versions &amp; channels</a> · <a href="known-limitations/">Known limitations</a> · Latest tagged: <strong>v0.20.0</strong></p>
 
 <div class="oc-hero-links">
   <a href="ontocode/feature-tour/">Feature tour</a>

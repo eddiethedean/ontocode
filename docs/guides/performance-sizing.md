@@ -47,7 +47,7 @@ Large-ontology targets (GO subset ~5k classes, SNOMED EL sample): download via `
 
 ## Reference measurement (tutorial fixtures)
 
-Measured with `ontocore inspect fixtures --format json` on release **0.19.0** (repository tutorial corpus):
+Measured with `ontocore inspect fixtures --format json` on release **0.20.0** (repository tutorial corpus):
 
 | Metric | Value |
 |--------|-------|
@@ -58,6 +58,10 @@ Measured with `ontocore inspect fixtures --format json` on release **0.19.0** (r
 
 Use this as a **smoke-test baseline only** — not representative of production ontologies.
 
+## Medium corpus note (order of magnitude)
+
+For a multi-file OWL/OBO pilot in the **Medium** sizing tier (tens–hundreds of files, ~100k–1M triples), expect index times dominated by format mix and import closure. Run the pilot benchmark protocol below on your own tree and record wall-clock `inspect` / `validate` — project CI does not publish a single shared enterprise corpus number. Optional larger fixtures: `./scripts/fetch-bench-fixtures.sh` then local `bench_*` tests.
+
 ## Recommended pilot benchmarks
 
 Run on a **representative clone** of your production ontology tree:
@@ -65,7 +69,7 @@ Run on a **representative clone** of your production ontology tree:
 ```bash
 # Replace with your ontology root
 ONTO=/path/to/ontologies
-VERSION=0.19.0
+VERSION=0.20.0
 
 # Catalog stats
 time ./ontocore-v${VERSION}-x86_64-unknown-linux-gnu inspect "$ONTO" --format json

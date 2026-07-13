@@ -24,14 +24,14 @@ CLI install options (separate from the extension): [getting started (CLI)](getti
 
 ## Option A — VS Code Marketplace (recommended)
 
-1. Install [OntoCode from the Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) (latest tagged release; may differ from unreleased docs on `main`).
+1. Install [OntoCode from the Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) (or [Open VSX](https://open-vsx.org/extension/ontocode/ontocode) for Cursor). If the store lags the latest GitHub tag, use the VSIX under Option B — see [Versions and channels](guides/versions-and-channels.md).
 2. **File → Open Folder…** and choose a directory with ontology files.
 3. OntoCode’s **bundled** language server runs without Trust; **Trust** only if you need custom `ontocode.lspPath` / `ontocode.robotPath`.
 4. Open the **OntoCode** activity bar and browse ontologies, classes, properties, individuals, and **Diagnostics**.
 
 For a full walkthrough, see [First success in 10 minutes](guides/first-success.md).
 
-**Tutorial pack:** when packaged for a release, download `ontocode-tutorial.zip` from [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) (same tagged version as the VSIX). Built with `./scripts/package-tutorial-zip.sh`. If missing, use the curl commands in [first-success](guides/first-success.md) or open `fixtures/` from a clone.
+**Tutorial pack:** download `ontocode-tutorial.zip` from [GitHub Releases](https://github.com/eddiethedean/ontocode/releases/tag/v0.20.0) (same tag as the VSIX). Built with `./scripts/package-tutorial-zip.sh`. If missing, use the curl commands in [first-success](guides/first-success.md) or open `fixtures/` from a clone.
 
 > **Multi-root workspaces (v0.10+):** All workspace folders are indexed on open. **OntoCode: Index Workspace** may prompt you to pick a folder when multiple roots are open.
 

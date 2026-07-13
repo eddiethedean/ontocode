@@ -111,6 +111,7 @@ nav:
       - "First success (~10 min)": guides/first-success.md
       - Install VS Code: vscode-install.md
       - Getting started (CLI / CI): getting-started.md
+      - Versions and channels: guides/versions-and-channels.md
       - Known limitations: known-limitations.md
   - Use OntoCode:
       - Feature tour: ontocode/feature-tour.md
@@ -173,21 +174,20 @@ nav:
       - Protégé vs OntoCode: guides/protege-decision.md
       - Enterprise evaluation: guides/enterprise-eval.md
       - Procurement appendix: guides/procurement-appendix.md
-      - Vision: vision.md
-      - Architecture: architecture.md
-      - Roadmap hub: roadmap-hub.md
       - API stability (pre-1.0): guides/api-stability.md
       - Security: security.md
+      - Direction:
+          - Vision: vision.md
+          - Architecture: architecture.md
+          - Roadmap hub: roadmap-hub.md
   - Help:
-      - Start here: start.md
-      - Which artifact?: guides/which-artifact.md
-      - Documentation index: documentation-index.md
-      - Migrating from Protégé: guides/protege-migration.md
+      - Find your path: start.md
       - FAQ: faq.md
       - Glossary: glossary.md
       - Ontology concepts: concepts.md
       - Troubleshooting: troubleshooting.md
       - Support and contact: support.md
+      - Migrating from Protégé: guides/protege-migration.md
       - Changelog: changelog.md
       - Migrations:
           - Migration index: migration/README.md
@@ -200,6 +200,8 @@ nav:
           - v0.15 → v0.16: migration/v0.16.md
           - v0.14 → v0.15: migration/v0.15.md
           - v0.13 → v0.14: migration/v0.14.md
+      - Documentation index: documentation-index.md
+      - Which artifact?: guides/which-artifact.md
       - Legacy guide URLs: guides/legacy-guide-urls.md
       - Release integrity: release-integrity.md
   - Contribute:

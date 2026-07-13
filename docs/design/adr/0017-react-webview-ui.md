@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted (planned v0.7a+)
+Accepted (shipped — React webview panels in production since mid-0.x)
 
 ## Context
 

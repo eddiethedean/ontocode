@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.20.0] - 2026-07-13
+
 ### Added
 
 - Workspace runtime (EPIC-003 / BLOCKER_03): host-owned ontology registry with active targeting and editability rules; per-ontology dirty tracking; `SaveCoordinator` for Save / Save All; `WorkspaceTransactionManager` with semantic undo/redo stacks (`undo_patches` from LSP); host event bus; selection and navigation managers; session persistence (workspace state + `.ontocode/session.json`); external-change recovery (reload / keep / compare); panel restore with semantic args ([#249](https://github.com/eddiethedean/ontocode/issues/249))
@@ -22,8 +24,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 
-- Workspace package and all `ontocore-*` crates bumped to **0.20.0** (in progress — not released); extension marketplace and webview UI **0.20.0**
-- Draft migration notes: [docs/migration/v0.20.md](docs/migration/v0.20.md)
+- Workspace package and all `ontocore-*` crates bumped to **0.20.0**; extension and webview UI **0.20.0**
+- Migration notes: [docs/migration/v0.20.md](docs/migration/v0.20.md)
 
 ## [0.19.0] - 2026-07-13
 

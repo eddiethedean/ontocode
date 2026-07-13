@@ -1,6 +1,6 @@
 # Platform overview
 
-> **v0.19 foundation shipped** (semantic transactions + Protégé parity program baseline on top of the v0.13–v0.18 OntoUI / plugin / shell stack). **v0.20 is in progress (unreleased).** For evaluator-facing capabilities, read [What ships today](../SHIPPED.md) first.
+> **v0.20 foundation shipped** (workspace runtime + Turtle patch hardening on top of the v0.13–v0.19 OntoUI / plugin / shell / transaction stack). For evaluator-facing capabilities, read [What ships today](../SHIPPED.md) first.
 >
 > **This section is design/implementation planning.** Items below may be shipped, partial, or planned — always cross-check [SHIPPED.md](../SHIPPED.md).
 >

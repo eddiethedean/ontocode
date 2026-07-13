@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted — **planned v0.14** (plugin host MVP)
+Accepted — **shipped v0.14+** (plugin host MVP; ecosystem API still pre-1.0)
 
 ## Context
 

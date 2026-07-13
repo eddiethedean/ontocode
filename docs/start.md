@@ -1,8 +1,10 @@
-# Start here
+# Find your path
 
 You can be successful with OntoCode/OntoCore in **5–15 minutes** if you follow one path below.
 
 **Primary path for most users:** [First success (~10 min)](guides/first-success.md).
+
+Choose an install channel: [Versions and channels](guides/versions-and-channels.md).
 
 ## Which artifact?
 
@@ -11,7 +13,7 @@ You can be successful with OntoCode/OntoCore in **5–15 minutes** if you follow
 | Edit ontologies in VS Code | [First success](guides/first-success.md) · [Install VS Code](vscode-install.md) |
 | Validate / query in CI | [Getting started (CLI)](getting-started.md) |
 | Embed in Rust | [Rust library guide](guides/rust-library.md) |
-| Compare products | [Which artifact (detail)](guides/which-artifact.md) |
+| Compare products in detail | [Which artifact](guides/which-artifact.md) |
 
 Read [Known limitations](known-limitations.md) before a large evaluation.
 

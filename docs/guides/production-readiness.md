@@ -1,6 +1,6 @@
 # Production readiness and pilot criteria
 
-This page states what OntoCode / OntoCore **v0.19.0** (latest tagged) is appropriate for in production-like environments. It is not legal advice and does not replace your organization's risk review.
+This page states what OntoCode / OntoCore **v0.20.0** (latest tagged) is appropriate for in production-like environments. It is not legal advice and does not replace your organization's risk review.
 
 Canonical capability matrix: [What ships today](../SHIPPED.md).
 
@@ -8,16 +8,16 @@ Canonical capability matrix: [What ships today](../SHIPPED.md).
 
 | Level | Version | Meaning |
 |-------|---------|---------|
-| **Pre-1.0** | **0.19.x (latest tagged)** | Pin `cargo install ontocore-cli --locked --version 0.19.0` in CI. Library APIs may change until [v1.0](../design/v1.0_BACKLOG.md). |
+| **Pre-1.0** | **0.20.x (latest tagged)** | Pin `cargo install ontocore-cli --locked --version 0.20.0` in CI. Library APIs may change until [v1.0](../design/v1.0_BACKLOG.md). |
 | **In development** | **0.20.x (unreleased on `main`)** | Workspace runtime and patch hardening — not on Marketplace/crates.io until tagged. |
 | **Stable CI gates** | 0.19.x | `ontocore validate`, `ontocore classify`, and `ontocore diff` are documented for CI — see [workspace limits](../workspace-limits.md). |
 | **v1.0 target** | Planned | Protégé-competitive OWL 2 DL + OBO in VS Code per [Protégé parity](../design/PROTEGE_PARITY.md). |
 
-OntoCode v0.19 is **not** documented as a general-availability replacement for Protégé for every advanced OWL 2 DL workflow (e.g. full Manchester axiom coverage for all formats; RDF/XML and OWL/XML write-back planned **v0.21**).
+OntoCode v0.20 is **not** documented as a general-availability replacement for Protégé for every advanced OWL 2 DL workflow (e.g. full Manchester axiom coverage for all formats; RDF/XML and OWL/XML write-back planned **v0.21**).
 
 ## Approved use cases (pilot or production)
 
-| Use case | v0.19 readiness | Notes |
+| Use case | v0.20 readiness | Notes |
 |----------|----------------|-------|
 | CI lint gate on ontology repos | **Suitable** | `ontocore validate` — [CI integration](../ci-integration.md) |
 | CI consistency gate (EL profile) | **Suitable** | `ontocore classify --profile el` — profile must match ontology |
@@ -47,7 +47,7 @@ Suggested pilot duration: **4–8 weeks** with 3–10 engineers on one ontology 
 
 ## What is stable enough for automation
 
-| Surface | Stability (v0.19 tagged) |
+| Surface | Stability (v0.20 tagged) |
 |---------|-------------------|
 | `ontocore validate` exit codes | Documented for CI |
 | `ontocore classify` exit codes | Documented for CI |
@@ -57,11 +57,11 @@ Suggested pilot duration: **4–8 weeks** with 3–10 engineers on one ontology 
 | LSP `ontocore/*` JSON | May change pre-1.0 |
 | Rust `ontocore-*` crate APIs | May change pre-1.0 |
 
-Pin CLI version in CI: release binary with `VERSION=0.19.0` or `cargo install ontocore-cli --locked --version 0.19.0`.
+Pin CLI version in CI: release binary with `VERSION=0.20.0` or `cargo install ontocore-cli --locked --version 0.20.0`.
 
 ## Support and incident response
 
-| Topic | v0.19 policy |
+| Topic | v0.20 policy |
 |-------|-------------|
 | Commercial support | **Not offered** — community / GitHub issues |
 | Security reports | [GitHub Security Advisories](https://github.com/eddiethedean/ontocode/security/advisories/new) — not public issues |

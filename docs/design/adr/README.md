@@ -22,7 +22,7 @@ Canonical ADRs live in this directory. The former `adrs/` folder was merged here
 | [0014](0014-rust-native-reasoners-only.md) | Rust-native reasoners only (no JVM) | Accepted |
 | [0015](0015-adopt-ontologos-reasoner.md) | Adopt OntoLogos as reasoner backend | Accepted |
 | [0016](0016-dependency-first-implementation.md) | Dependency-first implementation | Accepted |
-| [0017](0017-react-webview-ui.md) | Adopt React for VS Code webview panels | Accepted (planned v0.7a+) |
+| [0017](0017-react-webview-ui.md) | Adopt React for VS Code webview panels | Accepted (shipped) |
 | [0018](0018-ontocore-platform-identity.md) | OntoCore platform identity | Accepted (v0.9) |
 | [0019](0019-obo-write-back.md) | OBO write-back via fastobo | Accepted — **implemented v0.12** (read v0.11) |
 | [0020](0020-semantic-transaction-edit-model.md) | Semantic transaction edit model | Accepted — **implemented v0.19** |

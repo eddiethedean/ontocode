@@ -22,7 +22,7 @@ Many teams use **both**: Protégé for heavy axiom authoring in OWL/XML, OntoCod
 
 ## Honest desktop known gaps (v0.19 tagged)
 
-See [Unreleased on main](../SHIPPED.md#unreleased-on-main-v020-not-tagged) for v0.20 branch items not yet on Marketplace.
+See [Versions & channels](versions-and-channels.md) if Marketplace lags behind the GitHub Release VSIX.
 
 | Gap | Status |
 |-----|--------|
@@ -66,7 +66,7 @@ Follow the [first success core path](../guides/first-success.md) if anything is 
 ## Day 3 — Validate in CI
 
 ```yaml
-- run: cargo install ontocore-cli --locked --version 0.19.0
+- run: cargo install ontocore-cli --locked --version 0.20.0
 - run: ontocore validate ./src/ontologies
 ```
 

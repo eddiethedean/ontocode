@@ -152,4 +152,4 @@ ontocore workflow --plugin owlmake --step qc /path/to/workspace
 
 ## Stability
 
-Plugin APIs are **pre-1.0** and may change until OntoCore 1.0. **Canonical author guide:** this page. Historical background only: [PLUGIN_SPEC.md](../design/PLUGIN_SPEC.md).
+Plugin APIs are **pre-1.0** and may change until OntoCore 1.0. **Canonical author guide:** this page. Do **not** implement against the historical trait sketches in [PLUGIN_SPEC.md](../design/PLUGIN_SPEC.md) (background only).

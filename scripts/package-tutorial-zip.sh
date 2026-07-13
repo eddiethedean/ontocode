@@ -10,9 +10,8 @@ TMP="$(mktemp -d)"
 trap 'rm -rf "$TMP"' EXIT
 
 mkdir -p "$TMP/ontocode-tutorial"
-for f in example.ttl complex-classes.ttl demo.obo; do
-  cp "fixtures/$f" "$TMP/ontocode-tutorial/"
-done
+cp fixtures/example.ttl fixtures/complex-classes.ttl "$TMP/ontocode-tutorial/"
+cp examples/obo-workflow/demo.obo "$TMP/ontocode-tutorial/"
 
 (
   cd "$TMP"

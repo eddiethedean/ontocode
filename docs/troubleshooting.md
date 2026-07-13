@@ -78,10 +78,10 @@ Patches write the **source file on disk** first (`.ttl` or `.obo`), then update 
 
 **Fix:**
 
-1. Pin the latest tagged release from [docs/TAGGED_RELEASE](https://github.com/eddiethedean/ontocode/blob/main/docs/TAGGED_RELEASE) (currently **0.19.0**):
+1. Pin the latest tagged release from [docs/TAGGED_RELEASE](https://github.com/eddiethedean/ontocode/blob/main/docs/TAGGED_RELEASE) (currently **0.20.0**):
 
    ```bash
-   cargo install ontocore-cli --locked --version 0.19.0
+   cargo install ontocore-cli --locked --version 0.20.0
    ```
 
 2. For release tarballs, download assets from the matching tag (e.g. `v0.19.0`), not an unreleased `v0.20.0` URL.
@@ -104,7 +104,7 @@ ontocore query /path/to/your/ontologies "SELECT * FROM classes"
 |---------|-----|
 | `ontocore: command not found` after `cargo install` | Add `~/.cargo/bin` to your `PATH` — see [Getting started](getting-started.md#prerequisites) |
 | `cargo install` fails with MSRV / edition error | Run `rustup update stable`; require Rust **1.88+** (`rustc --version`) |
-| `cargo install` network / crates.io errors | Retry with `--locked`; pin `--version 0.19.0` in CI |
+| `cargo install` network / crates.io errors | Retry with `--locked`; pin `--version 0.20.0` in CI |
 | Release tarball on macOS/Windows | CLI pre-builds are **Linux x64 only** — use `cargo install` or the VSIX extension |
 | `ontocore diff HEAD..WORKTREE` fails | Run from a **git repository** root containing ontology files |
 

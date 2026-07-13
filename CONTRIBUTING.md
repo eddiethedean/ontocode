@@ -73,7 +73,16 @@ Run `./scripts/run-ci-local.sh` before PRs that touch plugin host, reference plu
 
 ## Before opening a PR
 
-**Minimum checks (most changes):**
+Use the **[testing matrix](docs/guides/testing-matrix.md)** for the minimum commands for your change type. Do **not** run the full Rust/extension suite for docs-only PRs.
+
+**Docs-only checklist:**
+
+```bash
+./scripts/check-doc-versions.sh
+# optional: pip install -r docs/requirements.txt && ./scripts/build-docs.sh
+```
+
+**Engine / extension checklist (most code changes):**
 
 ```bash
 cargo fmt --all --check
@@ -88,6 +97,14 @@ cd extension && ONTOCORE_LSP_BIN=../target/debug/ontocore-lsp npm ci && npm run 
 **Full CI parity (release branches or broad changes):** `./scripts/run-ci-local.sh` (~30+ minutes). This matches GitHub Actions (rustfmt, clippy, tests, extension e2e, mkdocs, packaging).
 
 Open an issue or discussion before large features. Follow existing commit message style in `git log`.
+
+### Good first issues
+
+Look for GitHub labels `good first issue` and `docs`. Useful first PRs:
+
+- Docs clarity / broken links / version pin nits under `docs/`
+- Small unit-test additions next to existing tests in a single crate
+- Copy fixes in `extension/README.md` or tutorial steps in [first-success](docs/guides/first-success.md)
 
 ## Prerequisites
 

@@ -856,6 +856,8 @@ check_file_contains "docs/adr/README.md" "Product & platform ADRs" "product adr 
 check_file_contains "docs/glossary.md" "OntoUI" "glossary OntoUI term"
 check_file_contains "docs/documentation-index.md" "Documentation index" "docs documentation index"
 check_file_contains "docs/documentation-index.md" "v${TAGGED_VERSION}" "documentation-index tagged release"
+check_file_contains "mkdocs.yml" "guides/versions-and-channels.md" "mkdocs versions and channels"
+check_file_contains "docs/guides/versions-and-channels.md" "Versions and channels" "versions and channels page"
 check_file_contains "mkdocs.yml" "guides/architecture-tour.md" "mkdocs architecture tour"
 check_file_contains "mkdocs.yml" "guides/testing-matrix.md" "mkdocs testing matrix"
 check_file_contains "mkdocs.yml" "guides/procurement-appendix.md" "mkdocs procurement appendix"
@@ -874,7 +876,7 @@ check_file_contains "mkdocs.yml" "v0\\.14 → v0\\.15" "mkdocs v0.15 migration i
 check_file_contains "docs/guides/owl-xml-workflow.md" "read-only catalog" "owl-xml workflow guide"
 check_file_contains "docs/ontocore/rust-api.md" "Book ↔ docs.rs crosswalk" "rust-api docs.rs crosswalk"
 check_file_contains "docs/troubleshooting.md" "Where to start" "troubleshooting decision tree"
-check_file_contains "docs/platform/OVERVIEW.md" "v0.19 foundation shipped" "platform overview shipped banner"
+check_file_contains "docs/platform/OVERVIEW.md" "v0.20 foundation shipped" "platform overview shipped banner"
 
 # vision.md must reference current shipped release (not v0.11 or v0.12)
 for file in docs/vision.md VISION.md; do

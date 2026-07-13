@@ -552,13 +552,31 @@ pub fn preview_move_entity(
         source_without.replace_range(range.start as usize..range.end as usize, "");
     }
 
+    let mut prefix_lines = BTreeSet::new();
+    for line in source_text.lines() {
+        if is_prefix_declaration_line(line) {
+            prefix_lines.insert(line.trim().to_string());
+        }
+    }
+    let prefix_header: String = prefix_lines.into_iter().collect::<Vec<_>>().join("\n");
+    let block_with_prefixes = if prefix_header.is_empty() {
+        block_text.clone()
+    } else {
+        format!("{prefix_header}\n\n{block_text}")
+    };
+
     let target_original = if target_file.exists() {
         read_source_text(target_file, document_overrides)?
     } else {
         String::new()
     };
-    let target_preview = if target_original.is_empty() {
-        format!("{block_text}\n")
+    let target_was_empty = target_original.is_empty();
+    let target_preview = if target_was_empty {
+        let mut out = block_with_prefixes.clone();
+        if !out.ends_with('\n') {
+            out.push('\n');
+        }
+        out
     } else {
         format!("{target_original}\n\n{block_text}")
     };
@@ -579,7 +597,11 @@ pub fn preview_move_entity(
                     start_byte: 0,
                     end_byte: 0,
                     old_text: String::new(),
-                    new_text: block_text,
+                    new_text: if target_was_empty {
+                        block_with_prefixes
+                    } else {
+                        block_text
+                    },
                 }],
             },
         ],

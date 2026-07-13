@@ -87,6 +87,16 @@ fn strip_comments_and_strings(text: &str) -> String {
                 while chars.next().is_some_and(|ch| ch != '\n') {}
                 out.push(' ');
             }
+            '<' => {
+                // Blank IRIs so QNAME_RE does not match colons inside <…>.
+                out.push(' ');
+                while let Some(ch) = chars.next() {
+                    out.push(' ');
+                    if ch == '>' {
+                        break;
+                    }
+                }
+            }
             '"' => {
                 if chars.peek() == Some(&'"') {
                     chars.next();
@@ -350,5 +360,47 @@ ex:Ok3 rdfs:label 'say \'hi\'' .
         };
         let diags = undefined_prefixes(&input, &|_| text.to_string());
         assert!(diags.is_empty(), "string contents should not lint: {diags:?}");
+    }
+
+    #[test]
+    fn ignores_colons_inside_angle_bracket_iris() {
+        let text = r#"@prefix ex: <http://ex/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+ex:Ok a owl:Class ;
+    rdfs:seeAlso <http://dbpedia.org/resource/Foo:Bar> .
+"#;
+        let documents = vec![OntologyDocument {
+            id: "doc-1".to_string(),
+            path: Path::new("ok.ttl").to_path_buf(),
+            format: OntologyFormat::Turtle,
+            base_iri: Some("http://ex/".to_string()),
+            imports: vec![],
+            namespaces: BTreeMap::from([
+                ("ex".to_string(), "http://ex/".to_string()),
+                ("owl".to_string(), "http://www.w3.org/2002/07/owl#".to_string()),
+                ("rdfs".to_string(), "http://www.w3.org/2000/01/rdf-schema#".to_string()),
+            ]),
+            parse_status: ParseStatus::Ok,
+            content_hash: "h".to_string(),
+            modified_time: 0,
+            parse_message: None,
+            parse_error_location: None,
+        }];
+        let input = DiagnosticInput {
+            documents: &documents,
+            entities: &[],
+            annotations: &[],
+            axioms: &[],
+            namespaces: &[],
+            imports: &[],
+        };
+        let diags = undefined_prefixes(&input, &|_| text.to_string());
+        assert!(
+            diags.is_empty(),
+            "colons inside <IRI> must not lint as prefixes: {diags:?}"
+        );
+        let stripped = strip_comments_and_strings(text);
+        assert!(!stripped.contains("Foo:Bar"), "IRI interior must be blanked: {stripped:?}");
     }
 }

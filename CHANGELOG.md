@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Reasoner cancel releases `ops_lock` during classify so index/patch ops are not blocked; cancelled runs skip snapshot updates ([#211](https://github.com/eddiethedean/ontocode/issues/211))
 - Manchester parser accepts Protégé-style property-first cardinality (`ex:hasPart min 1 ex:Organ`) and normalizes to the same form ([#226](https://github.com/eddiethedean/ontocode/issues/226))
 - Manchester Turtle emit writes qualified cardinalities as `"N"^^xsd:nonNegativeInteger` per OWL 2 RDF mapping ([#231](https://github.com/eddiethedean/ontocode/issues/231))
 - Find Usages jump guards out-of-range line numbers instead of throwing from `lineAt` ([#228](https://github.com/eddiethedean/ontocode/issues/228))

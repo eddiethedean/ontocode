@@ -5,13 +5,20 @@ use ontocore_core::{
     validate_workspace_scope, validate_workspace_scope_any, Diagnostic, OntologyDocument,
 };
 use ontocore_reasoner::{ReasonerCacheStore, ReasonerSnapshot};
+use lsp_server::RequestId;
 use std::collections::{BTreeSet, HashMap};
 use std::path::{Path, PathBuf};
+use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::{Arc, Mutex, RwLock};
 use std::time::{SystemTime, UNIX_EPOCH};
 
+/// Test-only: sleep this many ms in [`handle_run_reasoner`] after releasing `ops_lock`.
 #[cfg(test)]
-use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
+pub(crate) static TEST_REASONER_CLASSIFY_PAUSE_MS: AtomicU64 = AtomicU64::new(0);
+
+/// Test-only: set while reasoner classify pause is in progress.
+#[cfg(test)]
+pub(crate) static TEST_REASONER_CLASSIFY_IN_PAUSE: AtomicBool = AtomicBool::new(false);
 
 /// Test-only: after snapshotting the previous catalog (lock released), sleep this many ms
 /// before `build_incremental` so concurrent writers can prove they are not blocked.
@@ -27,6 +34,10 @@ pub struct ServerState {
     inner: Arc<RwLock<InnerState>>,
     /// Serializes catalog rebuilds and reasoner runs against the same workspace state.
     ops_lock: Arc<Mutex<()>>,
+    /// Bumped when a reasoner run starts or is cancelled; stale runs must not update snapshot.
+    reasoner_run_generation: Arc<AtomicU64>,
+    /// LSP request id for the in-flight `ontocore/runReasoner`, if any.
+    active_reasoner_request_id: Arc<Mutex<Option<RequestId>>>,
 }
 
 struct InnerState {
@@ -81,7 +92,42 @@ impl ServerState {
                 active_ontology_id: None,
             })),
             ops_lock: Arc::new(Mutex::new(())),
+            reasoner_run_generation: Arc::new(AtomicU64::new(0)),
+            active_reasoner_request_id: Arc::new(Mutex::new(None)),
         }
+    }
+
+    /// Start a new reasoner run; returns a generation token for stale-result checks.
+    pub fn begin_reasoner_run(&self, request_id: RequestId) -> u64 {
+        let gen = self.reasoner_run_generation.fetch_add(1, Ordering::SeqCst) + 1;
+        if let Ok(mut guard) = self.active_reasoner_request_id.lock() {
+            *guard = Some(request_id);
+        }
+        gen
+    }
+
+    pub fn clear_active_reasoner_request(&self) {
+        if let Ok(mut guard) = self.active_reasoner_request_id.lock() {
+            *guard = None;
+        }
+    }
+
+    /// Invalidate the active reasoner run when the client sends `$/cancelRequest`.
+    pub fn cancel_reasoner_request(&self, request_id: RequestId) -> bool {
+        let should_cancel = self
+            .active_reasoner_request_id
+            .lock()
+            .ok()
+            .and_then(|g| g.as_ref().map(|active| active == &request_id))
+            .unwrap_or(false);
+        if should_cancel {
+            self.reasoner_run_generation.fetch_add(1, Ordering::SeqCst);
+        }
+        should_cancel
+    }
+
+    pub fn reasoner_run_is_current(&self, generation: u64) -> bool {
+        self.reasoner_run_generation.load(Ordering::SeqCst) == generation
     }
 
     pub fn active_ontology_id(&self) -> Option<String> {

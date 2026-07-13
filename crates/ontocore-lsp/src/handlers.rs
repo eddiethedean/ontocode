@@ -11,7 +11,8 @@ use crate::protocol::{
     SemanticDiffResult, SparqlParams, TabularQueryResult, UsageSummary,
 };
 use crate::state::{path_to_uri, resolve_workspace_for_index, ServerState};
-use lsp_server::ResponseError;
+use crossbeam_channel::Receiver;
+use lsp_server::{Message, RequestId, ResponseError};
 use lsp_types::{
     CodeActionProviderCapability, CompletionOptions, DocumentChanges, DocumentSymbol,
     DocumentSymbolParams, DocumentSymbolResponse, GotoDefinitionParams, GotoDefinitionResponse,
@@ -33,6 +34,9 @@ use ontocore_reasoner::{
     classify, explain_alternatives, ExplanationRequest, ReasonerId, ReasonerSnapshot,
     WorkspaceInputLoader,
 };
+use serde::Deserialize;
+use std::thread;
+use std::time::Duration;
 use ontocore_refactor::{
     apply_refactor_plan_checked_with_overrides, find_usages_with_overrides, plans_equivalent,
     preview_refactor, preview_rename_iri,
@@ -1522,29 +1526,65 @@ pub fn handle_parse_manchester(
     })
 }
 
-pub fn handle_run_reasoner(
+pub fn handle_run_reasoner_lsp(
     state: &ServerState,
     params: RunReasonerParams,
+    message_rx: &Receiver<Message>,
+    run_generation: u64,
 ) -> Result<RunReasonerResult, LspErrorPayload> {
-    let ops_lock = state.ops_lock();
-    let _guard = ops_lock.lock().map_err(|e| LspErrorPayload::reasoner_failed(e.to_string()))?;
-
     let profile = ReasonerId::parse(&params.profile)
         .map_err(|e| LspErrorPayload::reasoner_failed(e.to_string()))?;
 
-    let input = load_reasoner_input(state)?;
+    let (input, cached) = {
+        let ops_lock = state.ops_lock();
+        let _guard =
+            ops_lock.lock().map_err(|e| LspErrorPayload::reasoner_failed(e.to_string()))?;
 
-    if let Some(cached) = state
-        .with_reasoner_cache(|cache| cache.get(&input.content_hash, profile).cloned())
-        .flatten()
-    {
+        let input = load_reasoner_input(state)?;
+        let cached = state
+            .with_reasoner_cache(|cache| cache.get(&input.content_hash, profile).cloned())
+            .flatten();
+        (input, cached)
+    };
+
+    if let Some(cached) = cached {
+        if !state.reasoner_run_is_current(run_generation) {
+            return Err(LspErrorPayload::reasoner_failed("Reasoner run cancelled".to_string()));
+        }
+        let ops_lock = state.ops_lock();
+        let _guard =
+            ops_lock.lock().map_err(|e| LspErrorPayload::reasoner_failed(e.to_string()))?;
         let snapshot = cached.snapshot.clone();
         state.set_reasoner_snapshot(snapshot.clone());
         return Ok(run_reasoner_result_from_classification(&cached.classification, snapshot));
     }
 
-    let classification = classify(profile, &input, params.auto_detect)
+    let auto_detect = params.auto_detect;
+    let input_for_classify = input.clone();
+    let classify_handle = thread::spawn(move || {
+        reasoner_classify_test_pause();
+        classify(profile, &input_for_classify, auto_detect)
+    });
+
+    while !classify_handle.is_finished() {
+        if !state.reasoner_run_is_current(run_generation) {
+            break;
+        }
+        drain_reasoner_cancel_notifications(message_rx, state);
+        thread::sleep(Duration::from_millis(5));
+    }
+
+    let classification = classify_handle
+        .join()
+        .map_err(|_| LspErrorPayload::reasoner_failed("reasoner thread panicked".to_string()))?
         .map_err(|e| LspErrorPayload::reasoner_failed(e.to_string()))?;
+
+    if !state.reasoner_run_is_current(run_generation) {
+        return Err(LspErrorPayload::reasoner_failed("Reasoner run cancelled".to_string()));
+    }
+
+    let ops_lock = state.ops_lock();
+    let _guard = ops_lock.lock().map_err(|e| LspErrorPayload::reasoner_failed(e.to_string()))?;
 
     let snapshot = state
         .reasoner_cache_mut(|cache| {
@@ -1554,6 +1594,40 @@ pub fn handle_run_reasoner(
     state.set_reasoner_snapshot(snapshot.clone());
 
     Ok(run_reasoner_result_from_classification(&classification, snapshot))
+}
+
+#[cfg(test)]
+fn reasoner_classify_test_pause() {
+    use crate::state::{TEST_REASONER_CLASSIFY_IN_PAUSE, TEST_REASONER_CLASSIFY_PAUSE_MS};
+    use std::sync::atomic::Ordering;
+
+    let pause_ms = TEST_REASONER_CLASSIFY_PAUSE_MS.load(Ordering::SeqCst);
+    if pause_ms > 0 {
+        TEST_REASONER_CLASSIFY_IN_PAUSE.store(true, Ordering::SeqCst);
+        thread::sleep(Duration::from_millis(pause_ms));
+        TEST_REASONER_CLASSIFY_IN_PAUSE.store(false, Ordering::SeqCst);
+    }
+}
+
+#[cfg(not(test))]
+fn reasoner_classify_test_pause() {}
+
+#[derive(Debug, Deserialize)]
+struct CancelParams {
+    id: RequestId,
+}
+
+fn drain_reasoner_cancel_notifications(rx: &Receiver<Message>, state: &ServerState) {
+    while let Ok(msg) = rx.try_recv() {
+        match msg {
+            Message::Notification(notif) if notif.method == "$/cancelRequest" => {
+                if let Ok(params) = serde_json::from_value::<CancelParams>(notif.params) {
+                    state.cancel_reasoner_request(params.id);
+                }
+            }
+            _ => {}
+        }
+    }
 }
 
 pub fn handle_get_explanation(
@@ -2323,12 +2397,6 @@ pub fn handle_custom_request(
             let params: ParseManchesterParams = parse_custom_params(params)?;
             let result = handle_parse_manchester(state, params)?;
             serde_json::to_value(result).map_err(|e| LspErrorPayload::index_failed(e.to_string()))
-        }
-        "ontocore/runReasoner" => {
-            let params: RunReasonerParams = parse_custom_params(params)?;
-            let result = handle_run_reasoner(state, params)?;
-            serde_json::to_value(result)
-                .map_err(|e| LspErrorPayload::reasoner_failed(e.to_string()))
         }
         "ontocore/getExplanation" => {
             let params: GetExplanationParams = parse_custom_params(params)?;

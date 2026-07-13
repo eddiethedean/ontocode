@@ -800,3 +800,111 @@ fn export_ontology_writes_under_workspace_not_cwd() {
     assert!(!cwd.path().join("exported.ttl").exists(), "must not write export against process CWD");
     assert!(!cwd.path().join("source.ttl").exists(), "must not resolve source against process CWD");
 }
+
+#[test]
+fn reasoner_classify_releases_ops_lock_during_classify() {
+    use crate::handlers::handle_run_reasoner_lsp;
+    use crate::protocol::RunReasonerParams;
+    use crate::state::{TEST_REASONER_CLASSIFY_IN_PAUSE, TEST_REASONER_CLASSIFY_PAUSE_MS};
+    use crossbeam_channel::unbounded;
+    use lsp_server::RequestId;
+    use std::sync::atomic::Ordering;
+    use std::thread;
+    use std::time::{Duration, Instant};
+
+    let state = indexed_state();
+    TEST_REASONER_CLASSIFY_IN_PAUSE.store(false, Ordering::SeqCst);
+    TEST_REASONER_CLASSIFY_PAUSE_MS.store(200, Ordering::SeqCst);
+
+    let state_reasoner = state.clone();
+    let (_tx, rx) = unbounded();
+    let reasoner = thread::spawn(move || {
+        let generation = state_reasoner.begin_reasoner_run(RequestId::from(42i32));
+        let result = handle_run_reasoner_lsp(
+            &state_reasoner,
+            RunReasonerParams { profile: "el".into(), auto_detect: false },
+            &rx,
+            generation,
+        );
+        state_reasoner.clear_active_reasoner_request();
+        result.expect("reasoner should complete")
+    });
+
+    let deadline = Instant::now() + Duration::from_secs(5);
+    while !TEST_REASONER_CLASSIFY_IN_PAUSE.load(Ordering::SeqCst) {
+        assert!(Instant::now() < deadline, "reasoner never entered classify pause");
+        thread::sleep(Duration::from_millis(1));
+    }
+
+    let lock_start = Instant::now();
+    state
+        .ops_lock()
+        .lock()
+        .expect("ops_lock should be available during classify");
+    let lock_elapsed = lock_start.elapsed();
+    TEST_REASONER_CLASSIFY_PAUSE_MS.store(0, Ordering::SeqCst);
+
+    reasoner.join().expect("reasoner thread");
+    assert!(
+        lock_elapsed < Duration::from_millis(100),
+        "ops_lock blocked for {lock_elapsed:?} during reasoner classify"
+    );
+}
+
+#[test]
+fn cancelled_reasoner_run_does_not_update_snapshot() {
+    use crate::handlers::handle_run_reasoner_lsp;
+    use crate::protocol::RunReasonerParams;
+    use crate::state::{TEST_REASONER_CLASSIFY_IN_PAUSE, TEST_REASONER_CLASSIFY_PAUSE_MS};
+    use crossbeam_channel::unbounded;
+    use lsp_server::{Message, Notification, RequestId};
+    use std::sync::atomic::Ordering;
+    use std::thread;
+    use std::time::{Duration, Instant};
+
+    let state = indexed_state();
+    let before = state
+        .with_catalog_and_reasoner(|_, reasoner| reasoner.cloned())
+        .flatten();
+
+    TEST_REASONER_CLASSIFY_IN_PAUSE.store(false, Ordering::SeqCst);
+    TEST_REASONER_CLASSIFY_PAUSE_MS.store(200, Ordering::SeqCst);
+
+    let (tx, rx) = unbounded();
+    let state_reasoner = state.clone();
+    let reasoner = thread::spawn(move || {
+        let generation = state_reasoner.begin_reasoner_run(RequestId::from(99i32));
+        let result = handle_run_reasoner_lsp(
+            &state_reasoner,
+            RunReasonerParams { profile: "el".into(), auto_detect: false },
+            &rx,
+            generation,
+        );
+        state_reasoner.clear_active_reasoner_request();
+        result
+    });
+
+    let deadline = Instant::now() + Duration::from_secs(5);
+    while !TEST_REASONER_CLASSIFY_IN_PAUSE.load(Ordering::SeqCst) {
+        assert!(Instant::now() < deadline, "reasoner never entered classify pause");
+        thread::sleep(Duration::from_millis(1));
+    }
+
+    let _ = tx.send(Message::Notification(Notification {
+        method: "$/cancelRequest".into(),
+        params: serde_json::json!({ "id": 99 }),
+    }));
+
+    let result = reasoner.join().expect("reasoner thread");
+    TEST_REASONER_CLASSIFY_PAUSE_MS.store(0, Ordering::SeqCst);
+
+    assert!(result.is_err(), "cancelled reasoner should return error");
+    let after = state
+        .with_catalog_and_reasoner(|_, reasoner| reasoner.cloned())
+        .flatten();
+    match (&before, &after) {
+        (None, None) => {}
+        (Some(b), Some(a)) => assert_eq!(b.profile_used, a.profile_used),
+        _ => panic!("cancelled run changed reasoner snapshot presence"),
+    }
+}

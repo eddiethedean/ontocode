@@ -11,7 +11,7 @@
 
 > **CLI or Rust crates?** See the [Rust & CLI documentation path](https://ontocode-vs.readthedocs.io/en/latest/guides/rust-crates/).
 
-![OntoCode product tour](media/screenshots/product-tour.gif)
+![OntoCode product tour](https://raw.githubusercontent.com/eddiethedean/ontocode/main/extension/media/screenshots/product-tour.gif)
 
 > **Editable today:** Turtle (`.ttl`) and OBO (`.obo`) only. OWL/XML and RDF/XML index and query as read-only — [Known limitations](https://ontocode-vs.readthedocs.io/en/latest/known-limitations/).
 

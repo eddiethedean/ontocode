@@ -24,9 +24,10 @@ OntoCode is on the [VS Code Marketplace](https://marketplace.visualstudio.com/it
 1. Version bumped in `extension/package.json` and root `Cargo.toml` workspace version
 2. [CHANGELOG.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) updated
 3. [extension/README.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/extension/README.md) and [docs/vscode-install.md](vscode-install.md) mention Marketplace install and current version
-4. User docs synced per [releasing.md](releasing.md) checklist
-5. `npm test` and `cargo test --workspace` pass
-6. Short description avoids overstating Protégé parity — point to [Protégé migration guide](guides/protege-migration.md) instead
+4. Marketplace README images use absolute GitHub URLs (or paths that resolve with `repository.directory: "extension"`) — relative `media/...` links are rewritten against the **repo root** and 404
+5. User docs synced per [releasing.md](releasing.md) checklist
+6. `npm test` and `cargo test --workspace` pass
+7. Short description avoids overstating Protégé parity — point to [Protégé migration guide](guides/protege-migration.md) instead
 
 ## Publish command
 

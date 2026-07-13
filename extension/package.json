@@ -7,7 +7,8 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/eddiethedean/ontocode.git"
+    "url": "https://github.com/eddiethedean/ontocode.git",
+    "directory": "extension"
   },
   "homepage": "https://ontocode-vs.readthedocs.io/en/latest/guides/first-success/",
   "bugs": {

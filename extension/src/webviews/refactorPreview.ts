@@ -5,28 +5,8 @@ import { RefactorPlan, RefactorRequest } from "../lsp/protocol";
 import { PanelHost } from "./panelHost";
 import type { WebviewMessage } from "./messages";
 import { openWorkspaceTextDocument } from "../utils/workspacePath";
-
-function byteColToUtf16Position(
-  doc: vscode.TextDocument,
-  line: number,
-  byteCol: number
-): vscode.Position {
-  const lineText = doc.lineAt(line).text;
-  let byteIdx = 0;
-  let utf16 = 0;
-  for (let i = 0; i < lineText.length; i++) {
-    if (byteIdx >= byteCol) {
-      break;
-    }
-    const code = lineText.codePointAt(i)!;
-    byteIdx += code > 0xffff ? 4 : code > 0x7ff ? 3 : code > 0x7f ? 2 : 1;
-    utf16 += code > 0xffff ? 2 : 1;
-    if (code > 0xffff) {
-      i += 1;
-    }
-  }
-  return new vscode.Position(line, utf16);
-}
+import { byteColToUtf16 } from "../utils/positions";
+import { isUsageJumpLineInDocument, usageJumpLineIndex } from "./refactorPreviewLogic";
 
 export async function showEntityUsages(iri: string): Promise<void> {
   const result = await findUsages(iri);
@@ -51,9 +31,16 @@ export async function showEntityUsages(iri: string): Promise<void> {
     return;
   }
   const editor = await vscode.window.showTextDocument(doc, vscode.ViewColumn.One);
-  const line = Math.max(0, (picked.usage.line ?? 1) - 1);
+  const line = usageJumpLineIndex(picked.usage.line);
+  if (!isUsageJumpLineInDocument(line, doc.lineCount)) {
+    void vscode.window.showWarningMessage(
+      `OntoCode: usage line ${picked.usage.line} is out of range`
+    );
+    return;
+  }
+  const lineText = doc.lineAt(line).text;
   const byteCol = picked.usage.column ?? 0;
-  const pos = byteColToUtf16Position(doc, line, byteCol);
+  const pos = new vscode.Position(line, byteColToUtf16(lineText, byteCol));
   editor.selection = new vscode.Selection(pos, pos);
   editor.revealRange(new vscode.Range(pos, pos));
 }

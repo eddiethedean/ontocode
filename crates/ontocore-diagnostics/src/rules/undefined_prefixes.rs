@@ -90,7 +90,7 @@ fn strip_comments_and_strings(text: &str) -> String {
             '<' => {
                 // Blank IRIs so QNAME_RE does not match colons inside <…>.
                 out.push(' ');
-                while let Some(ch) = chars.next() {
+                for ch in chars.by_ref() {
                     out.push(' ');
                     if ch == '>' {
                         break;
@@ -396,10 +396,7 @@ ex:Ok a owl:Class ;
             imports: &[],
         };
         let diags = undefined_prefixes(&input, &|_| text.to_string());
-        assert!(
-            diags.is_empty(),
-            "colons inside <IRI> must not lint as prefixes: {diags:?}"
-        );
+        assert!(diags.is_empty(), "colons inside <IRI> must not lint as prefixes: {diags:?}");
         let stripped = strip_comments_and_strings(text);
         assert!(!stripped.contains("Foo:Bar"), "IRI interior must be blanked: {stripped:?}");
     }

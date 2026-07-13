@@ -22,10 +22,8 @@ pub fn duplicate_labels(
     let mut diagnostics = Vec::new();
     for (label, entities) in by_label {
         let mut seen = BTreeSet::new();
-        let unique: Vec<_> = entities
-            .into_iter()
-            .filter(|entity| seen.insert(entity.iri.as_str()))
-            .collect();
+        let unique: Vec<_> =
+            entities.into_iter().filter(|entity| seen.insert(entity.iri.as_str())).collect();
         if unique.len() < 2 {
             continue;
         }
@@ -165,9 +163,6 @@ mod tests {
             imports: &[],
         };
         let diags = duplicate_labels(&input, &empty_source);
-        assert!(
-            diags.is_empty(),
-            "same-entity case-variant labels must not warn: {diags:?}"
-        );
+        assert!(diags.is_empty(), "same-entity case-variant labels must not warn: {diags:?}");
     }
 }

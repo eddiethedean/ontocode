@@ -597,11 +597,7 @@ pub fn preview_move_entity(
                     start_byte: 0,
                     end_byte: 0,
                     old_text: String::new(),
-                    new_text: if target_was_empty {
-                        block_with_prefixes
-                    } else {
-                        block_text
-                    },
+                    new_text: if target_was_empty { block_with_prefixes } else { block_text },
                 }],
             },
         ],

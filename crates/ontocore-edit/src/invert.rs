@@ -360,10 +360,7 @@ mod tests {
         .expect("invert");
         assert_eq!(
             inverted,
-            PatchOp::SetDeprecated {
-                entity_iri: "http://example.org/A".into(),
-                value: false,
-            }
+            PatchOp::SetDeprecated { entity_iri: "http://example.org/A".into(), value: false }
         );
     }
 
@@ -383,10 +380,7 @@ mod tests {
         .expect("invert set true");
         assert_eq!(
             inverted,
-            PatchOp::SetFunctional {
-                entity_iri: "http://example.org/p".into(),
-                value: false,
-            }
+            PatchOp::SetFunctional { entity_iri: "http://example.org/p".into(), value: false }
         );
     }
 }

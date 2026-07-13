@@ -320,10 +320,7 @@ mod tests {
     #[test]
     fn lexical_value_strips_lang_and_datatype() {
         assert_eq!(turtle_literal_lexical_value(r#""Person"@en"#), Some("Person".to_string()));
-        assert_eq!(
-            turtle_literal_lexical_value(r#""42"^^xsd:integer"#),
-            Some("42".to_string())
-        );
+        assert_eq!(turtle_literal_lexical_value(r#""42"^^xsd:integer"#), Some("42".to_string()));
         assert_eq!(
             turtle_literal_lexical_value(r#""x"^^<http://www.w3.org/2001/XMLSchema#string>"#),
             Some("x".to_string())

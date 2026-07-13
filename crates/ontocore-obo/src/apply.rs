@@ -357,10 +357,8 @@ fn remove_synonym_line(
 ) -> Result<()> {
     let (start, end) = term_block_range(text, term_id)?;
     let block = &text[start..end];
-    let matches: Vec<&str> = block
-        .lines()
-        .filter(|l| is_synonym_match_line(l, value, scope))
-        .collect();
+    let matches: Vec<&str> =
+        block.lines().filter(|l| is_synonym_match_line(l, value, scope)).collect();
     if matches.is_empty() {
         return Err(OboError::PatchInvalid(format!("synonym not found: {value}")));
     }

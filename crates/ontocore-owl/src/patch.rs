@@ -253,13 +253,7 @@ fn apply_one_patch(
             add_subclass_triple(text, entity_iri, parent_iri, namespaces)
         }
         PatchOp::RemoveSubClassOf { entity_iri, parent_iri } => {
-            remove_predicate_iri_object(
-                text,
-                entity_iri,
-                "rdfs:subClassOf",
-                parent_iri,
-                namespaces,
-            )
+            remove_predicate_iri_object(text, entity_iri, "rdfs:subClassOf", parent_iri, namespaces)
         }
         PatchOp::AddComplexSubClassOf { entity_iri, manchester } => {
             add_complex_axiom(text, entity_iri, manchester, "rdfs:subClassOf", namespaces)
@@ -579,13 +573,11 @@ fn remainder_declares_owl_ontology(remainder: &str) -> bool {
             continue;
         }
         let obj = after_pred.trim_start();
-        for ontology_type in [
-            "owl:Ontology",
-            "<http://www.w3.org/2002/07/owl#Ontology>",
-        ] {
+        for ontology_type in ["owl:Ontology", "<http://www.w3.org/2002/07/owl#Ontology>"] {
             if let Some(after) = obj.strip_prefix(ontology_type) {
                 if after.is_empty()
-                    || after.starts_with(|c: char| c.is_whitespace() || matches!(c, ';' | '.' | ','))
+                    || after
+                        .starts_with(|c: char| c.is_whitespace() || matches!(c, ';' | '.' | ','))
                 {
                     return true;
                 }
@@ -1248,10 +1240,7 @@ fn remove_predicate_iri_object(
 }
 
 /// Surface forms an IRI may take in Turtle (absolute, CURIE, default-prefix).
-fn iri_turtle_term_forms(
-    iri: &str,
-    namespaces: &BTreeMap<String, String>,
-) -> Result<Vec<String>> {
+fn iri_turtle_term_forms(iri: &str, namespaces: &BTreeMap<String, String>) -> Result<Vec<String>> {
     if !is_safe_iri(iri) {
         return Err(OwlError::PatchInvalid(format!(
             "IRI contains characters that cannot be safely written to Turtle: {iri:?}"
@@ -2524,10 +2513,7 @@ ex:Foo a owl:Class .
         ]);
         let result = apply_patches_to_text(
             ttl,
-            &[PatchOp::AddLabel {
-                entity_iri: "http://example.org/Foo".into(),
-                value: "L".into(),
-            }],
+            &[PatchOp::AddLabel { entity_iri: "http://example.org/Foo".into(), value: "L".into() }],
             true,
             &ns,
         )
@@ -2550,10 +2536,7 @@ ex:Foo a owl:Class .
         // Stronger: comment line must not gain a label predicate.
         for line in preview.lines() {
             if line.contains("was a prototype") {
-                assert!(
-                    !line.contains("rdfs:label"),
-                    "comment line must stay label-free: {line}"
-                );
+                assert!(!line.contains("rdfs:label"), "comment line must stay label-free: {line}");
             }
         }
     }
@@ -2654,10 +2637,7 @@ ex:p a owl:ObjectProperty ;
         ]);
         let result = apply_patches_to_text(
             ttl,
-            &[PatchOp::SetFunctional {
-                entity_iri: "http://example.org/p".into(),
-                value: true,
-            }],
+            &[PatchOp::SetFunctional { entity_iri: "http://example.org/p".into(), value: true }],
             true,
             &ns,
         )

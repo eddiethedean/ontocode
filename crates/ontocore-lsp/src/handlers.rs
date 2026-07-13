@@ -13,7 +13,6 @@ use crate::protocol::{
 use crate::state::{path_to_uri, resolve_workspace_for_index, ServerState};
 use crossbeam_channel::Receiver;
 use lsp_server::{Message, RequestId, ResponseError};
-use std::collections::VecDeque;
 use lsp_types::{
     CodeActionProviderCapability, CompletionOptions, DocumentChanges, DocumentSymbol,
     DocumentSymbolParams, DocumentSymbolResponse, GotoDefinitionParams, GotoDefinitionResponse,
@@ -41,6 +40,7 @@ use ontocore_refactor::{
 };
 use serde::Deserialize;
 use serde_json::Value;
+use std::collections::VecDeque;
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
 use std::thread;
@@ -1106,9 +1106,7 @@ fn jail_robot_path_args(
         match flag {
             "--input" | "--output" | "--report" | "--catalog" | "--ontology" | "--left"
             | "--right" | "--merge-input" | "--output-dir" | "--update" | "--prefixes"
-            | "--add-prefixes" | "--inputs" => {
-                Some(PathExpect { min: 1, max: 1 })
-            }
+            | "--add-prefixes" | "--inputs" => Some(PathExpect { min: 1, max: 1 }),
             // ROBOT: --query/--select/--construct take query file + output file.
             "--query" | "--select" | "--construct" => Some(PathExpect { min: 1, max: 2 }),
             // ROBOT: --queries takes one or more query files until the next flag.
@@ -1256,34 +1254,35 @@ pub fn handle_apply_axiom_patch(
             .document_text(&document_path)
             .ok_or_else(|| LspErrorPayload::patch_invalid("cannot read document".to_string()))?;
 
-        let (transaction, patch_applied, patch_preview, patch_diagnostics) =
-            if format == OntologyFormat::Obo {
-                let transaction = ontocore_edit::parse_obo_input(params.patches).map_err(|e| {
-                    LspErrorPayload::patch_invalid(format!("invalid OBO patch JSON: {e}"))
+        let (transaction, patch_applied, patch_preview, patch_diagnostics) = if format
+            == OntologyFormat::Obo
+        {
+            let transaction = ontocore_edit::parse_obo_input(params.patches).map_err(|e| {
+                LspErrorPayload::patch_invalid(format!("invalid OBO patch JSON: {e}"))
+            })?;
+            let result = transaction
+                .apply_to_text(&source, params.preview_only, &namespaces)
+                .map_err(|e| LspErrorPayload::patch_invalid(e.to_string()))?;
+            (transaction, result.applied, result.preview_text, result.diagnostics)
+        } else if format == OntologyFormat::Turtle {
+            let transaction = ontocore_edit::parse_turtle_input(params.patches).map_err(|e| {
+                LspErrorPayload::patch_invalid(format!("invalid Turtle patch JSON: {e}"))
+            })?;
+            let result = transaction
+                .apply_to_text(&source, params.preview_only, &namespaces)
+                .map_err(|e| match e {
+                    ontocore_edit::EditError::UnsupportedFormat(m) => {
+                        LspErrorPayload::unsupported_format(m)
+                    }
+                    _ => LspErrorPayload::patch_invalid(e.to_string()),
                 })?;
-                let result = transaction
-                    .apply_to_text(&source, params.preview_only, &namespaces)
-                    .map_err(|e| LspErrorPayload::patch_invalid(e.to_string()))?;
-                (transaction, result.applied, result.preview_text, result.diagnostics)
-            } else if format == OntologyFormat::Turtle {
-                let transaction = ontocore_edit::parse_turtle_input(params.patches).map_err(|e| {
-                    LspErrorPayload::patch_invalid(format!("invalid Turtle patch JSON: {e}"))
-                })?;
-                let result = transaction
-                    .apply_to_text(&source, params.preview_only, &namespaces)
-                    .map_err(|e| match e {
-                        ontocore_edit::EditError::UnsupportedFormat(m) => {
-                            LspErrorPayload::unsupported_format(m)
-                        }
-                        _ => LspErrorPayload::patch_invalid(e.to_string()),
-                    })?;
-                (transaction, result.applied, result.preview_text, result.diagnostics)
-            } else {
-                return Err(LspErrorPayload::unsupported_format(format!(
-                    "write-back supports Turtle and OBO only, got {}",
-                    format.as_str()
-                )));
-            };
+            (transaction, result.applied, result.preview_text, result.diagnostics)
+        } else {
+            return Err(LspErrorPayload::unsupported_format(format!(
+                "write-back supports Turtle and OBO only, got {}",
+                format.as_str()
+            )));
+        };
 
         let entity_iri = primary_iri_from_transaction(&transaction);
 

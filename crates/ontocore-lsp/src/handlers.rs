@@ -494,10 +494,12 @@ pub fn handle_get_workspace_ui_state(
         })
         .unwrap_or((false, 0, None, false));
     let reasoner = state.with_catalog_and_reasoner(|_, r| r.cloned()).flatten();
+    let registry_dirty = params.ontology_registry.iter().any(|e| e.dirty);
+    let dirty = params.dirty_document_count > 0 || registry_dirty;
     Ok(crate::protocol::WorkspaceUiState {
         has_ontology,
         ontology_count,
-        is_dirty: params.dirty_document_count > 0,
+        is_dirty: dirty,
         has_selection: params.selection_iri.is_some(),
         selection_iri: params.selection_iri.clone(),
         selection_editable,
@@ -506,6 +508,7 @@ pub fn handle_get_workspace_ui_state(
         reasoner_consistent: reasoner.as_ref().map(|r| r.consistent),
         active_ontology_id: params.active_ontology_id.or_else(|| state.active_ontology_id()),
         stats,
+        ontology_registry: params.ontology_registry,
     })
 }
 
@@ -1246,7 +1249,7 @@ pub fn handle_apply_axiom_patch(
     }
 
     // Serialize applies without holding ops_lock across enqueue_sync (index worker needs it).
-    let (patch_result, workspace_edit, needs_reindex, entity_iri) = {
+    let (patch_result, workspace_edit, needs_reindex, entity_iri, undo_patches) = {
         let ops_lock = state.ops_lock();
         let _guard = ops_lock.lock().map_err(|e| LspErrorPayload::patch_invalid(e.to_string()))?;
 
@@ -1299,11 +1302,25 @@ pub fn handle_apply_axiom_patch(
                 entity_detail: None,
                 reindex_warning: None,
                 workspace_edit: None,
+                undo_patches: None,
             });
         }
 
         let mut workspace_edit = None;
         let mut needs_reindex = false;
+        let undo_patches = if patch_result.applied && !params.preview_only {
+            transaction.invert().ok().and_then(|inverted| match format {
+                OntologyFormat::Turtle => {
+                    inverted.turtle_patches().ok().and_then(|p| serde_json::to_value(p).ok())
+                }
+                OntologyFormat::Obo => {
+                    inverted.obo_patches().ok().and_then(|p| serde_json::to_value(p).ok())
+                }
+                _ => None,
+            })
+        } else {
+            None
+        };
         if patch_result.applied && !params.preview_only {
             if let Some(text) = &patch_result.preview_text {
                 if text.len() as u64 > ontocore_core::MAX_FILE_BYTES {
@@ -1336,7 +1353,7 @@ pub fn handle_apply_axiom_patch(
                 needs_reindex = true;
             }
         }
-        (patch_result, workspace_edit, needs_reindex, entity_iri)
+        (patch_result, workspace_edit, needs_reindex, entity_iri, undo_patches)
     };
 
     let mut reindex_warning = None;
@@ -1356,6 +1373,7 @@ pub fn handle_apply_axiom_patch(
         entity_detail,
         reindex_warning,
         workspace_edit,
+        undo_patches,
     })
 }
 

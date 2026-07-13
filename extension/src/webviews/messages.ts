@@ -273,6 +273,14 @@ export type HostMessage =
       error?: string;
     }
   | { type: "loadExplanation"; payload: ExplanationPayload }
+  | {
+      type: "workspaceEvent";
+      event: {
+        type: string;
+        payload?: unknown;
+        timestamp: number;
+      };
+    }
   | { type: "error"; message: string };
 
 /** React → Host */

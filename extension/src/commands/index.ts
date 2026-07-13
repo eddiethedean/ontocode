@@ -43,6 +43,12 @@ import { refreshPluginCommands } from "./pluginCommands";
 import { WorkflowPanel } from "../webviews/workflowPanel";
 import { PluginViewPanel } from "../webviews/pluginViewPanel";
 import { registerV017Commands } from "./v017Commands";
+import {
+  navigationManager,
+  ontologyRegistry,
+  saveCoordinator,
+  workspaceTransactionManager,
+} from "../workspace";
 
 export function registerCommands(
   context: vscode.ExtensionContext,
@@ -704,6 +710,42 @@ export function registerCommands(
       });
     })
   );
+  context.subscriptions.push(
+    vscode.commands.registerCommand("ontocode.navigateBack", async () => {
+      const entry = navigationManager.back();
+      if (!entry) {
+        void vscode.window.showInformationMessage("OntoCode: no earlier navigation entry");
+        return;
+      }
+      if (entry.kind === "entity") {
+        await vscode.commands.executeCommand("ontocode.openEntity", entry.id);
+      }
+    }),
+    vscode.commands.registerCommand("ontocode.navigateForward", async () => {
+      const entry = navigationManager.forward();
+      if (!entry) {
+        void vscode.window.showInformationMessage("OntoCode: no forward navigation entry");
+        return;
+      }
+      if (entry.kind === "entity") {
+        await vscode.commands.executeCommand("ontocode.openEntity", entry.id);
+      }
+    }),
+    vscode.commands.registerCommand("ontocode.workspaceUndo", async () => {
+      if (await workspaceTransactionManager.undo()) {
+        await refreshExplorer(providers);
+        return;
+      }
+      await vscode.commands.executeCommand("undo");
+    }),
+    vscode.commands.registerCommand("ontocode.workspaceRedo", async () => {
+      if (await workspaceTransactionManager.redo()) {
+        await refreshExplorer(providers);
+        return;
+      }
+      await vscode.commands.executeCommand("redo");
+    })
+  );
   registerV017Commands(context, () => refreshExplorer(providers));
 }
 
@@ -735,6 +777,7 @@ export async function refreshExplorer(providers: {
     providers.properties.setSnapshot(snapshot);
     providers.individuals.setSnapshot(snapshot);
     providers.diagnostics.setSnapshot(snapshot);
+    await ontologyRegistry.syncFromCatalog();
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     vscode.window.showErrorMessage(`OntoCode refresh failed: ${message}`);
@@ -786,31 +829,41 @@ async function createEntity(
     return;
   }
   const snapshot = await getCatalogSnapshot();
-  let ttlDocs = snapshot.documents.filter((d) => d.format === "turtle");
-  const activeEditor = vscode.window.activeTextEditor;
-  if (activeEditor) {
-    const folder = vscode.workspace.getWorkspaceFolder(activeEditor.document.uri);
-    if (folder) {
-      const prefix = folder.uri.fsPath;
-      const inFolder = ttlDocs.filter((d) => isPathUnderFolder(d.path, prefix));
-      if (inFolder.length > 0) {
-        ttlDocs = inFolder;
+  let docPick = await ontologyRegistry.resolveEditableDocument();
+  if (!docPick) {
+    let ttlDocs = snapshot.documents.filter((d) => {
+      const entry = ontologyRegistry.getEntry(d.id);
+      return entry?.editable ?? (d.format === "turtle" || d.format === "obo");
+    });
+    const activeEditor = vscode.window.activeTextEditor;
+    if (activeEditor) {
+      const folder = vscode.workspace.getWorkspaceFolder(activeEditor.document.uri);
+      if (folder) {
+        const prefix = folder.uri.fsPath;
+        const inFolder = ttlDocs.filter((d) => isPathUnderFolder(d.path, prefix));
+        if (inFolder.length > 0) {
+          ttlDocs = inFolder;
+        }
       }
     }
+    if (ttlDocs.length === 0) {
+      void vscode.window.showErrorMessage("No editable ontology in workspace");
+      return;
+    }
+    docPick =
+      ttlDocs.length === 1
+        ? ttlDocs[0]
+        : await vscode.window
+            .showQuickPick(
+              ttlDocs.map((d) => ({
+                label: d.base_iri ?? d.path,
+                description: d.format,
+                doc: d,
+              })),
+              { placeHolder: "Target ontology file" }
+            )
+            .then((p) => p?.doc);
   }
-  if (ttlDocs.length === 0) {
-    void vscode.window.showErrorMessage("No Turtle (.ttl) ontology in workspace");
-    return;
-  }
-  const docPick =
-    ttlDocs.length === 1
-      ? ttlDocs[0]
-      : await vscode.window
-          .showQuickPick(
-            ttlDocs.map((d) => ({ label: d.path, doc: d })),
-            { placeHolder: "Target ontology file" }
-          )
-          .then((p) => p?.doc);
   if (!docPick) {
     return;
   }
@@ -831,11 +884,12 @@ async function createEntity(
       void vscode.window.showErrorMessage(WORKSPACE_DOCUMENT_OUTSIDE_MESSAGE);
       return;
     }
-    const result = await applyAxiomPatch({
-      document_uri: documentUri,
+    const result = await workspaceTransactionManager.apply(
+      documentUri,
+      docPick.path,
       patches,
-      preview_only: false,
-    });
+      `Create ${kind}`
+    );
     if (!result.applied) {
       void vscode.window.showErrorMessage(patchFailureMessage(result));
       return;

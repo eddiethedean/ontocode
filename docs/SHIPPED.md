@@ -110,7 +110,7 @@ Detailed notes for v0.9–v0.18 are in the [CHANGELOG](https://github.com/eddiet
 
 ## What's next
 
-Forward milestones: finish workspace runtime (**v0.20** / EPIC-003), RDF/XML + OWL/XML write-back (**v0.21**), full Protégé parity path (**v0.21–v0.25**), Protégé-competitive release (**1.0**). See **[Platform roadmap](roadmap.md)** · **[Known limitations](known-limitations.md)**.
+Forward milestones: RDF/XML + OWL/XML write-back (**v0.21**), full Protégé parity path (**v0.21–v0.25**), Protégé-competitive release (**1.0**). Workspace runtime (**v0.20** / EPIC-003) is implemented on the `v0.20` branch. See **[Platform roadmap](roadmap.md)** · **[Known limitations](known-limitations.md)**.
 
 ## Where to learn more
 

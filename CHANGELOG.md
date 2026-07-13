@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Workspace runtime (EPIC-003 / BLOCKER_03): host-owned ontology registry with active targeting and editability rules; per-ontology dirty tracking; `SaveCoordinator` for Save / Save All; `WorkspaceTransactionManager` with semantic undo/redo stacks (`undo_patches` from LSP); host event bus; selection and navigation managers; session persistence (workspace state + `.ontocode/session.json`); external-change recovery (reload / keep / compare); panel restore with semantic args ([#249](https://github.com/eddiethedean/ontocode/issues/249))
+
 ### Fixed
 
 - Turtle patch matching for Protégé/ROBOT-style files: lang-tagged/typed literal removes, angle-bracket IRI object removes, `rdf:type` ontology IRI rewrite, comment-safe type/characteristic detection, and property-chain subject needles ([#261](https://github.com/eddiethedean/ontocode/issues/261), [#262](https://github.com/eddiethedean/ontocode/issues/262), [#270](https://github.com/eddiethedean/ontocode/issues/270), [#271](https://github.com/eddiethedean/ontocode/issues/271), [#272](https://github.com/eddiethedean/ontocode/issues/272), [#273](https://github.com/eddiethedean/ontocode/issues/273), [#278](https://github.com/eddiethedean/ontocode/issues/278); [#286](https://github.com/eddiethedean/ontocode/pull/286))

@@ -99,7 +99,7 @@ Workspace + formats Reason + SWRL            Verify + polish      Protégé repl
 | 17 | v0.17 | E | Shipped | — | Menu/toolbar/dialog parity + keyboard workflows |
 | 18 | v0.18 | E | Shipped | — | Desktop UX shell gate + migration readiness |
 | 19 | v0.19 | F | Shipped | — | Semantic foundation + program baseline |
-| 20 | v0.20 | F | In progress | 1† | Workspace runtime |
+| 20 | v0.20 | F | Complete (branch) | 1† | Workspace runtime |
 | 21 | v0.21 | F | Planned | — | RDF/XML + OWL/XML write-back |
 | 22 | v0.22 | F | Planned | 2† | Complete OWL 2 authoring |
 | 23 | v0.23 | F | Planned | 5† | Reasoning parity + SWRL |
@@ -527,21 +527,23 @@ See [migration/v0.19.md](docs/migration/v0.19.md) and [SHIPPED.md](docs/SHIPPED.
 
 ---
 
-### v0.20 — Workspace runtime (in progress)
+### v0.20 — Workspace runtime (complete on branch)
 
-**Status:** In progress on the `v0.20` branch — **not released**. Packaging version is **0.20.0**; latest tagged release remains **v0.19.0**.
+**Status:** Implemented on `v0.20` — **awaiting tag**. Packaging version is **0.20.0**; latest tagged release remains **v0.19.0**.
 
 **Theme:** Workspace as central runtime for ontology state and transactions.
 
 | Area | Deliverables |
 |------|--------------|
-| **OntoCore** | Multi-ontology registry; dirty/save state; transaction manager; session persistence; selection/navigation sync |
-| **OntoCode** | Save/Save All; panel restore; external-change recovery |
-| **Landed on branch (unreleased)** | Turtle patch matching hardening for Protégé/ROBOT-style files ([#286](https://github.com/eddiethedean/ontocode/pull/286)) |
+| **OntoCore** | `undo_patches` on `applyAxiomPatch`; registry snapshot in `getWorkspaceUiState` |
+| **OntoCode** | Ontology registry; dirty/save coordinator; transaction manager + event bus; selection/navigation; session persistence; external-change recovery |
+| **Also on branch** | Turtle/OBO patch hardening ([#286](https://github.com/eddiethedean/ontocode/pull/286)–#291) |
 
-**Exit criteria:** Multi-ontology workflows pass end-to-end tests; workspace state survives restart.
+**Exit criteria:** Multi-ontology workflows pass end-to-end tests; workspace state survives restart — met on branch.
 
-**Blockers:** [BLOCKER_03](docs/protege-parity/04_BLOCKERS/BLOCKER_03_WORKSPACE.md)
+**Blockers:** [BLOCKER_03](docs/protege-parity/04_BLOCKERS/BLOCKER_03_WORKSPACE.md) — EPIC [#249](https://github.com/eddiethedean/ontocode/issues/249)
+
+See [migration/v0.20.md](docs/migration/v0.20.md).
 
 ---
 

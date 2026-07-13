@@ -16,6 +16,7 @@ import {
 import { ExplorerTreeProvider } from "./treeviews/explorer";
 import { registerWebviewPanelSerializers } from "./webviews/layoutPersistence";
 import { registerErrorLog } from "./logging/errorLog";
+import { initializeWorkspaceRuntime } from "./workspace";
 
 let providers: {
   ontologies: ExplorerTreeProvider;
@@ -86,6 +87,7 @@ export async function activate(
     registerCommands(context, providers);
     registerErrorLog(context);
     registerWebviewPanelSerializers(context);
+    initializeWorkspaceRuntime(context);
 
     context.subscriptions.push(
       vscode.workspace.onDidChangeConfiguration((e) => {

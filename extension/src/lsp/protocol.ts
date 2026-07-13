@@ -330,6 +330,8 @@ export interface ApplyPatchResult {
   entity_detail?: EntityDetail;
   reindex_warning?: string;
   workspace_edit?: LspWorkspaceEdit;
+  /** Inverted patch ops for workspace-level semantic undo (v0.20+). */
+  undo_patches?: Array<PatchOp | ({ op: string } & Record<string, unknown>)>;
 }
 
 /** Client-side result after optional VS Code workspace edit sync. */
@@ -552,10 +554,23 @@ export interface ListCommandsResult {
   commands: CommandDescriptor[];
 }
 
+export interface OntologyRegistryEntrySnapshot {
+  id: string;
+  uri: string;
+  path: string;
+  format: string;
+  role: "root" | "import" | "scratch";
+  editable: boolean;
+  dirty: boolean;
+  version: number;
+  active: boolean;
+}
+
 export interface WorkspaceUiStateParams {
   selection_iri?: string;
   dirty_document_count?: number;
   active_ontology_id?: string;
+  ontology_registry?: OntologyRegistryEntrySnapshot[];
 }
 
 export interface WorkspaceUiState {
@@ -570,6 +585,7 @@ export interface WorkspaceUiState {
   reasoner_consistent?: boolean;
   active_ontology_id?: string;
   stats?: CatalogStats;
+  ontology_registry?: OntologyRegistryEntrySnapshot[];
 }
 
 export interface DialogFieldSchema {

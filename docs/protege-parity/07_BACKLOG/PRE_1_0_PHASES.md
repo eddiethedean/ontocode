@@ -30,7 +30,7 @@ objective of the phases below.
 | Release | P0 phase | Stages | Primary epics | Primary blockers | Status |
 |---------|----------|--------|---------------|------------------|--------|
 | **v0.19** | A + baseline | 0–1 | EPIC-001, EPIC-011 (skeleton) | BLOCKER_01, BLOCKER_11 (manifest skeleton) | Complete |
-| **v0.20** | B | 2 | EPIC-003 | BLOCKER_03 | In progress |
+| **v0.20** | B | 2 | EPIC-003 | BLOCKER_03 | Complete (branch) |
 | **v0.21** | C (formats) | 3 | EPIC-001, EPIC-020 | BLOCKER_01, format audit | Planned |
 | **v0.22** | C (OWL 2) | 4 | EPIC-002 | BLOCKER_02 | Planned |
 | **v0.23** | D (reason + SWRL) | 5–6 | EPIC-004, EPIC-005 | BLOCKER_04, BLOCKER_05 | Planned |
@@ -91,6 +91,7 @@ stage in one prompt. See [EXECUTION_ORDER.md § Cursor Session Strategy](../05_I
 
 # v0.20 — Workspace runtime
 
+**Status:** Complete on `v0.20` branch (awaiting tag)\
 **P0 phase:** B (Workspace Runtime)\
 **Stage:** 2\
 **Theme:** Make the workspace the central runtime for ontology state.

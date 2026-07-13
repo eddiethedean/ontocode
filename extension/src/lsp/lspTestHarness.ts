@@ -109,7 +109,15 @@ export async function smokeInitializeLsp(binaryPath: string): Promise<void> {
     ),
   ]);
 
+  child.stdin?.end();
   child.kill();
+  await new Promise<void>((resolve) => {
+    const timer = setTimeout(resolve, 5_000);
+    child.once("exit", () => {
+      clearTimeout(timer);
+      resolve();
+    });
+  });
 
   if (!response) {
     throw new Error("no initialize response from ontocore-lsp");

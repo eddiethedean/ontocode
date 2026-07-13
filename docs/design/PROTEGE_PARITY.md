@@ -1,10 +1,10 @@
 # Protégé Parity Matrix (v1.0.0)
 
 > **Superseded for planning.** The authoritative 1.0 engineering program is
-> [docs/protege-parity/](../protege-parity/README.md) — especially
-> [PRE_1_0_PHASES.md](../protege-parity/07_BACKLOG/PRE_1_0_PHASES.md),
-> [PARITY_SCOPE.md](../protege-parity/PARITY_SCOPE.md), and
-> [PARITY_RELEASE_GATE.md](../protege-parity/03_PARITY/PARITY_RELEASE_GATE.md).
+> [docs/protege-parity/](https://github.com/eddiethedean/ontocode/blob/main/docs/protege-parity/README.md) — especially
+> [PRE_1_0_PHASES.md](https://github.com/eddiethedean/ontocode/blob/main/docs/protege-parity/07_BACKLOG/PRE_1_0_PHASES.md),
+> [PARITY_SCOPE.md](https://github.com/eddiethedean/ontocode/blob/main/docs/protege-parity/PARITY_SCOPE.md), and
+> [PARITY_RELEASE_GATE.md](https://github.com/eddiethedean/ontocode/blob/main/docs/protege-parity/03_PARITY/PARITY_RELEASE_GATE.md).
 >
 > **This page** remains a historical v0.18-era P0/P1/P2 checklist and migration
 > reference. Do not use it as the live 1.0 implementation plan.

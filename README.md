@@ -2,7 +2,7 @@
 
 **Edit OWL/RDF/OBO ontologies in VS Code — with a Rust engine for CI.**
 
-Install the [VS Code extension](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode), open a folder of `.ttl` / `.obo` files, and use the **OntoCode** activity bar to browse and edit. For CI gates, pin `cargo install ontocore-cli --locked --version 0.20.0` (first compile can take 15–30+ minutes) then `ontocore validate ./ontologies`.
+Install the [VS Code extension](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode), open a folder of `.ttl` / `.obo` files, and use the **OntoCode** activity bar to browse and edit. For CI gates, pin `cargo install ontocore-cli --locked --version 0.19.0` (first compile can take 15–30+ minutes) then `ontocore validate ./ontologies`.
 
 **Editable today:** Turtle (`.ttl`) and OBO (`.obo`). Other formats index and query as read-only — see [Known limitations](https://ontocode-vs.readthedocs.io/en/latest/known-limitations/).
 **Catalog SQL (subset):** not full SQL — prefer SPARQL for graph patterns.
@@ -23,9 +23,10 @@ Install the [VS Code extension](https://marketplace.visualstudio.com/items?itemN
 | I want to… | Start here |
 |------------|------------|
 | **Edit ontologies in VS Code** | **[First success (~10 min)](https://ontocode-vs.readthedocs.io/en/latest/guides/first-success/)** |
-| Validate or query in CI | `cargo install ontocore-cli --locked --version 0.20.0` → [CI guide](https://ontocode-vs.readthedocs.io/en/latest/ci-integration/) (first compile: 15–30+ min) |
+| Validate or query in CI | `cargo install ontocore-cli --locked --version 0.19.0` → [CI guide](https://ontocode-vs.readthedocs.io/en/latest/ci-integration/) (first compile: 15–30+ min) |
 | Decide if it fits | [Known limitations](https://ontocode-vs.readthedocs.io/en/latest/known-limitations/) · [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) |
 | Embed in Rust | [Rust library guide](https://ontocode-vs.readthedocs.io/en/latest/guides/rust-library/) |
+| Contribute | [CONTRIBUTING.md](CONTRIBUTING.md) |
 
 Full documentation: **[Read the Docs](https://ontocode-vs.readthedocs.io/en/latest/)**. You do not need to clone this repo to use the extension or installed CLI.
 
@@ -55,7 +56,7 @@ Release CLI tarballs are **Linux x64 only**; macOS/Windows use `cargo install` (
 **CLI (install):** First `cargo install` compiles dependencies — expect **15–30+ minutes** on a cold machine (Rust 1.88+). Pin releases in CI.
 
 ```bash
-cargo install ontocore-cli --locked --version 0.20.0
+cargo install ontocore-cli --locked --version 0.19.0
 # Catalog SQL (subset) — not full SQL; see docs
 ontocore query /path/to/ontologies "SELECT * FROM classes"
 ontocore validate /path/to/ontologies

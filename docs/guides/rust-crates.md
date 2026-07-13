@@ -9,7 +9,7 @@
 ## Quick start
 
 ```bash
-cargo install ontocore-cli --locked --version 0.20.0
+cargo install ontocore-cli --locked --version 0.19.0
 ontocore query /path/to/ontologies "SELECT * FROM classes"
 ontocore validate /path/to/ontologies
 ```
@@ -39,7 +39,7 @@ ontocore validate /path/to/ontologies
 | Crate map | [ontocore/crate-map.md](../ontocore/crate-map.md) |
 | `Workspace` example | [`examples/ontocore_workspace.rs`](https://github.com/eddiethedean/ontocode/blob/main/examples/ontocore_workspace.rs) |
 
-Primary dependency: `ontocore = "0.20"`.
+Primary dependency: `ontocore = "0.19"`.
 
 ## Related
 

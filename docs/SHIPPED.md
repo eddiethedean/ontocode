@@ -1,10 +1,10 @@
-# What ships today (v0.20.0)
+# What ships today (v0.19.0 — latest tagged)
 
 > **Canonical capability matrix.** Update this page on every release. Design specs under [Project](design/README.md) may describe future targets — check here for what is actually available.
 >
-> **v0.20.0 is in progress (unreleased).** Latest tagged release: **v0.19.0**. Capability rows below include work already on the `v0.20` branch.
+> **Latest tagged release: v0.19.0** (Marketplace, crates.io, GitHub Releases). Documentation on `main` may describe unreleased **v0.20** work — see [Unreleased on main](#unreleased-on-main-v020-not-tagged) below. Pin installs: `cargo install ontocore-cli --locked --version 0.19.0`.
 
-**Current release:** v0.20.0 (in progress — unreleased) · Latest tagged: [v0.19.0](migration/v0.19.md) · [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) · Draft [migration/v0.20.md](migration/v0.20.md)
+**Latest tagged: v0.19.0** · [v0.19 migration](migration/v0.19.md) · **Docs branch:** v0.20 in progress · [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) · Draft [migration/v0.20.md](migration/v0.20.md)
 
 ## Products
 
@@ -13,7 +13,7 @@
 | **OntoCode** | VS Code IDE — explorer, React inspector, graphs (asserted/inferred modes), Query Workbench, Manchester editor, refactor preview, reasoner, explanation panel, plugin commands/views/preferences/context actions |
 | **OntoCore** | Rust semantic workspace engine — `ontocore` façade, `ontocore-*` crates, `ontocore` CLI, `ontocore-lsp`, plugin host |
 
-## Capability matrix
+## Capability matrix (v0.19.0 tagged)
 
 | Capability | VS Code | CLI |
 |------------|---------|-----|
@@ -27,7 +27,7 @@
 | Generic annotation assertions | Yes (Turtle) | `ontocore patch` |
 | OBO term edit (name, synonym, def, is_a, …) | Yes (inspector) | `ontocore patch` |
 | Find usages / rename IRI / namespace migration / move / extract module | Yes (preview + apply) | `ontocore refactor` |
-| Merge entities / replace entity references | Yes (preview + apply) | `ontocore refactor` |
+| Merge entities / replace entity references | Yes (preview + apply) | — (IDE only; not `ontocore refactor`) |
 | New ontology scaffold / export (ROBOT convert or copy) | Yes | `ontocore new` / export LSP |
 | Prefix manager / ontology metadata patches | Yes | `ontocore patch` |
 | Active ontology selector | Yes | LSP `setActiveOntology` |
@@ -67,14 +67,7 @@
 | Refactor apply | Yes | — | — | — | — |
 | Rich OBO metadata (synonyms, defs, xrefs) | — | Yes | — | — | — |
 
-## Unreleased on v0.20 (not tagged)
-
-| Capability | Status |
-|------------|--------|
-| Turtle patch matching for lang-tagged / typed literals | Yes (on branch) |
-| Turtle patch IRI removes across CURIE and `<IRI>` forms | Yes (on branch) |
-| Token-aware type / characteristic detection (ignores comment substrings) | Yes (on branch) |
-| `SetOntologyIri` rewrites `rdf:type owl:Ontology` in place | Yes (on branch) |
+> **OBO versioning:** patch engine write-back since **v0.12**; Entity Inspector write-back since **v0.13**.
 
 ## New in v0.19.0 (latest tagged)
 
@@ -86,9 +79,23 @@
 
 Full user-facing delta: [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md#0190---2026-07-13).
 
+## Unreleased on main (v0.20 — not tagged)
+
+These items are implemented on the `v0.20` branch but **not** in Marketplace / crates.io **0.19.0** yet:
+
+| Capability | Status |
+|------------|--------|
+| Workspace runtime (registry, dirty/save, transactions, session persistence) | On branch |
+| Turtle patch matching for lang-tagged / typed literals | On branch |
+| Turtle patch IRI removes across CURIE and `<IRI>` forms | On branch |
+| Token-aware type / characteristic detection (ignores comment substrings) | On branch |
+| `SetOntologyIri` rewrites `rdf:type owl:Ontology` in place | On branch |
+
+Draft migration: [migration/v0.20.md](migration/v0.20.md).
+
 ## Release history
 
-Detailed notes for v0.9–v0.18 are in the [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md). This page lists **what is available in the current release**, not every past milestone.
+Detailed notes for v0.9–v0.18 are in the [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md). This page lists **what is available in the latest tagged release**, not every past milestone.
 
 ## Manchester scope (v0.8+)
 
@@ -110,7 +117,7 @@ Detailed notes for v0.9–v0.18 are in the [CHANGELOG](https://github.com/eddiet
 
 ## What's next
 
-Forward milestones: RDF/XML + OWL/XML write-back (**v0.21**), full Protégé parity path (**v0.21–v0.25**), Protégé-competitive release (**1.0**). Workspace runtime (**v0.20** / EPIC-003) is implemented on the `v0.20` branch. See **[Platform roadmap](roadmap.md)** · **[Known limitations](known-limitations.md)**.
+Forward milestones: workspace runtime tag (**v0.20**), RDF/XML + OWL/XML write-back (**v0.21**), full Protégé parity path (**v0.21–v0.25**), Protégé-competitive release (**1.0**). See **[Platform roadmap](roadmap.md)** · **[Known limitations](known-limitations.md)**.
 
 ## Where to learn more
 

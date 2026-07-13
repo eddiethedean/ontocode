@@ -99,7 +99,7 @@ Workspace + formats Reason + SWRL            Verify + polish      Protégé repl
 | 17 | v0.17 | E | Shipped | — | Menu/toolbar/dialog parity + keyboard workflows |
 | 18 | v0.18 | E | Shipped | — | Desktop UX shell gate + migration readiness |
 | 19 | v0.19 | F | Shipped | — | Semantic foundation + program baseline |
-| 20 | v0.20 | F | Complete (branch) | 1† | Workspace runtime |
+| 20 | v0.20 | F | In progress (branch complete — awaiting tag) | 1† | Workspace runtime |
 | 21 | v0.21 | F | Planned | — | RDF/XML + OWL/XML write-back |
 | 22 | v0.22 | F | Planned | 2† | Complete OWL 2 authoring |
 | 23 | v0.23 | F | Planned | 5† | Reasoning parity + SWRL |
@@ -527,9 +527,9 @@ See [migration/v0.19.md](docs/migration/v0.19.md) and [SHIPPED.md](docs/SHIPPED.
 
 ---
 
-### v0.20 — Workspace runtime (complete on branch)
+### v0.20 — Workspace runtime (in progress — branch complete, awaiting tag)
 
-**Status:** Implemented on `v0.20` — **awaiting tag**. Packaging version is **0.20.0**; latest tagged release remains **v0.19.0**.
+**Status:** Implemented on `v0.20` — **awaiting tag**. Packaging version is **0.20.0**; latest tagged release remains **v0.19.0**. Canonical RTD copy: [docs/roadmap.md](docs/roadmap.md).
 
 **Theme:** Workspace as central runtime for ontology state and transactions.
 

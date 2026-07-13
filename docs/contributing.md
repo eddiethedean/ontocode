@@ -8,12 +8,14 @@ Thank you for contributing. This repository contains:
 
 ### Docs-only contributors (~15 minutes)
 
-**No Rust or Node required** for documentation-only PRs:
+**No Rust or Node required** for documentation-only PRs. Expect **under one hour** end-to-end including review prep:
 
 1. Edit pages under `docs/` (this site). Update root `README.md`, `CONTRIBUTING.md`, or `extension/README.md` when install or marketplace text changes.
 2. Run `./scripts/check-doc-versions.sh`.
 3. Optional preview: `pip install -r docs/requirements.txt && ./scripts/serve-docs.sh`
 4. Open a focused PR.
+
+**Public install pins** must match [`docs/TAGGED_RELEASE`](TAGGED_RELEASE) — not the unreleased workspace version in `Cargo.toml`.
 
 Platform content: edit [vision.md](vision.md), [roadmap.md](roadmap.md), and [architecture.md](architecture.md) here first; keep [GitHub root mirrors](https://github.com/eddiethedean/ontocode/blob/main/CONTRIBUTING.md#canonical-documentation-paths) in sync when those change.
 
@@ -36,7 +38,7 @@ Root `VISION.md`, `ARCHITECTURE.md`, and `ROADMAP.md` are mirrored under `docs/`
 
 The root Cargo package `ontocode` is unpublished and hosts workspace integration tests (`tests/`).
 
-**New contributors:** start with [internals.md](internals.md) for role-based paths (Rust, extension, docs, LSP).
+**New contributors:** start with [Architecture tour](guides/architecture-tour.md) (~15 min) and [internals.md](internals.md) for role-based paths (Rust, extension, docs, LSP).
 
 ### First PR paths
 
@@ -48,13 +50,15 @@ The root Cargo package `ontocode` is unpublished and hosts workspace integration
 4. `cargo fmt --all --check` and `./scripts/check-doc-versions.sh` for docs changes.
 5. Open a focused PR with a short description.
 
-**Full contributor setup (~60+ minutes)** — extension, LSP, or release-impacting changes:
+**Full contributor setup (~60+ minutes warm cache; 2–4+ hours cold)** — extension, LSP, or release-impacting changes:
 
 1. Complete smoke steps above.
 2. `cargo test --workspace` and `cargo build -p ontocore-lsp --bins`.
 3. Extension: `cd extension && npm ci && ONTOCORE_LSP_BIN=../target/debug/ontocore-lsp npm test`.
 4. Webview: `cd extension/webview-ui && npm ci && npm test`.
-5. Before opening a PR: `./scripts/run-ci-local.sh` (30+ minutes; matches GitHub Actions).
+5. Before opening a PR: `./scripts/run-ci-local.sh` (30–60+ minutes; matches GitHub Actions).
+
+See [Testing matrix](guides/testing-matrix.md) for which commands to run by change type.
 
 ### Plugin contributors (v0.14+)
 

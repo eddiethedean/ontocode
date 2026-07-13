@@ -37,7 +37,7 @@ jobs:
 
       - name: Download ontocore CLI and validate
         run: |
-          VERSION=0.20.0
+          VERSION=0.19.0
           ASSET="ontocore-v${VERSION}-x86_64-unknown-linux-gnu.tar.gz"
           BIN="ontocore-v${VERSION}-x86_64-unknown-linux-gnu"
           curl -fsSL -o "${ASSET}" \
@@ -48,7 +48,7 @@ jobs:
 
       - name: Verify checksum (recommended for production)
         run: |
-          VERSION=0.20.0
+          VERSION=0.19.0
           curl -fsSL -o SHA256SUMS \
             "https://github.com/eddiethedean/ontocode/releases/download/v${VERSION}/SHA256SUMS"
           grep "ontocore-v${VERSION}-x86_64-unknown-linux-gnu.tar.gz" SHA256SUMS | sha256sum -c -
@@ -57,7 +57,7 @@ jobs:
 Adjust the validate path (`.` or `ontologies/`) to the directory containing your `.ttl`, `.owl`, etc. Verify checksums per [release-integrity.md](release-integrity.md) in production pipelines.
 
 !!! tip "Pin the CLI version pre-1.0"
-    Set `VERSION=0.20.0` explicitly so CI does not pick up breaking minor releases unexpectedly. See [FAQ](faq.md).
+    Set `VERSION=0.19.0` explicitly so CI does not pick up breaking minor releases unexpectedly. See [FAQ](faq.md).
 
 ## GitHub Actions (cargo install — macOS/Windows or when building from source)
 
@@ -75,7 +75,7 @@ Use when you need a platform without a release tarball, or when developing again
           workspaces: ""
 
       - name: Install ontocore CLI
-        run: cargo install ontocore-cli --locked --version 0.20.0
+        run: cargo install ontocore-cli --locked --version 0.19.0
 
       - name: Validate ontology files
         run: ontocore validate .
@@ -92,7 +92,7 @@ Fail the job when EL classification finds unsatisfiable classes:
     ```yaml
           - name: Classify ontologies (EL)
             run: |
-              VERSION=0.20.0
+              VERSION=0.19.0
               BIN="ontocore-v${VERSION}-x86_64-unknown-linux-gnu"
               curl -fsSL -o "${BIN}.tar.gz" \
                 "https://github.com/eddiethedean/ontocode/releases/download/v${VERSION}/ontocore-v${VERSION}-x86_64-unknown-linux-gnu.tar.gz"
@@ -105,7 +105,7 @@ Fail the job when EL classification finds unsatisfiable classes:
 
     ```yaml
           - name: Install ontocore CLI
-            run: cargo install ontocore-cli --locked --version 0.20.0
+            run: cargo install ontocore-cli --locked --version 0.19.0
 
           - name: Classify ontologies (EL)
             run: ontocore classify . --profile el --format json
@@ -140,7 +140,7 @@ Compare git refs in pull requests (requires a git checkout with history):
 ```yaml
       - name: Semantic diff (breaking changes only)
         run: |
-          VERSION=0.20.0
+          VERSION=0.19.0
           BIN="ontocore-v${VERSION}-x86_64-unknown-linux-gnu"
           curl -fsSL -o "${BIN}.tar.gz" \
             "https://github.com/eddiethedean/ontocode/releases/download/v${VERSION}/ontocore-v${VERSION}-x86_64-unknown-linux-gnu.tar.gz"

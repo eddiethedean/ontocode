@@ -5,7 +5,7 @@ OBO Format read/write for [OntoCore](https://github.com/eddiethedean/ontocode) �
 ## Install
 
 ```toml
-ontocore-obo = "0.20"
+ontocore-obo = "0.21"
 ```
 
 Re-exported from the `ontocore` façade as `ontocore::obo` for patch operations. Not all OBO workflows require this crate directly — see [OBO authoring guide](https://ontocode-vs.readthedocs.io/en/latest/ontocode/obo-authoring/).

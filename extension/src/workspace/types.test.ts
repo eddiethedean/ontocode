@@ -17,10 +17,13 @@ function doc(
 }
 
 describe("workspace types", () => {
-  it("isEditableFormat accepts turtle and obo only", () => {
+  it("isEditableFormat accepts turtle, obo, owl, rdf_xml, and owl_xml", () => {
     assert.equal(isEditableFormat("turtle"), true);
     assert.equal(isEditableFormat("OBO"), true);
-    assert.equal(isEditableFormat("owl"), false);
+    assert.equal(isEditableFormat("owl"), true);
+    assert.equal(isEditableFormat("rdf_xml"), true);
+    assert.equal(isEditableFormat("owl_xml"), true);
+    assert.equal(isEditableFormat("jsonld"), false);
   });
 
   it("inferRole marks imported documents as import", () => {

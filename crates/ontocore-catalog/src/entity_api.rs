@@ -138,7 +138,11 @@ impl OntologyCatalog {
         let editable = doc.is_some_and(|d| {
             matches!(
                 d.format,
-                ontocore_core::OntologyFormat::Turtle | ontocore_core::OntologyFormat::Obo
+                ontocore_core::OntologyFormat::Turtle
+                    | ontocore_core::OntologyFormat::Obo
+                    | ontocore_core::OntologyFormat::Owl
+                    | ontocore_core::OntologyFormat::RdfXml
+                    | ontocore_core::OntologyFormat::OwlXml
             ) && d.parse_status == ontocore_core::ParseStatus::Ok
         });
         let document_path = doc.map(|d| d.path.display().to_string());

@@ -69,9 +69,9 @@ Every parity claim must be traceable to this matrix.
   PAR-FMT-002    Formats         OBO semantic        P0         PARTIAL           IMPLEMENTATION_EVIDENCE    Round-trip         Expand corpus
                                  round-trip                                                                                     
 
-  PAR-FMT-003    Formats         RDF/XML write-back  P0         NOT_IMPLEMENTED   Audit                      Missing            Major blocker
+  PAR-FMT-003    Formats         RDF/XML write-back  P0         COMPLETE          ADR-0021                   Horned re-serialize Closed v0.21
 
-  PAR-FMT-004    Formats         OWL/XML write-back  P0         NOT_IMPLEMENTED   Audit                      Missing            Major blocker
+  PAR-FMT-004    Formats         OWL/XML write-back  P0         COMPLETE          ADR-0021                   Horned re-serialize Closed v0.21
 
   PAR-OWL-001    OWL2            Complete OWL2       P0         PARTIAL           Audit                      OWL fixtures       Structural gaps
                                  authoring                                                                                      remain

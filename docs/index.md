@@ -7,7 +7,7 @@ hide:
 <div class="oc-hero">
 
 <div class="oc-hero-badges">
-  <span class="oc-badge oc-badge--accent">Latest tagged v0.20.0</span>
+  <span class="oc-badge oc-badge--accent">Latest tagged v0.21.0</span>
   <span class="oc-badge">VS Code</span>
   <span class="oc-badge">CLI · LSP</span>
 </div>
@@ -25,7 +25,7 @@ Index and explore OWL/RDF/OBO, run queries, refactors, and reasoning — in VS C
   <a class="oc-hero-cta" href="getting-started/" style="margin-left:0.75rem">CLI / CI →</a>
 </p>
 
-<p class="oc-hero-subcta"><a href="SHIPPED/">What ships today</a> · <a href="guides/versions-and-channels/">Versions &amp; channels</a> · <a href="known-limitations/">Known limitations</a> · Latest tagged: <strong>v0.20.0</strong></p>
+<p class="oc-hero-subcta"><a href="SHIPPED/">What ships today</a> · <a href="guides/versions-and-channels/">Versions &amp; channels</a> · <a href="known-limitations/">Known limitations</a> · Latest tagged: <strong>v0.21.0</strong></p>
 
 <div class="oc-hero-links">
   <a href="ontocode/feature-tour/">Feature tour</a>
@@ -85,7 +85,7 @@ Index and explore OWL/RDF/OBO, run queries, refactors, and reasoning — in VS C
 
 ## What ships today
 
-**Latest tagged: v0.20.0.** Full capability matrix: **[What ships today](SHIPPED.md)**. For channel lag (Marketplace vs crates.io vs docs), see [Versions & channels](guides/versions-and-channels.md).
+**Latest tagged: v0.21.0.** Full capability matrix: **[What ships today](SHIPPED.md)**. For channel lag (Marketplace vs crates.io vs docs), see [Versions & channels](guides/versions-and-channels.md).
 
 ## Quick start
 
@@ -98,7 +98,7 @@ Index and explore OWL/RDF/OBO, run queries, refactors, and reasoning — in VS C
 
 === "CLI (Linux x64)"
 
-    Prefer the [release tarball](https://github.com/eddiethedean/ontocode/releases/tag/v0.20.0) — verify `SHA256SUMS`, then:
+    Prefer the [release tarball](https://github.com/eddiethedean/ontocode/releases/tag/v0.21.0) — verify `SHA256SUMS`, then:
 
     ```bash
     ontocore query /path/to/ontologies "SELECT * FROM classes"
@@ -110,7 +110,7 @@ Index and explore OWL/RDF/OBO, run queries, refactors, and reasoning — in VS C
     Requires Rust **1.88+**. Windows: [MSVC Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/). macOS: Xcode Command Line Tools (`xcode-select --install`). First compile: **15–30+ minutes**.
 
     ```bash
-    cargo install ontocore-cli --locked --version 0.20.0
+    cargo install ontocore-cli --locked --version 0.21.0
     ontocore query /path/to/ontologies "SELECT * FROM classes"
     ontocore validate /path/to/ontologies
     ```

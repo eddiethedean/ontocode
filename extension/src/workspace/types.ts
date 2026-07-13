@@ -70,7 +70,13 @@ export interface CommittedTransaction {
 
 export function isEditableFormat(format: string): boolean {
   const normalized = format.toLowerCase();
-  return normalized === "turtle" || normalized === "obo";
+  return (
+    normalized === "turtle" ||
+    normalized === "obo" ||
+    normalized === "owl" ||
+    normalized === "rdf_xml" ||
+    normalized === "owl_xml"
+  );
 }
 
 export function inferRole(

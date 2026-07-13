@@ -4,7 +4,7 @@
 
 | Version | Supported |
 |---------|-----------|
-| 0.20.x  | Yes — latest tagged release |
+| 0.21.x  | Yes — latest tagged release |
 | 0.19.x  | Yes |
 | 0.18.x  | Yes       |
 | 0.16.x  | Yes       |

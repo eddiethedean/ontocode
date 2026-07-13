@@ -2,24 +2,34 @@
 //!
 //! Published as [`ontocore-owl`](https://crates.io/crates/ontocore-owl).
 
+mod apply_xml;
 mod bridge;
+pub mod compare;
 mod error;
 mod load;
 pub mod manchester;
+mod mutate;
 pub mod patch;
+mod serialize;
 mod span;
 mod turtle_lex;
 
+pub use apply_xml::{apply_xml_patches, apply_xml_patches_to_text};
 pub use bridge::{bridge_ontology, OwlBridgeResult};
+pub use compare::{compare_bridges, compare_ontologies, SemanticDiff};
 pub use error::{OwlError, Result};
 pub use load::{load_from_quads, load_owx_text, load_turtle_text, supports_horned_load};
 pub use manchester::{
     class_expression_to_manchester, class_expression_to_turtle_fragment, expression_tree_json,
     parse_class_expression, ManchesterDiagnostic, ManchesterParseOutput,
 };
+pub use mutate::apply_patches_to_ontology;
 pub use patch::{
     apply_patches, apply_patches_to_text, atomic_write, is_safe_iri, validate_prefix,
     ApplyPatchResult, PatchDiagnostic, PatchEntityKind, PatchOp,
+};
+pub use serialize::{
+    load_owl_xml_ontology, load_rdf_xml_ontology, serialize_owl_xml, serialize_rdf_xml,
 };
 pub use span::{
     all_entity_statement_ranges, entity_block_range, entity_primary_block_range,

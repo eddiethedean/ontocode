@@ -100,7 +100,7 @@ Formats write-back   Reason + SWRL            Verify + polish      Protégé rep
 | 18 | v0.18 | E | Shipped | — | Desktop UX shell gate + migration readiness |
 | 19 | v0.19 | F | Shipped | — | Semantic foundation + program baseline |
 | 20 | v0.20 | F | Shipped | 1† | Workspace runtime |
-| 21 | v0.21 | F | Planned | — | RDF/XML + OWL/XML write-back |
+| 21 | v0.21 | F | Shipped | — | RDF/XML + OWL/XML write-back |
 | 22 | v0.22 | F | Planned | 2† | Complete OWL 2 authoring |
 | 23 | v0.23 | F | Planned | 5† | Reasoning parity + SWRL |
 | 24 | v0.24 | F | Planned | 3†, 6† | Refactoring + DL Query parity |
@@ -547,7 +547,7 @@ See [migration/v0.20.md](docs/migration/v0.20.md).
 
 ---
 
-### v0.21 — Required format write-back (planned)
+### v0.21 — Required format write-back (shipped)
 
 **Theme:** RDF/XML and OWL/XML semantic round-trip.
 
@@ -557,7 +557,11 @@ See [migration/v0.20.md](docs/migration/v0.20.md).
 
 **Exit criteria:** Turtle, OBO, RDF/XML, OWL/XML open → edit → save → reload without semantic loss.
 
+**Shipped:** ADR-0021, Horned writers, `ontocore-edit` XML adapters, CLI/LSP/editable gates, PAR-FMT-003/004 closed.
+
 **Blockers:** [BLOCKER_01](docs/protege-parity/04_BLOCKERS/BLOCKER_01_FORMAT_INDEPENDENCE.md), [format audit](docs/protege-parity/02_PROTEGE_AUDIT/PROTEGE_FILE_FORMAT_AUDIT.md)
+
+See [migration/v0.21.md](docs/migration/v0.21.md).
 
 ---
 

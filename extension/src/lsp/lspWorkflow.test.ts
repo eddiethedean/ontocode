@@ -92,10 +92,22 @@ class LspSession {
       if (queued >= 0) {
         return this.queue.splice(queued, 1)[0]!;
       }
+      let settle: ((msg: LspMsg) => void) | undefined;
       const msg = await Promise.race([
-        new Promise<LspMsg>((resolve) => this.waiters.push(resolve)),
+        new Promise<LspMsg>((resolve) => {
+          settle = resolve;
+          this.waiters.push(resolve);
+        }),
         new Promise<null>((resolve) => setTimeout(() => resolve(null), 100)),
       ]);
+      // If the timeout won, remove the still-pending waiter so it cannot
+      // swallow the next message (orphaned waiter leak under load).
+      if (settle) {
+        const idx = this.waiters.indexOf(settle);
+        if (idx >= 0) {
+          this.waiters.splice(idx, 1);
+        }
+      }
       if (msg && msg.id === id) {
         return msg;
       }

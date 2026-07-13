@@ -26,7 +26,7 @@ use std::path::{Path, PathBuf};
 #[command(
     name = "ontocore",
     version,
-    about = "Local-first ontology index and query engine (OntoCode v0.20)"
+    about = "Local-first ontology index and query engine (OntoCode v0.21)"
 )]
 struct Cli {
     #[command(subcommand)]
@@ -482,11 +482,11 @@ fn main() -> Result<()> {
                 if !preview && result.applied {
                     println!("applied");
                 }
-            } else if ext == "ttl" {
+            } else if matches!(ext.as_str(), "ttl" | "owl" | "rdf" | "owx") {
                 let value: serde_json::Value =
                     serde_json::from_slice(&patch_bytes).context("failed to parse patch JSON")?;
                 let transaction = ontocore_edit::parse_turtle_input(value)
-                    .context("failed to parse Turtle transaction")?;
+                    .context("failed to parse patch transaction")?;
                 let result = ontocore_edit::apply_transaction_to_path(
                     &transaction,
                     &document,
@@ -503,7 +503,7 @@ fn main() -> Result<()> {
                     println!("applied");
                 }
             } else {
-                bail!("patch write-back supports .ttl and .obo documents only");
+                bail!("patch write-back supports .ttl, .obo, .owl, .rdf, and .owx documents only");
             }
         }
         Commands::Classify { workspace, profile, auto_profile, format } => {

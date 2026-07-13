@@ -15,7 +15,7 @@
 >
 > **Contributor crate layout:** [Implementation architecture](design/ARCHITECTURE.md) (internal modules only).
 >
-> **Latest tagged: v0.20.0** — v0.20 ships today. OntoCode (VS Code) + OntoCore (CLI/LSP/library). Turtle + OBO write-back; EL–DL reasoning via Ontologos; plugin host; semantic diff; workspace runtime. Canonical matrix: [What ships today](SHIPPED.md). Planned work: [roadmap hub](roadmap-hub.md).
+> **Latest tagged: v0.21.0** — v0.21 ships today. OntoCode (VS Code) + OntoCore (CLI/LSP/library). Turtle + OBO + RDF/XML + OWL/XML write-back; EL–DL reasoning via Ontologos; plugin host; semantic diff; workspace runtime. Canonical matrix: [What ships today](SHIPPED.md). Planned work: [roadmap hub](roadmap-hub.md).
 > **Planned v1.0:** stable plugin API, full workflow plugin integration, language SDKs, MCP server. See [Platform roadmap](roadmap.md).
 > **Planned post-1.0:** OntoStudio desktop, AI-native workflows — [UI roadmap mapping](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/ROADMAP_MAPPING.md).
 

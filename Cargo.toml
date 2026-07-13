@@ -29,7 +29,7 @@ default-members = ["crates/ontocore-cli"]
 # `cargo run --` runs the `ontocore` CLI (default-member), not this package as a library.
 [package]
 name = "ontocode"
-version = "0.20.0"
+version = "0.21.0"
 edition = "2021"
 license = "MIT OR Apache-2.0"
 publish = false
@@ -73,7 +73,7 @@ fastobo.workspace = true
 tempfile = "3"
 
 [workspace.package]
-version = "0.20.0"
+version = "0.21.0"
 edition = "2021"
 rust-version = "1.88"
 license = "MIT OR Apache-2.0"
@@ -84,26 +84,26 @@ keywords = ["ontology", "owl", "rdf", "sparql", "turtle"]
 categories = ["command-line-utilities", "science", "parser-implementations"]
 
 [workspace.dependencies]
-ontocore = { path = "crates/ontocore", version = "0.20.0" }
-ontocore-core = { path = "crates/ontocore-core", version = "0.20.0" }
-ontocore-parser = { path = "crates/ontocore-parser", version = "0.20.0" }
-ontocore-owl = { path = "crates/ontocore-owl", version = "0.20.0" }
-ontocore-obo = { path = "crates/ontocore-obo", version = "0.20.0" }
-ontocore-catalog = { path = "crates/ontocore-catalog", version = "0.20.0" }
-ontocore-diagnostics = { path = "crates/ontocore-diagnostics", version = "0.20.0" }
-ontocore-query = { path = "crates/ontocore-query", version = "0.20.0" }
-ontocore-lsp = { path = "crates/ontocore-lsp", version = "0.20.0" }
-ontocore-reasoner = { path = "crates/ontocore-reasoner", version = "0.20.0" }
-ontocore-robot = { path = "crates/ontocore-robot", version = "0.20.0" }
-ontocore-refactor = { path = "crates/ontocore-refactor", version = "0.20.0" }
-ontocore-diff = { path = "crates/ontocore-diff", version = "0.20.0" }
-ontocore-docs = { path = "crates/ontocore-docs", version = "0.20.0" }
-ontocore-plugin = { path = "crates/ontocore-plugin", version = "0.20.0" }
-ontocore-plugin-naming = { path = "crates/ontocore-plugin-naming", version = "0.20.0" }
-ontocore-plugin-markdown-export = { path = "crates/ontocore-plugin-markdown-export", version = "0.20.0" }
-ontocore-plugin-shacl = { path = "crates/ontocore-plugin-shacl", version = "0.20.0" }
-ontocore-edit = { path = "crates/ontocore-edit", version = "0.20.0" }
-ontocore-plugin-builtins = { path = "crates/ontocore-plugin-builtins", version = "0.20.0" }
+ontocore = { path = "crates/ontocore", version = "0.21.0" }
+ontocore-core = { path = "crates/ontocore-core", version = "0.21.0" }
+ontocore-parser = { path = "crates/ontocore-parser", version = "0.21.0" }
+ontocore-owl = { path = "crates/ontocore-owl", version = "0.21.0" }
+ontocore-obo = { path = "crates/ontocore-obo", version = "0.21.0" }
+ontocore-catalog = { path = "crates/ontocore-catalog", version = "0.21.0" }
+ontocore-diagnostics = { path = "crates/ontocore-diagnostics", version = "0.21.0" }
+ontocore-query = { path = "crates/ontocore-query", version = "0.21.0" }
+ontocore-lsp = { path = "crates/ontocore-lsp", version = "0.21.0" }
+ontocore-reasoner = { path = "crates/ontocore-reasoner", version = "0.21.0" }
+ontocore-robot = { path = "crates/ontocore-robot", version = "0.21.0" }
+ontocore-refactor = { path = "crates/ontocore-refactor", version = "0.21.0" }
+ontocore-diff = { path = "crates/ontocore-diff", version = "0.21.0" }
+ontocore-docs = { path = "crates/ontocore-docs", version = "0.21.0" }
+ontocore-plugin = { path = "crates/ontocore-plugin", version = "0.21.0" }
+ontocore-plugin-naming = { path = "crates/ontocore-plugin-naming", version = "0.21.0" }
+ontocore-plugin-markdown-export = { path = "crates/ontocore-plugin-markdown-export", version = "0.21.0" }
+ontocore-plugin-shacl = { path = "crates/ontocore-plugin-shacl", version = "0.21.0" }
+ontocore-edit = { path = "crates/ontocore-edit", version = "0.21.0" }
+ontocore-plugin-builtins = { path = "crates/ontocore-plugin-builtins", version = "0.21.0" }
 
 git2 = { version = "0.20", features = ["vendored-openssl"] }
 

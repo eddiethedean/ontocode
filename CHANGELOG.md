@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.21.0] - 2026-07-13
+
+### Added
+
+- RDF/XML (`.owl` / `.rdf`) and OWL/XML (`.owx`) write-back via Horned full-document re-serialize (ADR-0021)
+- `ontocore-owl` serialize / mutate / apply_xml APIs and semantic comparator
+- CLI / LSP / catalog / extension editable gates for required XML formats
+- Protégé round-trip edit → save → reload tests and malformed / unsupported-op fail-closed cases
+- Migration guide: [docs/migration/v0.21.md](docs/migration/v0.21.md)
+- Parity closeout: PAR-FMT-003 / PAR-FMT-004 ([#247](https://github.com/eddiethedean/ontocode/issues/247))
+
+### Changed
+
+- Workspace package and all `ontocore-*` crates bumped to **0.21.0**; extension and webview UI **0.21.0**
+
 ## [0.20.0] - 2026-07-13
 
 ### Added

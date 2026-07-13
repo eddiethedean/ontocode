@@ -1,6 +1,6 @@
 # Known limitations
 
-> **Latest tagged release: v0.20.0.** Pin CI to a tagged version from [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) or crates.io — see [What ships today](SHIPPED.md) and [Versions & channels](guides/versions-and-channels.md). **Not a full Protégé replacement today** — coexistence and pilot workflows are the supported path until **1.0**.
+> **Latest tagged release: v0.21.0.** Pin CI to a tagged version from [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) or crates.io — see [What ships today](SHIPPED.md) and [Versions & channels](guides/versions-and-channels.md). **Not a full Protégé replacement today** — coexistence and pilot workflows are the supported path until **1.0**.
 
 Honest limits for evaluators and new users.
 
@@ -8,10 +8,12 @@ Honest limits for evaluators and new users.
 
 | Can edit (write-back) | Index / browse / query only |
 |-----------------------|-----------------------------|
-| Turtle (`.ttl`) | OWL/XML (`.owl`, `.owx`) |
-| OBO (`.obo`) | RDF/XML (`.rdf`, `.xml`), JSON-LD, N-Triples, N-Quads, TriG |
+| Turtle (`.ttl`) | JSON-LD, N-Triples, N-Quads, TriG |
+| OBO (`.obo`) | |
+| RDF/XML (`.rdf`, `.owl`) | |
+| OWL/XML (`.owx`) | |
 
-Entity Inspector and patch write-back apply to **`.ttl` and `.obo` only**. Opening a typical Protégé `.owl` corpus works for browse and query; convert or dual-maintain Turtle for editing. See [Supported formats](supported-formats.md) and [OWL/XML workflow](guides/owl-xml-workflow.md).
+Entity Inspector and patch write-back apply to **`.ttl`, `.obo`, `.owl`/`.rdf`, and `.owx`**. XML write-back is **semantic re-serialize** (ADR-0021), not byte-identical to Protégé. See [Supported formats](supported-formats.md) and [OWL/XML workflow](guides/owl-xml-workflow.md).
 
 ## Catalog SQL (subset)
 
@@ -33,7 +35,7 @@ Plugin host **MVP shipped** (manifest, permissions, views, preferences, context 
 
 ## API stability (pre-1.0)
 
-Published crates are **0.20.x**. Library APIs, LSP JSON, and SQL table columns may change between minor releases until v1.0. Pin in CI: `cargo install ontocore-cli --locked --version 0.20.0`.
+Published crates are **0.21.x**. Library APIs, LSP JSON, and SQL table columns may change between minor releases until v1.0. Pin in CI: `cargo install ontocore-cli --locked --version 0.21.0`.
 
 ## Reasoning
 
@@ -49,7 +51,8 @@ Graphs may be **truncated** (badge in the Graph panel). Prefer narrower search, 
 
 ## When not to use OntoCode today
 
-- You need **in-place OWL/XML or RDF/XML write-back** — use Turtle/OBO or Protégé.
+- You need **byte-identical OWL/XML or RDF/XML** that matches Protégé layout — OntoCode re-serializes for semantic fidelity (ADR-0021); use Protégé when layout identity matters.
+- You need **JSON-LD / TriG / N-Triples write-back** — still read-only; use Turtle or convert.
 - You need **full SQL analytics** — use SPARQL or an external store.
 - You need a **stable plugin marketplace API** without scaffolding — wait for v1.0 or keep Protégé plugins.
 - You need **WebProtégé collaboration** — out of scope until post-1.0.

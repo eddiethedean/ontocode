@@ -42,7 +42,7 @@ After 1.0, the roadmap shifts from parity to modernization.
 | [Product Roadmap 2.0](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/PRODUCT_ROADMAP_2.0.md) | UI phases with milestone acceptance criteria |
 | [Product design (UI)](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/README.md) | Product design specification pack (UX, design system, OntoStudio target) |
 
-**Current release:** v0.20.0
+**Current release:** v0.21.0
 
 ---
 
@@ -462,7 +462,7 @@ See [migration/v0.19.md](migration/v0.19.md) · [SHIPPED.md](SHIPPED.md) · full
 
 ### v0.20 — Workspace runtime (shipped)
 
-**Status:** **Shipped** as tagged **v0.20.0**.
+**Status:** **Shipped** as tagged **v0.21.0**.
 
 **Theme:** Workspace as central runtime for ontology state and transactions.
 

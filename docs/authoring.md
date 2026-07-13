@@ -1,9 +1,9 @@
-# Ontology authoring (OntoCore v0.20)
+# Ontology authoring (OntoCore v0.21)
 
-> **Status:** Documents behavior in **OntoCore v0.20.0**. Pre-1.0 APIs may change.
+> **Status:** Documents behavior in **OntoCore v0.21.0**. Pre-1.0 APIs may change.
 > Canonical feature list: [What ships today](SHIPPED.md).
 
-OntoCode provides **Turtle and OBO write-back** for simple edits and **Manchester** for complex class expressions — without Protégé.
+OntoCode provides **Turtle, OBO, RDF/XML, and OWL/XML write-back** for simple edits and **Manchester** for complex class expressions — without Protégé.
 
 ## Supported operations
 
@@ -30,8 +30,8 @@ Full JSON reference: [patch-reference.md](patch-reference.md).
 ## Format policy
 
 - **Write-back:** Turtle (`.ttl`) and OBO (`.obo`)
-- **Read/index:** Turtle, OBO, RDF/XML (`.owl`), OWL/XML (`.owx`), JSON-LD, N-Triples, TriG
-- OWL/XML and RDF/XML are read-only in the Entity Inspector (`editable: false`); edit as Turtle or OBO
+- **Read/index:** Turtle, OBO, RDF/XML (`.owl` / `.rdf`), OWL/XML (`.owx`), JSON-LD, N-Triples, TriG
+- OWL/XML and RDF/XML support inspector/`ontocore patch` write-back via Horned re-serialize (v0.21; not byte-identical layout)
 
 ## VS Code workflow (simple edits)
 
@@ -138,7 +138,7 @@ When you apply a patch or Manchester edit in VS Code, the language server uses t
 
 ## Limitations
 
-- Write-back is **Turtle (`.ttl`) and OBO (`.obo`)**; RDF/XML, OWL/XML, and JSON-LD are read-only
+- Write-back is **Turtle (`.ttl`), OBO (`.obo`), RDF/XML (`.owl`/`.rdf`), and OWL/XML (`.owx`)**; JSON-LD and line-oriented RDF remain read-only
 - Complex axioms appear in the inspector and Manchester editor but **not** as edges in the class hierarchy tree (named-parent edges only; use reasoner for inferred hierarchy)
 - Manchester autocomplete uses catalog **Insert** pickers (no inline buffer autocomplete yet)
 - No SQL/SPARQL editor autocomplete in the workbench (v0.8+)

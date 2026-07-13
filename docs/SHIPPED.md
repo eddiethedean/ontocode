@@ -1,10 +1,10 @@
-# What ships today (v0.20.0 — latest tagged)
+# What ships today (v0.21.0 — latest tagged)
 
 > **Canonical capability matrix.** Update this page on every release. Design specs under [Project](design/README.md) may describe future targets — check here for what is actually available.
 >
-> **Latest tagged release: v0.20.0** (crates.io, GitHub Releases; Marketplace/Open VSX may lag — see [Versions & channels](guides/versions-and-channels.md)). Pin installs: `cargo install ontocore-cli --locked --version 0.20.0`.
+> **Latest tagged release: v0.21.0** (crates.io, GitHub Releases; Marketplace/Open VSX may lag — see [Versions & channels](guides/versions-and-channels.md)). Pin installs: `cargo install ontocore-cli --locked --version 0.21.0`.
 
-**Latest tagged: v0.20.0** · [v0.20 migration](migration/v0.20.md) · [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md)
+**Latest tagged: v0.21.0** · [v0.21 migration](migration/v0.21.md) · [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md)
 
 ## Products
 
@@ -13,18 +13,18 @@
 | **OntoCode** | VS Code IDE — explorer, React inspector, graphs (asserted/inferred modes), Query Workbench, Manchester editor, refactor preview, reasoner, explanation panel, plugin commands/views/preferences/context actions |
 | **OntoCore** | Rust semantic workspace engine — `ontocore` façade, `ontocore-*` crates, `ontocore` CLI, `ontocore-lsp`, plugin host |
 
-## Capability matrix (v0.20.0 tagged)
+## Capability matrix (v0.21.0 tagged)
 
 | Capability | VS Code | CLI |
 |------------|---------|-----|
 | Browse classes, properties, individuals | Yes | via SQL |
-| Edit labels, comments, parents (`.ttl` and `.obo`) | Yes (React inspector) | `ontocore patch` |
-| Create / delete entities (`.ttl`) | Yes | `ontocore patch` |
-| Complex `SubClassOf` / `EquivalentClasses` (Manchester) | Yes | `ontocore patch` |
+| Edit labels, comments, parents (`.ttl`, `.obo`, `.owl`/`.rdf`, `.owx`) | Yes (React inspector) | `ontocore patch` |
+| Create / delete entities (`.ttl`, XML required formats) | Yes | `ontocore patch` |
+| Complex `SubClassOf` / `EquivalentClasses` (Manchester) | Yes (Turtle) | `ontocore patch` |
 | Disjoint classes (author + view) | Yes (inspector + Manchester) | `ontocore patch` |
-| Domain / range / characteristics / property chains | Yes (inspector + patch) | `ontocore patch` |
-| Individual assertions (class/object/data) | Yes (Turtle) | `ontocore patch` |
-| Generic annotation assertions | Yes (Turtle) | `ontocore patch` |
+| Domain / range / characteristics / property chains | Yes (inspector + patch; Turtle) | `ontocore patch` |
+| Individual assertions (class/object/data) | Yes (Turtle; class assertion on XML) | `ontocore patch` |
+| Generic annotation assertions | Yes | `ontocore patch` |
 | OBO term edit (name, synonym, def, is_a, …) | Yes (inspector) | `ontocore patch` |
 | Find usages / rename IRI / namespace migration / move / extract module | Yes (preview + apply) | `ontocore refactor` |
 | Merge entities / replace entity references | Yes (preview + apply) | — (IDE only; not `ontocore refactor`) |
@@ -61,16 +61,26 @@
 
 ## Format support
 
-| Operation | Turtle (`.ttl`) | OBO (`.obo`) | RDF/XML (`.rdf`, `.xml`) | OWL/XML (`.owl`, `.owx`) | JSON-LD, N-Triples, TriG |
-|-----------|-----------------|--------------|--------------------------|--------------------------|---------------------------|
+| Operation | Turtle (`.ttl`) | OBO (`.obo`) | RDF/XML (`.rdf`, `.owl`) | OWL/XML (`.owx`) | JSON-LD, N-Triples, TriG |
+|-----------|-----------------|--------------|--------------------------|------------------|---------------------------|
 | Index / query | Yes | Yes | Yes (Horned catalog) | Yes (Horned catalog) | Yes |
-| Write-back (inspector, patches) | Yes | Yes | Read-only | Read-only | Read-only |
+| Write-back (inspector, patches) | Yes | Yes | Yes (Horned re-serialize) | Yes (Horned re-serialize) | Read-only |
 | Refactor apply | Yes | — | — | — | — |
 | Rich OBO metadata (synonyms, defs, xrefs) | — | Yes | — | — | — |
 
-> **OBO versioning:** patch engine write-back since **v0.12**; Entity Inspector write-back since **v0.13**.
+> **OBO versioning:** patch engine write-back since **v0.12**; Entity Inspector write-back since **v0.13**.  
+> **XML write-back:** semantic fidelity (ADR-0021); not byte-identical to Protégé saves.
 
-## New in v0.20.0 (latest tagged)
+## New in v0.21.0 (latest tagged)
+
+| Capability | Status |
+|------------|--------|
+| RDF/XML (`.owl` / `.rdf`) write-back via Horned serializers | Yes |
+| OWL/XML (`.owx`) write-back via Horned serializers | Yes |
+| Cross-format semantic comparator + Protégé edit/save/reload fixtures | Yes |
+| Editable gates lifted for CLI / LSP / catalog / extension inspector | Yes |
+
+## Previously in v0.20.0
 
 | Capability | Status |
 |------------|--------|
@@ -79,19 +89,11 @@
 | Token-aware type / characteristic detection (ignores comment substrings) | Yes |
 | `SetOntologyIri` rewrites `rdf:type owl:Ontology` in place | Yes |
 
-## Previously in v0.19.0
-
-| Capability | Status |
-|------------|--------|
-| `ontocore-edit` semantic transactions (`compose`, `validate`, `invert`, serde) | Yes |
-| Turtle / OBO LSP + CLI apply via `Transaction` (legacy patch JSON still accepted) | Yes |
-| Protégé parity program baseline (manifest + CI validator) | Yes |
-
-Full user-facing delta: [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md#0200---2026-07-13).
+Full user-facing delta: [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md#0210---2026-07-13).
 
 ## Release history
 
-Detailed notes for v0.9–v0.19 are in the [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md). This page lists **what is available in the latest tagged release**, not every past milestone.
+Detailed notes for v0.9–v0.20 are in the [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md). This page lists **what is available in the latest tagged release**, not every past milestone.
 
 ## Manchester scope (v0.8+)
 
@@ -104,7 +106,7 @@ Detailed notes for v0.9–v0.19 are in the [CHANGELOG](https://github.com/eddiet
 | Limitation | Notes |
 |------------|-------|
 | Multi-root VS Code workspaces | **All folders indexed** (v0.10+), including peer folders added after open. Manual **Index Workspace** may prompt when multiple roots are open |
-| Write-back | **Turtle (`.ttl`) and OBO (`.obo`)**; RDF/XML, OWL/XML, JSON-LD, N-Triples read-only |
+| Write-back | **Turtle, OBO, RDF/XML, OWL/XML**; JSON-LD, N-Triples, TriG read-only. XML is semantic re-serialize (not byte-identical) |
 | Refactoring | **Turtle (`.ttl`) only**; extract module uses direct-reference closure |
 | Class hierarchy tree | Named-parent edges; **inferred/combined** after reasoner run |
 | Reasoning | **EL / RL / RDFS / DL / auto** via Ontologos 1.0 (HermiT parity) |
@@ -113,23 +115,14 @@ Detailed notes for v0.9–v0.19 are in the [CHANGELOG](https://github.com/eddiet
 
 ## What's next
 
-Forward milestones: RDF/XML + OWL/XML write-back (**v0.21**), full Protégé parity path (**v0.21–v0.25**), Protégé-competitive release (**1.0**). See **[Platform roadmap](roadmap.md)** · **[Known limitations](known-limitations.md)**.
+Forward milestones: complete OWL 2 authoring (**v0.22**), reasoning/SWRL parity (**v0.23**), Protégé-competitive release (**1.0**). See **[Platform roadmap](roadmap.md)** · **[Known limitations](known-limitations.md)**.
 
 ## Where to learn more
 
 | Topic | Guide |
 |-------|-------|
-| VS Code onboarding | [First success in 10 minutes](guides/first-success.md) |
-| Query workbench | [Query Workbench](ontocode/query-workbench.md) |
-| Reasoner & explanations | [Reasoner guide](guides/reasoner.md) |
-| Plugin authoring | [Plugin authoring](guides/plugins.md) |
-| Manchester editor | [Manchester editor](ontocode/manchester-editor.md) |
-| Semantic diff | [Semantic diff guide](ontocode/semantic-diff.md) |
-| Turtle editing & patches | [Authoring](authoring.md) · [Patch reference](patch-reference.md) · [Refactoring](guides/refactoring.md) |
-| CLI & CI | [Getting started](getting-started.md) · [CI integration](ci-integration.md) |
-| Graph visualization | [Graph view](ontocode/graph-view.md) |
-| OBO workflows | [OBO workflow guide](guides/obo-workflow.md) |
-| OWL/XML & RDF/XML (read-only) | [OWL/XML workflow](guides/owl-xml-workflow.md) |
-| ROBOT interop | [ROBOT interop guide](guides/robot-interop.md) |
-| LSP integrators | [LSP API](lsp-api.md) · [Webview protocol](webview-protocol.md) |
-| Enterprise evaluation | [Enterprise evaluation](guides/enterprise-eval.md) |
+| First success | [First success](guides/first-success.md) |
+| Authoring | [Authoring](authoring.md) |
+| OWL/XML & RDF/XML write-back | [OWL/XML workflow](guides/owl-xml-workflow.md) |
+| OBO | [OBO authoring](ontocode/obo-authoring.md) |
+| Versions | [Versions & channels](guides/versions-and-channels.md) |

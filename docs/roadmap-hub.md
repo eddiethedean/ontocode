@@ -2,7 +2,7 @@
 
 OntoCode and OntoCore publish several roadmap documents. **Use this page to pick the right one** — they serve different audiences and must not be read as a single capability list.
 
-**Current release:** v0.20.0 · [What ships today](SHIPPED.md)
+**Current release:** v0.21.0 · [What ships today](SHIPPED.md)
 
 ## Which document should I read?
 
@@ -51,6 +51,6 @@ flowchart TB
 
 ## Current release
 
-**v0.20.0** — see [Migration v0.19.0 → v0.20.0](migration/v0.20.md), [Migration v0.18.2 → v0.19.0](migration/v0.19.md), and [Changelog](changelog.md).
+**v0.21.0** — see [Migration v0.19.0 → v0.21.0](migration/v0.20.md), [Migration v0.18.2 → v0.19.0](migration/v0.19.md), and [Changelog](changelog.md).
 
 > **Design docs under `docs/platform/`, `docs/ui/`, and Protégé reverse-engineering are not a shipped feature list.** Cross-check [SHIPPED.md](SHIPPED.md) before treating a design page as product capability.

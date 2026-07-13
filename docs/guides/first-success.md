@@ -43,7 +43,7 @@ For offline or air-gapped environments, use a release VSIX instead — see [Inst
 
 Download a minimal tutorial pack if you do not already have ontology files.
 
-**Offline / air-gapped:** download `ontocode-v0.20.0.vsix` (pattern: `ontocode-v<version>.vsix`) and `ontocode-tutorial.zip` from [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) for the **same tagged version** (e.g. **v0.20.0**). Prefer [Versions and channels](versions-and-channels.md) if Marketplace and GitHub disagree. If the zip is missing for an older tag, use the curl commands below on a connected machine, or clone the repo and open `fixtures/`.
+**Offline / air-gapped:** download `ontocode-v0.21.0.vsix` (pattern: `ontocode-v<version>.vsix`) and `ontocode-tutorial.zip` from [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) for the **same tagged version** (e.g. **v0.21.0**). Prefer [Versions and channels](versions-and-channels.md) if Marketplace and GitHub disagree. If the zip is missing for an older tag, use the curl commands below on a connected machine, or clone the repo and open `fixtures/`.
 
 **Online (curl from the tagged release):**
 
@@ -51,21 +51,21 @@ Download a minimal tutorial pack if you do not already have ontology files.
 
     ```bash
     mkdir ontocode-tutorial && cd ontocode-tutorial
-    curl -fsSLO https://raw.githubusercontent.com/eddiethedean/ontocode/v0.20.0/fixtures/example.ttl
-    curl -fsSLO https://raw.githubusercontent.com/eddiethedean/ontocode/v0.20.0/fixtures/complex-classes.ttl
-    curl -fsSLO https://raw.githubusercontent.com/eddiethedean/ontocode/v0.20.0/examples/obo-workflow/demo.obo
+    curl -fsSLO https://raw.githubusercontent.com/eddiethedean/ontocode/v0.21.0/fixtures/example.ttl
+    curl -fsSLO https://raw.githubusercontent.com/eddiethedean/ontocode/v0.21.0/fixtures/complex-classes.ttl
+    curl -fsSLO https://raw.githubusercontent.com/eddiethedean/ontocode/v0.21.0/examples/obo-workflow/demo.obo
     ```
 
 === "Windows (PowerShell)"
 
     ```powershell
     mkdir ontocode-tutorial; cd ontocode-tutorial
-    Invoke-WebRequest -Uri https://raw.githubusercontent.com/eddiethedean/ontocode/v0.20.0/fixtures/example.ttl -OutFile example.ttl
-    Invoke-WebRequest -Uri https://raw.githubusercontent.com/eddiethedean/ontocode/v0.20.0/fixtures/complex-classes.ttl -OutFile complex-classes.ttl
-    Invoke-WebRequest -Uri https://raw.githubusercontent.com/eddiethedean/ontocode/v0.20.0/examples/obo-workflow/demo.obo -OutFile demo.obo
+    Invoke-WebRequest -Uri https://raw.githubusercontent.com/eddiethedean/ontocode/v0.21.0/fixtures/example.ttl -OutFile example.ttl
+    Invoke-WebRequest -Uri https://raw.githubusercontent.com/eddiethedean/ontocode/v0.21.0/fixtures/complex-classes.ttl -OutFile complex-classes.ttl
+    Invoke-WebRequest -Uri https://raw.githubusercontent.com/eddiethedean/ontocode/v0.21.0/examples/obo-workflow/demo.obo -OutFile demo.obo
     ```
 
-Or download the files from the [v0.20.0 fixtures](https://github.com/eddiethedean/ontocode/tree/v0.20.0/fixtures) and [obo-workflow](https://github.com/eddiethedean/ontocode/tree/v0.20.0/examples/obo-workflow) trees in your browser.
+Or download the files from the [v0.21.0 fixtures](https://github.com/eddiethedean/ontocode/tree/v0.21.0/fixtures) and [obo-workflow](https://github.com/eddiethedean/ontocode/tree/v0.21.0/examples/obo-workflow) trees in your browser.
 
 Then **File → Open Folder…** and select `ontocode-tutorial` (or your own ontology folder).
 
@@ -98,7 +98,7 @@ See the [feature tour](../ontocode/feature-tour.md) for a visual overview of the
 
 ### 4. Edit a Turtle entity
 
-Write-back works in **Turtle (`.ttl`) and OBO (`.obo`) files**. For a full matrix (index/query vs write-back), see [Supported formats](../supported-formats.md). RDF/XML, OWL/XML, and JSON-LD are read-only in the inspector.
+Write-back works in **Turtle (`.ttl`), OBO (`.obo`), RDF/XML (`.owl`/`.rdf`), and OWL/XML (`.owx`)**. For a full matrix (index/query vs write-back), see [Supported formats](../supported-formats.md). JSON-LD and line-oriented RDF remain read-only in the inspector.
 
 1. Select a class from a `.ttl` file in the explorer.
 2. In the Entity Inspector **Edit** section:
@@ -187,7 +187,7 @@ To catch lint and parse errors in CI or locally (optional — **not part of the 
 === "Linux x64 (release binary — recommended for CI)"
 
     ```bash
-    VERSION=0.20.0
+    VERSION=0.21.0
     ASSET="ontocore-v${VERSION}-x86_64-unknown-linux-gnu.tar.gz"
     BIN="ontocore-v${VERSION}-x86_64-unknown-linux-gnu"
     curl -fsSL -o "${ASSET}" \
@@ -200,7 +200,7 @@ To catch lint and parse errors in CI or locally (optional — **not part of the 
 === "macOS / Windows / dev (cargo install)"
 
     ```bash
-    cargo install ontocore-cli --locked --version 0.20.0
+    cargo install ontocore-cli --locked --version 0.21.0
     ontocore validate /path/to/your/ontology/folder
     ```
 

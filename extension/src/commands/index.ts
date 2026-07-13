@@ -383,7 +383,7 @@ export function registerCommands(
       try {
         const { detail } = await getEntity(iri);
         if (!detail.document_path) {
-          void vscode.window.showErrorMessage("Entity is not in an editable Turtle file");
+          void vscode.window.showErrorMessage("Entity is not in an editable ontology file");
           return;
         }
         const documentUri = documentUriInWorkspace(detail.document_path);
@@ -833,7 +833,7 @@ async function createEntity(
   if (!docPick) {
     let ttlDocs = snapshot.documents.filter((d) => {
       const entry = ontologyRegistry.getEntry(d.id);
-      return entry?.editable ?? (d.format === "turtle" || d.format === "obo");
+      return entry?.editable ?? (d.format === "turtle" || d.format === "obo" || d.format === "owl" || d.format === "rdf_xml" || d.format === "owl_xml");
     });
     const activeEditor = vscode.window.activeTextEditor;
     if (activeEditor) {

@@ -53,7 +53,7 @@ for row in &result.rows {
 Default features are **empty** — enable `lsp` when you need LSP wire types:
 
 ```toml
-ontocore = { version = "0.20", features = ["lsp"] }
+ontocore = { version = "0.21", features = ["lsp"] }
 ```
 
 ## Binaries

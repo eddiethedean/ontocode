@@ -6,7 +6,8 @@ Planning ranges for OntoCode / OntoCore. **These are product goals, not contract
 
 | Version | Status | Date (changelog) |
 |---------|--------|------------------|
-| **0.19.0** | Current | 2026-07-13 |
+| **0.20.0** | Current (in progress — unreleased) | — |
+| **0.19.0** | Latest tagged | 2026-07-13 |
 | **0.18.2** | Previous | 2026-07-13 |
 | **0.18.1** | Previous | 2026-07-12 |
 | **0.18.0** | Previous | 2026-07-11 |
@@ -32,6 +33,7 @@ Pre-1.0: minor releases may change library APIs, LSP JSON, and SQL virtual table
 | **v0.13** | OntoUI platform — WorkspaceStore, focus relay, schema browser, PR summary, semantic tokens | **Shipped** (2026-07-08) |
 | **v0.14** | Plugin host MVP — manifests, reference plugins, CLI/LSP hooks, owlmake scaffold | **Shipped** (2026-07-09) |
 | **v0.19** | Semantic foundation — `ontocore-edit` transactions; parity manifest + CI; epics EPIC-001…011 | **Shipped** (2026-07-13) |
+| **v0.20** | Workspace runtime — multi-ontology registry, dirty/save, session persistence | **In progress** (unreleased) |
 | **v1.0** | Protégé-competitive OWL + OBO in VS Code; full axiom catalog; stable plugin API | Planned |
 
 Canonical forward plan: [Platform roadmap](../roadmap.md). Engineering milestone history: [Milestones (shipped)](../design/ROADMAP.md).

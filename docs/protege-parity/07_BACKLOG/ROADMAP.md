@@ -26,7 +26,7 @@ here. Use the canonical pre-1.0 plan instead:
 
 | Release | Theme | Status | Plan |
 |---------|-------|--------|------|
-| v0.19 | Semantic foundation + program baseline | **Shipped** (v0.19.0) | [PRE_1_0_PHASES.md § v0.19](PRE_1_0_PHASES.md#v019-semantic-foundation-program-baseline) |
+| v0.19 | Semantic foundation + program baseline | **Shipped** (v0.20.0) | [PRE_1_0_PHASES.md § v0.19](PRE_1_0_PHASES.md#v019-semantic-foundation-program-baseline) |
 | v0.20 | Workspace runtime | Planned | [PRE_1_0_PHASES.md § v0.20](PRE_1_0_PHASES.md#v020-workspace-runtime) |
 | v0.21 | Required format write-back | Planned | [PRE_1_0_PHASES.md § v0.21](PRE_1_0_PHASES.md#v021-required-format-write-back) |
 | v0.22 | Complete OWL 2 authoring | Planned | [PRE_1_0_PHASES.md § v0.22](PRE_1_0_PHASES.md#v022-complete-owl-2-authoring) |

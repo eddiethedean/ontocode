@@ -39,7 +39,7 @@ Product code (LSP `applyAxiomPatch`, CLI `ontocore patch`) routes through `Trans
 - Extra indirection layer until serializers consume a richer semantic model
 - Some `Set*` patch ops are not invertible without prior-value capture (documented; `invert()` returns error)
 
-## Non-goals (v0.19)
+## Non-goals (v0.20)
 
 - Rewriting Turtle/OBO text engines
 - Workspace transaction manager (v0.20)

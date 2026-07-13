@@ -1,8 +1,10 @@
-# What ships today (v0.19.0)
+# What ships today (v0.20.0)
 
 > **Canonical capability matrix.** Update this page on every release. Design specs under [Project](design/README.md) may describe future targets — check here for what is actually available.
+>
+> **v0.20.0 is in progress (unreleased).** Latest tagged release: **v0.19.0**. Capability rows below include work already on the `v0.20` branch.
 
-**Current release:** v0.19.0 · [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) · [Migration from v0.18.2](migration/v0.19.md) · [v0.18.2 patch notes](migration/v0.18.2.md)
+**Current release:** v0.20.0 (in progress — unreleased) · Latest tagged: [v0.19.0](migration/v0.19.md) · [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) · Draft [migration/v0.20.md](migration/v0.20.md)
 
 ## Products
 
@@ -65,7 +67,16 @@
 | Refactor apply | Yes | — | — | — | — |
 | Rich OBO metadata (synonyms, defs, xrefs) | — | Yes | — | — | — |
 
-## New in v0.19.0
+## Unreleased on v0.20 (not tagged)
+
+| Capability | Status |
+|------------|--------|
+| Turtle patch matching for lang-tagged / typed literals | Yes (on branch) |
+| Turtle patch IRI removes across CURIE and `<IRI>` forms | Yes (on branch) |
+| Token-aware type / characteristic detection (ignores comment substrings) | Yes (on branch) |
+| `SetOntologyIri` rewrites `rdf:type owl:Ontology` in place | Yes (on branch) |
+
+## New in v0.19.0 (latest tagged)
 
 | Capability | Status |
 |------------|--------|
@@ -99,7 +110,7 @@ Detailed notes for v0.9–v0.18 are in the [CHANGELOG](https://github.com/eddiet
 
 ## What's next
 
-Forward milestones: RDF/XML + OWL/XML write-back (**v0.21**), full Protégé parity path (**v0.20–v0.25**), Protégé-competitive release (**1.0**). See **[Platform roadmap](roadmap.md)** · **[Known limitations](known-limitations.md)**.
+Forward milestones: finish workspace runtime (**v0.20** / EPIC-003), RDF/XML + OWL/XML write-back (**v0.21**), full Protégé parity path (**v0.21–v0.25**), Protégé-competitive release (**1.0**). See **[Platform roadmap](roadmap.md)** · **[Known limitations](known-limitations.md)**.
 
 ## Where to learn more
 

@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Turtle patch matching for Protégé/ROBOT-style files: lang-tagged/typed literal removes, angle-bracket IRI object removes, `rdf:type` ontology IRI rewrite, comment-safe type/characteristic detection, and property-chain subject needles ([#261](https://github.com/eddiethedean/ontocode/issues/261), [#262](https://github.com/eddiethedean/ontocode/issues/262), [#270](https://github.com/eddiethedean/ontocode/issues/270), [#271](https://github.com/eddiethedean/ontocode/issues/271), [#272](https://github.com/eddiethedean/ontocode/issues/272), [#273](https://github.com/eddiethedean/ontocode/issues/273), [#278](https://github.com/eddiethedean/ontocode/issues/278); [#286](https://github.com/eddiethedean/ontocode/pull/286))
+
+### Changed
+
+- Workspace package and all `ontocore-*` crates bumped to **0.20.0** (in progress — not released); extension marketplace and webview UI **0.20.0**
+- Draft migration notes: [docs/migration/v0.20.md](docs/migration/v0.20.md)
+
 ## [0.19.0] - 2026-07-13
 
 ### Added

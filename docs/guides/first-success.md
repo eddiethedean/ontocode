@@ -185,7 +185,7 @@ To catch lint and parse errors in CI or locally (optional — **not part of the 
 === "Linux x64 (release binary — recommended for CI)"
 
     ```bash
-    VERSION=0.19.0
+    VERSION=0.20.0
     ASSET="ontocore-v${VERSION}-x86_64-unknown-linux-gnu.tar.gz"
     BIN="ontocore-v${VERSION}-x86_64-unknown-linux-gnu"
     curl -fsSL -o "${ASSET}" \
@@ -198,7 +198,7 @@ To catch lint and parse errors in CI or locally (optional — **not part of the 
 === "macOS / Windows / dev (cargo install)"
 
     ```bash
-    cargo install ontocore-cli --locked --version 0.19.0
+    cargo install ontocore-cli --locked --version 0.20.0
     ontocore validate /path/to/your/ontology/folder
     ```
 

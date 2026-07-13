@@ -48,6 +48,7 @@ Maintainer checklist for publishing crates, binaries, and the VS Code extension.
 - [ ] [docs/migration/v0.17.md](migration/v0.17.md) — Protégé-shell menus / perspectives when applicable
 - [ ] [docs/migration/v0.18.md](migration/v0.18.md) — Protégé Desktop parity gate when applicable
 - [ ] [docs/migration/v0.19.md](migration/v0.19.md) — semantic transaction apply path when applicable
+- [ ] [docs/migration/v0.20.md](migration/v0.20.md) — Turtle patch matching hardening when applicable
 - [ ] [docs/ontocode/feature-tour.md](ontocode/feature-tour.md) — retitle to current release
 - [ ] [ROADMAP.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/ROADMAP.md) and [docs/roadmap.md](roadmap.md) — keep shipped/planned sections in sync
 - [ ] [docs/guides/plugins.md](guides/plugins.md) — plugin authoring when plugin surface changes
@@ -63,8 +64,8 @@ Maintainer checklist for publishing crates, binaries, and the VS Code extension.
 Push a tag matching `[workspace.package].version` in `Cargo.toml`:
 
 ```bash
-git tag v0.19.0   # must match [workspace.package].version in Cargo.toml
-git push origin v0.19.0
+git tag v0.20.0   # must match [workspace.package].version in Cargo.toml
+git push origin v0.20.0
 ```
 
 The [release workflow on GitHub](https://github.com/eddiethedean/ontocode/blob/main/.github/workflows/release.yml):

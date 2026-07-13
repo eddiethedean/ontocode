@@ -10,8 +10,8 @@ OntoCore is currently implemented by the `ontocore-*` crates. The [`ontocore`](h
 
 ```toml
 [dependencies]
-ontocore = "0.19"
-# Optional: ontocore = { version = "0.19", features = ["lsp", "plugins"] }
+ontocore = "0.20"
+# Optional: ontocore = { version = "0.20", features = ["lsp", "plugins"] }
 ```
 
 ```rust
@@ -29,7 +29,7 @@ use ontocore::catalog::IndexBuilder;  // lower-level
 | `ontocore-query` | SQL virtual tables, SPARQL |
 | `ontocore-owl` | Horned-OWL facade, patches, Manchester |
 | `ontocore-obo` | OBO Format 1.4 patch write-back |
-| `ontocore-edit` | Semantic transaction apply path (v0.19) |
+| `ontocore-edit` | Semantic transaction apply path (v0.20) |
 | `ontocore-diagnostics` | Lint rules |
 | `ontocore-reasoner` | OntoLogos classification facade |
 | `ontocore-refactor` | Workspace refactoring |

@@ -7,7 +7,7 @@ Embed **OntoCore** in tools, pipelines, or custom CLIs via the [`ontocore`](http
 Pre-1.0: public APIs may change between minor releases until v1.0.
 
 !!! tip "Prefer `Workspace`"
-    For new code, use the **`Workspace` API** (`ontocore = "0.19"`). Lower-level `IndexBuilder` remains available for specialized pipelines — see [Rust API](../ontocore/rust-api.md).
+    For new code, use the **`Workspace` API** (`ontocore = "0.20"`). Lower-level `IndexBuilder` remains available for specialized pipelines — see [Rust API](../ontocore/rust-api.md).
 
 ## Quick example: `Workspace` API
 
@@ -120,7 +120,7 @@ Uses `OntoCoreError` from `ontocore-core` (re-exported as `ontocore::OntoCoreErr
 
 ## API stability
 
-- Crates are at **0.19.x** on crates.io (`ontocore = "0.19"`)
+- Crates are at **0.20.x** on crates.io (`ontocore = "0.20"`)
 - Prefer the `Workspace` API for new code; see [Rust API](../ontocore/rust-api.md)
 - `Workspace` and `WorkspaceOptions` are **stable since v0.10** (pre-1.0 policy still applies to other crates)
 - LSP wire JSON: [LSP API](../lsp-api.md)

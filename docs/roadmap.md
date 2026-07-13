@@ -42,7 +42,7 @@ After 1.0, the roadmap shifts from parity to modernization.
 | [Product Roadmap 2.0](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/PRODUCT_ROADMAP_2.0.md) | UI phases with milestone acceptance criteria |
 | [Product design (UI)](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/README.md) | Product design specification pack (UX, design system, OntoStudio target) |
 
-**Current release:** v0.19.0
+**Current release:** v0.20.0 (in progress — unreleased)
 
 ---
 
@@ -71,7 +71,7 @@ Full timeline: [ROADMAP.md on GitHub](https://github.com/eddiethedean/ontocode/b
 | **C — Platform & authoring** | v0.9–v0.12 | Shipped | OntoCore identity, semantic workspace, authoring parity |
 | **D — OntoUI platform** | v0.13–v0.14 | Shipped | v0.13: WorkspaceStore, focus relay; v0.14: plugin host MVP |
 | **E — Desktop UX shell gate** | v0.15–v0.18 | Shipped | Menus, layouts, workflows, migration readiness (not full parity) |
-| **F — Full Protégé parity path** | v0.19–v0.25 | In progress (v0.19 shipped) | Semantic core → formats → OWL 2 → reason/SWRL → services → verify |
+| **F — Full Protégé parity path** | v0.19–v0.25 | In progress (v0.19 shipped; v0.20 in progress) | Semantic core → formats → OWL 2 → reason/SWRL → services → verify |
 | **G — Protégé replacement** | 1.0.0 | Planned | Daily OWL/OBO engineering without Protégé |
 | **H — Ecosystem** | v1.1–v1.2+ | Planned | SDKs, AI, toolchain & collaboration |
 
@@ -79,7 +79,7 @@ Full timeline: [ROADMAP.md on GitHub](https://github.com/eddiethedean/ontocode/b
 |-------|---------|-----|--------|-----------|-------|
 | 1–18 | v0.1–v0.18 | A–E | Shipped | — | See [ROADMAP.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/ROADMAP.md) |
 | 19 | v0.19 | F | Shipped | — | Semantic foundation + program baseline |
-| 20 | v0.20 | F | Planned | 1† | Workspace runtime |
+| 20 | v0.20 | F | In progress | 1† | Workspace runtime |
 | 21 | v0.21 | F | Planned | — | RDF/XML + OWL/XML write-back |
 | 22 | v0.22 | F | Planned | 2† | Complete OWL 2 authoring |
 | 23 | v0.23 | F | Planned | 5† | Reasoning parity + SWRL |
@@ -457,6 +457,16 @@ Canonical detail: root [ROADMAP.md on GitHub](https://github.com/eddiethedean/on
 | **Parity program** | Frozen scope; `parity/protege-desktop-parity.yaml` + CI validator; epics EPIC-001…011 |
 
 See [migration/v0.19.md](migration/v0.19.md) · [SHIPPED.md](SHIPPED.md) · full detail in [ROADMAP.md § v0.19](https://github.com/eddiethedean/ontocode/blob/main/ROADMAP.md).
+
+---
+
+### v0.20 — Workspace runtime (in progress)
+
+**Status:** In progress — **not released**. Packaging version **0.20.0**; latest tagged release **v0.19.0**.
+
+**Theme:** Workspace as central runtime for ontology state and transactions.
+
+See [SHIPPED.md](SHIPPED.md) · full detail in [ROADMAP.md § v0.20](https://github.com/eddiethedean/ontocode/blob/main/ROADMAP.md).
 
 ---
 

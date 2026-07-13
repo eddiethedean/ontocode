@@ -16,6 +16,8 @@
 >
 > **Shipped through v0.19:** workspace scanner, incremental indexing, multi-root workspaces, SQL/SPARQL queries (including Horned-OWL axiom virtual tables), diagnostics (`.ontocore/diagnostics.toml`), CLI, LSP (semantic tokens, `listSqlSchema`), Turtle and OBO write-back, Query Workbench + schema browser, Manchester editor, React webviews with WorkspaceStore + focus relay (inspector, graphs, workbench, refactor preview, semantic diff, imports, reasoner, explanation), EL–DL reasoning (OntoLogos 1.0), OBO index + OBO write-back, OWL/XML read-only catalog, ROBOT CLI wrappers, semantic diff (`--pr-summary`), `ontocore docs` export, Turtle completion, diagnostic quick fixes, property chain editing, DL unsatisfiability explanations (alternatives + stale detection), plugin host (permissions, UI views/commands/preferences/context actions), Protégé-shell menus/perspectives, reasoner cancel + distinct lifecycle, layout reopen-with-context. See [What ships today](../SHIPPED.md).
 >
+> **Unreleased on v0.20:** Turtle patch matching hardening (lang-tagged/typed literals, IRI forms, comment-safe types).
+>
 > **Shipped v0.14–v0.17:** plugin host MVP → permissions/views → preferences/context actions → Protégé-shell. **Planned v0.21:** RDF/XML and OWL/XML write-back. **Planned v1.0:** full workflow plugin integration, full DL axiom catalog for all formats. See [Platform roadmap](../roadmap.md).
 >
 > **Reference:** [lsp-api.md](../lsp-api.md), [adr/README.md](adr/README.md), [DEPENDENCY_MATRIX.md](DEPENDENCY_MATRIX.md).

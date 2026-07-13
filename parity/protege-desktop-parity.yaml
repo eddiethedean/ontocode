@@ -51,7 +51,7 @@ requirements:
     documentation:
       - docs/protege-parity/IMPLEMENTATION_EVIDENCE.md
       - docs/patch-reference.md
-    notes: Turtle apply routed through ontocore-edit Transaction (v0.19)
+    notes: Turtle apply routed through ontocore-edit Transaction (v0.20)
   - id: PAR-FMT-002
     area: Formats
     title: OBO semantic round-trip
@@ -70,7 +70,7 @@ requirements:
     github_issue: https://github.com/eddiethedean/ontocode/issues/247
     documentation:
       - docs/protege-parity/IMPLEMENTATION_EVIDENCE.md
-    notes: OBO apply routed through ontocore-edit Transaction (v0.19)
+    notes: OBO apply routed through ontocore-edit Transaction (v0.20)
   - id: PAR-FMT-003
     area: Formats
     title: RDF/XML write-back
@@ -276,4 +276,4 @@ requirements:
     github_issue: https://github.com/eddiethedean/ontocode/issues/257
     documentation:
       - docs/protege-parity/04_BLOCKERS/BLOCKER_11_PARITY_VERIFICATION.md
-    notes: Manifest skeleton + validator in CI (v0.19); full gate in v0.25
+    notes: Manifest skeleton + validator in CI (v0.20); full gate in v0.25

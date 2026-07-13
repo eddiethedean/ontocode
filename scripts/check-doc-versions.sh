@@ -731,10 +731,23 @@ else
   echo "ok: no stale property chains view-only claims"
 fi
 
-# Architecture banner must reference current release ships today
-MINOR="${VERSION%.*}"
-check_file_contains "ARCHITECTURE.md" "v${MINOR} ships today" "ARCHITECTURE.md v${MINOR} banner"
-check_file_contains "docs/architecture.md" "v${MINOR} ships today" "docs/architecture.md v${MINOR} banner"
+# Architecture banner: during an unreleased minor, allow "in progress" wording
+if grep -qE "v${MINOR_VERSION} ships today" ARCHITECTURE.md 2>/dev/null; then
+  echo "ok: ARCHITECTURE.md v${MINOR_VERSION} ships today banner"
+elif grep -qE "v${MINOR_VERSION} in progress" ARCHITECTURE.md 2>/dev/null; then
+  echo "ok: ARCHITECTURE.md v${MINOR_VERSION} in progress banner"
+else
+  echo "FAIL: ARCHITECTURE.md v${MINOR_VERSION} banner — expected 'ships today' or 'in progress'" >&2
+  fail=1
+fi
+if grep -qE "v${MINOR_VERSION} ships today" docs/architecture.md 2>/dev/null; then
+  echo "ok: docs/architecture.md v${MINOR_VERSION} ships today banner"
+elif grep -qE "v${MINOR_VERSION} in progress" docs/architecture.md 2>/dev/null; then
+  echo "ok: docs/architecture.md v${MINOR_VERSION} in progress banner"
+else
+  echo "FAIL: docs/architecture.md v${MINOR_VERSION} banner — expected 'ships today' or 'in progress'" >&2
+  fail=1
+fi
 
 # Stale CLI alias notes
 if rg -q 'ontocore alias is planned' docs --glob '!**/migration/**' --glob '!**/design/**' 2>/dev/null; then
@@ -754,15 +767,23 @@ else
   echo "ok: no directory-only ui/ markdown links"
 fi
 
-# design/ARCHITECTURE.md must not freeze shipped banner at an old minor
-if grep -qE 'Shipped through v0\.(1[0-7]|[0-9]):' docs/design/ARCHITECTURE.md 2>/dev/null; then
-  echo "FAIL: docs/design/ARCHITECTURE.md shipped banner still says through an older minor (expected v${MINOR_VERSION})" >&2
-  fail=1
-elif ! grep -qE "Shipped through v${MINOR_VERSION}:" docs/design/ARCHITECTURE.md 2>/dev/null; then
-  echo "FAIL: docs/design/ARCHITECTURE.md must say Shipped through v${MINOR_VERSION}:" >&2
+# design/ARCHITECTURE.md shipped banner: current minor if released, else previous tagged minor
+PREV_MINOR_VERSION="$(python3 - <<PY
+maj, minor, *_ = "${VERSION}".split(".")
+print(f"{maj}.{int(minor)-1}")
+PY
+)"
+if grep -qE "Shipped through v${MINOR_VERSION}:" docs/design/ARCHITECTURE.md 2>/dev/null; then
+  echo "ok: design ARCHITECTURE shipped banner (current minor)"
+elif grep -qE "Shipped through v${PREV_MINOR_VERSION}:" docs/design/ARCHITECTURE.md 2>/dev/null \
+  && grep -qE "Unreleased on v${MINOR_VERSION}" docs/design/ARCHITECTURE.md 2>/dev/null; then
+  echo "ok: design ARCHITECTURE shipped banner (previous minor + unreleased note)"
+elif grep -qE 'Shipped through v0\.(1[0-7]|[0-9]):' docs/design/ARCHITECTURE.md 2>/dev/null; then
+  echo "FAIL: docs/design/ARCHITECTURE.md shipped banner still says through an older minor (expected v${MINOR_VERSION} or v${PREV_MINOR_VERSION} + unreleased)" >&2
   fail=1
 else
-  echo "ok: design ARCHITECTURE shipped banner"
+  echo "FAIL: docs/design/ARCHITECTURE.md must say Shipped through v${MINOR_VERSION}: (or v${PREV_MINOR_VERSION}: with Unreleased on v${MINOR_VERSION})" >&2
+  fail=1
 fi
 
 # LSP API must document OBO write-back alongside Turtle
@@ -896,8 +917,15 @@ fi
 # Enterprise eval capability table header must match release
 check_file_contains "docs/guides/enterprise-eval.md" "What ships today \\(v${VERSION}\\)" "enterprise-eval capability table version"
 
-# Governance must list current minor as supported
-check_file_contains "docs/guides/governance.md" "\\*\\*${MINOR_VERSION}\\.x\\*\\* \\| Yes — current release" "governance current release stream"
+# Governance must list current minor as supported (or in-progress development line)
+if grep -qE "\\*\\*${MINOR_VERSION}\\.x\\*\\* \\| Yes — current release" docs/guides/governance.md 2>/dev/null; then
+  echo "ok: governance current release stream"
+elif grep -qE "\\*\\*${MINOR_VERSION}\\.x\\*\\* \\| In progress \\(unreleased\\)" docs/guides/governance.md 2>/dev/null; then
+  echo "ok: governance in-progress development stream"
+else
+  echo "FAIL: governance must list **${MINOR_VERSION}.x** as current release or in progress (unreleased)" >&2
+  fail=1
+fi
 
 # MkDocs must surface v0.15 migration in Get started / Help
 check_file_contains "mkdocs.yml" "migration/v0.16.md" "mkdocs v0.16 migration guide"

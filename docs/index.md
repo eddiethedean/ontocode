@@ -7,7 +7,7 @@ hide:
 <div class="oc-hero">
 
 <div class="oc-hero-badges">
-  <span class="oc-badge oc-badge--accent">v0.19.0</span>
+  <span class="oc-badge oc-badge--accent">v0.20.0</span>
   <span class="oc-badge">VS Code</span>
   <span class="oc-badge">CLI · LSP</span>
   <span class="oc-badge">Plugins</span>
@@ -86,7 +86,7 @@ Index and explore OWL/RDF/OBO, run queries, refactors, and reasoning — in VS C
 
 ## What ships today
 
-**v0.19.0 highlights:** Semantic transaction apply path (`ontocore-edit`) for Turtle/OBO; Protégé parity manifest and CI validator; GitHub epics for P0 blockers. Built on the v0.18 Protégé Desktop parity gate.
+**v0.20.0 (in progress):** Turtle patch matching hardening on this branch; workspace runtime epic open. Latest tagged: **v0.19.0** (semantic transactions + parity program baseline).
 
 Full matrix: **[What ships today](SHIPPED.md)** (canonical — do not rely on this summary alone).
 

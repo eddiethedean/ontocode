@@ -3,7 +3,7 @@
 # Protégé Desktop Parity Status Dashboard
 
 **Status:** Living Status Report\
-**Repository Baseline:** OntoCode v0.19.0\
+**Repository Baseline:** OntoCode v0.20.0\
 **Target Release:** OntoCode 1.0.0\
 **Current phase:** v0.19 complete — see [PRE_1_0_PHASES.md](../07_BACKLOG/PRE_1_0_PHASES.md)
 

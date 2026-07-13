@@ -12,7 +12,7 @@ pub fn short_name_from_iri(iri: &str) -> String {
     iri.to_string()
 }
 
-/// Parse `@prefix` declarations from Turtle source (skips `#` comments; requires `<iri>` form).
+/// Parse Turtle/SPARQL prefix declarations (`@prefix`, `@PREFIX`, `PREFIX`; case-insensitive).
 pub fn prefixes_from_turtle(source_text: &str) -> BTreeMap<String, String> {
     let mut map = BTreeMap::new();
     for line in source_text.lines() {
@@ -20,18 +20,18 @@ pub fn prefixes_from_turtle(source_text: &str) -> BTreeMap<String, String> {
         if trimmed.is_empty() || trimmed.starts_with('#') {
             continue;
         }
-        if let Some(rest) = trimmed.strip_prefix("@prefix ") {
-            let mut parts = rest.split_whitespace();
-            let Some(prefix_raw) = parts.next() else { continue };
-            let Some(uri_raw) = parts.next() else { continue };
-            let prefix = prefix_raw.trim_end_matches(':').to_string();
-            if let Some(uri) = parse_turtle_prefix_iri(uri_raw) {
-                if !prefix.is_empty() {
-                    map.insert(prefix, uri);
-                }
-            }
-        } else if !trimmed.starts_with('@') {
-            break;
+        let mut parts = trimmed.split_whitespace();
+        let Some(keyword) = parts.next() else {
+            continue;
+        };
+        if !(keyword.eq_ignore_ascii_case("@prefix") || keyword.eq_ignore_ascii_case("PREFIX")) {
+            continue;
+        }
+        let Some(prefix_raw) = parts.next() else { continue };
+        let Some(uri_raw) = parts.next() else { continue };
+        let prefix = prefix_raw.trim_end_matches(':').to_string();
+        if let Some(uri) = parse_turtle_prefix_iri(uri_raw) {
+            map.insert(prefix, uri);
         }
     }
     map
@@ -676,5 +676,33 @@ ex:A a owl:Class ;
         let start = ttl.find("ex:A").unwrap();
         let end = statement_end_byte(ttl, start).expect("end");
         assert!(ttl[start..end].contains(r#"\""" quote"""#));
+    }
+
+    #[test]
+    fn prefixes_from_turtle_accepts_prefix_keyword() {
+        let ttl = "PREFIX ex: <http://example.org/people#>\n";
+        let map = prefixes_from_turtle(ttl);
+        assert_eq!(map.get("ex"), Some(&"http://example.org/people#".to_string()));
+    }
+
+    #[test]
+    fn prefixes_from_turtle_accepts_uppercase_at_prefix() {
+        let ttl = "@PREFIX owl: <http://www.w3.org/2002/07/owl#> .\n";
+        let map = prefixes_from_turtle(ttl);
+        assert_eq!(map.get("owl"), Some(&"http://www.w3.org/2002/07/owl#".to_string()));
+    }
+
+    #[test]
+    fn prefixes_from_turtle_scans_after_prefix_form_and_default_prefix() {
+        let ttl = concat!(
+            "PREFIX ex: <http://example.org/people#>\n",
+            "@prefix owl: <http://www.w3.org/2002/07/owl#> .\n",
+            "@prefix : <http://example.org/org#> .\n",
+            ":Person a owl:Class .\n"
+        );
+        let map = prefixes_from_turtle(ttl);
+        assert_eq!(map.get("ex"), Some(&"http://example.org/people#".to_string()));
+        assert_eq!(map.get("owl"), Some(&"http://www.w3.org/2002/07/owl#".to_string()));
+        assert_eq!(map.get(""), Some(&"http://example.org/org#".to_string()));
     }
 }

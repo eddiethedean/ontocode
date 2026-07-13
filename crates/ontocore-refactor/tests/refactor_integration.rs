@@ -48,6 +48,63 @@ fn find_usages_rejects_person_substring_in_person_type() {
 }
 
 #[test]
+fn find_usages_finds_default_prefix_curie() {
+    let tmp = TempDir::new().unwrap();
+    let ws = tmp.path();
+    std::fs::write(
+        ws.join("default.ttl"),
+        concat!(
+            "@prefix : <http://example.org/org#> .\n",
+            "@prefix owl: <http://www.w3.org/2002/07/owl#> .\n",
+            "@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n",
+            ":Person a owl:Class .\n",
+            ":Employee rdfs:subClassOf :Person .\n"
+        ),
+    )
+    .unwrap();
+    let catalog = build_catalog(ws);
+    let usages = find_usages(&catalog, "http://example.org/org#Person");
+    assert!(
+        usages.iter().any(|u| {
+            u.kind == ontocore_refactor::UsageKind::TextReference && u.context.contains(":Employee")
+        }),
+        "expected default-prefix CURIE reference, got {:?}",
+        usages
+    );
+}
+
+#[test]
+fn find_usages_lists_multiple_annotation_subjects() {
+    let tmp = TempDir::new().unwrap();
+    let ws = tmp.path();
+    std::fs::write(
+        ws.join("annotated.ttl"),
+        concat!(
+            "@prefix : <http://example.org/org#> .\n",
+            "@prefix owl: <http://www.w3.org/2002/07/owl#> .\n",
+            "@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n",
+            "@prefix skos: <http://www.w3.org/2004/02/skos/core#> .\n",
+            ":Person a owl:Class ;\n",
+            "    rdfs:label \"Person\" ;\n",
+            "    rdfs:comment \"first\" ;\n",
+            "    skos:note \"second\" .\n"
+        ),
+    )
+    .unwrap();
+    let catalog = build_catalog(ws);
+    let usages = find_usages(&catalog, "http://example.org/org#Person");
+    let annotation_subjects: Vec<_> = usages
+        .iter()
+        .filter(|u| u.kind == ontocore_refactor::UsageKind::AnnotationSubject)
+        .collect();
+    assert!(
+        annotation_subjects.len() >= 2,
+        "expected multiple annotation-subject hits, got {:?}",
+        annotation_subjects
+    );
+}
+
+#[test]
 fn rename_iri_across_workspace() {
     let tmp = TempDir::new().unwrap();
     let ws = tmp.path();

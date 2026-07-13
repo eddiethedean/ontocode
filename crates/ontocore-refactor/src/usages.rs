@@ -80,7 +80,17 @@ pub fn find_usages_with_overrides(
         if ann.subject == target_iri {
             if let Some(doc) = document_for_ontology_id(data.documents.as_slice(), &ann.ontology_id)
             {
-                let key = (doc.path.clone(), UsageKind::AnnotationSubject, ann.subject.clone());
+                let key = (
+                    doc.path.clone(),
+                    UsageKind::AnnotationSubject,
+                    format!(
+                        "{}-{}-{}-{}",
+                        ann.subject,
+                        ann.predicate,
+                        ann.source_location.line.unwrap_or(0),
+                        ann.source_location.start_byte.unwrap_or(0),
+                    ),
+                );
                 if seen.insert(key) {
                     usages.push(Usage {
                         iri: ann.subject.clone(),
@@ -182,6 +192,36 @@ pub fn find_usages_with_overrides(
             for (prefix, ns) in &namespaces {
                 if target_iri.starts_with(ns) && !prefix.is_empty() {
                     let token = format!("{prefix}:{short}");
+                    if !line.contains(&token) {
+                        continue;
+                    }
+                    let mut search_from = 0usize;
+                    while let Some(col) = line[search_from..].find(&token) {
+                        let col = search_from + col;
+                        if is_token_match_at(line, &token, col) {
+                            let key = (
+                                doc.path.clone(),
+                                UsageKind::TextReference,
+                                format!("{line_idx}-{col}-{token}"),
+                            );
+                            if seen.insert(key) {
+                                usages.push(text_usage(
+                                    doc,
+                                    target_iri,
+                                    line_idx,
+                                    col,
+                                    line,
+                                    UsageKind::TextReference,
+                                ));
+                            }
+                        }
+                        search_from = col + token.len();
+                    }
+                }
+            }
+            if let Some(default_ns) = namespaces.get("") {
+                if target_iri.starts_with(default_ns.as_str()) {
+                    let token = format!(":{short}");
                     if !line.contains(&token) {
                         continue;
                     }

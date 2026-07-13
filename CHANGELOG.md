@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Find Usages jump guards out-of-range line numbers instead of throwing from `lineAt` ([#228](https://github.com/eddiethedean/ontocode/issues/228))
+- Find Usages text scan matches default-prefix CURIEs (`:Local`) under `@prefix : <…>` ([#232](https://github.com/eddiethedean/ontocode/issues/232))
+- Find Usages lists each annotation subject separately instead of collapsing to one hit per entity ([#237](https://github.com/eddiethedean/ontocode/issues/237))
+- `prefixes_from_turtle` recognizes `PREFIX`, `@PREFIX`, and default-prefix declarations for LSP rename and text scans ([#225](https://github.com/eddiethedean/ontocode/issues/225))
 - Reasoner panel keeps running state during in-flight classify; `reasonerSyncRunId` no longer clears the spinner at run start ([#212](https://github.com/eddiethedean/ontocode/issues/212))
 - Reasoner `lastRunAt` and `dirty` update only on successful completion; cancel restores pre-run snapshot ([#221](https://github.com/eddiethedean/ontocode/issues/221))
 - Focus sync treats `reasoningState` with `running: true` as in-progress without emitting completion ([#220](https://github.com/eddiethedean/ontocode/issues/220))

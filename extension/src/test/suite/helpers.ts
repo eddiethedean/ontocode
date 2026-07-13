@@ -19,3 +19,22 @@ export const FIXTURE_IRIS = {
   worksFor: "http://example.org/people#worksFor",
   alice: "http://example.org/people#alice",
 } as const;
+
+/** Match production path equality (Windows case + `\\?\` verbatim prefixes). */
+export function pathsEqual(a: string, b: string): boolean {
+  const normalize = (filePath: string): string => {
+    let normalized = filePath;
+    if (normalized.startsWith("\\\\?\\UNC\\")) {
+      normalized = `\\\\${normalized.slice("\\\\?\\UNC\\".length)}`;
+    } else if (normalized.startsWith("\\\\?\\")) {
+      normalized = normalized.slice("\\\\?\\".length);
+    }
+    return path.resolve(normalized);
+  };
+  const left = normalize(a);
+  const right = normalize(b);
+  if (process.platform === "win32") {
+    return left.toLowerCase() === right.toLowerCase();
+  }
+  return left === right;
+}

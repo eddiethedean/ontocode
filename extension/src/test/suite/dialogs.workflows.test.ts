@@ -3,8 +3,7 @@ import * as fs from "fs";
 import * as path from "path";
 import * as vscode from "vscode";
 import { LanguageClient } from "vscode-languageclient/node";
-import { pathsEqual } from "../../utils/pathUnder";
-import { FIXTURE_IRIS, fixturesWorkspaceUri } from "./helpers";
+import { FIXTURE_IRIS, fixturesWorkspaceUri, pathsEqual } from "./helpers";
 
 interface OntoCodeTestHooks {
   openEntityInspector(iri: string): Promise<void>;

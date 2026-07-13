@@ -7,6 +7,9 @@ This is the **canonical tutorial** for new OntoCode users. You do not need to cl
 !!! warning "Write-back formats"
     Entity Inspector edits apply only to **`.ttl` and `.obo`**. If your corpus is mostly `.owl` / RDF/XML, you can browse and query now; convert or dual-maintain Turtle for editing — see [Supported formats](../supported-formats.md) and [Known limitations](../known-limitations.md).
 
+!!! tip "Corpus is OWL/XML or RDF/XML?"
+    If you opened a typical Protégé `.owl` export, **read this next:** [OWL/XML and RDF/XML workflow](../guides/owl-xml-workflow.md) — browse/query works today; in-place write-back does not.
+
 New to OWL/RDF? Skim [Ontology concepts](../concepts.md) first (IRIs, Turtle, classes).
 
 > **Multi-root workspaces (v0.10+):** All workspace folders are indexed on open. **OntoCode: Index Workspace** may prompt you to pick a folder when multiple roots are open.
@@ -38,7 +41,11 @@ For offline or air-gapped environments, use a release VSIX instead — see [Inst
 
 ### 2. Open a folder
 
-Download a minimal tutorial pack if you do not already have ontology files:
+Download a minimal tutorial pack if you do not already have ontology files.
+
+**Offline / air-gapped:** download `ontocode-tutorial.zip` from [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) (same release as the VSIX), extract, and open the folder in VS Code.
+
+**Online (curl):**
 
 === "macOS / Linux"
 
@@ -46,6 +53,7 @@ Download a minimal tutorial pack if you do not already have ontology files:
     mkdir ontocode-tutorial && cd ontocode-tutorial
     curl -fsSLO https://raw.githubusercontent.com/eddiethedean/ontocode/main/fixtures/example.ttl
     curl -fsSLO https://raw.githubusercontent.com/eddiethedean/ontocode/main/fixtures/complex-classes.ttl
+    curl -fsSLO https://raw.githubusercontent.com/eddiethedean/ontocode/main/examples/obo-workflow/demo.obo
     ```
 
 === "Windows (PowerShell)"
@@ -54,9 +62,10 @@ Download a minimal tutorial pack if you do not already have ontology files:
     mkdir ontocode-tutorial; cd ontocode-tutorial
     Invoke-WebRequest -Uri https://raw.githubusercontent.com/eddiethedean/ontocode/main/fixtures/example.ttl -OutFile example.ttl
     Invoke-WebRequest -Uri https://raw.githubusercontent.com/eddiethedean/ontocode/main/fixtures/complex-classes.ttl -OutFile complex-classes.ttl
+    Invoke-WebRequest -Uri https://raw.githubusercontent.com/eddiethedean/ontocode/main/examples/obo-workflow/demo.obo -OutFile demo.obo
     ```
 
-Or download the two files from [fixtures/](https://github.com/eddiethedean/ontocode/tree/main/fixtures) in your browser.
+Or download the files from [fixtures/](https://github.com/eddiethedean/ontocode/tree/main/fixtures) and [examples/obo-workflow/](https://github.com/eddiethedean/ontocode/tree/main/examples/obo-workflow) in your browser.
 
 Then **File → Open Folder…** and select `ontocode-tutorial` (or your own ontology folder).
 
@@ -67,16 +76,15 @@ Use **Workspace Trust** only when you set custom `ontocode.lspPath` or `ontocode
 
 1. Click the **OntoCode** icon in the **Activity Bar** (left edge of the window).
 2. Wait for indexing to finish.
-
-**Success looks like:**
-
-- **Classes** contains `Person` (from `example.ttl`).
-- **Ontologies** lists `example.ttl` and `complex-classes.ttl` with no parse errors.
-
-For the tutorial pack (~2 files), this usually takes a few seconds. To confirm progress, open **View → Output**, select **OntoCore Language Server**, and look for index completion messages. If trees stay empty after 30 seconds, run **OntoCode: Index Workspace**.
 3. Expand **Ontologies** to see indexed files and parse status.
 4. Expand **Classes**, **Properties**, or **Individuals** to browse entities.
 5. **Click an entity name** (e.g. `Person`) to open the **Entity Inspector**.
+
+For the tutorial pack (~3 files), indexing usually takes a few seconds. To confirm progress, open **View → Output**, select **OntoCore Language Server**, and look for index completion messages. If trees stay empty after 30 seconds, run **OntoCode: Index Workspace**.
+
+!!! success "Success looks like"
+    - **Classes** contains `Person` (from `example.ttl`).
+    - **Ontologies** lists `example.ttl`, `complex-classes.ttl`, and `demo.obo` with no parse errors.
 
 If views stay empty:
 
@@ -157,11 +165,11 @@ Guide: [Refactoring](../guides/refactoring.md).
 
 Guide: [Graph view](../ontocode/graph-view.md).
 
-### Edit an OBO term (optional, v0.12+)
+### Edit an OBO term (optional)
 
-If your workspace includes `.obo` files:
+The tutorial pack includes `demo.obo`:
 
-1. Select a term in the **Classes** explorer (from an `.obo` file).
+1. Select a term in the **Classes** explorer (from `demo.obo`).
 2. In the Entity Inspector, edit **name**, **definition**, **synonyms**, or **is_a** parents.
 3. Use **Preview** then **Apply** — changes write to the `.obo` file on disk.
 
@@ -169,12 +177,30 @@ Guide: [OBO workflow](../guides/obo-workflow.md).
 
 ### Validate from the CLI
 
-To catch lint and parse errors in CI or locally:
+To catch lint and parse errors in CI or locally (optional — **not part of the 10-minute core path**):
 
-```bash
-cargo install ontocore-cli --locked --version 0.19.0
-ontocore validate /path/to/your/ontology/folder
-```
+!!! note "CLI install time"
+    First `cargo install ontocore-cli` compiles dependencies — expect **15–30+ minutes** on macOS/Windows. **Linux CI:** use the [prebuilt release binary](../ci-integration.md) instead of compiling every job.
+
+=== "Linux x64 (release binary — recommended for CI)"
+
+    ```bash
+    VERSION=0.19.0
+    ASSET="ontocore-v${VERSION}-x86_64-unknown-linux-gnu.tar.gz"
+    BIN="ontocore-v${VERSION}-x86_64-unknown-linux-gnu"
+    curl -fsSL -o "${ASSET}" \
+      "https://github.com/eddiethedean/ontocode/releases/download/v${VERSION}/${ASSET}"
+    tar xzf "${ASSET}"
+    chmod +x "${BIN}"
+    ./"${BIN}" validate /path/to/your/ontology/folder
+    ```
+
+=== "macOS / Windows / dev (cargo install)"
+
+    ```bash
+    cargo install ontocore-cli --locked --version 0.19.0
+    ontocore validate /path/to/your/ontology/folder
+    ```
 
 Use the folder you opened in VS Code (e.g. `ontocode-tutorial`). Exit code **0** means no diagnostic **errors** (warnings are allowed). See [CI integration](../ci-integration.md).
 

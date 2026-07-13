@@ -13,6 +13,8 @@ Product and contributor **user guides** live on this Read the Docs site. Deeper 
 | UI product specs | [`docs/ui/README.md`](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/README.md) |
 | Cursor prompts | [`docs/cursor-prompts/README.md`](https://github.com/eddiethedean/ontocode/blob/main/docs/cursor-prompts/README.md) |
 | Protégé reverse engineering | [`docs/PROTEGE_REVERSE_ENGINEERING/README.md`](https://github.com/eddiethedean/ontocode/blob/main/docs/PROTEGE_REVERSE_ENGINEERING/README.md) |
+| Protégé parity program (1.0 engineering) | [`docs/protege-parity/README.md`](https://github.com/eddiethedean/ontocode/blob/main/docs/protege-parity/README.md) |
+| Historical v0.18 parity checklist (not current) | [`docs/design/PROTEGE_PARITY.md`](https://github.com/eddiethedean/ontocode/blob/main/docs/design/PROTEGE_PARITY.md) |
 | Full documentation map | [`docs/documentation-index.md`](https://github.com/eddiethedean/ontocode/blob/main/docs/documentation-index.md) |
 
 ## On this site
@@ -21,9 +23,8 @@ Product and contributor **user guides** live on this Read the Docs site. Deeper 
 - [Extension development](guides/extension-development.md)
 - [Releasing](releasing.md)
 - [Engineering ADRs](design/adr/0001-use-rust-for-ontocore.md) (see [ADR index on GitHub](https://github.com/eddiethedean/ontocode/blob/main/docs/design/adr/README.md))
-- [Protégé parity matrix](design/PROTEGE_PARITY.md)
 - [Plugin model](ontocore/plugin-model.md)
 - [Licenses](design/LICENSES.md)
 - [Documentation index](https://github.com/eddiethedean/ontocode/blob/main/docs/documentation-index.md) (GitHub reading-order map)
 
-Capability truth for adopters: **[What ships today](SHIPPED.md)** and **[Known limitations](known-limitations.md)**.
+Capability truth for adopters: **[What ships today](SHIPPED.md)** and **[Known limitations](known-limitations.md)**. For Protégé comparison use **[Protégé vs OntoCode](guides/protege-decision.md)** — not the historical [design/PROTEGE_PARITY.md](design/PROTEGE_PARITY.md) checklist.

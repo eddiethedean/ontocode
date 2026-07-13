@@ -31,6 +31,8 @@ CLI install options (separate from the extension): [getting started (CLI)](getti
 
 For a full walkthrough, see [First success in 10 minutes](guides/first-success.md).
 
+**Tutorial pack:** download `ontocode-tutorial.zip` from [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) (offline/air-gapped), or use the curl commands in the first-success guide.
+
 > **Multi-root workspaces (v0.10+):** All workspace folders are indexed on open. **OntoCode: Index Workspace** may prompt you to pick a folder when multiple roots are open.
 
 ## Option B — GitHub Release VSIX (offline / air-gapped)

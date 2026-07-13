@@ -90,6 +90,26 @@ let diff = ws.diff_against_path("./baseline")?;
 
 Semantic diff: `ws.diff()`, `ws.diff_against_path()`, or `ontocore::diff::diff_git_refs` — see [Semantic diff](../ontocode/semantic-diff.md).
 
+## Semantic transactions (`ontocore-edit`)
+
+v0.19 ships **`ontocore-edit`** for ordered, invertible Turtle/OBO edit batches. Use when building undo/redo, audit trails, or multi-step apply pipelines:
+
+```rust
+use ontocore_edit::Transaction;
+use ontocore_owl::PatchOp;
+
+let txn = Transaction::from_turtle(vec![
+    PatchOp::SetLabel {
+        entity_iri: "http://example.org/Person".into(),
+        value: "Person".into(),
+    },
+]);
+
+let undo = txn.invert()?;
+```
+
+Dependency: `ontocore-edit = "0.19"`. Full API: [Rust API — semantic transactions](../ontocore/rust-api.md#semantic-transactions-ontocore-edit-v019) · [docs.rs/ontocore-edit](https://docs.rs/ontocore-edit).
+
 ## Error handling
 
 ```bash

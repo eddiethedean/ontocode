@@ -11,7 +11,7 @@
 >
 > See [Platform roadmap § OntoCode 1.0](../roadmap.md#ontocode-10-modern-protege-replacement) and [PLAN.md](PLAN.md) §4.
 >
-> **Status column:** current release (**v0.18.0**). Refresh this matrix when capabilities change — do not leave a stale “v0.4” snapshot.
+> **Status column:** frozen at **v0.18.0** — **not current** for v0.19+ adoption decisions. Use [What ships today](../SHIPPED.md), [Known limitations](../known-limitations.md), and [Protégé vs OntoCode](../guides/protege-decision.md) instead.
 >
 > **Dependencies:** [DEPENDENCY_MATRIX.md](DEPENDENCY_MATRIX.md)
 

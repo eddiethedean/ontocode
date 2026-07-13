@@ -72,63 +72,15 @@ Index and explore OWL/RDF/OBO, run queries, refactors, and reasoning — in VS C
 
     `cargo install ontocore-cli`, embed `ontocore` / `ontocore-*` crates, validate and classify in CI.
 
-    [:octicons-arrow-right-24: OntoCore docs](ontocore/index.md)
+    [:octicons-arrow-right-24: Getting started (CLI)](getting-started.md)
 
--   :material-brain:{ .lg .middle } **Reasoner**
-
-    ---
-
-    Run EL/RL/RDFS classification, toggle inferred hierarchy, and open EL explanations.
-
-    [:octicons-arrow-right-24: Reasoner guide](guides/reasoner.md)
-
--   :material-pencil-outline:{ .lg .middle } **Authoring**
+-   :material-clipboard-check-outline:{ .lg .middle } **Evaluate adoption**
 
     ---
 
-    Edit labels, parents, and entities in `.ttl` files — in VS Code or via patch JSON.
+    Capability matrix, Protégé comparison, production readiness, and known limits.
 
-    [:octicons-arrow-right-24: Authoring guide](authoring.md)
-
--   :material-database-search:{ .lg .middle } **Query Workbench**
-
-    ---
-
-    Run SQL and SPARQL against your indexed workspace from VS Code.
-
-    [:octicons-arrow-right-24: Query Workbench](ontocode/query-workbench.md)
-
--   :material-code-braces:{ .lg .middle } **Manchester editor**
-
-    ---
-
-    Edit complex SubClassOf and EquivalentClasses axioms in Manchester syntax.
-
-    [:octicons-arrow-right-24: Manchester guide](ontocode/manchester-editor.md)
-
--   :material-graph-outline:{ .lg .middle } **Graph visualization**
-
-    ---
-
-    Open class, property, import, and neighborhood graphs from the explorer.
-
-    [:octicons-arrow-right-24: Graph guide](ontocode/graph-view.md)
-
--   :material-file-document-outline:{ .lg .middle } **OBO workflows**
-
-    ---
-
-    Index `.obo` files, browse `obo_id` in the explorer, and run ROBOT from the CLI.
-
-    [:octicons-arrow-right-24: OBO workflow guide](guides/obo-workflow.md)
-
--   :material-help-circle:{ .lg .middle } **Questions?**
-
-    ---
-
-    FAQ, troubleshooting, support, workspace limits, and security.
-
-    [:octicons-arrow-right-24: Troubleshooting](troubleshooting.md)
+    [:octicons-arrow-right-24: What ships today](SHIPPED.md)
 
 </div>
 
@@ -170,21 +122,11 @@ Full matrix: **[What ships today](SHIPPED.md)** (canonical — do not rely on th
 | 10-minute tutorial | [First success](guides/first-success.md) |
 | Honest limits | [Known limitations](known-limitations.md) |
 | Capability matrix | [SHIPPED.md](SHIPPED.md) |
-| Product overview | [architecture.md](architecture.md) |
-| Plugin authoring | [guides/plugins.md](guides/plugins.md) |
-| Engineering specs (GitHub) | [engineering.md](engineering.md) |
-
-| Topic | Link |
-|-------|------|
-| **Vision** | [vision.md](vision.md) |
-| **Architecture** | [architecture.md](architecture.md) |
-| **Roadmap** | [roadmap.md](roadmap.md) |
-| **OntoCore** | [ontocore/index.md](ontocore/index.md) |
-| **OntoCode extension** | [ontocode/vscode-extension.md](ontocode/vscode-extension.md) |
+| Protégé comparison | [Protégé vs OntoCode](guides/protege-decision.md) |
+| CLI / CI | [Getting started](getting-started.md) · [CI integration](ci-integration.md) |
+| Embed in Rust | [Rust library guide](guides/rust-library.md) |
+| Roadmap (pick the right doc) | [Roadmap hub](roadmap-hub.md) |
 | Feature tour | [ontocode/feature-tour.md](ontocode/feature-tour.md) |
-| Migrating from Protégé | [guides/protege-migration.md](guides/protege-migration.md) |
-| Catalog SQL (subset) | [sql-reference.md](sql-reference.md) |
-| SPARQL | [sparql-reference.md](sparql-reference.md) |
 | Troubleshooting | [troubleshooting.md](troubleshooting.md) |
 | Contributing | [contributing.md](contributing.md) |
 

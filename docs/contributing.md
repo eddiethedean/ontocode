@@ -6,6 +6,17 @@ Thank you for contributing. This repository contains:
 - **OntoCode** — VS Code extension under `extension/`
 - **User guides** — install, SQL, and LSP API under `docs/`
 
+### Docs-only contributors (~15 minutes)
+
+**No Rust or Node required** for documentation-only PRs:
+
+1. Edit pages under `docs/` (this site). Update root `README.md`, `CONTRIBUTING.md`, or `extension/README.md` when install or marketplace text changes.
+2. Run `./scripts/check-doc-versions.sh`.
+3. Optional preview: `pip install -r docs/requirements.txt && ./scripts/serve-docs.sh`
+4. Open a focused PR.
+
+Platform content: edit [vision.md](vision.md), [roadmap.md](roadmap.md), and [architecture.md](architecture.md) here first; keep [GitHub root mirrors](https://github.com/eddiethedean/ontocode/blob/main/CONTRIBUTING.md#canonical-documentation-paths) in sync when those change.
+
 ### Canonical documentation paths
 
 | Topic | GitHub (root) | Read the Docs (`docs/`) |
@@ -19,7 +30,7 @@ Thank you for contributing. This repository contains:
 | Engineering ADRs | — | [design/adr/README.md](design/adr/README.md) |
 | Documentation map | — | [documentation-index.md](documentation-index.md) |
 
-Root `VISION.md`, `ARCHITECTURE.md`, and `ROADMAP.md` are mirrored under `docs/` for Read the Docs. **Edit both** when changing platform-facing content, or run `./scripts/check-doc-versions.sh` to catch drift.
+Root `VISION.md`, `ARCHITECTURE.md`, and `ROADMAP.md` are mirrored under `docs/` for Read the Docs. **Prefer editing this `docs/` copy first**, then update root mirrors when platform-facing content changes, or run `./scripts/check-doc-versions.sh` to catch drift.
 
 - **Specs** — product and architecture docs under `docs/design/` ([DEPENDENCY_MATRIX.md](design/DEPENDENCY_MATRIX.md) for external crates)
 

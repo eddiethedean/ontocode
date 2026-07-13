@@ -2,6 +2,12 @@
 
 Use this page to decide **when OntoCode fits**, **when to keep Protégé**, and **when to run both**. It reflects **v0.19.0** — see [What ships today](../SHIPPED.md). A [first-week migration guide](protege-migration.md) ships today; extended round-trip playbooks are planned for **v1.0**.
 
+!!! note "Non-goals today (v0.19)"
+    - **WebProtégé-style collaboration** — out of scope until post-1.0
+    - **In-place OWL/XML or RDF/XML write-back** — browse/query only; edit Turtle/OBO or use Protégé
+    - **Stable semver-guaranteed third-party plugin marketplace API** — plugin host MVP shipped; ecosystem hardening is v1.0
+    - **Language SDKs** (Python/TypeScript ontology clients) — embed via Rust `ontocore`, CLI, or LSP instead
+
 ## Quick decision
 
 | Your situation | Recommendation |

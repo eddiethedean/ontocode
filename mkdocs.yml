@@ -107,15 +107,10 @@ markdown_extensions:
 nav:
   - Home: index.md
   - Get started:
-      - Start here: start.md
       - "First success (~10 min)": guides/first-success.md
       - Install VS Code: vscode-install.md
-      - Getting started (CLI): getting-started.md
-      - Which artifact?: guides/which-artifact.md
-      - Documentation index: documentation-index.md
-      - What ships today: SHIPPED.md
+      - Getting started (CLI / CI): getting-started.md
       - Known limitations: known-limitations.md
-      - Migrating from Protégé: guides/protege-migration.md
   - Use OntoCode:
       - Feature tour: ontocode/feature-tour.md
       - Overview: ontocode/vscode-extension.md
@@ -159,6 +154,8 @@ nav:
       - "Catalog SQL (subset)": sql-reference.md
       - SPARQL: sparql-reference.md
       - Patch JSON: patch-reference.md
+      - LSP hello world: guides/lsp-hello-world.md
+      - OntoCore LSP overview: ontocore/lsp.md
       - LSP API: lsp-api.md
       - LSP JSON Schema: lsp-protocol.schema.json
       - Webview protocol: webview-protocol.md
@@ -167,9 +164,8 @@ nav:
       - Supported formats: supported-formats.md
       - Automation and stability: automation-stability.md
       - OntoCore SQL views: ontocore/sql-views.md
-      - OntoCore LSP overview: ontocore/lsp.md
-      - LSP hello world: guides/lsp-hello-world.md
   - Evaluate:
+      - What ships today: SHIPPED.md
       - Vision: vision.md
       - Architecture: architecture.md
       - Roadmap hub: roadmap-hub.md
@@ -186,6 +182,10 @@ nav:
       - LGPL compliance: guides/lgpl-compliance.md
       - Security: security.md
   - Help:
+      - Start here: start.md
+      - Which artifact?: guides/which-artifact.md
+      - Documentation index: documentation-index.md
+      - Migrating from Protégé: guides/protege-migration.md
       - FAQ: faq.md
       - Glossary: glossary.md
       - Ontology concepts: concepts.md
@@ -212,8 +212,6 @@ nav:
       - Releasing: releasing.md
       - Marketplace publish: marketplace-publish.md
       - Internals: internals.md
-      - Protégé parity program: protege-parity/README.md
-      - Protégé parity (historical v0.18 checklist): design/PROTEGE_PARITY.md
       - Licenses: design/LICENSES.md
       - Engineering docs (GitHub): engineering.md
 

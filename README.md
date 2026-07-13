@@ -86,7 +86,7 @@ cargo run -- validate fixtures
         └─────────────┘              └──────────────────┘
 ```
 
-Platform docs: [Vision](https://ontocode-vs.readthedocs.io/en/latest/vision/) · [Architecture](ARCHITECTURE.md) · [Roadmap](ROADMAP.md) · [Protégé parity](https://ontocode-vs.readthedocs.io/en/latest/design/PROTEGE_PARITY/)
+Platform docs: [Vision](https://ontocode-vs.readthedocs.io/en/latest/vision/) · [Architecture](ARCHITECTURE.md) · [Roadmap hub](https://ontocode-vs.readthedocs.io/en/latest/roadmap-hub/) · [Protégé vs OntoCode](https://ontocode-vs.readthedocs.io/en/latest/guides/protege-decision/)
 
 **v0.19.0** adds the semantic transaction apply path (`ontocore-edit`) and Protégé parity program baseline. See [SHIPPED](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/), [v0.19 migration](docs/migration/v0.19.md), and [What's new in v0.18](docs/migration/v0.18.md).
 

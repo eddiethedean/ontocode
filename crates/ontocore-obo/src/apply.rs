@@ -102,9 +102,12 @@ fn validate_patch(patch: &OboPatchOp) -> Result<()> {
             reject_line_breaks(value, "synonym")?;
             reject_line_breaks(scope, "synonym scope")?;
         }
-        OboPatchOp::RemoveSynonym { term_id, value } => {
+        OboPatchOp::RemoveSynonym { term_id, value, scope } => {
             reject_obo_token(term_id, "term_id")?;
             reject_line_breaks(value, "synonym")?;
+            if let Some(scope) = scope {
+                reject_line_breaks(scope, "synonym scope")?;
+            }
         }
         OboPatchOp::AddDef { term_id, value } => {
             reject_obo_token(term_id, "term_id")?;
@@ -147,7 +150,9 @@ fn apply_one(text: &mut String, patch: &OboPatchOp) -> Result<()> {
             let line = format!("synonym: \"{escaped}\" {scope} []");
             add_line_in_term(text, term_id, &line)
         }
-        OboPatchOp::RemoveSynonym { term_id, value } => remove_synonym_line(text, term_id, value),
+        OboPatchOp::RemoveSynonym { term_id, value, scope } => {
+            remove_synonym_line(text, term_id, value, scope.as_deref())
+        }
         OboPatchOp::AddDef { term_id, value } => {
             let escaped = value.replace('"', "\\\"");
             let line = format!("def: \"{escaped}\" []");
@@ -177,9 +182,31 @@ fn apply_one(text: &mut String, patch: &OboPatchOp) -> Result<()> {
 fn term_block_range(text: &str, term_id: &str) -> Result<(usize, usize)> {
     let id_line_start = find_term_id_line_start(text, term_id)
         .ok_or_else(|| OboError::TermNotFound(term_id.to_string()))?;
-    let block_start = text[..id_line_start].rfind("[Term]").unwrap_or(id_line_start);
+    let block_start = preceding_stanza_header(text, id_line_start).unwrap_or(id_line_start);
     let block_end = next_stanza_offset(text, id_line_start).unwrap_or(text.len());
     Ok((block_start, block_end))
+}
+
+/// Byte offset of the stanza header (`[Term]`, `[Typedef]`, `[Instance]`, …) that owns `before`.
+fn preceding_stanza_header(text: &str, before: usize) -> Option<usize> {
+    let mut last = None;
+    let mut offset = 0usize;
+    for line in text[..before].split_inclusive('\n') {
+        if is_obo_stanza_header(line.trim_end_matches(['\n', '\r'])) {
+            last = Some(offset);
+        }
+        offset += line.len();
+    }
+    last
+}
+
+/// Dominant newline sequence in `text` (`\r\n` if present, else `\n`).
+fn detect_newline(text: &str) -> &'static str {
+    if text.contains("\r\n") {
+        "\r\n"
+    } else {
+        "\n"
+    }
 }
 
 /// Byte offset of the next OBO stanza header (`[Term]`, `[Typedef]`, `[Instance]`, …)
@@ -212,7 +239,7 @@ fn is_obo_stanza_header(line: &str) -> bool {
 fn find_term_id_line_start(text: &str, term_id: &str) -> Option<usize> {
     let mut offset = 0usize;
     for line in text.split_inclusive('\n') {
-        let line_body = line.trim_end_matches('\n');
+        let line_body = line.trim_end_matches(['\n', '\r']);
         if obo_id_line_matches(line_body, term_id) {
             return Some(offset);
         }
@@ -236,6 +263,7 @@ fn set_single_line(
     value: &str,
     _allow_multiple: bool,
 ) -> Result<()> {
+    let nl = detect_newline(text);
     let line = format!("{prefix} {value}");
     let (start, end) = term_block_range(text, term_id)?;
     let block = &text[start..end];
@@ -248,7 +276,7 @@ fn set_single_line(
             } else {
                 out.push_str(l);
             }
-            out.push('\n');
+            out.push_str(nl);
         }
         text.replace_range(start..end, &out);
         Ok(())
@@ -267,14 +295,15 @@ fn set_or_add_line(text: &mut String, term_id: &str, prefix: &str, full_line: &s
 }
 
 fn add_line_in_term(text: &mut String, term_id: &str, line: &str) -> Result<()> {
+    let nl = detect_newline(text);
     let (start, end) = term_block_range(text, term_id)?;
     let block = &text[start..end];
-    let mut new_block = block.trim_end().to_string();
-    if !new_block.ends_with('\n') {
-        new_block.push('\n');
+    let mut new_block = block.trim_end_matches(['\n', '\r']).to_string();
+    if !new_block.is_empty() {
+        new_block.push_str(nl);
     }
     new_block.push_str(line);
-    new_block.push('\n');
+    new_block.push_str(nl);
     text.replace_range(start..end, &new_block);
     Ok(())
 }
@@ -285,6 +314,7 @@ fn remove_lines_where(
     should_remove: impl Fn(&str) -> bool,
     not_found: Option<&str>,
 ) -> Result<()> {
+    let nl = detect_newline(text);
     let (start, end) = term_block_range(text, term_id)?;
     let block = &text[start..end];
     let lines: Vec<&str> = block.lines().collect();
@@ -294,11 +324,10 @@ fn remove_lines_where(
             return Err(OboError::PatchInvalid(message.to_string()));
         }
     }
-    let filtered: String =
-        lines.into_iter().filter(|l| !should_remove(l)).collect::<Vec<_>>().join("\n");
-    let mut new_block = filtered;
-    if !new_block.ends_with('\n') {
-        new_block.push('\n');
+    let kept: Vec<&str> = lines.into_iter().filter(|l| !should_remove(l)).collect();
+    let mut new_block = kept.join(nl);
+    if !new_block.is_empty() {
+        new_block.push_str(nl);
     }
     text.replace_range(start..end, &new_block);
     Ok(())
@@ -320,10 +349,75 @@ fn remove_xref_line(text: &mut String, term_id: &str, xref: &str) -> Result<()> 
     remove_lines_where(text, term_id, move |l| is_xref_line(l, &xref), Some(&not_found))
 }
 
-fn remove_synonym_line(text: &mut String, term_id: &str, value: &str) -> Result<()> {
+fn remove_synonym_line(
+    text: &mut String,
+    term_id: &str,
+    value: &str,
+    scope: Option<&str>,
+) -> Result<()> {
+    let (start, end) = term_block_range(text, term_id)?;
+    let block = &text[start..end];
+    let matches: Vec<&str> = block
+        .lines()
+        .filter(|l| is_synonym_match_line(l, value, scope))
+        .collect();
+    if matches.is_empty() {
+        return Err(OboError::PatchInvalid(format!("synonym not found: {value}")));
+    }
+    if scope.is_none() && matches.len() > 1 {
+        return Err(OboError::PatchInvalid(format!(
+            "multiple synonyms with text {value:?}; specify scope to disambiguate"
+        )));
+    }
     let value = value.to_string();
+    let scope = scope.map(str::to_string);
     let not_found = format!("synonym not found: {value}");
-    remove_lines_where(text, term_id, move |l| is_synonym_value_line(l, &value), Some(&not_found))
+    remove_lines_where(
+        text,
+        term_id,
+        move |l| is_synonym_match_line(l, &value, scope.as_deref()),
+        Some(&not_found),
+    )
+}
+
+fn is_synonym_match_line(line: &str, value: &str, scope: Option<&str>) -> bool {
+    let Some((v, line_scope)) = parse_synonym_value_and_scope(line) else {
+        return false;
+    };
+    if v != value {
+        return false;
+    }
+    match scope {
+        Some(want) => line_scope.eq_ignore_ascii_case(want),
+        None => true,
+    }
+}
+
+fn parse_synonym_value_and_scope(line: &str) -> Option<(String, String)> {
+    let value = parse_quoted_value_after_prefix(line, "synonym:")?;
+    let trimmed = line.trim_start();
+    let after_prefix = trimmed.strip_prefix("synonym:")?.trim_start();
+    if !after_prefix.starts_with('"') {
+        return None;
+    }
+    // Walk past the quoted value (same unescape rules as parse_quoted_value_after_prefix).
+    let mut rest = &after_prefix[1..];
+    let mut chars = rest.chars();
+    while let Some(c) = chars.next() {
+        if c == '\\' {
+            let _ = chars.next()?;
+        } else if c == '"' {
+            rest = chars.as_str().trim_start();
+            break;
+        }
+    }
+    let scope_end =
+        rest.find(|c: char| c.is_whitespace() || c == '[' || c == '{').unwrap_or(rest.len());
+    let scope = rest[..scope_end].trim();
+    if scope.is_empty() {
+        return None;
+    }
+    Some((value, scope.to_string()))
 }
 
 fn obo_field_token(rest: &str) -> Option<&str> {
@@ -350,10 +444,6 @@ fn is_xref_line(line: &str, xref: &str) -> bool {
         return false;
     }
     obo_field_token(trimmed["xref:".len()..].trim_start()) == Some(xref)
-}
-
-fn is_synonym_value_line(line: &str, value: &str) -> bool {
-    parse_quoted_value_after_prefix(line, "synonym:").as_deref() == Some(value)
 }
 
 fn parse_quoted_value_after_prefix(line: &str, prefix: &str) -> Option<String> {
@@ -741,6 +831,95 @@ name: B
         assert!(!tmp.exists());
         let bak = tmp.with_extension("bak");
         assert!(!bak.exists(), "backup must not be left behind");
+    }
+
+    #[test]
+    fn set_name_on_typedef_does_not_rewrite_preceding_term() {
+        const MIXED: &str = r#"format-version: 1.2
+ontology: ex
+
+[Term]
+id: EX:001
+name: A
+
+[Typedef]
+id: EX:rel
+name: related
+"#;
+
+        let result = apply_patches_to_text(
+            MIXED,
+            &[OboPatchOp::SetName { term_id: "EX:rel".into(), value: "renamed".into() }],
+            true,
+        )
+        .expect("set typedef name");
+        let text = result.preview_text.expect("preview");
+        let (term_start, term_end) = term_block_range(&text, "EX:001").expect("term");
+        let (td_start, td_end) = term_block_range(&text, "EX:rel").expect("typedef");
+        assert!(text[term_start..term_end].contains("name: A"));
+        assert!(!text[term_start..term_end].contains("renamed"));
+        assert!(text[td_start..td_end].contains("name: renamed"));
+        assert!(!text[td_start..td_end].contains("name: related"));
+    }
+
+    #[test]
+    fn remove_synonym_requires_scope_when_text_is_ambiguous() {
+        const MULTI: &str = r#"format-version: 1.2
+ontology: ex
+
+[Term]
+id: EX:1
+name: t
+synonym: "foo" EXACT []
+synonym: "foo" BROAD []
+"#;
+
+        let ambiguous = apply_patches_to_text(
+            MULTI,
+            &[OboPatchOp::RemoveSynonym {
+                term_id: "EX:1".into(),
+                value: "foo".into(),
+                scope: None,
+            }],
+            true,
+        )
+        .expect("patch result");
+        assert!(!ambiguous.applied);
+        assert!(ambiguous.diagnostics.iter().any(|d| d.message.contains("multiple synonyms")));
+
+        let scoped = apply_patches_to_text(
+            MULTI,
+            &[OboPatchOp::RemoveSynonym {
+                term_id: "EX:1".into(),
+                value: "foo".into(),
+                scope: Some("EXACT".into()),
+            }],
+            true,
+        )
+        .expect("scoped remove");
+        let text = scoped.preview_text.expect("preview");
+        assert!(!text.contains(r#"synonym: "foo" EXACT"#));
+        assert!(text.contains(r#"synonym: "foo" BROAD"#));
+    }
+
+    #[test]
+    fn set_name_preserves_crlf_line_endings() {
+        let crlf = SAMPLE.replace('\n', "\r\n");
+        let result = apply_patches_to_text(
+            &crlf,
+            &[OboPatchOp::SetName { term_id: "EX:001".into(), value: "renamed".into() }],
+            true,
+        )
+        .expect("patch");
+        let text = result.preview_text.expect("preview");
+        assert!(text.contains("name: renamed\r\n"));
+        assert!(text.contains("\r\n"), "must keep CRLF");
+        assert!(!text.replace("\r\n", "").contains('\r'));
+        // Rewritten region should not introduce bare LF joins.
+        assert!(
+            !text.contains("renamed\nname:") && text.contains("renamed\r\n"),
+            "name line must end with CRLF"
+        );
     }
 
     #[test]

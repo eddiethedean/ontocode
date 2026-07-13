@@ -6,7 +6,14 @@ use serde::{Deserialize, Serialize};
 pub enum OboPatchOp {
     SetName { term_id: String, value: String },
     AddSynonym { term_id: String, value: String, scope: String },
-    RemoveSynonym { term_id: String, value: String },
+    RemoveSynonym {
+        term_id: String,
+        value: String,
+        /// When set, only a synonym with this scope is removed.
+        /// When omitted and multiple scopes share the same text, apply fails.
+        #[serde(default, skip_serializing_if = "Option::is_none")]
+        scope: Option<String>,
+    },
     AddDef { term_id: String, value: String },
     RemoveDef { term_id: String },
     AddXref { term_id: String, xref: String },

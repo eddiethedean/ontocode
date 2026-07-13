@@ -51,6 +51,6 @@ flowchart TB
 
 ## Current release
 
-**v0.19.0** — see [Migration v0.18.1 → v0.19.0](migration/v0.19.0.md), [v0.18 overview](migration/v0.18.md), and [Changelog](changelog.md).
+**v0.19.0** — see [Migration v0.18.2 → v0.19.0](migration/v0.19.md), [v0.18 overview](migration/v0.18.md), and [Changelog](changelog.md).
 
 > **Design docs under `docs/platform/`, `docs/ui/`, and Protégé reverse-engineering are not a shipped feature list.** Cross-check [SHIPPED.md](SHIPPED.md) before treating a design page as product capability.

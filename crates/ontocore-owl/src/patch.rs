@@ -734,8 +734,9 @@ fn add_complex_axiom(
     predicate: &str,
     namespaces: &BTreeMap<String, String>,
 ) -> Result<()> {
-    let parsed = parse_class_expression(manchester, namespaces)?;
-    let triple = class_expression_to_turtle_fragment(&parsed.expression, predicate, namespaces)?;
+    let ns = crate::span::namespaces_for_text(text, namespaces);
+    let parsed = parse_class_expression(manchester, &ns)?;
+    let triple = class_expression_to_turtle_fragment(&parsed.expression, predicate, &ns)?;
     insert_multiline_into_entity_block(text, entity_iri, &triple, namespaces)
 }
 
@@ -746,9 +747,10 @@ fn remove_complex_axiom(
     predicate: &str,
     namespaces: &BTreeMap<String, String>,
 ) -> Result<()> {
-    let parsed = parse_class_expression(manchester, namespaces)?;
+    let ns = crate::span::namespaces_for_text(text, namespaces);
+    let parsed = parse_class_expression(manchester, &ns)?;
     let object_value =
-        crate::manchester::class_expression_to_turtle_value(&parsed.expression, namespaces, 0)?;
+        crate::manchester::class_expression_to_turtle_value(&parsed.expression, &ns, 0)?;
     remove_predicate_object(text, entity_iri, predicate, &object_value, namespaces)
 }
 
@@ -2707,5 +2709,34 @@ ex:Bar a owl:Class .
         );
         let preview = result.preview_text.expect("preview");
         assert!(preview.contains("owl:propertyChainAxiom"));
+    }
+
+    #[test]
+    fn complex_subclass_uses_document_prefixes_when_caller_map_empty() {
+        let ttl = r#"@prefix ex: <http://example.org/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+ex:A a owl:Class .
+ex:B a owl:Class .
+ex:p a owl:ObjectProperty .
+"#;
+        let empty = BTreeMap::new();
+        let result = apply_patches_to_text(
+            ttl,
+            &[PatchOp::AddComplexSubClassOf {
+                entity_iri: "http://example.org/A".into(),
+                manchester: "ex:p some ex:B".into(),
+            }],
+            true,
+            &empty,
+        )
+        .expect("patch");
+        assert!(
+            result.diagnostics.is_empty(),
+            "document @prefix must resolve Manchester CURIEs: {:?}",
+            result.diagnostics
+        );
+        let preview = result.preview_text.expect("preview");
+        assert!(preview.contains("owl:someValuesFrom") || preview.contains("ex:B"));
     }
 }

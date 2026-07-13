@@ -257,6 +257,10 @@ fn resolve_term_iri(term: &str, namespaces: &BTreeMap<String, String>) -> Result
         if let Some(ns) = namespaces.get(prefix) {
             return Ok(format!("{ns}{local}"));
         }
+        // OWL Thing/Nothing are builtin defaults (e.g. unqualified cardinality fillers).
+        if prefix == "owl" && (local == "Thing" || local == "Nothing") {
+            return Ok(format!("http://www.w3.org/2002/07/owl#{local}"));
+        }
         return Err(OwlError::ManchesterInvalid(format!("unknown prefix '{prefix}' in '{term}'")));
     }
     Err(OwlError::ManchesterInvalid(format!(
@@ -430,7 +434,8 @@ impl ManchesterParser {
             let filler = if Self::starts_class_term(self.peek()) {
                 self.parse_primary()?
             } else {
-                ManchesterAst::Class("owl:Thing".to_string())
+                // Absolute IRI so unqualified cardinality works without a declared owl: prefix.
+                ManchesterAst::Class("http://www.w3.org/2002/07/owl#Thing".to_string())
             };
             return Ok(match kind {
                 Token::Keyword(Keyword::Min) => {
@@ -473,7 +478,8 @@ impl ManchesterParser {
         } else if Self::starts_class_term(self.peek()) {
             self.parse_primary()?
         } else {
-            ManchesterAst::Class("owl:Thing".to_string())
+            // Absolute IRI so unqualified cardinality works without a declared owl: prefix.
+            ManchesterAst::Class("http://www.w3.org/2002/07/owl#Thing".to_string())
         };
         Ok(match kind {
             Token::Keyword(Keyword::Min) => {
@@ -717,6 +723,18 @@ mod tests {
         match &out.expression {
             ClassExpression::ObjectMinCardinality { bce, .. } => {
                 assert!(is_owl_thing(bce));
+            }
+            other => panic!("expected min cardinality, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn unqualified_cardinality_without_owl_prefix() {
+        let ns = BTreeMap::from([("ex".to_string(), "http://example.org/".to_string())]);
+        let out = parse_class_expression("ex:p min 1", &ns).expect("parse without owl prefix");
+        match &out.expression {
+            ClassExpression::ObjectMinCardinality { bce, .. } => {
+                assert!(is_owl_thing(bce), "default filler must be owl:Thing");
             }
             other => panic!("expected min cardinality, got {other:?}"),
         }

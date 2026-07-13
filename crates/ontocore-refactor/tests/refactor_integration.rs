@@ -676,3 +676,28 @@ fn move_entity_across_multi_root_workspace() {
     let source = std::fs::read_to_string(root_a.join("people.ttl")).unwrap();
     assert!(!source.contains("ex:Person"));
 }
+
+#[test]
+fn move_entity_to_new_file_includes_prefix_declarations() {
+    let tmp = TempDir::new().unwrap();
+    let ws = tmp.path();
+    std::fs::create_dir_all(ws).unwrap();
+    std::fs::copy(fixture_dir().join("people.ttl"), ws.join("people.ttl")).unwrap();
+    let catalog = build_catalog(ws);
+    let target = ws.join("moved.ttl");
+    let plan = preview_move_entity(
+        &catalog,
+        "http://example.org/org#Person",
+        &target,
+        &empty_overrides(),
+        &workspace_roots(ws),
+    )
+    .expect("plan");
+    apply_refactor_plan(&plan, false, ws).expect("apply");
+    let moved = std::fs::read_to_string(&target).expect("target");
+    assert!(
+        moved.lines().any(|l| l.trim_start().to_ascii_lowercase().starts_with("@prefix")),
+        "new target must include @prefix lines: {moved}"
+    );
+    assert!(moved.contains("ex:Person"));
+}

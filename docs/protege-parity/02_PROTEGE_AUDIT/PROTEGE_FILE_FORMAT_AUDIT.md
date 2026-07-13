@@ -140,7 +140,7 @@ A required format is considered parity-complete only when:
 # Related Documents
 
 -   README.md
--   CURRENT_REPOSITORY_AUDIT.md
+-   ONTOCODE_CURRENT_PROTEGE_PARITY_AUDIT.md
 -   CURRENT_FEATURE_MATRIX.md
 -   IMPLEMENTATION_EVIDENCE.md
 -   FORMAT_SUPPORT.md

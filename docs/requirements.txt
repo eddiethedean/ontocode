@@ -1,5 +1,5 @@
 mkdocs>=1.6,<2
-# Pin below 9.7.2 to avoid stderr MkDocs 2.0 banner on every build (see mkdocs-material #8567)
+# Pin below 9.7.2 to reduce MkDocs 2.0 stderr noise; use ./scripts/build-docs.sh (sets DISABLE_MKDOCS_2_WARNING=true).
 mkdocs-material>=9.5,<9.7.2
 mkdocs-git-revision-date-localized-plugin>=1.5,<2
 mkdocs-minify-plugin>=0.8,<1

@@ -25,7 +25,7 @@ Design documents, ADRs, and backlogs live under [design/](design/README.md). **P
 ### Docs-only
 
 1. [Contributing guide](contributing.md) — mirror rules for `VISION.md` / `ARCHITECTURE.md` / `ROADMAP.md`
-2. `./scripts/check-doc-versions.sh` and `mkdocs build --strict`
+2. `./scripts/check-doc-versions.sh` and `./scripts/build-docs.sh`
 3. [Documentation index](documentation-index.md) — find the right page to edit
 
 ### LSP / custom editor integrators

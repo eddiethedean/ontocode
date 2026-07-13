@@ -1,5 +1,7 @@
 # MkDocs site — built on Read the Docs and locally via:
-#   pip install -r docs/requirements.txt && mkdocs serve
+#   pip install -r docs/requirements.txt && ./scripts/build-docs.sh
+#   ./scripts/serve-docs.sh   # local preview
+# CI / RTD set DISABLE_MKDOCS_2_WARNING=true (see scripts/build-docs.sh).
 
 site_name: OntoCode
 site_description: Ontology-as-code for Git and VS Code — OntoCore engine and OntoCode extension docs
@@ -105,15 +107,10 @@ markdown_extensions:
 nav:
   - Home: index.md
   - Get started:
-      - Start here: start.md
       - "First success (~10 min)": guides/first-success.md
       - Install VS Code: vscode-install.md
-      - Getting started (CLI): getting-started.md
-      - What ships today: SHIPPED.md
+      - Getting started (CLI / CI): getting-started.md
       - Known limitations: known-limitations.md
-      - Glossary: glossary.md
-      - Ontology concepts: concepts.md
-      - Migrating from Protégé: guides/protege-migration.md
   - Use OntoCode:
       - Feature tour: ontocode/feature-tour.md
       - Overview: ontocode/vscode-extension.md
@@ -157,6 +154,8 @@ nav:
       - "Catalog SQL (subset)": sql-reference.md
       - SPARQL: sparql-reference.md
       - Patch JSON: patch-reference.md
+      - LSP hello world: guides/lsp-hello-world.md
+      - OntoCore LSP overview: ontocore/lsp.md
       - LSP API: lsp-api.md
       - LSP JSON Schema: lsp-protocol.schema.json
       - Webview protocol: webview-protocol.md
@@ -165,19 +164,11 @@ nav:
       - Supported formats: supported-formats.md
       - Automation and stability: automation-stability.md
       - OntoCore SQL views: ontocore/sql-views.md
-      - OntoCore LSP overview: ontocore/lsp.md
-      - LSP hello world: guides/lsp-hello-world.md
   - Evaluate:
+      - What ships today: SHIPPED.md
       - Vision: vision.md
       - Architecture: architecture.md
       - Roadmap hub: roadmap-hub.md
-      - Platform roadmap: roadmap.md
-      - Protégé parity program:
-          - Overview: protege-parity/README.md
-          - Pre-1.0 phases: protege-parity/07_BACKLOG/PRE_1_0_PHASES.md
-          - Execution order: protege-parity/05_IMPLEMENTATION/EXECUTION_ORDER.md
-          - Parity status: protege-parity/03_PARITY/PARITY_STATUS.md
-          - Release gate: protege-parity/03_PARITY/PARITY_RELEASE_GATE.md
       - API stability (pre-1.0): guides/api-stability.md
       - Enterprise evaluation: guides/enterprise-eval.md
       - Protégé vs OntoCode: guides/protege-decision.md
@@ -191,12 +182,19 @@ nav:
       - LGPL compliance: guides/lgpl-compliance.md
       - Security: security.md
   - Help:
+      - Start here: start.md
+      - Which artifact?: guides/which-artifact.md
+      - Documentation index: documentation-index.md
+      - Migrating from Protégé: guides/protege-migration.md
       - FAQ: faq.md
+      - Glossary: glossary.md
+      - Ontology concepts: concepts.md
       - Troubleshooting: troubleshooting.md
       - Support and contact: support.md
       - Changelog: changelog.md
       - Migrations:
           - Migration index: migration/README.md
+          - v0.18.2 → v0.19.0: migration/v0.19.md
           - v0.18.1 → v0.18.2: migration/v0.18.2.md
           - v0.18.0 → v0.18.1: migration/v0.18.1.md
           - v0.17 → v0.18: migration/v0.18.md
@@ -209,14 +207,12 @@ nav:
   - Contribute:
       - Guide: contributing.md
       - Extension development: guides/extension-development.md
+      - Plugin authoring: guides/plugins.md
       - Debugging: debugging.md
       - Releasing: releasing.md
       - Marketplace publish: marketplace-publish.md
       - Internals: internals.md
-      - Protégé parity (historical v0.18 checklist): design/PROTEGE_PARITY.md
       - Licenses: design/LICENSES.md
-      - Plugin model: ontocore/plugin-model.md
-      - Engineering ADRs: design/adr/0001-use-rust-for-ontocore.md
       - Engineering docs (GitHub): engineering.md
 
 extra:

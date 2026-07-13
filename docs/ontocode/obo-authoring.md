@@ -1,12 +1,12 @@
-# OBO authoring (v0.12+)
+# OBO authoring (v0.13+)
 
-Edit **OBO Format 1.4** (`.obo`) files in VS Code via the Entity Inspector and `ontocore patch`. Requires OntoCode **v0.12.0+** or `ontocore-cli` **0.12.0+**.
+Edit **OBO Format 1.4** (`.obo`) files in VS Code via the Entity Inspector and `ontocore patch`. Requires OntoCode **v0.13.0+** or `ontocore-cli` **0.13.0+**.
 
 **Related:** [OBO workflows](../guides/obo-workflow.md) · [Patch reference](../patch-reference.md) · [What ships today](../SHIPPED.md)
 
 ## Quick start
 
-1. Open a workspace with `.obo` files and **Trust** the folder.
+1. Open a workspace with `.obo` files (bundled LSP works in Restricted Mode).
 2. Select a term in the explorer or open a `.obo` file.
 3. Open the **Entity Inspector** — edit name, synonyms, definition, `is_a` parent, namespace, or deprecated flag.
 4. **Preview** then **Apply** (same flow as Turtle).

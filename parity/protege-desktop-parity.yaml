@@ -1,0 +1,279 @@
+schema_version: "0.1"
+baseline: "0.18.2"
+target: "1.0.0"
+frozen_at: "2026-07-13"
+requirements:
+  - id: PAR-LIFE-001
+    area: Lifecycle
+    title: Create/Open/Save ontology
+    priority: P0
+    status: PARTIAL
+    owner: null
+    source_files: []
+    test_ids: []
+    acceptance_criteria:
+      - docs/protege-parity/03_PARITY/PARITY_ACCEPTANCE_CRITERIA.md
+    github_issue: null
+    documentation:
+      - docs/protege-parity/03_PARITY/PARITY_MATRIX.md
+      - docs/protege-parity/03_PARITY/PARITY_TEST_PLAN.md
+    notes: Multi-format save incomplete
+  - id: PAR-LIFE-002
+    area: Lifecycle
+    title: Multi-ontology workspace
+    priority: P0
+    status: PARTIAL
+    owner: null
+    source_files: []
+    test_ids: []
+    acceptance_criteria: []
+    github_issue: https://github.com/eddiethedean/ontocode/issues/249
+    documentation:
+      - docs/protege-parity/ONTOCODE_CURRENT_PROTEGE_PARITY_AUDIT.md
+      - docs/protege-parity/03_PARITY/PARITY_TEST_PLAN.md
+    notes: Session restoration gap
+  - id: PAR-FMT-001
+    area: Formats
+    title: Turtle semantic round-trip
+    priority: P0
+    status: COMPLETE
+    owner: null
+    source_files:
+      - crates/ontocore-owl/src/patch.rs
+      - crates/ontocore-edit/src/transaction.rs
+      - crates/ontocore-edit/src/adapter.rs
+    test_ids:
+      - tests/owl_patch_oracles.rs
+      - tests/protege_roundtrip.rs
+      - crates/ontocore-edit/tests/transaction.rs
+    acceptance_criteria: []
+    github_issue: https://github.com/eddiethedean/ontocode/issues/247
+    documentation:
+      - docs/protege-parity/IMPLEMENTATION_EVIDENCE.md
+      - docs/patch-reference.md
+    notes: Turtle apply routed through ontocore-edit Transaction (v0.19)
+  - id: PAR-FMT-002
+    area: Formats
+    title: OBO semantic round-trip
+    priority: P0
+    status: PARTIAL
+    owner: null
+    source_files:
+      - crates/ontocore-obo/src/apply.rs
+      - crates/ontocore-obo/src/patch.rs
+      - crates/ontocore-edit/src/transaction.rs
+      - crates/ontocore-edit/src/adapter.rs
+    test_ids:
+      - tests/obo_patch_roundtrip.rs
+      - crates/ontocore-edit/tests/transaction.rs
+    acceptance_criteria: []
+    github_issue: https://github.com/eddiethedean/ontocode/issues/247
+    documentation:
+      - docs/protege-parity/IMPLEMENTATION_EVIDENCE.md
+    notes: OBO apply routed through ontocore-edit Transaction (v0.19)
+  - id: PAR-FMT-003
+    area: Formats
+    title: RDF/XML write-back
+    priority: P0
+    status: NOT_IMPLEMENTED
+    owner: null
+    source_files: []
+    test_ids: []
+    acceptance_criteria: []
+    github_issue: https://github.com/eddiethedean/ontocode/issues/247
+    documentation:
+      - docs/protege-parity/04_BLOCKERS/BLOCKER_01_FORMAT_INDEPENDENCE.md
+      - docs/protege-parity/02_PROTEGE_AUDIT/PROTEGE_FILE_FORMAT_AUDIT.md
+    notes: Target v0.21
+  - id: PAR-FMT-004
+    area: Formats
+    title: OWL/XML write-back
+    priority: P0
+    status: NOT_IMPLEMENTED
+    owner: null
+    source_files: []
+    test_ids: []
+    acceptance_criteria: []
+    github_issue: https://github.com/eddiethedean/ontocode/issues/247
+    documentation:
+      - docs/protege-parity/04_BLOCKERS/BLOCKER_01_FORMAT_INDEPENDENCE.md
+      - docs/protege-parity/02_PROTEGE_AUDIT/PROTEGE_FILE_FORMAT_AUDIT.md
+    notes: Target v0.21
+  - id: PAR-OWL-001
+    area: OWL2
+    title: Complete OWL2 authoring
+    priority: P0
+    status: PARTIAL
+    owner: null
+    source_files:
+      - crates/ontocore-owl/src/patch.rs
+      - crates/ontocore-owl/src/manchester.rs
+    test_ids: []
+    acceptance_criteria: []
+    github_issue: https://github.com/eddiethedean/ontocode/issues/248
+    documentation:
+      - docs/protege-parity/06_SUBSYSTEMS/OWL2_AUTHORING.md
+    notes: Target v0.22
+  - id: PAR-WS-001
+    area: Workspace
+    title: Persistent workspace semantics
+    priority: P0
+    status: PARTIAL
+    owner: null
+    source_files:
+      - extension/webview-ui/src/store/WorkspaceStore.ts
+    test_ids: []
+    acceptance_criteria: []
+    github_issue: https://github.com/eddiethedean/ontocode/issues/249
+    documentation:
+      - docs/protege-parity/04_BLOCKERS/BLOCKER_03_WORKSPACE.md
+    notes: Target v0.20
+  - id: PAR-RSN-001
+    area: Reasoning
+    title: Classification
+    priority: P0
+    status: COMPLETE
+    owner: null
+    source_files:
+      - crates/ontocore-reasoner/src/lib.rs
+    test_ids:
+      - tests/reasoner_el.rs
+    acceptance_criteria: []
+    github_issue: https://github.com/eddiethedean/ontocode/issues/250
+    documentation:
+      - docs/protege-parity/IMPLEMENTATION_EVIDENCE.md
+  - id: PAR-RSN-002
+    area: Reasoning
+    title: Full ABox reasoning
+    priority: P0
+    status: PARTIAL
+    owner: null
+    source_files: []
+    test_ids: []
+    acceptance_criteria: []
+    github_issue: https://github.com/eddiethedean/ontocode/issues/250
+    documentation:
+      - docs/protege-parity/04_BLOCKERS/BLOCKER_04_REASONING.md
+    notes: Target v0.23
+  - id: PAR-RSN-003
+    area: Reasoning
+    title: Native DL explanations
+    priority: P0
+    status: PARTIAL
+    owner: null
+    source_files: []
+    test_ids: []
+    acceptance_criteria: []
+    github_issue: https://github.com/eddiethedean/ontocode/issues/250
+    documentation:
+      - docs/protege-parity/04_BLOCKERS/BLOCKER_04_REASONING.md
+    notes: Target v0.23
+  - id: PAR-QRY-001
+    area: Query
+    title: SPARQL
+    priority: P0
+    status: COMPLETE
+    owner: null
+    source_files:
+      - crates/ontocore-query/src/lib.rs
+    test_ids: []
+    acceptance_criteria: []
+    github_issue: https://github.com/eddiethedean/ontocode/issues/253
+    documentation:
+      - docs/protege-parity/IMPLEMENTATION_EVIDENCE.md
+  - id: PAR-QRY-002
+    area: Query
+    title: DL Query workflow
+    priority: P1
+    status: PARTIAL
+    owner: null
+    source_files: []
+    test_ids: []
+    acceptance_criteria: []
+    github_issue: https://github.com/eddiethedean/ontocode/issues/253
+    documentation:
+      - docs/protege-parity/04_BLOCKERS/BLOCKER_07_QUERY.md
+    notes: Target v0.24
+  - id: PAR-SWRL-001
+    area: SWRL
+    title: Rule authoring/editing
+    priority: P0
+    status: NOT_IMPLEMENTED
+    owner: null
+    source_files: []
+    test_ids: []
+    acceptance_criteria: []
+    github_issue: https://github.com/eddiethedean/ontocode/issues/251
+    documentation:
+      - docs/protege-parity/04_BLOCKERS/BLOCKER_05_SWRL.md
+    notes: Target v0.23
+  - id: PAR-REF-001
+    area: Refactoring
+    title: Semantic refactoring
+    priority: P0
+    status: PARTIAL
+    owner: null
+    source_files:
+      - crates/ontocore-refactor/src/lib.rs
+    test_ids: []
+    acceptance_criteria: []
+    github_issue: https://github.com/eddiethedean/ontocode/issues/252
+    documentation:
+      - docs/protege-parity/IMPLEMENTATION_EVIDENCE.md
+    notes: Target v0.24
+  - id: PAR-VIS-001
+    area: Visualization
+    title: Graph parity
+    priority: P1
+    status: PARTIAL
+    owner: null
+    source_files: []
+    test_ids: []
+    acceptance_criteria: []
+    github_issue: https://github.com/eddiethedean/ontocode/issues/254
+    documentation:
+      - docs/protege-parity/04_BLOCKERS/BLOCKER_08_VISUALIZATION.md
+    notes: Target v0.25
+  - id: PAR-PLG-001
+    area: Plugins
+    title: Stable SDK
+    priority: P1
+    status: PARTIAL
+    owner: null
+    source_files:
+      - crates/ontocore-plugin/src/lib.rs
+    test_ids: []
+    acceptance_criteria: []
+    github_issue: https://github.com/eddiethedean/ontocode/issues/255
+    documentation:
+      - docs/protege-parity/IMPLEMENTATION_EVIDENCE.md
+    notes: Target v0.25
+  - id: PAR-ACC-001
+    area: Accessibility
+    title: Keyboard and screen reader parity
+    priority: P1
+    status: PARTIAL
+    owner: null
+    source_files: []
+    test_ids: []
+    acceptance_criteria: []
+    github_issue: https://github.com/eddiethedean/ontocode/issues/256
+    documentation:
+      - docs/protege-parity/04_BLOCKERS/BLOCKER_10_ACCESSIBILITY.md
+    notes: Target v0.25
+  - id: PAR-TST-001
+    area: Verification
+    title: Executable parity corpus
+    priority: P0
+    status: PARTIAL
+    owner: null
+    source_files:
+      - parity/protege-desktop-parity.yaml
+      - scripts/validate-parity-manifest.py
+    test_ids:
+      - scripts/validate-parity-manifest.py
+    acceptance_criteria: []
+    github_issue: https://github.com/eddiethedean/ontocode/issues/257
+    documentation:
+      - docs/protege-parity/04_BLOCKERS/BLOCKER_11_PARITY_VERIFICATION.md
+    notes: Manifest skeleton + validator in CI (v0.19); full gate in v0.25

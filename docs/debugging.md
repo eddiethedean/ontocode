@@ -129,7 +129,7 @@ ONTOINDEX_UPDATE_FIXTURE_SNAPSHOT=1 cargo test -p ontocode --test fixture_snapsh
 
 ```bash
 ./scripts/check-doc-versions.sh
-pip install -r docs/requirements.txt && mkdocs build --strict
+pip install -r docs/requirements.txt && ./scripts/build-docs.sh
 ```
 
 ## Related

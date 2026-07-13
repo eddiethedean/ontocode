@@ -6,6 +6,17 @@ Thank you for contributing. This repository contains:
 - **OntoCode** — VS Code extension under `extension/`
 - **User guides** — install, SQL, and LSP API under `docs/`
 
+### Docs-only contributors (~15 minutes)
+
+**No Rust or Node required** for documentation-only PRs:
+
+1. Edit pages under [`docs/`](docs/) (Read the Docs source). Root `README.md`, `CONTRIBUTING.md`, and `extension/README.md` when user-facing install text changes.
+2. Run `./scripts/check-doc-versions.sh` (version pins and link hygiene).
+3. Optional preview: `pip install -r docs/requirements.txt && ./scripts/serve-docs.sh`
+4. Open a focused PR describing what confused adopters you fixed.
+
+Platform vision/roadmap/architecture: prefer editing [`docs/vision.md`](docs/vision.md), [`docs/roadmap.md`](docs/roadmap.md), and [`docs/architecture.md`](docs/architecture.md); keep root mirrors in sync — see [Canonical documentation paths](#canonical-documentation-paths) below.
+
 ### Canonical documentation paths
 
 | Topic | GitHub (root) | Read the Docs (`docs/`) |
@@ -19,7 +30,7 @@ Thank you for contributing. This repository contains:
 | Engineering ADRs | — | [docs/design/adr/](docs/design/adr/README.md) |
 | Documentation map | — | [docs/documentation-index.md](docs/documentation-index.md) |
 
-Root `VISION.md`, `ARCHITECTURE.md`, and `ROADMAP.md` are mirrored under `docs/` for Read the Docs. **Edit both** when changing platform-facing content, or run `./scripts/check-doc-versions.sh` to catch drift.
+Root `VISION.md`, `ARCHITECTURE.md`, and `ROADMAP.md` are mirrored under `docs/` for Read the Docs. **Prefer editing `docs/` copies first**, then update root mirrors when platform-facing content changes, or run `./scripts/check-doc-versions.sh` to catch drift.
 
 - **Specs** — product and architecture docs under `docs/design/` ([DEPENDENCY_MATRIX.md](docs/design/DEPENDENCY_MATRIX.md) for external crates)
 
@@ -27,24 +38,32 @@ The root Cargo package `ontocode` is unpublished and hosts workspace integration
 
 **New contributors:** start with [internals.md](docs/internals.md) for role-based paths (Rust, extension, docs, LSP).
 
-### First PR in ~60 minutes
+### First PR paths
 
-1. Install **Rust 1.88+** and **Node 20+**.
+**Smoke PR (~15 minutes)** — docs-only or small Rust fix:
+
+1. Install **Rust 1.88+** (Node 20 only if you touch `extension/`).
 2. `git clone https://github.com/eddiethedean/ontocode.git && cd ontocode`
-3. `cargo test -p ontocore-core --lib` (fast smoke) or `cargo test --workspace` (full).
-4. For extension work: `cargo build -p ontocore-lsp --bins` then `cd extension && npm ci && ONTOCORE_LSP_BIN=../target/debug/ontocore-lsp npm test`.
-5. Make a small, focused change; update docs if behavior changes.
-6. Before opening a PR: `./scripts/run-ci-local.sh` (or at least `./scripts/check-doc-versions.sh` for docs-only PRs).
+3. `cargo test -p ontocore-core --lib` (or your touched crate).
+4. `cargo fmt --all --check` and `./scripts/check-doc-versions.sh` for docs changes.
+5. Open a focused PR with a short description.
+
+**Full contributor setup (~60+ minutes)** — extension, LSP, or release-impacting changes:
+
+1. Complete smoke steps above.
+2. `cargo test --workspace` and `cargo build -p ontocore-lsp --bins`.
+3. Extension: `cd extension && npm ci && ONTOCORE_LSP_BIN=../target/debug/ontocore-lsp npm test`.
+4. Webview: `cd extension/webview-ui && npm ci && npm test`.
+5. Before opening a PR: `./scripts/run-ci-local.sh` (30+ minutes; matches GitHub Actions).
 
 ### Plugin contributors (v0.14+)
 
 | Task | Start here |
 |------|------------|
-| Author a workspace plugin (manifest, validator, exporter) | [docs/guides/plugins.md](docs/guides/plugins.md) |
-| Understand host traits and manifest schema | [docs/ontocore/plugin-model.md](docs/ontocore/plugin-model.md), [PLUGIN_SPEC.md](docs/design/PLUGIN_SPEC.md) |
+| Author a workspace plugin (manifest, validator, exporter) | **[docs/guides/plugins.md](docs/guides/plugins.md)** — canonical author guide |
 | Reference implementation | `crates/ontocore-plugin-naming/`, `examples/plugin-workspace/` |
+| Historical trait-based design (do not implement from) | [docs/design/PLUGIN_SPEC.md](docs/design/PLUGIN_SPEC.md) |
 | Wire LSP / CLI integration | [docs/lsp-api.md](docs/lsp-api.md), `crates/ontocore-lsp/` |
-| OntoUI inspector plugin cards | [docs/platform/CAPABILITY_PROVIDERS.md](docs/platform/CAPABILITY_PROVIDERS.md), `extension/webview-ui/src/capabilities/` |
 
 Run `./scripts/run-ci-local.sh` before PRs that touch plugin host, reference plugins, or extension capability registry.
 
@@ -185,8 +204,8 @@ See [Examples index](docs/examples/index.md) for all runnable assets.
 
 ```bash
 pip install -r docs/requirements.txt   # Python 3.12 in CI
-mkdocs serve
-mkdocs build --strict   # CI uses this; must pass with no warnings
+./scripts/serve-docs.sh
+./scripts/build-docs.sh   # CI-equivalent; must pass with no warnings
 ./scripts/check-doc-versions.sh   # README / RTD / extension version sync
 ```
 

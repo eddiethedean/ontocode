@@ -2,20 +2,21 @@
 
 **OntoCore** is the semantic workspace engine for ontology development. It lives in the [OntoCode repository](https://github.com/eddiethedean/ontocode) and powers the OntoCode VS Code IDE.
 
-**Current release: v0.18.2** · [crates.io search](https://crates.io/search?q=ontocore)
+**Current release: v0.19.0** · [crates.io search](https://crates.io/search?q=ontocore)
 
-[![ontocore](https://img.shields.io/badge/ontocore-0.18.2-blue)](https://crates.io/crates/ontocore)
-[![core](https://img.shields.io/badge/core-0.18.2-blue)](https://crates.io/crates/ontocore-core)
-[![parser](https://img.shields.io/badge/parser-0.18.2-blue)](https://crates.io/crates/ontocore-parser)
-[![catalog](https://img.shields.io/badge/catalog-0.18.2-blue)](https://crates.io/crates/ontocore-catalog)
-[![query](https://img.shields.io/badge/query-0.18.2-blue)](https://crates.io/crates/ontocore-query)
-[![cli](https://img.shields.io/badge/cli-0.18.2-blue)](https://crates.io/crates/ontocore-cli)
-[![lsp](https://img.shields.io/badge/lsp-0.18.2-blue)](https://crates.io/crates/ontocore-lsp)
-[![owl](https://img.shields.io/badge/owl-0.18.2-blue)](https://crates.io/crates/ontocore-owl)
-[![reasoner](https://img.shields.io/badge/reasoner-0.18.2-blue)](https://crates.io/crates/ontocore-reasoner)
-[![diff](https://img.shields.io/badge/diff-0.18.2-blue)](https://crates.io/crates/ontocore-diff)
-[![refactor](https://img.shields.io/badge/refactor-0.18.2-blue)](https://crates.io/crates/ontocore-refactor)
-[![docs](https://img.shields.io/badge/docs-0.18.2-blue)](https://crates.io/crates/ontocore-docs)
+[![ontocore](https://img.shields.io/badge/ontocore-0.19.0-blue)](https://crates.io/crates/ontocore)
+[![core](https://img.shields.io/badge/core-0.19.0-blue)](https://crates.io/crates/ontocore-core)
+[![parser](https://img.shields.io/badge/parser-0.19.0-blue)](https://crates.io/crates/ontocore-parser)
+[![catalog](https://img.shields.io/badge/catalog-0.19.0-blue)](https://crates.io/crates/ontocore-catalog)
+[![query](https://img.shields.io/badge/query-0.19.0-blue)](https://crates.io/crates/ontocore-query)
+[![cli](https://img.shields.io/badge/cli-0.19.0-blue)](https://crates.io/crates/ontocore-cli)
+[![lsp](https://img.shields.io/badge/lsp-0.19.0-blue)](https://crates.io/crates/ontocore-lsp)
+[![owl](https://img.shields.io/badge/owl-0.19.0-blue)](https://crates.io/crates/ontocore-owl)
+[![edit](https://img.shields.io/badge/edit-0.19.0-blue)](https://crates.io/crates/ontocore-edit)
+[![reasoner](https://img.shields.io/badge/reasoner-0.19.0-blue)](https://crates.io/crates/ontocore-reasoner)
+[![diff](https://img.shields.io/badge/diff-0.19.0-blue)](https://crates.io/crates/ontocore-diff)
+[![refactor](https://img.shields.io/badge/refactor-0.19.0-blue)](https://crates.io/crates/ontocore-refactor)
+[![docs](https://img.shields.io/badge/docs-0.19.0-blue)](https://crates.io/crates/ontocore-docs)
 
 OntoCore indexes ontology workspaces on disk and provides:
 

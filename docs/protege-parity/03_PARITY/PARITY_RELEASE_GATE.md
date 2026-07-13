@@ -136,7 +136,7 @@ The release gate is satisfied only when:
 
 Release approval should reference:
 
--   CURRENT_REPOSITORY_AUDIT.md
+-   ONTOCODE_CURRENT_PROTEGE_PARITY_AUDIT.md
 -   IMPLEMENTATION_EVIDENCE.md
 -   PARITY_MATRIX.md
 -   PARITY_GAP_ANALYSIS.md

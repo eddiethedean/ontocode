@@ -180,7 +180,7 @@ Each debt item should eventually include:
 # Related Documents
 
 -   README.md
--   CURRENT_REPOSITORY_AUDIT.md
+-   ONTOCODE_CURRENT_PROTEGE_PARITY_AUDIT.md
 -   CURRENT_ARCHITECTURE.md
 -   CURRENT_LIMITATIONS.md
 -   IMPLEMENTATION_EVIDENCE.md

@@ -3,7 +3,8 @@
 # EPIC-001 --- Format Independence
 
 **Epic ID:** EPIC-001\
-**Status:** Planned\
+**GitHub:** https://github.com/eddiethedean/ontocode/issues/247\
+**Status:** In progress (v0.19)\
 **Priority:** P0 (Release Blocking)\
 **Target Release:** OntoCode 1.0.0
 

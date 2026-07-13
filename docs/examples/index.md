@@ -16,6 +16,16 @@ Runnable examples for OntoCore CLI, Rust embedding, and OntoCode workflows.
 
 From a git clone, prefix commands with `cargo run --` (e.g. `cargo run -- query fixtures "SELECT * FROM classes"`). With `cargo install ontocore-cli`, use `ontocore` directly.
 
+## End-to-end workflow (clone)
+
+```bash
+cargo run -- validate fixtures
+cargo run -- classify fixtures --profile el --format json
+cargo run -- diff HEAD..WORKTREE --format markdown
+```
+
+Then try a patch preview: [Sample patches](patches.md). VS Code path: [First success (~10 min)](../guides/first-success.md).
+
 ## Rust examples (`examples/`)
 
 | Example | Run | Description |

@@ -72,7 +72,7 @@ Full flags: [CLI reference](../cli-reference.md#diff) · [migration v0.10](../mi
 Fail or annotate PRs when breaking ontology changes appear:
 
 ```yaml
-- run: cargo install ontocore-cli --locked --version 0.18.0
+- run: cargo install ontocore-cli --locked --version 0.19.0
 - run: ontocore diff --pr-summary main..HEAD
 ```
 
@@ -84,7 +84,7 @@ See [CI integration](../ci-integration.md).
 |---------|-------------|
 | `no git repository found` | Run from a git checkout; use `--left-ref` / `--right-ref` directory compare instead |
 | Empty diff unexpectedly | Confirm refs exist; re-index with `ontocore validate` or **Index Workspace** |
-| Panel shows no data | Trust workspace; check **Output → OntoCore Language Server** |
+| Panel shows no data | Run **Index Workspace**; check **Output → OntoCore Language Server**; Trust only if using custom `lspPath` |
 | Ref compare slow on large repos | Compare feature branch tip only; use `--breaking-only` in CI |
 
 More: [Troubleshooting](../troubleshooting.md) · [FAQ](../faq.md).

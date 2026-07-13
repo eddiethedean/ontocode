@@ -56,7 +56,7 @@ Establish a stable source of truth before implementation begins.
 ## Required Work
 
 -   Finalize `PARITY_SCOPE.md`
--   Finalize `CURRENT_REPOSITORY_AUDIT.md`
+-   Finalize `ONTOCODE_CURRENT_PROTEGE_PARITY_AUDIT.md`
 -   Assign stable parity requirement IDs
 -   Synchronize:
     -   `PARITY_MATRIX.md`

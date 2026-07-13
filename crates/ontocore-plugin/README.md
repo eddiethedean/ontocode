@@ -14,7 +14,7 @@ ontocore-plugin = "0.17"
 Enable via the `ontocore` façade feature:
 
 ```toml
-ontocore = { version = "0.17", features = ["plugins"] }
+ontocore = { version = "0.19", features = ["plugins"] }
 ```
 
-**Current version: 0.18.2**
+**Current version: 0.19.0**

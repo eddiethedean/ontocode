@@ -24,17 +24,17 @@ here. Use the canonical pre-1.0 plan instead:
 
 # Pre-1.0 (do not use this file)
 
-| Release | Theme | Plan |
-|---------|-------|------|
-| v0.19 | Semantic foundation + program baseline | [PRE_1_0_PHASES.md § v0.19](PRE_1_0_PHASES.md#v019-semantic-foundation-program-baseline) |
-| v0.20 | Workspace runtime | [PRE_1_0_PHASES.md § v0.20](PRE_1_0_PHASES.md#v020-workspace-runtime) |
-| v0.21 | Required format write-back | [PRE_1_0_PHASES.md § v0.21](PRE_1_0_PHASES.md#v021-required-format-write-back) |
-| v0.22 | Complete OWL 2 authoring | [PRE_1_0_PHASES.md § v0.22](PRE_1_0_PHASES.md#v022-complete-owl-2-authoring) |
-| v0.23 | Reasoning parity + SWRL | [PRE_1_0_PHASES.md § v0.23](PRE_1_0_PHASES.md#v023-reasoning-parity-swrl) |
-| v0.24 | Semantic services completion | [PRE_1_0_PHASES.md § v0.24](PRE_1_0_PHASES.md#v024-semantic-services-completion) |
-| v0.25 | UX completion + executable verification | [PRE_1_0_PHASES.md § v0.25](PRE_1_0_PHASES.md#v025-ux-completion-executable-verification) |
-| 1.0.0-rc | Stabilize | [PRE_1_0_PHASES.md § 1.0.0-rc](PRE_1_0_PHASES.md#100-rc-release-candidate) |
-| 1.0.0 | Ship | [PRE_1_0_PHASES.md § 1.0.0](PRE_1_0_PHASES.md#100-protege-replacement-release) |
+| Release | Theme | Status | Plan |
+|---------|-------|--------|------|
+| v0.19 | Semantic foundation + program baseline | **Shipped** (v0.19.0) | [PRE_1_0_PHASES.md § v0.19](PRE_1_0_PHASES.md#v019-semantic-foundation-program-baseline) |
+| v0.20 | Workspace runtime | Planned | [PRE_1_0_PHASES.md § v0.20](PRE_1_0_PHASES.md#v020-workspace-runtime) |
+| v0.21 | Required format write-back | Planned | [PRE_1_0_PHASES.md § v0.21](PRE_1_0_PHASES.md#v021-required-format-write-back) |
+| v0.22 | Complete OWL 2 authoring | Planned | [PRE_1_0_PHASES.md § v0.22](PRE_1_0_PHASES.md#v022-complete-owl-2-authoring) |
+| v0.23 | Reasoning parity + SWRL | Planned | [PRE_1_0_PHASES.md § v0.23](PRE_1_0_PHASES.md#v023-reasoning-parity-swrl) |
+| v0.24 | Semantic services completion | Planned | [PRE_1_0_PHASES.md § v0.24](PRE_1_0_PHASES.md#v024-semantic-services-completion) |
+| v0.25 | UX completion + executable verification | Planned | [PRE_1_0_PHASES.md § v0.25](PRE_1_0_PHASES.md#v025-ux-completion-executable-verification) |
+| 1.0.0-rc | Stabilize | Planned | [PRE_1_0_PHASES.md § 1.0.0-rc](PRE_1_0_PHASES.md#100-rc-release-candidate) |
+| 1.0.0 | Ship | Planned | [PRE_1_0_PHASES.md § 1.0.0](PRE_1_0_PHASES.md#100-protege-replacement-release) |
 
 ------------------------------------------------------------------------
 

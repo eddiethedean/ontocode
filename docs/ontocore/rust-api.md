@@ -15,10 +15,10 @@ Pin dependencies in `Cargo.toml`:
 
 ```toml
 [dependencies]
-ontocore = "0.18"
+ontocore = "0.19"
 ```
 
-For CI and reproducible builds: `cargo install ontocore-cli --locked --version 0.18.0`.
+For CI and reproducible builds: `cargo install ontocore-cli --locked --version 0.19.0`.
 
 ## docs.rs
 
@@ -40,6 +40,7 @@ Generated API documentation is published on [docs.rs](https://docs.rs/ontocore):
 | `ontocore-diff` | [docs.rs/ontocore-diff](https://docs.rs/ontocore-diff) |
 | `ontocore-docs` | [docs.rs/ontocore-docs](https://docs.rs/ontocore-docs) |
 | `ontocore-refactor` | [docs.rs/ontocore-refactor](https://docs.rs/ontocore-refactor) |
+| `ontocore-edit` | [docs.rs/ontocore-edit](https://docs.rs/ontocore-edit) |
 | `ontocore-plugin` | [docs.rs/ontocore-plugin](https://docs.rs/ontocore-plugin) (experimental; plugin host MVP in v0.14) |
 | `ontocore-cli` | [docs.rs/ontocore-cli](https://docs.rs/ontocore-cli) |
 
@@ -55,6 +56,7 @@ Use **this book** for workflows, limits, and LSP JSON; use **docs.rs** for Rust 
 | SQL virtual tables | [SQL reference](../sql-reference.md), [SQL views](sql-views.md) | [`ontocore::query`](https://docs.rs/ontocore/latest/ontocore/query/index.html) |
 | SPARQL | [SPARQL reference](../sparql-reference.md) | [`Workspace::sparql`](https://docs.rs/ontocore/latest/ontocore/struct.Workspace.html#method.sparql) |
 | Turtle patch apply | [Patch JSON](../patch-reference.md), [Authoring](../authoring.md) | [`ontocore::owl`](https://docs.rs/ontocore/latest/ontocore/owl/index.html) |
+| Semantic transactions (v0.19+) | [Rust library guide](../guides/rust-library.md#semantic-transactions-ontocore-edit) | [`ontocore-edit`](https://docs.rs/ontocore-edit/latest/ontocore_edit/struct.Transaction.html) |
 | OBO patch apply | [OBO authoring](../ontocode/obo-authoring.md) | [`ontocore::obo`](https://docs.rs/ontocore-obo/latest/ontocore_obo/index.html) |
 | Semantic diff | [Semantic diff](../ontocode/semantic-diff.md) | [`ontocore-diff`](https://docs.rs/ontocore-diff/latest/ontocore_diff/index.html) |
 | Refactoring | [Refactoring guide](../guides/refactoring.md) | [`ontocore-refactor`](https://docs.rs/ontocore-refactor/latest/ontocore_refactor/index.html) |
@@ -129,6 +131,29 @@ let diff = ws.diff_against_path("./baseline")?;
 Use `apply_owl_patches` / `apply_obo_patches` from `ontocore::owl` and `ontocore::obo` when importing both patch helpers. Unified errors: [`ontocore::Error`](https://docs.rs/ontocore/latest/ontocore/enum.Error.html) — see `examples/error_handling.rs`.
 
 Refactoring helpers live in [`ontocore::refactor`](https://docs.rs/ontocore/latest/ontocore/refactor/index.html) (`preview_rename_iri`, `apply_refactor_plan_checked`, …). Pass `workspace_root` from `Workspace::root()`.
+
+## Semantic transactions (`ontocore-edit`, v0.19+)
+
+v0.19 adds a format-aware **transaction** layer for ordered Turtle/OBO edits with compose, validate, and invert:
+
+```rust
+use ontocore_edit::Transaction;
+use ontocore_owl::PatchOp;
+
+let txn = Transaction::from_turtle(vec![
+    PatchOp::AddLabel {
+        entity_iri: "http://example.org/Person".into(),
+        value: "Person".into(),
+    },
+]);
+
+// Preview / apply via ontocore::edit or LSP applyAxiomPatch envelope
+let inverted = txn.invert()?;
+```
+
+- **Book:** [Rust library guide — semantic transactions](../guides/rust-library.md#semantic-transactions-ontocore-edit)
+- **API:** [`ontocore_edit::Transaction`](https://docs.rs/ontocore-edit/latest/ontocore_edit/struct.Transaction.html)
+- **Wire format:** [Patch JSON](../patch-reference.md) (legacy patch arrays still accepted; transactions preferred for undo)
 
 ## Lower-level API
 

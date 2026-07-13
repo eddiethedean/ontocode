@@ -16,7 +16,7 @@ For quick answers, see also [FAQ](faq.md).
 | `validate` exits non-zero | Diagnostic errors in ontology | [Validate exit](#cli-validate-exits-non-zero) |
 | Query returns no rows | Stale index, wrong table/column names | [Query empty](#queries-return-no-rows-or-wrong-data) |
 | Reasoner errors or empty hierarchy | Profile mismatch, Ontologos, unsat classes | [Reasoner](#reasoner) |
-| Cannot edit `.obo` | Pre-v0.12 extension or term not in `.obo` file | [Graphs, OBO, ROBOT](#graphs-obo-robot-and-semantic-diff) |
+| Cannot edit `.obo` | Pre-v0.13 extension or term not in `.obo` file | [Graphs, OBO, ROBOT](#graphs-obo-robot-and-semantic-diff) |
 | Semantic diff / graph missing | No git repo, not indexed | [Graphs, OBO, ROBOT](#graphs-obo-robot-and-semantic-diff) |
 | Inspector and graph show different entities | Panels opened before v0.13 or focus relay disabled | Re-open panels; click entity in explorer — [migration v0.13](migration/v0.13.md) |
 | Schema browser empty in Query Workbench | Workspace not indexed or SPARQL mode selected | Index workspace; switch to catalog SQL mode — [Query Workbench](ontocode/query-workbench.md) |
@@ -34,7 +34,7 @@ flowchart TD
   empty -->|No| edit{Cannot edit?}
   edit -->|Yes| formatCheck{Turtle or OBO file?}
   formatCheck -->|No| owlXml[Read OWL/XML/RDF/XML guide]
-  formatCheck -->|Yes| trust[Trust workspace + re-index]
+  formatCheck -->|Yes| reindex[Run Index Workspace + check Output panel]
   edit -->|No| reasoner{Reasoner issue?}
   reasoner -->|Yes| reasonerGuide[Reasoner guide + lighter profile]
   reasoner -->|No| faq[FAQ + errors reference]
@@ -44,7 +44,7 @@ flowchart TD
 
 1. Run **OntoCode: Index Workspace** from the Command Palette.
 2. Check **View → Output → OntoCore Language Server** for errors.
-3. Confirm the folder contains supported files (`.ttl`, `.owl`, `.rdf`, `.jsonld`, `.nt`, `.nq`, `.trig`).
+3. Confirm the folder contains supported files (`.ttl`, `.obo`, `.owl`, `.rdf`, `.jsonld`, `.nt`, `.nq`, `.trig`).
 4. **Multi-root workspace:** since v0.10 all folders are indexed — confirm each root contains ontology files and check **Output → OntoCore Language Server** for per-root errors.
 
 ## VS Code: language server failed to start
@@ -57,7 +57,7 @@ flowchart TD
 
 ## VS Code: cannot edit in inspector
 
-- Write-back applies to **Turtle (`.ttl`) and OBO (`.obo`)** (v0.12+). See [Supported formats](supported-formats.md) for the full matrix. RDF/XML, OWL/XML, and JSON-LD are read-only.
+- Write-back applies to **Turtle (`.ttl`) and OBO (`.obo`)** (v0.13+). See [Supported formats](supported-formats.md) for the full matrix. RDF/XML, OWL/XML, and JSON-LD are read-only.
 - Entity must be declared in an indexed `.ttl` or `.obo` file in the workspace.
 - See [OBO authoring](ontocode/obo-authoring.md).
 
@@ -84,7 +84,7 @@ ontocore query /path/to/your/ontologies "SELECT * FROM classes"
 |---------|-----|
 | `ontocore: command not found` after `cargo install` | Add `~/.cargo/bin` to your `PATH` — see [Getting started](getting-started.md#prerequisites) |
 | `cargo install` fails with MSRV / edition error | Run `rustup update stable`; require Rust **1.88+** (`rustc --version`) |
-| `cargo install` network / crates.io errors | Retry with `--locked`; pin `--version 0.18.2` in CI |
+| `cargo install` network / crates.io errors | Retry with `--locked`; pin `--version 0.19.0` in CI |
 | Release tarball on macOS/Windows | CLI pre-builds are **Linux x64 only** — use `cargo install` or the VSIX extension |
 | `ontocore diff HEAD..WORKTREE` fails | Run from a **git repository** root containing ontology files |
 
@@ -129,7 +129,7 @@ Indexing may fail above [workspace limits](workspace-limits.md) (file count, siz
 | Semantic diff: `no git repository` | Open a git checkout; or use CLI `ontocore diff --left-ref ./a --right-ref ./b` |
 | Semantic diff panel empty | Run **Index Workspace**; see [Semantic diff](ontocode/semantic-diff.md) |
 | Graph commands missing | Run **Index Workspace** first — [Graph view](ontocode/graph-view.md) |
-| Cannot edit `.obo` in inspector | Confirm OntoCode **v0.12.0+**; entity must be in an indexed `.obo` file — [OBO guide](guides/obo-workflow.md) |
+| Cannot edit `.obo` in inspector | Confirm OntoCode **v0.13.0+**; entity must be in an indexed `.obo` file — [OBO guide](guides/obo-workflow.md) |
 | `robot` not found | Install Java + ROBOT; set `ontocode.robotPath` — [ROBOT guide](guides/robot-interop.md) |
 
 ## Reasoner

@@ -223,7 +223,7 @@ The objective is **functional equivalence**, not binary compatibility.
 # Related Documents
 
 -   README.md
--   CURRENT_REPOSITORY_AUDIT.md
+-   ONTOCODE_CURRENT_PROTEGE_PARITY_AUDIT.md
 -   PARITY_SCOPE.md
 -   PARITY_MATRIX.md
 -   IMPLEMENTATION_EVIDENCE.md

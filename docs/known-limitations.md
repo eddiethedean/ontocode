@@ -1,6 +1,8 @@
-# Known limitations (v0.18)
+# Known limitations
 
-Honest limits for evaluators and new users. Capability matrix: [What ships today](SHIPPED.md). Desktop parity gate: [v0.18 assessment on GitHub](https://github.com/eddiethedean/ontocode/blob/main/docs/PROTEGE_REVERSE_ENGINEERING/ONTOCODE_PARITY/ONTOCODE_0.18_PROTEGE_PARITY_ASSESSMENT.md).
+> **Current release:** v0.19.0 — see [What ships today](SHIPPED.md). **Not a full Protégé replacement today** — coexistence and pilot workflows are the supported path until **1.0**.
+
+Honest limits for evaluators and new users.
 
 ## Editable formats
 
@@ -31,7 +33,7 @@ Plugin host **MVP shipped** (manifest, permissions, views, preferences, context 
 
 ## API stability (pre-1.0)
 
-Published crates are **0.18.x**. Library APIs, LSP JSON, and SQL table columns may change between minor releases until v1.0. Pin in CI: `cargo install ontocore-cli --locked --version 0.18.2`.
+Published crates are **0.19.x**. Library APIs, LSP JSON, and SQL table columns may change between minor releases until v1.0. Pin in CI: `cargo install ontocore-cli --locked --version 0.19.0`.
 
 ## Reasoning
 

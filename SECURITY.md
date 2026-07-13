@@ -4,6 +4,7 @@
 
 | Version | Supported |
 |---------|-----------|
+| 0.19.x  | Yes       |
 | 0.18.x  | Yes       |
 | 0.16.x  | Yes       |
 | 0.15.x  | Yes       |

@@ -5,7 +5,7 @@ Patterns for using OntoCode and OntoCore in daily ontology engineering.
 ## Repository layout
 
 - Keep ontology source files in a dedicated directory (e.g. `ontologies/` or `src/ontology/`)
-- Prefer **Turtle (`.ttl`)** for files you edit in VS Code — write-back is Turtle-only
+- Prefer **Turtle (`.ttl`) or OBO (`.obo`)** for files you edit in VS Code — those formats support write-back. RDF/XML and OWL/XML are read-only — see [Supported formats](../supported-formats.md). Refactor apply is Turtle-only today.
 - Use a single-root VS Code workspace when you want the simplest onboarding (multi-root is supported since v0.10 — all folders are indexed)
 
 ## When to use SQL vs SPARQL vs classify
@@ -32,8 +32,8 @@ Examples: [CI integration](../ci-integration.md)
 ## VS Code workflow
 
 1. Open ontology folder (single-root)
-2. Trust workspace
-3. Edit in Entity Inspector or Manchester editor (`.ttl` only)
+2. Bundled language server works in Restricted Mode — **Trust** only if you set custom `ontocode.lspPath` or `ontocode.robotPath`
+3. Edit in Entity Inspector or Manchester editor (`.ttl` and `.obo`)
 4. Run **Index Workspace** after bulk file changes
 5. Use **Query Workbench** for ad-hoc catalog queries
 

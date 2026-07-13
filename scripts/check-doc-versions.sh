@@ -352,6 +352,7 @@ if [[ "$fail" -eq 0 ]]; then
 fi
 
 check_file_contains ".github/workflows/release.yml" "publish_with_pause ontocore-obo" "release.yml publishes ontocore-obo"
+check_file_contains ".github/workflows/release.yml" "publish_with_pause ontocore-edit" "release.yml publishes ontocore-edit"
 check_file_contains ".github/workflows/release.yml" "publish_with_pause ontocore" "release.yml publishes ontocore"
 
 # docs/contributing.md should track root CONTRIBUTING.md (OntoCore branding)
@@ -453,7 +454,9 @@ check_file_contains "mkdocs.yml" "guides/protege-migration.md" "mkdocs Protégé
 check_file_contains "mkdocs.yml" "ontocode/feature-tour.md" "mkdocs feature tour"
 check_file_contains "mkdocs.yml" "guides/plugins.md" "mkdocs plugins guide"
 check_file_contains "mkdocs.yml" "guides/docs-export.md" "mkdocs docs export guide"
-check_file_contains "mkdocs.yml" "design/adr/0001-use-rust-for-ontocore.md" "mkdocs ADR entry"
+check_file_contains "mkdocs.yml" "guides/which-artifact.md" "mkdocs which-artifact in Get started"
+check_file_contains "mkdocs.yml" "documentation-index.md" "mkdocs documentation index in Get started"
+check_file_contains "mkdocs.yml" "guides/plugins.md" "mkdocs plugins guide in Contribute"
 check_file_contains "mkdocs.yml" "known-limitations.md" "mkdocs known limitations"
 check_file_contains "mkdocs.yml" "Reference:" "mkdocs Reference tab"
 check_file_contains "docs/guides/rust-crates.md" "ontocore = \"${MINOR_VERSION}\"" "rust-crates version pin"
@@ -577,8 +580,8 @@ done
 check_file_contains "ARCHITECTURE.md" "docs/architecture.md" "ARCHITECTURE.md points to canonical docs copy"
 check_file_contains "docs/architecture.md" "Ontologos thinks" "docs architecture responsibility line"
 
-check_file_contains "docs/roadmap.md" "Shipped releases \\(v0.1–v0.18\\)" "docs roadmap shipped section"
-check_file_contains "ROADMAP.md" "Shipped releases \\(v0.1–v0.18\\)" "ROADMAP.md shipped section"
+check_file_contains "docs/roadmap.md" "Shipped releases \\(v0.1–v0.19\\)" "docs roadmap shipped section"
+check_file_contains "ROADMAP.md" "Shipped releases \\(v0.1–v0.19\\)" "ROADMAP.md shipped section"
 check_file_contains "ROADMAP.md" "v0.14 — Plugin host MVP \\(shipped\\)" "ROADMAP.md v0.14 shipped section"
 check_file_contains "ROADMAP.md" "v1.2 — Ontology Toolchain Platform" "roadmap v1.2 toolchain milestone"
 check_file_contains "docs/roadmap.md" "v1.2 — Ontology Toolchain Platform" "docs roadmap v1.2 milestone"
@@ -636,11 +639,11 @@ else
   echo "ok: no stale ontocore = \"0.11\" user-facing pins"
 fi
 
-# Stale crate pins for previous minors (0.14–0.16) when current is newer
+# Stale crate pins for previous minors (0.14–0.18) when current is newer
 PREV_MINOR_MAJOR="${MINOR_VERSION%%.*}"
 PREV_MINOR_MINOR="${MINOR_VERSION#*.}"
 if [[ "$PREV_MINOR_MAJOR" == "0" ]] && [[ "$PREV_MINOR_MINOR" -ge 17 ]]; then
-  for stale in 14 15 16; do
+  for stale in 14 15 16 17 18; do
     if rg -q "ontocore = \"0\\.${stale}\"" "${CRATE_PIN_PATHS[@]}" --glob '!**/migration/**' --glob '!**/design/**' --glob '!**/changelog.md' --glob '!**/CHANGELOG.md' 2>/dev/null; then
       echo "FAIL: stale ontocore = \"0.${stale}\" pin found outside migration/design/changelog" >&2
       rg -n "ontocore = \"0\\.${stale}\"" "${CRATE_PIN_PATHS[@]}" --glob '!**/migration/**' --glob '!**/design/**' --glob '!**/changelog.md' --glob '!**/CHANGELOG.md' 2>/dev/null || true
@@ -648,7 +651,22 @@ if [[ "$PREV_MINOR_MAJOR" == "0" ]] && [[ "$PREV_MINOR_MINOR" -ge 17 ]]; then
     fi
   done
   if [[ "$fail" -eq 0 ]]; then
-    echo "ok: no stale ontocore = \"0.14\"/\"0.15\"/\"0.16\" user-facing pins"
+    echo "ok: no stale ontocore = \"0.14\"–\"0.18\" user-facing pins"
+  fi
+fi
+
+# Stale --version install pins for previous minors (0.14–0.18)
+INSTALL_PIN_EXCLUDES=(--glob '!**/changelog.md' --glob '!**/CHANGELOG.md' --glob '!**/migration/**' --glob '!**/design/**')
+if [[ "$PREV_MINOR_MAJOR" == "0" ]] && [[ "$PREV_MINOR_MINOR" -ge 17 ]]; then
+  for stale in 14 15 16 17 18; do
+    if rg -q "--version 0\\.${stale}\\." "${STALE_PIN_PATHS[@]}" "${INSTALL_PIN_EXCLUDES[@]}" 2>/dev/null; then
+      echo "FAIL: stale --version 0.${stale}.x install pin found outside migration/design/changelog" >&2
+      rg -n "--version 0\\.${stale}\\." "${STALE_PIN_PATHS[@]}" "${INSTALL_PIN_EXCLUDES[@]}" 2>/dev/null || true
+      fail=1
+    fi
+  done
+  if [[ "$fail" -eq 0 ]]; then
+    echo "ok: no stale --version 0.14–0.18 install pins"
   fi
 fi
 
@@ -801,7 +819,7 @@ check_file_contains "mkdocs.yml" "v0\\.14 → v0\\.15" "mkdocs v0.15 migration i
 check_file_contains "docs/guides/owl-xml-workflow.md" "read-only catalog" "owl-xml workflow guide"
 check_file_contains "docs/ontocore/rust-api.md" "Book ↔ docs.rs crosswalk" "rust-api docs.rs crosswalk"
 check_file_contains "docs/troubleshooting.md" "Where to start" "troubleshooting decision tree"
-check_file_contains "docs/platform/OVERVIEW.md" "v0.18 foundation shipped" "platform overview shipped banner"
+check_file_contains "docs/platform/OVERVIEW.md" "v0.19 foundation shipped" "platform overview shipped banner"
 
 # vision.md must reference current shipped release (not v0.11 or v0.12)
 for file in docs/vision.md VISION.md; do
@@ -828,6 +846,7 @@ if grep -q 'Turtle (`.ttl`) only' extension/README.md 2>/dev/null; then
 else
   echo "ok: extension README inspector write-back"
 fi
+check_file_contains "CONTRIBUTING.md" "build-docs.sh" "contributing documents build-docs script"
 check_file_contains "CONTRIBUTING.md" "run-ci-local.sh" "contributing documents local CI script"
 check_file_contains "docs/internals.md" "Extension-only" "internals extension-only path"
 check_file_contains "docs/guides/lsp-hello-world.md" "ontocore-lsp" "lsp hello-world guide"

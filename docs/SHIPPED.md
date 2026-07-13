@@ -1,8 +1,8 @@
-# What ships today (v0.18.2)
+# What ships today (v0.19.0)
 
 > **Canonical capability matrix.** Update this page on every release. Design specs under [Project](design/README.md) may describe future targets — check here for what is actually available.
 
-**Current release:** v0.18.2 · [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) · [Migration from v0.17](migration/v0.18.md) · [Patch notes](migration/v0.18.2.md)
+**Current release:** v0.19.0 · [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) · [Migration from v0.18.2](migration/v0.19.md) · [v0.18.2 patch notes](migration/v0.18.2.md)
 
 ## Products
 
@@ -58,175 +58,26 @@
 
 ## Format support
 
-| Operation | Turtle (`.ttl`) | OBO (`.obo`) | RDF/XML (`.owl`), OWL/XML (`.owx`) | JSON-LD, N-Triples, TriG |
-|-----------|-----------------|--------------|-------------------------------------|---------------------------|
-| Index / query | Yes | Yes | Yes (Horned catalog) | Yes |
-| Write-back (inspector, patches, refactor) | Yes | Yes | Read-only | Read-only |
-| Rich OBO metadata (synonyms, defs, xrefs) | — | Yes | — | — |
+| Operation | Turtle (`.ttl`) | OBO (`.obo`) | RDF/XML (`.rdf`, `.xml`) | OWL/XML (`.owl`, `.owx`) | JSON-LD, N-Triples, TriG |
+|-----------|-----------------|--------------|--------------------------|--------------------------|---------------------------|
+| Index / query | Yes | Yes | Yes (Horned catalog) | Yes (Horned catalog) | Yes |
+| Write-back (inspector, patches) | Yes | Yes | Read-only | Read-only | Read-only |
+| Refactor apply | Yes | — | — | — | — |
+| Rich OBO metadata (synonyms, defs, xrefs) | — | Yes | — | — | — |
 
-## New in v0.18.2
-
-| Capability | Status |
-|------------|--------|
-| Windows verbatim (`\\?\`) path normalization for Prefix Manager / inspector patches | Yes |
-| Reasoner classify releases `ops_lock`; `$/cancelRequest` skips snapshot updates | Yes |
-| Protégé-style property-first Manchester cardinality + typed Turtle emit | Yes |
-| Find Usages default-prefix / annotation / line-guard fixes | Yes |
-
-## New in v0.18.1
+## New in v0.19.0
 
 | Capability | Status |
 |------------|--------|
-| Named unsatisfiable expansion (classes ⊑ `owl:Nothing` and descendants in reasoner `unsatisfiable` / `consistent`) | Yes |
-| Composed explanations for expansion-only unsats (`composed_subclass_chain` to ancestor / `owl:Nothing`) | Yes |
-| Stronger reasoner / Protégé / diff / path-jail / OBO and LSP workflow test oracles | Yes |
+| `ontocore-edit` semantic transactions (`compose`, `validate`, `invert`, serde) | Yes |
+| Turtle / OBO LSP + CLI apply via `Transaction` (legacy patch JSON still accepted) | Yes |
+| Protégé parity program baseline (manifest + CI validator) | Yes |
 
-## New in v0.18.0
+Full user-facing delta: [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md#0190---2026-07-13).
 
-| Capability | Status |
-|------------|--------|
-| Distinct reasoner Start / Synchronize / Classify / Consistency workflows | Yes |
-| Stop reasoner cancels in-flight client request; late results ignored | Yes (server may still finish CPU-bound classify) |
-| Explanation stale banner wired to catalog fingerprint after reindex | Yes |
-| Layout restore: recovered tabs offer Reopen with saved command + context | Yes |
-| Graph truncation messaging for large ontologies | Yes |
-| Graph export (JSON / CSV) + Expand refreshes neighborhood depth | Yes |
-| Accessibility basics on Explanation / Reasoner / restore chrome | Yes |
-| Expanded `protege-roundtrip` + workflow fixtures | Yes |
-| Protégé migration guide + honest desktop known-gap list | Yes |
-| Desktop parity assessment + checklist honesty (MENUS false greens) | Yes |
+## Release history
 
-## New in v0.17.0
-
-| Capability | Status |
-|------------|--------|
-| Protégé-style File, Edit, Active Ontology, Refactor, Reasoner, Tools, Window, and Help menus | Yes |
-| High-frequency toolbar actions with context-sensitive enablement | Yes |
-| Shared React dialog shell with keyboard handling and live IRI/prefix validation | Yes |
-| New Ontology, Prefix Manager, Metrics, and About webview dialogs | Yes |
-| Central command registry, platform-aware keybindings, and conflict detection | Yes |
-| Persistent layouts and named Modeling, Reasoning, and Review perspectives | Partial in v0.17 — tabs only; reopen+context completed in v0.18 |
-| Help, plugin information, error log, diagnostics export, and support surfaces | Yes |
-| Engine support for prefix/metadata patches, create/export, active ontology, merge/replace, and reasoner workflows | Yes — lifecycle fidelity completed in v0.18 |
-
-## New in v0.16.0
-
-| Capability | Status |
-|------------|--------|
-| Plugin preference pages (`ui.preferences_pages`) wired in the extension | Yes |
-| Plugin context actions (`ui.context_actions`) wired in the extension | Yes |
-| Plugin command contributions execute via LSP `ontocore/runPlugin` | Yes |
-| Imports reload command (reindex + refresh imports panel) | Yes |
-| Layout reset command (close key OntoCode panels) | Yes |
-
-## New in v0.15.0
-
-| Capability | Status |
-|------------|--------|
-| Plugin permissions enforcement (`workspace.read`, `workspace.write`, `external_process`) | Yes |
-| Versioned plugin API (`api_version = "1"`) | Yes |
-| Plugin UI views (dockable webview panels) | Yes |
-| Plugin UI commands (command palette) | Yes |
-| LSP `ontocore/runPlugin` `ui_view` action | Yes |
-| Explanation alternatives (multiple justifications) | Yes |
-| Explanation staleness metadata (`indexed_at`, `content_hash`) | Yes |
-| Graph asserted / inferred / combined modes | Yes |
-| Graph layouts (grid, circle, stack) and search | Yes |
-| Subprocess plugin path-jail hardening | Yes |
-| Multi-root index workspace root selection fix | Yes |
-
-**Plugin authoring:** see [Plugin authoring](guides/plugins.md).
-
-## New in v0.14.0
-
-| Capability | Status |
-|------------|--------|
-| Plugin manifest discovery (`.ontocore/plugins/*.toml`) | Yes |
-| Plugin host runtime (in-process + subprocess) | Yes |
-| Reference naming validator plugin | Yes |
-| Reference Markdown exporter plugin | Yes |
-| SHACL validator scaffold | Yes |
-| `ontocore plugins list/run`, `ontocore workflow` | Yes |
-| LSP `ontocore/listPlugins`, `ontocore/runPlugin` | Yes |
-| OntoUI capability registry + WorkspaceStore plugins slice | Yes |
-| owlmake workflow scaffold command | Yes |
-
-## New in v0.13.0
-
-| Capability | Status |
-|------------|--------|
-| WorkspaceStore + focus relay across webviews | Yes |
-| Schema browser (LSP `listSqlSchema`) | Yes |
-| Horned-OWL axiom SQL virtual tables | Yes |
-| `ontocore diff --pr-summary` | Yes |
-| `.ontocore/diagnostics.toml` rule config | Yes |
-| LSP semantic tokens (Turtle, OBO) | Yes |
-| Docs class hierarchy + property index | Yes |
-| Design tokens + shared UI primitives | Yes |
-
-## New in v0.12.0
-
-| Capability | Status |
-|------------|--------|
-| Turtle domain/range/characteristics/chain/annotation patch ops | Yes |
-| OBO write-back (`ontocore-obo`) | Yes |
-| OWL/XML (`.owx`) and RDF/XML Horned catalog | Yes (read-only inspector) |
-| DL unsatisfiability explanations | Yes (with EL/RL fallback) |
-| Protégé round-trip golden tests | Yes (`cargo test protege_roundtrip`) |
-| PreviewApplyBar on all inspector edits | Yes |
-
-## New in v0.11.3
-
-| Capability | Status |
-|------------|--------|
-| Entity Inspector reuses panel when navigating to another entity | Yes |
-| VS Code e2e tests for inspector navigation and workspace commands | Yes |
-
-## New in v0.11.2
-
-| Capability | Status |
-|------------|--------|
-| Webview panel routing with pre-existing query params (Cursor/VS Code) | Yes |
-| Entity Inspector panel recovery when webview stuck on Smoke fallback | Yes |
-
-## New in v0.11.1
-
-| Capability | Status |
-|------------|--------|
-| React webview `?panel=` bootstrap before React loads | Yes |
-
-## New in v0.11.0
-
-| Capability | Status |
-|------------|--------|
-| Open VSX publish (Cursor marketplace) | Yes |
-| LSP `textDocument/completion` (Turtle) | Yes |
-| LSP `textDocument/codeAction` (diagnostic quick fixes) | Yes |
-| `ontocore docs` + `ontocore-docs` crate | Yes |
-| Import patch ops + Manage Imports UI | Yes |
-| OBO indexed via `fastobo` (read path) | Yes |
-| OBO write-back (CLI/LSP patches) | v0.11 read-only in editor; **engine shipped v0.12**; **inspector write-back v0.13** — [OBO authoring](ontocode/obo-authoring.md) |
-
-## New in v0.10.0
-
-| Capability | Status |
-|------------|--------|
-| Incremental workspace indexing (content-hash reuse) | Yes |
-| Multi-root VS Code / LSP workspaces | Yes |
-| Stable `ontocore::Workspace` API | Yes |
-| `ontocore-diff` + `ontocore diff` CLI | Yes |
-| LSP `ontocore/semanticDiff` + VS Code panel | Yes |
-| Optional `.ontocore/cache/` disk index cache | Yes |
-
-## New in v0.9.0
-
-| Capability | Status |
-|------------|--------|
-| `ontocore` façade crate on crates.io | Yes |
-| `Workspace::open` experimental API | Yes |
-| **`ontocore-*` crate rename** (from `ontoindex-*`) | Yes |
-| **Ontologos 1.0 DL/auto classification** (`dl`, `auto` profiles) | Yes |
-| OntoCore / OntoCode documentation trees | Yes |
+Detailed notes for v0.9–v0.18 are in the [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md). This page lists **what is available in the current release**, not every past milestone.
 
 ## Manchester scope (v0.8+)
 
@@ -248,7 +99,7 @@
 
 ## What's next
 
-Forward milestones (stable plugin API, OWL/XML write-back, Protégé-competitive IDE → **v1.0**): **[Platform roadmap](roadmap.md)** · **[Known limitations](known-limitations.md)** · [v0.18 scope](design/v0.18_SCOPE.md).
+Forward milestones: RDF/XML + OWL/XML write-back (**v0.21**), full Protégé parity path (**v0.20–v0.25**), Protégé-competitive release (**1.0**). See **[Platform roadmap](roadmap.md)** · **[Known limitations](known-limitations.md)**.
 
 ## Where to learn more
 

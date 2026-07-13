@@ -1334,36 +1334,25 @@ pub fn handle_apply_axiom_patch(
             .ok_or_else(|| LspErrorPayload::patch_invalid("cannot read document".to_string()))?;
 
         let (patch_applied, patch_preview, patch_diagnostics) = if format == OntologyFormat::Obo {
-            let patches: Vec<ontocore_obo::OboPatchOp> = serde_json::from_value(params.patches)
-                .map_err(|e| {
-                    LspErrorPayload::patch_invalid(format!("invalid OBO patch JSON: {e}"))
-                })?;
-            let result =
-                ontocore_obo::apply_patches_to_text(&source, &patches, params.preview_only)
-                    .map_err(|e| LspErrorPayload::patch_invalid(e.to_string()))?;
-            let diagnostics = result
-                .diagnostics
-                .into_iter()
-                .map(|d| ontocore_owl::PatchDiagnostic { severity: d.severity, message: d.message })
-                .collect::<Vec<_>>();
-            (result.applied, result.preview_text, diagnostics)
-        } else if format == OntologyFormat::Turtle {
-            let patches: Vec<ontocore_owl::PatchOp> = serde_json::from_value(params.patches)
-                .map_err(|e| {
-                    LspErrorPayload::patch_invalid(format!("invalid Turtle patch JSON: {e}"))
-                })?;
-            let result = ontocore_owl::apply_patches_to_text(
-                &source,
-                &patches,
-                params.preview_only,
-                &namespaces,
-            )
-            .map_err(|e| match e {
-                ontocore_owl::OwlError::UnsupportedFormat(m) => {
-                    LspErrorPayload::unsupported_format(m)
-                }
-                _ => LspErrorPayload::patch_invalid(e.to_string()),
+            let transaction = ontocore_edit::parse_obo_input(params.patches).map_err(|e| {
+                LspErrorPayload::patch_invalid(format!("invalid OBO patch JSON: {e}"))
             })?;
+            let result = transaction
+                .apply_to_text(&source, params.preview_only, &namespaces)
+                .map_err(|e| LspErrorPayload::patch_invalid(e.to_string()))?;
+            (result.applied, result.preview_text, result.diagnostics)
+        } else if format == OntologyFormat::Turtle {
+            let transaction = ontocore_edit::parse_turtle_input(params.patches).map_err(|e| {
+                LspErrorPayload::patch_invalid(format!("invalid Turtle patch JSON: {e}"))
+            })?;
+            let result = transaction
+                .apply_to_text(&source, params.preview_only, &namespaces)
+                .map_err(|e| match e {
+                    ontocore_edit::EditError::UnsupportedFormat(m) => {
+                        LspErrorPayload::unsupported_format(m)
+                    }
+                    _ => LspErrorPayload::patch_invalid(e.to_string()),
+                })?;
             (result.applied, result.preview_text, result.diagnostics)
         } else {
             return Err(LspErrorPayload::unsupported_format(format!(

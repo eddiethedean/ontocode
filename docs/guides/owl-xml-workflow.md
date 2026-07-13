@@ -43,7 +43,7 @@ Protégé coexistence patterns: [Protégé coexistence](protege-coexistence.md).
 ## VS Code behavior
 
 1. Open a workspace containing `.owl` or `.owx` files.
-2. **Trust** the workspace and run **OntoCode: Index Workspace**.
+2. Run **OntoCode: Index Workspace** (bundled LSP works in Restricted Mode).
 3. Select an entity — the inspector shows axioms but edit controls are disabled.
 4. For edits, open the corresponding `.ttl` or `.obo` file, or create one and link via imports.
 

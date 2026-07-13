@@ -24,12 +24,14 @@ CLI install options (separate from the extension): [getting started (CLI)](getti
 
 ## Option A — VS Code Marketplace (recommended)
 
-1. Install [OntoCode from the Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) (v0.18.0+).
+1. Install [OntoCode from the Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) (v0.19.0+).
 2. **File → Open Folder…** and choose a directory with ontology files.
 3. OntoCode’s **bundled** language server runs without Trust; **Trust** only if you need custom `ontocode.lspPath` / `ontocode.robotPath`.
 4. Open the **OntoCode** activity bar and browse ontologies, classes, properties, individuals, and **Diagnostics**.
 
 For a full walkthrough, see [First success in 10 minutes](guides/first-success.md).
+
+**Tutorial pack:** download `ontocode-tutorial.zip` from [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) (offline/air-gapped), or use the curl commands in the first-success guide.
 
 > **Multi-root workspaces (v0.10+):** All workspace folders are indexed on open. **OntoCode: Index Workspace** may prompt you to pick a folder when multiple roots are open.
 

@@ -26,7 +26,7 @@ use std::path::{Path, PathBuf};
 #[command(
     name = "ontocore",
     version,
-    about = "Local-first ontology index and query engine (OntoCode v0.18)"
+    about = "Local-first ontology index and query engine (OntoCode v0.19)"
 )]
 struct Cli {
     #[command(subcommand)]
@@ -463,26 +463,40 @@ fn main() -> Result<()> {
                 .map(|d| d.namespaces.clone())
                 .unwrap_or_default();
             if ext == "obo" {
-                let patches: Vec<ontocore_obo::OboPatchOp> =
+                let value: serde_json::Value =
                     serde_json::from_slice(&patch_bytes).context("failed to parse patch JSON")?;
-                let result = ontocore_obo::apply_patches(&document, &patches, preview)
-                    .context("patch failed")?;
+                let transaction = ontocore_edit::parse_obo_input(value)
+                    .context("failed to parse OBO transaction")?;
+                let result = ontocore_edit::apply_transaction_to_path(
+                    &transaction,
+                    &document,
+                    preview,
+                    &namespaces,
+                )
+                .context("patch failed")?;
                 println!("{}", serde_json::to_string_pretty(&result)?);
                 let has_errors = result.diagnostics.iter().any(|d| d.severity == "error");
-                if has_errors || (!preview && !patches.is_empty() && !result.applied) {
+                if has_errors || (!preview && !transaction.is_empty() && !result.applied) {
                     bail!("patch failed with {} diagnostic(s)", result.diagnostics.len().max(1));
                 }
                 if !preview && result.applied {
                     println!("applied");
                 }
             } else if ext == "ttl" {
-                let patches: Vec<ontocore_owl::PatchOp> =
+                let value: serde_json::Value =
                     serde_json::from_slice(&patch_bytes).context("failed to parse patch JSON")?;
-                let result = ontocore_owl::apply_patches(&document, &patches, preview, &namespaces)
-                    .context("patch failed")?;
+                let transaction = ontocore_edit::parse_turtle_input(value)
+                    .context("failed to parse Turtle transaction")?;
+                let result = ontocore_edit::apply_transaction_to_path(
+                    &transaction,
+                    &document,
+                    preview,
+                    &namespaces,
+                )
+                .context("patch failed")?;
                 println!("{}", serde_json::to_string_pretty(&result)?);
                 let has_errors = result.diagnostics.iter().any(|d| d.severity == "error");
-                if has_errors || (!preview && !patches.is_empty() && !result.applied) {
+                if has_errors || (!preview && !transaction.is_empty() && !result.applied) {
                     bail!("patch failed with {} diagnostic(s)", result.diagnostics.len().max(1));
                 }
                 if !preview && result.applied {

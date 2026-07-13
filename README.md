@@ -2,12 +2,12 @@
 
 **Edit OWL/RDF/OBO ontologies in VS Code — with a Rust engine for CI.**
 
-Install the [VS Code extension](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode), open a folder of `.ttl` / `.obo` files, and use the **OntoCode** activity bar to browse and edit. Need CI gates? `cargo install ontocore-cli --locked` then `ontocore validate ./ontologies`.
+Install the [VS Code extension](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode), open a folder of `.ttl` / `.obo` files, and use the **OntoCode** activity bar to browse and edit. For CI gates, pin `cargo install ontocore-cli --locked --version 0.19.0` (first compile can take 15–30+ minutes) then `ontocore validate ./ontologies`.
 
 **Editable today:** Turtle (`.ttl`) and OBO (`.obo`). Other formats index and query as read-only — see [Known limitations](https://ontocode-vs.readthedocs.io/en/latest/known-limitations/).
 **Catalog SQL (subset):** not full SQL — prefer SPARQL for graph patterns.
 
-**Current release: v0.18.2** · [10-minute tutorial](https://ontocode-vs.readthedocs.io/en/latest/guides/first-success/) · [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) · [Changelog](CHANGELOG.md) · [Docs](https://ontocode-vs.readthedocs.io/en/latest/)
+**Current release: v0.19.0** · [10-minute tutorial](https://ontocode-vs.readthedocs.io/en/latest/guides/first-success/) · [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) · [Changelog](CHANGELOG.md) · [Docs](https://ontocode-vs.readthedocs.io/en/latest/)
 
 [![CI](https://github.com/eddiethedean/ontocode/actions/workflows/ci.yml/badge.svg)](https://github.com/eddiethedean/ontocode/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue)](https://github.com/eddiethedean/ontocode/blob/main/LICENSE-MIT)
@@ -23,7 +23,7 @@ Install the [VS Code extension](https://marketplace.visualstudio.com/items?itemN
 | I want to… | Start here |
 |------------|------------|
 | **Edit ontologies in VS Code** | **[First success (~10 min)](https://ontocode-vs.readthedocs.io/en/latest/guides/first-success/)** |
-| Validate or query in CI | `cargo install ontocore-cli --locked` → [CI guide](https://ontocode-vs.readthedocs.io/en/latest/ci-integration/) |
+| Validate or query in CI | `cargo install ontocore-cli --locked --version 0.19.0` → [CI guide](https://ontocode-vs.readthedocs.io/en/latest/ci-integration/) (first compile: 15–30+ min) |
 | Decide if it fits | [Known limitations](https://ontocode-vs.readthedocs.io/en/latest/known-limitations/) · [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) |
 | Embed in Rust | [Rust library guide](https://ontocode-vs.readthedocs.io/en/latest/guides/rust-library/) |
 
@@ -52,10 +52,10 @@ Release CLI tarballs are **Linux x64 only**; macOS/Windows use `cargo install` (
 
 **VS Code:** Install [OntoCode](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) → open a folder with ontology files → click the **OntoCode** activity bar. Edit **Turtle (`.ttl`)** and **OBO (`.obo`)** in the Entity Inspector. RDF/XML and OWL/XML are indexed for browse/query only — [Supported formats](https://ontocode-vs.readthedocs.io/en/latest/supported-formats/). OntoCode’s **bundled** language server runs in trusted and Restricted Mode; **Trust** only if you set custom `ontocode.lspPath` or `ontocode.robotPath`.
 
-**CLI (install):**
+**CLI (install):** First `cargo install` compiles dependencies — expect **15–30+ minutes** on a cold machine (Rust 1.88+). Pin releases in CI.
 
 ```bash
-cargo install ontocore-cli --locked
+cargo install ontocore-cli --locked --version 0.19.0
 # Catalog SQL (subset) — not full SQL; see docs
 ontocore query /path/to/ontologies "SELECT * FROM classes"
 ontocore validate /path/to/ontologies
@@ -86,9 +86,9 @@ cargo run -- validate fixtures
         └─────────────┘              └──────────────────┘
 ```
 
-Platform docs: [Vision](https://ontocode-vs.readthedocs.io/en/latest/vision/) · [Architecture](ARCHITECTURE.md) · [Roadmap](ROADMAP.md) · [Protégé parity](https://ontocode-vs.readthedocs.io/en/latest/design/PROTEGE_PARITY/)
+Platform docs: [Vision](https://ontocode-vs.readthedocs.io/en/latest/vision/) · [Architecture](ARCHITECTURE.md) · [Roadmap hub](https://ontocode-vs.readthedocs.io/en/latest/roadmap-hub/) · [Protégé vs OntoCode](https://ontocode-vs.readthedocs.io/en/latest/guides/protege-decision/)
 
-**v0.18.2** patches the Protégé Desktop parity gate with Windows path normalization, reasoner cancel/`ops_lock`, Manchester cardinality, Find Usages, and panel restore fixes. See [SHIPPED](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/), [v0.18.2 migration](docs/migration/v0.18.2.md), and [What's new in v0.18](docs/migration/v0.18.md).
+**v0.19.0** adds the semantic transaction apply path (`ontocore-edit`) and Protégé parity program baseline. See [SHIPPED](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/), [v0.19 migration](docs/migration/v0.19.md), and [What's new in v0.18](docs/migration/v0.18.md).
 
 ## Development
 

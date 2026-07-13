@@ -1,18 +1,20 @@
 # Rust & CLI (OntoCore)
 
-**OntoCore** is the Rust semantic workspace engine behind OntoCode: the `ontocore` CLI (OntoCore CLI), published `ontocore` and `ontocore-*` crates on [crates.io](https://crates.io/search?q=ontocore), and the `ontocore-lsp` language server (OntoCore LSP, bundled in the VS Code extension).
+> **Canonical embedder guide:** [Rust library guide](rust-library.md) — `Workspace`, classification, transactions, and examples.
+>
+> This page is a short CLI-oriented index. For VS Code only, see [OntoCode VS Code extension](../ontocode/vscode-extension.md).
 
-> **Looking for the VS Code extension only?** See [OntoCode VS Code extension](../ontocode/vscode-extension.md).
+**OntoCore** is the Rust semantic workspace engine: `ontocore` CLI, `ontocore-*` crates on [crates.io](https://crates.io/search?q=ontocore), and `ontocore-lsp` (bundled in the VS Code extension).
 
 ## Quick start
 
 ```bash
-cargo install ontocore-cli --locked
+cargo install ontocore-cli --locked --version 0.19.0
 ontocore query /path/to/ontologies "SELECT * FROM classes"
 ontocore validate /path/to/ontologies
 ```
 
-No clone required. Release binaries: [release integrity](../release-integrity.md).
+**Linux CI:** prefer the [release binary](../ci-integration.md) over `cargo install` on every job.
 
 [:octicons-arrow-right-24: CLI getting started](../getting-started.md)
 
@@ -25,27 +27,22 @@ No clone required. Release binaries: [release integrity](../release-integrity.md
 | SPARQL | `ontocore sparql` — [SPARQL reference](../sparql-reference.md) |
 | Lint / CI gate | `ontocore validate` — [CI integration](../ci-integration.md) |
 | EL / RL / RDFS classify | `ontocore classify` — [Reasoner](reasoner.md) |
-| Turtle patches | `ontocore patch` — [Patch reference](../patch-reference.md) |
+| Turtle / OBO patches | `ontocore patch` — [Patch reference](../patch-reference.md) |
 | Workspace refactor | `ontocore refactor` — [Refactoring guide](refactoring.md) |
 
 ## Rust library embedding
 
 | Topic | Guide |
 |-------|-------|
-| OntoCore overview | [ontocore/index.md](../ontocore/index.md) |
-| Crate map, examples | [Rust library guide](rust-library.md) · [Rust API reference](../ontocore/rust-api.md) |
-| `Workspace` API | [`examples/ontocore_workspace.rs`](https://github.com/eddiethedean/ontocode/blob/main/examples/ontocore_workspace.rs) |
+| **Start here** | [Rust library guide](rust-library.md) |
+| API crosswalk | [Rust API reference](../ontocore/rust-api.md) |
+| Crate map | [ontocore/crate-map.md](../ontocore/crate-map.md) |
+| `Workspace` example | [`examples/ontocore_workspace.rs`](https://github.com/eddiethedean/ontocode/blob/main/examples/ontocore_workspace.rs) |
 
-Primary dependency: `ontocore = "0.18"`.
-
-**Install pinning:** `cargo install ontocore-cli --locked` tracks the latest compatible crates.io release. For reproducible CI or audits, pin the patch: `cargo install ontocore-cli --locked --version 0.18.2`. See [API stability](api-stability.md) and [Rust API reference](../ontocore/rust-api.md).
-
-## LSP integration
-
-OntoCore LSP is provided by `ontocore-lsp`. Wire format: [OntoCore LSP](../ontocore/lsp.md) · [LSP API](../lsp-api.md).
+Primary dependency: `ontocore = "0.19"`.
 
 ## Related
 
-- [OntoCore architecture](../ontocore/architecture.md)
-- [OntoCore roadmap](../ontocore/roadmap.md)
-- [What ships today](../SHIPPED.md)
+- [OntoCore overview](../ontocore/index.md)
+- [Which artifact?](which-artifact.md)
+- [API stability (pre-1.0)](api-stability.md)

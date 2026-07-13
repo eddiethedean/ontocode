@@ -3,6 +3,7 @@
 # EPIC-002 --- Complete OWL 2 Authoring
 
 **Epic ID:** EPIC-002\
+**GitHub:** https://github.com/eddiethedean/ontocode/issues/248\
 **Status:** Planned\
 **Priority:** P0 (Release Blocking)\
 **Target Release:** OntoCode 1.0.0

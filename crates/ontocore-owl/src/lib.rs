@@ -8,6 +8,7 @@ mod load;
 pub mod manchester;
 pub mod patch;
 mod span;
+mod turtle_lex;
 
 pub use bridge::{bridge_ontology, OwlBridgeResult};
 pub use error::{OwlError, Result};

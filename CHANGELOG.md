@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Extension normalizes Windows `\\?\` paths from LSP canonicalize so Prefix Manager and inspector patches resolve workspace documents
 - Duplicate `ontocode.showImportsPanel` registration no longer breaks extension activation
+- Reasoner ops_lock release test no longer deadlocks by holding the mutex across reasoner join
 - Reasoner cancel releases `ops_lock` during classify so index/patch ops are not blocked; cancelled runs skip snapshot updates ([#211](https://github.com/eddiethedean/ontocode/issues/211))
 - Manchester parser accepts Protégé-style property-first cardinality (`ex:hasPart min 1 ex:Organ`) and normalizes to the same form ([#226](https://github.com/eddiethedean/ontocode/issues/226))
 - Manchester Turtle emit writes qualified cardinalities as `"N"^^xsd:nonNegativeInteger` per OWL 2 RDF mapping ([#231](https://github.com/eddiethedean/ontocode/issues/231))

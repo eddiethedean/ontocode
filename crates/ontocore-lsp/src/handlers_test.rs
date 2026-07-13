@@ -837,9 +837,13 @@ fn reasoner_classify_releases_ops_lock_during_classify() {
     }
 
     let lock_start = Instant::now();
-    let ops_lock = state.ops_lock();
-    let _unused = ops_lock.lock().expect("ops_lock should be available during classify");
-    let lock_elapsed = lock_start.elapsed();
+    let lock_elapsed = {
+        let ops_lock = state.ops_lock();
+        let _guard = ops_lock.lock().expect("ops_lock should be available during classify");
+        let elapsed = lock_start.elapsed();
+        // Release before join: the reasoner reacquires ops_lock to store the snapshot.
+        elapsed
+    };
     TEST_REASONER_CLASSIFY_PAUSE_MS.store(0, Ordering::SeqCst);
 
     reasoner.join().expect("reasoner thread");

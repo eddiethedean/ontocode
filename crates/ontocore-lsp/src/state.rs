@@ -132,6 +132,11 @@ impl ServerState {
         self.reasoner_run_generation.load(Ordering::SeqCst) == generation
     }
 
+    /// Bump the reasoner generation so in-flight classify cannot publish a stale snapshot.
+    pub fn invalidate_in_flight_reasoner_runs(&self) {
+        self.reasoner_run_generation.fetch_add(1, Ordering::SeqCst);
+    }
+
     pub fn active_ontology_id(&self) -> Option<String> {
         self.inner.read().ok()?.active_ontology_id.clone()
     }
@@ -155,12 +160,16 @@ impl ServerState {
         let mut guard = self.inner.write().map_err(|e| e.to_string())?;
         if canonical.is_empty() {
             let _ = clear_workspace_state_inner(&mut guard);
+            drop(guard);
+            self.invalidate_in_flight_reasoner_runs();
             return Ok(());
         }
         let primary = canonical[0].clone();
         on_workspace_roots_changed_inner(&mut guard, &canonical);
         guard.workspace_roots = canonical;
         guard.workspace = Some(primary);
+        drop(guard);
+        self.invalidate_in_flight_reasoner_runs();
         Ok(())
     }
 
@@ -168,11 +177,13 @@ impl ServerState {
     /// Returns previously published diagnostic URIs so the caller can clear the Problems panel.
     pub fn clear_workspace_state(&self) -> BTreeSet<String> {
         let _ops = self.ops_lock.lock().ok();
-        if let Ok(mut guard) = self.inner.write() {
+        let uris = if let Ok(mut guard) = self.inner.write() {
             clear_workspace_state_inner(&mut guard)
         } else {
             BTreeSet::new()
-        }
+        };
+        self.invalidate_in_flight_reasoner_runs();
+        uris
     }
 
     /// Invalidate catalog/reasoner and prune buffers outside the current roots.
@@ -187,6 +198,7 @@ impl ServerState {
                 on_workspace_roots_changed_inner(&mut guard, &roots);
             }
         }
+        self.invalidate_in_flight_reasoner_runs();
     }
 
     pub fn workspace_roots(&self) -> Vec<PathBuf> {
@@ -256,6 +268,9 @@ impl ServerState {
         guard.explanation_cache.clear();
         guard.explanation_cache_order.clear();
         guard.plugin_diagnostics = plugin_diags;
+        drop(guard);
+        // Patch/reindex must invalidate in-flight classify so it cannot republish H1 after H2.
+        self.invalidate_in_flight_reasoner_runs();
 
         Ok((stats, indexed_at))
     }

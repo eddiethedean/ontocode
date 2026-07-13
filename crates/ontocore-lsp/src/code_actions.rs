@@ -144,14 +144,14 @@ fn remove_line_preserving_endings(content: &str, line_1based: usize) -> Option<S
 }
 
 fn full_document_edit(old: &str, new_text: &str) -> TextEdit {
-    let end_line = old.lines().count().saturating_sub(1) as u32;
-    let last_len =
-        old.lines().last().map(|l| crate::positions::byte_col_to_utf16(l, l.len())).unwrap_or(0);
+    // Prefer u32::MAX end so trailing newlines are included (str::lines() drops them).
+    let end = if old.is_empty() {
+        lsp_types::Position { line: 0, character: 0 }
+    } else {
+        lsp_types::Position { line: u32::MAX, character: 0 }
+    };
     TextEdit {
-        range: Range {
-            start: lsp_types::Position { line: 0, character: 0 },
-            end: lsp_types::Position { line: end_line, character: last_len },
-        },
+        range: Range { start: lsp_types::Position { line: 0, character: 0 }, end },
         new_text: new_text.to_string(),
     }
 }
@@ -319,5 +319,17 @@ mod tests {
         assert_eq!(edit.new_text, "line1\r\nline3\r\n");
         assert!(!edit.new_text.contains('\n') || edit.new_text.contains("\r\n"));
         assert!(!edit.new_text.replace("\r\n", "").contains('\n'));
+        assert_eq!(
+            edit.range.end.line,
+            u32::MAX,
+            "full-document replace must cover trailing newlines"
+        );
+    }
+
+    #[test]
+    fn full_document_edit_covers_trailing_newline() {
+        let edit = full_document_edit("a\nb\n", "a\n");
+        assert_eq!(edit.range.end.line, u32::MAX);
+        assert_eq!(edit.new_text, "a\n");
     }
 }

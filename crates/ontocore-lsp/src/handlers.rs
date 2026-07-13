@@ -1105,7 +1105,8 @@ fn jail_robot_path_args(
     fn path_expect_for_long_flag(flag: &str) -> Option<PathExpect> {
         match flag {
             "--input" | "--output" | "--report" | "--catalog" | "--ontology" | "--left"
-            | "--right" | "--merge-input" | "--output-dir" | "--update" => {
+            | "--right" | "--merge-input" | "--output-dir" | "--update" | "--prefixes"
+            | "--add-prefixes" | "--inputs" => {
                 Some(PathExpect { min: 1, max: 1 })
             }
             // ROBOT: --query/--select/--construct take query file + output file.
@@ -1246,87 +1247,8 @@ pub fn handle_apply_axiom_patch(
         ));
     }
 
-    let entity_iri = if format == OntologyFormat::Obo {
-        serde_json::from_value::<Vec<ontocore_obo::OboPatchOp>>(params.patches.clone())
-            .ok()
-            .and_then(|p| {
-                p.first().map(|op| match op {
-                    ontocore_obo::OboPatchOp::SetName { term_id, .. }
-                    | ontocore_obo::OboPatchOp::AddSynonym { term_id, .. }
-                    | ontocore_obo::OboPatchOp::RemoveSynonym { term_id, .. }
-                    | ontocore_obo::OboPatchOp::AddDef { term_id, .. }
-                    | ontocore_obo::OboPatchOp::RemoveDef { term_id }
-                    | ontocore_obo::OboPatchOp::AddXref { term_id, .. }
-                    | ontocore_obo::OboPatchOp::RemoveXref { term_id, .. }
-                    | ontocore_obo::OboPatchOp::SetNamespace { term_id, .. }
-                    | ontocore_obo::OboPatchOp::SetDeprecated { term_id, .. }
-                    | ontocore_obo::OboPatchOp::AddIsA { term_id, .. }
-                    | ontocore_obo::OboPatchOp::RemoveIsA { term_id, .. } => term_id.clone(),
-                })
-            })
-    } else {
-        serde_json::from_value::<Vec<ontocore_owl::PatchOp>>(params.patches.clone()).ok().and_then(
-            |patches| {
-                patches.first().map(|p| match p {
-                    ontocore_owl::PatchOp::CreateEntity { entity_iri, .. }
-                    | ontocore_owl::PatchOp::DeleteEntity { entity_iri }
-                    | ontocore_owl::PatchOp::SetLabel { entity_iri, .. }
-                    | ontocore_owl::PatchOp::AddLabel { entity_iri, .. }
-                    | ontocore_owl::PatchOp::RemoveLabel { entity_iri, .. }
-                    | ontocore_owl::PatchOp::SetComment { entity_iri, .. }
-                    | ontocore_owl::PatchOp::AddComment { entity_iri, .. }
-                    | ontocore_owl::PatchOp::RemoveComment { entity_iri, .. }
-                    | ontocore_owl::PatchOp::AddSubClassOf { entity_iri, .. }
-                    | ontocore_owl::PatchOp::RemoveSubClassOf { entity_iri, .. }
-                    | ontocore_owl::PatchOp::AddComplexSubClassOf { entity_iri, .. }
-                    | ontocore_owl::PatchOp::RemoveComplexSubClassOf { entity_iri, .. }
-                    | ontocore_owl::PatchOp::AddEquivalentClass { entity_iri, .. }
-                    | ontocore_owl::PatchOp::RemoveEquivalentClass { entity_iri, .. }
-                    | ontocore_owl::PatchOp::SetEquivalentClass { entity_iri, .. }
-                    | ontocore_owl::PatchOp::SetDeprecated { entity_iri, .. }
-                    | ontocore_owl::PatchOp::AddDisjointClass { entity_iri, .. }
-                    | ontocore_owl::PatchOp::RemoveDisjointClass { entity_iri, .. }
-                    | ontocore_owl::PatchOp::AddDomain { entity_iri, .. }
-                    | ontocore_owl::PatchOp::RemoveDomain { entity_iri, .. }
-                    | ontocore_owl::PatchOp::AddRange { entity_iri, .. }
-                    | ontocore_owl::PatchOp::RemoveRange { entity_iri, .. }
-                    | ontocore_owl::PatchOp::SetFunctional { entity_iri, .. }
-                    | ontocore_owl::PatchOp::SetInverseFunctional { entity_iri, .. }
-                    | ontocore_owl::PatchOp::SetTransitive { entity_iri, .. }
-                    | ontocore_owl::PatchOp::SetSymmetric { entity_iri, .. }
-                    | ontocore_owl::PatchOp::SetAsymmetric { entity_iri, .. }
-                    | ontocore_owl::PatchOp::SetReflexive { entity_iri, .. }
-                    | ontocore_owl::PatchOp::SetIrreflexive { entity_iri, .. }
-                    | ontocore_owl::PatchOp::AddPropertyChain { entity_iri, .. }
-                    | ontocore_owl::PatchOp::RemovePropertyChain { entity_iri, .. }
-                    | ontocore_owl::PatchOp::AddClassAssertion { entity_iri, .. }
-                    | ontocore_owl::PatchOp::RemoveClassAssertion { entity_iri, .. }
-                    | ontocore_owl::PatchOp::AddObjectPropertyAssertion { entity_iri, .. }
-                    | ontocore_owl::PatchOp::RemoveObjectPropertyAssertion { entity_iri, .. }
-                    | ontocore_owl::PatchOp::AddDataPropertyAssertion { entity_iri, .. }
-                    | ontocore_owl::PatchOp::RemoveDataPropertyAssertion { entity_iri, .. }
-                    | ontocore_owl::PatchOp::AddAnnotation { entity_iri, .. }
-                    | ontocore_owl::PatchOp::RemoveAnnotation { entity_iri, .. } => {
-                        entity_iri.clone()
-                    }
-                    ontocore_owl::PatchOp::AddImport { ontology_iri, .. }
-                    | ontocore_owl::PatchOp::RemoveImport { ontology_iri, .. }
-                    | ontocore_owl::PatchOp::SetOntologyIri { ontology_iri }
-                    | ontocore_owl::PatchOp::SetVersionIri { ontology_iri, .. }
-                    | ontocore_owl::PatchOp::AddOntologyAnnotation { ontology_iri, .. }
-                    | ontocore_owl::PatchOp::RemoveOntologyAnnotation { ontology_iri, .. } => {
-                        ontology_iri.clone()
-                    }
-                    ontocore_owl::PatchOp::AddPrefix { .. }
-                    | ontocore_owl::PatchOp::RemovePrefix { .. }
-                    | ontocore_owl::PatchOp::SetPrefix { .. } => String::new(),
-                })
-            },
-        )
-    };
-
     // Serialize applies without holding ops_lock across enqueue_sync (index worker needs it).
-    let (patch_result, workspace_edit, needs_reindex) = {
+    let (patch_result, workspace_edit, needs_reindex, entity_iri) = {
         let ops_lock = state.ops_lock();
         let _guard = ops_lock.lock().map_err(|e| LspErrorPayload::patch_invalid(e.to_string()))?;
 
@@ -1334,33 +1256,36 @@ pub fn handle_apply_axiom_patch(
             .document_text(&document_path)
             .ok_or_else(|| LspErrorPayload::patch_invalid("cannot read document".to_string()))?;
 
-        let (patch_applied, patch_preview, patch_diagnostics) = if format == OntologyFormat::Obo {
-            let transaction = ontocore_edit::parse_obo_input(params.patches).map_err(|e| {
-                LspErrorPayload::patch_invalid(format!("invalid OBO patch JSON: {e}"))
-            })?;
-            let result = transaction
-                .apply_to_text(&source, params.preview_only, &namespaces)
-                .map_err(|e| LspErrorPayload::patch_invalid(e.to_string()))?;
-            (result.applied, result.preview_text, result.diagnostics)
-        } else if format == OntologyFormat::Turtle {
-            let transaction = ontocore_edit::parse_turtle_input(params.patches).map_err(|e| {
-                LspErrorPayload::patch_invalid(format!("invalid Turtle patch JSON: {e}"))
-            })?;
-            let result = transaction
-                .apply_to_text(&source, params.preview_only, &namespaces)
-                .map_err(|e| match e {
-                    ontocore_edit::EditError::UnsupportedFormat(m) => {
-                        LspErrorPayload::unsupported_format(m)
-                    }
-                    _ => LspErrorPayload::patch_invalid(e.to_string()),
+        let (transaction, patch_applied, patch_preview, patch_diagnostics) =
+            if format == OntologyFormat::Obo {
+                let transaction = ontocore_edit::parse_obo_input(params.patches).map_err(|e| {
+                    LspErrorPayload::patch_invalid(format!("invalid OBO patch JSON: {e}"))
                 })?;
-            (result.applied, result.preview_text, result.diagnostics)
-        } else {
-            return Err(LspErrorPayload::unsupported_format(format!(
-                "write-back supports Turtle and OBO only, got {}",
-                format.as_str()
-            )));
-        };
+                let result = transaction
+                    .apply_to_text(&source, params.preview_only, &namespaces)
+                    .map_err(|e| LspErrorPayload::patch_invalid(e.to_string()))?;
+                (transaction, result.applied, result.preview_text, result.diagnostics)
+            } else if format == OntologyFormat::Turtle {
+                let transaction = ontocore_edit::parse_turtle_input(params.patches).map_err(|e| {
+                    LspErrorPayload::patch_invalid(format!("invalid Turtle patch JSON: {e}"))
+                })?;
+                let result = transaction
+                    .apply_to_text(&source, params.preview_only, &namespaces)
+                    .map_err(|e| match e {
+                        ontocore_edit::EditError::UnsupportedFormat(m) => {
+                            LspErrorPayload::unsupported_format(m)
+                        }
+                        _ => LspErrorPayload::patch_invalid(e.to_string()),
+                    })?;
+                (transaction, result.applied, result.preview_text, result.diagnostics)
+            } else {
+                return Err(LspErrorPayload::unsupported_format(format!(
+                    "write-back supports Turtle and OBO only, got {}",
+                    format.as_str()
+                )));
+            };
+
+        let entity_iri = primary_iri_from_transaction(&transaction);
 
         let patch_result = ontocore_owl::ApplyPatchResult {
             applied: patch_applied,
@@ -1412,7 +1337,7 @@ pub fn handle_apply_axiom_patch(
                 needs_reindex = true;
             }
         }
-        (patch_result, workspace_edit, needs_reindex)
+        (patch_result, workspace_edit, needs_reindex, entity_iri)
     };
 
     let mut reindex_warning = None;
@@ -1432,6 +1357,87 @@ pub fn handle_apply_axiom_patch(
         entity_detail,
         reindex_warning,
         workspace_edit,
+    })
+}
+
+fn primary_iri_from_transaction(transaction: &ontocore_edit::Transaction) -> Option<String> {
+    if let Ok(patches) = transaction.turtle_patches() {
+        return patches.first().and_then(primary_iri_from_turtle_patch).filter(|s| !s.is_empty());
+    }
+    if let Ok(patches) = transaction.obo_patches() {
+        return patches.first().and_then(primary_iri_from_obo_patch).filter(|s| !s.is_empty());
+    }
+    None
+}
+
+fn primary_iri_from_obo_patch(op: &ontocore_obo::OboPatchOp) -> Option<String> {
+    Some(match op {
+        ontocore_obo::OboPatchOp::SetName { term_id, .. }
+        | ontocore_obo::OboPatchOp::AddSynonym { term_id, .. }
+        | ontocore_obo::OboPatchOp::RemoveSynonym { term_id, .. }
+        | ontocore_obo::OboPatchOp::AddDef { term_id, .. }
+        | ontocore_obo::OboPatchOp::RemoveDef { term_id }
+        | ontocore_obo::OboPatchOp::AddXref { term_id, .. }
+        | ontocore_obo::OboPatchOp::RemoveXref { term_id, .. }
+        | ontocore_obo::OboPatchOp::SetNamespace { term_id, .. }
+        | ontocore_obo::OboPatchOp::SetDeprecated { term_id, .. }
+        | ontocore_obo::OboPatchOp::AddIsA { term_id, .. }
+        | ontocore_obo::OboPatchOp::RemoveIsA { term_id, .. } => term_id.clone(),
+    })
+}
+
+fn primary_iri_from_turtle_patch(p: &ontocore_owl::PatchOp) -> Option<String> {
+    Some(match p {
+        ontocore_owl::PatchOp::CreateEntity { entity_iri, .. }
+        | ontocore_owl::PatchOp::DeleteEntity { entity_iri }
+        | ontocore_owl::PatchOp::SetLabel { entity_iri, .. }
+        | ontocore_owl::PatchOp::AddLabel { entity_iri, .. }
+        | ontocore_owl::PatchOp::RemoveLabel { entity_iri, .. }
+        | ontocore_owl::PatchOp::SetComment { entity_iri, .. }
+        | ontocore_owl::PatchOp::AddComment { entity_iri, .. }
+        | ontocore_owl::PatchOp::RemoveComment { entity_iri, .. }
+        | ontocore_owl::PatchOp::AddSubClassOf { entity_iri, .. }
+        | ontocore_owl::PatchOp::RemoveSubClassOf { entity_iri, .. }
+        | ontocore_owl::PatchOp::AddComplexSubClassOf { entity_iri, .. }
+        | ontocore_owl::PatchOp::RemoveComplexSubClassOf { entity_iri, .. }
+        | ontocore_owl::PatchOp::AddEquivalentClass { entity_iri, .. }
+        | ontocore_owl::PatchOp::RemoveEquivalentClass { entity_iri, .. }
+        | ontocore_owl::PatchOp::SetEquivalentClass { entity_iri, .. }
+        | ontocore_owl::PatchOp::SetDeprecated { entity_iri, .. }
+        | ontocore_owl::PatchOp::AddDisjointClass { entity_iri, .. }
+        | ontocore_owl::PatchOp::RemoveDisjointClass { entity_iri, .. }
+        | ontocore_owl::PatchOp::AddDomain { entity_iri, .. }
+        | ontocore_owl::PatchOp::RemoveDomain { entity_iri, .. }
+        | ontocore_owl::PatchOp::AddRange { entity_iri, .. }
+        | ontocore_owl::PatchOp::RemoveRange { entity_iri, .. }
+        | ontocore_owl::PatchOp::SetFunctional { entity_iri, .. }
+        | ontocore_owl::PatchOp::SetInverseFunctional { entity_iri, .. }
+        | ontocore_owl::PatchOp::SetTransitive { entity_iri, .. }
+        | ontocore_owl::PatchOp::SetSymmetric { entity_iri, .. }
+        | ontocore_owl::PatchOp::SetAsymmetric { entity_iri, .. }
+        | ontocore_owl::PatchOp::SetReflexive { entity_iri, .. }
+        | ontocore_owl::PatchOp::SetIrreflexive { entity_iri, .. }
+        | ontocore_owl::PatchOp::AddPropertyChain { entity_iri, .. }
+        | ontocore_owl::PatchOp::RemovePropertyChain { entity_iri, .. }
+        | ontocore_owl::PatchOp::AddClassAssertion { entity_iri, .. }
+        | ontocore_owl::PatchOp::RemoveClassAssertion { entity_iri, .. }
+        | ontocore_owl::PatchOp::AddObjectPropertyAssertion { entity_iri, .. }
+        | ontocore_owl::PatchOp::RemoveObjectPropertyAssertion { entity_iri, .. }
+        | ontocore_owl::PatchOp::AddDataPropertyAssertion { entity_iri, .. }
+        | ontocore_owl::PatchOp::RemoveDataPropertyAssertion { entity_iri, .. }
+        | ontocore_owl::PatchOp::AddAnnotation { entity_iri, .. }
+        | ontocore_owl::PatchOp::RemoveAnnotation { entity_iri, .. } => entity_iri.clone(),
+        ontocore_owl::PatchOp::AddImport { ontology_iri, .. }
+        | ontocore_owl::PatchOp::RemoveImport { ontology_iri, .. }
+        | ontocore_owl::PatchOp::SetOntologyIri { ontology_iri }
+        | ontocore_owl::PatchOp::SetVersionIri { ontology_iri, .. }
+        | ontocore_owl::PatchOp::AddOntologyAnnotation { ontology_iri, .. }
+        | ontocore_owl::PatchOp::RemoveOntologyAnnotation { ontology_iri, .. } => {
+            ontology_iri.clone()
+        }
+        ontocore_owl::PatchOp::AddPrefix { .. }
+        | ontocore_owl::PatchOp::RemovePrefix { .. }
+        | ontocore_owl::PatchOp::SetPrefix { .. } => String::new(),
     })
 }
 
@@ -2893,6 +2899,43 @@ mod tests {
             "/tmp/evil-results".to_string(),
         ];
         assert!(jail_robot_path_args(&roots, &args).is_err());
+    }
+
+    #[test]
+    fn jail_robot_rejects_prefixes_equals_outside_workspace() {
+        let dir = tempfile::tempdir().unwrap();
+        let roots = vec![dir.path().to_path_buf()];
+        let input = dir.path().join("in.ttl");
+        std::fs::write(&input, "").unwrap();
+        let args = vec![
+            "convert".to_string(),
+            format!("--input={}", input.display()),
+            "--prefixes=/tmp/evil.jsonld".to_string(),
+            format!("--output={}", dir.path().join("out.owl").display()),
+        ];
+        assert!(jail_robot_path_args(&roots, &args).is_err());
+    }
+
+    #[test]
+    fn jail_robot_rejects_inputs_and_add_prefixes_outside_workspace() {
+        let dir = tempfile::tempdir().unwrap();
+        let roots = vec![dir.path().to_path_buf()];
+        let input = dir.path().join("in.ttl");
+        std::fs::write(&input, "").unwrap();
+        let args_inputs = vec![
+            "merge".to_string(),
+            format!("--input={}", input.display()),
+            "--inputs=/tmp/outside.owl".to_string(),
+            format!("--output={}", dir.path().join("out.owl").display()),
+        ];
+        assert!(jail_robot_path_args(&roots, &args_inputs).is_err());
+        let args_add = vec![
+            "convert".to_string(),
+            format!("--input={}", input.display()),
+            "--add-prefixes=/tmp/evil.jsonld".to_string(),
+            format!("--output={}", dir.path().join("out.owl").display()),
+        ];
+        assert!(jail_robot_path_args(&roots, &args_add).is_err());
     }
 
     #[test]

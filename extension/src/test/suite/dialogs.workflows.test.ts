@@ -3,6 +3,7 @@ import * as fs from "fs";
 import * as path from "path";
 import * as vscode from "vscode";
 import { LanguageClient } from "vscode-languageclient/node";
+import { pathsEqual } from "../../utils/pathUnder";
 import { FIXTURE_IRIS, fixturesWorkspaceUri } from "./helpers";
 
 interface OntoCodeTestHooks {
@@ -61,9 +62,8 @@ async function restoreFixtureFile(
   original: string
 ): Promise<void> {
   fs.writeFileSync(filePath, original, "utf8");
-  const normalized = path.resolve(filePath);
   for (const doc of vscode.workspace.textDocuments) {
-    if (path.resolve(doc.uri.fsPath) !== normalized) {
+    if (!pathsEqual(doc.uri.fsPath, filePath)) {
       continue;
     }
     if (doc.isDirty) {
@@ -123,8 +123,7 @@ suite("Dialog workflows (VS Code e2e)", () => {
       assert.ok(
         snapshot.documents.some(
           (doc) =>
-            path.resolve(doc.path) === path.resolve(targetPath) ||
-            doc.base_iri === ontologyIri
+            pathsEqual(doc.path, targetPath) || doc.base_iri === ontologyIri
         ),
         "catalog should list the new ontology"
       );
@@ -168,8 +167,8 @@ suite("Dialog workflows (VS Code e2e)", () => {
 
       await api.indexWorkspace(fixturesWorkspaceUri());
       const snapshot = await api.getCatalogSnapshot();
-      const doc = snapshot.documents.find(
-        (d) => path.resolve(d.path) === path.resolve(examplePath)
+      const doc = snapshot.documents.find((d) =>
+        pathsEqual(d.path, examplePath)
       );
       assert.ok(doc, "example.ttl should be in catalog");
       assert.equal(

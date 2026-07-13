@@ -4,6 +4,7 @@ import {
   documentUriInWorkspace,
   isPathUnderFolder,
   isUriInWorkspace,
+  normalizeFsPath,
 } from "./workspacePath";
 
 export interface ResolveTurtleFilePathOptions {
@@ -19,7 +20,7 @@ export async function resolveTurtleFilePath(
 ): Promise<string | undefined> {
   if (options.filePath) {
     return documentUriInWorkspace(options.filePath)
-      ? options.filePath
+      ? normalizeFsPath(options.filePath)
       : undefined;
   }
 
@@ -53,12 +54,12 @@ export async function resolveTurtleFilePath(
     return undefined;
   }
   if (ttlDocs.length === 1) {
-    return ttlDocs[0].path;
+    return normalizeFsPath(ttlDocs[0].path);
   }
 
   const pick = await vscode.window.showQuickPick(
     ttlDocs.map((d) => ({ label: d.path, path: d.path })),
     { placeHolder: "Select Turtle ontology file" }
   );
-  return pick?.path;
+  return pick?.path ? normalizeFsPath(pick.path) : undefined;
 }

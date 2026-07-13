@@ -1,6 +1,11 @@
 import * as vscode from "vscode";
 
-export { isPathUnderFolder } from "./pathUnder";
+export {
+  isPathUnderFolder,
+  normalizeFsPath,
+  pathsEqual,
+} from "./pathUnder";
+import { normalizeFsPath } from "./pathUnder";
 
 /** True when a file URI belongs to an open workspace folder. */
 export function isUriInWorkspace(uri: vscode.Uri): boolean {
@@ -14,7 +19,7 @@ export function isUriInWorkspace(uri: vscode.Uri): boolean {
 export async function openWorkspaceTextDocument(
   filePath: string
 ): Promise<vscode.TextDocument | undefined> {
-  const uri = vscode.Uri.file(filePath);
+  const uri = vscode.Uri.file(normalizeFsPath(filePath));
   if (!isUriInWorkspace(uri)) {
     void vscode.window.showErrorMessage(
       "OntoCode: path is outside the workspace"
@@ -26,7 +31,7 @@ export async function openWorkspaceTextDocument(
 
 /** Validate a document path from the language server before editing. */
 export function documentUriInWorkspace(documentPath: string): string | undefined {
-  const uri = vscode.Uri.file(documentPath);
+  const uri = vscode.Uri.file(normalizeFsPath(documentPath));
   if (!isUriInWorkspace(uri)) {
     return undefined;
   }

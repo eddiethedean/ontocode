@@ -23,6 +23,7 @@ import { focusRelay } from "../focus/focusRelay";
 import { CommandRegistry } from "./registry";
 import { getFocusedEntityIri } from "./uiState";
 import { appendError, openErrorLog } from "../logging/errorLog";
+import { pathsEqual } from "../utils/pathUnder";
 import {
   listPerspectives,
   persistPerspective,
@@ -427,9 +428,8 @@ export async function openPrefixManager(documentPath: string): Promise<void> {
     throw new Error("OntoCode dialog commands are not registered");
   }
   const snapshot = await getCatalogSnapshot();
-  const normalized = path.resolve(documentPath);
-  const document = snapshot.documents.find(
-    (doc) => path.resolve(doc.path) === normalized
+  const document = snapshot.documents.find((doc) =>
+    pathsEqual(doc.path, documentPath)
   );
   if (!document) {
     throw new Error(`No indexed ontology document at ${documentPath}`);

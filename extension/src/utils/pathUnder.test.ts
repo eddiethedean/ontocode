@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import path from "node:path";
 import { describe, it } from "node:test";
-import { isPathUnderFolder } from "./pathUnder";
+import { isPathUnderFolder, normalizeFsPath, pathsEqual } from "./pathUnder";
 
 describe("isPathUnderFolder", () => {
   it("matches the folder itself and descendants", () => {
@@ -24,6 +24,53 @@ describe("isPathUnderFolder", () => {
     assert.equal(
       isPathUnderFolder(path.join(path.sep, "workspace", "other", "a.ttl"), folder),
       false
+    );
+  });
+
+  it("matches Rust canonicalize verbatim-prefixed descendants", () => {
+    if (process.platform !== "win32") {
+      return;
+    }
+    const folder = "D:\\workspace\\proj";
+    const child = "\\\\?\\D:\\workspace\\proj\\a.ttl";
+    assert.equal(isPathUnderFolder(child, folder), true);
+  });
+});
+
+describe("normalizeFsPath", () => {
+  it("strips Windows extended-length prefixes from Rust canonicalize()", () => {
+    if (process.platform !== "win32") {
+      return;
+    }
+    assert.equal(
+      normalizeFsPath("\\\\?\\D:\\a\\ontocode\\fixtures\\example.ttl"),
+      path.resolve("D:\\a\\ontocode\\fixtures\\example.ttl")
+    );
+    assert.equal(
+      normalizeFsPath("\\\\?\\UNC\\server\\share\\ontology.ttl"),
+      path.resolve("\\\\server\\share\\ontology.ttl")
+    );
+  });
+});
+
+describe("pathsEqual", () => {
+  it("equates verbatim-prefixed and normal paths", () => {
+    if (process.platform !== "win32") {
+      return;
+    }
+    assert.equal(
+      pathsEqual(
+        "D:\\a\\ontocode\\fixtures\\example.ttl",
+        "\\\\?\\D:\\a\\ontocode\\fixtures\\example.ttl"
+      ),
+      true
+    );
+    assert.equal(
+      pathsEqual(
+        "d:\\a\\ontocode\\fixtures\\example.ttl",
+        "\\\\?\\D:\\a\\ontocode\\fixtures\\example.ttl"
+      ),
+      true
     );
   });
 });

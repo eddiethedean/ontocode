@@ -23,7 +23,8 @@ import { focusRelay } from "../focus/focusRelay";
 import { CommandRegistry } from "./registry";
 import { getFocusedEntityIri } from "./uiState";
 import { appendError, openErrorLog } from "../logging/errorLog";
-import { pathsEqual } from "../utils/pathUnder";
+import { normalizeFsPath, pathsEqual } from "../utils/pathUnder";
+import { documentUriInWorkspace } from "../utils/workspacePath";
 import {
   listPerspectives,
   persistPerspective,
@@ -519,7 +520,7 @@ async function runExport(saveAs: boolean): Promise<void> {
   if (!document) return;
   const target = await vscode.window.showSaveDialog({
     title: saveAs ? "Save Ontology As" : "Export Ontology",
-    defaultUri: vscode.Uri.file(document.path),
+    defaultUri: vscode.Uri.file(normalizeFsPath(document.path)),
     filters: ONTOLOGY_FILTERS,
   });
   if (!target) return;
@@ -572,8 +573,12 @@ async function applyDocumentPatches(
   document: OntologyDocument,
   patches: PatchOp[]
 ): Promise<void> {
+  const documentUri = documentUriInWorkspace(document.path);
+  if (!documentUri) {
+    throw new Error(`document path is outside the workspace: ${document.path}`);
+  }
   const result = await applyAxiomPatch({
-    document_uri: vscode.Uri.file(document.path).toString(),
+    document_uri: documentUri,
     patches,
     preview_only: false,
   });

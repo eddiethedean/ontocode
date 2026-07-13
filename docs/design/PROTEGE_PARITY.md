@@ -1,6 +1,14 @@
 # Protégé Parity Matrix (v1.0.0)
 
-> **Canonical exit bar for v1.0.0.** All **P0** items must be green before release.
+> **Superseded for planning.** The authoritative 1.0 engineering program is
+> [docs/protege-parity/](../protege-parity/README.md) — especially
+> [PRE_1_0_PHASES.md](../protege-parity/07_BACKLOG/PRE_1_0_PHASES.md),
+> [PARITY_SCOPE.md](../protege-parity/PARITY_SCOPE.md), and
+> [PARITY_RELEASE_GATE.md](../protege-parity/03_PARITY/PARITY_RELEASE_GATE.md).
+>
+> **This page** remains a historical v0.18-era P0/P1/P2 checklist and migration
+> reference. Do not use it as the live 1.0 implementation plan.
+>
 > See [Platform roadmap § OntoCode 1.0](../roadmap.md#ontocode-10-modern-protege-replacement) and [PLAN.md](PLAN.md) §4.
 >
 > **Status column:** current release (**v0.18.0**). Refresh this matrix when capabilities change — do not leave a stale “v0.4” snapshot.

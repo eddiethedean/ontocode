@@ -97,13 +97,14 @@ plugins, UI workflows, and testing.
 
 # Recommended Reading Order
 
-1.  Read `CURRENT_REPOSITORY_AUDIT.md`.
-2.  Read `PARITY_SCOPE.md`.
-3.  Review `PARITY_MATRIX.md` and `PARITY_GAP_ANALYSIS.md`.
-4.  Read the blocker documents in order.
-5.  Execute work from the implementation plan and backlog.
-6.  Validate progress using the acceptance criteria and test plan.
-7.  Ship only after every release gate has been satisfied.
+1.  Read [PRE_1_0_PHASES.md](07_BACKLOG/PRE_1_0_PHASES.md) for the versioned release plan (v0.19–1.0).
+2.  Read `ONTOCODE_CURRENT_PROTEGE_PARITY_AUDIT.md` or `01_CURRENT_STATE/` audit docs.
+3.  Read `PARITY_SCOPE.md`.
+4.  Review `PARITY_MATRIX.md` and `PARITY_GAP_ANALYSIS.md`.
+5.  Read the blocker documents in order.
+6.  Execute work from [EXECUTION_ORDER.md](05_IMPLEMENTATION/EXECUTION_ORDER.md) and backlog.
+7.  Validate progress using the acceptance criteria and test plan.
+8.  Ship only after every release gate has been satisfied.
 
 ------------------------------------------------------------------------
 

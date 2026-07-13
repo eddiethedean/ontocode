@@ -27,9 +27,11 @@ After 1.0, the roadmap shifts from parity to modernization.
 | Document | Role |
 |----------|------|
 | [SHIPPED.md](docs/SHIPPED.md) | **Canonical capability matrix** — what is available in the current release |
+| [protege-parity/](docs/protege-parity/README.md) | **1.0 engineering program** — scope, blockers, release gates |
+| [PRE_1_0_PHASES.md](docs/protege-parity/07_BACKLOG/PRE_1_0_PHASES.md) | **Pre-1.0 release phases** — v0.19–v0.25 → 1.0.0 |
 | [ROADMAP_MAPPING.md](docs/ui/ROADMAP_MAPPING.md) | **UI specs ↔ releases** — master checklist for all Product Roadmap 2.0 items |
 | [design/ROADMAP.md](docs/design/ROADMAP.md) | Per-crate engineering detail for **shipped** v0.1–v0.11 milestones |
-| [PROTEGE_PARITY.md](docs/design/PROTEGE_PARITY.md) | **v1.0 exit bar** — P0 / P1 / P2 parity tiers |
+| [PROTEGE_PARITY.md](docs/design/PROTEGE_PARITY.md) | Historical v0.18 P0/P1/P2 checklist (superseded for planning) |
 | [v1.0_BACKLOG.md](docs/design/v1.0_BACKLOG.md) | Implementation checklist toward v1.0 |
 | [platform/OVERVIEW.md](docs/platform/OVERVIEW.md) | OntoUI / WorkspaceStore architecture (foundation shipped v0.13) |
 | [PRODUCT_ROADMAP_2.0.md](docs/ui/PRODUCT_ROADMAP_2.0.md) | UI phases with milestone acceptance criteria |
@@ -46,15 +48,20 @@ After 1.0, the roadmap shifts from parity to modernization.
 ```text
 SHIPPED (v0.1–v0.18) ─────────────────────────────────────────────────►
 v0.1–v0.4          v0.5–v0.8              v0.9–v0.12           v0.13–v0.18
-Engine foundation    IDE depth                Platform & authoring   OntoUI → parity gate
+Engine foundation    IDE depth                Platform & authoring   OntoUI → UX shell gate
   │                    │                        │                      │
   Foundation           Query, reason,           Identity, diff,      WorkspaceStore,
   Explorer, diag,      graphs, refactor,        OBO write-back,      plugins, menus,
-  write-back           Manchester               OWL/XML catalog      Desktop parity
+  write-back           Manchester               OWL/XML catalog      Desktop UX shell
 
-PLANNED (v1.0+) ──────────────────────────────────────────────────────►
-v1.0
-1.0 exit / Protégé replacement
+PLANNED (v0.19–1.0) ─────────────────────────────────────────────────►
+v0.19–v0.22        v0.23–v0.24            v0.25                1.0.0-rc → 1.0.0
+Semantic core      Reason + SWRL            Verify + polish      Protégé replacement
+  │                    │                        │                      │
+  Transactions       Reasoning parity         Viz, SDK, a11y       Full parity ship
+  Workspace          Refactor + query         Parity manifest CI
+  Format write-back  DL Query
+  OWL 2 complete
 ```
 
 ### Phase index
@@ -65,9 +72,10 @@ v1.0
 | **B — IDE depth** | v0.5–v0.8 | Shipped | Query, reason, visualize, refactor |
 | **C — Platform & authoring** | v0.9–v0.12 | Shipped | OntoCore identity, semantic workspace, authoring parity |
 | **D — OntoUI platform** | v0.13–v0.14 | Shipped | v0.13: WorkspaceStore, focus relay; v0.14: plugin host MVP |
-| **E — Pre-1.0 Protégé parity** | v0.15–v0.18 | Shipped | Desktop parity gate closed in v0.18; v1.0 polish remains |
-| **F — Protégé replacement** | v1.0 | Planned | Daily OWL/OBO engineering without Protégé |
-| **G — Ecosystem** | v1.1–v1.2+ | Planned | SDKs, AI, toolchain & collaboration |
+| **E — Desktop UX shell gate** | v0.15–v0.18 | Shipped | Menus, layouts, workflows, migration readiness (not full parity) |
+| **F — Full Protégé parity path** | v0.19–v0.25 | Planned | Semantic core → formats → OWL 2 → reason/SWRL → services → verify |
+| **G — Protégé replacement** | 1.0.0 | Planned | Daily OWL/OBO engineering without Protégé |
+| **H — Ecosystem** | v1.1–v1.2+ | Planned | SDKs, AI, toolchain & collaboration |
 
 | Phase | Version | Era | Status | UI phases | Theme |
 |-------|---------|-----|--------|-----------|-------|
@@ -88,10 +96,18 @@ v1.0
 | 15 | v0.15 | E | Shipped | 4†, 5†, 8† | Plugin API + visualization + explanations |
 | 16 | v0.16 | E | Shipped | 1†, 2† | Workspace layouts + preferences + imports polish |
 | 17 | v0.17 | E | Shipped | — | Menu/toolbar/dialog parity + keyboard workflows |
-| 18 | v0.18 | E | Shipped | — | Protégé Desktop parity gate + migration readiness |
-| 19 | v1.0 | F | Planned | 1–6 exit, 9† | Protégé-competitive release |
-| 20 | v1.1 | G | Planned | 7, 2†, 3†, 4†, 8†, 9† | Language bindings & AI primitives |
-| 21 | v1.2+ | G | Planned | 9, 10, 11 | Ontology toolchain platform |
+| 18 | v0.18 | E | Shipped | — | Desktop UX shell gate + migration readiness |
+| 19 | v0.19 | F | Planned | — | Semantic foundation + program baseline |
+| 20 | v0.20 | F | Planned | 1† | Workspace runtime |
+| 21 | v0.21 | F | Planned | — | RDF/XML + OWL/XML write-back |
+| 22 | v0.22 | F | Planned | 2† | Complete OWL 2 authoring |
+| 23 | v0.23 | F | Planned | 5† | Reasoning parity + SWRL |
+| 24 | v0.24 | F | Planned | 3†, 6† | Refactoring + DL Query parity |
+| 25 | v0.25 | F | Planned | 4†, 8† | Viz + plugin SDK 1.0 + a11y + parity CI |
+| 26 | 1.0.0-rc | F | Planned | — | Stabilize; all P0 VERIFIED |
+| 27 | v1.0 | G | Planned | 1–6 exit, 9† | Protégé-competitive release |
+| 28 | v1.1 | H | Planned | 7, 2†, 3†, 4†, 8†, 9† | Language bindings & AI primitives |
+| 29 | v1.2+ | H | Planned | 9, 10, 11 | Ontology toolchain platform |
 
 †Partial scope in this release (remainder in later releases). Full mapping: [ROADMAP_MAPPING.md](docs/ui/ROADMAP_MAPPING.md).
 
@@ -390,7 +406,7 @@ Sub-phases: **v0.7a** (React foundation) → **v0.7** (graphs + inspector) → *
 
 ---
 
-### Era E — Pre-1.0 Protégé parity (v0.15–v0.18)
+### Era E — Desktop UX shell gate (v0.15–v0.18)
 
 > **Scope note:** These phases target **Protégé Desktop parity** only. WebProtégé parity (live collaboration, permissions, notifications, etc.) remains post-1.0.
 
@@ -463,11 +479,11 @@ See [migration/v0.17.md](docs/migration/v0.17.md) and [SHIPPED.md](docs/SHIPPED.
 
 ---
 
-### v0.18 — Protégé Desktop parity gate + 1.0 migration readiness (shipped)
+### v0.18 — Desktop UX shell gate + migration readiness (shipped)
 
 **Released:** v0.18.0 (2026-07-11); patches **v0.18.1** (2026-07-12), **v0.18.2** (2026-07-13)
 
-**Theme:** Finish the last-mile parity items and ship a verifiable “Protégé not required” desktop experience before the 1.0 stabilization push.
+**Theme:** Close the desktop UX shell gate (menus, layouts, workflows, migration docs). **Not** full functional Protégé parity — that is the objective of [v0.19–v0.25](docs/protege-parity/07_BACKLOG/PRE_1_0_PHASES.md).
 
 **Scope (docs/audit-first):** [v0.18_SCOPE.md](docs/design/v0.18_SCOPE.md) · [0.18 parity assessment](docs/PROTEGE_REVERSE_ENGINEERING/ONTOCODE_PARITY/ONTOCODE_0.18_PROTEGE_PARITY_ASSESSMENT.md)
 
@@ -477,14 +493,132 @@ See [migration/v0.17.md](docs/migration/v0.17.md) and [SHIPPED.md](docs/SHIPPED.
 | **OntoUI / OntoCode** | Parity audits against the reverse-engineered checklist (workspace shell, menus/toolbars/dialogs, views, explanations, visualization); accessibility pass on remaining panels; migration guide drafts (“from Protégé to OntoCode”) with honest known-gap list (desktop only) |
 
 **Exit criteria:**
-- **Protégé Desktop parity = 100%** for the agreed pre-1.0 scope (desktop only), backed by the reverse-engineering specs and fixture-driven regression checks.
+- **Desktop UX shell gate = 100%** for the agreed pre-1.0 scope (desktop only), backed by the reverse-engineering specs and fixture-driven regression checks.
 - A working “Protégé → OntoCode” migration path is documented for common workflows (modeling, reasoning, explanations, visualization, imports, preferences).
 
 See [migration/v0.18.md](docs/migration/v0.18.md) and [SHIPPED.md](docs/SHIPPED.md).
 
 ---
 
-### Era F — Protégé replacement (v1.0)
+### Era F — Full Protégé parity path (v0.19–v0.25)
+
+**Canonical plan:** [PRE_1_0_PHASES.md](docs/protege-parity/07_BACKLOG/PRE_1_0_PHASES.md) · **Sequencing:** [EXECUTION_ORDER.md](docs/protege-parity/05_IMPLEMENTATION/EXECUTION_ORDER.md) · **Status:** [PARITY_STATUS.md](docs/protege-parity/03_PARITY/PARITY_STATUS.md)
+
+v0.18 closed the desktop UX shell gate. v0.19–v0.25 implement the remaining P0 blockers defined in [docs/protege-parity/](docs/protege-parity/README.md).
+
+### v0.19 — Semantic foundation + program baseline (planned)
+
+**Theme:** Freeze parity scope; route all edits through semantic transactions.
+
+| Area | Deliverables |
+|------|--------------|
+| **OntoCore** | Canonical semantic change API; transaction composition and inverse ops; Turtle/OBO routed through transactions; parity manifest skeleton |
+| **Docs** | Frozen scope, matrix, gap analysis, implementation evidence |
+
+**Exit criteria:** All supported edits flow through semantic transactions; Turtle/OBO regression-free; parity status reproducible from evidence.
+
+**Blockers:** [BLOCKER_01](docs/protege-parity/04_BLOCKERS/BLOCKER_01_FORMAT_INDEPENDENCE.md), [BLOCKER_11 skeleton](docs/protege-parity/04_BLOCKERS/BLOCKER_11_PARITY_VERIFICATION.md)
+
+---
+
+### v0.20 — Workspace runtime (planned)
+
+**Theme:** Workspace as central runtime for ontology state and transactions.
+
+| Area | Deliverables |
+|------|--------------|
+| **OntoCore** | Multi-ontology registry; dirty/save state; transaction manager; session persistence; selection/navigation sync |
+| **OntoCode** | Save/Save All; panel restore; external-change recovery |
+
+**Exit criteria:** Multi-ontology workflows pass end-to-end tests; workspace state survives restart.
+
+**Blockers:** [BLOCKER_03](docs/protege-parity/04_BLOCKERS/BLOCKER_03_WORKSPACE.md)
+
+---
+
+### v0.21 — Required format write-back (planned)
+
+**Theme:** RDF/XML and OWL/XML semantic round-trip.
+
+| Area | Deliverables |
+|------|--------------|
+| **OntoCore** | RDF/XML and OWL/XML serializer adapters; cross-format semantic comparator; Protégé fixture corpus |
+
+**Exit criteria:** Turtle, OBO, RDF/XML, OWL/XML open → edit → save → reload without semantic loss.
+
+**Blockers:** [BLOCKER_01](docs/protege-parity/04_BLOCKERS/BLOCKER_01_FORMAT_INDEPENDENCE.md), [format audit](docs/protege-parity/02_PROTEGE_AUDIT/PROTEGE_FILE_FORMAT_AUDIT.md)
+
+---
+
+### v0.22 — Complete OWL 2 authoring (planned)
+
+**Theme:** Every P0 OWL 2 construct authorable across required formats.
+
+| Area | Deliverables |
+|------|--------------|
+| **OntoCore** | Missing TBox/RBox/ABox axioms; keys, datatypes, restrictions, axiom annotations |
+| **OntoCode** | Structured editors; validation; undo/redo coverage |
+
+**Exit criteria:** All P0 OWL 2 constructs VERIFIED end-to-end.
+
+**Blockers:** [BLOCKER_02](docs/protege-parity/04_BLOCKERS/BLOCKER_02_OWL2_AUTHORING.md)
+
+---
+
+### v0.23 — Reasoning parity + SWRL (planned)
+
+**Theme:** TBox/ABox reasoning workflows and SWRL subsystem.
+
+| Area | Deliverables |
+|------|--------------|
+| **OntoCore** | Realization, instance checking, native DL explanations; SWRL parse/serialize/validate |
+| **OntoCode** | Rule browser/editor; inferred/asserted views |
+
+**Exit criteria:** Reasoning and SWRL P0 requirements VERIFIED.
+
+**Blockers:** [BLOCKER_04](docs/protege-parity/04_BLOCKERS/BLOCKER_04_REASONING.md), [BLOCKER_05](docs/protege-parity/04_BLOCKERS/BLOCKER_05_SWRL.md)
+
+---
+
+### v0.24 — Semantic services completion (planned)
+
+**Theme:** Refactoring and query/search parity on stable semantic core.
+
+| Area | Deliverables |
+|------|--------------|
+| **OntoCore** | Merge, module extraction, SWRL-aware refactor; DL Query; semantic search |
+| **OntoCode** | Refactor preview; query export and navigation |
+
+**Exit criteria:** Refactoring and query P0 requirements VERIFIED.
+
+**Blockers:** [BLOCKER_06](docs/protege-parity/04_BLOCKERS/BLOCKER_06_REFACTORING.md), [BLOCKER_07](docs/protege-parity/04_BLOCKERS/BLOCKER_07_QUERY.md)
+
+---
+
+### v0.25 — UX completion + executable verification (planned)
+
+**Theme:** Visualization, plugin SDK 1.0, accessibility, parity manifest CI.
+
+| Area | Deliverables |
+|------|--------------|
+| **OntoCore** | Graph model completion; plugin SDK freeze; parity manifest + CI release gate |
+| **OntoCode** | Accessibility audit closed; conformance suite aggregation |
+
+**Exit criteria:** Plugin SDK 1.0 stable; every P0 requirement has automated CI evidence.
+
+**Blockers:** [BLOCKER_08](docs/protege-parity/04_BLOCKERS/BLOCKER_08_VISUALIZATION.md)–[BLOCKER_11](docs/protege-parity/04_BLOCKERS/BLOCKER_11_PARITY_VERIFICATION.md)
+
+---
+
+### 1.0.0-rc — Release candidate (planned)
+
+**Theme:** Stabilize only — no new major features or scope changes.
+
+**Exit criteria:** All P0 VERIFIED; all release gates pass; zero open P0 defects; APIs frozen.
+
+---
+
+### Era G — Protégé replacement (v1.0)
 
 ### v1.0 — Protégé-competitive release (planned)
 
@@ -494,7 +628,7 @@ See [migration/v0.18.md](docs/migration/v0.18.md) and [SHIPPED.md](docs/SHIPPED.
 
 | Area | Deliverables |
 |------|--------------|
-| **OntoCore** | All [PROTEGE_PARITY.md](docs/design/PROTEGE_PARITY.md) **P0** items green; all **P1** items green or documented known gaps; stable CLI/API/LSP semver 1.0; `examples/protege-roundtrip/` ontology set with workflow doc; performance benchmarks published |
+| **OntoCore** | All [protege-parity P0 requirements](docs/protege-parity/03_PARITY/PARITY_RELEASE_GATE.md) green; all **P1** items green or documented known gaps; stable CLI/API/LSP semver 1.0; `examples/protege-roundtrip/` ontology set with workflow doc; performance benchmarks published |
 | **OntoUI** | **[1]** Persistent tabs + bottom dock ([WORKSPACE_WIREFRAMES](docs/ui/WORKSPACE_WIREFRAMES.md)). **[2]** Relationship cards, references view, metadata view; entity workspace diagnostics integration ([ENTITY_EDITOR_SPEC](docs/ui/ENTITY_EDITOR_SPEC.md)). **[4]** Graph saved layouts, filters, reasoning overlays ([GRAPH_WORKSPACE](docs/ui/GRAPH_WORKSPACE.md)). **[5]** Semantic build pipeline UI; entity-level reasoning cards; reasoning history; Problems ↔ reasoning integration ([REASONING_EXPERIENCE](docs/ui/REASONING_EXPERIENCE.md)). **[6]** Merge classes; batch label normalization; undo/redo on refactor and patch writes ([SEMANTIC_REFACTORING](docs/ui/SEMANTIC_REFACTORING.md)). **[9]** Review workspace MVP ([COLLABORATION](docs/ui/COLLABORATION.md)). Supporting: HIG + keyboard shortcuts ([HUMAN_INTERFACE_GUIDELINES](docs/ui/HUMAN_INTERFACE_GUIDELINES.md), [KEYBOARD_SHORTCUTS](docs/ui/KEYBOARD_SHORTCUTS.md)) |
 | **OntoCode** | Complete hybrid authoring loop (forms + Manchester + Turtle/OBO); full IDE surface (explorer, search, diagnostics, refactoring, query workbench, visualization, reasoning); React webview hardening; VS Code Marketplace + Open VSX publish as 1.0 |
 | **Toolchain** | ODK project layout recognition (`src/ontology/`, catalog files, import structure); ODK QC and release workflow surfacing; ROBOT-compatible operations where practical; import existing ODK/ROBOT/owlmake workflows (Makefile, GitHub Actions); Protégé migration guide with honest parity table |
@@ -505,9 +639,9 @@ See [migration/v0.18.md](docs/migration/v0.18.md) and [SHIPPED.md](docs/SHIPPED.
 **Exit criteria:**
 
 > Daily ontology engineering (OWL 2 DL + OBO maintenance) is completable in VS Code.
-> Protégé is required only for **P2** features in [PROTEGE_PARITY.md](docs/design/PROTEGE_PARITY.md).
+> Protégé is required only for **P2** features in [PARITY_SCOPE.md](docs/protege-parity/PARITY_SCOPE.md).
 
-Track implementation: [v1.0_BACKLOG.md](docs/design/v1.0_BACKLOG.md)
+Track implementation: [PRE_1_0_PHASES.md](docs/protege-parity/07_BACKLOG/PRE_1_0_PHASES.md) · [v1.0_BACKLOG.md](docs/design/v1.0_BACKLOG.md)
 
 **Dependencies:** Ontologos 1.0.0; `react` / `vite` (extension `webview-ui`); [cursor-prompts/](docs/cursor-prompts/README.md) 06–07, 11–12
 
@@ -543,7 +677,7 @@ Ontologos provides **reasoning**. OntoCore provides the **workspace platform** a
 
 ---
 
-### Era G — Ecosystem expansion (v1.1+)
+### Era H — Ecosystem expansion (v1.1+)
 
 ### v1.1 — Language bindings & AI primitives (planned)
 

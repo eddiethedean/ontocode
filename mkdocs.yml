@@ -172,6 +172,12 @@ nav:
       - Architecture: architecture.md
       - Roadmap hub: roadmap-hub.md
       - Platform roadmap: roadmap.md
+      - Protégé parity program:
+          - Overview: protege-parity/README.md
+          - Pre-1.0 phases: protege-parity/07_BACKLOG/PRE_1_0_PHASES.md
+          - Execution order: protege-parity/05_IMPLEMENTATION/EXECUTION_ORDER.md
+          - Parity status: protege-parity/03_PARITY/PARITY_STATUS.md
+          - Release gate: protege-parity/03_PARITY/PARITY_RELEASE_GATE.md
       - API stability (pre-1.0): guides/api-stability.md
       - Enterprise evaluation: guides/enterprise-eval.md
       - Protégé vs OntoCode: guides/protege-decision.md
@@ -207,7 +213,7 @@ nav:
       - Releasing: releasing.md
       - Marketplace publish: marketplace-publish.md
       - Internals: internals.md
-      - Protégé parity: design/PROTEGE_PARITY.md
+      - Protégé parity (historical v0.18 checklist): design/PROTEGE_PARITY.md
       - Licenses: design/LICENSES.md
       - Plugin model: ontocore/plugin-model.md
       - Engineering ADRs: design/adr/0001-use-rust-for-ontocore.md

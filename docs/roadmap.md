@@ -29,9 +29,11 @@ After 1.0, the roadmap shifts from parity to modernization.
 | Document | Role |
 |----------|------|
 | [What ships today](SHIPPED.md) | **Canonical capability matrix** — what is available in the current release |
+| [Protégé parity program](protege-parity/README.md) | **1.0 engineering program** — scope, blockers, release gates |
+| [Pre-1.0 release phases](protege-parity/07_BACKLOG/PRE_1_0_PHASES.md) | **v0.19–v0.25 → 1.0.0** versioned parity plan |
 | [UI roadmap mapping](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/ROADMAP_MAPPING.md) | **UI specs ↔ releases** — master checklist for all Product Roadmap 2.0 items |
 | [Milestones (shipped)](design/ROADMAP.md) | Per-crate engineering detail for **shipped** v0.1–v0.11 milestones |
-| [Protégé parity matrix](design/PROTEGE_PARITY.md) | **v1.0 exit bar** — P0 / P1 / P2 parity tiers |
+| [Protégé parity matrix](design/PROTEGE_PARITY.md) | Historical v0.18 P0/P1/P2 checklist (superseded for planning) |
 | [v1.0 backlog](design/v1.0_BACKLOG.md) | Implementation checklist toward v1.0 |
 | [Platform overview](https://github.com/eddiethedean/ontocode/blob/main/docs/platform/OVERVIEW.md) | OntoUI / WorkspaceStore architecture (foundation shipped v0.13) |
 | [Product Roadmap 2.0](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/PRODUCT_ROADMAP_2.0.md) | UI phases with milestone acceptance criteria |
@@ -48,14 +50,14 @@ After 1.0, the roadmap shifts from parity to modernization.
 ```text
 SHIPPED (v0.1–v0.18) ─────────────────────────────────────────────────►
 v0.1–v0.4          v0.5–v0.8              v0.9–v0.12           v0.13–v0.18
-Engine foundation    IDE depth                Platform & authoring   OntoUI → parity gate
-  │                    │                        │                      │
-  Foundation           Query, reason,           Identity, diff,      WorkspaceStore,
-  Explorer, diag,      graphs, refactor,        OBO write-back,      plugins, menus,
-  write-back           Manchester               OWL/XML catalog      Desktop parity
+Engine foundation    IDE depth                Platform & authoring   OntoUI → UX shell gate
 
-PLANNED (v1.0+) ──────────────────────────────────────────────────────►
+PLANNED (v0.19–1.0) ─────────────────────────────────────────────────►
+v0.19–v0.22        v0.23–v0.24            v0.25                1.0.0-rc → 1.0.0
+Semantic core      Reason + SWRL            Verify + polish      Protégé replacement
 ```
+
+Full timeline: [ROADMAP.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/ROADMAP.md). Pre-1.0 phases: [PRE_1_0_PHASES.md](protege-parity/07_BACKLOG/PRE_1_0_PHASES.md).
 
 ### Phase index
 
@@ -65,30 +67,25 @@ PLANNED (v1.0+) ─────────────────────�
 | **B — IDE depth** | v0.5–v0.8 | Shipped | Query, reason, visualize, refactor |
 | **C — Platform & authoring** | v0.9–v0.12 | Shipped | OntoCore identity, semantic workspace, authoring parity |
 | **D — OntoUI platform** | v0.13–v0.14 | Shipped | v0.13: WorkspaceStore, focus relay; v0.14: plugin host MVP |
-| **E — Pre-1.0 Protégé parity** | v0.15–v0.18 | Shipped | Desktop parity gate closed in v0.18; v1.0 polish remains |
-| **F — Protégé replacement** | v1.0 | Planned | Daily OWL/OBO engineering without Protégé |
-| **G — Ecosystem** | v1.1–v1.2+ | Planned | SDKs, AI, toolchain & collaboration |
+| **E — Desktop UX shell gate** | v0.15–v0.18 | Shipped | Menus, layouts, workflows, migration readiness (not full parity) |
+| **F — Full Protégé parity path** | v0.19–v0.25 | Planned | Semantic core → formats → OWL 2 → reason/SWRL → services → verify |
+| **G — Protégé replacement** | 1.0.0 | Planned | Daily OWL/OBO engineering without Protégé |
+| **H — Ecosystem** | v1.1–v1.2+ | Planned | SDKs, AI, toolchain & collaboration |
 
 | Phase | Version | Era | Status | UI phases | Theme |
 |-------|---------|-----|--------|-----------|-------|
-| 1 | v0.1 | A | Shipped | — | OntoCore foundation |
-| 2 | v0.2 | A | Shipped | 1 (partial) | VS Code explorer |
-| 3 | v0.3 | A | Shipped | — | Diagnostics |
-| 4 | v0.4 | A | Shipped | 2 (partial) | Turtle write-back + Horned-OWL |
-| 5 | v0.5 | B | Shipped | 3 | Query workbench + Manchester MVP |
-| 6 | v0.6 | B | Shipped | — | Ontologos reasoning (EL/RL/RDFS) |
-| 7 | v0.7 | B | Shipped | 2, 4 (partial) | React UI, graphs, OBO + ROBOT |
-| 8 | v0.8 | B | Shipped | 6 | Refactoring + full Manchester |
-| 9 | v0.9 | C | Shipped | 5 (partial) | OntoCore platform identity |
-| 10 | v0.10 | C | Shipped | 9 (partial) | Semantic workspace |
-| 11 | v0.11 | C | Shipped | 5, 7, 11 (partial) | Editor depth & distribution |
-| 12 | v0.12 | C | Shipped | 2 (P0 exit) | Authoring parity |
-| 13 | v0.13 | D | Shipped | 0, 1, 3†, 5†, 9† | Platform hardening |
-| 14 | v0.14 | D | Shipped | 8 | Plugin host MVP |
-| 15 | v0.15 | E | Shipped (partial) | 4†, 5†, 8† | Plugin API + visualization + explanations |
-| 16 | v1.0 | E | Planned | 1–6 exit, 9† | Protégé-competitive release |
-| 17 | v1.1 | F | Planned | 7, 2†, 3†, 4†, 8†, 9† | Language bindings & AI primitives |
-| 18 | v1.2+ | F | Planned | 9, 10, 11 | Ontology toolchain platform |
+| 1–18 | v0.1–v0.18 | A–E | Shipped | — | See [ROADMAP.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/ROADMAP.md) |
+| 19 | v0.19 | F | Planned | — | Semantic foundation + program baseline |
+| 20 | v0.20 | F | Planned | 1† | Workspace runtime |
+| 21 | v0.21 | F | Planned | — | RDF/XML + OWL/XML write-back |
+| 22 | v0.22 | F | Planned | 2† | Complete OWL 2 authoring |
+| 23 | v0.23 | F | Planned | 5† | Reasoning parity + SWRL |
+| 24 | v0.24 | F | Planned | 3†, 6† | Refactoring + DL Query parity |
+| 25 | v0.25 | F | Planned | 4†, 8† | Viz + plugin SDK 1.0 + a11y + parity CI |
+| 26 | 1.0.0-rc | F | Planned | — | Stabilize; all P0 VERIFIED |
+| 27 | v1.0 | G | Planned | 1–6 exit, 9† | Protégé-competitive release |
+| 28 | v1.1 | H | Planned | 7, 2†, 3†, 4†, 8†, 9† | Language bindings & AI primitives |
+| 29 | v1.2+ | H | Planned | 9, 10, 11 | Ontology toolchain platform |
 
 †Partial scope in this release (remainder in later releases). Full mapping: [ROADMAP_MAPPING.md](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/ROADMAP_MAPPING.md).
 
@@ -429,11 +426,11 @@ See [v0.17 scope](design/v0.17_SCOPE.md), [migration/v0.17.md](migration/v0.17.m
 
 ---
 
-### v0.18 — Protégé Desktop parity gate + migration readiness (shipped)
+### v0.18 — Desktop UX shell gate + migration readiness (shipped)
 
 **Released:** v0.18.0 (2026-07-11); patches **v0.18.1** (2026-07-12), **v0.18.2** (2026-07-13)
 
-**Theme:** Finish last-mile Desktop parity and ship a verifiable “Protégé not required” path before the 1.0 push.
+**Theme:** Close the desktop UX shell gate (menus, layouts, workflows, migration docs). **Not** full functional Protégé parity — see [PRE_1_0_PHASES.md](protege-parity/07_BACKLOG/PRE_1_0_PHASES.md) for v0.19–v0.25.
 
 **Scope (docs/audit-first):** [v0.18_SCOPE.md](design/v0.18_SCOPE.md) · [0.18 parity assessment](https://github.com/eddiethedean/ontocode/blob/main/docs/PROTEGE_REVERSE_ENGINEERING/ONTOCODE_PARITY/ONTOCODE_0.18_PROTEGE_PARITY_ASSESSMENT.md)
 
@@ -441,11 +438,13 @@ Canonical detail: root [ROADMAP.md on GitHub](https://github.com/eddiethedean/on
 
 ---
 
-## Planned releases (v1.0 → v1.2+)
+## Planned releases (v0.19 → v1.2+)
+
+**Pre-1.0 parity phases:** [PRE_1_0_PHASES.md](protege-parity/07_BACKLOG/PRE_1_0_PHASES.md) (v0.19–v0.25 → 1.0.0-rc → 1.0.0). Per-release detail: [ROADMAP.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/ROADMAP.md) § Era F.
 
 ---
 
-### Era F — Protégé replacement (v1.0)
+### Era G — Protégé replacement (v1.0)
 
 ### v1.0 — Protégé-competitive release (planned)
 
@@ -455,7 +454,7 @@ Canonical detail: root [ROADMAP.md on GitHub](https://github.com/eddiethedean/on
 
 | Area | Deliverables |
 |------|--------------|
-| **OntoCore** | All [PROTEGE_PARITY.md](design/PROTEGE_PARITY.md) **P0** items green; all **P1** items green or documented known gaps; stable CLI/API/LSP semver 1.0; `examples/protege-roundtrip/` ontology set with workflow doc; performance benchmarks published |
+| **OntoCore** | All [protege-parity P0 requirements](protege-parity/03_PARITY/PARITY_RELEASE_GATE.md) green; all **P1** items green or documented known gaps; stable CLI/API/LSP semver 1.0; `examples/protege-roundtrip/` ontology set with workflow doc; performance benchmarks published |
 | **OntoUI** | **[1]** Persistent tabs + bottom dock ([WORKSPACE_WIREFRAMES](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/WORKSPACE_WIREFRAMES.md)). **[2]** Relationship cards, references view, metadata view; entity workspace diagnostics integration ([ENTITY_EDITOR_SPEC](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/ENTITY_EDITOR_SPEC.md)). **[4]** Graph saved layouts, filters, reasoning overlays ([GRAPH_WORKSPACE](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/GRAPH_WORKSPACE.md)). **[5]** Semantic build pipeline UI; entity-level reasoning cards; reasoning history; Problems ↔ reasoning integration ([REASONING_EXPERIENCE](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/REASONING_EXPERIENCE.md)). **[6]** Merge classes; batch label normalization; undo/redo on refactor and patch writes ([SEMANTIC_REFACTORING](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/SEMANTIC_REFACTORING.md)). **[9]** Review workspace MVP ([COLLABORATION](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/COLLABORATION.md)). Supporting: HIG + keyboard shortcuts ([HUMAN_INTERFACE_GUIDELINES](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/HUMAN_INTERFACE_GUIDELINES.md), [KEYBOARD_SHORTCUTS](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/KEYBOARD_SHORTCUTS.md)) |
 | **OntoCode** | Complete hybrid authoring loop (forms + Manchester + Turtle/OBO); full IDE surface (explorer, search, diagnostics, refactoring, query workbench, visualization, reasoning); React webview hardening; VS Code Marketplace + Open VSX publish as 1.0 |
 | **Toolchain** | ODK project layout recognition (`src/ontology/`, catalog files, import structure); ODK QC and release workflow surfacing; ROBOT-compatible operations where practical; import existing ODK/ROBOT/owlmake workflows (Makefile, GitHub Actions); Protégé migration guide with honest parity table |
@@ -466,9 +465,9 @@ Canonical detail: root [ROADMAP.md on GitHub](https://github.com/eddiethedean/on
 **Exit criteria:**
 
 > Daily ontology engineering (OWL 2 DL + OBO maintenance) is completable in VS Code.
-> Protégé is required only for **P2** features in [PROTEGE_PARITY.md](design/PROTEGE_PARITY.md).
+> Protégé is required only for **P2** features in [PARITY_SCOPE.md](protege-parity/PARITY_SCOPE.md).
 
-Track implementation: [v1.0_BACKLOG.md](design/v1.0_BACKLOG.md)
+Track implementation: [PRE_1_0_PHASES.md](protege-parity/07_BACKLOG/PRE_1_0_PHASES.md) · [v1.0_BACKLOG.md](design/v1.0_BACKLOG.md)
 
 **Dependencies:** Ontologos 1.0.0; `react` / `vite` (extension `webview-ui`); [cursor-prompts/](https://github.com/eddiethedean/ontocode/blob/main/docs/cursor-prompts/README.md) 06–07, 11–12
 
@@ -504,7 +503,7 @@ Ontologos provides **reasoning**. OntoCore provides the **workspace platform** a
 
 ---
 
-### Era F — Ecosystem expansion (v1.1+)
+### Era H — Ecosystem expansion (v1.1+)
 
 ### v1.1 — Language bindings & AI primitives (planned)
 

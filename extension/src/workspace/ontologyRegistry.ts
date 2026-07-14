@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import { getCatalogSnapshot, setActiveOntology } from "../lsp/client";
 import type { OntologyDocument } from "../lsp/protocol";
 import { isOntologyDocument } from "../commands/uiState";
-import { documentUriInWorkspace, resolveWorkspaceDocumentUri } from "../utils/workspacePath";
+import { documentUriInWorkspace, isUriInWorkspace, resolveWorkspaceDocumentUri } from "../utils/workspacePath";
 import { normalizeFsPath } from "../utils/pathUnder";
 import { workspaceEventBus } from "./eventBus";
 import {
@@ -328,13 +328,21 @@ export class OntologyRegistry {
 
   hydrateOpenUris(uris: string[]): void {
     for (const uri of uris) {
-      const parsed = vscode.Uri.parse(uri);
+      let parsed: vscode.Uri;
+      try {
+        parsed = vscode.Uri.parse(uri);
+      } catch {
+        continue;
+      }
+      if (!isUriInWorkspace(parsed)) {
+        continue;
+      }
       const path = normalizeFsPath(parsed.fsPath);
       if (!this.entries.has(path) && !this.getEntryByPath(path)) {
         const format = formatFromPath(path);
         this.entries.set(path, {
           id: path,
-          uri,
+          uri: parsed.toString(),
           path,
           format,
           role: "scratch" as OntologyRole,

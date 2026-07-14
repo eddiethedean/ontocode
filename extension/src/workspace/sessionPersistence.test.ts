@@ -2,6 +2,7 @@ import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import type { WorkspaceSessionSnapshot } from "./types";
 import { isAllowedPanelRestoreCommand } from "../webviews/layoutPersistenceLogic";
+import { isNotIndexedError } from "../utils/lspErrors";
 
 describe("workspace session snapshot shape", () => {
   it("accepts bounded navigation and panel restore payloads", () => {
@@ -31,11 +32,16 @@ describe("workspace session snapshot shape", () => {
   });
 
   it("treats non-ontocode panel restore commands as disallowed (#309)", () => {
-    const malicious = "workbench.action.terminal.new";
-    assert.equal(isAllowedPanelRestoreCommand(malicious), false);
+    assert.equal(isAllowedPanelRestoreCommand("workbench.action.terminal.new"), false);
+    assert.equal(isAllowedPanelRestoreCommand("ontocode.showEntityInspector"), true);
+  });
+
+  it("detects NOT_INDEXED catalog errors (#294)", () => {
     assert.equal(
-      isAllowedPanelRestoreCommand("ontocode.showEntityInspector"),
+      isNotIndexedError(new Error("NOT_INDEXED: workspace not indexed yet")),
       true
     );
+    assert.equal(isNotIndexedError(new Error("OTHER: boom")), false);
+    assert.equal(isNotIndexedError("NOT_INDEXED"), false);
   });
 });

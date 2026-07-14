@@ -129,11 +129,7 @@ pub fn run_plugin_subprocess(
     plugin: &DiscoveredPlugin,
     request: SubprocessRequest<'_>,
 ) -> Result<PluginOutput, SubprocessError> {
-    run_plugin_subprocess_with_timeout(
-        plugin,
-        request,
-        Duration::from_secs(DEFAULT_TIMEOUT_SECS),
-    )
+    run_plugin_subprocess_with_timeout(plugin, request, Duration::from_secs(DEFAULT_TIMEOUT_SECS))
 }
 
 pub(crate) fn run_plugin_subprocess_with_timeout(
@@ -291,9 +287,6 @@ diagnostics = true
         let pid_text = std::fs::read_to_string(&marker).expect("grandchild pid written");
         let pid: i32 = pid_text.trim().parse().expect("pid");
         let still_alive = unsafe { libc::kill(pid, 0) == 0 };
-        assert!(
-            !still_alive,
-            "grandchild pid {pid} should be dead after process-group kill"
-        );
+        assert!(!still_alive, "grandchild pid {pid} should be dead after process-group kill");
     }
 }

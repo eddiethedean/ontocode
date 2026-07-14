@@ -1070,10 +1070,7 @@ mod tests {
     fn text_and_csv_surface_truncation_flag() {
         assert_eq!(text_truncation_marker(true), Some("# truncated: true"));
         assert_eq!(text_truncation_marker(false), None);
-        assert_eq!(
-            csv_truncation_warning(true),
-            Some("WARNING: OntoCode query results truncated")
-        );
+        assert_eq!(csv_truncation_warning(true), Some("WARNING: OntoCode query results truncated"));
         assert_eq!(csv_truncation_warning(false), None);
     }
 }

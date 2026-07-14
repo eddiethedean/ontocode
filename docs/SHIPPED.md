@@ -81,6 +81,7 @@
 | OWL/XML (`.owx`) write-back via Horned serializers | Yes |
 | Cross-format semantic comparator + Protégé edit/save/reload fixtures | Yes |
 | Editable gates lifted for CLI / LSP / catalog / extension inspector | Yes |
+| Session/TM, OBO/XML, focus, SQL, sameAs/prefix, plugin, Windows-path bug-fix cluster | Yes |
 
 ## Previously in v0.20.0
 

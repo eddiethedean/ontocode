@@ -189,9 +189,10 @@ fn owl_same_as_links_renamed_entities() {
         diff.entity_changes
     );
     assert!(
-        !diff.entity_changes.iter().any(|c| {
-            c.kind == EntityChangeKind::Removed && c.iri.contains("Old")
-        }),
+        !diff
+            .entity_changes
+            .iter()
+            .any(|c| { c.kind == EntityChangeKind::Removed && c.iri.contains("Old") }),
         "renamed Old must not remain as Removed: {:?}",
         diff.entity_changes
     );

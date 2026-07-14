@@ -46,3 +46,11 @@ export function isExplanationStale(options: {
     options.shownIndexedAt !== options.currentIndexedAt
   );
 }
+
+/** True when this fetch generation is still the latest allocated (#276). */
+export function isLatestExplanationFetch(
+  generation: number,
+  latestAllocated: number
+): boolean {
+  return generation === latestAllocated;
+}

@@ -100,11 +100,20 @@ export function EntityInspectorPanel(_props?: WorkspaceProps): JSX.Element {
         setObjectPropertyOptions(msg.objectPropertyOptions ?? []);
         resetFormState();
         // Host-driven loads must not push navigation history (#92).
-        hydrateFocus({
-          kind: "entity",
-          id: msg.detail.entity.iri,
-          source: "inspector",
-        });
+        // Do not hydrate focus when a newer stamped focus already points elsewhere (#277).
+        const currentFocus = useWorkspaceStore.getState().focus;
+        const incomingIri = msg.detail.entity.iri;
+        const stampedElsewhere =
+          currentFocus?.kind === "entity" &&
+          typeof currentFocus.timestamp === "number" &&
+          currentFocus.id !== incomingIri;
+        if (!stampedElsewhere) {
+          hydrateFocus({
+            kind: "entity",
+            id: incomingIri,
+            source: "inspector",
+          });
+        }
       } else if (msg.type === "preview") {
         setPreview(msg.text);
         setEditPreview(msg.text);

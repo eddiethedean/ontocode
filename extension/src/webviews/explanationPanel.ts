@@ -4,6 +4,7 @@ import { getExplanation } from "../lsp/client";
 import type { GetExplanationResult } from "../lsp/protocol";
 import {
   isExplanationStale,
+  isLatestExplanationFetch,
   resolveExplanationProfile,
 } from "./explanationPanelLogic";
 import { rememberPanelRestoreState } from "./layoutPersistence";
@@ -12,6 +13,8 @@ import { PanelHost } from "./panelHost";
 
 export class ExplanationPanel {
   public static current: ExplanationPanel | undefined;
+  /** Monotonic counter so concurrent cold opens share a total order (#276). */
+  private static nextFetchGeneration = 0;
   private classIri = "";
   private profile = "el";
   private lastResult: GetExplanationResult | undefined;
@@ -52,19 +55,20 @@ export class ExplanationPanel {
       lastRunProfile: focusRelay.getReasoning()?.profile,
       settingsDefault: cfg.get<string>("reasoner.default"),
     });
-    const generation = ExplanationPanel.current
-      ? ++ExplanationPanel.current.fetchGeneration
-      : 1;
+    const generation = ++ExplanationPanel.nextFetchGeneration;
     if (ExplanationPanel.current) {
+      ExplanationPanel.current.fetchGeneration = generation;
       ExplanationPanel.current.activeFetchGeneration = generation;
     }
 
     const result = await getExplanation({ class_iri: classIri, profile });
 
+    // A newer show() was started while we awaited — discard this result (#276).
+    if (!isLatestExplanationFetch(generation, ExplanationPanel.nextFetchGeneration)) {
+      return;
+    }
+
     if (ExplanationPanel.current) {
-      if (ExplanationPanel.current.activeFetchGeneration !== generation) {
-        return;
-      }
       ExplanationPanel.current.activeFetchGeneration = 0;
       ExplanationPanel.current.host.panel.reveal(vscode.ViewColumn.Beside);
       ExplanationPanel.current.setContent(classIri, result, profile);

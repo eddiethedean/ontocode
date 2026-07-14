@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
   isExplanationStale,
+  isLatestExplanationFetch,
   resolveExplanationProfile,
   stepsAsText,
 } from "./explanationPanelLogic";
@@ -65,5 +66,10 @@ describe("explanationPanelLogic", () => {
       stepsAsText([{ index: 1, display: "A SubClassOf B", rule: "r" }]),
       "1. A SubClassOf B"
     );
+  });
+
+  it("keeps only the latest concurrent explanation fetch (#276)", () => {
+    assert.equal(isLatestExplanationFetch(1, 2), false);
+    assert.equal(isLatestExplanationFetch(2, 2), true);
   });
 });

@@ -712,24 +712,28 @@ export function registerCommands(
   );
   context.subscriptions.push(
     vscode.commands.registerCommand("ontocode.navigateBack", async () => {
-      const entry = navigationManager.back();
-      if (!entry) {
-        void vscode.window.showInformationMessage("OntoCode: no earlier navigation entry");
-        return;
-      }
-      if (entry.kind === "entity") {
-        await vscode.commands.executeCommand("ontocode.openEntity", entry.id);
-      }
+      await navigationManager.runHistoryNavigation(async () => {
+        const entry = navigationManager.back();
+        if (!entry) {
+          void vscode.window.showInformationMessage("OntoCode: no earlier navigation entry");
+          return;
+        }
+        if (entry.kind === "entity") {
+          await vscode.commands.executeCommand("ontocode.openEntity", entry.id);
+        }
+      });
     }),
     vscode.commands.registerCommand("ontocode.navigateForward", async () => {
-      const entry = navigationManager.forward();
-      if (!entry) {
-        void vscode.window.showInformationMessage("OntoCode: no forward navigation entry");
-        return;
-      }
-      if (entry.kind === "entity") {
-        await vscode.commands.executeCommand("ontocode.openEntity", entry.id);
-      }
+      await navigationManager.runHistoryNavigation(async () => {
+        const entry = navigationManager.forward();
+        if (!entry) {
+          void vscode.window.showInformationMessage("OntoCode: no forward navigation entry");
+          return;
+        }
+        if (entry.kind === "entity") {
+          await vscode.commands.executeCommand("ontocode.openEntity", entry.id);
+        }
+      });
     }),
     vscode.commands.registerCommand("ontocode.workspaceUndo", async () => {
       if (await workspaceTransactionManager.undo()) {

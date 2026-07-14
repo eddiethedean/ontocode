@@ -1,6 +1,6 @@
 # OWL/XML and RDF/XML write-back
 
-> **Status:** Shipped in **v0.21.0** — open → edit → save → reload without semantic loss for `.owl`/`.rdf` (RDF/XML) and `.owx` (OWL/XML). Write-back uses Horned full-document re-serialize (not byte-identical formatting). See [ADR-0021](../design/adr/0021-deterministic-xml-serializers.md).
+> **Status:** Shipped in **v0.22.0** — open → edit → save → reload without semantic loss for `.owl`/`.rdf` (RDF/XML) and `.owx` (OWL/XML). Write-back uses Horned full-document re-serialize (not byte-identical formatting). See [ADR-0021](../design/adr/0021-deterministic-xml-serializers.md).
 
 OntoCore indexes and edits RDF/XML and OWL/XML via [Horned-OWL](https://crates.io/crates/horned-owl). The Entity Inspector marks these documents **editable** when parse status is OK.
 

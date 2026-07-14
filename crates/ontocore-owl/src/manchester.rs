@@ -1,5 +1,7 @@
 use crate::error::{OwlError, Result};
-use horned_owl::model::{Build, ClassExpression, ObjectPropertyExpression, RcStr};
+use horned_owl::model::{
+    Build, ClassExpression, DataRange, Individual, Literal, ObjectPropertyExpression, RcStr,
+};
 use serde::Serialize;
 use std::collections::BTreeMap;
 use std::fmt::Write as _;
@@ -106,7 +108,55 @@ pub fn class_expression_to_manchester(
             bce,
             namespaces,
         ),
-        other => format!("({other:?})"),
+        ClassExpression::ObjectComplementOf(inner) => {
+            let body = class_expression_to_manchester(inner, namespaces);
+            format!("not ({body})")
+        }
+        ClassExpression::ObjectHasValue { ope, i } => {
+            format!(
+                "{} value {}",
+                iri_to_manchester_term(&ope_to_iri(ope), namespaces),
+                iri_to_manchester_term(i, namespaces)
+            )
+        }
+        ClassExpression::ObjectHasSelf(ope) => {
+            format!("{} Self", iri_to_manchester_term(&ope_to_iri(ope), namespaces))
+        }
+        ClassExpression::ObjectOneOf(inds) => {
+            let parts: Vec<String> =
+                inds.iter().map(|i| iri_to_manchester_term(i, namespaces)).collect();
+            format!("{{ {} }}", parts.join(" "))
+        }
+        ClassExpression::DataSomeValuesFrom { dp, dr } => {
+            format!(
+                "{} some {}",
+                iri_to_manchester_term(dp.0.as_ref(), namespaces),
+                data_range_to_manchester(dr, namespaces)
+            )
+        }
+        ClassExpression::DataAllValuesFrom { dp, dr } => {
+            format!(
+                "{} only {}",
+                iri_to_manchester_term(dp.0.as_ref(), namespaces),
+                data_range_to_manchester(dr, namespaces)
+            )
+        }
+        ClassExpression::DataHasValue { dp, l } => {
+            format!(
+                "{} value \"{}\"",
+                iri_to_manchester_term(dp.0.as_ref(), namespaces),
+                literal_lexical(l)
+            )
+        }
+        ClassExpression::DataMinCardinality { n, dp, dr } => {
+            data_cardinality_manchester(dp.0.as_ref(), "min", *n, dr, namespaces)
+        }
+        ClassExpression::DataMaxCardinality { n, dp, dr } => {
+            data_cardinality_manchester(dp.0.as_ref(), "max", *n, dr, namespaces)
+        }
+        ClassExpression::DataExactCardinality { n, dp, dr } => {
+            data_cardinality_manchester(dp.0.as_ref(), "exactly", *n, dr, namespaces)
+        }
     }
 }
 
@@ -155,6 +205,38 @@ pub fn expression_tree_json(
             "property": iri_to_manchester_term(&ope_to_iri(ope), namespaces),
             "filler": expression_tree_json(bce, namespaces),
         }),
+        ClassExpression::ObjectComplementOf(inner) => serde_json::json!({
+            "kind": "ObjectComplementOf",
+            "filler": expression_tree_json(inner, namespaces),
+        }),
+        ClassExpression::ObjectHasValue { ope, i } => serde_json::json!({
+            "kind": "ObjectHasValue",
+            "property": iri_to_manchester_term(&ope_to_iri(ope), namespaces),
+            "individual": iri_to_manchester_term(i, namespaces),
+        }),
+        ClassExpression::ObjectHasSelf(ope) => serde_json::json!({
+            "kind": "ObjectHasSelf",
+            "property": iri_to_manchester_term(&ope_to_iri(ope), namespaces),
+        }),
+        ClassExpression::ObjectOneOf(inds) => serde_json::json!({
+            "kind": "ObjectOneOf",
+            "individuals": inds.iter().map(|i| iri_to_manchester_term(i, namespaces)).collect::<Vec<_>>(),
+        }),
+        ClassExpression::DataSomeValuesFrom { dp, dr } => serde_json::json!({
+            "kind": "DataSomeValuesFrom",
+            "property": iri_to_manchester_term(dp.0.as_ref(), namespaces),
+            "range": data_range_to_manchester(dr, namespaces),
+        }),
+        ClassExpression::DataAllValuesFrom { dp, dr } => serde_json::json!({
+            "kind": "DataAllValuesFrom",
+            "property": iri_to_manchester_term(dp.0.as_ref(), namespaces),
+            "range": data_range_to_manchester(dr, namespaces),
+        }),
+        ClassExpression::DataHasValue { dp, l } => serde_json::json!({
+            "kind": "DataHasValue",
+            "property": iri_to_manchester_term(dp.0.as_ref(), namespaces),
+            "literal": literal_lexical(l),
+        }),
         other => serde_json::json!({ "kind": format!("{other:?}") }),
     }
 }
@@ -169,6 +251,11 @@ enum ManchesterAst {
     Min { n: u32, property: String, filler: Box<ManchesterAst> },
     Max { n: u32, property: String, filler: Box<ManchesterAst> },
     Exactly { n: u32, property: String, filler: Box<ManchesterAst> },
+    Not(Box<ManchesterAst>),
+    HasValue { property: String, individual: String },
+    HasSelf { property: String },
+    OneOf(Vec<String>),
+    DataHasValue { property: String, literal: String },
 }
 
 fn ast_to_class_expression(
@@ -182,20 +269,34 @@ fn ast_to_class_expression(
             Ok(ClassExpression::Class(build.class(resolved)))
         }
         ManchesterAst::Some { property, filler } => {
-            let prop = build.object_property(resolve_term_iri(property, namespaces)?);
-            let bce = Box::new(ast_to_class_expression(filler, build, namespaces)?);
-            Ok(ClassExpression::ObjectSomeValuesFrom {
-                ope: ObjectPropertyExpression::ObjectProperty(prop),
-                bce,
-            })
+            let prop_iri = resolve_term_iri(property, namespaces)?;
+            if let Some(dr) = filler_as_data_range(filler, build, namespaces)? {
+                Ok(ClassExpression::DataSomeValuesFrom {
+                    dp: build.data_property(prop_iri),
+                    dr,
+                })
+            } else {
+                let bce = Box::new(ast_to_class_expression(filler, build, namespaces)?);
+                Ok(ClassExpression::ObjectSomeValuesFrom {
+                    ope: ObjectPropertyExpression::ObjectProperty(build.object_property(prop_iri)),
+                    bce,
+                })
+            }
         }
         ManchesterAst::Only { property, filler } => {
-            let prop = build.object_property(resolve_term_iri(property, namespaces)?);
-            let bce = Box::new(ast_to_class_expression(filler, build, namespaces)?);
-            Ok(ClassExpression::ObjectAllValuesFrom {
-                ope: ObjectPropertyExpression::ObjectProperty(prop),
-                bce,
-            })
+            let prop_iri = resolve_term_iri(property, namespaces)?;
+            if let Some(dr) = filler_as_data_range(filler, build, namespaces)? {
+                Ok(ClassExpression::DataAllValuesFrom {
+                    dp: build.data_property(prop_iri),
+                    dr,
+                })
+            } else {
+                let bce = Box::new(ast_to_class_expression(filler, build, namespaces)?);
+                Ok(ClassExpression::ObjectAllValuesFrom {
+                    ope: ObjectPropertyExpression::ObjectProperty(build.object_property(prop_iri)),
+                    bce,
+                })
+            }
         }
         ManchesterAst::And(items) => {
             let exprs: Result<Vec<_>> =
@@ -208,33 +309,115 @@ fn ast_to_class_expression(
             Ok(ClassExpression::ObjectUnionOf(exprs?))
         }
         ManchesterAst::Min { n, property, filler } => {
-            let prop = build.object_property(resolve_term_iri(property, namespaces)?);
-            let bce = Box::new(ast_to_class_expression(filler, build, namespaces)?);
-            Ok(ClassExpression::ObjectMinCardinality {
-                n: *n,
-                ope: ObjectPropertyExpression::ObjectProperty(prop),
-                bce,
-            })
+            let prop_iri = resolve_term_iri(property, namespaces)?;
+            if let Some(dr) = filler_as_data_range(filler, build, namespaces)? {
+                Ok(ClassExpression::DataMinCardinality {
+                    n: *n,
+                    dp: build.data_property(prop_iri),
+                    dr,
+                })
+            } else {
+                let bce = Box::new(ast_to_class_expression(filler, build, namespaces)?);
+                Ok(ClassExpression::ObjectMinCardinality {
+                    n: *n,
+                    ope: ObjectPropertyExpression::ObjectProperty(build.object_property(prop_iri)),
+                    bce,
+                })
+            }
         }
         ManchesterAst::Max { n, property, filler } => {
-            let prop = build.object_property(resolve_term_iri(property, namespaces)?);
-            let bce = Box::new(ast_to_class_expression(filler, build, namespaces)?);
-            Ok(ClassExpression::ObjectMaxCardinality {
-                n: *n,
-                ope: ObjectPropertyExpression::ObjectProperty(prop),
-                bce,
-            })
+            let prop_iri = resolve_term_iri(property, namespaces)?;
+            if let Some(dr) = filler_as_data_range(filler, build, namespaces)? {
+                Ok(ClassExpression::DataMaxCardinality {
+                    n: *n,
+                    dp: build.data_property(prop_iri),
+                    dr,
+                })
+            } else {
+                let bce = Box::new(ast_to_class_expression(filler, build, namespaces)?);
+                Ok(ClassExpression::ObjectMaxCardinality {
+                    n: *n,
+                    ope: ObjectPropertyExpression::ObjectProperty(build.object_property(prop_iri)),
+                    bce,
+                })
+            }
         }
         ManchesterAst::Exactly { n, property, filler } => {
+            let prop_iri = resolve_term_iri(property, namespaces)?;
+            if let Some(dr) = filler_as_data_range(filler, build, namespaces)? {
+                Ok(ClassExpression::DataExactCardinality {
+                    n: *n,
+                    dp: build.data_property(prop_iri),
+                    dr,
+                })
+            } else {
+                let bce = Box::new(ast_to_class_expression(filler, build, namespaces)?);
+                Ok(ClassExpression::ObjectExactCardinality {
+                    n: *n,
+                    ope: ObjectPropertyExpression::ObjectProperty(build.object_property(prop_iri)),
+                    bce,
+                })
+            }
+        }
+        ManchesterAst::Not(inner) => {
+            let ce = ast_to_class_expression(inner, build, namespaces)?;
+            Ok(ClassExpression::ObjectComplementOf(Box::new(ce)))
+        }
+        ManchesterAst::HasValue { property, individual } => {
             let prop = build.object_property(resolve_term_iri(property, namespaces)?);
-            let bce = Box::new(ast_to_class_expression(filler, build, namespaces)?);
-            Ok(ClassExpression::ObjectExactCardinality {
-                n: *n,
+            let ind: Individual<RcStr> =
+                build.named_individual(resolve_term_iri(individual, namespaces)?).into();
+            Ok(ClassExpression::ObjectHasValue {
                 ope: ObjectPropertyExpression::ObjectProperty(prop),
-                bce,
+                i: ind,
             })
         }
+        ManchesterAst::HasSelf { property } => {
+            let prop = build.object_property(resolve_term_iri(property, namespaces)?);
+            Ok(ClassExpression::ObjectHasSelf(ObjectPropertyExpression::ObjectProperty(prop)))
+        }
+        ManchesterAst::OneOf(inds) => {
+            let individuals: Result<Vec<_>> = inds
+                .iter()
+                .map(|i| {
+                    Ok(Individual::from(build.named_individual(resolve_term_iri(i, namespaces)?)))
+                })
+                .collect();
+            Ok(ClassExpression::ObjectOneOf(individuals?))
+        }
+        ManchesterAst::DataHasValue { property, literal } => Ok(ClassExpression::DataHasValue {
+            dp: build.data_property(resolve_term_iri(property, namespaces)?),
+            l: Literal::Simple { literal: literal.clone() },
+        }),
     }
+}
+
+fn filler_as_data_range(
+    filler: &ManchesterAst,
+    build: &Build<RcStr>,
+    namespaces: &BTreeMap<String, String>,
+) -> Result<Option<DataRange<RcStr>>> {
+    match filler {
+        ManchesterAst::Class(term) => {
+            let iri = resolve_term_iri(term, namespaces)?;
+            if looks_like_datatype_iri(&iri, term) {
+                Ok(Some(DataRange::Datatype(build.datatype(iri))))
+            } else {
+                Ok(None)
+            }
+        }
+        _ => Ok(None),
+    }
+}
+
+fn looks_like_datatype_iri(iri: &str, original: &str) -> bool {
+    iri.starts_with("http://www.w3.org/2001/XMLSchema#")
+        || iri.starts_with("http://www.w3.org/1999/02/22-rdf-syntax-ns#")
+            && (iri.ends_with("PlainLiteral") || iri.ends_with("langString") || iri.ends_with("HTML") || iri.ends_with("XMLLiteral"))
+        || iri == "http://www.w3.org/2000/01/rdf-schema#Literal"
+        || iri == "http://www.w3.org/2002/07/owl#real"
+        || iri == "http://www.w3.org/2002/07/owl#rational"
+        || original.starts_with("xsd:")
 }
 
 fn resolve_term_iri(term: &str, namespaces: &BTreeMap<String, String>) -> Result<String> {
@@ -278,6 +461,29 @@ fn tokenize(input: &str) -> std::result::Result<Vec<Token>, String> {
         match ch {
             '(' => tokens.push(Token::LParen),
             ')' => tokens.push(Token::RParen),
+            '{' => tokens.push(Token::LBrace),
+            '}' => tokens.push(Token::RBrace),
+            '"' => {
+                let mut lit = String::new();
+                let mut closed = false;
+                while let Some((_, c)) = chars.next() {
+                    if c == '"' {
+                        closed = true;
+                        break;
+                    }
+                    if c == '\\' {
+                        if let Some((_, escaped)) = chars.next() {
+                            lit.push(escaped);
+                        }
+                    } else {
+                        lit.push(c);
+                    }
+                }
+                if !closed {
+                    return Err(format!("unclosed string starting at {start}"));
+                }
+                tokens.push(Token::StringLit(lit));
+            }
             '<' => {
                 let mut iri = String::new();
                 let mut closed = false;
@@ -318,6 +524,8 @@ fn tokenize(input: &str) -> std::result::Result<Vec<Token>, String> {
                     "max" => Some(Keyword::Max),
                     "exactly" => Some(Keyword::Exactly),
                     "not" => Some(Keyword::Not),
+                    "value" => Some(Keyword::Value),
+                    "self" => Some(Keyword::SelfKw),
                     _ => None,
                 };
                 if let Some(k) = kw {
@@ -337,10 +545,13 @@ fn tokenize(input: &str) -> std::result::Result<Vec<Token>, String> {
 enum Token {
     Ident(String),
     Iri(String),
+    StringLit(String),
     Keyword(Keyword),
     Number(u32),
     LParen,
     RParen,
+    LBrace,
+    RBrace,
     Eof,
 }
 
@@ -354,6 +565,8 @@ enum Keyword {
     Max,
     Exactly,
     Not,
+    Value,
+    SelfKw,
 }
 
 struct ManchesterParser {
@@ -410,7 +623,9 @@ impl ManchesterParser {
 
     fn parse_unary(&mut self) -> std::result::Result<ManchesterAst, String> {
         if matches!(self.peek(), Token::Keyword(Keyword::Not)) {
-            return Err("not expressions are not supported in Manchester syntax".to_string());
+            self.advance();
+            let inner = self.parse_unary()?;
+            return Ok(ManchesterAst::Not(Box::new(inner)));
         }
         self.parse_primary()
     }
@@ -419,6 +634,9 @@ impl ManchesterParser {
         if matches!(self.peek(), Token::Keyword(Keyword::Min | Keyword::Max | Keyword::Exactly)) {
             return self.parse_cardinality();
         }
+        if matches!(self.peek(), Token::LBrace) {
+            return self.parse_one_of();
+        }
         if matches!(self.peek(), Token::LParen) {
             self.advance();
             let inner = self.parse_expression()?;
@@ -426,6 +644,23 @@ impl ManchesterParser {
             return Ok(inner);
         }
         let name = self.parse_name()?;
+        if matches!(self.peek(), Token::Keyword(Keyword::SelfKw)) {
+            self.advance();
+            return Ok(ManchesterAst::HasSelf { property: name });
+        }
+        if matches!(self.peek(), Token::Keyword(Keyword::Value)) {
+            self.advance();
+            return match self.peek().clone() {
+                Token::StringLit(lit) => {
+                    self.advance();
+                    Ok(ManchesterAst::DataHasValue { property: name, literal: lit })
+                }
+                _ => {
+                    let individual = self.parse_name()?;
+                    Ok(ManchesterAst::HasValue { property: name, individual })
+                }
+            };
+        }
         if matches!(self.peek(), Token::Keyword(Keyword::Min | Keyword::Max | Keyword::Exactly)) {
             let kind = self.advance();
             let Token::Number(n) = self.advance() else {
@@ -466,6 +701,23 @@ impl ManchesterParser {
         Ok(ManchesterAst::Class(name))
     }
 
+    fn parse_one_of(&mut self) -> std::result::Result<ManchesterAst, String> {
+        if !matches!(self.advance(), Token::LBrace) {
+            return Err("expected '{'".to_string());
+        }
+        let mut inds = Vec::new();
+        while !matches!(self.peek(), Token::RBrace | Token::Eof) {
+            inds.push(self.parse_name()?);
+        }
+        if !matches!(self.advance(), Token::RBrace) {
+            return Err("expected '}'".to_string());
+        }
+        if inds.is_empty() {
+            return Err("ObjectOneOf must contain at least one individual".to_string());
+        }
+        Ok(ManchesterAst::OneOf(inds))
+    }
+
     fn parse_cardinality(&mut self) -> std::result::Result<ManchesterAst, String> {
         let kind = self.advance();
         let Token::Number(n) = self.advance() else {
@@ -496,7 +748,7 @@ impl ManchesterParser {
     }
 
     fn starts_class_term(tok: &Token) -> bool {
-        matches!(tok, Token::Ident(_) | Token::Iri(_) | Token::LParen)
+        matches!(tok, Token::Ident(_) | Token::Iri(_) | Token::LParen | Token::LBrace)
     }
 
     fn parse_name(&mut self) -> std::result::Result<String, String> {
@@ -598,9 +850,89 @@ pub(crate) fn class_expression_to_turtle_value(
             };
             class_expression_to_turtle_value(first, namespaces, indent)
         }
-        other => Err(OwlError::ManchesterInvalid(format!(
-            "unsupported expression for Turtle: {other:?}"
-        ))),
+        ClassExpression::ObjectComplementOf(inner) => {
+            let ce = class_expression_to_turtle_value(inner, namespaces, indent + 1)?;
+            let mut out = String::new();
+            writeln!(out, "[").ok();
+            writeln!(out, "{inner_pad}a owl:Class ;").ok();
+            writeln!(out, "{inner_pad}owl:complementOf {ce}").ok();
+            write!(out, "{pad}]").ok();
+            Ok(out)
+        }
+        ClassExpression::ObjectHasValue { ope, i } => {
+            let prop = iri_to_turtle_term(&ope_to_iri(ope), namespaces)?;
+            let ind = iri_to_turtle_term(i, namespaces)?;
+            let mut out = String::new();
+            writeln!(out, "[").ok();
+            writeln!(out, "{inner_pad}a owl:Restriction ;").ok();
+            writeln!(out, "{inner_pad}owl:onProperty {prop} ;").ok();
+            writeln!(out, "{inner_pad}owl:hasValue {ind}").ok();
+            write!(out, "{pad}]").ok();
+            Ok(out)
+        }
+        ClassExpression::ObjectHasSelf(ope) => {
+            let prop = iri_to_turtle_term(&ope_to_iri(ope), namespaces)?;
+            let mut out = String::new();
+            writeln!(out, "[").ok();
+            writeln!(out, "{inner_pad}a owl:Restriction ;").ok();
+            writeln!(out, "{inner_pad}owl:onProperty {prop} ;").ok();
+            writeln!(out, "{inner_pad}owl:hasSelf true").ok();
+            write!(out, "{pad}]").ok();
+            Ok(out)
+        }
+        ClassExpression::ObjectOneOf(inds) => {
+            let terms: Result<Vec<_>> =
+                inds.iter().map(|i| iri_to_turtle_term(i, namespaces)).collect();
+            let list = terms?.join(" ");
+            let mut out = String::new();
+            writeln!(out, "[").ok();
+            writeln!(out, "{inner_pad}a owl:Class ;").ok();
+            writeln!(out, "{inner_pad}owl:oneOf ( {list} )").ok();
+            write!(out, "{pad}]").ok();
+            Ok(out)
+        }
+        ClassExpression::DataSomeValuesFrom { dp, dr } => {
+            let prop = iri_to_turtle_term(dp.0.as_ref(), namespaces)?;
+            let range = data_range_to_turtle(dr, namespaces)?;
+            let mut out = String::new();
+            writeln!(out, "[").ok();
+            writeln!(out, "{inner_pad}a owl:Restriction ;").ok();
+            writeln!(out, "{inner_pad}owl:onProperty {prop} ;").ok();
+            writeln!(out, "{inner_pad}owl:someValuesFrom {range}").ok();
+            write!(out, "{pad}]").ok();
+            Ok(out)
+        }
+        ClassExpression::DataAllValuesFrom { dp, dr } => {
+            let prop = iri_to_turtle_term(dp.0.as_ref(), namespaces)?;
+            let range = data_range_to_turtle(dr, namespaces)?;
+            let mut out = String::new();
+            writeln!(out, "[").ok();
+            writeln!(out, "{inner_pad}a owl:Restriction ;").ok();
+            writeln!(out, "{inner_pad}owl:onProperty {prop} ;").ok();
+            writeln!(out, "{inner_pad}owl:allValuesFrom {range}").ok();
+            write!(out, "{pad}]").ok();
+            Ok(out)
+        }
+        ClassExpression::DataHasValue { dp, l } => {
+            let prop = iri_to_turtle_term(dp.0.as_ref(), namespaces)?;
+            let lit = format!("\"{}\"", escape_turtle_string_local(literal_lexical(l)));
+            let mut out = String::new();
+            writeln!(out, "[").ok();
+            writeln!(out, "{inner_pad}a owl:Restriction ;").ok();
+            writeln!(out, "{inner_pad}owl:onProperty {prop} ;").ok();
+            writeln!(out, "{inner_pad}owl:hasValue {lit}").ok();
+            write!(out, "{pad}]").ok();
+            Ok(out)
+        }
+        ClassExpression::DataMinCardinality { n, dp, dr } => {
+            data_cardinality_turtle("owl:minQualifiedCardinality", *n, dp.0.as_ref(), dr, namespaces, indent)
+        }
+        ClassExpression::DataMaxCardinality { n, dp, dr } => {
+            data_cardinality_turtle("owl:maxQualifiedCardinality", *n, dp.0.as_ref(), dr, namespaces, indent)
+        }
+        ClassExpression::DataExactCardinality { n, dp, dr } => {
+            data_cardinality_turtle("owl:qualifiedCardinality", *n, dp.0.as_ref(), dr, namespaces, indent)
+        }
     }
 }
 
@@ -628,6 +960,85 @@ fn cardinality_turtle(
     writeln!(out, "{inner_pad}owl:onClass {filler}").ok();
     write!(out, "{pad}]").ok();
     Ok(out)
+}
+
+fn data_cardinality_turtle(
+    pred: &str,
+    n: u32,
+    property_iri: &str,
+    dr: &DataRange<RcStr>,
+    namespaces: &BTreeMap<String, String>,
+    indent: usize,
+) -> Result<String> {
+    let pad = "    ".repeat(indent);
+    let inner_pad = "    ".repeat(indent + 1);
+    let prop = iri_to_turtle_term(property_iri, namespaces)?;
+    let range = data_range_to_turtle(dr, namespaces)?;
+    let mut out = String::new();
+    writeln!(out, "[").ok();
+    writeln!(out, "{inner_pad}a owl:Restriction ;").ok();
+    writeln!(out, "{inner_pad}owl:onProperty {prop} ;").ok();
+    writeln!(
+        out,
+        "{inner_pad}{pred} \"{n}\"^^<http://www.w3.org/2001/XMLSchema#nonNegativeInteger> ;"
+    )
+    .ok();
+    writeln!(out, "{inner_pad}owl:onDataRange {range}").ok();
+    write!(out, "{pad}]").ok();
+    Ok(out)
+}
+
+fn data_range_to_turtle(dr: &DataRange<RcStr>, namespaces: &BTreeMap<String, String>) -> Result<String> {
+    match dr {
+        DataRange::Datatype(dt) => iri_to_turtle_term(dt.0.as_ref(), namespaces),
+        other => Err(OwlError::ManchesterInvalid(format!(
+            "unsupported data range for Turtle: {other:?}"
+        ))),
+    }
+}
+
+fn data_range_to_manchester(dr: &DataRange<RcStr>, namespaces: &BTreeMap<String, String>) -> String {
+    match dr {
+        DataRange::Datatype(dt) => iri_to_manchester_term(dt.0.as_ref(), namespaces),
+        other => format!("({other:?})"),
+    }
+}
+
+fn data_cardinality_manchester(
+    prop: &str,
+    keyword: &str,
+    n: u32,
+    dr: &DataRange<RcStr>,
+    namespaces: &BTreeMap<String, String>,
+) -> String {
+    format!(
+        "{} {keyword} {n} {}",
+        iri_to_manchester_term(prop, namespaces),
+        data_range_to_manchester(dr, namespaces)
+    )
+}
+
+fn literal_lexical(l: &Literal<RcStr>) -> &str {
+    match l {
+        Literal::Simple { literal } => literal.as_str(),
+        Literal::Language { literal, .. } => literal.as_str(),
+        Literal::Datatype { literal, .. } => literal.as_str(),
+    }
+}
+
+fn escape_turtle_string_local(value: &str) -> String {
+    let mut out = String::with_capacity(value.len());
+    for ch in value.chars() {
+        match ch {
+            '\\' => out.push_str("\\\\"),
+            '"' => out.push_str("\\\""),
+            '\n' => out.push_str("\\n"),
+            '\r' => out.push_str("\\r"),
+            '\t' => out.push_str("\\t"),
+            c => out.push(c),
+        }
+    }
+    out
 }
 
 fn is_owl_thing(expr: &ClassExpression<RcStr>) -> bool {
@@ -825,5 +1236,43 @@ mod tests {
             .expect("turtle");
         assert!(turtle.contains("exfoo:Bar"));
         assert!(!turtle.contains("ex:foo/Bar"));
+    }
+
+    #[test]
+    fn parse_not_complement() {
+        let ns = ex_ns();
+        let out = parse_class_expression("not ex:Person", &ns).expect("parse not");
+        assert!(matches!(out.expression, ClassExpression::ObjectComplementOf(_)));
+        let turtle = class_expression_to_turtle_value(&out.expression, &ns, 0).expect("turtle");
+        assert!(turtle.contains("owl:complementOf"));
+    }
+
+    #[test]
+    fn parse_has_value_and_has_self() {
+        let ns = clinic_ns();
+        let out = parse_class_expression("ex:hasRecord value ex:rec1", &ns).expect("has value");
+        assert!(matches!(out.expression, ClassExpression::ObjectHasValue { .. }));
+        let out = parse_class_expression("ex:likes Self", &ns).expect("has self");
+        assert!(matches!(out.expression, ClassExpression::ObjectHasSelf(_)));
+    }
+
+    #[test]
+    fn parse_one_of() {
+        let ns = ex_ns();
+        let out = parse_class_expression("{ ex:Person ex:Organization }", &ns).expect("one of");
+        match out.expression {
+            ClassExpression::ObjectOneOf(inds) => assert_eq!(inds.len(), 2),
+            other => panic!("expected oneOf, got {other:?}"),
+        }
+    }
+
+    #[test]
+    fn parse_data_some_with_xsd() {
+        let ns = BTreeMap::from([
+            ("ex".to_string(), "http://example.org/".to_string()),
+            ("xsd".to_string(), "http://www.w3.org/2001/XMLSchema#".to_string()),
+        ]);
+        let out = parse_class_expression("ex:age some xsd:integer", &ns).expect("data some");
+        assert!(matches!(out.expression, ClassExpression::DataSomeValuesFrom { .. }));
     }
 }

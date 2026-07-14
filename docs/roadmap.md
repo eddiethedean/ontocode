@@ -42,7 +42,7 @@ After 1.0, the roadmap shifts from parity to modernization.
 | [Product Roadmap 2.0](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/PRODUCT_ROADMAP_2.0.md) | UI phases with milestone acceptance criteria |
 | [Product design (UI)](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/README.md) | Product design specification pack (UX, design system, OntoStudio target) |
 
-**Current release:** v0.21.0
+**Current release:** v0.22.0
 
 ---
 
@@ -81,7 +81,7 @@ Full timeline: [ROADMAP.md on GitHub](https://github.com/eddiethedean/ontocode/b
 | 19 | v0.19 | F | Shipped | — | Semantic foundation + program baseline |
 | 20 | v0.20 | F | Shipped | 1† | Workspace runtime |
 | 21 | v0.21 | F | Shipped | — | RDF/XML + OWL/XML write-back |
-| 22 | v0.22 | F | Planned | 2† | Complete OWL 2 authoring |
+| 22 | v0.22 | F | Shipped | 2† | Complete OWL 2 authoring |
 | 23 | v0.23 | F | Planned | 5† | Reasoning parity + SWRL |
 | 24 | v0.24 | F | Planned | 3†, 6† | Refactoring + DL Query parity |
 | 25 | v0.25 | F | Planned | 4†, 8† | Viz + plugin SDK 1.0 + a11y + parity CI |
@@ -470,9 +470,27 @@ See [SHIPPED.md](SHIPPED.md) · [migration/v0.20.md](migration/v0.20.md) · full
 
 ---
 
-## Planned releases (v0.22 → v1.2+)
+### v0.21 — Required format write-back (shipped)
 
-**Pre-1.0 parity phases remaining:** [PRE_1_0_PHASES.md](https://github.com/eddiethedean/ontocode/blob/main/docs/protege-parity/07_BACKLOG/PRE_1_0_PHASES.md) (v0.21–v0.25 → 1.0.0-rc → 1.0.0). Per-release detail: [ROADMAP.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/ROADMAP.md) § Era F.
+**Status:** **Shipped** as tagged **v0.21.0**.
+
+See [SHIPPED.md](SHIPPED.md) · [migration/v0.21.md](migration/v0.21.md).
+
+---
+
+### v0.22 — Complete OWL 2 authoring (shipped)
+
+**Status:** **Shipped** as tagged **v0.22.0**.
+
+**Theme:** Every P0 OWL 2 construct authorable across required formats.
+
+See [SHIPPED.md](SHIPPED.md) · [migration/v0.22.md](migration/v0.22.md) · [OWL2_AUTHORING_GAPS.md](https://github.com/eddiethedean/ontocode/blob/main/docs/protege-parity/06_SUBSYSTEMS/OWL2_AUTHORING_GAPS.md).
+
+---
+
+## Planned releases (v0.23 → v1.2+)
+
+**Pre-1.0 parity phases remaining:** [PRE_1_0_PHASES.md](https://github.com/eddiethedean/ontocode/blob/main/docs/protege-parity/07_BACKLOG/PRE_1_0_PHASES.md) (v0.23–v0.25 → 1.0.0-rc → 1.0.0). Per-release detail: [ROADMAP.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/ROADMAP.md) § Era F.
 
 ---
 

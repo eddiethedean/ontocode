@@ -299,6 +299,70 @@ export type PatchOp =
   | { op: "remove_data_property_assertion"; entity_iri: string; property_iri: string; value: string }
   | { op: "add_annotation"; entity_iri: string; predicate: string; value: string }
   | { op: "remove_annotation"; entity_iri: string; predicate: string; value: string }
+  | { op: "add_has_key"; class_iri: string; properties: string[] }
+  | { op: "remove_has_key"; class_iri: string; properties: string[] }
+  | { op: "add_disjoint_union"; class_iri: string; members: string[] }
+  | { op: "remove_disjoint_union"; class_iri: string; members: string[] }
+  | { op: "add_inverse_object_properties"; property_iri: string; inverse_iri: string }
+  | { op: "remove_inverse_object_properties"; property_iri: string; inverse_iri: string }
+  | { op: "add_equivalent_object_properties"; properties: string[] }
+  | { op: "remove_equivalent_object_properties"; properties: string[] }
+  | { op: "add_disjoint_object_properties"; properties: string[] }
+  | { op: "remove_disjoint_object_properties"; properties: string[] }
+  | { op: "add_equivalent_data_properties"; properties: string[] }
+  | { op: "remove_equivalent_data_properties"; properties: string[] }
+  | { op: "add_disjoint_data_properties"; properties: string[] }
+  | { op: "remove_disjoint_data_properties"; properties: string[] }
+  | { op: "add_sub_object_property_of"; property_iri: string; parent_iri: string }
+  | { op: "remove_sub_object_property_of"; property_iri: string; parent_iri: string }
+  | { op: "add_sub_data_property_of"; property_iri: string; parent_iri: string }
+  | { op: "remove_sub_data_property_of"; property_iri: string; parent_iri: string }
+  | {
+      op: "add_negative_object_property_assertion";
+      entity_iri: string;
+      property_iri: string;
+      target_iri: string;
+    }
+  | {
+      op: "remove_negative_object_property_assertion";
+      entity_iri: string;
+      property_iri: string;
+      target_iri: string;
+    }
+  | {
+      op: "add_negative_data_property_assertion";
+      entity_iri: string;
+      property_iri: string;
+      value: string;
+    }
+  | {
+      op: "remove_negative_data_property_assertion";
+      entity_iri: string;
+      property_iri: string;
+      value: string;
+    }
+  | { op: "add_same_individual"; individuals: string[] }
+  | { op: "remove_same_individual"; individuals: string[] }
+  | { op: "add_different_individuals"; individuals: string[] }
+  | { op: "remove_different_individuals"; individuals: string[] }
+  | { op: "add_datatype_definition"; datatype_iri: string; manchester: string }
+  | { op: "remove_datatype_definition"; datatype_iri: string; manchester: string }
+  | {
+      op: "add_axiom_annotation";
+      axiom_op: string;
+      subject_iri: string;
+      related_iri?: string;
+      predicate: string;
+      value: string;
+    }
+  | {
+      op: "remove_axiom_annotation";
+      axiom_op: string;
+      subject_iri: string;
+      related_iri?: string;
+      predicate: string;
+      value: string;
+    }
   | { op: "set_name"; term_id: string; value: string }
   | { op: "add_synonym"; term_id: string; value: string; scope: string }
   | { op: "remove_synonym"; term_id: string; value: string }
@@ -315,7 +379,8 @@ export type PatchEntityKind =
   | "object_property"
   | "data_property"
   | "annotation_property"
-  | "individual";
+  | "individual"
+  | "datatype";
 
 export interface PatchDiagnostic {
   severity: string;

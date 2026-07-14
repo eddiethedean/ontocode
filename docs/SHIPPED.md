@@ -1,12 +1,12 @@
-# What ships today (v0.21.0 — latest tagged)
+# What ships today (v0.22.0 — latest tagged)
 
 > **Canonical capability matrix.** Update this page on every release. Design specs under [Project](design/README.md) may describe future targets — check here for what is actually available.
 >
 > **Format write-back truth:** this page and [Supported formats](supported-formats.md) are the source of truth. Tier-1 user docs (README, Home, First success, FAQ, Evaluate pack, LSP/patch/CLI refs) must match them — see [Releasing — Tier-1 capability truth](releasing.md#documentation-sync-checklist-every-release).
 >
-> **Latest tagged release: v0.21.0** (crates.io, GitHub Releases; Marketplace/Open VSX may lag — see [Versions & channels](guides/versions-and-channels.md)). Pin installs: `cargo install ontocore-cli --locked --version 0.21.0`.
+> **Latest tagged release: v0.22.0** (crates.io, GitHub Releases; Marketplace/Open VSX may lag — see [Versions & channels](guides/versions-and-channels.md)). Pin installs: `cargo install ontocore-cli --locked --version 0.22.0`.
 
-**Latest tagged: v0.21.0** · [v0.21 migration](migration/v0.21.md) · [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md)
+**Latest tagged: v0.22.0** · [v0.22 migration](migration/v0.22.md) · [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md)
 
 ## Products
 
@@ -15,7 +15,7 @@
 | **OntoCode** | VS Code IDE — explorer, React inspector, graphs (asserted/inferred modes), Query Workbench, Manchester editor, refactor preview, reasoner, explanation panel, plugin commands/views/preferences/context actions |
 | **OntoCore** | Rust semantic workspace engine — `ontocore` façade, `ontocore-*` crates, `ontocore` CLI, `ontocore-lsp`, plugin host |
 
-## Capability matrix (v0.21.0 tagged)
+## Capability matrix (v0.22.0 tagged)
 
 | Capability | VS Code | CLI |
 |------------|---------|-----|
@@ -73,7 +73,17 @@
 > **OBO versioning:** patch engine write-back since **v0.12**; Entity Inspector write-back since **v0.13**.  
 > **XML write-back:** semantic fidelity (ADR-0021); not byte-identical to Protégé saves.
 
-## New in v0.21.0 (latest tagged)
+## New in v0.22.0 (latest tagged)
+
+| Capability | Status |
+|------------|--------|
+| HasKey, DisjointUnion, inverse / equivalent / disjoint properties, sub-property hierarchy | Yes (Turtle + XML mutate) |
+| Negative assertions; SameIndividual / DifferentIndividuals | Yes |
+| Datatype entities + datatype definitions; axiom annotations | Yes (Turtle; XML best-effort for complex DataRanges / some axiom types) |
+| Manchester `not`, `value`, `Self`, OneOf, data restrictions | Yes |
+| Inspector UI for HasKey, DisjointUnion, Inverse, Same/Different, NegativeOPA | Yes |
+
+## Previously in v0.21.0
 
 | Capability | Status |
 |------------|--------|
@@ -92,17 +102,17 @@
 | Token-aware type / characteristic detection (ignores comment substrings) | Yes |
 | `SetOntologyIri` rewrites `rdf:type owl:Ontology` in place | Yes |
 
-Full user-facing delta: [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md#0210---2026-07-13).
+Full user-facing delta: [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md#0220---2026-07-14).
 
 ## Release history
 
-Detailed notes for v0.9–v0.20 are in the [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md). This page lists **what is available in the latest tagged release**, not every past milestone.
+Detailed notes for v0.9–v0.21 are in the [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md). This page lists **what is available in the latest tagged release**, not every past milestone.
 
-## Manchester scope (v0.8+)
+## Manchester scope (v0.22)
 
-**Shipped:** named classes; `and` / `or`; `some` / `only`; `min` / `max` / `exact` cardinality; nested restrictions; `SubClassOf`, `EquivalentClasses`, and `DisjointClasses` via Manchester editor or patch JSON; domain/range editing; **property chain editing** (v0.12) via inspector and patch JSON.
+**Shipped:** named classes; `and` / `or` / `not`; `some` / `only` / `value` / `Self`; OneOf `{…}`; `min` / `max` / `exact` cardinality; nested restrictions; data restrictions on xsd types; `SubClassOf`, `EquivalentClasses`, and `DisjointClasses` via Manchester editor or patch JSON; domain/range; property chains; HasKey and remaining RBox/ABox ops via patch JSON / inspector.
 
-**Not shipped:** full DL axiom catalog for all formats, inline Manchester autocomplete in the text buffer. See [Protégé parity](design/PROTEGE_PARITY.md) for the v1.0 target.
+**Not shipped:** inline Manchester autocomplete in the text buffer; SWRL. See [Protégé parity](design/PROTEGE_PARITY.md) for remaining 1.0 targets.
 
 ## Known limitations
 
@@ -118,7 +128,7 @@ Detailed notes for v0.9–v0.20 are in the [CHANGELOG](https://github.com/eddiet
 
 ## What's next
 
-Forward milestones: complete OWL 2 authoring (**v0.22**), reasoning/SWRL parity (**v0.23**), Protégé-competitive release (**1.0**). See **[Platform roadmap](roadmap.md)** · **[Known limitations](known-limitations.md)**.
+Forward milestones: reasoning/SWRL parity (**v0.23**), semantic services (**v0.24**), Protégé-competitive release (**1.0**). See **[Platform roadmap](roadmap.md)** · **[Known limitations](known-limitations.md)**.
 
 ## Where to learn more
 

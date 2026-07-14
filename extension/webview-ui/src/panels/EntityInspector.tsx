@@ -47,6 +47,13 @@ export function EntityInspectorPanel(_props?: WorkspaceProps): JSX.Element {
   const [rangePick, setRangePick] = useState("");
   const [annotationPredicate, setAnnotationPredicate] = useState("");
   const [annotationValue, setAnnotationValue] = useState("");
+  const [hasKeyProps, setHasKeyProps] = useState("");
+  const [disjointUnionMembers, setDisjointUnionMembers] = useState("");
+  const [inverseIri, setInverseIri] = useState("");
+  const [sameIndividuals, setSameIndividuals] = useState("");
+  const [differentIndividuals, setDifferentIndividuals] = useState("");
+  const [negPropIri, setNegPropIri] = useState("");
+  const [negTargetIri, setNegTargetIri] = useState("");
   const [oboName, setOboName] = useState("");
   const [oboSynonym, setOboSynonym] = useState("");
   const [oboDef, setOboDef] = useState("");
@@ -64,6 +71,13 @@ export function EntityInspectorPanel(_props?: WorkspaceProps): JSX.Element {
     setRangePick("");
     setAnnotationPredicate("");
     setAnnotationValue("");
+    setHasKeyProps("");
+    setDisjointUnionMembers("");
+    setInverseIri("");
+    setSameIndividuals("");
+    setDifferentIndividuals("");
+    setNegPropIri("");
+    setNegTargetIri("");
     setOboName("");
     setOboSynonym("");
     setOboDef("");
@@ -828,6 +842,300 @@ export function EntityInspectorPanel(_props?: WorkspaceProps): JSX.Element {
               />
             ) : null}
 
+            {entity.kind === "class" ? (
+              <>
+                <FormField label="HasKey properties (IRI list, space/comma-separated)">
+                  <Input
+                    value={hasKeyProps}
+                    onChange={(e) => setHasKeyProps(e.target.value)}
+                    placeholder="http://ex#p1 http://ex#p2"
+                  />
+                </FormField>
+                <PreviewApplyBar
+                  preview={editPreview}
+                  disabled={!hasKeyProps.trim()}
+                  onPreview={() => {
+                    const properties = splitIris(hasKeyProps);
+                    if (properties.length === 0) return;
+                    apply(
+                      [{ op: "add_has_key", class_iri: entity.iri, properties }],
+                      true
+                    );
+                  }}
+                  onApply={() => {
+                    const properties = splitIris(hasKeyProps);
+                    if (properties.length === 0) return;
+                    apply(
+                      [{ op: "add_has_key", class_iri: entity.iri, properties }],
+                      false
+                    );
+                  }}
+                />
+                <ButtonBar>
+                  <button
+                    type="button"
+                    className="secondary"
+                    disabled={!hasKeyProps.trim()}
+                    onClick={() => {
+                      const properties = splitIris(hasKeyProps);
+                      if (properties.length === 0) return;
+                      apply(
+                        [{ op: "remove_has_key", class_iri: entity.iri, properties }],
+                        false
+                      );
+                    }}
+                  >
+                    Remove HasKey
+                  </button>
+                </ButtonBar>
+                <FormField label="Disjoint union members (IRI list)">
+                  <Input
+                    value={disjointUnionMembers}
+                    onChange={(e) => setDisjointUnionMembers(e.target.value)}
+                    placeholder="http://ex#A http://ex#B"
+                  />
+                </FormField>
+                <PreviewApplyBar
+                  preview={editPreview}
+                  disabled={!disjointUnionMembers.trim()}
+                  onPreview={() => {
+                    const members = splitIris(disjointUnionMembers);
+                    if (members.length === 0) return;
+                    apply(
+                      [{ op: "add_disjoint_union", class_iri: entity.iri, members }],
+                      true
+                    );
+                  }}
+                  onApply={() => {
+                    const members = splitIris(disjointUnionMembers);
+                    if (members.length === 0) return;
+                    apply(
+                      [{ op: "add_disjoint_union", class_iri: entity.iri, members }],
+                      false
+                    );
+                  }}
+                />
+                <ButtonBar>
+                  <button
+                    type="button"
+                    className="secondary"
+                    disabled={!disjointUnionMembers.trim()}
+                    onClick={() => {
+                      const members = splitIris(disjointUnionMembers);
+                      if (members.length === 0) return;
+                      apply(
+                        [
+                          {
+                            op: "remove_disjoint_union",
+                            class_iri: entity.iri,
+                            members,
+                          },
+                        ],
+                        false
+                      );
+                    }}
+                  >
+                    Remove disjoint union
+                  </button>
+                </ButtonBar>
+              </>
+            ) : null}
+
+            {entity.kind === "object_property" ? (
+              <>
+                <FormField label="Inverse property IRI">
+                  <Input
+                    value={inverseIri}
+                    onChange={(e) => setInverseIri(e.target.value)}
+                    placeholder="http://ex#inverseOf"
+                  />
+                </FormField>
+                <PreviewApplyBar
+                  preview={editPreview}
+                  disabled={!inverseIri.trim()}
+                  onPreview={() => {
+                    if (!inverseIri.trim()) return;
+                    apply(
+                      [
+                        {
+                          op: "add_inverse_object_properties",
+                          property_iri: entity.iri,
+                          inverse_iri: inverseIri.trim(),
+                        },
+                      ],
+                      true
+                    );
+                  }}
+                  onApply={() => {
+                    if (!inverseIri.trim()) return;
+                    apply(
+                      [
+                        {
+                          op: "add_inverse_object_properties",
+                          property_iri: entity.iri,
+                          inverse_iri: inverseIri.trim(),
+                        },
+                      ],
+                      false
+                    );
+                  }}
+                />
+                <ButtonBar>
+                  <button
+                    type="button"
+                    className="secondary"
+                    disabled={!inverseIri.trim()}
+                    onClick={() => {
+                      if (!inverseIri.trim()) return;
+                      apply(
+                        [
+                          {
+                            op: "remove_inverse_object_properties",
+                            property_iri: entity.iri,
+                            inverse_iri: inverseIri.trim(),
+                          },
+                        ],
+                        false
+                      );
+                    }}
+                  >
+                    Remove inverse
+                  </button>
+                </ButtonBar>
+              </>
+            ) : null}
+
+            {entity.kind === "individual" ? (
+              <>
+                <FormField label="Same individuals (IRI list)">
+                  <Input
+                    value={sameIndividuals}
+                    onChange={(e) => setSameIndividuals(e.target.value)}
+                    placeholder="http://ex#alice http://ex#ally"
+                  />
+                </FormField>
+                <PreviewApplyBar
+                  preview={editPreview}
+                  disabled={!sameIndividuals.trim()}
+                  onPreview={() => {
+                    const others = splitIris(sameIndividuals);
+                    if (others.length === 0) return;
+                    apply(
+                      [
+                        {
+                          op: "add_same_individual",
+                          individuals: [entity.iri, ...others],
+                        },
+                      ],
+                      true
+                    );
+                  }}
+                  onApply={() => {
+                    const others = splitIris(sameIndividuals);
+                    if (others.length === 0) return;
+                    apply(
+                      [
+                        {
+                          op: "add_same_individual",
+                          individuals: [entity.iri, ...others],
+                        },
+                      ],
+                      false
+                    );
+                  }}
+                />
+                <FormField label="Different individuals (IRI list)">
+                  <Input
+                    value={differentIndividuals}
+                    onChange={(e) => setDifferentIndividuals(e.target.value)}
+                    placeholder="http://ex#bob http://ex#carol"
+                  />
+                </FormField>
+                <PreviewApplyBar
+                  preview={editPreview}
+                  disabled={!differentIndividuals.trim()}
+                  onPreview={() => {
+                    const others = splitIris(differentIndividuals);
+                    if (others.length === 0) return;
+                    apply(
+                      [
+                        {
+                          op: "add_different_individuals",
+                          individuals: [entity.iri, ...others],
+                        },
+                      ],
+                      true
+                    );
+                  }}
+                  onApply={() => {
+                    const others = splitIris(differentIndividuals);
+                    if (others.length === 0) return;
+                    apply(
+                      [
+                        {
+                          op: "add_different_individuals",
+                          individuals: [entity.iri, ...others],
+                        },
+                      ],
+                      false
+                    );
+                  }}
+                />
+                <FormField label="Negative object property">
+                  <Select
+                    value={negPropIri}
+                    onChange={(e) => setNegPropIri(e.target.value)}
+                  >
+                    <option value="">—</option>
+                    {objectPropertyOptions.map((p) => (
+                      <option key={p} value={p}>
+                        {shortLabel(p)}
+                      </option>
+                    ))}
+                  </Select>
+                </FormField>
+                <FormField label="Negative assertion target IRI">
+                  <Input
+                    value={negTargetIri}
+                    onChange={(e) => setNegTargetIri(e.target.value)}
+                    placeholder="http://ex#target"
+                  />
+                </FormField>
+                <PreviewApplyBar
+                  preview={editPreview}
+                  disabled={!negPropIri || !negTargetIri.trim()}
+                  onPreview={() => {
+                    if (!negPropIri || !negTargetIri.trim()) return;
+                    apply(
+                      [
+                        {
+                          op: "add_negative_object_property_assertion",
+                          entity_iri: entity.iri,
+                          property_iri: negPropIri,
+                          target_iri: negTargetIri.trim(),
+                        },
+                      ],
+                      true
+                    );
+                  }}
+                  onApply={() => {
+                    if (!negPropIri || !negTargetIri.trim()) return;
+                    apply(
+                      [
+                        {
+                          op: "add_negative_object_property_assertion",
+                          entity_iri: entity.iri,
+                          property_iri: negPropIri,
+                          target_iri: negTargetIri.trim(),
+                        },
+                      ],
+                      false
+                    );
+                  }}
+                />
+              </>
+            ) : null}
+
             <ButtonBar>
               <button
                 type="button"
@@ -905,4 +1213,11 @@ export function EntityInspectorPanel(_props?: WorkspaceProps): JSX.Element {
       </StickyActions>
     </Panel>
   );
+}
+
+function splitIris(raw: string): string[] {
+  return raw
+    .split(/[\s,]+/)
+    .map((s) => s.trim())
+    .filter(Boolean);
 }

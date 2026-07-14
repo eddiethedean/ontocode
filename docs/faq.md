@@ -15,7 +15,7 @@ OntoCore was previously branded **OntoIndex** (`ontoindex` CLI, `ontoindex-*` cr
 
 **Is the API stable?**
 
-Pre-1.0. Published crates are at **0.21.x**. Library APIs, LSP JSON, and SQL table columns may change between minor releases until v1.0. Pin versions in CI with `cargo install ontocore-cli --locked --version 0.21.0`. See [API stability](guides/api-stability.md). Upgrading from **0.17.x**? See [v0.18 migration](migration/v0.18.md). Upgrading from **0.16.x**? See [v0.17 migration](migration/v0.17.md). Upgrading from **0.15.x**? See [v0.16 migration](migration/v0.16.md). Upgrading from **0.14.x** (or earlier)? Start at the [migration index](migration/README.md). The `validate` and `classify` exit codes are documented in [workspace-limits.md](workspace-limits.md).
+Pre-1.0. Published crates are at **0.22.x**. Library APIs, LSP JSON, and SQL table columns may change between minor releases until v1.0. Pin versions in CI with `cargo install ontocore-cli --locked --version 0.22.0`. See [API stability](guides/api-stability.md). Upgrading from **0.17.x**? See [v0.18 migration](migration/v0.18.md). Upgrading from **0.16.x**? See [v0.17 migration](migration/v0.17.md). Upgrading from **0.15.x**? See [v0.16 migration](migration/v0.16.md). Upgrading from **0.14.x** (or earlier)? Start at the [migration index](migration/README.md). The `validate` and `classify` exit codes are documented in [workspace-limits.md](workspace-limits.md).
 
 **What ships in the current release?**
 
@@ -25,13 +25,13 @@ See [What ships today](SHIPPED.md) for the canonical capability matrix.
 
 **Is OntoCode production-ready?**
 
-**Pilot-ready for many OWL/OBO workflows in VS Code and CI** — not a full Protégé replacement for every profile. Use [What ships today](SHIPPED.md) and [Known limitations](known-limitations.md) for the capability matrix, [Production readiness](guides/production-readiness.md) for pilot vs production tiers, and [Protégé decision guide](guides/protege-decision.md) for gap analysis. Pin releases in CI (`--version 0.21.0`) and review [API stability](guides/api-stability.md) before embedding Rust libraries.
+**Pilot-ready for many OWL/OBO workflows in VS Code and CI** — not a full Protégé replacement for every profile. Use [What ships today](SHIPPED.md) and [Known limitations](known-limitations.md) for the capability matrix, [Production readiness](guides/production-readiness.md) for pilot vs production tiers, and [Protégé decision guide](guides/protege-decision.md) for gap analysis. Pin releases in CI (`--version 0.22.0`) and review [API stability](guides/api-stability.md) before embedding Rust libraries.
 
 ## Installation
 
 **Which version should I install?**
 
-Pin to the tagged release in [`docs/TAGGED_RELEASE`](https://github.com/eddiethedean/ontocode/blob/main/docs/TAGGED_RELEASE) (currently **0.21.0**). See [Versions and channels](guides/versions-and-channels.md) for Marketplace vs GitHub Releases vs crates.io vs Read the Docs `latest`.
+Pin to the tagged release in [`docs/TAGGED_RELEASE`](https://github.com/eddiethedean/ontocode/blob/main/docs/TAGGED_RELEASE) (currently **0.22.0**). See [Versions and channels](guides/versions-and-channels.md) for Marketplace vs GitHub Releases vs crates.io vs Read the Docs `latest`.
 
 **Why might Marketplace lag GitHub Releases?**
 
@@ -57,7 +57,7 @@ The `fixtures/` directory exists only in a git clone. Use your own ontology path
 ontocore query /path/to/your/ontologies "SELECT * FROM classes"
 ```
 
-See [getting-started.md](getting-started.md). Always pin with `--version 0.21.0` in CI so you do not surprise-upgrade.
+See [getting-started.md](getting-started.md). Always pin with `--version 0.22.0` in CI so you do not surprise-upgrade.
 
 **Do I need Rust to use VS Code?**
 

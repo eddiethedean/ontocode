@@ -47,7 +47,7 @@ Follow the [first success core path](../guides/first-success.md) if anything is 
 
 ## Day 2 — Map Protégé habits to OntoCode
 
-| In Protégé | In OntoCode v0.21 |
+| In Protégé | In OntoCode v0.22 |
 |------------|-------------------|
 | Class hierarchy tab | **Classes** explorer; toggle **asserted / inferred / combined** after reasoner |
 | Entity editor (labels, parents) | **Entity Inspector** (`.ttl` and `.obo`) |
@@ -66,7 +66,7 @@ Follow the [first success core path](../guides/first-success.md) if anything is 
 ## Day 3 — Validate in CI
 
 ```yaml
-- run: cargo install ontocore-cli --locked --version 0.21.0
+- run: cargo install ontocore-cli --locked --version 0.22.0
 - run: ontocore validate ./src/ontologies
 ```
 

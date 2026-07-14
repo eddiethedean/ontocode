@@ -1,6 +1,6 @@
-# Ontology authoring (OntoCore v0.21)
+# Ontology authoring (OntoCore v0.22)
 
-> **Status:** Documents behavior in **OntoCore v0.21.0**. Pre-1.0 APIs may change.
+> **Status:** Documents behavior in **OntoCore v0.22.0**. Pre-1.0 APIs may change.
 > Canonical feature list: [What ships today](SHIPPED.md).
 
 OntoCode provides **Turtle, OBO, RDF/XML, and OWL/XML write-back** for simple edits and **Manchester** for complex class expressions — without Protégé.

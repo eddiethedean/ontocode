@@ -108,7 +108,7 @@ Web foundation       Team workspaces          Cloud collaboration
 | 19 | v0.19 | F | Shipped | — | Semantic foundation + program baseline |
 | 20 | v0.20 | F | Shipped | 1† | Workspace runtime |
 | 21 | v0.21 | F | Shipped | — | RDF/XML + OWL/XML write-back |
-| 22 | v0.22 | F | Planned | 2† | Complete OWL 2 authoring |
+| 22 | v0.22 | F | Shipped | 2† | Complete OWL 2 authoring |
 | 23 | v0.23 | F | Planned | 5† | Reasoning parity + SWRL |
 | 24 | v0.24 | F | Planned | 3†, 6† | Refactoring + DL Query parity |
 | 25 | v0.25 | F | Planned | 4†, 8† | Viz + plugin SDK 1.0 + a11y + parity CI |
@@ -575,7 +575,9 @@ See [migration/v0.21.md](docs/migration/v0.21.md).
 
 ---
 
-### v0.22 — Complete OWL 2 authoring (planned)
+### v0.22 — Complete OWL 2 authoring (shipped)
+
+**Status:** **Shipped** as tagged **v0.22.0**.
 
 **Theme:** Every P0 OWL 2 construct authorable across required formats.
 
@@ -587,6 +589,8 @@ See [migration/v0.21.md](docs/migration/v0.21.md).
 **Exit criteria:** All P0 OWL 2 constructs VERIFIED end-to-end.
 
 **Blockers:** [BLOCKER_02](docs/protege-parity/04_BLOCKERS/BLOCKER_02_OWL2_AUTHORING.md)
+
+See [migration/v0.22.md](docs/migration/v0.22.md).
 
 ---
 

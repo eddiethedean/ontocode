@@ -225,6 +225,160 @@ pub fn invert_patch_op(op: &PatchOp) -> Result<PatchOp> {
             predicate: predicate.clone(),
             value: value.clone(),
         },
+        PatchOp::AddHasKey { class_iri, properties } => PatchOp::RemoveHasKey {
+            class_iri: class_iri.clone(),
+            properties: properties.clone(),
+        },
+        PatchOp::RemoveHasKey { class_iri, properties } => PatchOp::AddHasKey {
+            class_iri: class_iri.clone(),
+            properties: properties.clone(),
+        },
+        PatchOp::AddDisjointUnion { class_iri, members } => PatchOp::RemoveDisjointUnion {
+            class_iri: class_iri.clone(),
+            members: members.clone(),
+        },
+        PatchOp::RemoveDisjointUnion { class_iri, members } => PatchOp::AddDisjointUnion {
+            class_iri: class_iri.clone(),
+            members: members.clone(),
+        },
+        PatchOp::AddInverseObjectProperties { property_iri, inverse_iri } => {
+            PatchOp::RemoveInverseObjectProperties {
+                property_iri: property_iri.clone(),
+                inverse_iri: inverse_iri.clone(),
+            }
+        }
+        PatchOp::RemoveInverseObjectProperties { property_iri, inverse_iri } => {
+            PatchOp::AddInverseObjectProperties {
+                property_iri: property_iri.clone(),
+                inverse_iri: inverse_iri.clone(),
+            }
+        }
+        PatchOp::AddEquivalentObjectProperties { properties } => {
+            PatchOp::RemoveEquivalentObjectProperties { properties: properties.clone() }
+        }
+        PatchOp::RemoveEquivalentObjectProperties { properties } => {
+            PatchOp::AddEquivalentObjectProperties { properties: properties.clone() }
+        }
+        PatchOp::AddDisjointObjectProperties { properties } => {
+            PatchOp::RemoveDisjointObjectProperties { properties: properties.clone() }
+        }
+        PatchOp::RemoveDisjointObjectProperties { properties } => {
+            PatchOp::AddDisjointObjectProperties { properties: properties.clone() }
+        }
+        PatchOp::AddEquivalentDataProperties { properties } => {
+            PatchOp::RemoveEquivalentDataProperties { properties: properties.clone() }
+        }
+        PatchOp::RemoveEquivalentDataProperties { properties } => {
+            PatchOp::AddEquivalentDataProperties { properties: properties.clone() }
+        }
+        PatchOp::AddDisjointDataProperties { properties } => {
+            PatchOp::RemoveDisjointDataProperties { properties: properties.clone() }
+        }
+        PatchOp::RemoveDisjointDataProperties { properties } => {
+            PatchOp::AddDisjointDataProperties { properties: properties.clone() }
+        }
+        PatchOp::AddSubObjectPropertyOf { property_iri, parent_iri } => {
+            PatchOp::RemoveSubObjectPropertyOf {
+                property_iri: property_iri.clone(),
+                parent_iri: parent_iri.clone(),
+            }
+        }
+        PatchOp::RemoveSubObjectPropertyOf { property_iri, parent_iri } => {
+            PatchOp::AddSubObjectPropertyOf {
+                property_iri: property_iri.clone(),
+                parent_iri: parent_iri.clone(),
+            }
+        }
+        PatchOp::AddSubDataPropertyOf { property_iri, parent_iri } => {
+            PatchOp::RemoveSubDataPropertyOf {
+                property_iri: property_iri.clone(),
+                parent_iri: parent_iri.clone(),
+            }
+        }
+        PatchOp::RemoveSubDataPropertyOf { property_iri, parent_iri } => {
+            PatchOp::AddSubDataPropertyOf {
+                property_iri: property_iri.clone(),
+                parent_iri: parent_iri.clone(),
+            }
+        }
+        PatchOp::AddNegativeObjectPropertyAssertion { entity_iri, property_iri, target_iri } => {
+            PatchOp::RemoveNegativeObjectPropertyAssertion {
+                entity_iri: entity_iri.clone(),
+                property_iri: property_iri.clone(),
+                target_iri: target_iri.clone(),
+            }
+        }
+        PatchOp::RemoveNegativeObjectPropertyAssertion { entity_iri, property_iri, target_iri } => {
+            PatchOp::AddNegativeObjectPropertyAssertion {
+                entity_iri: entity_iri.clone(),
+                property_iri: property_iri.clone(),
+                target_iri: target_iri.clone(),
+            }
+        }
+        PatchOp::AddNegativeDataPropertyAssertion { entity_iri, property_iri, value } => {
+            PatchOp::RemoveNegativeDataPropertyAssertion {
+                entity_iri: entity_iri.clone(),
+                property_iri: property_iri.clone(),
+                value: value.clone(),
+            }
+        }
+        PatchOp::RemoveNegativeDataPropertyAssertion { entity_iri, property_iri, value } => {
+            PatchOp::AddNegativeDataPropertyAssertion {
+                entity_iri: entity_iri.clone(),
+                property_iri: property_iri.clone(),
+                value: value.clone(),
+            }
+        }
+        PatchOp::AddSameIndividual { individuals } => {
+            PatchOp::RemoveSameIndividual { individuals: individuals.clone() }
+        }
+        PatchOp::RemoveSameIndividual { individuals } => {
+            PatchOp::AddSameIndividual { individuals: individuals.clone() }
+        }
+        PatchOp::AddDifferentIndividuals { individuals } => {
+            PatchOp::RemoveDifferentIndividuals { individuals: individuals.clone() }
+        }
+        PatchOp::RemoveDifferentIndividuals { individuals } => {
+            PatchOp::AddDifferentIndividuals { individuals: individuals.clone() }
+        }
+        PatchOp::AddDatatypeDefinition { datatype_iri, manchester } => {
+            PatchOp::RemoveDatatypeDefinition {
+                datatype_iri: datatype_iri.clone(),
+                manchester: manchester.clone(),
+            }
+        }
+        PatchOp::RemoveDatatypeDefinition { datatype_iri, manchester } => {
+            PatchOp::AddDatatypeDefinition {
+                datatype_iri: datatype_iri.clone(),
+                manchester: manchester.clone(),
+            }
+        }
+        PatchOp::AddAxiomAnnotation {
+            axiom_op,
+            subject_iri,
+            related_iri,
+            predicate,
+            value,
+        } => PatchOp::RemoveAxiomAnnotation {
+            axiom_op: axiom_op.clone(),
+            subject_iri: subject_iri.clone(),
+            related_iri: related_iri.clone(),
+            predicate: predicate.clone(),
+            value: value.clone(),
+        },
+        PatchOp::RemoveAxiomAnnotation {
+            axiom_op,
+            subject_iri,
+            related_iri,
+            predicate,
+            value,
+        } => PatchOp::AddAxiomAnnotation {
+            axiom_op: axiom_op.clone(),
+            subject_iri: subject_iri.clone(),
+            related_iri: related_iri.clone(),
+            predicate: predicate.clone(),
+            value: value.clone(),
+        },
     })
 }
 
@@ -381,6 +535,55 @@ mod tests {
         assert_eq!(
             inverted,
             PatchOp::SetFunctional { entity_iri: "http://example.org/p".into(), value: false }
+        );
+    }
+
+    #[test]
+    fn has_key_and_inverse_invert() {
+        let inverted = invert_patch_op(&PatchOp::AddHasKey {
+            class_iri: "http://example.org/C".into(),
+            properties: vec!["http://example.org/p".into()],
+        })
+        .expect("invert has key");
+        assert_eq!(
+            inverted,
+            PatchOp::RemoveHasKey {
+                class_iri: "http://example.org/C".into(),
+                properties: vec!["http://example.org/p".into()],
+            }
+        );
+        let inverted = invert_patch_op(&PatchOp::AddInverseObjectProperties {
+            property_iri: "http://example.org/p".into(),
+            inverse_iri: "http://example.org/q".into(),
+        })
+        .expect("invert inverse");
+        assert_eq!(
+            inverted,
+            PatchOp::RemoveInverseObjectProperties {
+                property_iri: "http://example.org/p".into(),
+                inverse_iri: "http://example.org/q".into(),
+            }
+        );
+    }
+
+    #[test]
+    fn negative_assertion_and_same_individual_invert() {
+        let inverted = invert_patch_op(&PatchOp::AddNegativeObjectPropertyAssertion {
+            entity_iri: "http://example.org/a".into(),
+            property_iri: "http://example.org/p".into(),
+            target_iri: "http://example.org/b".into(),
+        })
+        .expect("invert nopa");
+        assert!(matches!(inverted, PatchOp::RemoveNegativeObjectPropertyAssertion { .. }));
+        let inverted = invert_patch_op(&PatchOp::AddSameIndividual {
+            individuals: vec!["http://example.org/a".into(), "http://example.org/b".into()],
+        })
+        .expect("invert same");
+        assert_eq!(
+            inverted,
+            PatchOp::RemoveSameIndividual {
+                individuals: vec!["http://example.org/a".into(), "http://example.org/b".into()],
+            }
         );
     }
 }

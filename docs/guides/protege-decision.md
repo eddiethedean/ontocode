@@ -1,6 +1,6 @@
 # Protégé vs OntoCode decision matrix
 
-Use this page to decide **when OntoCode fits**, **when to keep Protégé**, and **when to run both**. It reflects **v0.21.0** (latest tagged) — see [What ships today](../SHIPPED.md). A [first-week migration guide](protege-migration.md) ships today; extended round-trip playbooks are planned for **v1.0**.
+Use this page to decide **when OntoCode fits**, **when to keep Protégé**, and **when to run both**. It reflects **v0.22.0** (latest tagged) — see [What ships today](../SHIPPED.md). A [first-week migration guide](protege-migration.md) ships today; extended round-trip playbooks are planned for **v1.0**.
 
 !!! note "Non-goals today (v0.21)"
     - **WebProtégé-style collaboration** — out of scope until post-1.0
@@ -22,7 +22,7 @@ Use this page to decide **when OntoCode fits**, **when to keep Protégé**, and 
 
 ## Capability comparison (v0.21 tagged)
 
-| Capability | Protégé | OntoCode v0.21 | Notes |
+| Capability | Protégé | OntoCode v0.22 | Notes |
 |------------|---------|----------------|-------|
 | OWL 2 DL classification | Yes | Yes (`dl` / `auto` via OntoLogos 1.x) | Explanations EL-first; see [Reasoner guide](reasoner.md) |
 | Turtle authoring | Manual / plugins | Native write-back | OntoCode inspector + patches |
@@ -45,7 +45,7 @@ Use this page to decide **when OntoCode fits**, **when to keep Protégé**, and 
 
 ### Path A — CI only (lowest risk)
 
-1. Pin `ontocore-cli` **0.21.0** in Linux CI
+1. Pin `ontocore-cli` **0.22.0** in Linux CI
 2. Gate merges with `ontocore validate`
 3. Optional: `ontocore classify --profile el` when ontology is EL
 4. Keep Protégé on engineer desktops unchanged

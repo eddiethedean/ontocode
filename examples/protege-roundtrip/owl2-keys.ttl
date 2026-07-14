@@ -1,0 +1,33 @@
+@prefix ex: <http://example.org/keys#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://example.org/keys> a owl:Ontology ;
+    rdfs:label "OWL2 Keys / Inverse Fixture" .
+
+ex:Person a owl:Class ;
+    rdfs:label "Person" ;
+    owl:hasKey ( ex:hasSSN ) .
+
+ex:Male a owl:Class ;
+    rdfs:label "Male" .
+
+ex:Female a owl:Class ;
+    rdfs:label "Female" .
+
+ex:Sex a owl:Class ;
+    rdfs:label "Sex" ;
+    owl:disjointUnionOf ( ex:Male ex:Female ) .
+
+ex:hasSSN a owl:DatatypeProperty ;
+    rdfs:label "has SSN" ;
+    rdfs:domain ex:Person ;
+    rdfs:range xsd:string .
+
+ex:hasParent a owl:ObjectProperty ;
+    rdfs:label "has parent" ;
+    owl:inverseOf ex:hasChild .
+
+ex:hasChild a owl:ObjectProperty ;
+    rdfs:label "has child" .

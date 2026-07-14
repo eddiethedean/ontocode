@@ -7,7 +7,7 @@ Core types, workspace scanner, path sandboxing, and resource limits for [OntoCor
 ## Install
 
 ```toml
-ontocore-core = "0.21"
+ontocore-core = "0.22"
 ```
 
 ## Documentation

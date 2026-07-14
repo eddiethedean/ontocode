@@ -23,7 +23,7 @@ pub use manchester::{
     class_expression_to_manchester, class_expression_to_turtle_fragment, expression_tree_json,
     parse_class_expression, ManchesterDiagnostic, ManchesterParseOutput,
 };
-pub use mutate::apply_patches_to_ontology;
+pub use mutate::{apply_patches_to_ontology, apply_patches_to_ontology_with_ns};
 pub use patch::{
     apply_patches, apply_patches_to_text, atomic_write, is_safe_iri, validate_prefix,
     ApplyPatchResult, PatchDiagnostic, PatchEntityKind, PatchOp,

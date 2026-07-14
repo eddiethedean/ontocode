@@ -64,6 +64,60 @@ pub enum PatchOp {
     RemoveDataPropertyAssertion { entity_iri: String, property_iri: String, value: String },
     AddAnnotation { entity_iri: String, predicate: String, value: String },
     RemoveAnnotation { entity_iri: String, predicate: String, value: String },
+    // TBox / Keys / RBox (v0.22)
+    AddHasKey { class_iri: String, properties: Vec<String> },
+    RemoveHasKey { class_iri: String, properties: Vec<String> },
+    AddDisjointUnion { class_iri: String, members: Vec<String> },
+    RemoveDisjointUnion { class_iri: String, members: Vec<String> },
+    AddInverseObjectProperties { property_iri: String, inverse_iri: String },
+    RemoveInverseObjectProperties { property_iri: String, inverse_iri: String },
+    AddEquivalentObjectProperties { properties: Vec<String> },
+    RemoveEquivalentObjectProperties { properties: Vec<String> },
+    AddDisjointObjectProperties { properties: Vec<String> },
+    RemoveDisjointObjectProperties { properties: Vec<String> },
+    AddEquivalentDataProperties { properties: Vec<String> },
+    RemoveEquivalentDataProperties { properties: Vec<String> },
+    AddDisjointDataProperties { properties: Vec<String> },
+    RemoveDisjointDataProperties { properties: Vec<String> },
+    AddSubObjectPropertyOf { property_iri: String, parent_iri: String },
+    RemoveSubObjectPropertyOf { property_iri: String, parent_iri: String },
+    AddSubDataPropertyOf { property_iri: String, parent_iri: String },
+    RemoveSubDataPropertyOf { property_iri: String, parent_iri: String },
+    // ABox (v0.22)
+    AddNegativeObjectPropertyAssertion {
+        entity_iri: String,
+        property_iri: String,
+        target_iri: String,
+    },
+    RemoveNegativeObjectPropertyAssertion {
+        entity_iri: String,
+        property_iri: String,
+        target_iri: String,
+    },
+    AddNegativeDataPropertyAssertion { entity_iri: String, property_iri: String, value: String },
+    RemoveNegativeDataPropertyAssertion { entity_iri: String, property_iri: String, value: String },
+    AddSameIndividual { individuals: Vec<String> },
+    RemoveSameIndividual { individuals: Vec<String> },
+    AddDifferentIndividuals { individuals: Vec<String> },
+    RemoveDifferentIndividuals { individuals: Vec<String> },
+    // Datatype (v0.22)
+    AddDatatypeDefinition { datatype_iri: String, manchester: String },
+    RemoveDatatypeDefinition { datatype_iri: String, manchester: String },
+    // Axiom annotations (v0.22)
+    AddAxiomAnnotation {
+        axiom_op: String,
+        subject_iri: String,
+        related_iri: Option<String>,
+        predicate: String,
+        value: String,
+    },
+    RemoveAxiomAnnotation {
+        axiom_op: String,
+        subject_iri: String,
+        related_iri: Option<String>,
+        predicate: String,
+        value: String,
+    },
 }
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
@@ -74,6 +128,7 @@ pub enum PatchEntityKind {
     DataProperty,
     AnnotationProperty,
     Individual,
+    Datatype,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -402,6 +457,147 @@ fn apply_one_patch(
         PatchOp::RemoveAnnotation { entity_iri, predicate, value } => {
             remove_annotation_value(text, entity_iri, predicate, value, namespaces)
         }
+        PatchOp::AddHasKey { class_iri, properties } => {
+            add_iri_list_axiom(text, class_iri, "owl:hasKey", properties, namespaces)
+        }
+        PatchOp::RemoveHasKey { class_iri, properties } => {
+            remove_iri_list_axiom(text, class_iri, "owl:hasKey", properties, namespaces)
+        }
+        PatchOp::AddDisjointUnion { class_iri, members } => {
+            add_iri_list_axiom(text, class_iri, "owl:disjointUnionOf", members, namespaces)
+        }
+        PatchOp::RemoveDisjointUnion { class_iri, members } => {
+            remove_iri_list_axiom(text, class_iri, "owl:disjointUnionOf", members, namespaces)
+        }
+        PatchOp::AddInverseObjectProperties { property_iri, inverse_iri } => {
+            let inv = iri_to_turtle_term(inverse_iri, namespaces)?;
+            add_object_triple(text, property_iri, "owl:inverseOf", &inv, namespaces)
+        }
+        PatchOp::RemoveInverseObjectProperties { property_iri, inverse_iri } => {
+            remove_predicate_iri_object(text, property_iri, "owl:inverseOf", inverse_iri, namespaces)
+        }
+        PatchOp::AddEquivalentObjectProperties { properties } => {
+            add_pairwise_property_axioms(text, properties, "owl:equivalentProperty", namespaces)
+        }
+        PatchOp::RemoveEquivalentObjectProperties { properties } => {
+            remove_pairwise_property_axioms(text, properties, "owl:equivalentProperty", namespaces)
+        }
+        PatchOp::AddDisjointObjectProperties { properties } => {
+            add_pairwise_property_axioms(text, properties, "owl:propertyDisjointWith", namespaces)
+        }
+        PatchOp::RemoveDisjointObjectProperties { properties } => {
+            remove_pairwise_property_axioms(text, properties, "owl:propertyDisjointWith", namespaces)
+        }
+        PatchOp::AddEquivalentDataProperties { properties } => {
+            add_pairwise_property_axioms(text, properties, "owl:equivalentProperty", namespaces)
+        }
+        PatchOp::RemoveEquivalentDataProperties { properties } => {
+            remove_pairwise_property_axioms(text, properties, "owl:equivalentProperty", namespaces)
+        }
+        PatchOp::AddDisjointDataProperties { properties } => {
+            add_pairwise_property_axioms(text, properties, "owl:propertyDisjointWith", namespaces)
+        }
+        PatchOp::RemoveDisjointDataProperties { properties } => {
+            remove_pairwise_property_axioms(text, properties, "owl:propertyDisjointWith", namespaces)
+        }
+        PatchOp::AddSubObjectPropertyOf { property_iri, parent_iri } => {
+            let parent = iri_to_turtle_term(parent_iri, namespaces)?;
+            add_object_triple(text, property_iri, "rdfs:subPropertyOf", &parent, namespaces)
+        }
+        PatchOp::RemoveSubObjectPropertyOf { property_iri, parent_iri } => {
+            remove_predicate_iri_object(
+                text,
+                property_iri,
+                "rdfs:subPropertyOf",
+                parent_iri,
+                namespaces,
+            )
+        }
+        PatchOp::AddSubDataPropertyOf { property_iri, parent_iri } => {
+            let parent = iri_to_turtle_term(parent_iri, namespaces)?;
+            add_object_triple(text, property_iri, "rdfs:subPropertyOf", &parent, namespaces)
+        }
+        PatchOp::RemoveSubDataPropertyOf { property_iri, parent_iri } => {
+            remove_predicate_iri_object(
+                text,
+                property_iri,
+                "rdfs:subPropertyOf",
+                parent_iri,
+                namespaces,
+            )
+        }
+        PatchOp::AddNegativeObjectPropertyAssertion { entity_iri, property_iri, target_iri } => {
+            add_negative_object_property_assertion(
+                text,
+                entity_iri,
+                property_iri,
+                target_iri,
+                namespaces,
+            )
+        }
+        PatchOp::RemoveNegativeObjectPropertyAssertion { entity_iri, property_iri, target_iri } => {
+            remove_negative_object_property_assertion(
+                text,
+                entity_iri,
+                property_iri,
+                target_iri,
+                namespaces,
+            )
+        }
+        PatchOp::AddNegativeDataPropertyAssertion { entity_iri, property_iri, value } => {
+            add_negative_data_property_assertion(text, entity_iri, property_iri, value, namespaces)
+        }
+        PatchOp::RemoveNegativeDataPropertyAssertion { entity_iri, property_iri, value } => {
+            remove_negative_data_property_assertion(text, entity_iri, property_iri, value, namespaces)
+        }
+        PatchOp::AddSameIndividual { individuals } => {
+            add_pairwise_individual_axioms(text, individuals, "owl:sameAs", namespaces)
+        }
+        PatchOp::RemoveSameIndividual { individuals } => {
+            remove_pairwise_individual_axioms(text, individuals, "owl:sameAs", namespaces)
+        }
+        PatchOp::AddDifferentIndividuals { individuals } => {
+            add_pairwise_individual_axioms(text, individuals, "owl:differentFrom", namespaces)
+        }
+        PatchOp::RemoveDifferentIndividuals { individuals } => {
+            remove_pairwise_individual_axioms(text, individuals, "owl:differentFrom", namespaces)
+        }
+        PatchOp::AddDatatypeDefinition { datatype_iri, manchester } => {
+            add_datatype_definition(text, datatype_iri, manchester, namespaces)
+        }
+        PatchOp::RemoveDatatypeDefinition { datatype_iri, manchester } => {
+            remove_datatype_definition(text, datatype_iri, manchester, namespaces)
+        }
+        PatchOp::AddAxiomAnnotation {
+            axiom_op,
+            subject_iri,
+            related_iri,
+            predicate,
+            value,
+        } => add_axiom_annotation(
+            text,
+            axiom_op,
+            subject_iri,
+            related_iri.as_deref(),
+            predicate,
+            value,
+            namespaces,
+        ),
+        PatchOp::RemoveAxiomAnnotation {
+            axiom_op,
+            subject_iri,
+            related_iri,
+            predicate,
+            value,
+        } => remove_axiom_annotation(
+            text,
+            axiom_op,
+            subject_iri,
+            related_iri.as_deref(),
+            predicate,
+            value,
+            namespaces,
+        ),
     }
 }
 
@@ -674,6 +870,7 @@ fn create_entity(
         PatchEntityKind::DataProperty => "owl:DatatypeProperty",
         PatchEntityKind::AnnotationProperty => "owl:AnnotationProperty",
         PatchEntityKind::Individual => "owl:NamedIndividual",
+        PatchEntityKind::Datatype => "rdfs:Datatype",
     };
     let block = format!("\n{subject} a {type_term} .\n");
     if !text.ends_with('\n') {
@@ -1043,6 +1240,425 @@ fn remove_property_chain(
         &chain_obj,
         namespaces,
     )
+}
+
+fn add_iri_list_axiom(
+    text: &mut String,
+    subject_iri: &str,
+    predicate: &str,
+    members: &[String],
+    namespaces: &BTreeMap<String, String>,
+) -> Result<()> {
+    if members.is_empty() {
+        return Err(OwlError::PatchInvalid(format!(
+            "{predicate} axiom must have at least one member"
+        )));
+    }
+    let terms: Vec<String> =
+        members.iter().map(|p| iri_to_turtle_term(p, namespaces)).collect::<Result<Vec<_>>>()?;
+    let list_obj = format!("( {} )", terms.join(" "));
+    add_object_triple(text, subject_iri, predicate, &list_obj, namespaces)
+}
+
+fn remove_iri_list_axiom(
+    text: &mut String,
+    subject_iri: &str,
+    predicate: &str,
+    members: &[String],
+    namespaces: &BTreeMap<String, String>,
+) -> Result<()> {
+    let terms: Vec<String> =
+        members.iter().map(|p| iri_to_turtle_term(p, namespaces)).collect::<Result<Vec<_>>>()?;
+    let list_obj = format!("( {} )", terms.join(" "));
+    remove_predicate_object_any_statement(text, subject_iri, predicate, &list_obj, namespaces)
+}
+
+fn add_pairwise_property_axioms(
+    text: &mut String,
+    properties: &[String],
+    predicate: &str,
+    namespaces: &BTreeMap<String, String>,
+) -> Result<()> {
+    if properties.len() < 2 {
+        return Err(OwlError::PatchInvalid(format!(
+            "{predicate} requires at least two properties"
+        )));
+    }
+    for window in properties.windows(2) {
+        let other = iri_to_turtle_term(&window[1], namespaces)?;
+        add_object_triple(text, &window[0], predicate, &other, namespaces)?;
+    }
+    Ok(())
+}
+
+fn remove_pairwise_property_axioms(
+    text: &mut String,
+    properties: &[String],
+    predicate: &str,
+    namespaces: &BTreeMap<String, String>,
+) -> Result<()> {
+    if properties.len() < 2 {
+        return Err(OwlError::PatchInvalid(format!(
+            "{predicate} requires at least two properties"
+        )));
+    }
+    for window in properties.windows(2) {
+        remove_predicate_iri_object(text, &window[0], predicate, &window[1], namespaces)?;
+    }
+    Ok(())
+}
+
+fn add_pairwise_individual_axioms(
+    text: &mut String,
+    individuals: &[String],
+    predicate: &str,
+    namespaces: &BTreeMap<String, String>,
+) -> Result<()> {
+    if individuals.len() < 2 {
+        return Err(OwlError::PatchInvalid(format!(
+            "{predicate} requires at least two individuals"
+        )));
+    }
+    for window in individuals.windows(2) {
+        let other = iri_to_turtle_term(&window[1], namespaces)?;
+        add_object_triple(text, &window[0], predicate, &other, namespaces)?;
+    }
+    Ok(())
+}
+
+fn remove_pairwise_individual_axioms(
+    text: &mut String,
+    individuals: &[String],
+    predicate: &str,
+    namespaces: &BTreeMap<String, String>,
+) -> Result<()> {
+    if individuals.len() < 2 {
+        return Err(OwlError::PatchInvalid(format!(
+            "{predicate} requires at least two individuals"
+        )));
+    }
+    for window in individuals.windows(2) {
+        remove_predicate_iri_object(text, &window[0], predicate, &window[1], namespaces)?;
+    }
+    Ok(())
+}
+
+fn append_standalone_block(text: &mut String, block: &str) {
+    if !text.is_empty() && !text.ends_with('\n') {
+        text.push('\n');
+    }
+    if !text.is_empty() && !text.ends_with("\n\n") {
+        text.push('\n');
+    }
+    text.push_str(block);
+    if !block.ends_with('\n') {
+        text.push('\n');
+    }
+}
+
+fn add_negative_object_property_assertion(
+    text: &mut String,
+    entity_iri: &str,
+    property_iri: &str,
+    target_iri: &str,
+    namespaces: &BTreeMap<String, String>,
+) -> Result<()> {
+    let source = iri_to_turtle_term(entity_iri, namespaces)?;
+    let prop = iri_to_turtle_term(property_iri, namespaces)?;
+    let target = iri_to_turtle_term(target_iri, namespaces)?;
+    let block = format!(
+        "[ rdf:type owl:NegativePropertyAssertion ;\n  owl:sourceIndividual {source} ;\n  owl:assertionProperty {prop} ;\n  owl:targetIndividual {target}\n] .\n"
+    );
+    if normalize_ws(text).contains(&normalize_ws(&block)) {
+        return Ok(());
+    }
+    append_standalone_block(text, &block);
+    Ok(())
+}
+
+fn remove_negative_object_property_assertion(
+    text: &mut String,
+    entity_iri: &str,
+    property_iri: &str,
+    target_iri: &str,
+    namespaces: &BTreeMap<String, String>,
+) -> Result<()> {
+    let source = iri_to_turtle_term(entity_iri, namespaces)?;
+    let prop = iri_to_turtle_term(property_iri, namespaces)?;
+    let target = iri_to_turtle_term(target_iri, namespaces)?;
+    remove_matching_npa_block(text, &source, &prop, Some(&target), None)
+}
+
+fn add_negative_data_property_assertion(
+    text: &mut String,
+    entity_iri: &str,
+    property_iri: &str,
+    value: &str,
+    namespaces: &BTreeMap<String, String>,
+) -> Result<()> {
+    let source = iri_to_turtle_term(entity_iri, namespaces)?;
+    let prop = iri_to_turtle_term(property_iri, namespaces)?;
+    let escaped = escape_turtle_string(value);
+    let block = format!(
+        "[ rdf:type owl:NegativePropertyAssertion ;\n  owl:sourceIndividual {source} ;\n  owl:assertionProperty {prop} ;\n  owl:targetValue \"{escaped}\"\n] .\n"
+    );
+    if normalize_ws(text).contains(&normalize_ws(&block)) {
+        return Ok(());
+    }
+    append_standalone_block(text, &block);
+    Ok(())
+}
+
+fn remove_negative_data_property_assertion(
+    text: &mut String,
+    entity_iri: &str,
+    property_iri: &str,
+    value: &str,
+    namespaces: &BTreeMap<String, String>,
+) -> Result<()> {
+    let source = iri_to_turtle_term(entity_iri, namespaces)?;
+    let prop = iri_to_turtle_term(property_iri, namespaces)?;
+    remove_matching_npa_block(text, &source, &prop, None, Some(value))
+}
+
+fn remove_matching_npa_block(
+    text: &mut String,
+    source: &str,
+    prop: &str,
+    target_individual: Option<&str>,
+    target_value: Option<&str>,
+) -> Result<()> {
+    let bytes = text.as_bytes();
+    let mut i = 0;
+    let mut state = TurtleScanState::default();
+    while i < bytes.len() {
+        if state.in_comment || state.in_string() || state.in_iri {
+            i = advance_turtle_scan(bytes, i, &mut state);
+            continue;
+        }
+        if bytes[i] == b'[' {
+            if let Some(end) = bracket_end_index(text, i) {
+                let block = &text[i..end];
+                if block.contains("owl:NegativePropertyAssertion")
+                    && block.contains(source)
+                    && block.contains(prop)
+                    && target_individual.map(|t| block.contains(t)).unwrap_or(true)
+                    && target_value
+                        .map(|v| {
+                            let lexical = v.trim().trim_matches('"').trim_matches('\'');
+                            block.contains(lexical)
+                        })
+                        .unwrap_or(true)
+                {
+                    let mut remove_end = end;
+                    let after = text[end..].trim_start();
+                    let trim_len = text[end..].len() - after.len();
+                    remove_end += trim_len;
+                    if after.starts_with('.') {
+                        remove_end += 1;
+                        let rest = &text[remove_end..];
+                        if rest.starts_with('\n') {
+                            remove_end += 1;
+                        }
+                    }
+                    // Also drop a leading blank line if present.
+                    let mut remove_start = i;
+                    if remove_start > 0 && text.as_bytes()[remove_start - 1] == b'\n' {
+                        remove_start -= 1;
+                    }
+                    text.replace_range(remove_start..remove_end, "");
+                    return Ok(());
+                }
+                i = end;
+                continue;
+            }
+        }
+        i = advance_turtle_scan(bytes, i, &mut state);
+    }
+    Err(OwlError::ManchesterInvalid(
+        "no matching NegativePropertyAssertion axiom".to_string(),
+    ))
+}
+
+fn add_datatype_definition(
+    text: &mut String,
+    datatype_iri: &str,
+    manchester: &str,
+    namespaces: &BTreeMap<String, String>,
+) -> Result<()> {
+    if !text_contains_entity(text, datatype_iri, namespaces) {
+        create_entity(text, datatype_iri, PatchEntityKind::Datatype, namespaces)?;
+    } else if !entity_declared_as(text, datatype_iri, "rdfs:Datatype", namespaces) {
+        add_type_triple(text, datatype_iri, "rdfs:Datatype", namespaces)?;
+    }
+    let ns = crate::span::namespaces_for_text(text, namespaces);
+    let trimmed = manchester.trim();
+    // Prefer Manchester class-expression parse; fall back to IRI/CURIE or raw fragment.
+    let object = match parse_class_expression(trimmed, &ns) {
+        Ok(parsed) => crate::manchester::class_expression_to_turtle_value(&parsed.expression, &ns, 0)?,
+        Err(_) => {
+            if trimmed.starts_with('[') || trimmed.starts_with('(') {
+                trimmed.to_string()
+            } else {
+                iri_to_turtle_term(trimmed, namespaces).unwrap_or_else(|_| trimmed.to_string())
+            }
+        }
+    };
+    add_object_triple(text, datatype_iri, "owl:equivalentClass", &object, namespaces)
+}
+
+fn remove_datatype_definition(
+    text: &mut String,
+    datatype_iri: &str,
+    manchester: &str,
+    namespaces: &BTreeMap<String, String>,
+) -> Result<()> {
+    let ns = crate::span::namespaces_for_text(text, namespaces);
+    let trimmed = manchester.trim();
+    let object = match parse_class_expression(trimmed, &ns) {
+        Ok(parsed) => crate::manchester::class_expression_to_turtle_value(&parsed.expression, &ns, 0)?,
+        Err(_) => {
+            if trimmed.starts_with('[') || trimmed.starts_with('(') {
+                trimmed.to_string()
+            } else {
+                iri_to_turtle_term(trimmed, namespaces).unwrap_or_else(|_| trimmed.to_string())
+            }
+        }
+    };
+    remove_predicate_object_any_statement(
+        text,
+        datatype_iri,
+        "owl:equivalentClass",
+        &object,
+        namespaces,
+    )
+}
+
+fn axiom_op_predicate(axiom_op: &str) -> Result<&'static str> {
+    Ok(match axiom_op {
+        "sub_class_of" => "rdfs:subClassOf",
+        "disjoint_with" | "disjoint_class" => "owl:disjointWith",
+        "equivalent_class" => "owl:equivalentClass",
+        "domain" => "rdfs:domain",
+        "range" => "rdfs:range",
+        "sub_object_property_of" | "sub_data_property_of" | "sub_property_of" => {
+            "rdfs:subPropertyOf"
+        }
+        "inverse_of" | "inverse_object_properties" => "owl:inverseOf",
+        "equivalent_property" | "equivalent_object_properties" | "equivalent_data_properties" => {
+            "owl:equivalentProperty"
+        }
+        "property_disjoint_with"
+        | "disjoint_object_properties"
+        | "disjoint_data_properties" => "owl:propertyDisjointWith",
+        "same_as" | "same_individual" => "owl:sameAs",
+        "different_from" | "different_individuals" => "owl:differentFrom",
+        other => {
+            return Err(OwlError::PatchInvalid(format!(
+                "unsupported axiom_op for axiom annotation: {other}"
+            )));
+        }
+    })
+}
+
+fn add_axiom_annotation(
+    text: &mut String,
+    axiom_op: &str,
+    subject_iri: &str,
+    related_iri: Option<&str>,
+    predicate: &str,
+    value: &str,
+    namespaces: &BTreeMap<String, String>,
+) -> Result<()> {
+    let annotated_property = axiom_op_predicate(axiom_op)?;
+    let source = iri_to_turtle_term(subject_iri, namespaces)?;
+    let target = match related_iri {
+        Some(iri) => iri_to_turtle_term(iri, namespaces)?,
+        None => {
+            return Err(OwlError::PatchInvalid(
+                "axiom annotation requires related_iri for the annotated target".into(),
+            ));
+        }
+    };
+    let ann_pred = predicate_to_term(predicate, namespaces)?;
+    let ann_value = if let Some(obj) = explicit_iri_annotation_term(value, namespaces)? {
+        obj
+    } else {
+        format!("\"{}\"", escape_turtle_string(value))
+    };
+    let block = format!(
+        "[ rdf:type owl:Axiom ;\n  owl:annotatedSource {source} ;\n  owl:annotatedProperty {annotated_property} ;\n  owl:annotatedTarget {target} ;\n  {ann_pred} {ann_value}\n] .\n"
+    );
+    if normalize_ws(text).contains(&normalize_ws(&block)) {
+        return Ok(());
+    }
+    append_standalone_block(text, &block);
+    Ok(())
+}
+
+fn remove_axiom_annotation(
+    text: &mut String,
+    axiom_op: &str,
+    subject_iri: &str,
+    related_iri: Option<&str>,
+    predicate: &str,
+    value: &str,
+    namespaces: &BTreeMap<String, String>,
+) -> Result<()> {
+    let annotated_property = axiom_op_predicate(axiom_op)?;
+    let source = iri_to_turtle_term(subject_iri, namespaces)?;
+    let target = match related_iri {
+        Some(iri) => iri_to_turtle_term(iri, namespaces)?,
+        None => {
+            return Err(OwlError::PatchInvalid(
+                "axiom annotation requires related_iri for the annotated target".into(),
+            ));
+        }
+    };
+    let ann_pred = predicate_to_term(predicate, namespaces)?;
+    let lexical = value.trim().trim_matches('"').trim_matches('\'');
+    let bytes = text.as_bytes();
+    let mut i = 0;
+    let mut state = TurtleScanState::default();
+    while i < bytes.len() {
+        if state.in_comment || state.in_string() || state.in_iri {
+            i = advance_turtle_scan(bytes, i, &mut state);
+            continue;
+        }
+        if bytes[i] == b'[' {
+            if let Some(end) = bracket_end_index(text, i) {
+                let block = &text[i..end];
+                if block.contains("owl:Axiom")
+                    && block.contains(&source)
+                    && block.contains(annotated_property)
+                    && block.contains(&target)
+                    && block.contains(&ann_pred)
+                    && block.contains(lexical)
+                {
+                    let mut remove_end = end;
+                    let after = text[end..].trim_start();
+                    let trim_len = text[end..].len() - after.len();
+                    remove_end += trim_len;
+                    if after.starts_with('.') {
+                        remove_end += 1;
+                        if text[remove_end..].starts_with('\n') {
+                            remove_end += 1;
+                        }
+                    }
+                    let mut remove_start = i;
+                    if remove_start > 0 && text.as_bytes()[remove_start - 1] == b'\n' {
+                        remove_start -= 1;
+                    }
+                    text.replace_range(remove_start..remove_end, "");
+                    return Ok(());
+                }
+                i = end;
+                continue;
+            }
+        }
+        i = advance_turtle_scan(bytes, i, &mut state);
+    }
+    Err(OwlError::ManchesterInvalid("no matching axiom annotation".to_string()))
 }
 
 fn remove_predicate_triples(
@@ -2729,5 +3345,235 @@ ex:p a owl:ObjectProperty .
         );
         let preview = result.preview_text.expect("preview");
         assert!(preview.contains("owl:someValuesFrom") || preview.contains("ex:B"));
+    }
+
+    #[test]
+    fn add_has_key_writes_rdf_list() {
+        let ttl = r#"@prefix ex: <http://example.org/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+ex:Person a owl:Class .
+ex:hasSSN a owl:ObjectProperty .
+ex:hasName a owl:DatatypeProperty .
+"#;
+        let ns = BTreeMap::from([
+            ("ex".into(), "http://example.org/".into()),
+            ("owl".into(), "http://www.w3.org/2002/07/owl#".into()),
+        ]);
+        let result = apply_patches_to_text(
+            ttl,
+            &[PatchOp::AddHasKey {
+                class_iri: "http://example.org/Person".into(),
+                properties: vec![
+                    "http://example.org/hasSSN".into(),
+                    "http://example.org/hasName".into(),
+                ],
+            }],
+            true,
+            &ns,
+        )
+        .expect("has key");
+        let preview = result.preview_text.expect("preview");
+        assert!(preview.contains("owl:hasKey"));
+        assert!(preview.contains("( ex:hasSSN ex:hasName )") || preview.contains("ex:hasSSN"));
+    }
+
+    #[test]
+    fn add_and_remove_disjoint_union() {
+        let ttl = r#"@prefix ex: <http://example.org/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+ex:Color a owl:Class .
+ex:Red a owl:Class .
+ex:Blue a owl:Class .
+"#;
+        let ns = BTreeMap::from([
+            ("ex".into(), "http://example.org/".into()),
+            ("owl".into(), "http://www.w3.org/2002/07/owl#".into()),
+        ]);
+        let add = apply_patches_to_text(
+            ttl,
+            &[PatchOp::AddDisjointUnion {
+                class_iri: "http://example.org/Color".into(),
+                members: vec!["http://example.org/Red".into(), "http://example.org/Blue".into()],
+            }],
+            true,
+            &ns,
+        )
+        .expect("add disjoint union");
+        let preview = add.preview_text.expect("preview");
+        assert!(preview.contains("owl:disjointUnionOf"));
+        let removed = apply_patches_to_text(
+            &preview,
+            &[PatchOp::RemoveDisjointUnion {
+                class_iri: "http://example.org/Color".into(),
+                members: vec!["http://example.org/Red".into(), "http://example.org/Blue".into()],
+            }],
+            true,
+            &ns,
+        )
+        .expect("remove disjoint union");
+        let out = removed.preview_text.expect("preview");
+        assert!(!out.contains("owl:disjointUnionOf"));
+    }
+
+    #[test]
+    fn add_inverse_object_properties() {
+        let ttl = r#"@prefix ex: <http://example.org/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+ex:hasChild a owl:ObjectProperty .
+ex:hasParent a owl:ObjectProperty .
+"#;
+        let ns = BTreeMap::from([
+            ("ex".into(), "http://example.org/".into()),
+            ("owl".into(), "http://www.w3.org/2002/07/owl#".into()),
+        ]);
+        let result = apply_patches_to_text(
+            ttl,
+            &[PatchOp::AddInverseObjectProperties {
+                property_iri: "http://example.org/hasChild".into(),
+                inverse_iri: "http://example.org/hasParent".into(),
+            }],
+            true,
+            &ns,
+        )
+        .expect("inverse");
+        let preview = result.preview_text.expect("preview");
+        assert!(preview.contains("owl:inverseOf") && preview.contains("ex:hasParent"));
+    }
+
+    #[test]
+    fn add_negative_object_property_assertion() {
+        let ttl = r#"@prefix ex: <http://example.org/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+ex:alice a owl:NamedIndividual .
+ex:bob a owl:NamedIndividual .
+ex:knows a owl:ObjectProperty .
+"#;
+        let ns = BTreeMap::from([
+            ("ex".into(), "http://example.org/".into()),
+            ("owl".into(), "http://www.w3.org/2002/07/owl#".into()),
+            ("rdf".into(), "http://www.w3.org/1999/02/22-rdf-syntax-ns#".into()),
+        ]);
+        let result = apply_patches_to_text(
+            ttl,
+            &[PatchOp::AddNegativeObjectPropertyAssertion {
+                entity_iri: "http://example.org/alice".into(),
+                property_iri: "http://example.org/knows".into(),
+                target_iri: "http://example.org/bob".into(),
+            }],
+            true,
+            &ns,
+        )
+        .expect("nopa");
+        let preview = result.preview_text.expect("preview");
+        assert!(preview.contains("owl:NegativePropertyAssertion"));
+        assert!(preview.contains("owl:sourceIndividual") && preview.contains("ex:alice"));
+        assert!(preview.contains("owl:targetIndividual") && preview.contains("ex:bob"));
+        let removed = apply_patches_to_text(
+            &preview,
+            &[PatchOp::RemoveNegativeObjectPropertyAssertion {
+                entity_iri: "http://example.org/alice".into(),
+                property_iri: "http://example.org/knows".into(),
+                target_iri: "http://example.org/bob".into(),
+            }],
+            true,
+            &ns,
+        )
+        .expect("remove nopa");
+        let out = removed.preview_text.expect("preview");
+        assert!(!out.contains("owl:NegativePropertyAssertion"));
+    }
+
+    #[test]
+    fn add_same_individual_pairwise() {
+        let ttl = r#"@prefix ex: <http://example.org/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+ex:a a owl:NamedIndividual .
+ex:b a owl:NamedIndividual .
+ex:c a owl:NamedIndividual .
+"#;
+        let ns = BTreeMap::from([
+            ("ex".into(), "http://example.org/".into()),
+            ("owl".into(), "http://www.w3.org/2002/07/owl#".into()),
+        ]);
+        let result = apply_patches_to_text(
+            ttl,
+            &[PatchOp::AddSameIndividual {
+                individuals: vec![
+                    "http://example.org/a".into(),
+                    "http://example.org/b".into(),
+                    "http://example.org/c".into(),
+                ],
+            }],
+            true,
+            &ns,
+        )
+        .expect("same individual");
+        let preview = result.preview_text.expect("preview");
+        assert!(preview.contains("owl:sameAs"));
+        assert!(preview.contains("ex:b") && preview.contains("ex:c"));
+    }
+
+    #[test]
+    fn create_datatype_and_definition() {
+        let ttl = r#"@prefix ex: <http://example.org/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+"#;
+        let ns = BTreeMap::from([
+            ("ex".into(), "http://example.org/".into()),
+            ("owl".into(), "http://www.w3.org/2002/07/owl#".into()),
+            ("rdfs".into(), "http://www.w3.org/2000/01/rdf-schema#".into()),
+            ("xsd".into(), "http://www.w3.org/2001/XMLSchema#".into()),
+        ]);
+        let result = apply_patches_to_text(
+            ttl,
+            &[PatchOp::AddDatatypeDefinition {
+                datatype_iri: "http://example.org/SSN".into(),
+                manchester: "xsd:string".into(),
+            }],
+            true,
+            &ns,
+        )
+        .expect("datatype def");
+        let preview = result.preview_text.expect("preview");
+        assert!(preview.contains("rdfs:Datatype") || preview.contains("ex:SSN"));
+        assert!(preview.contains("owl:equivalentClass") && preview.contains("xsd:string"));
+    }
+
+    #[test]
+    fn add_axiom_annotation_owl_axiom_block() {
+        let ttl = r#"@prefix ex: <http://example.org/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+ex:A a owl:Class ;
+    rdfs:subClassOf ex:B .
+ex:B a owl:Class .
+"#;
+        let ns = BTreeMap::from([
+            ("ex".into(), "http://example.org/".into()),
+            ("owl".into(), "http://www.w3.org/2002/07/owl#".into()),
+            ("rdfs".into(), "http://www.w3.org/2000/01/rdf-schema#".into()),
+            ("rdf".into(), "http://www.w3.org/1999/02/22-rdf-syntax-ns#".into()),
+        ]);
+        let result = apply_patches_to_text(
+            ttl,
+            &[PatchOp::AddAxiomAnnotation {
+                axiom_op: "sub_class_of".into(),
+                subject_iri: "http://example.org/A".into(),
+                related_iri: Some("http://example.org/B".into()),
+                predicate: "rdfs:comment".into(),
+                value: "explained".into(),
+            }],
+            true,
+            &ns,
+        )
+        .expect("axiom ann");
+        let preview = result.preview_text.expect("preview");
+        assert!(preview.contains("owl:Axiom"));
+        assert!(preview.contains("owl:annotatedSource") && preview.contains("owl:annotatedTarget"));
+        assert!(preview.contains("explained"));
     }
 }

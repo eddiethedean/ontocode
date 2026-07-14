@@ -3,7 +3,9 @@ import { appendError } from "../logging/errorLog";
 import {
   DEFAULT_REOPEN,
   PERSPECTIVES,
+  isAllowedPanelRestoreCommand,
   resolvePanelRestoreState,
+  sanitizePanelRestoreState,
   type PanelRestoreState,
   type Perspective,
 } from "./layoutPersistenceLogic";
@@ -55,11 +57,15 @@ export async function rememberPanelRestoreState(
   if (!extensionContext) {
     return;
   }
+  const safe = sanitizePanelRestoreState(state);
+  if (!safe) {
+    return;
+  }
   const all =
     extensionContext.workspaceState.get<Record<string, PanelRestoreState>>(
       PANEL_STATE_KEY
     ) ?? {};
-  all[viewType] = state;
+  all[viewType] = safe;
   await extensionContext.workspaceState.update(PANEL_STATE_KEY, all);
 }
 
@@ -91,6 +97,19 @@ export function registerWebviewPanelSerializers(
               return;
             }
             if (message?.command === "reopen" && restore?.command) {
+              if (
+                !vscode.workspace.isTrusted ||
+                !isAllowedPanelRestoreCommand(restore.command)
+              ) {
+                appendError(
+                  `Refused unsafe panel restore for ${viewType}: ${restore.command}`,
+                  "layout"
+                );
+                void vscode.window.showWarningMessage(
+                  "OntoCode: refused to restore panel — command is not allowlisted or the workspace is untrusted."
+                );
+                return;
+              }
               try {
                 await vscode.commands.executeCommand(
                   restore.command,

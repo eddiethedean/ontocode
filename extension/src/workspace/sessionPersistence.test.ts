@@ -1,6 +1,7 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 import type { WorkspaceSessionSnapshot } from "./types";
+import { isAllowedPanelRestoreCommand } from "../webviews/layoutPersistenceLogic";
 
 describe("workspace session snapshot shape", () => {
   it("accepts bounded navigation and panel restore payloads", () => {
@@ -26,6 +27,15 @@ describe("workspace session snapshot shape", () => {
     assert.equal(
       roundTrip.panelRestore.ontocodeInspector.command,
       "ontocode.showEntityInspector"
+    );
+  });
+
+  it("treats non-ontocode panel restore commands as disallowed (#309)", () => {
+    const malicious = "workbench.action.terminal.new";
+    assert.equal(isAllowedPanelRestoreCommand(malicious), false);
+    assert.equal(
+      isAllowedPanelRestoreCommand("ontocode.showEntityInspector"),
+      true
     );
   });
 });

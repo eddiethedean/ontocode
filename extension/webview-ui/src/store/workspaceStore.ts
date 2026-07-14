@@ -262,14 +262,14 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
 
   hydrateFocus(focus) {
     const current = get().focus;
-    if (
-      focus &&
-      current &&
-      typeof focus.timestamp === "number" &&
-      typeof current.timestamp === "number" &&
-      focus.timestamp < current.timestamp
-    ) {
-      return;
+    // Stamped focus wins over missing timestamps and older stamps (#161 / #277).
+    if (focus && current && typeof current.timestamp === "number") {
+      if (
+        typeof focus.timestamp !== "number" ||
+        focus.timestamp < current.timestamp
+      ) {
+        return;
+      }
     }
     set({ focus });
     if (focus?.kind === "entity") {

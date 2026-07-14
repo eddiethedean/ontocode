@@ -7,6 +7,8 @@ const MAX_NAV = 50;
 export class NavigationManager {
   private stack: NavigationEntry[] = [];
   private index = -1;
+  /** While > 0, focus-driven push must not mutate history (#292). */
+  private historyPushSuppressed = 0;
   private context: { workspaceState: { get<T>(key: string): T | undefined; update(key: string, value: unknown): Thenable<void> } } | undefined;
 
   bindContext(context: {
@@ -42,7 +44,33 @@ export class NavigationManager {
     return this.index >= 0 && this.index < this.stack.length - 1;
   }
 
+  /** Suppress focus→push feedback while applying Back/Forward (and follow-up openEntity). */
+  beginHistoryNavigation(): void {
+    this.historyPushSuppressed += 1;
+  }
+
+  endHistoryNavigation(): void {
+    this.historyPushSuppressed = Math.max(0, this.historyPushSuppressed - 1);
+  }
+
+  async runHistoryNavigation<T>(fn: () => Promise<T> | T): Promise<T> {
+    this.beginHistoryNavigation();
+    try {
+      return await fn();
+    } finally {
+      this.endHistoryNavigation();
+    }
+  }
+
   push(entry: NavigationEntry): NavigationEntry {
+    if (this.historyPushSuppressed > 0) {
+      return entry;
+    }
+    // Re-focusing the current history slot must not truncate forward history (#292).
+    const current = this.index >= 0 ? this.stack[this.index] : undefined;
+    if (current && current.kind === entry.kind && current.id === entry.id) {
+      return current;
+    }
     if (this.index < this.stack.length - 1) {
       this.stack = this.stack.slice(0, this.index + 1);
     }
@@ -106,6 +134,7 @@ export class NavigationManager {
   resetForTests(): void {
     this.stack = [];
     this.index = -1;
+    this.historyPushSuppressed = 0;
     this.context = undefined;
   }
 

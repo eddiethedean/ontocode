@@ -154,4 +154,19 @@ describe("parseApplyPatchMessage", () => {
     assert.ok(parsed);
     assert.equal(parsed?.patches[0]?.op, "add_import");
   });
+
+  it("rejects import patches when entity context is set (#310)", () => {
+    const importPatch = {
+      op: "add_import",
+      ontology_iri: "http://example.org/ont",
+      import_iri: "http://example.org/other",
+    };
+    assert.equal(
+      parseApplyPatchMessage(
+        { type: "applyPatch", patches: [importPatch], previewOnly: false },
+        entity
+      ),
+      null
+    );
+  });
 });

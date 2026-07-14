@@ -522,6 +522,10 @@ export function parseApplyPatchMessage(
     }
 
     if (typeof ontologyIri === "string") {
+      // Imports panel passes no expected entity; Inspector must reject ontology-only ops (#310).
+      if (expectedEntityIri !== undefined || expectedOboId !== undefined) {
+        return null;
+      }
       continue;
     }
 

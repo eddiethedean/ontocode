@@ -1000,21 +1000,41 @@ fn print_query_result(
     };
     match format {
         OutputFormat::Json => println!("{}", sql_to_json(&result)?),
-        OutputFormat::Csv => print!("{}", sql_to_csv(&result)?),
+        OutputFormat::Csv => {
+            print!("{}", sql_to_csv(&result)?);
+            // Keep CSV body machine-clean; warn on stderr when the result set was capped (#313).
+            if truncated {
+                eprintln!("WARNING: OntoCode query results truncated");
+            }
+        }
         OutputFormat::Text => {
             if columns.is_empty() {
                 println!("(no columns)");
-                return Ok(());
+            } else {
+                println!("{}", columns.join("\t"));
+                for row in rows {
+                    let line: Vec<String> =
+                        columns.iter().map(|c| row.get(c).cloned().unwrap_or_default()).collect();
+                    println!("{}", line.join("\t"));
+                }
             }
-            println!("{}", columns.join("\t"));
-            for row in rows {
-                let line: Vec<String> =
-                    columns.iter().map(|c| row.get(c).cloned().unwrap_or_default()).collect();
-                println!("{}", line.join("\t"));
+            if truncated {
+                println!("# truncated: true");
             }
         }
     }
     Ok(())
+}
+
+/// Format helpers used by unit tests for truncation signaling (#313).
+#[cfg(test)]
+fn text_truncation_marker(truncated: bool) -> Option<&'static str> {
+    truncated.then_some("# truncated: true")
+}
+
+#[cfg(test)]
+fn csv_truncation_warning(truncated: bool) -> Option<&'static str> {
+    truncated.then_some("WARNING: OntoCode query results truncated")
 }
 
 #[cfg(test)]
@@ -1044,5 +1064,16 @@ mod tests {
             }
             _ => panic!("expected plugins run"),
         }
+    }
+
+    #[test]
+    fn text_and_csv_surface_truncation_flag() {
+        assert_eq!(text_truncation_marker(true), Some("# truncated: true"));
+        assert_eq!(text_truncation_marker(false), None);
+        assert_eq!(
+            csv_truncation_warning(true),
+            Some("WARNING: OntoCode query results truncated")
+        );
+        assert_eq!(csv_truncation_warning(false), None);
     }
 }

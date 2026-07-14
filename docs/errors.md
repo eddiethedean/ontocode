@@ -61,7 +61,7 @@ Custom `ontocore/*` method failures return JSON-RPC errors with `data` containin
 | `APPLIED_NOT_INDEXED` | Patch written to buffer/disk but reindex failed | Run Index Workspace; file may already be updated (`recoverable: true`) |
 | `REASONER_FAILED` | `runReasoner` failed (profile, parse, OntoLogos error) | Try another profile or fix ontology axioms |
 | `EXPLANATION_FAILED` | `getExplanation` failed | Run reasoner first or choose another class |
-| `REFACTOR_FAILED` | Refactor preview/apply failed | Check IRIs, Turtle-only scope, and preview plan |
+| `REFACTOR_FAILED` | Refactor preview/apply failed | Check IRIs, format coverage (rename/merge/replace vs Turtle-first ops), and preview plan |
 | `GRAPH_FAILED` | `getGraph` failed | Re-index workspace or reduce neighborhood depth |
 | `ROBOT_FAILED` | `runRobot` external process failed | Check `ontocode.robotPath` and ROBOT install |
 

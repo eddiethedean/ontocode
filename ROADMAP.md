@@ -55,7 +55,7 @@ Engine foundation    IDE depth                Platform & authoring   OntoUI → 
   Foundation           Query, reason,           Identity, diff,      UX shell + semantic txn
   Explorer, diag,      graphs, refactor,        OBO write-back,      (v0.18–v0.20) + RDF/OWL-XML
   write-back           Manchester               OWL/XML catalog      WB (v0.21) + OWL 2 (v0.22)
-                                                                       + reasoning/SWRL (v0.24)
+                                                                       + reasoning/SWRL (v0.23)
                                                                        + refactor/DL Query (v0.24)
 
 PLANNED (v0.25–1.0) ─────────────────────────────────────────────────►

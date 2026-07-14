@@ -14,8 +14,10 @@ v0.24.0 — Semantic services (refactoring + DL Query).
 ### Added
 
 - DL Query (`PAR-QRY-002` / EPIC-007): Manchester class expressions via temp equivalent class + classify/realize; CLI `ontocore dl-query`; LSP `ontocore/dlQuery`; Query Workbench **DL** mode with Instances / Subclasses / Superclasses / Equivalents tabs
+- Asserted-mode DL Query instance path polish; Query Workbench DL mode history
 - Workspace search LSP `ontocore/search` (QuickPick live search)
 - Refactor plan impact metrics (`affected_entity_count` / `affected_axiom_count`); CLI `refactor merge` / `replace`
+- Multi-format rename/merge/replace remaps (`ontocore-owl` / `ontocore-obo` `remap.rs`) for RDF/XML, OWL/XML, and OBO (plus Turtle)
 - Move selected axioms; ontology merge; flatten imports; import cleanup; locality-based module extraction (`--locality`)
 - SWRL-aware rename/merge/replace (rewrites `ontocore:swrlRule` JSON literals); `UsageKind::SwrlReference`
 - Migration guide: [docs/migration/v0.24.md](docs/migration/v0.24.md)
@@ -24,7 +26,8 @@ v0.24.0 — Semantic services (refactoring + DL Query).
 
 - Workspace package and all `ontocore-*` crates bumped to **0.24.0**; extension and webview UI **0.24.0**
 - Refactor preview subtitle surfaces entity/axiom impact counts
-- `PAR-REF-001` / `PAR-QRY-002` marked **VERIFIED** in the parity manifest (Turtle-first refactor; non-Turtle skipped with warnings)
+- Release publish workflow trusts green `ci.yml` on the tagged SHA and publishes crates without fixed inter-crate delays
+- `PAR-REF-001` / `PAR-QRY-002` marked **VERIFIED** in the parity manifest (rename/merge/replace multi-format; move/extract/ontology-merge/flatten/cleanup remain Turtle-first)
 
 ## [0.23.0] - 2026-07-14
 

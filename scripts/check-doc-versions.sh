@@ -488,6 +488,20 @@ else
   echo "ok: CLI merge/replace not marked IDE-only"
 fi
 
+# Stale global "refactor Turtle-only" claims after multi-format rename/merge/replace
+for stale_ref in docs/SHIPPED.md docs/guides/refactoring.md docs/guides/owl-xml-workflow.md docs/guides/best-practices.md docs/errors.md docs/faq.md; do
+  if grep -qE 'Refactor apply is Turtle-only|Format policy:.*Turtle \(`.ttl`\) only|Refactoring apply \| No \(Turtle only\)|Refactor apply is \*\*Turtle-only\*\*' "$stale_ref" 2>/dev/null; then
+    echo "FAIL: $stale_ref still claims global Turtle-only refactor after multi-format remaps" >&2
+    fail=1
+  fi
+done
+if ! grep -qE 'rename.*merge.*replace' docs/SHIPPED.md; then
+  echo "FAIL: docs/SHIPPED.md should document multi-format rename/merge/replace" >&2
+  fail=1
+else
+  echo "ok: no stale Turtle-only-only refactor claims on primary surfaces"
+fi
+
 # v0.8 docs added in adoption review
 for file in docs/guides/refactoring.md docs/migration/v0.8.md docs/migration/v0.9.md docs/migration/v0.10.md docs/examples/refactoring.md docs/ontocode/semantic-diff.md docs/ontocore/rust-api.md docs/guides/protege-migration.md docs/ontocode/feature-tour.md; do
   if [[ ! -f "$file" ]]; then

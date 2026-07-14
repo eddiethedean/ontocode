@@ -16,7 +16,8 @@ Canonical capability matrix: [What ships today](../SHIPPED.md).
 | Entity Inspector (edit) | Yes (core ops) | Yes (core ops) |
 | Patch / `ontocore patch` write-back | Yes | Yes |
 | Manchester editor apply | Limited (named ops via patches) | Limited |
-| Refactoring apply | No (Turtle only) | No |
+| Refactoring apply (rename / merge / replace) | Yes (remap + re-serialize) | Yes (remap + re-serialize) |
+| Refactoring apply (move / extract / …) | No (Turtle-first) | No (Turtle-first) |
 
 **Supported XML patch ops (first cut):** create/delete entity, labels/comments/annotations, SubClassOf, imports, ontology/version IRI, class assertions. Unsupported ops return structured errors and leave the file unchanged.
 
@@ -35,7 +36,7 @@ Protégé may rewrite XML layout on save. OntoCode verifies **semantic** round-t
 
 ### When to prefer Turtle
 
-Keep Turtle (span surgery) when you need byte-stable formatting, property characteristics, complex Manchester expressions, or refactor apply.
+Keep Turtle (span surgery) when you need byte-stable formatting, property characteristics, complex Manchester expressions, or Turtle-first refactor ops (move / extract / ontology merge / flatten / cleanup). Rename / merge / replace also work on RDF/XML and OWL/XML.
 
 ## VS Code behavior
 

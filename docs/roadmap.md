@@ -56,7 +56,7 @@ After 1.0, the roadmap shifts from parity to modernization.
 SHIPPED (v0.1–v0.24) ─────────────────────────────────────────────────►
 v0.1–v0.4          v0.5–v0.8              v0.9–v0.12           v0.13–v0.24
 Engine foundation    IDE depth                Platform & authoring   OntoUI → formats → OWL 2
-                                                                       + reasoning/SWRL (v0.24)
+                                                                       + reasoning/SWRL (v0.23)
                                                                        + refactor/DL Query (v0.24)
 
 PLANNED (v0.25–1.0) ─────────────────────────────────────────────────►

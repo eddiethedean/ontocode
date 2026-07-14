@@ -423,9 +423,15 @@ Build a refactor plan without writing files.
 | `kind` | Fields |
 |--------|--------|
 | `rename_iri` | `from_iri`, `to_iri` |
+| `merge_entities` | `keep_iri`, `merge_iri` |
+| `replace_entity` | `from_iri`, `to_iri` |
 | `migrate_namespace` | `from_base`, `to_base` |
 | `move_entity` | `entity_iri`, `target_file` |
-| `extract_module` | `entity_iris[]`, `output_file`, `leave_stub?` |
+| `extract_module` | `entity_iris[]`, `output_file`, `leave_stub?`, `locality?` |
+| `move_axioms` | `entity_iri`, `target_file`, `statement_indexes?`, `exclude_primary?` |
+| `merge_ontologies` | `source_paths[]`, `target_file` |
+| `flatten_imports` | `ontology_file` |
+| `cleanup_imports` | `ontology_file` |
 
 **Result:** `RefactorPlan` — `{ changes: FileChange[], warnings: string[] }` where each change has `path`, `preview_text`, `original_text`, and `hunks`.
 

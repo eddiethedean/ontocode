@@ -39,7 +39,7 @@ Marketplace and Open VSX publishes are manual after the release workflow. Prefer
 
 **Can I edit Protégé `.owl` / RDF/XML in place?**
 
-**Yes (v0.21+), with caveats.** RDF/XML (`.owl`/`.rdf`) and OWL/XML (`.owx`) support Entity Inspector and `ontocore patch` write-back via full-document re-serialize (semantic fidelity, not Protégé byte-identical). Prefer Turtle when you need byte-stable diffs, full Manchester, or refactor apply. Details: [Supported formats](supported-formats.md) and [OWL/XML and RDF/XML write-back](guides/owl-xml-workflow.md).
+**Yes (v0.21+), with caveats.** RDF/XML (`.owl`/`.rdf`) and OWL/XML (`.owx`) support Entity Inspector and `ontocore patch` write-back via full-document re-serialize (semantic fidelity, not Protégé byte-identical). Prefer Turtle when you need byte-stable diffs, full Manchester, or Turtle-first refactor ops; rename / merge / replace also apply to XML and OBO. Details: [Supported formats](supported-formats.md) and [OWL/XML and RDF/XML write-back](guides/owl-xml-workflow.md).
 
 **SQL or SPARQL — which should I use?**
 

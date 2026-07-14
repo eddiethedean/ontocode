@@ -72,11 +72,13 @@
 |-----------|-----------------|--------------|--------------------------|------------------|---------------------------|
 | Index / query | Yes | Yes | Yes (Horned catalog) | Yes (Horned catalog) | Yes |
 | Write-back (inspector, patches) | Yes | Yes | Yes (Horned re-serialize) | Yes (Horned re-serialize) | Read-only |
-| Refactor apply | Yes | — | — | — | — |
+| Refactor apply (rename / merge / replace) | Yes | Yes¹ | Yes¹ | Yes¹ | — |
+| Refactor apply (move / extract / ontology merge / flatten / cleanup) | Yes | — | — | — | — |
 | Rich OBO metadata (synonyms, defs, xrefs) | — | Yes | — | — | — |
 
 > **OBO versioning:** patch engine write-back since **v0.12**; Entity Inspector write-back since **v0.13**.  
 > **XML write-back:** semantic fidelity (ADR-0021); not byte-identical to Protégé saves.  
+> **¹ Rename / merge / replace:** format-specific IRI remaps (XML re-serialize; OBO id/reference rewrite). Other refactor ops stay Turtle-first.  
 > Deeper capability grid (Manchester, refactor, XML re-serialize): [Capabilities by format](guides/capabilities-by-format.md).
 
 ## New in v0.24.0 (latest tagged)

@@ -519,6 +519,26 @@
         },
         {
           "type": "object",
+          "required": ["kind", "keep_iri", "merge_iri"],
+          "properties": {
+            "kind": { "const": "merge_entities" },
+            "keep_iri": { "type": "string" },
+            "merge_iri": { "type": "string" }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["kind", "from_iri", "to_iri"],
+          "properties": {
+            "kind": { "const": "replace_entity" },
+            "from_iri": { "type": "string" },
+            "to_iri": { "type": "string" }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
           "required": ["kind", "from_base", "to_base"],
           "properties": {
             "kind": { "const": "migrate_namespace" },
@@ -544,7 +564,51 @@
             "kind": { "const": "extract_module" },
             "entity_iris": { "type": "array", "items": { "type": "string" } },
             "output_file": { "type": "string" },
-            "leave_stub": { "type": "boolean", "default": false }
+            "leave_stub": { "type": "boolean", "default": false },
+            "locality": { "type": "boolean", "default": false }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["kind", "entity_iri", "target_file"],
+          "properties": {
+            "kind": { "const": "move_axioms" },
+            "entity_iri": { "type": "string" },
+            "target_file": { "type": "string" },
+            "statement_indexes": {
+              "type": "array",
+              "items": { "type": "integer", "minimum": 0 }
+            },
+            "exclude_primary": { "type": "boolean", "default": true }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["kind", "source_paths", "target_file"],
+          "properties": {
+            "kind": { "const": "merge_ontologies" },
+            "source_paths": { "type": "array", "items": { "type": "string" } },
+            "target_file": { "type": "string" }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["kind", "ontology_file"],
+          "properties": {
+            "kind": { "const": "flatten_imports" },
+            "ontology_file": { "type": "string" }
+          },
+          "additionalProperties": false
+        },
+        {
+          "type": "object",
+          "required": ["kind", "ontology_file"],
+          "properties": {
+            "kind": { "const": "cleanup_imports" },
+            "ontology_file": { "type": "string" }
           },
           "additionalProperties": false
         }

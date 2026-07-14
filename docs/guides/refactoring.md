@@ -1,6 +1,6 @@
 # Workspace refactoring
 
-OntoCode v0.8 adds **workspace-wide refactoring** for Turtle (`.ttl`) ontologies: find usages, rename IRIs, migrate namespaces, move entities between files, and extract modules. All operations support **preview before apply**.
+OntoCode provides **workspace-wide refactoring** with **preview before apply**: find usages, rename IRIs, merge/replace entities, migrate namespaces, move entities, and extract modules.
 
 Canonical capability matrix: [What ships today](../SHIPPED.md).
 
@@ -13,10 +13,10 @@ Canonical capability matrix: [What ships today](../SHIPPED.md).
 | Migrate namespace base | **Migrate Namespace** command | `ontocore refactor migrate-namespace` |
 | Move entity to another file | **Move Entity** command | `ontocore refactor move` |
 | Extract module (subset of entities) | **Extract Module** command | `ontocore refactor extract` |
-| Merge entities | **Merge Entities** command | — (IDE only) |
-| Replace entity references | **Replace Entity** command | — (IDE only) |
+| Merge entities | **Merge Entities** command | `ontocore refactor merge` |
+| Replace entity references | **Replace Entity** command | `ontocore refactor replace` |
 
-**Format policy:** refactoring applies to **Turtle (`.ttl`) only**. RDF/XML, OBO, and other formats are indexed but not modified.
+**Format policy:** **rename / merge / replace** rewrite Turtle, RDF/XML, OWL/XML, and OBO (format-specific remaps). **Move / extract / ontology merge / flatten / cleanup imports** remain **Turtle-first** (non-Turtle files skipped with warnings).
 
 ## VS Code workflow
 
@@ -50,7 +50,7 @@ Standard LSP **Rename** (`F2` on an IRI in a `.ttl` file) also triggers IRI rena
 | **OntoCode: Migrate Namespace** | Replace a namespace base IRI (`@prefix` + term IRIs) |
 | **OntoCode: Move Entity** | Move an entity block to another `.ttl` file |
 | **OntoCode: Extract Module** | Copy selected entities into a new module file |
-| **OntoCode: Merge Entities** | Merge two entities (survivor + duplicate) across Turtle files |
+| **OntoCode: Merge Entities** | Merge two entities (survivor + duplicate) across supported formats |
 | **OntoCode: Replace Entity** | Replace references to one IRI with another (preview + apply) |
 
 Use **`--preview`** before apply in production repos.
@@ -141,7 +141,7 @@ Full flag reference: [CLI reference](../cli-reference.md#refactor).
 | `ontocore/previewRefactor` | Build a `RefactorPlan` without writing |
 | `ontocore/applyRefactor` | Apply a plan (re-previews and verifies match) |
 
-Refactor requests use a tagged `kind` field: `rename_iri`, `migrate_namespace`, `move_entity`, `extract_module`. See [LSP API](../lsp-api.md) and [lsp-protocol.schema.json](../lsp-protocol.schema.json).
+Refactor requests use a tagged `kind` field including `rename_iri`, `migrate_namespace`, `move_entity`, `extract_module`, `merge_entities`, `replace_entity`, and related ontology ops. See [LSP API](../lsp-api.md) and [lsp-protocol.schema.json](../lsp-protocol.schema.json).
 
 ## Safety and limitations
 
@@ -149,8 +149,8 @@ Refactor requests use a tagged `kind` field: `rename_iri`, `migrate_namespace`, 
 |-------|-------|
 | Preview | Always preview multi-file changes before apply in production repos |
 | Open buffers | LSP applies to open editor buffers first, then disk (same as patches) |
-| Multi-root workspace | All folders indexed (v0.10+); refactor applies across indexed Turtle in every root |
-| Non-Turtle files | Refactor apply is **Turtle-only** — `.obo`, `.owl`, etc. are skipped (use inspector/patch for OBO) |
+| Multi-root workspace | All folders indexed (v0.10+); refactor applies across indexed roots |
+| Format coverage | Rename / merge / replace: Turtle + RDF/XML + OWL/XML + OBO. Move / extract / ontology-merge / flatten / cleanup: Turtle-first |
 | Extract module | Direct-reference closure; may not capture all indirect imports |
 | Git | Review diffs before commit; use [semantic diff](../ontocode/semantic-diff.md) for PR summaries |
 

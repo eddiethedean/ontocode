@@ -5,7 +5,7 @@ Maintainer checklist for publishing crates, binaries, and the VS Code extension.
 ## Version bump
 
 1. Update `[workspace.package].version` in root [Cargo.toml on GitHub](https://github.com/eddiethedean/ontocode/blob/main/Cargo.toml)
-2. Update **`docs/TAGGED_RELEASE`** to the new tag (public install pins follow this file until the next release)
+2. Update **`docs/TAGGED_RELEASE`** in the release commit that cuts that tag — public install pins must equal the **published** GitHub Release version (never bump pins on a working branch before the tag exists)
 3. Update `extension/package.json` and `extension/webview-ui/package.json` `version`
 3. Update [CHANGELOG.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) and [docs/changelog.md](changelog.md)
 4. Regenerate [NOTICES on GitHub](https://github.com/eddiethedean/ontocode/blob/main/NOTICES) if dependencies changed (`cargo license` recommended)
@@ -57,32 +57,29 @@ Source of truth: **[docs/SHIPPED.md](SHIPPED.md)** and **[docs/supported-formats
 - [ ] [docs/design/LICENSES.md](design/LICENSES.md) — dependency sections
 - [ ] Run `./scripts/build-docs.sh` locally before tagging
 - [ ] Build tutorial pack: `./scripts/package-tutorial-zip.sh` and attach `ontocode-tutorial.zip` to the GitHub Release
-- [ ] Ensure **CI is green on the release commit** before tagging (the release workflow also re-runs preflight gates including `cargo test --workspace`)
+- [ ] Ensure **CI is green on the release commit** before tagging (the release workflow **requires** a successful `ci.yml` run on that SHA; it does not re-run the full test suite)
 
 ## Tag and publish
 
 Push a tag matching `[workspace.package].version` in `Cargo.toml`:
 
 ```bash
-git tag v0.23.0   # must match [workspace.package].version in Cargo.toml
-git push origin v0.23.0
+git tag v0.24.0   # must match [workspace.package].version in Cargo.toml
+git push origin v0.24.0
 ```
 
 The [release workflow on GitHub](https://github.com/eddiethedean/ontocode/blob/main/.github/workflows/release.yml):
 
-1. Builds multi-platform `ontocore-lsp` binaries (matrix job)
-2. Verifies the tag matches `Cargo.toml` and release binaries build
-3. Publishes workspace crates to [crates.io](https://crates.io/) in dependency order
-4. Creates a GitHub Release with:
-   - `ontocore` Linux x64 binary
-   - `ontocore-lsp` per-platform archives
-   - Multi-platform `ontocode-*.vsix`
+1. **Preflight (tag gates):** tag↔version match, doc version sync, rustfmt, and a green `ci.yml` run on the tagged SHA (waits briefly if CI is still in progress)
+2. **LSP matrix** (parallel with publish after preflight): multi-platform `ontocore-lsp` binaries
+3. **Publish crates.io** (starts after preflight; overlaps LSP builds): workspace crates in dependency order with `--no-verify`, retrying only on 429 / index lag (no fixed inter-crate sleep — crates.io allows a burst of 30 version updates)
+4. **Package + GitHub Release** (after LSP matrix): Linux x64 `ontocore` CLI, per-platform LSP archives, multi-platform VSIX, Open VSX (if `OVSX_PAT` is set), `SHA256SUMS` + `NOTICES`
 
 Requires the `CARGO_REGISTRY_TOKEN` repository secret. For Open VSX (Cursor), set `OVSX_PAT` — see [marketplace-publish.md](marketplace-publish.md).
 
 ## Published crates (dependency order)
 
-`ontocore-core` → `ontocore-parser` → `ontocore-owl` → `ontocore-obo` → `ontocore-edit` → `ontocore-diagnostics` → `ontocore-catalog` → `ontocore-diff` → `ontocore-docs` → `ontocore-refactor` → `ontocore-query` → `ontocore-swrl` → `ontocore-reasoner` → `ontocore-robot` → `ontocore-plugin` (+ plugin crates) → `ontocore-lsp` → `ontocore` → `ontocore-cli`
+`ontocore-core` → `ontocore-parser` → `ontocore-owl` → `ontocore-obo` → `ontocore-edit` → `ontocore-diagnostics` → `ontocore-catalog` → `ontocore-diff` → `ontocore-docs` → `ontocore-swrl` → `ontocore-refactor` → `ontocore-query` → `ontocore-reasoner` → `ontocore-robot` → `ontocore-plugin` (+ plugin crates) → `ontocore-lsp` → `ontocore` → `ontocore-cli`
 
 ## VS Code Marketplace and Open VSX
 

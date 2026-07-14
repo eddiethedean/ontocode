@@ -419,10 +419,17 @@ if [[ "$fail" -eq 0 ]]; then
   echo "ok: reference pages have no OntoCore v0.8/v0.9/v0.10/v0.11.0/v0.11.1/v0.11.2 banners"
 fi
 
-check_file_contains ".github/workflows/release.yml" "publish_with_pause ontocore-obo" "release.yml publishes ontocore-obo"
-check_file_contains ".github/workflows/release.yml" "publish_with_pause ontocore-edit" "release.yml publishes ontocore-edit"
-check_file_contains ".github/workflows/release.yml" "publish_with_pause ontocore-swrl" "release.yml publishes ontocore-swrl"
-check_file_contains ".github/workflows/release.yml" "publish_with_pause ontocore" "release.yml publishes ontocore"
+check_file_contains ".github/workflows/release.yml" "publish_crate ontocore-obo" "release.yml publishes ontocore-obo"
+check_file_contains ".github/workflows/release.yml" "publish_crate ontocore-edit" "release.yml publishes ontocore-edit"
+check_file_contains ".github/workflows/release.yml" "publish_crate ontocore-swrl" "release.yml publishes ontocore-swrl"
+# refactor depends on swrl — publish order must list swrl first
+if ! awk '/publish_crate ontocore-swrl/{s=NR} /publish_crate ontocore-refactor/{r=NR} END{exit !(s && r && s < r)}' .github/workflows/release.yml; then
+  echo "FAIL: release.yml must publish ontocore-swrl before ontocore-refactor" >&2
+  fail=1
+else
+  echo "ok: release.yml publishes ontocore-swrl before ontocore-refactor"
+fi
+check_file_contains ".github/workflows/release.yml" "publish_crate ontocore" "release.yml publishes ontocore"
 
 # docs/contributing.md should track root CONTRIBUTING.md (OntoCore branding)
 if ! grep -q 'OntoCore' docs/contributing.md; then
@@ -453,6 +460,53 @@ if ! grep -q "${TAGGED_MINOR}\.x   | Yes" docs/security.md; then
   fail=1
 else
   echo "ok: docs/security.md tagged supported version"
+fi
+
+# SECURITY.md ↔ docs/security.md N−1 minor must match (previous tagged line)
+N1_MINOR="$(python3 - <<PY
+maj, min, _ = "${TAGGED_VERSION}".split(".")
+print(f"{maj}.{int(min) - 1}")
+PY
+)"
+if ! grep -qE "${N1_MINOR}\\.x[[:space:]]*\\| Yes" SECURITY.md \
+  || ! grep -qE "${N1_MINOR}\\.x[[:space:]]*\\| Yes" docs/security.md; then
+  echo "FAIL: SECURITY.md and docs/security.md must both list ${N1_MINOR}.x as Yes (N−1)" >&2
+  fail=1
+else
+  echo "ok: SECURITY.md and docs/security.md N−1 (${N1_MINOR}.x) agree"
+fi
+
+# Tier-1 pages must not claim DL Query is unshipped when SHIPPED says Yes
+if grep -qE 'DL Query \(Workbench DL mode' docs/SHIPPED.md 2>/dev/null \
+  && grep -qE 'Shipped' docs/SHIPPED.md 2>/dev/null; then
+  for anti_dl in docs/guides/protege-decision.md docs/guides/production-readiness.md docs/guides/enterprise-eval.md; do
+    if grep -qE 'DL Query.*(Not shipped|does not)|without Protégé DL Query' "$anti_dl" 2>/dev/null; then
+      echo "FAIL: $anti_dl still claims DL Query is unshipped / optional gap after v0.24" >&2
+      fail=1
+    fi
+  done
+fi
+
+# CLI refactor merge/replace must not be documented as IDE-only
+if grep -qE 'no.*\`ontocore refactor merge\`|IDE-only:.*Merge entities' docs/cli-reference.md docs/guides/refactoring.md 2>/dev/null; then
+  echo "FAIL: cli-reference/refactoring still claim merge/replace are IDE-only" >&2
+  fail=1
+else
+  echo "ok: CLI merge/replace not marked IDE-only"
+fi
+
+# Stale global "refactor Turtle-only" claims after multi-format rename/merge/replace
+for stale_ref in docs/SHIPPED.md docs/guides/refactoring.md docs/guides/owl-xml-workflow.md docs/guides/best-practices.md docs/errors.md docs/faq.md; do
+  if grep -qE 'Refactor apply is Turtle-only|Format policy:.*Turtle \(`.ttl`\) only|Refactoring apply \| No \(Turtle only\)|Refactor apply is \*\*Turtle-only\*\*' "$stale_ref" 2>/dev/null; then
+    echo "FAIL: $stale_ref still claims global Turtle-only refactor after multi-format remaps" >&2
+    fail=1
+  fi
+done
+if ! grep -qE 'rename.*merge.*replace' docs/SHIPPED.md; then
+  echo "FAIL: docs/SHIPPED.md should document multi-format rename/merge/replace" >&2
+  fail=1
+else
+  echo "ok: no stale Turtle-only-only refactor claims on primary surfaces"
 fi
 
 # v0.8 docs added in adoption review

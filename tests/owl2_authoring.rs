@@ -188,9 +188,7 @@ fn owl2_turtle_remove_alldifferent_pair_and_add_nary() {
     // Inspector-style remove against Protégé AllDifferent fixture.
     apply_patches(
         &path,
-        &[PatchOp::RemoveDifferentIndividuals {
-            individuals: vec![alice.into(), bob.into()],
-        }],
+        &[PatchOp::RemoveDifferentIndividuals { individuals: vec![alice.into(), bob.into()] }],
         false,
         &abox_ns(),
     )

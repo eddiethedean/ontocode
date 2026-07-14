@@ -604,6 +604,17 @@ impl OntologyBuilder {
             return;
         }
 
+        if quad.predicate == OWL::same_as() {
+            self.annotations.push(Annotation {
+                subject: subject.clone(),
+                predicate: predicate.clone(),
+                object: object.clone(),
+                ontology_id: self.ontology_id.clone(),
+                source_location: SourceLocation::default(),
+            });
+            return;
+        }
+
         if quad.predicate == Rdfs::sub_class_of() {
             self.axiom_counter += 1;
             self.axioms.push(Axiom {

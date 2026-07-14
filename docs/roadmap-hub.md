@@ -51,6 +51,6 @@ flowchart TB
 
 ## Current release
 
-**v0.21.0** — see [Migration v0.19.0 → v0.21.0](migration/v0.20.md), [Migration v0.18.2 → v0.19.0](migration/v0.19.md), and [Changelog](changelog.md).
+**v0.21.0** — see [Migration v0.20.0 → v0.21.0](migration/v0.21.md), [Migration v0.19.0 → v0.20.0](migration/v0.20.md), and [Changelog](changelog.md).
 
-> **Design docs under `docs/platform/`, `docs/ui/`, and Protégé reverse-engineering are not a shipped feature list.** Cross-check [SHIPPED.md](SHIPPED.md) before treating a design page as product capability.
+> **Design docs under `docs/platform/`, `docs/ui/`, `docs/protege-parity/`, and `docs/PROTEGE_REVERSE_ENGINEERING/` are not a shipped feature list.** Evaluators and procurement should use [SHIPPED.md](SHIPPED.md) and [Known limitations](known-limitations.md) only — ignore internal parity percentage assessments on GitHub.

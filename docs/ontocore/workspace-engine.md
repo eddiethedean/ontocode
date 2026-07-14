@@ -2,15 +2,17 @@
 
 OntoCore discovers ontology files under a workspace root, parses them, and builds a queryable catalog.
 
-## `Workspace` API (experimental)
+## `Workspace` API
+
+**Stable since v0.10** as the recommended high-level API (pre-1.0 semver still applies until v1.0 — [API stability](../guides/api-stability.md)). Lower-level `IndexBuilder` remains available for custom pipelines.
 
 ```rust
-use ontocore::workspace::Workspace;
+use ontocore::Workspace;
 
 let ws = Workspace::open("/path/to/ontologies")?;
 
 // Catalog stats
-let stats = ws.catalog().data().stats();
+let stats = ws.stats();
 println!("{} classes", stats.class_count);
 
 // SQL query
@@ -24,8 +26,6 @@ for d in ws.diagnostics() {
     println!("{:?}: {}", d.code, d.message);
 }
 ```
-
-**Stable since v0.10:** `Workspace` is the recommended high-level API. Lower-level `IndexBuilder` remains available for custom pipelines.
 
 ## Lower-level indexing
 

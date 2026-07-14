@@ -1,9 +1,14 @@
-# Getting started
+# Install CLI & CI
 
-Quick paths to success (5–30 min depending on install method) with OntoCore (CLI) and OntoCode (VS Code). VS Code tutorial: ~10 minutes — see [First success](guides/first-success.md).
+This page is the **CLI / CI install matrix** — not the VS Code tutorial. For editing ontologies in the IDE, use [First success (~10 min)](guides/first-success.md) instead.
+
+Quick paths to success (5–30 min depending on install method) with OntoCore (CLI). VS Code tutorial: ~10 minutes — see [First success](guides/first-success.md).
 
 !!! note "First `cargo install` or clone build"
-    A cold Rust toolchain may take **15–30+ minutes** to compile OntoCore on first run. The VS Code extension bundles `ontocore-lsp` and does not require Rust.
+    A cold Rust toolchain may take **15–30+ minutes** to compile OntoCore on first run. The VS Code extension bundles `ontocore-lsp` and does not require Rust. **Linux x64 CI should prefer the release tarball** ([CI integration](ci-integration.md)) over `cargo install`.
+
+!!! note "Linux arm64 and non-x64"
+    Prebuilt CLI tarballs are **`x86_64-unknown-linux-gnu` only**. On Linux arm64 (and other unsupported targets), use `cargo install ontocore-cli --locked --version 0.21.0` or the language server bundled in the VSIX — see [platform compatibility](guides/platform-compatibility.md).
 
 ## Install matrix (CLI)
 

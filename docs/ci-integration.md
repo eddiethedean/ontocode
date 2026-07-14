@@ -35,23 +35,19 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Download ontocore CLI and validate
+      - name: Download ontocore CLI, verify checksum, validate
         run: |
           VERSION=0.21.0
           ASSET="ontocore-v${VERSION}-x86_64-unknown-linux-gnu.tar.gz"
           BIN="ontocore-v${VERSION}-x86_64-unknown-linux-gnu"
           curl -fsSL -o "${ASSET}" \
             "https://github.com/eddiethedean/ontocode/releases/download/v${VERSION}/${ASSET}"
+          curl -fsSL -o SHA256SUMS \
+            "https://github.com/eddiethedean/ontocode/releases/download/v${VERSION}/SHA256SUMS"
+          grep "${ASSET}" SHA256SUMS | sha256sum -c -
           tar xzf "${ASSET}"
           chmod +x "${BIN}"
           ./"${BIN}" validate .
-
-      - name: Verify checksum (recommended for production)
-        run: |
-          VERSION=0.21.0
-          curl -fsSL -o SHA256SUMS \
-            "https://github.com/eddiethedean/ontocode/releases/download/v${VERSION}/SHA256SUMS"
-          grep "ontocore-v${VERSION}-x86_64-unknown-linux-gnu.tar.gz" SHA256SUMS | sha256sum -c -
 ```
 
 Adjust the validate path (`.` or `ontologies/`) to the directory containing your `.ttl`, `.owl`, etc. Verify checksums per [release-integrity.md](release-integrity.md) in production pipelines.

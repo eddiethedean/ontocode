@@ -2,7 +2,7 @@
 
 > **Most users never need this page.** The [OntoCode VS Code / Cursor extension](../vscode-install.md) bundles `ontocore-lsp`. Install the extension for IDE work and skip compiling the CLI unless you need `ontocore` for CI, scripting, or local validation outside the editor.
 
-Release CLI tarballs are **Linux x64 only**. On **macOS** and **Windows**, install from crates.io with Rust.
+Release CLI tarballs are **Linux x64 only** (`x86_64-unknown-linux-gnu`). On **macOS** and **Windows**, install from crates.io with Rust. On **Linux arm64** (and other non-x64 targets), there is no tarball — use `cargo install` below or the LSP bundled in the VSIX ([platform compatibility](platform-compatibility.md)).
 
 Canonical pin: **`0.21.0`** ([TAGGED_RELEASE](../TAGGED_RELEASE)). See also [Getting started](../getting-started.md) and [CI integration](../ci-integration.md) (Linux CI prefers the release tarball).
 

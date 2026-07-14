@@ -95,6 +95,9 @@ cd ..
 npm run compile   # builds webview-ui then extension host
 ```
 
+!!! warning "`npm run watch` skips Vite"
+    From `extension/`, `npm run watch` rebuilds the host bundle only. After React/panel changes, run `npm run build:webview` (or full `npm run compile`) before F5.
+
 ### Message protocol
 
 Extension host ↔ React messages: [Webview protocol](webview-protocol.md) · types in `extension/src/webviews/messages.ts`.

@@ -117,12 +117,12 @@ nav:
   - Get started:
       - "First success (~10 min)": guides/first-success.md
       - Install VS Code: vscode-install.md
-      - Install CLI (macOS / Windows): guides/install-cli.md
-      - Getting started (CLI / CI): getting-started.md
+      - Install CLI (optional): guides/install-cli.md
+      - "Install CLI & CI": getting-started.md
+      - CI with Linux tarball: ci-integration.md
       - Supported formats: supported-formats.md
       - Versions and channels: guides/versions-and-channels.md
-      - Path chooser (optional): start.md
-      - Examples: examples/index.md
+      - Which artifact?: guides/which-artifact.md
   - Use OntoCode:
       - Feature tour: ontocode/feature-tour.md
       - Overview: ontocode/vscode-extension.md

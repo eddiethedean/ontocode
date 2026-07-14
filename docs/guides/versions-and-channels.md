@@ -13,6 +13,16 @@
 | [Open VSX](https://open-vsx.org/extension/ontocode/ontocode) | Extension for Cursor / Open VSX clients |
 | Read the Docs `latest` | Built from the default branch (`main`) — may describe work **after** the last tag |
 
+## How to check which version you have
+
+| Surface | How |
+|---------|-----|
+| **VS Code / Cursor extension** | Extensions view → **OntoCode** → version under the title (or `ontocode.ontocode` in the extension details) |
+| **CLI** | `ontocore --version` (or `ontocore -V`) |
+| **Language server** | **Output → OntoCore Language Server** often logs the binary path; or run the bundled `ontocore-lsp` with `--version` if you know its path |
+
+If Marketplace / Open VSX is behind GitHub, install the release VSIX for the tag you need — see below.
+
 ## Recommended installs (v0.21.0)
 
 | Goal | Command / link |

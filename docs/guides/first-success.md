@@ -24,7 +24,7 @@ Complete these four steps before exploring optional features below.
 
 1. Open **Extensions** (`Ctrl+Shift+X` / `Cmd+Shift+X`).
 2. Search for **OntoCode**.
-3. Click **Install** on the extension by OntoCode.
+3. Click **Install** on the extension by **OntoCode** (extension id `ontocode.ontocode`).
 4. Reload the window if prompted.
 
 **Cursor (Open VSX):**
@@ -71,8 +71,10 @@ Then **File → Open Folder…** and select `ontocode-tutorial` (or your own ont
 
 !!! tip "Corpus is mostly `.owl` / RDF/XML?"
     Write-back works (v0.21+). Prefer Turtle when you need byte-stable diffs, full Manchester, or refactor apply — [OWL/XML and RDF/XML write-back](owl-xml-workflow.md).
-OntoCode’s **bundled** language server works in trusted and Restricted Mode.
-Use **Workspace Trust** only when you set custom `ontocode.lspPath` or `ontocode.robotPath` — those settings are ignored when the folder is untrusted.
+
+!!! note "Workspace Trust"
+    OntoCode’s **bundled** language server works in trusted and Restricted Mode.
+    Use **Workspace Trust** only when you set custom `ontocode.lspPath` or `ontocode.robotPath` — those settings are ignored when the folder is untrusted.
 
 ### 3. Browse the explorer
 
@@ -225,27 +227,28 @@ Guide: [Semantic diff](../ontocode/semantic-diff.md).
 
 More help: [Troubleshooting](../troubleshooting.md) · [FAQ](../faq.md).
 
+## Week-1 learning path
+
+After the core path above, use this short sequence (about a day each — or squeeze into a few hours):
+
+| Day | Goal | Start here |
+|-----|------|------------|
+| 1 | Edit confidently (labels, parents, save) | This page · [Authoring](../authoring.md) |
+| 2 | Query the catalog | [Query Workbench](../ontocode/query-workbench.md) · [SQL reference](../sql-reference.md) |
+| 3 | Classify and explain | [Reasoner guide](../guides/reasoner.md) |
+| 4 | Gate CI | [CI integration](../ci-integration.md) (Linux x64 tarball preferred) |
+
 ## Next steps
-
-Suggested order after first success:
-
-1. **Query** — [Query Workbench](../ontocode/query-workbench.md) then [SQL reference](../sql-reference.md)
-2. **Reason** — [Reasoner guide](../guides/reasoner.md)
-3. **Refactor / CI** — [Refactoring](../guides/refactoring.md) then [CI integration](../ci-integration.md)
 
 | Goal | Document |
 |------|----------|
 | Visual tour of panels | [Feature tour](../ontocode/feature-tour.md) |
 | Install options (VSIX, offline) | [vscode-install.md](../vscode-install.md) |
 | Migrating from Protégé | [protege-migration.md](protege-migration.md) |
-| Query workbench | [ontocode/query-workbench.md](../ontocode/query-workbench.md) |
 | Graph visualization | [ontocode/graph-view.md](../ontocode/graph-view.md) |
 | OBO workflows | [guides/obo-workflow.md](../guides/obo-workflow.md) |
-| Reasoner | [guides/reasoner.md](../guides/reasoner.md) |
 | Manchester editor | [ontocode/manchester-editor.md](../ontocode/manchester-editor.md) |
 | Semantic diff | [ontocode/semantic-diff.md](../ontocode/semantic-diff.md) |
 | Refactoring | [guides/refactoring.md](../guides/refactoring.md) |
 | Patch JSON automation | [patch-reference.md](../patch-reference.md) |
-| SQL / SPARQL reference | [sql-reference.md](../sql-reference.md) · [sparql-reference.md](../sparql-reference.md) |
-| Authoring overview | [authoring.md](../authoring.md) |
-| CI validation | [ci-integration.md](../ci-integration.md) |
+| SPARQL | [sparql-reference.md](../sparql-reference.md) |

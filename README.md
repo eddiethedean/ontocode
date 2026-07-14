@@ -1,13 +1,16 @@
 # OntoCode
 
-**Edit OWL/RDF/OBO ontologies in VS Code — with a Rust engine for CI.**
+**OntoCode** edits OWL/RDF/OBO ontologies in VS Code. Install the [extension](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) (publisher **OntoCode**, id `ontocode.ontocode`), open a folder of `.ttl` / `.obo` / `.owl` files, and use the **OntoCode** activity bar.
 
-Install the [VS Code extension](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode), open a folder of ontology files, and use the **OntoCode** activity bar to browse and edit. **Most users only need the extension** (language server is bundled). For CI on **Linux x64**, prefer the release tarball ([CI guide](https://ontocode-vs.readthedocs.io/en/latest/ci-integration/)); on **macOS/Windows**, see [Install CLI](https://ontocode-vs.readthedocs.io/en/latest/guides/install-cli/) or pin `cargo install ontocore-cli --locked --version 0.21.0` (first compile can take 15–30+ minutes) then `ontocore validate ./ontologies`.
+**Next:** [First success (~10 min)](https://ontocode-vs.readthedocs.io/en/latest/guides/first-success/) — no clone required.
 
-**Editable today:** Turtle (`.ttl`), OBO (`.obo`), RDF/XML (`.owl`/`.rdf`), and OWL/XML (`.owx`). XML saves are **semantic re-serialize** (not byte-identical to Protégé). JSON-LD / N-Triples / TriG remain read-only — see [Supported formats](https://ontocode-vs.readthedocs.io/en/latest/supported-formats/) and [Known limitations](https://ontocode-vs.readthedocs.io/en/latest/known-limitations/).
-**Catalog SQL (subset):** not full SQL — prefer SPARQL for graph patterns.
+Need CI validate on **Linux x64**? Prefer the release tarball ([CI guide](https://ontocode-vs.readthedocs.io/en/latest/ci-integration/)). CLI on macOS/Windows is optional and slow to compile — most users never need it ([Install CLI](https://ontocode-vs.readthedocs.io/en/latest/guides/install-cli/)).
 
-**Current release: v0.21.0** · [10-minute tutorial](https://ontocode-vs.readthedocs.io/en/latest/guides/first-success/) · [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) · [Changelog](CHANGELOG.md) · [Docs](https://ontocode-vs.readthedocs.io/en/latest/)
+**Editable today:** Turtle (`.ttl`), OBO (`.obo`), RDF/XML (`.owl`/`.rdf`), and OWL/XML (`.owx`). XML saves are **semantic re-serialize** (not byte-identical to Protégé). JSON-LD / N-Triples / TriG remain read-only — [Supported formats](https://ontocode-vs.readthedocs.io/en/latest/supported-formats/) · [Known limitations](https://ontocode-vs.readthedocs.io/en/latest/known-limitations/).
+
+**Current release: v0.21.0** · [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) · [Changelog](CHANGELOG.md) · [Docs](https://ontocode-vs.readthedocs.io/en/latest/)
+
+> **Procurement / evaluators:** Use [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) and [Known limitations](https://ontocode-vs.readthedocs.io/en/latest/known-limitations/) only. Ignore GitHub trees `docs/protege-parity/` and `docs/PROTEGE_REVERSE_ENGINEERING/` — they are engineering notes, not product capability claims.
 
 [![CI](https://github.com/eddiethedean/ontocode/actions/workflows/ci.yml/badge.svg)](https://github.com/eddiethedean/ontocode/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue)](https://github.com/eddiethedean/ontocode/blob/main/LICENSE-MIT)

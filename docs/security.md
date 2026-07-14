@@ -1,25 +1,36 @@
 # Security policy
 
-OntoCore and OntoCode are **local-first** tools: they index and parse files on disk and do not upload ontology content by default.
+OntoCore and OntoCode are **local-first** tools: they index and parse files on disk and do not upload ontology content by default. There is **no telemetry**.
 
 ## Supported versions
 
 | Version | Supported |
 |---------|-----------|
 | 0.21.x   | Yes — latest tagged release |
-| 0.20.x   | Yes |
-| 0.19.x   | Yes |
-| 0.18.x  | Yes       |
-| 0.17.x   | Best effort |
-| 0.16.x   | Yes       |
-| 0.15.x   | Yes       |
-| 0.14.x   | Best effort |
-| 0.13.x   | Best effort |
-| 0.12.x  | Best effort |
-| 0.11.x  | No        |
-| 0.10.x  | Best effort |
-| ≤ 0.9.x | No        |
+| 0.20.x   | Yes (N−1) |
+| ≤ 0.19.x | No — upgrade to a tagged 0.20.x or 0.21.x release |
 
-Full policy: **[SECURITY.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/SECURITY.md)**
+Pin production and CI to the latest **tagged** release ([TAGGED_RELEASE](https://github.com/eddiethedean/ontocode/blob/main/docs/TAGGED_RELEASE)). Unreleased minors on `main` are not supported until tagged. There is **no committed security patch SLA**.
+
+Canonical policy file (GitHub Security tab): **[SECURITY.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/SECURITY.md)**
+
+## Reporting a vulnerability
+
+**Do not open a public issue.**
+
+Report via [GitHub Security Advisories](https://github.com/eddiethedean/ontocode/security/advisories/new). Include affected version, component, and reproduction steps. Allow time for a fix before disclosure. Maintainers handle reports on a best-effort basis — see [Support](support.md).
 
 ## Threat model summary
+
+| Trust boundary | Behavior |
+|----------------|----------|
+| **Local disk** | Parse, index, query, reason, and write-back stay on the machine unless you or another tool move the files. |
+| **Path jail** | Operations are constrained to workspace root(s). |
+| **Resource limits** | Caps on files, sizes, entities, triples, and query rows — [workspace limits](workspace-limits.md). |
+| **LSP** | `ontocore-lsp` is a **stdio** child of the editor — do not expose it on the network without authentication. |
+| **Restricted Mode** | Bundled LSP works untrusted; custom `ontocode.lspPath` / `ontocode.robotPath` are ignored until Workspace Trust. |
+| **Plugins** | Manifest permissions gate read/write/external process; treat third-party plugins as executables you chose to run. |
+| **ROBOT** | Spawns external Java `robot` from PATH or configured path — separate trust boundary. |
+| **Telemetry / AI** | No telemetry. Cloud AI features are not shipped. |
+
+Release checksums and `cargo audit`: [Release integrity](release-integrity.md). Enterprise checklist: [Enterprise evaluation](guides/enterprise-eval.md).

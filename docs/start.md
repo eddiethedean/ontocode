@@ -1,7 +1,7 @@
 # Find your path (optional)
 
 > **Most users:** go straight to **[First success (~10 min)](guides/first-success.md)**.  
-> **CLI / CI:** **[Getting started](getting-started.md)**.  
+> **CLI / CI:** **[Install CLI & CI](getting-started.md)** · Linux x64 tarball: **[CI integration](ci-integration.md)**.  
 > **Evaluators:** **[What ships today](SHIPPED.md)**.
 
 This page is a secondary chooser. Prefer the Home CTAs or the **Get started** tab.
@@ -11,7 +11,7 @@ This page is a secondary chooser. Prefer the Home CTAs or the **Get started** ta
 | I want to… | Start here |
 |------------|------------|
 | Edit ontologies in VS Code | [First success](guides/first-success.md) · [Install VS Code](vscode-install.md) |
-| Validate / query in CI | [Getting started (CLI)](getting-started.md) |
+| Validate / query in CI | Linux x64 tarball → [CI integration](ci-integration.md); else [Install CLI & CI](getting-started.md) |
 | Embed in Rust | [Rust library guide](guides/rust-library.md) |
 | Compare products in detail | [Which artifact](guides/which-artifact.md) |
 

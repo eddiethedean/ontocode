@@ -40,7 +40,7 @@ For a full walkthrough, see [First success in 10 minutes](guides/first-success.m
 1. Open [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) and download the latest `ontocode-v*.vsix` (example: `ontocode-v0.21.0.vsix`).
 2. In VS Code: **Extensions** → **…** menu → **Install from VSIX…**
 3. Verify against `SHA256SUMS` — see [release-integrity.md](release-integrity.md).
-4. Open a folder containing ontology files (`.ttl`, `.obo`, `.owl`, `.rdf`, `.jsonld`, `.nt`, `.nq`, `.trig`).
+4. Open a folder containing ontology files (`.ttl`, `.obo`, `.owl`, `.rdf`, `.owx`, `.jsonld`, `.nt`, `.nq`, `.trig`).
 
 Release VSIX packages bundle `ontocore-lsp` for Linux, macOS, and Windows.
 
@@ -100,7 +100,7 @@ After indexing, the **OntoCode** activity bar shows five views:
 
 **Re-index** — run **OntoCode: Index Workspace** after adding or changing ontology files.
 
-Click an entity name to open the **Entity Inspector**. For `.ttl` and `.obo` files, use the edit section to change labels, parents, or delete entities. See [authoring.md](authoring.md).
+Click an entity name to open the **Entity Inspector**. For **`.ttl`, `.obo`, `.owl`/`.rdf`, and `.owx`**, use the edit section to change labels, parents, or delete entities (XML is semantic re-serialize). See [authoring.md](authoring.md) and [OWL/XML write-back](guides/owl-xml-workflow.md).
 
 ## Settings
 
@@ -123,11 +123,11 @@ Indexing runs on workspace open. `ontocode.autoIndexOnOpen` is a legacy setting 
 - **OntoCode: Refresh Explorer** — refresh tree views (including diagnostics)
 - **OntoCode: Open Query Workbench** — SQL and SPARQL against indexed workspace ([guide](ontocode/query-workbench.md))
 - **OntoCode: Open Manchester Editor** / **Add Manchester Axiom** — complex class expressions ([guide](ontocode/manchester-editor.md))
-- **OntoCode: Run Reasoner** — EL/RL/RDFS classification ([guide](guides/reasoner.md))
+- **OntoCode: Run Reasoner** — EL / RL / RDFS / DL / auto classification ([guide](guides/reasoner.md))
 - **OntoCode: Show Explanation** — justification for unsatisfiable class
 - **OntoCode: Set Hierarchy Mode** — asserted / inferred / combined class tree
 - **OntoCode: Open Class Graph** / **Property Graph** / **Import Graph** / **Neighborhood Graph** — visualization ([guide](ontocode/graph-view.md))
-- **OntoCode: Create Class / Property / Individual** — authoring in `.ttl` files
+- **OntoCode: Create Class / Property / Individual** — authoring in editable formats (richest on `.ttl`)
 - **Problems panel** — inline diagnostics from `ontocore-lsp` after indexing
 - **OntoCode: Show Entity Inspector** / **Jump to Source** — from explorer context menu
 

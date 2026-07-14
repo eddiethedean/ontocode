@@ -46,7 +46,7 @@ SQL/SPARQL (SQL-like virtual tables)
 Diagnostics
 Navigation
 Refactoring
-Plugin Platform (v1.0 target)
+Plugin host (shipped; stable API v1.0 target)
 Persistent Cache
 LSP
           │
@@ -61,8 +61,11 @@ Explanations
           │
           ▼
 OWL • RDF • Turtle • OBO
-(SHACL: planned)
+(SHACL: plugin scaffold)
 ```
+
+!!! note "Plugin platform"
+    The **plugin host** (manifests, permissions, subprocess workflows, UI hooks) **ships today** (v0.14–v0.17). A semver-stable ecosystem plugin API remains a **v1.0 target** — see [Plugin authoring](guides/plugins.md).
 
 ## Responsibilities
 

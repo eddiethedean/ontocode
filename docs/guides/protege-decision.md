@@ -67,7 +67,7 @@ Do **not** plan org-wide Protégé retirement on pre-1.0 alone. Re-evaluate at *
 
 ## When OntoCode is a poor fit
 
-- Ontology program **requires OWL 2 DL** reasoning as the **only** gate with no CI alternative
+- Needs HermiT-/Protégé-grade DL **explanation UX** or a **full axiom editor for every OWL construct** as the sole gate — OntoCode ships DL classification for CI/IDE (`dl` / `auto`), but is not a drop-in Protégé replacement for all axiom authoring
 - Primary artifacts require **byte-identical Protégé XML** (OntoCode re-serializes)
 - Workspaces exceed [workspace limits](../workspace-limits.md) without split-repo strategy
 - Legal cannot accept **LGPL** (`horned-owl`) for desktop distribution — [LGPL compliance](lgpl-compliance.md)

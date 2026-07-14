@@ -74,7 +74,7 @@ Index and explore OWL/RDF/OBO, run queries, refactors, and reasoning — in VS C
 
     `cargo install ontocore-cli`, embed `ontocore` / `ontocore-*` crates, validate and classify in CI.
 
-    [:octicons-arrow-right-24: Getting started (CLI)](getting-started.md)
+    [:octicons-arrow-right-24: Install CLI & CI](getting-started.md)
 
 -   :material-clipboard-check-outline:{ .lg .middle } **Evaluate adoption**
 
@@ -134,7 +134,7 @@ Index and explore OWL/RDF/OBO, run queries, refactors, and reasoning — in VS C
 | Honest limits | [Known limitations](known-limitations.md) |
 | Capability matrix | [SHIPPED.md](SHIPPED.md) |
 | Protégé comparison | [Protégé vs OntoCode](guides/protege-decision.md) |
-| CLI / CI | [Getting started](getting-started.md) · [CI integration](ci-integration.md) |
+| CLI / CI | [Install CLI & CI](getting-started.md) · [CI integration](ci-integration.md) |
 | Embed in Rust | [Rust library guide](guides/rust-library.md) |
 | Roadmap (pick the right doc) | [Roadmap hub](roadmap-hub.md) |
 | Feature tour | [ontocode/feature-tour.md](ontocode/feature-tour.md) |

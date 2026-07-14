@@ -83,7 +83,12 @@ See [ADR-0019](design/adr/0019-obo-write-back.md). Ops use `term_id` (OBO id, e.
 
 ## RDF/XML and OWL/XML operations (`.owl` / `.rdf` / `.owx`)
 
-Same Turtle-shaped `PatchOp` JSON applies via Horned load → mutate → full-document re-serialize (v0.21+). First-cut supported ops: create/delete entity, labels/comments/annotations, SubClassOf add/remove, imports, ontology/version IRI, class assertions. Unsupported ops return structured errors and leave the file unchanged. Details: [OWL/XML write-back](guides/owl-xml-workflow.md).
+Same Turtle-shaped `PatchOp` JSON applies via Horned load → mutate → full-document re-serialize (v0.21+). Unsupported ops return structured errors and **leave the file unchanged**. Details: [OWL/XML write-back](guides/owl-xml-workflow.md).
+
+| Status | Operations |
+|--------|------------|
+| **Supported (first cut)** | `create_entity`, `delete_entity`, `add_label` / `remove_label`, `add_comment` / `remove_comment`, generic annotation add/remove, `add_sub_class_of` / `remove_sub_class_of` (named parents), `add_import` / `remove_import`, ontology IRI / version IRI, class assertions |
+| **Unsupported (return error)** | Prefix manager ops (e.g. `AddPrefix`), complex Manchester `SubClassOf` / equivalents, many property characteristics / chains, Turtle-only refactor apply — prefer `.ttl` or Protégé for those |
 
 ### `kind` values for `create_entity`
 
@@ -248,9 +253,9 @@ Method: `ontocore/applyAxiomPatch`
 
 See [lsp-api.md](lsp-api.md) and [authoring.md](authoring.md).
 
-## Limitations (v0.14)
+## Limitations (v0.21)
 
 - Write-back: **Turtle (`.ttl`), OBO (`.obo`), RDF/XML (`.owl`/`.rdf`), OWL/XML (`.owx`)**; JSON-LD and line-oriented RDF are read-only. XML is semantic re-serialize — [OWL/XML write-back](guides/owl-xml-workflow.md)
-- Simple `add_sub_class_of` parent must be a **named class IRI**; use Manchester ops (`add_complex_sub_class_of`, `add_equivalent_class`, etc.) for class expressions
-- Manchester: `SubClassOf`, `EquivalentClasses`, and `DisjointClasses`; property chains editable via patch ops and inspector (v0.13)
-- Patch engine uses targeted text edits; unusual formatting may need manual review
+- Simple `add_sub_class_of` parent must be a **named class IRI**; use Manchester ops (`add_complex_sub_class_of`, `add_equivalent_class`, etc.) for class expressions (richest on Turtle)
+- Manchester: `SubClassOf`, `EquivalentClasses`, and `DisjointClasses`; property chains editable via patch ops and inspector (v0.13+)
+- Patch engine uses targeted text edits on Turtle/OBO; unusual formatting may need manual review. XML always full-document re-serialize.

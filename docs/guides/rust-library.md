@@ -40,6 +40,41 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
 Method-level params / returns / side effects: [Rust API — Workspace methods](../ontocore/rust-api.md#workspace-method-reference).
 
+## Minimal `Cargo.toml` recipes
+
+**Query / index only** (façade defaults):
+
+```toml
+[dependencies]
+ontocore = "0.21"
+```
+
+**Classify + explain** (same crate — reasoner is included):
+
+```toml
+[dependencies]
+ontocore = "0.21"
+```
+
+```rust
+use ontocore::Workspace;
+use ontocore::reasoner::ReasonerId;
+
+let ws = Workspace::open("./ontologies")?;
+let result = ws.classify(ReasonerId::El)?;
+```
+
+**Semantic patch / transactions** (extra crates):
+
+```toml
+[dependencies]
+ontocore = "0.21"
+ontocore-edit = "0.21"
+ontocore-owl = "0.21"
+```
+
+See [Semantic transactions](#semantic-transactions-ontocore-edit) below.
+
 ## Optional: monorepo examples (clone only)
 
 In-repo examples under the unpublished `ontocode` package need a git clone:
@@ -130,5 +165,5 @@ Dependency: `ontocore-edit = "0.21"`. Full API: [Rust API — semantic transacti
 |------|-----|
 | Method reference | [Rust API](../ontocore/rust-api.md) |
 | Error types | [Errors](../errors.md#rust-library-errors) |
-| CLI instead of embed | [Getting started](../getting-started.md) |
+| CLI instead of embed | [Install CLI & CI](../getting-started.md) |
 | Stability expectations | [API stability](api-stability.md) |

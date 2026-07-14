@@ -197,3 +197,17 @@ Yes. `ontocore robot` and LSP `runRobot` spawn the external `robot` CLI. See [RO
 **Which panels use React vs legacy HTML?**
 
 As of **v0.10**, production webview panels are React: **Entity Inspector**, **graph panels**, **Query Workbench**, **Manchester editor**, **Refactor Preview**, **Semantic Diff**, **Reasoner Results**, and **Explanation**. Legacy HTML panels were removed in v0.9.
+
+## Contributing
+
+**Do I need `cargo test --workspace` for a docs-only PR?**
+
+No. Use the [testing matrix](guides/testing-matrix.md) and scoped PR template checkboxes. Docs-only changes need MkDocs preview (`./scripts/serve-docs.sh` or `./scripts/build-docs.sh`) — not a full Rust build. See [scripts/README.md](https://github.com/eddiethedean/ontocode/blob/main/scripts/README.md).
+
+**When should I run `./scripts/run-ci-local.sh`?**
+
+Before PRs that change CI scripts, release packaging, or broad Rust/extension surfaces — or when you want full Actions parity. Expect **30–60+ minutes** cold. Skip it for docs-only PRs.
+
+**I edited React webviews but F5 still shows the old UI — why?**
+
+`npm run watch` in `extension/` rebuilds the host only. Run `npm run build:webview` or `npm run compile` after `webview-ui/` changes — [Extension development](guides/extension-development.md).

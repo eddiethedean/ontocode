@@ -40,7 +40,7 @@ The following modules are **documented and intended to stabilize** toward 1.0:
 
 ## What may change between minors
 
-- Rust public API on `ontocore-*` crates (prefer pinning `0.20` in Cargo.toml).
+- Rust public API on `ontocore-*` crates (prefer pinning `0.21` in Cargo.toml).
 - LSP request/response fields (clients should tolerate unknown fields).
 - SQL virtual table columns (check [sql-reference](../sql-reference.md) per release).
 - Webview `postMessage` payloads (extension + webview-ui ship together in the VSIX).

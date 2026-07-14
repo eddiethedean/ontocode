@@ -462,7 +462,7 @@ See [migration/v0.19.md](migration/v0.19.md) · [SHIPPED.md](SHIPPED.md) · full
 
 ### v0.20 — Workspace runtime (shipped)
 
-**Status:** **Shipped** as tagged **v0.21.0**.
+**Status:** **Shipped** as tagged **v0.20.0**.
 
 **Theme:** Workspace as central runtime for ontology state and transactions.
 

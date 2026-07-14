@@ -716,8 +716,11 @@ pub fn handle_create_ontology(
             )));
         }
     };
-    let mut file =
-        std::fs::File::create(&path).map_err(|e| LspErrorPayload::index_failed(e.to_string()))?;
+    let mut file = std::fs::OpenOptions::new()
+        .write(true)
+        .create_new(true)
+        .open(&path)
+        .map_err(|e| LspErrorPayload::index_failed(e.to_string()))?;
     file.write_all(content.as_bytes()).map_err(|e| LspErrorPayload::index_failed(e.to_string()))?;
     Ok(crate::protocol::CreateOntologyResult {
         path: path.display().to_string(),

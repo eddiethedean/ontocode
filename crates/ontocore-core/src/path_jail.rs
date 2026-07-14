@@ -90,6 +90,10 @@ pub fn validate_workspace_scope(
 ///
 /// Walks upward to the longest existing prefix, canonicalizes that prefix, and joins only
 /// the missing suffix. If any existing prefix resolves outside the root, rejects.
+///
+/// Also rejects a dangling (or out-of-root) **leaf/intermediate symlink** under the
+/// workspace: those would otherwise look like a plain non-existent path whose existing
+/// prefix is the parent directory.
 fn resolve_path_in_workspace(
     path: &Path,
     workspace_root: &Path,
@@ -118,10 +122,12 @@ fn resolve_path_in_workspace(
         return Err(outside_msg.to_string());
     }
 
+    reject_symlink_escape_from(&canonical_prefix, &missing_suffix, &root)?;
+
     let candidate = if missing_suffix.as_os_str().is_empty() {
         canonical_prefix
     } else {
-        canonical_prefix.join(missing_suffix)
+        canonical_prefix.join(&missing_suffix)
     };
 
     if path_is_under(&root, &candidate) || is_path_within_lexical(&root, &candidate) {
@@ -129,6 +135,33 @@ fn resolve_path_in_workspace(
     } else {
         Err(outside_msg.to_string())
     }
+}
+
+/// Walk `prefix` + each component of `suffix`, rejecting dangling symlinks or symlink
+/// targets outside `root`. `prefix` must already be canonical and inside `root`.
+fn reject_symlink_escape_from(prefix: &Path, suffix: &Path, root: &Path) -> Result<(), String> {
+    let mut current = prefix.to_path_buf();
+    for component in suffix.components() {
+        current.push(component);
+        let meta = match std::fs::symlink_metadata(&current) {
+            Ok(meta) => meta,
+            Err(_) => continue,
+        };
+        if !meta.file_type().is_symlink() {
+            continue;
+        }
+        match current.canonicalize() {
+            Ok(target) => {
+                if !path_is_under(root, &target) {
+                    return Err("path escapes workspace via symlink".to_string());
+                }
+            }
+            Err(_) => {
+                return Err("path escapes workspace via dangling symlink".to_string());
+            }
+        }
+    }
+    Ok(())
 }
 
 /// Split `path` into (longest existing prefix, remaining relative suffix).
@@ -212,6 +245,9 @@ pub fn is_path_within(workspace_root: &Path, path: &Path) -> bool {
         return is_path_within_lexical(&root, &absolute);
     };
     if !path_is_under(&root, &canonical_prefix) {
+        return false;
+    }
+    if reject_symlink_escape_from(&canonical_prefix, &missing_suffix, &root).is_err() {
         return false;
     }
     let candidate = if missing_suffix.as_os_str().is_empty() {
@@ -377,6 +413,49 @@ mod tests {
         let target = link.join("nested").join("pwn.ttl");
         let err = validate_workspace_scope(&target, &root).expect_err("must reject");
         assert!(err.contains("outside") || err.contains("escapes"), "unexpected error: {err}");
+    }
+
+    #[test]
+    #[cfg(unix)]
+    fn rejects_dangling_leaf_symlink_create_escape() {
+        let dir = tempfile::tempdir().unwrap();
+        let outside = tempfile::tempdir().unwrap();
+        let root = canonical_workspace_root(dir.path()).unwrap();
+        let leaf = dir.path().join("new.ttl");
+        let outside_target = outside.path().join("pwn.ttl");
+        std::os::unix::fs::symlink(&outside_target, &leaf).unwrap();
+
+        let err = validate_workspace_scope(&leaf, &root)
+            .expect_err("must reject dangling leaf symlink escape");
+        assert!(
+            err.contains("dangling symlink") || err.contains("symlink") || err.contains("outside"),
+            "unexpected error: {err}"
+        );
+        assert!(!is_path_within(&root, &leaf));
+
+        let uri = url::Url::from_file_path(&leaf).unwrap().to_string();
+        let lsp_err = resolve_lsp_document_path(&uri, &root).expect_err("lsp path");
+        assert!(
+            lsp_err.contains("dangling symlink")
+                || lsp_err.contains("symlink")
+                || lsp_err.contains("outside"),
+            "unexpected lsp error: {lsp_err}"
+        );
+        assert!(!outside_target.exists(), "must not create outside file during checks");
+    }
+
+    #[test]
+    #[cfg(unix)]
+    fn allows_symlink_leaf_that_resolves_inside_workspace() {
+        let dir = tempfile::tempdir().unwrap();
+        let root = canonical_workspace_root(dir.path()).unwrap();
+        let real = dir.path().join("real.ttl");
+        fs::write(&real, "@prefix ex: <http://ex/> .").unwrap();
+        let link = dir.path().join("alias.ttl");
+        std::os::unix::fs::symlink(&real, &link).unwrap();
+
+        let resolved = validate_workspace_scope(&link, &root).expect("in-workspace symlink");
+        assert_eq!(resolved, real.canonicalize().unwrap());
     }
 
     #[test]

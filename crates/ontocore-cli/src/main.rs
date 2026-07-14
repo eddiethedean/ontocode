@@ -20,6 +20,7 @@ use ontocore_refactor::{
     preview_move_entity, preview_rename_iri, RefactorPlan,
 };
 use std::collections::HashMap;
+use std::io::Write;
 use std::path::{Path, PathBuf};
 
 #[derive(Parser)]
@@ -767,6 +768,16 @@ fn write_new_ontology(
     if path.exists() && !force {
         bail!("file already exists: {} (use --force to overwrite)", path.display());
     }
+    // Refuse to create/overwrite through a symlink (dangling or otherwise) — closes TOCTOU
+    // / path-jail escapes when the leaf is replaced with a link after an exists() check.
+    if let Ok(meta) = std::fs::symlink_metadata(path) {
+        if meta.file_type().is_symlink() {
+            bail!(
+                "refusing to write through symlink: {} (remove the symlink or choose another path)",
+                path.display()
+            );
+        }
+    }
     if !ontocore_owl::is_safe_iri(ontology_iri) {
         bail!("ontology IRI contains characters that cannot be safely written: {ontology_iri:?}");
     }
@@ -801,8 +812,18 @@ fn write_new_ontology(
         }
         _ => bail!("new ontology path must have a .ttl or .obo extension"),
     };
-    std::fs::write(path, contents)
-        .with_context(|| format!("failed to create ontology file {}", path.display()))
+    let mut opts = std::fs::OpenOptions::new();
+    opts.write(true);
+    if force {
+        opts.create(true).truncate(true);
+    } else {
+        opts.create_new(true);
+    }
+    let mut file = opts
+        .open(path)
+        .with_context(|| format!("failed to create ontology file {}", path.display()))?;
+    file.write_all(contents.as_bytes())
+        .with_context(|| format!("failed to write ontology file {}", path.display()))
 }
 
 fn run_refactor_plan(

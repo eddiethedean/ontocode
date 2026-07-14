@@ -3,7 +3,7 @@ import { focusRelay } from "../focus/focusRelay";
 import type { ReasoningStatePayload } from "../focus/types";
 import { cancelActiveReasonerRequest, runReasoner } from "../lsp/client";
 import type { RunReasonerResult } from "../lsp/protocol";
-import { rememberPanelRestoreState } from "./layoutPersistence";
+import { forgetPanelRestoreState, rememberPanelRestoreState } from "./layoutPersistence";
 import type { ReasonerResultPayload, WebviewMessage } from "./messages";
 import { PanelHost } from "./panelHost";
 import {
@@ -35,6 +35,7 @@ export class ReasonerPanel {
 
   private constructor(private readonly host: PanelHost) {
     this.host.panel.onDidDispose(() => {
+      void forgetPanelRestoreState("ontocodeReasoner");
       ReasonerPanel.current = undefined;
     });
   }

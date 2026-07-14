@@ -7,7 +7,7 @@ import {
   isLatestExplanationFetch,
   resolveExplanationProfile,
 } from "./explanationPanelLogic";
-import { rememberPanelRestoreState } from "./layoutPersistence";
+import { forgetPanelRestoreState, rememberPanelRestoreState } from "./layoutPersistence";
 import type { ExplanationPayload, WebviewMessage } from "./messages";
 import { PanelHost } from "./panelHost";
 
@@ -27,6 +27,7 @@ export class ExplanationPanel {
     private readonly extensionUri: vscode.Uri
   ) {
     this.host.panel.onDidDispose(() => {
+      void forgetPanelRestoreState("ontocodeExplanation");
       this.unsubscribeCatalog?.();
       ExplanationPanel.current = undefined;
     });

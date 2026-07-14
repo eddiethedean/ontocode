@@ -67,6 +67,36 @@ export async function rememberPanelRestoreState(
   await extensionContext.workspaceState.update(PANEL_STATE_KEY, all);
 }
 
+/** Drop remembered restore state when a panel is closed (session must not reopen it). */
+export async function forgetPanelRestoreState(viewType: string): Promise<void> {
+  if (!extensionContext) {
+    return;
+  }
+  const all =
+    extensionContext.workspaceState.get<Record<string, PanelRestoreState>>(
+      PANEL_STATE_KEY
+    ) ?? {};
+  if (!(viewType in all)) {
+    return;
+  }
+  delete all[viewType];
+  await extensionContext.workspaceState.update(PANEL_STATE_KEY, all);
+}
+
+/**
+ * Session capture: only panels the user actually opened (raw workspaceState).
+ * Do **not** fall back to DEFAULT_REOPEN — that would reopen reasoner/diff on every restore.
+ */
+export function getRememberedPanelRestoreState(
+  context: vscode.ExtensionContext,
+  viewType: string
+): PanelRestoreState | undefined {
+  const all =
+    context.workspaceState.get<Record<string, PanelRestoreState>>(PANEL_STATE_KEY) ??
+    {};
+  return sanitizePanelRestoreState(all[viewType]);
+}
+
 export function getPanelRestoreState(
   context: vscode.ExtensionContext,
   viewType: string

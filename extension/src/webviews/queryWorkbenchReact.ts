@@ -7,7 +7,7 @@ import {
   parseRunQueryMessage,
   parseSaveQueryMessage,
 } from "./messages";
-import { rememberPanelRestoreState } from "./layoutPersistence";
+import { forgetPanelRestoreState, rememberPanelRestoreState } from "./layoutPersistence";
 import {
   SQL_TABLES,
   exportResultCsv,
@@ -34,6 +34,7 @@ export class QueryWorkbenchPanel {
   ) {
     this.host = host;
     host.panel.onDidDispose(() => {
+      void forgetPanelRestoreState("ontocodeQueryWorkbench");
       QueryWorkbenchPanel.current = undefined;
     });
   }

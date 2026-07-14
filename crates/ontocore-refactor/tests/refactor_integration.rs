@@ -105,6 +105,36 @@ fn find_usages_lists_multiple_annotation_subjects() {
 }
 
 #[test]
+fn find_usages_lists_multiple_annotation_objects() {
+    let tmp = TempDir::new().unwrap();
+    let ws = tmp.path();
+    std::fs::write(
+        ws.join("seeAlso.ttl"),
+        concat!(
+            "@prefix : <http://example.org/org#> .\n",
+            "@prefix owl: <http://www.w3.org/2002/07/owl#> .\n",
+            "@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n",
+            ":Person a owl:Class .\n",
+            ":A a owl:Class ; rdfs:seeAlso :Person .\n",
+            ":B a owl:Class ; rdfs:seeAlso :Person .\n",
+            ":C a owl:Class ; rdfs:seeAlso :Person .\n"
+        ),
+    )
+    .unwrap();
+    let catalog = build_catalog(ws);
+    let usages = find_usages(&catalog, "http://example.org/org#Person");
+    let annotation_objects: Vec<_> = usages
+        .iter()
+        .filter(|u| u.kind == ontocore_refactor::UsageKind::AnnotationObject)
+        .collect();
+    assert!(
+        annotation_objects.len() >= 3,
+        "expected distinct annotation-object hits per subject, got {:?}",
+        annotation_objects
+    );
+}
+
+#[test]
 fn rename_iri_across_workspace() {
     let tmp = TempDir::new().unwrap();
     let ws = tmp.path();

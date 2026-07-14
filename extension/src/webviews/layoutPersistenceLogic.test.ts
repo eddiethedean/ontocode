@@ -23,6 +23,16 @@ describe("layoutPersistenceLogic", () => {
     assert.equal(restore?.command, "ontocode.openQueryWorkbench");
   });
 
+  it("sanitize without defaults leaves missing session panels empty", () => {
+    // Session capture must use sanitizePanelRestoreState / remembered-only lookups,
+    // not resolvePanelRestoreState — otherwise DEFAULT_REOPEN reopens reasoner/diff.
+    assert.equal(sanitizePanelRestoreState(undefined), undefined);
+    assert.equal(
+      sanitizePanelRestoreState({ command: "ontocode.runReasoner" })?.command,
+      "ontocode.runReasoner"
+    );
+  });
+
   it("prefers saved restore state over defaults", () => {
     const saved: PanelRestoreState = {
       command: "ontocode.showExplanation",

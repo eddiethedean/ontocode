@@ -13,7 +13,7 @@ import {
   WORKSPACE_DOCUMENT_OUTSIDE_MESSAGE,
 } from "../utils/workspacePath";
 import { workspaceTransactionManager } from "../workspace/transactionManager";
-import { rememberPanelRestoreState } from "./layoutPersistence";
+import { forgetPanelRestoreState, rememberPanelRestoreState } from "./layoutPersistence";
 import {
   AMBIGUOUS_ONTOLOGY_HEADER_MESSAGE,
   entityBelongsToDocument,
@@ -101,6 +101,7 @@ export class ImportsPanel {
     private readonly onRefresh?: RefreshFn
   ) {
     host.panel.onDidDispose(() => {
+      void forgetPanelRestoreState("ontocodeImports");
       ImportsPanel.current = undefined;
     });
   }

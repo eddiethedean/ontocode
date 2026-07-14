@@ -13,7 +13,7 @@ import { PanelHost } from "./panelHost";
 import type { EntityDetailPayload, PatchOp, WebviewMessage } from "./messages";
 import { GraphPanel } from "./graphPanel";
 import { acceptInspectorRevealRequest } from "./inspectorReveal";
-import { rememberPanelRestoreState } from "./layoutPersistence";
+import { forgetPanelRestoreState, rememberPanelRestoreState } from "./layoutPersistence";
 
 type RefreshFn = () => Promise<void>;
 
@@ -62,6 +62,7 @@ export class EntityInspectorPanel {
     this.host = host;
     this.extensionUri = extensionUri;
     host.panel.onDidDispose(() => {
+      void forgetPanelRestoreState("ontocodeInspector");
       EntityInspectorPanel.currentPanel = undefined;
     });
   }

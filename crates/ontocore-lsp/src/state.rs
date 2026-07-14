@@ -615,10 +615,7 @@ pub(crate) fn canonical_roots_match(a: &Path, b: &Path) -> bool {
 }
 
 pub fn path_to_uri(path: &Path) -> String {
-    let abs = path.canonicalize().unwrap_or_else(|_| path.to_path_buf());
-    url::Url::from_file_path(&abs)
-        .map(|u| u.to_string())
-        .unwrap_or_else(|_| format!("file://{}", abs.display()))
+    ontocore_core::file_uri_for_path(path)
 }
 
 fn now_epoch_secs() -> u64 {

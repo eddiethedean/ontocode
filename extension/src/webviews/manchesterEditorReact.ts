@@ -17,7 +17,7 @@ import {
   buildManchesterPatches,
   resolveManchesterApplyMode,
 } from "./manchesterEditorLogic";
-import { rememberPanelRestoreState } from "./layoutPersistence";
+import { forgetPanelRestoreState, rememberPanelRestoreState } from "./layoutPersistence";
 import {
   resolveWorkspaceDocumentUri,
   WORKSPACE_DOCUMENT_OUTSIDE_MESSAGE,
@@ -44,6 +44,7 @@ export class ManchesterEditorPanel {
     this.host = host;
     this.options = options;
     host.panel.onDidDispose(() => {
+      void forgetPanelRestoreState("ontocodeManchesterEditor");
       ManchesterEditorPanel.current = undefined;
     });
   }

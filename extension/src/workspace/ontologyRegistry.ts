@@ -3,7 +3,7 @@ import { getCatalogSnapshot, setActiveOntology } from "../lsp/client";
 import type { OntologyDocument } from "../lsp/protocol";
 import { isOntologyDocument } from "../commands/uiState";
 import { documentUriInWorkspace, isUriInWorkspace, resolveWorkspaceDocumentUri } from "../utils/workspacePath";
-import { normalizeFsPath } from "../utils/pathUnder";
+import { normalizeFsPath, pathIdentityKey, pathsEqual } from "../utils/pathUnder";
 import { workspaceEventBus } from "./eventBus";
 import {
   entryFromDocument,
@@ -51,9 +51,9 @@ export class OntologyRegistry {
   }
 
   getEntryByPath(path: string): OntologyRegistryEntry | undefined {
-    const normalized = normalizeFsPath(path);
+    const key = pathIdentityKey(path);
     return [...this.entries.values()].find(
-      (entry) => normalizeFsPath(entry.path) === normalized
+      (entry) => pathIdentityKey(entry.path) === key
     );
   }
 
@@ -76,16 +76,18 @@ export class OntologyRegistry {
         documentUriInWorkspace(document.path) ??
         vscode.Uri.file(document.path).toString();
       const normalizedPath = normalizeFsPath(document.path);
+      const pathKey = pathIdentityKey(document.path);
       const bufferDirty = vscode.workspace.textDocuments.some(
         (doc) =>
           isOntologyDocument(doc) &&
-          normalizeFsPath(doc.uri.fsPath) === normalizedPath &&
+          pathsEqual(doc.uri.fsPath, document.path) &&
           doc.isDirty
       );
       const dirty =
         bufferDirty ||
         this.semanticDirty.has(document.id) ||
-        this.semanticDirty.has(normalizedPath);
+        this.semanticDirty.has(normalizedPath) ||
+        this.semanticDirty.has(pathKey);
       const version = this.versionById.get(document.id) ?? 0;
       const entry = entryFromDocument(document, documents, {
         uri,
@@ -101,7 +103,7 @@ export class OntologyRegistry {
         continue;
       }
       const path = normalizeFsPath(doc.uri.fsPath);
-      if ([...next.values()].some((e) => normalizeFsPath(e.path) === path)) {
+      if ([...next.values()].some((e) => pathsEqual(e.path, path))) {
         continue;
       }
       const id = path;

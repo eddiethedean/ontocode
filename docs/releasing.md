@@ -64,8 +64,8 @@ Source of truth: **[docs/SHIPPED.md](SHIPPED.md)** and **[docs/supported-formats
 Push a tag matching `[workspace.package].version` in `Cargo.toml`:
 
 ```bash
-git tag v0.22.0   # must match [workspace.package].version in Cargo.toml
-git push origin v0.22.0
+git tag v0.23.0   # must match [workspace.package].version in Cargo.toml
+git push origin v0.23.0
 ```
 
 The [release workflow on GitHub](https://github.com/eddiethedean/ontocode/blob/main/.github/workflows/release.yml):

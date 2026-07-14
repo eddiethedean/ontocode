@@ -47,7 +47,7 @@ Large-ontology targets (GO subset ~5k classes, SNOMED EL sample): download via `
 
 ## Reference measurement (tutorial fixtures)
 
-Measured with `ontocore inspect fixtures --format json` on release **0.22.0** (repository tutorial corpus):
+Measured with `ontocore inspect fixtures --format json` on release **0.23.0** (repository tutorial corpus):
 
 | Metric | Value |
 |--------|-------|

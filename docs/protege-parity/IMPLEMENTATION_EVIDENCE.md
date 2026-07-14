@@ -98,11 +98,12 @@ Every parity feature should reference:
   PAR-RSN-001    Reasoning    IMPLEMENTED       ontocore-reasoner   lib.rs           ✓       ✓       ✓       EL
                  classify                                                                                    classification.
 
-  PAR-RSN-002    ABox         PARTIAL           ontocore-reasoner   TBD              ✓       TBD     ✓       Target
-                 reasoning                                                                                   v0.23.
+  PAR-RSN-002    ABox         VERIFIED          ontocore-reasoner   abox.rs          ✓       ✓       ✓       v0.23.0
+                 reasoning                      lsp                                                 realization,
+                                                                                                    instance check.
 
-  PAR-RSN-003    DL           PARTIAL           ontocore-reasoner   TBD              ✓       TBD     ✓       Target
-                 explanations                                                                                v0.23.
+  PAR-RSN-003    DL           VERIFIED          ontocore-reasoner   explain.rs       ✓       ✓       ✓       v0.23.0
+                 explanations                                                                                DL-first.
 
   PAR-QRY-001    SPARQL       IMPLEMENTED       ontocore-query      lib.rs           ✓       TBD     ✓       Query
                  query                                                                                       workbench.
@@ -110,8 +111,8 @@ Every parity feature should reference:
   PAR-QRY-002    DL Query     PARTIAL           ---                 ---              ✓       TBD     ✓       Target
                  workflow                                                                                    v0.24.
 
-  PAR-SWRL-001   SWRL         NOT_IMPLEMENTED   ---                 ---              ---     ---     ---     Target
-                                                                                                             v0.23.
+  PAR-SWRL-001   SWRL         VERIFIED          ontocore-swrl       lib.rs           ✓       ✓       ✓       v0.23.0
+                                                                                                             Rule Browser.
 
   PAR-REF-001    Semantic     PARTIAL           ontocore-refactor   lib.rs           ✓       TBD     ✓       Target
                  refactoring                                                                                 v0.24.

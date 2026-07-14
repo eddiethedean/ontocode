@@ -2,13 +2,15 @@ use crate::index_worker::IndexWorker;
 use crate::positions::{byte_col_to_utf16, utf16_offset_to_byte};
 use crate::protocol::{
     ApplyAxiomPatchParams, ApplyAxiomPatchResult, ApplyRefactorParams, ApplyRefactorResult,
-    CatalogSnapshot, DiagnosticSummary, FindUsagesParams, FindUsagesResult, GetEntityParams,
-    GetEntityResult, GetExplanationParams, GetExplanationResult, GetGraphResult,
-    IndexWorkspaceParams, IndexWorkspaceResult, ListPluginsResult, ListSqlSchemaResult,
-    LspErrorPayload, ManchesterCompletions, ParseManchesterParams, ParseManchesterResult,
+    CatalogSnapshot, CheckInstanceParams, CheckInstanceResult, DiagnosticSummary, FindUsagesParams,
+    FindUsagesResult, GetEntityParams, GetEntityResult, GetExplanationParams, GetExplanationResult,
+    GetGraphResult, IndexWorkspaceParams, IndexWorkspaceResult, ListPluginsResult,
+    ListSqlSchemaResult, ListSwrlRulesResult, LspErrorPayload, ManchesterCompletions,
+    ParseManchesterParams, ParseManchesterResult, ParseSwrlRuleParams, ParseSwrlRuleResult,
     PreviewRefactorParams, PreviewRefactorResult, QueryParams, RunPluginParams, RunPluginResult,
     RunReasonerParams, RunReasonerResult, RunRobotParams, RunRobotResult, SemanticDiffParams,
-    SemanticDiffResult, SparqlParams, TabularQueryResult, UsageSummary,
+    SemanticDiffResult, SparqlParams, SwrlRuleListItem, TabularQueryResult, UsageSummary,
+    ValidateSwrlRuleParams, ValidateSwrlRuleResult,
 };
 use crate::state::{path_to_uri, resolve_workspace_for_index, ServerState};
 use crossbeam_channel::Receiver;
@@ -43,6 +45,8 @@ use serde_json::Value;
 use std::collections::VecDeque;
 use std::path::{Path, PathBuf};
 use std::str::FromStr;
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 use std::thread;
 use std::time::Duration;
 
@@ -1506,9 +1510,10 @@ fn primary_iri_from_turtle_patch(p: &ontocore_owl::PatchOp) -> Option<String> {
         | ontocore_owl::PatchOp::SetOntologyIri { ontology_iri }
         | ontocore_owl::PatchOp::SetVersionIri { ontology_iri, .. }
         | ontocore_owl::PatchOp::AddOntologyAnnotation { ontology_iri, .. }
-        | ontocore_owl::PatchOp::RemoveOntologyAnnotation { ontology_iri, .. } => {
-            ontology_iri.clone()
-        }
+        | ontocore_owl::PatchOp::RemoveOntologyAnnotation { ontology_iri, .. }
+        | ontocore_owl::PatchOp::AddSwrlRule { ontology_iri, .. }
+        | ontocore_owl::PatchOp::RemoveSwrlRule { ontology_iri, .. }
+        | ontocore_owl::PatchOp::ReplaceSwrlRule { ontology_iri, .. } => ontology_iri.clone(),
         ontocore_owl::PatchOp::AddPrefix { .. }
         | ontocore_owl::PatchOp::RemovePrefix { .. }
         | ontocore_owl::PatchOp::SetPrefix { .. } => String::new(),
@@ -1596,6 +1601,102 @@ pub fn handle_parse_manchester(
     })
 }
 
+fn ontology_iri_from_turtle(text: &str) -> Option<String> {
+    for line in text.lines() {
+        let trimmed = line.trim();
+        if let Some(rest) = trimmed.strip_prefix('<') {
+            if let Some(end) = rest.find('>') {
+                let iri = &rest[..end];
+                if rest[end + 1..].contains("owl:Ontology")
+                    || rest[end + 1..].contains("http://www.w3.org/2002/07/owl#Ontology")
+                {
+                    return Some(iri.to_string());
+                }
+            }
+        }
+    }
+    None
+}
+
+fn collect_swrl_rules_from_text(
+    text: &str,
+    document_uri: Option<String>,
+    rules: &mut Vec<SwrlRuleListItem>,
+    seen: &mut std::collections::BTreeSet<String>,
+) {
+    let ontology_iri = ontology_iri_from_turtle(text);
+    for (index, rule) in ontocore_swrl::rules_from_turtle_document(text).into_iter().enumerate() {
+        let summary = rule.summary(index);
+        let key =
+            format!("{}|{}|{}", document_uri.as_deref().unwrap_or(""), summary.id, summary.label);
+        if !seen.insert(key) {
+            continue;
+        }
+        let rule_json = serde_json::to_string(&rule).ok();
+        rules.push(SwrlRuleListItem {
+            id: summary.id,
+            label: summary.label,
+            body_count: summary.body_count,
+            head_count: summary.head_count,
+            enabled: summary.enabled,
+            rule_json,
+            document_uri: document_uri.clone(),
+            ontology_iri: ontology_iri.clone(),
+        });
+    }
+}
+
+pub fn handle_list_swrl_rules(state: &ServerState) -> Result<ListSwrlRulesResult, LspErrorPayload> {
+    let mut rules = Vec::new();
+    let mut seen = std::collections::BTreeSet::new();
+
+    for (path, text) in state.open_documents_for_reasoner() {
+        let uri = path_to_uri(&path);
+        collect_swrl_rules_from_text(text.as_str(), Some(uri), &mut rules, &mut seen);
+    }
+
+    if let Some(docs) = state.with_catalog(|catalog| catalog.data().documents.clone()) {
+        let open = state.open_documents_for_reasoner();
+        for doc in docs {
+            if doc.path.extension().is_none_or(|ext| ext != "ttl") {
+                continue;
+            }
+            if open.contains_key(&doc.path) {
+                continue;
+            }
+            if let Ok(canonical) = doc.path.canonicalize() {
+                if open.contains_key(&canonical) {
+                    continue;
+                }
+            }
+            let Ok(text) = std::fs::read_to_string(&doc.path) else {
+                continue;
+            };
+            let uri = path_to_uri(&doc.path);
+            collect_swrl_rules_from_text(&text, Some(uri), &mut rules, &mut seen);
+        }
+    }
+
+    Ok(ListSwrlRulesResult { rules })
+}
+
+pub fn handle_validate_swrl_rule(
+    params: ValidateSwrlRuleParams,
+) -> Result<ValidateSwrlRuleResult, LspErrorPayload> {
+    let rule = ontocore_swrl::parse_swrl_rule_json(&params.rule_json)
+        .map_err(|e| LspErrorPayload::invalid_params(format!("invalid SWRL rule JSON: {e}")))?;
+    Ok(ValidateSwrlRuleResult { diagnostics: ontocore_swrl::validate_rule(&rule) })
+}
+
+pub fn handle_parse_swrl_rule(
+    params: ParseSwrlRuleParams,
+) -> Result<ParseSwrlRuleResult, LspErrorPayload> {
+    let rule = ontocore_swrl::parse_swrl_rule_json(&params.rule_json)
+        .map_err(|e| LspErrorPayload::invalid_params(format!("invalid SWRL rule JSON: {e}")))?;
+    let diagnostics = ontocore_swrl::validate_rule(&rule);
+    Ok(ParseSwrlRuleResult { rule, diagnostics })
+}
+
 pub fn handle_run_reasoner_lsp(
     state: &ServerState,
     params: RunReasonerParams,
@@ -1632,9 +1733,15 @@ pub fn handle_run_reasoner_lsp(
 
     let auto_detect = params.auto_detect;
     let input_for_classify = input.clone();
+    let cancel_flag = Arc::new(AtomicBool::new(false));
+    state.set_reasoner_cancel_flag(Some(Arc::clone(&cancel_flag)));
+    let classify_cancel = Arc::clone(&cancel_flag);
     let classify_handle = thread::spawn(move || {
+        ontocore_reasoner::install_cancel_flag(classify_cancel);
         reasoner_classify_test_pause();
-        classify(profile, &input_for_classify, auto_detect)
+        let result = classify(profile, &input_for_classify, auto_detect);
+        ontocore_reasoner::clear_cancel_flag();
+        result
     });
 
     while !classify_handle.is_finished() {
@@ -1648,21 +1755,104 @@ pub fn handle_run_reasoner_lsp(
     let classification = classify_handle
         .join()
         .map_err(|_| LspErrorPayload::reasoner_failed("reasoner thread panicked".to_string()))?
-        .map_err(|e| LspErrorPayload::reasoner_failed(e.to_string()))?;
+        .map_err(|e| {
+            state.set_reasoner_cancel_flag(None);
+            if matches!(e, ontocore_reasoner::ReasonerError::Cancelled) {
+                LspErrorPayload::reasoner_failed("Reasoner run cancelled".to_string())
+            } else {
+                LspErrorPayload::reasoner_failed(e.to_string())
+            }
+        })?;
 
-    if !state.reasoner_run_is_current(run_generation) {
+    if !state.reasoner_run_is_current(run_generation) || cancel_flag.load(Ordering::Acquire) {
+        state.set_reasoner_cancel_flag(None);
         return Err(LspErrorPayload::reasoner_failed("Reasoner run cancelled".to_string()));
     }
 
     let ops_lock = state.ops_lock();
     let _guard = ops_lock.lock().map_err(|e| LspErrorPayload::reasoner_failed(e.to_string()))?;
 
-    let snapshot = state
+    let mut snapshot = state
         .reasoner_cache_mut(|cache| {
-            cache.store_classification(input, profile, classification.clone())
+            cache.store_classification(input.clone(), profile, classification.clone())
         })
         .unwrap_or_else(|| ReasonerSnapshot::from(classification.clone()));
+
+    // Keep cancel armed through ABox enrich (realize can be O(I×C)).
+    ontocore_reasoner::install_cancel_flag(Arc::clone(&cancel_flag));
+    drain_reasoner_cancel_notifications(message_rx, deferred, state);
+
+    let enrich_cancelled = |flag: &AtomicBool, state: &ServerState| {
+        flag.load(Ordering::Acquire) || !state.reasoner_run_is_current(run_generation)
+    };
+
+    if enrich_cancelled(&cancel_flag, state) {
+        ontocore_reasoner::clear_cancel_flag();
+        state.set_reasoner_cancel_flag(None);
+        return Err(LspErrorPayload::reasoner_failed("Reasoner run cancelled".to_string()));
+    }
+
+    // Enrich with ABox realization / consistency (best-effort; keep TBox snapshot on failure).
+    match ontocore_reasoner::check_full_consistency(
+        &input.ontology,
+        profile,
+        &classification.unsatisfiable,
+    ) {
+        Ok(detail) => {
+            snapshot.consistency = Some(detail.clone());
+            snapshot.consistent = detail.consistent;
+        }
+        Err(ontocore_reasoner::ReasonerError::Cancelled) => {
+            ontocore_reasoner::clear_cancel_flag();
+            state.set_reasoner_cancel_flag(None);
+            return Err(LspErrorPayload::reasoner_failed("Reasoner run cancelled".to_string()));
+        }
+        Err(_) => {}
+    }
+
+    drain_reasoner_cancel_notifications(message_rx, deferred, state);
+    if enrich_cancelled(&cancel_flag, state) {
+        ontocore_reasoner::clear_cancel_flag();
+        state.set_reasoner_cancel_flag(None);
+        return Err(LspErrorPayload::reasoner_failed("Reasoner run cancelled".to_string()));
+    }
+
+    let realization = match ontocore_reasoner::realize(profile, &input) {
+        Ok(r) => Some(r),
+        Err(ontocore_reasoner::ReasonerError::Cancelled) => {
+            ontocore_reasoner::clear_cancel_flag();
+            state.set_reasoner_cancel_flag(None);
+            return Err(LspErrorPayload::reasoner_failed("Reasoner run cancelled".to_string()));
+        }
+        Err(_) => None,
+    };
+    if let Some(ref realization) = realization {
+        snapshot.realization = Some(realization.clone());
+        drain_reasoner_cancel_notifications(message_rx, deferred, state);
+        if enrich_cancelled(&cancel_flag, state) {
+            ontocore_reasoner::clear_cancel_flag();
+            state.set_reasoner_cancel_flag(None);
+            return Err(LspErrorPayload::reasoner_failed("Reasoner run cancelled".to_string()));
+        }
+        match ontocore_reasoner::inferred_assertions_from_realization(
+            &input.ontology,
+            profile,
+            realization,
+        ) {
+            Ok(assertions) => snapshot.inferred_assertions = Some(assertions),
+            Err(ontocore_reasoner::ReasonerError::Cancelled) => {
+                ontocore_reasoner::clear_cancel_flag();
+                state.set_reasoner_cancel_flag(None);
+                return Err(LspErrorPayload::reasoner_failed("Reasoner run cancelled".to_string()));
+            }
+            Err(_) => {}
+        }
+    }
+
+    ontocore_reasoner::clear_cancel_flag();
+    state.set_reasoner_cancel_flag(None);
     state.set_reasoner_snapshot(snapshot.clone());
+    state.clear_reasoner_dirty();
 
     Ok(run_reasoner_result_from_classification(&classification, snapshot))
 }
@@ -1759,6 +1949,31 @@ pub fn handle_get_explanation(
         alternatives,
         indexed_at: state.indexed_at().unwrap_or(0),
         content_hash: input.content_hash,
+    })
+}
+
+pub fn handle_check_instance(
+    state: &ServerState,
+    params: CheckInstanceParams,
+) -> Result<CheckInstanceResult, LspErrorPayload> {
+    let ops_lock = state.ops_lock();
+    let _guard = ops_lock.lock().map_err(|e| LspErrorPayload::reasoner_failed(e.to_string()))?;
+    let profile = ReasonerId::parse(&params.profile)
+        .map_err(|e| LspErrorPayload::reasoner_failed(e.to_string()))?;
+    let input = load_reasoner_input(state)?;
+    let result = ontocore_reasoner::check_instance(
+        profile,
+        &input,
+        &params.individual_iri,
+        &params.class_iri,
+    )
+    .map_err(|e| LspErrorPayload::reasoner_failed(e.to_string()))?;
+    Ok(CheckInstanceResult {
+        individual_iri: result.individual_iri,
+        class_iri: result.class_iri,
+        entailed: result.entailed,
+        profile_used: result.profile_used,
+        duration_ms: result.duration_ms,
     })
 }
 
@@ -2474,11 +2689,31 @@ pub fn handle_custom_request(
             let result = handle_parse_manchester(state, params)?;
             serde_json::to_value(result).map_err(|e| LspErrorPayload::index_failed(e.to_string()))
         }
+        "ontocore/listSwrlRules" => {
+            let result = handle_list_swrl_rules(state)?;
+            serde_json::to_value(result).map_err(|e| LspErrorPayload::index_failed(e.to_string()))
+        }
+        "ontocore/validateSwrlRule" => {
+            let params: ValidateSwrlRuleParams = parse_custom_params(params)?;
+            let result = handle_validate_swrl_rule(params)?;
+            serde_json::to_value(result).map_err(|e| LspErrorPayload::invalid_params(e.to_string()))
+        }
+        "ontocore/parseSwrlRule" => {
+            let params: ParseSwrlRuleParams = parse_custom_params(params)?;
+            let result = handle_parse_swrl_rule(params)?;
+            serde_json::to_value(result).map_err(|e| LspErrorPayload::invalid_params(e.to_string()))
+        }
         "ontocore/getExplanation" => {
             let params: GetExplanationParams = parse_custom_params(params)?;
             let result = handle_get_explanation(state, params)?;
             serde_json::to_value(result)
                 .map_err(|e| LspErrorPayload::explanation_failed(e.to_string()))
+        }
+        "ontocore/checkInstance" => {
+            let params: CheckInstanceParams = parse_custom_params(params)?;
+            let result = handle_check_instance(state, params)?;
+            serde_json::to_value(result)
+                .map_err(|e| LspErrorPayload::reasoner_failed(e.to_string()))
         }
         "ontocore/runRobot" => {
             let params: RunRobotParams = parse_custom_params(params)?;

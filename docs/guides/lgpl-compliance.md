@@ -79,7 +79,7 @@ Maintainers regenerate `NOTICES` before releases per [releasing.md](../releasing
 | Mitigation | When |
 |------------|------|
 | **CI-only adoption** | Minimize desktop extension rollout until legal sign-off |
-| **Pin versions** | `cargo install ontocore-cli --locked --version 0.22.0` or release tarball |
+| **Pin versions** | `cargo install ontocore-cli --locked --version 0.23.0` or release tarball |
 | **Archive NOTICES** | Store with internal artifact registry |
 | **Protégé coexistence** | Teams that cannot accept LGPL on desktops use Protégé for authoring; OntoCore in Linux CI only |
 | **Air-gapped mirror** | Host VSIX + CLI + `NOTICES` + source snapshot internally — [enterprise deployment](enterprise-deployment.md) |

@@ -45,7 +45,7 @@ Use this page to decide **when OntoCode fits**, **when to keep Protégé**, and 
 
 ### Path A — CI only (lowest risk)
 
-1. Pin `ontocore-cli` **0.22.0** in Linux CI
+1. Pin `ontocore-cli` **0.23.0** in Linux CI
 2. Gate merges with `ontocore validate`
 3. Optional: `ontocore classify --profile el` when ontology is EL
 4. Keep Protégé on engineer desktops unchanged

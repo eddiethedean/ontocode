@@ -33,6 +33,7 @@ ontocore-parser = { workspace = true }
 ontocore-query = { workspace = true }
 ontocore-reasoner = { workspace = true }
 ontocore-refactor = { workspace = true }
+ontocore-swrl = { workspace = true }
 thiserror = { workspace = true }
 
 [package.metadata.docs.rs]

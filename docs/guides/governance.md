@@ -48,7 +48,7 @@ Maintainers follow [releasing.md](../releasing.md): version bump, CHANGELOG, SHI
 
 | Stream | Security support (documented) |
 |--------|-------------------------------|
-| **0.22.x** | Yes — current tagged release |
+| **0.23.x** | Yes — current tagged release |
 | **0.19.x** | Yes |
 | **0.14.x** | Best effort |
 | **0.11.x** | No |

@@ -101,7 +101,6 @@ fn lsp_indexes_fixture_workspace() {
         .and_then(|d| d.as_array())
         .expect("diagnostics array");
     assert_eq!(diagnostics.len(), 0, "clean fixtures must not emit diagnostics: {diagnostics:?}");
-
     let example_doc = documents
         .iter()
         .find(|d| {

@@ -499,6 +499,23 @@ pub struct RunRobotResult {
     pub stderr: String,
 }
 
+#[derive(Debug, Deserialize)]
+pub struct CheckInstanceParams {
+    pub individual_iri: String,
+    pub class_iri: String,
+    #[serde(default = "default_reasoner_profile")]
+    pub profile: String,
+}
+
+#[derive(Debug, Serialize)]
+pub struct CheckInstanceResult {
+    pub individual_iri: String,
+    pub class_iri: String,
+    pub entailed: bool,
+    pub profile_used: String,
+    pub duration_ms: u64,
+}
+
 #[derive(Debug, Serialize)]
 pub struct GetExplanationResult {
     pub class_iri: String,
@@ -597,6 +614,49 @@ pub struct ApplyRefactorResult {
 #[derive(Debug, Serialize)]
 pub struct ListPluginsResult {
     pub plugins: Vec<ontocore_plugin::PluginDescriptor>,
+}
+
+/// SWRL rule summary for Rule Browser (v0.23).
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SwrlRuleListItem {
+    pub id: String,
+    pub label: String,
+    pub body_count: usize,
+    pub head_count: usize,
+    pub enabled: bool,
+    /// Full JSON for editor round-trip when known.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub rule_json: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub document_uri: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub ontology_iri: Option<String>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct ListSwrlRulesResult {
+    pub rules: Vec<SwrlRuleListItem>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct ValidateSwrlRuleParams {
+    pub rule_json: String,
+}
+
+#[derive(Debug, Serialize)]
+pub struct ValidateSwrlRuleResult {
+    pub diagnostics: Vec<ontocore_swrl::SwrlDiagnostic>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct ParseSwrlRuleParams {
+    pub rule_json: String,
+}
+
+#[derive(Debug, Serialize)]
+pub struct ParseSwrlRuleResult {
+    pub rule: ontocore_swrl::SwrlRule,
+    pub diagnostics: Vec<ontocore_swrl::SwrlDiagnostic>,
 }
 
 #[derive(Debug, Deserialize)]

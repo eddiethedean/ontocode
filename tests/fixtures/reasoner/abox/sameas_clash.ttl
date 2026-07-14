@@ -1,0 +1,10 @@
+@prefix ex: <http://example.org/abox-clash#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+<http://example.org/abox-clash> a owl:Ontology .
+
+ex:a a owl:NamedIndividual .
+ex:b a owl:NamedIndividual .
+ex:a owl:sameAs ex:b .
+[] a owl:AllDifferent ;
+    owl:distinctMembers ( ex:a ex:b ) .

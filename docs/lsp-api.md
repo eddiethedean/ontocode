@@ -1,4 +1,4 @@
-# OntoCore LSP API (v0.22)
+# OntoCore LSP API (v0.23)
 
 > **Status:** Documents behavior in **OntoCore v0.22.0**. Pre-1.0 APIs may change.
 > Canonical feature list: [What ships today](SHIPPED.md).
@@ -20,7 +20,7 @@ The schema file is the wire contract for the **current product release**. Until 
 Until v1.0, minor releases may change request/response fields.
 For stable integrations:
 
-- Pin OntoCore to **0.22.0** in your tooling.
+- Pin OntoCore to **0.23.0** in your tooling.
 - Prefer consuming `lsp-protocol.schema.json` from the same tagged release you deploy.
 
 ## Wire format

@@ -4,6 +4,8 @@ import { GraphPanel } from "../panels/GraphPanel";
 import { QueryWorkbenchPanel } from "../panels/QueryWorkbench";
 import { RefactorPreviewPanel } from "../panels/RefactorPreview";
 import { ManchesterEditorPanel } from "../panels/ManchesterEditor";
+import { RuleBrowserPanel } from "../panels/RuleBrowser";
+import { RuleEditorPanel } from "../panels/RuleEditor";
 import { SemanticDiffPanel } from "../panels/SemanticDiffPanel";
 import { ImportsPanel } from "../panels/ImportsPanel";
 import { MetricsPanel } from "../panels/MetricsPanel";
@@ -69,6 +71,18 @@ function bootRegistry(): void {
       title: "Manchester Editor",
       panelKind: "manchesterEditor",
       component: ManchesterEditorPanel,
+    },
+    {
+      id: "ruleBrowser",
+      title: "SWRL Rule Browser",
+      panelKind: "ruleBrowser",
+      component: RuleBrowserPanel,
+    },
+    {
+      id: "ruleEditor",
+      title: "SWRL Rule Editor",
+      panelKind: "ruleEditor",
+      component: RuleEditorPanel,
     },
     {
       id: "semanticDiff",

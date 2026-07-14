@@ -1,4 +1,4 @@
-# OntoCode feature tour (current: v0.22)
+# OntoCode feature tour (current: v0.23)
 
 A visual and structural overview of the OntoCode VS Code IDE. For hands-on setup, start with [First success (~10 min)](../guides/first-success.md).
 

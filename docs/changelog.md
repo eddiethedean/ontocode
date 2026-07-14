@@ -6,6 +6,10 @@ Migration guides: [Migration index](migration/README.md)
 
 ## [Unreleased]
 
+## [0.23.0] - 2026-07-14
+
+**v0.23.0** — Reasoning parity + SWRL (`PAR-RSN-002`/`PAR-RSN-003`/`PAR-SWRL-001`): full consistency, realization, instance check, inferred ABox assertions; native DL explanations with weaker-engine fallback; engine cancel through enrich; `ontocore-swrl` + Rule Browser/Editor + authored-rule injection for classify. See [CHANGELOG.md](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) and [migration/v0.23.md](migration/v0.23.md).
+
 ## [0.22.0] - 2026-07-14
 
 **v0.22.0** — Complete OWL 2 authoring (`PAR-OWL-001`): HasKey, DisjointUnion, RBox/ABox expansions, datatype defs, axiom annotations, Manchester `not`/`value`/`Self`/OneOf/data restrictions, XML mutate parity, Inspector UI; AllDifferent Turtle write-back; dangling-leaf symlink path-jail fix. See [CHANGELOG.md](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) and [migration/v0.22.md](migration/v0.22.md).

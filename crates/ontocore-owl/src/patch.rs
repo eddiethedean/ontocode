@@ -336,6 +336,20 @@ pub enum PatchOp {
         predicate: String,
         value: String,
     },
+    /// SWRL rule authoring (v0.23) — stores rule as JSON via ontocore:swrlRule.
+    AddSwrlRule {
+        ontology_iri: String,
+        rule_json: String,
+    },
+    RemoveSwrlRule {
+        ontology_iri: String,
+        rule_json: String,
+    },
+    ReplaceSwrlRule {
+        ontology_iri: String,
+        old_rule_json: String,
+        new_rule_json: String,
+    },
 }
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]
@@ -826,7 +840,91 @@ fn apply_one_patch(
                 namespaces,
             )
         }
+        PatchOp::AddSwrlRule { ontology_iri, rule_json } => {
+            add_swrl_rule_json(text, ontology_iri, rule_json)
+        }
+        PatchOp::RemoveSwrlRule { ontology_iri, rule_json } => {
+            remove_swrl_rule_json(text, ontology_iri, rule_json)
+        }
+        PatchOp::ReplaceSwrlRule { ontology_iri, old_rule_json, new_rule_json } => {
+            remove_swrl_rule_json(text, ontology_iri, old_rule_json)?;
+            add_swrl_rule_json(text, ontology_iri, new_rule_json)
+        }
     }
+}
+
+const ONTOCORE_SWRL_PRED: &str = "http://ontocode.dev/ns#swrlRule";
+
+fn add_swrl_rule_json(text: &mut String, ontology_iri: &str, rule_json: &str) -> Result<()> {
+    if !is_safe_iri(ontology_iri) {
+        return Err(OwlError::PatchInvalid(format!(
+            "SWRL ontology IRI is unsafe for Turtle write-back: {ontology_iri:?}"
+        )));
+    }
+    // Compact JSON so the literal stays on one Turtle line.
+    let compact = serde_json::from_str::<serde_json::Value>(rule_json)
+        .map_err(|e| OwlError::PatchInvalid(format!("invalid SWRL rule JSON: {e}")))
+        .and_then(|v| {
+            serde_json::to_string(&v)
+                .map_err(|e| OwlError::PatchInvalid(format!("serialize SWRL rule JSON: {e}")))
+        })?;
+    let escaped = escape_turtle_string(&compact);
+    let triple = format!(
+        "<{ontology_iri}> <{ONTOCORE_SWRL_PRED}> \"{escaped}\"^^<http://www.w3.org/2001/XMLSchema#string> .\n"
+    );
+    let needle = format!("<{ontology_iri}> <{ONTOCORE_SWRL_PRED}> \"{escaped}\"");
+    if text.lines().any(|line| line.contains(&needle)) {
+        return Ok(());
+    }
+    if !text.ends_with('\n') {
+        text.push('\n');
+    }
+    text.push_str(&triple);
+    Ok(())
+}
+
+fn remove_swrl_rule_json(text: &mut String, ontology_iri: &str, rule_json: &str) -> Result<()> {
+    if !is_safe_iri(ontology_iri) {
+        return Err(OwlError::PatchInvalid(format!(
+            "SWRL ontology IRI is unsafe for Turtle write-back: {ontology_iri:?}"
+        )));
+    }
+    let compact = serde_json::from_str::<serde_json::Value>(rule_json)
+        .map(|v| serde_json::to_string(&v).unwrap_or_else(|_| rule_json.to_string()))
+        .unwrap_or_else(|_| rule_json.to_string());
+    let escaped = escape_turtle_string(&compact);
+    let needle = format!("<{ontology_iri}> <{ONTOCORE_SWRL_PRED}> \"{escaped}\"");
+    let mut out = String::new();
+    let mut removed = false;
+    for line in text.lines() {
+        if !removed && line.contains(&needle) {
+            removed = true;
+            continue;
+        }
+        out.push_str(line);
+        out.push('\n');
+    }
+    if !removed {
+        // Fallback: try original escaping for rules written before compacting.
+        let legacy = rule_json.replace('\\', "\\\\").replace('"', "\\\"");
+        let legacy_needle = format!("<{ontology_iri}> <{ONTOCORE_SWRL_PRED}> \"{legacy}\"");
+        out.clear();
+        for line in text.lines() {
+            if !removed && line.contains(&legacy_needle) {
+                removed = true;
+                continue;
+            }
+            out.push_str(line);
+            out.push('\n');
+        }
+    }
+    if !removed {
+        return Err(OwlError::PatchInvalid(format!(
+            "SWRL rule not found for ontology {ontology_iri}"
+        )));
+    }
+    *text = out;
+    Ok(())
 }
 
 fn prefix_declaration_name(line: &str) -> Option<&str> {

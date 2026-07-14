@@ -30,6 +30,7 @@ ontocore-obo = { workspace = true }
 ontocore-query = { workspace = true }
 ontocore-reasoner = { workspace = true }
 ontocore-refactor = { workspace = true }
+ontocore-swrl = { workspace = true }
 ontocore-robot = { workspace = true }
 ontocore-diff = { workspace = true }
 ontocore-plugin-builtins = { workspace = true }

@@ -1,7 +1,8 @@
 use crate::error::{ReasonerError, Result};
 use crate::input::ReasonerInput;
 use crate::result::{
-    ClassificationResult, ConsistencyResult, ExplanationRequest, ExplanationResult,
+    ClassificationResult, ConsistencyDetail, ConsistencyResult, ExplanationRequest,
+    ExplanationResult, InferredAssertions, InstanceCheckResult, RealizationResult,
 };
 use serde::{Deserialize, Serialize};
 
@@ -70,10 +71,34 @@ pub trait ReasonerAdapter: Send + Sync {
     fn classify(&self, input: &ReasonerInput) -> Result<ClassificationResult>;
     fn check_consistency(&self, input: &ReasonerInput) -> Result<ConsistencyResult> {
         let result = self.classify(input)?;
+        let detail =
+            crate::abox::check_full_consistency(&input.ontology, self.id(), &result.unsatisfiable)?;
         Ok(ConsistencyResult {
-            consistent: result.unsatisfiable.is_empty(),
+            consistent: detail.consistent,
             unsatisfiable: result.unsatisfiable.clone(),
+            detail: Some(detail),
         })
+    }
+    fn realize(&self, input: &ReasonerInput) -> Result<RealizationResult> {
+        crate::abox::realize(&input.ontology, self.id())
+    }
+    fn check_instance(
+        &self,
+        input: &ReasonerInput,
+        individual_iri: &str,
+        class_iri: &str,
+    ) -> Result<InstanceCheckResult> {
+        crate::abox::check_instance(&input.ontology, self.id(), individual_iri, class_iri)
+    }
+    fn inferred_assertions(&self, input: &ReasonerInput) -> Result<InferredAssertions> {
+        crate::abox::inferred_assertions(&input.ontology, self.id())
+    }
+    fn consistency_detail(
+        &self,
+        input: &ReasonerInput,
+        unsatisfiable: &[String],
+    ) -> Result<ConsistencyDetail> {
+        crate::abox::check_full_consistency(&input.ontology, self.id(), unsatisfiable)
     }
     fn explain(
         &self,

@@ -6,9 +6,9 @@ OntoCore and OntoCode are **local-first** tools: they index and parse files on d
 
 | Version | Supported |
 |---------|-----------|
-| 0.22.x   | Yes — latest tagged release |
+| 0.23.x   | Yes — latest tagged release |
 | 0.21.x   | Yes (N−1) |
-| ≤ 0.20.x | No — upgrade to a tagged 0.21.x or 0.22.x release |
+| ≤ 0.20.x | No — upgrade to a tagged 0.21.x or 0.23.x release |
 
 Pin production and CI to the latest **tagged** release ([TAGGED_RELEASE](https://github.com/eddiethedean/ontocode/blob/main/docs/TAGGED_RELEASE)). Unreleased minors on `main` are not supported until tagged. There is **no committed security patch SLA**.
 

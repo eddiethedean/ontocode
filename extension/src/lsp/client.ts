@@ -37,8 +37,11 @@ import {
   GetGraphParams,
   GetGraphResult,
   IndexWorkspaceResult,
+  ListSwrlRulesResult,
   ParseManchesterParams,
   ParseManchesterResult,
+  ParseSwrlRuleParams,
+  ParseSwrlRuleResult,
   RunReasonerParams,
   RunReasonerResult,
   RunRobotParams,
@@ -48,6 +51,8 @@ import {
   RefactorRequest,
   PreviewRefactorResult,
   RefactorPlan,
+  ValidateSwrlRuleParams,
+  ValidateSwrlRuleResult,
   ApplyRefactorResult,
   SemanticDiffParams,
   SemanticDiffResult,
@@ -405,6 +410,47 @@ export async function parseManchester(
     params
   );
   return assertParseManchesterResult(result);
+}
+
+export async function listSwrlRules(): Promise<ListSwrlRulesResult> {
+  const result = await ontcoreRequest<unknown>("ontocore/listSwrlRules", {});
+  if (
+    !result ||
+    typeof result !== "object" ||
+    !Array.isArray((result as { rules?: unknown }).rules)
+  ) {
+    throw new Error("Invalid listSwrlRules result from language server");
+  }
+  return result as ListSwrlRulesResult;
+}
+
+export async function validateSwrlRule(
+  params: ValidateSwrlRuleParams
+): Promise<ValidateSwrlRuleResult> {
+  const result = await ontcoreRequest<unknown>("ontocore/validateSwrlRule", params);
+  if (
+    !result ||
+    typeof result !== "object" ||
+    !Array.isArray((result as { diagnostics?: unknown }).diagnostics)
+  ) {
+    throw new Error("Invalid validateSwrlRule result from language server");
+  }
+  return result as ValidateSwrlRuleResult;
+}
+
+export async function parseSwrlRule(
+  params: ParseSwrlRuleParams
+): Promise<ParseSwrlRuleResult> {
+  const result = await ontcoreRequest<unknown>("ontocore/parseSwrlRule", params);
+  if (
+    !result ||
+    typeof result !== "object" ||
+    !(result as { rule?: unknown }).rule ||
+    !Array.isArray((result as { diagnostics?: unknown }).diagnostics)
+  ) {
+    throw new Error("Invalid parseSwrlRule result from language server");
+  }
+  return result as ParseSwrlRuleResult;
 }
 
 /** Active reasoner RPC cancellation (Stop / progress Cancel). */

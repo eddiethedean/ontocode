@@ -25,6 +25,8 @@ export const DEFAULT_REOPEN: Record<string, PanelRestoreState> = {
   ontocodeExplanation: { command: "ontocode.showExplanation" },
   ontocodeSemanticDiff: { command: "ontocode.semanticDiff" },
   ontocodeManchesterEditor: { command: "ontocode.openManchesterEditor" },
+  ontocodeRuleBrowser: { command: "ontocode.openRuleBrowser" },
+  ontocodeRuleEditor: { command: "ontocode.openRuleEditor" },
 };
 
 /** Commands permitted for panel reopen from session / layout restore state. */

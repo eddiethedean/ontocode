@@ -5,7 +5,7 @@
 
 **Ontology IDE for VS Code** — browse, edit Turtle/OBO/RDF/XML/OWL/XML, query, reason (EL–DL), validate, and diff OWL/RDF/OBO ontologies.
 
-**Current release: v0.22.0**
+**Current release: v0.23.0**
 
 ## Start here
 

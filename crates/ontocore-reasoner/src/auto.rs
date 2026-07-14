@@ -27,7 +27,8 @@ pub(crate) fn resolve_auto_reasoner_id(ontology: &Ontology) -> Result<ReasonerId
         EngineKind::El => ReasonerId::El,
         EngineKind::Rl => ReasonerId::Rl,
         EngineKind::Rdfs => ReasonerId::Rdfs,
-        EngineKind::Alc | EngineKind::Dl | EngineKind::Swrl | EngineKind::Hybrid => ReasonerId::Dl,
+        EngineKind::Swrl => ReasonerId::Dl, // SWRL materializes then DL; surface via warnings
+        EngineKind::Alc | EngineKind::Dl | EngineKind::Hybrid => ReasonerId::Dl,
     })
 }
 

@@ -367,6 +367,21 @@ pub fn invert_patch_op(op: &PatchOp) -> Result<PatchOp> {
                 value: value.clone(),
             }
         }
+        PatchOp::AddSwrlRule { ontology_iri, rule_json } => PatchOp::RemoveSwrlRule {
+            ontology_iri: ontology_iri.clone(),
+            rule_json: rule_json.clone(),
+        },
+        PatchOp::RemoveSwrlRule { ontology_iri, rule_json } => PatchOp::AddSwrlRule {
+            ontology_iri: ontology_iri.clone(),
+            rule_json: rule_json.clone(),
+        },
+        PatchOp::ReplaceSwrlRule { ontology_iri, old_rule_json, new_rule_json } => {
+            PatchOp::ReplaceSwrlRule {
+                ontology_iri: ontology_iri.clone(),
+                old_rule_json: new_rule_json.clone(),
+                new_rule_json: old_rule_json.clone(),
+            }
+        }
     })
 }
 

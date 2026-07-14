@@ -43,7 +43,7 @@ For offline or air-gapped environments, use a release VSIX instead — see [Inst
 
 Download a minimal tutorial pack if you do not already have ontology files.
 
-**Offline / air-gapped:** download `ontocode-v0.22.0.vsix` (pattern: `ontocode-v<version>.vsix`) and `ontocode-tutorial.zip` from [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) for the **same tagged version** (e.g. **v0.22.0**). Prefer [Versions and channels](versions-and-channels.md) if Marketplace and GitHub disagree. If the zip is missing for an older tag, use the curl commands below on a connected machine, or clone the repo and open `fixtures/`.
+**Offline / air-gapped:** download `ontocode-v0.23.0.vsix` (pattern: `ontocode-v<version>.vsix`) and `ontocode-tutorial.zip` from [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) for the **same tagged version** (e.g. **v0.22.0**). Prefer [Versions and channels](versions-and-channels.md) if Marketplace and GitHub disagree. If the zip is missing for an older tag, use the curl commands below on a connected machine, or clone the repo and open `fixtures/`.
 
 **Online (curl from the tagged release):**
 
@@ -216,7 +216,7 @@ To catch lint and parse errors in CI or locally (optional — **not part of the 
 === "macOS / Windows / dev (cargo install)"
 
     ```bash
-    cargo install ontocore-cli --locked --version 0.22.0
+    cargo install ontocore-cli --locked --version 0.23.0
     ontocore validate /path/to/your/ontology/folder
     ```
 

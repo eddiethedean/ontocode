@@ -8,9 +8,7 @@ use ontocore_core::{
 use ontocore_reasoner::{ReasonerCacheStore, ReasonerSnapshot};
 use std::collections::{BTreeSet, HashMap};
 use std::path::{Path, PathBuf};
-#[cfg(test)]
-use std::sync::atomic::AtomicBool;
-use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::{Arc, Mutex, RwLock};
 use std::time::{SystemTime, UNIX_EPOCH};
 
@@ -44,6 +42,10 @@ pub struct ServerState {
     reasoner_run_generation: Arc<AtomicU64>,
     /// LSP request id for the in-flight `ontocore/runReasoner`, if any.
     active_reasoner_request_id: Arc<Mutex<Option<RequestId>>>,
+    /// Engine-level cancel flag for the in-flight Ontologos classify/realize thread.
+    reasoner_cancel_flag: Arc<Mutex<Option<Arc<AtomicBool>>>>,
+    /// Workspace edits since last successful reasoner sync (incremental sync contract).
+    reasoner_dirty: Arc<AtomicBool>,
 }
 
 struct InnerState {
@@ -100,6 +102,8 @@ impl ServerState {
             ops_lock: Arc::new(Mutex::new(())),
             reasoner_run_generation: Arc::new(AtomicU64::new(0)),
             active_reasoner_request_id: Arc::new(Mutex::new(None)),
+            reasoner_cancel_flag: Arc::new(Mutex::new(None)),
+            reasoner_dirty: Arc::new(AtomicBool::new(false)),
         }
     }
 
@@ -128,8 +132,32 @@ impl ServerState {
             .unwrap_or(false);
         if should_cancel {
             self.reasoner_run_generation.fetch_add(1, Ordering::SeqCst);
+            if let Ok(guard) = self.reasoner_cancel_flag.lock() {
+                if let Some(flag) = guard.as_ref() {
+                    flag.store(true, Ordering::Release);
+                }
+            }
         }
         should_cancel
+    }
+
+    pub fn set_reasoner_cancel_flag(&self, flag: Option<Arc<AtomicBool>>) {
+        if let Ok(mut guard) = self.reasoner_cancel_flag.lock() {
+            *guard = flag;
+        }
+    }
+
+    pub fn mark_reasoner_dirty(&self) {
+        self.reasoner_dirty.store(true, Ordering::SeqCst);
+    }
+
+    pub fn clear_reasoner_dirty(&self) {
+        self.reasoner_dirty.store(false, Ordering::SeqCst);
+    }
+
+    #[allow(dead_code)]
+    pub fn reasoner_is_dirty(&self) -> bool {
+        self.reasoner_dirty.load(Ordering::SeqCst)
     }
 
     pub fn reasoner_run_is_current(&self, generation: u64) -> bool {
@@ -139,6 +167,12 @@ impl ServerState {
     /// Bump the reasoner generation so in-flight classify cannot publish a stale snapshot.
     pub fn invalidate_in_flight_reasoner_runs(&self) {
         self.reasoner_run_generation.fetch_add(1, Ordering::SeqCst);
+        self.mark_reasoner_dirty();
+        if let Ok(guard) = self.reasoner_cancel_flag.lock() {
+            if let Some(flag) = guard.as_ref() {
+                flag.store(true, Ordering::Release);
+            }
+        }
     }
 
     pub fn active_ontology_id(&self) -> Option<String> {

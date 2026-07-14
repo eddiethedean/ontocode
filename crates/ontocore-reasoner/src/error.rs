@@ -28,6 +28,12 @@ pub enum ReasonerError {
 
     #[error("explanation not available for class: {0}")]
     ExplanationUnavailable(String),
+
+    #[error("individual not found: {0}")]
+    IndividualNotFound(String),
+
+    #[error("reasoner run cancelled")]
+    Cancelled,
 }
 
 pub type Result<T> = std::result::Result<T, ReasonerError>;

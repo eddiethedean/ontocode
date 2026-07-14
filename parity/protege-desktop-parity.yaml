@@ -191,28 +191,34 @@ requirements:
     area: Reasoning
     title: Full ABox reasoning
     priority: P0
-    status: PARTIAL
+    status: VERIFIED
     owner: null
-    source_files: []
-    test_ids: []
+    source_files:
+      - crates/ontocore-reasoner/src/abox.rs
+      - crates/ontocore-reasoner/src/result.rs
+      - crates/ontocore-lsp/src/handlers.rs
+    test_ids:
+      - tests/reasoner_abox.rs
     acceptance_criteria: []
     github_issue: https://github.com/eddiethedean/ontocode/issues/250
     documentation:
       - docs/protege-parity/04_BLOCKERS/BLOCKER_04_REASONING.md
-    notes: Target v0.23
+    notes: Shipped v0.23.0
   - id: PAR-RSN-003
     area: Reasoning
     title: Native DL explanations
     priority: P0
-    status: PARTIAL
+    status: VERIFIED
     owner: null
-    source_files: []
-    test_ids: []
+    source_files:
+      - crates/ontocore-reasoner/src/explain.rs
+    test_ids:
+      - crates/ontocore-reasoner/src/explain.rs
     acceptance_criteria: []
     github_issue: https://github.com/eddiethedean/ontocode/issues/250
     documentation:
       - docs/protege-parity/04_BLOCKERS/BLOCKER_04_REASONING.md
-    notes: Target v0.23
+    notes: Shipped v0.23.0 DL-first path
   - id: PAR-QRY-001
     area: Query
     title: SPARQL
@@ -243,15 +249,21 @@ requirements:
     area: SWRL
     title: Rule authoring/editing
     priority: P0
-    status: NOT_IMPLEMENTED
+    status: VERIFIED
     owner: null
-    source_files: []
-    test_ids: []
+    source_files:
+      - crates/ontocore-swrl/src/lib.rs
+      - crates/ontocore-owl/src/patch.rs
+      - extension/webview-ui/src/panels/RuleBrowser.tsx
+      - extension/webview-ui/src/panels/RuleEditor.tsx
+    test_ids:
+      - tests/swrl_validate.rs
+      - tests/swrl_patch.rs
     acceptance_criteria: []
     github_issue: https://github.com/eddiethedean/ontocode/issues/251
     documentation:
       - docs/protege-parity/04_BLOCKERS/BLOCKER_05_SWRL.md
-    notes: Target v0.23
+    notes: Shipped v0.23.0
   - id: PAR-REF-001
     area: Refactoring
     title: Semantic refactoring

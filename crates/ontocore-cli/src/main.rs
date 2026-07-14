@@ -14,7 +14,10 @@ use ontocore_query::{
     sparql_catalog,
     sql::{to_csv as sql_to_csv, to_json as sql_to_json},
 };
-use ontocore_reasoner::{classify, explain, ExplanationRequest, ReasonerId, WorkspaceInputLoader};
+use ontocore_reasoner::{
+    check_instance, classify, explain, realize, ExplanationRequest, ReasonerId,
+    WorkspaceInputLoader,
+};
 use ontocore_refactor::{
     apply_refactor_plan_checked, find_usages, preview_extract_module, preview_migrate_namespace,
     preview_move_entity, preview_rename_iri, RefactorPlan,
@@ -27,7 +30,7 @@ use std::path::{Path, PathBuf};
 #[command(
     name = "ontocore",
     version,
-    about = "Local-first ontology index and query engine (OntoCode v0.22)"
+    about = "Local-first ontology index and query engine (OntoCode v0.23)"
 )]
 struct Cli {
     #[command(subcommand)]
@@ -124,6 +127,28 @@ enum Commands {
         class: String,
         /// Reasoner profile
         #[arg(long, default_value = "el")]
+        profile: String,
+        #[arg(long, value_enum, default_value_t = OutputFormat::Text)]
+        format: OutputFormat,
+    },
+    /// Realize individuals (inferred types) in a workspace
+    Realize {
+        #[arg(default_value = ".")]
+        workspace: PathBuf,
+        #[arg(long, default_value = "rl")]
+        profile: String,
+        #[arg(long, value_enum, default_value_t = OutputFormat::Text)]
+        format: OutputFormat,
+    },
+    /// Check whether an individual is an instance of a class
+    CheckInstance {
+        #[arg(default_value = ".")]
+        workspace: PathBuf,
+        #[arg(long)]
+        individual: String,
+        #[arg(long)]
+        class: String,
+        #[arg(long, default_value = "rl")]
         profile: String,
         #[arg(long, value_enum, default_value_t = OutputFormat::Text)]
         format: OutputFormat,
@@ -539,6 +564,49 @@ fn main() -> Result<()> {
                     println!("class: {}", result.class_iri);
                     println!("{}", result.text);
                 }
+            }
+        }
+        Commands::Realize { workspace, profile, format } => {
+            let profile_id = ReasonerId::parse(&profile).map_err(|e| anyhow::anyhow!(e))?;
+            let input =
+                WorkspaceInputLoader::new(&workspace).load().map_err(|e| anyhow::anyhow!(e))?;
+            let result = realize(profile_id, &input).map_err(|e| anyhow::anyhow!(e))?;
+            match format {
+                OutputFormat::Json => println!("{}", serde_json::to_string_pretty(&result)?),
+                OutputFormat::Text | OutputFormat::Csv => {
+                    println!("profile: {}", result.profile_used);
+                    println!("individuals: {}", result.individuals.len());
+                    for entry in &result.individuals {
+                        println!(
+                            "{} types=[{}] most_specific=[{}]",
+                            entry.individual_iri,
+                            entry.types.join(", "),
+                            entry.most_specific.join(", ")
+                        );
+                    }
+                }
+            }
+        }
+        Commands::CheckInstance { workspace, individual, class, profile, format } => {
+            let profile_id = ReasonerId::parse(&profile).map_err(|e| anyhow::anyhow!(e))?;
+            let input =
+                WorkspaceInputLoader::new(&workspace).load().map_err(|e| anyhow::anyhow!(e))?;
+            let result = check_instance(profile_id, &input, &individual, &class)
+                .map_err(|e| anyhow::anyhow!(e))?;
+            match format {
+                OutputFormat::Json => println!("{}", serde_json::to_string_pretty(&result)?),
+                OutputFormat::Text | OutputFormat::Csv => {
+                    println!(
+                        "{} instanceOf {} => {} ({}ms)",
+                        result.individual_iri,
+                        result.class_iri,
+                        result.entailed,
+                        result.duration_ms
+                    );
+                }
+            }
+            if !result.entailed {
+                bail!("instance check failed");
             }
         }
         Commands::Robot { command } => {

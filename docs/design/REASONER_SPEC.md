@@ -159,7 +159,7 @@ v0.6 ships EL explanations where available; v1.0 exit requires DL explanations �
 
 Format is OntoCode's LSP JSON mapping of `ontologos-explain` output — UX parity with Protégé, not HermiT wire compatibility.
 
-## 7. Instance checking (P1)
+## 7. Instance checking (P0 — v0.23)
 
 - Optional `check_instances` on `ReasonerAdapter`
 - Surface in inspector for named individuals
@@ -195,7 +195,7 @@ v0.9: evaluate `ontologos-watch` for invalidating cache on file change ([ADR-001
 | Reasoner errors in Problems panel | P0 | OntoCore |
 | `rl` / `rdfs` adapters | P1 | 0.9.0 |
 | `auto` profile routing | P1 | **1.0.0** |
-| Instance checking | P1 | 1.0.0 (`ontologos-abox`) |
+| Instance checking | P0 | 0.23.0 |
 
 ## 11. Dependency versions
 

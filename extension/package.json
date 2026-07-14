@@ -2,7 +2,7 @@
   "name": "ontocode",
   "displayName": "OntoCode",
   "description": "Ontology IDE for VS Code powered by OntoCore. Browse, edit Turtle, query, reason (EL–DL), validate, and diff OWL/RDF/OBO ontologies from the IDE or CI.",
-  "version": "0.22.0",
+  "version": "0.23.0",
   "publisher": "ontocode",
   "license": "MIT",
   "repository": {
@@ -194,6 +194,14 @@
       {
         "command": "ontocode.addManchesterAxiom",
         "title": "OntoCode: Add Manchester Axiom"
+      },
+      {
+        "command": "ontocode.openRuleBrowser",
+        "title": "OntoCode: Open SWRL Rule Browser"
+      },
+      {
+        "command": "ontocode.openRuleEditor",
+        "title": "OntoCode: Open SWRL Rule Editor"
       },
       {
         "command": "ontocode.runReasoner",

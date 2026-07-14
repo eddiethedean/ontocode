@@ -2,6 +2,7 @@
 //!
 //! Published as [`ontocore-reasoner`](https://crates.io/crates/ontocore-reasoner).
 
+mod abox;
 mod adapter;
 mod auto;
 mod cache;
@@ -15,13 +16,27 @@ mod rdfs;
 mod result;
 mod rl;
 mod runner;
+mod swrl_run;
 
+pub use abox::{
+    cancel_requested, check_full_consistency, clear_cancel_flag,
+    inferred_assertions_from_realization, install_cancel_flag,
+};
 pub use adapter::{ReasonerAdapter, ReasonerId, ReasonerProfile};
 pub use cache::{ReasonerCache, ReasonerCacheStore};
 pub use error::{ReasonerError, Result};
 pub use input::{ReasonerInput, WorkspaceInputLoader};
 pub use result::{
-    expand_named_unsatisfiable, ClassificationResult, ConsistencyResult, ExplanationRequest,
-    ExplanationResult, ExplanationStep, InferredHierarchy, ReasonerSnapshot, ReasonerWarning,
+    expand_named_unsatisfiable, ClassificationResult, ConsistencyDetail, ConsistencyResult,
+    ExplanationRequest, ExplanationResult, ExplanationStep, InferredAssertions,
+    InferredClassAssertion, InferredHierarchy, InferredObjectPropertyAssertion,
+    InstanceCheckResult, RealizationEntry, RealizationResult, ReasonerSnapshot, ReasonerWarning,
+    SameAsCluster,
 };
-pub use runner::{classify, explain, explain_alternatives};
+pub use runner::{
+    check_consistency, check_instance, classify, explain, explain_alternatives,
+    inferred_assertions, realize,
+};
+pub use swrl_run::{
+    classify_with_swrl, inject_swrl_from_turtle, input_has_swrl_rules, ontology_has_swrl_rules,
+};

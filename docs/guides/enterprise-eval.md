@@ -29,7 +29,7 @@ Prefer Protégé or other tools (or wait for v1.0) if you need:
 | [Protégé coexistence](protege-coexistence.md) | Ontology teams — split workflow with Protégé |
 | [Plugin authoring](plugins.md) | Platform — v0.16+ plugin API (permissions, views, preferences, context actions), manifests, subprocess plugins |
 
-## What ships today (v0.22.0)
+## What ships today (v0.23.0)
 
 | Capability | Status |
 |------------|--------|

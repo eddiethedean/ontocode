@@ -4,7 +4,7 @@ Embed **OntoCore** in tools, pipelines, or custom CLIs via the [`ontocore`](http
 
 > OntoCore (previously branded **OntoIndex** / `ontoindex-*`) is implemented by the `ontocore-*` crates. See [v0.9 migration](../migration/v0.9.md).
 
-Pre-1.0: public APIs may change between minor releases until v1.0. Pin minors in production. Crates are at **0.22.x**.
+Pre-1.0: public APIs may change between minor releases until v1.0. Pin minors in production. Crates are at **0.23.x**.
 
 !!! tip "Prefer `Workspace`"
     For new code, use the **`Workspace` API** (`ontocore = "0.22"`). Lower-level `IndexBuilder` remains available for specialized pipelines — see [Rust API](../ontocore/rust-api.md).

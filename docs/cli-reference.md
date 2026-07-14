@@ -1,11 +1,11 @@
-# CLI reference (OntoCore v0.22)
+# CLI reference (OntoCore v0.23)
 
 The `ontocore` binary indexes ontology workspaces and exposes query, validation, patch, and reasoning commands.
 
 Install (pin latest tagged release):
 
 ```bash
-cargo install ontocore-cli --locked --version 0.22.0
+cargo install ontocore-cli --locked --version 0.23.0
 ```
 
 From a git clone, use `cargo run --` instead of `ontocore`.

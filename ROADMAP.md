@@ -20,7 +20,7 @@ Every feature before 1.0 should answer one question:
 
 After 1.0, the roadmap shifts from parity to modernization.
 
-> **Not a Protégé replacement today.** v0.21 supports pilot and coexistence workflows — not org-wide Protégé retirement. See [What ships today](docs/SHIPPED.md) and [Known limitations](docs/known-limitations.md).
+>  **Not a Protégé replacement today.** v0.23 supports pilot and coexistence workflows — not org-wide Protégé retirement. See [What ships today](docs/SHIPPED.md) and [Known limitations](docs/known-limitations.md).
 
 ---
 
@@ -39,7 +39,7 @@ After 1.0, the roadmap shifts from parity to modernization.
 | [PRODUCT_ROADMAP_2.0.md](docs/ui/PRODUCT_ROADMAP_2.0.md) | UI phases with milestone acceptance criteria |
 | [ui/README.md](docs/ui/README.md) | Product design specification pack (UX, design system, OntoStudio target) |
 
-**Current release:** v0.22.0
+**Current release:** v0.23.0
 
 ---
 
@@ -109,7 +109,7 @@ Web foundation       Team workspaces          Cloud collaboration
 | 20 | v0.20 | F | Shipped | 1† | Workspace runtime |
 | 21 | v0.21 | F | Shipped | — | RDF/XML + OWL/XML write-back |
 | 22 | v0.22 | F | Shipped | 2† | Complete OWL 2 authoring |
-| 23 | v0.23 | F | Planned | 5† | Reasoning parity + SWRL |
+| 23 | v0.23 | F | Shipped | 5† | Reasoning parity + SWRL |
 | 24 | v0.24 | F | Planned | 3†, 6† | Refactoring + DL Query parity |
 | 25 | v0.25 | F | Planned | 4†, 8† | Viz + plugin SDK 1.0 + a11y + parity CI |
 | 26 | 1.0.0-rc | F | Planned | — | Stabilize; all P0 VERIFIED |
@@ -594,7 +594,7 @@ See [migration/v0.22.md](docs/migration/v0.22.md).
 
 ---
 
-### v0.23 — Reasoning parity + SWRL (planned)
+### v0.23 — Reasoning parity + SWRL (shipped)
 
 **Theme:** TBox/ABox reasoning workflows and SWRL subsystem.
 

@@ -88,7 +88,7 @@ export function classRootEntities(snapshot: CatalogSnapshot, mode: HierarchyMode
   const entityIris = new Set(snapshot.entities.map((e) => e.iri));
   const childSet = new Set(hierarchy.edges.map((e) => e.child));
 
-  return classes.filter((c) => {
+  const roots = classes.filter((c) => {
     if (!childSet.has(c.iri)) {
       return true;
     }
@@ -96,6 +96,12 @@ export function classRootEntities(snapshot: CatalogSnapshot, mode: HierarchyMode
     const hasCatalogParent = parents.some((p) => entityIris.has(p));
     return !hasCatalogParent;
   });
+  // Pure SubClassOf cycles leave every class with a parent — fall back so classes
+  // remain discoverable under hierarchy roots (#222).
+  if (roots.length === 0 && classes.length > 0) {
+    return [...classes].sort((a, b) => a.iri.localeCompare(b.iri));
+  }
+  return roots;
 }
 
 export function propertyGroupsPresent(

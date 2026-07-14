@@ -127,6 +127,19 @@ describe("entityBelongsToDocument", () => {
     });
     assert.equal(entityBelongsToDocument(ont, document), true);
   });
+
+  it("does not match nested overlapping bases via startsWith (#234)", () => {
+    const broader = doc({
+      id: "doc-broad",
+      base_iri: "http://example.org/ont",
+    });
+    const entityOnLonger = entity({
+      iri: "http://example.org/ontology#A",
+      kind: "class",
+      ontology_id: "http://example.org/ontology",
+    });
+    assert.equal(entityBelongsToDocument(entityOnLonger, broader), false);
+  });
 });
 
 describe("MISSING_ONTOLOGY_HEADER_MESSAGE", () => {

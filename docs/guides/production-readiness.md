@@ -13,7 +13,7 @@ Canonical capability matrix: [What ships today](../SHIPPED.md). Follow-on pilot 
 | **In development** | Next unreleased minor on `main` | May preview upcoming work — pin installs to [TAGGED_RELEASE](../TAGGED_RELEASE), not workspace `Cargo.toml`. |
 | **v1.0 target** | Planned | Protégé-competitive OWL 2 DL + OBO in VS Code — [Protégé vs OntoCode](protege-decision.md); capability truth: [SHIPPED](../SHIPPED.md) + [known limitations](../known-limitations.md). |
 
-OntoCode **v0.24** is suitable for pilot IDE editing, Linux CI validate/classify/realize, and coexistence with Protégé — **not** an org-wide Protégé retirement. RDF/XML and OWL/XML write-back are semantic re-serialize (ships since v0.21). Realization, instance checking, and SWRL (DLSafe + classify materialize) ship in v0.24; Protégé DL Query syntax does not — [DL Query vs Query Workbench](dl-query.md).
+OntoCode **v0.24** is suitable for pilot IDE editing, Linux CI validate/classify/realize/dl-query, and coexistence with Protégé — **not** an org-wide Protégé retirement. RDF/XML and OWL/XML write-back are semantic re-serialize (ships since v0.21). Realization, instance checking, and SWRL (DLSafe + classify materialize) ship since v0.23. Query Workbench **DL** mode / `ontocore dl-query` ships in v0.24 — see honesty notes in [DL Query vs Query Workbench](dl-query.md) (not full Protégé DL Query tab parity).
 
 ## Approved use cases (pilot or production)
 
@@ -26,12 +26,12 @@ OntoCode **v0.24** is suitable for pilot IDE editing, Linux CI validate/classify
 | SWRL materialize on classify | **Pilot** | Rules via IDE / LSP / patches; no `ontocore swrl` CLI — [SWRL examples](../examples/swrl.md) |
 | Developer IDE for Turtle/OBO authoring | **Pilot** | Turtle + OBO write-back; pre-1.0 extension APIs |
 | Developer IDE for RDF/XML / OWL/XML light edits | **Pilot** | Semantic re-serialize; core ops — [OWL/XML write-back](owl-xml-workflow.md) |
-| Workspace refactoring (rename, migrate, move, extract) | **Pilot** | Turtle only; preview before apply — [Refactoring guide](refactoring.md) |
+| Workspace refactoring (rename, migrate, move, extract, merge, replace) | **Pilot** | Rename/merge/replace multi-format; move/extract Turtle-first; preview before apply — [Refactoring guide](refactoring.md) |
 | Semantic diff in PR review | **Pilot** | `ontocore diff` + VS Code panel — [Semantic diff](../ontocode/semantic-diff.md) |
-| Ontology browse/query in VS Code | **Pilot** | SQL catalog / SPARQL — **not** Protégé DL Query — [DL Query honesty](dl-query.md) |
+| Ontology browse/query in VS Code | **Pilot** | SQL / SPARQL + Workbench **DL** mode — [DL Query honesty](dl-query.md) |
 | Air-gapped VS Code install | **Pilot** | VSIX + SHA256 — [enterprise deployment](enterprise-deployment.md) |
 | OBO index + write-back + ROBOT CLI in CI | **Pilot** | Index and edit `.obo`; `ontocore robot validate` — requires Java + `robot` on PATH — [ROBOT interop](robot-interop.md) |
-| Replace Protégé for full OWL 2 DL engineering | **Not supported** | DL classification / realize / SWRL ship; DL Query UI and full axiom catalog remain pre-1.0; XML not byte-identical — [Protégé coexistence](protege-coexistence.md) |
+| Replace Protégé for full OWL 2 DL engineering | **Not supported** | Classification, realize, SWRL, and DL Query Workbench ship; full axiom catalog + Protégé tab parity remain pre-1.0; XML not byte-identical — [Protégé coexistence](protege-coexistence.md) |
 | Org-wide mandatory IDE standard | **Defer** | Complete pilot + legal review first |
 
 ## Pilot criteria (recommended before wider rollout)
@@ -97,10 +97,10 @@ Developers (VS Code + OntoCode VSIX)
   Ontology workspace (.ttl / .obo / .owl / .rdf / .owx editable; JSON-LD / NT / TriG read-only)
         │
         ▼
-  CI pipeline (ontocore validate / classify / realize / robot)
+  CI pipeline (ontocore validate / classify / realize / dl-query / robot)
         │
         ▼
-  Optional: Protégé for DL Query and advanced axiom review
+  Optional: Protégé for byte-identical XML, uncovered axiom types, and Protégé-only plugins
 ```
 
 ## Related

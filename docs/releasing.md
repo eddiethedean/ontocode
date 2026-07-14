@@ -5,7 +5,7 @@ Maintainer checklist for publishing crates, binaries, and the VS Code extension.
 ## Version bump
 
 1. Update `[workspace.package].version` in root [Cargo.toml on GitHub](https://github.com/eddiethedean/ontocode/blob/main/Cargo.toml)
-2. Update **`docs/TAGGED_RELEASE`** to the new tag (public install pins follow this file until the next release)
+2. Update **`docs/TAGGED_RELEASE`** in the release commit that cuts that tag — public install pins must equal the **published** GitHub Release version (never bump pins on a working branch before the tag exists)
 3. Update `extension/package.json` and `extension/webview-ui/package.json` `version`
 3. Update [CHANGELOG.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) and [docs/changelog.md](changelog.md)
 4. Regenerate [NOTICES on GitHub](https://github.com/eddiethedean/ontocode/blob/main/NOTICES) if dependencies changed (`cargo license` recommended)

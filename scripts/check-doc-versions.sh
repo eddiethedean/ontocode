@@ -455,6 +455,39 @@ else
   echo "ok: docs/security.md tagged supported version"
 fi
 
+# SECURITY.md ↔ docs/security.md N−1 minor must match (previous tagged line)
+N1_MINOR="$(python3 - <<PY
+maj, min, _ = "${TAGGED_VERSION}".split(".")
+print(f"{maj}.{int(min) - 1}")
+PY
+)"
+if ! grep -qE "${N1_MINOR}\\.x[[:space:]]*\\| Yes" SECURITY.md \
+  || ! grep -qE "${N1_MINOR}\\.x[[:space:]]*\\| Yes" docs/security.md; then
+  echo "FAIL: SECURITY.md and docs/security.md must both list ${N1_MINOR}.x as Yes (N−1)" >&2
+  fail=1
+else
+  echo "ok: SECURITY.md and docs/security.md N−1 (${N1_MINOR}.x) agree"
+fi
+
+# Tier-1 pages must not claim DL Query is unshipped when SHIPPED says Yes
+if grep -qE 'DL Query \(Workbench DL mode' docs/SHIPPED.md 2>/dev/null \
+  && grep -qE 'Shipped' docs/SHIPPED.md 2>/dev/null; then
+  for anti_dl in docs/guides/protege-decision.md docs/guides/production-readiness.md docs/guides/enterprise-eval.md; do
+    if grep -qE 'DL Query.*(Not shipped|does not)|without Protégé DL Query' "$anti_dl" 2>/dev/null; then
+      echo "FAIL: $anti_dl still claims DL Query is unshipped / optional gap after v0.24" >&2
+      fail=1
+    fi
+  done
+fi
+
+# CLI refactor merge/replace must not be documented as IDE-only
+if grep -qE 'no.*\`ontocore refactor merge\`|IDE-only:.*Merge entities' docs/cli-reference.md docs/guides/refactoring.md 2>/dev/null; then
+  echo "FAIL: cli-reference/refactoring still claim merge/replace are IDE-only" >&2
+  fail=1
+else
+  echo "ok: CLI merge/replace not marked IDE-only"
+fi
+
 # v0.8 docs added in adoption review
 for file in docs/guides/refactoring.md docs/migration/v0.8.md docs/migration/v0.9.md docs/migration/v0.10.md docs/examples/refactoring.md docs/ontocode/semantic-diff.md docs/ontocore/rust-api.md docs/guides/protege-migration.md docs/ontocode/feature-tour.md; do
   if [[ ! -f "$file" ]]; then

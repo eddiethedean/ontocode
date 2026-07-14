@@ -8,10 +8,11 @@ Runnable examples for OntoCore CLI, Rust embedding, and OntoCode workflows.
 |-------|-------------|
 | [Query cookbook](queries.md) | SQL and SPARQL over virtual tables |
 | [Sample patches](patches.md) | `ontocore patch` JSON for Turtle, OBO, RDF/XML, and OWL/XML write-back |
-| [Refactoring](refactoring.md) | Rename, migrate namespace, move, extract |
+| [Refactoring](refactoring.md) | Rename, merge, replace, migrate, move, extract |
+| [DL Query](dl-query.md) | Manchester class expressions (CLI / Workbench DL mode) |
 | [Classify](classify.md) | Reasoner profiles and CI exit semantics |
-| [Realize / instance check](realize.md) | ABox realization and `check-instance` (v0.24) |
-| [SWRL](swrl.md) | Rule patches + LSP validate/list (v0.24) |
+| [Realize / instance check](realize.md) | ABox realization and `check-instance` (v0.23+) |
+| [SWRL](swrl.md) | Rule patches + LSP validate/list (v0.23+) |
 | [Semantic diff](diff.md) | Git refs, PR summary, directory compare |
 | [Docs export](docs-export.md) | Markdown/HTML documentation export |
 | [Index vs inspect](inspect.md) | Stats-only vs diagnostic summary |

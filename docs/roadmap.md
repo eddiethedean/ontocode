@@ -1,6 +1,8 @@
 # OntoCore & OntoCode Roadmap
 
-> **Multiple roadmap documents?** See [Roadmap hub](roadmap-hub.md) to pick the right page. For **what ships today**, use [SHIPPED.md](SHIPPED.md).
+> **Canonical full roadmap:** [ROADMAP.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/ROADMAP.md) (includes Era I webapp / WASM / React app no-backend detail).  
+> **This RTD page** is a condensed summary for ships + near-term phases.  
+> **Which roadmap?** [Roadmap hub](roadmap-hub.md). **What ships today?** [SHIPPED.md](SHIPPED.md).
 
 ## Vision
 

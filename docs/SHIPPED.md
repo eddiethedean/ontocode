@@ -148,7 +148,7 @@ Remaining 1.0 targets: [known limitations](known-limitations.md) · [Protégé v
 |------------|-------|
 | Multi-root VS Code workspaces | **All folders indexed** (v0.10+), including peer folders added after open. Manual **Index Workspace** may prompt when multiple roots are open |
 | Write-back | **Turtle, OBO, RDF/XML, OWL/XML**; JSON-LD, N-Triples, TriG read-only. XML is semantic re-serialize (not byte-identical). See [Capabilities by format](guides/capabilities-by-format.md) |
-| Refactoring | **Turtle (`.ttl`) only**; extract module uses direct-reference closure |
+| Refactoring | Rename / merge / replace: Turtle + RDF/XML + OWL/XML + OBO (format-specific remaps). Move / extract / flatten / cleanup imports: Turtle-first. Extract uses direct-reference closure (optional `--locality`) — not full locality profiling |
 | Class hierarchy tree | Named-parent edges; **inferred/combined** after reasoner run |
 | Reasoning | **EL / RL / RDFS / DL / auto** via Ontologos 1.x (not certified HermiT-identical) |
 | CLI release binaries | Linux x64 only; macOS/Windows use `cargo install` or bundled LSP in VSIX |

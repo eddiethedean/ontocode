@@ -1,11 +1,10 @@
 # UI roadmap mapping
 
-> **Document type:** Release mapping for UI design specs. For shipped product capabilities, see [SHIPPED.md](../SHIPPED.md).
-
-
+> **Document type:** Engineering / design mapping (GitHub). **Not** the evaluator capability matrix — use [What ships today](../SHIPPED.md) for adoption decisions.
+>
 > **Purpose:** Connect the [Product Roadmap 2.0](PRODUCT_ROADMAP_2.0.md) UX phases to **shipped** OntoCore/OntoCode releases and **planned** platform milestones.
 >
-> **Canonical shipped matrix:** [What ships today](../SHIPPED.md) · **Platform roadmap:** [roadmap.md](../roadmap.md) · **v1.0 checklist:** [v1.0_BACKLOG.md](../design/v1.0_BACKLOG.md)
+> **Canonical shipped matrix:** [What ships today](../SHIPPED.md) · **Platform roadmap:** [GitHub ROADMAP.md](https://github.com/eddiethedean/ontocode/blob/main/ROADMAP.md) · **v1.0 checklist:** [v1.0_BACKLOG.md](../design/v1.0_BACKLOG.md)
 
 ## How to use this document
 
@@ -31,7 +30,7 @@
 
 ## Master checklist — Product Roadmap 2.0
 
-Every item from [PRODUCT_ROADMAP_2.0.md](PRODUCT_ROADMAP_2.0.md), with release assignment. **Shipped** = available in the current release unless noted (v0.18.0).
+Every item from [PRODUCT_ROADMAP_2.0.md](PRODUCT_ROADMAP_2.0.md), with release assignment. **Shipped** = available in the tagged release named in the Target column (current public pin: **v0.24.0**).
 
 | UI phase | Deliverable | Status | Target release | Spec |
 |----------|-------------|--------|----------------|------|

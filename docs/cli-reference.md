@@ -239,9 +239,7 @@ ontocore check-instance . \
 
 ### `refactor`
 
-Workspace-wide Turtle refactoring. See [Refactoring guide](guides/refactoring.md).
-
-> **IDE-only:** **Merge entities** and **replace entity references** are available in the OntoCode extension (refactor preview). There is **no** `ontocore refactor merge` / `replace` CLI subcommand — see [What ships today](SHIPPED.md).
+Workspace refactoring (rename / merge / replace across formats where remaps apply; move / extract / import ops are Turtle-first). See [Refactoring guide](guides/refactoring.md).
 
 #### `refactor usages`
 
@@ -256,7 +254,7 @@ ontocore refactor usages . 'http://example.org/people#Person' --format json
 
 #### `refactor rename`
 
-Rename an entity IRI in all Turtle files.
+Rename an entity IRI across indexed ontology files (Turtle + format remaps for RDF/XML, OWL/XML, OBO).
 
 ```bash
 ontocore refactor rename fixtures \
@@ -275,6 +273,42 @@ ontocore refactor rename fixtures \
 | `--to` | New entity IRI (required) |
 | `--preview` | Print plan without writing files |
 | `--format` | `text` (default) or `json` |
+
+#### `refactor merge`
+
+Merge one entity into another (rewrite references to the keep IRI; drop the merge declaration).
+
+```bash
+ontocore refactor merge fixtures \
+  --keep 'http://example.org/people#Person' \
+  --merge 'http://example.org/people#Human' \
+  --preview
+```
+
+| Flag | Description |
+|------|-------------|
+| `--keep` | Survivor entity IRI (required) |
+| `--merge` | Duplicate entity IRI to fold in (required) |
+| `--preview` | Print plan without writing files |
+| `--format` | `text` or `json` |
+
+#### `refactor replace`
+
+Replace references to one entity with another (keeps source declaration when the target already exists).
+
+```bash
+ontocore refactor replace fixtures \
+  --from 'http://example.org/people#OldName' \
+  --to 'http://example.org/people#NewName' \
+  --preview
+```
+
+| Flag | Description |
+|------|-------------|
+| `--from` | Source entity IRI (required) |
+| `--to` | Target entity IRI (required) |
+| `--preview` | Print plan without writing files |
+| `--format` | `text` or `json` |
 
 #### `refactor migrate-namespace`
 
@@ -319,6 +353,7 @@ ontocore refactor extract fixtures \
   --entities 'http://example.org/people#Person,http://example.org/people#Student' \
   --out ./core.ttl \
   --leave-stub \
+  --locality \
   --preview
 ```
 
@@ -327,10 +362,31 @@ ontocore refactor extract fixtures \
 | `--entities` | Comma-separated entity IRIs (required) |
 | `--out` | Output `.ttl` path (required) |
 | `--leave-stub` | Leave import stubs in source files |
+| `--locality` | Close seed signature under bottom-locality heuristic before extract |
 | `--preview` | Print plan without writing |
 | `--format` | `text` or `json` |
 
-**Exit (rename / migrate / move / extract):** 0 on success; non-zero on invalid request, path jail violation, or I/O failure. With `--preview`, files are not written.
+#### `refactor merge-ontologies`
+
+Merge one or more Turtle ontology files into a target Turtle file.
+
+```bash
+ontocore refactor merge-ontologies fixtures \
+  --sources ./a.ttl --sources ./b.ttl \
+  --target ./combined.ttl \
+  --preview
+```
+
+#### `refactor flatten-imports` / `cleanup-imports`
+
+Inline imported Turtle axioms (flatten) or remove unused `owl:imports` (cleanup heuristic).
+
+```bash
+ontocore refactor flatten-imports fixtures --file ./root.ttl --preview
+ontocore refactor cleanup-imports fixtures --file ./root.ttl --preview
+```
+
+**Exit (rename / merge / replace / migrate / move / extract / ontology ops):** 0 on success; non-zero on invalid request, path jail violation, or I/O failure. With `--preview`, files are not written.
 
 ### `diff`
 

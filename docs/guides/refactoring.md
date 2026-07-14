@@ -32,7 +32,7 @@ Canonical capability matrix: [What ships today](../SHIPPED.md).
 2. Enter survivor/duplicate IRIs (merge) or source/target IRIs (replace).
 3. Review the **Refactor Preview** panel and click **Apply**.
 
-These operations apply to **Turtle (`.ttl`)** only and are not available on the CLI yet.
+Rename / merge / replace also run from the CLI (`ontocore refactor …`). They rewrite Turtle plus RDF/XML, OWL/XML, and OBO where remaps apply (non-Turtle files may be skipped with warnings).
 
 ### Rename, migrate, move, or extract
 
@@ -53,13 +53,34 @@ Standard LSP **Rename** (`F2` on an IRI in a `.ttl` file) also triggers IRI rena
 | **OntoCode: Merge Entities** | Merge two entities (survivor + duplicate) across Turtle files |
 | **OntoCode: Replace Entity** | Replace references to one IRI with another (preview + apply) |
 
-Merge and Replace are **IDE-only** today — there is no `ontocore refactor merge` CLI subcommand. Use preview before apply in production repos.
+Use **`--preview`** before apply in production repos.
 
 After apply, the workspace re-indexes automatically. If re-index fails, you may see `reindex_warning` — run **OntoCode: Index Workspace**.
 
 ## CLI examples
 
 Replace `fixtures` with your ontology root (or use `cargo run --` from a git clone).
+
+### Merge or replace entities
+
+```bash
+ontocore refactor merge fixtures \
+  --keep 'http://example.org/people#Person' \
+  --merge 'http://example.org/people#Human' \
+  --preview
+
+ontocore refactor replace fixtures \
+  --from 'http://example.org/people#OldName' \
+  --to 'http://example.org/people#NewName' \
+  --preview
+```
+
+| Flag | Description |
+|------|-------------|
+| `--keep` / `--merge` | Survivor and duplicate IRIs for merge |
+| `--from` / `--to` | Source and target IRIs for replace |
+| `--preview` | Print plan without writing files |
+| `--format` | `text` (default) or `json` |
 
 ### Find usages
 

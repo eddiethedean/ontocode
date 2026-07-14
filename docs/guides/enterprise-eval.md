@@ -61,9 +61,12 @@ Prefer Protégé or other tools (or wait for v1.0) if you need:
 | Graph asserted/inferred/combined modes | **Shipped** (v0.15) |
 | Reference plugins (naming validator, Markdown exporter, SHACL scaffold) | **Shipped** (v0.14) |
 | owlmake workflow scaffold (`ontocore workflow run`) | **Shipped** (v0.14 — subprocess; not production-hardened) |
-| Realization / instance checking (`realize`, `check-instance`) | **Shipped** (v0.24) |
+| Realization / instance checking (`realize`, `check-instance`) | **Shipped** (v0.23) |
 | SWRL rule browser / editor / validate | **Shipped** (v0.23; DLSafe) |
-| Engine-level reasoner cancel | **Shipped** (v0.24) |
+| Engine-level reasoner cancel | **Shipped** (v0.23) |
+| DL Query (Workbench DL mode, CLI `dl-query`, LSP) | **Shipped** (v0.24) — [honesty notes](dl-query.md) |
+| Refactor merge / replace (CLI + IDE; multi-format rename) | **Shipped** (v0.24) |
+| Workspace search LSP (`ontocore/search`) | **Shipped** (v0.24) |
 
 Full gap analysis for evaluators: [Known limitations](../known-limitations.md) · [What ships today](../SHIPPED.md) · [Protégé decision](protege-decision.md).
 
@@ -109,7 +112,7 @@ A [first-week Protégé migration guide](protege-migration.md) ships today. Roun
 - [Protégé coexistence guide](protege-coexistence.md) — split workflow when keeping Protégé for specific features
 - [OWL/XML and RDF/XML write-back](owl-xml-workflow.md) — semantic re-serialize caveats
 
-- Use OntoCode for **Turtle / OBO / RDF/XML / OWL/XML editing in VS Code** (XML with caveats), **CI validation**, **SQL/SPARQL queries**, **Manchester axioms** (richest on Turtle), **workspace refactoring** (Turtle), **property chain editing**, and **EL/RL/RDFS/DL classification**
+- Use OntoCode for **Turtle / OBO / RDF/XML / OWL/XML editing in VS Code** (XML with caveats), **CI validation**, **SQL/SPARQL + DL Query Workbench**, **Manchester axioms** (richest on Turtle), **workspace refactoring** (rename/merge/replace multi-format; move/extract Turtle-first), **property chain editing**, and **EL/RL/RDFS/DL classification**
 - Keep Protégé for **byte-identical XML layout**, **Protégé-specific plugins**, and axiom types still listed under [known limitations](../known-limitations.md) until v1.0
 - See [Protégé vs OntoCode](protege-decision.md) and [What ships today](../SHIPPED.md)
 
@@ -120,7 +123,7 @@ A [first-week Protégé migration guide](protege-migration.md) ships today. Roun
 3. Run the [production evidence protocol](production-evidence.md) on your corpus
 4. Run `ontocore validate` and optionally `ontocore classify --profile el` or `--profile dl` in a test CI job ([ci-integration.md](../ci-integration.md))
 5. Optional: `ontocore realize` on a representative ABox corpus and a SWRL dual-check ([realize](../examples/realize.md) · [swrl](../examples/swrl.md) · [week-2](enterprise-week-2.md))
-6. Confirm Query Workbench is acceptable without Protégé DL Query — [dl-query.md](dl-query.md)
+6. Trial Query Workbench **DL** mode / `ontocore dl-query` against your Manchester expressions — [dl-query.md](dl-query.md)
 7. Review [Protégé decision matrix](protege-decision.md) and [platform compatibility](platform-compatibility.md)
 8. Review [security policy](../security.md) and [governance](governance.md) with your platform team
 9. Compare [What ships today](../SHIPPED.md) and [known limitations](../known-limitations.md) against your requirements; read [release timeline](release-timeline.md) for planning (no fixed v1.0 date)

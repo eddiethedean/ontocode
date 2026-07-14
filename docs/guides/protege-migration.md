@@ -67,7 +67,7 @@ Follow the [first success core path](../guides/first-success.md) if anything is 
 ## Day 3 — Validate in CI
 
 ```yaml
-- run: cargo install ontocore-cli --locked --version 0.23.0
+- run: cargo install ontocore-cli --locked --version 0.24.0
 - run: ontocore validate ./src/ontologies
 ```
 

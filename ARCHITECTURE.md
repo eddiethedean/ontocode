@@ -4,7 +4,7 @@
 >
 > Edit **`docs/architecture.md`** for content changes. This root file is a GitHub landing pointer so links from the repository root stay valid.
 
-**Latest tagged: v0.24.0 — v0.24 ships today. OntoCode (VS Code) + OntoCore (CLI/LSP/library).
+**Latest tagged: v0.24.0** — v0.24 ships today. OntoCode (VS Code) + OntoCore (CLI/LSP/library).
 
 ## Quick map
 

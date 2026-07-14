@@ -30,7 +30,7 @@ LSP JSON uses **snake_case** for enums serialized from Rust (`EntityKind`, `Pars
 **Reference links (implementation):**
 
 - Types: [`protocol.rs` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/crates/ontocore-lsp/src/protocol.rs)
-- JSON Schema: [`lsp-protocol.schema.json`](lsp-protocol.schema.json) — query, patch, reasoner, refactor, graph, semantic diff, schema browser, PR summary, plugin payloads, explanation alternatives.
+- JSON Schema: [`lsp-protocol.schema.json`](lsp-protocol.schema.json) — query, DL Query, search, patch, reasoner, refactor, graph, semantic diff, schema browser, PR summary, plugin payloads, SWRL, explanation alternatives.
 - Handlers: [`handlers.rs` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/crates/ontocore-lsp/src/handlers.rs)
 - Extension client: [`client.ts` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/extension/src/lsp/client.ts)
 
@@ -614,6 +614,50 @@ Plugin diagnostics use `code` values like `plugin:<id>:<code>` and LSP `source` 
 **Errors:** `NOT_INDEXED`, `INDEX_FAILED` (plugin not found, missing permission, unsupported action, subprocess failure, or export error)
 
 `getCatalogSnapshot` includes plugin diagnostics merged after index (same wire codes).
+
+### `ontocore/dlQuery` (v0.24+)
+
+Run a Manchester **class expression** DL Query (instances / subclasses / superclasses / equivalents). Named classes use hierarchy + realization; anonymous expressions inject a temporary equivalent class (never written to disk).
+
+**Params:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `expression` | string | Manchester class expression |
+| `profile` | string? | Reasoner profile (default `dl`) |
+| `mode` | string? | `inferred` (default) or `asserted` |
+| `document_uri` | string? | Optional document for prefix context |
+
+**Result:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `expression` | string | Input expression |
+| `normalized` | string | Normalized form |
+| `query_class_iri` | string | Named class or temporary query class IRI |
+| `subclasses` / `superclasses` / `equivalents` / `instances` | string[] | Hit IRIs |
+| `profile` / `mode` | string | Profile and query mode used |
+| `duration_ms` | integer | Elapsed time |
+| `warnings` / `diagnostics` | string[] | Optional messages |
+
+**Errors:** `NOT_INDEXED`, `REASONER_FAILED`, `INVALID_PARAMS`, `MANCHESTER_INVALID`
+
+Honesty notes: [DL Query guide](guides/dl-query.md) · cookbook: [examples/dl-query.md](examples/dl-query.md).
+
+### `ontocore/search` (v0.24+)
+
+Workspace entity search for QuickPick / live search UIs.
+
+**Params:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `query` | string | Search text (short name / IRI substring) |
+| `limit` | integer? | Max hits (default 100, capped at 500) |
+
+**Result:** `{ entities: EntityDetail[] }`
+
+**Errors:** `NOT_INDEXED`
 
 ### `ontocore/checkInstance` (v0.23+)
 

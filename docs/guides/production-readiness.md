@@ -2,34 +2,36 @@
 
 This page states what OntoCode / OntoCore **v0.23.0** (latest tagged) is appropriate for in production-like environments. It is not legal advice and does not replace your organization's risk review.
 
-Canonical capability matrix: [What ships today](../SHIPPED.md).
+Canonical capability matrix: [What ships today](../SHIPPED.md). Follow-on pilot weeks: [Enterprise week-2 playbook](enterprise-week-2.md).
 
 ## Maturity model
 
 | Level | Version | Meaning |
 |-------|---------|---------|
 | **Pre-1.0** | **0.23.x (latest tagged)** | Pin `cargo install ontocore-cli --locked --version 0.23.0` in CI. Library APIs may change until [v1.0](../design/v1.0_BACKLOG.md). |
-| **Stable CI gates** | 0.23.x | `ontocore validate`, `ontocore classify`, and `ontocore diff` are documented for CI — see [workspace limits](../workspace-limits.md). |
+| **Stable CI gates** | 0.23.x | `ontocore validate`, `ontocore classify`, `ontocore realize`, `ontocore check-instance`, and `ontocore diff` are documented for CI — see [workspace limits](../workspace-limits.md). |
 | **In development** | Next unreleased minor on `main` | May preview upcoming work — pin installs to [TAGGED_RELEASE](../TAGGED_RELEASE), not workspace `Cargo.toml`. |
 | **v1.0 target** | Planned | Protégé-competitive OWL 2 DL + OBO in VS Code — [Protégé vs OntoCode](protege-decision.md); capability truth: [SHIPPED](../SHIPPED.md) + [known limitations](../known-limitations.md). |
 
-OntoCode v0.22 is **not** documented as a general-availability replacement for Protégé for every advanced OWL 2 DL workflow (e.g. full Manchester axiom coverage for all formats; byte-identical XML layout). RDF/XML and OWL/XML write-back **ship** in v0.21 (semantic re-serialize); v0.22 deepens OWL 2 authoring.
+OntoCode **v0.23** is suitable for pilot IDE editing, Linux CI validate/classify/realize, and coexistence with Protégé — **not** an org-wide Protégé retirement. RDF/XML and OWL/XML write-back are semantic re-serialize (ships since v0.21). Realization, instance checking, and SWRL (DLSafe + classify materialize) ship in v0.23; Protégé DL Query syntax does not — [DL Query vs Query Workbench](dl-query.md).
 
 ## Approved use cases (pilot or production)
 
-| Use case | v0.22 readiness | Notes |
+| Use case | v0.23 readiness | Notes |
 |----------|-----------------|-------|
 | CI lint gate on ontology repos | **Suitable** | `ontocore validate` — [CI integration](../ci-integration.md) |
 | CI consistency gate (EL profile) | **Suitable** | `ontocore classify --profile el` — profile must match ontology |
-| CI consistency gate (DL profile) | **Pilot** | `ontocore classify --profile dl` or `auto` — OntoLogos 1.0.0; verify on your corpus |
+| CI consistency gate (DL profile) | **Pilot** | `ontocore classify --profile dl` or `auto` — OntoLogos 1.x; verify on your corpus |
+| CI realization / instance checks | **Pilot** | `ontocore realize` / `ontocore check-instance` — [realize cookbook](../examples/realize.md) |
+| SWRL materialize on classify | **Pilot** | Rules via IDE / LSP / patches; no `ontocore swrl` CLI — [SWRL examples](../examples/swrl.md) |
 | Developer IDE for Turtle/OBO authoring | **Pilot** | Turtle + OBO write-back; pre-1.0 extension APIs |
 | Developer IDE for RDF/XML / OWL/XML light edits | **Pilot** | Semantic re-serialize; core ops — [OWL/XML write-back](owl-xml-workflow.md) |
 | Workspace refactoring (rename, migrate, move, extract) | **Pilot** | Turtle only; preview before apply — [Refactoring guide](refactoring.md) |
 | Semantic diff in PR review | **Pilot** | `ontocore diff` + VS Code panel — [Semantic diff](../ontocode/semantic-diff.md) |
-| Ontology browse/query in VS Code | **Pilot** | Local-first; multi-root supported — [enterprise deployment](enterprise-deployment.md) |
+| Ontology browse/query in VS Code | **Pilot** | SQL catalog / SPARQL — **not** Protégé DL Query — [DL Query honesty](dl-query.md) |
 | Air-gapped VS Code install | **Pilot** | VSIX + SHA256 — [enterprise deployment](enterprise-deployment.md) |
 | OBO index + write-back + ROBOT CLI in CI | **Pilot** | Index and edit `.obo`; `ontocore robot validate` — requires Java + `robot` on PATH — [ROBOT interop](robot-interop.md) |
-| Replace Protégé for full OWL 2 DL engineering | **Not supported** | DL classification shipped; full axiom catalog for all formats remains v1.0; XML not byte-identical — [Protégé coexistence](protege-coexistence.md) |
+| Replace Protégé for full OWL 2 DL engineering | **Not supported** | DL classification / realize / SWRL ship; DL Query UI and full axiom catalog remain pre-1.0; XML not byte-identical — [Protégé coexistence](protege-coexistence.md) |
 | Org-wide mandatory IDE standard | **Defer** | Complete pilot + legal review first |
 
 ## Pilot criteria (recommended before wider rollout)
@@ -40,18 +42,19 @@ Complete these on a **representative** ontology project (not only tutorial fixtu
 2. **Sizing** — Confirm workspace within [limits](../workspace-limits.md); run [production evidence protocol](production-evidence.md) on your corpus — [performance and sizing](performance-sizing.md).
 3. **Security** — Platform review of [security policy](../security.md) and [enterprise deployment](enterprise-deployment.md) (LSP stdio, Restricted Mode, path jail).
 4. **Legal** — Review LGPL (`horned-owl`) and third-party notices — [LGPL compliance](lgpl-compliance.md).
-5. **CI proof** — `validate` and optional `classify` in a test pipeline on real branches.
+5. **CI proof** — `validate` and optional `classify` / `realize` in a test pipeline on real branches.
 6. **Coexistence** — If migrating from Protégé, follow [Protégé coexistence](protege-coexistence.md) split workflow for 1–2 release cycles.
-7. **Exit criteria** — Define what would trigger rollback (e.g. unsatisfiable-class false positives, scale failures, DL axiom editing gaps).
+7. **Exit criteria** — Define what would trigger rollback (e.g. unsatisfiable-class false positives, scale failures, DL axiom editing gaps, SWRL materialize surprises).
 
-Suggested pilot duration: **4–8 weeks** with 3–10 engineers on one ontology repository.
+Suggested pilot duration: **4–8 weeks** with 3–10 engineers on one ontology repository. After week 1, continue with the [week-2 playbook](enterprise-week-2.md).
 
 ## What is stable enough for automation
 
-| Surface | Stability (v0.22 tagged) |
+| Surface | Stability (v0.23 tagged) |
 |---------|--------------------------|
 | `ontocore validate` exit codes | Documented for CI |
 | `ontocore classify` exit codes | Documented for CI |
+| `ontocore realize` / `check-instance` exit codes | Documented for CI (pilot corpora) |
 | `ontocore diff` output | Documented for CI; pre-1.0 field names may evolve |
 | `ontocore::Workspace` API | Stable since v0.10; other crates pre-1.0 |
 | SQL virtual table column names | May change pre-1.0 |
@@ -62,7 +65,7 @@ Pin CLI version in CI: release binary with `VERSION=0.23.0` or `cargo install on
 
 ## Support and incident response
 
-| Topic | v0.22 policy |
+| Topic | v0.23 policy |
 |-------|-------------|
 | Commercial support | **Not offered** — community / GitHub issues |
 | Security reports | [GitHub Security Advisories](https://github.com/eddiethedean/ontocode/security/advisories/new) — not public issues |
@@ -94,15 +97,16 @@ Developers (VS Code + OntoCode VSIX)
   Ontology workspace (.ttl / .obo / .owl / .rdf / .owx editable; JSON-LD / NT / TriG read-only)
         │
         ▼
-  CI pipeline (ontocore validate / classify / robot)
+  CI pipeline (ontocore validate / classify / realize / robot)
         │
         ▼
-  Optional: Protégé for DL review
+  Optional: Protégé for DL Query and advanced axiom review
 ```
 
 ## Related
 
 - [Enterprise evaluation](enterprise-eval.md)
+- [Enterprise week-2 playbook](enterprise-week-2.md)
 - [Production evidence protocol](production-evidence.md)
 - [Enterprise deployment](enterprise-deployment.md)
 - [Performance and sizing](performance-sizing.md)

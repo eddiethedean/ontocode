@@ -79,6 +79,10 @@ Yes. Download release binaries and VSIX from [GitHub Releases](https://github.co
 
 Command Palette → **OntoCode: Open Query Workbench**. See [Query Workbench](ontocode/query-workbench.md).
 
+**Is Query Workbench Protégé’s DL Query tab?**
+
+**No.** Query Workbench runs SQL catalog queries and SPARQL only. There is no Protégé-style Manchester DL Query UI yet — planned for **v0.24**. See [DL Query vs Query Workbench](guides/dl-query.md).
+
 **How do I edit complex axioms?**
 
 Select a class in a `.ttl` file → Entity Inspector → **Edit in Manchester** or **Add Manchester axiom**. See [Manchester editor](ontocode/manchester-editor.md).
@@ -168,7 +172,7 @@ If classification fails, check that your ontology is within [workspace limits](w
 
 **Why is explanation empty for a class?**
 
-Explanations require an unsatisfiable class and a prior reasoner run (or successful `classify`). EL explanations are limited compared to full DL clash traces.
+Explanations require an unsatisfiable class and a prior reasoner run (or successful `classify`). On the **DL** profile, explanations are DL-first; EL/RL/RDFS alternatives depend on OntoLogos coverage for that profile.
 
 ## Roadmap
 

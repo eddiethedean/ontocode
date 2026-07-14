@@ -5,6 +5,7 @@
 > | Doc | Role |
 > |-----|------|
 > | **This guide** | Canonical — ship plugins from here |
+> | [Plugin policy](plugin-policy.md) | Support stance / semver / no marketplace SLA |
 > | [plugin-model.md](../ontocore/plugin-model.md) | Overview only — do not implement sketches |
 > | [ui/PLUGIN_API_SPEC.md](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/PLUGIN_API_SPEC.md) | Future OntoUI host — **not** the shipped VS Code contract |
 > | [ui/PLUGIN_PLATFORM.md](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/PLUGIN_PLATFORM.md) | Future Capability Providers — **not** the shipped host |

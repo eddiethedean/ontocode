@@ -119,6 +119,10 @@ nav:
   - Get started:
       - "First success (~10 min)": guides/first-success.md
       - Install: install.md
+      - Install CLI & CI (detail): getting-started.md
+      - VS Code install (detail): vscode-install.md
+      - Install CLI (macOS/Windows): guides/install-cli.md
+      - Which artifact?: guides/which-artifact.md
       - Supported formats: supported-formats.md
       - Versions and channels: guides/versions-and-channels.md
   - Use OntoCode:
@@ -132,6 +136,7 @@ nav:
           - Manchester editor: ontocode/manchester-editor.md
       - Query and visualize:
           - Query Workbench: ontocode/query-workbench.md
+          - DL Query vs Query Workbench: guides/dl-query.md
           - Graph visualization: ontocode/graph-view.md
           - Semantic diff: ontocode/semantic-diff.md
       - Reason and refactor:
@@ -188,7 +193,13 @@ nav:
       - Known limitations: known-limitations.md
       - Protégé vs OntoCode: guides/protege-decision.md
       - Enterprise evaluation: guides/enterprise-eval.md
+      - Enterprise week-2: guides/enterprise-week-2.md
+      - Production readiness: guides/production-readiness.md
+      - Enterprise deployment: guides/enterprise-deployment.md
+      - Performance and sizing: guides/performance-sizing.md
+      - API stability (pre-1.0): guides/api-stability.md
       - Procurement appendix: guides/procurement-appendix.md
+      - Release timeline: guides/release-timeline.md
   - Help:
       - FAQ: faq.md
       - Glossary: glossary.md
@@ -196,17 +207,7 @@ nav:
       - Troubleshooting: troubleshooting.md
       - Support and contact: support.md
       - Migrating from Protégé: guides/protege-migration.md
-      - Protégé coexistence: guides/protege-coexistence.md
-      - Production readiness: guides/production-readiness.md
-      - Release timeline: guides/release-timeline.md
-      - Enterprise deployment: guides/enterprise-deployment.md
-      - Performance and sizing: guides/performance-sizing.md
-      - API stability (pre-1.0): guides/api-stability.md
       - Security: security.md
-      - Install CLI & CI (detail): getting-started.md
-      - VS Code install (detail): vscode-install.md
-      - Install CLI (macOS/Windows): guides/install-cli.md
-      - Which artifact?: guides/which-artifact.md
       - Changelog: changelog.md
       - Migrations:
           - Migration index: migration/README.md
@@ -233,6 +234,7 @@ nav:
       - Automation and stability: automation-stability.md
       - Releasing: releasing.md
       - Marketplace publish: marketplace-publish.md
+      - Plugin policy: guides/plugin-policy.md
       - Internals: internals.md
       - Documentation index: documentation-index.md
       - Direction:

@@ -631,6 +631,9 @@ Check whether an individual is an instance of a class (ABox).
 
 **Errors:** `NOT_INDEXED`, `REASONER_FAILED`, `INVALID_PARAMS`
 
+!!! note "Realization is CLI-only"
+    There is no LSP `ontocore/realize` method. Use `ontocore realize` for bulk realization in CI — [CLI reference](cli-reference.md) · [realize cookbook](examples/realize.md). Instance checks use this method or `ontocore check-instance`.
+
 ### `ontocore/listSwrlRules` (v0.23+)
 
 List SWRL rules found in open Turtle buffers and indexed `.ttl` documents (`ontocore:swrlRule` JSON).

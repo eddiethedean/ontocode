@@ -2,6 +2,9 @@
 
 The **Query Workbench** is an OntoCode React panel for running **SQL-like** catalog queries and **SPARQL** against your indexed workspace. Queries execute in **OntoCore** via LSP (`ontocore/query`, `ontocore/sparql`).
 
+!!! warning "Not Protégé DL Query"
+    This is **not** Protégé’s DL Query tab. There is no Manchester class-expression “Instances / Subclasses / Superclasses” workflow here. Use SQL virtual tables or SPARQL today; dedicated DL Query UI is planned for **v0.24** — details: [DL Query vs Query Workbench](../guides/dl-query.md).
+
 !!! warning "SQL-like, not full SQL"
     The SQL mode uses **virtual tables** with a small subset of SQL: single-table `SELECT`, limited `WHERE` (`=`, `!=`, `AND`/`OR`), no `JOIN`, `ORDER BY`, `GROUP BY`, `LIKE`, or functions.
     Full details: [SQL reference](../sql-reference.md).

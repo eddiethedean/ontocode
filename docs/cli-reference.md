@@ -213,6 +213,13 @@ ontocore check-instance . \
 
 **Exit:** 0 when entailed; **non-zero** when not entailed or on reasoner error.
 
+**LSP note:** Realization is a **CLI / CI** command today (`ontocore realize`). Instance checks are available via LSP `ontocore/checkInstance`. There is no LSP `realize` method — use the CLI in automation.
+
+### SWRL (no CLI subcommand)
+
+!!! note "No `ontocore swrl` command"
+    Author and validate SWRL via **patches**, the IDE Rule Browser, and LSP (`ontocore/listSwrlRules`, `ontocore/validateSwrlRule`, `ontocore/parseSwrlRule`). When rules are present, classify may materialize SWRL consequents. See [SWRL examples](examples/swrl.md) and [patch SWRL ops](patch-reference.md).
+
 ### `refactor`
 
 Workspace-wide Turtle refactoring. See [Refactoring guide](guides/refactoring.md).

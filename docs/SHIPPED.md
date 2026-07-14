@@ -143,7 +143,7 @@ Remaining 1.0 targets: [known limitations](known-limitations.md) · [Protégé v
 
 ## What's next
 
-Forward milestones: semantic services (**v0.24**), UX/parity verify (**v0.25**), Protégé-competitive release (**1.0**). See **[Platform roadmap](roadmap.md)** · **[Known limitations](known-limitations.md)**.
+Forward milestones: refactoring + DL Query parity (**v0.24**), UX/parity verify (**v0.25**), Protégé-competitive release (**1.0**). See **[Platform roadmap](roadmap.md)** · **[Known limitations](known-limitations.md)**.
 
 ## Where to learn more
 

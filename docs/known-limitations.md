@@ -41,7 +41,7 @@ Published crates are **0.23.x**. Library APIs, LSP JSON, and SQL table columns m
 
 ## Reasoning
 
-EL / RL / RDFS / DL classification ships via **Ontologos 1.1.4**. Explanations are **DL-first** for the DL profile (with EL/RL/RDFS alternatives). Realization and instance checking ship in v0.23. **Stop** sets an engine cancel flag and ignores late results. See [Reasoner guide](guides/reasoner.md).
+EL / RL / RDFS / DL classification ships via **Ontologos 1.x** (crates pinned in the workspace). Explanations are **DL-first** for the DL profile (with EL/RL/RDFS alternatives). Realization and instance checking ship in v0.23. **Stop** sets an engine cancel flag and ignores late results. See [Reasoner guide](guides/reasoner.md).
 
 ## Layout persistence
 
@@ -53,10 +53,11 @@ Graphs may be **truncated** (badge in the Graph panel). Prefer narrower search, 
 
 ## When not to use OntoCode today
 
+- You need **Protégé DL Query tab** syntax (class expressions with Instances / Subclasses / Superclasses tabs) — Query Workbench is SQL catalog + SPARQL only; dedicated DL Query UI is **v0.24** — [DL Query vs Query Workbench](guides/dl-query.md).
 - You need **byte-identical OWL/XML or RDF/XML** that matches Protégé layout — OntoCode re-serializes for semantic fidelity (ADR-0021); use Protégé when layout identity matters.
 - You need **JSON-LD / TriG / N-Triples write-back** — still read-only; use Turtle or convert.
 - You need **full SQL analytics** — use SPARQL or an external store.
-- You need a **stable plugin marketplace API** without scaffolding — wait for v1.0 or keep Protégé plugins.
+- You need a **stable plugin marketplace API** without scaffolding — wait for v1.0 or keep Protégé plugins — [Plugin policy](guides/plugin-policy.md).
 - You need **WebProtégé collaboration** — out of scope until post-1.0.
 
 More: [Start here](start.md) · [Protégé migration](guides/protege-migration.md) · [Protégé decision](guides/protege-decision.md) · [FAQ](faq.md)

@@ -23,7 +23,7 @@ Every feature before 1.0 should answer one question:
 After 1.0, the roadmap shifts from parity to modernization.
 
 !!! warning "Not a Protégé replacement today"
-    **v0.20** supports pilot and coexistence workflows — not org-wide Protégé retirement. See [What ships today](SHIPPED.md) and [Known limitations](known-limitations.md) before planning format or IDE migration.
+    **v0.23** supports pilot and coexistence workflows — not org-wide Protégé retirement. See [What ships today](SHIPPED.md) and [Known limitations](known-limitations.md) before planning format or IDE migration.
 
 ---
 
@@ -211,7 +211,7 @@ OntoUI work uses **UI phases 0–12** from [Product Roadmap 2.0](https://github.
 | Area | Deliverables |
 |------|--------------|
 | **OntoCore** | `ontocore-reasoner` crate (Ontologos facade); `el`, `rl`, `rdfs` adapters; profile detection; unsatisfiable classes; classification result cache |
-| **OntoCode** | Reasoner panel; asserted/inferred/combined hierarchy toggle; explanation panel (EL-first) |
+| **OntoCode** | Reasoner panel; asserted/inferred/combined hierarchy toggle; explanation panel (DL-first on DL) |
 
 **Exit criteria:** User can classify EL ontologies, see inferred hierarchy, and get EL explanations where available.
 

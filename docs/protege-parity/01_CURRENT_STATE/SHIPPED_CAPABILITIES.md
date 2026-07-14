@@ -164,17 +164,19 @@ separately in `CURRENT_LIMITATIONS.md` and `PARITY_GAP_ANALYSIS.md`.
 
 # Capabilities Still Advancing
 
-The following areas are intentionally marked as **EXPANDING** because
-they exist today but require additional engineering before OntoCode 1.0
-can claim complete Protégé Desktop parity:
+> **Engineering baseline note:** This list was written against a **v0.18.2** audit snapshot.
+> Several items below have since shipped for product use — see **[`docs/SHIPPED.md`](../../SHIPPED.md)** before citing gaps.
 
--   Complete OWL 2 authoring
--   RDF/XML write-back
--   OWL/XML write-back
--   Workspace semantics
--   Full reasoning parity
--   SWRL
--   Stable Plugin SDK
+The following areas still need additional engineering before OntoCode 1.0
+can claim complete Protégé Desktop parity (product status may already be
+**Shipped** for pilot use — confirm in SHIPPED.md):
+
+-   Complete OWL 2 authoring (full axiom catalog for all formats)
+-   Byte-identical RDF/XML / OWL/XML layout (semantic re-serialize **ships**; layout identity does not)
+-   Workspace semantics (cross-file / imports depth toward 1.0)
+-   Full reasoning parity with Protégé + HermiT (realize / SWRL / DL classify **ship** in current release; identity not certified)
+-   Protégé DL Query UI (Query Workbench ≠ DL Query; planned v0.24)
+-   Stable Plugin SDK / marketplace (host MVP ships; ecosystem API → v1.0) — [plugin policy](../../guides/plugin-policy.md)
 -   Executable parity verification
 
 ------------------------------------------------------------------------

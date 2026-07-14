@@ -1264,6 +1264,35 @@ if [[ "$TAGGED_MINOR" =~ ^0\.([0-9]+)$ ]]; then
       echo "ok: docs/roadmap.md v${TAGGED_MINOR} not Planned"
     fi
     check_file_contains "mkdocs.yml" "migration/v${TAGGED_MINOR}.md" "mkdocs current migration guide"
+
+    # Content-drift guards (readiness columns, mixed crate pins, pilot wording)
+    if grep -qE "v${STALE_PREV_MINOR} readiness|Stability \(v${STALE_PREV_FULL}|Stability \(v${STALE_PREV_MINOR}|v${STALE_PREV_MINOR} policy" docs/guides/production-readiness.md 2>/dev/null; then
+      echo "FAIL: docs/guides/production-readiness.md still uses ${STALE_PREV_MINOR} readiness/stability/policy columns" >&2
+      fail=1
+    else
+      echo "ok: production-readiness not using ${STALE_PREV_MINOR} column labels"
+    fi
+    check_file_contains "docs/guides/production-readiness.md" "v${TAGGED_MINOR} readiness" "production-readiness current readiness column"
+    if grep -qE "ontocore-core = \"0\.[0-9]+\"" docs/guides/api-stability.md 2>/dev/null; then
+      if ! grep -qE "ontocore-core = \"${TAGGED_MINOR}\"" docs/guides/api-stability.md 2>/dev/null; then
+        echo "FAIL: docs/guides/api-stability.md ontocore-core pin must be \"${TAGGED_MINOR}\"" >&2
+        fail=1
+      else
+        echo "ok: api-stability ontocore-core pin is ${TAGGED_MINOR}"
+      fi
+    fi
+    if grep -qE '\*\*v0\.(1[0-9]|2[0-2])\*\* supports pilot' docs/roadmap.md 2>/dev/null; then
+      echo "FAIL: docs/roadmap.md pilot warning still cites a pre-${TAGGED_MINOR} release" >&2
+      fail=1
+    else
+      echo "ok: docs/roadmap.md pilot warning not stuck on older minor"
+    fi
+    check_file_contains "docs/roadmap.md" "\*\*v${TAGGED_MINOR}\*\* supports pilot" "roadmap pilot warning uses tagged minor"
+    check_file_contains "docs/cli-reference.md" "No \`ontocore swrl\` command" "cli-reference SWRL absence note"
+    check_file_contains "docs/guides/dl-query.md" "Not Protégé DL Query" "dl-query honesty page"
+    check_file_contains "docs/guides/enterprise-week-2.md" "Enterprise week-2" "enterprise week-2 playbook"
+    check_file_contains "docs/guides/plugin-policy.md" "Plugin policy" "plugin policy page"
+    check_file_contains "docs/internals.md" "\*\*v${TAGGED_MINOR}\*\*" "internals LSP tagged release"
   fi
 fi
 

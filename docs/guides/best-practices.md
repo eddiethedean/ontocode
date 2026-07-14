@@ -15,7 +15,8 @@ Patterns for using OntoCode and OntoCore in daily ontology engineering.
 | **SQL** (`ontocore query`) | Catalog tables — classes, properties, diagnostics, axioms metadata |
 | **SPARQL** (`ontocore sparql`) | RDF graph patterns over indexed triples |
 | **`validate`** | CI gate for parse errors and lint |
-| **`classify`** | CI gate for unsatisfiable classes (EL/RL/RDFS) |
+| **`classify`** | CI gate for unsatisfiable classes (EL/RL/RDFS/DL/`auto`) |
+| **`realize` / `check-instance`** | ABox inferred types and instance checks (v0.23+) |
 
 SQL and SPARQL results truncate silently at 100,000 rows — narrow queries in CI. See [workspace limits](../workspace-limits.md).
 
@@ -24,7 +25,9 @@ SQL and SPARQL results truncate silently at 100,000 rows — narrow queries in C
 | Goal | Command |
 |------|---------|
 | Lint + parse | `ontocore validate .` |
-| Unsatisfiable classes | `ontocore classify . --profile el --format json` |
+| Unsatisfiable classes (EL) | `ontocore classify . --profile el --format json` |
+| Unsatisfiable classes (DL) | `ontocore classify . --profile dl --format json` |
+| Realization | `ontocore realize . --profile rl --format json` |
 | Inspect errors | `ontocore query . "SELECT code, message FROM diagnostics WHERE severity = 'error'"` |
 
 Examples: [CI integration](../ci-integration.md)
@@ -33,13 +36,13 @@ Examples: [CI integration](../ci-integration.md)
 
 1. Open ontology folder (single-root)
 2. Bundled language server works in Restricted Mode — **Trust** only if you set custom `ontocode.lspPath` or `ontocode.robotPath`
-3. Edit in Entity Inspector or Manchester editor (`.ttl` and `.obo`)
+3. Edit in Entity Inspector or Manchester editor (`.ttl`, `.obo`, `.owl`/`.rdf`, `.owx`)
 4. Run **Index Workspace** after bulk file changes
-5. Use **Query Workbench** for ad-hoc catalog queries
+5. Use **Query Workbench** for SQL/SPARQL (not Protégé DL Query — [dl-query.md](dl-query.md))
 
 ## Protégé teams
 
-Use OntoCode for Turtle/OBO/XML editing, CI validate/classify (including DL profile), realization/instance checking, and SWRL authoring/validation. Keep Protégé when you need HermiT-identical explanations or workflows OntoCode still marks partial — see [known limitations](../known-limitations.md) and [Protégé coexistence](protege-coexistence.md).
+Use OntoCode for Turtle/OBO/XML editing, CI validate/classify (including DL profile), realization/instance checking, and SWRL authoring/validation. Keep Protégé when you need HermiT-identical explanations, **DL Query tab** workflows, or other gaps in [known limitations](../known-limitations.md) — see [Protégé coexistence](protege-coexistence.md) and [DL Query honesty](dl-query.md).
 
 ## Rust embedding
 

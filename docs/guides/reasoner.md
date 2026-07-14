@@ -9,7 +9,7 @@ Results are **not** certified identical to Protégé + HermiT; use dual-tool che
 1. Index the workspace (**OntoCode: Index Workspace**).
 2. Run **`OntoCode: Run Reasoner`** — opens the Reasoner Results panel.
 3. Use **`OntoCode: Set Hierarchy Mode`** to switch the Classes tree between **asserted**, **inferred**, and **combined** hierarchies.
-4. Click an unsatisfiable class in the panel to open **`OntoCode: Show Explanation`** (EL-first; DL where supported).
+4. Click an unsatisfiable class in the panel to open **`OntoCode: Show Explanation`** (DL-first on the DL profile; EL/RL/RDFS alternatives where OntoLogos supports).
 
 ### Explanation panel (v0.15)
 
@@ -62,7 +62,7 @@ Custom methods: `ontocore/runReasoner`, `ontocore/getExplanation`, `ontocore/che
 
 ## Dual-stack note
 
-OntoCore keeps **two in-memory models** in v0.6:
+OntoCore keeps **two in-memory models** (dual-stack since early releases; still true in v0.23):
 
 - **Oxigraph + Horned-OWL** — authoritative for indexing, SPARQL/SQL, Turtle write-back, asserted hierarchy.
 - **OntoLogos** — loads workspace Turtle/RDF files separately for classification.
@@ -73,7 +73,7 @@ Axiom counts and some constructs may differ from Protégé until the Horned-OWL 
 
 | Limitation | Notes |
 |------------|-------|
-| Explanations | EL-first with **multiple alternatives** (v0.15) where `ontologos-explain` supports; full DL clash traces depend on profile coverage |
+| Explanations | **DL-first** on the DL profile; EL/RL/RDFS alternatives (v0.15+) where `ontologos-explain` supports; coverage depends on profile |
 | Hierarchy toggle | **Inferred** / **combined** need a successful reasoner run first |
 | Parse coverage | Partial OWL mapping — see [Protégé parity](../design/PROTEGE_PARITY.md) |
 

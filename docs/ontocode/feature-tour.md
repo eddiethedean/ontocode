@@ -80,7 +80,7 @@ Guide: [Graph view](graph-view.md)
 | Panel | Purpose |
 |-------|---------|
 | **Reasoner** | Profile, consistency, unsatisfiable classes, inferred changes, warnings |
-| **Explanation** | EL-first justification for unsatisfiable classes (after reasoner run) |
+| **Explanation** | DL-first justification on the DL profile; EL/RL/RDFS alternatives where supported (after reasoner run) |
 
 **Reasoner actions (v0.18):** distinct **Start**, **Synchronize**, **Classify**, and **Consistency** commands. **Stop** cancels the in-flight client LSP request (late server results are ignored). Explanations show a **stale** badge when the catalog fingerprint changes while the panel stays open.
 

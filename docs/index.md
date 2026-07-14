@@ -39,20 +39,25 @@ Index and explore OWL/RDF/OBO, run queries, refactors, and reasoning — in VS C
 
 **Primary path:** **[First success (~10 min)](guides/first-success.md)** — install the extension, open sample ontologies, browse and edit. No clone required.
 
-**Also:** [Install](install.md) · [Examples](examples/index.md) · [Known limitations](known-limitations.md) · [What ships today](SHIPPED.md) · [Feature tour](ontocode/feature-tour.md)
+**Also:** [Install](install.md) · [Examples](examples/index.md) · [Feature tour](ontocode/feature-tour.md) · [What ships today](SHIPPED.md)
+
+![OntoCode product tour](assets/screenshots/product-tour.gif)
+
+<details markdown>
+<summary>Formats, SQL subset, and names</summary>
 
 !!! warning "Editable formats"
     Entity Inspector write-back applies to **`.ttl`, `.obo`, `.owl`/`.rdf` (RDF/XML), and `.owx` (OWL/XML)**. XML is **semantic re-serialize** (not Protégé byte-identical). JSON-LD / TriG / N-Triples stay read-only — [Supported formats](supported-formats.md).
 
 !!! note "Catalog SQL (subset)"
-    Query Workbench SQL mode is **not** full SQL (no `JOIN` / `ORDER BY` / `LIMIT`). Prefer SPARQL for graph patterns — [SQL reference](sql-reference.md).
+    Query Workbench SQL mode is **not** full SQL (no `JOIN` / `ORDER BY` / `LIMIT`). Prefer SPARQL for graph patterns — [SQL reference](sql-reference.md). Query Workbench is also **not** Protégé DL Query — [DL Query honesty](guides/dl-query.md).
 
 !!! tip "CLI on macOS/Windows?"
     Most IDE users never need the CLI — the extension bundles `ontocore-lsp`. If you need `ontocore` for CI or scripting, see [Install](install.md).
 
 > **Names:** **OntoCode** = VS Code extension. **OntoCore** = Rust engine (CLI + language server). **Ontologos** = external reasoner.
 
-![OntoCode product tour](assets/screenshots/product-tour.gif)
+</details>
 
 </div>
 

@@ -40,7 +40,7 @@ Prefer Protégé or other tools (or wait for v1.0) if you need:
 | Query workbench + Manchester editor in VS Code | Shipped |
 | EL/RL/RDFS/DL reasoning + inferred hierarchy | **Shipped** (OntoLogos 1.x) |
 | OWL 2 DL classification (`dl` / `auto` profiles) | **Shipped** (OntoLogos 1.x; not certified HermiT-identical) |
-| EL explanations (where OntoLogos supports) | **Shipped** (EL-first; DL clash traces partial) |
+| Explanations (OntoLogos) | **Shipped** (DL-first on DL; EL/RL/RDFS alternatives where supported) |
 | React entity inspector + graph visualization | **Shipped** |
 | OBO format index + `obo_id` in explorer | **Shipped** |
 | OBO write-back in VS Code + CLI (`ontocore-obo`) | **Shipped** (engine v0.12; inspector v0.13) |
@@ -97,7 +97,7 @@ Full gap analysis for evaluators: [Known limitations](../known-limitations.md) �
 |------------|--------|
 | **Multi-root VS Code workspaces** | **All folders indexed** (v0.10+) |
 | **Write-back** | **Turtle, OBO, RDF/XML, OWL/XML**; JSON-LD / TriG / N-Triples read-only. XML is semantic re-serialize (not byte-identical) |
-| **Reasoning** | EL/RL/RDFS/DL/auto via OntoLogos 1.x; explanations EL-first; results may differ from Protégé on partial OWL mappings |
+| **Reasoning** | EL/RL/RDFS/DL/auto via OntoLogos 1.x; explanations DL-first on DL (EL/RL/RDFS alternatives); results may differ from Protégé on partial OWL mappings |
 | **CLI release binaries** | Linux x64 only; macOS/Windows use `cargo install` or bundled LSP in VSIX |
 | **Scale** | Workspaces above [workspace limits](../workspace-limits.md) may fail indexing — prefer CLI batch workflows for very large terminologies |
 | **ROBOT / Java** | `ontocore robot` and LSP `runRobot` spawn an external Java `robot` process — not JVM-free for that workflow |
@@ -118,10 +118,12 @@ A [first-week Protégé migration guide](protege-migration.md) ships today. Roun
 1. Install from [Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode), [Open VSX](https://open-vsx.org/extension/ontocode/ontocode) (Cursor), or offline VSIX
 2. Complete [First success in 10 minutes](first-success.md) on a representative `.ttl` project
 3. Run the [production evidence protocol](production-evidence.md) on your corpus
-4. Run `ontocore validate` and optionally `ontocore classify --profile el` in a test CI job ([ci-integration.md](../ci-integration.md))
-5. Review [Protégé decision matrix](protege-decision.md) and [platform compatibility](platform-compatibility.md)
-6. Review [security policy](../security.md) and [governance](governance.md) with your platform team
-7. Compare [What ships today](../SHIPPED.md) and [known limitations](../known-limitations.md) against your requirements; read [release timeline](release-timeline.md) for planning (no fixed v1.0 date)
+4. Run `ontocore validate` and optionally `ontocore classify --profile el` or `--profile dl` in a test CI job ([ci-integration.md](../ci-integration.md))
+5. Optional: `ontocore realize` on a representative ABox corpus and a SWRL dual-check ([realize](../examples/realize.md) · [swrl](../examples/swrl.md) · [week-2](enterprise-week-2.md))
+6. Confirm Query Workbench is acceptable without Protégé DL Query — [dl-query.md](dl-query.md)
+7. Review [Protégé decision matrix](protege-decision.md) and [platform compatibility](platform-compatibility.md)
+8. Review [security policy](../security.md) and [governance](governance.md) with your platform team
+9. Compare [What ships today](../SHIPPED.md) and [known limitations](../known-limitations.md) against your requirements; read [release timeline](release-timeline.md) for planning (no fixed v1.0 date)
 
 ## Questions
 

@@ -301,7 +301,15 @@ diagnostics = true
         }
         let pid_text = pid_text.expect("grandchild pid written");
         let pid: i32 = pid_text.trim().parse().expect("pid");
-        let still_alive = unsafe { libc::kill(pid, 0) == 0 };
+        // Poll for death — kill(0) can succeed briefly for a dying/zombie process under CI load.
+        let mut still_alive = true;
+        for _ in 0..40 {
+            still_alive = unsafe { libc::kill(pid, 0) == 0 };
+            if !still_alive {
+                break;
+            }
+            thread::sleep(Duration::from_millis(50));
+        }
         assert!(!still_alive, "grandchild pid {pid} should be dead after process-group kill");
     }
 }

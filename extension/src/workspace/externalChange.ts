@@ -3,6 +3,7 @@ import { indexWorkspace } from "../lsp/client";
 import { isOntologyDocument } from "../commands/uiState";
 import { normalizeFsPath } from "../utils/pathUnder";
 import { ontologyRegistry } from "./ontologyRegistry";
+import { isSelfWrite } from "./selfWriteGuard";
 
 type ExternalChangeChoice = "reload" | "keep" | "compare";
 
@@ -27,6 +28,10 @@ export class ExternalChangeRecovery {
       return;
     }
     const path = normalizeFsPath(uri.fsPath);
+    // Ignore OntoCode's own patch/save writes (#293).
+    if (isSelfWrite(path)) {
+      return;
+    }
     const entry = ontologyRegistry.getEntryByPath(path);
     if (!entry && kind === "change") {
       await indexWorkspace().catch(() => undefined);

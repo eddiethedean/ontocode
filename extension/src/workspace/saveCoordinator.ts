@@ -5,6 +5,11 @@ import { normalizeFsPath } from "../utils/pathUnder";
 import { focusRelay } from "../focus/focusRelay";
 import { workspaceEventBus } from "./eventBus";
 import { ontologyRegistry } from "./ontologyRegistry";
+import {
+  findOpenDocumentForEntry,
+  noOpenDocumentSaveOutcome,
+} from "./saveCoordinatorLogic";
+import { noteSelfWrite } from "./selfWriteGuard";
 
 export interface SaveResult {
   saved: string[];
@@ -47,18 +52,41 @@ export class SaveCoordinator {
   async saveEntry(
     entry: { uri: string; path: string; id: string }
   ): Promise<SaveResult> {
-    const uri = vscode.Uri.parse(entry.uri);
-    const document = vscode.workspace.textDocuments.find(
-      (doc) => doc.uri.toString() === uri.toString()
+    const match = findOpenDocumentForEntry(
+      vscode.workspace.textDocuments.map((doc) => ({
+        uriString: doc.uri.toString(),
+        fsPath: doc.uri.fsPath,
+        isDirty: doc.isDirty,
+      })),
+      entry.uri,
+      entry.path
     );
+    const document = match
+      ? vscode.workspace.textDocuments.find(
+          (doc) =>
+            doc.uri.toString() === match.uriString ||
+            normalizeFsPath(doc.uri.fsPath) === normalizeFsPath(match.fsPath)
+        )
+      : undefined;
+
     if (!document) {
+      const outcome = noOpenDocumentSaveOutcome();
       try {
         await indexWorkspace();
-        ontologyRegistry.markClean(entry.id);
-        ontologyRegistry.bumpVersion(entry.id);
-        workspaceEventBus.publish("OntologySaved", { id: entry.id, path: entry.path });
-        focusRelay.markReasoningDirty();
-        return { saved: [entry.path], failed: [] };
+        if (outcome.markClean) {
+          ontologyRegistry.markClean(entry.id);
+          ontologyRegistry.bumpVersion(entry.id);
+          workspaceEventBus.publish("OntologySaved", {
+            id: entry.id,
+            path: entry.path,
+          });
+          focusRelay.markReasoningDirty();
+        }
+        // #299: never claim a file was saved when we did not call document.save().
+        return {
+          saved: outcome.claimSaved ? [entry.path] : [],
+          failed: [],
+        };
       } catch (error) {
         const message = error instanceof Error ? error.message : String(error);
         return { saved: [], failed: [{ path: entry.path, error: message }] };
@@ -68,6 +96,7 @@ export class SaveCoordinator {
       return { saved: [], failed: [] };
     }
     try {
+      noteSelfWrite(document.uri.fsPath);
       await document.save();
       ontologyRegistry.markClean(entry.id);
       ontologyRegistry.bumpVersion(entry.id);
@@ -89,11 +118,12 @@ export class SaveCoordinator {
     const path = normalizeFsPath(document.uri.fsPath);
     const entry = ontologyRegistry.getEntryByPath(path);
     if (!entry) {
+      noteSelfWrite(document.uri.fsPath);
       await document.save();
       return true;
     }
     const result = await this.saveEntry(entry);
-    return result.saved.length > 0;
+    return result.saved.length > 0 || !ontologyRegistry.isDirty(entry.id);
   }
 }
 

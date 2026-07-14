@@ -21,6 +21,9 @@
     "src/webviews/webviewBootstrap.test.ts",
     "src/webviews/inspectorReveal.ts",
     "src/webviews/messages.ts",
+    "src/workspace/selfWriteGuard.ts",
+    "src/workspace/saveCoordinatorLogic.ts",
+    "src/workspace/transactionApplyPolicy.ts",
     "src/test/fixtureSnapshot.ts",
     "src/test/fixture-catalog.snapshot.json"
   ],

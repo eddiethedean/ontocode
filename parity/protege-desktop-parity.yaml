@@ -284,11 +284,13 @@ requirements:
       - crates/ontocore-swrl/src/turtle.rs
     test_ids:
       - crates/ontocore-refactor/tests/refactor_integration.rs
+      - crates/ontocore-owl/src/remap.rs
+      - crates/ontocore-obo/src/remap.rs
     acceptance_criteria: []
     github_issue: https://github.com/eddiethedean/ontocode/issues/252
     documentation:
       - docs/protege-parity/IMPLEMENTATION_EVIDENCE.md
-    notes: Shipped v0.24.0 — Turtle-first; non-Turtle skipped with warnings
+    notes: Shipped v0.24 — rename/merge/replace on Turtle + RDF/XML + OWL/XML + OBO; move/extract/ontology-merge/flatten stay Turtle-first
   - id: PAR-VIS-001
     area: Visualization
     title: Graph parity

@@ -114,7 +114,9 @@ Every item from [PRODUCT_ROADMAP_2.0.md](PRODUCT_ROADMAP_2.0.md), with release a
 | **11** | Tutorials | Partial | ongoing | [first-success](../guides/first-success.md) |
 | **11** | Community templates | Planned | v1.2 | — |
 | **11** | Enterprise adoption guides | Shipped | v0.11+ | [enterprise-eval](../guides/enterprise-eval.md) |
-| **12** | Browser client | Planned | Post-1.2 | [PLATFORM_ARCHITECTURE.md](PLATFORM_ARCHITECTURE.md) |
+| **12** | Browser client | Planned | v1.3 (Post-1.2 Era I) | [PLATFORM_ARCHITECTURE.md](PLATFORM_ARCHITECTURE.md) · [ROADMAP.md Era I](../../ROADMAP.md) |
+| **12** | OntoCore WASM (backendless browser engine) | Planned | v1.3 | [ROADMAP.md Era I](../../ROADMAP.md) |
+| **12** | React app (no backend) — static SPA | Planned | v1.3 | [ROADMAP.md Era I](../../ROADMAP.md) |
 | **12** | Cloud sync | Planned | Post-1.2 | [PLATFORM_ARCHITECTURE.md](PLATFORM_ARCHITECTURE.md) |
 | **12** | Team workspaces | Planned | Post-1.2 | [COLLABORATION.md](COLLABORATION.md) |
 | **12** | Distributed reasoning | Planned | Post-1.2 | [REASONING_EXPERIENCE.md](REASONING_EXPERIENCE.md) |
@@ -221,7 +223,9 @@ Full list: [roadmap.md § v1.2](../roadmap.md)
 | Native graph performance | 10 |
 | Local AI support | 10 |
 | Enterprise packaging | 10 |
-| Browser client | 12 |
+| Browser client (hosted service + React app no-backend) | 12 |
+| OntoCore WASM MVP (engine for React app no-backend) | 12 |
+| React app (no backend) — static SPA | 12 |
 | Cloud sync + team workspaces | 12 |
 | Distributed reasoning | 12 |
 | Shared semantic canvases | 12 |

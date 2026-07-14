@@ -230,6 +230,46 @@ describe("QueryWorkbenchPanel", () => {
     expect(screen.getAllByRole("combobox")[0]).toHaveValue("sparql");
   });
 
+  it("restores asserted dlMode from saved DL query", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<QueryWorkbenchPanel />);
+    postHostMessage({
+      type: "queryInit",
+      saved: savedQueries,
+      history: [],
+      sqlTables: [],
+    });
+    await screen.findByRole("option", { name: "People asserted (dl)" });
+
+    const savedSelect = screen
+      .getByRole("option", { name: "People asserted (dl)" })
+      .closest("select");
+    expect(savedSelect).not.toBeNull();
+    await user.selectOptions(savedSelect as HTMLSelectElement, "1");
+
+    expect(screen.getAllByRole("combobox")[0]).toHaveValue("dl");
+    expect(screen.getByRole("textbox")).toHaveValue("Person");
+    expect(screen.getAllByRole("combobox")[1]).toHaveValue("asserted");
+  });
+
+  it("saves DL query with dlMode", async () => {
+    const user = userEvent.setup();
+    vi.spyOn(window, "prompt").mockReturnValue("DL people");
+
+    renderWithProviders(<QueryWorkbenchPanel />);
+    await user.selectOptions(screen.getAllByRole("combobox")[0], "dl");
+    await user.selectOptions(screen.getAllByRole("combobox")[1], "asserted");
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    expect(lastPostedMessage()).toMatchObject({
+      type: "saveQuery",
+      name: "DL people",
+      mode: "dl",
+      text: "Person",
+      dlMode: "asserted",
+    });
+  });
+
   it("exports JSON results", async () => {
     const user = userEvent.setup();
     renderWithProviders(<QueryWorkbenchPanel />);

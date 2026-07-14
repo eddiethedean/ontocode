@@ -115,9 +115,10 @@ Every parity feature should reference:
   PAR-SWRL-001   SWRL         VERIFIED          ontocore-swrl       lib.rs           ✓       ✓       ✓       v0.23.0
                                                                                                              Rule Browser.
 
-  PAR-REF-001    Semantic     VERIFIED          ontocore-refactor   lib.rs,          ✓       ✓       ✓       v0.24.0
-                 refactoring                                        ontology.rs                              Turtle-first;
-                                                                                                             non-Turtle skip.
+  PAR-REF-001    Semantic     VERIFIED          ontocore-refactor   lib.rs,          ✓       ✓       ✓       v0.24
+                 refactoring                                        rename.rs,                               rename/merge/replace
+                                                                    ontology.rs                              multi-format;
+                                                                                                             move/extract Turtle-first.
 
   PAR-VIS-001    Graph        PARTIAL           extension           graph webview    ✓       TBD     ✓       Target
                  visualization                                                                               v0.25.

@@ -164,6 +164,8 @@ export interface SavedQuery {
   name: string;
   mode: "sql" | "sparql" | "dl";
   text: string;
+  /** Asserted vs inferred for DL queries; ignored for SQL/SPARQL. */
+  dlMode?: "asserted" | "inferred";
 }
 
 export interface DlQueryResult {
@@ -474,7 +476,7 @@ export type WebviewMessage =
   | { type: "applyRefactor" }
   | { type: "cancelRefactor" }
   | { type: "runQuery"; mode: "sql" | "sparql" | "dl"; text: string; runId: number; dlMode?: "asserted" | "inferred" }
-  | { type: "saveQuery"; name: string; mode: "sql" | "sparql" | "dl"; text: string }
+  | { type: "saveQuery"; name: string; mode: "sql" | "sparql" | "dl"; text: string; dlMode?: "asserted" | "inferred" }
   | { type: "exportQueryResult"; format: "csv" | "json"; runId?: number }
   | { type: "exportGraph"; format: "json" | "csv"; payload: string; suggestedName?: string }
   | { type: "validateManchester"; expression: string; axiomKind: string; seq: number }

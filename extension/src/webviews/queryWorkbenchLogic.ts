@@ -65,12 +65,18 @@ export function mergeHistory(
   limit: number
 ): SavedQuery[] {
   const filtered = history.filter(
-    (h) => !(h.mode === entry.mode && h.text === entry.text)
+    (h) =>
+      !(
+        h.mode === entry.mode &&
+        h.text === entry.text &&
+        (h.dlMode ?? undefined) === (entry.dlMode ?? undefined)
+      )
   );
-  return [{ name: entry.name, mode: entry.mode, text: entry.text }, ...filtered].slice(
-    0,
-    limit
-  );
+  const next: SavedQuery = { name: entry.name, mode: entry.mode, text: entry.text };
+  if (entry.mode === "dl" && entry.dlMode) {
+    next.dlMode = entry.dlMode;
+  }
+  return [next, ...filtered].slice(0, limit);
 }
 
 export function upsertSavedQuery(

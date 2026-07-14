@@ -43,9 +43,9 @@ Published crates are **0.24.x**. Library APIs, LSP JSON, and SQL table columns m
 
 EL / RL / RDFS / DL classification ships via **Ontologos 1.x** (crates pinned in the workspace). Explanations are **DL-first** for the DL profile (with EL/RL/RDFS alternatives). Realization and instance checking ship in v0.23. **DL Query** (Workbench DL mode, `ontocore dl-query`, LSP `ontocore/dlQuery`) ships in v0.24. **Stop** sets an engine cancel flag and ignores late results. See [Reasoner guide](guides/reasoner.md) and [DL Query](guides/dl-query.md).
 
-## Refactoring (Turtle-first)
+## Refactoring
 
-Refactor preview/apply (rename, merge, replace, move, extract, ontology merge, import flatten/cleanup) is **Turtle-first**. Non-Turtle files (OBO, RDF/XML, OWL/XML) are **skipped with warnings**; edit those formats via patches / Entity Inspector write-back instead. Full multi-format serializer-independent transform remains a known gap. See [What ships today](SHIPPED.md) and [v0.24 migration](migration/v0.24.md).
+**Rename / merge / replace** apply to Turtle, RDF/XML (`.owl`/`.rdf`), OWL/XML (`.owx`), and OBO (semantic re-serialize for XML — ADR-0021; OBO id/reference rewrite). **Move entity/axioms**, **module extract**, and **ontology merge / flatten / cleanup imports** remain **Turtle-first** (non-Turtle files skipped with warnings). See [What ships today](SHIPPED.md) and [v0.24 migration](migration/v0.24.md).
 
 ## Layout persistence
 
@@ -59,7 +59,7 @@ Graphs may be **truncated** (badge in the Graph panel). Prefer narrower search, 
 
 - You need **byte-identical OWL/XML or RDF/XML** that matches Protégé layout — OntoCode re-serializes for semantic fidelity (ADR-0021); use Protégé when layout identity matters.
 - You need **JSON-LD / TriG / N-Triples write-back** — still read-only; use Turtle or convert.
-- You need **refactor apply on non-Turtle files** — refactor is Turtle-first; non-Turtle files are skipped with warnings (edit via patch / Inspector instead). See [v0.24 migration](migration/v0.24.md).
+- You need **move / extract / ontology-merge refactor on non-Turtle files** — those operations stay Turtle-first (rename/merge/replace already multi-format). See [v0.24 migration](migration/v0.24.md).
 - You need **full SQL analytics** — use SPARQL or an external store.
 - You need a **stable plugin marketplace API** without scaffolding — wait for v1.0 or keep Protégé plugins — [Plugin policy](guides/plugin-policy.md).
 - You need **WebProtégé collaboration** — out of scope until post-1.0.

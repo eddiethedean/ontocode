@@ -29,6 +29,8 @@ Related query surfaces:
 3. Enter a Manchester class expression (e.g. `Person and hasPet some Dog`)
 4. Choose asserted or inferred, then run — results appear in the four tabs
 
+**Asserted mode:** named-class instances come from asserted class assertions (including asserted subclasses). Anonymous expressions still need **inferred** mode for instances. Saved DL queries remember the asserted/inferred toggle.
+
 ## CLI
 
 ```bash

@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<Ontology xmlns="http://www.w3.org/2002/07/owl#"
+          ontologyIRI="http://example.org/person">
+  <Declaration>
+    <Class IRI="http://example.org#Person"/>
+  </Declaration>
+  <Declaration>
+    <Class IRI="http://example.org#Patient"/>
+  </Declaration>
+  <SubClassOf>
+    <Class IRI="http://example.org#Patient"/>
+    <Class IRI="http://example.org#Person"/>
+  </SubClassOf>
+</Ontology>

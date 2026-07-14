@@ -242,6 +242,7 @@ export function QueryWorkbenchPanel(_props?: WorkspaceProps): JSX.Element {
                 name,
                 mode,
                 text,
+                ...(mode === "dl" ? { dlMode } : {}),
               });
             }}
           >
@@ -301,6 +302,9 @@ export function QueryWorkbenchPanel(_props?: WorkspaceProps): JSX.Element {
                 if (item) {
                   setQueryLanguage(item.mode);
                   setQueryText(item.text);
+                  if (item.mode === "dl") {
+                    setDlMode(item.dlMode === "asserted" ? "asserted" : "inferred");
+                  }
                 }
               }}
             >
@@ -319,6 +323,9 @@ export function QueryWorkbenchPanel(_props?: WorkspaceProps): JSX.Element {
                 if (item) {
                   setQueryLanguage(item.mode);
                   setQueryText(item.text);
+                  if (item.mode === "dl") {
+                    setDlMode(item.dlMode === "asserted" ? "asserted" : "inferred");
+                  }
                 }
               }}
             >

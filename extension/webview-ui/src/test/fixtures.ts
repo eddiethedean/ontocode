@@ -74,10 +74,22 @@ export const refactorPlan: RefactorPlanPayload = {
 
 export const savedQueries: SavedQuery[] = [
   { name: "All classes", mode: "sql", text: "SELECT * FROM classes" },
+  {
+    name: "People asserted",
+    mode: "dl",
+    text: "Person",
+    dlMode: "asserted",
+  },
 ];
 
 export const queryHistory: SavedQuery[] = [
   { name: "Recent", mode: "sparql", text: "SELECT ?s WHERE { ?s ?p ?o }" },
+  {
+    name: "Recent DL",
+    mode: "dl",
+    text: "Employee",
+    dlMode: "asserted",
+  },
 ];
 
 export const queryResult: TabularQueryResult = {

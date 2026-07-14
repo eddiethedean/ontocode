@@ -93,8 +93,9 @@ Every parity claim must be traceable to this matrix.
   PAR-SWRL-001   SWRL            Rule                P0         NOT_IMPLEMENTED   Audit                      Missing            Major blocker
                                  authoring/editing                                                                              
 
-  PAR-REF-001    Refactoring     Semantic            P0         VERIFIED          IMPLEMENTATION_EVIDENCE    Refactor tests     Turtle-first;
-                                 refactoring                                                                                    non-Turtle skip
+  PAR-REF-001    Refactoring     Semantic            P0         VERIFIED          IMPLEMENTATION_EVIDENCE    Refactor tests     rename/merge/replace
+                                 refactoring                                                                                    multi-format; move/
+                                                                                                                                extract Turtle-first
 
   PAR-VIS-001    Visualization   Graph parity        P1         PARTIAL           Audit                      UI tests           
 

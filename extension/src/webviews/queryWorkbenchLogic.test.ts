@@ -53,8 +53,19 @@ test("upsertSavedQuery accepts dl mode", () => {
     name: "q-dl",
     mode: "dl",
     text: "Person and hasPet some Animal",
+    dlMode: "asserted",
   });
   assert.equal(saved[0]?.mode, "dl");
+  assert.equal(saved[0]?.dlMode, "asserted");
+});
+
+test("mergeHistory preserves dlMode", () => {
+  const history = mergeHistory(
+    [],
+    { name: "dl", mode: "dl", text: "Person", dlMode: "asserted" },
+    5
+  );
+  assert.equal(history[0]?.dlMode, "asserted");
 });
 
 test("dlQueryToTabular flattens tabs", () => {

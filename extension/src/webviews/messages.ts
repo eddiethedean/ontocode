@@ -131,6 +131,8 @@ export interface SavedQuery {
   name: string;
   mode: "sql" | "sparql" | "dl";
   text: string;
+  /** Asserted vs inferred for DL queries; ignored for SQL/SPARQL. */
+  dlMode?: "asserted" | "inferred";
 }
 
 export interface DlQueryResult {
@@ -353,7 +355,7 @@ export type WebviewMessage =
   | { type: "applyRefactor" }
   | { type: "cancelRefactor" }
   | { type: "runQuery"; mode: "sql" | "sparql" | "dl"; text: string; runId: number; dlMode?: "asserted" | "inferred" }
-  | { type: "saveQuery"; name: string; mode: "sql" | "sparql" | "dl"; text: string }
+  | { type: "saveQuery"; name: string; mode: "sql" | "sparql" | "dl"; text: string; dlMode?: "asserted" | "inferred" }
   | { type: "exportQueryResult"; format: "csv" | "json"; runId?: number }
   | { type: "exportGraph"; format: "json" | "csv"; payload: string; suggestedName?: string }
   | { type: "validateManchester"; expression: string; axiomKind: string; seq: number }
@@ -526,7 +528,12 @@ export function parseRunQueryMessage(
 
 export function parseSaveQueryMessage(
   message: WebviewMessage
-): { name: string; mode: "sql" | "sparql" | "dl"; text: string } | null {
+): {
+  name: string;
+  mode: "sql" | "sparql" | "dl";
+  text: string;
+  dlMode?: "asserted" | "inferred";
+} | null {
   if (message.type !== "saveQuery") {
     return null;
   }
@@ -539,7 +546,11 @@ export function parseSaveQueryMessage(
   if (!message.name.trim() || message.text.length > MAX_QUERY_TEXT_BYTES) {
     return null;
   }
-  return { name: message.name.trim(), mode: message.mode, text: message.text };
+  const dlMode =
+    message.dlMode === "asserted" || message.dlMode === "inferred"
+      ? message.dlMode
+      : undefined;
+  return { name: message.name.trim(), mode: message.mode, text: message.text, dlMode };
 }
 
 /** Validate applyPatch payload; reject missing previewOnly (must not default to write). */

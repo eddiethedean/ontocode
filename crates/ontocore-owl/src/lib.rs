@@ -10,6 +10,7 @@ mod load;
 pub mod manchester;
 mod mutate;
 pub mod patch;
+mod remap;
 mod serialize;
 mod span;
 mod turtle_lex;
@@ -30,6 +31,7 @@ pub use patch::{
     apply_patches, apply_patches_to_text, atomic_write, is_safe_iri, validate_prefix,
     ApplyPatchResult, PatchDiagnostic, PatchEntityKind, PatchOp,
 };
+pub use remap::{remap_entity_iri, remap_entity_iri_in_xml_text};
 pub use serialize::{
     load_owl_xml_ontology, load_rdf_xml_ontology, serialize_owl_xml, serialize_rdf_xml,
 };

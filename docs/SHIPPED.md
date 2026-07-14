@@ -85,9 +85,10 @@
 |------------|--------|
 | DL Query (Workbench DL mode, CLI, LSP) | Shipped |
 | Workspace search LSP (`ontocore/search`) | Shipped |
-| Merge / replace / move axioms / ontology merge | Shipped (Turtle-first) |
+| Rename / merge / replace (Turtle + RDF/XML + OWL/XML + OBO) | Shipped |
+| Move axioms / ontology merge | Shipped (Turtle-first) |
 | Flatten / cleanup imports; locality module extract | Shipped (Turtle-first) |
-| SWRL-aware rename / merge / replace | Shipped |
+| SWRL-aware rename / merge / replace | Shipped (Turtle SWRL JSON; XML remaps structured IRI when present) |
 | Refactor plan impact metrics | Shipped |
 
 ## Previously in v0.23.0

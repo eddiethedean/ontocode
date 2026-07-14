@@ -98,11 +98,11 @@ pub fn run_dl_query(
             }
         }
     } else if mode == DlQueryMode::Asserted {
-        // Asserted instances from class assertions in hierarchy-only mode are unavailable
-        // without a store walk; leave empty with a note when we only have asserted taxonomy.
         if is_named {
+            instances = asserted_instances_of_class(&query_input, &hierarchy, &query_iri);
+        } else {
             warnings.push(
-                "asserted mode returns class hierarchy only; instances require inferred mode"
+                "asserted mode cannot materialize instances for anonymous class expressions; use inferred mode"
                     .to_string(),
             );
         }
@@ -146,6 +146,51 @@ fn collect_inferred(
     _profile: ReasonerId,
 ) -> (ClassHierarchy, String, Option<RealizationResult>) {
     (classification.inferred.combined.clone(), classification.profile_used.clone(), realization)
+}
+
+/// Collect individuals with an asserted type of `class_iri` or any asserted descendant.
+fn asserted_instances_of_class(
+    input: &ReasonerInput,
+    hierarchy: &ClassHierarchy,
+    class_iri: &str,
+) -> Vec<String> {
+    let mut class_iris: BTreeSet<String> = collect_descendants(hierarchy, class_iri)
+        .into_iter()
+        .collect();
+    class_iris.insert(class_iri.to_string());
+
+    let mut out = BTreeSet::new();
+    for iri in &class_iris {
+        let Some(class_id) = input.ontology.lookup_entity(iri) else {
+            continue;
+        };
+        for ind_id in input.ontology.individuals_of(class_id) {
+            if let Ok(ind_iri) = crate::result::entity_iri(&input.ontology, *ind_id) {
+                out.insert(ind_iri);
+            }
+        }
+    }
+
+    // Fallback: walk ClassAssertion axioms (including load-marked "inferred" ones).
+    if out.is_empty() {
+        use ontologos_core::Axiom;
+        for (_id, axiom) in input.ontology.axioms().iter() {
+            let Axiom::ClassAssertion { individual, class } = axiom else {
+                continue;
+            };
+            let Ok(class_s) = crate::result::entity_iri(&input.ontology, *class) else {
+                continue;
+            };
+            if !class_iris.contains(&class_s) {
+                continue;
+            }
+            if let Ok(ind_s) = crate::result::entity_iri(&input.ontology, *individual) {
+                out.insert(ind_s);
+            }
+        }
+    }
+
+    out.into_iter().collect()
 }
 
 fn named_class_iri(expr: &ClassExpression<horned_owl::model::RcStr>) -> Option<String> {

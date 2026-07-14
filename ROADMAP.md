@@ -70,7 +70,9 @@ v1.3                 v1.4                    v1.5+
 Web foundation       Team workspaces          Cloud collaboration
   │                    │                        │
   Browser shell       Projects + sharing       Live editing + governance
-  OntoCore service    Auth + permissions       Enterprise deployment
+  Service + WASM      Auth + permissions       Enterprise deployment
+  React app           Lightweight edits        Hybrid WASM preview
+  (no backend)
 ```
 
 ### Phase index
@@ -85,7 +87,7 @@ Web foundation       Team workspaces          Cloud collaboration
 | **F — Full Protégé parity path** | v0.19–v0.25 | In progress (v0.19–v0.24 shipped) | Semantic core → formats → OWL 2 → reason/SWRL → services → verify |
 | **G — Protégé replacement** | 1.0.0 | Planned | Daily OWL/OBO engineering without Protégé |
 | **H — Ecosystem** | v1.1–v1.2 | Planned | SDKs, AI, toolchain & collaboration |
-| **I — Webapp platform** | v1.3–v1.5+ | Planned | Browser-first ontology engineering, team workspaces, and cloud collaboration |
+| **I — Webapp platform** | v1.3–v1.5+ | Planned | Browser-first ontology engineering: hosted webapp, React app (no backend) via WASM, team workspaces, cloud collaboration |
 
 | Phase | Version | Era | Status | UI phases | Theme |
 |-------|---------|-----|--------|-----------|-------|
@@ -118,7 +120,7 @@ Web foundation       Team workspaces          Cloud collaboration
 | 27 | v1.0 | G | Planned | 1–6 exit, 9† | Protégé-competitive release |
 | 28 | v1.1 | H | Planned | 7, 2†, 3†, 4†, 8†, 9† | Language bindings & AI primitives |
 | 29 | v1.2 | H | Planned | 9, 10, 11 | Ontology toolchain platform |
-| 30 | v1.3 | I | Planned | 10, 12† | Webapp foundation |
+| 30 | v1.3 | I | Planned | 10, 12† | Webapp foundation + React app (no backend) |
 | 31 | v1.4 | I | Planned | 9, 12 | Team workspaces |
 | 32 | v1.5+ | I | Planned | 9, 12 | Cloud collaboration + governance |
 
@@ -142,7 +144,7 @@ OntoUI work uses **UI phases 0–12** from [Product Roadmap 2.0](docs/ui/PRODUCT
 | **9** | Collaboration | v0.10+ (diff); v0.13† (PR summary CLI shipped); v1.0 (review); v1.2 (GitHub UI) |
 | **10** | OntoStudio desktop | v1.2† (marketplace); Post-1.2 (shell, native graph) |
 | **11** | Ecosystem & docs | v0.11+ (guides); v1.2 (registry, templates) |
-| **12** | Semantic engineering platform | v1.3 (browser shell); v1.4 (team workspaces); v1.5+ (cloud collaboration) |
+| **12** | Semantic engineering platform | v1.3 (browser shell, React app no-backend, OntoCore WASM); v1.4 (team workspaces); v1.5+ (cloud collaboration) |
 
 > **Note on v0.13–v0.18 (retired labels):** Earlier drafts used v0.13–v0.18 for capabilities that **shipped in v0.3–v0.11** (diagnostics, SQL virtual tables, refactoring, Ontologos reasoning, semantic diff, docs export). Those labels are retired. Forward work from v0.13 onward is defined in the phases below.
 
@@ -751,23 +753,30 @@ Former roadmap labels **v0.17 (Language Bindings)** and **v0.18 (AI Platform)** 
 ### Era I — Webapp platform (v1.3+)
 
 > **Scope note:** The webapp is a new product surface on the OntoCore platform, not a replacement for the VS Code extension. OntoCode remains the power-user IDE; the webapp prioritizes onboarding, review, shared workspaces, and browser-first collaboration.
+>
+> **Two product shapes (same OntoUI):**
+> 1. **OntoCode Web (hosted)** — React browser app backed by OntoCore **service mode** (HTTP/WebSocket). Default for team workspaces, large ontologies, and collaboration.
+> 2. **React app (no backend)** — static SPA that runs OntoCore entirely in-browser via **WASM**. No OntoCore server, no auth service, no remote API — open files/samples locally, browse, validate, query, and export. Ideal for demos, embeddings, offline review, and GitHub Pages–style static deploys.
+>
+> Both share TypeScript/OntoUI components and WorkspaceHost adapters; only the engine transport differs (service client vs WASM Worker).
 
 ### v1.3 — Webapp foundation (planned)
 
-**Theme:** Bring OntoCore-backed ontology browsing, validation, query, and review into the browser.
+**Theme:** Ship OntoCode in the browser — hosted service path **and** a **React app (no backend)** powered by OntoCore WASM.
 
 **UI phases:** **10**, partial **12**. Milestones: [Product Roadmap 2.0 phases 10–12](docs/ui/PRODUCT_ROADMAP_2.0.md).
 
 | Area | Deliverables |
 |------|--------------|
-| **OntoCore** | Long-running service mode; workspace/project API over HTTP or WebSocket; serialized catalog snapshots; query/validate/diff endpoints; server-side workspace sandboxing and resource limits |
-| **OntoUI** | Shared React component package usable by VS Code webviews and browser routes; responsive shell; browser-safe graph/query/inspector workspaces; design tokens aligned across extension and webapp |
-| **OntoCode Web** | Browser app MVP: open sample/project workspace, browse entities, run validation, run SQL/SPARQL, view semantic diffs, export reports; read-only by default with explicit edit preview gates |
-| **Ecosystem** | Deployment guide for local server, container image, and single-user hosted instance; API docs for embedding catalog/query/review views |
+| **OntoCore** | Long-running service mode; workspace/project API over HTTP or WebSocket; serialized catalog snapshots; query/validate/diff endpoints; server-side workspace sandboxing and resource limits. **WASM track (required by React app no-backend):** `ontocore-wasm` (or equivalent) crate targeting `wasm32`; worker-friendly JS/TS bindings for open/index snapshot, browse catalog, validate, and run constrained SQL/SPARQL; virtual FS / in-memory workspace for file blobs (no native disk); documented capability matrix vs native (reasoning/plugins/ROBOT may be reduced or deferred); size/perf budget and CI smoke tests for browser load |
+| **OntoUI** | Shared React component package usable by VS Code webviews, hosted OntoCode Web, and the **React app (no backend)**; responsive shell; browser-safe graph/query/inspector workspaces; design tokens aligned across surfaces; WorkspaceHost adapters for service mode and for WASM (Worker message bus) |
+| **OntoCode Web (hosted)** | Browser app MVP against service mode: open sample/project workspace, browse entities, run validation, run SQL/SPARQL, view semantic diffs, export reports; read-only by default with explicit edit preview gates |
+| **React app (no backend)** | First-class static product: Vite/React SPA that embeds OntoCore WASM; open local ontology files or bundled samples; entity explorer, inspector, Query Workbench, validation, and semantic diff **with zero server dependency**; deployable as static assets (CDN / GitHub Pages); documented limits vs hosted mode; same OntoUI shell as hosted Web where capabilities overlap |
+| **Ecosystem** | Deployment guide for local server, container image, single-user hosted instance, **and** static React SPA + WASM assets; API docs for embedding catalog/query/review views; published npm package wrapping WASM bindings; template repo or `create-` starter for embedding the React no-backend app |
 
-**Exit criteria:** A user can open a browser, load an ontology workspace through OntoCore service mode, inspect entities, run validation/query, and review semantic diffs without installing VS Code.
+**Exit criteria:** Without installing VS Code, a user can (a) use **OntoCode Web (hosted)** via OntoCore service mode, or (b) open the **React app (no backend)** from a static URL or local static server, load a sample or local file through WASM, and in either shape inspect entities, run validation/query, and review semantic diffs. Path (b) must work with **no** OntoCore backend process.
 
-**Dependencies:** Stable OntoCore 1.x API; TypeScript SDK from v1.1; plugin/toolchain APIs from v1.2; ADR for hosted service security and workspace isolation.
+**Dependencies:** Stable OntoCore 1.x API; TypeScript SDK from v1.1; plugin/toolchain APIs from v1.2; ADR for hosted service security and workspace isolation; **ADR for OntoCore WASM crate boundaries** (which subsystems compile for `wasm32`, Worker vs main-thread, FS/network stubs, and deferred features); Vite/static-hosting packaging ADR for the React no-backend app.
 
 ---
 
@@ -779,9 +788,10 @@ Former roadmap labels **v0.17 (Language Bindings)** and **v0.18 (AI Platform)** 
 
 | Area | Deliverables |
 |------|--------------|
-| **OntoCore** | Project metadata store; branch/snapshot model; review annotations; proposal/apply workflow for semantic patches; audit log primitives |
+| **OntoCore** | Project metadata store; branch/snapshot model; review annotations; proposal/apply workflow for semantic patches; audit log primitives; WASM feature expansion for lightweight browser edits (label/comment/simple axiom patches) with patch export that matches service-mode semantic patch format |
 | **OntoUI** | Review workspace; comment threads on entities/axioms/diffs; assignment/status filters; browser editor forms for labels, comments, simple class/property changes, and controlled patch application |
 | **OntoCode Web** | Team project dashboard; invite/share links; role-aware project views; pull-request-style semantic review; report publishing for validation, reasoning, and release workflows |
+| **React app (no backend)** | Optional offline edit preview: apply simple patches locally via WASM, export semantic patch / Turtle diff for later apply in hosted Web or VS Code; remains deployable as pure static assets |
 | **Ecosystem** | GitHub/GitLab integration for branch import/export; webhook support for CI validation and release reports |
 
 **Exit criteria:** A small ontology team can review, comment on, approve, and apply ontology changes in the browser while preserving Git-backed provenance.
@@ -798,9 +808,10 @@ Former roadmap labels **v0.17 (Language Bindings)** and **v0.18 (AI Platform)** 
 
 | Area | Deliverables |
 |------|--------------|
-| **OntoCore** | Multi-tenant deployment profile; collaborative session protocol; conflict detection/merge for semantic edits; scalable reasoning/query workers; policy hooks for governance workflows |
+| **OntoCore** | Multi-tenant deployment profile; collaborative session protocol; conflict detection/merge for semantic edits; scalable reasoning/query workers; policy hooks for governance workflows; optional hybrid clients (WASM for local preview + service workers for shared sessions) |
 | **OntoUI** | Live presence; shared semantic canvases; real-time review state; governance dashboards; large-ontology performance modes for browser graph and table views |
 | **OntoCode Web** | Organization workspaces; permissions; notifications; live edit/review sessions; hosted release dashboards; governance workflows for approval, deprecation, publication, and compliance evidence |
+| **React app (no backend)** | Remains available as a static offline/review surface; optional hybrid mode where the same React shell can attach to a hosted session when the user opts in (default stays no-backend) |
 | **Ecosystem** | Enterprise deployment patterns; identity provider integration; observability; backup/export guarantees; hosted plugin/runtime policy |
 
 **Exit criteria:** Ontology teams can run a governed browser-first workflow for collaborative editing, review, validation, release, and audit without relying on a desktop-only toolchain.
@@ -817,8 +828,8 @@ Former roadmap labels **v0.17 (Language Bindings)** and **v0.18 (AI Platform)** 
 
 | Area | Deliverables |
 |------|--------------|
-| **OntoCore** | Semantic workspace APIs (persistent semantic databases); plugin marketplace maturity; advanced graph analytics; webapp service/runtime hardening from v1.3–v1.5 |
-| **OntoUI** | **[10]** OntoStudio Tauri app shell; shared React UI (OntoCode + OntoStudio + OntoCode Web); native graph performance; local AI support; enterprise packaging ([ONTOSTUDIO_DESKTOP](docs/ui/ONTOSTUDIO_DESKTOP.md), [GRAPH_RENDERING_ARCHITECTURE](docs/ui/GRAPH_RENDERING_ARCHITECTURE.md), [COMPONENT_LIBRARY](docs/ui/COMPONENT_LIBRARY.md)). **[12]** Browser client; cloud sync; team workspaces; distributed reasoning; shared semantic canvases; governance workflows ([PLATFORM_ARCHITECTURE](docs/ui/PLATFORM_ARCHITECTURE.md), [COLLABORATION](docs/ui/COLLABORATION.md), [GRAPH_WORKSPACE](docs/ui/GRAPH_WORKSPACE.md), [governance](docs/guides/governance.md)). **[9, 12]** Live collaboration; ontology PR review; advanced visualization (large-graph layout, temporal diff) |
+| **OntoCore** | Semantic workspace APIs (persistent semantic databases); plugin marketplace maturity; advanced graph analytics; webapp service/runtime hardening from v1.3–v1.5; WASM parity hardening (reasoning profiles, larger workspaces, publishable npm/CDN packages) |
+| **OntoUI** | **[10]** OntoStudio Tauri app shell; shared React UI (OntoCode + OntoStudio + OntoCode Web + React app no-backend); native graph performance; local AI support; enterprise packaging ([ONTOSTUDIO_DESKTOP](docs/ui/ONTOSTUDIO_DESKTOP.md), [GRAPH_RENDERING_ARCHITECTURE](docs/ui/GRAPH_RENDERING_ARCHITECTURE.md), [COMPONENT_LIBRARY](docs/ui/COMPONENT_LIBRARY.md)). **[12]** Browser client (hosted service + React app no-backend / WASM); cloud sync; team workspaces; distributed reasoning; shared semantic canvases; governance workflows ([PLATFORM_ARCHITECTURE](docs/ui/PLATFORM_ARCHITECTURE.md), [COLLABORATION](docs/ui/COLLABORATION.md), [GRAPH_WORKSPACE](docs/ui/GRAPH_WORKSPACE.md), [governance](docs/guides/governance.md)). **[9, 12]** Live collaboration; ontology PR review; advanced visualization (large-graph layout, temporal diff) |
 | **OntoCode** | AI-assisted ontology engineering (modeling suggestions, axiom completion); live collaboration; ontology review in pull requests; deep links between VS Code workspaces and OntoCode Web reviews |
 | **Ecosystem** | Enterprise governance tooling; knowledge graph tooling integrations; documentation generators via plugin APIs |
 

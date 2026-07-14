@@ -112,7 +112,7 @@ OntoUI work uses **UI phases 0–12** from [Product Roadmap 2.0](https://github.
 | **9** | Collaboration | v0.10+ (diff); v0.13† (PR summary CLI shipped); v1.0 (review); v1.2 (GitHub UI) |
 | **10** | OntoStudio desktop | v1.2† (marketplace); Post-1.2 (shell, native graph) |
 | **11** | Ecosystem & docs | v0.11+ (guides); v1.2 (registry, templates) |
-| **12** | Semantic engineering platform | Post-1.2 (browser, cloud, team workspaces) |
+| **12** | Semantic engineering platform | Post-1.2 (hosted webapp + React app no-backend, cloud, team workspaces) |
 
 > **Note on v0.13–v0.18 (retired labels):** Earlier drafts used v0.13–v0.18 for capabilities that **shipped in v0.3–v0.11** (diagnostics, SQL virtual tables, refactoring, Ontologos reasoning, semantic diff, docs export). Those labels are retired. Forward work from v0.13 onward is defined in the phases below.
 
@@ -601,10 +601,12 @@ Former roadmap labels **v0.17 (Language Bindings)** and **v0.18 (AI Platform)** 
 
 **UI phases:** **10**, **12**, plus collaboration items from **9**. Milestones: [Product Roadmap 2.0 phases 10–12](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/PRODUCT_ROADMAP_2.0.md).
 
+> **Full Era I detail (v1.3–v1.5+ webapp, hosted service + React app no-backend / WASM):** [ROADMAP.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/ROADMAP.md#era-i--webapp-platform-v13).
+
 | Area | Deliverables |
 |------|--------------|
-| **OntoCore** | Semantic workspace APIs (persistent semantic databases); plugin marketplace maturity; advanced graph analytics |
-| **OntoUI** | **[10]** OntoStudio Tauri app shell; shared React UI (OntoCode + OntoStudio); native graph performance; local AI support; enterprise packaging ([ONTOSTUDIO_DESKTOP](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/ONTOSTUDIO_DESKTOP.md), [GRAPH_RENDERING_ARCHITECTURE](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/GRAPH_RENDERING_ARCHITECTURE.md), [COMPONENT_LIBRARY](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/COMPONENT_LIBRARY.md)). **[12]** Browser client; cloud sync; team workspaces; distributed reasoning; shared semantic canvases; governance workflows ([PLATFORM_ARCHITECTURE](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/PLATFORM_ARCHITECTURE.md), [COLLABORATION](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/COLLABORATION.md), [GRAPH_WORKSPACE](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/GRAPH_WORKSPACE.md), [governance](guides/governance.md)). **[9, 12]** Live collaboration; ontology PR review; advanced visualization (large-graph layout, temporal diff) |
+| **OntoCore** | Semantic workspace APIs (persistent semantic databases); plugin marketplace maturity; advanced graph analytics; **OntoCore WASM** powering a **React app (no backend)** for static/offline embeddings (catalog browse, validate, constrained query) alongside service-mode hosting |
+| **OntoUI** | **[10]** OntoStudio Tauri app shell; shared React UI (OntoCode + OntoStudio + React app no-backend); native graph performance; local AI support; enterprise packaging ([ONTOSTUDIO_DESKTOP](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/ONTOSTUDIO_DESKTOP.md), [GRAPH_RENDERING_ARCHITECTURE](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/GRAPH_RENDERING_ARCHITECTURE.md), [COMPONENT_LIBRARY](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/COMPONENT_LIBRARY.md)). **[12]** Browser client (hosted + React app no-backend); cloud sync; team workspaces; distributed reasoning; shared semantic canvases; governance workflows ([PLATFORM_ARCHITECTURE](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/PLATFORM_ARCHITECTURE.md), [COLLABORATION](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/COLLABORATION.md), [GRAPH_WORKSPACE](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/GRAPH_WORKSPACE.md), [governance](guides/governance.md)). **[9, 12]** Live collaboration; ontology PR review; advanced visualization (large-graph layout, temporal diff) |
 | **OntoCode** | AI-assisted ontology engineering (modeling suggestions, axiom completion); live collaboration; ontology review in pull requests |
 | **Ecosystem** | Enterprise governance tooling; knowledge graph tooling integrations; documentation generators via plugin APIs |
 

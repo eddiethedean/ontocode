@@ -558,6 +558,8 @@ export interface SavedQuery {
   name: string;
   mode: "sql" | "sparql" | "dl";
   text: string;
+  /** Asserted vs inferred for DL queries; ignored for SQL/SPARQL. */
+  dlMode?: "asserted" | "inferred";
 }
 
 export interface UsageSummary {

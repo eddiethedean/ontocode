@@ -1355,6 +1355,7 @@ version = "0.24.0"
 dependencies = [
  "ontocore-catalog",
  "ontocore-core",
+ "ontocore-obo",
  "ontocore-owl",
  "ontocore-swrl",
  "serde",

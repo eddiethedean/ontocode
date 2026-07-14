@@ -200,30 +200,10 @@ fn merge_entities_rewrites_references_and_removes_merged_declaration() {
 }
 
 #[test]
-fn rename_iri_skips_non_turtle_with_warning() {
+fn rename_iri_rewrites_rdf_xml() {
     let tmp = TempDir::new().unwrap();
     let ws = tmp.path();
-    std::fs::write(
-        ws.join("a.ttl"),
-        concat!(
-            "@prefix ex: <http://example.org#> .\n",
-            "@prefix owl: <http://www.w3.org/2002/07/owl#> .\n",
-            "ex:Person a owl:Class .\n",
-        ),
-    )
-    .unwrap();
-    // Minimal RDF/XML that mentions the same IRI — should be skipped with a warning.
-    std::fs::write(
-        ws.join("b.owl"),
-        r#"<?xml version="1.0"?>
-<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-         xmlns:owl="http://www.w3.org/2002/07/owl#"
-         xmlns:ex="http://example.org#">
-  <owl:Class rdf:about="http://example.org#Person"/>
-</rdf:RDF>
-"#,
-    )
-    .unwrap();
+    std::fs::copy(fixture_dir().join("person.owl"), ws.join("person.owl")).unwrap();
     let catalog = build_catalog(ws);
     let plan = preview_rename_iri(
         &catalog,
@@ -232,12 +212,133 @@ fn rename_iri_skips_non_turtle_with_warning() {
         &empty_overrides(),
     )
     .expect("rename");
-    assert!(plan.changes.iter().any(|c| c.path.ends_with("a.ttl")));
-    assert!(plan.warnings.iter().any(|w| w.contains("non-Turtle") || w.contains("b.owl")));
+    assert!(plan.changes.iter().any(|c| c.path.ends_with("person.owl")));
+    let preview = &plan.changes[0].preview_text;
+    assert!(preview.contains("http://example.org#Human"), "{preview}");
+    assert!(!preview.contains("http://example.org#Person"), "{preview}");
     assert!(
-        plan.affected_entity_count >= 1,
-        "expected metrics: {:?}",
-        plan.affected_entity_count
+        plan.warnings.iter().all(|w| !w.contains("skipping") || !w.contains("person.owl")),
+        "unexpected skip warnings: {:?}",
+        plan.warnings
+    );
+}
+
+#[test]
+fn rename_iri_rewrites_owl_xml() {
+    let tmp = TempDir::new().unwrap();
+    let ws = tmp.path();
+    std::fs::copy(fixture_dir().join("person.owx"), ws.join("person.owx")).unwrap();
+    let catalog = build_catalog(ws);
+    let plan = preview_rename_iri(
+        &catalog,
+        "http://example.org#Person",
+        "http://example.org#Human",
+        &empty_overrides(),
+    )
+    .expect("rename");
+    assert!(plan.changes.iter().any(|c| c.path.ends_with("person.owx")));
+    let preview = &plan.changes[0].preview_text;
+    assert!(preview.contains("http://example.org#Human"), "{preview}");
+    assert!(!preview.contains("http://example.org#Person"), "{preview}");
+}
+
+#[test]
+fn rename_iri_rewrites_obo() {
+    let tmp = TempDir::new().unwrap();
+    let ws = tmp.path();
+    std::fs::copy(fixture_dir().join("person.obo"), ws.join("person.obo")).unwrap();
+    let catalog = build_catalog(ws);
+    let from = "http://purl.obolibrary.org/obo/EX_001";
+    let to = "http://purl.obolibrary.org/obo/EX_010";
+    assert!(
+        catalog.find_entity(from).is_some(),
+        "expected OBO entity in catalog; entities={:?}",
+        catalog
+            .data()
+            .entities
+            .iter()
+            .map(|e| (&e.iri, &e.obo_id))
+            .collect::<Vec<_>>()
+    );
+    let plan = preview_rename_iri(&catalog, from, to, &empty_overrides()).expect("rename");
+    assert!(plan.changes.iter().any(|c| c.path.ends_with("person.obo")));
+    let preview = &plan.changes[0].preview_text;
+    assert!(preview.contains("id: EX:010"), "{preview}");
+    assert!(preview.contains("is_a: EX:010"), "{preview}");
+    assert!(!preview.contains("id: EX:001"), "{preview}");
+}
+
+#[test]
+fn merge_entities_rewrites_rdf_xml() {
+    let tmp = TempDir::new().unwrap();
+    let ws = tmp.path();
+    std::fs::write(
+        ws.join("merge.owl"),
+        r#"<?xml version="1.0"?>
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:owl="http://www.w3.org/2002/07/owl#"
+         xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+  <owl:Class rdf:about="http://example.org#Keep"/>
+  <owl:Class rdf:about="http://example.org#Merge"/>
+  <owl:Class rdf:about="http://example.org#Child">
+    <rdfs:subClassOf rdf:resource="http://example.org#Merge"/>
+  </owl:Class>
+</rdf:RDF>
+"#,
+    )
+    .unwrap();
+    let catalog = build_catalog(ws);
+    let plan = preview_merge_entities(
+        &catalog,
+        "http://example.org#Keep",
+        "http://example.org#Merge",
+        &empty_overrides(),
+    )
+    .expect("merge");
+    assert!(!plan.changes.is_empty());
+    let preview = &plan.changes[0].preview_text;
+    assert!(preview.contains("http://example.org#Keep"), "{preview}");
+    assert!(
+        preview.contains("http://example.org#Child"),
+        "{preview}"
+    );
+    // Merge IRI should be gone after remap.
+    assert!(!preview.contains("http://example.org#Merge"), "{preview}");
+}
+
+#[test]
+fn replace_entity_rewrites_obo_when_target_exists() {
+    let tmp = TempDir::new().unwrap();
+    let ws = tmp.path();
+    std::fs::write(
+        ws.join("replace.obo"),
+        "\
+format-version: 1.2
+ontology: ex
+
+[Term]
+id: EX:001
+name: From
+
+[Term]
+id: EX:002
+name: To
+is_a: EX:001 ! From
+",
+    )
+    .unwrap();
+    let catalog = build_catalog(ws);
+    let from = "http://purl.obolibrary.org/obo/EX_001";
+    let to = "http://purl.obolibrary.org/obo/EX_002";
+    let plan = preview_replace_entity(&catalog, from, to, &empty_overrides()).expect("replace");
+    assert!(!plan.changes.is_empty());
+    let preview = &plan.changes[0].preview_text;
+    assert!(preview.contains("is_a: EX:002"), "{preview}");
+    assert!(!preview.contains("is_a: EX:001"), "{preview}");
+    assert!(
+        plan.warnings.iter().any(|w| w.contains("non-Turtle replace")),
+        "expected non-Turtle replace warning: {:?}",
+        plan.warnings
     );
 }
 

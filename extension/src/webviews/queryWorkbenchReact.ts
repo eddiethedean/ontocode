@@ -111,7 +111,7 @@ export class QueryWorkbenchPanel {
       if (!parsed) {
         return;
       }
-      await this.saveQuery(parsed.mode, parsed.text, parsed.name);
+      await this.saveQuery(parsed.mode, parsed.text, parsed.name, parsed.dlMode);
     }
     if (message.type === "exportQueryResult") {
       await this.exportResult(message.format, message.runId);
@@ -163,7 +163,12 @@ export class QueryWorkbenchPanel {
       }
       const history = mergeHistory(
         this.context.workspaceState.get<SavedQuery[]>(HISTORY_KEY) ?? [],
-        { name: `${mode} @ ${new Date().toLocaleTimeString()}`, mode, text },
+        {
+          name: `${mode} @ ${new Date().toLocaleTimeString()}`,
+          mode,
+          text,
+          ...(mode === "dl" ? { dlMode: dlMode ?? "inferred" } : {}),
+        },
         vscode.workspace
           .getConfiguration("ontocode")
           .get<number>("queryHistoryLimit", DEFAULT_HISTORY_LIMIT)
@@ -185,11 +190,16 @@ export class QueryWorkbenchPanel {
   private async saveQuery(
     mode: "sql" | "sparql" | "dl",
     text: string,
-    name: string
+    name: string,
+    dlMode?: "asserted" | "inferred"
   ): Promise<void> {
+    const entry: SavedQuery = { name, mode, text };
+    if (mode === "dl") {
+      entry.dlMode = dlMode ?? "inferred";
+    }
     const saved = upsertSavedQuery(
       this.context.workspaceState.get<SavedQuery[]>(SAVED_KEY) ?? [],
-      { name, mode, text }
+      entry
     );
     await this.context.workspaceState.update(SAVED_KEY, saved);
     await this.bootstrap();

@@ -253,12 +253,7 @@ fn rename_iri_rewrites_obo() {
     assert!(
         catalog.find_entity(from).is_some(),
         "expected OBO entity in catalog; entities={:?}",
-        catalog
-            .data()
-            .entities
-            .iter()
-            .map(|e| (&e.iri, &e.obo_id))
-            .collect::<Vec<_>>()
+        catalog.data().entities.iter().map(|e| (&e.iri, &e.obo_id)).collect::<Vec<_>>()
     );
     let plan = preview_rename_iri(&catalog, from, to, &empty_overrides()).expect("rename");
     assert!(plan.changes.iter().any(|c| c.path.ends_with("person.obo")));
@@ -298,10 +293,7 @@ fn merge_entities_rewrites_rdf_xml() {
     assert!(!plan.changes.is_empty());
     let preview = &plan.changes[0].preview_text;
     assert!(preview.contains("http://example.org#Keep"), "{preview}");
-    assert!(
-        preview.contains("http://example.org#Child"),
-        "{preview}"
-    );
+    assert!(preview.contains("http://example.org#Child"), "{preview}");
     // Merge IRI should be gone after remap.
     assert!(!preview.contains("http://example.org#Merge"), "{preview}");
 }
@@ -347,7 +339,8 @@ fn rename_iri_rewrites_swrl_rule_json_literals() {
     let tmp = TempDir::new().unwrap();
     let ws = tmp.path();
     std::fs::copy(
-        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../tests/fixtures/swrl/basic_class_property.ttl"),
+        PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+            .join("../../tests/fixtures/swrl/basic_class_property.ttl"),
         ws.join("swrl.ttl"),
     )
     .unwrap();
@@ -1185,4 +1178,3 @@ fn extract_module_locality_expands_related_entities() {
         module.preview_text
     );
 }
-

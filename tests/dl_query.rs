@@ -11,14 +11,9 @@ fn dl_query_named_class_returns_hierarchy() {
     let input = WorkspaceInputLoader::new(fixture_dir()).load().expect("load fixtures");
     let mut namespaces = BTreeMap::new();
     namespaces.insert("ex".to_string(), "http://example.org/clinic#".to_string());
-    let result = run_dl_query(
-        ReasonerId::Rl,
-        &input,
-        "ex:ClinicPerson",
-        &namespaces,
-        DlQueryMode::Inferred,
-    )
-    .expect("dl query");
+    let result =
+        run_dl_query(ReasonerId::Rl, &input, "ex:ClinicPerson", &namespaces, DlQueryMode::Inferred)
+            .expect("dl query");
     assert!(!result.subclasses.is_empty(), "expected subclasses of ClinicPerson");
     assert!(
         result.subclasses.iter().any(|iri| iri.contains("Patient") || iri.contains("Staff")),
@@ -40,7 +35,7 @@ fn dl_query_parses_complex_expression() {
         DlQueryMode::Inferred,
     )
     .expect("complex dl query");
-    assert_eq!(result.normalized.is_empty(), false);
+    assert!(!result.normalized.is_empty());
     assert!(!result.query_class_iri.is_empty());
 }
 
@@ -65,14 +60,9 @@ fn dl_query_asserted_mode_returns_named_class_instances() {
     let input = WorkspaceInputLoader::new(ws).load().expect("load");
     let mut namespaces = BTreeMap::new();
     namespaces.insert("ex".to_string(), "http://example.org#".to_string());
-    let result = run_dl_query(
-        ReasonerId::Rl,
-        &input,
-        "ex:Person",
-        &namespaces,
-        DlQueryMode::Asserted,
-    )
-    .expect("asserted dl query");
+    let result =
+        run_dl_query(ReasonerId::Rl, &input, "ex:Person", &namespaces, DlQueryMode::Asserted)
+            .expect("asserted dl query");
     assert!(
         result.instances.iter().any(|i| i.ends_with("#alice")),
         "alice should be asserted instance: {:?}",

@@ -1,7 +1,6 @@
 //! Rewrite OBO term/typedef identifiers across a document (v0.24 multi-format refactor).
 
 use crate::error::{OboError, Result};
-use fastobo;
 
 /// Remap `from_id` → `to_id` in an OBO document (id lines and common reference tags).
 ///

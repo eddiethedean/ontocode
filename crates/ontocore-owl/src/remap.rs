@@ -80,11 +80,7 @@ fn remap_annotated(
     build: &Build<RcStr>,
 ) -> AnnotatedComponent<RcStr> {
     let component = remap_component(&ac.component, from, to, build);
-    let ann = ac
-        .ann
-        .iter()
-        .map(|a| remap_annotation(a, from, to, build))
-        .collect();
+    let ann = ac.ann.iter().map(|a| remap_annotation(a, from, to, build)).collect();
     AnnotatedComponent { component, ann }
 }
 
@@ -111,14 +107,16 @@ fn remap_component(
             sub: remap_class_expression(&ax.sub, from, to, build),
             sup: remap_class_expression(&ax.sup, from, to, build),
         }),
-        Component::EquivalentClasses(ax) => Component::EquivalentClasses(
-            horned_owl::model::EquivalentClasses(
+        Component::EquivalentClasses(ax) => {
+            Component::EquivalentClasses(horned_owl::model::EquivalentClasses(
                 ax.0.iter().map(|ce| remap_class_expression(ce, from, to, build)).collect(),
-            ),
-        ),
-        Component::DisjointClasses(ax) => Component::DisjointClasses(horned_owl::model::DisjointClasses(
-            ax.0.iter().map(|ce| remap_class_expression(ce, from, to, build)).collect(),
-        )),
+            ))
+        }
+        Component::DisjointClasses(ax) => {
+            Component::DisjointClasses(horned_owl::model::DisjointClasses(
+                ax.0.iter().map(|ce| remap_class_expression(ce, from, to, build)).collect(),
+            ))
+        }
         Component::ClassAssertion(ax) => Component::ClassAssertion(ClassAssertion {
             ce: remap_class_expression(&ax.ce, from, to, build),
             i: remap_individual(&ax.i, from, to, build),
@@ -137,12 +135,10 @@ fn remap_component(
                 to: ax.to.clone(),
             })
         }
-        Component::AnnotationAssertion(ax) => {
-            Component::AnnotationAssertion(AnnotationAssertion {
-                subject: remap_annotation_subject(&ax.subject, from, to, build),
-                ann: remap_annotation(&ax.ann, from, to, build),
-            })
-        }
+        Component::AnnotationAssertion(ax) => Component::AnnotationAssertion(AnnotationAssertion {
+            subject: remap_annotation_subject(&ax.subject, from, to, build),
+            ann: remap_annotation(&ax.ann, from, to, build),
+        }),
         Component::ObjectPropertyDomain(ax) => {
             Component::ObjectPropertyDomain(horned_owl::model::ObjectPropertyDomain {
                 ope: remap_ope(&ax.ope, from, to, build),
@@ -175,11 +171,11 @@ fn remap_component(
                             chain.iter().map(|ope| remap_ope(ope, from, to, build)).collect(),
                         )
                     }
-                    horned_owl::model::SubObjectPropertyExpression::ObjectPropertyExpression(ope) => {
-                        horned_owl::model::SubObjectPropertyExpression::ObjectPropertyExpression(
-                            remap_ope(ope, from, to, build),
-                        )
-                    }
+                    horned_owl::model::SubObjectPropertyExpression::ObjectPropertyExpression(
+                        ope,
+                    ) => horned_owl::model::SubObjectPropertyExpression::ObjectPropertyExpression(
+                        remap_ope(ope, from, to, build),
+                    ),
                 },
                 sup: remap_ope(&ax.sup, from, to, build),
             })
@@ -331,13 +327,15 @@ fn remap_class_expression(
         ClassExpression::ObjectUnionOf(v) => ClassExpression::ObjectUnionOf(
             v.iter().map(|e| remap_class_expression(e, from, to, build)).collect(),
         ),
-        ClassExpression::ObjectComplementOf(inner) => ClassExpression::ObjectComplementOf(Box::new(
-            remap_class_expression(inner, from, to, build),
-        )),
-        ClassExpression::ObjectSomeValuesFrom { ope, bce } => ClassExpression::ObjectSomeValuesFrom {
-            ope: remap_ope(ope, from, to, build),
-            bce: Box::new(remap_class_expression(bce, from, to, build)),
-        },
+        ClassExpression::ObjectComplementOf(inner) => ClassExpression::ObjectComplementOf(
+            Box::new(remap_class_expression(inner, from, to, build)),
+        ),
+        ClassExpression::ObjectSomeValuesFrom { ope, bce } => {
+            ClassExpression::ObjectSomeValuesFrom {
+                ope: remap_ope(ope, from, to, build),
+                bce: Box::new(remap_class_expression(bce, from, to, build)),
+            }
+        }
         ClassExpression::ObjectAllValuesFrom { ope, bce } => ClassExpression::ObjectAllValuesFrom {
             ope: remap_ope(ope, from, to, build),
             bce: Box::new(remap_class_expression(bce, from, to, build)),

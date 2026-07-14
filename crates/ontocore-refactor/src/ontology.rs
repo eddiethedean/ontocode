@@ -64,10 +64,7 @@ pub fn expand_signature_locality(catalog: &OntologyCatalog, seeds: &[String]) ->
     sigma.into_iter().collect()
 }
 
-fn axiom_named_signature(
-    axiom: &ontocore_core::Axiom,
-    known: &BTreeSet<&str>,
-) -> BTreeSet<String> {
+fn axiom_named_signature(axiom: &ontocore_core::Axiom, known: &BTreeSet<&str>) -> BTreeSet<String> {
     let mut out = BTreeSet::new();
     for candidate in [&axiom.subject, &axiom.object, &axiom.predicate] {
         if is_builtin_iri(candidate) {
@@ -121,9 +118,7 @@ fn resolve_import_doc<'a>(
     let norm = normalize_iri(import_iri);
     catalog.data().documents.iter().find(|d| {
         document_matches_ontology_id(import_iri, d)
-            || d.base_iri
-                .as_ref()
-                .is_some_and(|b| normalize_iri(b) == norm || b == import_iri)
+            || d.base_iri.as_ref().is_some_and(|b| normalize_iri(b) == norm || b == import_iri)
             || normalize_iri(&d.id) == norm
             || d.id == import_iri
     })
@@ -274,10 +269,7 @@ pub fn preview_merge_ontologies(
         }
         if let Some(doc) = find_doc_by_path(catalog, src) {
             if doc.format != OntologyFormat::Turtle || doc.parse_status != ParseStatus::Ok {
-                warnings.push(format!(
-                    "skipping non-Turtle or errored file: {}",
-                    src.display()
-                ));
+                warnings.push(format!("skipping non-Turtle or errored file: {}", src.display()));
                 continue;
             }
         }
@@ -325,8 +317,7 @@ pub fn preview_merge_ontologies(
         vec![whole_file_change(target_file.to_path_buf(), original, preview)]
     };
 
-    Ok(RefactorPlan { changes, warnings, ..Default::default() }
-        .with_metrics(appended_entities))
+    Ok(RefactorPlan { changes, warnings, ..Default::default() }.with_metrics(appended_entities))
 }
 
 fn collect_import_closure<'a>(
@@ -432,10 +423,7 @@ pub fn preview_flatten_imports(
 ) -> Result<RefactorPlan> {
     require_path_in_workspace(ontology_file, workspace_roots)?;
     let doc = find_doc_by_path(catalog, ontology_file).ok_or_else(|| {
-        RefactorError::Invalid(format!(
-            "ontology file not in catalog: {}",
-            ontology_file.display()
-        ))
+        RefactorError::Invalid(format!("ontology file not in catalog: {}", ontology_file.display()))
     })?;
     if doc.format != OntologyFormat::Turtle || doc.parse_status != ParseStatus::Ok {
         return Err(RefactorError::UnsupportedFormat(doc.format.as_str().to_string()));
@@ -448,12 +436,8 @@ pub fn preview_flatten_imports(
 
     if imports.is_empty() && doc.imports.is_empty() {
         warnings.push("no owl:imports to flatten".to_string());
-        return Ok(RefactorPlan {
-            changes: vec![],
-            warnings,
-            ..Default::default()
-        }
-        .with_metrics(Vec::<String>::new()));
+        return Ok(RefactorPlan { changes: vec![], warnings, ..Default::default() }
+            .with_metrics(Vec::<String>::new()));
     }
 
     let (mut preview, removed) = strip_owl_imports_lines(&original);
@@ -502,12 +486,8 @@ pub fn preview_flatten_imports(
 
     if preview == original {
         warnings.push("flatten produced no textual changes".to_string());
-        return Ok(RefactorPlan {
-            changes: vec![],
-            warnings,
-            ..Default::default()
-        }
-        .with_metrics(Vec::<String>::new()));
+        return Ok(RefactorPlan { changes: vec![], warnings, ..Default::default() }
+            .with_metrics(Vec::<String>::new()));
     }
 
     Ok(RefactorPlan {
@@ -518,7 +498,10 @@ pub fn preview_flatten_imports(
     .with_metrics(doc.imports.clone()))
 }
 
-fn entity_iris_for_document(catalog: &OntologyCatalog, doc: &ontocore_core::OntologyDocument) -> Vec<String> {
+fn entity_iris_for_document(
+    catalog: &OntologyCatalog,
+    doc: &ontocore_core::OntologyDocument,
+) -> Vec<String> {
     catalog
         .data()
         .entities
@@ -529,15 +512,19 @@ fn entity_iris_for_document(catalog: &OntologyCatalog, doc: &ontocore_core::Onto
                     .base_iri
                     .as_ref()
                     .is_some_and(|b| normalize_iri(b) == normalize_iri(&e.ontology_id))
-                || catalog.entity_document(&e.iri).is_some_and(|d| {
-                    canonical_path(&d.path) == canonical_path(&doc.path)
-                })
+                || catalog
+                    .entity_document(&e.iri)
+                    .is_some_and(|d| canonical_path(&d.path) == canonical_path(&doc.path))
         })
         .map(|e| e.iri.clone())
         .collect()
 }
 
-fn text_references_any_entity(text: &str, entity_iris: &[String], namespaces: &BTreeMap<String, String>) -> bool {
+fn text_references_any_entity(
+    text: &str,
+    entity_iris: &[String],
+    namespaces: &BTreeMap<String, String>,
+) -> bool {
     for iri in entity_iris {
         if text.contains(iri) {
             return true;
@@ -585,10 +572,7 @@ pub fn preview_cleanup_imports(
 ) -> Result<RefactorPlan> {
     require_path_in_workspace(ontology_file, workspace_roots)?;
     let doc = find_doc_by_path(catalog, ontology_file).ok_or_else(|| {
-        RefactorError::Invalid(format!(
-            "ontology file not in catalog: {}",
-            ontology_file.display()
-        ))
+        RefactorError::Invalid(format!("ontology file not in catalog: {}", ontology_file.display()))
     })?;
     if doc.format != OntologyFormat::Turtle || doc.parse_status != ParseStatus::Ok {
         return Err(RefactorError::UnsupportedFormat(doc.format.as_str().to_string()));
@@ -611,9 +595,7 @@ pub fn preview_cleanup_imports(
             continue;
         };
         if imported.format != OntologyFormat::Turtle {
-            warnings.push(format!(
-                "skipping non-Turtle import for cleanup: {import_iri}"
-            ));
+            warnings.push(format!("skipping non-Turtle import for cleanup: {import_iri}"));
             continue;
         }
         let entities = entity_iris_for_document(catalog, imported);
@@ -637,12 +619,8 @@ pub fn preview_cleanup_imports(
 
     if preview == original {
         warnings.push("no unused owl:imports found".to_string());
-        return Ok(RefactorPlan {
-            changes: vec![],
-            warnings,
-            ..Default::default()
-        }
-        .with_metrics(Vec::<String>::new()));
+        return Ok(RefactorPlan { changes: vec![], warnings, ..Default::default() }
+            .with_metrics(Vec::<String>::new()));
     }
 
     if !removed_iris.is_empty() {

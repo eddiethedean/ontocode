@@ -64,11 +64,8 @@ impl RefactorPlan {
             entity_iris.into_iter().map(|s| s.as_ref().to_string()).collect();
         entities.retain(|iri| !iri.is_empty());
         self.affected_entity_count = entities.len();
-        self.affected_axiom_count = self
-            .changes
-            .iter()
-            .map(|c| if c.hunks.is_empty() { 1 } else { c.hunks.len() })
-            .sum();
+        self.affected_axiom_count =
+            self.changes.iter().map(|c| if c.hunks.is_empty() { 1 } else { c.hunks.len() }).sum();
         self
     }
 }

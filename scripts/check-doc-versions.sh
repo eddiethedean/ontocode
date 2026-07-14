@@ -419,10 +419,10 @@ if [[ "$fail" -eq 0 ]]; then
   echo "ok: reference pages have no OntoCore v0.8/v0.9/v0.10/v0.11.0/v0.11.1/v0.11.2 banners"
 fi
 
-check_file_contains ".github/workflows/release.yml" "publish_with_pause ontocore-obo" "release.yml publishes ontocore-obo"
-check_file_contains ".github/workflows/release.yml" "publish_with_pause ontocore-edit" "release.yml publishes ontocore-edit"
-check_file_contains ".github/workflows/release.yml" "publish_with_pause ontocore-swrl" "release.yml publishes ontocore-swrl"
-check_file_contains ".github/workflows/release.yml" "publish_with_pause ontocore" "release.yml publishes ontocore"
+check_file_contains ".github/workflows/release.yml" "publish_crate ontocore-obo" "release.yml publishes ontocore-obo"
+check_file_contains ".github/workflows/release.yml" "publish_crate ontocore-edit" "release.yml publishes ontocore-edit"
+check_file_contains ".github/workflows/release.yml" "publish_crate ontocore-swrl" "release.yml publishes ontocore-swrl"
+check_file_contains ".github/workflows/release.yml" "publish_crate ontocore" "release.yml publishes ontocore"
 
 # docs/contributing.md should track root CONTRIBUTING.md (OntoCore branding)
 if ! grep -q 'OntoCore' docs/contributing.md; then

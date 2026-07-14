@@ -4,15 +4,14 @@ use crate::protocol::{
     ApplyAxiomPatchParams, ApplyAxiomPatchResult, ApplyRefactorParams, ApplyRefactorResult,
     CatalogSnapshot, CheckInstanceParams, CheckInstanceResult, DiagnosticSummary, DlQueryParams,
     DlQueryResult, FindUsagesParams, FindUsagesResult, GetEntityParams, GetEntityResult,
-    SearchParams, SearchResult,
     GetExplanationParams, GetExplanationResult, GetGraphResult, IndexWorkspaceParams,
     IndexWorkspaceResult, ListPluginsResult, ListSqlSchemaResult, ListSwrlRulesResult,
     LspErrorPayload, ManchesterCompletions, ParseManchesterParams, ParseManchesterResult,
     ParseSwrlRuleParams, ParseSwrlRuleResult, PreviewRefactorParams, PreviewRefactorResult,
     QueryParams, RunPluginParams, RunPluginResult, RunReasonerParams, RunReasonerResult,
-    RunRobotParams, RunRobotResult, SemanticDiffParams, SemanticDiffResult, SparqlParams,
-    SwrlRuleListItem, TabularQueryResult, UsageSummary, ValidateSwrlRuleParams,
-    ValidateSwrlRuleResult,
+    RunRobotParams, RunRobotResult, SearchParams, SearchResult, SemanticDiffParams,
+    SemanticDiffResult, SparqlParams, SwrlRuleListItem, TabularQueryResult, UsageSummary,
+    ValidateSwrlRuleParams, ValidateSwrlRuleResult,
 };
 use crate::state::{path_to_uri, resolve_workspace_for_index, ServerState};
 use crossbeam_channel::Receiver;
@@ -904,9 +903,7 @@ pub fn handle_search(
                 .entities
                 .iter()
                 .filter(|entity| entity_matches_search_term(entity, &needle))
-                .filter_map(|entity| {
-                    catalog.entity_detail_with_hierarchy(&entity.iri, &hierarchy)
-                })
+                .filter_map(|entity| catalog.entity_detail_with_hierarchy(&entity.iri, &hierarchy))
                 .collect();
             matches.sort_by(|a, b| a.entity.short_name.cmp(&b.entity.short_name));
             matches.dedup_by(|a, b| a.entity.iri == b.entity.iri);

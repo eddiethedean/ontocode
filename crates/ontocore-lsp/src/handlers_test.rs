@@ -7,7 +7,8 @@ use crate::handlers::{
 use crate::index_worker::IndexWorker;
 use crate::protocol::{
     ApplyAxiomPatchParams, ApplyRefactorParams, CreateOntologyParams, DeleteImpactParams,
-    ExportOntologyParams, FindUsagesParams, GetEntityParams, QueryParams, SearchParams, SparqlParams,
+    ExportOntologyParams, FindUsagesParams, GetEntityParams, QueryParams, SearchParams,
+    SparqlParams,
 };
 use crate::state::{path_to_uri, ServerState};
 use crossbeam_channel::unbounded;
@@ -311,11 +312,8 @@ fn workspace_symbol_finds_person() {
 #[test]
 fn search_finds_person_by_short_name() {
     let state = indexed_state();
-    let result = handle_search(
-        &state,
-        SearchParams { query: "Person".into(), limit: Some(50) },
-    )
-    .expect("search");
+    let result = handle_search(&state, SearchParams { query: "Person".into(), limit: Some(50) })
+        .expect("search");
     assert!(result.entities.iter().any(|e| e.entity.short_name == "Person"));
 }
 

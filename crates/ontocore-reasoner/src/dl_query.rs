@@ -154,9 +154,8 @@ fn asserted_instances_of_class(
     hierarchy: &ClassHierarchy,
     class_iri: &str,
 ) -> Vec<String> {
-    let mut class_iris: BTreeSet<String> = collect_descendants(hierarchy, class_iri)
-        .into_iter()
-        .collect();
+    let mut class_iris: BTreeSet<String> =
+        collect_descendants(hierarchy, class_iri).into_iter().collect();
     class_iris.insert(class_iri.to_string());
 
     let mut out = BTreeSet::new();
@@ -195,16 +194,7 @@ fn asserted_instances_of_class(
 
 fn named_class_iri(expr: &ClassExpression<horned_owl::model::RcStr>) -> Option<String> {
     match expr {
-        ClassExpression::Class(c) => {
-            let iri = c.to_string();
-            if iri == "http://www.w3.org/2002/07/owl#Thing"
-                || iri == "http://www.w3.org/2002/07/owl#Nothing"
-            {
-                Some(iri)
-            } else {
-                Some(iri)
-            }
-        }
+        ClassExpression::Class(c) => Some(c.to_string()),
         _ => None,
     }
 }
@@ -214,8 +204,9 @@ fn inject_temp_equivalent(
     expr: &ClassExpression<horned_owl::model::RcStr>,
     namespaces: &BTreeMap<String, String>,
 ) -> Result<(ReasonerInput, Vec<String>)> {
-    let ce_turtle = class_expression_to_turtle_value(expr, namespaces, 0)
-        .map_err(|e| ReasonerError::Classify(format!("failed to serialize class expression: {e}")))?;
+    let ce_turtle = class_expression_to_turtle_value(expr, namespaces, 0).map_err(|e| {
+        ReasonerError::Classify(format!("failed to serialize class expression: {e}"))
+    })?;
     let supplement = build_query_supplement(&ce_turtle, namespaces);
     let loaded = load_ontology_from_temp_text(&supplement)?;
     let mut ontology = input.ontology.clone();

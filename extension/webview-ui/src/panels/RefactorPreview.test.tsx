@@ -30,7 +30,7 @@ describe("RefactorPreviewPanel", () => {
     expect(screen.getByText("Review import statements")).toBeInTheDocument();
     expect(screen.getByText("ex:OldName a owl:Class .")).toBeInTheDocument();
     expect(screen.getByText("ex:NewName a owl:Class .")).toBeInTheDocument();
-    expect(screen.getByText("1 file affected")).toBeInTheDocument();
+    expect(screen.getByText(/1 file · .* entities · .* axioms/)).toBeInTheDocument();
   });
 
   it("applies refactor from sticky actions", async () => {
@@ -60,7 +60,7 @@ describe("RefactorPreviewPanel", () => {
     await screen.findByRole("heading", { name: "Refactor preview" });
 
     expect(screen.getByText("ex:A a owl:Class .")).toBeInTheDocument();
-    expect(screen.getByText("2 files affected")).toBeInTheDocument();
+    expect(screen.getByText(/2 files · .* entities · .* axioms/)).toBeInTheDocument();
 
     await user.selectOptions(screen.getByLabelText("File"), "1");
     expect(screen.getByText("ex:Old a owl:Class .")).toBeInTheDocument();

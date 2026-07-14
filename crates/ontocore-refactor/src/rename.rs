@@ -27,9 +27,13 @@ pub fn preview_rename_iri(
     let from_obo = catalog.find_entity(from_iri).and_then(|e| e.obo_id.clone());
     let to_obo = catalog.find_entity(to_iri).and_then(|e| e.obo_id.clone()).or_else(|| {
         // Derive local id from IRIs when renaming within the same OBO namespace.
-        short_obo_id_from_iri(to_iri).or_else(|| from_obo.as_ref().map(|_| {
-            short_obo_id_from_iri(to_iri).unwrap_or_else(|| to_iri.rsplit(['#', '/']).next().unwrap_or(to_iri).to_string())
-        }))
+        short_obo_id_from_iri(to_iri).or_else(|| {
+            from_obo.as_ref().map(|_| {
+                short_obo_id_from_iri(to_iri).unwrap_or_else(|| {
+                    to_iri.rsplit(['#', '/']).next().unwrap_or(to_iri).to_string()
+                })
+            })
+        })
     });
 
     for doc in &catalog.data().documents {
@@ -94,10 +98,7 @@ pub fn preview_rename_iri(
                 ) {
                     Ok(text) => text,
                     Err(e) => {
-                        warnings.push(format!(
-                            "skipping RDF/XML {}: {e}",
-                            doc.path.display()
-                        ));
+                        warnings.push(format!("skipping RDF/XML {}: {e}", doc.path.display()));
                         continue;
                     }
                 }
@@ -115,24 +116,20 @@ pub fn preview_rename_iri(
                 ) {
                     Ok(text) => text,
                     Err(e) => {
-                        warnings.push(format!(
-                            "skipping OWL/XML {}: {e}",
-                            doc.path.display()
-                        ));
+                        warnings.push(format!("skipping OWL/XML {}: {e}", doc.path.display()));
                         continue;
                     }
                 }
             }
             OntologyFormat::Obo => {
-                let from_id = from_obo
-                    .clone()
-                    .or_else(|| short_obo_id_from_iri(from_iri))
-                    .unwrap_or_else(|| {
-                        from_iri.rsplit(['#', '/']).next().unwrap_or(from_iri).to_string()
+                let from_id =
+                    from_obo.clone().or_else(|| short_obo_id_from_iri(from_iri)).unwrap_or_else(
+                        || from_iri.rsplit(['#', '/']).next().unwrap_or(from_iri).to_string(),
+                    );
+                let to_id =
+                    to_obo.clone().or_else(|| short_obo_id_from_iri(to_iri)).unwrap_or_else(|| {
+                        to_iri.rsplit(['#', '/']).next().unwrap_or(to_iri).to_string()
                     });
-                let to_id = to_obo.clone().or_else(|| short_obo_id_from_iri(to_iri)).unwrap_or_else(
-                    || to_iri.rsplit(['#', '/']).next().unwrap_or(to_iri).to_string(),
-                );
                 if !original.contains(&from_id) {
                     continue;
                 }
@@ -159,18 +156,20 @@ pub fn preview_rename_iri(
         if preview == original {
             continue;
         }
-        file_changes.insert(
-            doc.path.clone(),
-            whole_file_change(doc.path.clone(), original, preview),
-        );
+        file_changes
+            .insert(doc.path.clone(), whole_file_change(doc.path.clone(), original, preview));
     }
 
     if file_changes.is_empty() {
         warnings.push(format!("no files changed for IRI {from_iri}"));
     }
 
-    Ok(RefactorPlan { changes: file_changes.into_values().collect(), warnings, ..Default::default() }
-        .with_metrics([from_iri, to_iri]))
+    Ok(RefactorPlan {
+        changes: file_changes.into_values().collect(),
+        warnings,
+        ..Default::default()
+    }
+    .with_metrics([from_iri, to_iri]))
 }
 
 fn short_obo_id_from_iri(iri: &str) -> Option<String> {
@@ -267,11 +266,7 @@ pub fn preview_merge_entities(
                 ) {
                     Ok(text) => text,
                     Err(e) => {
-                        warnings.push(format!(
-                            "skipping {} {}: {e}",
-                            fmt,
-                            doc.path.display()
-                        ));
+                        warnings.push(format!("skipping {} {}: {e}", fmt, doc.path.display()));
                         continue;
                     }
                 }
@@ -397,11 +392,7 @@ pub fn preview_replace_entity(
                     "non-Turtle replace rewrites all IRI mentions in {}",
                     doc.path.display()
                 ));
-                let fmt = if doc.format == OntologyFormat::OwlXml {
-                    "owlxml"
-                } else {
-                    "rdfxml"
-                };
+                let fmt = if doc.format == OntologyFormat::OwlXml { "owlxml" } else { "rdfxml" };
                 match ontocore_owl::remap_entity_iri_in_xml_text(
                     &original,
                     fmt,
@@ -411,11 +402,7 @@ pub fn preview_replace_entity(
                 ) {
                     Ok(text) => text,
                     Err(e) => {
-                        warnings.push(format!(
-                            "skipping {} {}: {e}",
-                            fmt,
-                            doc.path.display()
-                        ));
+                        warnings.push(format!("skipping {} {}: {e}", fmt, doc.path.display()));
                         continue;
                     }
                 }
@@ -471,9 +458,7 @@ pub fn preview_replace_entity(
     }
 
     if changes.is_empty() {
-        warnings.push(format!(
-            "no files changed for entity replacement {from_iri} -> {to_iri}"
-        ));
+        warnings.push(format!("no files changed for entity replacement {from_iri} -> {to_iri}"));
     }
 
     Ok(RefactorPlan { changes: changes.into_values().collect(), warnings, ..Default::default() }
@@ -1074,11 +1059,8 @@ pub fn preview_move_axioms(
         .filter(|line| is_prefix_declaration_line(line))
         .map(str::to_string)
         .collect();
-    let target_prefix_names: BTreeSet<String> = target_original
-        .lines()
-        .filter_map(prefix_declaration_name)
-        .map(str::to_string)
-        .collect();
+    let target_prefix_names: BTreeSet<String> =
+        target_original.lines().filter_map(prefix_declaration_name).map(str::to_string).collect();
     let mut missing_prefixes = Vec::new();
     for line in &prefix_lines {
         let Some(name) = prefix_declaration_name(line) else {

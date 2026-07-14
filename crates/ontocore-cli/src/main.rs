@@ -820,36 +820,23 @@ fn main() -> Result<()> {
                 let plan = preview_replace_entity(&catalog, &from, &to, &HashMap::new())?;
                 run_refactor_plan(&plan, preview, format, &workspace)?;
             }
-            RefactorCommands::MergeOntologies {
-                workspace,
-                sources,
-                target,
-                preview,
-                format,
-            } => {
+            RefactorCommands::MergeOntologies { workspace, sources, target, preview, format } => {
                 let catalog = build_catalog(&workspace)?;
                 let roots = vec![workspace.clone()];
-                let plan = preview_merge_ontologies(
-                    &catalog,
-                    &sources,
-                    &target,
-                    &HashMap::new(),
-                    &roots,
-                )?;
+                let plan =
+                    preview_merge_ontologies(&catalog, &sources, &target, &HashMap::new(), &roots)?;
                 run_refactor_plan(&plan, preview, format, &workspace)?;
             }
             RefactorCommands::FlattenImports { workspace, file, preview, format } => {
                 let catalog = build_catalog(&workspace)?;
                 let roots = vec![workspace.clone()];
-                let plan =
-                    preview_flatten_imports(&catalog, &file, &HashMap::new(), &roots)?;
+                let plan = preview_flatten_imports(&catalog, &file, &HashMap::new(), &roots)?;
                 run_refactor_plan(&plan, preview, format, &workspace)?;
             }
             RefactorCommands::CleanupImports { workspace, file, preview, format } => {
                 let catalog = build_catalog(&workspace)?;
                 let roots = vec![workspace.clone()];
-                let plan =
-                    preview_cleanup_imports(&catalog, &file, &HashMap::new(), &roots)?;
+                let plan = preview_cleanup_imports(&catalog, &file, &HashMap::new(), &roots)?;
                 run_refactor_plan(&plan, preview, format, &workspace)?;
             }
         },

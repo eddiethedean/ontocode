@@ -266,7 +266,8 @@ pub fn find_usages_with_overrides(
         let Ok(text) = read_source_text(&doc.path, document_overrides) else {
             continue;
         };
-        for (rule_idx, rule) in ontocore_swrl::rules_from_turtle_document(&text).into_iter().enumerate()
+        for (rule_idx, rule) in
+            ontocore_swrl::rules_from_turtle_document(&text).into_iter().enumerate()
         {
             if rule.referenced_iris().iter().any(|iri| iri == target_iri) {
                 let key = (doc.path.clone(), UsageKind::SwrlReference, format!("swrl-{rule_idx}"));
@@ -280,10 +281,7 @@ pub fn find_usages_with_overrides(
                         start_byte: None,
                         end_byte: None,
                         kind: UsageKind::SwrlReference,
-                        context: format!(
-                            "SWRL rule {}",
-                            rule.id.as_deref().unwrap_or("anonymous")
-                        ),
+                        context: format!("SWRL rule {}", rule.id.as_deref().unwrap_or("anonymous")),
                     });
                 }
             }

@@ -8,7 +8,7 @@ Migration guides: [Migration index](migration/README.md)
 
 ## [0.22.0] - 2026-07-14
 
-**v0.22.0** — Complete OWL 2 authoring (`PAR-OWL-001`): HasKey, DisjointUnion, RBox/ABox expansions, datatype defs, axiom annotations, Manchester `not`/`value`/`Self`/OneOf/data restrictions, XML mutate parity, Inspector UI. See [CHANGELOG.md](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) and [migration/v0.22.md](migration/v0.22.md).
+**v0.22.0** — Complete OWL 2 authoring (`PAR-OWL-001`): HasKey, DisjointUnion, RBox/ABox expansions, datatype defs, axiom annotations, Manchester `not`/`value`/`Self`/OneOf/data restrictions, XML mutate parity, Inspector UI; AllDifferent Turtle write-back; dangling-leaf symlink path-jail fix. See [CHANGELOG.md](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) and [migration/v0.22.md](migration/v0.22.md).
 
 ## [0.21.0] - 2026-07-13
 

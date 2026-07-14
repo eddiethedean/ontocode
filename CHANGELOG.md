@@ -23,6 +23,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Workspace package and all `ontocore-*` crates bumped to **0.22.0**; extension and webview UI **0.22.0**
 
+### Fixed
+
+- Turtle `DifferentIndividuals` write-back now emits/matches Protégé-style `owl:AllDifferent` + `owl:distinctMembers` (pairwise `owl:differentFrom` no longer drops multi-member axioms) ([#330](https://github.com/eddiethedean/ontocode/issues/330), [#344](https://github.com/eddiethedean/ontocode/pull/344))
+- Workspace path jail rejects dangling leaf symlinks (and symlink create escape); `createOntology` / CLI `new` use exclusive create ([#336](https://github.com/eddiethedean/ontocode/issues/336), [#345](https://github.com/eddiethedean/ontocode/pull/345))
+
 ## [0.21.0] - 2026-07-13
 
 ### Added

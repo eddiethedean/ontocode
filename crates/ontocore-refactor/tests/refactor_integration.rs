@@ -701,3 +701,33 @@ fn move_entity_to_new_file_includes_prefix_declarations() {
     );
     assert!(moved.contains("ex:Person"));
 }
+
+#[test]
+fn move_entity_into_nonempty_target_merges_missing_prefixes() {
+    let tmp = TempDir::new().unwrap();
+    let ws = tmp.path();
+    std::fs::create_dir_all(ws).unwrap();
+    std::fs::copy(fixture_dir().join("people.ttl"), ws.join("people.ttl")).unwrap();
+    // Target has owl but not ex — the moved block uses ex: CURIE (#314).
+    std::fs::write(
+        ws.join("target.ttl"),
+        "@prefix owl: <http://www.w3.org/2002/07/owl#> .\n",
+    )
+    .unwrap();
+    let catalog = build_catalog(ws);
+    let plan = preview_move_entity(
+        &catalog,
+        "http://example.org/org#Person",
+        &ws.join("target.ttl"),
+        &empty_overrides(),
+        &workspace_roots(ws),
+    )
+    .expect("plan");
+    apply_refactor_plan(&plan, false, ws).expect("apply");
+    let target = std::fs::read_to_string(ws.join("target.ttl")).unwrap();
+    assert!(
+        target.lines().any(|l| l.contains("@prefix ex:") || l.contains("@prefix ex :")),
+        "non-empty target must gain missing source prefixes: {target}"
+    );
+    assert!(target.contains("ex:Person"));
+}

@@ -43,6 +43,7 @@ kind = "validator"
 id = "org.example.evil"
 api_version = "1"
 entry = "{}"
+permissions = ["workspace.read","workspace.write","external_process"]
 
 [capabilities]
 validate = true
@@ -63,6 +64,61 @@ diagnostics = true
 
     let root = workspace.canonicalize().expect("canonical root");
     assert!(is_path_within(&root, file), "plugin diagnostic file must be jailed");
+}
+
+#[test]
+fn subprocess_validate_requires_workspace_write() {
+    let dir = tempfile::tempdir().expect("tempdir");
+    let workspace = dir.path().join("ws");
+    std::fs::create_dir_all(workspace.join(".ontocore/plugins")).expect("plugins dir");
+    std::fs::write(workspace.join("demo.ttl"), "@prefix ex: <http://ex/> .\nex:Ok a owl:Class .\n")
+        .expect("write demo.ttl");
+
+    let plugin_bin = workspace.join("readonly_plugin.sh");
+    std::fs::write(
+        &plugin_bin,
+        r#"#!/bin/sh
+echo '{"diagnostics":[]}'"#,
+    )
+    .expect("write plugin");
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        let mut perms = std::fs::metadata(&plugin_bin).expect("metadata").permissions();
+        perms.set_mode(0o755);
+        std::fs::set_permissions(&plugin_bin, perms).expect("chmod");
+    }
+
+    let manifest = format!(
+        r#"[plugin]
+name = "readonly-validator"
+version = "0.1.0"
+kind = "validator"
+id = "org.example.readonly"
+api_version = "1"
+entry = "{}"
+permissions = ["workspace.read","external_process"]
+
+[capabilities]
+validate = true
+diagnostics = true
+"#,
+        plugin_bin.display()
+    );
+    std::fs::write(workspace.join(".ontocore/plugins/readonly.toml"), manifest.as_bytes())
+        .expect("write manifest");
+
+    let catalog =
+        IndexBuilder::new().workspace(workspace.clone()).build().expect("index workspace");
+    let host = load_plugin_host(&workspace).expect("load plugin host");
+    let err = host
+        .run_validate_plugin("org.example.readonly", &catalog)
+        .expect_err("subprocess validate without workspace.write must fail (#315)");
+    let msg = err.to_string();
+    assert!(
+        msg.contains("WorkspaceWrite") || msg.contains("workspace.write") || msg.contains("Missing"),
+        "expected missing write permission, got {msg}"
+    );
 }
 
 #[test]
@@ -108,6 +164,7 @@ kind = "validator"
 id = "org.example.evilabs"
 api_version = "1"
 entry = "{}"
+permissions = ["workspace.read","workspace.write","external_process"]
 
 [capabilities]
 validate = true

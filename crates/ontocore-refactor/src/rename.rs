@@ -558,7 +558,7 @@ pub fn preview_move_entity(
             prefix_lines.insert(line.trim().to_string());
         }
     }
-    let prefix_header: String = prefix_lines.into_iter().collect::<Vec<_>>().join("\n");
+    let prefix_header: String = prefix_lines.iter().cloned().collect::<Vec<_>>().join("\n");
     let block_with_prefixes = if prefix_header.is_empty() {
         block_text.clone()
     } else {
@@ -571,14 +571,43 @@ pub fn preview_move_entity(
         String::new()
     };
     let target_was_empty = target_original.is_empty();
-    let target_preview = if target_was_empty {
+    let mut warnings = Vec::new();
+    let (target_preview, target_hunk_new) = if target_was_empty {
         let mut out = block_with_prefixes.clone();
         if !out.ends_with('\n') {
             out.push('\n');
         }
-        out
+        (out, block_with_prefixes)
     } else {
-        format!("{target_original}\n\n{block_text}")
+        // Merge missing source @prefix bindings into non-empty targets (#314).
+        let target_prefix_names: BTreeSet<String> = target_original
+            .lines()
+            .filter_map(prefix_declaration_name)
+            .map(str::to_string)
+            .collect();
+        let mut missing_prefixes = Vec::new();
+        for line in &prefix_lines {
+            let Some(name) = prefix_declaration_name(line) else {
+                continue;
+            };
+            if !target_prefix_names.contains(name) {
+                missing_prefixes.push(line.clone());
+            }
+        }
+        let inserted = if missing_prefixes.is_empty() {
+            String::new()
+        } else {
+            format!("{}\n\n", missing_prefixes.join("\n"))
+        };
+        if !missing_prefixes.is_empty() {
+            warnings.push(format!(
+                "added {} missing @prefix declaration(s) to {}",
+                missing_prefixes.len(),
+                target_file.display()
+            ));
+        }
+        let hunk_new = format!("{inserted}{block_text}");
+        (format!("{target_original}\n\n{hunk_new}"), hunk_new)
     };
 
     Ok(RefactorPlan {
@@ -597,11 +626,11 @@ pub fn preview_move_entity(
                     start_byte: 0,
                     end_byte: 0,
                     old_text: String::new(),
-                    new_text: if target_was_empty { block_with_prefixes } else { block_text },
+                    new_text: target_hunk_new,
                 }],
             },
         ],
-        warnings: Vec::new(),
+        warnings,
     })
 }
 

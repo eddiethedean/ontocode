@@ -188,6 +188,8 @@ impl PluginHost {
         }
         if plugin.manifest.entry.is_some() {
             Self::ensure_permission(plugin, plugin_id, PluginPermission::ExternalProcess)?;
+            // Subprocess validators can mutate the filesystem; require write explicitly (#315).
+            Self::ensure_permission(plugin, plugin_id, PluginPermission::WorkspaceWrite)?;
             let output = run_plugin_subprocess(
                 plugin,
                 SubprocessRequest {

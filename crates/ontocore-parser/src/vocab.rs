@@ -34,6 +34,10 @@ impl OWL {
     pub fn deprecated() -> NamedNodeRef<'static> {
         NamedNodeRef::new_unchecked("http://www.w3.org/2002/07/owl#deprecated")
     }
+
+    pub fn same_as() -> NamedNodeRef<'static> {
+        NamedNodeRef::new_unchecked("http://www.w3.org/2002/07/owl#sameAs")
+    }
 }
 
 pub struct Rdfs;

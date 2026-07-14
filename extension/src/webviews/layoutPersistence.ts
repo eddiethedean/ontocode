@@ -1,9 +1,9 @@
 import * as vscode from "vscode";
-import { appendError } from "../logging/errorLog";
 import {
   DEFAULT_REOPEN,
   PERSPECTIVES,
   resolvePanelRestoreState,
+  sanitizePanelRestoreState,
   type PanelRestoreState,
   type Perspective,
 } from "./layoutPersistenceLogic";
@@ -55,12 +55,46 @@ export async function rememberPanelRestoreState(
   if (!extensionContext) {
     return;
   }
+  const safe = sanitizePanelRestoreState(state);
+  if (!safe) {
+    return;
+  }
   const all =
     extensionContext.workspaceState.get<Record<string, PanelRestoreState>>(
       PANEL_STATE_KEY
     ) ?? {};
-  all[viewType] = state;
+  all[viewType] = safe;
   await extensionContext.workspaceState.update(PANEL_STATE_KEY, all);
+}
+
+/** Drop remembered restore state when a panel is closed (session must not reopen it). */
+export async function forgetPanelRestoreState(viewType: string): Promise<void> {
+  if (!extensionContext) {
+    return;
+  }
+  const all =
+    extensionContext.workspaceState.get<Record<string, PanelRestoreState>>(
+      PANEL_STATE_KEY
+    ) ?? {};
+  if (!(viewType in all)) {
+    return;
+  }
+  delete all[viewType];
+  await extensionContext.workspaceState.update(PANEL_STATE_KEY, all);
+}
+
+/**
+ * Session capture: only panels the user actually opened (raw workspaceState).
+ * Do **not** fall back to DEFAULT_REOPEN — that would reopen reasoner/diff on every restore.
+ */
+export function getRememberedPanelRestoreState(
+  context: vscode.ExtensionContext,
+  viewType: string
+): PanelRestoreState | undefined {
+  const all =
+    context.workspaceState.get<Record<string, PanelRestoreState>>(PANEL_STATE_KEY) ??
+    {};
+  return sanitizePanelRestoreState(all[viewType]);
 }
 
 export function getPanelRestoreState(
@@ -75,6 +109,10 @@ export function getPanelRestoreState(
 
 const SERIALIZED_VIEWS = Object.keys(DEFAULT_REOPEN);
 
+/**
+ * Session restore owns live panel reopen (`reopenPanels`). VS Code serializers
+ * previously revived stub “Reopen panel” tabs in parallel (#300) — dispose them.
+ */
 export function registerWebviewPanelSerializers(
   context: vscode.ExtensionContext
 ): void {
@@ -83,67 +121,10 @@ export function registerWebviewPanelSerializers(
     context.subscriptions.push(
       vscode.window.registerWebviewPanelSerializer(viewType, {
         async deserializeWebviewPanel(panel): Promise<void> {
-          const restore = getPanelRestoreState(context, viewType);
-          panel.webview.html = restoredPanelHtml(viewType, restore);
-          panel.webview.onDidReceiveMessage(async (message) => {
-            if (message?.command === "close") {
-              panel.dispose();
-              return;
-            }
-            if (message?.command === "reopen" && restore?.command) {
-              try {
-                await vscode.commands.executeCommand(
-                  restore.command,
-                  ...(restore.args ?? [])
-                );
-                panel.dispose();
-              } catch (err) {
-                const detail = err instanceof Error ? err.message : String(err);
-                appendError(
-                  `Failed to restore ${viewType}: ${detail}`,
-                  "layout"
-                );
-                void vscode.window.showErrorMessage(
-                  `OntoCode: could not restore panel — ${detail}`
-                );
-              }
-            }
-          });
-          appendError(
-            `Restored ${viewType}; reopen via ${restore?.command ?? "commands"}`,
-            "layout"
-          );
+          // Prefer session-driven live reopen; discard placeholder stubs (#300).
+          panel.dispose();
         },
       })
     );
   }
-}
-
-function restoredPanelHtml(
-  viewType: string,
-  restore: PanelRestoreState | undefined
-): string {
-  const label = restore?.title ?? viewType;
-  const canReopen = Boolean(restore?.command);
-  return `<!doctype html><html lang="en"><body style="font-family:var(--vscode-font-family);padding:16px">
-<main aria-label="Restored OntoCode panel">
-<h2>OntoCode panel restored</h2>
-<p>The previous session tab for <code>${escapeHtml(label)}</code> was recovered.</p>
-<p>${canReopen ? "Reopen to reload live ontology context." : "Reopen the panel from the OntoCode commands."}</p>
-<div role="toolbar" aria-label="Restore actions" style="display:flex;gap:8px;flex-wrap:wrap">
-${canReopen ? `<button id="reopen" type="button" autofocus>Reopen panel</button>` : ""}
-<button id="close" type="button">Close</button>
-</div>
-</main>
-<script>
-const vscode=acquireVsCodeApi();
-const reopen=document.getElementById('reopen');
-if(reopen){reopen.onclick=()=>vscode.postMessage({command:'reopen'});}
-document.getElementById('close').onclick=()=>vscode.postMessage({command:'close'});
-</script>
-</body></html>`;
-}
-
-function escapeHtml(value: string): string {
-  return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
 }

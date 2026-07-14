@@ -26,7 +26,7 @@ use std::path::{Path, PathBuf};
 #[command(
     name = "ontocore",
     version,
-    about = "Local-first ontology index and query engine (OntoCode v0.20)"
+    about = "Local-first ontology index and query engine (OntoCode v0.21)"
 )]
 struct Cli {
     #[command(subcommand)]
@@ -457,9 +457,7 @@ fn main() -> Result<()> {
                 .data()
                 .documents
                 .iter()
-                .find(|d| {
-                    d.path.canonicalize().ok().as_ref() == document.canonicalize().ok().as_ref()
-                })
+                .find(|d| ontocore_core::paths_refer_to_same(&d.path, &document))
                 .map(|d| d.namespaces.clone())
                 .unwrap_or_default();
             if ext == "obo" {
@@ -482,11 +480,11 @@ fn main() -> Result<()> {
                 if !preview && result.applied {
                     println!("applied");
                 }
-            } else if ext == "ttl" {
+            } else if matches!(ext.as_str(), "ttl" | "owl" | "rdf" | "owx") {
                 let value: serde_json::Value =
                     serde_json::from_slice(&patch_bytes).context("failed to parse patch JSON")?;
                 let transaction = ontocore_edit::parse_turtle_input(value)
-                    .context("failed to parse Turtle transaction")?;
+                    .context("failed to parse patch transaction")?;
                 let result = ontocore_edit::apply_transaction_to_path(
                     &transaction,
                     &document,
@@ -503,7 +501,7 @@ fn main() -> Result<()> {
                     println!("applied");
                 }
             } else {
-                bail!("patch write-back supports .ttl and .obo documents only");
+                bail!("patch write-back supports .ttl, .obo, .owl, .rdf, and .owx documents only");
             }
         }
         Commands::Classify { workspace, profile, auto_profile, format } => {
@@ -1000,21 +998,41 @@ fn print_query_result(
     };
     match format {
         OutputFormat::Json => println!("{}", sql_to_json(&result)?),
-        OutputFormat::Csv => print!("{}", sql_to_csv(&result)?),
+        OutputFormat::Csv => {
+            print!("{}", sql_to_csv(&result)?);
+            // Keep CSV body machine-clean; warn on stderr when the result set was capped (#313).
+            if truncated {
+                eprintln!("WARNING: OntoCode query results truncated");
+            }
+        }
         OutputFormat::Text => {
             if columns.is_empty() {
                 println!("(no columns)");
-                return Ok(());
+            } else {
+                println!("{}", columns.join("\t"));
+                for row in rows {
+                    let line: Vec<String> =
+                        columns.iter().map(|c| row.get(c).cloned().unwrap_or_default()).collect();
+                    println!("{}", line.join("\t"));
+                }
             }
-            println!("{}", columns.join("\t"));
-            for row in rows {
-                let line: Vec<String> =
-                    columns.iter().map(|c| row.get(c).cloned().unwrap_or_default()).collect();
-                println!("{}", line.join("\t"));
+            if truncated {
+                println!("# truncated: true");
             }
         }
     }
     Ok(())
+}
+
+/// Format helpers used by unit tests for truncation signaling (#313).
+#[cfg(test)]
+fn text_truncation_marker(truncated: bool) -> Option<&'static str> {
+    truncated.then_some("# truncated: true")
+}
+
+#[cfg(test)]
+fn csv_truncation_warning(truncated: bool) -> Option<&'static str> {
+    truncated.then_some("WARNING: OntoCode query results truncated")
 }
 
 #[cfg(test)]
@@ -1044,5 +1062,13 @@ mod tests {
             }
             _ => panic!("expected plugins run"),
         }
+    }
+
+    #[test]
+    fn text_and_csv_surface_truncation_flag() {
+        assert_eq!(text_truncation_marker(true), Some("# truncated: true"));
+        assert_eq!(text_truncation_marker(false), None);
+        assert_eq!(csv_truncation_warning(true), Some("WARNING: OntoCode query results truncated"));
+        assert_eq!(csv_truncation_warning(false), None);
     }
 }

@@ -1,4 +1,5 @@
 use crate::error::{Result, RobotError};
+use std::io::ErrorKind;
 use std::path::{Component, Path};
 use std::process::Command;
 
@@ -29,16 +30,21 @@ pub fn detect_robot(explicit_path: Option<&str>) -> Result<String> {
         }
         return Err(RobotError::NotFound);
     }
-    let which = Command::new("which").arg("robot").output();
-    if let Ok(output) = which {
-        if output.status.success() {
-            let path = String::from_utf8_lossy(&output.stdout).trim().to_string();
-            if !path.is_empty() {
-                return Ok(path);
-            }
+    // Probe PATH by spawning allowlisted names. Avoids Unix-only `which` (#316);
+    // Windows PATHEXT resolves `robot` → `robot.cmd` / `.bat` / `.exe` when present.
+    for name in ["robot", "robot.cmd", "robot.bat", "robot.exe"] {
+        if robot_exists_on_path(name) {
+            return Ok(name.to_string());
         }
     }
     Err(RobotError::NotFound)
+}
+
+fn robot_exists_on_path(name: &str) -> bool {
+    match Command::new(name).arg("--version").output() {
+        Ok(_) => true,
+        Err(err) => err.kind() != ErrorKind::NotFound,
+    }
 }
 
 pub fn run_robot(robot_path: Option<&str>, args: &[String]) -> Result<RobotOutput> {
@@ -187,5 +193,11 @@ mod tests {
                 "{name} should be accepted by name check before existence"
             );
         }
+    }
+
+    #[test]
+    fn path_probe_skips_missing_binary_without_which() {
+        // ensure robot_exists_on_path returns false for a nonsense name (no panic / which).
+        assert!(!robot_exists_on_path("ontocode-definitely-missing-robot-bin-xyz"));
     }
 }

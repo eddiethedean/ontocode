@@ -677,7 +677,7 @@ describe("EntityInspectorPanel", () => {
     });
   });
 
-  it("loadEntity hydrates focus without pushing navigation history", async () => {
+  it("loadEntity does not override newer stamped focus (#277)", async () => {
     const { useWorkspaceStore } = await import("../store/workspaceStore");
     useWorkspaceStore.getState().reset();
     useWorkspaceStore.getState().setFocus({
@@ -686,6 +686,20 @@ describe("EntityInspectorPanel", () => {
       source: "explorer",
       timestamp: 1,
     });
+    const stackBefore = useWorkspaceStore.getState().navigation.stack.length;
+
+    renderWithProviders(<EntityInspectorPanel />);
+    postHostMessage({ type: "loadEntity", detail: entityDetail, classOptions });
+    expect(await screen.findByRole("heading", { name: "Person" })).toBeInTheDocument();
+
+    // Detail may update for the buffered load, but stamped focus stays Seed.
+    expect(useWorkspaceStore.getState().focus?.id).toBe("http://example.org#Seed");
+    expect(useWorkspaceStore.getState().navigation.stack.length).toBe(stackBefore);
+  });
+
+  it("loadEntity hydrates focus without pushing navigation history", async () => {
+    const { useWorkspaceStore } = await import("../store/workspaceStore");
+    useWorkspaceStore.getState().reset();
     const stackBefore = useWorkspaceStore.getState().navigation.stack.length;
 
     renderWithProviders(<EntityInspectorPanel />);

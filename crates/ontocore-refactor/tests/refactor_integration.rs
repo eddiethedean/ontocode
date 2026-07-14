@@ -105,6 +105,36 @@ fn find_usages_lists_multiple_annotation_subjects() {
 }
 
 #[test]
+fn find_usages_lists_multiple_annotation_objects() {
+    let tmp = TempDir::new().unwrap();
+    let ws = tmp.path();
+    std::fs::write(
+        ws.join("seeAlso.ttl"),
+        concat!(
+            "@prefix : <http://example.org/org#> .\n",
+            "@prefix owl: <http://www.w3.org/2002/07/owl#> .\n",
+            "@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n",
+            ":Person a owl:Class .\n",
+            ":A a owl:Class ; rdfs:seeAlso :Person .\n",
+            ":B a owl:Class ; rdfs:seeAlso :Person .\n",
+            ":C a owl:Class ; rdfs:seeAlso :Person .\n"
+        ),
+    )
+    .unwrap();
+    let catalog = build_catalog(ws);
+    let usages = find_usages(&catalog, "http://example.org/org#Person");
+    let annotation_objects: Vec<_> = usages
+        .iter()
+        .filter(|u| u.kind == ontocore_refactor::UsageKind::AnnotationObject)
+        .collect();
+    assert!(
+        annotation_objects.len() >= 3,
+        "expected distinct annotation-object hits per subject, got {:?}",
+        annotation_objects
+    );
+}
+
+#[test]
 fn rename_iri_across_workspace() {
     let tmp = TempDir::new().unwrap();
     let ws = tmp.path();
@@ -700,4 +730,31 @@ fn move_entity_to_new_file_includes_prefix_declarations() {
         "new target must include @prefix lines: {moved}"
     );
     assert!(moved.contains("ex:Person"));
+}
+
+#[test]
+fn move_entity_into_nonempty_target_merges_missing_prefixes() {
+    let tmp = TempDir::new().unwrap();
+    let ws = tmp.path();
+    std::fs::create_dir_all(ws).unwrap();
+    std::fs::copy(fixture_dir().join("people.ttl"), ws.join("people.ttl")).unwrap();
+    // Target has owl but not ex — the moved block uses ex: CURIE (#314).
+    std::fs::write(ws.join("target.ttl"), "@prefix owl: <http://www.w3.org/2002/07/owl#> .\n")
+        .unwrap();
+    let catalog = build_catalog(ws);
+    let plan = preview_move_entity(
+        &catalog,
+        "http://example.org/org#Person",
+        &ws.join("target.ttl"),
+        &empty_overrides(),
+        &workspace_roots(ws),
+    )
+    .expect("plan");
+    apply_refactor_plan(&plan, false, ws).expect("apply");
+    let target = std::fs::read_to_string(ws.join("target.ttl")).unwrap();
+    assert!(
+        target.lines().any(|l| l.contains("@prefix ex:") || l.contains("@prefix ex :")),
+        "non-empty target must gain missing source prefixes: {target}"
+    );
+    assert!(target.contains("ex:Person"));
 }

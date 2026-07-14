@@ -52,7 +52,7 @@ pub fn collect_diagnostics_with_sources(
             }
         }
         for (override_path, text) in source_overrides {
-            if override_path.canonicalize().ok().as_ref() == path.canonicalize().ok().as_ref() {
+            if ontocore_core::paths_refer_to_same(override_path, path) {
                 return text.clone();
             }
         }

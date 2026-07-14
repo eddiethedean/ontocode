@@ -21,12 +21,16 @@ export function normalizeFsPath(filePath: string): string {
 
 /** True when two filesystem paths refer to the same location. */
 export function pathsEqual(a: string, b: string): boolean {
-  const left = normalizeFsPath(a);
-  const right = normalizeFsPath(b);
-  if (process.platform === "win32") {
-    return left.toLowerCase() === right.toLowerCase();
-  }
-  return left === right;
+  return pathIdentityKey(a) === pathIdentityKey(b);
+}
+
+/**
+ * Stable map key for filesystem path identity (case-folded on Windows).
+ * Prefer this over raw `normalizeFsPath` when looking up by path.
+ */
+export function pathIdentityKey(filePath: string): string {
+  const normalized = normalizeFsPath(filePath);
+  return process.platform === "win32" ? normalized.toLowerCase() : normalized;
 }
 
 /**

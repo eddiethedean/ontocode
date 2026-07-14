@@ -2,7 +2,7 @@
 
 > Part of **OntoCore** (semantic workspace engine).
 
-Command-line interface for [OntoCore](https://github.com/eddiethedean/ontocode) — index ontology workspaces, run SQL/SPARQL queries, validate, patch Turtle and OBO files, and classify with OntoLogos.
+Command-line interface for [OntoCore](https://github.com/eddiethedean/ontocode) — index ontology workspaces, run SQL/SPARQL queries, validate, patch Turtle, OBO, RDF/XML, and OWL/XML files, and classify with OntoLogos.
 
 ## Prerequisites
 
@@ -12,7 +12,7 @@ Command-line interface for [OntoCore](https://github.com/eddiethedean/ontocode) 
 ## Install (pinned)
 
 ```bash
-cargo install ontocore-cli --locked --version 0.20.0
+cargo install ontocore-cli --locked --version 0.21.0
 ```
 
 ## Linux x64 without Rust

@@ -2,22 +2,6 @@ use ontocore_core::document_lookup::normalize_iri;
 use ontocore_owl::{namespaces_for_text, short_name_from_iri};
 use std::collections::BTreeMap;
 
-/// Build replacement needles for an IRI in Turtle source (reserved for future prefix-aware renames).
-#[allow(dead_code)]
-pub fn iri_replacement_needles(
-    iri: &str,
-    namespaces: &BTreeMap<String, String>,
-) -> Vec<(String, String)> {
-    let short = short_name_from_iri(iri);
-    let mut needles = vec![(format!("<{iri}>"), iri.to_string())];
-    for (prefix, ns) in namespaces {
-        if iri.starts_with(ns) && !prefix.is_empty() {
-            needles.push((format!("{prefix}:{short}"), format!("{prefix}:{short}")));
-        }
-    }
-    needles
-}
-
 pub fn normalize_namespace_base(base: &str) -> String {
     normalize_iri(base)
 }

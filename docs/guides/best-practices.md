@@ -5,7 +5,7 @@ Patterns for using OntoCode and OntoCore in daily ontology engineering.
 ## Repository layout
 
 - Keep ontology source files in a dedicated directory (e.g. `ontologies/` or `src/ontology/`)
-- Prefer **Turtle (`.ttl`) or OBO (`.obo`)** for files you edit in VS Code — those formats support write-back. RDF/XML and OWL/XML are read-only — see [Supported formats](../supported-formats.md). Refactor apply is Turtle-only today.
+- Prefer **Turtle (`.ttl`) or OBO (`.obo`)** when you need byte-stable diffs or refactor apply. **RDF/XML and OWL/XML** also support write-back (v0.21+, semantic re-serialize) — see [Supported formats](../supported-formats.md) and [OWL/XML write-back](owl-xml-workflow.md). Refactor apply is Turtle-only today.
 - Use a single-root VS Code workspace when you want the simplest onboarding (multi-root is supported since v0.10 — all folders are indexed)
 
 ## When to use SQL vs SPARQL vs classify

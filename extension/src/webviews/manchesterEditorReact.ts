@@ -17,11 +17,12 @@ import {
   buildManchesterPatches,
   resolveManchesterApplyMode,
 } from "./manchesterEditorLogic";
-import { rememberPanelRestoreState } from "./layoutPersistence";
+import { forgetPanelRestoreState, rememberPanelRestoreState } from "./layoutPersistence";
 import {
   resolveWorkspaceDocumentUri,
   WORKSPACE_DOCUMENT_OUTSIDE_MESSAGE,
 } from "../utils/workspacePath";
+import { workspaceTransactionManager } from "../workspace/transactionManager";
 
 export interface ManchesterEditorOptions {
   iri: string;
@@ -43,6 +44,7 @@ export class ManchesterEditorPanel {
     this.host = host;
     this.options = options;
     host.panel.onDidDispose(() => {
+      void forgetPanelRestoreState("ontocodeManchesterEditor");
       ManchesterEditorPanel.current = undefined;
     });
   }
@@ -251,11 +253,18 @@ export class ManchesterEditorPanel {
         void vscode.window.showErrorMessage(WORKSPACE_DOCUMENT_OUTSIDE_MESSAGE);
         return;
       }
-      const result = await applyAxiomPatch({
-        document_uri: documentUri,
-        patches,
-        preview_only: previewOnly,
-      });
+      const result = previewOnly
+        ? await applyAxiomPatch({
+            document_uri: documentUri,
+            patches,
+            preview_only: true,
+          })
+        : await workspaceTransactionManager.apply(
+            documentUri,
+            vscode.Uri.parse(documentUri).fsPath,
+            patches,
+            "Manchester apply"
+          );
       if (previewOnly) {
         if (hasPatchFailureDiagnostics(result)) {
           void vscode.window.showErrorMessage(patchFailureMessage(result));

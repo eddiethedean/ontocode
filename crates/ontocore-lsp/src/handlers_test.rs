@@ -805,7 +805,10 @@ fn export_ontology_writes_under_workspace_not_cwd() {
 fn reasoner_classify_releases_ops_lock_during_classify() {
     use crate::handlers::handle_run_reasoner_lsp;
     use crate::protocol::RunReasonerParams;
-    use crate::state::{TEST_REASONER_CLASSIFY_IN_PAUSE, TEST_REASONER_CLASSIFY_PAUSE_MS};
+    use crate::state::{
+        TEST_REASONER_CLASSIFY_IN_PAUSE, TEST_REASONER_CLASSIFY_LOCK,
+        TEST_REASONER_CLASSIFY_PAUSE_MS,
+    };
     use crossbeam_channel::unbounded;
     use lsp_server::RequestId;
     use std::collections::VecDeque;
@@ -814,6 +817,8 @@ fn reasoner_classify_releases_ops_lock_during_classify() {
     use std::time::{Duration, Instant};
 
     let state = indexed_state();
+    let _classify_pause_guard =
+        TEST_REASONER_CLASSIFY_LOCK.lock().unwrap_or_else(|e| e.into_inner());
     TEST_REASONER_CLASSIFY_IN_PAUSE.store(false, Ordering::SeqCst);
     TEST_REASONER_CLASSIFY_PAUSE_MS.store(200, Ordering::SeqCst);
 
@@ -860,7 +865,10 @@ fn reasoner_classify_releases_ops_lock_during_classify() {
 fn cancelled_reasoner_run_does_not_update_snapshot() {
     use crate::handlers::handle_run_reasoner_lsp;
     use crate::protocol::RunReasonerParams;
-    use crate::state::{TEST_REASONER_CLASSIFY_IN_PAUSE, TEST_REASONER_CLASSIFY_PAUSE_MS};
+    use crate::state::{
+        TEST_REASONER_CLASSIFY_IN_PAUSE, TEST_REASONER_CLASSIFY_LOCK,
+        TEST_REASONER_CLASSIFY_PAUSE_MS,
+    };
     use crossbeam_channel::unbounded;
     use lsp_server::{Message, Notification, RequestId};
     use std::collections::VecDeque;
@@ -871,6 +879,8 @@ fn cancelled_reasoner_run_does_not_update_snapshot() {
     let state = indexed_state();
     let before = state.with_catalog_and_reasoner(|_, reasoner| reasoner.cloned()).flatten();
 
+    let _classify_pause_guard =
+        TEST_REASONER_CLASSIFY_LOCK.lock().unwrap_or_else(|e| e.into_inner());
     TEST_REASONER_CLASSIFY_IN_PAUSE.store(false, Ordering::SeqCst);
     TEST_REASONER_CLASSIFY_PAUSE_MS.store(200, Ordering::SeqCst);
 
@@ -917,7 +927,10 @@ fn cancelled_reasoner_run_does_not_update_snapshot() {
 fn reasoner_cancel_drain_preserves_non_cancel_messages() {
     use crate::handlers::handle_run_reasoner_lsp;
     use crate::protocol::RunReasonerParams;
-    use crate::state::{TEST_REASONER_CLASSIFY_IN_PAUSE, TEST_REASONER_CLASSIFY_PAUSE_MS};
+    use crate::state::{
+        TEST_REASONER_CLASSIFY_IN_PAUSE, TEST_REASONER_CLASSIFY_LOCK,
+        TEST_REASONER_CLASSIFY_PAUSE_MS,
+    };
     use crossbeam_channel::unbounded;
     use lsp_server::{Message, Notification, Request, RequestId};
     use std::collections::VecDeque;
@@ -926,6 +939,8 @@ fn reasoner_cancel_drain_preserves_non_cancel_messages() {
     use std::time::{Duration, Instant};
 
     let state = indexed_state();
+    let _classify_pause_guard =
+        TEST_REASONER_CLASSIFY_LOCK.lock().unwrap_or_else(|e| e.into_inner());
     TEST_REASONER_CLASSIFY_IN_PAUSE.store(false, Ordering::SeqCst);
     TEST_REASONER_CLASSIFY_PAUSE_MS.store(300, Ordering::SeqCst);
 
@@ -990,7 +1005,10 @@ fn reasoner_cancel_drain_preserves_non_cancel_messages() {
 fn reindex_during_classify_discards_stale_reasoner_snapshot() {
     use crate::handlers::handle_run_reasoner_lsp;
     use crate::protocol::RunReasonerParams;
-    use crate::state::{TEST_REASONER_CLASSIFY_IN_PAUSE, TEST_REASONER_CLASSIFY_PAUSE_MS};
+    use crate::state::{
+        TEST_REASONER_CLASSIFY_IN_PAUSE, TEST_REASONER_CLASSIFY_LOCK,
+        TEST_REASONER_CLASSIFY_PAUSE_MS,
+    };
     use crossbeam_channel::unbounded;
     use lsp_server::RequestId;
     use std::collections::VecDeque;
@@ -1002,6 +1020,8 @@ fn reindex_during_classify_discards_stale_reasoner_snapshot() {
     let before = state.with_catalog_and_reasoner(|_, reasoner| reasoner.cloned()).flatten();
     let ws = state.workspace_root().expect("workspace");
 
+    let _classify_pause_guard =
+        TEST_REASONER_CLASSIFY_LOCK.lock().unwrap_or_else(|e| e.into_inner());
     TEST_REASONER_CLASSIFY_IN_PAUSE.store(false, Ordering::SeqCst);
     TEST_REASONER_CLASSIFY_PAUSE_MS.store(300, Ordering::SeqCst);
 

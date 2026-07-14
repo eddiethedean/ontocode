@@ -17,6 +17,7 @@ const RDFS_LABEL: &str = "http://www.w3.org/2000/01/rdf-schema#label";
 const RDFS_COMMENT: &str = "http://www.w3.org/2000/01/rdf-schema#comment";
 const RDFS_SUB_CLASS_OF: &str = "http://www.w3.org/2000/01/rdf-schema#subClassOf";
 const OWL_DEPRECATED: &str = "http://www.w3.org/2002/07/owl#deprecated";
+const OWL_SAME_AS: &str = "http://www.w3.org/2002/07/owl#sameAs";
 
 /// Catalog-shaped extraction from a Horned-OWL ontology.
 #[derive(Debug, Clone, Default)]
@@ -83,6 +84,25 @@ pub fn bridge_ontology(
             ontology_id: ont_id.clone(),
             source_location: SourceLocation::default(),
         });
+    }
+
+    // Project SameIndividual as owl:sameAs annotations so semantic-diff rename detection works (#312).
+    for si in idx.same_individual() {
+        for a in &si.0 {
+            let subject = individual_to_iri(a);
+            for b in &si.0 {
+                if a == b {
+                    continue;
+                }
+                result.annotations.push(Annotation {
+                    subject: subject.clone(),
+                    predicate: OWL_SAME_AS.to_string(),
+                    object: individual_to_iri(b),
+                    ontology_id: ont_id.clone(),
+                    source_location: SourceLocation::default(),
+                });
+            }
+        }
     }
 
     let mut axiom_counter = 0usize;

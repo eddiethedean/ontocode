@@ -31,7 +31,7 @@ objective of the phases below.
 |---------|----------|--------|---------------|------------------|--------|
 | **v0.19** | A + baseline | 0–1 | EPIC-001, EPIC-011 (skeleton) | BLOCKER_01, BLOCKER_11 (manifest skeleton) | Complete |
 | **v0.20** | B | 2 | EPIC-003 | BLOCKER_03 | Complete (branch) |
-| **v0.21** | C (formats) | 3 | EPIC-001, EPIC-020 | BLOCKER_01, format audit | Planned |
+| **v0.21** | C (formats) | 3 | EPIC-001, EPIC-020 | BLOCKER_01, format audit | Shipped |
 | **v0.22** | C (OWL 2) | 4 | EPIC-002 | BLOCKER_02 | Planned |
 | **v0.23** | D (reason + SWRL) | 5–6 | EPIC-004, EPIC-005 | BLOCKER_04, BLOCKER_05 | Planned |
 | **v0.24** | D (services) | 7 | EPIC-006, EPIC-007 | BLOCKER_06, BLOCKER_07 | Planned |
@@ -46,7 +46,7 @@ Epics are indexed in [EPIC_INDEX.md](EPIC_INDEX.md).
 
 # v0.19 — Semantic foundation + program baseline
 
-**Status:** Complete (v0.20.0, 2026-07-13)\
+**Status:** Complete (v0.21.0, 2026-07-13)\
 **P0 phase:** A (Semantic Foundation)\
 **Stages:** 0–1\
 **Theme:** Freeze parity scope and route all edits through semantic transactions.

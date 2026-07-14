@@ -93,7 +93,7 @@ pub struct ApplyPatchResult {
     pub document_path: Option<String>,
 }
 
-/// Apply patches to a document on disk (Turtle only).
+/// Apply patches to a document on disk (Turtle span surgery or XML re-serialize).
 pub fn apply_patches(
     document_path: &Path,
     patches: &[PatchOp],
@@ -103,11 +103,22 @@ pub fn apply_patches(
     let format = OntologyFormat::from_extension(
         document_path.extension().and_then(|e| e.to_str()).unwrap_or(""),
     );
-    if format != OntologyFormat::Turtle {
-        return Err(OwlError::UnsupportedFormat(format!(
-            "write-back supports Turtle (.ttl) only, got {}",
-            format.as_str()
-        )));
+    match format {
+        OntologyFormat::Turtle => {}
+        OntologyFormat::Owl | OntologyFormat::RdfXml | OntologyFormat::OwlXml => {
+            return crate::apply_xml::apply_xml_patches(
+                document_path,
+                patches,
+                preview_only,
+                namespaces,
+            );
+        }
+        other => {
+            return Err(OwlError::UnsupportedFormat(format!(
+                "write-back supports Turtle (.ttl), RDF/XML (.owl/.rdf), OWL/XML (.owx); got {}",
+                other.as_str()
+            )));
+        }
     }
 
     let source = read_to_string_capped(document_path, MAX_FILE_BYTES).map_err(OwlError::Core)?;

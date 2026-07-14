@@ -26,10 +26,10 @@ permissions = ["workspace.read", "workspace.write", "external_process"]
 | Permission | Required for |
 |------------|--------------|
 | `workspace.read` | Validate, export, list plugins, read workspace files |
-| `workspace.write` | Plugins that write into the workspace |
+| `workspace.write` | Plugins that write into the workspace; **required for subprocess `validate` entry** |
 | `external_process` | Subprocess `entry` binaries |
 
-Manifests that omit `permissions` receive backward-compatible defaults (`workspace.read`, and `external_process` when `entry` is set). **New plugins should always declare permissions explicitly.**
+Manifests that omit `permissions` receive backward-compatible defaults (`workspace.read`, and `external_process` when `entry` is set). Those defaults are **not** sufficient for subprocess `validate` — declare `workspace.write` as well. **New plugins should always declare permissions explicitly.**
 
 ## Quick start
 
@@ -49,7 +49,7 @@ kind = "validator"          # validator | exporter | workflow | …
 id = "org.example.my-validator"
 api_version = "1"
 entry = "my-plugin-cli"     # optional subprocess binary
-permissions = ["workspace.read", "external_process"]
+permissions = ["workspace.read", "workspace.write", "external_process"]
 
 [capabilities]
 validate = true

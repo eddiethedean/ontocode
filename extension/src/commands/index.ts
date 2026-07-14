@@ -1,6 +1,5 @@
 import * as vscode from "vscode";
 import {
-  applyAxiomPatch,
   getCatalogSnapshot,
   getEntity,
   indexWorkspace,
@@ -383,7 +382,7 @@ export function registerCommands(
       try {
         const { detail } = await getEntity(iri);
         if (!detail.document_path) {
-          void vscode.window.showErrorMessage("Entity is not in an editable Turtle file");
+          void vscode.window.showErrorMessage("Entity is not in an editable ontology file");
           return;
         }
         const documentUri = documentUriInWorkspace(detail.document_path);
@@ -393,11 +392,12 @@ export function registerCommands(
           );
           return;
         }
-        const result = await applyAxiomPatch({
-          document_uri: documentUri,
-          patches: [{ op: "delete_entity", entity_iri: iri }],
-          preview_only: false,
-        });
+        const result = await workspaceTransactionManager.apply(
+          documentUri,
+          detail.document_path,
+          [{ op: "delete_entity", entity_iri: iri }],
+          "Delete entity"
+        );
         if (!result.applied) {
           void vscode.window.showErrorMessage(patchFailureMessage(result));
           return;
@@ -712,24 +712,28 @@ export function registerCommands(
   );
   context.subscriptions.push(
     vscode.commands.registerCommand("ontocode.navigateBack", async () => {
-      const entry = navigationManager.back();
-      if (!entry) {
-        void vscode.window.showInformationMessage("OntoCode: no earlier navigation entry");
-        return;
-      }
-      if (entry.kind === "entity") {
-        await vscode.commands.executeCommand("ontocode.openEntity", entry.id);
-      }
+      await navigationManager.runHistoryNavigation(async () => {
+        const entry = navigationManager.back();
+        if (!entry) {
+          void vscode.window.showInformationMessage("OntoCode: no earlier navigation entry");
+          return;
+        }
+        if (entry.kind === "entity") {
+          await vscode.commands.executeCommand("ontocode.openEntity", entry.id);
+        }
+      });
     }),
     vscode.commands.registerCommand("ontocode.navigateForward", async () => {
-      const entry = navigationManager.forward();
-      if (!entry) {
-        void vscode.window.showInformationMessage("OntoCode: no forward navigation entry");
-        return;
-      }
-      if (entry.kind === "entity") {
-        await vscode.commands.executeCommand("ontocode.openEntity", entry.id);
-      }
+      await navigationManager.runHistoryNavigation(async () => {
+        const entry = navigationManager.forward();
+        if (!entry) {
+          void vscode.window.showInformationMessage("OntoCode: no forward navigation entry");
+          return;
+        }
+        if (entry.kind === "entity") {
+          await vscode.commands.executeCommand("ontocode.openEntity", entry.id);
+        }
+      });
     }),
     vscode.commands.registerCommand("ontocode.workspaceUndo", async () => {
       if (await workspaceTransactionManager.undo()) {
@@ -833,7 +837,7 @@ async function createEntity(
   if (!docPick) {
     let ttlDocs = snapshot.documents.filter((d) => {
       const entry = ontologyRegistry.getEntry(d.id);
-      return entry?.editable ?? (d.format === "turtle" || d.format === "obo");
+      return entry?.editable ?? (d.format === "turtle" || d.format === "obo" || d.format === "owl" || d.format === "rdf_xml" || d.format === "owl_xml");
     });
     const activeEditor = vscode.window.activeTextEditor;
     if (activeEditor) {

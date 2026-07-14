@@ -35,6 +35,9 @@ ONTOCORE_LSP_BIN="../target/debug/ontocore-lsp" npm test
 
 Press **F5** in VS Code with the `extension/` folder open (or use **Run Extension** launch config) after `npm run compile`.
 
+!!! warning "`npm run watch` does not rebuild webviews"
+    `npm run watch` runs **esbuild only** (extension host). After editing React under `webview-ui/`, run `npm run build:webview` or `npm run compile` before F5 — otherwise the Extension Development Host will show a stale UI.
+
 ## Key docs
 
 | Topic | Doc |

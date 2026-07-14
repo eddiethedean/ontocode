@@ -7,6 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.21.0] - 2026-07-13
+
+### Added
+
+- RDF/XML (`.owl` / `.rdf`) and OWL/XML (`.owx`) write-back via Horned full-document re-serialize (ADR-0021)
+- `ontocore-owl` serialize / mutate / apply_xml APIs and semantic comparator
+- CLI / LSP / catalog / extension editable gates for required XML formats
+- Protégé round-trip edit → save → reload tests and malformed / unsupported-op fail-closed cases
+- Migration guide: [docs/migration/v0.21.md](docs/migration/v0.21.md)
+- Parity closeout: PAR-FMT-003 / PAR-FMT-004 ([#247](https://github.com/eddiethedean/ontocode/issues/247))
+
+### Changed
+
+- Workspace package and all `ontocore-*` crates bumped to **0.21.0**; extension and webview UI **0.21.0**
+
+### Fixed
+
+- Session restore: command allowlist, workspace URI jail, open-editors capture, `NOT_INDEXED` retry, TransactionManager sync, panel serializers ([#309](https://github.com/eddiethedean/ontocode/issues/309), [#311](https://github.com/eddiethedean/ontocode/issues/311), [#295](https://github.com/eddiethedean/ontocode/issues/295), [#294](https://github.com/eddiethedean/ontocode/issues/294), [#300](https://github.com/eddiethedean/ontocode/issues/300), [#301](https://github.com/eddiethedean/ontocode/issues/301); [#317](https://github.com/eddiethedean/ontocode/pull/317), [#318](https://github.com/eddiethedean/ontocode/pull/318))
+- TransactionManager integrity: self-write FS guard, Sync-cancel bookkeeping, route UI edits through TM, honest Save when dirty ([#293](https://github.com/eddiethedean/ontocode/issues/293), [#296](https://github.com/eddiethedean/ontocode/issues/296)–[#299](https://github.com/eddiethedean/ontocode/issues/299); [#319](https://github.com/eddiethedean/ontocode/pull/319))
+- OBO catalog absolute IRIs / `property_value` / def-vs-comment; XML `SetOntologyIri` + `DeleteEntity` ([#303](https://github.com/eddiethedean/ontocode/issues/303)–[#306](https://github.com/eddiethedean/ontocode/issues/306), [#308](https://github.com/eddiethedean/ontocode/issues/308); [#320](https://github.com/eddiethedean/ontocode/pull/320))
+- Focus/nav races: history suppress, hydrateFocus timestamps, explanation fetch generation ([#276](https://github.com/eddiethedean/ontocode/issues/276), [#277](https://github.com/eddiethedean/ontocode/issues/277), [#292](https://github.com/eddiethedean/ontocode/issues/292); [#321](https://github.com/eddiethedean/ontocode/pull/321))
+- Nested SQL WHERE, bare-column rejection, text/CSV truncation honesty ([#238](https://github.com/eddiethedean/ontocode/issues/238), [#307](https://github.com/eddiethedean/ontocode/issues/307), [#313](https://github.com/eddiethedean/ontocode/issues/313); [#322](https://github.com/eddiethedean/ontocode/pull/322))
+- Cyclic class roots, `entityBelongsToDocument` exact match, Inspector `ontology_iri` rejection ([#222](https://github.com/eddiethedean/ontocode/issues/222), [#234](https://github.com/eddiethedean/ontocode/issues/234), [#310](https://github.com/eddiethedean/ontocode/issues/310); [#323](https://github.com/eddiethedean/ontocode/pull/323))
+- Semantic-diff `owl:sameAs` rename detection; move-entity `@prefix` merge into non-empty targets; subprocess validate requires `workspace.write` ([#312](https://github.com/eddiethedean/ontocode/issues/312), [#314](https://github.com/eddiethedean/ontocode/issues/314), [#315](https://github.com/eddiethedean/ontocode/issues/315); [#324](https://github.com/eddiethedean/ontocode/pull/324))
+- ROBOT PATH discovery without Unix-only `which`; Windows-safe `file://` URIs; plugin timeout process-group kill; silent index debounce coalesces distinct paths ([#316](https://github.com/eddiethedean/ontocode/issues/316), [#218](https://github.com/eddiethedean/ontocode/issues/218), [#217](https://github.com/eddiethedean/ontocode/issues/217), [#215](https://github.com/eddiethedean/ontocode/issues/215); [#325](https://github.com/eddiethedean/ontocode/pull/325))
+- Pre-tag hardening: jail ROBOT short-flag `=` forms (`-i=/abs`); `default_base_iri` / LSP `path_to_uri` use `file_uri_for_path`; path identity rejects dual-failed canonicalize; Find Usages lists distinct annotation objects; session capture skips DEFAULT_REOPEN and forgets closed panels; deferred catalog restore keeps retrying; Windows path identity keys for self-write/registry
+
 ## [0.20.0] - 2026-07-13
 
 ### Added

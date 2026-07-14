@@ -516,13 +516,81 @@ if grep -qE 'read-only in the Entity Inspector|Write-back in VS Code remains \*\
 else
   echo "ok: obo-workflow OBO edit status"
 fi
-check_file_contains "docs/guides/protege-coexistence.md" "v0\.14" "protege-coexistence v0.14"
+check_file_contains "docs/guides/protege-coexistence.md" "v0\.21" "protege-coexistence v0.21"
 check_file_contains "docs/guides/release-timeline.md" "non-commitment" "release-timeline disclaimer"
 if grep -qE 'OBO format \+ ROBOT interop.*Not shipped' docs/guides/enterprise-eval.md; then
   echo "FAIL: enterprise-eval.md contradicts SHIPPED.md on OBO/ROBOT" >&2
   fail=1
 else
   echo "ok: enterprise-eval OBO/ROBOT status"
+fi
+
+# Tier-1: after XML write-back ships, reject stale "TTL/OBO only" / "XML read-only" claims
+# on high-traffic surfaces (exclude historical migration notes and frozen design checklists).
+STALE_WRITEBACK_FILES=(
+  README.md
+  extension/README.md
+  docs/index.md
+  docs/faq.md
+  docs/guides/first-success.md
+  docs/guides/protege-decision.md
+  docs/guides/production-readiness.md
+  docs/guides/enterprise-eval.md
+  docs/guides/procurement-appendix.md
+  docs/guides/protege-coexistence.md
+  docs/guides/protege-migration.md
+  docs/guides/best-practices.md
+  docs/start.md
+  docs/troubleshooting.md
+  docs/vscode-install.md
+  docs/authoring.md
+  docs/ontocode/feature-tour.md
+  docs/ontocode/obo-authoring.md
+  docs/patch-reference.md
+  docs/cli-reference.md
+  docs/lsp-api.md
+)
+for f in "${STALE_WRITEBACK_FILES[@]}"; do
+  if [[ ! -f "$f" ]]; then
+    continue
+  fi
+  if grep -qE 'Editable today:\*\* Turtle \(`.ttl`\) and OBO \(`.obo`\) only|write-back applies to \*\*`.ttl` and `.obo` only|Entity Inspector edits apply only to \*\*`.ttl` and `.obo`\*\*|No — write-back is \*\*Turtle|in-place write-back does not|RDF/XML and OWL/XML are \*\*read-only\*\*|OWL/XML and RDF/XML index and query as read-only|RDF/XML, OWL/XML, JSON-LD are read-only|Write-back: \*\*Turtle \(`.ttl`\) and OBO \(`.obo`\)\*\*; RDF/XML|Apply \*\*Turtle \(`.ttl`\) and OBO \(`.obo`\)\*\* patch|planned for \*\*v0\.21\*\*|Write-back \| \*\*Turtle and OBO|OWL/XML and RDF/XML read-only' "$f"; then
+    echo "FAIL: stale pre-v0.21 write-back claim in $f" >&2
+    fail=1
+  else
+    echo "ok: no stale write-back claim in $f"
+  fi
+done
+
+# Crate READMEs must not advertise the previous minor as "Current version"
+if grep -qE 'Current version: 0\.20\.0|--version 0\.20\.0' crates/ontocore*/README.md crates/ontocore/README.md 2>/dev/null; then
+  echo "FAIL: crate README still pins 0.20.0 (expected ${TAGGED_VERSION})" >&2
+  fail=1
+else
+  echo "ok: crate README version pins"
+fi
+
+# Public roadmap must not list the tagged release as Planned
+if grep -qE "^\| 21 \| v0\.21 \| F \| Planned" docs/roadmap.md; then
+  echo "FAIL: docs/roadmap.md still marks v0.21 as Planned" >&2
+  fail=1
+else
+  echo "ok: docs/roadmap.md v0.21 status"
+fi
+
+# Migration index must not show nonsense same-version → same-version for latest
+if grep -qE 'v0\.21\.0 → v0\.21\.0' docs/migration/README.md; then
+  echo "FAIL: docs/migration/README.md has v0.21.0 → v0.21.0 row" >&2
+  fail=1
+else
+  echo "ok: migration index versions"
+fi
+
+if ! grep -qF -- "--version ${TAGGED_VERSION}" crates/ontocore-cli/README.md; then
+  echo "FAIL: ontocore-cli README missing --version ${TAGGED_VERSION}" >&2
+  fail=1
+else
+  echo "ok: ontocore-cli README install pin"
 fi
 
 # release-integrity must not pin an old example version
@@ -873,7 +941,7 @@ check_file_contains "docs/ui/README.md" "OntoUI" "ui readme OntoUI term"
 
 check_file_contains "mkdocs.yml" "guides/owl-xml-workflow.md" "mkdocs owl-xml workflow guide"
 check_file_contains "mkdocs.yml" "v0\\.14 → v0\\.15" "mkdocs v0.15 migration in Help nav"
-check_file_contains "docs/guides/owl-xml-workflow.md" "read-only catalog" "owl-xml workflow guide"
+check_file_contains "docs/guides/owl-xml-workflow.md" "Horned full-document re-serialize" "owl-xml workflow guide"
 check_file_contains "docs/ontocore/rust-api.md" "Book ↔ docs.rs crosswalk" "rust-api docs.rs crosswalk"
 check_file_contains "docs/troubleshooting.md" "Where to start" "troubleshooting decision tree"
 check_file_contains "docs/platform/OVERVIEW.md" "v0.20 foundation shipped" "platform overview shipped banner"

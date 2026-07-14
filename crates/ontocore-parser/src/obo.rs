@@ -1,6 +1,6 @@
 //! OBO Format 1.4 parser via [`fastobo`] → OntoCore catalog model.
 
-use fastobo::ast::{HeaderClause, TermClause};
+use fastobo::ast::{HeaderClause, PropertyValue, TermClause};
 use ontocore_core::{
     limits::{MAX_FILE_BYTES, MAX_TRIPLES_PER_FILE},
     read_to_string_capped, Annotation, Axiom, Entity, EntityKind, SourceLocation,
@@ -13,6 +13,9 @@ use crate::rdf::{assemble_parsed_ontology, ParseError, ParsedOntology, Result};
 
 /// Default OBO PURL prefix (terms use `GO:0000001` → `…/obo/GO_0000001`).
 const DEFAULT_OBO_BASE: &str = "http://purl.obolibrary.org/obo/";
+const RDFS_SUBCLASS_OF: &str = "http://www.w3.org/2000/01/rdf-schema#subClassOf";
+const IAO_DEFINITION: &str = "http://purl.obolibrary.org/obo/IAO_0000115";
+const OBO_INOWL_NS: &str = "http://www.geneontology.org/formats/oboInOwl#";
 
 pub fn parse_obo_text(path: &Path, ontology_id: &str, source_text: &str) -> Result<ParsedOntology> {
     let doc = fastobo::from_str(source_text)
@@ -47,12 +50,11 @@ pub fn parse_obo_text(path: &Path, ontology_id: &str, source_text: &str) -> Resu
                 TermClause::Name(name) => labels.push(name.to_string()),
                 TermClause::Comment(comment) => comments.push(comment.to_string()),
                 TermClause::Def(def) => {
-                    let def_text = def.text().to_string();
-                    comments.push(def_text.clone());
+                    // Definition is IAO_0000115 only — do not also emit rdfs:comment (#308).
                     annotations.push(Annotation {
                         subject: iri.clone(),
-                        predicate: "obo:IAO_0000115".to_string(),
-                        object: def_text,
+                        predicate: IAO_DEFINITION.to_string(),
+                        object: def.text().to_string(),
                         ontology_id: ontology_id.to_string(),
                         source_location: SourceLocation::default(),
                     });
@@ -65,7 +67,8 @@ pub fn parse_obo_text(path: &Path, ontology_id: &str, source_text: &str) -> Resu
                         id: format!("{ontology_id}#axiom-{axiom_counter}"),
                         ontology_id: ontology_id.to_string(),
                         subject: iri.clone(),
-                        predicate: "rdfs:subClassOf".to_string(),
+                        // Absolute IRIs so catalog SQL / SPARQL / diff agree (#305).
+                        predicate: RDFS_SUBCLASS_OF.to_string(),
                         object: obo_id_to_iri(&parent_id, &namespaces),
                         axiom_kind: AXIOM_KIND_SUB_CLASS_OF.to_string(),
                         source_location: SourceLocation::default(),
@@ -74,7 +77,7 @@ pub fn parse_obo_text(path: &Path, ontology_id: &str, source_text: &str) -> Resu
                 TermClause::Synonym(syn) => {
                     annotations.push(Annotation {
                         subject: iri.clone(),
-                        predicate: format!("obo:has{}Synonym", scope_label(syn.scope())),
+                        predicate: format!("{OBO_INOWL_NS}has{}Synonym", scope_label(syn.scope())),
                         object: syn.description().to_string(),
                         ontology_id: ontology_id.to_string(),
                         source_location: SourceLocation::default(),
@@ -83,17 +86,18 @@ pub fn parse_obo_text(path: &Path, ontology_id: &str, source_text: &str) -> Resu
                 TermClause::Xref(xref) => {
                     annotations.push(Annotation {
                         subject: iri.clone(),
-                        predicate: "obo:hasDbXref".to_string(),
+                        predicate: format!("{OBO_INOWL_NS}hasDbXref"),
                         object: xref.as_ref().to_string(),
                         ontology_id: ontology_id.to_string(),
                         source_location: SourceLocation::default(),
                     });
                 }
                 TermClause::PropertyValue(pv) => {
+                    let (predicate, object) = property_value_parts(pv, &namespaces);
                     annotations.push(Annotation {
                         subject: iri.clone(),
-                        predicate: pv.property().to_string(),
-                        object: pv.to_string(),
+                        predicate,
+                        object,
                         ontology_id: ontology_id.to_string(),
                         source_location: SourceLocation::default(),
                     });
@@ -151,6 +155,19 @@ fn scope_label(scope: &fastobo::ast::SynonymScope) -> &'static str {
     }
 }
 
+/// Split property_value into predicate IRI + object (not the full Display form) (#306).
+fn property_value_parts(
+    pv: &PropertyValue,
+    namespaces: &BTreeMap<String, String>,
+) -> (String, String) {
+    let predicate = obo_id_to_iri(&ident_to_string(pv.property()), namespaces);
+    let object = match pv {
+        PropertyValue::Resource(r) => obo_id_to_iri(&ident_to_string(r.target()), namespaces),
+        PropertyValue::Literal(l) => l.literal().as_str().to_string(),
+    };
+    (predicate, object)
+}
+
 /// Map an OBO ID to an IRI using `idspace:` expansions when present.
 fn obo_id_to_iri(obo_id: &str, namespaces: &BTreeMap<String, String>) -> String {
     if obo_id.starts_with("http://") || obo_id.starts_with("https://") {
@@ -201,6 +218,7 @@ mod tests {
         assert_eq!(parsed.entities[0].iri, "http://purl.obolibrary.org/obo/TEST_0000001");
         assert_eq!(parsed.entities[0].labels, vec!["example term"]);
         assert_eq!(parsed.axioms.len(), 1);
+        assert_eq!(parsed.axioms[0].predicate, "http://www.w3.org/2000/01/rdf-schema#subClassOf");
         assert_eq!(parsed.axioms[0].object, "http://purl.obolibrary.org/obo/TEST_0000002");
         assert!(parsed.triple_count > 0);
         assert!(!parsed.quads().is_empty(), "OBO must materialize RDF quads");
@@ -228,6 +246,12 @@ def: \"A definition.\" []\n";
             predicates.contains("http://www.geneontology.org/formats/oboInOwl#hasRelatedSynonym")
         );
         assert!(predicates.contains("http://purl.obolibrary.org/obo/IAO_0000115"));
+        assert!(
+            !predicates.contains("http://www.w3.org/2000/01/rdf-schema#comment"),
+            "def: must not also emit rdfs:comment (#308)"
+        );
+        assert!(parsed.annotations.iter().all(|a| a.predicate.contains("://")));
+        assert!(parsed.axioms.iter().all(|a| a.predicate.contains("://")));
     }
 
     #[test]
@@ -236,10 +260,61 @@ def: \"A definition.\" []\n";
 id: TEST:0000001\n\
 name: example\n\
 def: \"A definition.\" []\n\
-synonym: \"alt label\" EXACT []\n";
+synonym: \"alt label\" EXACT []\n\
+comment: \"A true comment.\"\n";
         let parsed = parse_obo_text(Path::new("t.obo"), "doc-1", text).unwrap();
-        assert!(parsed.entities[0].comments.iter().any(|c| c.contains("definition")));
-        assert!(parsed.annotations.iter().any(|a| a.predicate.contains("Synonym")));
+        assert!(
+            !parsed.entities[0].comments.iter().any(|c| c.contains("definition")),
+            "def text must not land in entity.comments (#308)"
+        );
+        assert!(parsed.entities[0].comments.iter().any(|c| c.contains("true comment")));
+        assert!(parsed.annotations.iter().any(|a| {
+            a.predicate == "http://purl.obolibrary.org/obo/IAO_0000115"
+                && a.object.contains("definition")
+        }));
+        assert!(parsed.annotations.iter().any(|a| {
+            a.predicate == "http://www.geneontology.org/formats/oboInOwl#hasExactSynonym"
+        }));
+    }
+
+    #[test]
+    fn property_value_stores_target_not_display() {
+        let text = "format-version: 1.2\n\
+idspace: dc http://purl.org/dc/elements/1.1/\n\
+idspace: ORCID http://orcid.org/\n\n\
+[Term]\n\
+id: TEST:0000001\n\
+name: example\n\
+property_value: dc:creator ORCID:0000-0002-3947-4444\n\
+property_value: shoe_size \"8\" xsd:positiveInteger\n";
+        let parsed = parse_obo_text(Path::new("pv.obo"), "doc-1", text).unwrap();
+        let resource = parsed
+            .annotations
+            .iter()
+            .find(|a| {
+                a.predicate == "http://purl.org/dc/elements/1.1/dc_creator"
+                    || a.predicate == "http://purl.org/dc/elements/1.1/creator"
+            })
+            .expect("dc:creator annotation");
+        assert!(
+            !resource.object.contains("dc:creator"),
+            "object must not duplicate the property Display: {}",
+            resource.object
+        );
+        assert!(
+            resource.object.contains("0000-0002-3947-4444"),
+            "object should be the ORCID target: {}",
+            resource.object
+        );
+        let literal =
+            parsed.annotations.iter().find(|a| a.object == "8").expect("shoe_size literal");
+        assert!(!literal.object.contains("shoe_size"));
+        let predicates: std::collections::BTreeSet<_> =
+            parsed.quads().iter().map(|q| q.predicate.as_str().to_string()).collect();
+        assert!(
+            predicates.iter().any(|p| p.contains("creator") || p.contains("shoe_size")),
+            "property_value must appear in SPARQL quads"
+        );
     }
 
     #[test]

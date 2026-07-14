@@ -19,6 +19,20 @@ fn seen_contains(seen: &[PathBuf], path: &Path) -> bool {
     seen.iter().any(|p| paths_equal(p, path))
 }
 
+/// Deduplicate index paths while preserving first-seen order (for silent debounce batches).
+fn distinct_index_paths<'a>(paths: impl IntoIterator<Item = &'a Path>) -> Vec<PathBuf> {
+    let mut seen = Vec::new();
+    let mut out = Vec::new();
+    for path in paths {
+        if seen_contains(&seen, path) {
+            continue;
+        }
+        seen.push(path.to_path_buf());
+        out.push(path.to_path_buf());
+    }
+    out
+}
+
 struct IndexJob {
     workspace: PathBuf,
     reply: Option<Sender<Result<(CatalogStats, u64), String>>>,
@@ -94,15 +108,14 @@ fn run_worker(state: ServerState, job_rx: Receiver<WorkerJob>, lsp_sender: Sende
                     }
                 }
 
-                // Coalesce only silent debounce jobs that share a path. Sync callers
+                // Coalesce silent debounce jobs by distinct path (#215). Sync callers
                 // (reply: Some) must get a result for their requested workspace.
                 let (silent, sync_jobs): (Vec<_>, Vec<_>) =
                     batch.into_iter().partition(|j| j.reply.is_none());
 
                 if sync_jobs.is_empty() {
-                    // Pure debounce: latest path wins.
-                    if let Some(last) = silent.last() {
-                        run_index_job(&state, &lsp_sender, last.workspace.clone(), &[]);
+                    for path in distinct_index_paths(silent.iter().map(|j| j.workspace.as_path())) {
+                        run_index_job(&state, &lsp_sender, path, &[]);
                     }
                 } else {
                     // Run each distinct sync workspace once; attach silent jobs only when
@@ -122,9 +135,8 @@ fn run_worker(state: ServerState, job_rx: Receiver<WorkerJob>, lsp_sender: Sende
                         run_index_job(&state, &lsp_sender, path.clone(), &replies);
                     }
                     // Silent jobs for paths not covered by a sync request.
-                    for job in silent {
-                        if !seen_contains(&seen, &job.workspace) {
-                            let path = job.workspace.clone();
+                    for path in distinct_index_paths(silent.iter().map(|j| j.workspace.as_path())) {
+                        if !seen_contains(&seen, &path) {
                             run_index_job(&state, &lsp_sender, path.clone(), &[]);
                             seen.push(path);
                         }
@@ -173,4 +185,24 @@ fn notify_index_failure(sender: &Sender<Message>, message: &str) {
         params: serde_json::to_value(params).unwrap_or_default(),
     };
     let _ = sender.send(Message::Notification(notif));
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn silent_debounce_keeps_distinct_paths() {
+        let a = PathBuf::from("/ws/a");
+        let b = PathBuf::from("/ws/b");
+        let paths = distinct_index_paths([&a, &b, &a].into_iter().map(|p| p.as_path()));
+        assert_eq!(paths, vec![a, b]);
+    }
+
+    #[test]
+    fn silent_debounce_dedupes_identical_paths() {
+        let a = PathBuf::from("/ws/a");
+        let paths = distinct_index_paths([&a, &a, &a].into_iter().map(|p| p.as_path()));
+        assert_eq!(paths, vec![a]);
+    }
 }

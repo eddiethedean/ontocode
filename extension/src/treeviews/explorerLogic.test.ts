@@ -28,6 +28,53 @@ describe("explorerLogic", () => {
     );
   });
 
+  it("falls back to all classes when SubClassOf forms a pure cycle (#222)", () => {
+    const aIri = "http://example.org/cycle#A";
+    const bIri = "http://example.org/cycle#B";
+    const snapshot = {
+      ...fixtureCatalogSnapshot,
+      entities: [
+        {
+          iri: aIri,
+          short_name: "A",
+          kind: "class",
+          ontology_id: "http://example.org/cycle",
+          labels: ["A"],
+          comments: [],
+          deprecated: false,
+        },
+        {
+          iri: bIri,
+          short_name: "B",
+          kind: "class",
+          ontology_id: "http://example.org/cycle",
+          labels: ["B"],
+          comments: [],
+          deprecated: false,
+        },
+      ],
+      hierarchy: {
+        edges: [
+          { child: aIri, parent: bIri },
+          { child: bIri, parent: aIri },
+        ],
+        parents: {
+          [aIri]: [bIri],
+          [bIri]: [aIri],
+        },
+        children: {
+          [aIri]: [bIri],
+          [bIri]: [aIri],
+        },
+      },
+    };
+    const roots = classRootEntities(snapshot as typeof fixtureCatalogSnapshot);
+    assert.deepEqual(
+      roots.map((e) => e.short_name).sort(),
+      ["A", "B"]
+    );
+  });
+
   it("lists property groups present in the snapshot", () => {
     const groups = propertyGroupsPresent(fixtureCatalogSnapshot);
     assert.deepEqual(

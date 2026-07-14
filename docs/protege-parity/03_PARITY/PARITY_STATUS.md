@@ -3,7 +3,7 @@
 # Protégé Desktop Parity Status Dashboard
 
 **Status:** Living Status Report\
-**Repository Baseline:** OntoCode v0.20.0\
+**Repository Baseline:** OntoCode v0.21.0\
 **Target Release:** OntoCode 1.0.0\
 **Current phase:** v0.19 complete — see [PRE_1_0_PHASES.md](../07_BACKLOG/PRE_1_0_PHASES.md)
 
@@ -56,11 +56,11 @@ from the parity manifest.
 
   Blocker                               Status
   ------------------------------------- --------
-  Format-independent semantic editing   Partial (v0.19: Turtle/OBO transaction routing)
-  RDF/XML write-back                    Open
-  OWL/XML write-back                    Open
+  Format-independent semantic editing   Partial (required formats writable v0.21)
+  RDF/XML write-back                    Closed (v0.21)
+  OWL/XML write-back                    Closed (v0.21)
   Complete OWL 2 authoring              Open
-  Workspace semantics                   Open
+  Workspace semantics                   Closed (v0.20)
   Full reasoning parity                 Open
   SWRL subsystem                        Open
   Executable parity verification        Partial (manifest skeleton + CI validator)
@@ -94,9 +94,9 @@ from the parity manifest.
 
 # Next Engineering Milestones
 
-1.  RDF/XML and OWL/XML write-back (v0.21)
-2.  Complete OWL 2 authoring (v0.22)
-3.  Workspace transaction model (v0.20)
+1.  Complete OWL 2 authoring (v0.22)
+2.  Reasoning parity + SWRL (v0.23)
+3.  Semantic services completion (v0.24)
 4.  Reasoning enhancements (v0.23)
 5.  SWRL implementation (v0.23)
 6.  Full automated parity validation (v0.25)

@@ -111,7 +111,7 @@ Look for GitHub labels `good first issue` and `docs`. Useful first PRs:
 - Rust **1.88+** (see `rust-version` in `Cargo.toml`)
 - Node.js **20** (extension CI)
 - `npm` (extension build)
-- **`cargo-audit`** — `cargo install cargo-audit` (required by CI; run `cargo audit` before PRs)
+- **`cargo-audit`** — `cargo install cargo-audit` if you run `./scripts/run-ci-local.sh` locally (CI runs `cargo audit`; not required for every PR smoke check)
 
 ## Optional dependencies
 
@@ -234,20 +234,22 @@ Open http://127.0.0.1:8000. Configuration: [`mkdocs.yml` on GitHub](https://gith
 
 ### Full local CI (recommended before PR)
 
+Script index: [`scripts/README.md` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/scripts/README.md).
+
 Mirrors [`.github/workflows/ci.yml` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/.github/workflows/ci.yml) plus VS Code e2e for your platform:
 
 ```bash
 ./scripts/run-ci-local.sh
 ```
 
-This runs rustfmt, `./scripts/check-doc-versions.sh`, clippy, workspace tests, MSRV (1.88), CLI smoke, release build, LSP smoke tests, webview-ui tests, extension build/tests, `cargo audit`, crate packaging dry-run, mkdocs strict build, and VS Code extension e2e. Expect 30+ minutes on a cold build.
+This runs rustfmt, `./scripts/check-doc-versions.sh`, clippy, workspace tests, MSRV (1.88), CLI smoke, release build, LSP smoke tests, webview-ui tests, extension build/tests, `cargo audit`, crate packaging dry-run, mkdocs strict build, and VS Code extension e2e. Expect 30+ minutes on a cold build. **Not required for docs-only PRs** — see the [testing matrix](guides/testing-matrix.md).
 
 ## Pull requests
 
 1. Fork and branch from `main`.
 2. Keep changes focused; match existing style and naming.
-3. Run Rust and extension tests locally (CI runs both).
-4. Update docs when behavior or public API changes (`README.md`, `docs/`, `CHANGELOG.md` as appropriate). On release, follow the checklist in [releasing.md](releasing.md).
+3. Run the **scoped** checks from the [testing matrix](guides/testing-matrix.md) (docs-only PRs do not need `cargo test --workspace`).
+4. Update docs when behavior or public API changes (`README.md`, `docs/`, `CHANGELOG.md` as appropriate). On release, follow the checklist in [releasing.md](releasing.md). Keep root/`docs/` mirrors in sync where the mirror policy applies.
 5. For spec changes, label whether they describe **implemented** vs **planned** behavior (see [lsp-api.md](lsp-api.md) as a model).
 
 ## Documentation conventions

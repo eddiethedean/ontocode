@@ -7,7 +7,7 @@ Runnable examples for OntoCore CLI, Rust embedding, and OntoCode workflows.
 | Guide | Description |
 |-------|-------------|
 | [Query cookbook](queries.md) | SQL and SPARQL over virtual tables |
-| [Sample patches](patches.md) | `ontocore patch` JSON for Turtle and OBO write-back |
+| [Sample patches](patches.md) | `ontocore patch` JSON for Turtle, OBO, RDF/XML, and OWL/XML write-back |
 | [Refactoring](refactoring.md) | Rename, migrate namespace, move, extract |
 | [Classify](classify.md) | Reasoner profiles and CI exit semantics |
 | [Semantic diff](diff.md) | Git refs, PR summary, directory compare |
@@ -50,8 +50,8 @@ Download tutorial files without cloning:
 
 ```bash
 mkdir ontocode-tutorial && cd ontocode-tutorial
-curl -fsSLO https://raw.githubusercontent.com/eddiethedean/ontocode/main/fixtures/example.ttl
-curl -fsSLO https://raw.githubusercontent.com/eddiethedean/ontocode/main/fixtures/complex-classes.ttl
+curl -fsSLO https://raw.githubusercontent.com/eddiethedean/ontocode/v0.21.0/fixtures/example.ttl
+curl -fsSLO https://raw.githubusercontent.com/eddiethedean/ontocode/v0.21.0/fixtures/complex-classes.ttl
 ```
 
 ## VS Code tutorial

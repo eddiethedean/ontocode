@@ -12,7 +12,8 @@ import {
   documentUriInWorkspace,
   WORKSPACE_DOCUMENT_OUTSIDE_MESSAGE,
 } from "../utils/workspacePath";
-import { rememberPanelRestoreState } from "./layoutPersistence";
+import { workspaceTransactionManager } from "../workspace/transactionManager";
+import { forgetPanelRestoreState, rememberPanelRestoreState } from "./layoutPersistence";
 import {
   AMBIGUOUS_ONTOLOGY_HEADER_MESSAGE,
   entityBelongsToDocument,
@@ -100,6 +101,7 @@ export class ImportsPanel {
     private readonly onRefresh?: RefreshFn
   ) {
     host.panel.onDidDispose(() => {
+      void forgetPanelRestoreState("ontocodeImports");
       ImportsPanel.current = undefined;
     });
   }
@@ -263,11 +265,18 @@ export class ImportsPanel {
       return;
     }
     try {
-      const result = await applyAxiomPatch({
-        document_uri: this.documentUri,
-        patches,
-        preview_only: previewOnly,
-      });
+      const result = previewOnly
+        ? await applyAxiomPatch({
+            document_uri: this.documentUri,
+            patches,
+            preview_only: true,
+          })
+        : await workspaceTransactionManager.apply(
+            this.documentUri,
+            this.filePath ?? vscode.Uri.parse(this.documentUri).fsPath,
+            patches,
+            "Imports apply"
+          );
       if (previewOnly) {
         if (hasPatchFailureDiagnostics(result)) {
           void vscode.window.showErrorMessage(patchFailureMessage(result));

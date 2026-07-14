@@ -11,9 +11,23 @@
 
 ## Test plan
 
-- [ ] `cargo test --workspace`
-- [ ] `cargo clippy --workspace --all-targets -- -D warnings` (if Rust changed)
-- [ ] `cd extension && npm test` (if extension changed)
+Check **only** what applies — see [testing matrix](https://ontocode-vs.readthedocs.io/en/latest/guides/testing-matrix/) and [CONTRIBUTING.md](../CONTRIBUTING.md).
+
+**Docs-only / specs-only**
+
+- [ ] Markdown / MkDocs preview locally if you touched `docs/` or `mkdocs.yml` (`./scripts/serve-docs.sh` or RTD preview)
+- [ ] No Rust/extension rebuild required
+
+**Rust (crates / CLI / LSP)**
+
+- [ ] Scoped tests for touched crates (preferred) or `cargo test --workspace`
+- [ ] `cargo clippy --workspace --all-targets --all-features -- -D warnings` (if Rust changed)
+- [ ] `./scripts/run-ci-local.sh` only when you want full CI parity (30–60+ min cold)
+
+**Extension / webview**
+
+- [ ] `cd extension && npm test` (if extension TS changed)
+- [ ] Rebuild webviews after React changes: `cd extension && npm run build:webview` (or `npm run compile`) — `npm run watch` does **not** rebuild the Vite webview UI
 - [ ] Manual verification (describe):
 
 ## Docs

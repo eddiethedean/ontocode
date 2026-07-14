@@ -22,6 +22,10 @@ pub(crate) static TEST_REASONER_CLASSIFY_PAUSE_MS: AtomicU64 = AtomicU64::new(0)
 #[cfg(test)]
 pub(crate) static TEST_REASONER_CLASSIFY_IN_PAUSE: AtomicBool = AtomicBool::new(false);
 
+/// Serializes tests that mutate [`TEST_REASONER_CLASSIFY_PAUSE_MS`] / `_IN_PAUSE`.
+#[cfg(test)]
+pub(crate) static TEST_REASONER_CLASSIFY_LOCK: Mutex<()> = Mutex::new(());
+
 /// Test-only: after snapshotting the previous catalog (lock released), sleep this many ms
 /// before `build_incremental` so concurrent writers can prove they are not blocked.
 #[cfg(test)]
@@ -611,10 +615,7 @@ pub(crate) fn canonical_roots_match(a: &Path, b: &Path) -> bool {
 }
 
 pub fn path_to_uri(path: &Path) -> String {
-    let abs = path.canonicalize().unwrap_or_else(|_| path.to_path_buf());
-    url::Url::from_file_path(&abs)
-        .map(|u| u.to_string())
-        .unwrap_or_else(|_| format!("file://{}", abs.display()))
+    ontocore_core::file_uri_for_path(path)
 }
 
 fn now_epoch_secs() -> u64 {

@@ -25,6 +25,7 @@ import {
   assertRunPluginResult,
 } from "./protocolGuards";
 import { patchSyncCancelledMessage } from "./patchFeedback";
+import { noteSelfWrite } from "../workspace/selfWriteGuard";
 import {
   ApplyAxiomPatchClientResult,
   ApplyAxiomPatchParams,
@@ -325,6 +326,14 @@ export async function getEntity(iri: string): Promise<GetEntityResult> {
 export async function applyAxiomPatch(
   params: ApplyAxiomPatchParams
 ): Promise<ApplyAxiomPatchClientResult> {
+  // Suppress external-change recovery for OntoCode's own disk write (#293).
+  if (!params.preview_only && params.document_uri) {
+    try {
+      noteSelfWrite(vscode.Uri.parse(params.document_uri).fsPath);
+    } catch {
+      // Invalid URI — LSP call will fail on its own.
+    }
+  }
   const result = await ontcoreRequest<unknown>(
     "ontocore/applyAxiomPatch",
     params
@@ -332,6 +341,13 @@ export async function applyAxiomPatch(
   const patch = assertApplyPatchResult(result);
   if (patch.applied) {
     focusRelay.markReasoningDirty();
+    if (params.document_uri) {
+      try {
+        noteSelfWrite(vscode.Uri.parse(params.document_uri).fsPath);
+      } catch {
+        // ignore
+      }
+    }
   }
   if (patch.applied && patch.workspace_edit) {
     const { applyLspWorkspaceEdit } = await import("./workspaceEdit");

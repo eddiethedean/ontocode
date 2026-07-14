@@ -76,3 +76,12 @@ Download: [patches-obo.json](patches-obo.json)
   }
 ]
 ```
+
+## RDF/XML and OWL/XML (v0.21)
+
+The same Turtle-shaped patch JSON applies to `.owl` / `.rdf` / `.owx` via Horned re-serialize. Prefer core ops (labels, SubClassOf, imports, create/delete). See [OWL/XML write-back](../guides/owl-xml-workflow.md) and [patch reference](../patch-reference.md).
+
+```bash
+ontocore patch ./ontology.owl patches.json --preview
+ontocore patch ./ontology.owl patches.json
+```

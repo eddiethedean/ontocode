@@ -78,30 +78,48 @@ requirements:
     area: Formats
     title: RDF/XML write-back
     priority: P0
-    status: NOT_IMPLEMENTED
+    status: COMPLETE
     owner: null
-    source_files: []
-    test_ids: []
+    source_files:
+      - crates/ontocore-owl/src/serialize.rs
+      - crates/ontocore-owl/src/mutate.rs
+      - crates/ontocore-owl/src/apply_xml.rs
+      - crates/ontocore-edit/src/adapter.rs
+      - docs/design/adr/0021-deterministic-xml-serializers.md
+    test_ids:
+      - crates/ontocore-owl/src/serialize.rs
+      - crates/ontocore-edit/tests/xml_writeback.rs
+      - tests/protege_roundtrip.rs
     acceptance_criteria: []
     github_issue: https://github.com/eddiethedean/ontocode/issues/247
     documentation:
-      - docs/protege-parity/04_BLOCKERS/BLOCKER_01_FORMAT_INDEPENDENCE.md
-      - docs/protege-parity/02_PROTEGE_AUDIT/PROTEGE_FILE_FORMAT_AUDIT.md
-    notes: Target v0.21
+      - docs/protege-parity/IMPLEMENTATION_EVIDENCE.md
+      - docs/guides/owl-xml-workflow.md
+      - docs/migration/v0.21.md
+    notes: Implemented v0.21 via Horned RDF/XML re-serialize
   - id: PAR-FMT-004
     area: Formats
     title: OWL/XML write-back
     priority: P0
-    status: NOT_IMPLEMENTED
+    status: COMPLETE
     owner: null
-    source_files: []
-    test_ids: []
+    source_files:
+      - crates/ontocore-owl/src/serialize.rs
+      - crates/ontocore-owl/src/mutate.rs
+      - crates/ontocore-owl/src/apply_xml.rs
+      - crates/ontocore-edit/src/adapter.rs
+      - docs/design/adr/0021-deterministic-xml-serializers.md
+    test_ids:
+      - crates/ontocore-owl/src/serialize.rs
+      - crates/ontocore-edit/tests/xml_writeback.rs
+      - tests/protege_roundtrip.rs
     acceptance_criteria: []
     github_issue: https://github.com/eddiethedean/ontocode/issues/247
     documentation:
-      - docs/protege-parity/04_BLOCKERS/BLOCKER_01_FORMAT_INDEPENDENCE.md
-      - docs/protege-parity/02_PROTEGE_AUDIT/PROTEGE_FILE_FORMAT_AUDIT.md
-    notes: Target v0.21
+      - docs/protege-parity/IMPLEMENTATION_EVIDENCE.md
+      - docs/guides/owl-xml-workflow.md
+      - docs/migration/v0.21.md
+    notes: Implemented v0.21 via Horned OWL/XML re-serialize
   - id: PAR-OWL-001
     area: OWL2
     title: Complete OWL2 authoring

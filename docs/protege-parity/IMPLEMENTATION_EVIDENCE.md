@@ -78,11 +78,15 @@ Every parity feature should reference:
                  write-back                     ontocore-obo        adapter.rs,                         transaction
                                                                                         patch.rs               apply path.
 
-  PAR-FMT-003    RDF/XML      NOT_IMPLEMENTED   ---                 ---              ---     ---     ---     Target
-                 write-back                                                                                  v0.21.
+  PAR-FMT-003    RDF/XML      COMPLETE          ontocore-owl        serialize.rs,    ✓       ✓       ✓       Horned
+                 write-back                     ontocore-edit       mutate.rs,                         RDF/XML
+                                                                    apply_xml.rs,                      re-serialize
+                                                                    adapter.rs                         (v0.21).
 
-  PAR-FMT-004    OWL/XML      NOT_IMPLEMENTED   ---                 ---              ---     ---     ---     Target
-                 write-back                                                                                  v0.21.
+  PAR-FMT-004    OWL/XML      COMPLETE          ontocore-owl        serialize.rs,    ✓       ✓       ✓       Horned
+                 write-back                     ontocore-edit       mutate.rs,                         OWL/XML
+                                                                    apply_xml.rs,                      re-serialize
+                                                                    adapter.rs                         (v0.21).
 
   PAR-OWL-001    OWL 2        PARTIAL           ontocore-owl        patch.rs,        ✓       TBD     ✓       Target
                  authoring                                          manchester.rs                       v0.22.

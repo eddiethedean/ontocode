@@ -1,6 +1,6 @@
-# OntoCore LSP API (v0.20)
+# OntoCore LSP API (v0.21)
 
-> **Status:** Documents behavior in **OntoCore v0.20.0**. Pre-1.0 APIs may change.
+> **Status:** Documents behavior in **OntoCore v0.21.0**. Pre-1.0 APIs may change.
 > Canonical feature list: [What ships today](SHIPPED.md).
 
 This document describes **what ships today** in `ontocore-lsp`. For the **v1.0 target** (extended plugin methods), see [LSP_SPEC.md](design/LSP_SPEC.md).
@@ -9,7 +9,7 @@ This document describes **what ships today** in `ontocore-lsp`. For the **v1.0 t
 
 If you are integrating OntoCore outside VS Code (custom editor, scripts, automation), treat the JSON schema as the **canonical, machine-readable contract** for this release:
 
-- **LSP JSON Schema:** [`lsp-protocol.schema.json`](lsp-protocol.schema.json) (ships with product **v0.20.0**)
+- **LSP JSON Schema:** [`lsp-protocol.schema.json`](lsp-protocol.schema.json) (ships with product **v0.21.0**)
 
 ### Schema vs product version
 
@@ -20,7 +20,7 @@ The schema file is the wire contract for the **current product release**. Until 
 Until v1.0, minor releases may change request/response fields.
 For stable integrations:
 
-- Pin OntoCore to **0.20.0** in your tooling.
+- Pin OntoCore to **0.21.0** in your tooling.
 - Prefer consuming `lsp-protocol.schema.json` from the same tagged release you deploy.
 
 ## Wire format
@@ -187,7 +187,7 @@ Return detailed entity information for the inspector.
 | `children` | Child class IRIs |
 | `axioms` | `EntityAxiomSummary[]` — structured axiom rows for inspector and Manchester editor |
 | `source` | Optional `{ path, line, column }` |
-| `editable` | `true` when the entity's declaring file supports patch write-back (`.ttl` or `.obo` per v0.12); see [Patch reference](patch-reference.md) |
+| `editable` | `true` when the entity's declaring file supports patch write-back (`.ttl`, `.obo`, `.owl`/`.rdf`, `.owx` as of v0.21); see [Patch reference](patch-reference.md) |
 | `document_path` | Filesystem path to declaring file |
 
 **`EntityAxiomSummary` fields:**
@@ -265,7 +265,7 @@ Parse and validate a Manchester class expression; return normalized text, Turtle
 
 ### `ontocore/applyAxiomPatch`
 
-Apply patch operations to Turtle (`.ttl`) or OBO (`.obo`) documents. See [authoring.md](authoring.md) and [OBO authoring](ontocode/obo-authoring.md).
+Apply patch operations to Turtle (`.ttl`), OBO (`.obo`), RDF/XML (`.owl`/`.rdf`), or OWL/XML (`.owx`) documents. See [authoring.md](authoring.md), [OBO authoring](ontocode/obo-authoring.md), and [OWL/XML write-back](guides/owl-xml-workflow.md).
 
 **Buffer-first (VS Code):** Reads the open document buffer when available, applies patches in memory, updates the buffer, writes disk, then reindexes. See [errors.md](errors.md) for `APPLIED_NOT_INDEXED`.
 

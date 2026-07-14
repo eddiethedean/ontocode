@@ -20,7 +20,7 @@ Every feature before 1.0 should answer one question:
 
 After 1.0, the roadmap shifts from parity to modernization.
 
-> **Not a Protégé replacement today.** v0.20 supports pilot and coexistence workflows — not org-wide Protégé retirement. See [What ships today](docs/SHIPPED.md) and [Known limitations](docs/known-limitations.md).
+> **Not a Protégé replacement today.** v0.21 supports pilot and coexistence workflows — not org-wide Protégé retirement. See [What ships today](docs/SHIPPED.md) and [Known limitations](docs/known-limitations.md).
 
 ---
 
@@ -39,7 +39,7 @@ After 1.0, the roadmap shifts from parity to modernization.
 | [PRODUCT_ROADMAP_2.0.md](docs/ui/PRODUCT_ROADMAP_2.0.md) | UI phases with milestone acceptance criteria |
 | [ui/README.md](docs/ui/README.md) | Product design specification pack (UX, design system, OntoStudio target) |
 
-**Current release:** v0.20.0
+**Current release:** v0.21.0
 
 ---
 
@@ -48,21 +48,20 @@ After 1.0, the roadmap shifts from parity to modernization.
 ### Timeline
 
 ```text
-SHIPPED (v0.1–v0.20) ─────────────────────────────────────────────────►
-v0.1–v0.4          v0.5–v0.8              v0.9–v0.12           v0.13–v0.20
-Engine foundation    IDE depth                Platform & authoring   OntoUI → workspace runtime
+SHIPPED (v0.1–v0.21) ─────────────────────────────────────────────────►
+v0.1–v0.4          v0.5–v0.8              v0.9–v0.12           v0.13–v0.21
+Engine foundation    IDE depth                Platform & authoring   OntoUI → formats write-back
   │                    │                        │                      │
   Foundation           Query, reason,           Identity, diff,      UX shell + semantic txn
-  Explorer, diag,      graphs, refactor,        OBO write-back,      (v0.18–v0.19) + workspace
-  write-back           Manchester               OWL/XML catalog      runtime (v0.20)
+  Explorer, diag,      graphs, refactor,        OBO write-back,      (v0.18–v0.20) + RDF/OWL-XML
+  write-back           Manchester               OWL/XML catalog      WB (v0.21)
 
-PLANNED (v0.21–1.0) ─────────────────────────────────────────────────►
-v0.21–v0.22        v0.23–v0.24            v0.25                1.0.0-rc → 1.0.0
-Formats write-back   Reason + SWRL            Verify + polish      Protégé replacement
+PLANNED (v0.22–1.0) ─────────────────────────────────────────────────►
+v0.22–v0.23        v0.24                  v0.25                1.0.0-rc → 1.0.0
+OWL 2 + reason         Refactor + DL Query      Verify + polish      Protégé replacement
   │                    │                        │                      │
-  RDF/OWL-XML WB     Reasoning parity         Viz, SDK, a11y       Full parity ship
-  OWL 2 complete     Refactor + query         Full parity CI
-                     DL Query
+  Complete OWL 2     Refactor + query         Viz, SDK, a11y       Full parity ship
+  Reasoning / SWRL                          Full parity CI
 ```
 
 ### Phase index
@@ -74,7 +73,7 @@ Formats write-back   Reason + SWRL            Verify + polish      Protégé rep
 | **C — Platform & authoring** | v0.9–v0.12 | Shipped | OntoCore identity, semantic workspace, authoring parity |
 | **D — OntoUI platform** | v0.13–v0.14 | Shipped | v0.13: WorkspaceStore, focus relay; v0.14: plugin host MVP |
 | **E — Desktop UX shell gate** | v0.15–v0.18 | Shipped | Menus, layouts, workflows, migration readiness (not full parity) |
-| **F — Full Protégé parity path** | v0.19–v0.25 | In progress (v0.19–v0.20 shipped) | Semantic core → formats → OWL 2 → reason/SWRL → services → verify |
+| **F — Full Protégé parity path** | v0.19–v0.25 | In progress (v0.19–v0.21 shipped) | Semantic core → formats → OWL 2 → reason/SWRL → services → verify |
 | **G — Protégé replacement** | 1.0.0 | Planned | Daily OWL/OBO engineering without Protégé |
 | **H — Ecosystem** | v1.1–v1.2+ | Planned | SDKs, AI, toolchain & collaboration |
 
@@ -100,7 +99,7 @@ Formats write-back   Reason + SWRL            Verify + polish      Protégé rep
 | 18 | v0.18 | E | Shipped | — | Desktop UX shell gate + migration readiness |
 | 19 | v0.19 | F | Shipped | — | Semantic foundation + program baseline |
 | 20 | v0.20 | F | Shipped | 1† | Workspace runtime |
-| 21 | v0.21 | F | Planned | — | RDF/XML + OWL/XML write-back |
+| 21 | v0.21 | F | Shipped | — | RDF/XML + OWL/XML write-back |
 | 22 | v0.22 | F | Planned | 2† | Complete OWL 2 authoring |
 | 23 | v0.23 | F | Planned | 5† | Reasoning parity + SWRL |
 | 24 | v0.24 | F | Planned | 3†, 6† | Refactoring + DL Query parity |
@@ -547,7 +546,7 @@ See [migration/v0.20.md](docs/migration/v0.20.md).
 
 ---
 
-### v0.21 — Required format write-back (planned)
+### v0.21 — Required format write-back (shipped)
 
 **Theme:** RDF/XML and OWL/XML semantic round-trip.
 
@@ -557,7 +556,11 @@ See [migration/v0.20.md](docs/migration/v0.20.md).
 
 **Exit criteria:** Turtle, OBO, RDF/XML, OWL/XML open → edit → save → reload without semantic loss.
 
+**Shipped:** ADR-0021, Horned writers, `ontocore-edit` XML adapters, CLI/LSP/editable gates, PAR-FMT-003/004 closed.
+
 **Blockers:** [BLOCKER_01](docs/protege-parity/04_BLOCKERS/BLOCKER_01_FORMAT_INDEPENDENCE.md), [format audit](docs/protege-parity/02_PROTEGE_AUDIT/PROTEGE_FILE_FORMAT_AUDIT.md)
+
+See [migration/v0.21.md](docs/migration/v0.21.md).
 
 ---
 

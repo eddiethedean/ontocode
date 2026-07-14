@@ -1,11 +1,11 @@
-# CLI reference (OntoCore v0.20)
+# CLI reference (OntoCore v0.21)
 
 The `ontocore` binary indexes ontology workspaces and exposes query, validation, patch, and reasoning commands.
 
 Install (pin latest tagged release):
 
 ```bash
-cargo install ontocore-cli --locked --version 0.20.0
+cargo install ontocore-cli --locked --version 0.21.0
 ```
 
 From a git clone, use `cargo run --` instead of `ontocore`.
@@ -96,15 +96,16 @@ ontocore validate /path/to/ontologies
 
 ### `patch`
 
-Apply **Turtle (`.ttl`) and OBO (`.obo`)** patch operations from a JSON file. See [patch reference](patch-reference.md) and [patch examples](examples/patches.md).
-For a one-page format matrix (index/query vs write-back), see [Supported formats](supported-formats.md).
+Apply **Turtle (`.ttl`), OBO (`.obo`), RDF/XML (`.owl`/`.rdf`), and OWL/XML (`.owx`)** patch operations from a JSON file. See [patch reference](patch-reference.md) and [patch examples](examples/patches.md).
+For a one-page format matrix (index/query vs write-back), see [Supported formats](supported-formats.md). XML caveats: [OWL/XML write-back](guides/owl-xml-workflow.md).
 
 ```bash
 ontocore patch ./ontology.ttl patches.json --preview
 ontocore patch ./ontology.ttl patches.json
+ontocore patch ./ontology.owl patches.json
 ```
 
-**Exit:** 0 on success; non-zero on invalid patch or unsupported format.
+**Exit:** 0 on success; non-zero on invalid patch or unsupported format/op.
 
 ### `robot`
 

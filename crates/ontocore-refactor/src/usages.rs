@@ -112,7 +112,13 @@ pub fn find_usages_with_overrides(
                 let key = (
                     doc.path.clone(),
                     UsageKind::AnnotationObject,
-                    format!("{}-{}", ann.subject, ann.predicate),
+                    format!(
+                        "{}-{}-{}-{}",
+                        ann.subject,
+                        ann.predicate,
+                        ann.source_location.line.unwrap_or(0),
+                        ann.source_location.start_byte.unwrap_or(0),
+                    ),
                 );
                 if seen.insert(key) {
                     usages.push(Usage {

@@ -148,6 +148,129 @@ fn protege_roundtrip_owl_rdfxml_horned() {
 }
 
 #[test]
+fn protege_roundtrip_owl_rdfxml_edit_label_reload() {
+    let dir = tempfile::tempdir().expect("tempdir");
+    let workspace = dir.path();
+    let path = workspace.join("organization.owl");
+    std::fs::copy(roundtrip_dir().join("organization.owl"), &path).expect("copy");
+
+    let dept = "http://example.org/org#Department";
+    let ns = BTreeMap::new();
+    apply_patches(
+        &path,
+        &[PatchOp::SetLabel { entity_iri: dept.to_string(), value: "Dept Renamed".to_string() }],
+        false,
+        &ns,
+    )
+    .expect("apply SetLabel to RDF/XML");
+
+    let text = std::fs::read_to_string(&path).expect("read");
+    let (ont, incomplete) = ontocore_owl::load_rdf_xml_ontology(&text).expect("reload");
+    assert!(!incomplete);
+    let bridge = ontocore_owl::bridge_ontology(ont, "doc", &text, &ns);
+    let entity = bridge.entities.iter().find(|e| e.iri == dept).expect("Department");
+    assert!(
+        entity.labels.iter().any(|l| l == "Dept Renamed"),
+        "expected renamed label, got {:?}",
+        entity.labels
+    );
+    assert!(
+        bridge.imports.iter().any(|i| i.import_iri.contains("people")),
+        "imports must survive RDF/XML write-back: {:?}",
+        bridge.imports
+    );
+}
+
+#[test]
+fn protege_roundtrip_owx_edit_parent_reload() {
+    let dir = tempfile::tempdir().expect("tempdir");
+    let workspace = dir.path();
+    let path = workspace.join("example.owx");
+    std::fs::copy(roundtrip_dir().join("example.owx"), &path).expect("copy");
+
+    let dept = "http://example.org/org#Department";
+    let old_parent = "http://example.org/people#Organization";
+    let new_parent = "http://example.org/people#Person";
+    let ns = BTreeMap::new();
+    apply_patches(
+        &path,
+        &[
+            PatchOp::RemoveSubClassOf {
+                entity_iri: dept.to_string(),
+                parent_iri: old_parent.to_string(),
+            },
+            PatchOp::AddSubClassOf {
+                entity_iri: dept.to_string(),
+                parent_iri: new_parent.to_string(),
+            },
+        ],
+        false,
+        &ns,
+    )
+    .expect("apply parent change to OWL/XML");
+
+    let text = std::fs::read_to_string(&path).expect("read");
+    let (ont, _) = ontocore_owl::load_owl_xml_ontology(&text).expect("reload");
+    let bridge = ontocore_owl::bridge_ontology(ont, "doc", &text, &ns);
+    assert!(bridge.entities.iter().any(|e| e.iri == dept));
+    assert!(
+        bridge.axioms.iter().any(|a| {
+            a.axiom_kind == ontocore_core::AXIOM_KIND_SUB_CLASS_OF
+                && a.subject == dept
+                && a.object == new_parent
+        }),
+        "expected new parent, axioms={:?}",
+        bridge.axioms
+    );
+}
+
+#[test]
+fn protege_rdfxml_malformed_refuses_writeback() {
+    let dir = tempfile::tempdir().expect("tempdir");
+    let path = dir.path().join("broken.owl");
+    std::fs::write(&path, "<rdf:RDF>not valid").expect("write");
+    let err = apply_patches(
+        &path,
+        &[PatchOp::SetLabel { entity_iri: "http://example.org/x".into(), value: "x".into() }],
+        false,
+        &BTreeMap::new(),
+    );
+    assert!(err.is_err(), "malformed RDF/XML must fail closed");
+    let remaining = std::fs::read_to_string(&path).expect("read");
+    assert_eq!(remaining, "<rdf:RDF>not valid", "file must not be truncated");
+}
+
+#[test]
+fn protege_xml_unsupported_op_leaves_file_unchanged() {
+    let dir = tempfile::tempdir().expect("tempdir");
+    let path = dir.path().join("organization.owl");
+    std::fs::copy(roundtrip_dir().join("organization.owl"), &path).expect("copy");
+    let before = std::fs::read_to_string(&path).expect("read");
+    let err = apply_patches(
+        &path,
+        &[PatchOp::AddPrefix {
+            prefix: "ex".into(),
+            namespace_iri: "http://example.org/x#".into(),
+        }],
+        false,
+        &BTreeMap::new(),
+    );
+    assert!(err.is_err());
+    let after = std::fs::read_to_string(&path).expect("read");
+    assert_eq!(before, after, "unsupported op must not rewrite the file");
+}
+
+#[test]
+fn protege_semantic_compare_rdfxml_roundtrip_equal() {
+    let src = std::fs::read_to_string(roundtrip_dir().join("organization.owl")).expect("read");
+    let (left, _) = ontocore_owl::load_rdf_xml_ontology(&src).expect("load");
+    let out = ontocore_owl::serialize_rdf_xml(&left).expect("serialize");
+    let (right, _) = ontocore_owl::load_rdf_xml_ontology(&out).expect("reload");
+    let diff = ontocore_owl::compare_ontologies(left, right);
+    assert!(diff.is_empty(), "semantic round-trip diff: {diff:?}");
+}
+
+#[test]
 fn protege_roundtrip_owx_horned() {
     let dir = roundtrip_dir();
     let ws = Workspace::open(&dir).expect("open workspace");

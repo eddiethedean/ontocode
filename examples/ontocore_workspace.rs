@@ -6,13 +6,13 @@
 //! cargo run -p ontocode --example ontocore_workspace
 //! ```
 
-use ontocore::workspace::Workspace;
+use ontocore::Workspace;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
     let workspace = std::path::Path::new("fixtures");
     let ws = Workspace::open(workspace)?;
 
-    let stats = ws.catalog().data().stats();
+    let stats = ws.stats();
     println!(
         "Indexed {} ontologies, {} classes, {} triples",
         stats.ontology_count, stats.class_count, stats.triple_count

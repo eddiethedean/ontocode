@@ -77,11 +77,6 @@ fn execute_select(catalog: &OntologyCatalog, select: Box<Select>) -> Result<Quer
     let known_columns = known_columns_for_table(&table_name)?;
     validate_projection(&select.projection, &known_columns)?;
     if let Some(selection) = &select.selection {
-        if matches!(selection, Expr::Identifier(_)) {
-            return Err(QueryError::Sql(
-                "bare column names are not supported in WHERE; use column = 'value'".to_string(),
-            ));
-        }
         validate_filter(selection, &known_columns)?;
     }
 
@@ -394,15 +389,22 @@ fn group_by_present(group_by: &GroupByExpr) -> bool {
     }
 }
 
+const BARE_WHERE_COLUMN_MSG: &str =
+    "bare column names are not supported in WHERE; use column = 'value'";
+
 fn validate_filter(expr: &Expr, known: &HashSet<String>) -> Result<()> {
     match expr {
+        // Parentheses: unwrap and keep validating (#238).
+        Expr::Nested(inner) => validate_filter(inner, known),
         Expr::BinaryOp { left, op, right } => {
             use sqlparser::ast::BinaryOperator;
             match op {
-                BinaryOperator::Eq
-                | BinaryOperator::NotEq
-                | BinaryOperator::And
-                | BinaryOperator::Or => {
+                BinaryOperator::Eq | BinaryOperator::NotEq => {
+                    validate_value_expr(left, known)?;
+                    validate_value_expr(right, known)?;
+                    Ok(())
+                }
+                BinaryOperator::And | BinaryOperator::Or => {
                     validate_filter(left, known)?;
                     validate_filter(right, known)?;
                     Ok(())
@@ -410,14 +412,25 @@ fn validate_filter(expr: &Expr, known: &HashSet<String>) -> Result<()> {
                 other => Err(QueryError::Sql(format!("unsupported WHERE operator: {other:?}"))),
             }
         }
+        // Bare identifiers in boolean context are invalid (#307).
+        Expr::Identifier(_) => Err(QueryError::Sql(BARE_WHERE_COLUMN_MSG.to_string())),
+        Expr::Value(Value::Boolean(_)) => Ok(()),
+        other => Err(QueryError::Sql(format!("unsupported WHERE expression: {other:?}"))),
+    }
+}
+
+fn validate_value_expr(expr: &Expr, known: &HashSet<String>) -> Result<()> {
+    match expr {
+        Expr::Nested(inner) => validate_value_expr(inner, known),
         Expr::Identifier(ident) => ensure_known_column(known, &ident.value.to_ascii_lowercase()),
         Expr::Value(_) => Ok(()),
-        other => Err(QueryError::Sql(format!("unsupported WHERE expression: {other:?}"))),
+        other => Err(QueryError::Sql(format!("unsupported expression: {other:?}"))),
     }
 }
 
 fn evaluate_filter(expr: &Expr, row: &Row) -> Result<bool> {
     match expr {
+        Expr::Nested(inner) => evaluate_filter(inner, row),
         Expr::BinaryOp { left, op, right } => {
             use sqlparser::ast::BinaryOperator;
             match op {
@@ -432,13 +445,7 @@ fn evaluate_filter(expr: &Expr, row: &Row) -> Result<bool> {
                 other => Err(QueryError::Sql(format!("unsupported WHERE operator: {other:?}"))),
             }
         }
-        Expr::Identifier(ident) => {
-            let key = ident.value.to_ascii_lowercase();
-            match row.get(&key) {
-                Some(v) => Ok(v == "true"),
-                None => Err(QueryError::Sql(format!("unknown column: {key}"))),
-            }
-        }
+        Expr::Identifier(_) => Err(QueryError::Sql(BARE_WHERE_COLUMN_MSG.to_string())),
         Expr::Value(Value::Boolean(b)) => Ok(*b),
         other => Err(QueryError::Sql(format!("unsupported WHERE expression: {other:?}"))),
     }
@@ -446,6 +453,7 @@ fn evaluate_filter(expr: &Expr, row: &Row) -> Result<bool> {
 
 fn eval_expr(expr: &Expr, row: &Row) -> Result<String> {
     match expr {
+        Expr::Nested(inner) => eval_expr(inner, row),
         Expr::Identifier(ident) => {
             let key = ident.value.to_ascii_lowercase();
             // Schema columns (e.g. obo_id) are always present; missing values are empty.
@@ -642,5 +650,59 @@ mod tests {
         };
         let json = to_json(&result).expect("json");
         assert!(json.contains("\"truncated\": true"));
+    }
+
+    #[test]
+    fn parenthesized_where_equality_succeeds() {
+        let catalog = fixture_catalog();
+        let result =
+            run_sql(&catalog, "SELECT short_name FROM classes WHERE (short_name = 'Person')")
+                .expect("parenthesized equality (#238)");
+        assert_eq!(result.rows.len(), 1);
+        assert_eq!(result.rows[0].get("short_name").map(String::as_str), Some("Person"));
+    }
+
+    #[test]
+    fn parenthesized_and_or_groups_succeed() {
+        let catalog = fixture_catalog();
+        let result = run_sql(
+            &catalog,
+            "SELECT short_name FROM classes WHERE (short_name = 'Person' OR short_name = 'Thing') AND deprecated = 'false'",
+        )
+        .expect("grouped and/or (#238)");
+        let names: Vec<_> =
+            result.rows.iter().filter_map(|r| r.get("short_name").cloned()).collect();
+        assert!(names.contains(&"Person".to_string()));
+    }
+
+    #[test]
+    fn nested_bare_column_in_where_returns_error() {
+        let catalog = fixture_catalog();
+        let err = run_sql(
+            &catalog,
+            "SELECT short_name FROM classes WHERE short_name AND short_name = 'Person'",
+        )
+        .unwrap_err();
+        let msg = err.to_string();
+        assert!(msg.contains("bare column"), "expected bare-column error, got {msg}");
+    }
+
+    #[test]
+    fn nested_bare_column_inside_parens_returns_error() {
+        let catalog = fixture_catalog();
+        let err = run_sql(
+            &catalog,
+            "SELECT short_name FROM classes WHERE (short_name) OR short_name = 'Person'",
+        )
+        .unwrap_err();
+        let msg = err.to_string();
+        assert!(msg.contains("bare column"), "expected bare-column error, got {msg}");
+    }
+
+    #[test]
+    fn top_level_bare_column_in_where_returns_error() {
+        let catalog = fixture_catalog();
+        let err = run_sql(&catalog, "SELECT short_name FROM classes WHERE short_name").unwrap_err();
+        assert!(matches!(err, crate::QueryError::Sql(msg) if msg.contains("bare column")));
     }
 }

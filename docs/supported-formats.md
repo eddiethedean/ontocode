@@ -1,13 +1,13 @@
 # Supported ontology formats
 
-> **Latest tagged release: v0.20.0** — canonical capability matrix: [What ships today](SHIPPED.md).
+> **Latest tagged release: v0.21.0** — canonical capability matrix: [What ships today](SHIPPED.md).
 
 This page is the canonical reference for **what OntoCode/OntoCore can do with each file format** today.
 
 ## Quick summary
 
-- **Write-back (edit in OntoCode / patch)**: **Turtle (`.ttl`)** and **OBO (`.obo`)**
-- **Read-only (index/query/browse)**: OWL/RDF serializations including **OWL/XML** (`.owl`, `.owx`) and **RDF/XML**
+- **Write-back (edit in OntoCode / patch)**: **Turtle (`.ttl`)**, **OBO (`.obo`)**, **RDF/XML (`.owl` / `.rdf`)**, **OWL/XML (`.owx`)**
+- **Read-only (index/query/browse)**: **JSON-LD**, **N-Triples**, **N-Quads**, **TriG**
 
 ## Capability matrix
 
@@ -15,23 +15,25 @@ This page is the canonical reference for **what OntoCode/OntoCore can do with ea
 |--------|------------------|----------------|--------------------|-------------------------------------|------------------------|
 | Turtle | `.ttl` | Yes | Yes | **Yes** | **Yes** |
 | OBO | `.obo` | Yes | Yes (via indexed catalog) | **Yes** (v0.13+) | **Yes** (v0.12+) |
-| OWL/XML | `.owl`, `.owx` | Yes | Yes | No (read-only) | No |
-| RDF/XML | `.rdf`, `.xml` | Yes | Yes | No (read-only) | No |
+| RDF/XML | `.rdf`, `.owl` | Yes | Yes | **Yes** (v0.21+) | **Yes** (v0.21+) |
+| OWL/XML | `.owx` | Yes | Yes | **Yes** (v0.21+) | **Yes** (v0.21+) |
 | JSON-LD | `.jsonld` | Yes | Yes | No (read-only) | No |
 | N-Triples | `.nt` | Yes | Yes | No (read-only) | No |
 | N-Quads | `.nq` | Yes | Yes | No (read-only) | No |
 | TriG | `.trig` | Yes | Yes | No (read-only) | No |
 
-> **OBO versioning:** patch engine write-back since **v0.12**; Entity Inspector write-back since **v0.13**.
+> **OBO versioning:** patch engine write-back since **v0.12**; Entity Inspector write-back since **v0.13**.  
+> **XML write-back (v0.21):** Horned full-document re-serialize; semantic fidelity, not byte-identical formatting ([ADR-0021](design/adr/0021-deterministic-xml-serializers.md)).
 
-## Why some formats are read-only
+## Why some formats remain read-only
 
-OntoCode focuses write-back on formats where it can safely round-trip edits with predictable diffs today:
+OntoCode write-back focuses on formats with a safe round-trip path:
 
-- **Turtle** is the primary write-back target.
-- **OBO** write-back is supported for common OBO term workflows.
+- **Turtle** — primary span-preserving write-back.
+- **OBO** — stanza-preserving write-back for common term workflows.
+- **RDF/XML / OWL/XML** — semantic re-serialize via Horned (v0.21).
 
-For OWL/RDF XML and JSON-LD, OntoCode can index, browse, and query, but does not yet guarantee safe in-place write-back.
+JSON-LD and line-oriented RDF still lack write-back adapters.
 
 See also:
 
@@ -40,4 +42,3 @@ See also:
 - [OBO authoring](ontocode/obo-authoring.md)
 - [OWL/XML workflow](guides/owl-xml-workflow.md)
 - [Patch reference](patch-reference.md)
-

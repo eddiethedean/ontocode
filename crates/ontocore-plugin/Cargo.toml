@@ -32,6 +32,9 @@ serde_json = { workspace = true }
 thiserror.workspace = true
 toml = "0.8"
 
+[target.'cfg(unix)'.dependencies]
+libc = "0.2"
+
 [dev-dependencies]
 ontocore-catalog = { workspace = true }
 tempfile = "3"

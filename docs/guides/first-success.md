@@ -5,10 +5,10 @@ This is the **canonical tutorial** for new OntoCode users. You do not need to cl
 **Prerequisites:** VS Code **1.85+**; network access to download tutorial files (step 2); optional [Ontology concepts](../concepts.md) skim if you are new to OWL/RDF.
 
 !!! warning "Write-back formats"
-    Entity Inspector edits apply only to **`.ttl` and `.obo`**. If your corpus is mostly `.owl` / RDF/XML, you can browse and query now; convert or dual-maintain Turtle for editing — see [Supported formats](../supported-formats.md) and [Known limitations](../known-limitations.md).
+    Entity Inspector write-back applies to **`.ttl`, `.obo`, `.owl`/`.rdf` (RDF/XML), and `.owx` (OWL/XML)**. XML saves are **semantic re-serialize** (not byte-identical to Protégé). JSON-LD / TriG / N-Triples stay read-only — see [Supported formats](../supported-formats.md) and [Known limitations](../known-limitations.md).
 
 !!! tip "Corpus is OWL/XML or RDF/XML?"
-    If you opened a typical Protégé `.owl` export, **read this next:** [OWL/XML and RDF/XML workflow](../guides/owl-xml-workflow.md) — browse/query works today; in-place write-back does not.
+    You can edit Protégé-style `.owl` / `.owx` files in the inspector (v0.21+). For caveats (re-serialize, limited ops vs Turtle), read [OWL/XML and RDF/XML write-back](owl-xml-workflow.md).
 
 New to OWL/RDF? Skim [Ontology concepts](../concepts.md) first (IRIs, Turtle, classes).
 
@@ -24,7 +24,7 @@ Complete these four steps before exploring optional features below.
 
 1. Open **Extensions** (`Ctrl+Shift+X` / `Cmd+Shift+X`).
 2. Search for **OntoCode**.
-3. Click **Install** on the extension by OntoCode.
+3. Click **Install** on the extension by **OntoCode** (extension id `ontocode.ontocode`).
 4. Reload the window if prompted.
 
 **Cursor (Open VSX):**
@@ -43,7 +43,7 @@ For offline or air-gapped environments, use a release VSIX instead — see [Inst
 
 Download a minimal tutorial pack if you do not already have ontology files.
 
-**Offline / air-gapped:** download `ontocode-v0.20.0.vsix` (pattern: `ontocode-v<version>.vsix`) and `ontocode-tutorial.zip` from [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) for the **same tagged version** (e.g. **v0.20.0**). Prefer [Versions and channels](versions-and-channels.md) if Marketplace and GitHub disagree. If the zip is missing for an older tag, use the curl commands below on a connected machine, or clone the repo and open `fixtures/`.
+**Offline / air-gapped:** download `ontocode-v0.21.0.vsix` (pattern: `ontocode-v<version>.vsix`) and `ontocode-tutorial.zip` from [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) for the **same tagged version** (e.g. **v0.21.0**). Prefer [Versions and channels](versions-and-channels.md) if Marketplace and GitHub disagree. If the zip is missing for an older tag, use the curl commands below on a connected machine, or clone the repo and open `fixtures/`.
 
 **Online (curl from the tagged release):**
 
@@ -51,28 +51,30 @@ Download a minimal tutorial pack if you do not already have ontology files.
 
     ```bash
     mkdir ontocode-tutorial && cd ontocode-tutorial
-    curl -fsSLO https://raw.githubusercontent.com/eddiethedean/ontocode/v0.20.0/fixtures/example.ttl
-    curl -fsSLO https://raw.githubusercontent.com/eddiethedean/ontocode/v0.20.0/fixtures/complex-classes.ttl
-    curl -fsSLO https://raw.githubusercontent.com/eddiethedean/ontocode/v0.20.0/examples/obo-workflow/demo.obo
+    curl -fsSLO https://raw.githubusercontent.com/eddiethedean/ontocode/v0.21.0/fixtures/example.ttl
+    curl -fsSLO https://raw.githubusercontent.com/eddiethedean/ontocode/v0.21.0/fixtures/complex-classes.ttl
+    curl -fsSLO https://raw.githubusercontent.com/eddiethedean/ontocode/v0.21.0/examples/obo-workflow/demo.obo
     ```
 
 === "Windows (PowerShell)"
 
     ```powershell
     mkdir ontocode-tutorial; cd ontocode-tutorial
-    Invoke-WebRequest -Uri https://raw.githubusercontent.com/eddiethedean/ontocode/v0.20.0/fixtures/example.ttl -OutFile example.ttl
-    Invoke-WebRequest -Uri https://raw.githubusercontent.com/eddiethedean/ontocode/v0.20.0/fixtures/complex-classes.ttl -OutFile complex-classes.ttl
-    Invoke-WebRequest -Uri https://raw.githubusercontent.com/eddiethedean/ontocode/v0.20.0/examples/obo-workflow/demo.obo -OutFile demo.obo
+    Invoke-WebRequest -Uri https://raw.githubusercontent.com/eddiethedean/ontocode/v0.21.0/fixtures/example.ttl -OutFile example.ttl
+    Invoke-WebRequest -Uri https://raw.githubusercontent.com/eddiethedean/ontocode/v0.21.0/fixtures/complex-classes.ttl -OutFile complex-classes.ttl
+    Invoke-WebRequest -Uri https://raw.githubusercontent.com/eddiethedean/ontocode/v0.21.0/examples/obo-workflow/demo.obo -OutFile demo.obo
     ```
 
-Or download the files from the [v0.20.0 fixtures](https://github.com/eddiethedean/ontocode/tree/v0.20.0/fixtures) and [obo-workflow](https://github.com/eddiethedean/ontocode/tree/v0.20.0/examples/obo-workflow) trees in your browser.
+Or download the files from the [v0.21.0 fixtures](https://github.com/eddiethedean/ontocode/tree/v0.21.0/fixtures) and [obo-workflow](https://github.com/eddiethedean/ontocode/tree/v0.21.0/examples/obo-workflow) trees in your browser.
 
 Then **File → Open Folder…** and select `ontocode-tutorial` (or your own ontology folder).
 
 !!! tip "Corpus is mostly `.owl` / RDF/XML?"
-    Browse and query work; **Entity Inspector write-back does not**. Convert or dual-maintain Turtle/OBO for editing — [OWL/XML and RDF/XML workflow](owl-xml-workflow.md) — before expecting Edit to appear.
-OntoCode’s **bundled** language server works in trusted and Restricted Mode.
-Use **Workspace Trust** only when you set custom `ontocode.lspPath` or `ontocode.robotPath` — those settings are ignored when the folder is untrusted.
+    Write-back works (v0.21+). Prefer Turtle when you need byte-stable diffs, full Manchester, or refactor apply — [OWL/XML and RDF/XML write-back](owl-xml-workflow.md).
+
+!!! note "Workspace Trust"
+    OntoCode’s **bundled** language server works in trusted and Restricted Mode.
+    Use **Workspace Trust** only when you set custom `ontocode.lspPath` or `ontocode.robotPath` — those settings are ignored when the folder is untrusted.
 
 ### 3. Browse the explorer
 
@@ -98,7 +100,7 @@ See the [feature tour](../ontocode/feature-tour.md) for a visual overview of the
 
 ### 4. Edit a Turtle entity
 
-Write-back works in **Turtle (`.ttl`) and OBO (`.obo`) files**. For a full matrix (index/query vs write-back), see [Supported formats](../supported-formats.md). RDF/XML, OWL/XML, and JSON-LD are read-only in the inspector.
+Write-back works in **Turtle (`.ttl`), OBO (`.obo`), RDF/XML (`.owl`/`.rdf`), and OWL/XML (`.owx`)**. For a full matrix (index/query vs write-back), see [Supported formats](../supported-formats.md). JSON-LD and line-oriented RDF remain read-only in the inspector.
 
 1. Select a class from a `.ttl` file in the explorer.
 2. In the Entity Inspector **Edit** section:
@@ -187,7 +189,7 @@ To catch lint and parse errors in CI or locally (optional — **not part of the 
 === "Linux x64 (release binary — recommended for CI)"
 
     ```bash
-    VERSION=0.20.0
+    VERSION=0.21.0
     ASSET="ontocore-v${VERSION}-x86_64-unknown-linux-gnu.tar.gz"
     BIN="ontocore-v${VERSION}-x86_64-unknown-linux-gnu"
     curl -fsSL -o "${ASSET}" \
@@ -200,7 +202,7 @@ To catch lint and parse errors in CI or locally (optional — **not part of the 
 === "macOS / Windows / dev (cargo install)"
 
     ```bash
-    cargo install ontocore-cli --locked --version 0.20.0
+    cargo install ontocore-cli --locked --version 0.21.0
     ontocore validate /path/to/your/ontology/folder
     ```
 
@@ -219,33 +221,34 @@ Guide: [Semantic diff](../ontocode/semantic-diff.md).
 | Problem | What to try |
 |---------|-------------|
 | Sidebar says to index workspace | Run **OntoCode: Index Workspace** |
-| No edit controls in inspector | Entity must be in a **`.ttl` or `.obo`** file (other formats are read-only) |
+| No edit controls in inspector | Entity must be in **`.ttl`, `.obo`, `.owl`/`.rdf`, or `.owx`**; check parse errors and [Supported formats](../supported-formats.md) |
 | Language server failed to start | See [Install VS Code](../vscode-install.md#troubleshooting) |
 | Empty **Classes** after indexing | Check **Output → OntoCore Language Server**; re-run **Index Workspace** |
 
 More help: [Troubleshooting](../troubleshooting.md) · [FAQ](../faq.md).
 
+## Week-1 learning path
+
+After the core path above, use this short sequence (about a day each — or squeeze into a few hours):
+
+| Day | Goal | Start here |
+|-----|------|------------|
+| 1 | Edit confidently (labels, parents, save) | This page · [Authoring](../authoring.md) |
+| 2 | Query the catalog | [Query Workbench](../ontocode/query-workbench.md) · [SQL reference](../sql-reference.md) |
+| 3 | Classify and explain | [Reasoner guide](../guides/reasoner.md) |
+| 4 | Gate CI | [CI integration](../ci-integration.md) (Linux x64 tarball preferred) |
+
 ## Next steps
-
-Suggested order after first success:
-
-1. **Query** — [Query Workbench](../ontocode/query-workbench.md) then [SQL reference](../sql-reference.md)
-2. **Reason** — [Reasoner guide](../guides/reasoner.md)
-3. **Refactor / CI** — [Refactoring](../guides/refactoring.md) then [CI integration](../ci-integration.md)
 
 | Goal | Document |
 |------|----------|
 | Visual tour of panels | [Feature tour](../ontocode/feature-tour.md) |
 | Install options (VSIX, offline) | [vscode-install.md](../vscode-install.md) |
 | Migrating from Protégé | [protege-migration.md](protege-migration.md) |
-| Query workbench | [ontocode/query-workbench.md](../ontocode/query-workbench.md) |
 | Graph visualization | [ontocode/graph-view.md](../ontocode/graph-view.md) |
 | OBO workflows | [guides/obo-workflow.md](../guides/obo-workflow.md) |
-| Reasoner | [guides/reasoner.md](../guides/reasoner.md) |
 | Manchester editor | [ontocode/manchester-editor.md](../ontocode/manchester-editor.md) |
 | Semantic diff | [ontocode/semantic-diff.md](../ontocode/semantic-diff.md) |
 | Refactoring | [guides/refactoring.md](../guides/refactoring.md) |
 | Patch JSON automation | [patch-reference.md](../patch-reference.md) |
-| SQL / SPARQL reference | [sql-reference.md](../sql-reference.md) · [sparql-reference.md](../sparql-reference.md) |
-| Authoring overview | [authoring.md](../authoring.md) |
-| CI validation | [ci-integration.md](../ci-integration.md) |
+| SPARQL | [sparql-reference.md](../sparql-reference.md) |

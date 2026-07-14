@@ -19,7 +19,7 @@ Edit **OBO Format 1.4** (`.obo`) files in VS Code via the Entity Inspector and `
 | **Direct `.obo` edit** | Bulk edits, version control diffs, ROBOT pipelines |
 | **`ontocore patch`** | CI, scripts, LSP integrators |
 
-RDF/XML, OWL/XML, and JSON-LD remain **read-only** in the inspector.
+RDF/XML and OWL/XML also support write-back (v0.21+, semantic re-serialize). JSON-LD remains **read-only** in the inspector. See [Supported formats](../supported-formats.md).
 
 ## Patch operations
 

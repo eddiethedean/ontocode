@@ -26,6 +26,7 @@ Canonical ADRs live in this directory. The former `adrs/` folder was merged here
 | [0018](0018-ontocore-platform-identity.md) | OntoCore platform identity | Accepted (v0.9) |
 | [0019](0019-obo-write-back.md) | OBO write-back via fastobo | Accepted — **implemented v0.12** (read v0.11) |
 | [0020](0020-semantic-transaction-edit-model.md) | Semantic transaction edit model | Accepted — **implemented v0.19** |
+| [0021](0021-deterministic-xml-serializers.md) | Deterministic RDF/XML and OWL/XML serializers | Accepted — **implemented v0.21** |
 
 ## Current stack
 

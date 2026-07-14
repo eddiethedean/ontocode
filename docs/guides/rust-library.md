@@ -4,10 +4,10 @@ Embed **OntoCore** in tools, pipelines, or custom CLIs via the [`ontocore`](http
 
 > OntoCore (previously branded **OntoIndex** / `ontoindex-*`) is implemented by the `ontocore-*` crates. See [v0.9 migration](../migration/v0.9.md).
 
-Pre-1.0: public APIs may change between minor releases until v1.0. Pin minors in production. Crates are at **0.20.x**.
+Pre-1.0: public APIs may change between minor releases until v1.0. Pin minors in production. Crates are at **0.21.x**.
 
 !!! tip "Prefer `Workspace`"
-    For new code, use the **`Workspace` API** (`ontocore = "0.20"`). Lower-level `IndexBuilder` remains available for specialized pipelines — see [Rust API](../ontocore/rust-api.md).
+    For new code, use the **`Workspace` API** (`ontocore = "0.21"`). Lower-level `IndexBuilder` remains available for specialized pipelines — see [Rust API](../ontocore/rust-api.md).
 
 ## crates.io first (5 minutes)
 
@@ -16,7 +16,7 @@ Pre-1.0: public APIs may change between minor releases until v1.0. Pin minors in
 
 ```toml
 [dependencies]
-ontocore = "0.20"
+ontocore = "0.21"
 ```
 
 3. Point `Workspace::open` at **your** ontology directory (any folder of `.ttl` / `.obo` / other indexed formats):
@@ -39,6 +39,41 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 **Errors:** `Workspace::open` returns `CatalogError`; `query` / `sparql` return `QueryError`. The façade also exposes a unified [`ontocore::Error`](https://docs.rs/ontocore/latest/ontocore/enum.Error.html) for `From` conversion — see [Errors reference](../errors.md#rust-library-errors).
 
 Method-level params / returns / side effects: [Rust API — Workspace methods](../ontocore/rust-api.md#workspace-method-reference).
+
+## Minimal `Cargo.toml` recipes
+
+**Query / index only** (façade defaults):
+
+```toml
+[dependencies]
+ontocore = "0.21"
+```
+
+**Classify + explain** (same crate — reasoner is included):
+
+```toml
+[dependencies]
+ontocore = "0.21"
+```
+
+```rust
+use ontocore::Workspace;
+use ontocore::reasoner::ReasonerId;
+
+let ws = Workspace::open("./ontologies")?;
+let result = ws.classify(ReasonerId::El)?;
+```
+
+**Semantic patch / transactions** (extra crates):
+
+```toml
+[dependencies]
+ontocore = "0.21"
+ontocore-edit = "0.21"
+ontocore-owl = "0.21"
+```
+
+See [Semantic transactions](#semantic-transactions-ontocore-edit) below.
 
 ## Optional: monorepo examples (clone only)
 
@@ -122,7 +157,7 @@ let txn = Transaction::from_turtle(vec![
 let undo = txn.invert()?;
 ```
 
-Dependency: `ontocore-edit = "0.20"`. Full API: [Rust API — semantic transactions](../ontocore/rust-api.md#semantic-transactions-ontocore-edit-v019) · [docs.rs/ontocore-edit](https://docs.rs/ontocore-edit).
+Dependency: `ontocore-edit = "0.21"`. Full API: [Rust API — semantic transactions](../ontocore/rust-api.md#semantic-transactions-ontocore-edit-v019) · [docs.rs/ontocore-edit](https://docs.rs/ontocore-edit).
 
 ## Next steps
 
@@ -130,5 +165,5 @@ Dependency: `ontocore-edit = "0.20"`. Full API: [Rust API — semantic transacti
 |------|-----|
 | Method reference | [Rust API](../ontocore/rust-api.md) |
 | Error types | [Errors](../errors.md#rust-library-errors) |
-| CLI instead of embed | [Getting started](../getting-started.md) |
+| CLI instead of embed | [Install CLI & CI](../getting-started.md) |
 | Stability expectations | [API stability](api-stability.md) |

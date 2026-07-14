@@ -22,6 +22,9 @@ pub enum OwlError {
     #[error("Horned-OWL load failed: {0}")]
     LoadFailed(String),
 
+    #[error("Horned-OWL serialize failed: {0}")]
+    SerializeFailed(String),
+
     #[error("IO error: {0}")]
     Io(#[from] std::io::Error),
 

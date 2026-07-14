@@ -484,8 +484,14 @@ pub fn handle_get_workspace_ui_state(
                         && catalog
                             .entity_document(iri)
                             .map(|d| {
-                                d.format == OntologyFormat::Turtle
-                                    || d.format == OntologyFormat::Obo
+                                matches!(
+                                    d.format,
+                                    OntologyFormat::Turtle
+                                        | OntologyFormat::Obo
+                                        | OntologyFormat::Owl
+                                        | OntologyFormat::RdfXml
+                                        | OntologyFormat::OwlXml
+                                )
                             })
                             .unwrap_or(false)
                 })
@@ -1151,7 +1157,11 @@ fn jail_robot_path_args(
         }
 
         if let Some((flag, value)) = arg.split_once('=') {
-            if path_expect_for_long_flag(flag).is_some() {
+            if path_expect_for_long_flag(flag).is_some()
+                || path_expect_for_short_flag(flag).is_some()
+            {
+                // Handles `--input=/abs` and `-i=/abs` (short `=` was previously
+                // mis-parsed as attached value `=/abs` and jailed as relative).
                 jail_path(workspace_roots, value)?;
                 continue;
             }
@@ -1228,11 +1238,7 @@ pub fn handle_apply_axiom_patch(
                 .data()
                 .documents
                 .iter()
-                .find(|d| {
-                    d.path.canonicalize().ok().as_ref()
-                        == document_path.canonicalize().ok().as_ref()
-                        || d.path == document_path
-                })
+                .find(|d| ontocore_core::paths_refer_to_same(&d.path, &document_path))
                 .map(|d| d.namespaces.clone())
         })
         .flatten()
@@ -1242,11 +1248,11 @@ pub fn handle_apply_axiom_patch(
         document_path.extension().and_then(|e| e.to_str()).unwrap_or(""),
     );
 
-    if matches!(format, OntologyFormat::Owl | OntologyFormat::RdfXml) {
-        return Err(LspErrorPayload::unsupported_format(
-            "read-only format — edit as Turtle (.ttl) or OBO (.obo)".to_string(),
-        ));
-    }
+    let edit_format = ontocore_edit::EditFormat::from_ontology_format(format).map_err(|e| {
+        LspErrorPayload::unsupported_format(format!(
+            "write-back supports Turtle, OBO, RDF/XML, and OWL/XML; {e}"
+        ))
+    })?;
 
     // Serialize applies without holding ops_lock across enqueue_sync (index worker needs it).
     let (patch_result, workspace_edit, needs_reindex, entity_iri, undo_patches) = {
@@ -1267,12 +1273,17 @@ pub fn handle_apply_axiom_patch(
                 .apply_to_text(&source, params.preview_only, &namespaces)
                 .map_err(|e| LspErrorPayload::patch_invalid(e.to_string()))?;
             (transaction, result.applied, result.preview_text, result.diagnostics)
-        } else if format == OntologyFormat::Turtle {
-            let transaction = ontocore_edit::parse_turtle_input(params.patches).map_err(|e| {
-                LspErrorPayload::patch_invalid(format!("invalid Turtle patch JSON: {e}"))
-            })?;
+        } else if matches!(
+            format,
+            OntologyFormat::Turtle
+                | OntologyFormat::Owl
+                | OntologyFormat::RdfXml
+                | OntologyFormat::OwlXml
+        ) {
+            let transaction = ontocore_edit::parse_turtle_input(params.patches)
+                .map_err(|e| LspErrorPayload::patch_invalid(format!("invalid patch JSON: {e}")))?;
             let result = transaction
-                .apply_to_text(&source, params.preview_only, &namespaces)
+                .apply_to_text_as(&source, params.preview_only, &namespaces, edit_format)
                 .map_err(|e| match e {
                     ontocore_edit::EditError::UnsupportedFormat(m) => {
                         LspErrorPayload::unsupported_format(m)
@@ -1282,7 +1293,7 @@ pub fn handle_apply_axiom_patch(
             (transaction, result.applied, result.preview_text, result.diagnostics)
         } else {
             return Err(LspErrorPayload::unsupported_format(format!(
-                "write-back supports Turtle and OBO only, got {}",
+                "write-back supports Turtle, OBO, RDF/XML, and OWL/XML; got {}",
                 format.as_str()
             )));
         };
@@ -1310,7 +1321,10 @@ pub fn handle_apply_axiom_patch(
         let mut needs_reindex = false;
         let undo_patches = if patch_result.applied && !params.preview_only {
             transaction.invert().ok().and_then(|inverted| match format {
-                OntologyFormat::Turtle => {
+                OntologyFormat::Turtle
+                | OntologyFormat::Owl
+                | OntologyFormat::RdfXml
+                | OntologyFormat::OwlXml => {
                     inverted.turtle_patches().ok().and_then(|p| serde_json::to_value(p).ok())
                 }
                 OntologyFormat::Obo => {
@@ -1754,10 +1768,7 @@ fn resolve_namespaces_for_manchester(
                     .data()
                     .documents
                     .iter()
-                    .find(|d| {
-                        d.path.canonicalize().ok().as_ref() == path.canonicalize().ok().as_ref()
-                            || d.path == path
-                    })
+                    .find(|d| ontocore_core::paths_refer_to_same(&d.path, &path))
                     .map(|d| d.namespaces.clone())
             })
             .flatten()
@@ -2953,6 +2964,32 @@ mod tests {
             format!("--output={}", dir.path().join("out.owl").display()),
         ];
         assert!(jail_robot_path_args(&roots, &args_add).is_err());
+    }
+
+    #[test]
+    fn jail_robot_rejects_short_input_equals_outside_workspace() {
+        let dir = tempfile::tempdir().unwrap();
+        let roots = vec![dir.path().to_path_buf()];
+        let args = vec!["validate".to_string(), "-i=/tmp/evil.owl".to_string()];
+        let err = jail_robot_path_args(&roots, &args).unwrap_err();
+        assert!(
+            err.contains("outside") || err.contains("workspace") || err.contains("path"),
+            "expected jail error, got {err}"
+        );
+    }
+
+    #[test]
+    fn jail_robot_rejects_short_output_equals_outside_workspace() {
+        let dir = tempfile::tempdir().unwrap();
+        let roots = vec![dir.path().to_path_buf()];
+        let input = dir.path().join("in.ttl");
+        std::fs::write(&input, "").unwrap();
+        let args = vec![
+            "convert".to_string(),
+            format!("-i={}", input.display()),
+            "-o=/tmp/evil.owl".to_string(),
+        ];
+        assert!(jail_robot_path_args(&roots, &args).is_err());
     }
 
     #[test]

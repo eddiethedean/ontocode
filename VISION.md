@@ -1,6 +1,6 @@
 # Modernizing the Ontology Ecosystem
 
-> **Long-term vision.** For what ships in **v0.20**, see [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/). **Protégé replacement is the 1.0 goal — not supported for org-wide retirement today.** Plugin host MVP and owlmake workflow scaffold **shipped in v0.14**; stable plugin ecosystem API is a **v1.0 target**.
+> **Long-term vision.** For what ships in **v0.21**, see [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/). **Protégé replacement is the 1.0 goal — not supported for org-wide retirement today.** Plugin host MVP and owlmake workflow scaffold **shipped in v0.14**; stable plugin ecosystem API is a **v1.0 target**.
 
 ## Mission
 
@@ -10,14 +10,14 @@ The current ontology ecosystem is powerful but fragmented, heavily JVM-centric, 
 
 ## Long-Term Vision
 
-Three foundational projects work together:
+Four projects work together:
 
 - **Ontologos** — Rust-native reasoning engine.
 - **OntoCore** — Semantic workspace engine and reusable platform.
 - **OntoCode** — Flagship VS Code IDE powered by OntoCore.
-- **OntoUI** — Shared React UI platform ([platform/ONTOUI.md](docs/platform/ONTOUI.md)) — **v0.13 foundation shipped** (WorkspaceStore, focus relay, design tokens); **OntoStudio** reuses it (planned).
+- **OntoUI** — Shared React UI platform ([platform/ONTOUI.md](docs/platform/ONTOUI.md)) — **v0.13 foundation shipped** (WorkspaceStore, focus relay, design tokens); **OntoStudio** reuses it (planned post-1.0).
 
-Together they enable modern workflows including AI-assisted development, CI/CD, team collaboration on version-controlled ontology files, Python and TypeScript integration, and high-performance local tooling.
+Together they enable modern workflows including CI/CD, team collaboration on version-controlled ontology files, and high-performance local tooling. **Post-1.0 / planned (not shipped today):** AI-assisted development surfaces, Python and TypeScript SDKs, and OntoStudio desktop — see [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) and [Protégé decision](https://ontocode-vs.readthedocs.io/en/latest/guides/protege-decision/) for current non-goals.
 
 ## Ecosystem Collaboration
 

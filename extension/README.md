@@ -3,9 +3,9 @@
 [![VS Code Marketplace](https://vsmarketplacebadges.dev/version/ontocode.ontocode.svg?label=VS%20Code%20Marketplace)](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode)
 [![Open VSX](https://img.shields.io/open-vsx/v/ontocode/ontocode)](https://open-vsx.org/extension/ontocode/ontocode)
 
-**Ontology IDE for VS Code** — browse, edit Turtle/OBO, query, reason (EL–DL), validate, and diff OWL/RDF/OBO ontologies.
+**Ontology IDE for VS Code** — browse, edit Turtle/OBO/RDF/XML/OWL/XML, query, reason (EL–DL), validate, and diff OWL/RDF/OBO ontologies.
 
-**Current release: v0.20.0**
+**Current release: v0.21.0**
 
 ## Start here
 
@@ -23,7 +23,7 @@
 | Full documentation | [Read the Docs](https://ontocode-vs.readthedocs.io/en/latest/) |
 | Extension overview | [VS Code extension docs](https://ontocode-vs.readthedocs.io/en/latest/ontocode/vscode-extension/) |
 
-> **Editable today:** Turtle (`.ttl`) and OBO (`.obo`) only. OWL/XML and RDF/XML index and query as read-only.
+> **Editable today:** Turtle (`.ttl`), OBO (`.obo`), RDF/XML (`.owl`/`.rdf`), and OWL/XML (`.owx`). XML is semantic re-serialize (not Protégé byte-identical). JSON-LD / TriG / N-Triples remain read-only.
 
 > **Names:** **OntoCode** = this extension. **OntoCore** = Rust engine (`ontocore-cli`, `ontocore-lsp`). Install the CLI with `cargo install ontocore-cli`, not `ontocode`.
 

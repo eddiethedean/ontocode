@@ -101,6 +101,18 @@ impl Transaction {
         crate::adapter::apply_transaction_to_text(self, source, preview_only, namespaces)
     }
 
+    /// Apply with an explicit document format (RDF/XML / OWL/XML use Horned re-serialize).
+    pub fn apply_to_text_as(
+        &self,
+        source: &str,
+        preview_only: bool,
+        namespaces: &BTreeMap<String, String>,
+        format: EditFormat,
+    ) -> Result<ApplyTextResult> {
+        self.validate()?;
+        crate::adapter::apply_transaction_to_text_as(self, source, preview_only, namespaces, format)
+    }
+
     pub fn turtle_patches(&self) -> Result<Vec<PatchOp>> {
         self.changes
             .iter()
@@ -142,6 +154,9 @@ pub fn parse_turtle_input(value: serde_json::Value) -> Result<Transaction> {
             EditFormat::Obo => Err(EditError::Validation(
                 "transaction contains OBO changes; refuse Turtle apply path".into(),
             )),
+            EditFormat::RdfXml | EditFormat::OwlXml => Err(EditError::Validation(
+                "unexpected XML edit format on ParseOps from tagged SemanticChange".into(),
+            )),
         }
     } else {
         let patches: Vec<PatchOp> = serde_json::from_value(value)?;
@@ -163,9 +178,11 @@ pub fn parse_obo_input(value: serde_json::Value) -> Result<Transaction> {
         let parsed: Transaction = serde_json::from_value(txn.clone())?;
         match parsed.format()? {
             EditFormat::Obo => Ok(parsed),
-            EditFormat::Turtle => Err(EditError::Validation(
-                "transaction contains Turtle changes; refuse OBO apply path".into(),
-            )),
+            EditFormat::Turtle | EditFormat::RdfXml | EditFormat::OwlXml => {
+                Err(EditError::Validation(
+                    "transaction contains Turtle changes; refuse OBO apply path".into(),
+                ))
+            }
         }
     } else {
         let patches: Vec<OboPatchOp> = serde_json::from_value(value)?;

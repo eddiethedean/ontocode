@@ -4,7 +4,7 @@ export function normalizeOntologyIri(iri: string): string {
   return iri.replace(/[#/]+$/, "");
 }
 
-/** Mirror `document_matches_entity` in ontocore-core. */
+/** Mirror `document_matches_entity` in ontocore-core (no IRI prefix matching). */
 export function entityBelongsToDocument(
   entity: Entity,
   doc: OntologyDocument
@@ -14,9 +14,6 @@ export function entityBelongsToDocument(
   }
   if (doc.base_iri) {
     if (normalizeOntologyIri(doc.base_iri) === normalizeOntologyIri(entity.ontology_id)) {
-      return true;
-    }
-    if (entity.iri.startsWith(doc.base_iri)) {
       return true;
     }
   }

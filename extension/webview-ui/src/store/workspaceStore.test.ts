@@ -101,6 +101,22 @@ describe("workspaceStore", () => {
     expect(useWorkspaceStore.getState().focus?.id).toBe("http://example.org#Newer");
   });
 
+  it("hydrateFocus ignores unstamped focus when current is stamped (#277)", () => {
+    const store = useWorkspaceStore.getState();
+    store.setFocus({
+      kind: "entity",
+      id: "http://example.org#B",
+      source: "explorer",
+      timestamp: 200,
+    });
+    store.hydrateFocus({
+      kind: "entity",
+      id: "http://example.org#A",
+      source: "inspector",
+    });
+    expect(useWorkspaceStore.getState().focus?.id).toBe("http://example.org#B");
+  });
+
   it("setQueryResult emits QueryExecuted", () => {
     const languages: string[] = [];
     subscribeWorkspaceEvents((e) => {

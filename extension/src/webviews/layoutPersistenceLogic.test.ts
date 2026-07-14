@@ -1,9 +1,12 @@
 import assert from "node:assert/strict";
 import { describe, it } from "node:test";
 import {
+  DEFAULT_REOPEN,
   PERSPECTIVES,
   graphRestoreState,
+  isAllowedPanelRestoreCommand,
   resolvePanelRestoreState,
+  sanitizePanelRestoreState,
   type PanelRestoreState,
 } from "./layoutPersistenceLogic";
 
@@ -20,6 +23,16 @@ describe("layoutPersistenceLogic", () => {
     assert.equal(restore?.command, "ontocode.openQueryWorkbench");
   });
 
+  it("sanitize without defaults leaves missing session panels empty", () => {
+    // Session capture must use sanitizePanelRestoreState / remembered-only lookups,
+    // not resolvePanelRestoreState — otherwise DEFAULT_REOPEN reopens reasoner/diff.
+    assert.equal(sanitizePanelRestoreState(undefined), undefined);
+    assert.equal(
+      sanitizePanelRestoreState({ command: "ontocode.runReasoner" })?.command,
+      "ontocode.runReasoner"
+    );
+  });
+
   it("prefers saved restore state over defaults", () => {
     const saved: PanelRestoreState = {
       command: "ontocode.showExplanation",
@@ -30,6 +43,34 @@ describe("layoutPersistenceLogic", () => {
       resolvePanelRestoreState({ ontocodeExplanation: saved }, "ontocodeExplanation"),
       saved
     );
+  });
+
+  it("rejects non-allowlisted restore commands (#309)", () => {
+    assert.equal(isAllowedPanelRestoreCommand("workbench.action.terminal.new"), false);
+    assert.equal(isAllowedPanelRestoreCommand("vscode.open"), false);
+    assert.equal(isAllowedPanelRestoreCommand("ontocode.showEntityInspector"), true);
+    assert.equal(isAllowedPanelRestoreCommand("ontocode.openEntity"), true);
+    assert.equal(isAllowedPanelRestoreCommand("ontocode.evil;rm"), false);
+    assert.equal(
+      sanitizePanelRestoreState({
+        command: "workbench.action.terminal.new",
+        args: [],
+      }),
+      undefined
+    );
+  });
+
+  it("falls back to default when saved restore command is not allowlisted", () => {
+    const restore = resolvePanelRestoreState(
+      {
+        ontocodeInspector: {
+          command: "workbench.action.terminal.new",
+          args: ["--dangerous"],
+        },
+      },
+      "ontocodeInspector"
+    );
+    assert.deepEqual(restore, DEFAULT_REOPEN.ontocodeInspector);
   });
 
   it("graphRestoreState maps graphKind to restore commands", () => {
@@ -55,6 +96,12 @@ describe("layoutPersistenceLogic", () => {
         args: ["http://ex.org#Person"],
         title: "Neighborhood",
       }
+    );
+    assert.equal(
+      isAllowedPanelRestoreCommand(
+        graphRestoreState({ graphKind: "neighborhood", rootIri: "x" }).command
+      ),
+      true
     );
   });
 });

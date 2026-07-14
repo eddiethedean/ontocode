@@ -31,16 +31,16 @@ CLI install options (separate from the extension): [getting started (CLI)](getti
 
 For a full walkthrough, see [First success in 10 minutes](guides/first-success.md).
 
-**Tutorial pack:** download `ontocode-tutorial.zip` from [GitHub Releases](https://github.com/eddiethedean/ontocode/releases/tag/v0.20.0) (same tag as the VSIX). Built with `./scripts/package-tutorial-zip.sh`. If missing, use the curl commands in [first-success](guides/first-success.md) or open `fixtures/` from a clone.
+**Tutorial pack:** download `ontocode-tutorial.zip` from [GitHub Releases](https://github.com/eddiethedean/ontocode/releases/tag/v0.21.0) (same tag as the VSIX). Built with `./scripts/package-tutorial-zip.sh`. If missing, use the curl commands in [first-success](guides/first-success.md) or open `fixtures/` from a clone.
 
 > **Multi-root workspaces (v0.10+):** All workspace folders are indexed on open. **OntoCode: Index Workspace** may prompt you to pick a folder when multiple roots are open.
 
 ## Option B — GitHub Release VSIX (offline / air-gapped)
 
-1. Open [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) and download the latest `ontocode-v*.vsix` (example: `ontocode-v0.20.0.vsix`).
+1. Open [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) and download the latest `ontocode-v*.vsix` (example: `ontocode-v0.21.0.vsix`).
 2. In VS Code: **Extensions** → **…** menu → **Install from VSIX…**
 3. Verify against `SHA256SUMS` — see [release-integrity.md](release-integrity.md).
-4. Open a folder containing ontology files (`.ttl`, `.obo`, `.owl`, `.rdf`, `.jsonld`, `.nt`, `.nq`, `.trig`).
+4. Open a folder containing ontology files (`.ttl`, `.obo`, `.owl`, `.rdf`, `.owx`, `.jsonld`, `.nt`, `.nq`, `.trig`).
 
 Release VSIX packages bundle `ontocore-lsp` for Linux, macOS, and Windows.
 
@@ -79,7 +79,7 @@ Set **OntoCode: Lsp Path** (`ontocode.lspPath`) to the absolute path of your `on
 
 If OntoCode does not appear in search (before v0.11 or if Open VSX sync is delayed):
 
-1. Download `ontocode-v*.vsix` (example: `ontocode-v0.20.0.vsix`) from [GitHub Releases](https://github.com/eddiethedean/ontocode/releases).
+1. Download `ontocode-v*.vsix` (example: `ontocode-v0.21.0.vsix`) from [GitHub Releases](https://github.com/eddiethedean/ontocode/releases).
 2. **Cmd+Shift+P** / **Ctrl+Shift+P** → **Extensions: Install from VSIX…**
 
 Release tags from v0.11.3 onward publish automatically to Open VSX.
@@ -100,7 +100,7 @@ After indexing, the **OntoCode** activity bar shows five views:
 
 **Re-index** — run **OntoCode: Index Workspace** after adding or changing ontology files.
 
-Click an entity name to open the **Entity Inspector**. For `.ttl` and `.obo` files, use the edit section to change labels, parents, or delete entities. See [authoring.md](authoring.md).
+Click an entity name to open the **Entity Inspector**. For **`.ttl`, `.obo`, `.owl`/`.rdf`, and `.owx`**, use the edit section to change labels, parents, or delete entities (XML is semantic re-serialize). See [authoring.md](authoring.md) and [OWL/XML write-back](guides/owl-xml-workflow.md).
 
 ## Settings
 
@@ -123,11 +123,11 @@ Indexing runs on workspace open. `ontocode.autoIndexOnOpen` is a legacy setting 
 - **OntoCode: Refresh Explorer** — refresh tree views (including diagnostics)
 - **OntoCode: Open Query Workbench** — SQL and SPARQL against indexed workspace ([guide](ontocode/query-workbench.md))
 - **OntoCode: Open Manchester Editor** / **Add Manchester Axiom** — complex class expressions ([guide](ontocode/manchester-editor.md))
-- **OntoCode: Run Reasoner** — EL/RL/RDFS classification ([guide](guides/reasoner.md))
+- **OntoCode: Run Reasoner** — EL / RL / RDFS / DL / auto classification ([guide](guides/reasoner.md))
 - **OntoCode: Show Explanation** — justification for unsatisfiable class
 - **OntoCode: Set Hierarchy Mode** — asserted / inferred / combined class tree
 - **OntoCode: Open Class Graph** / **Property Graph** / **Import Graph** / **Neighborhood Graph** — visualization ([guide](ontocode/graph-view.md))
-- **OntoCode: Create Class / Property / Individual** — authoring in `.ttl` files
+- **OntoCode: Create Class / Property / Individual** — authoring in editable formats (richest on `.ttl`)
 - **Problems panel** — inline diagnostics from `ontocore-lsp` after indexing
 - **OntoCode: Show Entity Inspector** / **Jump to Source** — from explorer context menu
 
@@ -142,7 +142,7 @@ Indexing runs on workspace open. `ontocode.autoIndexOnOpen` is a legacy setting 
 | `spawn ... ontocore-lsp EACCES` (macOS/Linux) | Upgrade to OntoCode ≥ 0.4.0. Manual: `chmod +x` on the bundled binary path from the error |
 | `couldn't create connection to server` | Check **Output → OntoCore Language Server**. Reinstall the extension or download a fresh VSIX from [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) |
 | Empty explorer after open | Run **OntoCode: Index Workspace**; check **Output → OntoCore Language Server**; Trust only if using custom `lspPath`/`robotPath` |
-| Inspector has no edit controls | Entity must be in a **Turtle (`.ttl`) or OBO (`.obo`)** file; RDF/XML, OWL/XML, and JSON-LD are read-only in the inspector |
+| Inspector has no edit controls | Entity must be in **`.ttl`, `.obo`, `.owl`/`.rdf`, or `.owx`**; JSON-LD / TriG / N-Triples are read-only — [Supported formats](supported-formats.md) |
 
 ### Developers (building from source)
 

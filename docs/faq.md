@@ -15,7 +15,7 @@ OntoCore was previously branded **OntoIndex** (`ontoindex` CLI, `ontoindex-*` cr
 
 **Is the API stable?**
 
-Pre-1.0. Published crates are at **0.20.x**. Library APIs, LSP JSON, and SQL table columns may change between minor releases until v1.0. Pin versions in CI with `cargo install ontocore-cli --locked --version 0.20.0`. See [API stability](guides/api-stability.md). Upgrading from **0.17.x**? See [v0.18 migration](migration/v0.18.md). Upgrading from **0.16.x**? See [v0.17 migration](migration/v0.17.md). Upgrading from **0.15.x**? See [v0.16 migration](migration/v0.16.md). Upgrading from **0.14.x** (or earlier)? Start at the [migration index](migration/README.md). The `validate` and `classify` exit codes are documented in [workspace-limits.md](workspace-limits.md).
+Pre-1.0. Published crates are at **0.21.x**. Library APIs, LSP JSON, and SQL table columns may change between minor releases until v1.0. Pin versions in CI with `cargo install ontocore-cli --locked --version 0.21.0`. See [API stability](guides/api-stability.md). Upgrading from **0.17.x**? See [v0.18 migration](migration/v0.18.md). Upgrading from **0.16.x**? See [v0.17 migration](migration/v0.17.md). Upgrading from **0.15.x**? See [v0.16 migration](migration/v0.16.md). Upgrading from **0.14.x** (or earlier)? Start at the [migration index](migration/README.md). The `validate` and `classify` exit codes are documented in [workspace-limits.md](workspace-limits.md).
 
 **What ships in the current release?**
 
@@ -25,13 +25,13 @@ See [What ships today](SHIPPED.md) for the canonical capability matrix.
 
 **Is OntoCode production-ready?**
 
-**Pilot-ready for many OWL/OBO workflows in VS Code and CI** — not a full Protégé replacement for every profile. Use [What ships today](SHIPPED.md) and [Known limitations](known-limitations.md) for the capability matrix, [Production readiness](guides/production-readiness.md) for pilot vs production tiers, and [Protégé decision guide](guides/protege-decision.md) for gap analysis. Pin releases in CI (`--version 0.20.0`) and review [API stability](guides/api-stability.md) before embedding Rust libraries.
+**Pilot-ready for many OWL/OBO workflows in VS Code and CI** — not a full Protégé replacement for every profile. Use [What ships today](SHIPPED.md) and [Known limitations](known-limitations.md) for the capability matrix, [Production readiness](guides/production-readiness.md) for pilot vs production tiers, and [Protégé decision guide](guides/protege-decision.md) for gap analysis. Pin releases in CI (`--version 0.21.0`) and review [API stability](guides/api-stability.md) before embedding Rust libraries.
 
 ## Installation
 
 **Which version should I install?**
 
-Pin to the tagged release in [`docs/TAGGED_RELEASE`](https://github.com/eddiethedean/ontocode/blob/main/docs/TAGGED_RELEASE) (currently **0.20.0**). See [Versions and channels](guides/versions-and-channels.md) for Marketplace vs GitHub Releases vs crates.io vs Read the Docs `latest`.
+Pin to the tagged release in [`docs/TAGGED_RELEASE`](https://github.com/eddiethedean/ontocode/blob/main/docs/TAGGED_RELEASE) (currently **0.21.0**). See [Versions and channels](guides/versions-and-channels.md) for Marketplace vs GitHub Releases vs crates.io vs Read the Docs `latest`.
 
 **Why might Marketplace lag GitHub Releases?**
 
@@ -39,7 +39,7 @@ Marketplace and Open VSX publishes are manual after the release workflow. Prefer
 
 **Can I edit Protégé `.owl` / RDF/XML in place?**
 
-No — write-back is **Turtle (`.ttl`) and OBO (`.obo`) only**. You can index and query OWL/XML and RDF/XML today; convert or dual-maintain Turtle for editing. See [Supported formats](supported-formats.md) and [OWL/XML workflow](guides/owl-xml-workflow.md).
+**Yes (v0.21+), with caveats.** RDF/XML (`.owl`/`.rdf`) and OWL/XML (`.owx`) support Entity Inspector and `ontocore patch` write-back via full-document re-serialize (semantic fidelity, not Protégé byte-identical). Prefer Turtle when you need byte-stable diffs, full Manchester, or refactor apply. Details: [Supported formats](supported-formats.md) and [OWL/XML and RDF/XML write-back](guides/owl-xml-workflow.md).
 
 **SQL or SPARQL — which should I use?**
 
@@ -57,7 +57,7 @@ The `fixtures/` directory exists only in a git clone. Use your own ontology path
 ontocore query /path/to/your/ontologies "SELECT * FROM classes"
 ```
 
-See [getting-started.md](getting-started.md). Always pin with `--version 0.20.0` in CI so you do not surprise-upgrade.
+See [getting-started.md](getting-started.md). Always pin with `--version 0.21.0` in CI so you do not surprise-upgrade.
 
 **Do I need Rust to use VS Code?**
 
@@ -85,7 +85,7 @@ Select a class in a `.ttl` file → Entity Inspector → **Edit in Manchester** 
 
 **I cannot edit in the Entity Inspector.**
 
-Write-back applies to **Turtle (`.ttl`) and OBO (`.obo`)** files (engine v0.12; inspector write-back v0.13). For the full matrix (index/query vs write-back), see [Supported formats](supported-formats.md). RDF/XML, OWL/XML, and JSON-LD are read-only in the inspector. See [OBO authoring](ontocode/obo-authoring.md).
+Write-back applies to **Turtle (`.ttl`), OBO (`.obo`), RDF/XML (`.owl`/`.rdf`), and OWL/XML (`.owx`)**. For the full matrix (index/query vs write-back), see [Supported formats](supported-formats.md). JSON-LD and line-oriented RDF are read-only in the inspector. See [OBO authoring](ontocode/obo-authoring.md) and [OWL/XML write-back](guides/owl-xml-workflow.md).
 
 **How do multi-root VS Code workspaces work?**
 
@@ -128,7 +128,7 @@ Parse errors plus catalog lint rules: broken imports, undefined prefixes, duplic
 
 **Which formats can I edit?**
 
-Turtle (`.ttl`) and OBO (`.obo`) for write-back. RDF/XML, OWL/XML, and JSON-LD can be indexed and queried but are read-only in the inspector. See [Supported formats](supported-formats.md).
+Turtle (`.ttl`), OBO (`.obo`), RDF/XML (`.owl`/`.rdf`), and OWL/XML (`.owx`) for write-back. JSON-LD and line-oriented RDF can be indexed and queried but are read-only in the inspector. See [Supported formats](supported-formats.md).
 
 **Where is the patch JSON format documented?**
 
@@ -178,13 +178,13 @@ EL/RL/RDFS shipped in **v0.6.0** (Ontologos 0.9.0). Full OWL 2 DL classification
 
 **How does this compare to Protégé?**
 
-OntoCode targets OWL/OBO workflows in VS Code: browse and edit Turtle and OBO, SQL/SPARQL queries, EL–DL reasoning, refactoring, graph views, Turtle completion, diagnostic quick fixes, Manage Imports, property chain editing, **semantic diff** (CLI, LSP, and VS Code panel), and **plugin host MVP** (manifests, reference plugins, CLI/LSP hooks — v0.14). Gaps vs Protégé today include **OWL/XML write-back**, **full DL axiom catalog for all formats**, and a **stable third-party plugin ecosystem API** (v1.0). For a decision framework see [Protégé vs OntoCode](guides/protege-decision.md); for the live capability matrix see [What ships today](SHIPPED.md) and [Known limitations](known-limitations.md). The historical v0.18 checklist under [design/PROTEGE_PARITY.md](design/PROTEGE_PARITY.md) is **not current**. For a first-week adoption path, see [Migrating from Protégé](guides/protege-migration.md).
+OntoCode targets OWL/OBO workflows in VS Code: browse and edit Turtle, OBO, RDF/XML, and OWL/XML; SQL/SPARQL queries; EL–DL reasoning; refactoring; graph views; Turtle completion; diagnostic quick fixes; Manage Imports; property chain editing; **semantic diff** (CLI, LSP, and VS Code panel); and **plugin host MVP** (manifests, reference plugins, CLI/LSP hooks — v0.14). Gaps vs Protégé today include **byte-identical XML layout**, **full DL axiom catalog for all formats**, and a **stable third-party plugin ecosystem API** (v1.0). For a decision framework see [Protégé vs OntoCode](guides/protege-decision.md); for the live capability matrix see [What ships today](SHIPPED.md) and [Known limitations](known-limitations.md). The historical v0.18 checklist under [design/PROTEGE_PARITY.md](design/PROTEGE_PARITY.md) is **not current**. For a first-week adoption path, see [Migrating from Protégé](guides/protege-migration.md).
 
 ## OBO and graphs
 
 **Can I edit `.obo` files in the inspector?**
 
-**Yes (v0.13+).** OBO terms can be edited in the Entity Inspector and via `ontocore patch` on `.obo` files. RDF/XML and JSON-LD remain read-only. See [OBO workflow guide](guides/obo-workflow.md).
+**Yes (v0.13+).** OBO terms can be edited in the Entity Inspector and via `ontocore patch` on `.obo` files. RDF/XML and OWL/XML are also writable (v0.21+). JSON-LD and line-oriented RDF remain read-only. See [OBO workflow guide](guides/obo-workflow.md) and [Supported formats](supported-formats.md).
 
 **How do I open ontology graphs?**
 
@@ -197,3 +197,17 @@ Yes. `ontocore robot` and LSP `runRobot` spawn the external `robot` CLI. See [RO
 **Which panels use React vs legacy HTML?**
 
 As of **v0.10**, production webview panels are React: **Entity Inspector**, **graph panels**, **Query Workbench**, **Manchester editor**, **Refactor Preview**, **Semantic Diff**, **Reasoner Results**, and **Explanation**. Legacy HTML panels were removed in v0.9.
+
+## Contributing
+
+**Do I need `cargo test --workspace` for a docs-only PR?**
+
+No. Use the [testing matrix](guides/testing-matrix.md) and scoped PR template checkboxes. Docs-only changes need MkDocs preview (`./scripts/serve-docs.sh` or `./scripts/build-docs.sh`) — not a full Rust build. See [scripts/README.md](https://github.com/eddiethedean/ontocode/blob/main/scripts/README.md).
+
+**When should I run `./scripts/run-ci-local.sh`?**
+
+Before PRs that change CI scripts, release packaging, or broad Rust/extension surfaces — or when you want full Actions parity. Expect **30–60+ minutes** cold. Skip it for docs-only PRs.
+
+**I edited React webviews but F5 still shows the old UI — why?**
+
+`npm run watch` in `extension/` rebuilds the host only. Run `npm run build:webview` or `npm run compile` after `webview-ui/` changes — [Extension development](guides/extension-development.md).

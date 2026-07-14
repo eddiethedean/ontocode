@@ -1,25 +1,40 @@
 import type { ApplyAxiomPatchClientResult, PatchOp } from "../lsp/protocol";
 import { applyAxiomPatch } from "../lsp/client";
-import { requirePatchFullySynced } from "../lsp/patchFeedback";
+import { patchFailureMessage } from "../lsp/patchFeedback";
+import { isNotIndexedError } from "../utils/lspErrors";
 import { workspaceEventBus } from "./eventBus";
 import { ontologyRegistry } from "./ontologyRegistry";
+import {
+  decideCommitBookkeeping,
+  shouldPopStackAfterApply,
+} from "./transactionApplyPolicy";
 import type { CommittedTransaction, PendingTransaction } from "./types";
 
 const MAX_UNDO = 50;
+
+type ApplyPatches = Array<PatchOp | ({ op: string } & Record<string, unknown>)>;
 
 export class WorkspaceTransactionManager {
   private pending: PendingTransaction | undefined;
   private undoStack: CommittedTransaction[] = [];
   private redoStack: CommittedTransaction[] = [];
 
-  begin(
+  async begin(
     documentUri: string,
     documentPath: string,
-    patches: PatchOp[],
+    patches: ApplyPatches,
     label?: string
-  ): PendingTransaction {
+  ): Promise<PendingTransaction> {
     if (this.pending) {
       throw new Error("A workspace transaction is already in progress");
+    }
+    // Sync registry before assert so cold-start / post-NOT_INDEXED edits work (#301).
+    try {
+      await ontologyRegistry.syncFromCatalog();
+    } catch (err) {
+      if (!isNotIndexedError(err)) {
+        throw err;
+      }
     }
     ontologyRegistry.assertEditable(documentPath);
     this.pending = { documentUri, documentPath, patches, label };
@@ -31,32 +46,40 @@ export class WorkspaceTransactionManager {
     if (!txn) {
       throw new Error("No workspace transaction to commit");
     }
-    this.pending = undefined;
-    const result = await applyAxiomPatch({
-      document_uri: txn.documentUri,
-      patches: txn.patches as PatchOp[],
-      preview_only: false,
-    });
-    requirePatchFullySynced(result);
-    ontologyRegistry.markDirty(txn.documentPath);
-    const undoPatches = result.undo_patches ?? [];
-    if (undoPatches.length > 0) {
-      this.undoStack.push({
-        documentUri: txn.documentUri,
+    try {
+      const result = await applyAxiomPatch({
+        document_uri: txn.documentUri,
+        patches: txn.patches as ApplyPatches,
+        preview_only: false,
+      });
+      const decision = decideCommitBookkeeping(result);
+      if (decision.throwNotApplied) {
+        throw new Error(patchFailureMessage(result));
+      }
+      // #297: mark dirty + stack undo even when editor sync was cancelled.
+      if (decision.markDirty) {
+        ontologyRegistry.markDirty(txn.documentPath);
+      }
+      if (decision.pushUndo) {
+        this.undoStack.push({
+          documentUri: txn.documentUri,
+          documentPath: txn.documentPath,
+          undoPatches: result.undo_patches ?? [],
+          label: txn.label,
+        });
+        this.redoStack = [];
+        if (this.undoStack.length > MAX_UNDO) {
+          this.undoStack.shift();
+        }
+      }
+      workspaceEventBus.publish("TransactionCommitted", {
         documentPath: txn.documentPath,
-        undoPatches,
         label: txn.label,
       });
-      this.redoStack = [];
-      if (this.undoStack.length > MAX_UNDO) {
-        this.undoStack.shift();
-      }
+      return result;
+    } finally {
+      this.pending = undefined;
     }
-    workspaceEventBus.publish("TransactionCommitted", {
-      documentPath: txn.documentPath,
-      label: txn.label,
-    });
-    return result;
   }
 
   rollback(): void {
@@ -72,17 +95,24 @@ export class WorkspaceTransactionManager {
   }
 
   async undo(): Promise<boolean> {
-    const txn = this.undoStack.pop();
+    const txn = this.undoStack[this.undoStack.length - 1];
     if (!txn) {
       return false;
     }
     const result = await applyAxiomPatch({
       document_uri: txn.documentUri,
-      patches: txn.undoPatches as PatchOp[],
+      patches: txn.undoPatches as ApplyPatches,
       preview_only: false,
     });
-    requirePatchFullySynced(result);
-    ontologyRegistry.markDirty(txn.documentPath);
+    if (!shouldPopStackAfterApply(result)) {
+      throw new Error(patchFailureMessage(result));
+    }
+    // #296: pop only after successful apply.
+    this.undoStack.pop();
+    const decision = decideCommitBookkeeping(result);
+    if (decision.markDirty) {
+      ontologyRegistry.markDirty(txn.documentPath);
+    }
     if (result.undo_patches && result.undo_patches.length > 0) {
       this.redoStack.push({
         documentUri: txn.documentUri,
@@ -99,17 +129,23 @@ export class WorkspaceTransactionManager {
   }
 
   async redo(): Promise<boolean> {
-    const txn = this.redoStack.pop();
+    const txn = this.redoStack[this.redoStack.length - 1];
     if (!txn) {
       return false;
     }
     const result = await applyAxiomPatch({
       document_uri: txn.documentUri,
-      patches: txn.undoPatches as PatchOp[],
+      patches: txn.undoPatches as ApplyPatches,
       preview_only: false,
     });
-    requirePatchFullySynced(result);
-    ontologyRegistry.markDirty(txn.documentPath);
+    if (!shouldPopStackAfterApply(result)) {
+      throw new Error(patchFailureMessage(result));
+    }
+    this.redoStack.pop();
+    const decision = decideCommitBookkeeping(result);
+    if (decision.markDirty) {
+      ontologyRegistry.markDirty(txn.documentPath);
+    }
     if (result.undo_patches && result.undo_patches.length > 0) {
       this.undoStack.push({
         documentUri: txn.documentUri,
@@ -128,11 +164,16 @@ export class WorkspaceTransactionManager {
   async apply(
     documentUri: string,
     documentPath: string,
-    patches: PatchOp[],
+    patches: ApplyPatches,
     label?: string
   ): Promise<ApplyAxiomPatchClientResult> {
-    this.begin(documentUri, documentPath, patches, label);
-    return this.commit();
+    await this.begin(documentUri, documentPath, patches, label);
+    try {
+      return await this.commit();
+    } catch (err) {
+      this.rollback();
+      throw err;
+    }
   }
 
   resetForTests(): void {

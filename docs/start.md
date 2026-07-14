@@ -45,7 +45,7 @@ If something doesn’t work:
 
 ## Path B — CI / CLI (recommended for automation and evaluation)
 
-1. **Install + run your first command:** [Getting started](getting-started.md)
+1. **Install + run your first command:** [Install CLI & CI (detail)](getting-started.md)
 2. **Run a CI gate locally:**
    - `ontocore validate /path/to/ontologies`
    - Optional: `ontocore classify /path/to/ontologies --profile el --format json`

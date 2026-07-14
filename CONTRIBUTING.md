@@ -44,13 +44,14 @@ The root Cargo package `ontocode` is unpublished and hosts workspace integration
 
 ### First PR paths
 
-**Smoke PR (~15 minutes)** — docs-only or small Rust fix:
+**Smoke PR (~15 minutes docs-only; Rust smoke is longer on a cold machine)** — docs-only or small Rust fix:
 
 1. Install **Rust 1.88+** (Node 20 only if you touch `extension/`).
 2. `git clone https://github.com/eddiethedean/ontocode.git && cd ontocode`
-3. `cargo test -p ontocore-core --lib` (or your touched crate).
-4. `cargo fmt --all --check` and `./scripts/check-doc-versions.sh` for docs changes.
-5. Open a focused PR with a short description.
+3. Docs-only: edit docs and run `./scripts/check-doc-versions.sh`.
+4. Small Rust fix: `cargo test -p ontocore-core --lib` (or your touched crate). **Cold first compile of OntoCore dependencies is often 15–30+ minutes** — not part of the “docs ~15 min” path. Warm cache is much faster; see [testing matrix](docs/guides/testing-matrix.md).
+5. `cargo fmt --all --check` when you touch Rust; always run `./scripts/check-doc-versions.sh` for docs changes.
+6. Open a focused PR with a short description.
 
 **Full contributor setup (~60+ minutes warm cache; 2–4+ hours cold)** — extension, LSP, or release-impacting changes:
 

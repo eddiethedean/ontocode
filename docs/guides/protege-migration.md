@@ -1,6 +1,6 @@
 # Migrating from Protégé — first week
 
-This guide helps ontology teams adopt OntoCode **v0.22** alongside or instead of [Protégé](https://protege.stanford.edu/). For a capability comparison, see [Protégé vs OntoCode](protege-decision.md) and [What ships today](../SHIPPED.md).
+This guide helps ontology teams adopt OntoCode **v0.23** alongside or instead of [Protégé](https://protege.stanford.edu/). For a capability comparison, see [Protégé vs OntoCode](protege-decision.md) and [What ships today](../SHIPPED.md).
 
 ## Before you start
 
@@ -20,7 +20,7 @@ This guide helps ontology teams adopt OntoCode **v0.22** alongside or instead of
 
 Many teams use **both**: Protégé for heavy axiom authoring or Protégé-only plugins, OntoCode for browse, light edit, lint, diff, reasoning, and CI. See [Protégé coexistence](protege-coexistence.md).
 
-## Honest desktop known gaps (v0.22 tagged)
+## Honest desktop known gaps (v0.23 tagged)
 
 See [Versions & channels](versions-and-channels.md) if Marketplace lags behind the GitHub Release VSIX.
 
@@ -47,14 +47,15 @@ Follow the [first success core path](../guides/first-success.md) if anything is 
 
 ## Day 2 — Map Protégé habits to OntoCode
 
-| In Protégé | In OntoCode v0.22 |
+| In Protégé | In OntoCode v0.23 |
 |------------|-------------------|
 | Class hierarchy tab | **Classes** explorer; toggle **asserted / inferred / combined** after reasoner |
-| Entity editor (labels, parents) | **Entity Inspector** (`.ttl` and `.obo`) |
+| Entity editor (labels, parents) | **Entity Inspector** (`.ttl`, `.obo`, `.owl`/`.rdf`, `.owx`) |
 | Manchester syntax | **Manchester editor** panel |
-| DL query tab | **Query Workbench** — SQL catalog tables or SPARQL |
-| Reasoner (HermiT, etc.) | **Start / Synchronize / Classify / Consistency** — EL/RL/RDFS/DL/auto via OntoLogos; **Stop** cancels the client request |
-| Explanations | **Explanation** panel (unsat; stale banner after reindex) |
+| DL query tab | **Query Workbench** — SQL catalog tables or SPARQL (**not** Protégé DL Query syntax; DL Query UI → **v0.24**) |
+| Reasoner (HermiT, etc.) | **Start / Synchronize / Classify / Consistency / Realize** — EL/RL/RDFS/DL/auto via OntoLogos (not certified HermiT-identical); **Stop** requests engine cancel |
+| Explanations | **Explanation** panel (unsat; DL-native steps where available; stale banner after reindex) |
+| SWRLTab | **Rule Browser** / **Rule Editor** (author + validate; DLSafe materialize on classify) |
 | OWLViz / OntoGraf | **Class / property / import / neighborhood** graphs (asserted/inferred/combined) |
 | Imports | **Manage Imports** panel |
 | Preferences | OntoCode settings + plugin preference pages |
@@ -66,17 +67,18 @@ Follow the [first success core path](../guides/first-success.md) if anything is 
 ## Day 3 — Validate in CI
 
 ```yaml
-- run: cargo install ontocore-cli --locked --version 0.22.0
+- run: cargo install ontocore-cli --locked --version 0.23.0
 - run: ontocore validate ./src/ontologies
 ```
 
-Optional: fail on unsatisfiable classes:
+Optional: fail on unsatisfiable classes, or assert an instance:
 
 ```yaml
 - run: ontocore classify . --profile el --format json
+- run: ontocore realize . --profile rl --format json
 ```
 
-Full examples: [CI integration](../ci-integration.md).
+Full examples: [CI integration](../ci-integration.md) · [Realize cookbook](../examples/realize.md).
 
 ## Day 4 — Queries, imports, diagnostics
 
@@ -90,16 +92,19 @@ SQL subset limits: [SQL reference](../sql-reference.md). SPARQL: [SPARQL referen
 
 1. **Synchronize Reasoner** (reindex + classify) or **Classify Ontology**.
 2. Review unsatisfiable classes; open **Explanation** and regenerate if the stale banner appears after edits.
-3. Open **Class Graph** in asserted vs inferred mode; truncated graphs show a warning on large ontologies.
-4. Set **Hierarchy Mode** to **inferred** or **combined**.
+3. Run **Realize** (or inspect realization in the Reasoner panel) for ABox inferred types.
+4. Open **Rule Browser** if your ontology uses SWRL; edit or validate rules in **Rule Editor**.
+5. Open **Class Graph** in asserted vs inferred mode; truncated graphs show a warning on large ontologies.
+6. Set **Hierarchy Mode** to **inferred** or **combined**.
 
-Guide: [Reasoner](reasoner.md).
+Guide: [Reasoner](reasoner.md) · [SWRL cookbook](../examples/swrl.md).
 
 ## Week 1 checkpoint
 
-- [ ] Browse and edit Turtle/OBO entities in VS Code
-- [ ] Run reasoner lifecycle (classify / consistency / stop) and open an explanation
-- [ ] Run `ontocore validate` (or classify) in CI
+- [ ] Browse and edit Turtle/OBO/XML entities in VS Code
+- [ ] Run reasoner lifecycle (classify / consistency / realize / stop) and open an explanation
+- [ ] Optionally open Rule Browser for SWRL (if your ontology uses rules)
+- [ ] Run `ontocore validate` (or classify / realize) in CI
 - [ ] Compare a branch with **Semantic Diff** or `ontocore diff`
 - [ ] Document which tasks stay in Protégé vs OntoCode for your team
 

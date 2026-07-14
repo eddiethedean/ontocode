@@ -1,12 +1,12 @@
-# What ships today (v0.22.0 — latest tagged)
+# What ships today (v0.23.0 — latest tagged)
 
 > **Canonical capability matrix.** Update this page on every release. Design specs under [Project](design/README.md) may describe future targets — check here for what is actually available.
 >
 > **Format write-back truth:** this page and [Supported formats](supported-formats.md) are the source of truth. Tier-1 user docs (README, Home, First success, FAQ, Evaluate pack, LSP/patch/CLI refs) must match them — see [Releasing — Tier-1 capability truth](releasing.md#documentation-sync-checklist-every-release).
 >
-> **Latest tagged release: v0.22.0** (crates.io, GitHub Releases; Marketplace/Open VSX may lag — see [Versions & channels](guides/versions-and-channels.md)). Pin installs: `cargo install ontocore-cli --locked --version 0.22.0`.
+> **Latest tagged release: v0.23.0** (crates.io, GitHub Releases; Marketplace/Open VSX may lag — see [Versions & channels](guides/versions-and-channels.md)). Pin installs: `cargo install ontocore-cli --locked --version 0.23.0`.
 
-**Latest tagged: v0.22.0** · [v0.22 migration](migration/v0.22.md) · [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md)
+**Latest tagged: v0.23.0** · [v0.23 migration](migration/v0.23.md) · [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md)
 
 ## Products
 
@@ -15,7 +15,7 @@
 | **OntoCode** | VS Code IDE — explorer, React inspector, graphs (asserted/inferred modes), Query Workbench, Manchester editor, refactor preview, reasoner, explanation panel, plugin commands/views/preferences/context actions |
 | **OntoCore** | Rust semantic workspace engine — `ontocore` façade, `ontocore-*` crates, `ontocore` CLI, `ontocore-lsp`, plugin host |
 
-## Capability matrix (v0.22.0 tagged)
+## Capability matrix (v0.23.0 tagged)
 
 | Capability | VS Code | CLI |
 |------------|---------|-----|
@@ -42,7 +42,11 @@
 | RL / RDFS classification | Reasoner panel | `ontocore classify --profile rl\|rdfs` |
 | OWL 2 DL classification (`dl` profile) | Reasoner panel + hierarchy toggle | `ontocore classify --profile dl` |
 | Auto profile routing (`auto`) | Reasoner panel | `ontocore classify --profile auto` |
-| EL / DL explanations (where available) | Explanation panel (multiple alternatives, staleness detection) | `ontocore explain` |
+| Realization / instance checking (ABox) | Reasoner panel realization + LSP `checkInstance` | `ontocore realize` / `check-instance` |
+| Full consistency (TBox + ABox) | Reasoner panel clashes + snapshot detail | via classify / consistency |
+| EL / DL explanations (DL-first + alternatives) | Explanation panel (multiple alternatives, staleness detection) | `ontocore explain` |
+| SWRL rule browser / editor / validate | Rule Browser + Rule Editor | patch + LSP SWRL methods |
+| Engine-level reasoner cancel | Stop Reasoner | LSP `$/cancelRequest` |
 | OBO format index + `obo_id` in explorer | Yes | `ontocore inspect` |
 | ROBOT interop | — | `ontocore robot validate\|merge\|report` |
 | Diagnostics / lint | Problems panel | `ontocore validate` |
@@ -74,16 +78,24 @@
 > **XML write-back:** semantic fidelity (ADR-0021); not byte-identical to Protégé saves.  
 > Deeper capability grid (Manchester, refactor, XML re-serialize): [Capabilities by format](guides/capabilities-by-format.md).
 
-## New in v0.22.0 (latest tagged)
+## New in v0.23.0 (latest tagged)
 
 | Capability | Status |
 |------------|--------|
-| HasKey, DisjointUnion, inverse / equivalent / disjoint properties, sub-property hierarchy | Yes (Turtle + XML mutate) |
-| Negative assertions; SameIndividual / DifferentIndividuals | Yes |
-| Datatype entities + datatype definitions; axiom annotations | Yes (Turtle + XML; shared Manchester DataRange for facets / oneOf / and/or/not) |
-| Catalog / EntityDetail listing for v0.22 axiom families (incl. nested axiom annotations) | Yes |
-| Manchester `not`, `value`, `Self`, OneOf, data restrictions | Yes |
-| Inspector UI for HasKey, DisjointUnion, Inverse, Same/Different, NegativeOPA (+ remove from listed cards) | Yes |
+| ABox realization + instance checking | Shipped |
+| Full consistency semantics + ABox clashes | Shipped |
+| Native DL explanations (DL-first) | Shipped |
+| Engine-level cancel + reasoner dirty sync | Shipped |
+| SWRL validate / author / Rule Browser-Editor | Shipped (DLSafe + builtin registry) |
+| Ontologos SWRL materialize on classify | Shipped when rules present |
+
+## Previously in v0.22.0
+
+| Capability | Status |
+|------------|--------|
+| Complete OWL 2 authoring (`PAR-OWL-001`) | Shipped |
+| Manchester `not` / `value` / `Self` / OneOf / data restrictions | Shipped |
+| HasKey / DisjointUnion / RBox / negatives / SameIndividual / datatypes / axiom annotations | Shipped |
 
 ## Previously in v0.21.0
 
@@ -114,7 +126,8 @@ Detailed notes for v0.9–v0.21 are in the [CHANGELOG](https://github.com/eddiet
 
 **Shipped:** named classes; `and` / `or` / `not`; `some` / `only` / `value` / `Self`; OneOf `{…}`; `min` / `max` / `exact` cardinality; nested restrictions; data restrictions on xsd types; `SubClassOf`, `EquivalentClasses`, and `DisjointClasses` via Manchester editor or patch JSON; domain/range; property chains; HasKey and remaining RBox/ABox ops via patch JSON / inspector.
 
-**Not shipped:** inline Manchester autocomplete in the text buffer; SWRL. Remaining 1.0 targets: [known limitations](known-limitations.md) · [Protégé vs OntoCode](guides/protege-decision.md).
+**Not shipped:** inline Manchester autocomplete in the text buffer.
+Remaining 1.0 targets: [known limitations](known-limitations.md) · [Protégé vs OntoCode](guides/protege-decision.md).
 
 ## Known limitations
 
@@ -124,13 +137,13 @@ Detailed notes for v0.9–v0.21 are in the [CHANGELOG](https://github.com/eddiet
 | Write-back | **Turtle, OBO, RDF/XML, OWL/XML**; JSON-LD, N-Triples, TriG read-only. XML is semantic re-serialize (not byte-identical). See [Capabilities by format](guides/capabilities-by-format.md) |
 | Refactoring | **Turtle (`.ttl`) only**; extract module uses direct-reference closure |
 | Class hierarchy tree | Named-parent edges; **inferred/combined** after reasoner run |
-| Reasoning | **EL / RL / RDFS / DL / auto** via Ontologos 1.0 (HermiT parity) |
+| Reasoning | **EL / RL / RDFS / DL / auto** via Ontologos 1.x (not certified HermiT-identical) |
 | CLI release binaries | Linux x64 only; macOS/Windows use `cargo install` or bundled LSP in VSIX |
 | Scale | See [workspace limits](workspace-limits.md) (includes walk entry cap) |
 
 ## What's next
 
-Forward milestones: reasoning/SWRL parity (**v0.23**), semantic services (**v0.24**), Protégé-competitive release (**1.0**). See **[Platform roadmap](roadmap.md)** · **[Known limitations](known-limitations.md)**.
+Forward milestones: semantic services (**v0.24**), UX/parity verify (**v0.25**), Protégé-competitive release (**1.0**). See **[Platform roadmap](roadmap.md)** · **[Known limitations](known-limitations.md)**.
 
 ## Where to learn more
 

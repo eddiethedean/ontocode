@@ -15,6 +15,13 @@ import {
   ManchesterEditorPanel,
   ManchesterEditorOptions,
 } from "../webviews/manchesterEditorReact";
+import {
+  RuleBrowserPanel,
+} from "../webviews/ruleBrowserReact";
+import {
+  RuleEditorPanel,
+  RuleEditorOptions,
+} from "../webviews/ruleEditorReact";
 import { ReasonerPanel } from "../webviews/reasonerPanel";
 import { ExplanationPanel } from "../webviews/explanationPanel";
 import { SemanticDiffPanel } from "../webviews/semanticDiffPanel";
@@ -511,6 +518,15 @@ export function registerCommands(
         );
       }
     ),
+    vscode.commands.registerCommand("ontocode.openRuleBrowser", () => {
+      RuleBrowserPanel.show(context.extensionUri);
+    }),
+    vscode.commands.registerCommand(
+      "ontocode.openRuleEditor",
+      async (arg?: RuleEditorOptions) => {
+        await RuleEditorPanel.show(context.extensionUri, arg ?? {});
+      }
+    ),
     vscode.commands.registerCommand("ontocode.runReasoner", async () => {
       const panel = ReasonerPanel.show(context.extensionUri);
       await vscode.window.withProgress(
@@ -671,6 +687,8 @@ export function registerCommands(
       SemanticDiffPanel.current?.dispose();
       RefactorPreviewPanel.current?.dispose();
       ManchesterEditorPanel.current?.dispose();
+      RuleBrowserPanel.current?.dispose();
+      RuleEditorPanel.current?.dispose();
       void vscode.window.showInformationMessage("OntoCode: layout reset");
     }),
     vscode.commands.registerCommand(

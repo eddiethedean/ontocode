@@ -227,6 +227,45 @@ export function ReasonerPanel(_props?: WorkspaceProps): JSX.Element {
               </ul>
             )}
           </Section>
+
+          {result.snapshot?.consistency &&
+          (result.snapshot.consistency.abox_clashes?.length ?? 0) > 0 ? (
+            <Section
+              title={`ABox clashes (${result.snapshot.consistency.abox_clashes.length})`}
+              card
+            >
+              <ul className="oc-list">
+                {result.snapshot.consistency.abox_clashes.map((c, i) => (
+                  <li key={`${c}-${i}`}>{c}</li>
+                ))}
+              </ul>
+            </Section>
+          ) : null}
+
+          {result.snapshot?.realization &&
+          result.snapshot.realization.individuals.length > 0 ? (
+            <Section
+              title={`Realization (${result.snapshot.realization.individuals.length})`}
+              card
+            >
+              <ul className="oc-list">
+                {result.snapshot.realization.individuals
+                  .slice(0, 50)
+                  .map((ind) => (
+                    <li key={ind.individual_iri}>
+                      <InlineCode>{shortLabel(ind.individual_iri)}</InlineCode>
+                      {": "}
+                      {(ind.most_specific.length
+                        ? ind.most_specific
+                        : ind.types
+                      )
+                        .map((t) => shortLabel(t))
+                        .join(", ")}
+                    </li>
+                  ))}
+              </ul>
+            </Section>
+          ) : null}
         </>
       ) : null}
     </Panel>

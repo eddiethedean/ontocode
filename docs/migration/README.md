@@ -23,6 +23,7 @@ Upgrade notes between OntoCode / OntoCore releases.
 | v0.19.0 → v0.20.0 | [Migration v0.19 → v0.20](v0.20.md) — workspace runtime; Turtle patch matching hardening |
 | v0.20.0 → v0.21.0 | [Migration v0.20 → v0.21](v0.21.md) — RDF/XML + OWL/XML write-back |
 | v0.21.0 → v0.22.0 | [Migration v0.21 → v0.22](v0.22.md) — complete OWL 2 authoring |
+| v0.22.0 → v0.23.0 | [Migration v0.22 → v0.23](v0.23.md) — reasoning parity + SWRL |
 
 Pre-1.0: library APIs, LSP JSON, and SQL virtual table columns may change between minor releases. See [API stability](../guides/api-stability.md) and [workspace limits](../workspace-limits.md).
 

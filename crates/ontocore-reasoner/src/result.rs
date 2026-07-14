@@ -34,9 +34,73 @@ pub struct ClassificationResult {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ConsistencyResult {
-    /// Class-level consistency only (see [`ClassificationResult::consistent`]).
+    /// Ontology + class-level consistency when available (see [`ConsistencyDetail`]).
     pub consistent: bool,
     pub unsatisfiable: Vec<String>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub detail: Option<ConsistencyDetail>,
+}
+
+/// Full consistency semantics (TBox unsat + ABox / ontology consistency).
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct ConsistencyDetail {
+    pub consistent: bool,
+    /// Whether the facade consistency check finished (budget / cancel complete).
+    pub complete: bool,
+    /// `true` when the ontology itself is consistent (ABox + TBox engines).
+    pub ontology_consistent: bool,
+    pub abox_clashes: Vec<String>,
+    pub unsatisfiable: Vec<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct RealizationEntry {
+    pub individual_iri: String,
+    pub types: Vec<String>,
+    pub most_specific: Vec<String>,
+    pub asserted: Vec<String>,
+    pub inferred: Vec<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct RealizationResult {
+    pub profile_used: String,
+    pub individuals: Vec<RealizationEntry>,
+    pub duration_ms: u64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct InstanceCheckResult {
+    pub individual_iri: String,
+    pub class_iri: String,
+    pub entailed: bool,
+    pub profile_used: String,
+    pub duration_ms: u64,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct InferredClassAssertion {
+    pub individual_iri: String,
+    pub class_iri: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct InferredObjectPropertyAssertion {
+    pub subject_iri: String,
+    pub property_iri: String,
+    pub object_iri: String,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SameAsCluster {
+    pub individuals: Vec<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct InferredAssertions {
+    pub class_assertions: Vec<InferredClassAssertion>,
+    pub object_property_assertions: Vec<InferredObjectPropertyAssertion>,
+    pub same_as_clusters: Vec<SameAsCluster>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -49,6 +113,12 @@ pub struct ReasonerSnapshot {
     pub warnings: Vec<ReasonerWarning>,
     pub duration_ms: u64,
     pub classified_at: u64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub consistency: Option<ConsistencyDetail>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub realization: Option<RealizationResult>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub inferred_assertions: Option<InferredAssertions>,
 }
 
 impl From<ClassificationResult> for ReasonerSnapshot {
@@ -65,6 +135,9 @@ impl From<ClassificationResult> for ReasonerSnapshot {
                 .duration_since(std::time::UNIX_EPOCH)
                 .map(|d| d.as_secs())
                 .unwrap_or(0),
+            consistency: None,
+            realization: None,
+            inferred_assertions: None,
         }
     }
 }

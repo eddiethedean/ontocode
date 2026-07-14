@@ -622,6 +622,47 @@ fn apply_one(
                 false,
             )
         }
+        PatchOp::AddSwrlRule { ontology_iri, rule_json } => {
+            insert_literal_annotation(
+                ont,
+                build,
+                ontology_iri,
+                "http://ontocode.dev/ns#swrlRule",
+                rule_json,
+            );
+            Ok(())
+        }
+        PatchOp::RemoveSwrlRule { ontology_iri, rule_json } => {
+            let removed = remove_annotation_assertions(
+                ont,
+                ontology_iri,
+                "http://ontocode.dev/ns#swrlRule",
+                Some(rule_json),
+            );
+            if removed == 0 {
+                return Err(format!("SWRL rule not found for ontology {ontology_iri}"));
+            }
+            Ok(())
+        }
+        PatchOp::ReplaceSwrlRule { ontology_iri, old_rule_json, new_rule_json } => {
+            let removed = remove_annotation_assertions(
+                ont,
+                ontology_iri,
+                "http://ontocode.dev/ns#swrlRule",
+                Some(old_rule_json),
+            );
+            if removed == 0 {
+                return Err(format!("SWRL rule not found for ontology {ontology_iri}"));
+            }
+            insert_literal_annotation(
+                ont,
+                build,
+                ontology_iri,
+                "http://ontocode.dev/ns#swrlRule",
+                new_rule_json,
+            );
+            Ok(())
+        }
     }
 }
 
@@ -709,6 +750,9 @@ fn patch_op_name(op: &PatchOp) -> &'static str {
         PatchOp::RemoveDatatypeDefinition { .. } => "RemoveDatatypeDefinition",
         PatchOp::AddAxiomAnnotation { .. } => "AddAxiomAnnotation",
         PatchOp::RemoveAxiomAnnotation { .. } => "RemoveAxiomAnnotation",
+        PatchOp::AddSwrlRule { .. } => "AddSwrlRule",
+        PatchOp::RemoveSwrlRule { .. } => "RemoveSwrlRule",
+        PatchOp::ReplaceSwrlRule { .. } => "ReplaceSwrlRule",
     }
 }
 
@@ -734,7 +778,7 @@ fn remove_annotation_assertions(
     entity_iri: &str,
     predicate: &str,
     value: Option<&str>,
-) {
+) -> usize {
     let to_remove: Vec<_> = ont
         .i()
         .annotation_assertion()
@@ -751,9 +795,15 @@ fn remove_annotation_assertions(
             }
             if let Some(v) = value {
                 match &ax.ann.av {
-                    AnnotationValue::Literal(Literal::Simple { literal }) => literal == v,
-                    AnnotationValue::Literal(Literal::Language { literal, .. }) => literal == v,
-                    AnnotationValue::Literal(Literal::Datatype { literal, .. }) => literal == v,
+                    AnnotationValue::Literal(Literal::Simple { literal }) => {
+                        literal == v || json_literals_equivalent(literal, v)
+                    }
+                    AnnotationValue::Literal(Literal::Language { literal, .. }) => {
+                        literal == v || json_literals_equivalent(literal, v)
+                    }
+                    AnnotationValue::Literal(Literal::Datatype { literal, .. }) => {
+                        literal == v || json_literals_equivalent(literal, v)
+                    }
                     _ => false,
                 }
             } else {
@@ -762,9 +812,21 @@ fn remove_annotation_assertions(
         })
         .cloned()
         .collect();
+    let count = to_remove.len();
     for ax in to_remove {
         let cmp = AnnotatedComponent::from(Component::AnnotationAssertion(ax));
         let _ = ont.take(&cmp);
+    }
+    count
+}
+
+fn json_literals_equivalent(a: &str, b: &str) -> bool {
+    match (
+        serde_json::from_str::<serde_json::Value>(a),
+        serde_json::from_str::<serde_json::Value>(b),
+    ) {
+        (Ok(va), Ok(vb)) => va == vb,
+        _ => false,
     }
 }
 

@@ -1,6 +1,6 @@
 # Evaluating OntoCode for your organization
 
-This page helps security, platform, and ontology teams decide whether OntoCode **v0.22.0** (latest tagged) fits your workflow. It is honest about **what ships today** vs the v1.0 Protégé-competitive target.
+This page helps security, platform, and ontology teams decide whether OntoCode **v0.23.0** (latest tagged) fits your workflow. It is honest about **what ships today** vs the v1.0 Protégé-competitive target.
 
 Canonical capability matrix: [What ships today](../SHIPPED.md).
 
@@ -29,7 +29,7 @@ Prefer Protégé or other tools (or wait for v1.0) if you need:
 | [Protégé coexistence](protege-coexistence.md) | Ontology teams — split workflow with Protégé |
 | [Plugin authoring](plugins.md) | Platform — v0.16+ plugin API (permissions, views, preferences, context actions), manifests, subprocess plugins |
 
-## What ships today (v0.22.0)
+## What ships today (v0.23.0)
 
 | Capability | Status |
 |------------|--------|
@@ -39,7 +39,7 @@ Prefer Protégé or other tools (or wait for v1.0) if you need:
 | Inline diagnostics (Problems panel) | Shipped |
 | Query workbench + Manchester editor in VS Code | Shipped |
 | EL/RL/RDFS/DL reasoning + inferred hierarchy | **Shipped** (OntoLogos 1.x) |
-| OWL 2 DL classification (`dl` / `auto` profiles) | **Shipped** (OntoLogos 1.x; HermiT parity) |
+| OWL 2 DL classification (`dl` / `auto` profiles) | **Shipped** (OntoLogos 1.x; not certified HermiT-identical) |
 | EL explanations (where OntoLogos supports) | **Shipped** (EL-first; DL clash traces partial) |
 | React entity inspector + graph visualization | **Shipped** |
 | OBO format index + `obo_id` in explorer | **Shipped** |
@@ -61,6 +61,9 @@ Prefer Protégé or other tools (or wait for v1.0) if you need:
 | Graph asserted/inferred/combined modes | **Shipped** (v0.15) |
 | Reference plugins (naming validator, Markdown exporter, SHACL scaffold) | **Shipped** (v0.14) |
 | owlmake workflow scaffold (`ontocore workflow run`) | **Shipped** (v0.14 — subprocess; not production-hardened) |
+| Realization / instance checking (`realize`, `check-instance`) | **Shipped** (v0.23) |
+| SWRL rule browser / editor / validate | **Shipped** (v0.23; DLSafe) |
+| Engine-level reasoner cancel | **Shipped** (v0.23) |
 
 Full gap analysis for evaluators: [Known limitations](../known-limitations.md) · [What ships today](../SHIPPED.md) · [Protégé decision](protege-decision.md).
 

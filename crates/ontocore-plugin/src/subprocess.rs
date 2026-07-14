@@ -233,10 +233,15 @@ mod tests {
 
         let marker = workspace.join("grandchild.pid");
         let plugin_bin = workspace.join("slow_plugin.sh");
+        // Write the pid before entering a long sleep so a short timeout cannot race the
+        // marker file on slow filesystems (e.g. external volumes under /Volumes).
         let script = format!(
             r#"#!/bin/sh
+set -eu
 sleep 999 &
 echo $! > "{}"
+# Ensure the pid lands on durable storage before we block forever.
+sync 2>/dev/null || true
 wait
 "#,
             marker.display()
@@ -277,16 +282,34 @@ diagnostics = true
                 step: None,
                 extra_args: &[],
             },
-            Duration::from_millis(200),
+            Duration::from_millis(1_500),
         )
         .expect_err("must time out");
         assert!(matches!(err, SubprocessError::TimedOut(_)), "got {err:?}");
 
         // Give the kernel a moment to reap; grandchild must be gone.
-        thread::sleep(Duration::from_millis(150));
-        let pid_text = std::fs::read_to_string(&marker).expect("grandchild pid written");
+        // Poll briefly for the marker (process may still be flushing under load).
+        let mut pid_text = None;
+        for _ in 0..20 {
+            if let Ok(text) = std::fs::read_to_string(&marker) {
+                if !text.trim().is_empty() {
+                    pid_text = Some(text);
+                    break;
+                }
+            }
+            thread::sleep(Duration::from_millis(50));
+        }
+        let pid_text = pid_text.expect("grandchild pid written");
         let pid: i32 = pid_text.trim().parse().expect("pid");
-        let still_alive = unsafe { libc::kill(pid, 0) == 0 };
+        // Poll for death — kill(0) can succeed briefly for a dying/zombie process under CI load.
+        let mut still_alive = true;
+        for _ in 0..40 {
+            still_alive = unsafe { libc::kill(pid, 0) == 0 };
+            if !still_alive {
+                break;
+            }
+            thread::sleep(Duration::from_millis(50));
+        }
         assert!(!still_alive, "grandchild pid {pid} should be dead after process-group kill");
     }
 }

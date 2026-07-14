@@ -1,8 +1,11 @@
 //! Reasoning integration via OntoLogos.
 
 pub use ontocore_reasoner::{
-    classify, explain, ClassificationResult, ConsistencyResult, ExplanationRequest,
-    ExplanationResult, ExplanationStep, InferredHierarchy, ReasonerAdapter, ReasonerCache,
+    cancel_requested, check_consistency, check_instance, classify, clear_cancel_flag, explain,
+    explain_alternatives, inferred_assertions, install_cancel_flag, realize, ClassificationResult,
+    ConsistencyDetail, ConsistencyResult, ExplanationRequest, ExplanationResult, ExplanationStep,
+    InferredAssertions, InferredClassAssertion, InferredHierarchy, InferredObjectPropertyAssertion,
+    InstanceCheckResult, RealizationEntry, RealizationResult, ReasonerAdapter, ReasonerCache,
     ReasonerCacheStore, ReasonerError, ReasonerId, ReasonerInput, ReasonerProfile,
-    ReasonerSnapshot, ReasonerWarning, WorkspaceInputLoader,
+    ReasonerSnapshot, ReasonerWarning, SameAsCluster, WorkspaceInputLoader,
 };

@@ -421,6 +421,7 @@ fi
 
 check_file_contains ".github/workflows/release.yml" "publish_with_pause ontocore-obo" "release.yml publishes ontocore-obo"
 check_file_contains ".github/workflows/release.yml" "publish_with_pause ontocore-edit" "release.yml publishes ontocore-edit"
+check_file_contains ".github/workflows/release.yml" "publish_with_pause ontocore-swrl" "release.yml publishes ontocore-swrl"
 check_file_contains ".github/workflows/release.yml" "publish_with_pause ontocore" "release.yml publishes ontocore"
 
 # docs/contributing.md should track root CONTRIBUTING.md (OntoCore branding)
@@ -1162,6 +1163,108 @@ while IFS= read -r readme; do
 done < <(find crates -name README.md -print)
 if [[ "$STALE_CRATE_PIN_FAIL" -eq 0 ]]; then
   echo "ok: crate README version pins match tagged minor ${TAGGED_MINOR}"
+fi
+
+# Reject previous-minor "current release" pins when tagged has moved on (e.g. 0.22 leftovers after 0.23)
+# Historical changelog/migration/design/parity trees are excluded.
+if [[ "$TAGGED_MINOR" =~ ^0\.([0-9]+)$ ]]; then
+  PREV_TAGGED_PART="${BASH_REMATCH[1]}"
+  if [[ "$PREV_TAGGED_PART" -gt 0 ]]; then
+    STALE_PREV_MINOR="0.$((PREV_TAGGED_PART - 1))"
+    STALE_PREV_FULL="${STALE_PREV_MINOR}.0"
+    PREV_PIN_EXCLUDES=(
+      --glob '!**/changelog.md'
+      --glob '!**/CHANGELOG.md'
+      --glob '!**/migration/**'
+      --glob '!**/design/**'
+      --glob '!**/protege-parity/**'
+      --glob '!**/PROTEGE_REVERSE_ENGINEERING/**'
+      --glob '!**/adr/**'
+      --glob '!**/cursor-prompts/**'
+    )
+    PREV_PIN_PATHS=(README.md docs extension crates CONTRIBUTING.md ROADMAP.md ARCHITECTURE.md VISION.md SECURITY.md)
+    # Install / Cargo pin leftovers that claim the previous release is current
+    if rg -q "VERSION=${STALE_PREV_FULL}" "${PREV_PIN_PATHS[@]}" "${PREV_PIN_EXCLUDES[@]}" 2>/dev/null; then
+      echo "FAIL: stale VERSION=${STALE_PREV_FULL} found (expected ${TAGGED_VERSION})" >&2
+      rg -n "VERSION=${STALE_PREV_FULL}" "${PREV_PIN_PATHS[@]}" "${PREV_PIN_EXCLUDES[@]}" 2>/dev/null || true
+      fail=1
+    else
+      echo "ok: no stale VERSION=${STALE_PREV_FULL} pins"
+    fi
+    if rg -q "--version ${STALE_PREV_FULL}" "${PREV_PIN_PATHS[@]}" "${PREV_PIN_EXCLUDES[@]}" 2>/dev/null; then
+      echo "FAIL: stale --version ${STALE_PREV_FULL} found (expected ${TAGGED_VERSION})" >&2
+      rg -n "--version ${STALE_PREV_FULL}" "${PREV_PIN_PATHS[@]}" "${PREV_PIN_EXCLUDES[@]}" 2>/dev/null || true
+      fail=1
+    else
+      echo "ok: no stale --version ${STALE_PREV_FULL} pins"
+    fi
+    if rg -q "ontocore = \"${STALE_PREV_MINOR}\"" "${PREV_PIN_PATHS[@]}" "${PREV_PIN_EXCLUDES[@]}" 2>/dev/null; then
+      echo "FAIL: stale ontocore = \"${STALE_PREV_MINOR}\" pin found (expected \"${TAGGED_MINOR}\")" >&2
+      rg -n "ontocore = \"${STALE_PREV_MINOR}\"" "${PREV_PIN_PATHS[@]}" "${PREV_PIN_EXCLUDES[@]}" 2>/dev/null || true
+      fail=1
+    else
+      echo "ok: no stale ontocore = \"${STALE_PREV_MINOR}\" pins"
+    fi
+    if rg -q "Canonical pin: \*\*\`${STALE_PREV_FULL}\`\*\*" docs/install.md 2>/dev/null; then
+      echo "FAIL: docs/install.md Canonical pin still ${STALE_PREV_FULL}" >&2
+      fail=1
+    else
+      echo "ok: install.md Canonical pin not ${STALE_PREV_FULL}"
+    fi
+    # "latest tagged is previous" claims on primary surfaces
+    for stale_claim_file in \
+      docs/install.md \
+      docs/supported-formats.md \
+      docs/guides/capabilities-by-format.md \
+      docs/guides/enterprise-eval.md \
+      docs/guides/enterprise-deployment.md \
+      docs/guides/lgpl-compliance.md \
+      docs/guides/platform-compatibility.md \
+      docs/guides/protege-decision.md \
+      docs/guides/production-readiness.md \
+      docs/guides/versions-and-channels.md \
+      docs/lsp-api.md \
+      docs/faq.md \
+      docs/known-limitations.md \
+      docs/ontocore/index.md; do
+      if [[ ! -f "$stale_claim_file" ]]; then
+        continue
+      fi
+      if grep -qE "latest tagged.*v?${STALE_PREV_FULL}|v${STALE_PREV_FULL} \(latest tagged\)|Latest tagged( release)?: v${STALE_PREV_FULL}|Published crates are( at)? \*\*${STALE_PREV_MINOR}\.x\*\*|Recommended installs \(v${STALE_PREV_FULL}\)|Documents behavior in \*\*OntoCore v${STALE_PREV_FULL}\*\*|Canonical pin: \*\*\`${STALE_PREV_FULL}\`\*\*|badge/[a-z0-9-]+-${STALE_PREV_FULL}-" "$stale_claim_file" 2>/dev/null; then
+        echo "FAIL: $stale_claim_file still treats ${STALE_PREV_FULL} / ${STALE_PREV_MINOR}.x as current/latest" >&2
+        fail=1
+      fi
+    done
+    if [[ "$fail" -eq 0 ]]; then
+      echo "ok: no previous-minor (${STALE_PREV_MINOR}) current-release claims on primary surfaces"
+    fi
+    # Tutorial / examples curl tags must not pin the previous release when describing current samples
+    for curl_file in docs/guides/first-success.md docs/examples/index.md docs/vscode-install.md; do
+      if grep -qE "ontocode/v${STALE_PREV_FULL}/|releases/tag/v${STALE_PREV_FULL}" "$curl_file" 2>/dev/null; then
+        echo "FAIL: $curl_file still downloads samples from v${STALE_PREV_FULL} (expected v${TAGGED_VERSION})" >&2
+        fail=1
+      fi
+    done
+    if [[ "$fail" -eq 0 ]]; then
+      echo "ok: tutorial/example sample URLs not pinned to v${STALE_PREV_FULL}"
+    fi
+    # SHIPPED must not list SWRL under Manchester "Not shipped" when the matrix claims SWRL shipped
+    if grep -qE 'SWRL validate / author.*Shipped' docs/SHIPPED.md 2>/dev/null \
+      && grep -qE '\*\*Not shipped:\*\*.*SWRL' docs/SHIPPED.md 2>/dev/null; then
+      echo "FAIL: docs/SHIPPED.md both ships SWRL and lists SWRL under Not shipped" >&2
+      fail=1
+    else
+      echo "ok: SHIPPED SWRL ship/not-shipped consistency"
+    fi
+    # Roadmap must not mark the tagged release as Planned
+    if grep -qE "\| ${TAGGED_MINOR##*.} \| v${TAGGED_MINOR} \| F \| Planned" docs/roadmap.md 2>/dev/null; then
+      echo "FAIL: docs/roadmap.md still marks v${TAGGED_MINOR} as Planned" >&2
+      fail=1
+    else
+      echo "ok: docs/roadmap.md v${TAGGED_MINOR} not Planned"
+    fi
+    check_file_contains "mkdocs.yml" "migration/v${TAGGED_MINOR}.md" "mkdocs current migration guide"
+  fi
 fi
 
 if [[ "$fail" -ne 0 ]]; then

@@ -99,6 +99,47 @@ export interface ReasonerSnapshot {
   warnings: ReasonerWarning[];
   duration_ms: number;
   classified_at: number;
+  consistency?: {
+    consistent: boolean;
+    complete: boolean;
+    ontology_consistent: boolean;
+    abox_clashes: string[];
+    unsatisfiable: string[];
+  };
+  realization?: {
+    profile_used: string;
+    individuals: Array<{
+      individual_iri: string;
+      types: string[];
+      most_specific: string[];
+      asserted: string[];
+      inferred: string[];
+    }>;
+    duration_ms: number;
+  };
+  inferred_assertions?: {
+    class_assertions: Array<{ individual_iri: string; class_iri: string }>;
+    object_property_assertions: Array<{
+      subject_iri: string;
+      property_iri: string;
+      object_iri: string;
+    }>;
+    same_as_clusters: Array<{ individuals: string[] }>;
+  };
+}
+
+export interface CheckInstanceParams {
+  individual_iri: string;
+  class_iri: string;
+  profile?: string;
+}
+
+export interface CheckInstanceResult {
+  individual_iri: string;
+  class_iri: string;
+  entailed: boolean;
+  profile_used: string;
+  duration_ms: number;
 }
 
 export interface RunReasonerParams {
@@ -441,6 +482,44 @@ export interface ParseManchesterResult {
   tree: unknown;
   diagnostics: PatchDiagnostic[];
   completions: ManchesterCompletions;
+}
+
+export interface SwrlDiagnostic {
+  code: string;
+  severity: "error" | "warning" | "info";
+  message: string;
+}
+
+export interface SwrlRuleListItem {
+  id: string;
+  label: string;
+  body_count: number;
+  head_count: number;
+  enabled: boolean;
+  rule_json?: string;
+  document_uri?: string;
+  ontology_iri?: string;
+}
+
+export interface ListSwrlRulesResult {
+  rules: SwrlRuleListItem[];
+}
+
+export interface ValidateSwrlRuleParams {
+  rule_json: string;
+}
+
+export interface ValidateSwrlRuleResult {
+  diagnostics: SwrlDiagnostic[];
+}
+
+export interface ParseSwrlRuleParams {
+  rule_json: string;
+}
+
+export interface ParseSwrlRuleResult {
+  rule: unknown;
+  diagnostics: SwrlDiagnostic[];
 }
 
 export interface SavedQuery {

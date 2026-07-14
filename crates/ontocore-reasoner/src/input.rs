@@ -62,7 +62,8 @@ impl WorkspaceInputLoader {
         let mut ontology = Ontology::new();
 
         for file in &files {
-            let loaded = if let Some(text) = self.document_override_text(&file.path) {
+            let override_text = self.document_override_text(&file.path).cloned();
+            let loaded = if let Some(ref text) = override_text {
                 // Hash override body so open-buffer edits invalidate the reasoner cache.
                 hasher.update(file.path.to_string_lossy().as_bytes());
                 hasher.update(text.as_bytes());
@@ -72,6 +73,13 @@ impl WorkspaceInputLoader {
                 load_workspace_file(&file.path, file.format, None, file)?
             };
             merge_ontology(&mut ontology, loaded)?;
+            if let Some(ref text) = override_text {
+                crate::swrl_run::inject_swrl_from_turtle(&mut ontology, text);
+            } else if matches!(file.format, OntologyFormat::Turtle) {
+                if let Ok(text) = std::fs::read_to_string(&file.path) {
+                    crate::swrl_run::inject_swrl_from_turtle(&mut ontology, &text);
+                }
+            }
         }
 
         for (path, text) in &self.document_overrides {
@@ -92,6 +100,7 @@ impl WorkspaceInputLoader {
             };
             let loaded = load_workspace_file(path, format, Some(text), &file_stub)?;
             merge_ontology(&mut ontology, loaded)?;
+            crate::swrl_run::inject_swrl_from_turtle(&mut ontology, text);
         }
 
         let asserted_hierarchy = asserted_hierarchy_from_ontology(&ontology);

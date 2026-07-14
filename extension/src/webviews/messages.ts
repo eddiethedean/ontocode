@@ -7,6 +7,8 @@ export type PanelKind =
   | "refactorPreview"
   | "queryWorkbench"
   | "manchesterEditor"
+  | "ruleBrowser"
+  | "ruleEditor"
   | "semanticDiff"
   | "imports"
   | "metrics"
@@ -202,6 +204,7 @@ export interface ReasonerResultPayload {
   new_inferences: Array<{ child: string; parent: string }>;
   warnings: Array<{ code: string; message: string; suggested_profile?: string }>;
   duration_ms: number;
+  snapshot?: import("../lsp/protocol").ReasonerSnapshot;
 }
 
 export interface ExplanationStepPayload {
@@ -245,6 +248,31 @@ export type HostMessage =
   | { type: "queryResult"; runId: number; result?: TabularQueryResult; error?: string }
   | { type: "manchesterInit"; entityIri: string; axiomKind: string; expression: string; completions: ManchesterCompletions }
   | { type: "manchesterValidation"; seq: number; result?: ManchesterValidationResult; error?: string }
+  | {
+      type: "swrlRulesLoaded";
+      rules: Array<{
+        id: string;
+        label: string;
+        body_count: number;
+        head_count: number;
+        enabled: boolean;
+        rule_json?: string;
+        document_uri?: string;
+        ontology_iri?: string;
+      }>;
+    }
+  | {
+      type: "swrlRuleInit";
+      ruleJson: string;
+      documentUri: string;
+      ontologyIri: string;
+    }
+  | {
+      type: "swrlRuleValidation";
+      seq: number;
+      diagnostics?: Array<{ code: string; severity: string; message: string }>;
+      error?: string;
+    }
   | { type: "loading" }
   | { type: "semanticDiffData"; diff: DiffPayload }
   | { type: "loadImports"; payload: ImportsDocumentPayload }
@@ -315,6 +343,15 @@ export type WebviewMessage =
   | { type: "exportGraph"; format: "json" | "csv"; payload: string; suggestedName?: string }
   | { type: "validateManchester"; expression: string; axiomKind: string; seq: number }
   | { type: "applyManchester"; expression: string; axiomKind: string; previewOnly: boolean }
+  | { type: "refreshSwrlRules" }
+  | {
+      type: "openSwrlRuleEditor";
+      ruleJson?: string;
+      documentUri?: string;
+      ontologyIri?: string;
+    }
+  | { type: "validateSwrlRule"; ruleJson: string; seq: number }
+  | { type: "applySwrlRule"; ruleJson: string; previewOnly: boolean }
   | { type: "copyMarkdown" }
   | { type: "setFocus"; focus: CurrentFocus }
   | { type: "showNotification"; message: string; level?: "info" | "warning" | "error" }

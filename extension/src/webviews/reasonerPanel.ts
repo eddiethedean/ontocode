@@ -24,6 +24,7 @@ function toPayload(result: RunReasonerResult): ReasonerResultPayload {
     new_inferences: result.new_inferences,
     warnings: result.warnings,
     duration_ms: result.duration_ms,
+    snapshot: result.snapshot,
   };
 }
 

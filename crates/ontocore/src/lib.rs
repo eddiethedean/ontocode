@@ -45,6 +45,7 @@ pub mod parser;
 pub mod query;
 pub mod reasoner;
 pub mod refactor;
+pub mod swrl;
 pub mod workspace;
 
 #[cfg(feature = "lsp")]

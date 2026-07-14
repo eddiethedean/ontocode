@@ -469,8 +469,13 @@ pub fn explain_unsatisfiable_dl(ontology: &Ontology, class_iri: &str) -> Result<
     if !taxonomy.unsatisfiable.contains(&class_id) {
         return Err(ReasonerError::ExplanationUnavailable(class_iri.to_string()));
     }
-    // DL classify has no Ontologos proof traces; fall back to weaker engines and label the
-    // actual profile that produced the justification (#66).
+
+    // DL-first: use native only when an asserted ⊥ path exists; else annotated fallback.
+    if let Some(native) = explain_unsatisfiable_dl_native(ontology, class_iri, class_id) {
+        return Ok(native);
+    }
+
+    // Secondary: weaker-engine traces, clearly labeled as non-primary.
     let (result, via) = if let Ok(r) = explain_unsatisfiable_el(ontology, class_iri) {
         (r, "EL")
     } else if let Ok(r) = explain_unsatisfiable_rl(ontology, class_iri) {
@@ -479,10 +484,78 @@ pub fn explain_unsatisfiable_dl(ontology: &Ontology, class_iri: &str) -> Result<
         (r, "RDFS")
     } else {
         return Err(ReasonerError::ExplanationUnavailable(format!(
-            "{class_iri}: DL reports unsatisfiable but no EL/RL/RDFS justification trace is available"
+            "{class_iri}: DL reports unsatisfiable but no native or EL/RL/RDFS justification is available"
         )));
     };
     Ok(annotate_dl_fallback_explanation(result, via))
+}
+
+/// Native DL explanation: only when an asserted ⊥ path is found.
+/// Returns `None` so callers can fall back to EL/RL/RDFS justifications.
+fn explain_unsatisfiable_dl_native(
+    ontology: &Ontology,
+    class_iri: &str,
+    class_id: EntityId,
+) -> Option<ExplanationResult> {
+    let nothing = "http://www.w3.org/2002/07/owl#Nothing";
+    let mut steps = Vec::new();
+    let mut index = 0usize;
+    let mut reached_bottom = false;
+
+    // Walk asserted superclass chain toward owl:Nothing.
+    let mut frontier = vec![class_id];
+    let mut seen = HashSet::new();
+    while let Some(cur) = frontier.pop() {
+        if !seen.insert(cur) {
+            continue;
+        }
+        let Some(cur_iri) = entity_iri_opt(ontology, cur) else {
+            continue;
+        };
+        for &sup in ontology.direct_superclasses(cur) {
+            let Some(sup_iri) = entity_iri_opt(ontology, sup) else {
+                continue;
+            };
+            steps.push(ExplanationStep {
+                index,
+                rule: "dl_asserted_subclass".into(),
+                display: format!("{cur_iri} SubClassOf {sup_iri}"),
+                subject_iri: Some(cur_iri.clone()),
+                object_iri: Some(sup_iri.clone()),
+            });
+            index += 1;
+            if is_owl_nothing(&sup_iri) || ontology.lookup_entity(nothing) == Some(sup) {
+                steps.push(ExplanationStep {
+                    index,
+                    rule: "dl_bottom".into(),
+                    display: format!("{cur_iri} is unsatisfiable (⊑ owl:Nothing)"),
+                    subject_iri: Some(cur_iri.clone()),
+                    object_iri: Some(nothing.into()),
+                });
+                reached_bottom = true;
+                break;
+            }
+            frontier.push(sup);
+        }
+        if reached_bottom {
+            break;
+        }
+    }
+
+    if !reached_bottom {
+        return None;
+    }
+
+    let text = format!(
+        "DL native explanation for {class_iri}\n{}",
+        steps
+            .iter()
+            .map(|s| format!("{}. {}", s.index + 1, s.display))
+            .collect::<Vec<_>>()
+            .join("\n")
+    );
+
+    Some(ExplanationResult { class_iri: class_iri.to_string(), steps, text })
 }
 
 fn annotate_dl_fallback_explanation(mut result: ExplanationResult, via: &str) -> ExplanationResult {
@@ -565,5 +638,28 @@ mod tests {
             result.steps
         );
         assert!(result.text.contains("Composed justification"));
+    }
+
+    #[test]
+    fn dl_native_only_when_asserted_bottom_path_exists() {
+        let ontology = unsat_ontology();
+        let nothing = "http://www.w3.org/2002/07/owl#Nothing";
+        let b = "http://example.org/reasoner-unsat#B";
+        let b_id = ontology.lookup_entity(b).expect("B");
+        // Fixture asserts B ⊑ owl:Nothing directly → native path.
+        let native = explain_unsatisfiable_dl_native(&ontology, b, b_id);
+        assert!(
+            native.is_some(),
+            "B has an asserted path to owl:Nothing and should explain natively"
+        );
+        let native = native.expect("native");
+        assert!(native.steps.iter().any(|s| s.rule == "dl_bottom"));
+        assert!(native.steps.iter().any(|s| s.object_iri.as_deref() == Some(nothing)));
+
+        // Class with no asserted ⊑ Nothing chain → native declines (caller may fall back).
+        let mut ont = Ontology::new();
+        let orphan = "http://example.org/orphan#C";
+        let cid = ont.entity_id(orphan, ontologos_core::EntityKind::Class).expect("declare");
+        assert!(explain_unsatisfiable_dl_native(&ont, orphan, cid).is_none());
     }
 }

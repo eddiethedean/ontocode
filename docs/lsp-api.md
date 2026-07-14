@@ -1,6 +1,6 @@
-# OntoCore LSP API (v0.22)
+# OntoCore LSP API (v0.23)
 
-> **Status:** Documents behavior in **OntoCore v0.22.0**. Pre-1.0 APIs may change.
+> **Status:** Documents behavior in **OntoCore v0.23.0**. Pre-1.0 APIs may change.
 > Canonical feature list: [What ships today](SHIPPED.md).
 
 This document describes **what ships today** in `ontocore-lsp`. For the **v1.0 target** (extended plugin methods), see [LSP_SPEC.md](design/LSP_SPEC.md).
@@ -9,7 +9,7 @@ This document describes **what ships today** in `ontocore-lsp`. For the **v1.0 t
 
 If you are integrating OntoCore outside VS Code (custom editor, scripts, automation), treat the JSON schema as the **canonical, machine-readable contract** for this release:
 
-- **LSP JSON Schema:** [`lsp-protocol.schema.json`](lsp-protocol.schema.json) (ships with product **v0.22.0**)
+- **LSP JSON Schema:** [`lsp-protocol.schema.json`](lsp-protocol.schema.json) (ships with product **v0.23.0**)
 
 ### Schema vs product version
 
@@ -20,7 +20,7 @@ The schema file is the wire contract for the **current product release**. Until 
 Until v1.0, minor releases may change request/response fields.
 For stable integrations:
 
-- Pin OntoCore to **0.22.0** in your tooling.
+- Pin OntoCore to **0.23.0** in your tooling.
 - Prefer consuming `lsp-protocol.schema.json` from the same tagged release you deploy.
 
 ## Wire format
@@ -392,6 +392,8 @@ Returns graph nodes and edges for visualization webviews.
 
 **Result:** `{ graph: { nodes, edges, truncated, graph_kind } }`
 
+**Errors:** `NOT_INDEXED`, `GRAPH_FAILED`, `INVALID_PARAMS` (e.g. missing `root_iri` for `neighborhood`)
+
 ### `ontocore/runRobot` (v0.7)
 
 Runs a ROBOT CLI subcommand.
@@ -400,6 +402,8 @@ Runs a ROBOT CLI subcommand.
 
 **Result:** `{ exit_code, stdout, stderr }`
 
+**Errors:** `ROBOT_FAILED` (ROBOT missing, non-zero exit, or I/O failure), `INVALID_PARAMS`
+
 ### `ontocore/findUsages` (v0.8)
 
 Return structured IRI usages across the workspace catalog and Turtle text spans.
@@ -407,6 +411,8 @@ Return structured IRI usages across the workspace catalog and Turtle text spans.
 **Params:** `{ "iri": "http://example.org/people#Person" }`
 
 **Result:** `{ "usages": UsageSummary[] }` — each usage has `iri`, `referenced_iri`, `file`, `line`, `column`, `kind`, `context` (byte ranges are not serialized on the wire).
+
+**Errors:** `NOT_INDEXED`, `INVALID_PARAMS`
 
 ### `ontocore/previewRefactor` (v0.8)
 
@@ -423,6 +429,8 @@ Build a refactor plan without writing files.
 
 **Result:** `RefactorPlan` — `{ changes: FileChange[], warnings: string[] }` where each change has `path`, `preview_text`, `original_text`, and `hunks`.
 
+**Errors:** `NOT_INDEXED`, `REFACTOR_FAILED`, `INVALID_PARAMS`
+
 ### `ontocore/applyRefactor` (v0.8)
 
 Apply a previously previewed refactor plan. The server re-previews from `request`, verifies the submitted `plan` matches, validates paths against the workspace jail, writes atomically, syncs open buffers, and reindexes.
@@ -430,6 +438,8 @@ Apply a previously previewed refactor plan. The server re-previews from `request
 **Params:** `{ "plan": RefactorPlan, "request": RefactorRequest, "preview_only"?: boolean }`
 
 **Result:** `{ "files_written": number, "reindex_warning"?: string }`
+
+**Errors:** `NOT_INDEXED`, `REFACTOR_FAILED`, `INVALID_PARAMS`
 
 ### `ontocore/semanticDiff` (v0.10+)
 
@@ -570,7 +580,7 @@ Set the active ontology id used for new-axiom targeting.
 
 **Result:** `{ "active_ontology_id": string }`
 
-**Errors:** `NOT_FOUND` (id not in the indexed catalog), `NOT_INDEXED`
+**Errors:** `ENTITY_NOT_FOUND` (id not in the indexed catalog), `NOT_INDEXED`
 
 ### `ontocore/deleteImpact` (v0.17+)
 
@@ -604,6 +614,52 @@ Plugin diagnostics use `code` values like `plugin:<id>:<code>` and LSP `source` 
 **Errors:** `NOT_INDEXED`, `INDEX_FAILED` (plugin not found, missing permission, unsupported action, subprocess failure, or export error)
 
 `getCatalogSnapshot` includes plugin diagnostics merged after index (same wire codes).
+
+### `ontocore/checkInstance` (v0.23+)
+
+Check whether an individual is an instance of a class (ABox).
+
+**Params:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `individual_iri` | string | Individual IRI |
+| `class_iri` | string | Class IRI |
+| `profile` | string? | Reasoner profile (default `rl`) |
+
+**Result:** `{ individual_iri, class_iri, entailed, profile_used, duration_ms }`
+
+**Errors:** `NOT_INDEXED`, `REASONER_FAILED`, `INVALID_PARAMS`
+
+### `ontocore/listSwrlRules` (v0.23+)
+
+List SWRL rules found in open Turtle buffers and indexed `.ttl` documents (`ontocore:swrlRule` JSON).
+
+**Params:** none
+
+**Result:** `{ rules: SwrlRuleListItem[] }` — each item includes id/label, body/head counts, enabled flag, optional document URI
+
+**Errors:** none (returns an empty list when no rules are present; indexing is recommended but not required for open buffers)
+
+### `ontocore/validateSwrlRule` (v0.23+)
+
+Validate a SWRL rule JSON string (builtins / DLSafe diagnostics). Does not write the ontology.
+
+**Params:** `{ rule_json: string }`
+
+**Result:** `{ diagnostics: SwrlDiagnostic[] }`
+
+**Errors:** `INVALID_PARAMS` (unparseable rule JSON)
+
+### `ontocore/parseSwrlRule` (v0.23+)
+
+Parse SWRL rule JSON into the OntoCore SWRL IR.
+
+**Params:** `{ rule_json: string }`
+
+**Result:** `{ rule: SwrlRule }`
+
+**Errors:** `INVALID_PARAMS` (unparseable rule JSON)
 
 ## Structured errors
 

@@ -1,6 +1,6 @@
 # Production readiness and pilot criteria
 
-This page states what OntoCode / OntoCore **v0.22.0** (latest tagged) is appropriate for in production-like environments. It is not legal advice and does not replace your organization's risk review.
+This page states what OntoCode / OntoCore **v0.23.0** (latest tagged) is appropriate for in production-like environments. It is not legal advice and does not replace your organization's risk review.
 
 Canonical capability matrix: [What ships today](../SHIPPED.md).
 
@@ -8,8 +8,8 @@ Canonical capability matrix: [What ships today](../SHIPPED.md).
 
 | Level | Version | Meaning |
 |-------|---------|---------|
-| **Pre-1.0** | **0.22.x (latest tagged)** | Pin `cargo install ontocore-cli --locked --version 0.22.0` in CI. Library APIs may change until [v1.0](../design/v1.0_BACKLOG.md). |
-| **Stable CI gates** | 0.22.x | `ontocore validate`, `ontocore classify`, and `ontocore diff` are documented for CI — see [workspace limits](../workspace-limits.md). |
+| **Pre-1.0** | **0.23.x (latest tagged)** | Pin `cargo install ontocore-cli --locked --version 0.23.0` in CI. Library APIs may change until [v1.0](../design/v1.0_BACKLOG.md). |
+| **Stable CI gates** | 0.23.x | `ontocore validate`, `ontocore classify`, and `ontocore diff` are documented for CI — see [workspace limits](../workspace-limits.md). |
 | **In development** | Next unreleased minor on `main` | May preview upcoming work — pin installs to [TAGGED_RELEASE](../TAGGED_RELEASE), not workspace `Cargo.toml`. |
 | **v1.0 target** | Planned | Protégé-competitive OWL 2 DL + OBO in VS Code — [Protégé vs OntoCode](protege-decision.md); capability truth: [SHIPPED](../SHIPPED.md) + [known limitations](../known-limitations.md). |
 
@@ -58,7 +58,7 @@ Suggested pilot duration: **4–8 weeks** with 3–10 engineers on one ontology 
 | LSP `ontocore/*` JSON | May change pre-1.0 |
 | Rust `ontocore-*` crate APIs | May change pre-1.0 |
 
-Pin CLI version in CI: release binary with `VERSION=0.22.0` or `cargo install ontocore-cli --locked --version 0.22.0`.
+Pin CLI version in CI: release binary with `VERSION=0.23.0` or `cargo install ontocore-cli --locked --version 0.23.0`.
 
 ## Support and incident response
 
@@ -68,7 +68,7 @@ Pin CLI version in CI: release binary with `VERSION=0.22.0` or `cargo install on
 | Security reports | [GitHub Security Advisories](https://github.com/eddiethedean/ontocode/security/advisories/new) — not public issues |
 | Acknowledgment target | Within a few business days ([SECURITY.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/SECURITY.md)) |
 | Patch SLA | **No committed SLA** — track [GitHub Security Advisories](https://github.com/eddiethedean/ontocode/security/advisories) for your version |
-| Supported versions | 0.22.x latest tagged; prior minors per [security policy](../security.md) |
+| Supported versions | 0.23.x latest tagged; prior minors per [security policy](../security.md) |
 
 Enterprises requiring contractual SLAs should treat OntoCode as **internal OSS adoption** with your own escalation path to maintainers via GitHub.
 

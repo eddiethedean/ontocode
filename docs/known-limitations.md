@@ -1,6 +1,6 @@
 # Known limitations
 
-> **Latest tagged release: v0.22.0.** Pin CI to a tagged version from [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) or crates.io — see [What ships today](SHIPPED.md) and [Versions & channels](guides/versions-and-channels.md). **Not a full Protégé replacement today** — coexistence and pilot workflows are the supported path until **1.0**.
+> **Latest tagged release: v0.23.0.** Pin CI to a tagged version from [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) or crates.io — see [What ships today](SHIPPED.md) and [Versions & channels](guides/versions-and-channels.md). **Not a full Protégé replacement today** — coexistence and pilot workflows are the supported path until **1.0**.
 
 Honest limits for evaluators and new users.
 
@@ -37,11 +37,11 @@ Plugin host **MVP shipped** (manifest, permissions, views, preferences, context 
 
 ## API stability (pre-1.0)
 
-Published crates are **0.22.x**. Library APIs, LSP JSON, and SQL table columns may change between minor releases until v1.0. Pin in CI: `cargo install ontocore-cli --locked --version 0.22.0`.
+Published crates are **0.23.x**. Library APIs, LSP JSON, and SQL table columns may change between minor releases until v1.0. Pin in CI: `cargo install ontocore-cli --locked --version 0.23.0`.
 
 ## Reasoning
 
-EL / RL / RDFS / DL classification ships via **Ontologos**. Explanations are **EL-first**; DL clash traces are partial. Start / Synchronize / Classify / Consistency are distinct client workflows; **Stop** cancels the in-flight client request and ignores late results (the server may still finish CPU-bound classify). See [Reasoner guide](guides/reasoner.md).
+EL / RL / RDFS / DL classification ships via **Ontologos 1.1.4**. Explanations are **DL-first** for the DL profile (with EL/RL/RDFS alternatives). Realization and instance checking ship in v0.23. **Stop** sets an engine cancel flag and ignores late results. See [Reasoner guide](guides/reasoner.md).
 
 ## Layout persistence
 

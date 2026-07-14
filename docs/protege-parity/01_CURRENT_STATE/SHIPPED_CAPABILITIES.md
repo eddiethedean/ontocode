@@ -1,22 +1,27 @@
-# SHIPPED_CAPABILITIES
+# SHIPPED_CAPABILITIES (engineering snapshot — not product SSOT)
+
+> **Not the public capability matrix.** For adopters and evaluators, use **[`docs/SHIPPED.md`](../../SHIPPED.md)** only.
+> This file is a **Protégé-parity engineering baseline** (historically frozen around OntoCode **v0.18.2**). Do not cite it in procurement or Marketplace claims.
 
 # Shipped Capabilities
 
-**Status:** Living Document\
-**Repository Baseline:** OntoCode v0.18.2 (audit baseline)
+**Status:** Living Document (engineering)\
+**Repository Baseline:** OntoCode v0.18.2 (audit baseline — outdated relative to current tagged release)
 
 ------------------------------------------------------------------------
 
 # Purpose
 
-This document catalogs the major capabilities that are already
-implemented in the current OntoCode repository. It complements the
+This document catalogs the major capabilities that were already
+implemented at the parity-audit baseline. It complements the
 parity documents by distinguishing shipped functionality from planned
-work.
+work **for engineers working in `docs/protege-parity/`**.
 
 A capability may be marked as **shipped** even if additional work is
 required to achieve full Protégé parity. Remaining gaps are tracked
 separately in `CURRENT_LIMITATIONS.md` and `PARITY_GAP_ANALYSIS.md`.
+
+**Product truth:** [docs/SHIPPED.md](../../SHIPPED.md) (latest tagged release).
 
 ------------------------------------------------------------------------
 

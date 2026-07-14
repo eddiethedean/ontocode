@@ -4,7 +4,7 @@
 
 **Epic ID:** EPIC-005\
 **GitHub:** https://github.com/eddiethedean/ontocode/issues/251\
-**Status:** Planned\
+**Status:** Complete (v0.23.0)\
 **Priority:** P0 (Release Blocking)\
 **Target Release:** v0.23
 

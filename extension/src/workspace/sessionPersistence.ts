@@ -46,6 +46,8 @@ export class WorkspaceSessionPersistence {
         "ontocodeExplanation",
         "ontocodeSemanticDiff",
         "ontocodeManchesterEditor",
+        "ontocodeRuleBrowser",
+        "ontocodeRuleEditor",
       ];
       for (const viewType of viewTypes) {
         // Only panels that were explicitly opened (remembered). Never inject

@@ -1261,6 +1261,7 @@ dependencies = [
 name = "ontocore-plugin"
 version = "0.21.0"
 dependencies = [
+ "libc",
  "ontocore-catalog",
  "ontocore-core",
  "ontocore-docs",

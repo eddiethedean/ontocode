@@ -33,7 +33,7 @@ CLI install options (separate from the extension): [Install](install.md) · [CLI
 
 For a full walkthrough, see [First success in 10 minutes](guides/first-success.md).
 
-**Tutorial pack:** download `ontocode-tutorial.zip` from [GitHub Releases](https://github.com/eddiethedean/ontocode/releases/tag/v0.22.0) (same tag as the VSIX). Built with `./scripts/package-tutorial-zip.sh`. If missing, use the curl commands in [first-success](guides/first-success.md) or open `fixtures/` from a clone.
+**Tutorial pack:** download `ontocode-tutorial.zip` from [GitHub Releases](https://github.com/eddiethedean/ontocode/releases/tag/v0.23.0) (same tag as the VSIX). Built with `./scripts/package-tutorial-zip.sh`. If missing, use the curl commands in [first-success](guides/first-success.md) or open `fixtures/` from a clone.
 
 > **Multi-root workspaces (v0.10+):** All workspace folders are indexed on open. **OntoCode: Index Workspace** may prompt you to pick a folder when multiple roots are open.
 

@@ -126,7 +126,8 @@ Detailed notes for v0.9–v0.21 are in the [CHANGELOG](https://github.com/eddiet
 
 **Shipped:** named classes; `and` / `or` / `not`; `some` / `only` / `value` / `Self`; OneOf `{…}`; `min` / `max` / `exact` cardinality; nested restrictions; data restrictions on xsd types; `SubClassOf`, `EquivalentClasses`, and `DisjointClasses` via Manchester editor or patch JSON; domain/range; property chains; HasKey and remaining RBox/ABox ops via patch JSON / inspector.
 
-**Not shipped:** inline Manchester autocomplete in the text buffer; SWRL. Remaining 1.0 targets: [known limitations](known-limitations.md) · [Protégé vs OntoCode](guides/protege-decision.md).
+**Not shipped:** inline Manchester autocomplete in the text buffer.
+Remaining 1.0 targets: [known limitations](known-limitations.md) · [Protégé vs OntoCode](guides/protege-decision.md).
 
 ## Known limitations
 
@@ -136,7 +137,7 @@ Detailed notes for v0.9–v0.21 are in the [CHANGELOG](https://github.com/eddiet
 | Write-back | **Turtle, OBO, RDF/XML, OWL/XML**; JSON-LD, N-Triples, TriG read-only. XML is semantic re-serialize (not byte-identical). See [Capabilities by format](guides/capabilities-by-format.md) |
 | Refactoring | **Turtle (`.ttl`) only**; extract module uses direct-reference closure |
 | Class hierarchy tree | Named-parent edges; **inferred/combined** after reasoner run |
-| Reasoning | **EL / RL / RDFS / DL / auto** via Ontologos 1.0 (HermiT parity) |
+| Reasoning | **EL / RL / RDFS / DL / auto** via Ontologos 1.x (not certified HermiT-identical) |
 | CLI release binaries | Linux x64 only; macOS/Windows use `cargo install` or bundled LSP in VSIX |
 | Scale | See [workspace limits](workspace-limits.md) (includes walk entry cap) |
 

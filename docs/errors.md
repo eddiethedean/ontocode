@@ -52,7 +52,7 @@ Custom `ontocore/*` method failures return JSON-RPC errors with `data` containin
 |------|------|------------------------|
 | `INVALID_PARAMS` | Malformed or unknown method parameters | Fix request JSON; see [lsp-api.md](lsp-api.md) |
 | `NOT_INDEXED` | Catalog methods called before first index | Run OntoCode: Index Workspace |
-| `ENTITY_NOT_FOUND` | `getEntity` IRI not in catalog | Check IRI spelling / re-index |
+| `ENTITY_NOT_FOUND` | `getEntity` / `setActiveOntology` id or IRI not in catalog | Check IRI/id spelling / re-index |
 | `PATCH_INVALID` | Patch JSON invalid or entity missing | Check patch parameters and entity IRIs |
 | `UNSUPPORTED_FORMAT` | Write-back on a read-only format | Write-back is supported for **Turtle**, **OBO**, **RDF/XML**, and **OWL/XML**. Convert JSON-LD / N-Triples / TriG before editing — see [supported-formats](supported-formats.md) |
 | `INDEX_FAILED` | Indexing failed (parse, limits, I/O) **or plugin host failure** (`listPlugins`, `runPlugin`) | Check ontology files; verify plugin manifest and subprocess entry |

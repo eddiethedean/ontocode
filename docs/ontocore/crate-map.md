@@ -32,6 +32,7 @@ use ontocore::catalog::IndexBuilder;  // lower-level
 | `ontocore-edit` | Semantic transaction apply path (v0.20) |
 | `ontocore-diagnostics` | Lint rules |
 | `ontocore-reasoner` | OntoLogos classification facade |
+| `ontocore-swrl` | SWRL rule IR, validation, Turtle helpers (v0.23) |
 | `ontocore-refactor` | Workspace refactoring |
 | `ontocore-diff` | Semantic catalog diff, git compare |
 | `ontocore-docs` | Markdown/HTML documentation export |
@@ -59,6 +60,7 @@ use ontocore::catalog::IndexBuilder;  // lower-level
 | `obo` | `ontocore-obo` |
 | `edit` | `ontocore-edit` |
 | `reasoner` | `ontocore-reasoner` |
+| `swrl` | `ontocore-swrl` |
 | `refactor` | `ontocore-refactor` |
 | `diff` | `ontocore-diff` |
 | `docs` | `ontocore-docs` |

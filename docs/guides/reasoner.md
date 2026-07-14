@@ -1,6 +1,8 @@
 # Reasoner guide
 
-OntoCode ships OWL reasoning via [OntoLogos](https://github.com/eddiethedean/ontologos) **1.0.0** — **EL**, **RL**, **RDFS**, **DL** (HermiT parity), and **auto** profile routing.
+OntoCode ships OWL reasoning via [OntoLogos](https://github.com/eddiethedean/ontologos) **1.x** — **EL**, **RL**, **RDFS**, **DL**, and **auto** profile routing.
+
+Results are **not** certified identical to Protégé + HermiT; use dual-tool checks for critical audits.
 
 ## Run in VS Code
 
@@ -32,15 +34,21 @@ ontocore classify ./my-ontologies --profile el --format json
 ontocore classify ./my-ontologies --profile dl --format json
 ontocore classify ./my-ontologies --profile auto --format json
 ontocore explain ./my-ontologies --class 'http://example.org/onto#Invalid' --profile el
+ontocore realize ./my-ontologies --profile rl
+ontocore check-instance ./my-ontologies \
+  --individual 'http://example.org/people#alice' \
+  --class 'http://example.org/people#Person' \
+  --profile rl
 ```
 
 - `classify` exits non-zero when unsatisfiable classes are found — see [workspace-limits.md](../workspace-limits.md).
+- `check-instance` exits non-zero when the instance is not entailed.
 
 CI example: [ci-integration.md](../ci-integration.md).
 
 ## LSP
 
-Custom methods: `ontocore/runReasoner`, `ontocore/getExplanation`. See [LSP API](../lsp-api.md).
+Custom methods: `ontocore/runReasoner`, `ontocore/getExplanation`, `ontocore/checkInstance`, `ontocore/listSwrlRules`. See [LSP API](../lsp-api.md).
 
 ## Profiles
 
@@ -49,7 +57,7 @@ Custom methods: `ontocore/runReasoner`, `ontocore/getExplanation`. See [LSP API]
 | `el` | `ontologos-el` | OWL EL ontologies (default) |
 | `rl` | `ontologos-rl` | OWL RL materialization |
 | `rdfs` | `ontologos-rl` (RDFS) | RDFS entailment |
-| `dl` | `ontologos-dl` | Full OWL 2 DL (HermiT parity) |
+| `dl` | `ontologos-dl` | Full OWL 2 DL (OntoLogos; not certified HermiT-identical) |
 | `auto` | `ontologos-facade` | Profile auto-routing |
 
 ## Dual-stack note

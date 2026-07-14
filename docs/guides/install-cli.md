@@ -4,7 +4,7 @@
 
 Release CLI tarballs are **Linux x64 only** (`x86_64-unknown-linux-gnu`). On **macOS** and **Windows**, install from crates.io with Rust. On **Linux arm64** (and other non-x64 targets), there is no tarball — use `cargo install` below or the LSP bundled in the VSIX ([platform compatibility](platform-compatibility.md)).
 
-Canonical pin: **`0.23.0`** ([TAGGED_RELEASE](../TAGGED_RELEASE)). See also [Getting started](../getting-started.md) and [CI integration](../ci-integration.md) (Linux CI prefers the release tarball).
+Canonical pin: **`0.23.0`** ([TAGGED_RELEASE](../TAGGED_RELEASE)). See also [Install CLI & CI (detail)](../getting-started.md) and [CI integration](../ci-integration.md) (Linux CI prefers the release tarball).
 
 ## Prerequisites
 

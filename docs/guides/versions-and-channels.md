@@ -23,11 +23,11 @@
 
 If Marketplace / Open VSX is behind GitHub, install the release VSIX for the tag you need — see below.
 
-## Recommended installs (v0.22.0)
+## Recommended installs (v0.23.0)
 
 | Goal | Command / link |
 |------|----------------|
-| VS Code | Marketplace **or** download `ontocode-v0.23.0.vsix` from [GitHub Releases](https://github.com/eddiethedean/ontocode/releases/tag/v0.22.0) |
+| VS Code | Marketplace **or** download `ontocode-v0.23.0.vsix` from [GitHub Releases](https://github.com/eddiethedean/ontocode/releases/tag/v0.23.0) |
 | Cursor | [Open VSX](https://open-vsx.org/extension/ontocode/ontocode) or the same VSIX |
 | CLI (pinned) | `cargo install ontocore-cli --locked --version 0.23.0` |
 | CLI (Linux, no compile) | `ontocore-v0.23.0-x86_64-unknown-linux-gnu.tar.gz` from GitHub Releases |
@@ -41,7 +41,7 @@ Marketplace and Open VSX publishes are **manual** steps after the release workfl
 
 ### Playbook: store version ≠ latest tag
 
-1. Check the [latest GitHub Release](https://github.com/eddiethedean/ontocode/releases/latest) tag (example: `v0.22.0`).
+1. Check the [latest GitHub Release](https://github.com/eddiethedean/ontocode/releases/latest) tag (example: `v0.23.0`).
 2. In VS Code / Cursor: **Extensions → OntoCode** — note the installed version.
 3. If the store is older than the tag you need:
    - Download `ontocode-v<version>.vsix` from that Release.

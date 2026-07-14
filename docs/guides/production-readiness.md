@@ -58,7 +58,7 @@ Suggested pilot duration: **4–8 weeks** with 3–10 engineers on one ontology 
 | LSP `ontocore/*` JSON | May change pre-1.0 |
 | Rust `ontocore-*` crate APIs | May change pre-1.0 |
 
-Pin CLI version in CI: release binary with `VERSION=0.22.0` or `cargo install ontocore-cli --locked --version 0.23.0`.
+Pin CLI version in CI: release binary with `VERSION=0.23.0` or `cargo install ontocore-cli --locked --version 0.23.0`.
 
 ## Support and incident response
 

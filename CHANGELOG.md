@@ -20,11 +20,13 @@ v0.23.0 — Reasoning parity + SWRL.
 - Ontologos workspace deps bumped to **1.1.4** (incl. `ontologos-swrl`)
 - Fixtures `tests/fixtures/reasoner/abox/`, `tests/fixtures/swrl/`; tests `reasoner_abox`, `swrl_validate`, `swrl_patch`
 - Migration guide: [docs/migration/v0.23.md](docs/migration/v0.23.md)
+- Release publish order includes `ontocore-swrl` before `ontocore-reasoner` / `ontocore-lsp`
 
 ### Changed
 
 - Workspace package and all `ontocore-*` crates bumped to **0.23.0**; extension and webview UI **0.23.0**
 - Classification `consistent` incorporates ontology/ABox consistency detail when available
+- Docs adoption sync: version-truth hygiene, HermiT wording softened, CLI/examples for realize/SWRL, Protégé/enterprise guides refreshed for v0.23
 
 ## [0.22.0] - 2026-07-14
 

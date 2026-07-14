@@ -19,7 +19,7 @@
 | What ships today | [SHIPPED](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) |
 | Known limitations | [Known limitations](https://ontocode-vs.readthedocs.io/en/latest/known-limitations/) |
 | Install options (VSIX, offline) | [Install VS Code](https://ontocode-vs.readthedocs.io/en/latest/vscode-install/) |
-| CLI / CI / Rust crates | [Getting started](https://ontocode-vs.readthedocs.io/en/latest/getting-started/) |
+| CLI / CI / Rust crates | [Install CLI & CI](https://ontocode-vs.readthedocs.io/en/latest/getting-started/) |
 | Full documentation | [Read the Docs](https://ontocode-vs.readthedocs.io/en/latest/) |
 | Extension overview | [VS Code extension docs](https://ontocode-vs.readthedocs.io/en/latest/ontocode/vscode-extension/) |
 
@@ -29,7 +29,7 @@
 
 ## Features (summary)
 
-Explorer, Entity Inspector, Query Workbench (SQL subset + SPARQL), Manchester editor, graphs, reasoner, semantic diff, Manage Imports, refactoring preview, plugin host MVP.
+Explorer, Entity Inspector, Query Workbench (SQL subset + SPARQL), Manchester editor, graphs, reasoner (EL–DL, realize / instance check), SWRL Rule Browser/Editor, semantic diff, Manage Imports, refactoring preview, plugin host MVP.
 
 Details: [Feature tour](https://ontocode-vs.readthedocs.io/en/latest/ontocode/feature-tour/) · [Supported formats](https://ontocode-vs.readthedocs.io/en/latest/supported-formats/)
 

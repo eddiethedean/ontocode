@@ -15,7 +15,7 @@
 !!! warning "Wrong crate name"
     The GitHub repo is `ontocode`. The CLI crate is **`ontocore-cli`** (`ontocore` binary). Do **not** run `cargo install ontocode`.
 
-Canonical pin: **`0.22.0`** ([TAGGED_RELEASE](TAGGED_RELEASE)).
+Canonical pin: **`0.23.0`** ([TAGGED_RELEASE](TAGGED_RELEASE)).
 
 ## 1. VS Code / Cursor extension (recommended)
 

@@ -57,7 +57,7 @@ cargo install ontocore-cli --locked --version 0.23.0
 **Rust embedding:**
 
 ```toml
-ontocore = "0.22"
+ontocore = "0.23"
 ontocore-core = "0.21"
 ```
 

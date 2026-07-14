@@ -168,6 +168,51 @@ ontocore explain . --class 'http://example.org#Invalid' --format json
 
 **Exit:** 0 when explanation produced; non-zero if class not found or explanation unavailable.
 
+### `realize`
+
+Realize individuals (inferred types) for a workspace (ABox). Default profile is `rl`.
+
+```bash
+ontocore realize ./ontologies --profile rl
+ontocore realize fixtures --profile dl --format json
+```
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--profile` | `rl` | `el`, `rl`, `rdfs`, `dl`, `auto` |
+| `--format` | `text` | `text` or `json` |
+
+**Expected output (text):** one line per individual with `types=[…]` and `most_specific=[…]`.
+
+**Exit:** 0 on success; non-zero on reasoner error.
+
+See [Reasoner guide](guides/reasoner.md) and [realize cookbook](examples/realize.md).
+
+### `check-instance`
+
+Check whether an individual is an instance of a class.
+
+```bash
+ontocore check-instance fixtures \
+  --individual 'http://example.org/people#alice' \
+  --class 'http://example.org/people#Person' \
+  --profile rl
+
+ontocore check-instance . \
+  --individual 'http://example.org/people#alice' \
+  --class 'http://example.org/people#Person' \
+  --format json
+```
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--individual` | *(required)* | Individual IRI |
+| `--class` | *(required)* | Class IRI |
+| `--profile` | `rl` | Reasoner profile |
+| `--format` | `text` | `text` or `json` |
+
+**Exit:** 0 when entailed; **non-zero** when not entailed or on reasoner error.
+
 ### `refactor`
 
 Workspace-wide Turtle refactoring. See [Refactoring guide](guides/refactoring.md).
@@ -366,7 +411,7 @@ ontocore workflow --plugin owlmake --step qc [workspace]
 - [Plugin authoring guide](guides/plugins.md)
 - [Refactoring guide](guides/refactoring.md)
 - [Examples: refactoring](examples/refactoring.md)
-- [Getting started](getting-started.md)
+- [Install CLI & CI (detail)](getting-started.md)
 - [CI integration](ci-integration.md)
 - [Errors reference](errors.md)
 - [What ships today](SHIPPED.md)

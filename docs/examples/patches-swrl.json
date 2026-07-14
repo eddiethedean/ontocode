@@ -1,0 +1,7 @@
+[
+  {
+    "op": "add_swrl_rule",
+    "ontology_iri": "http://example.org/people",
+    "rule_json": "{\"id\":\"person-is-human\",\"body\":[{\"kind\":\"class\",\"class\":\"http://example.org/people#Person\",\"arg\":{\"variable\":\"x\"}}],\"head\":[{\"kind\":\"class\",\"class\":\"http://example.org/people#Human\",\"arg\":{\"variable\":\"x\"}}],\"enabled\":true}"
+  }
+]

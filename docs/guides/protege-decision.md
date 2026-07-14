@@ -1,30 +1,34 @@
 # Protégé vs OntoCode decision matrix
 
-Use this page to decide **when OntoCode fits**, **when to keep Protégé**, and **when to run both**. It reflects **v0.22.0** (latest tagged) — see [What ships today](../SHIPPED.md). A [first-week migration guide](protege-migration.md) ships today; extended round-trip playbooks are planned for **v1.0**.
+Use this page to decide **when OntoCode fits**, **when to keep Protégé**, and **when to run both**. It reflects **v0.23.0** (latest tagged) — see [What ships today](../SHIPPED.md). A [first-week migration guide](protege-migration.md) ships today; extended round-trip playbooks are planned for **v1.0**.
 
-!!! note "Non-goals today (v0.22)"
+!!! note "Non-goals today (v0.23)"
     - **WebProtégé-style collaboration** — out of scope until post-1.0
     - **Byte-identical Protégé OWL/XML / RDF/XML layout** — OntoCode re-serializes for semantic fidelity ([ADR-0021](../design/adr/0021-deterministic-xml-serializers.md)); write-back itself **ships** in v0.21
     - **Stable semver-guaranteed third-party plugin marketplace API** — plugin host MVP shipped; ecosystem hardening is v1.0
     - **Language SDKs** (Python/TypeScript ontology clients) — embed via Rust `ontocore`, CLI, or LSP instead
+    - **Certified HermiT-identical results** — OntoLogos DL is not certified HermiT-identical; dual-tool check critical audits
 
 ## Quick decision
 
 | Your situation | Recommendation |
 |----------------|----------------|
 | VS Code + Turtle-primary ontologies | **Adopt OntoCode** (pilot IDE + CI) |
-| CI lint/consistency gates without desktop Protégé | **Adopt OntoCore CLI** (`ontocore validate` / `classify`) |
+| CI lint/consistency gates without desktop Protégé | **Adopt OntoCore CLI** (`ontocore validate` / `classify` / `realize`) |
 | Protégé `.owl` / `.owx` corpora that need light inspector edits | **Adopt OntoCode** for core write-back; keep Protégé when you need byte-identical XML layout, full axiom catalog, or Protégé-only plugins — [OWL/XML write-back](owl-xml-workflow.md) |
 | Full OWL 2 DL axiom catalog on every format | **Split workflow** — OntoCode for browse/query/CI/classification + supported authoring; keep Protégé for uncovered axiom types until [v1.0](../roadmap.md) |
 | OBO release pipelines with in-editor OBO write-back | **Adopt OntoCode** (inspector since v0.13; patch engine since v0.12) for OBO inspector + `ontocore patch`; validate with ROBOT in CI |
+| SWRL rule editing in IDE | **Adopt OntoCode** (Rule Browser/Editor in v0.23); keep Protégé if you need full SWTab ecosystem plugins |
 | Enterprise requires vendor SLA / SOC 2 | **Defer** or run limited CI pilot — [Production readiness](production-readiness.md) |
 | Air-gapped VS Code + internal artifact mirror | **Pilot** — [Enterprise deployment](enterprise-deployment.md) |
 
-## Capability comparison (v0.22 tagged)
+## Capability comparison (v0.23 tagged)
 
-| Capability | Protégé | OntoCode v0.22 | Notes |
+| Capability | Protégé | OntoCode v0.23 | Notes |
 |------------|---------|----------------|-------|
-| OWL 2 DL classification | Yes | Yes (`dl` / `auto` via OntoLogos 1.x) | Explanations EL-first; see [Reasoner guide](reasoner.md) |
+| OWL 2 DL classification | Yes | Yes (`dl` / `auto` via OntoLogos 1.x) | Not certified HermiT-identical — [Reasoner guide](reasoner.md) |
+| Realization / instance checking | Yes | Yes | CLI `realize` / `check-instance`; Reasoner panel |
+| SWRL authoring | SWRLTab | Rule Browser / Editor | DLSafe; validate via LSP |
 | Turtle authoring | Manual / plugins | Native write-back | OntoCode inspector + patches |
 | OBO authoring | Native | Native write-back | Patch engine since v0.12; Entity Inspector since v0.13 |
 | RDF/XML in-place editing | Yes | Yes (semantic re-serialize) | Not byte-identical to Protégé — [OWL/XML write-back](owl-xml-workflow.md) |
@@ -35,9 +39,10 @@ Use this page to decide **when OntoCode fits**, **when to keep Protégé**, and 
 | OBO format | Native | Index + write-back | v0.12 inspector + patch |
 | ROBOT integration | Common | CLI wrapper | Java + `robot` required |
 | SQL/SPARQL over repo | Plugins / external | Built-in workbench + CLI | |
+| DL Query tab | Native | Not shipped (Query Workbench is SQL/SPARQL) | DL Query UI → **v0.24** |
 | Semantic diff in pull requests | Weak default | Strong default | Shipped v0.10 |
 | Workspace refactoring | Limited | Rename, migrate, move, extract | Turtle only; preview + apply |
-| CI automation | External scripts | `ontocore validate` / `classify` | Documented exit codes |
+| CI automation | External scripts | `ontocore validate` / `classify` / `realize` | Documented exit codes |
 | Local-first / no telemetry | Desktop app | Yes | No cloud upload by default |
 | Commercial support | Ecosystem / third parties | **None** — community OSS | |
 

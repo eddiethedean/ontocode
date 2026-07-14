@@ -6,11 +6,7 @@
 
 Need CI validate on **Linux x64**? Prefer the release tarball ([CI guide](https://ontocode-vs.readthedocs.io/en/latest/ci-integration/)). CLI on macOS/Windows is optional and slow to compile — most users never need it ([Install CLI](https://ontocode-vs.readthedocs.io/en/latest/guides/install-cli/)).
 
-**Editable today:** Turtle (`.ttl`), OBO (`.obo`), RDF/XML (`.owl`/`.rdf`), and OWL/XML (`.owx`). XML saves are **semantic re-serialize** (not byte-identical to Protégé). JSON-LD / N-Triples / TriG remain read-only — [Supported formats](https://ontocode-vs.readthedocs.io/en/latest/supported-formats/) · [Known limitations](https://ontocode-vs.readthedocs.io/en/latest/known-limitations/).
-
 **Current release: v0.23.0** · [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) · [Changelog](CHANGELOG.md) · [Docs](https://ontocode-vs.readthedocs.io/en/latest/)
-
-> **Procurement / evaluators:** Use [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) and [Known limitations](https://ontocode-vs.readthedocs.io/en/latest/known-limitations/) only. Ignore GitHub trees `docs/protege-parity/` and `docs/PROTEGE_REVERSE_ENGINEERING/` — they are engineering notes, not product capability claims.
 
 [![CI](https://github.com/eddiethedean/ontocode/actions/workflows/ci.yml/badge.svg)](https://github.com/eddiethedean/ontocode/actions/workflows/ci.yml)
 [![License](https://img.shields.io/badge/license-MIT%20OR%20Apache--2.0-blue)](https://github.com/eddiethedean/ontocode/blob/main/LICENSE-MIT)
@@ -27,12 +23,16 @@ Need CI validate on **Linux x64**? Prefer the release tarball ([CI guide](https:
 |------------|------------|
 | **Edit ontologies in VS Code** | **[First success (~10 min)](https://ontocode-vs.readthedocs.io/en/latest/guides/first-success/)** |
 | Validate or query in CI | **Linux x64:** release tarball → [CI guide](https://ontocode-vs.readthedocs.io/en/latest/ci-integration/). **macOS/Windows:** [Install CLI](https://ontocode-vs.readthedocs.io/en/latest/guides/install-cli/) (`cargo install` 15–30+ min) |
-| Decide if it fits | [Known limitations](https://ontocode-vs.readthedocs.io/en/latest/known-limitations/) · [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) · [Versions & channels](https://ontocode-vs.readthedocs.io/en/latest/guides/versions-and-channels/) |
+| Decide if it fits | [Known limitations](https://ontocode-vs.readthedocs.io/en/latest/known-limitations/) · [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) · [Versions & channels](https://ontocode-vs.readthedocs.io/en/latest/guides/versions-and-channels/) · [Evaluate pack](https://ontocode-vs.readthedocs.io/en/latest/guides/enterprise-eval/) |
 | Try examples | [Examples](https://ontocode-vs.readthedocs.io/en/latest/examples/) · repo [`examples/`](examples/) |
 | Embed in Rust | [Rust library guide](https://ontocode-vs.readthedocs.io/en/latest/guides/rust-library/) |
 | Contribute | [CONTRIBUTING.md](CONTRIBUTING.md) |
 
 Full documentation: **[Read the Docs](https://ontocode-vs.readthedocs.io/en/latest/)**. You do not need to clone this repo to use the extension or installed CLI.
+
+**Editable today:** Turtle (`.ttl`), OBO (`.obo`), RDF/XML (`.owl`/`.rdf`), and OWL/XML (`.owx`). XML saves are **semantic re-serialize** (not byte-identical to Protégé). JSON-LD / N-Triples / TriG remain read-only — [Supported formats](https://ontocode-vs.readthedocs.io/en/latest/supported-formats/) · [Known limitations](https://ontocode-vs.readthedocs.io/en/latest/known-limitations/).
+
+Evaluators: use [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) and [Known limitations](https://ontocode-vs.readthedocs.io/en/latest/known-limitations/) as the capability source of truth (see the Evaluate tab on Read the Docs). GitHub trees `docs/protege-parity/` and `docs/PROTEGE_REVERSE_ENGINEERING/` are engineering notes, not product claims.
 
 | Install | Command / link |
 |---------|----------------|

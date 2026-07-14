@@ -1,6 +1,6 @@
 # LGPL compliance guide (horned-owl)
 
-This page helps **legal, security, and platform teams** evaluate copyleft obligations when adopting OntoCode / OntoCore **v0.22.0** (latest tagged). It summarizes documentation and dependency licenses — **it is not legal advice**. Engage your counsel for binding decisions.
+This page helps **legal, security, and platform teams** evaluate copyleft obligations when adopting OntoCode / OntoCore **v0.23.0** (latest tagged). It summarizes documentation and dependency licenses — **it is not legal advice**. Engage your counsel for binding decisions.
 
 Dependency inventory: [LICENSES.md](../design/LICENSES.md) · [DEPENDENCY_MATRIX.md](../design/DEPENDENCY_MATRIX.md).
 

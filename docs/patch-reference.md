@@ -85,6 +85,28 @@ Supported formats: **Turtle (`.ttl`)**, **OBO (`.obo`)**, **RDF/XML (`.owl`/`.rd
 | `add_datatype_definition` / `remove_…` | `datatype_iri`, `manchester` | Yes | Yes | Datatype ≡ data range |
 | `add_axiom_annotation` / `remove_…` | `axiom_op`, `subject_iri`, `related_iri?`, `predicate`, `value` | Yes | Yes* | Annotate an axiom (*XML: `sub_class_of`, `disjoint_with`) |
 
+### SWRL operations (v0.23)
+
+SWRL rules are stored as ontology annotations (`ontocore:swrlRule` JSON). Prefer the Rule Browser / Rule Editor in VS Code for interactive authoring; use patches for CI and scripts.
+
+| `op` | Required fields | Description |
+|------|-----------------|-------------|
+| `add_swrl_rule` | `ontology_iri`, `rule_json` | Add a SWRL rule (JSON IR string) |
+| `remove_swrl_rule` | `ontology_iri`, `rule_json` | Remove a matching rule JSON |
+| `replace_swrl_rule` | `ontology_iri`, `old_rule_json`, `new_rule_json` | Replace one rule with another |
+
+`rule_json` is a string containing a JSON object with `body` / `head` atoms (optional `id`, `enabled`). Example atom shape:
+
+```json
+{
+  "op": "add_swrl_rule",
+  "ontology_iri": "http://example.org/people",
+  "rule_json": "{\"id\":\"person-is-human\",\"body\":[{\"kind\":\"class\",\"class\":\"http://example.org/people#Person\",\"arg\":{\"variable\":\"x\"}}],\"head\":[{\"kind\":\"class\",\"class\":\"http://example.org/people#Human\",\"arg\":{\"variable\":\"x\"}}],\"enabled\":true}"
+}
+```
+
+See [SWRL cookbook](examples/swrl.md). LSP helpers: `ontocore/listSwrlRules`, `ontocore/validateSwrlRule`, `ontocore/parseSwrlRule` ([LSP API](lsp-api.md)).
+
 ## OBO operations (`.obo`)
 
 See [ADR-0019](design/adr/0019-obo-write-back.md). Ops use `term_id` (OBO id, e.g. `GO:0008150`).

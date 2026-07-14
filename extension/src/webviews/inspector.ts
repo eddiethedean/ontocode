@@ -8,6 +8,7 @@ import {
 import { EntityDetail } from "../lsp/protocol";
 import { entityKindLabel } from "../utils/iri";
 import { documentUriInWorkspace, WORKSPACE_DOCUMENT_OUTSIDE_MESSAGE } from "../utils/workspacePath";
+import { workspaceTransactionManager } from "../workspace/transactionManager";
 import { PanelHost } from "./panelHost";
 import type { EntityDetailPayload, PatchOp, WebviewMessage } from "./messages";
 import { GraphPanel } from "./graphPanel";
@@ -47,6 +48,7 @@ export class EntityInspectorPanel {
   private iri: string | undefined;
   private oboId: string | undefined;
   private documentUri: string | undefined;
+  private documentPath: string | undefined;
   private classOptions: string[] = [];
   private objectPropertyOptions: string[] = [];
   private activeRequestId = 0;
@@ -128,6 +130,7 @@ export class EntityInspectorPanel {
     this.oboId = detail.entity.obo_id;
     this.classOptions = classOptions;
     this.objectPropertyOptions = objectPropertyOptions;
+    this.documentPath = detail.document_path;
     this.documentUri = detail.document_path
       ? documentUriInWorkspace(detail.document_path)
       : undefined;
@@ -260,11 +263,18 @@ export class EntityInspectorPanel {
     const iriAtStart = this.iri;
     const requestId = ++this.activeRequestId;
     try {
-      const result = await applyAxiomPatch({
-        document_uri: this.documentUri,
-        patches,
-        preview_only: previewOnly,
-      });
+      const result = previewOnly
+        ? await applyAxiomPatch({
+            document_uri: this.documentUri,
+            patches,
+            preview_only: true,
+          })
+        : await workspaceTransactionManager.apply(
+            this.documentUri,
+            this.documentPath ?? vscode.Uri.parse(this.documentUri).fsPath,
+            patches,
+            "Inspector apply"
+          );
       if (iriAtStart !== this.iri) {
         return;
       }

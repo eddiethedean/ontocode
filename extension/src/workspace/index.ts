@@ -8,3 +8,5 @@ export * from "./selectionManager";
 export * from "./sessionPersistence";
 export * from "./externalChange";
 export * from "./workspaceRuntime";
+export * from "./selfWriteGuard";
+

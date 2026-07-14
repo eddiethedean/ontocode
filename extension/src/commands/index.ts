@@ -1,6 +1,5 @@
 import * as vscode from "vscode";
 import {
-  applyAxiomPatch,
   getCatalogSnapshot,
   getEntity,
   indexWorkspace,
@@ -393,11 +392,12 @@ export function registerCommands(
           );
           return;
         }
-        const result = await applyAxiomPatch({
-          document_uri: documentUri,
-          patches: [{ op: "delete_entity", entity_iri: iri }],
-          preview_only: false,
-        });
+        const result = await workspaceTransactionManager.apply(
+          documentUri,
+          detail.document_path,
+          [{ op: "delete_entity", entity_iri: iri }],
+          "Delete entity"
+        );
         if (!result.applied) {
           void vscode.window.showErrorMessage(patchFailureMessage(result));
           return;

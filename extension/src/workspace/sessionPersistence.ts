@@ -294,6 +294,7 @@ export class WorkspaceSessionPersistence {
   resetForTests(): void {
     this.context = undefined;
     this.deferredSnapshot = undefined;
+    this.deferredReopenPanels = true;
     this.catalogRestoreScheduled = false;
   }
 }

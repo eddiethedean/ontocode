@@ -223,11 +223,13 @@ requirements:
     area: Query
     title: SPARQL
     priority: P0
-    status: COMPLETE
+    status: VERIFIED
     owner: null
     source_files:
       - crates/ontocore-query/src/lib.rs
-    test_ids: []
+      - crates/ontocore-query/src/sparql.rs
+    test_ids:
+      - tests/integration_test.rs
     acceptance_criteria: []
     github_issue: https://github.com/eddiethedean/ontocode/issues/253
     documentation:
@@ -236,15 +238,20 @@ requirements:
     area: Query
     title: DL Query workflow
     priority: P1
-    status: PARTIAL
+    status: VERIFIED
     owner: null
-    source_files: []
-    test_ids: []
+    source_files:
+      - crates/ontocore-reasoner/src/dl_query.rs
+      - crates/ontocore-lsp/src/handlers.rs
+      - extension/webview-ui/src/panels/QueryWorkbench.tsx
+    test_ids:
+      - tests/dl_query.rs
     acceptance_criteria: []
     github_issue: https://github.com/eddiethedean/ontocode/issues/253
     documentation:
+      - docs/guides/dl-query.md
       - docs/protege-parity/04_BLOCKERS/BLOCKER_07_QUERY.md
-    notes: Target v0.24
+    notes: Shipped v0.24.0
   - id: PAR-SWRL-001
     area: SWRL
     title: Rule authoring/editing
@@ -268,16 +275,20 @@ requirements:
     area: Refactoring
     title: Semantic refactoring
     priority: P0
-    status: PARTIAL
+    status: VERIFIED
     owner: null
     source_files:
       - crates/ontocore-refactor/src/lib.rs
-    test_ids: []
+      - crates/ontocore-refactor/src/rename.rs
+      - crates/ontocore-refactor/src/ontology.rs
+      - crates/ontocore-swrl/src/turtle.rs
+    test_ids:
+      - crates/ontocore-refactor/tests/refactor_integration.rs
     acceptance_criteria: []
     github_issue: https://github.com/eddiethedean/ontocode/issues/252
     documentation:
       - docs/protege-parity/IMPLEMENTATION_EVIDENCE.md
-    notes: Target v0.24
+    notes: Shipped v0.24.0 — Turtle-first; non-Turtle skipped with warnings
   - id: PAR-VIS-001
     area: Visualization
     title: Graph parity

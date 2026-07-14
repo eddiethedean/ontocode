@@ -1,9 +1,9 @@
 # Query Workbench
 
-The **Query Workbench** is an OntoCode React panel for running **SQL-like** catalog queries and **SPARQL** against your indexed workspace. Queries execute in **OntoCore** via LSP (`ontocore/query`, `ontocore/sparql`).
+The **Query Workbench** is an OntoCode React panel for running **SQL-like** catalog queries, **SPARQL**, and **DL Query** (Manchester class expressions) against your indexed workspace. Queries execute in **OntoCore** via LSP (`ontocore/query`, `ontocore/sparql`, `ontocore/dlQuery`).
 
-!!! warning "Not Protégé DL Query"
-    This is **not** Protégé’s DL Query tab. There is no Manchester class-expression “Instances / Subclasses / Superclasses” workflow here. Use SQL virtual tables or SPARQL today; dedicated DL Query UI is planned for **v0.24** — details: [DL Query vs Query Workbench](../guides/dl-query.md).
+!!! tip "DL Query (v0.24+)"
+    **DL** mode provides Protégé-style Manchester class expressions with Instances / Subclasses / Superclasses / Equivalents tabs (asserted or inferred). Details: [DL Query](../guides/dl-query.md).
 
 !!! warning "SQL-like, not full SQL"
     The SQL mode uses **virtual tables** with a small subset of SQL: single-table `SELECT`, limited `WHERE` (`=`, `!=`, `AND`/`OR`), no `JOIN`, `ORDER BY`, `GROUP BY`, `LIKE`, or functions.
@@ -20,6 +20,7 @@ The **Query Workbench** is an OntoCode React panel for running **SQL-like** cata
 |------|--------|---------|
 | **SQL** | OntoCore virtual tables | Catalog queries (`classes`, `properties`, `diagnostics`, …) |
 | **SPARQL** | Oxigraph over indexed triples | RDF graph patterns |
+| **DL Query** | Reasoner (`ontocore/dlQuery`) | Manchester class expressions → Instances / Subclasses / Superclasses / Equivalents |
 
 Toggle **Mode** at the top of the panel. Starter templates load when you switch modes.
 
@@ -38,6 +39,10 @@ SELECT ?s ?p ?o WHERE { ?s ?p ?o } LIMIT 10
 ```
 
 More examples: [SPARQL reference](../sparql-reference.md) · [Query cookbook](../examples/queries.md).
+
+### DL Query quick start (v0.24+)
+
+Enter a Manchester expression such as `Person and hasPet some Dog`, choose asserted or inferred, and run. Results appear in the four tabs. More: [DL Query](../guides/dl-query.md).
 
 ## Schema browser (v0.13)
 
@@ -70,6 +75,7 @@ Selecting an entity in the explorer updates **Current Focus** across open React 
 ```bash
 ontocore query . "SELECT short_name, labels FROM classes"
 ontocore sparql . "SELECT ?s ?p ?o WHERE { ?s ?p ?o } LIMIT 10"
+ontocore dl-query . "Person and hasPet some Dog" --profile dl
 ```
 
 See [Rust & CLI guide](../guides/rust-crates.md).

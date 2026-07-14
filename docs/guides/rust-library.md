@@ -4,10 +4,10 @@ Embed **OntoCore** in tools, pipelines, or custom CLIs via the [`ontocore`](http
 
 > OntoCore (previously branded **OntoIndex** / `ontoindex-*`) is implemented by the `ontocore-*` crates. See [v0.9 migration](../migration/v0.9.md).
 
-Pre-1.0: public APIs may change between minor releases until v1.0. Pin minors in production. Crates are at **0.23.x**.
+Pre-1.0: public APIs may change between minor releases until v1.0. Pin minors in production. Crates are at **0.24.x**.
 
 !!! tip "Prefer `Workspace`"
-    For new code, use the **`Workspace` API** (`ontocore = "0.23"`). Lower-level `IndexBuilder` remains available for specialized pipelines — see [Rust API](../ontocore/rust-api.md).
+    For new code, use the **`Workspace` API** (`ontocore = "0.24"`). Lower-level `IndexBuilder` remains available for specialized pipelines — see [Rust API](../ontocore/rust-api.md).
 
 ## crates.io first (5 minutes)
 
@@ -16,7 +16,7 @@ Pre-1.0: public APIs may change between minor releases until v1.0. Pin minors in
 
 ```toml
 [dependencies]
-ontocore = "0.23"
+ontocore = "0.24"
 ```
 
 3. Point `Workspace::open` at **your** ontology directory (any folder of `.ttl` / `.obo` / other indexed formats):
@@ -46,14 +46,14 @@ Method-level params / returns / side effects: [Rust API — Workspace methods](.
 
 ```toml
 [dependencies]
-ontocore = "0.23"
+ontocore = "0.24"
 ```
 
 **Classify + explain** (same crate — reasoner is included):
 
 ```toml
 [dependencies]
-ontocore = "0.23"
+ontocore = "0.24"
 ```
 
 ```rust
@@ -68,8 +68,8 @@ let result = ws.classify(ReasonerId::El)?;
 
 ```toml
 [dependencies]
-ontocore = "0.23"
-ontocore-edit = "0.23"
+ontocore = "0.24"
+ontocore-edit = "0.24"
 ontocore-owl = "0.21"
 ```
 
@@ -157,7 +157,7 @@ let txn = Transaction::from_turtle(vec![
 let undo = txn.invert()?;
 ```
 
-Dependency: `ontocore-edit = "0.23"`. Full API: [Rust API — semantic transactions](../ontocore/rust-api.md#semantic-transactions-ontocore-edit-v019) · [docs.rs/ontocore-edit](https://docs.rs/ontocore-edit).
+Dependency: `ontocore-edit = "0.24"`. Full API: [Rust API — semantic transactions](../ontocore/rust-api.md#semantic-transactions-ontocore-edit-v019) · [docs.rs/ontocore-edit](https://docs.rs/ontocore-edit).
 
 ## Next steps
 

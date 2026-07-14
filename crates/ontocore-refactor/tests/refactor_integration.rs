@@ -1,8 +1,9 @@
 use ontocore_catalog::IndexBuilder;
 use ontocore_refactor::{
-    apply_refactor_plan, apply_refactor_plan_checked, find_usages, preview_extract_module,
-    preview_merge_entities, preview_migrate_namespace, preview_move_entity, preview_rename_iri,
-    preview_replace_entity, validate_refactor_plan_paths, RefactorError,
+    apply_refactor_plan, apply_refactor_plan_checked, find_usages, preview_cleanup_imports,
+    preview_extract_module, preview_flatten_imports, preview_merge_entities,
+    preview_merge_ontologies, preview_migrate_namespace, preview_move_axioms, preview_move_entity,
+    preview_rename_iri, preview_replace_entity, validate_refactor_plan_paths, RefactorError,
 };
 use std::collections::HashMap;
 use std::path::{Path, PathBuf};
@@ -199,6 +200,114 @@ fn merge_entities_rewrites_references_and_removes_merged_declaration() {
 }
 
 #[test]
+fn rename_iri_skips_non_turtle_with_warning() {
+    let tmp = TempDir::new().unwrap();
+    let ws = tmp.path();
+    std::fs::write(
+        ws.join("a.ttl"),
+        concat!(
+            "@prefix ex: <http://example.org#> .\n",
+            "@prefix owl: <http://www.w3.org/2002/07/owl#> .\n",
+            "ex:Person a owl:Class .\n",
+        ),
+    )
+    .unwrap();
+    // Minimal RDF/XML that mentions the same IRI — should be skipped with a warning.
+    std::fs::write(
+        ws.join("b.owl"),
+        r#"<?xml version="1.0"?>
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:owl="http://www.w3.org/2002/07/owl#"
+         xmlns:ex="http://example.org#">
+  <owl:Class rdf:about="http://example.org#Person"/>
+</rdf:RDF>
+"#,
+    )
+    .unwrap();
+    let catalog = build_catalog(ws);
+    let plan = preview_rename_iri(
+        &catalog,
+        "http://example.org#Person",
+        "http://example.org#Human",
+        &empty_overrides(),
+    )
+    .expect("rename");
+    assert!(plan.changes.iter().any(|c| c.path.ends_with("a.ttl")));
+    assert!(plan.warnings.iter().any(|w| w.contains("non-Turtle") || w.contains("b.owl")));
+    assert!(
+        plan.affected_entity_count >= 1,
+        "expected metrics: {:?}",
+        plan.affected_entity_count
+    );
+}
+
+#[test]
+fn rename_iri_rewrites_swrl_rule_json_literals() {
+    let tmp = TempDir::new().unwrap();
+    let ws = tmp.path();
+    std::fs::copy(
+        PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../tests/fixtures/swrl/basic_class_property.ttl"),
+        ws.join("swrl.ttl"),
+    )
+    .unwrap();
+    let catalog = build_catalog(ws);
+    let plan = preview_rename_iri(
+        &catalog,
+        "http://example.org/swrl#Person",
+        "http://example.org/swrl#PersonRenamed",
+        &empty_overrides(),
+    )
+    .expect("swrl rename");
+    assert!(!plan.changes.is_empty());
+    let preview = &plan.changes[0].preview_text;
+    assert!(preview.contains("PersonRenamed"));
+    assert!(preview.contains("ontocode.dev/ns#swrlRule"));
+    assert!(
+        preview.contains("http://example.org/swrl#PersonRenamed"),
+        "SWRL JSON should rewrite class IRI: {preview}"
+    );
+    assert!(!preview.contains("\"class\":\"http://example.org/swrl#Person\""));
+    assert!(plan.warnings.iter().any(|w| w.contains("SWRL")));
+}
+
+#[test]
+fn move_axioms_relocates_non_primary_statements() {
+    let tmp = TempDir::new().unwrap();
+    let ws = tmp.path();
+    std::fs::write(
+        ws.join("src.ttl"),
+        concat!(
+            "@prefix ex: <http://example.org#> .\n",
+            "@prefix owl: <http://www.w3.org/2002/07/owl#> .\n",
+            "@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n\n",
+            "ex:A a owl:Class .\n",
+            "ex:A rdfs:label \"Alpha\" .\n",
+            "ex:A rdfs:comment \"note\" .\n",
+        ),
+    )
+    .unwrap();
+    let target = ws.join("axioms.ttl");
+    let catalog = build_catalog(ws);
+    let plan = preview_move_axioms(
+        &catalog,
+        "http://example.org#A",
+        &target,
+        &[],
+        true,
+        &empty_overrides(),
+        &[ws.to_path_buf()],
+    )
+    .expect("move axioms");
+    assert_eq!(plan.changes.len(), 2);
+    let source = plan.changes.iter().find(|c| c.path.ends_with("src.ttl")).unwrap();
+    let dest = plan.changes.iter().find(|c| c.path.ends_with("axioms.ttl")).unwrap();
+    assert!(source.preview_text.contains("ex:A a owl:Class"));
+    assert!(!source.preview_text.contains("rdfs:label"));
+    assert!(dest.preview_text.contains("rdfs:label"));
+    assert!(dest.preview_text.contains("rdfs:comment"));
+}
+
+#[test]
 fn merge_entities_warns_when_an_entity_is_missing() {
     let tmp = TempDir::new().unwrap();
     let ws = tmp.path();
@@ -368,6 +477,8 @@ fn validate_refactor_plan_rejects_paths_outside_workspace() {
             hunks: vec![],
         }],
         warnings: vec![],
+        affected_entity_count: 0,
+        affected_axiom_count: 0,
     };
     let err = validate_refactor_plan_paths(&ws, &plan).unwrap_err();
     assert!(matches!(err, RefactorError::Invalid(_)));
@@ -426,6 +537,7 @@ fn extract_multiple_entities_same_file() {
         &["http://example.org/org#Person".to_string(), "http://example.org/org#Agent".to_string()],
         &out,
         false,
+        false,
         &empty_overrides(),
         &workspace_roots(ws),
     )
@@ -453,6 +565,7 @@ fn extract_module_preserves_existing_output_content() {
         &catalog,
         &["http://example.org/org#Person".to_string()],
         &out,
+        false,
         false,
         &empty_overrides(),
         &workspace_roots(ws),
@@ -548,6 +661,7 @@ ex:Person a owl:Class .
         &["http://example.org/org#Person".to_string()],
         &out,
         false,
+        false,
         &empty_overrides(),
         &workspace_roots(ws),
     )
@@ -569,6 +683,7 @@ fn extract_module_stub_escapes_path_special_chars() {
         &["http://example.org/org#Person".to_string()],
         &out,
         true,
+        false,
         &empty_overrides(),
         &workspace_roots(ws),
     )
@@ -593,6 +708,7 @@ fn extract_module_leave_stub_uses_prefixed_curie() {
         &["http://example.org/org#Person".to_string()],
         &out,
         true,
+        false,
         &empty_overrides(),
         &workspace_roots(ws),
     )
@@ -637,6 +753,7 @@ fn extract_module_validates_nonexistent_output_path() {
         &catalog,
         &["http://example.org/org#Person".to_string()],
         &out,
+        false,
         false,
         &empty_overrides(),
         &workspace_roots(ws),
@@ -758,3 +875,213 @@ fn move_entity_into_nonempty_target_merges_missing_prefixes() {
     );
     assert!(target.contains("ex:Person"));
 }
+
+#[test]
+fn merge_ontologies_unions_prefixes_and_appends_body() {
+    let tmp = TempDir::new().unwrap();
+    let ws = tmp.path();
+    std::fs::write(
+        ws.join("target.ttl"),
+        concat!(
+            "@prefix owl: <http://www.w3.org/2002/07/owl#> .\n",
+            "@prefix ex: <http://example.org#> .\n\n",
+            "ex:Keep a owl:Class .\n",
+        ),
+    )
+    .unwrap();
+    std::fs::write(
+        ws.join("source.ttl"),
+        concat!(
+            "@prefix owl: <http://www.w3.org/2002/07/owl#> .\n",
+            "@prefix ex: <http://example.org#> .\n",
+            "@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n\n",
+            "ex:Added a owl:Class ;\n",
+            "    rdfs:label \"Added\" .\n",
+        ),
+    )
+    .unwrap();
+    let catalog = build_catalog(ws);
+    let plan = preview_merge_ontologies(
+        &catalog,
+        &[ws.join("source.ttl")],
+        &ws.join("target.ttl"),
+        &empty_overrides(),
+        &workspace_roots(ws),
+    )
+    .expect("merge plan");
+    assert_eq!(plan.changes.len(), 1);
+    let preview = &plan.changes[0].preview_text;
+    assert!(preview.contains("ex:Keep"));
+    assert!(preview.contains("ex:Added"));
+    assert!(preview.contains("@prefix rdfs:"));
+    apply_refactor_plan(&plan, false, ws).expect("apply");
+}
+
+#[test]
+fn merge_ontologies_rejects_path_outside_workspace() {
+    let tmp = TempDir::new().unwrap();
+    let ws = tmp.path();
+    std::fs::write(ws.join("a.ttl"), "@prefix ex: <http://example.org#> .\nex:A a owl:Class .\n")
+        .unwrap();
+    let catalog = build_catalog(ws);
+    let outside = TempDir::new().unwrap();
+    let err = preview_merge_ontologies(
+        &catalog,
+        &[ws.join("a.ttl")],
+        &outside.path().join("out.ttl"),
+        &empty_overrides(),
+        &workspace_roots(ws),
+    )
+    .unwrap_err();
+    assert!(matches!(err, RefactorError::Invalid(_)));
+}
+
+#[test]
+fn flatten_imports_inlines_imported_axioms_and_removes_imports() {
+    let tmp = TempDir::new().unwrap();
+    let ws = tmp.path();
+    std::fs::write(
+        ws.join("lib.ttl"),
+        concat!(
+            "@prefix ex: <http://example.org/lib#> .\n",
+            "@prefix owl: <http://www.w3.org/2002/07/owl#> .\n\n",
+            "<http://example.org/lib> a owl:Ontology .\n",
+            "ex:LibClass a owl:Class .\n",
+        ),
+    )
+    .unwrap();
+    std::fs::write(
+        ws.join("root.ttl"),
+        concat!(
+            "@prefix ex: <http://example.org/root#> .\n",
+            "@prefix owl: <http://www.w3.org/2002/07/owl#> .\n\n",
+            "<http://example.org/root> a owl:Ontology ;\n",
+            "    owl:imports <http://example.org/lib> .\n",
+            "ex:RootClass a owl:Class .\n",
+        ),
+    )
+    .unwrap();
+    let catalog = build_catalog(ws);
+    let plan = preview_flatten_imports(
+        &catalog,
+        &ws.join("root.ttl"),
+        &empty_overrides(),
+        &workspace_roots(ws),
+    )
+    .expect("flatten plan");
+    assert_eq!(plan.changes.len(), 1);
+    let preview = &plan.changes[0].preview_text;
+    assert!(!preview.contains("owl:imports"));
+    assert!(preview.contains("ex:LibClass") || preview.contains("LibClass"));
+    assert!(preview.contains("ex:RootClass"));
+}
+
+#[test]
+fn cleanup_imports_removes_unused_import() {
+    let tmp = TempDir::new().unwrap();
+    let ws = tmp.path();
+    std::fs::write(
+        ws.join("lib.ttl"),
+        concat!(
+            "@prefix ex: <http://example.org/lib#> .\n",
+            "@prefix owl: <http://www.w3.org/2002/07/owl#> .\n\n",
+            "<http://example.org/lib> a owl:Ontology .\n",
+            "ex:UnusedLib a owl:Class .\n",
+        ),
+    )
+    .unwrap();
+    std::fs::write(
+        ws.join("root.ttl"),
+        concat!(
+            "@prefix ex: <http://example.org/root#> .\n",
+            "@prefix owl: <http://www.w3.org/2002/07/owl#> .\n\n",
+            "<http://example.org/root> a owl:Ontology ;\n",
+            "    owl:imports <http://example.org/lib> .\n",
+            "ex:Local a owl:Class .\n",
+        ),
+    )
+    .unwrap();
+    let catalog = build_catalog(ws);
+    let plan = preview_cleanup_imports(
+        &catalog,
+        &ws.join("root.ttl"),
+        &empty_overrides(),
+        &workspace_roots(ws),
+    )
+    .expect("cleanup plan");
+    assert_eq!(plan.changes.len(), 1);
+    let preview = &plan.changes[0].preview_text;
+    assert!(!preview.contains("owl:imports"));
+    assert!(preview.contains("ex:Local"));
+}
+
+#[test]
+fn cleanup_imports_keeps_used_import() {
+    let tmp = TempDir::new().unwrap();
+    let ws = tmp.path();
+    std::fs::write(
+        ws.join("lib.ttl"),
+        concat!(
+            "@prefix lib: <http://example.org/lib#> .\n",
+            "@prefix owl: <http://www.w3.org/2002/07/owl#> .\n\n",
+            "<http://example.org/lib> a owl:Ontology .\n",
+            "lib:Shared a owl:Class .\n",
+        ),
+    )
+    .unwrap();
+    std::fs::write(
+        ws.join("root.ttl"),
+        concat!(
+            "@prefix root: <http://example.org/root#> .\n",
+            "@prefix lib: <http://example.org/lib#> .\n",
+            "@prefix owl: <http://www.w3.org/2002/07/owl#> .\n",
+            "@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n\n",
+            "<http://example.org/root> a owl:Ontology ;\n",
+            "    owl:imports <http://example.org/lib> .\n",
+            "root:Child a owl:Class ; rdfs:subClassOf lib:Shared .\n",
+        ),
+    )
+    .unwrap();
+    let catalog = build_catalog(ws);
+    let plan = preview_cleanup_imports(
+        &catalog,
+        &ws.join("root.ttl"),
+        &empty_overrides(),
+        &workspace_roots(ws),
+    )
+    .expect("cleanup plan");
+    assert!(
+        plan.changes.is_empty(),
+        "used import must be retained, got {:?}",
+        plan.changes.first().map(|c| &c.preview_text)
+    );
+}
+
+#[test]
+fn extract_module_locality_expands_related_entities() {
+    let tmp = TempDir::new().unwrap();
+    let ws = tmp.path();
+    std::fs::copy(fixture_dir().join("people.ttl"), ws.join("people.ttl")).unwrap();
+    let catalog = build_catalog(ws);
+    let out = ws.join("module.ttl");
+    // Person ⊑ Agent — locality should pull Agent into the module.
+    let plan = preview_extract_module(
+        &catalog,
+        &["http://example.org/org#Person".to_string()],
+        &out,
+        false,
+        true,
+        &empty_overrides(),
+        &workspace_roots(ws),
+    )
+    .expect("locality extract");
+    assert!(plan.warnings.iter().any(|w| w.contains("locality")));
+    let module = plan.changes.iter().find(|c| c.path == out).expect("module change");
+    assert!(module.preview_text.contains("ex:Person"));
+    assert!(
+        module.preview_text.contains("ex:Agent"),
+        "locality should expand Person→Agent: {}",
+        module.preview_text
+    );
+}
+

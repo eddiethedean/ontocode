@@ -4,7 +4,7 @@
 >
 > Edit **`docs/architecture.md`** for content changes. This root file is a GitHub landing pointer so links from the repository root stay valid.
 
-**Latest tagged: v0.23.0** — v0.23 ships today. OntoCode (VS Code) + OntoCore (CLI/LSP/library). Turtle + OBO + RDF/XML + OWL/XML write-back; EL–DL reasoning via Ontologos; plugin host; semantic diff. Canonical matrix: [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/). Planned work: [roadmap hub](https://ontocode-vs.readthedocs.io/en/latest/roadmap-hub/).
+**Latest tagged: v0.24.0 — v0.24 ships today. OntoCode (VS Code) + OntoCore (CLI/LSP/library).
 
 ## Quick map
 

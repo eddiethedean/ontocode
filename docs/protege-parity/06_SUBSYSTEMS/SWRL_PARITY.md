@@ -1,4 +1,4 @@
-# SWRL Parity (v0.23)
+# SWRL Parity (v0.24)
 
 Canonical product SWRL status for OntoCode v0.23.
 

@@ -33,13 +33,13 @@ CLI install options (separate from the extension): [Install](install.md) · [CLI
 
 For a full walkthrough, see [First success in 10 minutes](guides/first-success.md).
 
-**Tutorial pack:** download `ontocode-tutorial.zip` from [GitHub Releases](https://github.com/eddiethedean/ontocode/releases/tag/v0.23.0) (same tag as the VSIX). Built with `./scripts/package-tutorial-zip.sh`. If missing, use the curl commands in [first-success](guides/first-success.md) or open `fixtures/` from a clone.
+**Tutorial pack:** download `ontocode-tutorial.zip` from [GitHub Releases](https://github.com/eddiethedean/ontocode/releases/tag/v0.24.0) (same tag as the VSIX). Built with `./scripts/package-tutorial-zip.sh`. If missing, use the curl commands in [first-success](guides/first-success.md) or open `fixtures/` from a clone.
 
 > **Multi-root workspaces (v0.10+):** All workspace folders are indexed on open. **OntoCode: Index Workspace** may prompt you to pick a folder when multiple roots are open.
 
 ## Option B — GitHub Release VSIX (offline / air-gapped)
 
-1. Open [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) and download the latest `ontocode-v*.vsix` (example: `ontocode-v0.23.0.vsix`).
+1. Open [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) and download the latest `ontocode-v*.vsix` (example: `ontocode-v0.24.0.vsix`).
 2. In VS Code: **Extensions** → **…** menu → **Install from VSIX…**
 3. Verify against `SHA256SUMS` — see [release-integrity.md](release-integrity.md).
 4. Open a folder containing ontology files (`.ttl`, `.obo`, `.owl`, `.rdf`, `.owx`, `.jsonld`, `.nt`, `.nq`, `.trig`).
@@ -81,7 +81,7 @@ Set **OntoCode: Lsp Path** (`ontocode.lspPath`) to the absolute path of your `on
 
 If OntoCode does not appear in search (before v0.11 or if Open VSX sync is delayed):
 
-1. Download `ontocode-v*.vsix` (example: `ontocode-v0.23.0.vsix`) from [GitHub Releases](https://github.com/eddiethedean/ontocode/releases).
+1. Download `ontocode-v*.vsix` (example: `ontocode-v0.24.0.vsix`) from [GitHub Releases](https://github.com/eddiethedean/ontocode/releases).
 2. **Cmd+Shift+P** / **Ctrl+Shift+P** → **Extensions: Install from VSIX…**
 
 Release tags from v0.11.3 onward publish automatically to Open VSX.

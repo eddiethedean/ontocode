@@ -1,6 +1,11 @@
 import * as vscode from "vscode";
-import { runSqlQuery, runSparqlQuery, listSqlSchema } from "../lsp/client";
-import { SavedQuery, TabularQueryResult } from "../lsp/protocol";
+import {
+  listSqlSchema,
+  runDlQuery,
+  runSparqlQuery,
+  runSqlQuery,
+} from "../lsp/client";
+import { DlQueryResult, SavedQuery, TabularQueryResult } from "../lsp/protocol";
 import { PanelHost } from "./panelHost";
 import type { WebviewMessage } from "./messages";
 import {
@@ -10,6 +15,7 @@ import {
 import { forgetPanelRestoreState, rememberPanelRestoreState } from "./layoutPersistence";
 import {
   SQL_TABLES,
+  dlQueryToTabular,
   exportResultCsv,
   exportResultJson,
   mergeHistory,
@@ -25,6 +31,7 @@ export class QueryWorkbenchPanel {
   public static current: QueryWorkbenchPanel | undefined;
   private host: PanelHost;
   private lastResult: TabularQueryResult | undefined;
+  private lastDlResult: DlQueryResult | undefined;
   private lastResultRunId = 0;
   private runId = 0;
 
@@ -97,7 +104,7 @@ export class QueryWorkbenchPanel {
       if (!parsed) {
         return;
       }
-      await this.runQuery(parsed.mode, parsed.text, parsed.runId);
+      await this.runQuery(parsed.mode, parsed.text, parsed.runId, parsed.dlMode);
     }
     if (message.type === "saveQuery") {
       const parsed = parseSaveQueryMessage(message);
@@ -109,27 +116,51 @@ export class QueryWorkbenchPanel {
     if (message.type === "exportQueryResult") {
       await this.exportResult(message.format, message.runId);
     }
+    if (message.type === "openEntity") {
+      await vscode.commands.executeCommand("ontocode.openEntity", message.iri);
+    }
   }
 
   private async runQuery(
-    mode: "sql" | "sparql",
+    mode: "sql" | "sparql" | "dl",
     text: string,
-    runId: number
+    runId: number,
+    dlMode?: "asserted" | "inferred"
   ): Promise<void> {
     this.runId = runId;
     try {
-      const result =
-        mode === "sql" ? await runSqlQuery(text) : await runSparqlQuery(text);
-      if (!shouldDeliverQueryResult(runId, this.runId)) {
-        return;
+      if (mode === "dl") {
+        const dlResult = await runDlQuery({
+          expression: text,
+          mode: dlMode ?? "inferred",
+        });
+        if (!shouldDeliverQueryResult(runId, this.runId)) {
+          return;
+        }
+        this.lastDlResult = dlResult;
+        this.lastResult = dlQueryToTabular(dlResult);
+        this.lastResultRunId = runId;
+        this.host.postMessage({
+          type: "queryResult",
+          runId,
+          dlResult,
+          result: this.lastResult,
+        });
+      } else {
+        const result =
+          mode === "sql" ? await runSqlQuery(text) : await runSparqlQuery(text);
+        if (!shouldDeliverQueryResult(runId, this.runId)) {
+          return;
+        }
+        this.lastResult = result;
+        this.lastDlResult = undefined;
+        this.lastResultRunId = runId;
+        this.host.postMessage({
+          type: "queryResult",
+          runId,
+          result,
+        });
       }
-      this.lastResult = result;
-      this.lastResultRunId = runId;
-      this.host.postMessage({
-        type: "queryResult",
-        runId,
-        result,
-      });
       const history = mergeHistory(
         this.context.workspaceState.get<SavedQuery[]>(HISTORY_KEY) ?? [],
         { name: `${mode} @ ${new Date().toLocaleTimeString()}`, mode, text },
@@ -145,13 +176,14 @@ export class QueryWorkbenchPanel {
         return;
       }
       this.lastResult = undefined;
+      this.lastDlResult = undefined;
       this.lastResultRunId = 0;
       this.host.postMessage({ type: "queryResult", runId, error: msg });
     }
   }
 
   private async saveQuery(
-    mode: "sql" | "sparql",
+    mode: "sql" | "sparql" | "dl",
     text: string,
     name: string
   ): Promise<void> {
@@ -165,7 +197,7 @@ export class QueryWorkbenchPanel {
   }
 
   private async exportResult(format: "csv" | "json", runId?: number): Promise<void> {
-    if (!this.lastResult) {
+    if (!this.lastResult && !this.lastDlResult) {
       return;
     }
     if (runId !== undefined && runId !== this.lastResultRunId) {
@@ -173,8 +205,8 @@ export class QueryWorkbenchPanel {
     }
     const body =
       format === "csv"
-        ? exportResultCsv(this.lastResult)
-        : exportResultJson(this.lastResult);
+        ? exportResultCsv(this.lastResult ?? dlQueryToTabular(this.lastDlResult!))
+        : exportResultJson(this.lastDlResult ?? this.lastResult!);
     await vscode.env.clipboard.writeText(body);
     void vscode.window.showInformationMessage(
       `OntoCode: ${format.toUpperCase()} copied to clipboard`

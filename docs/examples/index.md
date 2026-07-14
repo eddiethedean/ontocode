@@ -10,8 +10,8 @@ Runnable examples for OntoCore CLI, Rust embedding, and OntoCode workflows.
 | [Sample patches](patches.md) | `ontocore patch` JSON for Turtle, OBO, RDF/XML, and OWL/XML write-back |
 | [Refactoring](refactoring.md) | Rename, migrate namespace, move, extract |
 | [Classify](classify.md) | Reasoner profiles and CI exit semantics |
-| [Realize / instance check](realize.md) | ABox realization and `check-instance` (v0.23) |
-| [SWRL](swrl.md) | Rule patches + LSP validate/list (v0.23) |
+| [Realize / instance check](realize.md) | ABox realization and `check-instance` (v0.24) |
+| [SWRL](swrl.md) | Rule patches + LSP validate/list (v0.24) |
 | [Semantic diff](diff.md) | Git refs, PR summary, directory compare |
 | [Docs export](docs-export.md) | Markdown/HTML documentation export |
 | [Index vs inspect](inspect.md) | Stats-only vs diagnostic summary |
@@ -52,8 +52,8 @@ Download tutorial files without cloning:
 
 ```bash
 mkdir ontocode-tutorial && cd ontocode-tutorial
-curl -fsSLO https://raw.githubusercontent.com/eddiethedean/ontocode/v0.23.0/fixtures/example.ttl
-curl -fsSLO https://raw.githubusercontent.com/eddiethedean/ontocode/v0.23.0/fixtures/complex-classes.ttl
+curl -fsSLO https://raw.githubusercontent.com/eddiethedean/ontocode/v0.24.0/fixtures/example.ttl
+curl -fsSLO https://raw.githubusercontent.com/eddiethedean/ontocode/v0.24.0/fixtures/complex-classes.ttl
 ```
 
 ## VS Code tutorial

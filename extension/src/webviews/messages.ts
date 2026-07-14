@@ -129,8 +129,23 @@ export interface RefactorPlanPayload {
 
 export interface SavedQuery {
   name: string;
-  mode: "sql" | "sparql";
+  mode: "sql" | "sparql" | "dl";
   text: string;
+}
+
+export interface DlQueryResult {
+  expression: string;
+  normalized: string;
+  query_class_iri: string;
+  subclasses: string[];
+  superclasses: string[];
+  equivalents: string[];
+  instances: string[];
+  profile: string;
+  mode: string;
+  duration_ms: number;
+  warnings?: string[];
+  diagnostics?: string[];
 }
 
 export interface TabularQueryResult {
@@ -245,7 +260,7 @@ export type HostMessage =
   | { type: "preview"; text: string }
   | { type: "loadRefactorPlan"; plan: RefactorPlanPayload }
   | { type: "queryInit"; saved: SavedQuery[]; history: SavedQuery[]; sqlTables: string[]; sqlSchema?: Array<{ name: string; columns: Array<{ name: string; type: string }> }> }
-  | { type: "queryResult"; runId: number; result?: TabularQueryResult; error?: string }
+  | { type: "queryResult"; runId: number; result?: TabularQueryResult; dlResult?: DlQueryResult; error?: string }
   | { type: "manchesterInit"; entityIri: string; axiomKind: string; expression: string; completions: ManchesterCompletions }
   | { type: "manchesterValidation"; seq: number; result?: ManchesterValidationResult; error?: string }
   | {
@@ -337,8 +352,8 @@ export type WebviewMessage =
   | { type: "renameIri" }
   | { type: "applyRefactor" }
   | { type: "cancelRefactor" }
-  | { type: "runQuery"; mode: "sql" | "sparql"; text: string; runId: number }
-  | { type: "saveQuery"; name: string; mode: "sql" | "sparql"; text: string }
+  | { type: "runQuery"; mode: "sql" | "sparql" | "dl"; text: string; runId: number; dlMode?: "asserted" | "inferred" }
+  | { type: "saveQuery"; name: string; mode: "sql" | "sparql" | "dl"; text: string }
   | { type: "exportQueryResult"; format: "csv" | "json"; runId?: number }
   | { type: "exportGraph"; format: "json" | "csv"; payload: string; suggestedName?: string }
   | { type: "validateManchester"; expression: string; axiomKind: string; seq: number }
@@ -484,11 +499,16 @@ export function parseApplyManchesterMessage(
 
 export function parseRunQueryMessage(
   message: WebviewMessage
-): { mode: "sql" | "sparql"; text: string; runId: number } | null {
+): {
+  mode: "sql" | "sparql" | "dl";
+  text: string;
+  runId: number;
+  dlMode?: "asserted" | "inferred";
+} | null {
   if (message.type !== "runQuery") {
     return null;
   }
-  if (message.mode !== "sql" && message.mode !== "sparql") {
+  if (message.mode !== "sql" && message.mode !== "sparql" && message.mode !== "dl") {
     return null;
   }
   if (typeof message.text !== "string" || typeof message.runId !== "number") {
@@ -497,16 +517,20 @@ export function parseRunQueryMessage(
   if (message.text.length > MAX_QUERY_TEXT_BYTES) {
     return null;
   }
-  return { mode: message.mode, text: message.text, runId: message.runId };
+  const dlMode =
+    message.dlMode === "asserted" || message.dlMode === "inferred"
+      ? message.dlMode
+      : undefined;
+  return { mode: message.mode, text: message.text, runId: message.runId, dlMode };
 }
 
 export function parseSaveQueryMessage(
   message: WebviewMessage
-): { name: string; mode: "sql" | "sparql"; text: string } | null {
+): { name: string; mode: "sql" | "sparql" | "dl"; text: string } | null {
   if (message.type !== "saveQuery") {
     return null;
   }
-  if (message.mode !== "sql" && message.mode !== "sparql") {
+  if (message.mode !== "sql" && message.mode !== "sparql" && message.mode !== "dl") {
     return null;
   }
   if (typeof message.name !== "string" || typeof message.text !== "string") {

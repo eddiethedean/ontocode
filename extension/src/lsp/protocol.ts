@@ -142,6 +142,38 @@ export interface CheckInstanceResult {
   duration_ms: number;
 }
 
+export interface DlQueryParams {
+  expression: string;
+  profile?: string;
+  /** `inferred` (default) or `asserted` */
+  mode?: "inferred" | "asserted" | string;
+  document_uri?: string;
+}
+
+export interface DlQueryResult {
+  expression: string;
+  normalized: string;
+  query_class_iri: string;
+  subclasses: string[];
+  superclasses: string[];
+  equivalents: string[];
+  instances: string[];
+  profile: string;
+  mode: string;
+  duration_ms: number;
+  warnings?: string[];
+  diagnostics?: string[];
+}
+
+export interface SearchParams {
+  query: string;
+  limit?: number;
+}
+
+export interface SearchResult {
+  entities: EntityDetail[];
+}
+
 export interface RunReasonerParams {
   profile?: string;
   auto_detect?: boolean;
@@ -524,7 +556,7 @@ export interface ParseSwrlRuleResult {
 
 export interface SavedQuery {
   name: string;
-  mode: "sql" | "sparql";
+  mode: "sql" | "sparql" | "dl";
   text: string;
 }
 
@@ -559,6 +591,8 @@ export interface RefactorFileChange {
 export interface RefactorPlan {
   changes: RefactorFileChange[];
   warnings?: string[];
+  affected_entity_count?: number;
+  affected_axiom_count?: number;
 }
 
 export type RefactorRequest =
@@ -572,11 +606,24 @@ export type RefactorRequest =
       entity_iris: string[];
       output_file: string;
       leave_stub?: boolean;
+      locality?: boolean;
+    }
+  | { kind: "merge_ontologies"; source_paths: string[]; target_file: string }
+  | { kind: "flatten_imports"; ontology_file: string }
+  | { kind: "cleanup_imports"; ontology_file: string }
+  | {
+      kind: "move_axioms";
+      entity_iri: string;
+      target_file: string;
+      statement_indexes?: number[];
+      exclude_primary?: boolean;
     };
 
 export interface PreviewRefactorResult {
   changes: RefactorFileChange[];
   warnings?: string[];
+  affected_entity_count?: number;
+  affected_axiom_count?: number;
 }
 
 export interface ApplyRefactorResult {

@@ -257,6 +257,57 @@ pub struct SparqlParams {
     pub query: String,
 }
 
+#[derive(Debug, Deserialize)]
+pub struct DlQueryParams {
+    pub expression: String,
+    #[serde(default = "default_dl_query_profile")]
+    pub profile: String,
+    /// `inferred` (default) or `asserted`
+    #[serde(default = "default_dl_query_mode")]
+    pub mode: String,
+    #[serde(default)]
+    pub document_uri: Option<String>,
+}
+
+fn default_dl_query_profile() -> String {
+    "dl".to_string()
+}
+
+fn default_dl_query_mode() -> String {
+    "inferred".to_string()
+}
+
+#[derive(Debug, Serialize)]
+pub struct DlQueryResult {
+    pub expression: String,
+    pub normalized: String,
+    pub query_class_iri: String,
+    pub subclasses: Vec<String>,
+    pub superclasses: Vec<String>,
+    pub equivalents: Vec<String>,
+    pub instances: Vec<String>,
+    pub profile: String,
+    pub mode: String,
+    pub duration_ms: u64,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub warnings: Vec<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub diagnostics: Vec<String>,
+}
+
+#[derive(Debug, Deserialize)]
+pub struct SearchParams {
+    pub query: String,
+    /// Max hits to return (default 100, capped at 500).
+    #[serde(default)]
+    pub limit: Option<usize>,
+}
+
+#[derive(Debug, Serialize)]
+pub struct SearchResult {
+    pub entities: Vec<EntityDetail>,
+}
+
 #[derive(Debug, Serialize)]
 pub struct TabularQueryResult {
     pub columns: Vec<String>,

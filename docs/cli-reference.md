@@ -1,11 +1,11 @@
-# CLI reference (OntoCore v0.23)
+# CLI reference (OntoCore v0.24)
 
 The `ontocore` binary indexes ontology workspaces and exposes query, validation, patch, and reasoning commands.
 
 Install (pin latest tagged release):
 
 ```bash
-cargo install ontocore-cli --locked --version 0.23.0
+cargo install ontocore-cli --locked --version 0.24.0
 ```
 
 From a git clone, use `cargo run --` instead of `ontocore`.
@@ -80,6 +80,23 @@ ontocore sparql fixtures "SELECT ?s ?p ?o WHERE { ?s ?p ?o } LIMIT 10"
 ```
 
 **Exit:** 0 on success; non-zero on failure. Results truncate at 100,000 rows.
+
+### `dl-query`
+
+Run a Protégé-style DL Query (Manchester class expression). See [DL Query](guides/dl-query.md).
+
+```bash
+ontocore dl-query fixtures "Person and hasPet some Dog" --profile dl
+ontocore dl-query . "Person" --mode asserted --format json
+```
+
+| Flag | Default | Description |
+|------|---------|-------------|
+| `--profile` | `dl` | Reasoner profile |
+| `--mode` | `inferred` | `inferred` or `asserted` |
+| `--format` | `text` | `text` or `json` |
+
+**Exit:** 0 on success; non-zero on parse/reasoner error.
 
 ### `validate`
 

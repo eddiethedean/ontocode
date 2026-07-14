@@ -15,12 +15,14 @@ use ontocore_query::{
     sql::{to_csv as sql_to_csv, to_json as sql_to_json},
 };
 use ontocore_reasoner::{
-    check_instance, classify, explain, realize, ExplanationRequest, ReasonerId,
-    WorkspaceInputLoader,
+    check_instance, classify, explain, realize, run_dl_query, DlQueryMode, ExplanationRequest,
+    ReasonerId, WorkspaceInputLoader,
 };
 use ontocore_refactor::{
-    apply_refactor_plan_checked, find_usages, preview_extract_module, preview_migrate_namespace,
-    preview_move_entity, preview_rename_iri, RefactorPlan,
+    apply_refactor_plan_checked, find_usages, preview_cleanup_imports, preview_extract_module,
+    preview_flatten_imports, preview_merge_entities, preview_merge_ontologies,
+    preview_migrate_namespace, preview_move_entity, preview_rename_iri, preview_replace_entity,
+    RefactorPlan,
 };
 use std::collections::HashMap;
 use std::io::Write;
@@ -30,7 +32,7 @@ use std::path::{Path, PathBuf};
 #[command(
     name = "ontocore",
     version,
-    about = "Local-first ontology index and query engine (OntoCode v0.23)"
+    about = "Local-first ontology index and query engine (OntoCode v0.24)"
 )]
 struct Cli {
     #[command(subcommand)]
@@ -150,6 +152,20 @@ enum Commands {
         class: String,
         #[arg(long, default_value = "rl")]
         profile: String,
+        #[arg(long, value_enum, default_value_t = OutputFormat::Text)]
+        format: OutputFormat,
+    },
+    /// Protégé-style DL Query (Manchester class expression)
+    DlQuery {
+        #[arg(default_value = ".")]
+        workspace: PathBuf,
+        /// Manchester class expression
+        expression: String,
+        #[arg(long, default_value = "dl")]
+        profile: String,
+        /// `inferred` (default) or `asserted`
+        #[arg(long, default_value = "inferred")]
+        mode: String,
         #[arg(long, value_enum, default_value_t = OutputFormat::Text)]
         format: OutputFormat,
     },
@@ -302,6 +318,65 @@ enum RefactorCommands {
         out: PathBuf,
         #[arg(long)]
         leave_stub: bool,
+        /// Close seed signature under bottom-locality heuristic before extract
+        #[arg(long)]
+        locality: bool,
+        #[arg(long)]
+        preview: bool,
+        #[arg(long, value_enum, default_value_t = OutputFormat::Text)]
+        format: OutputFormat,
+    },
+    /// Merge one entity into another (rewrite refs to keep IRI, drop merge declaration)
+    Merge {
+        workspace: PathBuf,
+        #[arg(long)]
+        keep: String,
+        #[arg(long)]
+        merge: String,
+        #[arg(long)]
+        preview: bool,
+        #[arg(long, value_enum, default_value_t = OutputFormat::Text)]
+        format: OutputFormat,
+    },
+    /// Replace references to one entity with another (keeps source declaration when target exists)
+    Replace {
+        workspace: PathBuf,
+        #[arg(long)]
+        from: String,
+        #[arg(long)]
+        to: String,
+        #[arg(long)]
+        preview: bool,
+        #[arg(long, value_enum, default_value_t = OutputFormat::Text)]
+        format: OutputFormat,
+    },
+    /// Merge one or more Turtle ontology files into a target file
+    MergeOntologies {
+        workspace: PathBuf,
+        #[arg(long, required = true)]
+        sources: Vec<PathBuf>,
+        #[arg(long)]
+        target: PathBuf,
+        #[arg(long)]
+        preview: bool,
+        #[arg(long, value_enum, default_value_t = OutputFormat::Text)]
+        format: OutputFormat,
+    },
+    /// Inline imported Turtle axioms into a root ontology and remove owl:imports
+    FlattenImports {
+        workspace: PathBuf,
+        #[arg(long)]
+        file: PathBuf,
+        #[arg(long)]
+        preview: bool,
+        #[arg(long, value_enum, default_value_t = OutputFormat::Text)]
+        format: OutputFormat,
+    },
+    /// Remove unused owl:imports (heuristic: no imported entities referenced)
+    CleanupImports {
+        workspace: PathBuf,
+        #[arg(long)]
+        file: PathBuf,
         #[arg(long)]
         preview: bool,
         #[arg(long, value_enum, default_value_t = OutputFormat::Text)]
@@ -609,6 +684,47 @@ fn main() -> Result<()> {
                 bail!("instance check failed");
             }
         }
+        Commands::DlQuery { workspace, expression, profile, mode, format } => {
+            let profile_id = ReasonerId::parse(&profile).map_err(|e| anyhow::anyhow!(e))?;
+            let mode = match mode.to_ascii_lowercase().as_str() {
+                "asserted" => DlQueryMode::Asserted,
+                _ => DlQueryMode::Inferred,
+            };
+            let input =
+                WorkspaceInputLoader::new(&workspace).load().map_err(|e| anyhow::anyhow!(e))?;
+            let namespaces = collect_workspace_namespaces(&workspace)?;
+            let result = run_dl_query(profile_id, &input, &expression, &namespaces, mode)
+                .map_err(|e| anyhow::anyhow!(e))?;
+            match format {
+                OutputFormat::Json => println!("{}", serde_json::to_string_pretty(&result)?),
+                OutputFormat::Text | OutputFormat::Csv => {
+                    println!("expression: {}", result.expression);
+                    println!("normalized: {}", result.normalized);
+                    println!("profile: {}", result.profile);
+                    println!("mode: {:?}", result.mode);
+                    println!("duration_ms: {}", result.duration_ms);
+                    println!("subclasses: {}", result.subclasses.len());
+                    for iri in &result.subclasses {
+                        println!("  SUB {iri}");
+                    }
+                    println!("superclasses: {}", result.superclasses.len());
+                    for iri in &result.superclasses {
+                        println!("  SUPER {iri}");
+                    }
+                    println!("equivalents: {}", result.equivalents.len());
+                    for iri in &result.equivalents {
+                        println!("  EQ {iri}");
+                    }
+                    println!("instances: {}", result.instances.len());
+                    for iri in &result.instances {
+                        println!("  INST {iri}");
+                    }
+                    for w in &result.warnings {
+                        println!("WARN {w}");
+                    }
+                }
+            }
+        }
         Commands::Robot { command } => {
             use ontocore_robot::{robot_merge, robot_report, robot_validate};
             let output = match command {
@@ -672,7 +788,15 @@ fn main() -> Result<()> {
                 let plan = preview_move_entity(&catalog, &iri, &to, &HashMap::new(), &roots)?;
                 run_refactor_plan(&plan, preview, format, &workspace)?;
             }
-            RefactorCommands::Extract { workspace, entities, out, leave_stub, preview, format } => {
+            RefactorCommands::Extract {
+                workspace,
+                entities,
+                out,
+                leave_stub,
+                locality,
+                preview,
+                format,
+            } => {
                 let catalog = build_catalog(&workspace)?;
                 let roots = vec![workspace.clone()];
                 let plan = preview_extract_module(
@@ -680,9 +804,52 @@ fn main() -> Result<()> {
                     &entities,
                     &out,
                     leave_stub,
+                    locality,
                     &HashMap::new(),
                     &roots,
                 )?;
+                run_refactor_plan(&plan, preview, format, &workspace)?;
+            }
+            RefactorCommands::Merge { workspace, keep, merge, preview, format } => {
+                let catalog = build_catalog(&workspace)?;
+                let plan = preview_merge_entities(&catalog, &keep, &merge, &HashMap::new())?;
+                run_refactor_plan(&plan, preview, format, &workspace)?;
+            }
+            RefactorCommands::Replace { workspace, from, to, preview, format } => {
+                let catalog = build_catalog(&workspace)?;
+                let plan = preview_replace_entity(&catalog, &from, &to, &HashMap::new())?;
+                run_refactor_plan(&plan, preview, format, &workspace)?;
+            }
+            RefactorCommands::MergeOntologies {
+                workspace,
+                sources,
+                target,
+                preview,
+                format,
+            } => {
+                let catalog = build_catalog(&workspace)?;
+                let roots = vec![workspace.clone()];
+                let plan = preview_merge_ontologies(
+                    &catalog,
+                    &sources,
+                    &target,
+                    &HashMap::new(),
+                    &roots,
+                )?;
+                run_refactor_plan(&plan, preview, format, &workspace)?;
+            }
+            RefactorCommands::FlattenImports { workspace, file, preview, format } => {
+                let catalog = build_catalog(&workspace)?;
+                let roots = vec![workspace.clone()];
+                let plan =
+                    preview_flatten_imports(&catalog, &file, &HashMap::new(), &roots)?;
+                run_refactor_plan(&plan, preview, format, &workspace)?;
+            }
+            RefactorCommands::CleanupImports { workspace, file, preview, format } => {
+                let catalog = build_catalog(&workspace)?;
+                let roots = vec![workspace.clone()];
+                let plan =
+                    preview_cleanup_imports(&catalog, &file, &HashMap::new(), &roots)?;
                 run_refactor_plan(&plan, preview, format, &workspace)?;
             }
         },
@@ -1026,6 +1193,19 @@ fn build_catalog(workspace: &PathBuf) -> Result<OntologyCatalog> {
         .workspace(workspace)
         .build()
         .with_context(|| format!("failed to index workspace {}", workspace.display()))
+}
+
+fn collect_workspace_namespaces(
+    workspace: &PathBuf,
+) -> Result<std::collections::BTreeMap<String, String>> {
+    let catalog = build_catalog(workspace)?;
+    let mut namespaces = std::collections::BTreeMap::new();
+    for doc in &catalog.data().documents {
+        for (prefix, iri) in &doc.namespaces {
+            namespaces.entry(prefix.clone()).or_insert_with(|| iri.clone());
+        }
+    }
+    Ok(namespaces)
 }
 
 fn load_reasoner_input(workspace: &PathBuf) -> Result<ontocore_reasoner::ReasonerInput> {

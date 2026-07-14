@@ -210,6 +210,35 @@ export function assertTabularQueryResult(
   return value as import("./protocol").TabularQueryResult;
 }
 
+export function assertDlQueryResult(
+  value: unknown
+): import("./protocol").DlQueryResult {
+  if (!value || typeof value !== "object") {
+    throw new Error("Invalid dlQuery result from language server");
+  }
+  const v = value as Record<string, unknown>;
+  if (
+    typeof v.expression !== "string" ||
+    typeof v.normalized !== "string" ||
+    !Array.isArray(v.instances) ||
+    !Array.isArray(v.subclasses) ||
+    !Array.isArray(v.superclasses) ||
+    !Array.isArray(v.equivalents)
+  ) {
+    throw new Error("Invalid dlQuery result shape");
+  }
+  return value as import("./protocol").DlQueryResult;
+}
+
+export function assertSearchResult(
+  value: unknown
+): import("./protocol").SearchResult {
+  if (!value || typeof value !== "object" || !Array.isArray((value as { entities?: unknown }).entities)) {
+    throw new Error("Invalid search result from language server");
+  }
+  return value as import("./protocol").SearchResult;
+}
+
 export function assertParseManchesterResult(
   value: unknown
 ): import("./protocol").ParseManchesterResult {

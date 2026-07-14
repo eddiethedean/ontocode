@@ -1,6 +1,6 @@
 # Production readiness and pilot criteria
 
-This page states what OntoCode / OntoCore **v0.23.0** (latest tagged) is appropriate for in production-like environments. It is not legal advice and does not replace your organization's risk review.
+This page states what OntoCode / OntoCore **v0.24.0** (latest tagged) is appropriate for in production-like environments. It is not legal advice and does not replace your organization's risk review.
 
 Canonical capability matrix: [What ships today](../SHIPPED.md). Follow-on pilot weeks: [Enterprise week-2 playbook](enterprise-week-2.md).
 
@@ -8,16 +8,16 @@ Canonical capability matrix: [What ships today](../SHIPPED.md). Follow-on pilot 
 
 | Level | Version | Meaning |
 |-------|---------|---------|
-| **Pre-1.0** | **0.23.x (latest tagged)** | Pin `cargo install ontocore-cli --locked --version 0.23.0` in CI. Library APIs may change until [v1.0](../design/v1.0_BACKLOG.md). |
-| **Stable CI gates** | 0.23.x | `ontocore validate`, `ontocore classify`, `ontocore realize`, `ontocore check-instance`, and `ontocore diff` are documented for CI — see [workspace limits](../workspace-limits.md). |
+| **Pre-1.0** | **0.24.x (latest tagged)** | Pin `cargo install ontocore-cli --locked --version 0.24.0` in CI. Library APIs may change until [v1.0](../design/v1.0_BACKLOG.md). |
+| **Stable CI gates** | 0.24.x | `ontocore validate`, `ontocore classify`, `ontocore realize`, `ontocore check-instance`, and `ontocore diff` are documented for CI — see [workspace limits](../workspace-limits.md). |
 | **In development** | Next unreleased minor on `main` | May preview upcoming work — pin installs to [TAGGED_RELEASE](../TAGGED_RELEASE), not workspace `Cargo.toml`. |
 | **v1.0 target** | Planned | Protégé-competitive OWL 2 DL + OBO in VS Code — [Protégé vs OntoCode](protege-decision.md); capability truth: [SHIPPED](../SHIPPED.md) + [known limitations](../known-limitations.md). |
 
-OntoCode **v0.23** is suitable for pilot IDE editing, Linux CI validate/classify/realize, and coexistence with Protégé — **not** an org-wide Protégé retirement. RDF/XML and OWL/XML write-back are semantic re-serialize (ships since v0.21). Realization, instance checking, and SWRL (DLSafe + classify materialize) ship in v0.23; Protégé DL Query syntax does not — [DL Query vs Query Workbench](dl-query.md).
+OntoCode **v0.24** is suitable for pilot IDE editing, Linux CI validate/classify/realize, and coexistence with Protégé — **not** an org-wide Protégé retirement. RDF/XML and OWL/XML write-back are semantic re-serialize (ships since v0.21). Realization, instance checking, and SWRL (DLSafe + classify materialize) ship in v0.24; Protégé DL Query syntax does not — [DL Query vs Query Workbench](dl-query.md).
 
 ## Approved use cases (pilot or production)
 
-| Use case | v0.23 readiness | Notes |
+| Use case | v0.24 readiness | Notes |
 |----------|-----------------|-------|
 | CI lint gate on ontology repos | **Suitable** | `ontocore validate` — [CI integration](../ci-integration.md) |
 | CI consistency gate (EL profile) | **Suitable** | `ontocore classify --profile el` — profile must match ontology |
@@ -50,7 +50,7 @@ Suggested pilot duration: **4–8 weeks** with 3–10 engineers on one ontology 
 
 ## What is stable enough for automation
 
-| Surface | Stability (v0.23 tagged) |
+| Surface | Stability (v0.24 tagged) |
 |---------|--------------------------|
 | `ontocore validate` exit codes | Documented for CI |
 | `ontocore classify` exit codes | Documented for CI |
@@ -61,17 +61,17 @@ Suggested pilot duration: **4–8 weeks** with 3–10 engineers on one ontology 
 | LSP `ontocore/*` JSON | May change pre-1.0 |
 | Rust `ontocore-*` crate APIs | May change pre-1.0 |
 
-Pin CLI version in CI: release binary with `VERSION=0.23.0` or `cargo install ontocore-cli --locked --version 0.23.0`.
+Pin CLI version in CI: release binary with `VERSION=0.24.0` or `cargo install ontocore-cli --locked --version 0.24.0`.
 
 ## Support and incident response
 
-| Topic | v0.23 policy |
+| Topic | v0.24 policy |
 |-------|-------------|
 | Commercial support | **Not offered** — community / GitHub issues |
 | Security reports | [GitHub Security Advisories](https://github.com/eddiethedean/ontocode/security/advisories/new) — not public issues |
 | Acknowledgment target | Within a few business days ([SECURITY.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/SECURITY.md)) |
 | Patch SLA | **No committed SLA** — track [GitHub Security Advisories](https://github.com/eddiethedean/ontocode/security/advisories) for your version |
-| Supported versions | 0.23.x latest tagged; prior minors per [security policy](../security.md) |
+| Supported versions | 0.24.x latest tagged; prior minors per [security policy](../security.md) |
 
 Enterprises requiring contractual SLAs should treat OntoCode as **internal OSS adoption** with your own escalation path to maintainers via GitHub.
 

@@ -20,9 +20,10 @@ pub use compare::{compare_bridges, compare_ontologies, SemanticDiff};
 pub use error::{OwlError, Result};
 pub use load::{load_from_quads, load_owx_text, load_turtle_text, supports_horned_load};
 pub use manchester::{
-    class_expression_to_manchester, class_expression_to_turtle_fragment, data_range_to_manchester,
-    data_range_to_turtle_term, expression_tree_json, parse_class_expression, parse_data_range,
-    ManchesterDiagnostic, ManchesterParseOutput,
+    class_expression_to_manchester, class_expression_to_turtle_fragment,
+    class_expression_to_turtle_value, data_range_to_manchester, data_range_to_turtle_term,
+    expression_tree_json, parse_class_expression, parse_data_range, ManchesterDiagnostic,
+    ManchesterParseOutput,
 };
 pub use mutate::{apply_patches_to_ontology, apply_patches_to_ontology_with_ns};
 pub use patch::{

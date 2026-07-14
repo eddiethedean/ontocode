@@ -150,6 +150,8 @@ export interface RefactorFileChange {
 export interface RefactorPlanPayload {
   changes: RefactorFileChange[];
   warnings?: string[];
+  affected_entity_count?: number;
+  affected_axiom_count?: number;
 }
 
 export interface TabularQueryResult {
@@ -160,8 +162,23 @@ export interface TabularQueryResult {
 
 export interface SavedQuery {
   name: string;
-  mode: "sql" | "sparql";
+  mode: "sql" | "sparql" | "dl";
   text: string;
+}
+
+export interface DlQueryResult {
+  expression: string;
+  normalized: string;
+  query_class_iri: string;
+  subclasses: string[];
+  superclasses: string[];
+  equivalents: string[];
+  instances: string[];
+  profile: string;
+  mode: string;
+  duration_ms: number;
+  warnings?: string[];
+  diagnostics?: string[];
 }
 
 export interface ManchesterCompletions {
@@ -375,7 +392,7 @@ export type HostMessage =
   | { type: "preview"; text: string }
   | { type: "loadRefactorPlan"; plan: RefactorPlanPayload }
   | { type: "queryInit"; saved: SavedQuery[]; history: SavedQuery[]; sqlTables: string[]; sqlSchema?: SqlTableSchema[] }
-  | { type: "queryResult"; runId: number; result?: TabularQueryResult; error?: string }
+  | { type: "queryResult"; runId: number; result?: TabularQueryResult; dlResult?: DlQueryResult; error?: string }
   | { type: "manchesterInit"; entityIri: string; axiomKind: string; expression: string; completions: ManchesterCompletions }
   | { type: "manchesterValidation"; seq: number; result?: ManchesterValidationResult; error?: string }
   | {
@@ -456,8 +473,8 @@ export type WebviewMessage =
   | { type: "renameIri" }
   | { type: "applyRefactor" }
   | { type: "cancelRefactor" }
-  | { type: "runQuery"; mode: "sql" | "sparql"; text: string; runId: number }
-  | { type: "saveQuery"; name: string; mode: "sql" | "sparql"; text: string }
+  | { type: "runQuery"; mode: "sql" | "sparql" | "dl"; text: string; runId: number; dlMode?: "asserted" | "inferred" }
+  | { type: "saveQuery"; name: string; mode: "sql" | "sparql" | "dl"; text: string }
   | { type: "exportQueryResult"; format: "csv" | "json"; runId?: number }
   | { type: "exportGraph"; format: "json" | "csv"; payload: string; suggestedName?: string }
   | { type: "validateManchester"; expression: string; axiomKind: string; seq: number }

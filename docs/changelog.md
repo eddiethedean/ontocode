@@ -6,9 +6,9 @@ Migration guides: [Migration index](migration/README.md)
 
 ## [Unreleased]
 
-## [0.23.0] - 2026-07-14
+## [0.24.0] - 2026-07-14
 
-**v0.23.0** — Reasoning parity + SWRL (`PAR-RSN-002`/`PAR-RSN-003`/`PAR-SWRL-001`): full consistency, realization, instance check, inferred ABox assertions; native DL explanations with weaker-engine fallback; engine cancel through enrich; `ontocore-swrl` + Rule Browser/Editor + authored-rule injection for classify; docs adoption sync. See [CHANGELOG.md](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) and [migration/v0.23.md](migration/v0.23.md).
+**v0.24.0** — Reasoning parity + SWRL (`PAR-RSN-002`/`PAR-RSN-003`/`PAR-SWRL-001`): full consistency, realization, instance check, inferred ABox assertions; native DL explanations with weaker-engine fallback; engine cancel through enrich; `ontocore-swrl` + Rule Browser/Editor + authored-rule injection for classify; docs adoption sync. See [CHANGELOG.md](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) and [migration/v0.23.md](migration/v0.23.md).
 
 ## [0.22.0] - 2026-07-14
 

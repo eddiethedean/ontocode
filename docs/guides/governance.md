@@ -20,7 +20,7 @@ Recent documented releases (see [changelog](../changelog.md)):
 
 | Version | Date (changelog) |
 |---------|------------------|
-| 0.23.0 | 2026-07-14 |
+| 0.24.0 | 2026-07-14 |
 | 0.22.0 | 2026-07-13 |
 | 0.20.0 | 2026-07-13 |
 | 0.19.0 | 2026-07-13 |
@@ -49,7 +49,7 @@ Maintainers follow [releasing.md](../releasing.md): version bump, CHANGELOG, SHI
 
 | Stream | Security support (documented) |
 |--------|-------------------------------|
-| **0.23.x** | Yes — current tagged release |
+| **0.24.x** | Yes — current tagged release |
 | **0.19.x** | Yes |
 | **0.14.x** | Best effort |
 | **0.11.x** | No |

@@ -106,6 +106,64 @@ pub fn rules_from_turtle_document(text: &str) -> Vec<SwrlRule> {
     rules
 }
 
+/// Rewrite `from_iri` → `to_iri` inside `ontocore:swrlRule` JSON string literals.
+///
+/// Returns updated text and number of rules remapped. Leaves non-SWRL content unchanged.
+pub fn rewrite_swrl_iris_in_turtle(text: &str, from_iri: &str, to_iri: &str) -> (String, usize) {
+    if from_iri == to_iri || !text.contains(ONTOCORE_SWRL_PRED) {
+        return (text.to_string(), 0);
+    }
+    let mut result = text.to_string();
+    let mut remapped = 0usize;
+    let marker = ONTOCORE_SWRL_PRED;
+    // Walk occurrences from the end so byte offsets stay valid.
+    let mut occ: Vec<(usize, usize, String)> = Vec::new();
+    let mut search_from = 0usize;
+    while let Some(rel) = result[search_from..].find(marker) {
+        let marker_pos = search_from + rel;
+        let after = &result[marker_pos..];
+        let Some(quote_rel) = after.find('"') else {
+            break;
+        };
+        let json_start = marker_pos + quote_rel + 1;
+        let rest = &result[json_start..];
+        let mut end = None;
+        let mut escaped = false;
+        for (i, ch) in rest.char_indices() {
+            if escaped {
+                escaped = false;
+                continue;
+            }
+            if ch == '\\' {
+                escaped = true;
+                continue;
+            }
+            if ch == '"' {
+                end = Some(i);
+                break;
+            }
+        }
+        let Some(json_len) = end else {
+            break;
+        };
+        let raw = &rest[..json_len];
+        let unescaped = unescape_turtle_string(raw);
+        if let Ok(mut rule) = serde_json::from_str::<SwrlRule>(&unescaped) {
+            if rule.remap_iri(from_iri, to_iri) {
+                if let Ok(new_json) = serde_json::to_string(&rule) {
+                    occ.push((json_start, json_start + json_len, escape_turtle_string(&new_json)));
+                    remapped += 1;
+                }
+            }
+        }
+        search_from = json_start + json_len + 1;
+    }
+    for (start, end, new_raw) in occ.into_iter().rev() {
+        result.replace_range(start..end, &new_raw);
+    }
+    (result, remapped)
+}
+
 #[allow(dead_code)]
 pub fn err_msg(msg: impl Into<String>) -> SwrlError {
     SwrlError::Message(msg.into())

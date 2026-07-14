@@ -60,6 +60,8 @@ export const graphPayload: GraphPayload = {
 
 export const refactorPlan: RefactorPlanPayload = {
   warnings: ["Review import statements"],
+  affected_entity_count: 2,
+  affected_axiom_count: 3,
   changes: [
     {
       path: "/workspace/ontology.ttl",

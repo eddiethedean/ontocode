@@ -1,21 +1,21 @@
-# What ships today (v0.23.0 — latest tagged)
+# What ships today (v0.24.0 — latest tagged)
 
 > **Canonical capability matrix.** Update this page on every release. Design specs under [Project](design/README.md) may describe future targets — check here for what is actually available.
 >
 > **Format write-back truth:** this page and [Supported formats](supported-formats.md) are the source of truth. Tier-1 user docs (README, Home, First success, FAQ, Evaluate pack, LSP/patch/CLI refs) must match them — see [Releasing — Tier-1 capability truth](releasing.md#documentation-sync-checklist-every-release).
 >
-> **Latest tagged release: v0.23.0** (crates.io, GitHub Releases; Marketplace/Open VSX may lag — see [Versions & channels](guides/versions-and-channels.md)). Pin installs: `cargo install ontocore-cli --locked --version 0.23.0`.
+> **Latest tagged release: v0.24.0** (crates.io, GitHub Releases; Marketplace/Open VSX may lag — see [Versions & channels](guides/versions-and-channels.md)). Pin installs: `cargo install ontocore-cli --locked --version 0.24.0`.
 
-**Latest tagged: v0.23.0** · [v0.23 migration](migration/v0.23.md) · [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md)
+**Latest tagged: v0.24.0** · [v0.24 migration](migration/v0.24.md) · [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md)
 
 ## Products
 
 | Product | What it is |
 |---------|------------|
-| **OntoCode** | VS Code IDE — explorer, React inspector, graphs (asserted/inferred modes), Query Workbench, Manchester editor, refactor preview, reasoner, explanation panel, plugin commands/views/preferences/context actions |
+| **OntoCode** | VS Code IDE — explorer, React inspector, graphs (asserted/inferred modes), Query Workbench (SQL/SPARQL/DL), Manchester editor, refactor preview, reasoner, explanation panel, plugin commands/views/preferences/context actions |
 | **OntoCore** | Rust semantic workspace engine — `ontocore` façade, `ontocore-*` crates, `ontocore` CLI, `ontocore-lsp`, plugin host |
 
-## Capability matrix (v0.23.0 tagged)
+## Capability matrix (v0.24.0 tagged)
 
 | Capability | VS Code | CLI |
 |------------|---------|-----|
@@ -29,7 +29,7 @@
 | Generic annotation assertions | Yes | `ontocore patch` |
 | OBO term edit (name, synonym, def, is_a, …) | Yes (inspector) | `ontocore patch` |
 | Find usages / rename IRI / namespace migration / move / extract module | Yes (preview + apply) | `ontocore refactor` |
-| Merge entities / replace entity references | Yes (preview + apply) | — (IDE only; not `ontocore refactor`) |
+| Merge entities / replace entity references | Yes (preview + apply) | `ontocore refactor merge` / `replace` |
 | New ontology scaffold / export (ROBOT convert or copy) | Yes | `ontocore new` / export LSP |
 | Prefix manager / ontology metadata patches | Yes | `ontocore patch` |
 | Active ontology selector | Yes | LSP `setActiveOntology` |
@@ -37,6 +37,7 @@
 | Menus / toolbars / keybindings / perspectives | Yes | — |
 | SQL-like queries | Query Workbench (React) + schema browser | `ontocore query` |
 | SPARQL | Query Workbench (React) | `ontocore sparql` |
+| DL Query (Manchester class expressions) | Query Workbench **DL** mode | `ontocore dl-query` |
 | Graph visualization (class, property, import, neighborhood) | Yes (React; asserted/inferred/combined; export JSON/CSV; expand depth) | LSP `ontocore/getGraph` |
 | OWL EL classification (`el` profile) | Reasoner panel + hierarchy toggle | `ontocore classify` |
 | RL / RDFS classification | Reasoner panel | `ontocore classify --profile rl\|rdfs` |
@@ -60,7 +61,7 @@
 | Cross-panel focus sync | Explorer → Inspector + Graph (relay) | — |
 | LSP semantic tokens (Turtle, OBO) | Editor highlighting | — |
 | Configurable diagnostics | Problems panel + `.ontocore/diagnostics.toml` | `ontocore validate` |
-| React webview UI | Inspector, graphs, Query Workbench, Manchester editor, refactor preview, semantic diff, imports | — |
+| React webview UI | Inspector, graphs, Query Workbench (SQL/SPARQL/DL), Manchester editor, refactor preview, semantic diff, imports | — |
 | Plugin host (manifest + runtime) | Plugin commands, dockable views, inspector cards, preferences pages, context actions, plugin Problems diagnostics | `ontocore plugins` / `ontocore workflow` |
 | Plugin permissions (`api_version = "1"`) | Enforced on plugin load/run | Enforced on CLI/LSP plugin host |
 | Reference plugins (naming, Markdown export, SHACL scaffold) | Via validate + plugins | `ontocore plugins run` |
@@ -78,7 +79,18 @@
 > **XML write-back:** semantic fidelity (ADR-0021); not byte-identical to Protégé saves.  
 > Deeper capability grid (Manchester, refactor, XML re-serialize): [Capabilities by format](guides/capabilities-by-format.md).
 
-## New in v0.23.0 (latest tagged)
+## New in v0.24.0 (latest tagged)
+
+| Capability | Status |
+|------------|--------|
+| DL Query (Workbench DL mode, CLI, LSP) | Shipped |
+| Workspace search LSP (`ontocore/search`) | Shipped |
+| Merge / replace / move axioms / ontology merge | Shipped (Turtle-first) |
+| Flatten / cleanup imports; locality module extract | Shipped (Turtle-first) |
+| SWRL-aware rename / merge / replace | Shipped |
+| Refactor plan impact metrics | Shipped |
+
+## Previously in v0.23.0
 
 | Capability | Status |
 |------------|--------|
@@ -116,7 +128,7 @@
 | Token-aware type / characteristic detection (ignores comment substrings) | Yes |
 | `SetOntologyIri` rewrites `rdf:type owl:Ontology` in place | Yes |
 
-Full user-facing delta: [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md#0220---2026-07-14).
+Full user-facing delta: [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md#0240---2026-07-14).
 
 ## Release history
 
@@ -143,7 +155,7 @@ Remaining 1.0 targets: [known limitations](known-limitations.md) · [Protégé v
 
 ## What's next
 
-Forward milestones: refactoring + DL Query parity (**v0.24**), UX/parity verify (**v0.25**), Protégé-competitive release (**1.0**). See **[Platform roadmap](roadmap.md)** · **[Known limitations](known-limitations.md)**.
+Forward milestones: UX/parity verify (**v0.25**), Protégé-competitive release (**1.0**). See **[Platform roadmap](roadmap.md)** · **[Known limitations](known-limitations.md)**.
 
 ## Where to learn more
 

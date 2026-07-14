@@ -211,6 +211,7 @@ nav:
       - Changelog: changelog.md
       - Migrations:
           - Migration index: migration/README.md
+          - v0.23.0 → v0.24.0: migration/v0.24.md
           - v0.22.0 → v0.23.0: migration/v0.23.md
           - v0.20.0 → v0.21.0: migration/v0.21.md
           - v0.21.0 → v0.22.0: migration/v0.22.md

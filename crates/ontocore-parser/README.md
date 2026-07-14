@@ -7,7 +7,7 @@ RDF and OBO parsing and entity extraction for [OntoCore](https://github.com/eddi
 ## Install
 
 ```toml
-ontocore-parser = "0.23"
+ontocore-parser = "0.24"
 ```
 
 ## Documentation

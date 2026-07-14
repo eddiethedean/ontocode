@@ -66,6 +66,70 @@ describe("QueryWorkbenchPanel", () => {
     );
   });
 
+  it("switches to DL mode with Manchester starter and asserted toggle", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<QueryWorkbenchPanel />);
+
+    await user.selectOptions(screen.getAllByRole("combobox")[0], "dl");
+
+    expect(screen.getByRole("textbox")).toHaveValue("Person");
+    expect(screen.getByText("Manchester class expression")).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "Inferred" })).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "Asserted" })).toBeInTheDocument();
+  });
+
+  it("runs DL query with asserted mode", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<QueryWorkbenchPanel />);
+
+    await user.selectOptions(screen.getAllByRole("combobox")[0], "dl");
+    const reasoningSelect = screen.getAllByRole("combobox")[1];
+    await user.selectOptions(reasoningSelect, "asserted");
+    await user.click(screen.getByRole("button", { name: "Run" }));
+
+    expect(lastPostedMessage()).toMatchObject({
+      type: "runQuery",
+      mode: "dl",
+      text: "Person",
+      dlMode: "asserted",
+      runId: 1,
+    });
+  });
+
+  it("renders DL result tabs and posts openEntity on IRI click", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<QueryWorkbenchPanel />);
+
+    await user.selectOptions(screen.getAllByRole("combobox")[0], "dl");
+    await user.click(screen.getByRole("button", { name: "Run" }));
+    const runId = (lastPostedMessage() as { runId: number }).runId;
+
+    postHostMessage({
+      type: "queryResult",
+      runId,
+      dlResult: {
+        expression: "Person",
+        normalized: "Person",
+        query_class_iri: "http://example.org#Person",
+        instances: ["http://example.org#Alice"],
+        subclasses: ["http://example.org#Student"],
+        superclasses: [],
+        equivalents: [],
+        profile: "dl",
+        mode: "inferred",
+        duration_ms: 12,
+      },
+    });
+
+    expect(await screen.findByRole("button", { name: "Instances (1)" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Subclasses (1)" })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /Alice/ }));
+    expect(lastPostedMessage()).toMatchObject({
+      type: "openEntity",
+      iri: "http://example.org#Alice",
+    });
+  });
+
   it("displays tabular results from host", async () => {
     renderWithProviders(<QueryWorkbenchPanel />);
 

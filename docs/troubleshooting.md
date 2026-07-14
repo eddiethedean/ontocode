@@ -10,9 +10,9 @@ For quick answers, see also [FAQ](faq.md).
 |---------|--------------|------------|
 | Explorer empty or stale | Not indexed, wrong folder, unsupported format | [Explorer empty](#vs-code-explorer-empty-or-stale) |
 | Language server failed to start | Untrusted workspace, bad `lspPath`, duplicate extension | [LSP failed](#vs-code-language-server-failed-to-start) |
-| Cannot edit in inspector | Wrong format (`.owl`/`.owx`/JSON-LD read-only), wrong file | [Cannot edit](#vs-code-cannot-edit-in-inspector) · [Known limitations](known-limitations.md) |
+| Cannot edit in inspector | Unsupported format (JSON-LD / TriG / N-Triples), parse error, or XML op outside first-cut set | [Cannot edit](#vs-code-cannot-edit-in-inspector) · [Supported formats](supported-formats.md) |
 | Patch / Manchester did not stick | Buffer vs disk conflict, stale index | [Patch did not stick](#vs-code-patch-or-manchester-apply-did-not-stick) |
-| `cargo install` / `ontocore: command not found` after install | PATH, wrong version pin, docs ahead of release | [Install / version pin](#cli-install-or-version-not-found) |
+| `cargo install` / `ontocore: command not found` after install | PATH, wrong version pin, docs ahead of release | [Install / version pin](#cli-install-or-version-not-found) · [Install CLI](guides/install-cli.md) |
 | `validate` exits non-zero | Diagnostic errors in ontology | [Validate exit](#cli-validate-exits-non-zero) |
 | Query returns no rows | Stale index, wrong table/column names | [Query empty](#queries-return-no-rows-or-wrong-data) |
 | Reasoner errors or empty hierarchy | Profile mismatch, Ontologos, unsat classes | [Reasoner](#reasoner) |
@@ -20,7 +20,7 @@ For quick answers, see also [FAQ](faq.md).
 | Semantic diff / graph missing | No git repo, not indexed | [Graphs, OBO, ROBOT](#graphs-obo-robot-and-semantic-diff) |
 | Inspector and graph show different entities | Panels opened before v0.13 or focus relay disabled | Re-open panels; click entity in explorer — [migration v0.13](migration/v0.13.md) |
 | Schema browser empty in Query Workbench | Workspace not indexed or SPARQL mode selected | Index workspace; switch to catalog SQL mode — [Query Workbench](ontocode/query-workbench.md) |
-| OWL/XML visible but not editable | Read-only by design (v0.12+) | [OWL/XML workflow](guides/owl-xml-workflow.md) · [Known limitations](known-limitations.md) |
+| XML edit rewrote layout / unsupported op | Semantic re-serialize (expected); check supported XML patch ops | [OWL/XML write-back](guides/owl-xml-workflow.md) |
 
 Need help beyond this page? See [Support and contact](support.md).
 
@@ -32,9 +32,9 @@ flowchart TD
   vscode -->|CLI| cliFix[Use absolute ontology path not fixtures/]
   empty -->|Yes| indexWs[Index Workspace + check Output panel]
   empty -->|No| edit{Cannot edit?}
-  edit -->|Yes| formatCheck{Turtle or OBO file?}
-  formatCheck -->|No| owlXml[Read OWL/XML/RDF/XML guide]
-  formatCheck -->|Yes| reindex[Run Index Workspace + check Output panel]
+  edit -->|Yes| formatCheck{ttl obo owl rdf or owx?}
+  formatCheck -->|No| readOnly[JSON-LD TriG N-Triples stay read-only]
+  formatCheck -->|Yes| reindex[Index Workspace + check parse status + Supported formats]
   edit -->|No| reasoner{Reasoner issue?}
   reasoner -->|Yes| reasonerGuide[Reasoner guide + lighter profile]
   reasoner -->|No| faq[FAQ + errors reference]
@@ -57,7 +57,7 @@ flowchart TD
 
 ## VS Code: cannot edit in inspector
 
-- Write-back applies to **Turtle (`.ttl`) and OBO (`.obo`)** (v0.13+). See [Supported formats](supported-formats.md) for the full matrix. RDF/XML, OWL/XML, and JSON-LD are read-only.
+- Write-back applies to **Turtle (`.ttl`), OBO (`.obo`), RDF/XML (`.owl`/`.rdf`), and OWL/XML (`.owx`)** (v0.21+). See [Supported formats](supported-formats.md). JSON-LD and line-oriented RDF are read-only. XML is semantic re-serialize — [OWL/XML write-back](guides/owl-xml-workflow.md).
 - Entity must be declared in an indexed `.ttl` or `.obo` file in the workspace.
 - See [OBO authoring](ontocode/obo-authoring.md).
 

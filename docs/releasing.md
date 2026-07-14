@@ -13,51 +13,49 @@ Maintainer checklist for publishing crates, binaries, and the VS Code extension.
 
 ## Documentation sync checklist (every release)
 
+### Tier-1 capability truth (must match SHIPPED — do these first)
+
+Source of truth: **[docs/SHIPPED.md](SHIPPED.md)** and **[docs/supported-formats.md](supported-formats.md)**. Every Tier-1 surface below must agree on writable formats, current tagged version, and evaluate-pack caveats (byte-identical XML is a non-goal; write-back itself must not be described as planned/read-only after it ships).
+
 - [ ] **[docs/SHIPPED.md](SHIPPED.md)** — canonical capability matrix (update first)
-- [ ] [Root README on GitHub](https://github.com/eddiethedean/ontocode/blob/main/README.md) — version, link to SHIPPED.md, Read the Docs badge
-- [ ] [docs/index.md](index.md) — hero version, capability table, documentation map
-- [ ] [extension/README.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/extension/README.md) — "What's included", command table
-- [ ] [docs/vscode-install.md](vscode-install.md) — recommended version, commands
-- [ ] [docs/getting-started.md](getting-started.md) — release binary examples (Path D)
-- [ ] [docs/faq.md](faq.md) — API version, Protégé comparison
+- [ ] **[docs/supported-formats.md](supported-formats.md)** — format write-back matrix
+- [ ] [Root README on GitHub](https://github.com/eddiethedean/ontocode/blob/main/README.md) — “Editable today”, install pins, migration pointer for this release
+- [ ] [docs/index.md](index.md) — hero version, write-back warning, capability table
+- [ ] [docs/guides/first-success.md](guides/first-success.md) — banners, step 4, and troubleshooting agree
+- [ ] [docs/faq.md](faq.md) — Protégé `.owl` edit answer, gaps list, formats
+- [ ] [extension/README.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/extension/README.md) — “Editable today” / What’s included
+- [ ] [docs/guides/owl-xml-workflow.md](guides/owl-xml-workflow.md) + [mkdocs.yml](https://github.com/eddiethedean/ontocode/blob/main/mkdocs.yml) Interop nav label
+- [ ] [docs/guides/protege-decision.md](guides/protege-decision.md), [production-readiness.md](guides/production-readiness.md), [enterprise-eval.md](guides/enterprise-eval.md), [procurement-appendix.md](guides/procurement-appendix.md), [protege-coexistence.md](guides/protege-coexistence.md), [protege-migration.md](guides/protege-migration.md)
+- [ ] [docs/troubleshooting.md](troubleshooting.md), [docs/vscode-install.md](vscode-install.md), [docs/start.md](start.md)
+- [ ] [docs/patch-reference.md](patch-reference.md), [docs/cli-reference.md](cli-reference.md), [docs/lsp-api.md](lsp-api.md)
+- [ ] [docs/roadmap.md](roadmap.md) + [ROADMAP.md](https://github.com/eddiethedean/ontocode/blob/main/ROADMAP.md) — tagged release must be **Shipped**, not Planned
+- [ ] [docs/migration/README.md](migration/README.md) + this release’s `docs/migration/vN.md`
+- [ ] Run `./scripts/check-doc-versions.sh` (also enforced in CI) — includes stale write-back claim greps
+
+### Full sync (after Tier-1)
+
+- [ ] [docs/getting-started.md](getting-started.md) — release binary examples / `cargo install` pin
 - [ ] [docs/errors.md](errors.md) / [docs/workspace-limits.md](workspace-limits.md) — behavior changes
-- [ ] [docs/guides/enterprise-eval.md](guides/enterprise-eval.md) — shipped capabilities
-- [ ] [docs/guides/protege-coexistence.md](guides/protege-coexistence.md) — must match SHIPPED
-- [ ] [docs/guides/protege-decision.md](guides/protege-decision.md) — decision matrix
 - [ ] [docs/guides/production-evidence.md](guides/production-evidence.md) — self-benchmark protocol
 - [ ] [docs/guides/governance.md](guides/governance.md) — sustainability / support policy
 - [ ] [docs/guides/platform-compatibility.md](guides/platform-compatibility.md) — VS Code / OS matrix
 - [ ] [docs/guides/release-timeline.md](guides/release-timeline.md) — non-commitment timeline
-- [ ] [docs/guides/production-readiness.md](guides/production-readiness.md) — pilot criteria
 - [ ] [docs/guides/enterprise-deployment.md](guides/enterprise-deployment.md) — air-gap / CI rollout
 - [ ] [docs/guides/performance-sizing.md](guides/performance-sizing.md) — sizing tiers
 - [ ] [docs/guides/lgpl-compliance.md](guides/lgpl-compliance.md) — legal review pack
 - [ ] [security.md](security.md) / [SECURITY.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/SECURITY.md) — supported versions table
 - [ ] [docs/changelog.md](changelog.md) — mirror recent releases from CHANGELOG.md
-- [ ] [docs/lsp-api.md](lsp-api.md) — new methods or error codes
 - [ ] [docs/webview-protocol.md](webview-protocol.md) — React panel message protocol
-- [ ] [docs/ontocode/graph-view.md](ontocode/graph-view.md), [docs/ontocode/semantic-diff.md](ontocode/semantic-diff.md), [obo-workflow.md](guides/obo-workflow.md), [robot-interop.md](guides/robot-interop.md)
-- [ ] [docs/migration/v0.8.md](migration/v0.8.md) — upgrade notes when applicable
-- [ ] [docs/migration/v0.9.md](migration/v0.9.md) — OntoCore identity upgrade notes when applicable
-- [ ] [docs/migration/v0.10.md](migration/v0.10.md) — semantic workspace upgrade notes when applicable
-- [ ] [docs/migration/v0.11.md](migration/v0.11.md) — editor depth upgrade notes when applicable
-- [ ] [docs/migration/v0.12.md](migration/v0.12.md) — authoring parity upgrade notes when applicable
-- [ ] [docs/migration/v0.13.md](migration/v0.13.md) — OntoUI platform upgrade notes when applicable
-- [ ] [docs/migration/v0.14.md](migration/v0.14.md) — plugin host MVP upgrade notes when applicable
-- [ ] [docs/migration/v0.15.md](migration/v0.15.md) — plugin permissions / UI views when applicable
-- [ ] [docs/migration/v0.16.md](migration/v0.16.md) — plugin preferences / layout polish when applicable
-- [ ] [docs/migration/v0.17.md](migration/v0.17.md) — Protégé-shell menus / perspectives when applicable
-- [ ] [docs/migration/v0.18.md](migration/v0.18.md) — Protégé Desktop parity gate when applicable
-- [ ] [docs/migration/v0.19.md](migration/v0.19.md) — semantic transaction apply path when applicable
-- [ ] [docs/migration/v0.20.md](migration/v0.20.md) — Turtle patch matching hardening when applicable
-- [ ] [docs/ontocode/feature-tour.md](ontocode/feature-tour.md) — retitle to current release
-- [ ] [ROADMAP.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/ROADMAP.md) and [docs/roadmap.md](roadmap.md) — keep shipped/planned sections in sync
+- [ ] [docs/ontocode/feature-tour.md](ontocode/feature-tour.md), [graph-view.md](ontocode/graph-view.md), [semantic-diff.md](ontocode/semantic-diff.md), [obo-workflow.md](guides/obo-workflow.md), [robot-interop.md](guides/robot-interop.md)
+- [ ] [docs/authoring.md](authoring.md), [docs/concepts.md](concepts.md), [docs/ontocore/lsp.md](ontocore/lsp.md)
+- [ ] Crate README “Current version” / `--version` pins (`crates/ontocore*`)
+- [ ] [docs/migration/v0.20.md](migration/v0.20.md) — when applicable
+- [ ] [docs/migration/v0.21.md](migration/v0.21.md) — RDF/XML + OWL/XML write-back (add a row for each new minor)
 - [ ] [docs/guides/plugins.md](guides/plugins.md) — plugin authoring when plugin surface changes
-- [ ] [docs/design/PROTEGE_PARITY.md](design/PROTEGE_PARITY.md) — status columns if features shipped
+- [ ] [docs/design/PROTEGE_PARITY.md](design/PROTEGE_PARITY.md) — status columns if features shipped (banner if historical)
 - [ ] [docs/design/ARCHITECTURE.md](design/ARCHITECTURE.md) / [OWL_AUTHORING_SPEC.md](design/OWL_AUTHORING_SPEC.md) — shipped vs target banners
 - [ ] [docs/design/LICENSES.md](design/LICENSES.md) — dependency sections
 - [ ] Run `./scripts/build-docs.sh` locally before tagging
-- [ ] Run `./scripts/check-doc-versions.sh` (also enforced in CI)
 - [ ] Build tutorial pack: `./scripts/package-tutorial-zip.sh` and attach `ontocode-tutorial.zip` to the GitHub Release
 - [ ] Ensure **CI is green on the release commit** before tagging (the release workflow also re-runs preflight gates including `cargo test --workspace`)
 

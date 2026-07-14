@@ -19,7 +19,7 @@ Read [Known limitations](known-limitations.md) before a large evaluation.
 
 ## When not to use OntoCode (today)
 
-- You need **OWL/XML or RDF/XML in-place write-back** — edit as Turtle/OBO or use Protégé.
+- You need **byte-identical OWL/XML or RDF/XML layout** after save — OntoCode re-serializes (write-back ships in v0.21); see [OWL/XML write-back](guides/owl-xml-workflow.md).
 - You need **full SQL** (JOINs, `ORDER BY`, `LIKE`) — use catalog SQL (subset) or SPARQL instead.
 - You need a **stable, semver-guaranteed plugin API** or production owlmake integration without subprocess scaffolding — plugin host **MVP shipped in v0.14** ([Plugin authoring](guides/plugins.md)); ecosystem hardening is **v1.0**.
 

@@ -3,7 +3,9 @@
 > **Status:** Documents behavior in **OntoCore v0.21.0**. Pre-1.0 APIs may change.
 > Canonical feature list: [What ships today](SHIPPED.md).
 
-Patch write-back (Turtle and OBO) uses a JSON array of patch operations. The CLI (`ontocore patch`) and LSP (`ontocore/applyAxiomPatch`) accept the same envelope; operation sets differ by file extension.
+Patch write-back uses a JSON array of patch operations. The CLI (`ontocore patch`) and LSP (`ontocore/applyAxiomPatch`) accept the same envelope; operation sets differ by file extension.
+
+Supported formats: **Turtle (`.ttl`)**, **OBO (`.obo`)**, **RDF/XML (`.owl`/`.rdf`)**, **OWL/XML (`.owx`)**. XML uses full-document re-serialize ([ADR-0021](design/adr/0021-deterministic-xml-serializers.md)). See [Supported formats](supported-formats.md).
 
 **Apply path (v0.20):** inbound patch JSON is wrapped as an `ontocore_edit::Transaction` and applied through format adapters (`TurtleAdapter` / `OboAdapter`) before the existing `apply_patches_to_text` engines run. Legacy patch arrays remain accepted; an optional forward envelope `{ "transaction": { "changes": [...] } }` is also supported.
 
@@ -13,7 +15,7 @@ Patch write-back (Turtle and OBO) uses a JSON array of patch operations. The CLI
 
 - JSON **array** of operation objects
 - Each object has an `"op"` field (snake_case)
-- Turtle (`.ttl`) and OBO (`.obo`) documents (dispatch by extension)
+- Turtle (`.ttl`), OBO (`.obo`), RDF/XML (`.owl`/`.rdf`), and OWL/XML (`.owx`) documents (dispatch by extension)
 
 ## Turtle operations
 
@@ -78,6 +80,10 @@ See [ADR-0019](design/adr/0019-obo-write-back.md). Ops use `term_id` (OBO id, e.
 | `set_deprecated` | `term_id`, `value` | Set `is_obsolete` |
 | `add_is_a` | `term_id`, `parent_id` | Add `is_a` parent |
 | `remove_is_a` | `term_id`, `parent_id` | Remove `is_a` parent |
+
+## RDF/XML and OWL/XML operations (`.owl` / `.rdf` / `.owx`)
+
+Same Turtle-shaped `PatchOp` JSON applies via Horned load → mutate → full-document re-serialize (v0.21+). First-cut supported ops: create/delete entity, labels/comments/annotations, SubClassOf add/remove, imports, ontology/version IRI, class assertions. Unsupported ops return structured errors and leave the file unchanged. Details: [OWL/XML write-back](guides/owl-xml-workflow.md).
 
 ### `kind` values for `create_entity`
 
@@ -244,7 +250,7 @@ See [lsp-api.md](lsp-api.md) and [authoring.md](authoring.md).
 
 ## Limitations (v0.14)
 
-- Write-back: **Turtle (`.ttl`) and OBO (`.obo`)**; RDF/XML, OWL/XML, JSON-LD are read-only
+- Write-back: **Turtle (`.ttl`), OBO (`.obo`), RDF/XML (`.owl`/`.rdf`), OWL/XML (`.owx`)**; JSON-LD and line-oriented RDF are read-only. XML is semantic re-serialize — [OWL/XML write-back](guides/owl-xml-workflow.md)
 - Simple `add_sub_class_of` parent must be a **named class IRI**; use Manchester ops (`add_complex_sub_class_of`, `add_equivalent_class`, etc.) for class expressions
 - Manchester: `SubClassOf`, `EquivalentClasses`, and `DisjointClasses`; property chains editable via patch ops and inspector (v0.13)
 - Patch engine uses targeted text edits; unusual formatting may need manual review

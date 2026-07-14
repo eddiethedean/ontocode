@@ -1,4 +1,4 @@
-# OWL/XML and RDF/XML workflow
+# OWL/XML and RDF/XML write-back
 
 > **Status:** Shipped in **v0.21.0** — open → edit → save → reload without semantic loss for `.owl`/`.rdf` (RDF/XML) and `.owx` (OWL/XML). Write-back uses Horned full-document re-serialize (not byte-identical formatting). See [ADR-0021](../design/adr/0021-deterministic-xml-serializers.md).
 

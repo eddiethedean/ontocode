@@ -13,7 +13,7 @@ Single entry point for security, platform, and legal questionnaires. Start with 
 | **Production-ready Protégé replacement?** | **No** until 1.0 — pilot/coexistence workflows today |
 | **Latest tagged release** | **v0.21.0** — pin installs; see [Versions & channels](versions-and-channels.md) for Marketplace lag |
 | **Commercial support** | **Not offered** — community via GitHub issues |
-| **Editable formats** | Turtle + OBO write-back; OWL/XML and RDF/XML read-only |
+| **Editable formats** | Turtle, OBO, RDF/XML, OWL/XML write-back; XML is semantic re-serialize (not Protégé byte-identical); JSON-LD / TriG / N-Triples read-only |
 | **CLI prebuilds** | Linux x64 only; macOS/Windows use `cargo install` or bundled VSIX LSP |
 
 ## Detailed guides (by topic)

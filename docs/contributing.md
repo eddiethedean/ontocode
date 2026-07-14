@@ -111,7 +111,7 @@ Look for GitHub labels `good first issue` and `docs`. Useful first PRs:
 - Rust **1.88+** (see `rust-version` in `Cargo.toml`)
 - Node.js **20** (extension CI)
 - `npm` (extension build)
-- **`cargo-audit`** — `cargo install cargo-audit` (required by CI; run `cargo audit` before PRs)
+- **`cargo-audit`** — `cargo install cargo-audit` if you run `./scripts/run-ci-local.sh` locally (CI runs `cargo audit`; not required for every PR smoke check)
 
 ## Optional dependencies
 

@@ -19,4 +19,4 @@ ontocore = { version = "0.21", features = ["plugins"] }
 
 Historical design notes only (do not implement from): [PLUGIN_SPEC.md](../../docs/design/PLUGIN_SPEC.md).
 
-**Current version: 0.20.0**
+**Current version: 0.21.0**

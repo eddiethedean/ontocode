@@ -27,7 +27,7 @@ OntoCore indexes ontology workspaces on disk and provides:
 - Diagnostics and lint rules
 - Refactoring (rename, migrate, move, extract)
 - Reasoning integration via [OntoLogos](https://github.com/eddiethedean/ontologos)
-- Patch write-back for Turtle and OBO (`.ttl`, `.obo`)
+- Patch write-back for Turtle, OBO, RDF/XML, and OWL/XML (`.ttl`, `.obo`, `.owl`/`.rdf`, `.owx`)
 - Semantic diff (version refs, directories, breaking-change heuristics)
 - Documentation export (`ontocore docs`)
 - CLI (`ontocore`) and LSP (`ontocore-lsp`)

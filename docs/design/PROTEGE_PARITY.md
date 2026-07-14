@@ -13,6 +13,7 @@
 >
 > **Status column:** frozen at **v0.18.0** — **not current** for v0.19+ adoption decisions. Use [What ships today](../SHIPPED.md), [Known limitations](../known-limitations.md), and [Protégé vs OntoCode](../guides/protege-decision.md) instead.
 >
+> **v0.21 update:** RDF/XML and OWL/XML write-back **shipped** (semantic re-serialize). Rows below that still say “OWL/XML write-back is v1.0” are historical — ignore them for adoption.
 > **Dependencies:** [DEPENDENCY_MATRIX.md](DEPENDENCY_MATRIX.md)
 
 ## Tier definitions

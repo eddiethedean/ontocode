@@ -45,9 +45,10 @@ Prefer Protégé or other tools (or wait for v1.0) if you need:
 | OBO format index + `obo_id` in explorer | **Shipped** |
 | OBO write-back in VS Code + CLI (`ontocore-obo`) | **Shipped** (engine v0.12; inspector v0.13) |
 | Turtle domain/range/chains/individual assertions | **Shipped** (v0.12) |
-| OWL/XML read-only catalog (`.owl`, `.owx`) | **Shipped** (v0.12) |
+| OWL/XML · RDF/XML catalog (`.owl`, `.owx`) | **Shipped** (read v0.12; write-back v0.21) |
+| RDF/XML + OWL/XML write-back (semantic re-serialize) | **Shipped** (v0.21) |
 | ROBOT CLI interop (`ontocore robot`, LSP `runRobot`) | **Shipped** (requires Java + `robot` on PATH) |
-| Full OWL 2 DL axiom catalog (all axiom kinds editable) | **Partial** (Turtle + OBO; Horned formats read-only) |
+| Full OWL 2 DL axiom catalog (all axiom kinds editable) | **Partial** (richest on Turtle; XML core ops) |
 | Semantic diff | **Shipped** (v0.10 — CLI, LSP, VS Code panel) |
 | Incremental indexing + multi-root workspaces | **Shipped** (v0.10) |
 | Turtle completion + diagnostic quick fixes | **Shipped** (v0.11) |
@@ -92,7 +93,7 @@ Full gap analysis for evaluators: [Known limitations](../known-limitations.md) �
 | Limitation | Impact |
 |------------|--------|
 | **Multi-root VS Code workspaces** | **All folders indexed** (v0.10+) |
-| **Write-back** | **Turtle and OBO (`.obo`)**; RDF/XML and OWL/XML read-only in the inspector |
+| **Write-back** | **Turtle, OBO, RDF/XML, OWL/XML**; JSON-LD / TriG / N-Triples read-only. XML is semantic re-serialize (not byte-identical) |
 | **Reasoning** | EL/RL/RDFS/DL/auto via OntoLogos 1.x; explanations EL-first; results may differ from Protégé on partial OWL mappings |
 | **CLI release binaries** | Linux x64 only; macOS/Windows use `cargo install` or bundled LSP in VSIX |
 | **Scale** | Workspaces above [workspace limits](../workspace-limits.md) may fail indexing — prefer CLI batch workflows for very large terminologies |
@@ -100,12 +101,13 @@ Full gap analysis for evaluators: [Known limitations](../known-limitations.md) �
 
 ## Protégé coexistence
 
-A [first-week Protégé migration guide](protege-migration.md) ships today. Round-trip workflows (Protégé export → OntoCode edit → Protégé verify) and OWL/XML-heavy migration playbooks are **v1.0 targets**. Today:
+A [first-week Protégé migration guide](protege-migration.md) ships today. Round-trip workflows (Protégé export → OntoCode edit → Protégé verify) and byte-identical XML playbooks are **v1.0 targets**. Today:
 
 - [Protégé coexistence guide](protege-coexistence.md) — split workflow when keeping Protégé for specific features
+- [OWL/XML and RDF/XML write-back](owl-xml-workflow.md) — semantic re-serialize caveats
 
-- Use OntoCode for **Turtle and OBO editing in VS Code**, **CI validation**, **SQL/SPARQL queries**, **Manchester axioms** (including disjoint classes), **workspace refactoring**, **property chain editing**, and **EL/RL/RDFS/DL classification**
-- Keep Protégé for **full OWL 2 DL axiom editing in OWL/XML**, **Protégé-specific plugins**, and axiom types not yet in the [Protégé parity matrix](../design/PROTEGE_PARITY.md) until v1.0
+- Use OntoCode for **Turtle / OBO / RDF/XML / OWL/XML editing in VS Code** (XML with caveats), **CI validation**, **SQL/SPARQL queries**, **Manchester axioms** (richest on Turtle), **workspace refactoring** (Turtle), **property chain editing**, and **EL/RL/RDFS/DL classification**
+- Keep Protégé for **byte-identical XML layout**, **Protégé-specific plugins**, and axiom types not yet in the [Protégé parity matrix](../design/PROTEGE_PARITY.md) until v1.0
 - See [Protégé parity matrix](../design/PROTEGE_PARITY.md) and [What ships today](../SHIPPED.md)
 
 ## Evaluation checklist

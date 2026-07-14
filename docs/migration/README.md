@@ -20,8 +20,8 @@ Upgrade notes between OntoCode / OntoCore releases.
 | v0.18.0 → v0.18.1 | [Migration v0.18.0 → v0.18.1](v0.18.1.md) — named unsatisfiable expansion; stronger tests |
 | v0.18.1 → v0.18.2 | [Migration v0.18.1 → v0.18.2](v0.18.2.md) — Windows paths; reasoner cancel; Manchester/Find Usages/Turtle/panel fixes |
 | v0.18.2 → v0.19.0 | [Migration v0.18.2 → v0.19.0](v0.19.md) — semantic transaction apply path; parity manifest skeleton |
-| v0.19.0 → v0.21.0 | [Migration v0.19.0 → v0.21.0](v0.20.md) — workspace runtime; Turtle patch matching hardening |
-| v0.21.0 → v0.21.0 | [Migration v0.21.0 → v0.21.0](v0.21.md) — RDF/XML + OWL/XML write-back |
+| v0.19.0 → v0.20.0 | [Migration v0.19 → v0.20](v0.20.md) — workspace runtime; Turtle patch matching hardening |
+| v0.20.0 → v0.21.0 | [Migration v0.20 → v0.21](v0.21.md) — RDF/XML + OWL/XML write-back |
 
 Pre-1.0: library APIs, LSP JSON, and SQL virtual table columns may change between minor releases. See [API stability](../guides/api-stability.md) and [workspace limits](../workspace-limits.md).
 

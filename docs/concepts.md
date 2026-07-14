@@ -8,7 +8,7 @@ Short glossary for engineers new to OWL/RDF who are evaluating OntoCode.
 |------|---------|
 | **IRI** | Internationalized Resource Identifier — the canonical ID for a class, property, or individual (e.g. `http://example.org/people#Person`) |
 | **Prefix** | Short name for a namespace in Turtle (`@prefix ex: <http://example.org/people#> .`) — lets you write `ex:Person` instead of the full IRI |
-| **Turtle (`.ttl`)** | Human-readable RDF syntax; primary editable format alongside OBO (`.obo`); RDF/XML and JSON-LD are read-only in the inspector |
+| **Turtle (`.ttl`)** | Human-readable RDF syntax; primary editable format (byte-stable span write-back). OBO, RDF/XML, and OWL/XML also support write-back — see [Supported formats](supported-formats.md) |
 | **Class** | A category or type (e.g. `Person`, `Organization`) |
 | **Object property** | A relationship between individuals (e.g. `hasParent`) |
 | **Data property** | A relationship from an individual to a literal value (e.g. `hasAge`) |

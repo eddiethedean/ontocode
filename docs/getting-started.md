@@ -9,7 +9,7 @@ Quick paths to success (5–30 min depending on install method) with OntoCore (C
 
 | Method | Linux x64 | macOS | Windows | Needs Rust? |
 |--------|-----------|-------|---------|-------------|
-| `cargo install ontocore-cli --locked` | Yes | Yes | Yes | Yes (1.88+) |
+| `cargo install ontocore-cli --locked --version 0.21.0` | Yes | Yes | Yes | Yes (1.88+) |
 | Release CLI tarball (`ontocore-v*-x86_64-unknown-linux-gnu`) | Yes | No | No | No |
 | Git clone + `cargo run --` | Yes | Yes | Yes | Yes (1.88+) |
 
@@ -72,10 +72,10 @@ The `fixtures/` directory is included in the repository for examples and tests.
 ## Path C — `cargo install` (no clone)
 
 ```bash
-cargo install ontocore-cli --locked
+cargo install ontocore-cli --locked --version 0.21.0
 ```
 
-**Version pinning:** Use `--locked` for reproducible installs from crates.io (recommended). Pin an exact release in CI with `cargo install ontocore-cli --locked --version 0.21.0` — see [API stability](guides/api-stability.md) and [release integrity](release-integrity.md).
+**Version pinning:** Always pin an exact release in CI with `--version 0.21.0` (see [TAGGED_RELEASE](TAGGED_RELEASE)). Prefer `--locked` for reproducible crates.io installs — see [API stability](guides/api-stability.md) and [release integrity](release-integrity.md). For a longer macOS/Windows walkthrough, see [Install CLI](guides/install-cli.md).
 
 Use **your own ontology directory** — there is no `fixtures/` folder outside a clone:
 

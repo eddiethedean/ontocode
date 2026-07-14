@@ -29,7 +29,7 @@ Full JSON reference: [patch-reference.md](patch-reference.md).
 
 ## Format policy
 
-- **Write-back:** Turtle (`.ttl`) and OBO (`.obo`)
+- **Write-back:** Turtle (`.ttl`), OBO (`.obo`), RDF/XML (`.owl`/`.rdf`), OWL/XML (`.owx`)
 - **Read/index:** Turtle, OBO, RDF/XML (`.owl` / `.rdf`), OWL/XML (`.owx`), JSON-LD, N-Triples, TriG
 - OWL/XML and RDF/XML support inspector/`ontocore patch` write-back via Horned re-serialize (v0.21; not byte-identical layout)
 

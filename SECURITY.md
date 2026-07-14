@@ -5,8 +5,10 @@
 | Version | Supported |
 |---------|-----------|
 | 0.21.x  | Yes — latest tagged release |
+| 0.20.x  | Yes |
 | 0.19.x  | Yes |
 | 0.18.x  | Yes       |
+| 0.17.x  | Best effort |
 | 0.16.x  | Yes       |
 | 0.15.x  | Yes       |
 | 0.14.x  | Best effort |

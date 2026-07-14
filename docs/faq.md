@@ -39,7 +39,7 @@ Marketplace and Open VSX publishes are manual after the release workflow. Prefer
 
 **Can I edit Protégé `.owl` / RDF/XML in place?**
 
-No — write-back is **Turtle (`.ttl`) and OBO (`.obo`) only**. You can index and query OWL/XML and RDF/XML today; convert or dual-maintain Turtle for editing. See [Supported formats](supported-formats.md) and [OWL/XML workflow](guides/owl-xml-workflow.md).
+**Yes (v0.21+), with caveats.** RDF/XML (`.owl`/`.rdf`) and OWL/XML (`.owx`) support Entity Inspector and `ontocore patch` write-back via full-document re-serialize (semantic fidelity, not Protégé byte-identical). Prefer Turtle when you need byte-stable diffs, full Manchester, or refactor apply. Details: [Supported formats](supported-formats.md) and [OWL/XML and RDF/XML write-back](guides/owl-xml-workflow.md).
 
 **SQL or SPARQL — which should I use?**
 
@@ -85,7 +85,7 @@ Select a class in a `.ttl` file → Entity Inspector → **Edit in Manchester** 
 
 **I cannot edit in the Entity Inspector.**
 
-Write-back applies to **Turtle (`.ttl`), OBO (`.obo`), RDF/XML (`.owl`/`.rdf`), and OWL/XML (`.owx`)**. For the full matrix (index/query vs write-back), see [Supported formats](supported-formats.md). JSON-LD and line-oriented RDF are read-only in the inspector. See [OBO authoring](ontocode/obo-authoring.md) and [OWL/XML workflow](guides/owl-xml-workflow.md).
+Write-back applies to **Turtle (`.ttl`), OBO (`.obo`), RDF/XML (`.owl`/`.rdf`), and OWL/XML (`.owx`)**. For the full matrix (index/query vs write-back), see [Supported formats](supported-formats.md). JSON-LD and line-oriented RDF are read-only in the inspector. See [OBO authoring](ontocode/obo-authoring.md) and [OWL/XML write-back](guides/owl-xml-workflow.md).
 
 **How do multi-root VS Code workspaces work?**
 
@@ -178,13 +178,13 @@ EL/RL/RDFS shipped in **v0.6.0** (Ontologos 0.9.0). Full OWL 2 DL classification
 
 **How does this compare to Protégé?**
 
-OntoCode targets OWL/OBO workflows in VS Code: browse and edit Turtle and OBO, SQL/SPARQL queries, EL–DL reasoning, refactoring, graph views, Turtle completion, diagnostic quick fixes, Manage Imports, property chain editing, **semantic diff** (CLI, LSP, and VS Code panel), and **plugin host MVP** (manifests, reference plugins, CLI/LSP hooks — v0.14). Gaps vs Protégé today include **OWL/XML write-back**, **full DL axiom catalog for all formats**, and a **stable third-party plugin ecosystem API** (v1.0). For a decision framework see [Protégé vs OntoCode](guides/protege-decision.md); for the live capability matrix see [What ships today](SHIPPED.md) and [Known limitations](known-limitations.md). The historical v0.18 checklist under [design/PROTEGE_PARITY.md](design/PROTEGE_PARITY.md) is **not current**. For a first-week adoption path, see [Migrating from Protégé](guides/protege-migration.md).
+OntoCode targets OWL/OBO workflows in VS Code: browse and edit Turtle, OBO, RDF/XML, and OWL/XML; SQL/SPARQL queries; EL–DL reasoning; refactoring; graph views; Turtle completion; diagnostic quick fixes; Manage Imports; property chain editing; **semantic diff** (CLI, LSP, and VS Code panel); and **plugin host MVP** (manifests, reference plugins, CLI/LSP hooks — v0.14). Gaps vs Protégé today include **byte-identical XML layout**, **full DL axiom catalog for all formats**, and a **stable third-party plugin ecosystem API** (v1.0). For a decision framework see [Protégé vs OntoCode](guides/protege-decision.md); for the live capability matrix see [What ships today](SHIPPED.md) and [Known limitations](known-limitations.md). The historical v0.18 checklist under [design/PROTEGE_PARITY.md](design/PROTEGE_PARITY.md) is **not current**. For a first-week adoption path, see [Migrating from Protégé](guides/protege-migration.md).
 
 ## OBO and graphs
 
 **Can I edit `.obo` files in the inspector?**
 
-**Yes (v0.13+).** OBO terms can be edited in the Entity Inspector and via `ontocore patch` on `.obo` files. RDF/XML and JSON-LD remain read-only. See [OBO workflow guide](guides/obo-workflow.md).
+**Yes (v0.13+).** OBO terms can be edited in the Entity Inspector and via `ontocore patch` on `.obo` files. RDF/XML and OWL/XML are also writable (v0.21+). JSON-LD and line-oriented RDF remain read-only. See [OBO workflow guide](guides/obo-workflow.md) and [Supported formats](supported-formats.md).
 
 **How do I open ontology graphs?**
 

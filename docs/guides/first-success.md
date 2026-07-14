@@ -5,10 +5,10 @@ This is the **canonical tutorial** for new OntoCode users. You do not need to cl
 **Prerequisites:** VS Code **1.85+**; network access to download tutorial files (step 2); optional [Ontology concepts](../concepts.md) skim if you are new to OWL/RDF.
 
 !!! warning "Write-back formats"
-    Entity Inspector edits apply only to **`.ttl` and `.obo`**. If your corpus is mostly `.owl` / RDF/XML, you can browse and query now; convert or dual-maintain Turtle for editing — see [Supported formats](../supported-formats.md) and [Known limitations](../known-limitations.md).
+    Entity Inspector write-back applies to **`.ttl`, `.obo`, `.owl`/`.rdf` (RDF/XML), and `.owx` (OWL/XML)**. XML saves are **semantic re-serialize** (not byte-identical to Protégé). JSON-LD / TriG / N-Triples stay read-only — see [Supported formats](../supported-formats.md) and [Known limitations](../known-limitations.md).
 
 !!! tip "Corpus is OWL/XML or RDF/XML?"
-    If you opened a typical Protégé `.owl` export, **read this next:** [OWL/XML and RDF/XML workflow](../guides/owl-xml-workflow.md) — browse/query works today; in-place write-back does not.
+    You can edit Protégé-style `.owl` / `.owx` files in the inspector (v0.21+). For caveats (re-serialize, limited ops vs Turtle), read [OWL/XML and RDF/XML write-back](owl-xml-workflow.md).
 
 New to OWL/RDF? Skim [Ontology concepts](../concepts.md) first (IRIs, Turtle, classes).
 
@@ -70,7 +70,7 @@ Or download the files from the [v0.21.0 fixtures](https://github.com/eddiethedea
 Then **File → Open Folder…** and select `ontocode-tutorial` (or your own ontology folder).
 
 !!! tip "Corpus is mostly `.owl` / RDF/XML?"
-    Browse and query work; **Entity Inspector write-back does not**. Convert or dual-maintain Turtle/OBO for editing — [OWL/XML and RDF/XML workflow](owl-xml-workflow.md) — before expecting Edit to appear.
+    Write-back works (v0.21+). Prefer Turtle when you need byte-stable diffs, full Manchester, or refactor apply — [OWL/XML and RDF/XML write-back](owl-xml-workflow.md).
 OntoCode’s **bundled** language server works in trusted and Restricted Mode.
 Use **Workspace Trust** only when you set custom `ontocode.lspPath` or `ontocode.robotPath` — those settings are ignored when the folder is untrusted.
 
@@ -219,7 +219,7 @@ Guide: [Semantic diff](../ontocode/semantic-diff.md).
 | Problem | What to try |
 |---------|-------------|
 | Sidebar says to index workspace | Run **OntoCode: Index Workspace** |
-| No edit controls in inspector | Entity must be in a **`.ttl` or `.obo`** file (other formats are read-only) |
+| No edit controls in inspector | Entity must be in **`.ttl`, `.obo`, `.owl`/`.rdf`, or `.owx`**; check parse errors and [Supported formats](../supported-formats.md) |
 | Language server failed to start | See [Install VS Code](../vscode-install.md#troubleshooting) |
 | Empty **Classes** after indexing | Check **Output → OntoCore Language Server**; re-run **Index Workspace** |
 

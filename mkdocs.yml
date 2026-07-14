@@ -117,9 +117,12 @@ nav:
   - Get started:
       - "First success (~10 min)": guides/first-success.md
       - Install VS Code: vscode-install.md
+      - Install CLI (macOS / Windows): guides/install-cli.md
       - Getting started (CLI / CI): getting-started.md
+      - Supported formats: supported-formats.md
       - Versions and channels: guides/versions-and-channels.md
       - Path chooser (optional): start.md
+      - Examples: examples/index.md
   - Use OntoCode:
       - Feature tour: ontocode/feature-tour.md
       - Overview: ontocode/vscode-extension.md
@@ -138,7 +141,7 @@ nav:
           - Refactoring: guides/refactoring.md
       - Interop:
           - OBO workflows: guides/obo-workflow.md
-          - OWL/XML and RDF/XML (read-only): guides/owl-xml-workflow.md
+          - OWL/XML and RDF/XML write-back: guides/owl-xml-workflow.md
           - Protégé coexistence: guides/protege-coexistence.md
           - Best practices: guides/best-practices.md
   - Use OntoCore:
@@ -224,7 +227,6 @@ nav:
       - Architecture tour: guides/architecture-tour.md
       - Testing matrix: guides/testing-matrix.md
       - Extension development: guides/extension-development.md
-      - Plugin authoring: guides/plugins.md
       - Debugging: debugging.md
       - Automation and stability: automation-stability.md
       - Releasing: releasing.md

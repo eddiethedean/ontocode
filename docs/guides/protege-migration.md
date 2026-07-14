@@ -1,6 +1,6 @@
 # Migrating from Protégé — first week
 
-This guide helps ontology teams adopt OntoCode **v0.20** alongside or instead of [Protégé](https://protege.stanford.edu/). For a capability comparison, see [Protégé vs OntoCode](protege-decision.md) and [What ships today](../SHIPPED.md).
+This guide helps ontology teams adopt OntoCode **v0.21** alongside or instead of [Protégé](https://protege.stanford.edu/). For a capability comparison, see [Protégé vs OntoCode](protege-decision.md) and [What ships today](../SHIPPED.md).
 
 ## Before you start
 
@@ -8,26 +8,26 @@ This guide helps ontology teams adopt OntoCode **v0.20** alongside or instead of
 
 - Version-control ontology files (Turtle, OWL, OBO) in shared repositories
 - Want VS Code editing, CI validation, and semantic diff
-- Can edit **Turtle (`.ttl`)** or **OBO (`.obo`)** for write-back (RDF/XML and OWL/XML are read-only in the inspector)
+- Can edit **Turtle (`.ttl`)**, **OBO (`.obo`)**, **RDF/XML (`.owl`/`.rdf`)**, or **OWL/XML (`.owx`)** for write-back (XML is semantic re-serialize — [OWL/XML write-back](owl-xml-workflow.md))
 - Need Protégé-like menus, reasoner workflows, explanations, graphs, and imports in the IDE
 
 **Keep Protégé (for now) when you need:**
 
-- **OWL/XML or RDF/XML in-place editing**
+- **Byte-identical OWL/XML or RDF/XML layout** after save
 - A **full DL axiom catalog UI** for every axiom kind and format
 - Protégé-specific plugins or a stable marketplace API (OntoCode plugin host is MVP; semver-stable API is **v1.0**)
 - WebProtégé-style live collaboration
 
-Many teams use **both**: Protégé for heavy axiom authoring in OWL/XML, OntoCode for browse, lint, diff, reasoning, and CI. See [Protégé coexistence](protege-coexistence.md).
+Many teams use **both**: Protégé for heavy axiom authoring or Protégé-only plugins, OntoCode for browse, light edit, lint, diff, reasoning, and CI. See [Protégé coexistence](protege-coexistence.md).
 
-## Honest desktop known gaps (v0.20 tagged)
+## Honest desktop known gaps (v0.21 tagged)
 
 See [Versions & channels](versions-and-channels.md) if Marketplace lags behind the GitHub Release VSIX.
 
 | Gap | Status |
 |-----|--------|
-| OWL/XML · RDF/XML write-back | Planned **v0.21** — [roadmap](../roadmap.md) |
-| Multi-step semantic undo | Deferred to **v1.0** |
+| Byte-identical OWL/XML · RDF/XML layout | Re-serialize only (write-back shipped v0.21) — [owl-xml-workflow](owl-xml-workflow.md) |
+| Multi-step semantic undo | Partial workspace runtime (v0.20); full history → **v1.0** |
 | Full OntoGraf filter/layout suite | Partial graphs shipped; polish → **v1.0** |
 | Explain all inference kinds (not only unsat) | Unsat explanations shipped |
 | Mid-classify thread kill on the Rust reasoner | Client cancel + ignore late results (v0.18); server may finish CPU work |
@@ -47,7 +47,7 @@ Follow the [first success core path](../guides/first-success.md) if anything is 
 
 ## Day 2 — Map Protégé habits to OntoCode
 
-| In Protégé | In OntoCode v0.20 |
+| In Protégé | In OntoCode v0.21 |
 |------------|-------------------|
 | Class hierarchy tab | **Classes** explorer; toggle **asserted / inferred / combined** after reasoner |
 | Entity editor (labels, parents) | **Entity Inspector** (`.ttl` and `.obo`) |
@@ -107,7 +107,7 @@ Guide: [Reasoner](reasoner.md).
 
 | Issue | Resolution |
 |-------|------------|
-| Cannot edit OWL/XML in inspector | Convert module to Turtle for write-back, or edit in Protégé |
+| Cannot edit OWL/XML / RDF/XML in inspector | Ensure file is `.owl`/`.rdf`/`.owx` with OK parse status (v0.21+); check [Supported formats](../supported-formats.md) and [OWL/XML write-back](owl-xml-workflow.md). Prefer Turtle for full Manchester / refactor |
 | SQL query fails | OntoCore SQL is single-table subset — use SPARQL for graph patterns |
 | Reasoner slow or fails on DL | Check [workspace limits](../workspace-limits.md); try `el` profile first |
 | Restored panel looks empty | Click **Reopen panel** on the recovery tab (context is reloaded from the last command) |

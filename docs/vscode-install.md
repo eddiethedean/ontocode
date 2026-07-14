@@ -142,7 +142,7 @@ Indexing runs on workspace open. `ontocode.autoIndexOnOpen` is a legacy setting 
 | `spawn ... ontocore-lsp EACCES` (macOS/Linux) | Upgrade to OntoCode ≥ 0.4.0. Manual: `chmod +x` on the bundled binary path from the error |
 | `couldn't create connection to server` | Check **Output → OntoCore Language Server**. Reinstall the extension or download a fresh VSIX from [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) |
 | Empty explorer after open | Run **OntoCode: Index Workspace**; check **Output → OntoCore Language Server**; Trust only if using custom `lspPath`/`robotPath` |
-| Inspector has no edit controls | Entity must be in a **Turtle (`.ttl`) or OBO (`.obo`)** file; RDF/XML, OWL/XML, and JSON-LD are read-only in the inspector |
+| Inspector has no edit controls | Entity must be in **`.ttl`, `.obo`, `.owl`/`.rdf`, or `.owx`**; JSON-LD / TriG / N-Triples are read-only — [Supported formats](supported-formats.md) |
 
 ### Developers (building from source)
 

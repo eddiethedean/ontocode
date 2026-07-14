@@ -187,7 +187,7 @@ Return detailed entity information for the inspector.
 | `children` | Child class IRIs |
 | `axioms` | `EntityAxiomSummary[]` — structured axiom rows for inspector and Manchester editor |
 | `source` | Optional `{ path, line, column }` |
-| `editable` | `true` when the entity's declaring file supports patch write-back (`.ttl` or `.obo` per v0.12); see [Patch reference](patch-reference.md) |
+| `editable` | `true` when the entity's declaring file supports patch write-back (`.ttl`, `.obo`, `.owl`/`.rdf`, `.owx` as of v0.21); see [Patch reference](patch-reference.md) |
 | `document_path` | Filesystem path to declaring file |
 
 **`EntityAxiomSummary` fields:**
@@ -265,7 +265,7 @@ Parse and validate a Manchester class expression; return normalized text, Turtle
 
 ### `ontocore/applyAxiomPatch`
 
-Apply patch operations to Turtle (`.ttl`) or OBO (`.obo`) documents. See [authoring.md](authoring.md) and [OBO authoring](ontocode/obo-authoring.md).
+Apply patch operations to Turtle (`.ttl`), OBO (`.obo`), RDF/XML (`.owl`/`.rdf`), or OWL/XML (`.owx`) documents. See [authoring.md](authoring.md), [OBO authoring](ontocode/obo-authoring.md), and [OWL/XML write-back](guides/owl-xml-workflow.md).
 
 **Buffer-first (VS Code):** Reads the open document buffer when available, applies patches in memory, updates the buffer, writes disk, then reindexes. See [errors.md](errors.md) for `APPLIED_NOT_INDEXED`.
 

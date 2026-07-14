@@ -37,7 +37,7 @@ Guide: [VS Code extension](vscode-extension.md) · [What's new in v0.17](../migr
 The inspector shows IRI, kind, labels, comments, parents, children, and axioms. For **`.ttl`** and **`.obo`** files, the **Edit** section supports labels, parents, delete, and Manchester axioms.
 
 !!! warning "Write-back formats"
-    Turtle (`.ttl`) and OBO (`.obo`) support write-back. RDF/XML, OWL/XML (`.owl`, `.owx`), and JSON-LD are **read-only** — index and browse only.
+    Turtle (`.ttl`), OBO (`.obo`), RDF/XML (`.owl`/`.rdf`), and OWL/XML (`.owx`) support write-back. JSON-LD and line-oriented RDF are **read-only**. XML is semantic re-serialize — [OWL/XML write-back](../guides/owl-xml-workflow.md).
 
 Guide: [Inspector](inspector.md) · [Authoring](../authoring.md)
 

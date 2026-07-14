@@ -2,9 +2,9 @@
 
 **Edit OWL/RDF/OBO ontologies in VS Code — with a Rust engine for CI.**
 
-Install the [VS Code extension](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode), open a folder of `.ttl` / `.obo` files, and use the **OntoCode** activity bar to browse and edit. For CI on **Linux x64**, prefer the release tarball ([CI guide](https://ontocode-vs.readthedocs.io/en/latest/ci-integration/)); on **macOS/Windows**, pin `cargo install ontocore-cli --locked --version 0.21.0` (first compile can take 15–30+ minutes) then `ontocore validate ./ontologies`.
+Install the [VS Code extension](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode), open a folder of ontology files, and use the **OntoCode** activity bar to browse and edit. **Most users only need the extension** (language server is bundled). For CI on **Linux x64**, prefer the release tarball ([CI guide](https://ontocode-vs.readthedocs.io/en/latest/ci-integration/)); on **macOS/Windows**, see [Install CLI](https://ontocode-vs.readthedocs.io/en/latest/guides/install-cli/) or pin `cargo install ontocore-cli --locked --version 0.21.0` (first compile can take 15–30+ minutes) then `ontocore validate ./ontologies`.
 
-**Editable today:** Turtle (`.ttl`) and OBO (`.obo`). Other formats index and query as read-only — see [Known limitations](https://ontocode-vs.readthedocs.io/en/latest/known-limitations/).
+**Editable today:** Turtle (`.ttl`), OBO (`.obo`), RDF/XML (`.owl`/`.rdf`), and OWL/XML (`.owx`). XML saves are **semantic re-serialize** (not byte-identical to Protégé). JSON-LD / N-Triples / TriG remain read-only — see [Supported formats](https://ontocode-vs.readthedocs.io/en/latest/supported-formats/) and [Known limitations](https://ontocode-vs.readthedocs.io/en/latest/known-limitations/).
 **Catalog SQL (subset):** not full SQL — prefer SPARQL for graph patterns.
 
 **Current release: v0.21.0** · [10-minute tutorial](https://ontocode-vs.readthedocs.io/en/latest/guides/first-success/) · [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) · [Changelog](CHANGELOG.md) · [Docs](https://ontocode-vs.readthedocs.io/en/latest/)
@@ -23,8 +23,9 @@ Install the [VS Code extension](https://marketplace.visualstudio.com/items?itemN
 | I want to… | Start here |
 |------------|------------|
 | **Edit ontologies in VS Code** | **[First success (~10 min)](https://ontocode-vs.readthedocs.io/en/latest/guides/first-success/)** |
-| Validate or query in CI | **Linux x64:** release tarball → [CI guide](https://ontocode-vs.readthedocs.io/en/latest/ci-integration/). **macOS/Windows:** `cargo install ontocore-cli --locked --version 0.21.0` (first compile: 15–30+ min) |
+| Validate or query in CI | **Linux x64:** release tarball → [CI guide](https://ontocode-vs.readthedocs.io/en/latest/ci-integration/). **macOS/Windows:** [Install CLI](https://ontocode-vs.readthedocs.io/en/latest/guides/install-cli/) (`cargo install` 15–30+ min) |
 | Decide if it fits | [Known limitations](https://ontocode-vs.readthedocs.io/en/latest/known-limitations/) · [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) · [Versions & channels](https://ontocode-vs.readthedocs.io/en/latest/guides/versions-and-channels/) |
+| Try examples | [Examples](https://ontocode-vs.readthedocs.io/en/latest/examples/) · repo [`examples/`](examples/) |
 | Embed in Rust | [Rust library guide](https://ontocode-vs.readthedocs.io/en/latest/guides/rust-library/) |
 | Contribute | [CONTRIBUTING.md](CONTRIBUTING.md) |
 
@@ -52,11 +53,11 @@ Release CLI tarballs are **Linux x64 only**; macOS/Windows use `cargo install` (
 
 ## Quick start
 
-**VS Code:** Install [OntoCode](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) → open a folder of **`.ttl` / `.obo`** (editable) or other ontology files (browse/query) → click the **OntoCode** activity bar. Edit **Turtle** and **OBO** in the Entity Inspector. If your corpus is mostly **`.owl` / RDF/XML**, browse works today but in-place write-back does not — see [OWL/XML workflow](https://ontocode-vs.readthedocs.io/en/latest/guides/owl-xml-workflow/) and [Supported formats](https://ontocode-vs.readthedocs.io/en/latest/supported-formats/). OntoCode’s **bundled** language server runs in trusted and Restricted Mode; **Trust** only if you set custom `ontocode.lspPath` or `ontocode.robotPath`.
+**VS Code:** Install [OntoCode](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) → open a folder of **`.ttl` / `.obo` / `.owl` / `.rdf` / `.owx`** (editable) or JSON-LD / TriG / N-Triples (browse/query only) → click the **OntoCode** activity bar. Edit in the Entity Inspector. XML write-back is semantic re-serialize — see [OWL/XML and RDF/XML write-back](https://ontocode-vs.readthedocs.io/en/latest/guides/owl-xml-workflow/) and [Supported formats](https://ontocode-vs.readthedocs.io/en/latest/supported-formats/). OntoCode’s **bundled** language server runs in trusted and Restricted Mode; **Trust** only if you set custom `ontocode.lspPath` or `ontocode.robotPath`.
 
 **CLI (Linux x64 CI):** download the release tarball, verify checksums, then validate — [CI integration](https://ontocode-vs.readthedocs.io/en/latest/ci-integration/).
 
-**CLI (macOS/Windows or from source):** First `cargo install` compiles dependencies — expect **15–30+ minutes** on a cold machine (Rust 1.88+; Windows needs [MSVC Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/); macOS needs Xcode CLT). Pin releases in CI.
+**CLI (macOS/Windows or from source):** Prefer the [Install CLI guide](https://ontocode-vs.readthedocs.io/en/latest/guides/install-cli/). First `cargo install` compiles dependencies — expect **15–30+ minutes** on a cold machine (Rust 1.88+; Windows needs [MSVC Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/); macOS needs Xcode CLT). Pin releases in CI.
 
 ```bash
 cargo install ontocore-cli --locked --version 0.21.0
@@ -92,7 +93,7 @@ cargo run -- validate fixtures
 
 Platform docs: [Vision](https://ontocode-vs.readthedocs.io/en/latest/vision/) · [Architecture](ARCHITECTURE.md) · [Roadmap hub](https://ontocode-vs.readthedocs.io/en/latest/roadmap-hub/) · [Protégé vs OntoCode](https://ontocode-vs.readthedocs.io/en/latest/guides/protege-decision/)
 
-**v0.21.0** adds workspace runtime and Turtle patch matching hardening for Protégé/ROBOT-style files. See [SHIPPED](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/), [v0.20 migration](docs/migration/v0.20.md), and [What's new in v0.19](docs/migration/v0.19.md).
+**v0.21.0** ships RDF/XML and OWL/XML write-back (plus prior workspace runtime). See [SHIPPED](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/), [v0.21 migration](docs/migration/v0.21.md), and [v0.20 migration](docs/migration/v0.20.md).
 
 ## Development
 

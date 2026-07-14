@@ -3,6 +3,7 @@ import * as path from "path";
 import * as vscode from "vscode";
 import { focusRelay } from "../focus/focusRelay";
 import type { PanelRestoreState } from "../webviews/layoutPersistenceLogic";
+import { isAllowedPanelRestoreCommand } from "../webviews/layoutPersistenceLogic";
 import { getPanelRestoreState } from "../webviews/layoutPersistence";
 import { ontologyRegistry } from "./ontologyRegistry";
 import { navigationManager } from "./navigationManager";
@@ -36,7 +37,7 @@ export class WorkspaceSessionPersistence {
       ];
       for (const viewType of viewTypes) {
         const state = getPanelRestoreState(this.context, viewType);
-        if (state?.command) {
+        if (state?.command && isAllowedPanelRestoreCommand(state.command)) {
           panelRestore[viewType] = state;
         }
       }
@@ -112,9 +113,13 @@ export class WorkspaceSessionPersistence {
   async reopenPanels(
     panelRestore: Record<string, PanelRestoreState>
   ): Promise<void> {
+    // Do not execute restore commands from session.json in untrusted workspaces (#309).
+    if (!vscode.workspace.isTrusted) {
+      return;
+    }
     const entries = Object.entries(panelRestore).slice(0, MAX_PANEL_RESTORE);
     for (const [, state] of entries) {
-      if (!state.command) {
+      if (!state.command || !isAllowedPanelRestoreCommand(state.command)) {
         continue;
       }
       try {

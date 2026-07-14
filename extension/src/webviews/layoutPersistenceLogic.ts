@@ -27,11 +27,53 @@ export const DEFAULT_REOPEN: Record<string, PanelRestoreState> = {
   ontocodeManchesterEditor: { command: "ontocode.openManchesterEditor" },
 };
 
+/** Commands permitted for panel reopen from session / layout restore state. */
+export const ALLOWED_PANEL_RESTORE_COMMANDS: ReadonlySet<string> = new Set([
+  ...Object.values(DEFAULT_REOPEN).map((state) => state.command),
+  "ontocode.openEntity",
+  "ontocode.openClassGraph",
+  "ontocode.openPropertyGraph",
+  "ontocode.openImportGraph",
+  "ontocode.openNeighborhoodGraph",
+]);
+
+/**
+ * Session/layout restore must never execute arbitrary VS Code commands from
+ * workspaceState or `.ontocode/session.json` (see #309).
+ */
+export function isAllowedPanelRestoreCommand(command: string): boolean {
+  if (typeof command !== "string" || command.length === 0) {
+    return false;
+  }
+  if (!command.startsWith("ontocode.")) {
+    return false;
+  }
+  // Reject unexpected characters that should never appear in our command IDs.
+  if (!/^ontocode\.[A-Za-z0-9.]+$/.test(command)) {
+    return false;
+  }
+  return ALLOWED_PANEL_RESTORE_COMMANDS.has(command);
+}
+
+/** Return state only when its reopen command is allowlisted. */
+export function sanitizePanelRestoreState(
+  state: PanelRestoreState | undefined
+): PanelRestoreState | undefined {
+  if (!state?.command || !isAllowedPanelRestoreCommand(state.command)) {
+    return undefined;
+  }
+  return state;
+}
+
 export function resolvePanelRestoreState(
   saved: Record<string, PanelRestoreState> | undefined,
   viewType: string
 ): PanelRestoreState | undefined {
-  return saved?.[viewType] ?? DEFAULT_REOPEN[viewType];
+  const savedState = sanitizePanelRestoreState(saved?.[viewType]);
+  if (savedState) {
+    return savedState;
+  }
+  return DEFAULT_REOPEN[viewType];
 }
 
 export interface GraphRestoreOptions {

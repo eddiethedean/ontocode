@@ -37,10 +37,19 @@ Always pin: bare `cargo install ontocore-cli` resolves to the **latest** crates.
 
 ## When Marketplace lags GitHub
 
-Marketplace and Open VSX publishes are **manual** steps after the release workflow finishes (see [Marketplace publish](../marketplace-publish.md)). If the store listing is behind the GitHub tag:
+Marketplace and Open VSX publishes are **manual** steps after the release workflow finishes (see [Marketplace publish](../marketplace-publish.md)). Stores can lag the GitHub tag by hours or longer.
 
-1. Prefer the **GitHub Release VSIX** for the version you need.
-2. Keep CI on crates.io with an explicit `--version`.
-3. Re-check Marketplace/Open VSX before org-wide rollout.
+### Playbook: store version ≠ latest tag
 
-For capability truth by version, use [What ships today](../SHIPPED.md). For upgrades, use [Migration guides](../migration/README.md). Maintainer notes: [Marketplace publish](../marketplace-publish.md).
+1. Check the [latest GitHub Release](https://github.com/eddiethedean/ontocode/releases/latest) tag (example: `v0.22.0`).
+2. In VS Code / Cursor: **Extensions → OntoCode** — note the installed version.
+3. If the store is older than the tag you need:
+   - Download `ontocode-v<version>.vsix` from that Release.
+   - **Extensions → … → Install from VSIX…**
+   - Reload the window.
+4. Confirm the extension version matches the tag under the Extension details.
+5. Keep CI pinned with `cargo install ontocore-cli --locked --version <tag>` (or the Linux tarball) — do not wait for Marketplace for automation.
+
+Re-check Marketplace / Open VSX before an org-wide rollout. Capability truth by version: [What ships today](../SHIPPED.md). Upgrades: [Migration guides](../migration/README.md).
+
+Maintainer notes: [Marketplace publish](../marketplace-publish.md).

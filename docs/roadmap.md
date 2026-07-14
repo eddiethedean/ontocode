@@ -51,13 +51,13 @@ After 1.0, the roadmap shifts from parity to modernization.
 ### Timeline
 
 ```text
-SHIPPED (v0.1–v0.21) ─────────────────────────────────────────────────►
-v0.1–v0.4          v0.5–v0.8              v0.9–v0.12           v0.13–v0.21
-Engine foundation    IDE depth                Platform & authoring   OntoUI → formats write-back
+SHIPPED (v0.1–v0.22) ─────────────────────────────────────────────────►
+v0.1–v0.4          v0.5–v0.8              v0.9–v0.12           v0.13–v0.22
+Engine foundation    IDE depth                Platform & authoring   OntoUI → formats → OWL 2
 
-PLANNED (v0.22–1.0) ─────────────────────────────────────────────────►
-v0.22–v0.23        v0.24                  v0.25                1.0.0-rc → 1.0.0
-OWL 2 + reason         Refactor + DL Query      Verify + polish      Protégé replacement
+PLANNED (v0.23–1.0) ─────────────────────────────────────────────────►
+v0.23              v0.24                  v0.25                1.0.0-rc → 1.0.0
+Reasoning / SWRL       Refactor + DL Query      Verify + polish      Protégé replacement
 ```
 
 Full timeline: [ROADMAP.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/ROADMAP.md). Pre-1.0 phases: [PRE_1_0_PHASES.md](https://github.com/eddiethedean/ontocode/blob/main/docs/protege-parity/07_BACKLOG/PRE_1_0_PHASES.md).
@@ -71,7 +71,7 @@ Full timeline: [ROADMAP.md on GitHub](https://github.com/eddiethedean/ontocode/b
 | **C — Platform & authoring** | v0.9–v0.12 | Shipped | OntoCore identity, semantic workspace, authoring parity |
 | **D — OntoUI platform** | v0.13–v0.14 | Shipped | v0.13: WorkspaceStore, focus relay; v0.14: plugin host MVP |
 | **E — Desktop UX shell gate** | v0.15–v0.18 | Shipped | Menus, layouts, workflows, migration readiness (not full parity) |
-| **F — Full Protégé parity path** | v0.19–v0.25 | In progress (v0.19–v0.21 shipped) | Semantic core → formats → OWL 2 → reason/SWRL → services → verify |
+| **F — Full Protégé parity path** | v0.19–v0.25 | In progress (v0.19–v0.22 shipped) | Semantic core → formats → OWL 2 → reason/SWRL → services → verify |
 | **G — Protégé replacement** | 1.0.0 | Planned | Daily OWL/OBO engineering without Protégé |
 | **H — Ecosystem** | v1.1–v1.2+ | Planned | SDKs, AI, toolchain & collaboration |
 

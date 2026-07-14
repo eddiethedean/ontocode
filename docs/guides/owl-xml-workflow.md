@@ -1,6 +1,6 @@
 # OWL/XML and RDF/XML write-back
 
-> **Status:** Shipped in **v0.22.0** — open → edit → save → reload without semantic loss for `.owl`/`.rdf` (RDF/XML) and `.owx` (OWL/XML). Write-back uses Horned full-document re-serialize (not byte-identical formatting). See [ADR-0021](../design/adr/0021-deterministic-xml-serializers.md).
+> **Status:** Write-back **shipped in v0.21**; v0.22 expands OWL 2 mutate/authoring ops. Open → edit → save → reload without semantic loss for `.owl`/`.rdf` (RDF/XML) and `.owx` (OWL/XML). Write-back uses Horned full-document re-serialize (not byte-identical formatting). See [ADR-0021](../design/adr/0021-deterministic-xml-serializers.md).
 
 OntoCore indexes and edits RDF/XML and OWL/XML via [Horned-OWL](https://crates.io/crates/horned-owl). The Entity Inspector marks these documents **editable** when parse status is OK.
 
@@ -58,6 +58,7 @@ Patch JSON uses the same Turtle-shaped `PatchOp` wire format for XML documents.
 
 - v0.12–v0.20: XML formats were browse-only.
 - v0.21: write-back enabled — see [Migration v0.20 → v0.21](../migration/v0.21.md).
+- v0.22: expanded OWL 2 patch ops and Manchester on XML-capable documents — see [Migration v0.21 → v0.22](../migration/v0.22.md).
 
 ## Related
 

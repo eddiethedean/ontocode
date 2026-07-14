@@ -1,3 +1,5 @@
+> **Canonical install:** [Install OntoCode and OntoCore](install.md). This page covers VS Code–specific options (Marketplace, VSIX, Restricted Mode, custom `lspPath`).
+
 # Installing OntoCode in VS Code
 
 [![Open VSX](https://img.shields.io/open-vsx/v/ontocode/ontocode)](https://open-vsx.org/extension/ontocode/ontocode)
@@ -20,7 +22,7 @@
 | `cargo install ontocore-lsp` + `ontocode.lspPath` | Yes | Yes | Yes | Yes (1.88+) |
 | Build from source (`package-extension.sh`) | Yes | Yes | Yes | Yes + Node 20 |
 
-CLI install options (separate from the extension): [getting started (CLI)](getting-started.md).
+CLI install options (separate from the extension): [Install](install.md) · [CLI & CI detail](getting-started.md).
 
 ## Option A — VS Code Marketplace (recommended)
 

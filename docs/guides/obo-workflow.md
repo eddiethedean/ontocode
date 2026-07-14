@@ -45,7 +45,7 @@ See [SQL reference](../sql-reference.md) for the `obo_id` column.
 |--------|---------------|------------------------|------------------|
 | `.obo` | Yes | Yes (v0.12+) | Yes (v0.12+) |
 | `.ttl` | Yes | Yes | Yes |
-| `.owl` / `.owx` / `.rdf` | Yes (read-only catalog) | Read-only | Not supported |
+| `.owl` / `.owx` / `.rdf` | Yes | Yes (v0.21+; semantic re-serialize; subset of Turtle ops) | Yes (v0.21+; see [OWL/XML workflow](owl-xml-workflow.md) and [patch reference](../patch-reference.md)) |
 
 ## Example workspace
 

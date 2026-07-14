@@ -71,7 +71,8 @@
 | Rich OBO metadata (synonyms, defs, xrefs) | — | Yes | — | — | — |
 
 > **OBO versioning:** patch engine write-back since **v0.12**; Entity Inspector write-back since **v0.13**.  
-> **XML write-back:** semantic fidelity (ADR-0021); not byte-identical to Protégé saves.
+> **XML write-back:** semantic fidelity (ADR-0021); not byte-identical to Protégé saves.  
+> Deeper capability grid (Manchester, refactor, XML re-serialize): [Capabilities by format](guides/capabilities-by-format.md).
 
 ## New in v0.22.0 (latest tagged)
 
@@ -113,14 +114,14 @@ Detailed notes for v0.9–v0.21 are in the [CHANGELOG](https://github.com/eddiet
 
 **Shipped:** named classes; `and` / `or` / `not`; `some` / `only` / `value` / `Self`; OneOf `{…}`; `min` / `max` / `exact` cardinality; nested restrictions; data restrictions on xsd types; `SubClassOf`, `EquivalentClasses`, and `DisjointClasses` via Manchester editor or patch JSON; domain/range; property chains; HasKey and remaining RBox/ABox ops via patch JSON / inspector.
 
-**Not shipped:** inline Manchester autocomplete in the text buffer; SWRL. See [Protégé parity](design/PROTEGE_PARITY.md) for remaining 1.0 targets.
+**Not shipped:** inline Manchester autocomplete in the text buffer; SWRL. Remaining 1.0 targets: [known limitations](known-limitations.md) · [Protégé vs OntoCode](guides/protege-decision.md).
 
 ## Known limitations
 
 | Limitation | Notes |
 |------------|-------|
 | Multi-root VS Code workspaces | **All folders indexed** (v0.10+), including peer folders added after open. Manual **Index Workspace** may prompt when multiple roots are open |
-| Write-back | **Turtle, OBO, RDF/XML, OWL/XML**; JSON-LD, N-Triples, TriG read-only. XML is semantic re-serialize (not byte-identical) |
+| Write-back | **Turtle, OBO, RDF/XML, OWL/XML**; JSON-LD, N-Triples, TriG read-only. XML is semantic re-serialize (not byte-identical). See [Capabilities by format](guides/capabilities-by-format.md) |
 | Refactoring | **Turtle (`.ttl`) only**; extract module uses direct-reference closure |
 | Class hierarchy tree | Named-parent edges; **inferred/combined** after reasoner run |
 | Reasoning | **EL / RL / RDFS / DL / auto** via Ontologos 1.0 (HermiT parity) |

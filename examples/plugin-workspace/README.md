@@ -20,7 +20,7 @@ plugin-workspace/
 
 ```bash
 # From repo root — list discovered plugins
-cargo run -- plugins list --path examples/plugin-workspace
+cargo run -- plugins list examples/plugin-workspace
 
 # Validate (runs validator plugins)
 cargo run -- validate examples/plugin-workspace
@@ -29,7 +29,7 @@ cargo run -- validate examples/plugin-workspace
 With an installed CLI:
 
 ```bash
-ontocore plugins list --path examples/plugin-workspace
+ontocore plugins list examples/plugin-workspace
 ontocore validate examples/plugin-workspace
 ```
 

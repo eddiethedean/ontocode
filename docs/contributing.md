@@ -34,6 +34,8 @@ Platform content: edit [vision.md](vision.md), [roadmap.md](roadmap.md), and [ar
 
 Root `VISION.md`, `ARCHITECTURE.md`, and `ROADMAP.md` are mirrored under `docs/` for Read the Docs. **Prefer editing this `docs/` copy first**, then update root mirrors when platform-facing content changes. **Release pin truth** is a single file: [`TAGGED_RELEASE`](TAGGED_RELEASE) — run `./scripts/check-doc-versions.sh` to catch drift (including stale “latest tagged” claims).
 
+**Contributor process (this page):** Edit [`docs/contributing.md`](contributing.md) first for Read the Docs; keep root [`CONTRIBUTING.md`](https://github.com/eddiethedean/ontocode/blob/main/CONTRIBUTING.md) in sync as the GitHub mirror. Do not treat both as independent sources of truth — one edit, then mirror.
+
 - **Specs** — product and architecture docs under `docs/design/` ([DEPENDENCY_MATRIX.md](design/DEPENDENCY_MATRIX.md) for external crates)
 
 The root Cargo package `ontocode` is unpublished and hosts workspace integration tests (`tests/`).
@@ -118,7 +120,7 @@ Look for GitHub labels `good first issue` and `docs`. Useful first PRs:
 - **Java 11+** and **[ROBOT](http://robot.obolibrary.org/)** on `PATH` — optional; needed only for manual `ontocore robot` / ROBOT interop development (not required for `cargo test --workspace`)
 - **Python 3.12** — for MkDocs doc site (`pip install -r docs/requirements.txt`)
 
-> **Canonical copy:** Root [`CONTRIBUTING.md` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/CONTRIBUTING.md) is the source of truth. Keep this page in sync when you edit contributor docs.
+> **Canonical contributor guide:** Edit [`docs/contributing.md`](contributing.md) first (Read the Docs). Keep this page in sync as the **GitHub mirror** — not a second independent source of truth.
 
 ## Build and test
 

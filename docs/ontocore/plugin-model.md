@@ -1,10 +1,12 @@
 # OntoCore plugin model
 
+> **Canonical author guide:** **[Plugin authoring](../guides/plugins.md)** — implement from that page only.
+>
+> **Do not implement from this page.** Categories and manifest sketches below are overview/background. The shipped host uses `.ontocore/plugins/*.toml` + subprocess entries (not native `.so` libraries).
+
 > **Status:** **Shipped in v0.14** (plugin host MVP). Stable semver API planned for **v1.0**.
 
 The plugin system allows users and organizations to extend **OntoCore** and **OntoCode** without modifying the core project. **Plugins integrate with OntoCore; they are not part of OntoCore.**
-
-Canonical author guide: **[Plugin authoring](../guides/plugins.md)**.
 
 Historical trait-based design (do not implement from): [PLUGIN_SPEC.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/docs/design/PLUGIN_SPEC.md) — superseded by the shipped manifest + subprocess host in v0.14+.
 
@@ -21,7 +23,7 @@ OntoCore (workspace engine + plugin host)
 
 [owlmake](https://github.com/INCATools/owlmake) is the **reference external workflow plugin** — ROBOT/ODK-style build, QC, and release automation without becoming a core dependency.
 
-## Plugin categories (planned)
+## Plugin categories (overview — not an implementation contract)
 
 | Category | Purpose | Examples |
 |----------|---------|----------|
@@ -50,16 +52,19 @@ Built-in reasoner adapters (`el`, `rl`, `rdfs`, `dl`, `auto`) ship in `ontocore-
 
 See [Plugin authoring](../guides/plugins.md) for manifest format, permissions, and reference plugins. [PLUGIN_SPEC.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/docs/design/PLUGIN_SPEC.md) is a historical design doc — do not implement from it.
 
-## Manifest (sketch)
+## Manifest (historical sketch — do not copy)
+
+Use the Toml + subprocess examples in [Plugin authoring](../guides/plugins.md). The sketch below is obsolete (native library `entry`):
 
 ```toml
 [plugin]
-id = "org.incato.owlmake"
-name = "owlmake"
+id = "org.example.demo"
+name = "demo"
 version = "0.1.0"
 api_version = "1"
-kind = "workflow"
-entry = "libowlmake_plugin.so"
+kind = "validator"
+# Real plugins: entry = a CLI executable or script, not a .so
+entry = "./bin/my-validator"
 ```
 
 ## Timeline

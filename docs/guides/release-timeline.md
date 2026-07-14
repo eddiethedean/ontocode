@@ -6,8 +6,10 @@ Planning ranges for OntoCode / OntoCore. **These are product goals, not contract
 
 | Version | Status | Date (changelog) |
 |---------|--------|------------------|
-| **0.22.0** | Current (tagged) | 2026-07-13 |
-| **0.22.0** | Latest tagged | 2026-07-13 |
+| **0.22.0** | Current (tagged) | 2026-07-14 |
+| **0.21.0** | Previous | 2026-07-13 |
+| **0.20.0** | Previous | 2026-07-13 |
+| **0.19.0** | Previous | 2026-07-13 |
 | **0.18.2** | Previous | 2026-07-13 |
 | **0.18.1** | Previous | 2026-07-12 |
 | **0.18.0** | Previous | 2026-07-11 |
@@ -34,6 +36,8 @@ Pre-1.0: minor releases may change library APIs, LSP JSON, and SQL virtual table
 | **v0.14** | Plugin host MVP — manifests, reference plugins, CLI/LSP hooks, owlmake scaffold | **Shipped** (2026-07-09) |
 | **v0.19** | Semantic foundation — `ontocore-edit` transactions; parity manifest + CI; epics EPIC-001…011 | **Shipped** (2026-07-13) |
 | **v0.20** | Workspace runtime — multi-ontology registry, dirty/save, session persistence | **Shipped** (2026-07-13) |
+| **v0.21** | RDF/XML + OWL/XML write-back (semantic re-serialize) | **Shipped** (2026-07-13) |
+| **v0.22** | Complete OWL 2 authoring (HasKey, DisjointUnion, RBox/ABox, Manchester depth) | **Shipped** (2026-07-14) |
 | **v1.0** | Protégé-competitive OWL + OBO in VS Code; full axiom catalog; stable plugin API | Planned |
 
 Canonical forward plan: [Platform roadmap](../roadmap.md). Engineering milestone history: [Milestones (shipped)](../design/ROADMAP.md).
@@ -58,10 +62,10 @@ Canonical forward plan: [Platform roadmap](../roadmap.md). Engineering milestone
 
 ## How to plan enterprise adoption without a v1.0 date
 
-1. **Now (v0.14):** CI gates + controlled IDE pilot — [production readiness](production-readiness.md)
+1. **Now (v0.22):** CI gates + controlled IDE pilot — [production readiness](production-readiness.md)
 2. **Run** [production evidence protocol](production-evidence.md) on your corpus
 3. **Re-evaluate** at each pinned minor bump using [migration index](../migration/README.md)
-4. **Do not** retire Protégé for DL/OBO workflows until parity matrix items you need are green in SHIPPED
+4. **Do not** retire Protégé for DL/OBO workflows until items you need are green in [SHIPPED](../SHIPPED.md) and acceptable under [known limitations](../known-limitations.md)
 
 ## Design docs vs shipped docs
 

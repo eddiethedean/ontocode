@@ -38,6 +38,7 @@ JSON-LD and line-oriented RDF still lack write-back adapters.
 See also:
 
 - [First success tutorial](guides/first-success.md)
+- [Capabilities by format](guides/capabilities-by-format.md)
 - [Authoring guide](authoring.md)
 - [OBO authoring](ontocode/obo-authoring.md)
 - [OWL/XML workflow](guides/owl-xml-workflow.md)

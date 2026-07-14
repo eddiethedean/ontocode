@@ -1,6 +1,6 @@
 # Install the OntoCore CLI (macOS and Windows)
 
-> **Most users never need this page.** The [OntoCode VS Code / Cursor extension](../vscode-install.md) bundles `ontocore-lsp`. Install the extension for IDE work and skip compiling the CLI unless you need `ontocore` for CI, scripting, or local validation outside the editor.
+> **Canonical install:** [Install](../install.md). **Most users never need this page.** The [OntoCode VS Code / Cursor extension](../vscode-install.md) bundles `ontocore-lsp`. Install the extension for IDE work and skip compiling the CLI unless you need `ontocore` for CI, scripting, or local validation outside the editor.
 
 Release CLI tarballs are **Linux x64 only** (`x86_64-unknown-linux-gnu`). On **macOS** and **Windows**, install from crates.io with Rust. On **Linux arm64** (and other non-x64 targets), there is no tarball — use `cargo install` below or the LSP bundled in the VSIX ([platform compatibility](platform-compatibility.md)).
 

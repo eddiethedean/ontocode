@@ -1,6 +1,8 @@
-# Install CLI & CI
+# Install CLI & CI (detail)
 
-This page is the **CLI / CI install matrix** — not the VS Code tutorial. For editing ontologies in the IDE, use [First success (~10 min)](guides/first-success.md) instead.
+> **Prefer the canonical [Install](install.md) page** (extension first, optional CLI). This page keeps the full CLI / CI path matrix for scripting and air-gapped setups.
+
+This page is **not** the VS Code tutorial. For editing ontologies in the IDE, use [First success (~10 min)](guides/first-success.md).
 
 Quick paths to success (5–30 min depending on install method) with OntoCore (CLI). VS Code tutorial: ~10 minutes — see [First success](guides/first-success.md).
 

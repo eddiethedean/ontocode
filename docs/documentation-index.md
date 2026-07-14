@@ -47,7 +47,7 @@ Deep planning docs (`docs/ui/`, `docs/platform/`, `docs/cursor-prompts/`, `docs/
 
 | Section | Start here |
 |---------|------------|
-| **Get started** | [start.md](start.md) → [first-success](guides/first-success.md) or [getting-started](getting-started.md) |
+| **Get started** | [start.md](start.md) → [first-success](guides/first-success.md) or [Install](install.md) |
 | **Use OntoCode** | [Feature tour](ontocode/feature-tour.md) |
 | **Use OntoCore** | [OntoCore overview](ontocore/index.md) · [Examples](examples/index.md) |
 | **Reference** | [CLI](cli-reference.md) · [Rust API](ontocore/rust-api.md) · [LSP API](lsp-api.md) · [docs.rs ontocore](https://docs.rs/ontocore) |

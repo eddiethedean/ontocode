@@ -96,7 +96,7 @@ cargo run -- validate fixtures
 
 Platform docs: [Vision](https://ontocode-vs.readthedocs.io/en/latest/vision/) · [Architecture](ARCHITECTURE.md) · [Roadmap hub](https://ontocode-vs.readthedocs.io/en/latest/roadmap-hub/) · [Protégé vs OntoCode](https://ontocode-vs.readthedocs.io/en/latest/guides/protege-decision/)
 
-**v0.22.0** ships RDF/XML and OWL/XML write-back (plus prior workspace runtime). See [SHIPPED](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/), [v0.21 migration](docs/migration/v0.21.md), and [v0.20 migration](docs/migration/v0.20.md).
+**v0.22.0** completes OWL 2 authoring (HasKey, DisjointUnion, RBox/ABox ops, datatypes, axiom annotations, richer Manchester). RDF/XML and OWL/XML write-back shipped in **v0.21** (semantic re-serialize — [OWL/XML workflow](docs/guides/owl-xml-workflow.md)). See [SHIPPED](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/), [v0.22 migration](docs/migration/v0.22.md).
 
 ## Development
 

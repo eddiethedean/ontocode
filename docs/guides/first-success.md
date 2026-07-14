@@ -179,6 +179,20 @@ The tutorial pack includes `demo.obo`:
 
 Guide: [OBO workflow](../guides/obo-workflow.md).
 
+### Edit RDF/XML or OWL/XML (optional)
+
+If your primary corpus is Protégé-style `.owl` / `.owx` (or `.rdf`):
+
+1. Add an RDF/XML or OWL/XML file to the folder (or open a workspace that already has one).
+2. Index the workspace; select a class in the Entity Inspector.
+3. Change a **label** or **comment**, then save.
+4. Open the file in a text editor (or `git diff`): expect a **full-document re-serialize**, not a one-line span edit. Semantics should match; layout usually will not.
+
+!!! note "Success looks like"
+    The entity label updates in the inspector after re-index / refresh, and Git shows a larger XML diff than a Turtle label edit. That is expected — [OWL/XML write-back](owl-xml-workflow.md) · [Capabilities by format](capabilities-by-format.md).
+
+Prefer Turtle when you need byte-stable diffs, rich Manchester, or refactor apply.
+
 ### Validate from the CLI
 
 To catch lint and parse errors in CI or locally (optional — **not part of the 10-minute core path**):

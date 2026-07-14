@@ -130,7 +130,7 @@ OntoCode does **not** ship centralized audit logging. For compliance:
 
 | Event | Suggested org control |
 |-------|----------------------|
-| Ontology edits | File change history on disk (write-back modifies `.ttl`); use version control if your team requires audit trails |
+| Ontology edits | File change history on disk (write-back may modify `.ttl`, `.obo`, `.owl`/`.rdf`, `.owx`); use version control if your team requires audit trails |
 | CI validation | Pipeline logs for `ontocore validate` / `classify` exit codes |
 | Extension install | MDM/Marketplace audit logs |
 | Vulnerability response | Subscribe to GitHub Security Advisories for `eddiethedean/ontocode` |

@@ -1052,17 +1052,26 @@ fn remove_different_individuals(
     ont: &mut ComponentMappedOntology<RcStr, RcAnnotatedComponent>,
     individuals: &[String],
 ) {
-    let to_remove: Vec<_> = ont
+    let want: std::collections::BTreeSet<&str> = individuals.iter().map(String::as_str).collect();
+    let candidates: Vec<_> = ont
         .i()
         .different_individuals()
         .filter(|ax| {
-            ax.0.len() == individuals.len()
-                && ax.0.iter().zip(individuals.iter()).all(|(i, want)| i.to_string() == *want)
+            let members: std::collections::BTreeSet<String> =
+                ax.0.iter().map(|i| i.to_string()).collect();
+            want.iter().all(|w| members.iter().any(|m| m == w))
         })
         .cloned()
         .collect();
-    for ax in to_remove {
+    for ax in candidates {
+        let remaining: Vec<_> =
+            ax.0.iter().filter(|i| !want.contains(i.to_string().as_str())).cloned().collect();
         let _ = ont.take(&AnnotatedComponent::from(Component::DifferentIndividuals(ax)));
+        if remaining.len() >= 2 {
+            ont.insert(Component::DifferentIndividuals(horned_owl::model::DifferentIndividuals(
+                remaining,
+            )));
+        }
     }
 }
 

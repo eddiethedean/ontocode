@@ -176,6 +176,64 @@ fn owl2_turtle_patch_abox_negative_and_same() {
 }
 
 #[test]
+fn owl2_turtle_remove_alldifferent_pair_and_add_nary() {
+    let dir = tempfile::tempdir().expect("tempdir");
+    let path = dir.path().join("owl2-abox.ttl");
+    std::fs::copy(roundtrip_dir().join("owl2-abox.ttl"), &path).expect("copy");
+
+    let alice = "http://example.org/abox#alice";
+    let bob = "http://example.org/abox#bob";
+    let carol = "http://example.org/abox#carol";
+
+    // Inspector-style remove against Protégé AllDifferent fixture.
+    apply_patches(
+        &path,
+        &[PatchOp::RemoveDifferentIndividuals {
+            individuals: vec![alice.into(), bob.into()],
+        }],
+        false,
+        &abox_ns(),
+    )
+    .expect("remove AllDifferent pair");
+    let after_remove = std::fs::read_to_string(&path).expect("read");
+    assert!(
+        !after_remove.contains("owl:AllDifferent"),
+        "AllDifferent must be cleared when two of three members are removed: {after_remove}"
+    );
+
+    // Re-add n-ary DifferentIndividuals — must write AllDifferent covering A≠C.
+    apply_patches(
+        &path,
+        &[PatchOp::AddDifferentIndividuals {
+            individuals: vec![alice.into(), bob.into(), carol.into()],
+        }],
+        false,
+        &abox_ns(),
+    )
+    .expect("add AllDifferent");
+    let after_add = std::fs::read_to_string(&path).expect("read");
+    assert!(
+        after_add.contains("owl:AllDifferent") && after_add.contains("owl:distinctMembers"),
+        "add must emit AllDifferent: {after_add}"
+    );
+    assert!(
+        after_add.contains("ex:alice")
+            && after_add.contains("ex:bob")
+            && after_add.contains("ex:carol"),
+        "all three members required: {after_add}"
+    );
+
+    let catalog = IndexBuilder::new().workspace(dir.path()).build().expect("reindex");
+    let detail = catalog.entity_detail(alice).expect("alice");
+    assert!(
+        detail.axioms.iter().any(|a| a.kind == "different_individuals"
+            && (a.other_iri.as_deref() == Some(carol) || a.display.contains("carol"))),
+        "catalog must project A≠C from AllDifferent, axioms={:?}",
+        detail.axioms
+    );
+}
+
+#[test]
 fn owl2_xml_mutate_supports_domain_characteristic_and_rejects_prefix() {
     let rdf = r#"<?xml version="1.0"?>
 <rdf:RDF xmlns:owl="http://www.w3.org/2002/07/owl#"

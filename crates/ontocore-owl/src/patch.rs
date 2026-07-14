@@ -16,73 +16,268 @@ use std::time::{SystemTime, UNIX_EPOCH};
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 #[serde(tag = "op", rename_all = "snake_case")]
 pub enum PatchOp {
-    AddPrefix { prefix: String, namespace_iri: String },
-    RemovePrefix { prefix: String },
-    SetPrefix { prefix: String, namespace_iri: String },
-    SetOntologyIri { ontology_iri: String },
-    SetVersionIri { ontology_iri: String, version_iri: String },
-    AddOntologyAnnotation { ontology_iri: String, predicate: String, value: String },
-    RemoveOntologyAnnotation { ontology_iri: String, predicate: String, value: String },
-    CreateEntity { entity_iri: String, kind: PatchEntityKind },
-    DeleteEntity { entity_iri: String },
-    SetLabel { entity_iri: String, value: String },
-    AddLabel { entity_iri: String, value: String },
-    RemoveLabel { entity_iri: String, value: String },
-    SetComment { entity_iri: String, value: String },
-    AddComment { entity_iri: String, value: String },
-    RemoveComment { entity_iri: String, value: String },
-    AddSubClassOf { entity_iri: String, parent_iri: String },
-    RemoveSubClassOf { entity_iri: String, parent_iri: String },
-    AddComplexSubClassOf { entity_iri: String, manchester: String },
-    RemoveComplexSubClassOf { entity_iri: String, manchester: String },
-    AddEquivalentClass { entity_iri: String, manchester: String },
-    RemoveEquivalentClass { entity_iri: String, manchester: String },
-    SetEquivalentClass { entity_iri: String, manchester: String },
-    SetDeprecated { entity_iri: String, value: bool },
-    AddDisjointClass { entity_iri: String, other_iri: String },
-    RemoveDisjointClass { entity_iri: String, other_iri: String },
-    AddImport { ontology_iri: String, import_iri: String },
-    RemoveImport { ontology_iri: String, import_iri: String },
-    AddDomain { entity_iri: String, class_iri: String },
-    RemoveDomain { entity_iri: String, class_iri: String },
-    AddRange { entity_iri: String, range_iri: String },
-    RemoveRange { entity_iri: String, range_iri: String },
-    SetFunctional { entity_iri: String, value: bool },
-    SetInverseFunctional { entity_iri: String, value: bool },
-    SetTransitive { entity_iri: String, value: bool },
-    SetSymmetric { entity_iri: String, value: bool },
-    SetAsymmetric { entity_iri: String, value: bool },
-    SetReflexive { entity_iri: String, value: bool },
-    SetIrreflexive { entity_iri: String, value: bool },
-    AddPropertyChain { entity_iri: String, properties: Vec<String> },
-    RemovePropertyChain { entity_iri: String, properties: Vec<String> },
-    AddClassAssertion { entity_iri: String, class_iri: String },
-    RemoveClassAssertion { entity_iri: String, class_iri: String },
-    AddObjectPropertyAssertion { entity_iri: String, property_iri: String, target_iri: String },
-    RemoveObjectPropertyAssertion { entity_iri: String, property_iri: String, target_iri: String },
-    AddDataPropertyAssertion { entity_iri: String, property_iri: String, value: String },
-    RemoveDataPropertyAssertion { entity_iri: String, property_iri: String, value: String },
-    AddAnnotation { entity_iri: String, predicate: String, value: String },
-    RemoveAnnotation { entity_iri: String, predicate: String, value: String },
+    AddPrefix {
+        prefix: String,
+        namespace_iri: String,
+    },
+    RemovePrefix {
+        prefix: String,
+    },
+    SetPrefix {
+        prefix: String,
+        namespace_iri: String,
+    },
+    SetOntologyIri {
+        ontology_iri: String,
+    },
+    SetVersionIri {
+        ontology_iri: String,
+        version_iri: String,
+    },
+    AddOntologyAnnotation {
+        ontology_iri: String,
+        predicate: String,
+        value: String,
+    },
+    RemoveOntologyAnnotation {
+        ontology_iri: String,
+        predicate: String,
+        value: String,
+    },
+    CreateEntity {
+        entity_iri: String,
+        kind: PatchEntityKind,
+    },
+    DeleteEntity {
+        entity_iri: String,
+    },
+    SetLabel {
+        entity_iri: String,
+        value: String,
+    },
+    AddLabel {
+        entity_iri: String,
+        value: String,
+    },
+    RemoveLabel {
+        entity_iri: String,
+        value: String,
+    },
+    SetComment {
+        entity_iri: String,
+        value: String,
+    },
+    AddComment {
+        entity_iri: String,
+        value: String,
+    },
+    RemoveComment {
+        entity_iri: String,
+        value: String,
+    },
+    AddSubClassOf {
+        entity_iri: String,
+        parent_iri: String,
+    },
+    RemoveSubClassOf {
+        entity_iri: String,
+        parent_iri: String,
+    },
+    AddComplexSubClassOf {
+        entity_iri: String,
+        manchester: String,
+    },
+    RemoveComplexSubClassOf {
+        entity_iri: String,
+        manchester: String,
+    },
+    AddEquivalentClass {
+        entity_iri: String,
+        manchester: String,
+    },
+    RemoveEquivalentClass {
+        entity_iri: String,
+        manchester: String,
+    },
+    SetEquivalentClass {
+        entity_iri: String,
+        manchester: String,
+    },
+    SetDeprecated {
+        entity_iri: String,
+        value: bool,
+    },
+    AddDisjointClass {
+        entity_iri: String,
+        other_iri: String,
+    },
+    RemoveDisjointClass {
+        entity_iri: String,
+        other_iri: String,
+    },
+    AddImport {
+        ontology_iri: String,
+        import_iri: String,
+    },
+    RemoveImport {
+        ontology_iri: String,
+        import_iri: String,
+    },
+    AddDomain {
+        entity_iri: String,
+        class_iri: String,
+    },
+    RemoveDomain {
+        entity_iri: String,
+        class_iri: String,
+    },
+    AddRange {
+        entity_iri: String,
+        range_iri: String,
+    },
+    RemoveRange {
+        entity_iri: String,
+        range_iri: String,
+    },
+    SetFunctional {
+        entity_iri: String,
+        value: bool,
+    },
+    SetInverseFunctional {
+        entity_iri: String,
+        value: bool,
+    },
+    SetTransitive {
+        entity_iri: String,
+        value: bool,
+    },
+    SetSymmetric {
+        entity_iri: String,
+        value: bool,
+    },
+    SetAsymmetric {
+        entity_iri: String,
+        value: bool,
+    },
+    SetReflexive {
+        entity_iri: String,
+        value: bool,
+    },
+    SetIrreflexive {
+        entity_iri: String,
+        value: bool,
+    },
+    AddPropertyChain {
+        entity_iri: String,
+        properties: Vec<String>,
+    },
+    RemovePropertyChain {
+        entity_iri: String,
+        properties: Vec<String>,
+    },
+    AddClassAssertion {
+        entity_iri: String,
+        class_iri: String,
+    },
+    RemoveClassAssertion {
+        entity_iri: String,
+        class_iri: String,
+    },
+    AddObjectPropertyAssertion {
+        entity_iri: String,
+        property_iri: String,
+        target_iri: String,
+    },
+    RemoveObjectPropertyAssertion {
+        entity_iri: String,
+        property_iri: String,
+        target_iri: String,
+    },
+    AddDataPropertyAssertion {
+        entity_iri: String,
+        property_iri: String,
+        value: String,
+    },
+    RemoveDataPropertyAssertion {
+        entity_iri: String,
+        property_iri: String,
+        value: String,
+    },
+    AddAnnotation {
+        entity_iri: String,
+        predicate: String,
+        value: String,
+    },
+    RemoveAnnotation {
+        entity_iri: String,
+        predicate: String,
+        value: String,
+    },
     // TBox / Keys / RBox (v0.22)
-    AddHasKey { class_iri: String, properties: Vec<String> },
-    RemoveHasKey { class_iri: String, properties: Vec<String> },
-    AddDisjointUnion { class_iri: String, members: Vec<String> },
-    RemoveDisjointUnion { class_iri: String, members: Vec<String> },
-    AddInverseObjectProperties { property_iri: String, inverse_iri: String },
-    RemoveInverseObjectProperties { property_iri: String, inverse_iri: String },
-    AddEquivalentObjectProperties { properties: Vec<String> },
-    RemoveEquivalentObjectProperties { properties: Vec<String> },
-    AddDisjointObjectProperties { properties: Vec<String> },
-    RemoveDisjointObjectProperties { properties: Vec<String> },
-    AddEquivalentDataProperties { properties: Vec<String> },
-    RemoveEquivalentDataProperties { properties: Vec<String> },
-    AddDisjointDataProperties { properties: Vec<String> },
-    RemoveDisjointDataProperties { properties: Vec<String> },
-    AddSubObjectPropertyOf { property_iri: String, parent_iri: String },
-    RemoveSubObjectPropertyOf { property_iri: String, parent_iri: String },
-    AddSubDataPropertyOf { property_iri: String, parent_iri: String },
-    RemoveSubDataPropertyOf { property_iri: String, parent_iri: String },
+    AddHasKey {
+        class_iri: String,
+        properties: Vec<String>,
+    },
+    RemoveHasKey {
+        class_iri: String,
+        properties: Vec<String>,
+    },
+    AddDisjointUnion {
+        class_iri: String,
+        members: Vec<String>,
+    },
+    RemoveDisjointUnion {
+        class_iri: String,
+        members: Vec<String>,
+    },
+    AddInverseObjectProperties {
+        property_iri: String,
+        inverse_iri: String,
+    },
+    RemoveInverseObjectProperties {
+        property_iri: String,
+        inverse_iri: String,
+    },
+    AddEquivalentObjectProperties {
+        properties: Vec<String>,
+    },
+    RemoveEquivalentObjectProperties {
+        properties: Vec<String>,
+    },
+    AddDisjointObjectProperties {
+        properties: Vec<String>,
+    },
+    RemoveDisjointObjectProperties {
+        properties: Vec<String>,
+    },
+    AddEquivalentDataProperties {
+        properties: Vec<String>,
+    },
+    RemoveEquivalentDataProperties {
+        properties: Vec<String>,
+    },
+    AddDisjointDataProperties {
+        properties: Vec<String>,
+    },
+    RemoveDisjointDataProperties {
+        properties: Vec<String>,
+    },
+    AddSubObjectPropertyOf {
+        property_iri: String,
+        parent_iri: String,
+    },
+    RemoveSubObjectPropertyOf {
+        property_iri: String,
+        parent_iri: String,
+    },
+    AddSubDataPropertyOf {
+        property_iri: String,
+        parent_iri: String,
+    },
+    RemoveSubDataPropertyOf {
+        property_iri: String,
+        parent_iri: String,
+    },
     // ABox (v0.22)
     AddNegativeObjectPropertyAssertion {
         entity_iri: String,
@@ -94,15 +289,37 @@ pub enum PatchOp {
         property_iri: String,
         target_iri: String,
     },
-    AddNegativeDataPropertyAssertion { entity_iri: String, property_iri: String, value: String },
-    RemoveNegativeDataPropertyAssertion { entity_iri: String, property_iri: String, value: String },
-    AddSameIndividual { individuals: Vec<String> },
-    RemoveSameIndividual { individuals: Vec<String> },
-    AddDifferentIndividuals { individuals: Vec<String> },
-    RemoveDifferentIndividuals { individuals: Vec<String> },
+    AddNegativeDataPropertyAssertion {
+        entity_iri: String,
+        property_iri: String,
+        value: String,
+    },
+    RemoveNegativeDataPropertyAssertion {
+        entity_iri: String,
+        property_iri: String,
+        value: String,
+    },
+    AddSameIndividual {
+        individuals: Vec<String>,
+    },
+    RemoveSameIndividual {
+        individuals: Vec<String>,
+    },
+    AddDifferentIndividuals {
+        individuals: Vec<String>,
+    },
+    RemoveDifferentIndividuals {
+        individuals: Vec<String>,
+    },
     // Datatype (v0.22)
-    AddDatatypeDefinition { datatype_iri: String, manchester: String },
-    RemoveDatatypeDefinition { datatype_iri: String, manchester: String },
+    AddDatatypeDefinition {
+        datatype_iri: String,
+        manchester: String,
+    },
+    RemoveDatatypeDefinition {
+        datatype_iri: String,
+        manchester: String,
+    },
     // Axiom annotations (v0.22)
     AddAxiomAnnotation {
         axiom_op: String,
@@ -474,7 +691,13 @@ fn apply_one_patch(
             add_object_triple(text, property_iri, "owl:inverseOf", &inv, namespaces)
         }
         PatchOp::RemoveInverseObjectProperties { property_iri, inverse_iri } => {
-            remove_predicate_iri_object(text, property_iri, "owl:inverseOf", inverse_iri, namespaces)
+            remove_predicate_iri_object(
+                text,
+                property_iri,
+                "owl:inverseOf",
+                inverse_iri,
+                namespaces,
+            )
         }
         PatchOp::AddEquivalentObjectProperties { properties } => {
             add_pairwise_property_axioms(text, properties, "owl:equivalentProperty", namespaces)
@@ -485,9 +708,12 @@ fn apply_one_patch(
         PatchOp::AddDisjointObjectProperties { properties } => {
             add_pairwise_property_axioms(text, properties, "owl:propertyDisjointWith", namespaces)
         }
-        PatchOp::RemoveDisjointObjectProperties { properties } => {
-            remove_pairwise_property_axioms(text, properties, "owl:propertyDisjointWith", namespaces)
-        }
+        PatchOp::RemoveDisjointObjectProperties { properties } => remove_pairwise_property_axioms(
+            text,
+            properties,
+            "owl:propertyDisjointWith",
+            namespaces,
+        ),
         PatchOp::AddEquivalentDataProperties { properties } => {
             add_pairwise_property_axioms(text, properties, "owl:equivalentProperty", namespaces)
         }
@@ -497,9 +723,12 @@ fn apply_one_patch(
         PatchOp::AddDisjointDataProperties { properties } => {
             add_pairwise_property_axioms(text, properties, "owl:propertyDisjointWith", namespaces)
         }
-        PatchOp::RemoveDisjointDataProperties { properties } => {
-            remove_pairwise_property_axioms(text, properties, "owl:propertyDisjointWith", namespaces)
-        }
+        PatchOp::RemoveDisjointDataProperties { properties } => remove_pairwise_property_axioms(
+            text,
+            properties,
+            "owl:propertyDisjointWith",
+            namespaces,
+        ),
         PatchOp::AddSubObjectPropertyOf { property_iri, parent_iri } => {
             let parent = iri_to_turtle_term(parent_iri, namespaces)?;
             add_object_triple(text, property_iri, "rdfs:subPropertyOf", &parent, namespaces)
@@ -548,7 +777,13 @@ fn apply_one_patch(
             add_negative_data_property_assertion(text, entity_iri, property_iri, value, namespaces)
         }
         PatchOp::RemoveNegativeDataPropertyAssertion { entity_iri, property_iri, value } => {
-            remove_negative_data_property_assertion(text, entity_iri, property_iri, value, namespaces)
+            remove_negative_data_property_assertion(
+                text,
+                entity_iri,
+                property_iri,
+                value,
+                namespaces,
+            )
         }
         PatchOp::AddSameIndividual { individuals } => {
             add_pairwise_individual_axioms(text, individuals, "owl:sameAs", namespaces)
@@ -568,36 +803,28 @@ fn apply_one_patch(
         PatchOp::RemoveDatatypeDefinition { datatype_iri, manchester } => {
             remove_datatype_definition(text, datatype_iri, manchester, namespaces)
         }
-        PatchOp::AddAxiomAnnotation {
-            axiom_op,
-            subject_iri,
-            related_iri,
-            predicate,
-            value,
-        } => add_axiom_annotation(
-            text,
-            axiom_op,
-            subject_iri,
-            related_iri.as_deref(),
-            predicate,
-            value,
-            namespaces,
-        ),
-        PatchOp::RemoveAxiomAnnotation {
-            axiom_op,
-            subject_iri,
-            related_iri,
-            predicate,
-            value,
-        } => remove_axiom_annotation(
-            text,
-            axiom_op,
-            subject_iri,
-            related_iri.as_deref(),
-            predicate,
-            value,
-            namespaces,
-        ),
+        PatchOp::AddAxiomAnnotation { axiom_op, subject_iri, related_iri, predicate, value } => {
+            add_axiom_annotation(
+                text,
+                axiom_op,
+                subject_iri,
+                related_iri.as_deref(),
+                predicate,
+                value,
+                namespaces,
+            )
+        }
+        PatchOp::RemoveAxiomAnnotation { axiom_op, subject_iri, related_iri, predicate, value } => {
+            remove_axiom_annotation(
+                text,
+                axiom_op,
+                subject_iri,
+                related_iri.as_deref(),
+                predicate,
+                value,
+                namespaces,
+            )
+        }
     }
 }
 
@@ -1475,9 +1702,7 @@ fn remove_matching_npa_block(
         }
         i = advance_turtle_scan(bytes, i, &mut state);
     }
-    Err(OwlError::ManchesterInvalid(
-        "no matching NegativePropertyAssertion axiom".to_string(),
-    ))
+    Err(OwlError::ManchesterInvalid("no matching NegativePropertyAssertion axiom".to_string()))
 }
 
 fn add_datatype_definition(
@@ -1493,17 +1718,9 @@ fn add_datatype_definition(
     }
     let ns = crate::span::namespaces_for_text(text, namespaces);
     let trimmed = manchester.trim();
-    // Prefer Manchester class-expression parse; fall back to IRI/CURIE or raw fragment.
-    let object = match parse_class_expression(trimmed, &ns) {
-        Ok(parsed) => crate::manchester::class_expression_to_turtle_value(&parsed.expression, &ns, 0)?,
-        Err(_) => {
-            if trimmed.starts_with('[') || trimmed.starts_with('(') {
-                trimmed.to_string()
-            } else {
-                iri_to_turtle_term(trimmed, namespaces).unwrap_or_else(|_| trimmed.to_string())
-            }
-        }
-    };
+    let object = crate::manchester::parse_data_range(trimmed, &ns)
+        .and_then(|dr| crate::manchester::data_range_to_turtle_term(&dr, &ns))
+        .or_else(|_| iri_to_turtle_term(trimmed, namespaces))?;
     add_object_triple(text, datatype_iri, "owl:equivalentClass", &object, namespaces)
 }
 
@@ -1515,16 +1732,9 @@ fn remove_datatype_definition(
 ) -> Result<()> {
     let ns = crate::span::namespaces_for_text(text, namespaces);
     let trimmed = manchester.trim();
-    let object = match parse_class_expression(trimmed, &ns) {
-        Ok(parsed) => crate::manchester::class_expression_to_turtle_value(&parsed.expression, &ns, 0)?,
-        Err(_) => {
-            if trimmed.starts_with('[') || trimmed.starts_with('(') {
-                trimmed.to_string()
-            } else {
-                iri_to_turtle_term(trimmed, namespaces).unwrap_or_else(|_| trimmed.to_string())
-            }
-        }
-    };
+    let object = crate::manchester::parse_data_range(trimmed, &ns)
+        .and_then(|dr| crate::manchester::data_range_to_turtle_term(&dr, &ns))
+        .or_else(|_| iri_to_turtle_term(trimmed, namespaces))?;
     remove_predicate_object_any_statement(
         text,
         datatype_iri,
@@ -1548,9 +1758,9 @@ fn axiom_op_predicate(axiom_op: &str) -> Result<&'static str> {
         "equivalent_property" | "equivalent_object_properties" | "equivalent_data_properties" => {
             "owl:equivalentProperty"
         }
-        "property_disjoint_with"
-        | "disjoint_object_properties"
-        | "disjoint_data_properties" => "owl:propertyDisjointWith",
+        "property_disjoint_with" | "disjoint_object_properties" | "disjoint_data_properties" => {
+            "owl:propertyDisjointWith"
+        }
         "same_as" | "same_individual" => "owl:sameAs",
         "different_from" | "different_individuals" => "owl:differentFrom",
         other => {

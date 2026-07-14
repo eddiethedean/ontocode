@@ -341,6 +341,7 @@ fn materialize_catalog_quads(
             EntityKind::DataProperty => OWL::datatype_property(),
             EntityKind::AnnotationProperty => OWL::annotation_property(),
             EntityKind::Individual => OWL::named_individual(),
+            EntityKind::Datatype => Rdfs::datatype(),
             EntityKind::Ontology => OWL::ontology(),
             EntityKind::Other => continue,
         };
@@ -623,6 +624,7 @@ impl OntologyBuilder {
                 object: object.clone(),
                 axiom_kind: AXIOM_KIND_SUB_CLASS_OF.to_string(),
                 source_location: SourceLocation::default(),
+                annotations: Vec::new(),
             });
         }
     }
@@ -729,6 +731,7 @@ fn entity_kind_for_type(type_iri: &str) -> EntityKind {
         t if t == OWL::datatype_property().as_str() => EntityKind::DataProperty,
         t if t == OWL::annotation_property().as_str() => EntityKind::AnnotationProperty,
         t if t == OWL::named_individual().as_str() => EntityKind::Individual,
+        t if t == Rdfs::datatype().as_str() => EntityKind::Datatype,
         t if t == OWL::ontology().as_str() => EntityKind::Ontology,
         _ => EntityKind::Other,
     }
@@ -741,6 +744,7 @@ fn kind_priority(kind: EntityKind) -> u8 {
         EntityKind::DataProperty => 5,
         EntityKind::AnnotationProperty => 5,
         EntityKind::Individual => 4,
+        EntityKind::Datatype => 4,
         EntityKind::Ontology => 3,
         EntityKind::Other => 0,
     }

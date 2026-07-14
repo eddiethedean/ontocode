@@ -199,8 +199,147 @@ export function EntityInspectorPanel(_props?: WorkspaceProps): JSX.Element {
         return "Object property assertions";
       case "data_property_assertion":
         return "Data property assertions";
+      case "has_key":
+        return "HasKey";
+      case "disjoint_union":
+        return "DisjointUnion";
+      case "inverse_object_properties":
+        return "Inverse object properties";
+      case "equivalent_object_properties":
+        return "Equivalent object properties";
+      case "disjoint_object_properties":
+        return "Disjoint object properties";
+      case "equivalent_data_properties":
+        return "Equivalent data properties";
+      case "disjoint_data_properties":
+        return "Disjoint data properties";
+      case "sub_object_property_of":
+        return "SubObjectPropertyOf";
+      case "sub_data_property_of":
+        return "SubDataPropertyOf";
+      case "negative_object_property_assertion":
+        return "Negative object property assertions";
+      case "negative_data_property_assertion":
+        return "Negative data property assertions";
+      case "same_individual":
+        return "Same individuals";
+      case "different_individuals":
+        return "Different individuals";
+      case "datatype_definition":
+        return "Datatype definitions";
       default:
         return kind;
+    }
+  };
+
+  const axiomOpForKind = (kind: string): string | null => {
+    switch (kind) {
+      case "sub_class_of":
+        return "sub_class_of";
+      case "disjoint_class":
+        return "disjoint_with";
+      case "equivalent_class":
+        return "equivalent_class";
+      case "domain":
+        return "domain";
+      case "range":
+        return "range";
+      case "sub_object_property_of":
+        return "sub_object_property_of";
+      case "sub_data_property_of":
+        return "sub_data_property_of";
+      case "inverse_object_properties":
+        return "inverse_object_properties";
+      case "equivalent_object_properties":
+        return "equivalent_property";
+      case "disjoint_object_properties":
+        return "property_disjoint_with";
+      case "equivalent_data_properties":
+        return "equivalent_property";
+      case "disjoint_data_properties":
+        return "property_disjoint_with";
+      case "same_individual":
+        return "same_individual";
+      case "different_individuals":
+        return "different_individuals";
+      default:
+        return null;
+    }
+  };
+
+  const removePatchForAxiom = (a: (typeof axioms)[number]): PatchOp[] | null => {
+    switch (a.kind) {
+      case "has_key":
+        return [
+          {
+            op: "remove_has_key",
+            class_iri: entity.iri,
+            properties: a.properties ?? [],
+          },
+        ];
+      case "disjoint_union":
+        return [
+          {
+            op: "remove_disjoint_union",
+            class_iri: entity.iri,
+            members: a.properties ?? [],
+          },
+        ];
+      case "inverse_object_properties":
+        if (!a.other_iri) return null;
+        return [
+          {
+            op: "remove_inverse_object_properties",
+            property_iri: entity.iri,
+            inverse_iri: a.other_iri,
+          },
+        ];
+      case "same_individual":
+        if (!a.other_iri) return null;
+        return [
+          {
+            op: "remove_same_individual",
+            individuals: [entity.iri, a.other_iri],
+          },
+        ];
+      case "different_individuals":
+        if (!a.other_iri) return null;
+        return [
+          {
+            op: "remove_different_individuals",
+            individuals: [entity.iri, a.other_iri],
+          },
+        ];
+      case "negative_object_property_assertion":
+        if (!a.other_iri || !a.predicate) return null;
+        return [
+          {
+            op: "remove_negative_object_property_assertion",
+            entity_iri: entity.iri,
+            property_iri: a.predicate,
+            target_iri: a.other_iri,
+          },
+        ];
+      case "negative_data_property_assertion":
+        if (!a.predicate || !a.manchester) return null;
+        return [
+          {
+            op: "remove_negative_data_property_assertion",
+            entity_iri: entity.iri,
+            property_iri: a.predicate,
+            value: a.manchester,
+          },
+        ];
+      case "datatype_definition":
+        return [
+          {
+            op: "remove_datatype_definition",
+            datatype_iri: entity.iri,
+            manchester: a.manchester ?? a.display.replace(/^DatatypeDefinition\s+/, ""),
+          },
+        ];
+      default:
+        return null;
     }
   };
   const parentOptions = classOptions.filter((c) => c !== entity.iri);
@@ -313,14 +452,55 @@ export function EntityInspectorPanel(_props?: WorkspaceProps): JSX.Element {
               <div key={kind} className="oc-section oc-section--nested">
                 <h3>{kindTitle(kind)}</h3>
                 <ul className="oc-axiom-list">
-                  {items.map((a, idx) => (
+                  {items.map((a, idx) => {
+                    const removePatches = editable ? removePatchForAxiom(a) : null;
+                    const axiomOp = axiomOpForKind(a.kind);
+                    return (
                     <li key={`${kind}-${idx}`} className="oc-axiom-item">
                       <InlineCode>{a.display}</InlineCode>
+                      {a.annotations && a.annotations.length > 0 ? (
+                        <ul className="oc-axiom-list oc-axiom-annos">
+                          {a.annotations.map((ann, annIdx) => (
+                            <li key={`ann-${idx}-${annIdx}`} className="oc-axiom-item">
+                              <InlineCode>
+                                {shortLabel(ann.predicate)} → {ann.value}
+                              </InlineCode>
+                              {editable && axiomOp && ann.editable ? (
+                                <button
+                                  type="button"
+                                  className="secondary"
+                                  onClick={() =>
+                                    apply(
+                                      [
+                                        {
+                                          op: "remove_axiom_annotation",
+                                          axiom_op: axiomOp,
+                                          subject_iri: entity.iri,
+                                          related_iri:
+                                            a.other_iri ?? a.parent_iri ?? undefined,
+                                          predicate: ann.predicate,
+                                          value: ann.value,
+                                        },
+                                      ],
+                                      false
+                                    )
+                                  }
+                                >
+                                  Remove annotation
+                                </button>
+                              ) : null}
+                            </li>
+                          ))}
+                        </ul>
+                      ) : null}
                       {editable &&
                       isTurtle &&
                       entity.kind === "class" &&
                       a.editable &&
-                      kind !== "property_chain" ? (
+                      kind !== "property_chain" &&
+                      (kind === "sub_class_of" ||
+                        kind === "equivalent_class" ||
+                        kind === "disjoint_class") ? (
                         <button
                           type="button"
                           className="secondary"
@@ -365,8 +545,18 @@ export function EntityInspectorPanel(_props?: WorkspaceProps): JSX.Element {
                           Remove
                         </button>
                       ) : null}
+                      {editable && removePatches && a.editable ? (
+                        <button
+                          type="button"
+                          className="secondary"
+                          onClick={() => apply(removePatches, false)}
+                        >
+                          Remove
+                        </button>
+                      ) : null}
                     </li>
-                  ))}
+                    );
+                  })}
                 </ul>
               </div>
             ))}

@@ -2738,6 +2738,7 @@ fn entity_kind_to_symbol_kind(kind: EntityKind) -> SymbolKind {
             SymbolKind::PROPERTY
         }
         EntityKind::Individual => SymbolKind::VARIABLE,
+        EntityKind::Datatype => SymbolKind::STRUCT,
         EntityKind::Ontology => SymbolKind::NAMESPACE,
         EntityKind::Other => SymbolKind::OBJECT,
     }

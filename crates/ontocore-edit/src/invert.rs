@@ -225,22 +225,18 @@ pub fn invert_patch_op(op: &PatchOp) -> Result<PatchOp> {
             predicate: predicate.clone(),
             value: value.clone(),
         },
-        PatchOp::AddHasKey { class_iri, properties } => PatchOp::RemoveHasKey {
-            class_iri: class_iri.clone(),
-            properties: properties.clone(),
-        },
-        PatchOp::RemoveHasKey { class_iri, properties } => PatchOp::AddHasKey {
-            class_iri: class_iri.clone(),
-            properties: properties.clone(),
-        },
-        PatchOp::AddDisjointUnion { class_iri, members } => PatchOp::RemoveDisjointUnion {
-            class_iri: class_iri.clone(),
-            members: members.clone(),
-        },
-        PatchOp::RemoveDisjointUnion { class_iri, members } => PatchOp::AddDisjointUnion {
-            class_iri: class_iri.clone(),
-            members: members.clone(),
-        },
+        PatchOp::AddHasKey { class_iri, properties } => {
+            PatchOp::RemoveHasKey { class_iri: class_iri.clone(), properties: properties.clone() }
+        }
+        PatchOp::RemoveHasKey { class_iri, properties } => {
+            PatchOp::AddHasKey { class_iri: class_iri.clone(), properties: properties.clone() }
+        }
+        PatchOp::AddDisjointUnion { class_iri, members } => {
+            PatchOp::RemoveDisjointUnion { class_iri: class_iri.clone(), members: members.clone() }
+        }
+        PatchOp::RemoveDisjointUnion { class_iri, members } => {
+            PatchOp::AddDisjointUnion { class_iri: class_iri.clone(), members: members.clone() }
+        }
         PatchOp::AddInverseObjectProperties { property_iri, inverse_iri } => {
             PatchOp::RemoveInverseObjectProperties {
                 property_iri: property_iri.clone(),
@@ -353,32 +349,24 @@ pub fn invert_patch_op(op: &PatchOp) -> Result<PatchOp> {
                 manchester: manchester.clone(),
             }
         }
-        PatchOp::AddAxiomAnnotation {
-            axiom_op,
-            subject_iri,
-            related_iri,
-            predicate,
-            value,
-        } => PatchOp::RemoveAxiomAnnotation {
-            axiom_op: axiom_op.clone(),
-            subject_iri: subject_iri.clone(),
-            related_iri: related_iri.clone(),
-            predicate: predicate.clone(),
-            value: value.clone(),
-        },
-        PatchOp::RemoveAxiomAnnotation {
-            axiom_op,
-            subject_iri,
-            related_iri,
-            predicate,
-            value,
-        } => PatchOp::AddAxiomAnnotation {
-            axiom_op: axiom_op.clone(),
-            subject_iri: subject_iri.clone(),
-            related_iri: related_iri.clone(),
-            predicate: predicate.clone(),
-            value: value.clone(),
-        },
+        PatchOp::AddAxiomAnnotation { axiom_op, subject_iri, related_iri, predicate, value } => {
+            PatchOp::RemoveAxiomAnnotation {
+                axiom_op: axiom_op.clone(),
+                subject_iri: subject_iri.clone(),
+                related_iri: related_iri.clone(),
+                predicate: predicate.clone(),
+                value: value.clone(),
+            }
+        }
+        PatchOp::RemoveAxiomAnnotation { axiom_op, subject_iri, related_iri, predicate, value } => {
+            PatchOp::AddAxiomAnnotation {
+                axiom_op: axiom_op.clone(),
+                subject_iri: subject_iri.clone(),
+                related_iri: related_iri.clone(),
+                predicate: predicate.clone(),
+                value: value.clone(),
+            }
+        }
     })
 }
 

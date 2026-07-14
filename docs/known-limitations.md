@@ -15,6 +15,8 @@ Honest limits for evaluators and new users.
 
 Entity Inspector and patch write-back apply to **`.ttl`, `.obo`, `.owl`/`.rdf`, and `.owx`**. XML write-back is **semantic re-serialize** (ADR-0021), not byte-identical to Protégé. See [Supported formats](supported-formats.md) and [OWL/XML workflow](guides/owl-xml-workflow.md).
 
+Axiom annotations on XML match named entities (`axiom_op` + `subject_iri` + optional `related_iri`); complex class-expression identity is not fully covered. See [patch-reference](patch-reference.md).
+
 ## Catalog SQL (subset)
 
 `ontocore query` and Query Workbench **SQL mode** are **not** full SQL. Supported: single-table `SELECT`, limited `WHERE` (`=`, `!=`, `AND`, `OR`, booleans). **No** `JOIN`, `GROUP BY`, `ORDER BY`, or `LIMIT`. Prefer [SPARQL](sparql-reference.md) for graph patterns. Details: [SQL reference](sql-reference.md).

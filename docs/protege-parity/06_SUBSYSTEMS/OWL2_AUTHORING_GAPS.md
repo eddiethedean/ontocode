@@ -80,11 +80,11 @@ Formats: **TTL** = Turtle · **XML** = RDF/XML + OWL/XML · **OBO** = not OWL2 s
 | Construct | PatchOp | TTL | XML | UI | Test ID |
 |-----------|---------|-----|-----|-----|---------|
 | Entity annotations | `add_annotation` / `remove_annotation` (+ label/comment) | Shipped | Shipped | Inspector | owl2_anno_entity |
-| Axiom annotations | `add_axiom_annotation` / `remove_axiom_annotation` | v0.22 | Shipped* | Inspector | owl2_anno_axiom |
+| Axiom annotations | `add_axiom_annotation` / `remove_axiom_annotation` | Shipped | Shipped | Inspector | owl2_anno_axiom |
 
-**Axiom annotation identity:** `axiom_op` + `subject_iri` + optional `related_iri` + `predicate`/`value` match the annotated triple (serialized as `owl:Axiom` reification in Turtle).
+**Axiom annotation identity:** `axiom_op` + `subject_iri` + optional `related_iri` + `predicate`/`value` match the annotated axiom (Turtle: `owl:Axiom` reification; XML: Horned `AnnotatedComponent.ann`). Matcher targets named entities; complex CE superclass/filler identity remains limited. Ambiguous multi-match requires `related_iri`.
 
-\*XML axiom annotations: `sub_class_of`, `disjoint_with` (best-effort `equivalent_class`).
+**Catalog listing:** Horned bridge projects all v0.22 axiom families onto `EntityDetail.axioms` (including nested axiom annotations). Datatype entities use `EntityKind::Datatype`.
 
 ## Out of v0.22
 
@@ -99,6 +99,7 @@ Formats: **TTL** = Turtle · **XML** = RDF/XML + OWL/XML · **OBO** = not OWL2 s
 
 ## Wire sync checklist
 
+- [x] `crates/ontocore-owl/src/bridge.rs` catalog projection (+ axiom annotations)
 - [x] `crates/ontocore-owl/src/patch.rs` `PatchOp`
 - [x] `crates/ontocore-edit/src/invert.rs`
 - [x] `crates/ontocore-owl/src/mutate.rs` / `apply_xml.rs`

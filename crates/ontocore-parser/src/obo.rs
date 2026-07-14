@@ -72,6 +72,7 @@ pub fn parse_obo_text(path: &Path, ontology_id: &str, source_text: &str) -> Resu
                         object: obo_id_to_iri(&parent_id, &namespaces),
                         axiom_kind: AXIOM_KIND_SUB_CLASS_OF.to_string(),
                         source_location: SourceLocation::default(),
+                        annotations: Vec::new(),
                     });
                 }
                 TermClause::Synonym(syn) => {

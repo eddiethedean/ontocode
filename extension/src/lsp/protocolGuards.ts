@@ -6,6 +6,7 @@ const ENTITY_KINDS = new Set([
   "data_property",
   "annotation_property",
   "individual",
+  "datatype",
   "ontology",
   "other",
 ]);

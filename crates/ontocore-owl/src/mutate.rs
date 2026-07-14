@@ -6,8 +6,9 @@ use crate::patch::{PatchDiagnostic, PatchEntityKind, PatchOp};
 use horned_owl::model::{
     AnnotatedComponent, Annotation, AnnotationAssertion, AnnotationSubject, AnnotationValue, Build,
     Class, ClassAssertion, ClassExpression, Component, ComponentKind, DataRange, DeclareClass,
-    DeclareDataProperty, DeclareNamedIndividual, DeclareObjectProperty, Import, Individual, Literal,
-    MutableOntology, ObjectPropertyExpression, OntologyID, RcAnnotatedComponent, RcStr, SubClassOf,
+    DeclareDataProperty, DeclareNamedIndividual, DeclareObjectProperty, Import, Individual,
+    Literal, MutableOntology, ObjectPropertyExpression, OntologyID, RcAnnotatedComponent, RcStr,
+    SubClassOf, SubObjectPropertyExpression,
 };
 use horned_owl::ontology::component_mapped::ComponentMappedOntology;
 use std::collections::BTreeMap;
@@ -80,13 +81,11 @@ fn apply_one(
                 PatchEntityKind::DataProperty => Component::DeclareDataProperty(
                     DeclareDataProperty(build.data_property(entity_iri.as_str())),
                 ),
-                PatchEntityKind::AnnotationProperty => {
-                    Component::DeclareAnnotationProperty(
-                        horned_owl::model::DeclareAnnotationProperty(
-                            build.annotation_property(entity_iri.as_str()),
-                        ),
-                    )
-                }
+                PatchEntityKind::AnnotationProperty => Component::DeclareAnnotationProperty(
+                    horned_owl::model::DeclareAnnotationProperty(
+                        build.annotation_property(entity_iri.as_str()),
+                    ),
+                ),
                 PatchEntityKind::Individual => Component::DeclareNamedIndividual(
                     DeclareNamedIndividual(build.named_individual(entity_iri.as_str())),
                 ),
@@ -180,9 +179,7 @@ fn apply_one(
                 .iter()
                 .map(|p| {
                     horned_owl::model::PropertyExpression::ObjectPropertyExpression(
-                        ObjectPropertyExpression::ObjectProperty(
-                            build.object_property(p.as_str()),
-                        ),
+                        ObjectPropertyExpression::ObjectProperty(build.object_property(p.as_str())),
                     )
                 })
                 .collect();
@@ -197,10 +194,8 @@ fn apply_one(
             Ok(())
         }
         PatchOp::AddDisjointUnion { class_iri, members } => {
-            let ces = members
-                .iter()
-                .map(|m| ClassExpression::Class(build.class(m.as_str())))
-                .collect();
+            let ces =
+                members.iter().map(|m| ClassExpression::Class(build.class(m.as_str()))).collect();
             ont.insert(Component::DisjointUnion(horned_owl::model::DisjointUnion(
                 build.class(class_iri.as_str()),
                 ces,
@@ -263,8 +258,7 @@ fn apply_one(
             Ok(())
         }
         PatchOp::AddEquivalentDataProperties { properties } => {
-            let dps =
-                properties.iter().map(|p| build.data_property(p.as_str())).collect();
+            let dps = properties.iter().map(|p| build.data_property(p.as_str())).collect();
             ont.insert(Component::EquivalentDataProperties(
                 horned_owl::model::EquivalentDataProperties(dps),
             ));
@@ -275,8 +269,7 @@ fn apply_one(
             Ok(())
         }
         PatchOp::AddDisjointDataProperties { properties } => {
-            let dps =
-                properties.iter().map(|p| build.data_property(p.as_str())).collect();
+            let dps = properties.iter().map(|p| build.data_property(p.as_str())).collect();
             ont.insert(Component::DisjointDataProperties(
                 horned_owl::model::DisjointDataProperties(dps),
             ));
@@ -361,9 +354,9 @@ fn apply_one(
                 .iter()
                 .map(|i| Individual::from(build.named_individual(i.as_str())))
                 .collect();
-            ont.insert(Component::DifferentIndividuals(
-                horned_owl::model::DifferentIndividuals(inds),
-            ));
+            ont.insert(Component::DifferentIndividuals(horned_owl::model::DifferentIndividuals(
+                inds,
+            )));
             Ok(())
         }
         PatchOp::RemoveDifferentIndividuals { individuals } => {
@@ -477,19 +470,24 @@ fn apply_one(
         PatchOp::AddRange { entity_iri, range_iri } => {
             if is_declared_data_property(ont, entity_iri)
                 || (!is_declared_object_property(ont, entity_iri)
-                    && looks_like_datatype_iri(ont, range_iri))
+                    && (looks_like_datatype_iri(ont, range_iri)
+                        || crate::manchester::parse_data_range(range_iri, namespaces).is_ok()))
             {
+                let dr = crate::manchester::parse_data_range(range_iri, namespaces)
+                    .unwrap_or_else(|_| DataRange::Datatype(build.datatype(range_iri.as_str())));
                 ont.insert(Component::DataPropertyRange(horned_owl::model::DataPropertyRange {
                     dp: build.data_property(entity_iri.as_str()),
-                    dr: DataRange::Datatype(build.datatype(range_iri.as_str())),
+                    dr,
                 }));
             } else {
-                ont.insert(Component::ObjectPropertyRange(horned_owl::model::ObjectPropertyRange {
-                    ope: ObjectPropertyExpression::ObjectProperty(
-                        build.object_property(entity_iri.as_str()),
-                    ),
-                    ce: ClassExpression::Class(build.class(range_iri.as_str())),
-                }));
+                ont.insert(Component::ObjectPropertyRange(
+                    horned_owl::model::ObjectPropertyRange {
+                        ope: ObjectPropertyExpression::ObjectProperty(
+                            build.object_property(entity_iri.as_str()),
+                        ),
+                        ce: ClassExpression::Class(build.class(range_iri.as_str())),
+                    },
+                ));
             }
             Ok(())
         }
@@ -498,13 +496,7 @@ fn apply_one(
             Ok(())
         }
         PatchOp::SetFunctional { entity_iri, value } => {
-            set_characteristic(
-                ont,
-                build,
-                entity_iri,
-                *value,
-                CharacteristicKind::Functional,
-            );
+            set_characteristic(ont, build, entity_iri, *value, CharacteristicKind::Functional);
             Ok(())
         }
         PatchOp::SetInverseFunctional { entity_iri, value } => {
@@ -592,7 +584,8 @@ fn apply_one(
                     build.datatype(datatype_iri.as_str()),
                 )));
             }
-            let range = parse_data_range(manchester, build, namespaces);
+            let range = crate::manchester::parse_data_range(manchester, namespaces)
+                .map_err(|e| e.to_string())?;
             ont.insert(Component::DatatypeDefinition(horned_owl::model::DatatypeDefinition {
                 kind: build.datatype(datatype_iri.as_str()),
                 range,
@@ -600,17 +593,12 @@ fn apply_one(
             Ok(())
         }
         PatchOp::RemoveDatatypeDefinition { datatype_iri, manchester } => {
-            let range = parse_data_range(manchester, build, namespaces);
+            let range = crate::manchester::parse_data_range(manchester, namespaces)
+                .map_err(|e| e.to_string())?;
             remove_datatype_definition(ont, datatype_iri, &range);
             Ok(())
         }
-        PatchOp::AddAxiomAnnotation {
-            axiom_op,
-            subject_iri,
-            related_iri,
-            predicate,
-            value,
-        } => {
+        PatchOp::AddAxiomAnnotation { axiom_op, subject_iri, related_iri, predicate, value } => {
             mutate_axiom_annotation(
                 ont,
                 build,
@@ -622,13 +610,7 @@ fn apply_one(
                 true,
             )
         }
-        PatchOp::RemoveAxiomAnnotation {
-            axiom_op,
-            subject_iri,
-            related_iri,
-            predicate,
-            value,
-        } => {
+        PatchOp::RemoveAxiomAnnotation { axiom_op, subject_iri, related_iri, predicate, value } => {
             mutate_axiom_annotation(
                 ont,
                 build,
@@ -716,7 +698,9 @@ fn patch_op_name(op: &PatchOp) -> &'static str {
             "RemoveNegativeObjectPropertyAssertion"
         }
         PatchOp::AddNegativeDataPropertyAssertion { .. } => "AddNegativeDataPropertyAssertion",
-        PatchOp::RemoveNegativeDataPropertyAssertion { .. } => "RemoveNegativeDataPropertyAssertion",
+        PatchOp::RemoveNegativeDataPropertyAssertion { .. } => {
+            "RemoveNegativeDataPropertyAssertion"
+        }
         PatchOp::AddSameIndividual { .. } => "AddSameIndividual",
         PatchOp::RemoveSameIndividual { .. } => "RemoveSameIndividual",
         PatchOp::AddDifferentIndividuals { .. } => "AddDifferentIndividuals",
@@ -1017,8 +1001,7 @@ fn remove_negative_object_property_assertion(
         .cloned()
         .collect();
     for ax in to_remove {
-        let _ =
-            ont.take(&AnnotatedComponent::from(Component::NegativeObjectPropertyAssertion(ax)));
+        let _ = ont.take(&AnnotatedComponent::from(Component::NegativeObjectPropertyAssertion(ax)));
     }
 }
 
@@ -1246,42 +1229,6 @@ fn parse_manchester_ce(
         .map_err(|e| e.to_string())
 }
 
-fn resolve_iri(term: &str, namespaces: &BTreeMap<String, String>) -> String {
-    let trimmed = term.trim();
-    if trimmed.starts_with("http://") || trimmed.starts_with("https://") || trimmed.starts_with("urn:")
-    {
-        return trimmed.to_string();
-    }
-    if let Some((prefix, local)) = trimmed.split_once(':') {
-        if let Some(base) = namespaces.get(prefix) {
-            return format!("{base}{local}");
-        }
-    }
-    trimmed.to_string()
-}
-
-fn parse_data_range(
-    manchester: &str,
-    build: &Build<RcStr>,
-    namespaces: &BTreeMap<String, String>,
-) -> DataRange<RcStr> {
-    let trimmed = manchester.trim();
-    let as_iri = resolve_iri(trimmed, namespaces);
-    if as_iri.starts_with("http://")
-        || as_iri.starts_with("https://")
-        || as_iri.starts_with("urn:")
-        || trimmed.contains(':') && !trimmed.contains(' ')
-    {
-        return DataRange::Datatype(build.datatype(as_iri.as_str()));
-    }
-    if let Ok(parsed) = parse_class_expression(trimmed, namespaces) {
-        if let ClassExpression::Class(Class(iri)) = parsed.expression {
-            return DataRange::Datatype(build.datatype(iri.as_ref()));
-        }
-    }
-    DataRange::DataOneOf(vec![Literal::Simple { literal: trimmed.to_string() }])
-}
-
 fn is_declared_data_property(
     ont: &ComponentMappedOntology<RcStr, RcAnnotatedComponent>,
     entity_iri: &str,
@@ -1332,8 +1279,7 @@ fn set_characteristic(
     if !value {
         return;
     }
-    let ope =
-        ObjectPropertyExpression::ObjectProperty(build.object_property(entity_iri));
+    let ope = ObjectPropertyExpression::ObjectProperty(build.object_property(entity_iri));
     match kind {
         CharacteristicKind::Functional => {
             if is_declared_data_property(ont, entity_iri) {
@@ -1393,7 +1339,8 @@ fn remove_characteristic(
                 .cloned()
                 .collect();
             for ax in ops {
-                let _ = ont.take(&AnnotatedComponent::from(Component::FunctionalObjectProperty(ax)));
+                let _ =
+                    ont.take(&AnnotatedComponent::from(Component::FunctionalObjectProperty(ax)));
             }
             let dps: Vec<_> = ont
                 .i()
@@ -1426,7 +1373,8 @@ fn remove_characteristic(
                 .cloned()
                 .collect();
             for ax in ops {
-                let _ = ont.take(&AnnotatedComponent::from(Component::TransitiveObjectProperty(ax)));
+                let _ =
+                    ont.take(&AnnotatedComponent::from(Component::TransitiveObjectProperty(ax)));
             }
         }
         CharacteristicKind::Symmetric => {
@@ -1448,7 +1396,8 @@ fn remove_characteristic(
                 .cloned()
                 .collect();
             for ax in ops {
-                let _ = ont.take(&AnnotatedComponent::from(Component::AsymmetricObjectProperty(ax)));
+                let _ =
+                    ont.take(&AnnotatedComponent::from(Component::AsymmetricObjectProperty(ax)));
             }
         }
         CharacteristicKind::Reflexive => {
@@ -1583,9 +1532,7 @@ fn remove_domain(
     let ops: Vec<_> = ont
         .i()
         .object_property_domain()
-        .filter(|ax| {
-            ope_mentions(&ax.ope, entity_iri) && class_expr_mentions(&ax.ce, class_iri)
-        })
+        .filter(|ax| ope_mentions(&ax.ope, entity_iri) && class_expr_mentions(&ax.ce, class_iri))
         .cloned()
         .collect();
     for ax in ops {
@@ -1610,9 +1557,7 @@ fn remove_range(
     let ops: Vec<_> = ont
         .i()
         .object_property_range()
-        .filter(|ax| {
-            ope_mentions(&ax.ope, entity_iri) && class_expr_mentions(&ax.ce, range_iri)
-        })
+        .filter(|ax| ope_mentions(&ax.ope, entity_iri) && class_expr_mentions(&ax.ce, range_iri))
         .cloned()
         .collect();
     for ax in ops {
@@ -1736,6 +1681,27 @@ fn annotation_value_matches(av: &AnnotationValue<RcStr>, value: &str) -> bool {
     }
 }
 
+fn annotation_av_from_value(build: &Build<RcStr>, value: &str) -> AnnotationValue<RcStr> {
+    let trimmed = value.trim();
+    if let Some(inner) = trimmed.strip_prefix('<').and_then(|s| s.strip_suffix('>')) {
+        return AnnotationValue::IRI(build.iri(inner.trim()));
+    }
+    if (trimmed.starts_with("http://")
+        || trimmed.starts_with("https://")
+        || trimmed.starts_with("urn:"))
+        && !trimmed.contains(' ')
+    {
+        return AnnotationValue::IRI(build.iri(trimmed));
+    }
+    AnnotationValue::Literal(Literal::Simple { literal: trimmed.to_string() })
+}
+
+const AXIOM_ANN_SUPPORTED: &str = "sub_class_of, disjoint_with, equivalent_class, domain, range, \
+sub_object_property_of, sub_data_property_of, inverse_object_properties, equivalent_property, \
+equivalent_object_properties, equivalent_data_properties, property_disjoint_with, \
+disjoint_object_properties, disjoint_data_properties, same_individual, different_individuals";
+
+#[allow(clippy::too_many_arguments)]
 fn mutate_axiom_annotation(
     ont: &mut ComponentMappedOntology<RcStr, RcAnnotatedComponent>,
     build: &Build<RcStr>,
@@ -1748,49 +1714,171 @@ fn mutate_axiom_annotation(
 ) -> std::result::Result<(), String> {
     let ann = Annotation {
         ap: build.annotation_property(predicate),
-        av: AnnotationValue::Literal(Literal::Simple { literal: value.to_string() }),
+        av: annotation_av_from_value(build, value),
     };
     let kind = match axiom_op {
         "sub_class_of" => ComponentKind::SubClassOf,
         "disjoint_with" | "disjoint_class" => ComponentKind::DisjointClasses,
         "equivalent_class" => ComponentKind::EquivalentClasses,
+        "domain" => {
+            // Prefer object property domain; fall through handled by dual search below.
+            ComponentKind::ObjectPropertyDomain
+        }
+        "range" => ComponentKind::ObjectPropertyRange,
+        "sub_object_property_of" | "sub_property_of" => ComponentKind::SubObjectPropertyOf,
+        "sub_data_property_of" => ComponentKind::SubDataPropertyOf,
+        "inverse_of" | "inverse_object_properties" => ComponentKind::InverseObjectProperties,
+        "equivalent_property" | "equivalent_object_properties" => {
+            ComponentKind::EquivalentObjectProperties
+        }
+        "equivalent_data_properties" => ComponentKind::EquivalentDataProperties,
+        "property_disjoint_with" | "disjoint_object_properties" => {
+            ComponentKind::DisjointObjectProperties
+        }
+        "disjoint_data_properties" => ComponentKind::DisjointDataProperties,
+        "same_as" | "same_individual" => ComponentKind::SameIndividual,
+        "different_from" | "different_individuals" => ComponentKind::DifferentIndividuals,
         other => {
             return Err(format!(
-                "axiom annotation for axiom_op '{other}' not yet supported for XML write-back (supported: sub_class_of, disjoint_with)"
+                "axiom annotation for axiom_op '{other}' not yet supported for XML write-back (supported: {AXIOM_ANN_SUPPORTED})"
             ));
         }
     };
+
+    let related = related_iri.unwrap_or("");
     let matches = |ac: &AnnotatedComponent<RcStr>| -> bool {
-        match (&ac.component, axiom_op) {
-            (Component::SubClassOf(ax), "sub_class_of") => {
-                let related = related_iri.unwrap_or("");
+        match &ac.component {
+            Component::SubClassOf(ax) if axiom_op == "sub_class_of" => {
                 matches!(
                     &ax.sub,
                     ClassExpression::Class(Class(iri)) if iri.to_string() == subject_iri
-                ) && matches!(
-                    &ax.sup,
-                    ClassExpression::Class(Class(iri)) if iri.to_string() == related
-                )
+                ) && (related.is_empty()
+                    || matches!(
+                        &ax.sup,
+                        ClassExpression::Class(Class(iri)) if iri.to_string() == related
+                    ))
             }
-            (Component::DisjointClasses(ax), "disjoint_with" | "disjoint_class") => {
-                let related = related_iri.unwrap_or("");
-                ax.0.iter().any(|ce| class_expr_mentions(ce, subject_iri))
-                    && ax.0.iter().any(|ce| class_expr_mentions(ce, related))
-            }
-            (Component::EquivalentClasses(ax), "equivalent_class") => {
-                let related = related_iri.unwrap_or("");
+            Component::DisjointClasses(ax)
+                if matches!(axiom_op, "disjoint_with" | "disjoint_class") =>
+            {
                 ax.0.iter().any(|ce| class_expr_mentions(ce, subject_iri))
                     && (related.is_empty()
                         || ax.0.iter().any(|ce| class_expr_mentions(ce, related)))
             }
+            Component::EquivalentClasses(ax) if axiom_op == "equivalent_class" => {
+                ax.0.iter().any(|ce| class_expr_mentions(ce, subject_iri))
+                    && (related.is_empty()
+                        || ax.0.iter().any(|ce| class_expr_mentions(ce, related)))
+            }
+            Component::ObjectPropertyDomain(ax) if axiom_op == "domain" => {
+                ope_mentions(&ax.ope, subject_iri)
+                    && (related.is_empty() || class_expr_mentions(&ax.ce, related))
+            }
+            Component::DataPropertyDomain(ax) if axiom_op == "domain" => {
+                ax.dp.to_string() == subject_iri
+                    && (related.is_empty() || class_expr_mentions(&ax.ce, related))
+            }
+            Component::ObjectPropertyRange(ax) if axiom_op == "range" => {
+                ope_mentions(&ax.ope, subject_iri)
+                    && (related.is_empty() || class_expr_mentions(&ax.ce, related))
+            }
+            Component::DataPropertyRange(ax) if axiom_op == "range" => {
+                ax.dp.to_string() == subject_iri
+                    && (related.is_empty()
+                        || data_range_display_match(&ax.dr, related)
+                        || matches!(
+                            &ax.dr,
+                            DataRange::Datatype(dt) if dt.to_string() == related
+                        ))
+            }
+            Component::SubObjectPropertyOf(ax)
+                if matches!(axiom_op, "sub_object_property_of" | "sub_property_of") =>
+            {
+                match &ax.sub {
+                    SubObjectPropertyExpression::ObjectPropertyExpression(sub) => {
+                        ope_mentions(sub, subject_iri)
+                            && (related.is_empty() || ope_mentions(&ax.sup, related))
+                    }
+                    _ => false,
+                }
+            }
+            Component::SubDataPropertyOf(ax) if axiom_op == "sub_data_property_of" => {
+                ax.sub.to_string() == subject_iri
+                    && (related.is_empty() || ax.sup.to_string() == related)
+            }
+            Component::InverseObjectProperties(ax)
+                if matches!(axiom_op, "inverse_of" | "inverse_object_properties") =>
+            {
+                let a = ax.0.to_string();
+                let b = ax.1.to_string();
+                (a == subject_iri || b == subject_iri)
+                    && (related.is_empty() || a == related || b == related)
+            }
+            Component::EquivalentObjectProperties(ax)
+                if matches!(axiom_op, "equivalent_property" | "equivalent_object_properties") =>
+            {
+                ax.0.iter().any(|ope| ope_mentions(ope, subject_iri))
+                    && (related.is_empty() || ax.0.iter().any(|ope| ope_mentions(ope, related)))
+            }
+            Component::EquivalentDataProperties(ax)
+                if matches!(axiom_op, "equivalent_property" | "equivalent_data_properties") =>
+            {
+                ax.0.iter().any(|dp| dp.to_string() == subject_iri)
+                    && (related.is_empty() || ax.0.iter().any(|dp| dp.to_string() == related))
+            }
+            Component::DisjointObjectProperties(ax)
+                if matches!(axiom_op, "property_disjoint_with" | "disjoint_object_properties") =>
+            {
+                ax.0.iter().any(|ope| ope_mentions(ope, subject_iri))
+                    && (related.is_empty() || ax.0.iter().any(|ope| ope_mentions(ope, related)))
+            }
+            Component::DisjointDataProperties(ax)
+                if matches!(axiom_op, "property_disjoint_with" | "disjoint_data_properties") =>
+            {
+                ax.0.iter().any(|dp| dp.to_string() == subject_iri)
+                    && (related.is_empty() || ax.0.iter().any(|dp| dp.to_string() == related))
+            }
+            Component::SameIndividual(ax) if matches!(axiom_op, "same_as" | "same_individual") => {
+                ax.0.iter().any(|i| individual_mentions(i, subject_iri))
+                    && (related.is_empty() || ax.0.iter().any(|i| individual_mentions(i, related)))
+            }
+            Component::DifferentIndividuals(ax)
+                if matches!(axiom_op, "different_from" | "different_individuals") =>
+            {
+                ax.0.iter().any(|i| individual_mentions(i, subject_iri))
+                    && (related.is_empty() || ax.0.iter().any(|i| individual_mentions(i, related)))
+            }
             _ => false,
         }
     };
-    let targets: Vec<_> =
-        ont.i().component_for_kind(kind).filter(|ac| matches(ac)).cloned().collect();
+
+    let mut kinds = vec![kind];
+    // Domain / range may live on data or object properties.
+    if axiom_op == "domain" {
+        kinds.push(ComponentKind::DataPropertyDomain);
+    } else if axiom_op == "range" {
+        kinds.push(ComponentKind::DataPropertyRange);
+    }
+    if matches!(axiom_op, "equivalent_property") {
+        kinds.push(ComponentKind::EquivalentDataProperties);
+    }
+    if matches!(axiom_op, "property_disjoint_with") {
+        kinds.push(ComponentKind::DisjointDataProperties);
+    }
+
+    let mut targets: Vec<_> = Vec::new();
+    for k in kinds {
+        targets.extend(ont.i().component_for_kind(k).filter(|ac| matches(ac)).cloned());
+    }
     if targets.is_empty() {
         return Err(format!(
             "no matching {axiom_op} axiom found for axiom annotation on {subject_iri}"
+        ));
+    }
+    if targets.len() > 1 && related.is_empty() {
+        return Err(format!(
+            "ambiguous {axiom_op} axiom annotation on {subject_iri}: {} matches; supply related_iri",
+            targets.len()
         ));
     }
     for target in targets {
@@ -1806,6 +1894,10 @@ fn mutate_axiom_annotation(
         ont.insert(updated);
     }
     Ok(())
+}
+
+fn data_range_display_match(dr: &DataRange<RcStr>, related: &str) -> bool {
+    crate::manchester::data_range_to_manchester(dr, &BTreeMap::new()) == related
 }
 
 fn set_ontology_iri(
@@ -1974,9 +2066,7 @@ mod tests {
         assert_eq!(ont.i().transitive_object_property().count(), 1);
         assert_eq!(ont.i().object_property_assertion().count(), 1);
         assert!(
-            ont.i()
-                .component_for_kind(ComponentKind::DisjointClasses)
-                .any(|ac| !ac.ann.is_empty()),
+            ont.i().component_for_kind(ComponentKind::DisjointClasses).any(|ac| !ac.ann.is_empty()),
             "expected axiom annotation on disjoint"
         );
 
@@ -1988,5 +2078,50 @@ mod tests {
             }],
         );
         assert!(err.is_err());
+    }
+
+    #[test]
+    fn axiom_annotation_on_domain_and_datatype_facets() {
+        let source = r#"<?xml version="1.0"?>
+<rdf:RDF xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+    <owl:Ontology rdf:about="http://example.org/ont"/>
+    <owl:Class rdf:about="http://example.org/ont#A"/>
+    <owl:ObjectProperty rdf:about="http://example.org/ont#p">
+        <rdfs:domain rdf:resource="http://example.org/ont#A"/>
+    </owl:ObjectProperty>
+</rdf:RDF>"#;
+        let (mut ont, _incomplete) = load_rdf_xml_ontology(source).expect("load");
+        let mut namespaces = BTreeMap::new();
+        namespaces.insert("xsd".into(), "http://www.w3.org/2001/XMLSchema#".into());
+        apply_patches_to_ontology_with_ns(
+            &mut ont,
+            &[
+                PatchOp::AddAxiomAnnotation {
+                    axiom_op: "domain".into(),
+                    subject_iri: "http://example.org/ont#p".into(),
+                    related_iri: Some("http://example.org/ont#A".into()),
+                    predicate: "http://www.w3.org/2000/01/rdf-schema#comment".into(),
+                    value: "domain note".into(),
+                },
+                PatchOp::AddDatatypeDefinition {
+                    datatype_iri: "http://example.org/ont#NonNegInt".into(),
+                    manchester: "xsd:integer[>= 0]".into(),
+                },
+            ],
+            &namespaces,
+        )
+        .expect("apply");
+        assert!(
+            ont.i()
+                .component_for_kind(ComponentKind::ObjectPropertyDomain)
+                .any(|ac| !ac.ann.is_empty()),
+            "domain axiom should carry annotation"
+        );
+        assert_eq!(ont.i().datatype_definition().count(), 1);
+        let def = ont.i().datatype_definition().next().expect("def");
+        assert!(matches!(def.range, DataRange::DatatypeRestriction(_, _)));
     }
 }

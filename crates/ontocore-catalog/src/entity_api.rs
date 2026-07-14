@@ -1,9 +1,16 @@
 use crate::OntologyCatalog;
 use ontocore_core::{
     document_for_entity, read_to_string_capped, Entity, EntityKind, PropertyCharacteristics,
-    AXIOM_KIND_CLASS_ASSERTION, AXIOM_KIND_DATA_PROPERTY_ASSERTION, AXIOM_KIND_DISJOINT_CLASS,
-    AXIOM_KIND_DOMAIN, AXIOM_KIND_EQUIVALENT_CLASS, AXIOM_KIND_OBJECT_PROPERTY_ASSERTION,
-    AXIOM_KIND_PROPERTY_CHAIN, AXIOM_KIND_RANGE, AXIOM_KIND_SUB_CLASS_OF, MAX_FILE_BYTES,
+    AXIOM_KIND_CLASS_ASSERTION, AXIOM_KIND_DATATYPE_DEFINITION, AXIOM_KIND_DATA_PROPERTY_ASSERTION,
+    AXIOM_KIND_DIFFERENT_INDIVIDUALS, AXIOM_KIND_DISJOINT_CLASS,
+    AXIOM_KIND_DISJOINT_DATA_PROPERTIES, AXIOM_KIND_DISJOINT_OBJECT_PROPERTIES,
+    AXIOM_KIND_DISJOINT_UNION, AXIOM_KIND_DOMAIN, AXIOM_KIND_EQUIVALENT_CLASS,
+    AXIOM_KIND_EQUIVALENT_DATA_PROPERTIES, AXIOM_KIND_EQUIVALENT_OBJECT_PROPERTIES,
+    AXIOM_KIND_HAS_KEY, AXIOM_KIND_INVERSE_OBJECT_PROPERTIES,
+    AXIOM_KIND_NEGATIVE_DATA_PROPERTY_ASSERTION, AXIOM_KIND_NEGATIVE_OBJECT_PROPERTY_ASSERTION,
+    AXIOM_KIND_OBJECT_PROPERTY_ASSERTION, AXIOM_KIND_PROPERTY_CHAIN, AXIOM_KIND_RANGE,
+    AXIOM_KIND_SAME_INDIVIDUAL, AXIOM_KIND_SUB_CLASS_OF, AXIOM_KIND_SUB_DATA_PROPERTY_OF,
+    AXIOM_KIND_SUB_OBJECT_PROPERTY_OF, MAX_FILE_BYTES,
 };
 use ontocore_diagnostics::{entity_needles, find_in_source};
 use serde::{Deserialize, Serialize};
@@ -40,9 +47,15 @@ pub struct EntityAxiomSummary {
     pub parent_iri: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub other_iri: Option<String>,
-    /// Ordered member property IRIs for `property_chain` axioms.
+    /// Property / relation IRI for assertion-like axioms.
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub predicate: Option<String>,
+    /// Ordered member property IRIs for `property_chain` / `has_key` / `disjoint_union`.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub properties: Vec<String>,
+    /// Annotations attached to this axiom (not entity annotation assertions).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub annotations: Vec<EntityAnnotationSummary>,
     pub editable: bool,
 }
 
@@ -221,22 +234,54 @@ impl OntologyCatalog {
 
 fn axiom_summary(a: &ontocore_core::Axiom, editable: bool) -> EntityAxiomSummary {
     let is_named_iri = a.object.starts_with("http://") || a.object.starts_with("https://");
-    let manchester = if is_named_iri { None } else { Some(a.object.clone()) };
+    let manchester = if is_named_iri
+        || a.axiom_kind == AXIOM_KIND_HAS_KEY
+        || a.axiom_kind == AXIOM_KIND_DISJOINT_UNION
+        || a.axiom_kind == AXIOM_KIND_PROPERTY_CHAIN
+    {
+        None
+    } else if a.axiom_kind == AXIOM_KIND_DATATYPE_DEFINITION
+        || (!is_named_iri && !a.object.is_empty())
+    {
+        Some(a.object.clone())
+    } else {
+        None
+    };
     let parent_iri = if (a.axiom_kind == AXIOM_KIND_SUB_CLASS_OF
-        || a.axiom_kind == AXIOM_KIND_CLASS_ASSERTION)
+        || a.axiom_kind == AXIOM_KIND_CLASS_ASSERTION
+        || a.axiom_kind == AXIOM_KIND_SUB_OBJECT_PROPERTY_OF
+        || a.axiom_kind == AXIOM_KIND_SUB_DATA_PROPERTY_OF
+        || a.axiom_kind == AXIOM_KIND_DOMAIN
+        || a.axiom_kind == AXIOM_KIND_RANGE)
         && is_named_iri
     {
         Some(a.object.clone())
     } else {
         None
     };
-    let other_iri = if a.axiom_kind == AXIOM_KIND_DISJOINT_CLASS && is_named_iri {
+    let other_iri = if matches!(
+        a.axiom_kind.as_str(),
+        AXIOM_KIND_DISJOINT_CLASS
+            | AXIOM_KIND_INVERSE_OBJECT_PROPERTIES
+            | AXIOM_KIND_EQUIVALENT_OBJECT_PROPERTIES
+            | AXIOM_KIND_DISJOINT_OBJECT_PROPERTIES
+            | AXIOM_KIND_EQUIVALENT_DATA_PROPERTIES
+            | AXIOM_KIND_DISJOINT_DATA_PROPERTIES
+            | AXIOM_KIND_SAME_INDIVIDUAL
+            | AXIOM_KIND_DIFFERENT_INDIVIDUALS
+            | AXIOM_KIND_EQUIVALENT_CLASS
+            | AXIOM_KIND_NEGATIVE_OBJECT_PROPERTY_ASSERTION
+            | AXIOM_KIND_OBJECT_PROPERTY_ASSERTION
+    ) && is_named_iri
+    {
         Some(a.object.clone())
     } else {
         None
     };
     let properties = if a.axiom_kind == AXIOM_KIND_PROPERTY_CHAIN {
         a.object.split(" o ").map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect()
+    } else if a.axiom_kind == AXIOM_KIND_HAS_KEY || a.axiom_kind == AXIOM_KIND_DISJOINT_UNION {
+        a.object.split(" | ").map(|s| s.trim().to_string()).filter(|s| !s.is_empty()).collect()
     } else {
         Vec::new()
     };
@@ -249,18 +294,66 @@ fn axiom_summary(a: &ontocore_core::Axiom, editable: bool) -> EntityAxiomSummary
         AXIOM_KIND_CLASS_ASSERTION => "ClassAssertion",
         AXIOM_KIND_OBJECT_PROPERTY_ASSERTION => "ObjectPropertyAssertion",
         AXIOM_KIND_DATA_PROPERTY_ASSERTION => "DataPropertyAssertion",
+        AXIOM_KIND_HAS_KEY => "HasKey",
+        AXIOM_KIND_DISJOINT_UNION => "DisjointUnion",
+        AXIOM_KIND_INVERSE_OBJECT_PROPERTIES => "InverseObjectProperties",
+        AXIOM_KIND_EQUIVALENT_OBJECT_PROPERTIES => "EquivalentObjectProperties",
+        AXIOM_KIND_DISJOINT_OBJECT_PROPERTIES => "DisjointObjectProperties",
+        AXIOM_KIND_EQUIVALENT_DATA_PROPERTIES => "EquivalentDataProperties",
+        AXIOM_KIND_DISJOINT_DATA_PROPERTIES => "DisjointDataProperties",
+        AXIOM_KIND_SUB_OBJECT_PROPERTY_OF => "SubObjectPropertyOf",
+        AXIOM_KIND_SUB_DATA_PROPERTY_OF => "SubDataPropertyOf",
+        AXIOM_KIND_NEGATIVE_OBJECT_PROPERTY_ASSERTION => "NegativeObjectPropertyAssertion",
+        AXIOM_KIND_NEGATIVE_DATA_PROPERTY_ASSERTION => "NegativeDataPropertyAssertion",
+        AXIOM_KIND_SAME_INDIVIDUAL => "SameIndividual",
+        AXIOM_KIND_DIFFERENT_INDIVIDUALS => "DifferentIndividuals",
+        AXIOM_KIND_DATATYPE_DEFINITION => "DatatypeDefinition",
         _ => "SubClassOf",
     };
-    let axiom_editable = editable;
+    let display = match a.axiom_kind.as_str() {
+        AXIOM_KIND_NEGATIVE_OBJECT_PROPERTY_ASSERTION
+        | AXIOM_KIND_NEGATIVE_DATA_PROPERTY_ASSERTION
+        | AXIOM_KIND_OBJECT_PROPERTY_ASSERTION
+        | AXIOM_KIND_DATA_PROPERTY_ASSERTION => {
+            format!("{} {} {}", kind_label, short_tail(&a.predicate), short_tail(&a.object))
+        }
+        _ => format!("{} {}", kind_label, short_tail(&a.object)),
+    };
+    let annotations: Vec<EntityAnnotationSummary> = a
+        .annotations
+        .iter()
+        .map(|ann| EntityAnnotationSummary {
+            predicate: ann.predicate.clone(),
+            value: ann.value.clone(),
+            editable,
+        })
+        .collect();
+    let predicate = if matches!(
+        a.axiom_kind.as_str(),
+        AXIOM_KIND_OBJECT_PROPERTY_ASSERTION
+            | AXIOM_KIND_DATA_PROPERTY_ASSERTION
+            | AXIOM_KIND_NEGATIVE_OBJECT_PROPERTY_ASSERTION
+            | AXIOM_KIND_NEGATIVE_DATA_PROPERTY_ASSERTION
+    ) {
+        Some(a.predicate.clone())
+    } else {
+        None
+    };
     EntityAxiomSummary {
         kind: a.axiom_kind.clone(),
-        display: format!("{} {}", kind_label, a.object),
+        display,
         manchester,
         parent_iri,
         other_iri,
+        predicate,
         properties,
-        editable: axiom_editable,
+        annotations,
+        editable,
     }
+}
+
+fn short_tail(iri_or_text: &str) -> &str {
+    iri_or_text.rsplit(['#', '/']).next().unwrap_or(iri_or_text)
 }
 
 fn scan_file_for_iri(

@@ -58,6 +58,10 @@ impl Rdfs {
     pub fn sub_class_of() -> NamedNodeRef<'static> {
         NamedNodeRef::new_unchecked("http://www.w3.org/2000/01/rdf-schema#subClassOf")
     }
+
+    pub fn datatype() -> NamedNodeRef<'static> {
+        NamedNodeRef::new_unchecked("http://www.w3.org/2000/01/rdf-schema#Datatype")
+    }
 }
 
 pub struct Rdf;

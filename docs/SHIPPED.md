@@ -79,9 +79,10 @@
 |------------|--------|
 | HasKey, DisjointUnion, inverse / equivalent / disjoint properties, sub-property hierarchy | Yes (Turtle + XML mutate) |
 | Negative assertions; SameIndividual / DifferentIndividuals | Yes |
-| Datatype entities + datatype definitions; axiom annotations | Yes (Turtle; XML best-effort for complex DataRanges / some axiom types) |
+| Datatype entities + datatype definitions; axiom annotations | Yes (Turtle + XML; shared Manchester DataRange for facets / oneOf / and/or/not) |
+| Catalog / EntityDetail listing for v0.22 axiom families (incl. nested axiom annotations) | Yes |
 | Manchester `not`, `value`, `Self`, OneOf, data restrictions | Yes |
-| Inspector UI for HasKey, DisjointUnion, Inverse, Same/Different, NegativeOPA | Yes |
+| Inspector UI for HasKey, DisjointUnion, Inverse, Same/Different, NegativeOPA (+ remove from listed cards) | Yes |
 
 ## Previously in v0.21.0
 

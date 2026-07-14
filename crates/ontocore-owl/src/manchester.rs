@@ -1,7 +1,9 @@
 use crate::error::{OwlError, Result};
 use horned_owl::model::{
-    Build, ClassExpression, DataRange, Individual, Literal, ObjectPropertyExpression, RcStr,
+    Build, ClassExpression, DataRange, FacetRestriction, Individual, Literal,
+    ObjectPropertyExpression, RcStr,
 };
+use horned_owl::vocab::Facet;
 use serde::Serialize;
 use std::collections::BTreeMap;
 use std::fmt::Write as _;
@@ -271,10 +273,7 @@ fn ast_to_class_expression(
         ManchesterAst::Some { property, filler } => {
             let prop_iri = resolve_term_iri(property, namespaces)?;
             if let Some(dr) = filler_as_data_range(filler, build, namespaces)? {
-                Ok(ClassExpression::DataSomeValuesFrom {
-                    dp: build.data_property(prop_iri),
-                    dr,
-                })
+                Ok(ClassExpression::DataSomeValuesFrom { dp: build.data_property(prop_iri), dr })
             } else {
                 let bce = Box::new(ast_to_class_expression(filler, build, namespaces)?);
                 Ok(ClassExpression::ObjectSomeValuesFrom {
@@ -286,10 +285,7 @@ fn ast_to_class_expression(
         ManchesterAst::Only { property, filler } => {
             let prop_iri = resolve_term_iri(property, namespaces)?;
             if let Some(dr) = filler_as_data_range(filler, build, namespaces)? {
-                Ok(ClassExpression::DataAllValuesFrom {
-                    dp: build.data_property(prop_iri),
-                    dr,
-                })
+                Ok(ClassExpression::DataAllValuesFrom { dp: build.data_property(prop_iri), dr })
             } else {
                 let bce = Box::new(ast_to_class_expression(filler, build, namespaces)?);
                 Ok(ClassExpression::ObjectAllValuesFrom {
@@ -399,21 +395,376 @@ fn filler_as_data_range(
 ) -> Result<Option<DataRange<RcStr>>> {
     match filler {
         ManchesterAst::Class(term) => {
-            let iri = resolve_term_iri(term, namespaces)?;
-            if looks_like_datatype_iri(&iri, term) {
-                Ok(Some(DataRange::Datatype(build.datatype(iri))))
-            } else {
-                Ok(None)
+            // Only interpret as a data range when the base term looks like a datatype
+            // (avoid treating class fillers such as owl:Thing as DataRanges).
+            let base = term.split('[').next().unwrap_or(term).trim();
+            let iri = resolve_term_iri(base, namespaces)?;
+            if !looks_like_datatype_iri(&iri, base) {
+                return Ok(None);
+            }
+            match parse_data_range(term, namespaces) {
+                Ok(dr) => Ok(Some(dr)),
+                Err(_) => Ok(Some(DataRange::Datatype(build.datatype(iri)))),
             }
         }
         _ => Ok(None),
     }
 }
 
+/// Parse a Manchester-style data range (datatype, facets, oneOf, and/or/not).
+pub fn parse_data_range(
+    input: &str,
+    namespaces: &BTreeMap<String, String>,
+) -> Result<DataRange<RcStr>> {
+    let trimmed = input.trim();
+    if trimmed.is_empty() {
+        return Err(OwlError::ManchesterInvalid("empty data range".to_string()));
+    }
+    let mut parser = DataRangeParser { input: trimmed, pos: 0, namespaces };
+    let dr = parser.parse_or()?;
+    parser.skip_ws();
+    if parser.pos < parser.input.len() {
+        return Err(OwlError::ManchesterInvalid(format!(
+            "unexpected trailing input in data range: '{}'",
+            &parser.input[parser.pos..]
+        )));
+    }
+    Ok(dr)
+}
+
+struct DataRangeParser<'a> {
+    input: &'a str,
+    pos: usize,
+    namespaces: &'a BTreeMap<String, String>,
+}
+
+impl<'a> DataRangeParser<'a> {
+    fn skip_ws(&mut self) {
+        while let Some(c) = self.input[self.pos..].chars().next() {
+            if !c.is_whitespace() {
+                break;
+            }
+            self.pos += c.len_utf8();
+        }
+    }
+
+    fn peek(&self) -> Option<char> {
+        self.input[self.pos..].chars().next()
+    }
+
+    fn bump(&mut self) -> Option<char> {
+        let c = self.peek()?;
+        self.pos += c.len_utf8();
+        Some(c)
+    }
+
+    fn parse_or(&mut self) -> Result<DataRange<RcStr>> {
+        let mut left = self.parse_and()?;
+        loop {
+            self.skip_ws();
+            if self.consume_keyword("or") {
+                let right = self.parse_and()?;
+                left = match left {
+                    DataRange::DataUnionOf(mut v) => {
+                        v.push(right);
+                        DataRange::DataUnionOf(v)
+                    }
+                    other => DataRange::DataUnionOf(vec![other, right]),
+                };
+            } else {
+                break;
+            }
+        }
+        Ok(left)
+    }
+
+    fn parse_and(&mut self) -> Result<DataRange<RcStr>> {
+        let mut left = self.parse_unary()?;
+        loop {
+            self.skip_ws();
+            if self.consume_keyword("and") {
+                let right = self.parse_unary()?;
+                left = match left {
+                    DataRange::DataIntersectionOf(mut v) => {
+                        v.push(right);
+                        DataRange::DataIntersectionOf(v)
+                    }
+                    other => DataRange::DataIntersectionOf(vec![other, right]),
+                };
+            } else {
+                break;
+            }
+        }
+        Ok(left)
+    }
+
+    fn parse_unary(&mut self) -> Result<DataRange<RcStr>> {
+        self.skip_ws();
+        if self.consume_keyword("not") {
+            let inner = self.parse_unary()?;
+            return Ok(DataRange::DataComplementOf(Box::new(inner)));
+        }
+        self.parse_primary()
+    }
+
+    fn parse_primary(&mut self) -> Result<DataRange<RcStr>> {
+        self.skip_ws();
+        if self.peek() == Some('{') {
+            return self.parse_one_of();
+        }
+        if self.peek() == Some('(') {
+            self.bump();
+            let inner = self.parse_or()?;
+            self.skip_ws();
+            if self.bump() != Some(')') {
+                return Err(OwlError::ManchesterInvalid("expected ')' in data range".to_string()));
+            }
+            return Ok(inner);
+        }
+        let name = self.parse_name()?;
+        let iri = resolve_term_iri(&name, self.namespaces)?;
+        let build = Build::new();
+        let datatype = build.datatype(iri.as_str());
+        let mut facets = Vec::new();
+        loop {
+            self.skip_ws();
+            if self.peek() != Some('[') {
+                break;
+            }
+            facets.push(self.parse_facet_bracket()?);
+        }
+        if facets.is_empty() {
+            Ok(DataRange::Datatype(datatype))
+        } else {
+            Ok(DataRange::DatatypeRestriction(datatype, facets))
+        }
+    }
+
+    fn parse_one_of(&mut self) -> Result<DataRange<RcStr>> {
+        self.bump(); // {
+        let mut lits = Vec::new();
+        loop {
+            self.skip_ws();
+            if self.peek() == Some('}') {
+                self.bump();
+                break;
+            }
+            lits.push(self.parse_literal_value()?);
+            self.skip_ws();
+            if self.peek() == Some(',') {
+                self.bump();
+                continue;
+            }
+            if self.peek() == Some('}') {
+                self.bump();
+                break;
+            }
+            return Err(OwlError::ManchesterInvalid(
+                "expected ',' or '}' in data oneOf".to_string(),
+            ));
+        }
+        Ok(DataRange::DataOneOf(lits))
+    }
+
+    fn parse_literal_value(&mut self) -> Result<Literal<RcStr>> {
+        self.skip_ws();
+        if self.peek() == Some('"') {
+            self.bump();
+            let mut lit = String::new();
+            while let Some(c) = self.bump() {
+                if c == '"' {
+                    break;
+                }
+                if c == '\\' {
+                    if let Some(n) = self.bump() {
+                        lit.push(n);
+                    }
+                } else {
+                    lit.push(c);
+                }
+            }
+            return Ok(Literal::Simple { literal: lit });
+        }
+        let start = self.pos;
+        while let Some(c) = self.peek() {
+            if c.is_whitespace() || c == ',' || c == '}' || c == ')' || c == ']' {
+                break;
+            }
+            self.bump();
+        }
+        let raw = self.input[start..self.pos].trim();
+        if raw.is_empty() {
+            return Err(OwlError::ManchesterInvalid("empty literal in data oneOf".into()));
+        }
+        Ok(Literal::Simple { literal: raw.to_string() })
+    }
+
+    fn parse_facet_bracket(&mut self) -> Result<FacetRestriction<RcStr>> {
+        self.bump(); // [
+        self.skip_ws();
+        let (facet, value) = if self.consume_symbol(">=") {
+            (Facet::MinInclusive, self.parse_facet_value()?)
+        } else if self.consume_symbol("<=") {
+            (Facet::MaxInclusive, self.parse_facet_value()?)
+        } else if self.consume_symbol(">") {
+            (Facet::MinExclusive, self.parse_facet_value()?)
+        } else if self.consume_symbol("<") {
+            (Facet::MaxExclusive, self.parse_facet_value()?)
+        } else if self.consume_keyword("length") {
+            (Facet::Length, self.parse_facet_value()?)
+        } else if self.consume_keyword("minLength") {
+            (Facet::MinLength, self.parse_facet_value()?)
+        } else if self.consume_keyword("maxLength") {
+            (Facet::MaxLength, self.parse_facet_value()?)
+        } else if self.consume_keyword("pattern") {
+            (Facet::Pattern, self.parse_facet_value()?)
+        } else if self.consume_keyword("totalDigits") {
+            (Facet::TotalDigits, self.parse_facet_value()?)
+        } else if self.consume_keyword("fractionDigits") {
+            (Facet::FractionDigits, self.parse_facet_value()?)
+        } else {
+            return Err(OwlError::ManchesterInvalid(
+                "unknown facet in datatype restriction".to_string(),
+            ));
+        };
+        self.skip_ws();
+        if self.bump() != Some(']') {
+            return Err(OwlError::ManchesterInvalid("expected ']' after facet".to_string()));
+        }
+        Ok(FacetRestriction { f: facet, l: value })
+    }
+
+    fn parse_facet_value(&mut self) -> Result<Literal<RcStr>> {
+        self.skip_ws();
+        self.parse_literal_value()
+    }
+
+    fn parse_name(&mut self) -> Result<String> {
+        self.skip_ws();
+        if self.peek() == Some('<') {
+            self.bump();
+            let start = self.pos;
+            while let Some(c) = self.bump() {
+                if c == '>' {
+                    return Ok(format!("<{}>", &self.input[start..self.pos - 1]));
+                }
+            }
+            return Err(OwlError::ManchesterInvalid("unclosed IRI in data range".into()));
+        }
+        let start = self.pos;
+        while let Some(c) = self.peek() {
+            if c.is_alphanumeric() || c == ':' || c == '_' || c == '-' || c == '.' {
+                self.bump();
+            } else {
+                break;
+            }
+        }
+        let name = self.input[start..self.pos].to_string();
+        if name.is_empty() {
+            return Err(OwlError::ManchesterInvalid("expected datatype name".into()));
+        }
+        Ok(name)
+    }
+
+    fn consume_keyword(&mut self, kw: &str) -> bool {
+        self.skip_ws();
+        let rest = &self.input[self.pos..];
+        if rest.len() >= kw.len()
+            && rest[..kw.len()].eq_ignore_ascii_case(kw)
+            && rest
+                .get(kw.len()..)
+                .and_then(|s| s.chars().next())
+                .map(|c| !c.is_alphanumeric() && c != '_')
+                .unwrap_or(true)
+        {
+            self.pos += kw.len();
+            true
+        } else {
+            false
+        }
+    }
+
+    fn consume_symbol(&mut self, sym: &str) -> bool {
+        self.skip_ws();
+        if self.input[self.pos..].starts_with(sym) {
+            self.pos += sym.len();
+            true
+        } else {
+            false
+        }
+    }
+}
+
+/// Pretty-print a data range in Manchester-ish form for Inspector / PatchOp payloads.
+pub fn data_range_to_manchester(
+    dr: &DataRange<RcStr>,
+    namespaces: &BTreeMap<String, String>,
+) -> String {
+    match dr {
+        DataRange::Datatype(dt) => iri_to_curie_or_full(dt.0.as_ref(), namespaces),
+        DataRange::DatatypeRestriction(dt, facets) => {
+            let mut s = iri_to_curie_or_full(dt.0.as_ref(), namespaces);
+            for f in facets {
+                s.push_str(&format!("[{} {}]", facet_symbol(&f.f), literal_lexical(&f.l)));
+            }
+            s
+        }
+        DataRange::DataOneOf(lits) => {
+            let inner = lits
+                .iter()
+                .map(|l| format!("\"{}\"", escape_turtle_string_local(literal_lexical(l))))
+                .collect::<Vec<_>>()
+                .join(", ");
+            format!("{{{inner}}}")
+        }
+        DataRange::DataComplementOf(inner) => {
+            format!("not ({})", data_range_to_manchester(inner, namespaces))
+        }
+        DataRange::DataIntersectionOf(parts) => parts
+            .iter()
+            .map(|p| data_range_to_manchester(p, namespaces))
+            .collect::<Vec<_>>()
+            .join(" and "),
+        DataRange::DataUnionOf(parts) => parts
+            .iter()
+            .map(|p| data_range_to_manchester(p, namespaces))
+            .collect::<Vec<_>>()
+            .join(" or "),
+    }
+}
+
+fn facet_symbol(f: &Facet) -> &'static str {
+    match f {
+        Facet::MinInclusive => ">=",
+        Facet::MaxInclusive => "<=",
+        Facet::MinExclusive => ">",
+        Facet::MaxExclusive => "<",
+        Facet::Length => "length",
+        Facet::MinLength => "minLength",
+        Facet::MaxLength => "maxLength",
+        Facet::Pattern => "pattern",
+        Facet::TotalDigits => "totalDigits",
+        Facet::FractionDigits => "fractionDigits",
+        _ => "facet",
+    }
+}
+
+fn iri_to_curie_or_full(iri: &str, namespaces: &BTreeMap<String, String>) -> String {
+    for (prefix, base) in namespaces {
+        if !prefix.is_empty() && iri.starts_with(base.as_str()) {
+            return format!("{prefix}:{}", &iri[base.len()..]);
+        }
+    }
+    format!("<{iri}>")
+}
+
 fn looks_like_datatype_iri(iri: &str, original: &str) -> bool {
     iri.starts_with("http://www.w3.org/2001/XMLSchema#")
         || iri.starts_with("http://www.w3.org/1999/02/22-rdf-syntax-ns#")
-            && (iri.ends_with("PlainLiteral") || iri.ends_with("langString") || iri.ends_with("HTML") || iri.ends_with("XMLLiteral"))
+            && (iri.ends_with("PlainLiteral")
+                || iri.ends_with("langString")
+                || iri.ends_with("HTML")
+                || iri.ends_with("XMLLiteral"))
         || iri == "http://www.w3.org/2000/01/rdf-schema#Literal"
         || iri == "http://www.w3.org/2002/07/owl#real"
         || iri == "http://www.w3.org/2002/07/owl#rational"
@@ -924,15 +1275,30 @@ pub(crate) fn class_expression_to_turtle_value(
             write!(out, "{pad}]").ok();
             Ok(out)
         }
-        ClassExpression::DataMinCardinality { n, dp, dr } => {
-            data_cardinality_turtle("owl:minQualifiedCardinality", *n, dp.0.as_ref(), dr, namespaces, indent)
-        }
-        ClassExpression::DataMaxCardinality { n, dp, dr } => {
-            data_cardinality_turtle("owl:maxQualifiedCardinality", *n, dp.0.as_ref(), dr, namespaces, indent)
-        }
-        ClassExpression::DataExactCardinality { n, dp, dr } => {
-            data_cardinality_turtle("owl:qualifiedCardinality", *n, dp.0.as_ref(), dr, namespaces, indent)
-        }
+        ClassExpression::DataMinCardinality { n, dp, dr } => data_cardinality_turtle(
+            "owl:minQualifiedCardinality",
+            *n,
+            dp.0.as_ref(),
+            dr,
+            namespaces,
+            indent,
+        ),
+        ClassExpression::DataMaxCardinality { n, dp, dr } => data_cardinality_turtle(
+            "owl:maxQualifiedCardinality",
+            *n,
+            dp.0.as_ref(),
+            dr,
+            namespaces,
+            indent,
+        ),
+        ClassExpression::DataExactCardinality { n, dp, dr } => data_cardinality_turtle(
+            "owl:qualifiedCardinality",
+            *n,
+            dp.0.as_ref(),
+            dr,
+            namespaces,
+            indent,
+        ),
     }
 }
 
@@ -988,20 +1354,62 @@ fn data_cardinality_turtle(
     Ok(out)
 }
 
-fn data_range_to_turtle(dr: &DataRange<RcStr>, namespaces: &BTreeMap<String, String>) -> Result<String> {
+fn data_range_to_turtle(
+    dr: &DataRange<RcStr>,
+    namespaces: &BTreeMap<String, String>,
+) -> Result<String> {
     match dr {
         DataRange::Datatype(dt) => iri_to_turtle_term(dt.0.as_ref(), namespaces),
-        other => Err(OwlError::ManchesterInvalid(format!(
-            "unsupported data range for Turtle: {other:?}"
-        ))),
+        DataRange::DatatypeRestriction(dt, facets) => {
+            let on = iri_to_turtle_term(dt.0.as_ref(), namespaces)?;
+            let mut restrictions = String::new();
+            for f in facets {
+                let facet_iri = f.f.as_ref();
+                let facet_term = iri_to_turtle_term(facet_iri, namespaces)?;
+                let lit = format!("\"{}\"", escape_turtle_string_local(literal_lexical(&f.l)));
+                write!(restrictions, " [ {facet_term} {lit} ]").ok();
+            }
+            Ok(format!(
+                "[ a rdfs:Datatype ; owl:onDatatype {on} ; owl:withRestrictions ({restrictions} ) ]"
+            ))
+        }
+        DataRange::DataOneOf(lits) => {
+            let members = lits
+                .iter()
+                .map(|l| format!("\"{}\"", escape_turtle_string_local(literal_lexical(l))))
+                .collect::<Vec<_>>()
+                .join(" ");
+            Ok(format!("[ a rdfs:Datatype ; owl:oneOf ( {members} ) ]"))
+        }
+        DataRange::DataComplementOf(inner) => {
+            let inner_t = data_range_to_turtle(inner, namespaces)?;
+            Ok(format!("[ a rdfs:Datatype ; owl:datatypeComplementOf {inner_t} ]"))
+        }
+        DataRange::DataIntersectionOf(parts) => {
+            let mut members = String::new();
+            for p in parts {
+                let t = data_range_to_turtle(p, namespaces)?;
+                write!(members, " {t}").ok();
+            }
+            Ok(format!("[ a rdfs:Datatype ; owl:intersectionOf ({members} ) ]"))
+        }
+        DataRange::DataUnionOf(parts) => {
+            let mut members = String::new();
+            for p in parts {
+                let t = data_range_to_turtle(p, namespaces)?;
+                write!(members, " {t}").ok();
+            }
+            Ok(format!("[ a rdfs:Datatype ; owl:unionOf ({members} ) ]"))
+        }
     }
 }
 
-fn data_range_to_manchester(dr: &DataRange<RcStr>, namespaces: &BTreeMap<String, String>) -> String {
-    match dr {
-        DataRange::Datatype(dt) => iri_to_manchester_term(dt.0.as_ref(), namespaces),
-        other => format!("({other:?})"),
-    }
+/// Public Turtle emitter for data ranges (DatatypeDefinition write-back).
+pub fn data_range_to_turtle_term(
+    dr: &DataRange<RcStr>,
+    namespaces: &BTreeMap<String, String>,
+) -> Result<String> {
+    data_range_to_turtle(dr, namespaces)
 }
 
 fn data_cardinality_manchester(
@@ -1274,5 +1682,20 @@ mod tests {
         ]);
         let out = parse_class_expression("ex:age some xsd:integer", &ns).expect("data some");
         assert!(matches!(out.expression, ClassExpression::DataSomeValuesFrom { .. }));
+    }
+
+    #[test]
+    fn parse_data_range_facets_and_one_of() {
+        let ns =
+            BTreeMap::from([("xsd".to_string(), "http://www.w3.org/2001/XMLSchema#".to_string())]);
+        let restricted = parse_data_range("xsd:integer[>= 0][<= 10]", &ns).expect("facets");
+        match restricted {
+            DataRange::DatatypeRestriction(_, facets) => assert_eq!(facets.len(), 2),
+            other => panic!("expected DatatypeRestriction, got {other:?}"),
+        }
+        let one_of = parse_data_range("{\"a\", \"b\"}", &ns).expect("oneOf");
+        assert!(matches!(one_of, DataRange::DataOneOf(_)));
+        let complement = parse_data_range("not xsd:string", &ns).expect("not");
+        assert!(matches!(complement, DataRange::DataComplementOf(_)));
     }
 }

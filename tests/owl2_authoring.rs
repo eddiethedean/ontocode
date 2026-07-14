@@ -2,8 +2,8 @@
 
 use ontocore::Workspace;
 use ontocore_catalog::IndexBuilder;
-use ontocore_owl::{apply_patches, apply_patches_to_text, apply_xml_patches_to_text, PatchOp};
 use ontocore_core::OntologyFormat;
+use ontocore_owl::{apply_patches, apply_patches_to_text, apply_xml_patches_to_text, PatchOp};
 use std::collections::BTreeMap;
 use std::path::PathBuf;
 
@@ -38,6 +38,29 @@ fn owl2_keys_fixture_indexes_haskey_and_inverse() {
     assert!(ws.catalog().find_entity("http://example.org/keys#hasParent").is_some());
     assert!(ws.catalog().find_entity("http://example.org/keys#hasChild").is_some());
     assert!(ws.catalog().find_entity("http://example.org/keys#Sex").is_some());
+
+    let person =
+        ws.catalog().entity_detail("http://example.org/keys#Person").expect("Person detail");
+    assert!(
+        person.axioms.iter().any(|a| a.kind == "has_key"),
+        "Person must list HasKey on EntityDetail, axioms={:?}",
+        person.axioms
+    );
+    let sex = ws.catalog().entity_detail("http://example.org/keys#Sex").expect("Sex");
+    assert!(
+        sex.axioms.iter().any(|a| a.kind == "disjoint_union"),
+        "Sex must list DisjointUnion, axioms={:?}",
+        sex.axioms
+    );
+    let has_parent =
+        ws.catalog().entity_detail("http://example.org/keys#hasParent").expect("hasParent");
+    assert!(
+        has_parent.axioms.iter().any(|a| a.kind == "inverse_object_properties"
+            && a.other_iri.as_deref() == Some("http://example.org/keys#hasChild")),
+        "hasParent must list InverseObjectProperties, axioms={:?}",
+        has_parent.axioms
+    );
+
     // Round-trip: patch a second key property onto Person and confirm write-back.
     let tmp = tempfile::tempdir().expect("tempdir");
     let path = tmp.path().join("owl2-keys.ttl");
@@ -63,19 +86,20 @@ fn owl2_keys_fixture_indexes_haskey_and_inverse() {
 fn owl2_abox_fixture_indexes_sameas_and_negative() {
     let dir = roundtrip_dir();
     let ws = Workspace::open(&dir).expect("open workspace");
-    let alice = ws
-        .catalog()
-        .entity_detail("http://example.org/abox#alice")
-        .expect("alice");
+    let alice = ws.catalog().entity_detail("http://example.org/abox#alice").expect("alice");
     assert!(
-        alice.axioms.iter().any(|a| {
-            a.kind.contains("same")
-                || a.display.contains("sameAs")
-                || a.display.contains("ally")
-                || a.kind.contains("negative")
-                || a.display.contains("knows")
-        }) || ws.catalog().find_entity("http://example.org/abox#ally").is_some(),
-        "expected sameAs / negative coverage, axioms={:?}",
+        alice.axioms.iter().any(|a| a.kind == "same_individual"),
+        "alice must list SameIndividual, axioms={:?}",
+        alice.axioms
+    );
+    assert!(
+        alice.axioms.iter().any(|a| a.kind == "different_individuals"),
+        "alice must list DifferentIndividuals, axioms={:?}",
+        alice.axioms
+    );
+    assert!(
+        alice.axioms.iter().any(|a| a.kind == "negative_object_property_assertion"),
+        "alice must list NegativeOPA, axioms={:?}",
         alice.axioms
     );
 }
@@ -90,10 +114,7 @@ fn owl2_turtle_patch_add_has_key_and_same_individual() {
     let has_parent = "http://example.org/keys#hasParent";
     let preview = apply_patches_to_text(
         &std::fs::read_to_string(&path).expect("read"),
-        &[PatchOp::AddHasKey {
-            class_iri: person.into(),
-            properties: vec![has_parent.into()],
-        }],
+        &[PatchOp::AddHasKey { class_iri: person.into(), properties: vec![has_parent.into()] }],
         true,
         &keys_ns(),
     )
@@ -106,10 +127,7 @@ fn owl2_turtle_patch_add_has_key_and_same_individual() {
 
     apply_patches(
         &path,
-        &[PatchOp::AddHasKey {
-            class_iri: person.into(),
-            properties: vec![has_parent.into()],
-        }],
+        &[PatchOp::AddHasKey { class_iri: person.into(), properties: vec![has_parent.into()] }],
         false,
         &keys_ns(),
     )
@@ -138,9 +156,7 @@ fn owl2_turtle_patch_abox_negative_and_same() {
     apply_patches(
         &path,
         &[
-            PatchOp::AddSameIndividual {
-                individuals: vec![alice.into(), carol.into()],
-            },
+            PatchOp::AddSameIndividual { individuals: vec![alice.into(), carol.into()] },
             PatchOp::AddNegativeObjectPropertyAssertion {
                 entity_iri: alice.into(),
                 property_iri: knows.into(),
@@ -201,10 +217,7 @@ fn owl2_xml_mutate_supports_domain_characteristic_and_rejects_prefix() {
     let err = apply_xml_patches_to_text(
         rdf,
         OntologyFormat::RdfXml,
-        &[PatchOp::AddPrefix {
-            prefix: "ex".into(),
-            namespace_iri: "http://example.org/".into(),
-        }],
+        &[PatchOp::AddPrefix { prefix: "ex".into(), namespace_iri: "http://example.org/".into() }],
         true,
         &ns,
     );

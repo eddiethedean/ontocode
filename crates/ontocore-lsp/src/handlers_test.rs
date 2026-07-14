@@ -637,6 +637,38 @@ fn create_ontology_rejects_adversarial_iri() {
 }
 
 #[test]
+#[cfg(unix)]
+fn create_ontology_rejects_dangling_leaf_symlink() {
+    let dir = tempfile::tempdir().unwrap();
+    let outside = tempfile::tempdir().unwrap();
+    let state = ServerState::new();
+    state.set_workspace_roots(vec![dir.path().to_path_buf()]).expect("set workspace");
+    let path = dir.path().join("new.ttl");
+    let outside_target = outside.path().join("pwn.ttl");
+    std::os::unix::fs::symlink(&outside_target, &path).unwrap();
+
+    let err = handle_create_ontology(
+        &state,
+        CreateOntologyParams {
+            path: path.display().to_string(),
+            ontology_iri: "http://example.org/ont".into(),
+            version_iri: None,
+            format: Some("ttl".into()),
+            prefixes: None,
+        },
+    )
+    .expect_err("dangling leaf symlink must be rejected");
+    assert!(
+        err.message.contains("dangling symlink")
+            || err.message.contains("symlink")
+            || err.message.contains("outside"),
+        "unexpected error: {}",
+        err.message
+    );
+    assert!(!outside_target.exists(), "must not create outside the workspace");
+}
+
+#[test]
 fn create_ontology_rejects_unsafe_prefix_iri() {
     let dir = tempfile::tempdir().unwrap();
     let state = ServerState::new();

@@ -1,6 +1,6 @@
 # Supported ontology formats
 
-> **Latest tagged release: v0.21.0** — canonical capability matrix: [What ships today](SHIPPED.md).
+> **Latest tagged release: v0.22.0** — canonical capability matrix: [What ships today](SHIPPED.md).
 
 This page is the canonical reference for **what OntoCode/OntoCore can do with each file format** today.
 
@@ -38,6 +38,7 @@ JSON-LD and line-oriented RDF still lack write-back adapters.
 See also:
 
 - [First success tutorial](guides/first-success.md)
+- [Capabilities by format](guides/capabilities-by-format.md)
 - [Authoring guide](authoring.md)
 - [OBO authoring](ontocode/obo-authoring.md)
 - [OWL/XML workflow](guides/owl-xml-workflow.md)

@@ -7,7 +7,7 @@ Semantic ontology diff for [OntoCore](https://github.com/eddiethedean/ontocode) 
 ## Install
 
 ```toml
-ontocore-diff = "0.21"
+ontocore-diff = "0.22"
 ```
 
 ## Quick example

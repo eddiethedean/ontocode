@@ -47,6 +47,13 @@ export function EntityInspectorPanel(_props?: WorkspaceProps): JSX.Element {
   const [rangePick, setRangePick] = useState("");
   const [annotationPredicate, setAnnotationPredicate] = useState("");
   const [annotationValue, setAnnotationValue] = useState("");
+  const [hasKeyProps, setHasKeyProps] = useState("");
+  const [disjointUnionMembers, setDisjointUnionMembers] = useState("");
+  const [inverseIri, setInverseIri] = useState("");
+  const [sameIndividuals, setSameIndividuals] = useState("");
+  const [differentIndividuals, setDifferentIndividuals] = useState("");
+  const [negPropIri, setNegPropIri] = useState("");
+  const [negTargetIri, setNegTargetIri] = useState("");
   const [oboName, setOboName] = useState("");
   const [oboSynonym, setOboSynonym] = useState("");
   const [oboDef, setOboDef] = useState("");
@@ -64,6 +71,13 @@ export function EntityInspectorPanel(_props?: WorkspaceProps): JSX.Element {
     setRangePick("");
     setAnnotationPredicate("");
     setAnnotationValue("");
+    setHasKeyProps("");
+    setDisjointUnionMembers("");
+    setInverseIri("");
+    setSameIndividuals("");
+    setDifferentIndividuals("");
+    setNegPropIri("");
+    setNegTargetIri("");
     setOboName("");
     setOboSynonym("");
     setOboDef("");
@@ -185,8 +199,147 @@ export function EntityInspectorPanel(_props?: WorkspaceProps): JSX.Element {
         return "Object property assertions";
       case "data_property_assertion":
         return "Data property assertions";
+      case "has_key":
+        return "HasKey";
+      case "disjoint_union":
+        return "DisjointUnion";
+      case "inverse_object_properties":
+        return "Inverse object properties";
+      case "equivalent_object_properties":
+        return "Equivalent object properties";
+      case "disjoint_object_properties":
+        return "Disjoint object properties";
+      case "equivalent_data_properties":
+        return "Equivalent data properties";
+      case "disjoint_data_properties":
+        return "Disjoint data properties";
+      case "sub_object_property_of":
+        return "SubObjectPropertyOf";
+      case "sub_data_property_of":
+        return "SubDataPropertyOf";
+      case "negative_object_property_assertion":
+        return "Negative object property assertions";
+      case "negative_data_property_assertion":
+        return "Negative data property assertions";
+      case "same_individual":
+        return "Same individuals";
+      case "different_individuals":
+        return "Different individuals";
+      case "datatype_definition":
+        return "Datatype definitions";
       default:
         return kind;
+    }
+  };
+
+  const axiomOpForKind = (kind: string): string | null => {
+    switch (kind) {
+      case "sub_class_of":
+        return "sub_class_of";
+      case "disjoint_class":
+        return "disjoint_with";
+      case "equivalent_class":
+        return "equivalent_class";
+      case "domain":
+        return "domain";
+      case "range":
+        return "range";
+      case "sub_object_property_of":
+        return "sub_object_property_of";
+      case "sub_data_property_of":
+        return "sub_data_property_of";
+      case "inverse_object_properties":
+        return "inverse_object_properties";
+      case "equivalent_object_properties":
+        return "equivalent_property";
+      case "disjoint_object_properties":
+        return "property_disjoint_with";
+      case "equivalent_data_properties":
+        return "equivalent_property";
+      case "disjoint_data_properties":
+        return "property_disjoint_with";
+      case "same_individual":
+        return "same_individual";
+      case "different_individuals":
+        return "different_individuals";
+      default:
+        return null;
+    }
+  };
+
+  const removePatchForAxiom = (a: (typeof axioms)[number]): PatchOp[] | null => {
+    switch (a.kind) {
+      case "has_key":
+        return [
+          {
+            op: "remove_has_key",
+            class_iri: entity.iri,
+            properties: a.properties ?? [],
+          },
+        ];
+      case "disjoint_union":
+        return [
+          {
+            op: "remove_disjoint_union",
+            class_iri: entity.iri,
+            members: a.properties ?? [],
+          },
+        ];
+      case "inverse_object_properties":
+        if (!a.other_iri) return null;
+        return [
+          {
+            op: "remove_inverse_object_properties",
+            property_iri: entity.iri,
+            inverse_iri: a.other_iri,
+          },
+        ];
+      case "same_individual":
+        if (!a.other_iri) return null;
+        return [
+          {
+            op: "remove_same_individual",
+            individuals: [entity.iri, a.other_iri],
+          },
+        ];
+      case "different_individuals":
+        if (!a.other_iri) return null;
+        return [
+          {
+            op: "remove_different_individuals",
+            individuals: [entity.iri, a.other_iri],
+          },
+        ];
+      case "negative_object_property_assertion":
+        if (!a.other_iri || !a.predicate) return null;
+        return [
+          {
+            op: "remove_negative_object_property_assertion",
+            entity_iri: entity.iri,
+            property_iri: a.predicate,
+            target_iri: a.other_iri,
+          },
+        ];
+      case "negative_data_property_assertion":
+        if (!a.predicate || !a.manchester) return null;
+        return [
+          {
+            op: "remove_negative_data_property_assertion",
+            entity_iri: entity.iri,
+            property_iri: a.predicate,
+            value: a.manchester,
+          },
+        ];
+      case "datatype_definition":
+        return [
+          {
+            op: "remove_datatype_definition",
+            datatype_iri: entity.iri,
+            manchester: a.manchester ?? a.display.replace(/^DatatypeDefinition\s+/, ""),
+          },
+        ];
+      default:
+        return null;
     }
   };
   const parentOptions = classOptions.filter((c) => c !== entity.iri);
@@ -299,14 +452,55 @@ export function EntityInspectorPanel(_props?: WorkspaceProps): JSX.Element {
               <div key={kind} className="oc-section oc-section--nested">
                 <h3>{kindTitle(kind)}</h3>
                 <ul className="oc-axiom-list">
-                  {items.map((a, idx) => (
+                  {items.map((a, idx) => {
+                    const removePatches = editable ? removePatchForAxiom(a) : null;
+                    const axiomOp = axiomOpForKind(a.kind);
+                    return (
                     <li key={`${kind}-${idx}`} className="oc-axiom-item">
                       <InlineCode>{a.display}</InlineCode>
+                      {a.annotations && a.annotations.length > 0 ? (
+                        <ul className="oc-axiom-list oc-axiom-annos">
+                          {a.annotations.map((ann, annIdx) => (
+                            <li key={`ann-${idx}-${annIdx}`} className="oc-axiom-item">
+                              <InlineCode>
+                                {shortLabel(ann.predicate)} → {ann.value}
+                              </InlineCode>
+                              {editable && axiomOp && ann.editable ? (
+                                <button
+                                  type="button"
+                                  className="secondary"
+                                  onClick={() =>
+                                    apply(
+                                      [
+                                        {
+                                          op: "remove_axiom_annotation",
+                                          axiom_op: axiomOp,
+                                          subject_iri: entity.iri,
+                                          related_iri:
+                                            a.other_iri ?? a.parent_iri ?? undefined,
+                                          predicate: ann.predicate,
+                                          value: ann.value,
+                                        },
+                                      ],
+                                      false
+                                    )
+                                  }
+                                >
+                                  Remove annotation
+                                </button>
+                              ) : null}
+                            </li>
+                          ))}
+                        </ul>
+                      ) : null}
                       {editable &&
                       isTurtle &&
                       entity.kind === "class" &&
                       a.editable &&
-                      kind !== "property_chain" ? (
+                      kind !== "property_chain" &&
+                      (kind === "sub_class_of" ||
+                        kind === "equivalent_class" ||
+                        kind === "disjoint_class") ? (
                         <button
                           type="button"
                           className="secondary"
@@ -351,8 +545,18 @@ export function EntityInspectorPanel(_props?: WorkspaceProps): JSX.Element {
                           Remove
                         </button>
                       ) : null}
+                      {editable && removePatches && a.editable ? (
+                        <button
+                          type="button"
+                          className="secondary"
+                          onClick={() => apply(removePatches, false)}
+                        >
+                          Remove
+                        </button>
+                      ) : null}
                     </li>
-                  ))}
+                    );
+                  })}
                 </ul>
               </div>
             ))}
@@ -828,6 +1032,300 @@ export function EntityInspectorPanel(_props?: WorkspaceProps): JSX.Element {
               />
             ) : null}
 
+            {entity.kind === "class" ? (
+              <>
+                <FormField label="HasKey properties (IRI list, space/comma-separated)">
+                  <Input
+                    value={hasKeyProps}
+                    onChange={(e) => setHasKeyProps(e.target.value)}
+                    placeholder="http://ex#p1 http://ex#p2"
+                  />
+                </FormField>
+                <PreviewApplyBar
+                  preview={editPreview}
+                  disabled={!hasKeyProps.trim()}
+                  onPreview={() => {
+                    const properties = splitIris(hasKeyProps);
+                    if (properties.length === 0) return;
+                    apply(
+                      [{ op: "add_has_key", class_iri: entity.iri, properties }],
+                      true
+                    );
+                  }}
+                  onApply={() => {
+                    const properties = splitIris(hasKeyProps);
+                    if (properties.length === 0) return;
+                    apply(
+                      [{ op: "add_has_key", class_iri: entity.iri, properties }],
+                      false
+                    );
+                  }}
+                />
+                <ButtonBar>
+                  <button
+                    type="button"
+                    className="secondary"
+                    disabled={!hasKeyProps.trim()}
+                    onClick={() => {
+                      const properties = splitIris(hasKeyProps);
+                      if (properties.length === 0) return;
+                      apply(
+                        [{ op: "remove_has_key", class_iri: entity.iri, properties }],
+                        false
+                      );
+                    }}
+                  >
+                    Remove HasKey
+                  </button>
+                </ButtonBar>
+                <FormField label="Disjoint union members (IRI list)">
+                  <Input
+                    value={disjointUnionMembers}
+                    onChange={(e) => setDisjointUnionMembers(e.target.value)}
+                    placeholder="http://ex#A http://ex#B"
+                  />
+                </FormField>
+                <PreviewApplyBar
+                  preview={editPreview}
+                  disabled={!disjointUnionMembers.trim()}
+                  onPreview={() => {
+                    const members = splitIris(disjointUnionMembers);
+                    if (members.length === 0) return;
+                    apply(
+                      [{ op: "add_disjoint_union", class_iri: entity.iri, members }],
+                      true
+                    );
+                  }}
+                  onApply={() => {
+                    const members = splitIris(disjointUnionMembers);
+                    if (members.length === 0) return;
+                    apply(
+                      [{ op: "add_disjoint_union", class_iri: entity.iri, members }],
+                      false
+                    );
+                  }}
+                />
+                <ButtonBar>
+                  <button
+                    type="button"
+                    className="secondary"
+                    disabled={!disjointUnionMembers.trim()}
+                    onClick={() => {
+                      const members = splitIris(disjointUnionMembers);
+                      if (members.length === 0) return;
+                      apply(
+                        [
+                          {
+                            op: "remove_disjoint_union",
+                            class_iri: entity.iri,
+                            members,
+                          },
+                        ],
+                        false
+                      );
+                    }}
+                  >
+                    Remove disjoint union
+                  </button>
+                </ButtonBar>
+              </>
+            ) : null}
+
+            {entity.kind === "object_property" ? (
+              <>
+                <FormField label="Inverse property IRI">
+                  <Input
+                    value={inverseIri}
+                    onChange={(e) => setInverseIri(e.target.value)}
+                    placeholder="http://ex#inverseOf"
+                  />
+                </FormField>
+                <PreviewApplyBar
+                  preview={editPreview}
+                  disabled={!inverseIri.trim()}
+                  onPreview={() => {
+                    if (!inverseIri.trim()) return;
+                    apply(
+                      [
+                        {
+                          op: "add_inverse_object_properties",
+                          property_iri: entity.iri,
+                          inverse_iri: inverseIri.trim(),
+                        },
+                      ],
+                      true
+                    );
+                  }}
+                  onApply={() => {
+                    if (!inverseIri.trim()) return;
+                    apply(
+                      [
+                        {
+                          op: "add_inverse_object_properties",
+                          property_iri: entity.iri,
+                          inverse_iri: inverseIri.trim(),
+                        },
+                      ],
+                      false
+                    );
+                  }}
+                />
+                <ButtonBar>
+                  <button
+                    type="button"
+                    className="secondary"
+                    disabled={!inverseIri.trim()}
+                    onClick={() => {
+                      if (!inverseIri.trim()) return;
+                      apply(
+                        [
+                          {
+                            op: "remove_inverse_object_properties",
+                            property_iri: entity.iri,
+                            inverse_iri: inverseIri.trim(),
+                          },
+                        ],
+                        false
+                      );
+                    }}
+                  >
+                    Remove inverse
+                  </button>
+                </ButtonBar>
+              </>
+            ) : null}
+
+            {entity.kind === "individual" ? (
+              <>
+                <FormField label="Same individuals (IRI list)">
+                  <Input
+                    value={sameIndividuals}
+                    onChange={(e) => setSameIndividuals(e.target.value)}
+                    placeholder="http://ex#alice http://ex#ally"
+                  />
+                </FormField>
+                <PreviewApplyBar
+                  preview={editPreview}
+                  disabled={!sameIndividuals.trim()}
+                  onPreview={() => {
+                    const others = splitIris(sameIndividuals);
+                    if (others.length === 0) return;
+                    apply(
+                      [
+                        {
+                          op: "add_same_individual",
+                          individuals: [entity.iri, ...others],
+                        },
+                      ],
+                      true
+                    );
+                  }}
+                  onApply={() => {
+                    const others = splitIris(sameIndividuals);
+                    if (others.length === 0) return;
+                    apply(
+                      [
+                        {
+                          op: "add_same_individual",
+                          individuals: [entity.iri, ...others],
+                        },
+                      ],
+                      false
+                    );
+                  }}
+                />
+                <FormField label="Different individuals (IRI list)">
+                  <Input
+                    value={differentIndividuals}
+                    onChange={(e) => setDifferentIndividuals(e.target.value)}
+                    placeholder="http://ex#bob http://ex#carol"
+                  />
+                </FormField>
+                <PreviewApplyBar
+                  preview={editPreview}
+                  disabled={!differentIndividuals.trim()}
+                  onPreview={() => {
+                    const others = splitIris(differentIndividuals);
+                    if (others.length === 0) return;
+                    apply(
+                      [
+                        {
+                          op: "add_different_individuals",
+                          individuals: [entity.iri, ...others],
+                        },
+                      ],
+                      true
+                    );
+                  }}
+                  onApply={() => {
+                    const others = splitIris(differentIndividuals);
+                    if (others.length === 0) return;
+                    apply(
+                      [
+                        {
+                          op: "add_different_individuals",
+                          individuals: [entity.iri, ...others],
+                        },
+                      ],
+                      false
+                    );
+                  }}
+                />
+                <FormField label="Negative object property">
+                  <Select
+                    value={negPropIri}
+                    onChange={(e) => setNegPropIri(e.target.value)}
+                  >
+                    <option value="">—</option>
+                    {objectPropertyOptions.map((p) => (
+                      <option key={p} value={p}>
+                        {shortLabel(p)}
+                      </option>
+                    ))}
+                  </Select>
+                </FormField>
+                <FormField label="Negative assertion target IRI">
+                  <Input
+                    value={negTargetIri}
+                    onChange={(e) => setNegTargetIri(e.target.value)}
+                    placeholder="http://ex#target"
+                  />
+                </FormField>
+                <PreviewApplyBar
+                  preview={editPreview}
+                  disabled={!negPropIri || !negTargetIri.trim()}
+                  onPreview={() => {
+                    if (!negPropIri || !negTargetIri.trim()) return;
+                    apply(
+                      [
+                        {
+                          op: "add_negative_object_property_assertion",
+                          entity_iri: entity.iri,
+                          property_iri: negPropIri,
+                          target_iri: negTargetIri.trim(),
+                        },
+                      ],
+                      true
+                    );
+                  }}
+                  onApply={() => {
+                    if (!negPropIri || !negTargetIri.trim()) return;
+                    apply(
+                      [
+                        {
+                          op: "add_negative_object_property_assertion",
+                          entity_iri: entity.iri,
+                          property_iri: negPropIri,
+                          target_iri: negTargetIri.trim(),
+                        },
+                      ],
+                      false
+                    );
+                  }}
+                />
+              </>
+            ) : null}
+
             <ButtonBar>
               <button
                 type="button"
@@ -905,4 +1403,11 @@ export function EntityInspectorPanel(_props?: WorkspaceProps): JSX.Element {
       </StickyActions>
     </Panel>
   );
+}
+
+function splitIris(raw: string): string[] {
+  return raw
+    .split(/[\s,]+/)
+    .map((s) => s.trim())
+    .filter(Boolean);
 }

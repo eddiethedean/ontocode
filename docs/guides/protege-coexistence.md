@@ -1,10 +1,10 @@
 # Protégé coexistence
 
-Guide for teams using Protégé today and evaluating OntoCode **v0.21**. A [first-week migration guide](protege-migration.md) ships today. RDF/XML and OWL/XML write-back **shipped in v0.21** (semantic re-serialize, not byte-identical) — see [OWL/XML write-back](owl-xml-workflow.md) and [roadmap](../roadmap.md).
+Guide for teams using Protégé today and evaluating OntoCode **v0.22**. A [first-week migration guide](protege-migration.md) ships today. RDF/XML and OWL/XML write-back **shipped in v0.21** (semantic re-serialize, not byte-identical); v0.22 completes OWL 2 authoring depth — see [OWL/XML write-back](owl-xml-workflow.md), [What ships today](../SHIPPED.md), and [roadmap](../roadmap.md).
 
-Canonical capability matrix: [What ships today](../SHIPPED.md). Decision matrix: [Protégé vs OntoCode](protege-decision.md). Gap analysis: [Protégé parity matrix](../design/PROTEGE_PARITY.md).
+Canonical capability matrix: [What ships today](../SHIPPED.md). Decision matrix: [Protégé vs OntoCode](protege-decision.md). Gap analysis for adopters: [Known limitations](../known-limitations.md).
 
-## Use OntoCode for (v0.21)
+## Use OntoCode for (v0.22)
 
 | Workflow | Status |
 |----------|--------|
@@ -30,7 +30,7 @@ Canonical capability matrix: [What ships today](../SHIPPED.md). Decision matrix:
 
 | Workflow | Why |
 |----------|-----|
-| Full OWL 2 DL axiom catalog for all formats | Partial Manchester + patches — see [Protégé parity](../design/PROTEGE_PARITY.md) |
+| Full OWL 2 DL axiom catalog for all formats | Partial Manchester + patches — see [SHIPPED](../SHIPPED.md) and [known limitations](../known-limitations.md) |
 | Byte-identical OWL/XML or RDF/XML layout | OntoCode re-serializes for semantic fidelity ([ADR-0021](../design/adr/0021-deterministic-xml-serializers.md)) |
 | Workflows that depend on Protégé-specific plugins | Not replicated in OntoCode |
 

@@ -48,6 +48,51 @@ if ! grep -F -- "--version ${TAGGED_VERSION}" docs/getting-started.md >/dev/null
 else
   echo "ok: getting-started install pin"
 fi
+if ! grep -F -- "--version ${TAGGED_VERSION}" docs/install.md >/dev/null; then
+  echo "FAIL: install.md public pin — expected --version ${TAGGED_VERSION}" >&2
+  fail=1
+else
+  echo "ok: install.md public pin"
+fi
+check_file_contains "docs/install.md" "Canonical install page" "install.md canonical banner"
+
+# Adoption-audit guards: stale current-release / contradictory write-back claims
+if ! grep -qE "^\*\*Current release:\*\* v${TAGGED_VERSION}$" ROADMAP.md; then
+  echo "FAIL: ROADMAP.md Current release must be v${TAGGED_VERSION}" >&2
+  fail=1
+else
+  echo "ok: ROADMAP.md Current release"
+fi
+if ! grep -qE "^\*\*Current release:\*\* v${TAGGED_VERSION}$" docs/roadmap.md; then
+  echo "FAIL: docs/roadmap.md Current release must be v${TAGGED_VERSION}" >&2
+  fail=1
+else
+  echo "ok: docs/roadmap.md Current release"
+fi
+if grep -qE '\.owl.*/.*Read-only|Read-only \| Not supported' docs/guides/obo-workflow.md 2>/dev/null; then
+  echo "FAIL: docs/guides/obo-workflow.md still claims XML inspector/patch read-only" >&2
+  fail=1
+else
+  echo "ok: obo-workflow write-back table"
+fi
+if grep -qE 'v0\.22\.0\*\* ships RDF/XML and OWL/XML write-back|v0\.22\.0 ships RDF/XML and OWL/XML write-back' README.md 2>/dev/null; then
+  echo "FAIL: README misattributes XML write-back to v0.22 (ships in v0.21)" >&2
+  fail=1
+else
+  echo "ok: README XML write-back attribution"
+fi
+if ! grep -q 'semantic re-serialize' docs/guides/obo-workflow.md; then
+  echo "FAIL: docs/guides/obo-workflow.md should mention semantic re-serialize for XML" >&2
+  fail=1
+else
+  echo "ok: obo-workflow XML re-serialize note"
+fi
+if [[ ! -f docs/guides/capabilities-by-format.md ]]; then
+  echo "FAIL: missing docs/guides/capabilities-by-format.md" >&2
+  fail=1
+else
+  echo "ok: capabilities-by-format.md exists"
+fi
 check_file_contains "docs/index.md" "Latest tagged v${TAGGED_VERSION}" "docs index hero tagged version"
 check_file_contains "extension/README.md" "v${VERSION}" "extension README version"
 check_file_contains "extension/package.json" "\"version\": \"${VERSION}\"" "extension package.json version"
@@ -477,7 +522,9 @@ check_file_contains "mkdocs.yml" "guides/protege-migration.md" "mkdocs Protégé
 check_file_contains "mkdocs.yml" "ontocode/feature-tour.md" "mkdocs feature tour"
 check_file_contains "mkdocs.yml" "guides/plugins.md" "mkdocs plugins guide"
 check_file_contains "mkdocs.yml" "guides/docs-export.md" "mkdocs docs export guide"
-check_file_contains "mkdocs.yml" "guides/which-artifact.md" "mkdocs which-artifact in Get started"
+check_file_contains "mkdocs.yml" "guides/which-artifact.md" "mkdocs which-artifact guide"
+check_file_contains "mkdocs.yml" "install.md" "mkdocs canonical Install page"
+check_file_contains "mkdocs.yml" "guides/capabilities-by-format.md" "mkdocs capabilities-by-format"
 check_file_contains "mkdocs.yml" "documentation-index.md" "mkdocs documentation index in Get started"
 check_file_contains "mkdocs.yml" "guides/plugins.md" "mkdocs plugins guide in Contribute"
 check_file_contains "mkdocs.yml" "known-limitations.md" "mkdocs known limitations"

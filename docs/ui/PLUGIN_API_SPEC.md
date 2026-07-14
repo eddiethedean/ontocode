@@ -1,6 +1,10 @@
 # Plugin API Specification
 
-> **Document type:** Product design specification (target state). **Not a shipped feature list.** See [ROADMAP_MAPPING.md](ROADMAP_MAPPING.md) for release mapping and [SHIPPED.md](../SHIPPED.md) for what works today.
+> **Document type:** Product design specification (target state). **Not a shipped feature list.**
+>
+> **Do not implement from this page.** For the shipping VS Code / CLI plugin host, use **[Plugin authoring](../guides/plugins.md)** only.
+>
+> See [ROADMAP_MAPPING.md](ROADMAP_MAPPING.md) for release mapping and [SHIPPED.md](../SHIPPED.md) for what works today.
 
 
 ## 1. Purpose

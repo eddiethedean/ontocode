@@ -124,17 +124,34 @@ requirements:
     area: OWL2
     title: Complete OWL2 authoring
     priority: P0
-    status: PARTIAL
+    status: COMPLETE
     owner: null
     source_files:
       - crates/ontocore-owl/src/patch.rs
       - crates/ontocore-owl/src/manchester.rs
-    test_ids: []
-    acceptance_criteria: []
+      - crates/ontocore-owl/src/mutate.rs
+      - crates/ontocore-edit/src/invert.rs
+      - extension/webview-ui/src/panels/EntityInspector.tsx
+    test_ids:
+      - tests/owl2_authoring.rs
+      - owl2_turtle_patch_add_has_key_and_same_individual
+      - owl2_turtle_patch_abox_negative_and_same
+      - owl2_xml_mutate_supports_domain_characteristic_and_rejects_prefix
+      - owl2_keys_fixture_indexes_haskey_and_inverse
+      - owl2_abox_fixture_indexes_sameas_and_negative
+    acceptance_criteria:
+      - HasKey DisjointUnion inverse equiv/disjoint properties sub-properties authored on Turtle
+      - Negatives Same/DifferentIndividual datatype defs axiom annotations authored on Turtle
+      - Manchester not value Self OneOf data restrictions parse
+      - XML mutate covers expanded PatchOp set
+      - Inspector UI for new families
     github_issue: https://github.com/eddiethedean/ontocode/issues/248
     documentation:
       - docs/protege-parity/06_SUBSYSTEMS/OWL2_AUTHORING.md
-    notes: Target v0.22
+      - docs/protege-parity/06_SUBSYSTEMS/OWL2_AUTHORING_GAPS.md
+      - docs/migration/v0.22.md
+      - docs/patch-reference.md
+    notes: Implemented v0.22
   - id: PAR-WS-001
     area: Workspace
     title: Persistent workspace semantics

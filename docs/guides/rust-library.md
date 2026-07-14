@@ -4,10 +4,10 @@ Embed **OntoCore** in tools, pipelines, or custom CLIs via the [`ontocore`](http
 
 > OntoCore (previously branded **OntoIndex** / `ontoindex-*`) is implemented by the `ontocore-*` crates. See [v0.9 migration](../migration/v0.9.md).
 
-Pre-1.0: public APIs may change between minor releases until v1.0. Pin minors in production. Crates are at **0.21.x**.
+Pre-1.0: public APIs may change between minor releases until v1.0. Pin minors in production. Crates are at **0.22.x**.
 
 !!! tip "Prefer `Workspace`"
-    For new code, use the **`Workspace` API** (`ontocore = "0.21"`). Lower-level `IndexBuilder` remains available for specialized pipelines — see [Rust API](../ontocore/rust-api.md).
+    For new code, use the **`Workspace` API** (`ontocore = "0.22"`). Lower-level `IndexBuilder` remains available for specialized pipelines — see [Rust API](../ontocore/rust-api.md).
 
 ## crates.io first (5 minutes)
 
@@ -16,7 +16,7 @@ Pre-1.0: public APIs may change between minor releases until v1.0. Pin minors in
 
 ```toml
 [dependencies]
-ontocore = "0.21"
+ontocore = "0.22"
 ```
 
 3. Point `Workspace::open` at **your** ontology directory (any folder of `.ttl` / `.obo` / other indexed formats):
@@ -46,14 +46,14 @@ Method-level params / returns / side effects: [Rust API — Workspace methods](.
 
 ```toml
 [dependencies]
-ontocore = "0.21"
+ontocore = "0.22"
 ```
 
 **Classify + explain** (same crate — reasoner is included):
 
 ```toml
 [dependencies]
-ontocore = "0.21"
+ontocore = "0.22"
 ```
 
 ```rust
@@ -68,7 +68,7 @@ let result = ws.classify(ReasonerId::El)?;
 
 ```toml
 [dependencies]
-ontocore = "0.21"
+ontocore = "0.22"
 ontocore-edit = "0.21"
 ontocore-owl = "0.21"
 ```

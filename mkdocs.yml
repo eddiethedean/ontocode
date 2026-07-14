@@ -86,6 +86,8 @@ plugins:
         guides/manchester-editor.md: ontocode/manchester-editor.md
         guides/graph-visualization.md: ontocode/graph-view.md
         guides/vscode-extension.md: ontocode/vscode-extension.md
+        # Legacy install entry points → canonical Install page
+        # (getting-started.md and vscode-install.md remain as detail pages)
 
 extra_css:
   - stylesheets/extra.css
@@ -116,13 +118,9 @@ nav:
   - Home: index.md
   - Get started:
       - "First success (~10 min)": guides/first-success.md
-      - Install VS Code: vscode-install.md
-      - Install CLI (optional): guides/install-cli.md
-      - "Install CLI & CI": getting-started.md
-      - CI with Linux tarball: ci-integration.md
+      - Install: install.md
       - Supported formats: supported-formats.md
       - Versions and channels: guides/versions-and-channels.md
-      - Which artifact?: guides/which-artifact.md
   - Use OntoCode:
       - Feature tour: ontocode/feature-tour.md
       - Overview: ontocode/vscode-extension.md
@@ -142,6 +140,7 @@ nav:
       - Interop:
           - OBO workflows: guides/obo-workflow.md
           - OWL/XML and RDF/XML write-back: guides/owl-xml-workflow.md
+          - Capabilities by format: guides/capabilities-by-format.md
           - Protégé coexistence: guides/protege-coexistence.md
           - Best practices: guides/best-practices.md
   - Use OntoCore:
@@ -186,19 +185,8 @@ nav:
       - What ships today: SHIPPED.md
       - Known limitations: known-limitations.md
       - Protégé vs OntoCode: guides/protege-decision.md
-      - Production readiness: guides/production-readiness.md
-      - Release timeline: guides/release-timeline.md
       - Enterprise evaluation: guides/enterprise-eval.md
-      - Enterprise deployment: guides/enterprise-deployment.md
-      - Performance and sizing: guides/performance-sizing.md
       - Procurement appendix: guides/procurement-appendix.md
-      - API stability (pre-1.0): guides/api-stability.md
-      - Security: security.md
-      - Direction:
-          - Vision: vision.md
-          - Architecture: architecture.md
-          - Roadmap hub: roadmap-hub.md
-          - Platform roadmap: roadmap.md
   - Help:
       - FAQ: faq.md
       - Glossary: glossary.md
@@ -206,10 +194,22 @@ nav:
       - Troubleshooting: troubleshooting.md
       - Support and contact: support.md
       - Migrating from Protégé: guides/protege-migration.md
+      - Protégé coexistence: guides/protege-coexistence.md
+      - Production readiness: guides/production-readiness.md
+      - Release timeline: guides/release-timeline.md
+      - Enterprise deployment: guides/enterprise-deployment.md
+      - Performance and sizing: guides/performance-sizing.md
+      - API stability (pre-1.0): guides/api-stability.md
+      - Security: security.md
+      - Install CLI & CI (detail): getting-started.md
+      - VS Code install (detail): vscode-install.md
+      - Install CLI (macOS/Windows): guides/install-cli.md
+      - Which artifact?: guides/which-artifact.md
       - Changelog: changelog.md
       - Migrations:
           - Migration index: migration/README.md
           - v0.20.0 → v0.21.0: migration/v0.21.md
+          - v0.21.0 → v0.22.0: migration/v0.22.md
           - v0.19.0 → v0.20.0: migration/v0.20.md
           - v0.18.2 → v0.19.0: migration/v0.19.md
           - v0.18.1 → v0.18.2: migration/v0.18.2.md
@@ -219,7 +219,6 @@ nav:
           - v0.15 → v0.16: migration/v0.16.md
           - v0.14 → v0.15: migration/v0.15.md
           - v0.13 → v0.14: migration/v0.14.md
-      - Which artifact?: guides/which-artifact.md
       - Legacy guide URLs: guides/legacy-guide-urls.md
       - Release integrity: release-integrity.md
   - Contribute:
@@ -233,9 +232,13 @@ nav:
       - Marketplace publish: marketplace-publish.md
       - Internals: internals.md
       - Documentation index: documentation-index.md
+      - Direction:
+          - Vision: vision.md
+          - Architecture: architecture.md
+          - Roadmap hub: roadmap-hub.md
+          - Platform roadmap: roadmap.md
       - Licenses: design/LICENSES.md
       - Engineering docs (GitHub): engineering.md
-
 extra:
   social:
     - icon: fontawesome/brands/github

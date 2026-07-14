@@ -3,6 +3,10 @@ import * as fs from "fs";
 import { downloadAndUnzipVSCode, runTests } from "@vscode/test-electron";
 
 async function main(): Promise<void> {
+  // Cursor/agent host shells often set ELECTRON_RUN_AS_NODE=1, which makes the
+  // VS Code Electron binary treat launchArgs (workspace folder) as a Node script.
+  delete process.env.ELECTRON_RUN_AS_NODE;
+
   const extensionRoot = path.resolve(__dirname, "..", "..");
   const extensionTestsPath = path.resolve(__dirname, "suite", "index");
   const fixturesPath =

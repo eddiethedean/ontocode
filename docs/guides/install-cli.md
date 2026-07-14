@@ -1,10 +1,10 @@
 # Install the OntoCore CLI (macOS and Windows)
 
-> **Most users never need this page.** The [OntoCode VS Code / Cursor extension](../vscode-install.md) bundles `ontocore-lsp`. Install the extension for IDE work and skip compiling the CLI unless you need `ontocore` for CI, scripting, or local validation outside the editor.
+> **Canonical install:** [Install](../install.md). **Most users never need this page.** The [OntoCode VS Code / Cursor extension](../vscode-install.md) bundles `ontocore-lsp`. Install the extension for IDE work and skip compiling the CLI unless you need `ontocore` for CI, scripting, or local validation outside the editor.
 
 Release CLI tarballs are **Linux x64 only** (`x86_64-unknown-linux-gnu`). On **macOS** and **Windows**, install from crates.io with Rust. On **Linux arm64** (and other non-x64 targets), there is no tarball — use `cargo install` below or the LSP bundled in the VSIX ([platform compatibility](platform-compatibility.md)).
 
-Canonical pin: **`0.21.0`** ([TAGGED_RELEASE](../TAGGED_RELEASE)). See also [Getting started](../getting-started.md) and [CI integration](../ci-integration.md) (Linux CI prefers the release tarball).
+Canonical pin: **`0.22.0`** ([TAGGED_RELEASE](../TAGGED_RELEASE)). See also [Getting started](../getting-started.md) and [CI integration](../ci-integration.md) (Linux CI prefers the release tarball).
 
 ## Prerequisites
 
@@ -35,7 +35,7 @@ xcode-select -p   # should print a Developer path
 ## Install
 
 ```bash
-cargo install ontocore-cli --locked --version 0.21.0
+cargo install ontocore-cli --locked --version 0.22.0
 ```
 
 Confirm:
@@ -72,7 +72,7 @@ ontocore query /path/to/your/ontologies "SELECT * FROM classes"
 | `ontocore: command not found` | Add `~/.cargo/bin` to `PATH`; open a new terminal |
 | Compile errors on Windows | Install MSVC Build Tools with the C++ desktop workload |
 | Compile errors on macOS | Re-run `xcode-select --install`; update Xcode CLT |
-| Wrong version after install | Re-run with `--version 0.21.0 --locked`; check `ontocore --version` |
+| Wrong version after install | Re-run with `--version 0.22.0 --locked`; check `ontocore --version` |
 | Slow installs | Expected on first cold build; subsequent upgrades are faster |
 
 ## Related

@@ -7,7 +7,7 @@ hide:
 <div class="oc-hero">
 
 <div class="oc-hero-badges">
-  <span class="oc-badge oc-badge--accent">Latest tagged v0.21.0</span>
+  <span class="oc-badge oc-badge--accent">Latest tagged v0.22.0</span>
   <span class="oc-badge">VS Code</span>
   <span class="oc-badge">CLI · LSP</span>
 </div>
@@ -22,15 +22,15 @@ Index and explore OWL/RDF/OBO, run queries, refactors, and reasoning — in VS C
 
 <p class="oc-hero-ctas">
   <a class="oc-hero-cta" href="guides/first-success/">First success (~10 min) →</a>
-  <a class="oc-hero-cta" href="getting-started/" style="margin-left:0.75rem">CLI / CI →</a>
+  <a class="oc-hero-cta" href="install/" style="margin-left:0.75rem">Install →</a>
 </p>
 
-<p class="oc-hero-subcta"><a href="SHIPPED/">What ships today</a> · <a href="guides/versions-and-channels/">Versions &amp; channels</a> · <a href="known-limitations/">Known limitations</a> · Latest tagged: <strong>v0.21.0</strong></p>
+<p class="oc-hero-subcta"><a href="SHIPPED/">What ships today</a> · <a href="guides/versions-and-channels/">Versions &amp; channels</a> · <a href="known-limitations/">Known limitations</a> · Latest tagged: <strong>v0.22.0</strong></p>
 
 <div class="oc-hero-links">
   <a href="ontocode/feature-tour/">Feature tour</a>
   <a href="glossary/">Glossary</a>
-  <a href="vscode-install/">Install extension</a>
+  <a href="install/">Install</a>
 </div>
 
 </div>
@@ -39,7 +39,7 @@ Index and explore OWL/RDF/OBO, run queries, refactors, and reasoning — in VS C
 
 **Primary path:** **[First success (~10 min)](guides/first-success.md)** — install the extension, open sample ontologies, browse and edit. No clone required.
 
-**Also:** [CLI / CI](getting-started.md) · [Install CLI (macOS/Windows)](guides/install-cli.md) · [Examples](examples/index.md) · [Known limitations](known-limitations.md) · [What ships today](SHIPPED.md) · [Feature tour](ontocode/feature-tour.md)
+**Also:** [Install](install.md) · [Examples](examples/index.md) · [Known limitations](known-limitations.md) · [What ships today](SHIPPED.md) · [Feature tour](ontocode/feature-tour.md)
 
 !!! warning "Editable formats"
     Entity Inspector write-back applies to **`.ttl`, `.obo`, `.owl`/`.rdf` (RDF/XML), and `.owx` (OWL/XML)**. XML is **semantic re-serialize** (not Protégé byte-identical). JSON-LD / TriG / N-Triples stay read-only — [Supported formats](supported-formats.md).
@@ -48,7 +48,7 @@ Index and explore OWL/RDF/OBO, run queries, refactors, and reasoning — in VS C
     Query Workbench SQL mode is **not** full SQL (no `JOIN` / `ORDER BY` / `LIMIT`). Prefer SPARQL for graph patterns — [SQL reference](sql-reference.md).
 
 !!! tip "CLI on macOS/Windows?"
-    Most IDE users never need the CLI — the extension bundles `ontocore-lsp`. If you need `ontocore` for CI or scripting, see [Install CLI](guides/install-cli.md).
+    Most IDE users never need the CLI — the extension bundles `ontocore-lsp`. If you need `ontocore` for CI or scripting, see [Install](install.md).
 
 > **Names:** **OntoCode** = VS Code extension. **OntoCore** = Rust engine (CLI + language server). **Ontologos** = external reasoner.
 
@@ -74,7 +74,7 @@ Index and explore OWL/RDF/OBO, run queries, refactors, and reasoning — in VS C
 
     `cargo install ontocore-cli`, embed `ontocore` / `ontocore-*` crates, validate and classify in CI.
 
-    [:octicons-arrow-right-24: Install CLI & CI](getting-started.md)
+    [:octicons-arrow-right-24: Install](install.md)
 
 -   :material-clipboard-check-outline:{ .lg .middle } **Evaluate adoption**
 
@@ -88,7 +88,7 @@ Index and explore OWL/RDF/OBO, run queries, refactors, and reasoning — in VS C
 
 ## What ships today
 
-**Latest tagged: v0.21.0.** Full capability matrix: **[What ships today](SHIPPED.md)**. For channel lag (Marketplace vs crates.io vs docs), see [Versions & channels](guides/versions-and-channels.md).
+**Latest tagged: v0.22.0.** Full capability matrix: **[What ships today](SHIPPED.md)**. For channel lag (Marketplace vs crates.io vs docs), see [Versions & channels](guides/versions-and-channels.md).
 
 ## Quick start
 
@@ -101,7 +101,7 @@ Index and explore OWL/RDF/OBO, run queries, refactors, and reasoning — in VS C
 
 === "CLI (Linux x64)"
 
-    Prefer the [release tarball](https://github.com/eddiethedean/ontocode/releases/tag/v0.21.0) — verify `SHA256SUMS`, then:
+    Prefer the [release tarball](https://github.com/eddiethedean/ontocode/releases/tag/v0.22.0) — verify `SHA256SUMS`, then:
 
     ```bash
     ontocore query /path/to/ontologies "SELECT * FROM classes"
@@ -113,7 +113,7 @@ Index and explore OWL/RDF/OBO, run queries, refactors, and reasoning — in VS C
     Requires Rust **1.88+**. Windows: [MSVC Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/). macOS: Xcode Command Line Tools (`xcode-select --install`). First compile: **15–30+ minutes**.
 
     ```bash
-    cargo install ontocore-cli --locked --version 0.21.0
+    cargo install ontocore-cli --locked --version 0.22.0
     ontocore query /path/to/ontologies "SELECT * FROM classes"
     ontocore validate /path/to/ontologies
     ```
@@ -134,7 +134,7 @@ Index and explore OWL/RDF/OBO, run queries, refactors, and reasoning — in VS C
 | Honest limits | [Known limitations](known-limitations.md) |
 | Capability matrix | [SHIPPED.md](SHIPPED.md) |
 | Protégé comparison | [Protégé vs OntoCode](guides/protege-decision.md) |
-| CLI / CI | [Install CLI & CI](getting-started.md) · [CI integration](ci-integration.md) |
+| CLI / CI | [Install](install.md) · [CI integration](ci-integration.md) |
 | Embed in Rust | [Rust library guide](guides/rust-library.md) |
 | Roadmap (pick the right doc) | [Roadmap hub](roadmap-hub.md) |
 | Feature tour | [ontocode/feature-tour.md](ontocode/feature-tour.md) |

@@ -96,7 +96,12 @@ fn add_and_remove_domain() {
     );
     let detail = catalog.entity_detail(chases).expect("chases");
     assert!(
-        detail.axioms.iter().any(|a| a.kind == AXIOM_KIND_DOMAIN && a.display.contains(cat)),
+        detail.axioms.iter().any(|a| {
+            a.kind == AXIOM_KIND_DOMAIN
+                && (a.parent_iri.as_deref() == Some(cat)
+                    || a.display.contains(cat)
+                    || a.display.contains("Cat"))
+        }),
         "Cat domain missing: {:?}",
         detail.axioms
     );
@@ -109,12 +114,22 @@ fn add_and_remove_domain() {
     );
     let detail = catalog.entity_detail(chases).expect("chases after remove Dog");
     assert!(
-        detail.axioms.iter().any(|a| a.kind == AXIOM_KIND_DOMAIN && a.display.contains(cat)),
+        detail.axioms.iter().any(|a| {
+            a.kind == AXIOM_KIND_DOMAIN
+                && (a.parent_iri.as_deref() == Some(cat)
+                    || a.display.contains(cat)
+                    || a.display.contains("Cat"))
+        }),
         "Cat domain must remain: {:?}",
         detail.axioms
     );
     assert!(
-        !detail.axioms.iter().any(|a| a.kind == AXIOM_KIND_DOMAIN && a.display.contains(dog)),
+        !detail.axioms.iter().any(|a| {
+            a.kind == AXIOM_KIND_DOMAIN
+                && (a.parent_iri.as_deref() == Some(dog)
+                    || a.display.contains(dog)
+                    || a.display.contains("Dog"))
+        }),
         "Dog domain must be absent: {:?}",
         detail.axioms
     );

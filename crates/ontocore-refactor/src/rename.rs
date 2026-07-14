@@ -433,6 +433,7 @@ fn owl_type_for_kind(kind: EntityKind) -> &'static str {
         EntityKind::DataProperty => "owl:DatatypeProperty",
         EntityKind::AnnotationProperty => "owl:AnnotationProperty",
         EntityKind::Individual => "owl:NamedIndividual",
+        EntityKind::Datatype => "rdfs:Datatype",
         EntityKind::Ontology => "owl:Ontology",
         EntityKind::Other => "owl:Class",
     }

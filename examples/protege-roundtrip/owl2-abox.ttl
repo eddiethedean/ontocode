@@ -1,0 +1,39 @@
+@prefix ex: <http://example.org/abox#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://example.org/abox> a owl:Ontology ;
+    rdfs:label "OWL2 ABox Fixture" .
+
+ex:Person a owl:Class ;
+    rdfs:label "Person" .
+
+ex:knows a owl:ObjectProperty ;
+    rdfs:label "knows" .
+
+ex:age a owl:DatatypeProperty ;
+    rdfs:label "age" ;
+    rdfs:range xsd:integer .
+
+ex:alice a owl:NamedIndividual , ex:Person ;
+    rdfs:label "Alice" ;
+    owl:sameAs ex:ally ;
+    ex:age "30"^^xsd:integer .
+
+ex:ally a owl:NamedIndividual , ex:Person ;
+    rdfs:label "Ally" .
+
+ex:bob a owl:NamedIndividual , ex:Person ;
+    rdfs:label "Bob" .
+
+ex:carol a owl:NamedIndividual , ex:Person ;
+    rdfs:label "Carol" .
+
+[] a owl:AllDifferent ;
+    owl:distinctMembers ( ex:alice ex:bob ex:carol ) .
+
+[] a owl:NegativePropertyAssertion ;
+    owl:sourceIndividual ex:alice ;
+    owl:assertionProperty ex:knows ;
+    owl:targetIndividual ex:bob .

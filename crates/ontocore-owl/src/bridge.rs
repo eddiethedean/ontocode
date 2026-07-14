@@ -1,23 +1,40 @@
 use crate::manchester::class_expression_to_manchester;
 use crate::span::{annotate_spans, find_entity_block, short_name_from_iri};
 use horned_owl::model::{
-    AnnotationSubject, AnnotationValue, ClassExpression, Individual, RcAnnotatedComponent, RcStr,
+    AnnotatedComponent, AnnotationSubject, AnnotationValue, ClassExpression, Component,
+    ComponentKind, Individual, ObjectPropertyExpression, PropertyExpression, RcAnnotatedComponent,
+    RcStr, SubObjectPropertyExpression,
 };
-use horned_owl::model::{ObjectPropertyExpression, SubObjectPropertyExpression};
 use horned_owl::ontology::component_mapped::{ComponentMappedIndex, ComponentMappedOntology};
 use ontocore_core::{
-    Annotation, Axiom, Entity, EntityKind, Import, Namespace, SourceLocation,
-    AXIOM_KIND_CLASS_ASSERTION, AXIOM_KIND_DATA_PROPERTY_ASSERTION, AXIOM_KIND_DISJOINT_CLASS,
-    AXIOM_KIND_DOMAIN, AXIOM_KIND_EQUIVALENT_CLASS, AXIOM_KIND_OBJECT_PROPERTY_ASSERTION,
-    AXIOM_KIND_PROPERTY_CHAIN, AXIOM_KIND_RANGE, AXIOM_KIND_SUB_CLASS_OF,
+    Annotation, Axiom, AxiomAnnotation, Entity, EntityKind, Import, Namespace, SourceLocation,
+    AXIOM_KIND_CLASS_ASSERTION, AXIOM_KIND_DATATYPE_DEFINITION, AXIOM_KIND_DATA_PROPERTY_ASSERTION,
+    AXIOM_KIND_DIFFERENT_INDIVIDUALS, AXIOM_KIND_DISJOINT_CLASS,
+    AXIOM_KIND_DISJOINT_DATA_PROPERTIES, AXIOM_KIND_DISJOINT_OBJECT_PROPERTIES,
+    AXIOM_KIND_DISJOINT_UNION, AXIOM_KIND_DOMAIN, AXIOM_KIND_EQUIVALENT_CLASS,
+    AXIOM_KIND_EQUIVALENT_DATA_PROPERTIES, AXIOM_KIND_EQUIVALENT_OBJECT_PROPERTIES,
+    AXIOM_KIND_HAS_KEY, AXIOM_KIND_INVERSE_OBJECT_PROPERTIES,
+    AXIOM_KIND_NEGATIVE_DATA_PROPERTY_ASSERTION, AXIOM_KIND_NEGATIVE_OBJECT_PROPERTY_ASSERTION,
+    AXIOM_KIND_OBJECT_PROPERTY_ASSERTION, AXIOM_KIND_PROPERTY_CHAIN, AXIOM_KIND_RANGE,
+    AXIOM_KIND_SAME_INDIVIDUAL, AXIOM_KIND_SUB_CLASS_OF, AXIOM_KIND_SUB_DATA_PROPERTY_OF,
+    AXIOM_KIND_SUB_OBJECT_PROPERTY_OF,
 };
 use std::collections::BTreeMap;
 
 const RDFS_LABEL: &str = "http://www.w3.org/2000/01/rdf-schema#label";
 const RDFS_COMMENT: &str = "http://www.w3.org/2000/01/rdf-schema#comment";
 const RDFS_SUB_CLASS_OF: &str = "http://www.w3.org/2000/01/rdf-schema#subClassOf";
+const RDFS_SUB_PROPERTY_OF: &str = "http://www.w3.org/2000/01/rdf-schema#subPropertyOf";
 const OWL_DEPRECATED: &str = "http://www.w3.org/2002/07/owl#deprecated";
 const OWL_SAME_AS: &str = "http://www.w3.org/2002/07/owl#sameAs";
+const OWL_DIFFERENT_FROM: &str = "http://www.w3.org/2002/07/owl#differentFrom";
+const OWL_HAS_KEY: &str = "http://www.w3.org/2002/07/owl#hasKey";
+const OWL_DISJOINT_UNION_OF: &str = "http://www.w3.org/2002/07/owl#disjointUnionOf";
+const OWL_INVERSE_OF: &str = "http://www.w3.org/2002/07/owl#inverseOf";
+const OWL_EQUIVALENT_PROPERTY: &str = "http://www.w3.org/2002/07/owl#equivalentProperty";
+const OWL_PROPERTY_DISJOINT_WITH: &str = "http://www.w3.org/2002/07/owl#propertyDisjointWith";
+const OWL_EQUIVALENT_CLASS: &str = "http://www.w3.org/2002/07/owl#equivalentClass";
+const MEMBER_SEP: &str = " | ";
 
 /// Catalog-shaped extraction from a Horned-OWL ontology.
 #[derive(Debug, Clone, Default)]
@@ -63,6 +80,9 @@ pub fn bridge_ontology(
     for decl in idx.declare_named_individual() {
         insert_entity(&mut entity_map, decl.0.to_string(), EntityKind::Individual, &ont_id);
     }
+    for decl in idx.declare_datatype() {
+        insert_entity(&mut entity_map, decl.0.to_string(), EntityKind::Datatype, &ont_id);
+    }
 
     for ann_ax in idx.annotation_assertion() {
         let subject = annotation_subject_iri(&ann_ax.subject);
@@ -106,24 +126,33 @@ pub fn bridge_ontology(
     }
 
     let mut axiom_counter = 0usize;
-    for ax in idx.sub_class_of() {
+
+    for ac in idx.component_for_kind(ComponentKind::SubClassOf) {
+        let Component::SubClassOf(ax) = &ac.component else {
+            continue;
+        };
         if let ClassExpression::Class(sub) = &ax.sub {
             if let Some(sup) = class_expr_display(&ax.sup, namespaces) {
-                axiom_counter += 1;
-                result.axioms.push(Axiom {
-                    id: format!("{ontology_id}#axiom-{axiom_counter}"),
-                    ontology_id: ont_id.clone(),
-                    subject: sub.to_string(),
-                    predicate: RDFS_SUB_CLASS_OF.to_string(),
-                    object: sup,
-                    axiom_kind: AXIOM_KIND_SUB_CLASS_OF.to_string(),
-                    source_location: SourceLocation::default(),
-                });
+                push_axiom(
+                    &mut result.axioms,
+                    &mut axiom_counter,
+                    ontology_id,
+                    &ont_id,
+                    sub.to_string(),
+                    RDFS_SUB_CLASS_OF.to_string(),
+                    sup,
+                    AXIOM_KIND_SUB_CLASS_OF,
+                    ann_bag(ac),
+                );
             }
         }
     }
 
-    for eq in idx.equivalent_class() {
+    for ac in idx.component_for_kind(ComponentKind::EquivalentClasses) {
+        let Component::EquivalentClasses(eq) = &ac.component else {
+            continue;
+        };
+        let anns = ann_bag(ac);
         for ce in &eq.0 {
             if let ClassExpression::Class(sub) = ce {
                 for other in &eq.0 {
@@ -131,175 +160,487 @@ pub fn bridge_ontology(
                         continue;
                     }
                     if let Some(obj) = class_expr_display(other, namespaces) {
-                        axiom_counter += 1;
-                        result.axioms.push(Axiom {
-                            id: format!("{ontology_id}#axiom-{axiom_counter}"),
-                            ontology_id: ont_id.clone(),
-                            subject: sub.to_string(),
-                            predicate: "http://www.w3.org/2002/07/owl#equivalentClass".to_string(),
-                            object: obj,
-                            axiom_kind: AXIOM_KIND_EQUIVALENT_CLASS.to_string(),
-                            source_location: SourceLocation::default(),
-                        });
+                        push_axiom(
+                            &mut result.axioms,
+                            &mut axiom_counter,
+                            ontology_id,
+                            &ont_id,
+                            sub.to_string(),
+                            OWL_EQUIVALENT_CLASS.to_string(),
+                            obj,
+                            AXIOM_KIND_EQUIVALENT_CLASS,
+                            anns.clone(),
+                        );
                     }
                 }
             }
         }
     }
 
-    for disj in idx.disjoint_class() {
+    for ac in idx.component_for_kind(ComponentKind::DisjointClasses) {
+        let Component::DisjointClasses(disj) = &ac.component else {
+            continue;
+        };
+        let anns = ann_bag(ac);
         for ce in &disj.0 {
             if let ClassExpression::Class(sub) = ce {
                 for other in &disj.0 {
                     if other == ce {
                         continue;
                     }
-                    if let ClassExpression::Class(obj) = other {
-                        axiom_counter += 1;
-                        result.axioms.push(Axiom {
-                            id: format!("{ontology_id}#axiom-{axiom_counter}"),
-                            ontology_id: ont_id.clone(),
-                            subject: sub.to_string(),
-                            predicate: "http://www.w3.org/2002/07/owl#disjointWith".to_string(),
-                            object: obj.to_string(),
-                            axiom_kind: AXIOM_KIND_DISJOINT_CLASS.to_string(),
-                            source_location: SourceLocation::default(),
-                        });
-                    } else if let Some(obj) = class_expr_display(other, namespaces) {
-                        axiom_counter += 1;
-                        result.axioms.push(Axiom {
-                            id: format!("{ontology_id}#axiom-{axiom_counter}"),
-                            ontology_id: ont_id.clone(),
-                            subject: sub.to_string(),
-                            predicate: "http://www.w3.org/2002/07/owl#disjointWith".to_string(),
-                            object: obj,
-                            axiom_kind: AXIOM_KIND_DISJOINT_CLASS.to_string(),
-                            source_location: SourceLocation::default(),
-                        });
+                    if let Some(obj) = class_expr_display(other, namespaces) {
+                        push_axiom(
+                            &mut result.axioms,
+                            &mut axiom_counter,
+                            ontology_id,
+                            &ont_id,
+                            sub.to_string(),
+                            "http://www.w3.org/2002/07/owl#disjointWith".to_string(),
+                            obj,
+                            AXIOM_KIND_DISJOINT_CLASS,
+                            anns.clone(),
+                        );
                     }
                 }
             }
         }
     }
 
-    for dom in idx.object_property_domain() {
-        let prop = ope_to_iri(&dom.ope);
-        if let ClassExpression::Class(cls) = &dom.ce {
-            push_class_binding_axiom(
-                &mut result.axioms,
-                &mut axiom_counter,
-                &ont_id,
-                &prop,
-                cls.to_string().as_str(),
-                AXIOM_KIND_DOMAIN,
-                "http://www.w3.org/2000/01/rdf-schema#domain",
-            );
-        }
-    }
-    for rng in idx.object_property_range() {
-        let prop = ope_to_iri(&rng.ope);
-        if let ClassExpression::Class(cls) = &rng.ce {
-            push_class_binding_axiom(
-                &mut result.axioms,
-                &mut axiom_counter,
-                &ont_id,
-                &prop,
-                cls.to_string().as_str(),
-                AXIOM_KIND_RANGE,
-                "http://www.w3.org/2000/01/rdf-schema#range",
-            );
-        }
-    }
-    for dom in idx.data_property_domain() {
-        let prop = dom.dp.to_string();
-        if let ClassExpression::Class(cls) = &dom.ce {
-            push_class_binding_axiom(
-                &mut result.axioms,
-                &mut axiom_counter,
-                &ont_id,
-                &prop,
-                cls.to_string().as_str(),
-                AXIOM_KIND_DOMAIN,
-                "http://www.w3.org/2000/01/rdf-schema#domain",
-            );
-        }
-    }
-    for rng in idx.data_property_range() {
-        let prop = rng.dp.to_string();
-        let filler = data_range_display(&rng.dr);
-        push_class_binding_axiom(
+    for ac in idx.component_for_kind(ComponentKind::DisjointUnion) {
+        let Component::DisjointUnion(du) = &ac.component else {
+            continue;
+        };
+        let members: Vec<String> =
+            du.1.iter().filter_map(|ce| class_expr_display(ce, namespaces)).collect();
+        push_axiom(
             &mut result.axioms,
             &mut axiom_counter,
+            ontology_id,
             &ont_id,
-            &prop,
-            &filler,
-            AXIOM_KIND_RANGE,
-            "http://www.w3.org/2000/01/rdf-schema#range",
+            du.0.to_string(),
+            OWL_DISJOINT_UNION_OF.to_string(),
+            members.join(MEMBER_SEP),
+            AXIOM_KIND_DISJOINT_UNION,
+            ann_bag(ac),
         );
     }
 
-    for sub_prop in idx.sub_object_property_of() {
-        if let SubObjectPropertyExpression::ObjectPropertyChain(chain) = &sub_prop.sub {
-            let chain_display = chain.iter().map(ope_to_iri).collect::<Vec<_>>().join(" o ");
-            axiom_counter += 1;
-            result.axioms.push(Axiom {
-                id: format!("{ontology_id}#axiom-{axiom_counter}"),
-                ontology_id: ont_id.clone(),
-                subject: ope_to_iri(&sub_prop.sup),
-                predicate: "http://www.w3.org/2002/07/owl#propertyChainAxiom".to_string(),
-                object: chain_display,
-                axiom_kind: AXIOM_KIND_PROPERTY_CHAIN.to_string(),
-                source_location: SourceLocation::default(),
-            });
+    for ac in idx.component_for_kind(ComponentKind::HasKey) {
+        let Component::HasKey(hk) = &ac.component else {
+            continue;
+        };
+        let ClassExpression::Class(cls) = &hk.ce else {
+            continue;
+        };
+        let props: Vec<String> = hk.vpe.iter().map(property_expr_to_iri).collect();
+        push_axiom(
+            &mut result.axioms,
+            &mut axiom_counter,
+            ontology_id,
+            &ont_id,
+            cls.to_string(),
+            OWL_HAS_KEY.to_string(),
+            props.join(MEMBER_SEP),
+            AXIOM_KIND_HAS_KEY,
+            ann_bag(ac),
+        );
+    }
+
+    for ac in idx.component_for_kind(ComponentKind::InverseObjectProperties) {
+        let Component::InverseObjectProperties(inv) = &ac.component else {
+            continue;
+        };
+        let anns = ann_bag(ac);
+        let a = inv.0.to_string();
+        let b = inv.1.to_string();
+        push_axiom(
+            &mut result.axioms,
+            &mut axiom_counter,
+            ontology_id,
+            &ont_id,
+            a.clone(),
+            OWL_INVERSE_OF.to_string(),
+            b.clone(),
+            AXIOM_KIND_INVERSE_OBJECT_PROPERTIES,
+            anns.clone(),
+        );
+        push_axiom(
+            &mut result.axioms,
+            &mut axiom_counter,
+            ontology_id,
+            &ont_id,
+            b,
+            OWL_INVERSE_OF.to_string(),
+            a,
+            AXIOM_KIND_INVERSE_OBJECT_PROPERTIES,
+            anns,
+        );
+    }
+
+    for ac in idx.component_for_kind(ComponentKind::EquivalentObjectProperties) {
+        let Component::EquivalentObjectProperties(eq) = &ac.component else {
+            continue;
+        };
+        let anns = ann_bag(ac);
+        let iris: Vec<String> = eq.0.iter().map(ope_to_iri).collect();
+        push_pairwise_property_axioms(
+            &mut result.axioms,
+            &mut axiom_counter,
+            ontology_id,
+            &ont_id,
+            &iris,
+            OWL_EQUIVALENT_PROPERTY,
+            AXIOM_KIND_EQUIVALENT_OBJECT_PROPERTIES,
+            anns,
+        );
+    }
+
+    for ac in idx.component_for_kind(ComponentKind::DisjointObjectProperties) {
+        let Component::DisjointObjectProperties(dj) = &ac.component else {
+            continue;
+        };
+        let anns = ann_bag(ac);
+        let iris: Vec<String> = dj.0.iter().map(ope_to_iri).collect();
+        push_pairwise_property_axioms(
+            &mut result.axioms,
+            &mut axiom_counter,
+            ontology_id,
+            &ont_id,
+            &iris,
+            OWL_PROPERTY_DISJOINT_WITH,
+            AXIOM_KIND_DISJOINT_OBJECT_PROPERTIES,
+            anns,
+        );
+    }
+
+    for ac in idx.component_for_kind(ComponentKind::EquivalentDataProperties) {
+        let Component::EquivalentDataProperties(eq) = &ac.component else {
+            continue;
+        };
+        let anns = ann_bag(ac);
+        let iris: Vec<String> = eq.0.iter().map(|dp| dp.to_string()).collect();
+        push_pairwise_property_axioms(
+            &mut result.axioms,
+            &mut axiom_counter,
+            ontology_id,
+            &ont_id,
+            &iris,
+            OWL_EQUIVALENT_PROPERTY,
+            AXIOM_KIND_EQUIVALENT_DATA_PROPERTIES,
+            anns,
+        );
+    }
+
+    for ac in idx.component_for_kind(ComponentKind::DisjointDataProperties) {
+        let Component::DisjointDataProperties(dj) = &ac.component else {
+            continue;
+        };
+        let anns = ann_bag(ac);
+        let iris: Vec<String> = dj.0.iter().map(|dp| dp.to_string()).collect();
+        push_pairwise_property_axioms(
+            &mut result.axioms,
+            &mut axiom_counter,
+            ontology_id,
+            &ont_id,
+            &iris,
+            OWL_PROPERTY_DISJOINT_WITH,
+            AXIOM_KIND_DISJOINT_DATA_PROPERTIES,
+            anns,
+        );
+    }
+
+    for ac in idx.component_for_kind(ComponentKind::ObjectPropertyDomain) {
+        let Component::ObjectPropertyDomain(dom) = &ac.component else {
+            continue;
+        };
+        let prop = ope_to_iri(&dom.ope);
+        if let ClassExpression::Class(cls) = &dom.ce {
+            push_axiom(
+                &mut result.axioms,
+                &mut axiom_counter,
+                ontology_id,
+                &ont_id,
+                prop,
+                "http://www.w3.org/2000/01/rdf-schema#domain".to_string(),
+                cls.to_string(),
+                AXIOM_KIND_DOMAIN,
+                ann_bag(ac),
+            );
+        }
+    }
+    for ac in idx.component_for_kind(ComponentKind::ObjectPropertyRange) {
+        let Component::ObjectPropertyRange(rng) = &ac.component else {
+            continue;
+        };
+        let prop = ope_to_iri(&rng.ope);
+        if let ClassExpression::Class(cls) = &rng.ce {
+            push_axiom(
+                &mut result.axioms,
+                &mut axiom_counter,
+                ontology_id,
+                &ont_id,
+                prop,
+                "http://www.w3.org/2000/01/rdf-schema#range".to_string(),
+                cls.to_string(),
+                AXIOM_KIND_RANGE,
+                ann_bag(ac),
+            );
+        }
+    }
+    for ac in idx.component_for_kind(ComponentKind::DataPropertyDomain) {
+        let Component::DataPropertyDomain(dom) = &ac.component else {
+            continue;
+        };
+        let prop = dom.dp.to_string();
+        if let ClassExpression::Class(cls) = &dom.ce {
+            push_axiom(
+                &mut result.axioms,
+                &mut axiom_counter,
+                ontology_id,
+                &ont_id,
+                prop,
+                "http://www.w3.org/2000/01/rdf-schema#domain".to_string(),
+                cls.to_string(),
+                AXIOM_KIND_DOMAIN,
+                ann_bag(ac),
+            );
+        }
+    }
+    for ac in idx.component_for_kind(ComponentKind::DataPropertyRange) {
+        let Component::DataPropertyRange(rng) = &ac.component else {
+            continue;
+        };
+        push_axiom(
+            &mut result.axioms,
+            &mut axiom_counter,
+            ontology_id,
+            &ont_id,
+            rng.dp.to_string(),
+            "http://www.w3.org/2000/01/rdf-schema#range".to_string(),
+            data_range_display(&rng.dr),
+            AXIOM_KIND_RANGE,
+            ann_bag(ac),
+        );
+    }
+
+    for ac in idx.component_for_kind(ComponentKind::SubObjectPropertyOf) {
+        let Component::SubObjectPropertyOf(sub_prop) = &ac.component else {
+            continue;
+        };
+        match &sub_prop.sub {
+            SubObjectPropertyExpression::ObjectPropertyChain(chain) => {
+                let chain_display = chain.iter().map(ope_to_iri).collect::<Vec<_>>().join(" o ");
+                push_axiom(
+                    &mut result.axioms,
+                    &mut axiom_counter,
+                    ontology_id,
+                    &ont_id,
+                    ope_to_iri(&sub_prop.sup),
+                    "http://www.w3.org/2002/07/owl#propertyChainAxiom".to_string(),
+                    chain_display,
+                    AXIOM_KIND_PROPERTY_CHAIN,
+                    ann_bag(ac),
+                );
+            }
+            SubObjectPropertyExpression::ObjectPropertyExpression(sub) => {
+                push_axiom(
+                    &mut result.axioms,
+                    &mut axiom_counter,
+                    ontology_id,
+                    &ont_id,
+                    ope_to_iri(sub),
+                    RDFS_SUB_PROPERTY_OF.to_string(),
+                    ope_to_iri(&sub_prop.sup),
+                    AXIOM_KIND_SUB_OBJECT_PROPERTY_OF,
+                    ann_bag(ac),
+                );
+            }
         }
     }
 
-    for ca in idx.class_assertion() {
+    for ac in idx.component_for_kind(ComponentKind::SubDataPropertyOf) {
+        let Component::SubDataPropertyOf(sub_prop) = &ac.component else {
+            continue;
+        };
+        push_axiom(
+            &mut result.axioms,
+            &mut axiom_counter,
+            ontology_id,
+            &ont_id,
+            sub_prop.sub.to_string(),
+            RDFS_SUB_PROPERTY_OF.to_string(),
+            sub_prop.sup.to_string(),
+            AXIOM_KIND_SUB_DATA_PROPERTY_OF,
+            ann_bag(ac),
+        );
+    }
+
+    for ac in idx.component_for_kind(ComponentKind::ClassAssertion) {
+        let Component::ClassAssertion(ca) = &ac.component else {
+            continue;
+        };
         if let ClassExpression::Class(cls) = &ca.ce {
-            let individual = individual_to_iri(&ca.i);
-            axiom_counter += 1;
-            result.axioms.push(Axiom {
-                id: format!("{ontology_id}#axiom-{axiom_counter}"),
-                ontology_id: ont_id.clone(),
-                subject: individual,
-                predicate: "http://www.w3.org/1999/02/22-rdf-syntax-ns#type".to_string(),
-                object: cls.to_string(),
-                axiom_kind: AXIOM_KIND_CLASS_ASSERTION.to_string(),
-                source_location: SourceLocation::default(),
-            });
+            push_axiom(
+                &mut result.axioms,
+                &mut axiom_counter,
+                ontology_id,
+                &ont_id,
+                individual_to_iri(&ca.i),
+                "http://www.w3.org/1999/02/22-rdf-syntax-ns#type".to_string(),
+                cls.to_string(),
+                AXIOM_KIND_CLASS_ASSERTION,
+                ann_bag(ac),
+            );
         }
     }
 
-    for opa in idx.object_property_assertion() {
-        let subject = individual_to_iri(&opa.from);
-        let predicate = ope_to_iri(&opa.ope);
-        let object = individual_to_iri(&opa.to);
-        axiom_counter += 1;
-        result.axioms.push(Axiom {
-            id: format!("{ontology_id}#axiom-{axiom_counter}"),
-            ontology_id: ont_id.clone(),
-            subject,
-            predicate,
-            object,
-            axiom_kind: AXIOM_KIND_OBJECT_PROPERTY_ASSERTION.to_string(),
-            source_location: SourceLocation::default(),
-        });
+    for ac in idx.component_for_kind(ComponentKind::ObjectPropertyAssertion) {
+        let Component::ObjectPropertyAssertion(opa) = &ac.component else {
+            continue;
+        };
+        push_axiom(
+            &mut result.axioms,
+            &mut axiom_counter,
+            ontology_id,
+            &ont_id,
+            individual_to_iri(&opa.from),
+            ope_to_iri(&opa.ope),
+            individual_to_iri(&opa.to),
+            AXIOM_KIND_OBJECT_PROPERTY_ASSERTION,
+            ann_bag(ac),
+        );
     }
 
-    for dpa in idx.data_property_assertion() {
-        let subject = individual_to_iri(&dpa.from);
-        let predicate = dpa.dp.to_string();
-        let object = dpa.to.literal().clone();
-        axiom_counter += 1;
-        result.axioms.push(Axiom {
-            id: format!("{ontology_id}#axiom-{axiom_counter}"),
-            ontology_id: ont_id.clone(),
-            subject,
-            predicate,
-            object,
-            axiom_kind: AXIOM_KIND_DATA_PROPERTY_ASSERTION.to_string(),
-            source_location: SourceLocation::default(),
-        });
+    for ac in idx.component_for_kind(ComponentKind::DataPropertyAssertion) {
+        let Component::DataPropertyAssertion(dpa) = &ac.component else {
+            continue;
+        };
+        push_axiom(
+            &mut result.axioms,
+            &mut axiom_counter,
+            ontology_id,
+            &ont_id,
+            individual_to_iri(&dpa.from),
+            dpa.dp.to_string(),
+            dpa.to.literal().clone(),
+            AXIOM_KIND_DATA_PROPERTY_ASSERTION,
+            ann_bag(ac),
+        );
+    }
+
+    for ac in idx.component_for_kind(ComponentKind::NegativeObjectPropertyAssertion) {
+        let Component::NegativeObjectPropertyAssertion(nopa) = &ac.component else {
+            continue;
+        };
+        push_axiom(
+            &mut result.axioms,
+            &mut axiom_counter,
+            ontology_id,
+            &ont_id,
+            individual_to_iri(&nopa.from),
+            ope_to_iri(&nopa.ope),
+            individual_to_iri(&nopa.to),
+            AXIOM_KIND_NEGATIVE_OBJECT_PROPERTY_ASSERTION,
+            ann_bag(ac),
+        );
+    }
+
+    for ac in idx.component_for_kind(ComponentKind::NegativeDataPropertyAssertion) {
+        let Component::NegativeDataPropertyAssertion(ndpa) = &ac.component else {
+            continue;
+        };
+        push_axiom(
+            &mut result.axioms,
+            &mut axiom_counter,
+            ontology_id,
+            &ont_id,
+            individual_to_iri(&ndpa.from),
+            ndpa.dp.to_string(),
+            ndpa.to.literal().clone(),
+            AXIOM_KIND_NEGATIVE_DATA_PROPERTY_ASSERTION,
+            ann_bag(ac),
+        );
+    }
+
+    for ac in idx.component_for_kind(ComponentKind::SameIndividual) {
+        let Component::SameIndividual(si) = &ac.component else {
+            continue;
+        };
+        let anns = ann_bag(ac);
+        let iris: Vec<String> = si.0.iter().map(individual_to_iri).collect();
+        for (i, a) in iris.iter().enumerate() {
+            for (j, b) in iris.iter().enumerate() {
+                if i == j {
+                    continue;
+                }
+                push_axiom(
+                    &mut result.axioms,
+                    &mut axiom_counter,
+                    ontology_id,
+                    &ont_id,
+                    a.clone(),
+                    OWL_SAME_AS.to_string(),
+                    b.clone(),
+                    AXIOM_KIND_SAME_INDIVIDUAL,
+                    anns.clone(),
+                );
+            }
+        }
+    }
+
+    for ac in idx.component_for_kind(ComponentKind::DifferentIndividuals) {
+        let Component::DifferentIndividuals(di) = &ac.component else {
+            continue;
+        };
+        let anns = ann_bag(ac);
+        let iris: Vec<String> = di.0.iter().map(individual_to_iri).collect();
+        for (i, a) in iris.iter().enumerate() {
+            for (j, b) in iris.iter().enumerate() {
+                if i >= j {
+                    continue;
+                }
+                push_axiom(
+                    &mut result.axioms,
+                    &mut axiom_counter,
+                    ontology_id,
+                    &ont_id,
+                    a.clone(),
+                    OWL_DIFFERENT_FROM.to_string(),
+                    b.clone(),
+                    AXIOM_KIND_DIFFERENT_INDIVIDUALS,
+                    anns.clone(),
+                );
+                push_axiom(
+                    &mut result.axioms,
+                    &mut axiom_counter,
+                    ontology_id,
+                    &ont_id,
+                    b.clone(),
+                    OWL_DIFFERENT_FROM.to_string(),
+                    a.clone(),
+                    AXIOM_KIND_DIFFERENT_INDIVIDUALS,
+                    anns.clone(),
+                );
+            }
+        }
+    }
+
+    for ac in idx.component_for_kind(ComponentKind::DatatypeDefinition) {
+        let Component::DatatypeDefinition(dd) = &ac.component else {
+            continue;
+        };
+        insert_entity(&mut entity_map, dd.kind.to_string(), EntityKind::Datatype, &ont_id);
+        push_axiom(
+            &mut result.axioms,
+            &mut axiom_counter,
+            ontology_id,
+            &ont_id,
+            dd.kind.to_string(),
+            OWL_EQUIVALENT_CLASS.to_string(),
+            data_range_display(&dd.range),
+            AXIOM_KIND_DATATYPE_DEFINITION,
+            ann_bag(ac),
+        );
     }
 
     mark_functional_properties(&mut entity_map, idx);
@@ -323,6 +664,72 @@ pub fn bridge_ontology(
     }
     annotate_spans(source_text, &mut result.entities, &mut result.annotations, &mut result.axioms);
     result
+}
+
+fn ann_bag(ac: &AnnotatedComponent<RcStr>) -> Vec<AxiomAnnotation> {
+    ac.ann
+        .iter()
+        .map(|a| AxiomAnnotation {
+            predicate: a.ap.to_string(),
+            value: annotation_value_string(&a.av),
+        })
+        .collect()
+}
+
+#[allow(clippy::too_many_arguments)]
+fn push_axiom(
+    axioms: &mut Vec<Axiom>,
+    counter: &mut usize,
+    doc_id: &str,
+    ontology_id: &str,
+    subject: String,
+    predicate: String,
+    object: String,
+    kind: &str,
+    annotations: Vec<AxiomAnnotation>,
+) {
+    *counter += 1;
+    axioms.push(Axiom {
+        id: format!("{doc_id}#axiom-{counter}"),
+        ontology_id: ontology_id.to_string(),
+        subject,
+        predicate,
+        object,
+        axiom_kind: kind.to_string(),
+        source_location: SourceLocation::default(),
+        annotations,
+    });
+}
+
+#[allow(clippy::too_many_arguments)]
+fn push_pairwise_property_axioms(
+    axioms: &mut Vec<Axiom>,
+    counter: &mut usize,
+    doc_id: &str,
+    ontology_id: &str,
+    iris: &[String],
+    predicate: &str,
+    kind: &str,
+    annotations: Vec<AxiomAnnotation>,
+) {
+    for (i, a) in iris.iter().enumerate() {
+        for (j, b) in iris.iter().enumerate() {
+            if i == j {
+                continue;
+            }
+            push_axiom(
+                axioms,
+                counter,
+                doc_id,
+                ontology_id,
+                a.clone(),
+                predicate.to_string(),
+                b.clone(),
+                kind,
+                annotations.clone(),
+            );
+        }
+    }
 }
 
 fn insert_entity(
@@ -423,32 +830,16 @@ fn ope_to_iri(ope: &ObjectPropertyExpression<RcStr>) -> String {
     }
 }
 
-fn data_range_display(dr: &horned_owl::model::DataRange<RcStr>) -> String {
-    match dr {
-        horned_owl::model::DataRange::Datatype(dt) => dt.to_string(),
-        other => format!("{other:?}"),
+fn property_expr_to_iri(pe: &PropertyExpression<RcStr>) -> String {
+    match pe {
+        PropertyExpression::ObjectPropertyExpression(ope) => ope_to_iri(ope),
+        PropertyExpression::DataProperty(dp) => dp.to_string(),
+        PropertyExpression::AnnotationProperty(ap) => ap.to_string(),
     }
 }
 
-fn push_class_binding_axiom(
-    axioms: &mut Vec<Axiom>,
-    counter: &mut usize,
-    ontology_id: &str,
-    subject: &str,
-    object: &str,
-    kind: &str,
-    predicate: &str,
-) {
-    *counter += 1;
-    axioms.push(Axiom {
-        id: format!("{ontology_id}#axiom-{counter}"),
-        ontology_id: ontology_id.to_string(),
-        subject: subject.to_string(),
-        predicate: predicate.to_string(),
-        object: object.to_string(),
-        axiom_kind: kind.to_string(),
-        source_location: SourceLocation::default(),
-    });
+fn data_range_display(dr: &horned_owl::model::DataRange<RcStr>) -> String {
+    crate::manchester::data_range_to_manchester(dr, &BTreeMap::new())
 }
 
 fn annotation_subject_iri(subject: &AnnotationSubject<RcStr>) -> String {
@@ -470,9 +861,6 @@ fn annotation_value_string(value: &AnnotationValue<RcStr>) -> String {
 mod tests {
     use super::*;
     use crate::load::load_turtle_text;
-    use ontocore_core::{
-        AXIOM_KIND_DISJOINT_CLASS, AXIOM_KIND_PROPERTY_CHAIN, AXIOM_KIND_SUB_CLASS_OF,
-    };
     use oxigraph::io::RdfParser;
     use oxigraph::model::Quad;
     use std::path::Path;
@@ -503,5 +891,57 @@ mod tests {
                 .expect("load");
         assert!(loaded.bridge.axioms.iter().any(|a| a.axiom_kind == AXIOM_KIND_DISJOINT_CLASS));
         assert!(loaded.bridge.axioms.iter().any(|a| a.axiom_kind == AXIOM_KIND_PROPERTY_CHAIN));
+    }
+
+    #[test]
+    fn bridge_extracts_owl2_keys_and_inverse() {
+        let ttl = include_str!("../../../examples/protege-roundtrip/owl2-keys.ttl");
+        let parser = RdfParser::from_format(oxigraph::io::RdfFormat::Turtle);
+        let quads: Vec<Quad> =
+            parser.for_reader(ttl.as_bytes()).collect::<std::result::Result<Vec<_>, _>>().unwrap();
+        let namespaces =
+            BTreeMap::from([("ex".to_string(), "http://example.org/keys#".to_string())]);
+        let loaded =
+            load_turtle_text(Path::new("owl2-keys.ttl"), "doc-keys", ttl, &quads, &namespaces)
+                .expect("load");
+        assert!(loaded
+            .bridge
+            .axioms
+            .iter()
+            .any(|a| a.axiom_kind == AXIOM_KIND_HAS_KEY
+                && a.subject == "http://example.org/keys#Person"));
+        assert!(loaded.bridge.axioms.iter().any(|a| a.axiom_kind == AXIOM_KIND_DISJOINT_UNION
+            && a.subject == "http://example.org/keys#Sex"));
+        assert!(loaded.bridge.axioms.iter().any(|a| {
+            a.axiom_kind == AXIOM_KIND_INVERSE_OBJECT_PROPERTIES
+                && a.subject == "http://example.org/keys#hasParent"
+                && a.object == "http://example.org/keys#hasChild"
+        }));
+    }
+
+    #[test]
+    fn bridge_extracts_owl2_abox() {
+        let ttl = include_str!("../../../examples/protege-roundtrip/owl2-abox.ttl");
+        let parser = RdfParser::from_format(oxigraph::io::RdfFormat::Turtle);
+        let quads: Vec<Quad> =
+            parser.for_reader(ttl.as_bytes()).collect::<std::result::Result<Vec<_>, _>>().unwrap();
+        let namespaces =
+            BTreeMap::from([("ex".to_string(), "http://example.org/abox#".to_string())]);
+        let loaded =
+            load_turtle_text(Path::new("owl2-abox.ttl"), "doc-abox", ttl, &quads, &namespaces)
+                .expect("load");
+        assert!(loaded.bridge.axioms.iter().any(|a| {
+            a.axiom_kind == AXIOM_KIND_SAME_INDIVIDUAL
+                && a.subject == "http://example.org/abox#alice"
+        }));
+        assert!(loaded.bridge.axioms.iter().any(|a| {
+            a.axiom_kind == AXIOM_KIND_DIFFERENT_INDIVIDUALS
+                && a.subject == "http://example.org/abox#alice"
+        }));
+        assert!(loaded.bridge.axioms.iter().any(|a| {
+            a.axiom_kind == AXIOM_KIND_NEGATIVE_OBJECT_PROPERTY_ASSERTION
+                && a.subject == "http://example.org/abox#alice"
+                && a.object == "http://example.org/abox#bob"
+        }));
     }
 }

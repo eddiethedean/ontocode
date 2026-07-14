@@ -1,7 +1,7 @@
 //! Full-document XML write-back: load → mutate → serialize (v0.21).
 
 use crate::error::{OwlError, Result};
-use crate::mutate::apply_patches_to_ontology;
+use crate::mutate::apply_patches_to_ontology_with_ns;
 use crate::patch::{atomic_write, ApplyPatchResult, PatchOp};
 use crate::serialize::{
     load_owl_xml_ontology, load_rdf_xml_ontology, serialize_owl_xml, serialize_rdf_xml,
@@ -26,7 +26,7 @@ pub fn apply_xml_patches_to_text(
                     "RDF/XML load incomplete; refusing write-back to avoid data loss".into(),
                 ));
             }
-            let diagnostics = apply_patches_to_ontology(&mut ont, patches)?;
+            let diagnostics = apply_patches_to_ontology_with_ns(&mut ont, patches, namespaces)?;
             let text = serialize_rdf_xml(&ont)?;
             Ok(ApplyPatchResult {
                 applied: !preview_only,
@@ -40,7 +40,7 @@ pub fn apply_xml_patches_to_text(
             for (k, v) in namespaces {
                 ns.entry(k.clone()).or_insert_with(|| v.clone());
             }
-            let diagnostics = apply_patches_to_ontology(&mut ont, patches)?;
+            let diagnostics = apply_patches_to_ontology_with_ns(&mut ont, patches, namespaces)?;
             let text = serialize_owl_xml(&ont, &ns)?;
             Ok(ApplyPatchResult {
                 applied: !preview_only,

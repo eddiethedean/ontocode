@@ -34,6 +34,8 @@ Platform vision/roadmap/architecture: prefer editing [`docs/vision.md`](docs/vis
 
 Root `VISION.md`, `ARCHITECTURE.md`, and `ROADMAP.md` are mirrored under `docs/` for Read the Docs. **Prefer editing `docs/` copies first**, then update root mirrors when platform-facing content changes. **Release pin truth** is a single file: [`docs/TAGGED_RELEASE`](docs/TAGGED_RELEASE) — run `./scripts/check-doc-versions.sh` to catch drift (including stale “latest tagged” claims).
 
+**Contributor process:** Edit [`docs/contributing.md`](docs/contributing.md) first; keep this root [`CONTRIBUTING.md`](CONTRIBUTING.md) in sync as the GitHub mirror. Not two independent sources of truth.
+
 - **Specs** — product and architecture docs under `docs/design/` ([DEPENDENCY_MATRIX.md](docs/design/DEPENDENCY_MATRIX.md) for external crates)
 
 The root Cargo package `ontocode` is unpublished and hosts workspace integration tests (`tests/`).
@@ -118,7 +120,7 @@ Look for GitHub labels `good first issue` and `docs`. Useful first PRs:
 - **Java 11+** and **[ROBOT](http://robot.obolibrary.org/)** on `PATH` — optional; needed only for manual `ontocore robot` / ROBOT interop development (not required for `cargo test --workspace`)
 - **Python 3.12** — for MkDocs doc site (`pip install -r docs/requirements.txt`)
 
-> **Canonical copy:** Root [`CONTRIBUTING.md`](CONTRIBUTING.md) is the source of truth for GitHub. Mirror changes to [`docs/contributing.md`](docs/contributing.md) for Read the Docs.
+> **Canonical contributor guide:** Edit [`docs/contributing.md`](docs/contributing.md) first (Read the Docs). Keep this root file in sync as the **GitHub mirror**.
 
 ## Build and test
 

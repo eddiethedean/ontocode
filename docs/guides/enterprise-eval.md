@@ -1,6 +1,6 @@
 # Evaluating OntoCode for your organization
 
-This page helps security, platform, and ontology teams decide whether OntoCode **v0.21.0** (latest tagged) fits your workflow. It is honest about **what ships today** vs the v1.0 Protégé-competitive target.
+This page helps security, platform, and ontology teams decide whether OntoCode **v0.22.0** (latest tagged) fits your workflow. It is honest about **what ships today** vs the v1.0 Protégé-competitive target.
 
 Canonical capability matrix: [What ships today](../SHIPPED.md).
 
@@ -29,7 +29,7 @@ Prefer Protégé or other tools (or wait for v1.0) if you need:
 | [Protégé coexistence](protege-coexistence.md) | Ontology teams — split workflow with Protégé |
 | [Plugin authoring](plugins.md) | Platform — v0.16+ plugin API (permissions, views, preferences, context actions), manifests, subprocess plugins |
 
-## What ships today (v0.21.0)
+## What ships today (v0.22.0)
 
 | Capability | Status |
 |------------|--------|
@@ -46,7 +46,7 @@ Prefer Protégé or other tools (or wait for v1.0) if you need:
 | OBO write-back in VS Code + CLI (`ontocore-obo`) | **Shipped** (engine v0.12; inspector v0.13) |
 | Turtle domain/range/chains/individual assertions | **Shipped** (v0.12) |
 | OWL/XML · RDF/XML catalog (`.owl`, `.owx`) | **Shipped** (read v0.12; write-back v0.21) |
-| RDF/XML + OWL/XML write-back (semantic re-serialize) | **Shipped** (v0.21) |
+| RDF/XML + OWL/XML write-back (semantic re-serialize) | **Shipped** (v0.21; OWL 2 mutate depth expanded in v0.22) |
 | ROBOT CLI interop (`ontocore robot`, LSP `runRobot`) | **Shipped** (requires Java + `robot` on PATH) |
 | Full OWL 2 DL axiom catalog (all axiom kinds editable) | **Partial** (richest on Turtle; XML core ops) |
 | Semantic diff | **Shipped** (v0.10 — CLI, LSP, VS Code panel) |
@@ -62,7 +62,7 @@ Prefer Protégé or other tools (or wait for v1.0) if you need:
 | Reference plugins (naming validator, Markdown exporter, SHACL scaffold) | **Shipped** (v0.14) |
 | owlmake workflow scaffold (`ontocore workflow run`) | **Shipped** (v0.14 — subprocess; not production-hardened) |
 
-Full gap analysis for evaluators: [Known limitations](../known-limitations.md) · [What ships today](../SHIPPED.md) · [Protégé decision](protege-decision.md). Engineering checklist (historical planning): [Protégé parity matrix](../design/PROTEGE_PARITY.md).
+Full gap analysis for evaluators: [Known limitations](../known-limitations.md) · [What ships today](../SHIPPED.md) · [Protégé decision](protege-decision.md).
 
 ## Deployment model
 
@@ -107,8 +107,8 @@ A [first-week Protégé migration guide](protege-migration.md) ships today. Roun
 - [OWL/XML and RDF/XML write-back](owl-xml-workflow.md) — semantic re-serialize caveats
 
 - Use OntoCode for **Turtle / OBO / RDF/XML / OWL/XML editing in VS Code** (XML with caveats), **CI validation**, **SQL/SPARQL queries**, **Manchester axioms** (richest on Turtle), **workspace refactoring** (Turtle), **property chain editing**, and **EL/RL/RDFS/DL classification**
-- Keep Protégé for **byte-identical XML layout**, **Protégé-specific plugins**, and axiom types not yet in the [Protégé parity matrix](../design/PROTEGE_PARITY.md) until v1.0
-- See [Protégé parity matrix](../design/PROTEGE_PARITY.md) and [What ships today](../SHIPPED.md)
+- Keep Protégé for **byte-identical XML layout**, **Protégé-specific plugins**, and axiom types still listed under [known limitations](../known-limitations.md) until v1.0
+- See [Protégé vs OntoCode](protege-decision.md) and [What ships today](../SHIPPED.md)
 
 ## Evaluation checklist
 
@@ -118,7 +118,7 @@ A [first-week Protégé migration guide](protege-migration.md) ships today. Roun
 4. Run `ontocore validate` and optionally `ontocore classify --profile el` in a test CI job ([ci-integration.md](../ci-integration.md))
 5. Review [Protégé decision matrix](protege-decision.md) and [platform compatibility](platform-compatibility.md)
 6. Review [security policy](../security.md) and [governance](governance.md) with your platform team
-7. Compare [Protégé parity matrix](../design/PROTEGE_PARITY.md) against your requirements; read [release timeline](release-timeline.md) for planning (no fixed v1.0 date)
+7. Compare [What ships today](../SHIPPED.md) and [known limitations](../known-limitations.md) against your requirements; read [release timeline](release-timeline.md) for planning (no fixed v1.0 date)
 
 ## Questions
 

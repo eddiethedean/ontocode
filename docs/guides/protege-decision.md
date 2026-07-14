@@ -1,8 +1,8 @@
 # Protégé vs OntoCode decision matrix
 
-Use this page to decide **when OntoCode fits**, **when to keep Protégé**, and **when to run both**. It reflects **v0.21.0** (latest tagged) — see [What ships today](../SHIPPED.md). A [first-week migration guide](protege-migration.md) ships today; extended round-trip playbooks are planned for **v1.0**.
+Use this page to decide **when OntoCode fits**, **when to keep Protégé**, and **when to run both**. It reflects **v0.22.0** (latest tagged) — see [What ships today](../SHIPPED.md). A [first-week migration guide](protege-migration.md) ships today; extended round-trip playbooks are planned for **v1.0**.
 
-!!! note "Non-goals today (v0.21)"
+!!! note "Non-goals today (v0.22)"
     - **WebProtégé-style collaboration** — out of scope until post-1.0
     - **Byte-identical Protégé OWL/XML / RDF/XML layout** — OntoCode re-serializes for semantic fidelity ([ADR-0021](../design/adr/0021-deterministic-xml-serializers.md)); write-back itself **ships** in v0.21
     - **Stable semver-guaranteed third-party plugin marketplace API** — plugin host MVP shipped; ecosystem hardening is v1.0
@@ -20,9 +20,9 @@ Use this page to decide **when OntoCode fits**, **when to keep Protégé**, and 
 | Enterprise requires vendor SLA / SOC 2 | **Defer** or run limited CI pilot — [Production readiness](production-readiness.md) |
 | Air-gapped VS Code + internal artifact mirror | **Pilot** — [Enterprise deployment](enterprise-deployment.md) |
 
-## Capability comparison (v0.21 tagged)
+## Capability comparison (v0.22 tagged)
 
-| Capability | Protégé | OntoCode v0.21 | Notes |
+| Capability | Protégé | OntoCode v0.22 | Notes |
 |------------|---------|----------------|-------|
 | OWL 2 DL classification | Yes | Yes (`dl` / `auto` via OntoLogos 1.x) | Explanations EL-first; see [Reasoner guide](reasoner.md) |
 | Turtle authoring | Manual / plugins | Native write-back | OntoCode inspector + patches |
@@ -45,7 +45,7 @@ Use this page to decide **when OntoCode fits**, **when to keep Protégé**, and 
 
 ### Path A — CI only (lowest risk)
 
-1. Pin `ontocore-cli` **0.21.0** in Linux CI
+1. Pin `ontocore-cli` **0.22.0** in Linux CI
 2. Gate merges with `ontocore validate`
 3. Optional: `ontocore classify --profile el` when ontology is EL
 4. Keep Protégé on engineer desktops unchanged
@@ -55,7 +55,7 @@ Docs: [CI integration](../ci-integration.md) · [Production evidence protocol](p
 ### Path B — Split workflow (recommended pilot)
 
 1. Author `.ttl` (or editable XML with caveats) in OntoCode; validate in CI
-2. Use Protégé for Protégé-specific plugins, byte-identical XML layout, or axiom types not yet in the parity matrix
+2. Use Protégé for Protégé-specific plugins, byte-identical XML layout, or axiom types not yet covered in [SHIPPED](../SHIPPED.md) / [known limitations](../known-limitations.md)
 3. Standardize on Turtle for shared authoring when you need byte-stable diffs or refactor apply
 4. Run 4–8 week pilot — [Production readiness](production-readiness.md)
 
@@ -63,7 +63,7 @@ Docs: [Protégé coexistence](protege-coexistence.md) · [OWL/XML write-back](ow
 
 ### Path C — Protégé replacement (not supported today)
 
-Do **not** plan org-wide Protégé retirement on pre-1.0 alone. Re-evaluate at **v1.0** against [Protégé parity matrix](../design/PROTEGE_PARITY.md).
+Do **not** plan org-wide Protégé retirement on pre-1.0 alone. Re-evaluate at **v1.0** against [What ships today](../SHIPPED.md) and [known limitations](../known-limitations.md).
 
 ## When OntoCode is a poor fit
 

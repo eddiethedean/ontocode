@@ -1457,7 +1457,47 @@ fn primary_iri_from_turtle_patch(p: &ontocore_owl::PatchOp) -> Option<String> {
         | ontocore_owl::PatchOp::AddDataPropertyAssertion { entity_iri, .. }
         | ontocore_owl::PatchOp::RemoveDataPropertyAssertion { entity_iri, .. }
         | ontocore_owl::PatchOp::AddAnnotation { entity_iri, .. }
-        | ontocore_owl::PatchOp::RemoveAnnotation { entity_iri, .. } => entity_iri.clone(),
+        | ontocore_owl::PatchOp::RemoveAnnotation { entity_iri, .. }
+        | ontocore_owl::PatchOp::AddNegativeObjectPropertyAssertion { entity_iri, .. }
+        | ontocore_owl::PatchOp::RemoveNegativeObjectPropertyAssertion { entity_iri, .. }
+        | ontocore_owl::PatchOp::AddNegativeDataPropertyAssertion { entity_iri, .. }
+        | ontocore_owl::PatchOp::RemoveNegativeDataPropertyAssertion { entity_iri, .. } => {
+            entity_iri.clone()
+        }
+        ontocore_owl::PatchOp::AddHasKey { class_iri, .. }
+        | ontocore_owl::PatchOp::RemoveHasKey { class_iri, .. }
+        | ontocore_owl::PatchOp::AddDisjointUnion { class_iri, .. }
+        | ontocore_owl::PatchOp::RemoveDisjointUnion { class_iri, .. } => class_iri.clone(),
+        ontocore_owl::PatchOp::AddInverseObjectProperties { property_iri, .. }
+        | ontocore_owl::PatchOp::RemoveInverseObjectProperties { property_iri, .. }
+        | ontocore_owl::PatchOp::AddSubObjectPropertyOf { property_iri, .. }
+        | ontocore_owl::PatchOp::RemoveSubObjectPropertyOf { property_iri, .. }
+        | ontocore_owl::PatchOp::AddSubDataPropertyOf { property_iri, .. }
+        | ontocore_owl::PatchOp::RemoveSubDataPropertyOf { property_iri, .. } => {
+            property_iri.clone()
+        }
+        ontocore_owl::PatchOp::AddEquivalentObjectProperties { properties }
+        | ontocore_owl::PatchOp::RemoveEquivalentObjectProperties { properties }
+        | ontocore_owl::PatchOp::AddDisjointObjectProperties { properties }
+        | ontocore_owl::PatchOp::RemoveDisjointObjectProperties { properties }
+        | ontocore_owl::PatchOp::AddEquivalentDataProperties { properties }
+        | ontocore_owl::PatchOp::RemoveEquivalentDataProperties { properties }
+        | ontocore_owl::PatchOp::AddDisjointDataProperties { properties }
+        | ontocore_owl::PatchOp::RemoveDisjointDataProperties { properties } => {
+            properties.first().cloned().unwrap_or_default()
+        }
+        ontocore_owl::PatchOp::AddSameIndividual { individuals }
+        | ontocore_owl::PatchOp::RemoveSameIndividual { individuals }
+        | ontocore_owl::PatchOp::AddDifferentIndividuals { individuals }
+        | ontocore_owl::PatchOp::RemoveDifferentIndividuals { individuals } => {
+            individuals.first().cloned().unwrap_or_default()
+        }
+        ontocore_owl::PatchOp::AddDatatypeDefinition { datatype_iri, .. }
+        | ontocore_owl::PatchOp::RemoveDatatypeDefinition { datatype_iri, .. } => {
+            datatype_iri.clone()
+        }
+        ontocore_owl::PatchOp::AddAxiomAnnotation { subject_iri, .. }
+        | ontocore_owl::PatchOp::RemoveAxiomAnnotation { subject_iri, .. } => subject_iri.clone(),
         ontocore_owl::PatchOp::AddImport { ontology_iri, .. }
         | ontocore_owl::PatchOp::RemoveImport { ontology_iri, .. }
         | ontocore_owl::PatchOp::SetOntologyIri { ontology_iri }
@@ -2698,6 +2738,7 @@ fn entity_kind_to_symbol_kind(kind: EntityKind) -> SymbolKind {
             SymbolKind::PROPERTY
         }
         EntityKind::Individual => SymbolKind::VARIABLE,
+        EntityKind::Datatype => SymbolKind::STRUCT,
         EntityKind::Ontology => SymbolKind::NAMESPACE,
         EntityKind::Other => SymbolKind::OBJECT,
     }

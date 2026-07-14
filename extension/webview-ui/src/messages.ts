@@ -62,8 +62,12 @@ export interface EntityAxiomSummary {
   manchester?: string;
   parent_iri?: string;
   other_iri?: string;
-  /** Member property IRIs for property_chain axioms (ordered). */
+  /** Property / relation IRI for assertion-like axioms. */
+  predicate?: string;
+  /** Member property IRIs for property_chain / has_key / disjoint_union (ordered). */
   properties?: string[];
+  /** Annotations attached to this axiom. */
+  annotations?: EntityAnnotationSummary[];
   editable: boolean;
 }
 

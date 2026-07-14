@@ -7,6 +7,22 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.22.0] - 2026-07-14
+
+### Added
+
+- Complete OWL 2 authoring (`PAR-OWL-001` / EPIC-002): HasKey, DisjointUnion, inverse/equivalent/disjoint object and data properties, sub-property hierarchy, negative assertions, Same/DifferentIndividual, datatype entities and definitions, axiom annotations
+- Manchester: `not`, `value`, `Self`, ObjectOneOf `{…}`, xsd data restrictions / facets
+- XML (RDF/XML / OWL/XML) mutate coverage for the expanded `PatchOp` catalog
+- Entity Inspector sections for HasKey, DisjointUnion, Inverse, Same/Different, NegativeOPA
+- Fixtures `owl2-keys.ttl` / `owl2-abox.ttl` and `tests/owl2_authoring.rs`
+- Inventory: [OWL2_AUTHORING_GAPS.md](docs/protege-parity/06_SUBSYSTEMS/OWL2_AUTHORING_GAPS.md)
+- Migration guide: [docs/migration/v0.22.md](docs/migration/v0.22.md)
+
+### Changed
+
+- Workspace package and all `ontocore-*` crates bumped to **0.22.0**; extension and webview UI **0.22.0**
+
 ## [0.21.0] - 2026-07-13
 
 ### Added

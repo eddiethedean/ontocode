@@ -149,9 +149,9 @@ dependencies = [
 
 [[package]]
 name = "cc"
-version = "1.2.66"
+version = "1.2.67"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f5d6cac793997bd970000024b2934968efe83b382de4fdcf4fcb46b6ee4ad996"
+checksum = "e17dd265a7d0f31ef544e1b20e03add05d3b45b491b633b10d67145d2acc1a38"
 dependencies = [
  "find-msvc-tools",
  "jobserver",
@@ -775,9 +775,9 @@ dependencies = [
 
 [[package]]
 name = "ignore"
-version = "0.4.27"
+version = "0.4.28"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "fe112b004901c62c2faa11f4f75e9864e0cc5af8da71c9115d184a3aa888749f"
+checksum = "2adf14691c72bcfc1058740436a35bdd3ae9c07d1a941ef00b749e9ea16aefa7"
 dependencies = [
  "crossbeam-deque",
  "globset",
@@ -1052,7 +1052,7 @@ checksum = "384b8ab6d37215f3c5301a95a4accb5d64aa607f1fcb26a11b5303878451b4fe"
 
 [[package]]
 name = "ontocode"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "fastobo",
  "ontocore",
@@ -1071,7 +1071,7 @@ dependencies = [
 
 [[package]]
 name = "ontocore"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "ontocore-catalog",
  "ontocore-core",
@@ -1093,7 +1093,7 @@ dependencies = [
 
 [[package]]
 name = "ontocore-catalog"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "hex",
  "ontocore-core",
@@ -1110,7 +1110,7 @@ dependencies = [
 
 [[package]]
 name = "ontocore-cli"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "anyhow",
  "clap",
@@ -1131,7 +1131,7 @@ dependencies = [
 
 [[package]]
 name = "ontocore-core"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "hex",
  "ignore",
@@ -1145,7 +1145,7 @@ dependencies = [
 
 [[package]]
 name = "ontocore-diagnostics"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "ontocore-core",
  "regex",
@@ -1157,7 +1157,7 @@ dependencies = [
 
 [[package]]
 name = "ontocore-diff"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "git2",
  "ontocore-catalog",
@@ -1170,7 +1170,7 @@ dependencies = [
 
 [[package]]
 name = "ontocore-docs"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "minijinja",
  "ontocore-catalog",
@@ -1182,7 +1182,7 @@ dependencies = [
 
 [[package]]
 name = "ontocore-edit"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "ontocore-core",
  "ontocore-obo",
@@ -1194,7 +1194,7 @@ dependencies = [
 
 [[package]]
 name = "ontocore-lsp"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "crossbeam-channel",
  "lsp-server",
@@ -1220,7 +1220,7 @@ dependencies = [
 
 [[package]]
 name = "ontocore-obo"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "fastobo",
  "ontocore-core",
@@ -1232,7 +1232,7 @@ dependencies = [
 
 [[package]]
 name = "ontocore-owl"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "curie",
  "horned-owl",
@@ -1246,7 +1246,7 @@ dependencies = [
 
 [[package]]
 name = "ontocore-parser"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "fastobo",
  "ontocore-core",
@@ -1259,7 +1259,7 @@ dependencies = [
 
 [[package]]
 name = "ontocore-plugin"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "libc",
  "ontocore-catalog",
@@ -1274,7 +1274,7 @@ dependencies = [
 
 [[package]]
 name = "ontocore-plugin-builtins"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "ontocore-plugin",
  "ontocore-plugin-markdown-export",
@@ -1284,7 +1284,7 @@ dependencies = [
 
 [[package]]
 name = "ontocore-plugin-markdown-export"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "clap",
  "ontocore-catalog",
@@ -1295,7 +1295,7 @@ dependencies = [
 
 [[package]]
 name = "ontocore-plugin-naming"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "clap",
  "ontocore-catalog",
@@ -1307,7 +1307,7 @@ dependencies = [
 
 [[package]]
 name = "ontocore-plugin-shacl"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "clap",
  "ontocore-catalog",
@@ -1318,7 +1318,7 @@ dependencies = [
 
 [[package]]
 name = "ontocore-query"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "csv",
  "ontocore-catalog",
@@ -1332,7 +1332,7 @@ dependencies = [
 
 [[package]]
 name = "ontocore-reasoner"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "hex",
  "ontocore-catalog",
@@ -1356,7 +1356,7 @@ dependencies = [
 
 [[package]]
 name = "ontocore-refactor"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "ontocore-catalog",
  "ontocore-core",
@@ -1368,16 +1368,16 @@ dependencies = [
 
 [[package]]
 name = "ontocore-robot"
-version = "0.21.0"
+version = "0.22.0"
 dependencies = [
  "thiserror 2.0.18",
 ]
 
 [[package]]
 name = "ontologos-alc"
-version = "1.1.2"
+version = "1.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f16939be4e141d9997f63b95a60e79133bef23b21335dc4ce190674894ce30b2"
+checksum = "f6dd4cea3d3a9470dc5f83dde7a28ea36a23c57411776b39ed5fd7e5cad8a691"
 dependencies = [
  "ontologos-core",
  "ontologos-parser",
@@ -1390,9 +1390,9 @@ dependencies = [
 
 [[package]]
 name = "ontologos-bridge"
-version = "1.1.2"
+version = "1.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "df23fb53dbc22881194232c724ab241047e42096fe675b048fc3afd1e3ce7775"
+checksum = "4f8c798a3c6f193636b7a2f647931db4b0413e7ce42a91e6f2d339ee76e057de"
 dependencies = [
  "horned-owl",
  "ontologos-core",
@@ -1406,9 +1406,9 @@ dependencies = [
 
 [[package]]
 name = "ontologos-core"
-version = "1.1.2"
+version = "1.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6525e12b595d901a8bfa1ef7c0fca7958dcc3da634e978ae9c9e9d01ef179379"
+checksum = "17cd5bc5717b3d7b58239a43b539a2a33e7cb7b22a9f408e5d6905ed9f719d2a"
 dependencies = [
  "serde",
  "serde_json",
@@ -1418,9 +1418,9 @@ dependencies = [
 
 [[package]]
 name = "ontologos-dl"
-version = "1.1.2"
+version = "1.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "65ace72a28e780549ec34bf1f8ee63a99b4c3e5667a4d443f01315af95b2bf77"
+checksum = "1ef86dab5a6001002e6992b45c66fee354610ff27632bbb7bce0865b3bb8fa9f"
 dependencies = [
  "horned-owl",
  "ontologos-alc",
@@ -1437,9 +1437,9 @@ dependencies = [
 
 [[package]]
 name = "ontologos-el"
-version = "1.1.2"
+version = "1.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "07b25baf640368437cadfba355b304a8b50516abbb90f37b9ab64b9747260cec"
+checksum = "39946999c6eb9801a4ede8a8ab1ad7e37895f937190d10817d710c62a8974a20"
 dependencies = [
  "ontologos-core",
  "ontologos-profile",
@@ -1449,9 +1449,9 @@ dependencies = [
 
 [[package]]
 name = "ontologos-explain"
-version = "1.1.2"
+version = "1.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "98e48b84a49c323479c5efecb17107e7e5b6a271e2aabc04b0f20f6787f143f2"
+checksum = "ec9c939b2f59aeb64310f1069593bd286cfbb373928ce21ba230f07ffbe58259"
 dependencies = [
  "ontologos-core",
  "ontologos-el",
@@ -1463,9 +1463,9 @@ dependencies = [
 
 [[package]]
 name = "ontologos-facade"
-version = "1.1.2"
+version = "1.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "9d4d788b09e831fc7625942952b7e707c31dd047a1652ae9a266684673ad765f"
+checksum = "5bc44939dea537b5421cdb49ce85790415b2f0e352545b4d34756a92cba68306"
 dependencies = [
  "ontologos-bridge",
  "ontologos-core",
@@ -1482,9 +1482,9 @@ dependencies = [
 
 [[package]]
 name = "ontologos-parser"
-version = "1.1.2"
+version = "1.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "454bece11417a09fb284b08fcbcce081794f36abc9e177ae7c20f04b4ab3178d"
+checksum = "ad62294b3dcf9dfdc5e7556690909aafdd9562950538ef485b85140aa1eb4e95"
 dependencies = [
  "horned-owl",
  "libc",
@@ -1495,9 +1495,9 @@ dependencies = [
 
 [[package]]
 name = "ontologos-profile"
-version = "1.1.2"
+version = "1.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ef36a9d4fe2da596fbd5600b9f3a7ba2c474a1729158f667b63166125d9de23d"
+checksum = "c377c52df0e442f851a7a83cd429acc9bea69c36071f3b3848a2a61529521f77"
 dependencies = [
  "ontologos-core",
  "serde",
@@ -1506,9 +1506,9 @@ dependencies = [
 
 [[package]]
 name = "ontologos-ql"
-version = "1.1.2"
+version = "1.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "61fc0cd9909a79891c4e1d1b1c04811704dd4031add3be4b36d6231d542d999f"
+checksum = "fec9d4fa48307a25562fe199868439d4f755e04f9f3a0246479a2b3fc24241a0"
 dependencies = [
  "ontologos-core",
  "thiserror 2.0.18",
@@ -1516,9 +1516,9 @@ dependencies = [
 
 [[package]]
 name = "ontologos-rl"
-version = "1.1.2"
+version = "1.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c81eeae2c0f9d081abdf544718bb75f35d9245059c23cebfeef16cb1e7f1073b"
+checksum = "d59339f9e92c290daf82daf2fd575fd4ac894cb84254e4b30173bc6293477ffb"
 dependencies = [
  "ontologos-bridge",
  "ontologos-core",
@@ -1529,9 +1529,9 @@ dependencies = [
 
 [[package]]
 name = "ontologos-swrl"
-version = "1.1.2"
+version = "1.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "21f033c21346ea5f00cb58e8f9bf93b9ce6b14aac28d6715519e803d7dbcd19c"
+checksum = "6b26682d352df1886c707c78cf4882bc60e6a7f33c262ede5162f3a5e706f65b"
 dependencies = [
  "ontologos-core",
  "ontologos-dl",
@@ -1593,7 +1593,7 @@ dependencies = [
  "oxrdfio 0.1.8",
  "oxrocksdb-sys",
  "oxsdatatypes",
- "rand 0.8.6",
+ "rand 0.8.7",
  "rustc-hash",
  "siphasher",
  "sparesults",
@@ -1651,7 +1651,7 @@ dependencies = [
  "oxilangtag",
  "oxiri",
  "oxsdatatypes",
- "rand 0.8.6",
+ "rand 0.8.7",
  "thiserror 2.0.18",
 ]
 
@@ -1663,7 +1663,7 @@ checksum = "0afd5c28e4a399c57ee2bc3accd40c7b671fdc7b6537499f14e95b265af7d7e0"
 dependencies = [
  "oxilangtag",
  "oxiri",
- "rand 0.9.4",
+ "rand 0.9.5",
  "thiserror 2.0.18",
 ]
 
@@ -1974,9 +1974,9 @@ checksum = "f8dcc9c7d52a811697d2151c701e0d08956f92b0e24136cf4cf27b57a6a0d9bf"
 
 [[package]]
 name = "rand"
-version = "0.8.6"
+version = "0.8.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5ca0ecfa931c29007047d1bc58e623ab12e5590e8c7cc53200d5202b69266d8a"
+checksum = "22f6172bdec972074665ed81ed53b71da00bfc44b65a753cfde883ec4c702a1a"
 dependencies = [
  "libc",
  "rand_chacha 0.3.1",
@@ -1985,9 +1985,9 @@ dependencies = [
 
 [[package]]
 name = "rand"
-version = "0.9.4"
+version = "0.9.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "44c5af06bb1b7d3216d91932aed5265164bf384dc89cd6ba05cf59a35f5f76ea"
+checksum = "b9ef1d0d795eb7d84685bca4f72f3649f064e6641543d3a8c415898726a57b41"
 dependencies = [
  "rand_chacha 0.9.0",
  "rand_core 0.9.5",
@@ -2078,9 +2078,9 @@ dependencies = [
 
 [[package]]
 name = "regex"
-version = "1.12.4"
+version = "1.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f1292b7759ae1cb9ec195452d1390a074f0cd8541ab7a5a8c31cd6db45d4a6ba"
+checksum = "2a0e75113e14dc5acb068cd0786884f214f1312650a3d36d269f5c4f3cdee8a2"
 dependencies = [
  "aho-corasick",
  "memchr",
@@ -2090,9 +2090,9 @@ dependencies = [
 
 [[package]]
 name = "regex-automata"
-version = "0.4.14"
+version = "0.4.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6e1dd4122fc1595e8162618945476892eefca7b88c52820e74af6262213cae8f"
+checksum = "1f388202e4b80542a0921078cc23b6333bcf1409c1e3f86404cae4766a6131db"
 dependencies = [
  "aho-corasick",
  "memchr",
@@ -2157,9 +2157,9 @@ dependencies = [
 
 [[package]]
 name = "rustls"
-version = "0.23.41"
+version = "0.23.42"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6b92b125634d9b795e7beca796cc790df15a7fb38323bf3196fda83292d06b1f"
+checksum = "3c54fcab019b409d04215d3a17cb438fd7fbf192ee61461f20f4fe18704bc138"
 dependencies = [
  "log",
  "once_cell",
@@ -2198,9 +2198,9 @@ checksum = "9774ba4a74de5f7b1c1451ed6cd5285a32eddb5cccb8cc655a4e50009e06477f"
 
 [[package]]
 name = "ryu-js"
-version = "1.0.2"
+version = "1.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dd29631678d6fb0903b69223673e122c32e9ae559d0960a38d574695ebc0ea15"
+checksum = "04d056b875a9d2e6cb9a61d127afee9ac5999b9f87bcb32079d1318e505be714"
 
 [[package]]
 name = "same-file"
@@ -2282,9 +2282,9 @@ dependencies = [
 
 [[package]]
 name = "sha1"
-version = "0.10.6"
+version = "0.10.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e3bf829a2d51ab4a5ddf1352d8470c140cadc8301b2ae1789db023f01cedd6ba"
+checksum = "a978451301f4db1d02937a4ab3ccce137717b81826e79b7d49ffe3244a13c3b8"
 dependencies = [
  "cfg-if",
  "cpufeatures",
@@ -2368,7 +2368,7 @@ dependencies = [
  "oxiri",
  "oxrdf 0.2.4",
  "oxsdatatypes",
- "rand 0.8.6",
+ "rand 0.8.7",
  "regex",
  "rustc-hash",
  "sha1",
@@ -2389,7 +2389,7 @@ dependencies = [
  "oxiri",
  "oxrdf 0.2.4",
  "peg",
- "rand 0.8.6",
+ "rand 0.8.7",
  "thiserror 2.0.18",
 ]
 
@@ -2400,7 +2400,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1790bbdf13560c2afc245ab0f82a489003b3918e668ebd45c65fe46bfd7a1763"
 dependencies = [
  "oxrdf 0.2.4",
- "rand 0.8.6",
+ "rand 0.8.7",
  "spargebra",
 ]
 
@@ -2856,18 +2856,18 @@ dependencies = [
 
 [[package]]
 name = "zerocopy"
-version = "0.8.53"
+version = "0.8.54"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "75726053136156d419e285b9b7eddaaea9e3fea6ce32eed44a89901f0bd98de1"
+checksum = "b7cbbc0a705a0fd05cc3676525980d2bf5a9bc4adac6d6475209a7887cf59d19"
 dependencies = [
  "zerocopy-derive",
 ]
 
 [[package]]
 name = "zerocopy-derive"
-version = "0.8.53"
+version = "0.8.54"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4714fd92cf900833d49538023a9b3915155210801d1c1169eba513b2addefd71"
+checksum = "e2e817b7b52d0c7358d3246da9d69935ebb18116b2b102b4230dac079b4862f5"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -2936,6 +2936,6 @@ dependencies = [
 
 [[package]]
 name = "zmij"
-version = "1.0.21"
+version = "1.0.23"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b8848ee67ecc8aedbaf3e4122217aff892639231befc6a1b58d29fff4c2cabaa"
+checksum = "29666d0abbfad1e3dc4dcf6144730dd3a3ab225bbbdac83319345b1b44ccfc1b"

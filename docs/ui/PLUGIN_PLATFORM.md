@@ -1,6 +1,10 @@
 # PLUGIN_PLATFORM.md
 
-> **Document type:** Product design specification (target state). **Not a shipped feature list.** See [ROADMAP_MAPPING.md](ROADMAP_MAPPING.md) for release mapping and [SHIPPED.md](../SHIPPED.md) for what works today.
+> **Document type:** Product design specification (target state). **Not a shipped feature list.**
+>
+> **Do not implement from this page.** Canonical plugin authoring: [guides/plugins.md](../guides/plugins.md). Capability-provider sketches below describe a future OntoUI layer; the VS Code host today uses TOML manifests + subprocess plugins (shipped since v0.14).
+>
+> See [ROADMAP_MAPPING.md](ROADMAP_MAPPING.md) for release mapping and [SHIPPED.md](../SHIPPED.md) for what works today.
 
 
 # OntoCode Plugin Platform Specification
@@ -9,7 +13,7 @@
 
 The Plugin Platform transforms OntoCode into an ecosystem via **Capability Providers** — typed extension interfaces for reasoning, query, AI, refactoring, and more.
 
-> **Architecture:** [platform/CAPABILITY_PROVIDERS.md](../platform/CAPABILITY_PROVIDERS.md) · **Engineering spec:** [design/PLUGIN_SPEC.md](../design/PLUGIN_SPEC.md) · **Status:** planned v0.14
+> **Architecture:** [platform/CAPABILITY_PROVIDERS.md](../platform/CAPABILITY_PROVIDERS.md) · **Engineering history:** [design/PLUGIN_SPEC.md](../design/PLUGIN_SPEC.md) · **Shipped host (v0.14+):** [Plugin authoring](../guides/plugins.md)
 
 Every major capability should be implemented as a Capability Provider or exposed through the same APIs available to third-party developers.
 

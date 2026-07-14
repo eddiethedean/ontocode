@@ -76,6 +76,7 @@ pub enum EntityKind {
     DataProperty,
     AnnotationProperty,
     Individual,
+    Datatype,
     Ontology,
     Other,
 }
@@ -88,6 +89,7 @@ impl EntityKind {
             Self::DataProperty => "data_property",
             Self::AnnotationProperty => "annotation_property",
             Self::Individual => "individual",
+            Self::Datatype => "datatype",
             Self::Ontology => "ontology",
             Self::Other => "other",
         }
@@ -273,6 +275,13 @@ pub struct Annotation {
     pub source_location: SourceLocation,
 }
 
+/// Annotation attached to an axiom (not an entity annotation assertion).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct AxiomAnnotation {
+    pub predicate: String,
+    pub value: String,
+}
+
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct Axiom {
     pub id: String,
@@ -283,6 +292,9 @@ pub struct Axiom {
     pub axiom_kind: String,
     #[serde(default, skip_serializing_if = "SourceLocation::is_empty")]
     pub source_location: SourceLocation,
+    /// Annotations on this axiom (Horned `AnnotatedComponent.ann`).
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub annotations: Vec<AxiomAnnotation>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -308,6 +320,21 @@ pub const AXIOM_KIND_PROPERTY_CHAIN: &str = "property_chain";
 pub const AXIOM_KIND_CLASS_ASSERTION: &str = "class_assertion";
 pub const AXIOM_KIND_OBJECT_PROPERTY_ASSERTION: &str = "object_property_assertion";
 pub const AXIOM_KIND_DATA_PROPERTY_ASSERTION: &str = "data_property_assertion";
+pub const AXIOM_KIND_HAS_KEY: &str = "has_key";
+pub const AXIOM_KIND_DISJOINT_UNION: &str = "disjoint_union";
+pub const AXIOM_KIND_INVERSE_OBJECT_PROPERTIES: &str = "inverse_object_properties";
+pub const AXIOM_KIND_EQUIVALENT_OBJECT_PROPERTIES: &str = "equivalent_object_properties";
+pub const AXIOM_KIND_DISJOINT_OBJECT_PROPERTIES: &str = "disjoint_object_properties";
+pub const AXIOM_KIND_EQUIVALENT_DATA_PROPERTIES: &str = "equivalent_data_properties";
+pub const AXIOM_KIND_DISJOINT_DATA_PROPERTIES: &str = "disjoint_data_properties";
+pub const AXIOM_KIND_SUB_OBJECT_PROPERTY_OF: &str = "sub_object_property_of";
+pub const AXIOM_KIND_SUB_DATA_PROPERTY_OF: &str = "sub_data_property_of";
+pub const AXIOM_KIND_NEGATIVE_OBJECT_PROPERTY_ASSERTION: &str =
+    "negative_object_property_assertion";
+pub const AXIOM_KIND_NEGATIVE_DATA_PROPERTY_ASSERTION: &str = "negative_data_property_assertion";
+pub const AXIOM_KIND_SAME_INDIVIDUAL: &str = "same_individual";
+pub const AXIOM_KIND_DIFFERENT_INDIVIDUALS: &str = "different_individuals";
+pub const AXIOM_KIND_DATATYPE_DEFINITION: &str = "datatype_definition";
 
 #[cfg(test)]
 mod tests {

@@ -1,6 +1,7 @@
 import type { ApplyAxiomPatchClientResult, PatchOp } from "../lsp/protocol";
 import { applyAxiomPatch } from "../lsp/client";
 import { requirePatchFullySynced } from "../lsp/patchFeedback";
+import { isNotIndexedError } from "../utils/lspErrors";
 import { workspaceEventBus } from "./eventBus";
 import { ontologyRegistry } from "./ontologyRegistry";
 import type { CommittedTransaction, PendingTransaction } from "./types";
@@ -12,14 +13,22 @@ export class WorkspaceTransactionManager {
   private undoStack: CommittedTransaction[] = [];
   private redoStack: CommittedTransaction[] = [];
 
-  begin(
+  async begin(
     documentUri: string,
     documentPath: string,
     patches: PatchOp[],
     label?: string
-  ): PendingTransaction {
+  ): Promise<PendingTransaction> {
     if (this.pending) {
       throw new Error("A workspace transaction is already in progress");
+    }
+    // Sync registry before assert so cold-start / post-NOT_INDEXED edits work (#301).
+    try {
+      await ontologyRegistry.syncFromCatalog();
+    } catch (err) {
+      if (!isNotIndexedError(err)) {
+        throw err;
+      }
     }
     ontologyRegistry.assertEditable(documentPath);
     this.pending = { documentUri, documentPath, patches, label };
@@ -131,7 +140,7 @@ export class WorkspaceTransactionManager {
     patches: PatchOp[],
     label?: string
   ): Promise<ApplyAxiomPatchClientResult> {
-    this.begin(documentUri, documentPath, patches, label);
+    await this.begin(documentUri, documentPath, patches, label);
     return this.commit();
   }
 

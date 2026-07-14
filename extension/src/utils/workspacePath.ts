@@ -55,3 +55,20 @@ export function resolveWorkspaceDocumentUri(
   }
   return documentUriInWorkspace(uriOrPath);
 }
+
+/** Keep only `file:` URIs that resolve inside an open workspace folder (#311). */
+export function filterWorkspaceFileUris(uris: string[]): string[] {
+  const kept: string[] = [];
+  for (const value of uris) {
+    try {
+      const uri = vscode.Uri.parse(value);
+      if (!isUriInWorkspace(uri)) {
+        continue;
+      }
+      kept.push(uri.toString());
+    } catch {
+      // Drop malformed entries.
+    }
+  }
+  return kept;
+}

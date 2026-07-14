@@ -10,6 +10,7 @@
     "src/**/*.e2e.test.ts",
     "src/utils/iri.ts",
     "src/utils/pathUnder.ts",
+    "src/utils/lspErrors.ts",
     "src/lsp/protocol.ts",
     "src/lsp/patchFeedback.ts",
     "src/lsp/protocolGuards.ts",

@@ -1,4 +1,5 @@
 import * as vscode from "vscode";
+import { appendError } from "../logging/errorLog";
 import { focusRelay } from "../focus/focusRelay";
 import { ontologyRegistry } from "./ontologyRegistry";
 import { workspaceEventBus } from "./eventBus";
@@ -48,9 +49,13 @@ export function initializeWorkspaceRuntime(
   }
 
   void (async () => {
-    await waitForWorkspaceFolder();
-    await workspaceSessionPersistence.restore({ reopenPanels: true });
-    await ontologyRegistry.syncFromCatalog();
+    try {
+      await waitForWorkspaceFolder();
+      await workspaceSessionPersistence.restore({ reopenPanels: true });
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      appendError(`Workspace session restore failed: ${message}`, "workspace");
+    }
   })();
 }
 

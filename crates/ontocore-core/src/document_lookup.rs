@@ -5,14 +5,26 @@ pub fn normalize_iri(iri: &str) -> String {
     iri.trim_end_matches('#').trim_end_matches('/').to_string()
 }
 
-/// Canonical `file://` path for workspace document matching.
+/// Canonical `file://` URI for workspace document matching and diagnostics.
+///
+/// Uses the same encoding rules as LSP `path_to_uri` (`url::Url::from_file_path`) so
+/// Windows paths become `file:///C:/…` instead of invalid `file://C:\\…` (#218).
 pub fn file_uri_for_path(path: &std::path::Path) -> String {
-    let display = path.display().to_string();
-    if display.starts_with('/') {
-        format!("file://{display}")
-    } else {
-        format!("file:///{display}")
-    }
+    let abs = path.canonicalize().unwrap_or_else(|_| {
+        if path.is_absolute() {
+            path.to_path_buf()
+        } else {
+            std::env::current_dir().unwrap_or_default().join(path)
+        }
+    });
+    url::Url::from_file_path(&abs).map(|u| u.to_string()).unwrap_or_else(|_| {
+        let display = abs.to_string_lossy().replace('\\', "/");
+        if display.starts_with('/') {
+            format!("file://{display}")
+        } else {
+            format!("file:///{display}")
+        }
+    })
 }
 
 /// Whether `entity` is owned by `doc` via exact ontology id / ontology IRI equality.
@@ -123,6 +135,29 @@ mod tests {
             deprecated: false,
             obo_id: None,
             characteristics: Default::default(),
+        }
+    }
+
+    #[test]
+    fn file_uri_for_path_uses_url_encoding() {
+        let dir = tempfile::tempdir().unwrap();
+        let file = dir.path().join("sample.ttl");
+        std::fs::write(&file, "").unwrap();
+        let uri = file_uri_for_path(&file);
+        assert!(uri.starts_with("file://"), "got {uri}");
+        assert!(!uri.contains('\\'), "Windows separators must not appear raw: {uri}");
+        // Drive-letter URIs are file:///C:/… (three slashes after file:).
+        #[cfg(windows)]
+        {
+            assert!(
+                uri.starts_with("file:///"),
+                "Windows file URI should use three slashes: {uri}"
+            );
+            assert!(uri.contains(":/") || uri.contains("%3A"), "got {uri}");
+        }
+        #[cfg(unix)]
+        {
+            assert!(uri.starts_with("file:///"), "got {uri}");
         }
     }
 

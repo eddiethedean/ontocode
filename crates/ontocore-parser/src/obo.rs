@@ -162,9 +162,7 @@ fn property_value_parts(
 ) -> (String, String) {
     let predicate = obo_id_to_iri(&ident_to_string(pv.property()), namespaces);
     let object = match pv {
-        PropertyValue::Resource(r) => {
-            obo_id_to_iri(&ident_to_string(r.target()), namespaces)
-        }
+        PropertyValue::Resource(r) => obo_id_to_iri(&ident_to_string(r.target()), namespaces),
         PropertyValue::Literal(l) => l.literal().as_str().to_string(),
     };
     (predicate, object)
@@ -293,8 +291,10 @@ property_value: shoe_size \"8\" xsd:positiveInteger\n";
         let resource = parsed
             .annotations
             .iter()
-            .find(|a| a.predicate == "http://purl.org/dc/elements/1.1/dc_creator"
-                || a.predicate == "http://purl.org/dc/elements/1.1/creator")
+            .find(|a| {
+                a.predicate == "http://purl.org/dc/elements/1.1/dc_creator"
+                    || a.predicate == "http://purl.org/dc/elements/1.1/creator"
+            })
             .expect("dc:creator annotation");
         assert!(
             !resource.object.contains("dc:creator"),
@@ -306,11 +306,8 @@ property_value: shoe_size \"8\" xsd:positiveInteger\n";
             "object should be the ORCID target: {}",
             resource.object
         );
-        let literal = parsed
-            .annotations
-            .iter()
-            .find(|a| a.object == "8")
-            .expect("shoe_size literal");
+        let literal =
+            parsed.annotations.iter().find(|a| a.object == "8").expect("shoe_size literal");
         assert!(!literal.object.contains("shoe_size"));
         let predicates: std::collections::BTreeSet<_> =
             parsed.quads().iter().map(|q| q.predicate.as_str().to_string()).collect();

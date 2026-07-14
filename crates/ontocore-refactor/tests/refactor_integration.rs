@@ -709,11 +709,8 @@ fn move_entity_into_nonempty_target_merges_missing_prefixes() {
     std::fs::create_dir_all(ws).unwrap();
     std::fs::copy(fixture_dir().join("people.ttl"), ws.join("people.ttl")).unwrap();
     // Target has owl but not ex — the moved block uses ex: CURIE (#314).
-    std::fs::write(
-        ws.join("target.ttl"),
-        "@prefix owl: <http://www.w3.org/2002/07/owl#> .\n",
-    )
-    .unwrap();
+    std::fs::write(ws.join("target.ttl"), "@prefix owl: <http://www.w3.org/2002/07/owl#> .\n")
+        .unwrap();
     let catalog = build_catalog(ws);
     let plan = preview_move_entity(
         &catalog,

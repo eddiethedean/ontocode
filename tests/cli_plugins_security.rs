@@ -116,7 +116,9 @@ diagnostics = true
         .expect_err("subprocess validate without workspace.write must fail (#315)");
     let msg = err.to_string();
     assert!(
-        msg.contains("WorkspaceWrite") || msg.contains("workspace.write") || msg.contains("Missing"),
+        msg.contains("WorkspaceWrite")
+            || msg.contains("workspace.write")
+            || msg.contains("Missing"),
         "expected missing write permission, got {msg}"
     );
 }

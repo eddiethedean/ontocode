@@ -366,9 +366,7 @@ fn remove_entity_components(
     let domains: Vec<_> = ont
         .i()
         .object_property_domain()
-        .filter(|ax| {
-            ope_mentions(&ax.ope, entity_iri) || class_expr_mentions(&ax.ce, entity_iri)
-        })
+        .filter(|ax| ope_mentions(&ax.ope, entity_iri) || class_expr_mentions(&ax.ce, entity_iri))
         .cloned()
         .collect();
     for ax in domains {
@@ -378,9 +376,7 @@ fn remove_entity_components(
     let ranges: Vec<_> = ont
         .i()
         .object_property_range()
-        .filter(|ax| {
-            ope_mentions(&ax.ope, entity_iri) || class_expr_mentions(&ax.ce, entity_iri)
-        })
+        .filter(|ax| ope_mentions(&ax.ope, entity_iri) || class_expr_mentions(&ax.ce, entity_iri))
         .cloned()
         .collect();
     for ax in ranges {
@@ -450,10 +446,7 @@ fn set_ontology_iri(
         Some(v) => Some(build.iri(v)),
         None => preserved_viri,
     };
-    ont.insert(Component::OntologyID(OntologyID {
-        iri: Some(build.iri(ontology_iri)),
-        viri,
-    }));
+    ont.insert(Component::OntologyID(OntologyID { iri: Some(build.iri(ontology_iri)), viri }));
 }
 
 #[cfg(test)]
@@ -477,9 +470,7 @@ mod tests {
         let (mut ont, _ns) = load_rdf_xml_ontology(source).expect("load");
         apply_patches_to_ontology(
             &mut ont,
-            &[PatchOp::SetOntologyIri {
-                ontology_iri: "http://example.org/ont-renamed".into(),
-            }],
+            &[PatchOp::SetOntologyIri { ontology_iri: "http://example.org/ont-renamed".into() }],
         )
         .expect("set ontology iri");
         let id = ont.i().the_ontology_id().expect("ontology id");
@@ -516,9 +507,7 @@ mod tests {
         let (mut ont, _ns) = load_rdf_xml_ontology(source).expect("load");
         apply_patches_to_ontology(
             &mut ont,
-            &[PatchOp::DeleteEntity {
-                entity_iri: "http://example.org/ont#A".into(),
-            }],
+            &[PatchOp::DeleteEntity { entity_iri: "http://example.org/ont#A".into() }],
         )
         .expect("delete");
         assert_eq!(
@@ -543,7 +532,10 @@ mod tests {
         assert_eq!(
             ont.i()
                 .equivalent_class()
-                .filter(|ax| ax.0.iter().any(|ce| class_expr_mentions(ce, "http://example.org/ont#A")))
+                .filter(|ax| ax
+                    .0
+                    .iter()
+                    .any(|ce| class_expr_mentions(ce, "http://example.org/ont#A")))
                 .count(),
             0
         );

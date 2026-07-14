@@ -20,7 +20,8 @@ Recent documented releases (see [changelog](../changelog.md)):
 
 | Version | Date (changelog) |
 |---------|------------------|
-| 0.21.0 (in progress) | — |
+| 0.21.0 | 2026-07-13 |
+| 0.20.0 | 2026-07-13 |
 | 0.19.0 | 2026-07-13 |
 | 0.18.2 | 2026-07-13 |
 | 0.18.1 | 2026-07-12 |

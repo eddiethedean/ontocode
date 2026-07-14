@@ -655,11 +655,9 @@ mod tests {
     #[test]
     fn parenthesized_where_equality_succeeds() {
         let catalog = fixture_catalog();
-        let result = run_sql(
-            &catalog,
-            "SELECT short_name FROM classes WHERE (short_name = 'Person')",
-        )
-        .expect("parenthesized equality (#238)");
+        let result =
+            run_sql(&catalog, "SELECT short_name FROM classes WHERE (short_name = 'Person')")
+                .expect("parenthesized equality (#238)");
         assert_eq!(result.rows.len(), 1);
         assert_eq!(result.rows[0].get("short_name").map(String::as_str), Some("Person"));
     }
@@ -686,10 +684,7 @@ mod tests {
         )
         .unwrap_err();
         let msg = err.to_string();
-        assert!(
-            msg.contains("bare column"),
-            "expected bare-column error, got {msg}"
-        );
+        assert!(msg.contains("bare column"), "expected bare-column error, got {msg}");
     }
 
     #[test]
@@ -701,10 +696,7 @@ mod tests {
         )
         .unwrap_err();
         let msg = err.to_string();
-        assert!(
-            msg.contains("bare column"),
-            "expected bare-column error, got {msg}"
-        );
+        assert!(msg.contains("bare column"), "expected bare-column error, got {msg}");
     }
 
     #[test]

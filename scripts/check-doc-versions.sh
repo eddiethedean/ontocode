@@ -422,6 +422,13 @@ fi
 check_file_contains ".github/workflows/release.yml" "publish_crate ontocore-obo" "release.yml publishes ontocore-obo"
 check_file_contains ".github/workflows/release.yml" "publish_crate ontocore-edit" "release.yml publishes ontocore-edit"
 check_file_contains ".github/workflows/release.yml" "publish_crate ontocore-swrl" "release.yml publishes ontocore-swrl"
+# refactor depends on swrl — publish order must list swrl first
+if ! awk '/publish_crate ontocore-swrl/{s=NR} /publish_crate ontocore-refactor/{r=NR} END{exit !(s && r && s < r)}' .github/workflows/release.yml; then
+  echo "FAIL: release.yml must publish ontocore-swrl before ontocore-refactor" >&2
+  fail=1
+else
+  echo "ok: release.yml publishes ontocore-swrl before ontocore-refactor"
+fi
 check_file_contains ".github/workflows/release.yml" "publish_crate ontocore" "release.yml publishes ontocore"
 
 # docs/contributing.md should track root CONTRIBUTING.md (OntoCore branding)

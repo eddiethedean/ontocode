@@ -215,7 +215,7 @@ jobs:
                 return 0
               fi
               echo "${output}"
-              if echo "${output}" | grep -qE 'already exists on crates.io index'; then
+              if echo "${output}" | grep -qE 'already exists on crates.io index|crate version .* is already uploaded|is already uploaded'; then
                 echo "Skipping ${crate}: version already published"
                 rm -rf target/package
                 return 0
@@ -248,9 +248,10 @@ jobs:
           publish_crate ontocore-catalog
           publish_crate ontocore-diff
           publish_crate ontocore-docs
+          # refactor depends on ontocore-swrl (must publish before refactor)
+          publish_crate ontocore-swrl
           publish_crate ontocore-refactor
           publish_crate ontocore-query
-          publish_crate ontocore-swrl
           publish_crate ontocore-reasoner
           publish_crate ontocore-robot
           publish_crate ontocore-plugin

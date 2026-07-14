@@ -11,37 +11,27 @@ env:
   RUST_BACKTRACE: 1
 
 jobs:
+  # Tag gates only — full clippy/tests/extension e2e already run on the
+  # release commit via ci.yml. Re-running them here doubled wall time and
+  # forced cargo clean (disk) on every tag.
   preflight:
-    name: Preflight (CI gates)
+    name: Preflight (tag gates)
     runs-on: ubuntu-latest
+    permissions:
+      actions: read
+      contents: read
     steps:
       - uses: actions/checkout@v6
 
-      # Same reclaim as CI test/MSRV jobs — clippy --all-features + workspace
-      # tests otherwise exhaust the ~14GB runner disk (v0.18.0 release failure).
-      - name: Free disk space
+      - name: Verify tag matches workspace version
         run: |
           set -euo pipefail
-          echo "Disk before cleanup:"
-          df -h
-          sudo rm -rf /usr/share/dotnet
-          sudo rm -rf /usr/local/lib/android
-          sudo rm -rf /opt/ghc
-          sudo rm -rf /opt/hostedtoolcache/CodeQL
-          sudo docker image prune --all --force || true
-          echo "Disk after cleanup:"
-          df -h
-
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          components: rustfmt, clippy
-
-      - uses: Swatinem/rust-cache@v2
-        with:
-          shared-key: release-preflight
-
-      - name: rustfmt
-        run: cargo fmt --all -- --check
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          WORKSPACE_VERSION=$(awk '/^\[workspace.package\]/{found=1} found && /^version = /{print $3; exit}' Cargo.toml | tr -d '"')
+          if [ "$TAG_VERSION" != "$WORKSPACE_VERSION" ]; then
+            echo "Tag ${GITHUB_REF_NAME} (v${TAG_VERSION}) does not match workspace version ${WORKSPACE_VERSION}"
+            exit 1
+          fi
 
       - name: Documentation version sync
         run: |
@@ -49,89 +39,41 @@ jobs:
           chmod +x scripts/check-doc-versions.sh
           ./scripts/check-doc-versions.sh
 
-      - name: clippy
-        run: cargo clippy --workspace --all-targets --all-features -- -D warnings
-
-      # Drop the all-features clippy tree before test profile rebuilds.
-      - name: Reclaim disk after clippy
-        run: |
-          set -euo pipefail
-          cargo clean
-          df -h
-
-      - name: Build core binaries (cached for tests)
-        run: cargo build -p ontocore-lsp -p ontocore-cli --bins
-
-      - name: cargo test --workspace
-        run: cargo test --workspace
-
-      - name: MkDocs (strict)
-        uses: actions/setup-python@v5
+      - uses: dtolnay/rust-toolchain@stable
         with:
-          python-version: "3.12"
+          components: rustfmt
 
-      - name: Install MkDocs deps
-        run: pip install -r docs/requirements.txt
+      - name: rustfmt
+        run: cargo fmt --all -- --check
 
-      - name: Build documentation
+      - name: Require green CI on tagged commit
         env:
-          DISABLE_MKDOCS_2_WARNING: "true"
-        run: mkdocs build --strict
-
-      - name: Webview UI tests
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: npm
-          cache-dependency-path: extension/webview-ui/package-lock.json
-
-      - run: npm ci
-        working-directory: extension/webview-ui
-
-      - run: npm test
-        working-directory: extension/webview-ui
-
-      - name: Extension build + tests (bundled LSP)
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
-          cache: npm
-          cache-dependency-path: extension/package-lock.json
-
-      - run: npm ci
-        working-directory: extension
-
-      - run: npm run compile
-        working-directory: extension
-
-      - name: Extension unit and bundled-LSP e2e tests
-        run: npm test
-        working-directory: extension
-        env:
-          ONTOCORE_LSP_BIN: ${{ github.workspace }}/target/debug/ontocore-lsp
-
-      - name: cargo audit
+          GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          cargo install cargo-audit --locked
-          cargo audit
+          echo "Looking for successful ci.yml run on ${GITHUB_SHA}..."
+          for i in $(seq 1 30); do
+            json=$(gh run list --workflow=ci.yml --commit="${GITHUB_SHA}" --limit 10 \
+              --json databaseId,conclusion,status,url,displayTitle)
+            echo "${json}" | jq -c '.[]' || true
 
-      - name: Crate packaging (dry-run + build sanity)
-        run: |
-          set -euo pipefail
-          # Only leaf crates (no unpublished path deps) can dry-run here.
-          # Full graph is published in dependency order on release tags.
-          cargo publish -p ontocore-core --dry-run
-          cargo publish -p ontocore-robot --dry-run
-          cargo build -p ontocore-diagnostics -p ontocore-owl -p ontocore-cli -p ontocore
+            if echo "${json}" | jq -e '[.[] | select(.conclusion == "success")] | length > 0' >/dev/null; then
+              echo "Found successful CI run for ${GITHUB_SHA}"
+              exit 0
+            fi
 
-      - name: CLI smoke
-        run: |
-          set -euo pipefail
-          cargo run -- query fixtures "SELECT * FROM classes"
-          cargo run -- validate fixtures
-          cargo run -- query fixtures "SELECT code FROM diagnostics"
-          cargo run -- sparql fixtures "SELECT ?s WHERE { ?s ?p ?o } LIMIT 1"
+            if echo "${json}" | jq -e '[.[] | select(.conclusion != null and .conclusion != "success" and .conclusion != "skipped" and .conclusion != "cancelled")] | length > 0' >/dev/null \
+              && ! echo "${json}" | jq -e '[.[] | select(.status == "in_progress" or .status == "queued" or .status == "pending" or .status == "waiting")] | length > 0' >/dev/null; then
+              echo "CI failed on ${GITHUB_SHA}; refusing to release. Fix CI before retagging."
+              exit 1
+            fi
+
+            echo "CI not green yet; waiting 30s (attempt ${i}/30)..."
+            sleep 30
+          done
+          echo "Timed out waiting for green CI on ${GITHUB_SHA}."
+          echo "Tag only after CI is green on the release commit (see docs/releasing.md)."
+          exit 1
 
   build-lsp:
     name: LSP (${{ matrix.bundle_dir }})
@@ -196,7 +138,136 @@ jobs:
           path: bundle/
           retention-days: 1
 
-  release:
+  # Starts as soon as tag gates pass — overlaps with the LSP matrix.
+  publish-crates:
+    name: Publish crates.io
+    needs: [preflight]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Free disk space
+        run: |
+          set -euo pipefail
+          echo "Disk before cleanup:"
+          df -h
+          sudo rm -rf /usr/share/dotnet
+          sudo rm -rf /usr/local/lib/android
+          sudo rm -rf /opt/ghc
+          sudo rm -rf /opt/hostedtoolcache/CodeQL
+          sudo docker image prune --all --force || true
+          echo "Disk after cleanup:"
+          df -h
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: release-publish
+
+      # New versions of existing crates: burst 30, then ~1/min
+      # (https://crates.io/docs/rate-limits). Do not sleep proactively —
+      # only back off on 429 / index lag. --no-verify: packaging verified in CI.
+      - name: Publish crates to crates.io
+        env:
+          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+          INDEX_RETRY_SECONDS: 30
+          RATE_LIMIT_RETRY_SECONDS: 60
+        run: |
+          set -euo pipefail
+          echo "Disk before crate publish:"
+          df -h
+
+          rate_limit_sleep_seconds() {
+            local output="$1"
+            local default="${RATE_LIMIT_RETRY_SECONDS}"
+            local secs
+            secs=$(echo "${output}" | grep -oiE 'retry-after:[[:space:]]*[0-9]+' | head -1 | grep -oE '[0-9]+' || true)
+            if [ -n "${secs}" ]; then
+              echo "${secs}"
+              return
+            fi
+            # Body style: "Please try again after <HTTP-date>"
+            local when
+            when=$(echo "${output}" | grep -oiE 'try again after [^[:space:]].+' | head -1 | sed -E 's/[Pp]lease try again after //;s/\..*//;s/[[:space:]]+$//' || true)
+            if [ -n "${when}" ]; then
+              local target now delta
+              target=$(date -u -d "${when}" +%s 2>/dev/null || date -u -j -f "%a, %d %b %Y %H:%M:%S %Z" "${when}" +%s 2>/dev/null || true)
+              now=$(date -u +%s)
+              if [ -n "${target}" ] && [ "${target}" -gt "${now}" ]; then
+                delta=$((target - now + 2))
+                echo "${delta}"
+                return
+              fi
+            fi
+            echo "${default}"
+          }
+
+          publish_crate() {
+            local crate="$1"
+            local attempt output wait_secs
+            for attempt in 1 2 3 4 5 6 7 8; do
+              echo "Publishing ${crate} (attempt ${attempt})..."
+              if output=$(cargo publish -p "${crate}" --locked --no-verify 2>&1); then
+                echo "${output}"
+                echo "Published ${crate}"
+                rm -rf target/package
+                return 0
+              fi
+              echo "${output}"
+              if echo "${output}" | grep -qE 'already exists on crates.io index'; then
+                echo "Skipping ${crate}: version already published"
+                rm -rf target/package
+                return 0
+              fi
+              if echo "${output}" | grep -qE 'status 400 Bad Request|expected at most'; then
+                echo "Non-retryable publish error for ${crate}"
+                return 1
+              fi
+              if echo "${output}" | grep -qE 'status 429 Too Many Requests|published too many new crates|published too many crate versions'; then
+                wait_secs=$(rate_limit_sleep_seconds "${output}")
+                echo "Rate limited by crates.io; waiting ${wait_secs}s..."
+                sleep "${wait_secs}"
+                continue
+              fi
+              if [ "${attempt}" -lt 8 ]; then
+                echo "Waiting ${INDEX_RETRY_SECONDS}s for crates.io index to update..."
+                sleep "${INDEX_RETRY_SECONDS}"
+              fi
+            done
+            echo "Failed to publish ${crate}"
+            return 1
+          }
+
+          publish_crate ontocore-core
+          publish_crate ontocore-parser
+          publish_crate ontocore-owl
+          publish_crate ontocore-obo
+          publish_crate ontocore-edit
+          publish_crate ontocore-diagnostics
+          publish_crate ontocore-catalog
+          publish_crate ontocore-diff
+          publish_crate ontocore-docs
+          publish_crate ontocore-refactor
+          publish_crate ontocore-query
+          publish_crate ontocore-swrl
+          publish_crate ontocore-reasoner
+          publish_crate ontocore-robot
+          publish_crate ontocore-plugin
+          publish_crate ontocore-plugin-naming
+          publish_crate ontocore-plugin-markdown-export
+          publish_crate ontocore-plugin-shacl
+          publish_crate ontocore-plugin-builtins
+          publish_crate ontocore-lsp
+          publish_crate ontocore
+          publish_crate ontocore-cli
+
+          echo "Disk after crate publish:"
+          df -h
+
+  # Overlaps with publish-crates once LSP artifacts are ready.
+  package-release:
+    name: Package + GitHub Release
     needs: [preflight, build-lsp]
     runs-on: ubuntu-latest
     permissions:
@@ -217,116 +288,14 @@ jobs:
           echo "Disk after cleanup:"
           df -h
 
-      - name: Install Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
-
-      - name: Verify tag matches workspace version
-        run: |
-          TAG_VERSION="${GITHUB_REF_NAME#v}"
-          WORKSPACE_VERSION=$(awk '/^\[workspace.package\]/{found=1} found && /^version = /{print $3; exit}' Cargo.toml | tr -d '"')
-          if [ "$TAG_VERSION" != "$WORKSPACE_VERSION" ]; then
-            echo "Tag ${GITHUB_REF_NAME} (v${TAG_VERSION}) does not match workspace version ${WORKSPACE_VERSION}"
-            exit 1
-          fi
+      - uses: dtolnay/rust-toolchain@stable
 
       - uses: Swatinem/rust-cache@v2
         with:
-          shared-key: release
+          shared-key: release-package
 
-      # Full workspace tests run on main in CI; release stays lean to avoid runner disk exhaustion.
-      - name: Verify release binaries build
-        run: cargo build --release --locked -p ontocore-cli -p ontocore --bins
-
-      - name: Publish crates to crates.io
-        env:
-          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
-          PUBLISH_PAUSE_SECONDS: 120
-          INDEX_RETRY_SECONDS: 60
-          RATE_LIMIT_RETRY_SECONDS: 180
-        run: |
-          set -euo pipefail
-          echo "Disk before crate publish:"
-          df -h
-
-          wait_between_crates() {
-            echo "Waiting ${PUBLISH_PAUSE_SECONDS}s before next crate (crates.io new-crate rate limit)..."
-            sleep "${PUBLISH_PAUSE_SECONDS}"
-          }
-
-          publish_crate() {
-            local crate="$1"
-            local attempt
-            for attempt in 1 2 3 4 5 6; do
-              echo "Publishing ${crate} (attempt ${attempt})..."
-              if output=$(cargo publish -p "${crate}" --locked 2>&1); then
-                echo "${output}"
-                echo "Published ${crate}"
-                echo "new" > "/tmp/publish-${crate}"
-                rm -rf target/package
-                return 0
-              fi
-              echo "${output}"
-              if echo "${output}" | grep -qE 'already exists on crates.io index'; then
-                echo "Skipping ${crate}: version already published"
-                echo "skip" > "/tmp/publish-${crate}"
-                rm -rf target/package
-                return 0
-              fi
-              if echo "${output}" | grep -qE 'status 400 Bad Request|expected at most'; then
-                echo "Non-retryable publish error for ${crate}"
-                return 1
-              fi
-              if echo "${output}" | grep -qE 'status 429 Too Many Requests|published too many new crates'; then
-                echo "Rate limited by crates.io; waiting ${RATE_LIMIT_RETRY_SECONDS}s..."
-                sleep "${RATE_LIMIT_RETRY_SECONDS}"
-                continue
-              fi
-              if [ "${attempt}" -lt 6 ]; then
-                echo "Waiting ${INDEX_RETRY_SECONDS}s for crates.io index to update..."
-                sleep "${INDEX_RETRY_SECONDS}"
-              fi
-            done
-            echo "Failed to publish ${crate}"
-            return 1
-          }
-
-          publish_with_pause() {
-            local crate="$1"
-            publish_crate "${crate}"
-            if [ "$(cat "/tmp/publish-${crate}")" = "new" ]; then
-              wait_between_crates
-            fi
-          }
-
-          publish_with_pause ontocore-core
-          publish_with_pause ontocore-parser
-          publish_with_pause ontocore-owl
-          publish_with_pause ontocore-obo
-          publish_with_pause ontocore-edit
-          publish_with_pause ontocore-diagnostics
-          publish_with_pause ontocore-catalog
-          publish_with_pause ontocore-diff
-          publish_with_pause ontocore-docs
-          publish_with_pause ontocore-refactor
-          publish_with_pause ontocore-query
-          publish_with_pause ontocore-swrl
-          publish_with_pause ontocore-reasoner
-          publish_with_pause ontocore-robot
-          publish_with_pause ontocore-plugin
-          publish_with_pause ontocore-plugin-naming
-          publish_with_pause ontocore-plugin-markdown-export
-          publish_with_pause ontocore-plugin-shacl
-          publish_with_pause ontocore-plugin-builtins
-          publish_with_pause ontocore-lsp
-          publish_with_pause ontocore
-          publish_crate ontocore-cli
-
-          cargo clean
-          echo "Disk after crate publish:"
-          df -h
-
-      - name: Build CLI binary
-        run: cargo build --release --locked -p ontocore-cli
+      - name: Build CLI release binary
+        run: cargo build --release --locked -p ontocore-cli --bins
 
       - name: Download multi-platform LSP binaries
         uses: actions/download-artifact@v4

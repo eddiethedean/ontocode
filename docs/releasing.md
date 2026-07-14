@@ -57,7 +57,7 @@ Source of truth: **[docs/SHIPPED.md](SHIPPED.md)** and **[docs/supported-formats
 - [ ] [docs/design/LICENSES.md](design/LICENSES.md) — dependency sections
 - [ ] Run `./scripts/build-docs.sh` locally before tagging
 - [ ] Build tutorial pack: `./scripts/package-tutorial-zip.sh` and attach `ontocode-tutorial.zip` to the GitHub Release
-- [ ] Ensure **CI is green on the release commit** before tagging (the release workflow also re-runs preflight gates including `cargo test --workspace`)
+- [ ] Ensure **CI is green on the release commit** before tagging (the release workflow **requires** a successful `ci.yml` run on that SHA; it does not re-run the full test suite)
 
 ## Tag and publish
 
@@ -70,13 +70,10 @@ git push origin v0.24.0
 
 The [release workflow on GitHub](https://github.com/eddiethedean/ontocode/blob/main/.github/workflows/release.yml):
 
-1. Builds multi-platform `ontocore-lsp` binaries (matrix job)
-2. Verifies the tag matches `Cargo.toml` and release binaries build
-3. Publishes workspace crates to [crates.io](https://crates.io/) in dependency order
-4. Creates a GitHub Release with:
-   - `ontocore` Linux x64 binary
-   - `ontocore-lsp` per-platform archives
-   - Multi-platform `ontocode-*.vsix`
+1. **Preflight (tag gates):** tag↔version match, doc version sync, rustfmt, and a green `ci.yml` run on the tagged SHA (waits briefly if CI is still in progress)
+2. **LSP matrix** (parallel with publish after preflight): multi-platform `ontocore-lsp` binaries
+3. **Publish crates.io** (starts after preflight; overlaps LSP builds): workspace crates in dependency order with `--no-verify`, retrying only on 429 / index lag (no fixed inter-crate sleep — crates.io allows a burst of 30 version updates)
+4. **Package + GitHub Release** (after LSP matrix): Linux x64 `ontocore` CLI, per-platform LSP archives, multi-platform VSIX, Open VSX (if `OVSX_PAT` is set), `SHA256SUMS` + `NOTICES`
 
 Requires the `CARGO_REGISTRY_TOKEN` repository secret. For Open VSX (Cursor), set `OVSX_PAT` — see [marketplace-publish.md](marketplace-publish.md).
 

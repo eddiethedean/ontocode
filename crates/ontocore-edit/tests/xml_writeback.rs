@@ -45,3 +45,27 @@ fn owl_xml_transaction_create_class() {
     let text = result.preview_text.expect("preview");
     assert!(text.contains("Team") || text.contains("#Team"));
 }
+
+#[test]
+fn rdf_xml_transaction_set_ontology_iri_keeps_version_iri_text() {
+    let source = r#"<?xml version="1.0"?>
+<rdf:RDF xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+    <owl:Ontology rdf:about="http://example.org/ont">
+        <owl:versionIRI rdf:resource="http://example.org/ont/1.0"/>
+    </owl:Ontology>
+</rdf:RDF>"#;
+    let txn = Transaction::from_turtle(vec![PatchOp::SetOntologyIri {
+        ontology_iri: "http://example.org/ont-renamed".into(),
+    }]);
+    let result =
+        apply_transaction_to_text_as(&txn, source, true, &BTreeMap::new(), EditFormat::RdfXml)
+            .expect("apply");
+    let text = result.preview_text.expect("preview");
+    assert!(text.contains("http://example.org/ont-renamed"));
+    assert!(
+        text.contains("http://example.org/ont/1.0"),
+        "version IRI must survive SetOntologyIri (#303): {text}"
+    );
+}

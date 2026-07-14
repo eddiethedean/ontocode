@@ -6,7 +6,7 @@ use horned_owl::model::{
     AnnotatedComponent, Annotation, AnnotationAssertion, AnnotationSubject, AnnotationValue, Build,
     Class, ClassAssertion, ClassExpression, Component, DeclareClass, DeclareDataProperty,
     DeclareNamedIndividual, DeclareObjectProperty, Import, Individual, Literal, MutableOntology,
-    OntologyID, RcAnnotatedComponent, RcStr, SubClassOf,
+    ObjectPropertyExpression, OntologyID, RcAnnotatedComponent, RcStr, SubClassOf,
 };
 use horned_owl::ontology::component_mapped::ComponentMappedOntology;
 
@@ -281,7 +281,7 @@ fn remove_entity_components(
     ont: &mut ComponentMappedOntology<RcStr, RcAnnotatedComponent>,
     entity_iri: &str,
 ) {
-    // Remove declaration + annotation assertions + subclass axioms mentioning the entity.
+    // Declarations
     let declares: Vec<_> =
         ont.i().declare_class().filter(|d| d.0.to_string() == entity_iri).cloned().collect();
     for d in declares {
@@ -314,23 +314,125 @@ fn remove_entity_components(
     for d in ni_declares {
         let _ = ont.take(&AnnotatedComponent::from(Component::DeclareNamedIndividual(d)));
     }
-    remove_annotation_assertions(ont, entity_iri, RDFS_LABEL, None);
-    remove_annotation_assertions(ont, entity_iri, RDFS_COMMENT, None);
+
+    // All annotation assertions on the entity (#304) — not just label/comment.
+    let anns: Vec<_> = ont
+        .i()
+        .annotation_assertion()
+        .filter(|ax| {
+            matches!(
+                &ax.subject,
+                AnnotationSubject::IRI(iri) if iri.to_string() == entity_iri
+            )
+        })
+        .cloned()
+        .collect();
+    for ax in anns {
+        let _ = ont.take(&AnnotatedComponent::from(Component::AnnotationAssertion(ax)));
+    }
+
     let sco: Vec<_> = ont
         .i()
         .sub_class_of()
         .filter(|ax| {
-            matches!(&ax.sub, ClassExpression::Class(Class(iri)) if iri.to_string() == entity_iri)
-                || matches!(
-                    &ax.sup,
-                    ClassExpression::Class(Class(iri)) if iri.to_string() == entity_iri
-                )
+            class_expr_mentions(&ax.sub, entity_iri) || class_expr_mentions(&ax.sup, entity_iri)
         })
         .cloned()
         .collect();
     for ax in sco {
         let _ = ont.take(&AnnotatedComponent::from(Component::SubClassOf(ax)));
     }
+
+    let eqs: Vec<_> = ont
+        .i()
+        .equivalent_class()
+        .filter(|ax| ax.0.iter().any(|ce| class_expr_mentions(ce, entity_iri)))
+        .cloned()
+        .collect();
+    for ax in eqs {
+        let _ = ont.take(&AnnotatedComponent::from(Component::EquivalentClasses(ax)));
+    }
+
+    let disj: Vec<_> = ont
+        .i()
+        .disjoint_class()
+        .filter(|ax| ax.0.iter().any(|ce| class_expr_mentions(ce, entity_iri)))
+        .cloned()
+        .collect();
+    for ax in disj {
+        let _ = ont.take(&AnnotatedComponent::from(Component::DisjointClasses(ax)));
+    }
+
+    let domains: Vec<_> = ont
+        .i()
+        .object_property_domain()
+        .filter(|ax| {
+            ope_mentions(&ax.ope, entity_iri) || class_expr_mentions(&ax.ce, entity_iri)
+        })
+        .cloned()
+        .collect();
+    for ax in domains {
+        let _ = ont.take(&AnnotatedComponent::from(Component::ObjectPropertyDomain(ax)));
+    }
+
+    let ranges: Vec<_> = ont
+        .i()
+        .object_property_range()
+        .filter(|ax| {
+            ope_mentions(&ax.ope, entity_iri) || class_expr_mentions(&ax.ce, entity_iri)
+        })
+        .cloned()
+        .collect();
+    for ax in ranges {
+        let _ = ont.take(&AnnotatedComponent::from(Component::ObjectPropertyRange(ax)));
+    }
+
+    let dp_domains: Vec<_> = ont
+        .i()
+        .data_property_domain()
+        .filter(|ax| ax.dp.to_string() == entity_iri || class_expr_mentions(&ax.ce, entity_iri))
+        .cloned()
+        .collect();
+    for ax in dp_domains {
+        let _ = ont.take(&AnnotatedComponent::from(Component::DataPropertyDomain(ax)));
+    }
+
+    let dp_ranges: Vec<_> = ont
+        .i()
+        .data_property_range()
+        .filter(|ax| ax.dp.to_string() == entity_iri)
+        .cloned()
+        .collect();
+    for ax in dp_ranges {
+        let _ = ont.take(&AnnotatedComponent::from(Component::DataPropertyRange(ax)));
+    }
+
+    let cas: Vec<_> = ont
+        .i()
+        .class_assertion()
+        .filter(|ax| {
+            individual_mentions(&ax.i, entity_iri) || class_expr_mentions(&ax.ce, entity_iri)
+        })
+        .cloned()
+        .collect();
+    for ax in cas {
+        let _ = ont.take(&AnnotatedComponent::from(Component::ClassAssertion(ax)));
+    }
+}
+
+fn class_expr_mentions(ce: &ClassExpression<RcStr>, entity_iri: &str) -> bool {
+    matches!(ce, ClassExpression::Class(Class(iri)) if iri.to_string() == entity_iri)
+}
+
+fn ope_mentions(ope: &ObjectPropertyExpression<RcStr>, entity_iri: &str) -> bool {
+    match ope {
+        ObjectPropertyExpression::ObjectProperty(p) => p.to_string() == entity_iri,
+        ObjectPropertyExpression::InverseObjectProperty(p) => p.to_string() == entity_iri,
+    }
+}
+
+fn individual_mentions(ind: &Individual<RcStr>, entity_iri: &str) -> bool {
+    ind.to_string() == entity_iri
 }
 
 fn set_ontology_iri(
@@ -339,12 +441,118 @@ fn set_ontology_iri(
     ontology_iri: &str,
     version_iri: Option<&str>,
 ) {
-    // Drop existing OntologyID components then insert the new one.
+    // Preserve existing owl:versionIRI when SetOntologyIri does not supply one (#303).
+    let preserved_viri = ont.i().the_ontology_id().and_then(|id| id.viri.clone());
     if let Some(id) = ont.i().the_ontology_id() {
         let _ = ont.take(&AnnotatedComponent::from(Component::OntologyID(id)));
     }
+    let viri = match version_iri {
+        Some(v) => Some(build.iri(v)),
+        None => preserved_viri,
+    };
     ont.insert(Component::OntologyID(OntologyID {
         iri: Some(build.iri(ontology_iri)),
-        viri: version_iri.map(|v| build.iri(v)),
+        viri,
     }));
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::serialize::load_rdf_xml_ontology;
+
+    #[test]
+    fn set_ontology_iri_preserves_version_iri() {
+        let source = r#"<?xml version="1.0"?>
+<rdf:RDF xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+    <owl:Ontology rdf:about="http://example.org/ont">
+        <owl:versionIRI rdf:resource="http://example.org/ont/1.0"/>
+    </owl:Ontology>
+    <owl:Class rdf:about="http://example.org/ont#A">
+        <rdfs:label>A</rdfs:label>
+    </owl:Class>
+</rdf:RDF>"#;
+        let (mut ont, _ns) = load_rdf_xml_ontology(source).expect("load");
+        apply_patches_to_ontology(
+            &mut ont,
+            &[PatchOp::SetOntologyIri {
+                ontology_iri: "http://example.org/ont-renamed".into(),
+            }],
+        )
+        .expect("set ontology iri");
+        let id = ont.i().the_ontology_id().expect("ontology id");
+        assert_eq!(
+            id.iri.as_ref().map(|i| i.to_string()).as_deref(),
+            Some("http://example.org/ont-renamed")
+        );
+        assert_eq!(
+            id.viri.as_ref().map(|i| i.to_string()).as_deref(),
+            Some("http://example.org/ont/1.0")
+        );
+    }
+
+    #[test]
+    fn delete_entity_removes_equivalents_annotations_and_domains() {
+        let source = r#"<?xml version="1.0"?>
+<rdf:RDF xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:skos="http://www.w3.org/2004/02/skos/core#">
+    <owl:Ontology rdf:about="http://example.org/ont"/>
+    <owl:Class rdf:about="http://example.org/ont#A">
+        <rdfs:label>A</rdfs:label>
+        <skos:note>extra</skos:note>
+        <owl:equivalentClass rdf:resource="http://example.org/ont#B"/>
+        <rdfs:subClassOf rdf:resource="http://example.org/ont#C"/>
+    </owl:Class>
+    <owl:Class rdf:about="http://example.org/ont#B"/>
+    <owl:Class rdf:about="http://example.org/ont#C"/>
+    <owl:ObjectProperty rdf:about="http://example.org/ont#p">
+        <rdfs:domain rdf:resource="http://example.org/ont#A"/>
+    </owl:ObjectProperty>
+</rdf:RDF>"#;
+        let (mut ont, _ns) = load_rdf_xml_ontology(source).expect("load");
+        apply_patches_to_ontology(
+            &mut ont,
+            &[PatchOp::DeleteEntity {
+                entity_iri: "http://example.org/ont#A".into(),
+            }],
+        )
+        .expect("delete");
+        assert_eq!(
+            ont.i()
+                .declare_class()
+                .filter(|d| d.0.to_string() == "http://example.org/ont#A")
+                .count(),
+            0
+        );
+        assert_eq!(
+            ont.i()
+                .annotation_assertion()
+                .filter(|ax| {
+                    matches!(
+                        &ax.subject,
+                        AnnotationSubject::IRI(iri) if iri.to_string() == "http://example.org/ont#A"
+                    )
+                })
+                .count(),
+            0
+        );
+        assert_eq!(
+            ont.i()
+                .equivalent_class()
+                .filter(|ax| ax.0.iter().any(|ce| class_expr_mentions(ce, "http://example.org/ont#A")))
+                .count(),
+            0
+        );
+        assert_eq!(
+            ont.i()
+                .object_property_domain()
+                .filter(|ax| class_expr_mentions(&ax.ce, "http://example.org/ont#A"))
+                .count(),
+            0
+        );
+    }
 }

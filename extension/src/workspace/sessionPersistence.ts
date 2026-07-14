@@ -11,7 +11,7 @@ import { isNotIndexedError } from "../utils/lspErrors";
 import { focusRelay } from "../focus/focusRelay";
 import type { PanelRestoreState } from "../webviews/layoutPersistenceLogic";
 import { isAllowedPanelRestoreCommand } from "../webviews/layoutPersistenceLogic";
-import { getPanelRestoreState } from "../webviews/layoutPersistence";
+import { getRememberedPanelRestoreState } from "../webviews/layoutPersistence";
 import { ontologyRegistry } from "./ontologyRegistry";
 import { navigationManager } from "./navigationManager";
 import { selectionManager } from "./selectionManager";
@@ -48,7 +48,9 @@ export class WorkspaceSessionPersistence {
         "ontocodeManchesterEditor",
       ];
       for (const viewType of viewTypes) {
-        const state = getPanelRestoreState(this.context, viewType);
+        // Only panels that were explicitly opened (remembered). Never inject
+        // DEFAULT_REOPEN — that would restart reasoner / interactive diff on restore.
+        const state = getRememberedPanelRestoreState(this.context, viewType);
         if (state?.command && isAllowedPanelRestoreCommand(state.command)) {
           panelRestore[viewType] = state;
         }
@@ -221,8 +223,11 @@ export class WorkspaceSessionPersistence {
         try {
           await ontologyRegistry.syncFromCatalog();
           await this.completeDeferredCatalogRestore();
-          this.catalogRestoreScheduled = false;
-          return;
+          // completeDeferredCatalogRestore may re-defer on NOT_INDEXED — keep retrying.
+          if (!this.deferredSnapshot) {
+            this.catalogRestoreScheduled = false;
+            return;
+          }
         } catch (err) {
           if (!isNotIndexedError(err)) {
             appendError(

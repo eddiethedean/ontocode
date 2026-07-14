@@ -184,6 +184,14 @@ fn path_is_under(root: &Path, path: &Path) -> bool {
     path == root || path.strip_prefix(root).is_ok()
 }
 
+/// True when two paths refer to the same filesystem location.
+///
+/// Uses exact equality, then both-sides canonicalize. Dual canonicalize failures
+/// do **not** count as a match (`None == None` would wrongly agree).
+pub fn paths_refer_to_same(a: &Path, b: &Path) -> bool {
+    a == b || a.canonicalize().ok().zip(b.canonicalize().ok()).is_some_and(|(x, y)| x == y)
+}
+
 /// Returns true if `path` is `workspace_root` or nested under it.
 pub fn is_path_within(workspace_root: &Path, path: &Path) -> bool {
     let Ok(root) = workspace_root.canonicalize() else {
@@ -284,6 +292,14 @@ mod tests {
             validate_workspace_scope(&new_file, &root).expect("new file under workspace");
         assert!(is_path_within(&root, &resolved));
         assert_eq!(resolved.file_name(), new_file.file_name());
+    }
+
+    #[test]
+    fn paths_refer_to_same_rejects_dual_canonicalize_failure() {
+        let missing_a = PathBuf::from("/definitely/missing/ontocode-a-xyz.ttl");
+        let missing_b = PathBuf::from("/definitely/missing/ontocode-b-xyz.ttl");
+        assert!(!paths_refer_to_same(&missing_a, &missing_b));
+        assert!(paths_refer_to_same(&missing_a, &missing_a));
     }
 
     #[test]

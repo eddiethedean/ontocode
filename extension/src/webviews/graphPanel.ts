@@ -2,7 +2,7 @@ import * as vscode from "vscode";
 import { getGraph } from "../lsp/client";
 import { PanelHost } from "./panelHost";
 import type { GraphFilters, WebviewMessage } from "./messages";
-import { rememberPanelRestoreState } from "./layoutPersistence";
+import { forgetPanelRestoreState, rememberPanelRestoreState } from "./layoutPersistence";
 import { graphRestoreState } from "./layoutPersistenceLogic";
 
 export interface GraphPanelOptions {
@@ -22,6 +22,7 @@ export class GraphPanel {
     private options: GraphPanelOptions
   ) {
     host.panel.onDidDispose(() => {
+      void forgetPanelRestoreState("ontocodeGraph");
       GraphPanel.currentPanel = undefined;
     });
   }

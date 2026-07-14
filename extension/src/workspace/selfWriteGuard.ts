@@ -1,4 +1,4 @@
-import { normalizeFsPath } from "../utils/pathUnder";
+import { normalizeFsPath, pathIdentityKey } from "../utils/pathUnder";
 
 /** Default window where FS watcher events for OntoCode's own writes are ignored (#293). */
 export const SELF_WRITE_TTL_MS = 2500;
@@ -11,7 +11,7 @@ export function noteSelfWrite(
   ttlMs: number = SELF_WRITE_TTL_MS,
   now: number = Date.now()
 ): void {
-  const key = normalizeFsPath(fsPath);
+  const key = pathIdentityKey(fsPath);
   const until = now + ttlMs;
   const previous = selfWriteUntil.get(key) ?? 0;
   if (until > previous) {
@@ -21,7 +21,7 @@ export function noteSelfWrite(
 
 /** True when `fsPath` was recently written by OntoCode and should not trigger recovery. */
 export function isSelfWrite(fsPath: string, now: number = Date.now()): boolean {
-  const key = normalizeFsPath(fsPath);
+  const key = pathIdentityKey(fsPath);
   const until = selfWriteUntil.get(key);
   if (until === undefined) {
     return false;

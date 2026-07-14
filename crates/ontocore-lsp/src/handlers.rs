@@ -1157,7 +1157,11 @@ fn jail_robot_path_args(
         }
 
         if let Some((flag, value)) = arg.split_once('=') {
-            if path_expect_for_long_flag(flag).is_some() {
+            if path_expect_for_long_flag(flag).is_some()
+                || path_expect_for_short_flag(flag).is_some()
+            {
+                // Handles `--input=/abs` and `-i=/abs` (short `=` was previously
+                // mis-parsed as attached value `=/abs` and jailed as relative).
                 jail_path(workspace_roots, value)?;
                 continue;
             }
@@ -1234,11 +1238,7 @@ pub fn handle_apply_axiom_patch(
                 .data()
                 .documents
                 .iter()
-                .find(|d| {
-                    d.path.canonicalize().ok().as_ref()
-                        == document_path.canonicalize().ok().as_ref()
-                        || d.path == document_path
-                })
+                .find(|d| ontocore_core::paths_refer_to_same(&d.path, &document_path))
                 .map(|d| d.namespaces.clone())
         })
         .flatten()
@@ -1768,10 +1768,7 @@ fn resolve_namespaces_for_manchester(
                     .data()
                     .documents
                     .iter()
-                    .find(|d| {
-                        d.path.canonicalize().ok().as_ref() == path.canonicalize().ok().as_ref()
-                            || d.path == path
-                    })
+                    .find(|d| ontocore_core::paths_refer_to_same(&d.path, &path))
                     .map(|d| d.namespaces.clone())
             })
             .flatten()
@@ -2967,6 +2964,32 @@ mod tests {
             format!("--output={}", dir.path().join("out.owl").display()),
         ];
         assert!(jail_robot_path_args(&roots, &args_add).is_err());
+    }
+
+    #[test]
+    fn jail_robot_rejects_short_input_equals_outside_workspace() {
+        let dir = tempfile::tempdir().unwrap();
+        let roots = vec![dir.path().to_path_buf()];
+        let args = vec!["validate".to_string(), "-i=/tmp/evil.owl".to_string()];
+        let err = jail_robot_path_args(&roots, &args).unwrap_err();
+        assert!(
+            err.contains("outside") || err.contains("workspace") || err.contains("path"),
+            "expected jail error, got {err}"
+        );
+    }
+
+    #[test]
+    fn jail_robot_rejects_short_output_equals_outside_workspace() {
+        let dir = tempfile::tempdir().unwrap();
+        let roots = vec![dir.path().to_path_buf()];
+        let input = dir.path().join("in.ttl");
+        std::fs::write(&input, "").unwrap();
+        let args = vec![
+            "convert".to_string(),
+            format!("-i={}", input.display()),
+            "-o=/tmp/evil.owl".to_string(),
+        ];
+        assert!(jail_robot_path_args(&roots, &args).is_err());
     }
 
     #[test]

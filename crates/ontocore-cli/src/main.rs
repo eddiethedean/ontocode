@@ -457,9 +457,7 @@ fn main() -> Result<()> {
                 .data()
                 .documents
                 .iter()
-                .find(|d| {
-                    d.path.canonicalize().ok().as_ref() == document.canonicalize().ok().as_ref()
-                })
+                .find(|d| ontocore_core::paths_refer_to_same(&d.path, document))
                 .map(|d| d.namespaces.clone())
                 .unwrap_or_default();
             if ext == "obo" {

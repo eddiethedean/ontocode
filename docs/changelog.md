@@ -8,7 +8,7 @@ Migration guides: [Migration index](migration/README.md)
 
 ## [0.21.0] - 2026-07-13
 
-**v0.21.0** — RDF/XML and OWL/XML write-back (Horned re-serialize); semantic comparator; editable gates for `.owl`/`.rdf`/`.owx`; session/TM, OBO/XML, focus, SQL, catalog, sameAs/prefix/plugin, and Windows/path debounce bug-fix cluster ([#317](https://github.com/eddiethedean/ontocode/pull/317)–[#325](https://github.com/eddiethedean/ontocode/pull/325)). See [CHANGELOG.md](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) and [migration/v0.21.md](migration/v0.21.md).
+**v0.21.0** — RDF/XML and OWL/XML write-back (Horned re-serialize); semantic comparator; editable gates for `.owl`/`.rdf`/`.owx`; session/TM, OBO/XML, focus, SQL, catalog, sameAs/prefix/plugin, and Windows/path debounce bug-fix cluster ([#317](https://github.com/eddiethedean/ontocode/pull/317)–[#325](https://github.com/eddiethedean/ontocode/pull/325)); pre-tag hardening (ROBOT short-flag jail, URI helpers, session capture, path identity). See [CHANGELOG.md](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) and [migration/v0.21.md](migration/v0.21.md).
 
 ## [0.20.0] - 2026-07-13
 

@@ -7,8 +7,6 @@ use ontocore_core::{
 use oxigraph::io::{RdfFormat, RdfParseError, RdfParser, RdfSerializer};
 use oxigraph::model::{GraphName, Literal, NamedNode, Quad, Subject, Term};
 use std::collections::{BTreeMap, BTreeSet, HashMap};
-#[cfg(test)]
-use std::fs;
 use std::path::Path;
 use thiserror::Error;
 
@@ -226,7 +224,7 @@ fn extract_parse_error_location(
 }
 
 fn default_base_iri(path: &Path) -> String {
-    format!("file://{}", path.display())
+    ontocore_core::file_uri_for_path(path)
 }
 
 fn extract_declared_prefixes(
@@ -840,6 +838,7 @@ fn short_name_from_iri(iri: &str) -> String {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use std::fs;
     use std::io::Write;
 
     #[test]
@@ -963,5 +962,16 @@ ex:Broken a owl:Class ; this is not valid turtle
             "entities parsed before the fault must be retained"
         );
         assert!(!parsed.quads().is_empty());
+    }
+
+    #[test]
+    fn default_base_iri_uses_file_uri_helper() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = dir.path().join("bare.ttl");
+        fs::write(&path, "<> a <http://www.w3.org/2002/07/owl#Ontology> .\n").unwrap();
+        let uri = default_base_iri(&path);
+        assert!(uri.starts_with("file://"), "got {uri}");
+        assert!(!uri.contains('\\'), "raw backslash must not appear: {uri}");
+        assert_eq!(uri, ontocore_core::file_uri_for_path(&path));
     }
 }

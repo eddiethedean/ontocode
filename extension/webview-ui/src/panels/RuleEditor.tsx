@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { LiveAnnouncer, PanelMain } from "../a11y";
 import {
   Callout,
   CodeBlock,
@@ -78,12 +79,25 @@ export function RuleEditorPanel(): JSX.Element {
 
   return (
     <Panel>
+      <PanelMain label="SWRL Rule Editor">
+      <LiveAnnouncer
+        message={
+          error
+            ? error
+            : diagnostics.length
+              ? `${diagnostics.length} diagnostic${diagnostics.length === 1 ? "" : "s"}`
+              : ""
+        }
+        politeness={error || hasErrors ? "assertive" : "polite"}
+      />
       <PanelHeader
         title="SWRL Rule Editor"
         subtitle={<InlineCode>{ontologyIri || documentUri || "—"}</InlineCode>}
       />
       <FormField label="Rule JSON">
         <CodeEditor
+          id="swrl-rule-json"
+          aria-label="Rule JSON"
           value={ruleJson}
           onChange={(e) => setRuleJson(e.target.value)}
           rows={14}
@@ -135,6 +149,7 @@ export function RuleEditorPanel(): JSX.Element {
           Apply
         </button>
       </StickyActions>
+      </PanelMain>
     </Panel>
   );
 }

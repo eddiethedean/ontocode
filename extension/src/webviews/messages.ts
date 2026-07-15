@@ -49,12 +49,21 @@ export interface PatchOp {
 export interface GraphFilters {
   ontology_iri?: string;
   hide_deprecated?: boolean;
+  entity_kinds?: string[];
+  namespaces?: string[];
+  relationship_kinds?: string[];
+  search_text?: string;
 }
 
 export interface GraphNode {
   id: string;
   label: string;
   kind: string;
+  namespace?: string;
+  ontology_iri?: string;
+  deprecated?: boolean;
+  unsatisfiable?: boolean;
+  equivalent?: boolean;
 }
 
 export interface GraphEdge {
@@ -346,7 +355,23 @@ export type WebviewMessage =
       axiom: { kind: string; manchester?: string; other_iri?: string };
     }
   | { type: "addManchesterAxiom" }
-  | { type: "requestGraph"; graphKind: string; rootIri?: string; depth?: number; includeInferred?: boolean; filters?: GraphFilters }
+  | {
+      type: "requestGraph";
+      graphKind: string;
+      rootIri?: string;
+      rootIris?: string[];
+      depth?: number;
+      includeInferred?: boolean;
+      filters?: GraphFilters;
+    }
+  | {
+      type: "openGraphFromResults";
+      graphKind: "query_result" | "refactor_preview";
+      rootIris: string[];
+      title?: string;
+    }
+  | { type: "revealInHierarchy"; iri: string }
+  | { type: "jumpToEditor"; iri: string }
   | { type: "selectNode"; iri: string }
   | { type: "openEntity"; iri: string }
   | { type: "openGraph"; rootIri?: string }
@@ -426,6 +451,13 @@ export function isWebviewMessage(data: unknown): data is WebviewMessage {
     }
     case "requestGraph":
       return typeof msg.graphKind === "string";
+    case "openGraphFromResults":
+      return (
+        (msg.graphKind === "query_result" || msg.graphKind === "refactor_preview") &&
+        Array.isArray(msg.rootIris)
+      );
+    case "revealInHierarchy":
+    case "jumpToEditor":
     case "selectNode":
     case "openEntity":
       return typeof msg.iri === "string";

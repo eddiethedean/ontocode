@@ -11,6 +11,7 @@ pub fn load_plugin_host(
     let mut host = PluginHost::new(workspace.as_ref());
     host.discover()?;
     register_builtins(&mut host);
+    host.activate_all()?;
     Ok(host)
 }
 

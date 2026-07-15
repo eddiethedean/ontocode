@@ -1,12 +1,12 @@
-# What ships today (v0.24.0 — latest tagged)
+# What ships today (v0.25.0 — latest tagged)
 
 > **Canonical capability matrix.** Update this page on every release. Design specs under [Project](design/README.md) may describe future targets — check here for what is actually available.
 >
 > **Format write-back truth:** this page and [Supported formats](supported-formats.md) are the source of truth. Tier-1 user docs (README, Home, First success, FAQ, Evaluate pack, LSP/patch/CLI refs) must match them — see [Releasing — Tier-1 capability truth](releasing.md#documentation-sync-checklist-every-release).
 >
-> **Latest tagged release: v0.24.0** (crates.io, GitHub Releases; Marketplace/Open VSX may lag — see [Versions & channels](guides/versions-and-channels.md)). Pin installs: `cargo install ontocore-cli --locked --version 0.24.0`.
+> **Latest tagged release: v0.25.0** (crates.io, GitHub Releases; Marketplace/Open VSX may lag — see [Versions & channels](guides/versions-and-channels.md)). Pin installs: `cargo install ontocore-cli --locked --version 0.25.0`.
 
-**Latest tagged: v0.24.0** · [v0.24 migration](migration/v0.24.md) · [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md)
+**Latest tagged: v0.25.0** · [v0.25 migration](migration/v0.25.md) · [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md)
 
 ## Products
 
@@ -15,7 +15,7 @@
 | **OntoCode** | VS Code IDE — explorer, React inspector, graphs (asserted/inferred modes), Query Workbench (SQL/SPARQL/DL), Manchester editor, refactor preview, reasoner, explanation panel, plugin commands/views/preferences/context actions |
 | **OntoCore** | Rust semantic workspace engine — `ontocore` façade, `ontocore-*` crates, `ontocore` CLI, `ontocore-lsp`, plugin host |
 
-## Capability matrix (v0.24.0 tagged)
+## Capability matrix (v0.25.0 tagged)
 
 | Capability | VS Code | CLI |
 |------------|---------|-----|
@@ -38,7 +38,7 @@
 | SQL-like queries | Query Workbench (React) + schema browser | `ontocore query` |
 | SPARQL | Query Workbench (React) | `ontocore sparql` |
 | DL Query (Manchester class expressions) | Query Workbench **DL** mode | `ontocore dl-query` |
-| Graph visualization (class, property, import, neighborhood) | Yes (React; asserted/inferred/combined; export JSON/CSV; expand depth) | LSP `ontocore/getGraph` |
+| Graph visualization (class, property hierarchies, individual, import, dependency, neighborhood; query/refactor result graphs) | Yes (React; asserted/inferred/combined; filters; unsatisfiable overlay; Graph\|List; virtualized; export JSON/CSV; expand depth) | LSP `ontocore/getGraph` |
 | OWL EL classification (`el` profile) | Reasoner panel + hierarchy toggle | `ontocore classify` |
 | RL / RDFS classification | Reasoner panel | `ontocore classify --profile rl\|rdfs` |
 | OWL 2 DL classification (`dl` profile) | Reasoner panel + hierarchy toggle | `ontocore classify --profile dl` |
@@ -62,9 +62,10 @@
 | LSP semantic tokens (Turtle, OBO) | Editor highlighting | — |
 | Configurable diagnostics | Problems panel + `.ontocore/diagnostics.toml` | `ontocore validate` |
 | React webview UI | Inspector, graphs, Query Workbench (SQL/SPARQL/DL), Manchester editor, refactor preview, semantic diff, imports | — |
-| Plugin host (manifest + runtime) | Plugin commands, dockable views, inspector cards, preferences pages, context actions, plugin Problems diagnostics | `ontocore plugins` / `ontocore workflow` |
+| Accessibility (WCAG 2.2 AA owned surfaces) | Keyboard + SR patterns, DialogShell focus trap, reduced motion, axe Vitest harness | — |
+| Plugin SDK 1.0 (manifest + lifecycle + providers) | Plugin commands, views, inspector cards, preferences, context actions; provider pickers via `listPlugins` | `ontocore plugins` (list/info/enable/disable/run) / `workflow` |
 | Plugin permissions (`api_version = "1"`) | Enforced on plugin load/run | Enforced on CLI/LSP plugin host |
-| Reference plugins (naming, Markdown export, SHACL scaffold) | Via validate + plugins | `ontocore plugins run` |
+| Reference plugins (naming, Markdown export, SHACL scaffold + reasoner/query/refactor/graph stubs) | Via validate + plugins | `ontocore plugins run` |
 
 ## Format support
 
@@ -81,7 +82,16 @@
 > **¹ Rename / merge / replace:** format-specific IRI remaps (XML re-serialize; OBO id/reference rewrite). Other refactor ops stay Turtle-first.  
 > Deeper capability grid (Manchester, refactor, XML re-serialize): [Capabilities by format](guides/capabilities-by-format.md).
 
-## New in v0.24.0 (latest tagged)
+## New in v0.25.0 (latest tagged)
+
+| Capability | Status |
+|------------|--------|
+| Graph visualization parity (expanded kinds, filters, virtualized React Flow, Open as graph) | Shipped |
+| Plugin SDK 1.0 (lifecycle, providers, CLI enable/disable, compat harness) | Shipped |
+| Accessibility parity (focus trap, live announcer, axe Vitest, ACCESSIBILITY_REPORT) | Shipped |
+| Parity verification CI (evidence paths, release-gate metrics, YAML→docs sync) | Shipped |
+
+## Previously in v0.24.0
 
 | Capability | Status |
 |------------|--------|
@@ -158,7 +168,7 @@ Remaining 1.0 targets: [known limitations](known-limitations.md) · [Protégé v
 
 ## What's next
 
-Forward milestones: UX/parity verify (**v0.25**), Protégé-competitive release (**1.0**). See **[Platform roadmap](roadmap.md)** · **[Known limitations](known-limitations.md)**.
+Forward milestones: v0.25 train epics done on branch (tag pending); Protégé-competitive release (**1.0**). See **[Platform roadmap](roadmap.md)** · **[Known limitations](known-limitations.md)**.
 
 ## Where to learn more
 

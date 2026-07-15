@@ -1,4 +1,5 @@
-import { useEffect, type ReactNode } from "react";
+import { useEffect, useId, useRef, type ReactNode } from "react";
+import { installFocusTrap } from "../a11y";
 import { Button, ButtonBar, Callout, Panel, PanelHeader } from "./ui";
 
 export interface DialogShellProps {
@@ -22,6 +23,18 @@ export function DialogShell({
   onPrimary,
   onCancel,
 }: DialogShellProps): JSX.Element {
+  const titleId = useId();
+  const descId = useId();
+  const dialogRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const node = dialogRef.current;
+    if (!node) {
+      return;
+    }
+    return installFocusTrap(node);
+  }, []);
+
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent): void => {
       if (event.key === "Escape") {
@@ -30,6 +43,7 @@ export function DialogShell({
       } else if (
         event.key === "Enter" &&
         !event.shiftKey &&
+        !(event.target instanceof HTMLTextAreaElement) &&
         !primaryDisabled
       ) {
         event.preventDefault();
@@ -42,12 +56,18 @@ export function DialogShell({
 
   return (
     <Panel>
-      <PanelHeader title={title} />
-      <div role="dialog" aria-modal="true" aria-labelledby="dialog-title">
-        <div id="dialog-title" className="oc-dialog-body">
-          {children}
-        </div>
-        <div aria-live="polite">
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
+        aria-describedby={validationMessage ? descId : undefined}
+        tabIndex={-1}
+        className="oc-dialog"
+      >
+        <PanelHeader title={title} titleId={titleId} />
+        <div className="oc-dialog-body">{children}</div>
+        <div id={descId} aria-live="assertive">
           {validationMessage ? (
             <Callout variant="error">{validationMessage}</Callout>
           ) : null}

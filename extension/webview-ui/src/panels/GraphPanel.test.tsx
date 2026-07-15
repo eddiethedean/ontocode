@@ -46,7 +46,7 @@ describe("GraphPanel", () => {
     await waitFor(() => {
       expect(document.querySelector(".react-flow")).toBeInTheDocument();
     });
-    expect(screen.getByText("class")).toBeInTheDocument();
+    expect(screen.getByLabelText("Graph kind")).toHaveValue("class");
   });
 
   it("shows truncated badge when graph is truncated", async () => {
@@ -56,7 +56,9 @@ describe("GraphPanel", () => {
       graph: { ...graphPayload, truncated: true },
     });
 
-    expect(await screen.findByText("Truncated (large ontology)")).toBeInTheDocument();
+    expect(
+      await screen.findByText("Truncated — focus root / reduce depth")
+    ).toBeInTheDocument();
   });
 
   it("shows error empty state on host error", async () => {
@@ -188,7 +190,7 @@ describe("GraphPanel", () => {
     renderWithProviders(<GraphPanel />);
     postHostMessage({ type: "graphData", graph: graphPayload });
     await waitFor(() => {
-      expect(screen.getByText("class")).toBeInTheDocument();
+      expect(screen.getByLabelText("Graph kind")).toHaveValue("class");
     });
 
     postHostMessage({
@@ -202,8 +204,40 @@ describe("GraphPanel", () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText("class")).toBeInTheDocument();
+      expect(screen.getByLabelText("Graph kind")).toHaveValue("class");
     });
-    expect(screen.queryByText("neighborhood")).not.toBeInTheDocument();
+  });
+
+  it("switches to list alternate view", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<GraphPanel />);
+    postHostMessage({ type: "graphData", graph: graphPayload });
+    await waitFor(() => expect(document.querySelector(".react-flow")).toBeInTheDocument());
+
+    await user.selectOptions(screen.getByLabelText("View mode"), "list");
+    expect(await screen.findByRole("table", { name: "Graph list alternate" })).toBeInTheDocument();
+    expect(screen.getByText("Person")).toBeInTheDocument();
+  });
+
+  it("shows improved truncated guidance", async () => {
+    renderWithProviders(<GraphPanel />);
+    postHostMessage({
+      type: "graphData",
+      graph: { ...graphPayload, truncated: true },
+    });
+    expect(
+      await screen.findByText("Truncated — focus root / reduce depth")
+    ).toBeInTheDocument();
+  });
+
+  it("includes ontology IRI filter in request", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<GraphPanel />);
+    await user.type(screen.getByLabelText("Ontology IRI filter"), "http://ex/onto");
+    await user.click(screen.getByRole("button", { name: "Refresh graph" }));
+    expect(lastPostedMessage()).toMatchObject({
+      type: "requestGraph",
+      filters: { ontology_iri: "http://ex/onto", hide_deprecated: false },
+    });
   });
 });

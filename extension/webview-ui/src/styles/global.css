@@ -278,7 +278,12 @@ button:active:not(:disabled) {
   transform: translateY(1px);
 }
 
-button:focus-visible {
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[tabindex]:focus-visible {
   outline: 2px solid var(--vscode-focusBorder);
   outline-offset: 2px;
 }
@@ -1299,9 +1304,66 @@ ul {
   transition: box-shadow var(--oc-transition), border-color var(--oc-transition);
 }
 
+.oc-graph-node--dimmed {
+  opacity: 0.25;
+}
+
+.oc-graph-node--unsat {
+  border: 2px solid var(--vscode-inputValidation-errorBorder, #f14c4c) !important;
+}
+
+.oc-graph-node--selected,
 .oc-graph-node.selected {
   border-color: var(--vscode-focusBorder);
   box-shadow: 0 0 0 2px var(--oc-accent-soft), var(--oc-shadow-md);
+}
+
+.graph-list {
+  padding: var(--oc-space-4);
+  overflow: auto;
+  height: 100%;
+}
+
+.graph-list table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.graph-list th,
+.graph-list td {
+  text-align: left;
+  padding: 0.35rem 0.5rem;
+  border-bottom: 1px solid var(--oc-border-subtle);
+  font-size: 0.8125rem;
+}
+
+.graph-list tr.is-selected {
+  background: var(--vscode-list-activeSelectionBackground, rgba(0, 127, 212, 0.2));
+}
+
+.graph-context-menu {
+  position: fixed;
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px;
+  background: var(--vscode-menu-background, var(--oc-surface-raised));
+  border: 1px solid var(--oc-border);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+}
+
+.graph-context-menu button {
+  text-align: left;
+  background: transparent;
+  border: none;
+  color: var(--vscode-foreground);
+  padding: 0.35rem 0.6rem;
+  cursor: pointer;
+}
+
+.graph-context-menu button:hover {
+  background: var(--vscode-list-hoverBackground, rgba(255, 255, 255, 0.08));
 }
 
 .oc-graph-edge {
@@ -1407,4 +1469,42 @@ ul {
 
 .oc-schema-column-list {
   margin-left: var(--oc-space-4);
+}
+
+/* ── Accessibility (EPIC-010) ───────────────────────────── */
+
+.oc-sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.oc-dialog {
+  outline: none;
+}
+
+.oc-dialog:focus-visible {
+  outline: 2px solid var(--vscode-focusBorder);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  button:active:not(:disabled) {
+    transform: none;
+  }
 }

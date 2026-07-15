@@ -20,7 +20,7 @@ Every feature before 1.0 should answer one question:
 
 After 1.0, the roadmap shifts from parity to modernization.
 
->  **Not a Protégé replacement today.** v0.24 supports pilot and coexistence workflows — not org-wide Protégé retirement. See [What ships today](docs/SHIPPED.md) and [Known limitations](docs/known-limitations.md).
+>  **Not a Protégé replacement today.** v0.25 supports pilot and coexistence workflows — not org-wide Protégé retirement. See [What ships today](docs/SHIPPED.md) and [Known limitations](docs/known-limitations.md).
 
 ---
 
@@ -39,7 +39,7 @@ After 1.0, the roadmap shifts from parity to modernization.
 | [PRODUCT_ROADMAP_2.0.md](docs/ui/PRODUCT_ROADMAP_2.0.md) | UI phases with milestone acceptance criteria |
 | [ui/README.md](docs/ui/README.md) | Product design specification pack (UX, design system, OntoStudio target) |
 
-**Current release:** v0.24.0
+**Current release:** v0.25.0
 
 ---
 
@@ -48,8 +48,8 @@ After 1.0, the roadmap shifts from parity to modernization.
 ### Timeline
 
 ```text
-SHIPPED (v0.1–v0.24) ─────────────────────────────────────────────────►
-v0.1–v0.4          v0.5–v0.8              v0.9–v0.12           v0.13–v0.24
+SHIPPED (v0.1–v0.25) ─────────────────────────────────────────────────►
+v0.1–v0.4          v0.5–v0.8              v0.9–v0.12           v0.13–v0.25
 Engine foundation    IDE depth                Platform & authoring   OntoUI → formats → OWL 2
   │                    │                        │                      │
   Foundation           Query, reason,           Identity, diff,      UX shell + semantic txn
@@ -57,13 +57,13 @@ Engine foundation    IDE depth                Platform & authoring   OntoUI → 
   write-back           Manchester               OWL/XML catalog      WB (v0.21) + OWL 2 (v0.22)
                                                                        + reasoning/SWRL (v0.23)
                                                                        + refactor/DL Query (v0.24)
+                                                                       + viz/SDK/a11y/CI (v0.25)
 
-PLANNED (v0.25–1.0) ─────────────────────────────────────────────────►
-v0.25                1.0.0-rc → 1.0.0
-Verify + polish      Protégé replacement
+PLANNED (1.0.0-rc → 1.0) ─────────────────────────────────────────────►
+1.0.0-rc → 1.0.0
+Stabilize            Protégé replacement
   │                      │
-  Viz, SDK, a11y       Full parity ship
-  Full parity CI
+  All P0 VERIFIED      Full parity ship
 
 WEBAPP PATH (post-1.2) ───────────────────────────────────────────────►
 v1.3                 v1.4                    v1.5+
@@ -84,7 +84,7 @@ Web foundation       Team workspaces          Cloud collaboration
 | **C — Platform & authoring** | v0.9–v0.12 | Shipped | OntoCore identity, semantic workspace, authoring parity |
 | **D — OntoUI platform** | v0.13–v0.14 | Shipped | v0.13: WorkspaceStore, focus relay; v0.14: plugin host MVP |
 | **E — Desktop UX shell gate** | v0.15–v0.18 | Shipped | Menus, layouts, workflows, migration readiness (not full parity) |
-| **F — Full Protégé parity path** | v0.19–v0.25 | In progress (v0.19–v0.24 shipped) | Semantic core → formats → OWL 2 → reason/SWRL → services → verify |
+| **F — Full Protégé parity path** | v0.19–v0.25 | In progress (v0.19–v0.25 shipped; 1.0.0-rc next) | Semantic core → formats → OWL 2 → reason/SWRL → services → verify |
 | **G — Protégé replacement** | 1.0.0 | Planned | Daily OWL/OBO engineering without Protégé |
 | **H — Ecosystem** | v1.1–v1.2 | Planned | SDKs, AI, toolchain & collaboration |
 | **I — Webapp platform** | v1.3–v1.5+ | Planned | Browser-first ontology engineering: hosted webapp, React app (no backend) via WASM, team workspaces, cloud collaboration |
@@ -115,7 +115,7 @@ Web foundation       Team workspaces          Cloud collaboration
 | 22 | v0.22 | F | Shipped | 2† | Complete OWL 2 authoring |
 | 23 | v0.23 | F | Shipped | 5† | Reasoning parity + SWRL |
 | 24 | v0.24 | F | Shipped | 3†, 6† | Refactoring + DL Query parity |
-| 25 | v0.25 | F | Planned | 4†, 8† | Viz + plugin SDK 1.0 + a11y + parity CI |
+| 25 | v0.25 | F | Shipped | 4†, 8† | Viz + plugin SDK 1.0 + a11y + parity CI |
 | 26 | 1.0.0-rc | F | Planned | — | Stabilize; all P0 VERIFIED |
 | 27 | v1.0 | G | Planned | 1–6 exit, 9† | Protégé-competitive release |
 | 28 | v1.1 | H | Planned | 7, 2†, 3†, 4†, 8†, 9† | Language bindings & AI primitives |
@@ -628,7 +628,9 @@ See [migration/v0.22.md](docs/migration/v0.22.md).
 
 ---
 
-### v0.25 — UX completion + executable verification (planned)
+### v0.25 — UX completion + executable verification (shipped)
+
+**Released:** v0.25.0 (2026-07-15)
 
 **Theme:** Visualization, plugin SDK 1.0, accessibility, parity manifest CI.
 
@@ -640,6 +642,8 @@ See [migration/v0.22.md](docs/migration/v0.22.md).
 **Exit criteria:** Plugin SDK 1.0 stable; every P0 requirement has automated CI evidence.
 
 **Blockers:** [BLOCKER_08](docs/protege-parity/04_BLOCKERS/BLOCKER_08_VISUALIZATION.md)–[BLOCKER_11](docs/protege-parity/04_BLOCKERS/BLOCKER_11_PARITY_VERIFICATION.md)
+
+See [migration/v0.25.md](docs/migration/v0.25.md) and [SHIPPED.md](docs/SHIPPED.md).
 
 ---
 

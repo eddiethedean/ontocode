@@ -1,6 +1,6 @@
-# OntoCore LSP API (v0.24)
+# OntoCore LSP API (v0.25)
 
-> **Status:** Documents behavior in **OntoCore v0.24.0**. Pre-1.0 APIs may change.
+> **Status:** Documents behavior in **OntoCore v0.25.0**. Pre-1.0 APIs may change.
 > Canonical feature list: [What ships today](SHIPPED.md).
 
 This document describes **what ships today** in `ontocore-lsp`. For the **v1.0 target** (extended plugin methods), see [LSP_SPEC.md](design/LSP_SPEC.md).
@@ -9,7 +9,7 @@ This document describes **what ships today** in `ontocore-lsp`. For the **v1.0 t
 
 If you are integrating OntoCore outside VS Code (custom editor, scripts, automation), treat the JSON schema as the **canonical, machine-readable contract** for this release:
 
-- **LSP JSON Schema:** [`lsp-protocol.schema.json`](lsp-protocol.schema.json) (ships with product **v0.24.0**)
+- **LSP JSON Schema:** [`lsp-protocol.schema.json`](lsp-protocol.schema.json) (ships with product **v0.25.0**)
 
 ### Schema vs product version
 
@@ -20,7 +20,7 @@ The schema file is the wire contract for the **current product release**. Until 
 Until v1.0, minor releases may change request/response fields.
 For stable integrations:
 
-- Pin OntoCore to **0.24.0** in your tooling.
+- Pin OntoCore to **0.25.0** in your tooling.
 - Prefer consuming `lsp-protocol.schema.json` from the same tagged release you deploy.
 
 ## Wire format
@@ -382,15 +382,16 @@ Returns graph nodes and edges for visualization webviews.
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `graph_kind` | string | `class`, `property`, `import`, or `neighborhood` |
-| `root_iri` | string? | Required for `neighborhood` |
-| `depth` | number? | BFS depth for neighborhood (default 2, max 5) |
-| `include_inferred` | boolean? | Include reasoner edges when snapshot exists |
-| `filters` | object? | `ontology_iri`, `hide_deprecated` |
+| `graph_kind` | string | `class`, `property`, `object_property`, `data_property`, `individual`, `import`, `dependency`, `neighborhood`, `query_result`, or `refactor_preview` |
+| `root_iri` | string? | Required for `neighborhood` / `individual` (single seed); optional elsewhere |
+| `root_iris` | string[]? | Multi-root seeds for `query_result` / `refactor_preview` (and optional individual) |
+| `depth` | number? | BFS depth for neighborhood/individual/result graphs (default 2, max 5) |
+| `include_inferred` | boolean? | Include reasoner subclass edges when snapshot exists |
+| `filters` | object? | `ontology_iri`, `hide_deprecated`, `entity_kinds[]`, `namespaces[]`, `relationship_kinds[]`, `search_text` |
 
-**Graph panel (v0.15):** The React graph webview supports **asserted**, **inferred only**, and **combined** edge modes, plus grid/circle/stack layouts and node search. These map to `include_inferred` and reasoner snapshot state on the LSP request.
+**Graph panel (v0.25):** React graph webview supports asserted / inferred-only / combined modes, filtering, search dimming, inferred unsatisfiable overlays, Graph\|List alternate, keyboard navigation, and virtualized render (`onlyRenderVisibleElements`). Query Workbench and Refactor Preview can open result graphs via `query_result` / `refactor_preview`.
 
-**Result:** `{ graph: { nodes, edges, truncated, graph_kind } }`
+**Result:** `{ graph: { nodes, edges, truncated, graph_kind } }` — nodes may include `namespace`, `ontology_iri`, `deprecated`, `unsatisfiable`, `equivalent`.
 
 **Errors:** `NOT_INDEXED`, `GRAPH_FAILED`, `INVALID_PARAMS` (e.g. missing `root_iri` for `neighborhood`)
 

@@ -2,7 +2,7 @@
   "name": "ontocode",
   "displayName": "OntoCode",
   "description": "Ontology IDE for VS Code powered by OntoCore. Browse, edit Turtle, query, reason (EL–DL), validate, and diff OWL/RDF/OBO ontologies from the IDE or CI.",
-  "version": "0.24.0",
+  "version": "0.25.0",
   "publisher": "ontocode",
   "license": "MIT",
   "repository": {
@@ -248,8 +248,28 @@
         "title": "OntoCode: Open Property Graph"
       },
       {
+        "command": "ontocode.openObjectPropertyGraph",
+        "title": "OntoCode: Open Object Property Graph"
+      },
+      {
+        "command": "ontocode.openDataPropertyGraph",
+        "title": "OntoCode: Open Data Property Graph"
+      },
+      {
+        "command": "ontocode.openIndividualGraph",
+        "title": "OntoCode: Open Individual Graph"
+      },
+      {
         "command": "ontocode.openImportGraph",
         "title": "OntoCode: Open Import Graph"
+      },
+      {
+        "command": "ontocode.openDependencyGraph",
+        "title": "OntoCode: Open Dependency Graph"
+      },
+      {
+        "command": "ontocode.openGraphFromResults",
+        "title": "OntoCode: Open Graph From Results"
       },
       {
         "command": "ontocode.manageImports",

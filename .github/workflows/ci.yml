@@ -39,7 +39,17 @@ jobs:
       - run: chmod +x scripts/check-doc-versions.sh
       - run: ./scripts/check-doc-versions.sh
 
-      - run: python3 scripts/validate-parity-manifest.py
+      - name: Install PyYAML
+        run: pip install --user pyyaml
+
+      - name: Validate parity manifest (schema + paths)
+        run: python3 scripts/validate-parity-manifest.py --paths
+
+      - name: Parity release-gate report (infra)
+        run: python3 scripts/check-parity-release-gate.py
+
+      - name: Parity docs sync check
+        run: python3 scripts/generate-parity-docs.py --check
 
   clippy:
     name: clippy

@@ -9,8 +9,13 @@ requirements:
     priority: P0
     status: PARTIAL
     owner: null
-    source_files: []
-    test_ids: []
+    source_files:
+      - extension/src/commands/v017Commands.ts
+      - extension/webview-ui/src/panels/NewOntologyDialog.tsx
+      - crates/ontocore/src/workspace.rs
+    test_ids:
+      - extension/src/test/suite/dialogs.workflows.test.ts
+      - extension/webview-ui/src/panels/NewOntologyDialog.test.tsx
     acceptance_criteria:
       - docs/protege-parity/03_PARITY/PARITY_ACCEPTANCE_CRITERIA.md
     github_issue: null
@@ -295,55 +300,104 @@ requirements:
     area: Visualization
     title: Graph parity
     priority: P1
-    status: PARTIAL
+    status: VERIFIED
     owner: null
-    source_files: []
-    test_ids: []
-    acceptance_criteria: []
+    source_files:
+      - crates/ontocore-catalog/src/graph.rs
+      - extension/webview-ui/src/panels/GraphPanel.tsx
+      - extension/src/webviews/graphPanel.ts
+      - extension/src/commands/index.ts
+    test_ids:
+      - crates/ontocore-catalog/src/graph.rs::tests
+      - extension/webview-ui/src/panels/GraphPanel.test.tsx
+    acceptance_criteria:
+      - docs/protege-parity/04_BLOCKERS/BLOCKER_08_VISUALIZATION.md
     github_issue: https://github.com/eddiethedean/ontocode/issues/254
     documentation:
       - docs/protege-parity/04_BLOCKERS/BLOCKER_08_VISUALIZATION.md
-    notes: Target v0.25
+      - docs/ontocode/graph-view.md
+      - docs/lsp-api.md
+    notes: v0.25 EPIC-008 — kinds, filters, overlays, virtualization, list alternate
   - id: PAR-PLG-001
     area: Plugins
     title: Stable SDK
     priority: P1
-    status: PARTIAL
+    status: VERIFIED
     owner: null
     source_files:
       - crates/ontocore-plugin/src/lib.rs
-    test_ids: []
-    acceptance_criteria: []
+      - crates/ontocore-plugin/src/host.rs
+      - crates/ontocore-plugin/src/lifecycle.rs
+      - crates/ontocore-plugin/src/manifest.rs
+      - crates/ontocore-plugin/src/traits.rs
+      - docs/guides/plugins.md
+      - docs/guides/plugin-policy.md
+      - examples/plugin-workspace/
+    test_ids:
+      - crates/ontocore-plugin/src/lifecycle.rs::tests
+      - crates/ontocore-plugin/src/host.rs::tests
+      - crates/ontocore-plugin/src/manifest.rs::tests
+      - tests/plugin_sdk_compat.rs
+      - tests/cli_plugins_security.rs
+    acceptance_criteria:
+      - docs/protege-parity/04_BLOCKERS/BLOCKER_09_PLUGIN_PLATFORM.md
     github_issue: https://github.com/eddiethedean/ontocode/issues/255
     documentation:
       - docs/protege-parity/IMPLEMENTATION_EVIDENCE.md
-    notes: Target v0.25
+      - docs/guides/plugins.md
+      - docs/guides/plugin-policy.md
+    notes: v0.25 EPIC-009 — SDK 1.0 freeze; lifecycle; reasoner/query/refactor/graph providers
   - id: PAR-ACC-001
     area: Accessibility
     title: Keyboard and screen reader parity
     priority: P1
-    status: PARTIAL
+    status: VERIFIED
     owner: null
-    source_files: []
-    test_ids: []
-    acceptance_criteria: []
+    source_files:
+      - extension/webview-ui/src/a11y/focusTrap.ts
+      - extension/webview-ui/src/a11y/liveAnnouncer.tsx
+      - extension/webview-ui/src/components/DialogShell.tsx
+      - extension/webview-ui/src/panels/EntityInspector.tsx
+      - extension/webview-ui/src/panels/QueryWorkbench.tsx
+      - extension/webview-ui/src/panels/ReasonerPanel.tsx
+      - extension/webview-ui/src/panels/GraphPanel.tsx
+      - docs/protege-parity/08_RELEASE/ACCESSIBILITY_REPORT.md
+    test_ids:
+      - extension/webview-ui/src/a11y/accessibility.test.tsx
+      - extension/webview-ui/src/a11y/focusTrap.test.ts
+      - extension/webview-ui/src/components/DialogShell.test.tsx
+    acceptance_criteria:
+      - docs/protege-parity/04_BLOCKERS/BLOCKER_10_ACCESSIBILITY.md
     github_issue: https://github.com/eddiethedean/ontocode/issues/256
     documentation:
       - docs/protege-parity/04_BLOCKERS/BLOCKER_10_ACCESSIBILITY.md
-    notes: Target v0.25
+      - docs/protege-parity/08_RELEASE/ACCESSIBILITY_REPORT.md
+      - docs/protege-parity/08_RELEASE/A11Y_P0_AUDIT.md
+    notes: v0.25 EPIC-010 — owned webviews keyboard/SR + axe harness; host chrome N/A
   - id: PAR-TST-001
     area: Verification
     title: Executable parity corpus
     priority: P0
-    status: PARTIAL
+    status: VERIFIED
     owner: null
     source_files:
       - parity/protege-desktop-parity.yaml
+      - parity/metrics.json
+      - scripts/parity_common.py
       - scripts/validate-parity-manifest.py
+      - scripts/check-parity-release-gate.py
+      - scripts/generate-parity-docs.py
     test_ids:
       - scripts/validate-parity-manifest.py
-    acceptance_criteria: []
+      - scripts/check-parity-release-gate.py
+      - scripts/generate-parity-docs.py
+    acceptance_criteria:
+      - docs/protege-parity/04_BLOCKERS/BLOCKER_11_PARITY_VERIFICATION.md
+      - docs/protege-parity/03_PARITY/PARITY_RELEASE_GATE.md
     github_issue: https://github.com/eddiethedean/ontocode/issues/257
     documentation:
       - docs/protege-parity/04_BLOCKERS/BLOCKER_11_PARITY_VERIFICATION.md
-    notes: Manifest skeleton + validator in CI (v0.20); full gate in v0.25
+      - docs/protege-parity/03_PARITY/PARITY_METRICS.md
+      - docs/protege-parity/03_PARITY/PARITY_RELEASE_GATE.md
+      - docs/protege-parity/IMPLEMENTATION_EVIDENCE.md
+    notes: v0.25 EPIC-011 — schema+path validation, metrics, Gate 3 report; --strict-release defers full P0 VERIFIED to 1.0.0-rc

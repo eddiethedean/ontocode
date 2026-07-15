@@ -21,6 +21,25 @@ pub struct PluginOutput {
     /// Non-fatal security violations (e.g. rejected paths) detected by the host.
     #[serde(default)]
     pub violations: Vec<String>,
+    /// Provider payload (reasoner / query / refactor / graph) — additive in SDK 1.0.
+    #[serde(default)]
+    pub result: Option<serde_json::Value>,
+    #[serde(default)]
+    pub columns: Option<Vec<String>>,
+    #[serde(default)]
+    pub rows: Option<Vec<Vec<String>>>,
+    #[serde(default)]
+    pub unsatisfiable: Option<Vec<String>>,
+    #[serde(default)]
+    pub affected_iris: Option<Vec<String>>,
+    #[serde(default)]
+    pub root_iris: Option<Vec<String>>,
+    #[serde(default)]
+    pub graph_kind: Option<String>,
+    #[serde(default)]
+    pub hints: Option<Vec<String>>,
+    #[serde(default)]
+    pub profile: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

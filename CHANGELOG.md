@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.25.0] - 2026-07-15
+
+v0.25.0 — UX completion + executable verification (viz, Plugin SDK 1.0, a11y, parity CI).
+
+### Added
+
+- EPIC-008 / visualization parity (`PAR-VIS-001`): expanded `ontocore/getGraph` kinds (`object_property`, `data_property`, `individual`, `dependency`, `query_result`, `refactor_preview`); richer node/filter model; Graph panel filters, search dimming, unsatisfiable overlay, Graph\|List alternate, keyboard nav, context menus, history, virtualized React Flow render; Query Workbench **Open as graph** and Refactor Preview **Show graph**
+- Graph truncation caps documented in workspace limits; scale regression test for class-graph build
+- EPIC-009 / Plugin SDK 1.0 (`PAR-PLG-001`): frozen extension-point matrix; `depends_on` / `activation` lifecycle with topo-sorted activate and cascade disable; provider actions `reasoner.classify` / `query.run` / `refactor.preview` / `graph.build`; CLI `plugins info|enable|disable`; compat harness `tests/plugin_sdk_compat.rs`; reference providers in `examples/plugin-workspace/`
+- EPIC-010 / accessibility parity (`PAR-ACC-001`): shared webview a11y layer (focus trap/restore, live announcer, reduced motion); DialogShell trap + labelled dialogs; P0 panel landmarks/announcements; axe-core Vitest harness (serious/critical); filled ACCESSIBILITY_REPORT + P0 audit inventory
+- EPIC-011 / parity verification (`PAR-TST-001`): evidence path validation, release-gate metrics report (`check-parity-release-gate.py`), YAML→matrix/metrics sync (`generate-parity-docs.py`), CI wiring; Gate 3 hard-fail reserved for `--strict-release` at 1.0.0-rc
+- Migration guide: [docs/migration/v0.25.md](docs/migration/v0.25.md)
+
+### Changed
+
+- Workspace package and all `ontocore-*` crates bumped to **0.25.0**; extension and webview UI **0.25.0**
+- `PAR-VIS-001` marked **VERIFIED** in the parity manifest
+- `PAR-PLG-001` marked **VERIFIED**; plugin author guide and policy retargeted to SDK 1.0 compatibility
+- `PAR-ACC-001` marked **VERIFIED** for OntoCode-owned webviews (VS Code host chrome remains N/A)
+- `PAR-TST-001` marked **VERIFIED**; parity matrix statuses synced from YAML
+
 ## [0.24.0] - 2026-07-14
 
 v0.24.0 — Semantic services (refactoring + DL Query).

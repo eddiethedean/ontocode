@@ -1,6 +1,6 @@
-# Patch reference (OntoCore v0.24)
+# Patch reference (OntoCore v0.25)
 
-> **Status:** Documents behavior in **OntoCore v0.24**. Pre-1.0 APIs may change.
+> **Status:** Documents behavior in **OntoCore v0.25**. Pre-1.0 APIs may change.
 > Canonical feature list: [What ships today](SHIPPED.md).
 
 Patch write-back uses a JSON array of patch operations. The CLI (`ontocore patch`) and LSP (`ontocore/applyAxiomPatch`) accept the same envelope; operation sets differ by file extension.

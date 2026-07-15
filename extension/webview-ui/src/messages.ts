@@ -114,6 +114,11 @@ export interface GraphNode {
   id: string;
   label: string;
   kind: string;
+  namespace?: string;
+  ontology_iri?: string;
+  deprecated?: boolean;
+  unsatisfiable?: boolean;
+  equivalent?: boolean;
 }
 
 export interface GraphEdge {
@@ -133,6 +138,10 @@ export interface GraphPayload {
 export interface GraphFilters {
   ontology_iri?: string;
   hide_deprecated?: boolean;
+  entity_kinds?: string[];
+  namespaces?: string[];
+  relationship_kinds?: string[];
+  search_text?: string;
 }
 
 export interface RefactorFileChange {
@@ -467,7 +476,18 @@ export type WebviewMessage =
   | { type: "jumpToSource" }
   | { type: "openManchester"; axiom: { kind: string; manchester?: string } }
   | { type: "addManchesterAxiom" }
-  | { type: "requestGraph"; graphKind: string; rootIri?: string; depth?: number; includeInferred?: boolean; filters?: GraphFilters }
+  | {
+      type: "requestGraph";
+      graphKind: string;
+      rootIri?: string;
+      rootIris?: string[];
+      depth?: number;
+      includeInferred?: boolean;
+      filters?: GraphFilters;
+    }
+  | { type: "openGraphFromResults"; graphKind: "query_result" | "refactor_preview"; rootIris: string[]; title?: string }
+  | { type: "revealInHierarchy"; iri: string }
+  | { type: "jumpToEditor"; iri: string }
   | { type: "selectNode"; iri: string }
   | { type: "openEntity"; iri: string }
   | { type: "openGraph"; rootIri?: string }

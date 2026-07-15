@@ -19,7 +19,7 @@ For offline VSIX installs, see [Install VS Code](../vscode-install.md).
 
 ### 2. Open a folder
 
-**Offline:** download `ontocode-tutorial.zip` (and optionally `ontocode-v0.24.0.vsix`) from the [v0.24.0 GitHub Release](https://github.com/eddiethedean/ontocode/releases/tag/v0.24.0).
+**Offline:** download `ontocode-tutorial.zip` (and optionally `ontocode-v0.25.0.vsix`) from the [v0.25.0 GitHub Release](https://github.com/eddiethedean/ontocode/releases/tag/v0.25.0).
 
 **Online:**
 
@@ -27,21 +27,21 @@ For offline VSIX installs, see [Install VS Code](../vscode-install.md).
 
     ```bash
     mkdir ontocode-tutorial && cd ontocode-tutorial
-    curl -fsSLO https://raw.githubusercontent.com/eddiethedean/ontocode/v0.24.0/fixtures/example.ttl
-    curl -fsSLO https://raw.githubusercontent.com/eddiethedean/ontocode/v0.24.0/fixtures/complex-classes.ttl
-    curl -fsSLO https://raw.githubusercontent.com/eddiethedean/ontocode/v0.24.0/examples/obo-workflow/demo.obo
+    curl -fsSLO https://raw.githubusercontent.com/eddiethedean/ontocode/v0.25.0/fixtures/example.ttl
+    curl -fsSLO https://raw.githubusercontent.com/eddiethedean/ontocode/v0.25.0/fixtures/complex-classes.ttl
+    curl -fsSLO https://raw.githubusercontent.com/eddiethedean/ontocode/v0.25.0/examples/obo-workflow/demo.obo
     ```
 
 === "Windows (PowerShell)"
 
     ```powershell
     mkdir ontocode-tutorial; cd ontocode-tutorial
-    Invoke-WebRequest -Uri https://raw.githubusercontent.com/eddiethedean/ontocode/v0.24.0/fixtures/example.ttl -OutFile example.ttl
-    Invoke-WebRequest -Uri https://raw.githubusercontent.com/eddiethedean/ontocode/v0.24.0/fixtures/complex-classes.ttl -OutFile complex-classes.ttl
-    Invoke-WebRequest -Uri https://raw.githubusercontent.com/eddiethedean/ontocode/v0.24.0/examples/obo-workflow/demo.obo -OutFile demo.obo
+    Invoke-WebRequest -Uri https://raw.githubusercontent.com/eddiethedean/ontocode/v0.25.0/fixtures/example.ttl -OutFile example.ttl
+    Invoke-WebRequest -Uri https://raw.githubusercontent.com/eddiethedean/ontocode/v0.25.0/fixtures/complex-classes.ttl -OutFile complex-classes.ttl
+    Invoke-WebRequest -Uri https://raw.githubusercontent.com/eddiethedean/ontocode/v0.25.0/examples/obo-workflow/demo.obo -OutFile demo.obo
     ```
 
-Or browse [v0.24.0 fixtures](https://github.com/eddiethedean/ontocode/tree/v0.24.0/fixtures). Then **File → Open Folder…** and select that folder.
+Or browse [v0.25.0 fixtures](https://github.com/eddiethedean/ontocode/tree/v0.25.0/fixtures). Then **File → Open Folder…** and select that folder.
 
 !!! note "Workspace Trust"
     The **bundled** language server works in Restricted Mode. **Trust** the folder only if you set custom `ontocode.lspPath` or `ontocode.robotPath`.

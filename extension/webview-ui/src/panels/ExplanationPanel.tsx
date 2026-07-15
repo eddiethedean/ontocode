@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { LiveAnnouncer, PanelMain } from "../a11y";
 import {
   Badge,
   Button,
@@ -85,6 +86,10 @@ export function ExplanationPanel(_props?: WorkspaceProps): JSX.Element {
 
   return (
     <Panel>
+      <PanelMain label="Explanation">
+      <LiveAnnouncer
+        message={`Explanation for ${shortLabel(payload.classIri)}, justification ${index + 1} of ${payload.justifications.length}`}
+      />
       <PanelHeader
         title="Explanation"
         subtitle={<InlineCode>{payload.classIri}</InlineCode>}
@@ -185,6 +190,7 @@ export function ExplanationPanel(_props?: WorkspaceProps): JSX.Element {
           </Button>
         </ButtonBar>
       </StickyActions>
+      </PanelMain>
     </Panel>
   );
 }

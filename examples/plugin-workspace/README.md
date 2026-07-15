@@ -1,6 +1,6 @@
-# Plugin workspace example
+# Plugin workspace example (SDK 1.0)
 
-Minimal ontology folder with sample `.ontocore/plugins/` manifests for the OntoCore plugin host (v0.14+).
+Minimal ontology folder with `.ontocore/plugins/` manifests for OntoCore Plugin SDK 1.0 — UI contributions, lifecycle deps, and reference providers.
 
 Full authoring guide: [Plugin authoring](https://ontocode-vs.readthedocs.io/en/latest/guides/plugins/).
 
@@ -10,37 +10,38 @@ Full authoring guide: [Plugin authoring](https://ontocode-vs.readthedocs.io/en/l
 plugin-workspace/
   demo.ttl
   demo_ui_view.sh
+  demo_providers.sh
   .ontocore/plugins/
     naming-validator.toml
     demo-ui-view.toml
+    demo-reasoner.toml
+    demo-query.toml
+    demo-refactor.toml
+    demo-graph.toml      # depends_on demo-reasoner
     owlmake.toml
 ```
 
 ## Try it (git clone)
 
 ```bash
-# From repo root — list discovered plugins
+# From repo root
 cargo run -- plugins list examples/plugin-workspace
-
-# Validate (runs validator plugins)
+cargo run -- plugins info org.example.demo-graph examples/plugin-workspace
+cargo run -- plugins run org.example.demo-reasoner --action reasoner.classify examples/plugin-workspace
+cargo run -- plugins run org.example.demo-query --action query.run --query "SELECT *" examples/plugin-workspace
+cargo run -- plugins run org.example.demo-refactor --action refactor.preview --iri http://example.org/Person examples/plugin-workspace
+cargo run -- plugins run org.example.demo-graph --action graph.build --iri http://example.org/Person examples/plugin-workspace
 cargo run -- validate examples/plugin-workspace
-```
-
-With an installed CLI:
-
-```bash
-ontocore plugins list examples/plugin-workspace
-ontocore validate examples/plugin-workspace
 ```
 
 ## VS Code
 
 1. **File → Open Folder…** → `examples/plugin-workspace`
 2. Run **OntoCode: Index Workspace**
-3. Use **Plugins: Open View…** / **Plugins: Run Command…** for UI contributions from `demo-ui-view.toml`
+3. Use **Plugins: Open View…** / **Plugins: Run Command…** for UI contributions
 
 ## Notes
 
-- Plugin manifests are **workspace-local** (not a marketplace).
-- Subprocess plugins need an executable `entry` (see `demo_ui_view.sh`).
-- Declare `permissions` explicitly on new plugins — see the plugins guide.
+- Workspace-local plugins (not a marketplace).
+- Subprocess `entry` binaries live next to the workspace root; symlinks under `.ontocore/plugins/` resolve them without `..` in the manifest.
+- `depends_on` / disable cascade: `ontocore plugins disable org.example.demo-reasoner` also disables `demo-graph`.

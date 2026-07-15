@@ -1,7 +1,7 @@
 {
   "name": "ontocode-webview-ui",
   "private": true,
-  "version": "0.24.0",
+  "version": "0.25.0",
   "type": "module",
   "scripts": {
     "build": "vite build",
@@ -18,9 +18,12 @@
     "@testing-library/jest-dom": "^6.9.1",
     "@testing-library/react": "^16.0.1",
     "@testing-library/user-event": "^14.6.1",
+    "@types/jest-axe": "^3.5.9",
     "@types/react": "^18.3.12",
     "@types/react-dom": "^18.3.1",
     "@vitejs/plugin-react": "^4.3.4",
+    "axe-core": "^4.12.1",
+    "jest-axe": "^10.0.0",
     "jsdom": "^25.0.1",
     "typescript": "^5.3.3",
     "vite": "^6.0.3",

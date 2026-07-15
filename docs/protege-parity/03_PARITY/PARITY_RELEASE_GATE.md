@@ -47,6 +47,12 @@ implementation intent.
 -   [ ] Every P0 requirement is VERIFIED in PARITY_MATRIX.md
 -   [ ] No unresolved P0 implementation issues
 
+Automation (v0.25 / EPIC-011):
+
+-   `python3 scripts/check-parity-release-gate.py` prints Gate 3 readiness from `parity/protege-desktop-parity.yaml`
+-   CI enforces **infrastructure** (paths + evidence completeness + docs sync), not full Gate 3
+-   `python3 scripts/check-parity-release-gate.py --strict-release` fails when Gate 3 is incomplete (for 1.0.0-rc)
+
 ## Gate 4 --- File Formats
 
 Required formats must support:

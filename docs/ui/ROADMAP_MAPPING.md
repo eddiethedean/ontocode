@@ -30,7 +30,7 @@
 
 ## Master checklist — Product Roadmap 2.0
 
-Every item from [PRODUCT_ROADMAP_2.0.md](PRODUCT_ROADMAP_2.0.md), with release assignment. **Shipped** = available in the tagged release named in the Target column (current public pin: **v0.24.0**).
+Every item from [PRODUCT_ROADMAP_2.0.md](PRODUCT_ROADMAP_2.0.md), with release assignment. **Shipped** = available in the tagged release named in the Target column (current public pin: **v0.25.0**).
 
 | UI phase | Deliverable | Status | Target release | Spec |
 |----------|-------------|--------|----------------|------|
@@ -66,8 +66,8 @@ Every item from [PRODUCT_ROADMAP_2.0.md](PRODUCT_ROADMAP_2.0.md), with release a
 | **4** | Focus neighborhood graph | Shipped | v0.7+ | [GRAPH_WORKSPACE.md](GRAPH_WORKSPACE.md) |
 | **4** | Pan/zoom/select | Shipped | v0.7+ | [GRAPH_RENDERING_ARCHITECTURE.md](GRAPH_RENDERING_ARCHITECTURE.md) |
 | **4** | Saved layouts | Planned | v1.0 | [GRAPH_WORKSPACE.md](GRAPH_WORKSPACE.md) |
-| **4** | Filters | Planned | v1.0 | [GRAPH_WORKSPACE.md](GRAPH_WORKSPACE.md) |
-| **4** | Reasoning overlays | Planned | v1.0 | [GRAPH_WORKSPACE.md](GRAPH_WORKSPACE.md) |
+| **4** | Filters | Shipped | v0.25 | [GRAPH_WORKSPACE.md](GRAPH_WORKSPACE.md) · functional filters; saved filter presets remain v1.0 |
+| **4** | Reasoning overlays | Shipped | v0.25 | [GRAPH_WORKSPACE.md](GRAPH_WORKSPACE.md) · unsatisfiable badges + inferred edges; richer overlays remain v1.0 |
 | **4** | AI graph explanations | Planned | v1.1 | [AI_EXPERIENCE.md](AI_EXPERIENCE.md) |
 | **5** | Semantic build pipeline UI | Planned | v1.0 | [REASONING_EXPERIENCE.md](REASONING_EXPERIENCE.md) |
 | **5** | Problems panel integration | Partial | v1.0 | VS Code Problems + LSP diagnostics |
@@ -94,7 +94,7 @@ Every item from [PRODUCT_ROADMAP_2.0.md](PRODUCT_ROADMAP_2.0.md), with release a
 | **8** | Inspector card API | Planned | v0.14 | [PLUGIN_API_SPEC.md](PLUGIN_API_SPEC.md) |
 | **8** | AI provider API | Planned | v1.1 | [PLUGIN_API_SPEC.md](PLUGIN_API_SPEC.md) |
 | **8** | Reasoner provider API | Planned | v0.14 | [PLUGIN_API_SPEC.md](PLUGIN_API_SPEC.md) |
-| **8** | SDK and examples | Planned | v0.14 | [design/PLUGIN_SPEC.md](../design/PLUGIN_SPEC.md) |
+| **8** | SDK and examples | Shipped | v0.25 | [guides/plugins.md](../guides/plugins.md) · TOML+subprocess SDK 1.0; marketplace/AI remain later |
 | **9** | Semantic diff | Shipped | v0.10+ | [COLLABORATION.md](COLLABORATION.md) |
 | **9** | Review workspace | Planned | v1.0 / Post-1.2 | [COLLABORATION.md](COLLABORATION.md) |
 | **9** | GitHub integration | Planned | v1.2 | [COLLABORATION.md](COLLABORATION.md) |
@@ -130,7 +130,7 @@ Every item from [PRODUCT_ROADMAP_2.0.md](PRODUCT_ROADMAP_2.0.md), with release a
 | Human interface guidelines | Planned | v1.0 | [HUMAN_INTERFACE_GUIDELINES.md](HUMAN_INTERFACE_GUIDELINES.md) |
 | Interaction principles | Reference | — | [INTERACTION_PRINCIPLES.md](INTERACTION_PRINCIPLES.md) |
 | Keyboard shortcuts catalog | Shipped | v0.17 | [KEYBOARD_SHORTCUTS.md](KEYBOARD_SHORTCUTS.md) |
-| Accessibility (WCAG) | Partial | v0.13 / v1.0 | [ACCESSIBILITY_SPEC.md](ACCESSIBILITY_SPEC.md) · migrated panels v0.13 |
+| Accessibility (WCAG) | Shipped | v0.25 | [ACCESSIBILITY_SPEC.md](ACCESSIBILITY_SPEC.md) · EPIC-010 owned webviews + axe; external cert later |
 | Telemetry / analytics | Not planned (opt-in only) | — | [TELEMETRY_ANALYTICS.md](TELEMETRY_ANALYTICS.md) |
 | Documentation workspace UX | Partial | v1.0 | [PRODUCT_DESIGN_SPECIFICATION.md](PRODUCT_DESIGN_SPECIFICATION.md) §4.6 |
 

@@ -15,7 +15,7 @@
 >
 > **Contributor crate layout:** [Implementation architecture](design/ARCHITECTURE.md) (internal modules only).
 >
-> **Latest tagged: v0.24.0** — v0.24 ships today. OntoCode (VS Code) + OntoCore (CLI/LSP/library).
+> **Latest tagged: v0.25.0** — v0.25 ships today. OntoCode (VS Code) + OntoCore (CLI/LSP/library).
 >
 > **Planned v1.0:** stable plugin API, full workflow plugin integration, language SDKs, MCP server. See [Platform roadmap](roadmap.md) ([full ROADMAP.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/ROADMAP.md)).
 >

@@ -120,19 +120,24 @@ Every parity feature should reference:
                                                                     ontology.rs                              multi-format;
                                                                                                              move/extract Turtle-first.
 
-  PAR-VIS-001    Graph        PARTIAL           extension           graph webview    ✓       TBD     ✓       Target
-                 visualization                                                                               v0.25.
+  PAR-VIS-001    Graph        VERIFIED          ontocore-catalog    graph.rs         ✓       ✓       ✓       v0.25
+                 visualization                  extension           GraphPanel.tsx                           EPIC-008 kinds,
+                                                                    GraphPanel.test                          filters, overlays,
+                                                                                                             virt, list view.
 
-  PAR-PLG-001    Plugin SDK   PARTIAL           ontocore-plugin     lib.rs           ✓       TBD     ✓       Target
-                                                                                                             v0.25.
+  PAR-PLG-001    Plugin SDK   VERIFIED          ontocore-plugin     host.rs,         ✓       ✓       ✓       v0.25
+                                                                    lifecycle.rs,                            EPIC-009 SDK 1.0;
+                                                                    manifest.rs                              providers +
+                                                                    plugin_sdk_compat                        compat harness.
 
-  PAR-ACC-001    Accessibility PARTIAL          extension           TBD              ✓       TBD     ✓       Target
-                                                                                                             v0.25.
+  PAR-ACC-001    Accessibility VERIFIED         webview-ui          a11y/*,          ✓       ✓       ✓       v0.25
+                                                                    DialogShell,                             EPIC-010 focus/
+                                                                    panels + axe                             SR + axe harness.
 
-  PAR-TST-001    Parity       PARTIAL           parity/             protege-desktop- ---     ✓       ✓       v0.19:
-                 verification                   scripts             parity.yaml,                        manifest
-                                                                                        validate-parity-       skeleton +
-                                                                                        manifest.py            CI validator.
+  PAR-TST-001    Parity       VERIFIED          parity/scripts      validate +       ✓       ✓       ✓       v0.25
+                 verification                                       release-gate +                           EPIC-011 path
+                                                                    generate-docs                            checks, metrics,
+                                                                                                             Gate 3 report.
   -------------------------------------------------------------------------------------------------------------------------
 
 ------------------------------------------------------------------------

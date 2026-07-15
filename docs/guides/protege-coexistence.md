@@ -33,7 +33,7 @@ Canonical capability matrix: [What ships today](../SHIPPED.md). Decision matrix:
 | Workflow | Why |
 |----------|-----|
 | HermiT-identical DL explanations / certified HermiT results | OntoLogos DL is not certified HermiT-identical |
-| Protégé DL Query tab syntax | Query Workbench is SQL/SPARQL; DL Query UI → **v0.24** |
+| Protégé DL Query tab syntax | Query Workbench is SQL/SPARQL; DL Query UI → **v0.25** |
 | Full OWL 2 DL axiom catalog for all formats | Partial Manchester + patches — see [SHIPPED](../SHIPPED.md) and [known limitations](../known-limitations.md) |
 | Byte-identical OWL/XML or RDF/XML layout | OntoCode re-serializes for semantic fidelity ([ADR-0021](../design/adr/0021-deterministic-xml-serializers.md)) |
 | Workflows that depend on Protégé-specific plugins | Not replicated in OntoCode |

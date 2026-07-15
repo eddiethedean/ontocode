@@ -82,10 +82,42 @@ describe("layoutPersistenceLogic", () => {
       command: "ontocode.openPropertyGraph",
       title: "Property Graph",
     });
+    assert.deepEqual(
+      graphRestoreState({ graphKind: "object_property" }, "Object Property Graph"),
+      {
+        command: "ontocode.openObjectPropertyGraph",
+        title: "Object Property Graph",
+      }
+    );
+    assert.deepEqual(
+      graphRestoreState({ graphKind: "data_property" }, "Data Property Graph"),
+      {
+        command: "ontocode.openDataPropertyGraph",
+        title: "Data Property Graph",
+      }
+    );
     assert.deepEqual(graphRestoreState({ graphKind: "import" }, "Import Graph"), {
       command: "ontocode.openImportGraph",
       title: "Import Graph",
     });
+    assert.deepEqual(
+      graphRestoreState({ graphKind: "dependency" }, "Dependency Graph"),
+      {
+        command: "ontocode.openDependencyGraph",
+        title: "Dependency Graph",
+      }
+    );
+    assert.deepEqual(
+      graphRestoreState(
+        { graphKind: "individual", rootIri: "http://ex#Alice" },
+        "Individual"
+      ),
+      {
+        command: "ontocode.openIndividualGraph",
+        args: ["http://ex#Alice"],
+        title: "Individual",
+      }
+    );
     assert.deepEqual(
       graphRestoreState(
         { graphKind: "neighborhood", rootIri: "http://ex.org#Person" },
@@ -101,6 +133,10 @@ describe("layoutPersistenceLogic", () => {
       isAllowedPanelRestoreCommand(
         graphRestoreState({ graphKind: "neighborhood", rootIri: "x" }).command
       ),
+      true
+    );
+    assert.equal(
+      isAllowedPanelRestoreCommand("ontocode.openObjectPropertyGraph"),
       true
     );
   });

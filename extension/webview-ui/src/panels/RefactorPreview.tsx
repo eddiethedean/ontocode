@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { LiveAnnouncer, PanelMain } from "../a11y";
 import {
   DiffColumns,
   FormField,
@@ -50,15 +51,16 @@ export function RefactorPreviewPanel(_props?: WorkspaceProps): JSX.Element {
 
   const change = plan.changes[selected];
 
+  const summary = `${plan.changes.length} file${plan.changes.length === 1 ? "" : "s"} · ${plan.affected_entity_count ?? 0} entities · ${plan.affected_axiom_count ?? 0} axioms`;
+
   return (
     <Panel>
-      <PanelHeader
-        title="Refactor preview"
-        subtitle={`${plan.changes.length} file${plan.changes.length === 1 ? "" : "s"} · ${plan.affected_entity_count ?? 0} entities · ${plan.affected_axiom_count ?? 0} axioms`}
-      />
+      <PanelMain label="Refactor preview">
+      <LiveAnnouncer message={`Refactor preview: ${summary}`} />
+      <PanelHeader title="Refactor preview" subtitle={summary} />
 
       {plan.warnings?.length ? (
-        <ul className="warnings">
+        <ul className="warnings" aria-label="Refactor warnings">
           {plan.warnings.map((w, i) => (
             <li key={`${i}-${w}`}>{w}</li>
           ))}
@@ -85,6 +87,31 @@ export function RefactorPreviewPanel(_props?: WorkspaceProps): JSX.Element {
       <StickyActions>
         <button
           type="button"
+          className="secondary"
+          onClick={() => {
+            if (!plan) {
+              return;
+            }
+            const iris: string[] = [];
+            for (const change of plan.changes) {
+              const texts = `${change.original_text}\n${change.preview_text}`;
+              for (const match of texts.matchAll(/https?:\/\/[^\s"'<>]+/g)) {
+                iris.push(match[0].replace(/[.,;)]+$/, ""));
+              }
+            }
+            const unique = [...new Set(iris)].slice(0, 200);
+            host.postToCore({
+              type: "openGraphFromResults",
+              graphKind: "refactor_preview",
+              rootIris: unique,
+              title: "Refactor preview graph",
+            });
+          }}
+        >
+          Show graph
+        </button>
+        <button
+          type="button"
           disabled={!plan}
           onClick={() => host.postToCore({ type: "applyRefactor" })}
         >
@@ -101,6 +128,7 @@ export function RefactorPreviewPanel(_props?: WorkspaceProps): JSX.Element {
           Cancel
         </button>
       </StickyActions>
+      </PanelMain>
     </Panel>
   );
 }

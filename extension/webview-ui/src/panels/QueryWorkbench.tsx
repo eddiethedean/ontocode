@@ -10,6 +10,7 @@ import {
   Toolbar,
   ToolbarGroup,
 } from "../components/ui";
+import { LiveAnnouncer, PanelMain } from "../a11y";
 import { SchemaBrowser } from "../components/SchemaBrowser";
 import { useWorkspaceHost } from "../context/HostContext";
 import { useWorkspaceStore } from "../store";
@@ -170,8 +171,18 @@ export function QueryWorkbenchPanel(_props?: WorkspaceProps): JSX.Element {
         ? "SPARQL query"
         : "Manchester class expression";
 
+  const resultAnnounce = error
+    ? `Query error: ${error}`
+    : dlResult
+      ? `DL Query returned ${dlTabItems(dlResult, dlTab).length} ${dlTab}`
+      : result
+        ? `Query returned ${result.rows.length} rows`
+        : "";
+
   return (
     <Panel>
+      <PanelMain label="Query Workbench">
+      <LiveAnnouncer message={resultAnnounce} politeness={error ? "assertive" : "polite"} />
       <PanelHeader
         title="Query Workbench"
         subtitle="Run SQL, SPARQL, or DL Query against the indexed ontology."
@@ -273,6 +284,39 @@ export function QueryWorkbenchPanel(_props?: WorkspaceProps): JSX.Element {
             }
           >
             Export JSON
+          </button>
+          <button
+            type="button"
+            className="secondary"
+            onClick={() => {
+              const iris: string[] = [];
+              if (dlResult) {
+                iris.push(...dlTabItems(dlResult, dlTab));
+              } else if (result) {
+                for (const row of result.rows) {
+                  for (const cell of row) {
+                    if (
+                      typeof cell === "string" &&
+                      (cell.startsWith("http://") || cell.startsWith("https://"))
+                    ) {
+                      iris.push(cell);
+                    }
+                  }
+                }
+              }
+              const unique = [...new Set(iris)].slice(0, 200);
+              if (unique.length === 0) {
+                return;
+              }
+              host.postToCore({
+                type: "openGraphFromResults",
+                graphKind: "query_result",
+                rootIris: unique,
+                title: "Query result graph",
+              });
+            }}
+          >
+            Open as graph
           </button>
         </ToolbarGroup>
       </Toolbar>
@@ -378,15 +422,20 @@ export function QueryWorkbenchPanel(_props?: WorkspaceProps): JSX.Element {
       ) : null}
 
       {!dlResult && result ? (
-        <div className="results">
+        <div className="results" role="region" aria-label="Query results">
           {result.truncated ? (
             <p className="oc-muted oc-results-banner">Results truncated at server row limit.</p>
           ) : null}
           <table>
+            <caption className="oc-sr-only">
+              Query results with {result.columns.length} columns and {result.rows.length} rows
+            </caption>
             <thead>
               <tr>
                 {result.columns.map((c) => (
-                  <th key={c}>{c}</th>
+                  <th key={c} scope="col">
+                    {c}
+                  </th>
                 ))}
               </tr>
             </thead>
@@ -402,6 +451,7 @@ export function QueryWorkbenchPanel(_props?: WorkspaceProps): JSX.Element {
           </table>
         </div>
       ) : null}
+      </PanelMain>
     </Panel>
   );
 }

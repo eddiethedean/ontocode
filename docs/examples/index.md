@@ -53,8 +53,8 @@ Download tutorial files without cloning:
 
 ```bash
 mkdir ontocode-tutorial && cd ontocode-tutorial
-curl -fsSLO https://raw.githubusercontent.com/eddiethedean/ontocode/v0.24.0/fixtures/example.ttl
-curl -fsSLO https://raw.githubusercontent.com/eddiethedean/ontocode/v0.24.0/fixtures/complex-classes.ttl
+curl -fsSLO https://raw.githubusercontent.com/eddiethedean/ontocode/v0.25.0/fixtures/example.ttl
+curl -fsSLO https://raw.githubusercontent.com/eddiethedean/ontocode/v0.25.0/fixtures/complex-classes.ttl
 ```
 
 ## VS Code tutorial

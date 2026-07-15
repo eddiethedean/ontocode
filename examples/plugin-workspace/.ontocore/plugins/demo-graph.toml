@@ -1,0 +1,16 @@
+[plugin]
+name = "demo-graph"
+version = "0.1.0"
+kind = "graph"
+id = "org.example.demo-graph"
+api_version = "1"
+entry = "demo_providers.sh"
+depends_on = ["org.example.demo-reasoner"]
+activation = "on_command"
+permissions = ["workspace.read", "external_process"]
+
+[capabilities]
+graph = true
+
+[config]
+graph_kind = "plugin_neighborhood"

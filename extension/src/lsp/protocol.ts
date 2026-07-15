@@ -281,11 +281,16 @@ export interface GetEntityResult {
 export interface GraphFilters {
   ontology_iri?: string;
   hide_deprecated?: boolean;
+  entity_kinds?: string[];
+  namespaces?: string[];
+  relationship_kinds?: string[];
+  search_text?: string;
 }
 
 export interface GetGraphParams {
   graph_kind: string;
   root_iri?: string;
+  root_iris?: string[];
   depth?: number;
   include_inferred?: boolean;
   filters?: GraphFilters;
@@ -295,6 +300,11 @@ export interface GraphNode {
   id: string;
   label: string;
   kind: string;
+  namespace?: string;
+  ontology_iri?: string;
+  deprecated?: boolean;
+  unsatisfiable?: boolean;
+  equivalent?: boolean;
 }
 
 export interface GraphEdge {
@@ -898,6 +908,10 @@ export interface PluginCapabilities {
   release: boolean;
   diagnostics: boolean;
   export: boolean;
+  reasoner?: boolean;
+  query?: boolean;
+  refactor?: boolean;
+  graph?: boolean;
 }
 
 export interface PluginDescriptor {
@@ -907,11 +921,15 @@ export interface PluginDescriptor {
   kind: string;
   api_version?: string;
   permissions?: string[];
+  depends_on?: string[];
+  activation?: string;
+  state?: string;
   capabilities: PluginCapabilities;
   manifest_path: string;
   ui: PluginUiContributions;
   in_process: boolean;
   disabled?: boolean;
+  enabled?: boolean;
 }
 
 export interface ListPluginsResult {
@@ -923,6 +941,8 @@ export interface RunPluginParams {
   action?: string;
   step?: string;
   view_id?: string;
+  query?: string;
+  focus_iri?: string;
 }
 
 export interface RunPluginResult {
@@ -931,4 +951,13 @@ export interface RunPluginResult {
   logs?: string;
   view_html?: string;
   success: boolean;
+  result?: unknown;
+  columns?: string[];
+  rows?: string[][];
+  unsatisfiable?: string[];
+  affected_iris?: string[];
+  root_iris?: string[];
+  graph_kind?: string;
+  hints?: string[];
+  profile?: string;
 }

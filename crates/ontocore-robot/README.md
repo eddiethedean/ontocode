@@ -7,7 +7,7 @@ Thin wrappers around the [ROBOT](https://github.com/ontodev/robot) CLI for OntoC
 ## Install
 
 ```toml
-ontocore-robot = "0.24"
+ontocore-robot = "0.25"
 ```
 
 ## CLI

@@ -15,10 +15,33 @@ describe("DialogShell", () => {
       </DialogShell>
     );
 
-    expect(screen.getByRole("dialog", { name: "Dialog content" })).toBeInTheDocument();
+    expect(screen.getByRole("dialog", { name: "Test dialog" })).toBeInTheDocument();
     await user.click(screen.getByRole("button", { name: "OK" }));
     expect(onPrimary).toHaveBeenCalledOnce();
     await user.keyboard("{Escape}");
     expect(onCancel).toHaveBeenCalledOnce();
+  });
+
+  it("restores focus to the previously focused element on unmount/cancel", async () => {
+    const user = userEvent.setup();
+    const opener = document.createElement("button");
+    opener.textContent = "Open";
+    document.body.appendChild(opener);
+    opener.focus();
+
+    const onCancel = vi.fn(() => {
+      // Simulate parent unmounting dialog on cancel.
+    });
+    const { unmount } = render(
+      <DialogShell title="Focus restore" onPrimary={() => undefined} onCancel={onCancel}>
+        Body
+      </DialogShell>
+    );
+
+    await user.keyboard("{Escape}");
+    expect(onCancel).toHaveBeenCalled();
+    unmount();
+    expect(document.activeElement).toBe(opener);
+    opener.remove();
   });
 });

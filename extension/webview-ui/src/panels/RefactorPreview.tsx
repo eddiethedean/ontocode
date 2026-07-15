@@ -85,6 +85,31 @@ export function RefactorPreviewPanel(_props?: WorkspaceProps): JSX.Element {
       <StickyActions>
         <button
           type="button"
+          className="secondary"
+          onClick={() => {
+            if (!plan) {
+              return;
+            }
+            const iris: string[] = [];
+            for (const change of plan.changes) {
+              const texts = `${change.original_text}\n${change.preview_text}`;
+              for (const match of texts.matchAll(/https?:\/\/[^\s"'<>]+/g)) {
+                iris.push(match[0].replace(/[.,;)]+$/, ""));
+              }
+            }
+            const unique = [...new Set(iris)].slice(0, 200);
+            host.postToCore({
+              type: "openGraphFromResults",
+              graphKind: "refactor_preview",
+              rootIris: unique,
+              title: "Refactor preview graph",
+            });
+          }}
+        >
+          Show graph
+        </button>
+        <button
+          type="button"
           disabled={!plan}
           onClick={() => host.postToCore({ type: "applyRefactor" })}
         >

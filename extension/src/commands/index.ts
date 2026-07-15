@@ -637,9 +637,63 @@ export function registerCommands(
     vscode.commands.registerCommand("ontocode.openPropertyGraph", async () => {
       await GraphPanel.show(context.extensionUri, { graphKind: "property" }, "Property Graph");
     }),
+    vscode.commands.registerCommand("ontocode.openObjectPropertyGraph", async () => {
+      await GraphPanel.show(
+        context.extensionUri,
+        { graphKind: "object_property" },
+        "Object Property Graph"
+      );
+    }),
+    vscode.commands.registerCommand("ontocode.openDataPropertyGraph", async () => {
+      await GraphPanel.show(
+        context.extensionUri,
+        { graphKind: "data_property" },
+        "Data Property Graph"
+      );
+    }),
+    vscode.commands.registerCommand(
+      "ontocode.openIndividualGraph",
+      async (arg?: unknown) => {
+        const iri = resolveEntityIri(arg);
+        await GraphPanel.show(
+          context.extensionUri,
+          { graphKind: "individual", rootIri: iri },
+          iri ? `Individual: ${iri}` : "Individual Graph"
+        );
+      }
+    ),
     vscode.commands.registerCommand("ontocode.openImportGraph", async () => {
       await GraphPanel.show(context.extensionUri, { graphKind: "import" }, "Import Graph");
     }),
+    vscode.commands.registerCommand("ontocode.openDependencyGraph", async () => {
+      await GraphPanel.show(
+        context.extensionUri,
+        { graphKind: "dependency" },
+        "Dependency Graph"
+      );
+    }),
+    vscode.commands.registerCommand(
+      "ontocode.openGraphFromResults",
+      async (args?: {
+        graphKind?: string;
+        rootIris?: string[];
+        title?: string;
+      }) => {
+        const graphKind = args?.graphKind ?? "query_result";
+        const rootIris = args?.rootIris ?? [];
+        if (rootIris.length === 0) {
+          void vscode.window.showWarningMessage(
+            "OntoCode: no IRIs available to open as a graph"
+          );
+          return;
+        }
+        await GraphPanel.show(
+          context.extensionUri,
+          { graphKind, rootIris, depth: 2 },
+          args?.title ?? "Result Graph"
+        );
+      }
+    ),
     vscode.commands.registerCommand(
       "ontocode.manageImports",
       async (item?: OntologyTreeItem | string) => {

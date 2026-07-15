@@ -281,11 +281,16 @@ export interface GetEntityResult {
 export interface GraphFilters {
   ontology_iri?: string;
   hide_deprecated?: boolean;
+  entity_kinds?: string[];
+  namespaces?: string[];
+  relationship_kinds?: string[];
+  search_text?: string;
 }
 
 export interface GetGraphParams {
   graph_kind: string;
   root_iri?: string;
+  root_iris?: string[];
   depth?: number;
   include_inferred?: boolean;
   filters?: GraphFilters;
@@ -295,6 +300,11 @@ export interface GraphNode {
   id: string;
   label: string;
   kind: string;
+  namespace?: string;
+  ontology_iri?: string;
+  deprecated?: boolean;
+  unsatisfiable?: boolean;
+  equivalent?: boolean;
 }
 
 export interface GraphEdge {

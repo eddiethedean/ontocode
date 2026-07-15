@@ -35,7 +35,11 @@ export const ALLOWED_PANEL_RESTORE_COMMANDS: ReadonlySet<string> = new Set([
   "ontocode.openEntity",
   "ontocode.openClassGraph",
   "ontocode.openPropertyGraph",
+  "ontocode.openObjectPropertyGraph",
+  "ontocode.openDataPropertyGraph",
+  "ontocode.openIndividualGraph",
   "ontocode.openImportGraph",
+  "ontocode.openDependencyGraph",
   "ontocode.openNeighborhoodGraph",
 ]);
 
@@ -93,8 +97,20 @@ export function graphRestoreState(
       return { command: "ontocode.openClassGraph", title };
     case "property":
       return { command: "ontocode.openPropertyGraph", title };
+    case "object_property":
+      return { command: "ontocode.openObjectPropertyGraph", title };
+    case "data_property":
+      return { command: "ontocode.openDataPropertyGraph", title };
+    case "individual":
+      return {
+        command: "ontocode.openIndividualGraph",
+        args: options.rootIri ? [options.rootIri] : undefined,
+        title,
+      };
     case "import":
       return { command: "ontocode.openImportGraph", title };
+    case "dependency":
+      return { command: "ontocode.openDependencyGraph", title };
     case "neighborhood":
     default:
       return {

@@ -116,6 +116,13 @@ export class QueryWorkbenchPanel {
     if (message.type === "exportQueryResult") {
       await this.exportResult(message.format, message.runId);
     }
+    if (message.type === "openGraphFromResults") {
+      await vscode.commands.executeCommand("ontocode.openGraphFromResults", {
+        graphKind: message.graphKind,
+        rootIris: message.rootIris,
+        title: message.title,
+      });
+    }
     if (message.type === "openEntity") {
       await vscode.commands.executeCommand("ontocode.openEntity", message.iri);
     }

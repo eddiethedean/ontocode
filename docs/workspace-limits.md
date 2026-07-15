@@ -31,6 +31,15 @@ indexing improvements.
 
 LSP `ontocore/query` and `ontocore/sparql` set `truncated: true` on `TabularQueryResult` when the cap is hit.
 
+## Graph visualization limits
+
+| Limit | Value |
+|-------|-------|
+| Graph nodes per `getGraph` payload | **2,000** (`MAX_GRAPH_NODES`) |
+| Graph edges per `getGraph` payload | **5,000** (`MAX_GRAPH_EDGES`) |
+
+When either cap is hit, `GraphPayload.truncated` is `true` and the graph panel shows a truncation badge. Prefer neighborhood graphs rooted at a specific entity, lower `depth`, or apply ontology / kind / namespace filters.
+
 ## `ontocore validate` exit codes
 
 | Outcome | Exit code |

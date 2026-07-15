@@ -227,6 +227,13 @@ export class RefactorPreviewPanel {
   }
 
   private async handleMessage(message: WebviewMessage): Promise<void> {
+    if (message.type === "openGraphFromResults") {
+      await vscode.commands.executeCommand("ontocode.openGraphFromResults", {
+        graphKind: message.graphKind,
+        rootIris: message.rootIris,
+        title: message.title,
+      });
+    }
     if (message.type === "applyRefactor" && this.plan && this.request && !this.applying) {
       this.applying = true;
       const planSnapshot = this.plan;

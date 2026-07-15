@@ -133,6 +133,7 @@ impl Workspace {
         self.import_graph_with(&GraphRequest {
             graph_kind: GraphKind::Import.as_str().to_string(),
             root_iri: None,
+            root_iris: vec![],
             depth: 2,
             include_inferred: false,
             filters: GraphFilters::default(),

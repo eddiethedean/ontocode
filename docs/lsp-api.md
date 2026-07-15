@@ -382,15 +382,16 @@ Returns graph nodes and edges for visualization webviews.
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `graph_kind` | string | `class`, `property`, `import`, or `neighborhood` |
-| `root_iri` | string? | Required for `neighborhood` |
-| `depth` | number? | BFS depth for neighborhood (default 2, max 5) |
-| `include_inferred` | boolean? | Include reasoner edges when snapshot exists |
-| `filters` | object? | `ontology_iri`, `hide_deprecated` |
+| `graph_kind` | string | `class`, `property`, `object_property`, `data_property`, `individual`, `import`, `dependency`, `neighborhood`, `query_result`, or `refactor_preview` |
+| `root_iri` | string? | Required for `neighborhood` / `individual` (single seed); optional elsewhere |
+| `root_iris` | string[]? | Multi-root seeds for `query_result` / `refactor_preview` (and optional individual) |
+| `depth` | number? | BFS depth for neighborhood/individual/result graphs (default 2, max 5) |
+| `include_inferred` | boolean? | Include reasoner subclass edges when snapshot exists |
+| `filters` | object? | `ontology_iri`, `hide_deprecated`, `entity_kinds[]`, `namespaces[]`, `relationship_kinds[]`, `search_text` |
 
-**Graph panel (v0.15):** The React graph webview supports **asserted**, **inferred only**, and **combined** edge modes, plus grid/circle/stack layouts and node search. These map to `include_inferred` and reasoner snapshot state on the LSP request.
+**Graph panel (v0.25):** React graph webview supports asserted / inferred-only / combined modes, filtering, search dimming, inferred unsatisfiable overlays, Graph\|List alternate, keyboard navigation, and virtualized render (`onlyRenderVisibleElements`). Query Workbench and Refactor Preview can open result graphs via `query_result` / `refactor_preview`.
 
-**Result:** `{ graph: { nodes, edges, truncated, graph_kind } }`
+**Result:** `{ graph: { nodes, edges, truncated, graph_kind } }` — nodes may include `namespace`, `ontology_iri`, `deprecated`, `unsatisfiable`, `equivalent`.
 
 **Errors:** `NOT_INDEXED`, `GRAPH_FAILED`, `INVALID_PARAMS` (e.g. missing `root_iri` for `neighborhood`)
 

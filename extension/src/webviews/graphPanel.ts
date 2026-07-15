@@ -8,6 +8,7 @@ import { graphRestoreState } from "./layoutPersistenceLogic";
 export interface GraphPanelOptions {
   graphKind: string;
   rootIri?: string;
+  rootIris?: string[];
   depth?: number;
   includeInferred?: boolean;
   filters?: GraphFilters;
@@ -76,14 +77,18 @@ export class GraphPanel {
       this.options = {
         graphKind: message.graphKind,
         rootIri: message.rootIri,
+        rootIris: message.rootIris,
         depth: message.depth,
         includeInferred: message.includeInferred,
         filters: message.filters,
       };
       await this.refresh();
     }
-    if (message.type === "selectNode") {
+    if (message.type === "selectNode" || message.type === "revealInHierarchy") {
       await vscode.commands.executeCommand("ontocode.openEntity", message.iri);
+    }
+    if (message.type === "jumpToEditor") {
+      await vscode.commands.executeCommand("ontocode.jumpToSource", message.iri);
     }
     if (message.type === "exportGraph") {
       const filters: Record<string, string[]> = {
@@ -116,6 +121,7 @@ export class GraphPanel {
       const result = await getGraph({
         graph_kind: this.options.graphKind,
         root_iri: this.options.rootIri,
+        root_iris: this.options.rootIris,
         depth: this.options.depth ?? 2,
         include_inferred: this.options.includeInferred ?? false,
         filters: this.options.filters,

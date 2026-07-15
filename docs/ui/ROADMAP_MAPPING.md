@@ -66,8 +66,8 @@ Every item from [PRODUCT_ROADMAP_2.0.md](PRODUCT_ROADMAP_2.0.md), with release a
 | **4** | Focus neighborhood graph | Shipped | v0.7+ | [GRAPH_WORKSPACE.md](GRAPH_WORKSPACE.md) |
 | **4** | Pan/zoom/select | Shipped | v0.7+ | [GRAPH_RENDERING_ARCHITECTURE.md](GRAPH_RENDERING_ARCHITECTURE.md) |
 | **4** | Saved layouts | Planned | v1.0 | [GRAPH_WORKSPACE.md](GRAPH_WORKSPACE.md) |
-| **4** | Filters | Planned | v1.0 | [GRAPH_WORKSPACE.md](GRAPH_WORKSPACE.md) |
-| **4** | Reasoning overlays | Planned | v1.0 | [GRAPH_WORKSPACE.md](GRAPH_WORKSPACE.md) |
+| **4** | Filters | Shipped | v0.25 | [GRAPH_WORKSPACE.md](GRAPH_WORKSPACE.md) · functional filters; saved filter presets remain v1.0 |
+| **4** | Reasoning overlays | Shipped | v0.25 | [GRAPH_WORKSPACE.md](GRAPH_WORKSPACE.md) · unsatisfiable badges + inferred edges; richer overlays remain v1.0 |
 | **4** | AI graph explanations | Planned | v1.1 | [AI_EXPERIENCE.md](AI_EXPERIENCE.md) |
 | **5** | Semantic build pipeline UI | Planned | v1.0 | [REASONING_EXPERIENCE.md](REASONING_EXPERIENCE.md) |
 | **5** | Problems panel integration | Partial | v1.0 | VS Code Problems + LSP diagnostics |

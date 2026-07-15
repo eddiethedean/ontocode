@@ -75,6 +75,7 @@ ontocore-refactor = { workspace = true }
 ontocore-edit = { workspace = true }
 serde_json.workspace = true
 fastobo.workspace = true
+regex = "1"
 tempfile = "3"
 
 [workspace.package]

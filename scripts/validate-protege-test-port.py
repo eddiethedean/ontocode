@@ -27,18 +27,22 @@ def main() -> int:
     entries = data.get("entries") or []
     errors: list[str] = []
     w1 = 0
+    w2 = 0
     for i, entry in enumerate(entries):
         if not isinstance(entry, dict):
             errors.append(f"entries[{i}] must be a mapping")
             continue
         tag = entry.get("tag")
         name = entry.get("class", f"entries[{i}]")
-        if tag == "PORT_W1":
-            w1 += 1
+        if tag in ("PORT_W1", "PORT_W2"):
+            if tag == "PORT_W1":
+                w1 += 1
+            else:
+                w2 += 1
             tests = entry.get("ontocode_tests") or []
             gap = entry.get("gap")
             if not tests and not gap:
-                errors.append(f"{name}: PORT_W1 requires ontocode_tests or gap")
+                errors.append(f"{name}: {tag} requires ontocode_tests or gap")
             for t in tests:
                 path = ROOT / t
                 if not path.exists():
@@ -52,7 +56,7 @@ def main() -> int:
             print(f"  - {e}", file=sys.stderr)
         return 1
 
-    print(f"protege-test-port: ok ({len(entries)} entries, {w1} PORT_W1)")
+    print(f"protege-test-port: ok ({len(entries)} entries, {w1} PORT_W1, {w2} PORT_W2)")
     return 0
 
 

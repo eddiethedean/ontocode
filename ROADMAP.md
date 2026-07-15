@@ -654,10 +654,10 @@ See [migration/v0.25.md](docs/migration/v0.25.md) and [SHIPPED.md](docs/SHIPPED.
 
 | Area | Deliverables |
 |------|--------------|
-| **OntoCore / tests** | Inventory [`parity/protege-test-port.yaml`](parity/protege-test-port.yaml); Wave 1 suites `tests/protege_port_*.rs`; fixtures under [`examples/protege-roundtrip/ported/`](examples/protege-roundtrip/ported/) |
+| **OntoCore / tests** | Inventory [`parity/protege-test-port.yaml`](parity/protege-test-port.yaml); Wave 1+2 suites `tests/protege_port_*.rs` (edit oracles + render/links); fixtures under [`examples/protege-roundtrip/ported/`](examples/protege-roundtrip/ported/); `ontocore-owl` `render`/`links` modules; inspector + LSP hover linkification |
 | **Verification** | [`scripts/validate-protege-test-port.py`](scripts/validate-protege-test-port.py); CI + local CI wiring; `PAR-*` `test_ids` linkage |
 
-**Exit criteria:** Every `PORT_W1` inventory row has OntoCode tests (or an explicit `gap`); Wave 1 suites green in CI.
+**Exit criteria:** Every `PORT_W1`/`PORT_W2` inventory row has OntoCode tests (or an explicit `gap`); Wave 1+2 suites green in CI.
 
 **Docs:** [PROTEGE_TEST_PORT.md](docs/protege-parity/03_PARITY/PROTEGE_TEST_PORT.md)
 

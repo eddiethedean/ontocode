@@ -30,6 +30,31 @@ import {
   PropertyCharacteristics,
 } from "../messages";
 import type { WorkspaceProps } from "../workspaces/types";
+import { annotationTextParts } from "../utils/annotationLinks";
+
+/** Render annotation values with DOI/PMID/… hyperlinks (Protégé link extractors). */
+function LinkedAnnotationValue({ value }: { value: string }): JSX.Element {
+  const parts = annotationTextParts(value);
+  return (
+    <>
+      {parts.map((part, i) =>
+        part.type === "link" ? (
+          <a
+            key={`lnk-${i}`}
+            href={part.url}
+            target="_blank"
+            rel="noreferrer noopener"
+            title={part.kind}
+          >
+            {part.value}
+          </a>
+        ) : (
+          <span key={`txt-${i}`}>{part.value}</span>
+        ),
+      )}
+    </>
+  );
+}
 
 export function EntityInspectorPanel(_props?: WorkspaceProps): JSX.Element {
   const host = useWorkspaceHost();
@@ -472,7 +497,8 @@ export function EntityInspectorPanel(_props?: WorkspaceProps): JSX.Element {
                           {a.annotations.map((ann, annIdx) => (
                             <li key={`ann-${idx}-${annIdx}`} className="oc-axiom-item">
                               <InlineCode>
-                                {shortLabel(ann.predicate)} → {ann.value}
+                                {shortLabel(ann.predicate)} →{" "}
+                                <LinkedAnnotationValue value={ann.value} />
                               </InlineCode>
                               {editable && axiomOp && ann.editable ? (
                                 <button
@@ -581,7 +607,7 @@ export function EntityInspectorPanel(_props?: WorkspaceProps): JSX.Element {
             {annotations.map((a, idx) => (
               <li key={`ann-${idx}`} className="oc-axiom-item">
                 <InlineCode>
-                  {shortLabel(a.predicate)} → {a.value}
+                  {shortLabel(a.predicate)} → <LinkedAnnotationValue value={a.value} />
                 </InlineCode>
               </li>
             ))}

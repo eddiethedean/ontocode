@@ -2236,7 +2236,7 @@ pub fn handle_hover(state: &ServerState, params: HoverParams) -> Option<Hover> {
                     .entity
                     .labels
                     .iter()
-                    .map(|l| escape_markdown(l))
+                    .map(|l| ontocore_owl::linkify_markdown_text(l))
                     .collect::<Vec<_>>()
                     .join(", ")
             ));
@@ -2248,7 +2248,7 @@ pub fn handle_hover(state: &ServerState, params: HoverParams) -> Option<Hover> {
                     .entity
                     .comments
                     .iter()
-                    .map(|c| escape_markdown(c))
+                    .map(|c| ontocore_owl::linkify_markdown_text(c))
                     .collect::<Vec<_>>()
                     .join(", ")
             ));

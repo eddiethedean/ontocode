@@ -317,16 +317,31 @@ requirements:
     area: Plugins
     title: Stable SDK
     priority: P1
-    status: PARTIAL
+    status: VERIFIED
     owner: null
     source_files:
       - crates/ontocore-plugin/src/lib.rs
-    test_ids: []
-    acceptance_criteria: []
+      - crates/ontocore-plugin/src/host.rs
+      - crates/ontocore-plugin/src/lifecycle.rs
+      - crates/ontocore-plugin/src/manifest.rs
+      - crates/ontocore-plugin/src/traits.rs
+      - docs/guides/plugins.md
+      - docs/guides/plugin-policy.md
+      - examples/plugin-workspace/
+    test_ids:
+      - crates/ontocore-plugin/src/lifecycle.rs::tests
+      - crates/ontocore-plugin/src/host.rs::tests
+      - crates/ontocore-plugin/src/manifest.rs::tests
+      - tests/plugin_sdk_compat.rs
+      - tests/cli_plugins_security.rs
+    acceptance_criteria:
+      - docs/protege-parity/04_BLOCKERS/BLOCKER_09_PLUGIN_PLATFORM.md
     github_issue: https://github.com/eddiethedean/ontocode/issues/255
     documentation:
       - docs/protege-parity/IMPLEMENTATION_EVIDENCE.md
-    notes: Target v0.25
+      - docs/guides/plugins.md
+      - docs/guides/plugin-policy.md
+    notes: v0.25 EPIC-009 — SDK 1.0 freeze; lifecycle; reasoner/query/refactor/graph providers
   - id: PAR-ACC-001
     area: Accessibility
     title: Keyboard and screen reader parity

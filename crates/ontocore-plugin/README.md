@@ -1,11 +1,14 @@
 # ontocore-plugin
 
-> **Experimental — v0.14+ host foundation.** Manifest parsing and discovery. **Not a stable plugin API** — implement against the TOML/subprocess model in **[Plugin authoring](../../docs/guides/plugins.md)**.
+> **Plugin SDK 1.0** — stable TOML manifest + subprocess JSON host for OntoCore / OntoCode.
+> Author against **[Plugin authoring](../../docs/guides/plugins.md)** and the **[SDK 1.0 compatibility policy](../../docs/guides/plugin-policy.md)**.
 
-Plugin host foundation for OntoCore:
+Plugin host for OntoCore:
 
-- TOML plugin manifest parsing (schema documented in the author guide)
-- Discovery of manifests under `.ontocore/plugins/*.toml`
+- TOML plugin manifest parsing (`api_version = "1"`)
+- Discovery under `.ontocore/plugins/*.toml`
+- Lifecycle: discover → validate → register → activate / disable (dependency-aware)
+- Provider actions: validate, export, workflow, UI view, reasoner, query, refactor, graph
 
 ```toml
 ontocore-plugin = "0.24"
@@ -17,6 +20,8 @@ Enable via the `ontocore` façade feature:
 ontocore = { version = "0.24", features = ["plugins"] }
 ```
 
+Reserved future kinds (`editor`, `language_service`, `tool_window`) and AI providers are documented but not hosted until a later release.
+
 Historical design notes only (do not implement from): [PLUGIN_SPEC.md](../../docs/design/PLUGIN_SPEC.md).
 
-**Current version: 0.24.0**
+**Current crate version: 0.24.0 (SDK 1.0 surface)**

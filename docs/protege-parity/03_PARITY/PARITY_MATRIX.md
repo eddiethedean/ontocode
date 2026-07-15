@@ -99,7 +99,7 @@ Every parity claim must be traceable to this matrix.
 
   PAR-VIS-001    Visualization   Graph parity        P1         PARTIAL           Audit                      UI tests           
 
-  PAR-PLG-001    Plugins         Stable SDK          P1         PARTIAL           IMPLEMENTATION_EVIDENCE    SDK tests          
+  PAR-PLG-001    Plugins         Stable SDK          P1         VERIFIED          IMPLEMENTATION_EVIDENCE    plugin_sdk_compat          
 
   PAR-ACC-001    Accessibility   Keyboard & screen   P1         PARTIAL           Audit                      Accessibility      
                                  reader parity                                                                                  

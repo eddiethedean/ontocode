@@ -125,8 +125,10 @@ Every parity feature should reference:
                                                                     GraphPanel.test                          filters, overlays,
                                                                                                              virt, list view.
 
-  PAR-PLG-001    Plugin SDK   PARTIAL           ontocore-plugin     lib.rs           ✓       TBD     ✓       Target
-                                                                                                             v0.25.
+  PAR-PLG-001    Plugin SDK   VERIFIED          ontocore-plugin     host.rs,         ✓       ✓       ✓       v0.25
+                                                                    lifecycle.rs,                            EPIC-009 SDK 1.0;
+                                                                    manifest.rs                              providers +
+                                                                    plugin_sdk_compat                        compat harness.
 
   PAR-ACC-001    Accessibility PARTIAL          extension           TBD              ✓       TBD     ✓       Target
                                                                                                              v0.25.

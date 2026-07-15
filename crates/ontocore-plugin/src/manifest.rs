@@ -34,10 +34,30 @@ impl PluginPermission {
             other => Err(ManifestValidationError::UnknownPermission(other.to_string())),
         }
     }
+
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Self::WorkspaceRead => "workspace.read",
+            Self::WorkspaceWrite => "workspace.write",
+            Self::FilesystemRead => "filesystem.read",
+            Self::FilesystemWrite => "filesystem.write",
+            Self::Network => "network",
+            Self::AiInvoke => "ai.invoke",
+            Self::GitRead => "git.read",
+            Self::GitWrite => "git.write",
+            Self::ExternalProcess => "external_process",
+        }
+    }
 }
 
-/// Supported plugin kinds per PLUGIN_SPEC.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Deserialize)]
+impl std::fmt::Display for PluginPermission {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.write_str(self.as_str())
+    }
+}
+
+/// Supported plugin kinds (SDK 1.0).
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum PluginKind {
     Validator,
@@ -48,7 +68,10 @@ pub enum PluginKind {
     Release,
     Reasoner,
     Query,
+    Refactor,
+    Graph,
     Ui,
+    /// Reserved — not hosted in SDK 1.0 (AI Phase → v1.1).
     Ai,
 }
 
@@ -63,6 +86,8 @@ impl PluginKind {
             Self::Release => "release",
             Self::Reasoner => "reasoner",
             Self::Query => "query",
+            Self::Refactor => "refactor",
+            Self::Graph => "graph",
             Self::Ui => "ui",
             Self::Ai => "ai",
         }
@@ -78,19 +103,87 @@ impl PluginKind {
             "release" => Ok(Self::Release),
             "reasoner" => Ok(Self::Reasoner),
             "query" => Ok(Self::Query),
+            "refactor" => Ok(Self::Refactor),
+            "graph" => Ok(Self::Graph),
             "ui" => Ok(Self::Ui),
             "ai" => Ok(Self::Ai),
+            // Reserved extension-point ids — accepted in manifests for forward-compat
+            // but not hosted until a later release.
+            "editor" | "language_service" | "tool_window" => {
+                Err(ManifestValidationError::ReservedKind(s.to_string()))
+            }
             other => Err(ManifestValidationError::UnknownKind(other.to_string())),
+        }
+    }
+
+    /// Kinds that the host can activate and run in SDK 1.0.
+    pub fn is_hosted(&self) -> bool {
+        !matches!(self, Self::Ai)
+    }
+}
+
+/// When a discovered plugin becomes Active after discovery.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, Default)]
+#[serde(rename_all = "snake_case")]
+pub enum PluginActivation {
+    #[default]
+    OnStartup,
+    OnCommand,
+    OnWorkspaceOpen,
+}
+
+impl PluginActivation {
+    pub fn parse(s: &str) -> Result<Self, ManifestValidationError> {
+        match s {
+            "on_startup" | "startup" => Ok(Self::OnStartup),
+            "on_command" | "command" => Ok(Self::OnCommand),
+            "on_workspace_open" | "workspace_open" => Ok(Self::OnWorkspaceOpen),
+            other => Err(ManifestValidationError::UnknownActivation(other.to_string())),
+        }
+    }
+
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Self::OnStartup => "on_startup",
+            Self::OnCommand => "on_command",
+            Self::OnWorkspaceOpen => "on_workspace_open",
         }
     }
 }
 
-#[derive(Debug, Error)]
+/// Lifecycle state for a discovered plugin.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum PluginLifecycleState {
+    Discovered,
+    Validated,
+    Registered,
+    Active,
+    Disabled,
+}
+
+impl PluginLifecycleState {
+    pub fn as_str(&self) -> &'static str {
+        match self {
+            Self::Discovered => "discovered",
+            Self::Validated => "validated",
+            Self::Registered => "registered",
+            Self::Active => "active",
+            Self::Disabled => "disabled",
+        }
+    }
+}
+
+#[derive(Debug, Error, PartialEq, Eq)]
 pub enum ManifestValidationError {
     #[error("unknown plugin kind: {0}")]
     UnknownKind(String),
+    #[error("reserved plugin kind (not hosted in SDK 1.0): {0}")]
+    ReservedKind(String),
     #[error("unknown plugin permission: {0}")]
     UnknownPermission(String),
+    #[error("unknown activation: {0}")]
+    UnknownActivation(String),
     #[error("unsupported api_version: {0} (expected \"1\")")]
     UnsupportedApiVersion(String),
     #[error("missing required field: {0}")]
@@ -107,6 +200,9 @@ pub struct PluginManifest {
     pub api_version: Option<String>,
     pub permissions: Vec<PluginPermission>,
     pub entry: Option<String>,
+    /// Plugin ids that must be Active before this plugin activates.
+    pub depends_on: Vec<String>,
+    pub activation: PluginActivation,
     pub capabilities: PluginCapabilities,
     pub config: PluginConfig,
     pub ui: PluginUiContributions,
@@ -122,6 +218,11 @@ pub struct PluginConfig {
     pub shapes_dir: Option<String>,
     #[serde(default)]
     pub output_dir: Option<String>,
+    /// Optional reasoner profile id or graph_kind contribution for provider plugins.
+    #[serde(default)]
+    pub provider_id: Option<String>,
+    #[serde(default)]
+    pub graph_kind: Option<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
@@ -202,6 +303,14 @@ pub struct PluginCapabilities {
     pub diagnostics: bool,
     #[serde(default)]
     pub export: bool,
+    #[serde(default)]
+    pub reasoner: bool,
+    #[serde(default)]
+    pub query: bool,
+    #[serde(default)]
+    pub refactor: bool,
+    #[serde(default)]
+    pub graph: bool,
 }
 
 impl PluginCapabilities {
@@ -246,6 +355,10 @@ struct PluginSection {
     permissions: Vec<String>,
     #[serde(default)]
     entry: Option<String>,
+    #[serde(default)]
+    depends_on: Vec<String>,
+    #[serde(default)]
+    activation: Option<String>,
 }
 
 /// Parse and validate a plugin manifest from TOML text.
@@ -276,6 +389,10 @@ pub fn parse_manifest(text: &str) -> Result<PluginManifest, ManifestValidationEr
             permissions.push(PluginPermission::ExternalProcess);
         }
     }
+    let activation = match &file.plugin.activation {
+        Some(s) => PluginActivation::parse(s)?,
+        None => PluginActivation::OnStartup,
+    };
     Ok(PluginManifest {
         name: file.plugin.name,
         version: file.plugin.version,
@@ -284,6 +401,8 @@ pub fn parse_manifest(text: &str) -> Result<PluginManifest, ManifestValidationEr
         api_version: file.plugin.api_version,
         permissions,
         entry: file.plugin.entry,
+        depends_on: file.plugin.depends_on,
+        activation,
         capabilities: file.capabilities,
         config: file.config,
         ui: file.ui,
@@ -311,6 +430,31 @@ validate = true
         assert_eq!(manifest.kind, PluginKind::Workflow);
         assert!(manifest.capabilities.build);
         assert!(manifest.capabilities.validate);
+        assert!(matches!(manifest.activation, PluginActivation::OnStartup));
+        assert!(manifest.depends_on.is_empty());
+    }
+
+    #[test]
+    fn parses_depends_on_and_activation() {
+        let text = r#"
+[plugin]
+name = "graph-overlay"
+version = "0.1.0"
+kind = "graph"
+id = "org.example.graph"
+api_version = "1"
+depends_on = ["ontocode.naming-validator"]
+activation = "on_command"
+permissions = ["workspace.read", "external_process"]
+
+[capabilities]
+graph = true
+"#;
+        let manifest = parse_manifest(text).expect("parse");
+        assert_eq!(manifest.kind, PluginKind::Graph);
+        assert_eq!(manifest.depends_on, vec!["ontocode.naming-validator"]);
+        assert_eq!(manifest.activation, PluginActivation::OnCommand);
+        assert!(manifest.capabilities.graph);
     }
 
     #[test]
@@ -322,6 +466,51 @@ version = "0.1.0"
 kind = "not-a-kind"
 "#;
         assert!(parse_manifest(text).is_err());
+    }
+
+    #[test]
+    fn rejects_reserved_kind() {
+        let text = r#"
+[plugin]
+name = "editor"
+version = "0.1.0"
+kind = "editor"
+"#;
+        let err = parse_manifest(text).unwrap_err();
+        assert!(matches!(err, ManifestValidationError::ReservedKind(_)));
+    }
+
+    #[test]
+    fn rejects_bad_api_version() {
+        let text = r#"
+[plugin]
+name = "bad"
+version = "0.1.0"
+kind = "validator"
+api_version = "2"
+"#;
+        assert!(matches!(
+            parse_manifest(text),
+            Err(ManifestValidationError::UnsupportedApiVersion(_))
+        ));
+    }
+
+    #[test]
+    fn parses_provider_kinds() {
+        for kind in ["reasoner", "query", "refactor", "graph"] {
+            let text = format!(
+                r#"
+[plugin]
+name = "p"
+version = "0.1.0"
+kind = "{kind}"
+api_version = "1"
+permissions = ["workspace.read"]
+"#
+            );
+            let m = parse_manifest(&text).expect(kind);
+            assert_eq!(m.kind.as_str(), kind);
+        }
     }
 
     #[test]

@@ -1050,6 +1050,7 @@ dependencies = [
  "ontocore-obo",
  "ontocore-owl",
  "ontocore-parser",
+ "ontocore-plugin",
  "ontocore-plugin-builtins",
  "ontocore-query",
  "ontocore-reasoner",

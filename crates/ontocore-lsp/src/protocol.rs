@@ -720,6 +720,12 @@ pub struct RunPluginParams {
     /// Used with `action = "ui_view"`.
     #[serde(default)]
     pub view_id: Option<String>,
+    /// Query text for `query.run`.
+    #[serde(default)]
+    pub query: Option<String>,
+    /// Focus / root IRI for `refactor.preview` or `graph.build`.
+    #[serde(default)]
+    pub focus_iri: Option<String>,
 }
 
 fn default_validate_action() -> String {
@@ -737,4 +743,22 @@ pub struct RunPluginResult {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub view_html: Option<String>,
     pub success: bool,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub result: Option<serde_json::Value>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub columns: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub rows: Option<Vec<Vec<String>>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub unsatisfiable: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub affected_iris: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub root_iris: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub graph_kind: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub hints: Option<Vec<String>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub profile: Option<String>,
 }

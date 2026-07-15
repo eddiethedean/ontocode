@@ -62,9 +62,9 @@
 | LSP semantic tokens (Turtle, OBO) | Editor highlighting | — |
 | Configurable diagnostics | Problems panel + `.ontocore/diagnostics.toml` | `ontocore validate` |
 | React webview UI | Inspector, graphs, Query Workbench (SQL/SPARQL/DL), Manchester editor, refactor preview, semantic diff, imports | — |
-| Plugin host (manifest + runtime) | Plugin commands, dockable views, inspector cards, preferences pages, context actions, plugin Problems diagnostics | `ontocore plugins` / `ontocore workflow` |
+| Plugin SDK 1.0 (manifest + lifecycle + providers) | Plugin commands, views, inspector cards, preferences, context actions; provider pickers via `listPlugins` | `ontocore plugins` (list/info/enable/disable/run) / `workflow` |
 | Plugin permissions (`api_version = "1"`) | Enforced on plugin load/run | Enforced on CLI/LSP plugin host |
-| Reference plugins (naming, Markdown export, SHACL scaffold) | Via validate + plugins | `ontocore plugins run` |
+| Reference plugins (naming, Markdown export, SHACL scaffold + reasoner/query/refactor/graph stubs) | Via validate + plugins | `ontocore plugins run` |
 
 ## Format support
 

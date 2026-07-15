@@ -120,8 +120,10 @@ Every parity feature should reference:
                                                                     ontology.rs                              multi-format;
                                                                                                              move/extract Turtle-first.
 
-  PAR-VIS-001    Graph        PARTIAL           extension           graph webview    ✓       TBD     ✓       Target
-                 visualization                                                                               v0.25.
+  PAR-VIS-001    Graph        VERIFIED          ontocore-catalog    graph.rs         ✓       ✓       ✓       v0.25
+                 visualization                  extension           GraphPanel.tsx                           EPIC-008 kinds,
+                                                                    GraphPanel.test                          filters, overlays,
+                                                                                                             virt, list view.
 
   PAR-PLG-001    Plugin SDK   PARTIAL           ontocore-plugin     lib.rs           ✓       TBD     ✓       Target
                                                                                                              v0.25.

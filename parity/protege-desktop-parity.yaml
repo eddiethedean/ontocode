@@ -295,15 +295,24 @@ requirements:
     area: Visualization
     title: Graph parity
     priority: P1
-    status: PARTIAL
+    status: VERIFIED
     owner: null
-    source_files: []
-    test_ids: []
-    acceptance_criteria: []
+    source_files:
+      - crates/ontocore-catalog/src/graph.rs
+      - extension/webview-ui/src/panels/GraphPanel.tsx
+      - extension/src/webviews/graphPanel.ts
+      - extension/src/commands/index.ts
+    test_ids:
+      - crates/ontocore-catalog/src/graph.rs::tests
+      - extension/webview-ui/src/panels/GraphPanel.test.tsx
+    acceptance_criteria:
+      - docs/protege-parity/04_BLOCKERS/BLOCKER_08_VISUALIZATION.md
     github_issue: https://github.com/eddiethedean/ontocode/issues/254
     documentation:
       - docs/protege-parity/04_BLOCKERS/BLOCKER_08_VISUALIZATION.md
-    notes: Target v0.25
+      - docs/ontocode/graph-view.md
+      - docs/lsp-api.md
+    notes: v0.25 EPIC-008 — kinds, filters, overlays, virtualization, list alternate
   - id: PAR-PLG-001
     area: Plugins
     title: Stable SDK

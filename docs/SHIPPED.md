@@ -38,7 +38,7 @@
 | SQL-like queries | Query Workbench (React) + schema browser | `ontocore query` |
 | SPARQL | Query Workbench (React) | `ontocore sparql` |
 | DL Query (Manchester class expressions) | Query Workbench **DL** mode | `ontocore dl-query` |
-| Graph visualization (class, property, import, neighborhood) | Yes (React; asserted/inferred/combined; export JSON/CSV; expand depth) | LSP `ontocore/getGraph` |
+| Graph visualization (class, property hierarchies, individual, import, dependency, neighborhood; query/refactor result graphs) | Yes (React; asserted/inferred/combined; filters; unsatisfiable overlay; Graph\|List; virtualized; export JSON/CSV; expand depth) | LSP `ontocore/getGraph` |
 | OWL EL classification (`el` profile) | Reasoner panel + hierarchy toggle | `ontocore classify` |
 | RL / RDFS classification | Reasoner panel | `ontocore classify --profile rl\|rdfs` |
 | OWL 2 DL classification (`dl` profile) | Reasoner panel + hierarchy toggle | `ontocore classify --profile dl` |

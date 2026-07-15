@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- EPIC-008 / visualization parity (`PAR-VIS-001`): expanded `ontocore/getGraph` kinds (`object_property`, `data_property`, `individual`, `dependency`, `query_result`, `refactor_preview`); richer node/filter model; Graph panel filters, search dimming, unsatisfiable overlay, Graph\|List alternate, keyboard nav, context menus, history, virtualized React Flow render; Query Workbench **Open as graph** and Refactor Preview **Show graph**
+- Graph truncation caps documented in workspace limits; scale regression test for class-graph build
+
+### Changed
+
+- `PAR-VIS-001` marked **VERIFIED** in the parity manifest
+
 ## [0.24.0] - 2026-07-14
 
 v0.24.0 — Semantic services (refactoring + DL Query).

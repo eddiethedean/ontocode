@@ -2,9 +2,9 @@
 
 # Blocker 08 --- Ontology Visualization Parity
 
-**Status:** P0 Release Blocker\
+**Status:** Resolved for v0.25 (EPIC-008)\
 **Priority:** Critical\
-**Target Release:** OntoCode 1.0.0
+**Target Release:** OntoCode 1.0.0 / delivered functional baseline in **v0.25**
 
 ------------------------------------------------------------------------
 

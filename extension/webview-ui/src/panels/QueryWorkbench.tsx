@@ -274,6 +274,39 @@ export function QueryWorkbenchPanel(_props?: WorkspaceProps): JSX.Element {
           >
             Export JSON
           </button>
+          <button
+            type="button"
+            className="secondary"
+            onClick={() => {
+              const iris: string[] = [];
+              if (dlResult) {
+                iris.push(...dlTabItems(dlResult, dlTab));
+              } else if (result) {
+                for (const row of result.rows) {
+                  for (const cell of row) {
+                    if (
+                      typeof cell === "string" &&
+                      (cell.startsWith("http://") || cell.startsWith("https://"))
+                    ) {
+                      iris.push(cell);
+                    }
+                  }
+                }
+              }
+              const unique = [...new Set(iris)].slice(0, 200);
+              if (unique.length === 0) {
+                return;
+              }
+              host.postToCore({
+                type: "openGraphFromResults",
+                graphKind: "query_result",
+                rootIris: unique,
+                title: "Query result graph",
+              });
+            }}
+          >
+            Open as graph
+          </button>
         </ToolbarGroup>
       </Toolbar>
 

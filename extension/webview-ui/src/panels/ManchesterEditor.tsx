@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { LiveAnnouncer, PanelMain } from "../a11y";
 import {
   Callout,
   CodeBlock,
@@ -123,8 +124,21 @@ export function ManchesterEditorPanel(): JSX.Element {
 
   const turtlePreview = preview || validation?.turtle_fragment || "—";
 
+  const validationAnnounce = error
+    ? error
+    : validation?.diagnostics?.length
+      ? `${validation.diagnostics.length} validation issue${validation.diagnostics.length === 1 ? "" : "s"}`
+      : validation
+        ? "Expression validated"
+        : "";
+
   return (
     <Panel>
+      <PanelMain label="Manchester Axiom Editor">
+      <LiveAnnouncer
+        message={validationAnnounce}
+        politeness={error ? "assertive" : "polite"}
+      />
       <PanelHeader
         title="Manchester Axiom Editor"
         subtitle={<InlineCode>{entityIri || "—"}</InlineCode>}
@@ -134,6 +148,7 @@ export function ManchesterEditorPanel(): JSX.Element {
         <Select
           value={axiomKind}
           onChange={(e) => setAxiomKind(e.target.value)}
+          aria-label="Axiom type"
         >
           <option value="sub_class_of">SubClassOf</option>
           <option value="equivalent_class">EquivalentClasses</option>
@@ -145,6 +160,10 @@ export function ManchesterEditorPanel(): JSX.Element {
         label={axiomKind === "disjoint_class" ? "Other class IRI" : "Expression"}
       >
         <CodeEditor
+          id="manchester-expression"
+          aria-label={
+            axiomKind === "disjoint_class" ? "Other class IRI" : "Manchester expression"
+          }
           value={expression}
           onChange={(e) => setExpression(e.target.value)}
           rows={6}
@@ -288,6 +307,7 @@ export function ManchesterEditorPanel(): JSX.Element {
       <Section title="Turtle preview">
         <CodeBlock>{turtlePreview}</CodeBlock>
       </Section>
+      </PanelMain>
     </Panel>
   );
 }

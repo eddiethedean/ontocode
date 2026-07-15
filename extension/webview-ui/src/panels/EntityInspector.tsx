@@ -16,6 +16,7 @@ import {
   shortLabel,
   StickyActions,
 } from "../components/ui";
+import { LiveAnnouncer, PanelMain } from "../a11y";
 import { PreviewApplyBar } from "../components/PreviewApplyBar";
 import { PropertyChainEditor } from "./PropertyChainEditor";
 import { useWorkspaceHost } from "../context/HostContext";
@@ -153,7 +154,11 @@ export function EntityInspectorPanel(_props?: WorkspaceProps): JSX.Element {
   if (!detail) {
     return (
       <Panel>
-        <LoadingState label={focusIri ? `Loading ${shortLabel(focusIri)}…` : "Loading entity…"} />
+        <PanelMain label="Entity Inspector">
+          <LoadingState
+            label={focusIri ? `Loading ${shortLabel(focusIri)}…` : "Loading entity…"}
+          />
+        </PanelMain>
       </Panel>
     );
   }
@@ -374,8 +379,12 @@ export function EntityInspectorPanel(_props?: WorkspaceProps): JSX.Element {
     return patches;
   };
 
+  const announce = `${kindLabel(entity.kind)} ${entity.labels[0] ?? entity.short_name}`;
+
   return (
     <Panel>
+      <PanelMain label="Entity Inspector">
+      <LiveAnnouncer message={`Selected ${announce}`} />
       <PanelHeader
         title={entity.labels[0] ?? entity.short_name}
         subtitle={
@@ -1401,6 +1410,7 @@ export function EntityInspectorPanel(_props?: WorkspaceProps): JSX.Element {
           Open Graph
         </button>
       </StickyActions>
+      </PanelMain>
     </Panel>
   );
 }

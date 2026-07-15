@@ -16,6 +16,7 @@ import {
   StickyActions,
   shortLabel,
 } from "../components/ui";
+import { LiveAnnouncer, PanelMain } from "../a11y";
 import {
   HostMessage,
   isHostMessage,
@@ -93,8 +94,25 @@ export function ReasonerPanel(_props?: WorkspaceProps): JSX.Element {
     });
   }, [runId, profile, autoDetect]);
 
+  const statusAnnounce = running
+    ? "Running reasoner"
+    : error
+      ? `Reasoner error: ${error}`
+      : summary
+        ? summary
+        : result
+          ? result.consistent
+            ? "Ontology is consistent"
+            : "Ontology is inconsistent"
+          : "";
+
   return (
     <Panel>
+      <PanelMain label="Reasoner">
+      <LiveAnnouncer
+        message={statusAnnounce}
+        politeness={error || result?.consistent === false ? "assertive" : "polite"}
+      />
       <PanelHeader
         title="Reasoner"
         subtitle="Classify the ontology and inspect unsatisfiable classes"
@@ -268,6 +286,7 @@ export function ReasonerPanel(_props?: WorkspaceProps): JSX.Element {
           ) : null}
         </>
       ) : null}
+      </PanelMain>
     </Panel>
   );
 }

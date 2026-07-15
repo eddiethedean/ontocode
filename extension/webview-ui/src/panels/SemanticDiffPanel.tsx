@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { LiveAnnouncer, PanelMain } from "../a11y";
 import {
   Callout,
   ChangeList,
@@ -98,7 +99,11 @@ export function SemanticDiffPanel(): JSX.Element {
   const inferenceShown = diff.inference_changes.slice(0, LIST_CAP);
 
   return (
-    <div className="semantic-diff">
+    <PanelMain label="Semantic diff" className="semantic-diff">
+      <LiveAnnouncer
+        message={`Semantic diff: ${counts.entities} entity changes, ${counts.breaking} breaking`}
+        politeness={counts.breaking > 0 ? "assertive" : "polite"}
+      />
       <PanelHeader title="Semantic diff" />
 
       <section>
@@ -221,6 +226,6 @@ export function SemanticDiffPanel(): JSX.Element {
           Copy Markdown summary
         </button>
       </StickyActions>
-    </div>
+    </PanelMain>
   );
 }

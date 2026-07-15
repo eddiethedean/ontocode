@@ -11,6 +11,7 @@ import {
   type ReactFlowInstance,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
+import { LiveAnnouncer, PanelMain, usePrefersReducedMotion } from "../a11y";
 import {
   Badge,
   ButtonBar,
@@ -62,6 +63,7 @@ function readInitialParams(): { graphKind: string; rootIri?: string } {
 }
 
 export function GraphPanel(_props?: WorkspaceProps): JSX.Element {
+  const prefersReducedMotion = usePrefersReducedMotion();
   const host = useWorkspaceHost();
   const storeRootIri = useWorkspaceStore((s) => s.graph.rootIri);
   const unsatisfiable = useWorkspaceStore((s) => s.reasoning.unsatisfiable);
@@ -287,7 +289,7 @@ export function GraphPanel(_props?: WorkspaceProps): JSX.Element {
         selectedIds,
       })
     );
-    setEdges(toFlowEdges(graph, graphMode, filteredNodeIds));
+    setEdges(toFlowEdges(graph, graphMode, filteredNodeIds, prefersReducedMotion));
   }, [
     graph,
     graphMode,
@@ -296,6 +298,7 @@ export function GraphPanel(_props?: WorkspaceProps): JSX.Element {
     unsatSet,
     showUnsatOverlay,
     selectedIds,
+    prefersReducedMotion,
     setNodes,
     setEdges,
   ]);
@@ -378,8 +381,17 @@ export function GraphPanel(_props?: WorkspaceProps): JSX.Element {
     }
   };
 
+  const selectionAnnounce = selectedNode
+    ? `Selected ${selectedNode.label || selectedNode.id}`
+    : viewMode === "list"
+      ? "Graph list view"
+      : graph
+        ? `Graph with ${visibleNodes.length} nodes`
+        : "";
+
   return (
-    <div className="graph-layout">
+    <PanelMain label="Ontology graph" className="graph-layout">
+      <LiveAnnouncer message={selectionAnnounce} />
       <div
         className="graph-canvas"
         ref={canvasRef}
@@ -821,7 +833,7 @@ export function GraphPanel(_props?: WorkspaceProps): JSX.Element {
           </Callout>
         )}
       </aside>
-    </div>
+    </PanelMain>
   );
 }
 
@@ -896,7 +908,8 @@ function layoutNodes(
 function toFlowEdges(
   graph: GraphPayload,
   mode: "asserted" | "inferred" | "combined",
-  searchIds: Set<string> | null
+  searchIds: Set<string> | null,
+  prefersReducedMotion = false
 ): Edge[] {
   return graph.edges
     .filter((e) => {
@@ -919,7 +932,7 @@ function toFlowEdges(
       source: e.source,
       target: e.target,
       label: e.kind,
-      animated: e.inferred,
+      animated: e.inferred && !prefersReducedMotion,
       className: e.inferred
         ? "oc-graph-edge oc-graph-edge--inferred"
         : "oc-graph-edge",

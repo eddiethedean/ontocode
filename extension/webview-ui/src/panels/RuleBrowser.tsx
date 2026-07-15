@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { PanelMain } from "../a11y";
 import {
   Callout,
   InlineCode,
@@ -60,6 +61,7 @@ export function RuleBrowserPanel(): JSX.Element {
 
   return (
     <Panel>
+      <PanelMain label="SWRL Rule Browser">
       <PanelHeader title="SWRL Rule Browser" subtitle="Workspace ontocore:swrlRule annotations" />
       {error ? <Callout variant="error">{error}</Callout> : null}
       <Toolbar>
@@ -131,6 +133,7 @@ export function RuleBrowserPanel(): JSX.Element {
           New rule
         </button>
       </StickyActions>
+      </PanelMain>
     </Panel>
   );
 }

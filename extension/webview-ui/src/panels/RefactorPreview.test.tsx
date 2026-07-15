@@ -30,7 +30,8 @@ describe("RefactorPreviewPanel", () => {
     expect(screen.getByText("Review import statements")).toBeInTheDocument();
     expect(screen.getByText("ex:OldName a owl:Class .")).toBeInTheDocument();
     expect(screen.getByText("ex:NewName a owl:Class .")).toBeInTheDocument();
-    expect(screen.getByText(/1 file · .* entities · .* axioms/)).toBeInTheDocument();
+    // Subtitle + live region both include the summary string.
+    expect(screen.getAllByText(/1 file · .* entities · .* axioms/).length).toBeGreaterThanOrEqual(1);
   });
 
   it("applies refactor from sticky actions", async () => {
@@ -60,7 +61,7 @@ describe("RefactorPreviewPanel", () => {
     await screen.findByRole("heading", { name: "Refactor preview" });
 
     expect(screen.getByText("ex:A a owl:Class .")).toBeInTheDocument();
-    expect(screen.getByText(/2 files · .* entities · .* axioms/)).toBeInTheDocument();
+    expect(screen.getAllByText(/2 files · .* entities · .* axioms/).length).toBeGreaterThanOrEqual(1);
 
     await user.selectOptions(screen.getByLabelText("File"), "1");
     expect(screen.getByText("ex:Old a owl:Class .")).toBeInTheDocument();

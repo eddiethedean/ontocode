@@ -1383,6 +1383,39 @@ if [[ "$TAGGED_MINOR" =~ ^0\.([0-9]+)$ ]]; then
     else
       echo "ok: Open VSX wording not stuck on always-manual"
     fi
+
+    # Docs trust fixes (post-v0.25 re-audit)
+    if grep -qE -- '--prefix[= ]' docs/examples/dl-query.md 2>/dev/null; then
+      echo "FAIL: docs/examples/dl-query.md must not document --prefix (flag does not exist)" >&2
+      fail=1
+    else
+      echo "ok: dl-query cookbook has no --prefix"
+    fi
+    check_file_contains "docs/examples/plugins.md" "plugins list" "plugins cookbook"
+    if grep -qiE 'plugin host MVP' docs/faq.md docs/architecture.md extension/README.md 2>/dev/null; then
+      echo "FAIL: faq/architecture/extension README still say 'plugin host MVP'" >&2
+      fail=1
+    else
+      echo "ok: no stale 'plugin host MVP' on Tier-1 surfaces"
+    fi
+    if grep -qiE 'semver-stable ecosystem plugin API remains a \*\*v1\.0 target\*\*|stable third-party plugin ecosystem API' docs/faq.md docs/architecture.md 2>/dev/null; then
+      echo "FAIL: faq/architecture still claim stable plugin API is only a v1.0 target (SDK 1.0 wire is frozen)" >&2
+      fail=1
+    else
+      echo "ok: faq/architecture plugin stability wording"
+    fi
+    if ! grep -qiE 'If (the zip is )?missing|if .*includes.*ontocode-tutorial\.zip' docs/vscode-install.md 2>/dev/null; then
+      echo "FAIL: docs/vscode-install.md must hedge tutorial zip as optional/missing-safe" >&2
+      fail=1
+    else
+      echo "ok: vscode-install tutorial zip hedge"
+    fi
+    if grep -qiE 'Quick paths to success|Path A — VS Code' docs/install-cli-ci.md 2>/dev/null; then
+      echo "FAIL: install-cli-ci.md still has IDE Path A / quick paths (CLI-only page)" >&2
+      fail=1
+    else
+      echo "ok: install-cli-ci is CLI/CI-only"
+    fi
   fi
 fi
 

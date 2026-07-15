@@ -29,7 +29,7 @@
 
 ## Features (summary)
 
-Explorer, Entity Inspector, Query Workbench (SQL subset + SPARQL), Manchester editor, graphs, reasoner (EL–DL, realize / instance check), SWRL Rule Browser/Editor, semantic diff, Manage Imports, refactoring preview, plugin host MVP.
+Explorer, Entity Inspector, Query Workbench (SQL subset + SPARQL + DL), Manchester editor, graphs, reasoner (EL–DL, realize / instance check), SWRL Rule Browser/Editor, semantic diff, Manage Imports, refactoring preview, Plugin SDK 1.0.
 
 Details: [Feature tour](https://ontocode-vs.readthedocs.io/en/latest/ontocode/feature-tour/) · [Supported formats](https://ontocode-vs.readthedocs.io/en/latest/supported-formats/)
 

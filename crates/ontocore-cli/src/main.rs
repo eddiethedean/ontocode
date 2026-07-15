@@ -157,10 +157,11 @@ enum Commands {
     },
     /// Protégé-style DL Query (Manchester class expression)
     DlQuery {
-        #[arg(default_value = ".")]
-        workspace: PathBuf,
         /// Manchester class expression
         expression: String,
+        /// Workspace directory
+        #[arg(default_value = ".")]
+        workspace: PathBuf,
         #[arg(long, default_value = "dl")]
         profile: String,
         /// `inferred` (default) or `asserted`

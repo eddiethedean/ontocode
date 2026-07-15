@@ -26,7 +26,7 @@ The public site navigation is defined in [`mkdocs.yml`](https://github.com/eddie
 ### Contributors
 
 1. [Contributing](contributing.md)
-2. [Internals](internals.md)
+2. [Architecture tour](guides/architecture-tour.md) · [Internals](internals.md)
 3. [Testing matrix](guides/testing-matrix.md) · [Debugging](debugging.md)
 4. [Releasing](releasing.md)
 5. APIs: [CLI reference](cli-reference.md) · [LSP API](lsp-api.md) · [Plugins](guides/plugins.md) · [Webview protocol](webview-protocol.md)

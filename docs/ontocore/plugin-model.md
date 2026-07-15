@@ -4,7 +4,7 @@
 >
 > **Do not implement from this page.** Categories and manifest sketches below are overview/background. The shipped host uses `.ontocore/plugins/*.toml` + subprocess entries (not native `.so` libraries).
 
-> **Status:** **Shipped in v0.14** (plugin host MVP). Stable semver API planned for **v1.0**.
+> **Status:** Plugin **SDK 1.0** freezes the TOML + subprocess JSON wire (`api_version = "1"`) — safe to author against today. A curated marketplace and production owlmake integration remain **product 1.0** goals. See [Plugin policy](../guides/plugin-policy.md).
 
 The plugin system allows users and organizations to extend **OntoCore** and **OntoCode** without modifying the core project. **Plugins integrate with OntoCore; they are not part of OntoCore.**
 

@@ -10,6 +10,7 @@ Runnable examples for OntoCore CLI, Rust embedding, and OntoCode workflows.
 | [Sample patches](patches.md) | `ontocore patch` JSON for Turtle, OBO, RDF/XML, and OWL/XML write-back |
 | [Refactoring](refactoring.md) | Rename, merge, replace, migrate, move, extract |
 | [DL Query](dl-query.md) | Manchester class expressions (CLI / Workbench DL mode) |
+| [Plugins](plugins.md) | `plugins list|info|enable|disable|run` against plugin-workspace |
 | [Classify](classify.md) | Reasoner profiles and CI exit semantics |
 | [Realize / instance check](realize.md) | ABox realization and `check-instance` (v0.23+) |
 | [SWRL](swrl.md) | Rule patches + LSP validate/list (v0.23+) |
@@ -47,7 +48,7 @@ Then try a patch preview: [Sample patches](patches.md). VS Code path: [First suc
 | [Fixtures README](https://github.com/eddiethedean/ontocode/blob/main/fixtures/README.md) | Per-file purpose and smoke commands |
 | [`examples/obo-workflow/`](https://github.com/eddiethedean/ontocode/tree/main/examples/obo-workflow) | Minimal OBO workspace — see [OBO workflow guide](../guides/obo-workflow.md) |
 | [`examples/protege-roundtrip/`](https://github.com/eddiethedean/ontocode/tree/main/examples/protege-roundtrip) | Protégé-style Turtle + OWL/XML / RDF/XML fixtures (v0.18) |
-| [`examples/plugin-workspace/`](https://github.com/eddiethedean/ontocode/tree/main/examples/plugin-workspace) | Sample plugin manifests — see [Plugin authoring](../guides/plugins.md) |
+| [`examples/plugin-workspace/`](https://github.com/eddiethedean/ontocode/tree/main/examples/plugin-workspace) | Sample plugin manifests — see [Plugins cookbook](plugins.md) · [Plugin authoring](../guides/plugins.md) |
 
 Download tutorial files without cloning:
 

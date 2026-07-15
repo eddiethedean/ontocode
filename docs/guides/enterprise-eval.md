@@ -69,9 +69,9 @@ Prefer Protégé or other tools (or wait for product **1.0**) if you need any of
 | Realization / instance checking (`realize`, `check-instance`) | **Shipped** (v0.23) |
 | SWRL rule browser / editor / validate | **Shipped** (v0.23; DLSafe) |
 | Engine-level reasoner cancel | **Shipped** (v0.23) |
-| DL Query (Workbench DL mode, CLI `dl-query`, LSP) | **Shipped** (v0.25) — [honesty notes](dl-query.md) |
-| Refactor merge / replace (CLI + IDE; multi-format rename) | **Shipped** (v0.25) |
-| Workspace search LSP (`ontocore/search`) | **Shipped** (v0.25) |
+| DL Query (Workbench DL mode, CLI `dl-query`, LSP) | **Shipped** (v0.24) — [honesty notes](dl-query.md) |
+| Refactor merge / replace (CLI + IDE; multi-format rename) | **Shipped** (v0.24) |
+| Workspace search LSP (`ontocore/search`) | **Shipped** (v0.24) |
 
 Full gap analysis for evaluators: [Known limitations](../known-limitations.md) · [What ships today](../SHIPPED.md) · [Protégé decision](protege-decision.md).
 

@@ -42,8 +42,8 @@ Full documentation: **[Read the Docs](https://ontocode-vs.readthedocs.io/en/late
 | Install | Command / link |
 |---------|----------------|
 | **VS Code extension** | [Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode), [Open VSX](https://open-vsx.org/extension/ontocode/ontocode) (Cursor), or [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) `ontocode-v0.25.0.vsix` |
-| **CLI (Linux x64)** | Download `ontocore-v0.25.0-x86_64-unknown-linux-gnu.tar.gz` from [Releases](https://github.com/eddiethedean/ontocode/releases), verify `SHA256SUMS`, extract, then run `./ontocore-v0.25.0-x86_64-unknown-linux-gnu validate …` — full steps: [CI guide](https://ontocode-vs.readthedocs.io/en/latest/ci-integration/) |
-| **CLI (macOS/Windows)** | `cargo install ontocore-cli --locked --version 0.25.0` (Rust 1.88+; first compile 15–30+ min) or use the language server bundled in the VSIX |
+| **CLI (Linux x64)** | Release tarball — full steps: [CI integration](https://ontocode-vs.readthedocs.io/en/latest/ci-integration/) |
+| **CLI (macOS/Windows)** | `cargo install ontocore-cli --locked --version 0.25.0` (Rust 1.88+; 15–30+ min cold) — [Install CLI](https://ontocode-vs.readthedocs.io/en/latest/guides/install-cli/) |
 | **Crates** | [`ontocore`](https://crates.io/crates/ontocore) on [crates.io](https://crates.io/search?q=ontocore) |
 
 Release CLI tarballs are **Linux x64 only**. Most IDE users never need the CLI — the extension bundles `ontocore-lsp`.
@@ -58,38 +58,19 @@ Evaluators: use [What ships today](https://ontocode-vs.readthedocs.io/en/latest/
 
 **VS Code:** Install [OntoCode](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) → open a folder of **`.ttl` / `.obo` / `.owl` / `.rdf` / `.owx`** (editable) or JSON-LD / TriG / N-Triples (browse/query only) → click the **OntoCode** activity bar. Edit in the Entity Inspector. XML write-back is semantic re-serialize — see [OWL/XML and RDF/XML write-back](https://ontocode-vs.readthedocs.io/en/latest/guides/owl-xml-workflow/) and [Supported formats](https://ontocode-vs.readthedocs.io/en/latest/supported-formats/). OntoCode’s **bundled** language server runs in trusted and Restricted Mode; **Trust** only if you set custom `ontocode.lspPath` or `ontocode.robotPath`.
 
-**CLI (Linux x64 CI):** download the release tarball, verify checksums, extract the versioned binary, then validate — see [CI integration](https://ontocode-vs.readthedocs.io/en/latest/ci-integration/) for the full copy-paste workflow:
+**CLI (Linux x64 CI):** [CI integration](https://ontocode-vs.readthedocs.io/en/latest/ci-integration/) — download tarball, verify checksums, run the versioned binary.
 
-```bash
-VERSION=0.25.0
-ASSET="ontocore-v${VERSION}-x86_64-unknown-linux-gnu.tar.gz"
-BIN="ontocore-v${VERSION}-x86_64-unknown-linux-gnu"
-curl -fsSL -o "${ASSET}" \
-  "https://github.com/eddiethedean/ontocode/releases/download/v${VERSION}/${ASSET}"
-curl -fsSL -o SHA256SUMS \
-  "https://github.com/eddiethedean/ontocode/releases/download/v${VERSION}/SHA256SUMS"
-grep "${ASSET}" SHA256SUMS | sha256sum -c -
-tar xzf "${ASSET}" && chmod +x "${BIN}"
-./"${BIN}" validate /path/to/ontologies
-```
-
-**CLI (macOS/Windows or from source):** Prefer the [Install CLI guide](https://ontocode-vs.readthedocs.io/en/latest/guides/install-cli/). First `cargo install` compiles dependencies — expect **15–30+ minutes** on a cold machine (Rust 1.88+; Windows needs [MSVC Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/); macOS needs Xcode CLT). Pin releases in CI.
+**CLI (macOS/Windows or from source):** [Install CLI](https://ontocode-vs.readthedocs.io/en/latest/guides/install-cli/). Cold `cargo install` may take **15–30+ minutes** (Rust 1.88+).
 
 ```bash
 cargo install ontocore-cli --locked --version 0.25.0
-# Catalog SQL (subset) — not full SQL; see docs
-ontocore query /path/to/ontologies "SELECT * FROM classes"
 ontocore validate /path/to/ontologies
-# Requires a git repository (run from your ontology repo root):
-ontocore diff HEAD..WORKTREE
-ontocore docs /path/to/ontologies --format markdown --output ./docs-out
 ```
 
 **CLI (clone):**
 
 ```bash
 git clone https://github.com/eddiethedean/ontocode.git && cd ontocode
-cargo run -- query fixtures "SELECT * FROM classes"
 cargo run -- validate fixtures
 ```
 

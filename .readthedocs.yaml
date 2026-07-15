@@ -13,6 +13,9 @@ build:
   jobs:
     # Default RTD mkdocs job does not pass this env; without it, the MkDocs 2.0
     # plugin notice is emitted as WARNING and fail_on_warning aborts the build.
+    # READTHEDOCS=True (set by the platform) enables git-revision-date-localized
+    # and HTML minify in mkdocs.yml; local/CI builds leave both off for speed.
+    # `--strict` is always on and is not a meaningful cost by itself.
     build:
       html:
         - DISABLE_MKDOCS_2_WARNING=true mkdocs build --strict --site-dir $READTHEDOCS_OUTPUT/html

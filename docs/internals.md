@@ -56,4 +56,4 @@ Start with **[Architecture tour](guides/architecture-tour.md)** (~15 min) for a 
 
 ## Plugin model
 
-The plugin host **shipped in v0.14** as an MVP (`ontocore-plugin` discovery + `PluginHost` runtime). The API is **not stable** until v1.0. See [plugin model](ontocore/plugin-model.md) and **[Plugin authoring guide](guides/plugins.md)** (canonical).
+Plugin **SDK 1.0** freezes the TOML + subprocess JSON wire (`api_version = "1"`) — safe to author against today. A curated marketplace and production owlmake integration remain **product 1.0** goals. See [plugin model](ontocore/plugin-model.md), [Plugin policy](guides/plugin-policy.md), and **[Plugin authoring guide](guides/plugins.md)** (canonical).

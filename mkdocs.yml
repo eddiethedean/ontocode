@@ -2,6 +2,12 @@
 #   pip install -r docs/requirements.txt && ./scripts/build-docs.sh
 #   ./scripts/serve-docs.sh   # local preview
 # CI / RTD set DISABLE_MKDOCS_2_WARNING=true (see scripts/build-docs.sh).
+#
+# Heavy plugins are off by default (local/CI fast path). Enabled on Read the
+# Docs (READTHEDOCS=True) or locally with:
+#   ENABLE_GIT_REVISION_DATE=true ./scripts/build-docs.sh   # page stamps
+#   ENABLE_MKDOCS_MINIFY=true ./scripts/build-docs.sh       # HTML minify
+# `--strict` itself is cheap; cost is page render + optional plugins.
 
 site_name: OntoCode
 site_description: Ontology-as-code for Git and VS Code — OntoCore engine and OntoCode extension docs
@@ -70,6 +76,8 @@ theme:
 plugins:
   - search
   - git-revision-date-localized:
+      # Local/CI: off (fast). RTD / opt-in: on (published "last updated" stamps).
+      enabled: !ENV [ENABLE_GIT_REVISION_DATE, READTHEDOCS, false]
       type: timeago
       # Creation dates compare first vs last commit and warn on new/untracked pages.
       enable_creation_date: false
@@ -78,7 +86,8 @@ plugins:
       # "No git logs" for brand-new pages must not fail `mkdocs build --strict`.
       strict: false
   - minify:
-      minify_html: true
+      # Local/CI: off (~2× faster). RTD / opt-in: on (smaller published HTML).
+      minify_html: !ENV [ENABLE_MKDOCS_MINIFY, READTHEDOCS, false]
   - redirects:
       redirect_maps:
         guides/start-here.md: start.md
@@ -168,6 +177,7 @@ nav:
           - Sample patches: examples/patches.md
           - Refactoring: examples/refactoring.md
           - DL Query: examples/dl-query.md
+          - Plugins: examples/plugins.md
           - Classify: examples/classify.md
           - Realize / instance check: examples/realize.md
           - SWRL: examples/swrl.md

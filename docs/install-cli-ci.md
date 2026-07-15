@@ -1,10 +1,8 @@
 # Install CLI & CI (detail)
 
-> **Prefer the canonical [Install](install.md) page** (extension first, optional CLI). This page keeps the full CLI / CI path matrix for scripting and air-gapped setups.
+> **Prefer the canonical [Install](install.md) page** (extension first, optional CLI). This page is **CLI/CI only**.
 
-This page is **not** the VS Code tutorial. For editing ontologies in the IDE, use [First success (~10 min)](guides/first-success.md).
-
-Quick paths to success (5–30 min depending on install method) with OntoCore (CLI). VS Code tutorial: ~10 minutes — see [First success](guides/first-success.md).
+IDE tutorial: [First success (~10 min)](guides/first-success.md). Canonical product install: [Install](install.md).
 
 !!! note "First `cargo install` or clone build"
     A cold Rust toolchain may take **15–30+ minutes** to compile OntoCore on first run. The VS Code extension bundles `ontocore-lsp` and does not require Rust. **Linux x64 CI should prefer the release tarball** ([CI integration](ci-integration.md)) over `cargo install`.
@@ -20,11 +18,6 @@ Quick paths to success (5–30 min depending on install method) with OntoCore (C
 | Release CLI tarball (`ontocore-v*-x86_64-unknown-linux-gnu`) | Yes | No | No | No |
 | Git clone + `cargo run --` | Yes | Yes | Yes | Yes (1.88+) |
 
-VS Code extension (bundled language server on Linux, macOS, and Windows): [vscode-install.md](vscode-install.md).
-
-[![Open VSX](https://img.shields.io/open-vsx/v/ontocode/ontocode)](https://open-vsx.org/extension/ontocode/ontocode)
-[![VS Code Marketplace](https://vsmarketplacebadges.dev/version/ontocode.ontocode.svg?label=marketplace)](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode)
-
 !!! note "SQL-like queries"
     `ontocore query` uses **catalog SQL (subset)** — single-table `SELECT`, limited `WHERE`. Not full SQL — see [SQL reference](sql-reference.md) and [Known limitations](known-limitations.md).
 
@@ -32,7 +25,6 @@ VS Code extension (bundled language server on Linux, macOS, and Windows): [vscod
 
 | Path | Requires |
 |------|----------|
-| Minimum VS Code | **1.85+** — see [platform compatibility guide](guides/platform-compatibility.md) |
 | `cargo install` CLI | Rust 1.88+; `~/.cargo/bin` on your `PATH` |
 | Git clone + `cargo run` | Rust 1.88+ |
 | Release CLI binaries | No Rust; **Linux x64 only** (download from GitHub Releases). macOS/Windows: use `cargo install` or the VS Code extension. |
@@ -53,16 +45,7 @@ export PATH="$HOME/.cargo/bin:$PATH"
 
 Add that line to your shell profile (`~/.bashrc`, `~/.zshrc`, etc.) for persistence. If install fails with an MSRV error, run `rustup update stable` and confirm `rustc --version` is **1.88 or newer**.
 
-!!! note "Editors vs this page"
-    Prefer **[First success](guides/first-success.md)** for the VS Code / Cursor tutorial. This page is the **CLI / CI install matrix**.
-
-## Path A — VS Code (recommended for browsing and editing)
-
-Follow [First success in 10 minutes](guides/first-success.md) — [Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) or [Open VSX](https://open-vsx.org/extension/ontocode/ontocode) install, browse the explorer, edit `.ttl` in the Entity Inspector.
-
-Details: [vscode-install.md](vscode-install.md) · [authoring.md](authoring.md)
-
-## Path B — Git clone + CLI (recommended for development)
+## Clone + CLI (development)
 
 ```bash
 git clone https://github.com/eddiethedean/ontocode.git
@@ -76,7 +59,7 @@ cargo run -- validate fixtures
 
 The `fixtures/` directory is included in the repository for examples and tests.
 
-## Path C — `cargo install` (no clone)
+## `cargo install` (no clone)
 
 ```bash
 cargo install ontocore-cli --locked --version 0.25.0
@@ -92,15 +75,14 @@ ontocore query /path/to/your/ontologies "SELECT * FROM classes"
 ontocore validate /path/to/your/ontologies
 ```
 
-## Path D — Release binaries (no Rust)
+## Release binaries (no Rust)
 
-**CLI pre-builds are Linux x64 only.** On macOS or Windows, use Path C (`cargo install ontocore-cli`) or install the VS Code extension (bundled LSP).
+**CLI pre-builds are Linux x64 only.** On macOS or Windows, use `cargo install ontocore-cli` or install the VS Code extension (bundled LSP). Full CI copy-paste: [CI integration](ci-integration.md).
 
 1. Open [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) for the latest **v0.25.x** tag.
-2. **For CLI on Linux x64:** download `ontocore-v<version>-x86_64-unknown-linux-gnu.tar.gz`.
-3. **For VS Code (any supported OS):** download `ontocode-v0.25.0.vsix` (pattern: `ontocode-v<version>.vsix`) — see [vscode-install.md](vscode-install.md).
-4. Verify with `SHA256SUMS` — see [release-integrity.md](release-integrity.md).
-5. Extract and run (Linux example; replace `0.25.0` with your tag):
+2. Download `ontocore-v<version>-x86_64-unknown-linux-gnu.tar.gz`.
+3. Verify with `SHA256SUMS` — see [release-integrity.md](release-integrity.md).
+4. Extract and run (replace `0.25.0` with your tag):
 
 ```bash
 VERSION=0.25.0
@@ -112,29 +94,26 @@ chmod +x "${BIN}"
 ./"${BIN}" validate /path/to/ontologies
 ```
 
-> **Note:** The extracted binary is versioned (not plain `ontocore`). CLI release tarballs are **Linux x64 only**; macOS/Windows users should use `cargo install ontocore-cli` or the bundled LSP inside the VSIX.
+> **Note:** The extracted binary is versioned (not plain `ontocore`).
 
-For VS Code, install the `ontocode-v*.vsix` from the same release (example: `ontocode-v0.25.0.vsix`).
+### Air-gapped / offline CLI
 
-### Air-gapped / offline install
+1. Download the Linux CLI tarball (and `SHA256SUMS` / `NOTICES`) from [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) on a connected machine.
+2. Transfer artifacts to the offline environment.
+3. Extract and run the versioned binary as above — see [Enterprise deployment](guides/enterprise-deployment.md).
 
-1. Download `ontocode-v0.25.0.vsix` (pattern: `ontocode-v<version>.vsix`) and optional Linux CLI tarball from [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) on a connected machine.
-2. Transfer the VSIX (and `SHA256SUMS` / `NOTICES`) to the offline environment.
-3. In VS Code: **Extensions → … → Install from VSIX…**
-4. For CLI without crates.io: use the Linux tarball (Path D) or vendor a `cargo vendor` / internal crates mirror — see [Enterprise deployment](guides/enterprise-deployment.md).
+For offline **extension** install, see [vscode-install.md](vscode-install.md).
 
 ## Next steps
 
 | Goal | Document |
 |------|----------|
 | What ships today | [SHIPPED.md](SHIPPED.md) |
-| Supported ontology formats | [supported-formats.md](supported-formats.md) |
-| Query Workbench (VS Code) | [ontocode/query-workbench.md](ontocode/query-workbench.md) |
-| Manchester editor | [ontocode/manchester-editor.md](ontocode/manchester-editor.md) |
-| Reasoner | [guides/reasoner.md](guides/reasoner.md) |
+| CI validation | [ci-integration.md](ci-integration.md) |
 | SQL queries | [sql-reference.md](sql-reference.md) · [query cookbook](examples/queries.md) |
 | SPARQL | [sparql-reference.md](sparql-reference.md) |
-| Edit Turtle files | [authoring.md](authoring.md) · [patch-reference.md](patch-reference.md) |
-| CI validation | [ci-integration.md](ci-integration.md) |
+| DL Query | [examples/dl-query.md](examples/dl-query.md) |
+| Plugins CLI | [examples/plugins.md](examples/plugins.md) |
+| Patch / authoring | [patch-reference.md](patch-reference.md) |
 | LSP integration | [lsp-api.md](lsp-api.md) |
 | Troubleshooting | [troubleshooting.md](troubleshooting.md) · [faq.md](faq.md) |

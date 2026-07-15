@@ -17,15 +17,15 @@
 >
 > **Latest tagged: v0.25.0** — v0.25 ships today. OntoCode (VS Code) + OntoCore (CLI/LSP/library).
 >
-> **Planned v1.0:** stable plugin API, full workflow plugin integration, language SDKs, MCP server. See [Platform roadmap](roadmap.md) ([full ROADMAP.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/ROADMAP.md)).
+> **Planned v1.0:** curated plugin marketplace, production owlmake integration, language SDKs, MCP server. Plugin **SDK 1.0** wire is frozen today — [Plugin policy](guides/plugin-policy.md). See [Platform roadmap](roadmap.md) ([full ROADMAP.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/ROADMAP.md)).
 >
 > **Planned post-1.0:** OntoStudio desktop, AI-native workflows — [UI roadmap mapping](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/ROADMAP_MAPPING.md).
 >
 > **Implementers only:** `docs/design/`, `docs/platform/`, and `docs/ui/` architecture specs are engineering targets — not the product capability matrix. Use [What ships today](SHIPPED.md) for adoption decisions.
 
 ```
-External Workflow Plugins (v0.17)  ← subprocess workflow plugins; API v1 (permissions, views, preferences)
-├── owlmake (reference design)
+External Workflow Plugins (SDK 1.0)  ← TOML + subprocess plugins; api_version = "1"
+├── owlmake (reference design; production hardening → product 1.0)
 ├── ROBOT / ODK workflow adapters
 └── Future build, validation, doc plugins
           │
@@ -50,7 +50,7 @@ SQL/SPARQL (SQL-like virtual tables)
 Diagnostics
 Navigation
 Refactoring
-Plugin host (shipped; stable API v1.0 target)
+Plugin host (SDK 1.0 wire frozen; marketplace → product 1.0)
 Persistent Cache
 LSP
           │
@@ -69,7 +69,7 @@ OWL • RDF • Turtle • OBO
 ```
 
 !!! note "Plugin platform"
-    The **plugin host** (manifests, permissions, subprocess workflows, UI hooks) **ships today** (v0.14–v0.17). A semver-stable ecosystem plugin API remains a **v1.0 target** — see [Plugin authoring](guides/plugins.md).
+    Plugin **SDK 1.0** freezes the TOML + subprocess JSON wire (`api_version = "1"`) — safe to author against today. A curated marketplace and production owlmake integration remain **product 1.0** goals. See [Plugin policy](guides/plugin-policy.md) and [Plugin authoring](guides/plugins.md).
 
 ## Responsibilities
 
@@ -83,18 +83,18 @@ Reusable semantic workspace platform: index, query, diagnostics, refactoring, an
 
 **Plugin platform status:**
 
-- **Shipped (v0.14–v0.17):** plugin host MVP — workspace manifest discovery, reference plugins, CLI/LSP hooks, subprocess workflow runner, UI views/commands, and (v0.16+) preferences pages + context actions (see [Plugin authoring](guides/plugins.md)).
-- **Planned (v1.0+):** semver-stable plugin API, hardened permissions/sandboxing, and marketplace/discovery.
+- **Shipped (SDK 1.0 / v0.25):** frozen wire contract — workspace manifest discovery, reference plugins, CLI/LSP hooks, subprocess workflow runner, UI views/commands/preferences/context actions, lifecycle (`depends_on` / `activation`), provider actions (see [Plugin authoring](guides/plugins.md)).
+- **Product 1.0 targets:** curated marketplace/discovery and production owlmake hardening.
 
 OntoCore is **not** a workflow engine; build, release, and QC automation should live in external tools and workflow plugins rather than becoming core engine dependencies.
 
 ### External workflow plugins (e.g. owlmake)
 
-**Host ships today; full owlmake integration is v1.0.** [owlmake](https://github.com/INCATools/owlmake) is the reference workflow plugin design — ROBOT/ODK-style pipelines without becoming a core OntoCore dependency. Today, ROBOT interop is the `ontocore robot` CLI wrapper plus the subprocess workflow scaffold.
+**SDK 1.0 wire ships today; production owlmake integration is product 1.0.** [owlmake](https://github.com/INCATools/owlmake) is the reference workflow plugin design — ROBOT/ODK-style pipelines without becoming a core OntoCore dependency. Today, ROBOT interop is the `ontocore robot` CLI wrapper plus the subprocess workflow scaffold.
 
 ### OntoCode
 
-Reference IDE on top of OntoCore. Presents editing, reasoning, and diagnostics in VS Code. Plugin views, commands, preferences, and context actions ship today; marketplace-scale workflow automation remains a v1.0 target.
+Reference IDE on top of OntoCore. Presents editing, reasoning, and diagnostics in VS Code. Plugin views, commands, preferences, and context actions ship today (SDK 1.0); marketplace-scale workflow automation remains a product **1.0** target.
 
 ## Design Philosophy
 

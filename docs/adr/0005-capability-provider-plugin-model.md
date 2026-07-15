@@ -2,7 +2,7 @@
 
 ## Status
 
-Accepted — **shipped v0.14+** (plugin host MVP; ecosystem API still pre-1.0)
+Accepted — **shipped**; Plugin **SDK 1.0** freezes the TOML + subprocess JSON wire (`api_version = "1"`). Curated marketplace / production owlmake remain **product 1.0** — [Plugin policy](../guides/plugin-policy.md).
 
 ## Context
 

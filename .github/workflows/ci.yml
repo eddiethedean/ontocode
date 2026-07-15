@@ -272,6 +272,6 @@ jobs:
         run: pip install -r docs/requirements.txt
 
       - name: Build documentation
-        env:
-          DISABLE_MKDOCS_2_WARNING: "true"
-        run: mkdocs build --strict
+        # Fast path: git-revision stamps off (see mkdocs.yml / build-docs.sh).
+        # RTD still publishes stamps via READTHEDOCS=True.
+        run: ./scripts/build-docs.sh

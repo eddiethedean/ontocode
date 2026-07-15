@@ -231,9 +231,10 @@ pip install -r docs/requirements.txt   # Python 3.12 in CI
 ./scripts/serve-docs.sh
 ./scripts/build-docs.sh   # CI-equivalent; must pass with no warnings
 ./scripts/check-doc-versions.sh   # README / RTD / extension version sync
+# ENABLE_GIT_REVISION_DATE=true ./scripts/build-docs.sh  # optional: RTD-like stamps (slow)
 ```
 
-Open http://127.0.0.1:8000. Configuration: [`mkdocs.yml`](mkdocs.yml), [`.readthedocs.yaml`](.readthedocs.yaml).
+Local/CI builds skip `git-revision-date-localized` for speed; Read the Docs still publishes page stamps. Open http://127.0.0.1:8000. Configuration: [`mkdocs.yml`](mkdocs.yml), [`.readthedocs.yaml`](.readthedocs.yaml).
 
 ### Full local CI (recommended before PR)
 

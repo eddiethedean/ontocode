@@ -22,10 +22,9 @@ Index and explore OWL/RDF/OBO, run queries, refactors, and reasoning — in VS C
 
 <p class="oc-hero-ctas">
   <a class="oc-hero-cta" href="guides/first-success/">First success (~10 min) →</a>
-  <a class="oc-hero-cta" href="SHIPPED/" style="margin-left:0.75rem">Evaluate →</a>
 </p>
 
-<p class="oc-hero-subcta"><a href="install/">Install</a> · <a href="guides/versions-and-channels/">Versions &amp; channels</a> · <a href="known-limitations/">Known limitations</a> · Latest tagged: <strong>v0.25.0</strong></p>
+<p class="oc-hero-subcta"><a href="SHIPPED/">Evaluate · What ships today</a> · <a href="install/">Install</a> · <a href="guides/versions-and-channels/">Versions &amp; channels</a> · <a href="known-limitations/">Known limitations</a> · Latest tagged: <strong>v0.25.0</strong></p>
 
 <div class="oc-hero-links">
   <a href="ontocode/">OntoCode overview</a>
@@ -99,36 +98,21 @@ Index and explore OWL/RDF/OBO, run queries, refactors, and reasoning — in VS C
 
 === "VS Code"
 
-    1. Install **OntoCode** from the [Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) or [Open VSX](https://open-vsx.org/extension/ontocode/ontocode) (Cursor) — not the VS Code editor itself
+    1. Install the **OntoCode extension** from the [Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) or [Open VSX](https://open-vsx.org/extension/ontocode/ontocode) (for Cursor)
     2. **File → Open Folder…** with **`.ttl` / `.obo` / `.owl` / `.rdf` / `.owx`** (editable) — JSON-LD / TriG / N-Triples are browse/query only ([Supported formats](supported-formats.md))
     3. OntoCode’s **bundled** language server indexes in Restricted Mode — **Trust** only if you set custom `ontocode.lspPath` or `ontocode.robotPath`
     4. Open the **OntoCode** activity bar → browse **Classes** → click an entity
 
 === "CLI (Linux x64)"
 
-    Prefer the [release tarball](https://github.com/eddiethedean/ontocode/releases/tag/v0.25.0). Full download → extract → validate steps: [CI integration](ci-integration.md). After the binary is on your `PATH` (or use `./ontocore-v0.25.0-x86_64-unknown-linux-gnu`):
-
-    ```bash
-    VERSION=0.25.0
-    ASSET="ontocore-v${VERSION}-x86_64-unknown-linux-gnu.tar.gz"
-    BIN="ontocore-v${VERSION}-x86_64-unknown-linux-gnu"
-    curl -fsSL -o "${ASSET}" \
-      "https://github.com/eddiethedean/ontocode/releases/download/v${VERSION}/${ASSET}"
-    curl -fsSL -o SHA256SUMS \
-      "https://github.com/eddiethedean/ontocode/releases/download/v${VERSION}/SHA256SUMS"
-    grep "${ASSET}" SHA256SUMS | sha256sum -c -
-    tar xzf "${ASSET}"
-    chmod +x "${BIN}"
-    ./"${BIN}" validate /path/to/ontologies
-    ```
+    Prefer the [release tarball](https://github.com/eddiethedean/ontocode/releases/tag/v0.25.0). Full download → extract → validate steps: [CI integration](ci-integration.md).
 
 === "CLI (macOS / Windows — cargo)"
 
-    Requires Rust **1.88+**. Windows: [MSVC Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/). macOS: Xcode Command Line Tools (`xcode-select --install`). First compile: **15–30+ minutes**.
+    Requires Rust **1.88+**. Windows: [MSVC Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/). macOS: Xcode Command Line Tools (`xcode-select --install`). First compile: **15–30+ minutes**. See [Install CLI](guides/install-cli.md).
 
     ```bash
     cargo install ontocore-cli --locked --version 0.25.0
-    ontocore query /path/to/ontologies "SELECT * FROM classes"
     ontocore validate /path/to/ontologies
     ```
 

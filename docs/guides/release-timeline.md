@@ -44,7 +44,7 @@ Pre-1.0: minor releases may change library APIs, LSP JSON, and SQL virtual table
 | **v0.23** | Reasoning parity + SWRL (realize, instance check, Rule Browser/Editor) | **Shipped** (2026-07-14) |
 | **v0.24** | Refactoring + DL Query parity | **Shipped** (2026-07-14) |
 | **v0.25** | Viz + plugin SDK 1.0 + a11y + parity CI | **Shipped** (2026-07-15) |
-| **v1.0** | Protégé-competitive OWL + OBO in VS Code; full axiom catalog; stable plugin API | Planned |
+| **v1.0** | Protégé-competitive OWL + OBO in VS Code; full axiom catalog; curated plugin marketplace + production owlmake | Planned |
 
 Canonical forward plan: [Platform roadmap](../roadmap.md). Engineering milestone history: [Milestones (shipped)](../design/ROADMAP.md).
 
@@ -62,7 +62,7 @@ Canonical forward plan: [Platform roadmap](../roadmap.md). Engineering milestone
 ### v1.0 (planned)
 
 - Extended OWL 2 DL axiom catalog and Protégé round-trip playbooks per parity matrix
-- Installable plugin host / owlmake-style workflow integration (**shipped MVP in v0.14**; stable API planned **v1.0**)
+- Installable plugin host / owlmake-style workflow integration (**SDK 1.0 wire frozen in v0.25**; curated marketplace + production owlmake planned **product 1.0** — [Plugin policy](plugin-policy.md))
 - Formal performance benchmarks (currently v1.0 backlog — [performance sizing](performance-sizing.md))
 - Extended Protégé migration playbooks (today: [first-week guide](protege-migration.md), [coexistence](protege-coexistence.md), [decision matrix](protege-decision.md))
 

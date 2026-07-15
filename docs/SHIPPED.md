@@ -141,7 +141,7 @@
 | Token-aware type / characteristic detection (ignores comment substrings) | Yes |
 | `SetOntologyIri` rewrites `rdf:type owl:Ontology` in place | Yes |
 
-Full user-facing delta: [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md#0240---2026-07-14).
+Full user-facing delta for the latest tagged release: [CHANGELOG 0.25.0](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md#0250---2026-07-15).
 
 ## Release history
 

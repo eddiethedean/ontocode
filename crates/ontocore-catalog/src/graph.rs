@@ -4,9 +4,9 @@ use crate::entity_api::SubclassEdge;
 use crate::OntologyCatalog;
 use ontocore_core::{
     limits::{MAX_GRAPH_EDGES, MAX_GRAPH_NODES},
-    Entity, EntityKind, AXIOM_KIND_CLASS_ASSERTION, AXIOM_KIND_DOMAIN,
-    AXIOM_KIND_EQUIVALENT_CLASS, AXIOM_KIND_OBJECT_PROPERTY_ASSERTION, AXIOM_KIND_RANGE,
-    AXIOM_KIND_SUB_CLASS_OF, AXIOM_KIND_SUB_DATA_PROPERTY_OF, AXIOM_KIND_SUB_OBJECT_PROPERTY_OF,
+    Entity, EntityKind, AXIOM_KIND_CLASS_ASSERTION, AXIOM_KIND_DOMAIN, AXIOM_KIND_EQUIVALENT_CLASS,
+    AXIOM_KIND_OBJECT_PROPERTY_ASSERTION, AXIOM_KIND_RANGE, AXIOM_KIND_SUB_CLASS_OF,
+    AXIOM_KIND_SUB_DATA_PROPERTY_OF, AXIOM_KIND_SUB_OBJECT_PROPERTY_OF,
 };
 use serde::{Deserialize, Serialize};
 use std::collections::{HashSet, VecDeque};
@@ -212,7 +212,9 @@ impl<'a> GraphBuilder<'a> {
             }
             if let Some(ref q) = filters.search_text {
                 let q = q.trim().to_lowercase();
-                if !q.is_empty() && !iri.to_lowercase().contains(&q) && !short_name(iri).to_lowercase().contains(&q)
+                if !q.is_empty()
+                    && !iri.to_lowercase().contains(&q)
+                    && !short_name(iri).to_lowercase().contains(&q)
                 {
                     return false;
                 }
@@ -868,9 +870,7 @@ mod tests {
     fn class_graph_from_fixtures() {
         let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../fixtures");
         let catalog = IndexBuilder::new().workspace(&root).build().expect("build");
-        let payload = GraphBuilder::new(&catalog)
-            .build(&default_request("class"))
-            .expect("graph");
+        let payload = GraphBuilder::new(&catalog).build(&default_request("class")).expect("graph");
         assert!(!payload.nodes.is_empty());
         assert!(!payload.edges.is_empty());
         assert!(payload.nodes.iter().any(|n| n.namespace.is_some()));
@@ -880,9 +880,7 @@ mod tests {
     fn import_graph_from_fixtures() {
         let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../fixtures");
         let catalog = IndexBuilder::new().workspace(&root).build().expect("build");
-        let payload = GraphBuilder::new(&catalog)
-            .build(&default_request("import"))
-            .expect("graph");
+        let payload = GraphBuilder::new(&catalog).build(&default_request("import")).expect("graph");
         assert!(!payload.nodes.is_empty());
     }
 
@@ -890,9 +888,8 @@ mod tests {
     fn dependency_graph_from_fixtures() {
         let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../fixtures");
         let catalog = IndexBuilder::new().workspace(&root).build().expect("build");
-        let payload = GraphBuilder::new(&catalog)
-            .build(&default_request("dependency"))
-            .expect("graph");
+        let payload =
+            GraphBuilder::new(&catalog).build(&default_request("dependency")).expect("graph");
         assert!(!payload.nodes.is_empty());
         assert_eq!(payload.graph_kind, "dependency");
     }
@@ -901,9 +898,8 @@ mod tests {
     fn property_graph_includes_domain_range_from_axioms() {
         let root = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../fixtures");
         let catalog = IndexBuilder::new().workspace(&root).build().expect("build");
-        let payload = GraphBuilder::new(&catalog)
-            .build(&default_request("property"))
-            .expect("graph");
+        let payload =
+            GraphBuilder::new(&catalog).build(&default_request("property")).expect("graph");
         assert!(
             payload.edges.iter().any(|e| e.kind == "domain"),
             "expected domain edges from axioms"
@@ -928,9 +924,8 @@ mod tests {
         )
         .expect("write");
         let catalog = IndexBuilder::new().workspace(dir.path()).build().expect("build");
-        let payload = GraphBuilder::new(&catalog)
-            .build(&default_request("object_property"))
-            .expect("graph");
+        let payload =
+            GraphBuilder::new(&catalog).build(&default_request("object_property")).expect("graph");
         assert!(
             payload.edges.iter().any(|e| e.kind == "sub_property_of"),
             "expected sub_property_of edges: {:?}",
@@ -1009,9 +1004,8 @@ mod tests {
         .expect("write");
         let catalog = IndexBuilder::new().workspace(dir.path()).build().expect("build");
         let ont_id = catalog.data().documents.first().map(|d| d.id.clone()).expect("doc");
-        let unfiltered = GraphBuilder::new(&catalog)
-            .build(&default_request("class"))
-            .expect("unfiltered");
+        let unfiltered =
+            GraphBuilder::new(&catalog).build(&default_request("class")).expect("unfiltered");
         assert!(
             unfiltered.nodes.iter().any(|n| n.id == "http://external.example/Parent"),
             "unknown parent should appear without ontology filter"
@@ -1062,16 +1056,12 @@ mod tests {
         // Enough subclass edges that truncation may trigger under low test caps —
         // assert non-empty and that builder completes quickly for a sizable hierarchy.
         for i in 0..200 {
-            ttl.push_str(&format!(
-                "ex:C{i} a owl:Class ; rdfs:subClassOf ex:Root .\n"
-            ));
+            ttl.push_str(&format!("ex:C{i} a owl:Class ; rdfs:subClassOf ex:Root .\n"));
         }
         std::fs::write(dir.path().join("large.ttl"), ttl).expect("write");
         let catalog = IndexBuilder::new().workspace(dir.path()).build().expect("build");
         let started = std::time::Instant::now();
-        let payload = GraphBuilder::new(&catalog)
-            .build(&default_request("class"))
-            .expect("graph");
+        let payload = GraphBuilder::new(&catalog).build(&default_request("class")).expect("graph");
         assert!(started.elapsed().as_secs() < 5, "class graph build too slow");
         assert!(!payload.nodes.is_empty());
         assert!(payload.nodes.len() <= MAX_GRAPH_NODES);

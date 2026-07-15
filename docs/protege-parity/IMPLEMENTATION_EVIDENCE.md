@@ -130,8 +130,9 @@ Every parity feature should reference:
                                                                     manifest.rs                              providers +
                                                                     plugin_sdk_compat                        compat harness.
 
-  PAR-ACC-001    Accessibility PARTIAL          extension           TBD              ✓       TBD     ✓       Target
-                                                                                                             v0.25.
+  PAR-ACC-001    Accessibility VERIFIED         webview-ui          a11y/*,          ✓       ✓       ✓       v0.25
+                                                                    DialogShell,                             EPIC-010 focus/
+                                                                    panels + axe                             SR + axe harness.
 
   PAR-TST-001    Parity       PARTIAL           parity/             protege-desktop- ---     ✓       ✓       v0.19:
                  verification                   scripts             parity.yaml,                        manifest

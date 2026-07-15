@@ -2,9 +2,9 @@
 
 # Blocker 10 --- Accessibility & Inclusive UX Parity
 
-**Status:** P0 Release Blocker\
+**Status:** Resolved for v0.25 (EPIC-010) — owned webviews keyboard/SR + automated axe harness\
 **Priority:** Critical\
-**Target Release:** OntoCode 1.0.0
+**Target Release:** OntoCode 1.0.0 / delivered functional baseline in **v0.25**
 
 ------------------------------------------------------------------------
 

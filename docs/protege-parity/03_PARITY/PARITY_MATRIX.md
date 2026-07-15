@@ -101,7 +101,7 @@ Every parity claim must be traceable to this matrix.
 
   PAR-PLG-001    Plugins         Stable SDK          P1         VERIFIED          IMPLEMENTATION_EVIDENCE    plugin_sdk_compat          
 
-  PAR-ACC-001    Accessibility   Keyboard & screen   P1         PARTIAL           Audit                      Accessibility      
+  PAR-ACC-001    Accessibility   Keyboard & screen   P1         VERIFIED          ACCESSIBILITY_REPORT       a11y Vitest      
                                  reader parity                                                                                  
 
   PAR-TST-001    Verification    Executable parity   P0         NOT_IMPLEMENTED   Audit                      Missing            Critical release

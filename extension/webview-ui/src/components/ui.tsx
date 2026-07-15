@@ -22,17 +22,22 @@ export function PanelHeader({
   title,
   subtitle,
   badges,
+  titleId,
 }: {
   title: string;
   subtitle?: ReactNode;
   badges?: ReactNode;
+  /** Optional id for associating dialogs / landmarks with the heading. */
+  titleId?: string;
 }): JSX.Element {
   return (
     <header className="oc-panel-header">
       <div className="oc-panel-header-accent" aria-hidden="true" />
       <div className="oc-panel-header-inner">
         <div className="oc-panel-header-text">
-          <h1 className="oc-title">{title}</h1>
+          <h1 id={titleId} className="oc-title">
+            {title}
+          </h1>
           {subtitle ? <p className="oc-subtitle">{subtitle}</p> : null}
         </div>
         {badges ? <div className="oc-badge-row">{badges}</div> : null}
@@ -84,7 +89,12 @@ export function Badge({
   children: ReactNode;
   variant?: "default" | "kind" | "danger" | "warning" | "success" | "accent";
 }): JSX.Element {
-  return <span className={`oc-badge oc-badge--${variant}`}>{children}</span>;
+  // Text content always accompanies color so status is never color-only.
+  return (
+    <span className={`oc-badge oc-badge--${variant}`} data-variant={variant}>
+      {children}
+    </span>
+  );
 }
 
 export function ButtonBar({ children }: { children: ReactNode }): JSX.Element {
@@ -158,7 +168,12 @@ export function Callout({
   children: ReactNode;
   variant?: "info" | "error" | "warning" | "success";
 }): JSX.Element {
-  return <div className={`oc-callout oc-callout--${variant}`}>{children}</div>;
+  const role = variant === "error" ? "alert" : "status";
+  return (
+    <div className={`oc-callout oc-callout--${variant}`} role={role}>
+      {children}
+    </div>
+  );
 }
 
 export function CodeBlock({
@@ -178,11 +193,21 @@ export function CodeBlock({
 export function CodeEditor(
   props: React.TextareaHTMLAttributes<HTMLTextAreaElement> & { label?: string }
 ): JSX.Element {
-  const { label, className = "", ...rest } = props;
+  const { label, className = "", id, ...rest } = props;
+  const textareaId = id ?? (label ? "oc-code-editor" : undefined);
   return (
     <div className="oc-code-editor">
-      {label ? <div className="oc-code-editor-bar">{label}</div> : null}
-      <textarea className={`oc-textarea oc-code-editor-input ${className}`.trim()} {...rest} />
+      {label ? (
+        <label className="oc-code-editor-bar" htmlFor={textareaId}>
+          {label}
+        </label>
+      ) : null}
+      <textarea
+        id={textareaId}
+        className={`oc-textarea oc-code-editor-input ${className}`.trim()}
+        aria-label={label || rest["aria-label"]}
+        {...rest}
+      />
     </div>
   );
 }

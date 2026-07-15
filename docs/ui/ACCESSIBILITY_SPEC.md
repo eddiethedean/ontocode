@@ -61,7 +61,14 @@ AI outputs must be readable, structured, and navigable.
 
 ## 8. Testing
 
-- automated accessibility checks
-- keyboard-only test scripts
-- screen reader smoke tests
-- high contrast snapshots
+Shipped for v0.25 (EPIC-010):
+
+- automated axe-core checks in `extension/webview-ui/src/a11y/accessibility.test.tsx` (serious/critical)
+- focus-trap unit tests + DialogShell Escape/restore
+- keyboard paths on Graph list/canvas (EPIC-008) and dialogs
+- evidence: [ACCESSIBILITY_REPORT.md](../protege-parity/08_RELEASE/ACCESSIBILITY_REPORT.md)
+
+Still aspirational:
+
+- full high-contrast visual snapshots
+- third-party screen reader certification (Phase 4)

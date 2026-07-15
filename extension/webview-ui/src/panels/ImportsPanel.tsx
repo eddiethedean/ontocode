@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
+import { PanelMain } from "../a11y";
 import {
   ButtonBar,
   Callout,
@@ -119,6 +120,7 @@ export function ImportsPanel(): JSX.Element {
 
   return (
     <Panel>
+      <PanelMain label="Manage Imports">
       <PanelHeader
         title="Manage Imports"
         subtitle={payload.path}
@@ -177,9 +179,12 @@ export function ImportsPanel(): JSX.Element {
 
       {preview ? (
         <Section title="Patch preview">
-          <pre className="preview-block">{preview}</pre>
+          <pre className="preview-block" role="region" aria-label="Patch preview">
+            {preview}
+          </pre>
         </Section>
       ) : null}
+      </PanelMain>
     </Panel>
   );
 }

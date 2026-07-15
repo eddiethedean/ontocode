@@ -346,15 +346,29 @@ requirements:
     area: Accessibility
     title: Keyboard and screen reader parity
     priority: P1
-    status: PARTIAL
+    status: VERIFIED
     owner: null
-    source_files: []
-    test_ids: []
-    acceptance_criteria: []
+    source_files:
+      - extension/webview-ui/src/a11y/focusTrap.ts
+      - extension/webview-ui/src/a11y/liveAnnouncer.tsx
+      - extension/webview-ui/src/components/DialogShell.tsx
+      - extension/webview-ui/src/panels/EntityInspector.tsx
+      - extension/webview-ui/src/panels/QueryWorkbench.tsx
+      - extension/webview-ui/src/panels/ReasonerPanel.tsx
+      - extension/webview-ui/src/panels/GraphPanel.tsx
+      - docs/protege-parity/08_RELEASE/ACCESSIBILITY_REPORT.md
+    test_ids:
+      - extension/webview-ui/src/a11y/accessibility.test.tsx
+      - extension/webview-ui/src/a11y/focusTrap.test.ts
+      - extension/webview-ui/src/components/DialogShell.test.tsx
+    acceptance_criteria:
+      - docs/protege-parity/04_BLOCKERS/BLOCKER_10_ACCESSIBILITY.md
     github_issue: https://github.com/eddiethedean/ontocode/issues/256
     documentation:
       - docs/protege-parity/04_BLOCKERS/BLOCKER_10_ACCESSIBILITY.md
-    notes: Target v0.25
+      - docs/protege-parity/08_RELEASE/ACCESSIBILITY_REPORT.md
+      - docs/protege-parity/08_RELEASE/A11Y_P0_AUDIT.md
+    notes: v0.25 EPIC-010 — owned webviews keyboard/SR + axe harness; host chrome N/A
   - id: PAR-TST-001
     area: Verification
     title: Executable parity corpus

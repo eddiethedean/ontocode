@@ -4,7 +4,7 @@
 
 **Epic ID:** EPIC-010\
 **GitHub:** https://github.com/eddiethedean/ontocode/issues/256\
-**Status:** Planned\
+**Status:** Done for v0.25 (`PAR-ACC-001` VERIFIED; owned webviews + axe harness)\
 **Priority:** P0 (Release Blocking)\
 **Target Release:** v0.25
 

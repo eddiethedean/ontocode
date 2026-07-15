@@ -1,0 +1,44 @@
+{
+  "@context": "http://obofoundry.github.io/registry/context.jsonld",
+  "ontologies": [
+    {
+      "id": "bfo",
+      "title": "Basic Formal Ontology",
+      "description": "Upper-level ontology for OBO Foundry ontologies.",
+      "activity_status": "active",
+      "ontology_purl": "http://purl.obolibrary.org/obo/bfo.owl",
+      "homepage": "http://ifomis.org/bfo/",
+      "contact": {
+        "email": "phismith@buffalo.edu",
+        "github": "phismith",
+        "label": "Barry Smith"
+      },
+      "license": {
+        "label": "CC-BY",
+        "url": "http://creativecommons.org/licenses/by/4.0/"
+      }
+    },
+    {
+      "id": "go",
+      "title": "Gene Ontology",
+      "description": "Gene product functions, processes, and cellular components.",
+      "activity_status": "active",
+      "ontology_purl": "http://purl.obolibrary.org/obo/go.owl",
+      "homepage": "http://geneontology.org/",
+      "contact": {
+        "email": "help@geneontology.org",
+        "label": "GO Helpdesk"
+      },
+      "license": {
+        "label": "CC-BY",
+        "url": "http://creativecommons.org/licenses/by/4.0/"
+      }
+    },
+    {
+      "id": "obsolete-example",
+      "title": "Obsolete Example",
+      "activity_status": "obsolete",
+      "ontology_purl": "http://example.org/obsolete.owl"
+    }
+  ]
+}

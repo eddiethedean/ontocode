@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate parity/protege-test-port.yaml (PORT_W1 rows need tests or gap).
+"""Validate parity/protege-test-port.yaml (PORT_W* rows need tests or gap).
 
 Usage:
   python3 scripts/validate-protege-test-port.py
@@ -16,6 +16,7 @@ from parity_common import ROOT  # noqa: E402
 import yaml  # noqa: E402
 
 INVENTORY = ROOT / "parity" / "protege-test-port.yaml"
+PORT_TAGS = ("PORT_W1", "PORT_W2", "PORT_W3")
 
 
 def main() -> int:
@@ -26,19 +27,15 @@ def main() -> int:
     data = yaml.safe_load(INVENTORY.read_text(encoding="utf-8"))
     entries = data.get("entries") or []
     errors: list[str] = []
-    w1 = 0
-    w2 = 0
+    counts = {t: 0 for t in PORT_TAGS}
     for i, entry in enumerate(entries):
         if not isinstance(entry, dict):
             errors.append(f"entries[{i}] must be a mapping")
             continue
         tag = entry.get("tag")
         name = entry.get("class", f"entries[{i}]")
-        if tag in ("PORT_W1", "PORT_W2"):
-            if tag == "PORT_W1":
-                w1 += 1
-            else:
-                w2 += 1
+        if tag in PORT_TAGS:
+            counts[tag] += 1
             tests = entry.get("ontocode_tests") or []
             gap = entry.get("gap")
             if not tests and not gap:
@@ -47,7 +44,7 @@ def main() -> int:
                 path = ROOT / t
                 if not path.exists():
                     errors.append(f"{name}: missing ontocode_tests path {t}")
-        if tag not in ("PORT_W1", "PORT_W2", "SKIP", "COVERED"):
+        if tag not in (*PORT_TAGS, "SKIP", "COVERED"):
             errors.append(f"{name}: invalid tag {tag!r}")
 
     if errors:
@@ -56,7 +53,8 @@ def main() -> int:
             print(f"  - {e}", file=sys.stderr)
         return 1
 
-    print(f"protege-test-port: ok ({len(entries)} entries, {w1} PORT_W1, {w2} PORT_W2)")
+    summary = ", ".join(f"{counts[t]} {t}" for t in PORT_TAGS)
+    print(f"protege-test-port: ok ({len(entries)} entries, {summary})")
     return 0
 
 

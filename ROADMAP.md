@@ -654,10 +654,10 @@ See [migration/v0.25.md](docs/migration/v0.25.md) and [SHIPPED.md](docs/SHIPPED.
 
 | Area | Deliverables |
 |------|--------------|
-| **OntoCore / tests** | Inventory [`parity/protege-test-port.yaml`](parity/protege-test-port.yaml); Wave 1+2 suites `tests/protege_port_*.rs` (edit oracles + render/links); fixtures under [`examples/protege-roundtrip/ported/`](examples/protege-roundtrip/ported/); `ontocore-owl` `render`/`links` modules; inspector + LSP hover linkification |
+| **OntoCore / tests** | Inventory [`parity/protege-test-port.yaml`](parity/protege-test-port.yaml); Wave 1–3 suites `tests/protege_port_*.rs` (edit oracles + render/links + utils/Foundry); fixtures under [`examples/protege-roundtrip/ported/`](examples/protege-roundtrip/ported/); `ontocore-owl` `render`/`links`/`util`; `ontocore-obo` `obofoundry`; inspector annotation order + linkification; LSP hover linkification |
 | **Verification** | [`scripts/validate-protege-test-port.py`](scripts/validate-protege-test-port.py); CI + local CI wiring; `PAR-*` `test_ids` linkage |
 
-**Exit criteria:** Every `PORT_W1`/`PORT_W2` inventory row has OntoCode tests (or an explicit `gap`); Wave 1+2 suites green in CI.
+**Exit criteria:** Every `PORT_W1`/`PORT_W2`/`PORT_W3` inventory row has OntoCode tests (or an explicit `gap`); Wave 1–3 suites green in CI.
 
 **Docs:** [PROTEGE_TEST_PORT.md](docs/protege-parity/03_PARITY/PROTEGE_TEST_PORT.md)
 

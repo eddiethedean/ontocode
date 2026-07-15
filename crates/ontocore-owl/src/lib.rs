@@ -16,6 +16,7 @@ pub mod render;
 mod serialize;
 mod span;
 mod turtle_lex;
+pub mod util;
 
 pub use apply_xml::{apply_xml_patches, apply_xml_patches_to_text};
 pub use bridge::{bridge_ontology, OwlBridgeResult};
@@ -49,4 +50,9 @@ pub use span::{
     all_entity_statement_ranges, entity_block_range, entity_primary_block_range,
     is_in_comment_or_string, namespaces_for_text, prefixes_from_turtle, short_name_from_iri,
     ByteRange,
+};
+pub use util::{
+    abbreviate_string, cmp_annotation_property_iri, format_iso8601_utc, render_entity_markdown,
+    replace_lexical_value, replace_lexical_value_whole, LexicalLiteral,
+    DEFAULT_ANNOTATION_PROPERTY_ORDER, ELLIPSIS,
 };

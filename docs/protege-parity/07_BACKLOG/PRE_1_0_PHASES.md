@@ -319,20 +319,23 @@ Rust semantic oracles (rewrite specs — do not run the JVM suite).
 ## Deliverables
 
 -   Full upstream test-class inventory tagged `PORT_W1` / `PORT_W2` /
-    `SKIP` / `COVERED`
+    `PORT_W3` / `SKIP` / `COVERED`
 -   Wave 1 oracle suites: hierarchy, merge, deprecation, history,
     axiom location, refs/defined-class, parsers/IDs
 -   Wave 2 presentation suites: render/escape/prefix/IRI + annotation
     link extractors (LSP hover + Entity Inspector)
+-   Wave 3 util suites: abbreviate, ISO8601, lexical replace, markdown
+    entity links, annotation-property order; OBO Foundry registry JSON
+    (vendored fixture)
 -   Synthetic fixtures under `examples/protege-roundtrip/ported/`
 -   `scripts/validate-protege-test-port.py` + CI wiring
 
 ## Exit criteria
 
--   Every `PORT_W1` / `PORT_W2` row has `ontocode_tests` paths that exist
-    (or an explicit `gap`)
+-   Every `PORT_W1` / `PORT_W2` / `PORT_W3` row has `ontocode_tests` paths
+    that exist (or an explicit `gap`)
 -   `cargo test -p ontocode --test protege_port_*` green
--   Webview annotation link Vitest green
+-   Webview annotation link + annotation-order Vitest green
 
 ------------------------------------------------------------------------
 

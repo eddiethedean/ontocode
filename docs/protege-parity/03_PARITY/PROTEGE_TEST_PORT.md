@@ -1,6 +1,6 @@
 # Protégé Desktop Test Port (v0.26)
 
-**Status:** Wave 1 + Wave 2 shipped on `v0.26`\
+**Status:** Waves 1–3 shipped on `v0.26`\
 **Upstream:** [protegeproject/protege](https://github.com/protegeproject/protege)\
 **Machine inventory:** [`parity/protege-test-port.yaml`](../../../parity/protege-test-port.yaml)
 
@@ -18,10 +18,9 @@ does **not** import Swing/OSGi suites.
 ## Approach
 
 1. Enumerate upstream `src/test/java` classes (see inventory YAML).
-2. Tag each: `PORT_W1` | `PORT_W2` | `SKIP` | `COVERED`.
+2. Tag each: `PORT_W1` | `PORT_W2` | `PORT_W3` | `SKIP` | `COVERED`.
 3. Rewrite case themes as OntoCode tests (catalog oracles or pure
-   render/link helpers). No Turtle byte-identity; XML uses ADR-0021
-   semantic compare.
+   helpers). No Turtle byte-identity; XML uses ADR-0021 semantic compare.
 4. Link executables via `ontocode_tests` in the inventory and
    `test_ids` on relevant `PAR-*` rows in
    [`protege-desktop-parity.yaml`](../../../parity/protege-desktop-parity.yaml).
@@ -34,6 +33,7 @@ does **not** import Swing/OSGi suites.
 |-----|---------|
 | `PORT_W1` | High-value OWL/edit behaviors — Wave 1 |
 | `PORT_W2` | Presentation helpers — Wave 2 (render/escape/prefix/links) |
+| `PORT_W3` | Deferred portable utils — Wave 3 (Foundry JSON, abbreviate, ISO8601, …) |
 | `SKIP` | Protégé UI/OSGi/prefs/network or no OntoCode product surface |
 | `COVERED` | Already adequately covered by existing OntoCode oracles |
 
@@ -64,7 +64,16 @@ Fixtures: [`examples/protege-roundtrip/ported/`](../../../examples/protege-round
 
 UX wiring: LSP hover linkifies labels/comments; Entity Inspector renders annotation hyperlinks.
 
-No-surface Wave 2 candidates (OBO Foundry registry, StringAbbreviator, breadcrumb VO, …) are tagged `SKIP`.
+------------------------------------------------------------------------
+
+## Wave 3 suites
+
+| Suite | Upstream anchors | OntoCode tests |
+|-------|------------------|----------------|
+| Utils | `StringAbbreviator`, `ISO8601Formatter`, `LiteralLexicalValueReplacer`, `MarkdownRenderer`, `AnnotationPropertyComparator` | `tests/protege_port_utils.rs` + `crates/ontocore-owl/src/util.rs` + `extension/webview-ui/src/utils/annotationOrder.ts` |
+| OBO Foundry registry | `OboFoundry*` (+ vendored JSON fixture, not live HTTP) | `tests/protege_port_obofoundry.rs` + `crates/ontocore-obo/src/obofoundry.rs` |
+
+UX wiring: Entity Inspector sorts annotations by Protégé default property order.
 
 ------------------------------------------------------------------------
 
@@ -78,7 +87,7 @@ No-surface Wave 2 candidates (OBO Foundry registry, StringAbbreviator, breadcrum
 - `NoOpReasoner_TestCase` (use OntoLogos / `tests/reasoner_*.rs`)
 - SelectionPlane / PopupMenuId
 - Byte-identical XML serialization
-- OBO Foundry registry product / unrelated UI value objects
+- Breadcrumb / assertion-row comparator VOs (no equivalent UI surface)
 
 ------------------------------------------------------------------------
 
@@ -90,12 +99,14 @@ cargo test -p ontocode --test protege_port_hierarchy --test protege_port_merge \
   --test protege_port_deprecation --test protege_port_history \
   --test protege_port_axiom_location --test protege_port_refs \
   --test protege_port_parsers --test protege_port_render \
-  --test protege_port_links
-cd extension/webview-ui && npm test -- --run src/utils/annotationLinks.test.ts
+  --test protege_port_links --test protege_port_utils \
+  --test protege_port_obofoundry
+cd extension/webview-ui && npm test -- --run src/utils/annotationLinks.test.ts \
+  src/utils/annotationOrder.test.ts
 ```
 
-Every `PORT_W1` / `PORT_W2` inventory row must list `ontocode_tests` paths that
-exist, or an explicit `gap` note.
+Every `PORT_W1` / `PORT_W2` / `PORT_W3` inventory row must list `ontocode_tests`
+paths that exist, or an explicit `gap` note.
 
 ------------------------------------------------------------------------
 

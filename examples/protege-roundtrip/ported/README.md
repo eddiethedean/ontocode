@@ -20,6 +20,7 @@ inspiration from Protégé test designs; Protégé itself is BSD-2-Clause.
 | `idranges_minimal.ttl` | Minimal GO-style idranges annotations |
 | `tabbed_hierarchy.txt` | Indented hierarchy input for parser → SubClassOf |
 | `merge_labels.ttl` | Merge with rdfs:label on source |
+| `obofoundry_minimal.json` | Truncated OBO Foundry registry JSON (Wave 3) |
 | `imports_home/` | Multi-file imports for axiom `ontology_id` location |
 
 Used by `cargo test -p ontocode --test protege_port_*`.

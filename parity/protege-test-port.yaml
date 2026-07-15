@@ -7,6 +7,7 @@ tags:
   - PORT_W2
   - SKIP
   - COVERED
+  - PORT_W3
 entries:
   - class: MacUIUtil_TestCase
     module: protege-editor-core
@@ -29,11 +30,13 @@ entries:
   - class: StringAbbreviator_TestCase
     module: protege-editor-core
     path: protege-editor-core/src/test/java/org/protege/editor/core/util/StringAbbreviator_TestCase.java
-    tag: SKIP
+    tag: PORT_W3
     area: util
     case_themes:
       - "string abbreviation"
-    gap: "No OntoCode StringAbbreviator product surface"
+    ontocode_tests:
+      - tests/protege_port_utils.rs
+    notes: "Wave 3 implemented"
   - class: BundleInfo_TestCase
     module: protege-launcher
     path: protege-launcher/src/test/java/org/protege/osgi/framework/BundleInfo_TestCase.java
@@ -359,43 +362,53 @@ entries:
   - class: OboFoundryContact_TestCase
     module: protege-editor-owl
     path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/obofoundry/OboFoundryContact_TestCase.java
-    tag: SKIP
+    tag: PORT_W3
     area: obofoundry
     case_themes:
       - "registry JSON model"
-    gap: "No OntoCode OBO Foundry registry product surface"
+    ontocode_tests:
+      - tests/protege_port_obofoundry.rs
+    notes: "Wave 3 implemented"
   - class: OboFoundryEntry_TestCase
     module: protege-editor-owl
     path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/obofoundry/OboFoundryEntry_TestCase.java
-    tag: SKIP
+    tag: PORT_W3
     area: obofoundry
     case_themes:
       - "registry JSON model"
-    gap: "No OntoCode OBO Foundry registry product surface"
+    ontocode_tests:
+      - tests/protege_port_obofoundry.rs
+    notes: "Wave 3 implemented"
   - class: OboFoundryLicenseDetails_TestCase
     module: protege-editor-owl
     path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/obofoundry/OboFoundryLicenseDetails_TestCase.java
-    tag: SKIP
+    tag: PORT_W3
     area: obofoundry
     case_themes:
       - "registry JSON model"
-    gap: "No OntoCode OBO Foundry registry product surface"
+    ontocode_tests:
+      - tests/protege_port_obofoundry.rs
+    notes: "Wave 3 implemented"
   - class: OboFoundryRegistry_TestCase
     module: protege-editor-owl
     path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/obofoundry/OboFoundryRegistry_TestCase.java
-    tag: SKIP
+    tag: PORT_W3
     area: obofoundry
     case_themes:
       - "registry JSON model"
-    gap: "No OntoCode OBO Foundry registry product surface"
+    ontocode_tests:
+      - tests/protege_port_obofoundry.rs
+    notes: "Wave 3 implemented"
   - class: OboFoundryRegistryParser_IT
     module: protege-editor-owl
     path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/obofoundry/OboFoundryRegistryParser_IT.java
-    tag: SKIP
+    tag: PORT_W3
     area: obofoundry
     case_themes:
       - "parse OboFoundry.json"
-    gap: "No OntoCode OBO Foundry registry product surface"
+    ontocode_tests:
+      - tests/protege_port_obofoundry.rs
+    notes: "Wave 3 implemented"
   - class: Prefix_TestCase
     module: protege-editor-owl
     path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/prefix/Prefix_TestCase.java
@@ -603,27 +616,34 @@ entries:
   - class: AnnotationPropertyComparator_TestCase
     module: protege-editor-owl
     path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/entity/AnnotationPropertyComparator_TestCase.java
-    tag: SKIP
+    tag: PORT_W3
     area: util
     case_themes:
       - "annotation property sort order"
-    gap: "No annotation-property sort product surface"
+    ontocode_tests:
+      - tests/protege_port_utils.rs
+      - extension/webview-ui/src/utils/annotationOrder.test.ts
+    notes: "Wave 3 implemented"
   - class: MarkdownRenderer_TestCase
     module: protege-editor-owl
     path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/entity/MarkdownRenderer_TestCase.java
-    tag: SKIP
+    tag: PORT_W3
     area: rendering
     case_themes:
       - "markdown render"
-    gap: "No Protégé-style MarkdownRenderer product surface"
+    ontocode_tests:
+      - tests/protege_port_utils.rs
+    notes: "Wave 3 implemented"
   - class: ISO8601Formatter_TestCase
     module: protege-editor-owl
     path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/util/ISO8601Formatter_TestCase.java
-    tag: SKIP
+    tag: PORT_W3
     area: util
     case_themes:
       - "ISO8601 format"
-    gap: "No ISO8601 formatter product surface"
+    ontocode_tests:
+      - tests/protege_port_utils.rs
+    notes: "Wave 3 implemented"
   - class: IriSplitter_TestCase
     module: protege-editor-owl
     path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/util/IriSplitter_TestCase.java
@@ -637,11 +657,13 @@ entries:
   - class: LiteralLexicalValueReplacer_TestCase
     module: protege-editor-owl
     path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/util/LiteralLexicalValueReplacer_TestCase.java
-    tag: SKIP
+    tag: PORT_W3
     area: util
     case_themes:
       - "literal lexical replace"
-    gap: "No literal lexical replacer product surface"
+    ontocode_tests:
+      - tests/protege_port_utils.rs
+    notes: "Wave 3 implemented"
   - class: OWLPropertyAssertionRowComparator_TestCase
     module: protege-editor-owl
     path: protege-editor-owl/src/test/java/org/protege/editor/owl/ui/OWLPropertyAssertionRowComparator_TestCase.java

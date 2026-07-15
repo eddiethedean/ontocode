@@ -414,7 +414,10 @@ requirements:
       - tests/protege_port_parsers.rs
       - tests/protege_port_render.rs
       - tests/protege_port_links.rs
+      - tests/protege_port_utils.rs
+      - tests/protege_port_obofoundry.rs
       - extension/webview-ui/src/utils/annotationLinks.test.ts
+      - extension/webview-ui/src/utils/annotationOrder.test.ts
     acceptance_criteria:
       - docs/protege-parity/04_BLOCKERS/BLOCKER_11_PARITY_VERIFICATION.md
       - docs/protege-parity/03_PARITY/PARITY_RELEASE_GATE.md
@@ -425,4 +428,4 @@ requirements:
       - docs/protege-parity/03_PARITY/PARITY_RELEASE_GATE.md
       - docs/protege-parity/03_PARITY/PROTEGE_TEST_PORT.md
       - docs/protege-parity/IMPLEMENTATION_EVIDENCE.md
-    notes: v0.25 EPIC-011 — schema+path validation, metrics, Gate 3 report; --strict-release defers full P0 VERIFIED to 1.0.0-rc; v0.26 Protégé Wave 1+2 behavioral ports
+    notes: v0.25 EPIC-011 — schema+path validation, metrics, Gate 3 report; --strict-release defers full P0 VERIFIED to 1.0.0-rc; v0.26 Protégé Wave 1–3 behavioral ports

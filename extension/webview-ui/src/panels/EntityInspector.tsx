@@ -31,6 +31,7 @@ import {
 } from "../messages";
 import type { WorkspaceProps } from "../workspaces/types";
 import { annotationTextParts } from "../utils/annotationLinks";
+import { sortAnnotationsByPredicate } from "../utils/annotationOrder";
 
 /** Render annotation values with DOI/PMID/… hyperlinks (Protégé link extractors). */
 function LinkedAnnotationValue({ value }: { value: string }): JSX.Element {
@@ -189,6 +190,7 @@ export function EntityInspectorPanel(_props?: WorkspaceProps): JSX.Element {
   }
 
   const { entity, parents, children, axioms, editable, document_path, annotations = [], characteristics } = detail;
+  const sortedAnnotations = sortAnnotationsByPredicate(annotations);
 
   const pluginCards = installedPlugins.flatMap((plugin) =>
     plugin.inspector_cards.filter(
@@ -601,10 +603,10 @@ export function EntityInspectorPanel(_props?: WorkspaceProps): JSX.Element {
         )}
       </Section>
 
-      {annotations.length > 0 ? (
+      {sortedAnnotations.length > 0 ? (
         <Section title="Annotations" card>
           <ul className="oc-axiom-list">
-            {annotations.map((a, idx) => (
+            {sortedAnnotations.map((a, idx) => (
               <li key={`ann-${idx}`} className="oc-axiom-item">
                 <InlineCode>
                   {shortLabel(a.predicate)} → <LinkedAnnotationValue value={a.value} />

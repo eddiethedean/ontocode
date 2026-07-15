@@ -1,0 +1,65 @@
+//! Protégé Wave 3 port: OBO Foundry registry JSON model/parser.
+//! Upstream: OboFoundryContact/Entry/License/Registry/RegistryParser.
+
+use ontocore_obo::{parse_registry_json, OboFoundryRegistry};
+use std::path::PathBuf;
+
+fn fixture_path() -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .join("examples/protege-roundtrip/ported/obofoundry_minimal.json")
+}
+
+#[test]
+fn obofoundry_parse_minimal_fixture() {
+    let bytes = std::fs::read(fixture_path()).expect("read fixture");
+    let reg = parse_registry_json(&bytes).expect("parse");
+    assert_eq!(reg.len(), 3);
+    assert!(!reg.is_empty());
+}
+
+#[test]
+fn obofoundry_lookup_bfo_and_go() {
+    let bytes = std::fs::read(fixture_path()).expect("read");
+    let reg = parse_registry_json(&bytes).expect("parse");
+
+    let bfo = reg.get("bfo").expect("bfo");
+    assert_eq!(bfo.title.as_deref(), Some("Basic Formal Ontology"));
+    assert_eq!(bfo.activity_status.as_deref(), Some("active"));
+    assert!(bfo
+        .ontology_purl
+        .as_deref()
+        .unwrap_or("")
+        .contains("bfo.owl"));
+    assert_eq!(
+        bfo.contact.as_ref().and_then(|c| c.label.as_deref()),
+        Some("Barry Smith")
+    );
+    assert_eq!(
+        bfo.license.as_ref().and_then(|l| l.label.as_deref()),
+        Some("CC-BY")
+    );
+
+    let go = reg.get("go").expect("go");
+    assert_eq!(go.title.as_deref(), Some("Gene Ontology"));
+}
+
+#[test]
+fn obofoundry_missing_id_and_empty() {
+    let bytes = std::fs::read(fixture_path()).expect("read");
+    let reg = parse_registry_json(&bytes).expect("parse");
+    assert!(reg.get("no-such-ontology").is_none());
+
+    let empty = OboFoundryRegistry::empty();
+    assert!(empty.is_empty());
+    assert_eq!(empty.len(), 0);
+    assert!(empty.get("bfo").is_none());
+}
+
+#[test]
+fn obofoundry_obsolete_entry_present() {
+    let bytes = std::fs::read(fixture_path()).expect("read");
+    let reg = parse_registry_json(&bytes).expect("parse");
+    let obs = reg.get("obsolete-example").expect("obsolete");
+    assert_eq!(obs.activity_status.as_deref(), Some("obsolete"));
+    assert!(obs.contact.is_none());
+}

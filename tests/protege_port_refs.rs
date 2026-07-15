@@ -6,8 +6,8 @@ mod support;
 use ontocore_core::AXIOM_KIND_EQUIVALENT_CLASS;
 use ontocore_owl::PatchOp;
 use ontocore_refactor::find_usages;
-use support::protege_port::{index_workspace, standard_ns};
 use std::collections::BTreeMap;
+use support::protege_port::{index_workspace, standard_ns};
 
 fn dep_ns() -> BTreeMap<String, String> {
     let mut ns = standard_ns();
@@ -31,10 +31,7 @@ ex:Employee a owl:Class ; rdfs:subClassOf ex:Person .
     std::fs::write(&path, ttl).unwrap();
     let catalog = index_workspace(dir.path());
     let usages = find_usages(&catalog, "http://example.org/refs#Person");
-    assert!(
-        !usages.is_empty(),
-        "Person should have usages, got {usages:?}"
-    );
+    assert!(!usages.is_empty(), "Person should have usages, got {usages:?}");
     assert!(
         usages.iter().any(|u| u.context.contains("Employee") || u.context.contains("Person")),
         "expected Employee/Person context in usages: {usages:?}"
@@ -71,12 +68,7 @@ ex:Defined a owl:Class .
     assert!(
         is_defined,
         "Defined class should have equivalent_class axiom; axioms={:?}",
-        catalog
-            .data()
-            .axioms
-            .iter()
-            .filter(|a| a.subject == defined)
-            .collect::<Vec<_>>()
+        catalog.data().axioms.iter().filter(|a| a.subject == defined).collect::<Vec<_>>()
     );
 
     // Primitive class Parent should not be "defined"
@@ -108,8 +100,9 @@ ex:Blue a owl:Class .
         }],
         &dep_ns(),
     );
-    let has_du = catalog.data().axioms.iter().any(|a| {
-        a.axiom_kind == "disjoint_union" && a.subject == "http://example.org/refs#Color"
-    });
+    let has_du =
+        catalog.data().axioms.iter().any(|a| {
+            a.axiom_kind == "disjoint_union" && a.subject == "http://example.org/refs#Color"
+        });
     assert!(has_du, "expected DisjointUnion on Color");
 }

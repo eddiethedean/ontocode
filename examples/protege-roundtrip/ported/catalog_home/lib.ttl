@@ -1,0 +1,6 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix ex: <http://example.org/lib#> .
+
+<http://example.org/lib> a owl:Ontology .
+
+ex:LibClass a owl:Class .

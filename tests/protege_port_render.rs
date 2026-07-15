@@ -18,10 +18,7 @@ fn ns() -> BTreeMap<String, String> {
 #[test]
 fn render_prefers_longest_prefix_curie() {
     let namespaces = ns();
-    assert_eq!(
-        render_entity_iri("http://example.org/people#Person", &namespaces),
-        "ex:Person"
-    );
+    assert_eq!(render_entity_iri("http://example.org/people#Person", &namespaces), "ex:Person");
 }
 
 #[test]
@@ -31,37 +28,25 @@ fn render_builtin_owl_and_rdfs_without_workspace_prefix() {
         Some("owl:Thing")
     );
     assert_eq!(
-        render_entity_iri(
-            "http://www.w3.org/2000/01/rdf-schema#label",
-            &BTreeMap::new()
-        ),
+        render_entity_iri("http://www.w3.org/2000/01/rdf-schema#label", &BTreeMap::new()),
         "rdfs:label"
     );
 }
 
 #[test]
 fn render_falls_back_to_short_name() {
-    assert_eq!(
-        render_entity_iri("http://orphan.example/ns#Widget", &BTreeMap::new()),
-        "Widget"
-    );
+    assert_eq!(render_entity_iri("http://orphan.example/ns#Widget", &BTreeMap::new()), "Widget");
 }
 
 #[test]
 fn split_iri_hash_and_path() {
     assert_eq!(
         split_iri("http://example.org/people#Person"),
-        (
-            "http://example.org/people#".to_string(),
-            "Person".to_string()
-        )
+        ("http://example.org/people#".to_string(), "Person".to_string())
     );
     assert_eq!(
         split_iri("http://purl.obolibrary.org/obo/GO_0000001"),
-        (
-            "http://purl.obolibrary.org/obo/".to_string(),
-            "GO_0000001".to_string()
-        )
+        ("http://purl.obolibrary.org/obo/".to_string(), "GO_0000001".to_string())
     );
 }
 
@@ -82,13 +67,9 @@ fn expand_prefixed_iri_and_angle_brackets() {
 #[test]
 fn match_prefix_longest_wins() {
     let mut namespaces = ns();
-    namespaces.insert(
-        "people".to_string(),
-        "http://example.org/people#".to_string(),
-    );
+    namespaces.insert("people".to_string(), "http://example.org/people#".to_string());
     // Both match; longer or either with equal length — people and ex share same ns length equal.
-    let (prefix, _) =
-        match_prefix("http://example.org/people#Person", &namespaces).expect("match");
+    let (prefix, _) = match_prefix("http://example.org/people#Person", &namespaces).expect("match");
     assert!(prefix == "ex" || prefix == "people");
 }
 

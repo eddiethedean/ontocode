@@ -18,10 +18,7 @@ fn utils_abbreviate_string() {
 
 #[test]
 fn utils_iso8601_utc() {
-    assert_eq!(
-        format_iso8601_utc(2022, 3, 25, 9, 8, 7),
-        "2022-03-25T09:08:07Z"
-    );
+    assert_eq!(format_iso8601_utc(2022, 3, 25, 9, 8, 7), "2022-03-25T09:08:07Z");
 }
 
 #[test]
@@ -35,10 +32,7 @@ fn utils_lexical_replace_pattern_and_whole() {
         "2",
     );
     assert_eq!(typed.lexical, "v2");
-    assert_eq!(
-        typed.datatype.as_deref(),
-        Some("http://www.w3.org/2001/XMLSchema#string")
-    );
+    assert_eq!(typed.datatype.as_deref(), Some("http://www.w3.org/2001/XMLSchema#string"));
 
     let whole = replace_lexical_value_whole("old", Some("en"), None, "new");
     assert_eq!(whole.lexical, "new");
@@ -66,14 +60,8 @@ fn utils_annotation_property_default_order() {
 
     assert_eq!(cmp_annotation_property_iri(label, comment), Ordering::Less);
     assert_eq!(cmp_annotation_property_iri(comment, synonym), Ordering::Less);
-    assert_eq!(
-        cmp_annotation_property_iri(label, unknown),
-        Ordering::Less
-    );
-    assert_eq!(
-        cmp_annotation_property_iri(unknown, label),
-        Ordering::Greater
-    );
+    assert_eq!(cmp_annotation_property_iri(label, unknown), Ordering::Less);
+    assert_eq!(cmp_annotation_property_iri(unknown, label), Ordering::Greater);
 
     let mut props = vec![comment, synonym, unknown, label];
     props.sort_by(|a, b| cmp_annotation_property_iri(a, b));

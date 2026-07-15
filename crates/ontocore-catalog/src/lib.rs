@@ -12,6 +12,7 @@ mod disk_cache;
 mod entity_api;
 mod graph;
 mod incremental;
+pub mod xml_catalog;
 
 pub use builder::{CatalogError, IndexBuilder, OntologyCatalog};
 pub use entity_api::{ClassHierarchy, EntityDetail, SourceHint, SubclassEdge};
@@ -20,6 +21,10 @@ pub use graph::{
     GraphRequest,
 };
 pub use incremental::IncrementalStats;
+pub use xml_catalog::{
+    discover_workspace_catalogs, load_workspace_xml_catalogs, load_xml_catalog, parse_xml_catalog,
+    XmlCatalog, XmlCatalogError,
+};
 
 use ontocore_core::{
     Annotation, Axiom, Diagnostic, Entity, Import, Namespace, OntologyDocument, ParseStatus,

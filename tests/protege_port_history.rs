@@ -24,9 +24,7 @@ ex:B a owl:Class .
         parent_iri: "http://example.org/tree#A".to_string(),
     };
     let txn = Transaction::from_turtle(vec![add.clone()]);
-    let applied = txn
-        .apply_to_text(ttl, false, &namespaces)
-        .expect("apply add");
+    let applied = txn.apply_to_text(ttl, false, &namespaces).expect("apply add");
     let text = applied.preview_text.expect("preview");
     assert!(
         text.contains("subClassOf") || text.contains("rdfs:subClassOf"),
@@ -35,16 +33,10 @@ ex:B a owl:Class .
 
     let inv = invert_patch_op(&add).expect("invert AddSubClassOf");
     let undo = Transaction::from_turtle(vec![inv]);
-    let restored = undo
-        .apply_to_text(&text, false, &namespaces)
-        .expect("apply invert");
+    let restored = undo.apply_to_text(&text, false, &namespaces).expect("apply invert");
     let restored_text = restored.preview_text.expect("restored");
     let (_dir, _path, catalog) = support::apply_and_reindex(&restored_text, &[], &namespaces);
-    assert_not_parent_of(
-        &catalog,
-        "http://example.org/tree#B",
-        "http://example.org/tree#A",
-    );
+    assert_not_parent_of(&catalog, "http://example.org/tree#B", "http://example.org/tree#A");
 }
 
 #[test]
@@ -70,16 +62,10 @@ ex:B a owl:Class .
     let composed = Transaction::from_turtle(vec![add])
         .compose(Transaction::from_turtle(vec![remove]))
         .expect("compose");
-    let out = composed
-        .apply_to_text(ttl, false, &namespaces)
-        .expect("apply composed");
+    let out = composed.apply_to_text(ttl, false, &namespaces).expect("apply composed");
     let text = out.preview_text.expect("preview");
     let (_dir, _path, catalog) = support::apply_and_reindex(&text, &[], &namespaces);
-    assert_not_parent_of(
-        &catalog,
-        "http://example.org/tree#B",
-        "http://example.org/tree#A",
-    );
+    assert_not_parent_of(&catalog, "http://example.org/tree#B", "http://example.org/tree#A");
     assert!(catalog.find_entity("http://example.org/tree#A").is_some());
     assert!(catalog.find_entity("http://example.org/tree#B").is_some());
 }
@@ -101,27 +87,15 @@ ex:B a owl:Class .
         parent_iri: "http://example.org/tree#A".to_string(),
     }];
     let (dir, path, catalog) = support::apply_and_reindex(ttl, &add, &ns);
-    assert_parent_of(
-        &catalog,
-        "http://example.org/tree#B",
-        "http://example.org/tree#A",
-    );
+    assert_parent_of(&catalog, "http://example.org/tree#B", "http://example.org/tree#A");
 
     let undo = [PatchOp::RemoveSubClassOf {
         entity_iri: "http://example.org/tree#B".to_string(),
         parent_iri: "http://example.org/tree#A".to_string(),
     }];
     let catalog = support::reapply_and_reindex(dir.path(), &path, &undo, &ns);
-    assert_not_parent_of(
-        &catalog,
-        "http://example.org/tree#B",
-        "http://example.org/tree#A",
-    );
+    assert_not_parent_of(&catalog, "http://example.org/tree#B", "http://example.org/tree#A");
 
     let catalog = support::reapply_and_reindex(dir.path(), &path, &add, &ns);
-    assert_parent_of(
-        &catalog,
-        "http://example.org/tree#B",
-        "http://example.org/tree#A",
-    );
+    assert_parent_of(&catalog, "http://example.org/tree#B", "http://example.org/tree#A");
 }

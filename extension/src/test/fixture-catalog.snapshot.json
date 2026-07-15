@@ -14,7 +14,8 @@
       "parse_error_location": null,
       "parse_message": null,
       "parse_status": "ok",
-      "path": "fixtures/complex-classes.ttl"
+      "path": "fixtures/complex-classes.ttl",
+      "version_iri": null
     },
     {
       "base_iri": "http://example.org/org#",
@@ -29,7 +30,8 @@
       "parse_error_location": null,
       "parse_message": null,
       "parse_status": "ok",
-      "path": "fixtures/disjoint-classes.ttl"
+      "path": "fixtures/disjoint-classes.ttl",
+      "version_iri": null
     },
     {
       "base_iri": "http://example.org/people",
@@ -45,7 +47,8 @@
       "parse_error_location": null,
       "parse_message": null,
       "parse_status": "ok",
-      "path": "fixtures/example.ttl"
+      "path": "fixtures/example.ttl",
+      "version_iri": null
     },
     {
       "base_iri": "http://example.org/org",
@@ -64,7 +67,8 @@
       "parse_error_location": null,
       "parse_message": null,
       "parse_status": "ok",
-      "path": "fixtures/organization.owl"
+      "path": "fixtures/organization.owl",
+      "version_iri": null
     },
     {
       "base_iri": "http://example.org/reasoner-el",
@@ -79,7 +83,8 @@
       "parse_error_location": null,
       "parse_message": null,
       "parse_status": "ok",
-      "path": "fixtures/reasoner-el.ttl"
+      "path": "fixtures/reasoner-el.ttl",
+      "version_iri": null
     },
     {
       "base_iri": "http://example.org/reasoner-unsat",
@@ -94,7 +99,8 @@
       "parse_error_location": null,
       "parse_message": null,
       "parse_status": "ok",
-      "path": "fixtures/reasoner-unsat.ttl"
+      "path": "fixtures/reasoner-unsat.ttl",
+      "version_iri": null
     }
   ],
   "entities": [

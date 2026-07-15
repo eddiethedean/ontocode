@@ -84,7 +84,7 @@ Web foundation       Team workspaces          Cloud collaboration
 | **C — Platform & authoring** | v0.9–v0.12 | Shipped | OntoCore identity, semantic workspace, authoring parity |
 | **D — OntoUI platform** | v0.13–v0.14 | Shipped | v0.13: WorkspaceStore, focus relay; v0.14: plugin host MVP |
 | **E — Desktop UX shell gate** | v0.15–v0.18 | Shipped | Menus, layouts, workflows, migration readiness (not full parity) |
-| **F — Full Protégé parity path** | v0.19–v0.26 | In progress (v0.19–v0.25 shipped; v0.26 Protégé test port; 1.0.0-rc next) | Semantic core → formats → OWL 2 → reason/SWRL → services → verify → Protégé JUnit behavioral port |
+| **F — Full Protégé parity path** | v0.19–v0.26 | Shipped through v0.26 (1.0.0-rc next) | Semantic core → formats → OWL 2 → reason/SWRL → services → verify → Protégé JUnit behavioral port |
 | **G — Protégé replacement** | 1.0.0 | Planned | Daily OWL/OBO engineering without Protégé |
 | **H — Ecosystem** | v1.1–v1.2 | Planned | SDKs, AI, toolchain & collaboration |
 | **I — Webapp platform** | v1.3–v1.5+ | Planned | Browser-first ontology engineering: hosted webapp, React app (no backend) via WASM, team workspaces, cloud collaboration |
@@ -116,7 +116,7 @@ Web foundation       Team workspaces          Cloud collaboration
 | 23 | v0.23 | F | Shipped | 5† | Reasoning parity + SWRL |
 | 24 | v0.24 | F | Shipped | 3†, 6† | Refactoring + DL Query parity |
 | 25 | v0.25 | F | Shipped | 4†, 8† | Viz + plugin SDK 1.0 + a11y + parity CI |
-| 26 | v0.26 | F | In progress | — | Protégé Desktop JUnit behavioral test port (Wave 1) |
+| 26 | v0.26 | F | Shipped | — | Protégé Desktop JUnit behavioral test port (Waves 1–4) |
 | 27 | 1.0.0-rc | F | Planned | — | Stabilize; all P0 VERIFIED |
 | 27 | v1.0 | G | Planned | 1–6 exit, 9† | Protégé-competitive release |
 | 28 | v1.1 | H | Planned | 7, 2†, 3†, 4†, 8†, 9† | Language bindings & AI primitives |
@@ -648,18 +648,30 @@ See [migration/v0.25.md](docs/migration/v0.25.md) and [SHIPPED.md](docs/SHIPPED.
 
 ---
 
-### v0.26 — Protégé Desktop test port (in progress)
+### v0.26 — Protégé Desktop test port (shipped)
 
 **Theme:** Port portable Protégé Desktop JUnit behaviors into OntoCode Rust semantic oracles (not a JVM suite runner).
 
 | Area | Deliverables |
 |------|--------------|
-| **OntoCore / tests** | Inventory [`parity/protege-test-port.yaml`](parity/protege-test-port.yaml); Wave 1–3 suites `tests/protege_port_*.rs` (edit oracles + render/links + utils/Foundry); fixtures under [`examples/protege-roundtrip/ported/`](examples/protege-roundtrip/ported/); `ontocore-owl` `render`/`links`/`util`; `ontocore-obo` `obofoundry`; inspector annotation order + linkification; LSP hover linkification |
+| **OntoCore / tests** | Inventory [`parity/protege-test-port.yaml`](parity/protege-test-port.yaml); Wave 1–4 suites `tests/protege_port_*.rs` (edit oracles + render/links + utils/Foundry + IdPolicy + `catalog-v001`); fixtures under [`examples/protege-roundtrip/ported/`](examples/protege-roundtrip/ported/); `ontocore-owl` `render`/`links`/`util`; `ontocore-obo` `obofoundry`/`idpolicy`; `ontocore-catalog` `xml_catalog`; inspector annotation order + linkification; LSP hover linkification; `OntologyDocument.version_iri` |
 | **Verification** | [`scripts/validate-protege-test-port.py`](scripts/validate-protege-test-port.py); CI + local CI wiring; `PAR-*` `test_ids` linkage |
 
-**Exit criteria:** Every `PORT_W1`/`PORT_W2`/`PORT_W3` inventory row has OntoCode tests (or an explicit `gap`); Wave 1–3 suites green in CI.
+**Exit criteria (met):** Every `PORT_W1`/`PORT_W2`/`PORT_W3`/`PORT_W4` inventory row has OntoCode tests (or an explicit `gap`); Wave 1–4 suites green in CI.
 
 **Docs:** [PROTEGE_TEST_PORT.md](docs/protege-parity/03_PARITY/PROTEGE_TEST_PORT.md)
+
+**Shipped follow-ons (full Upstream-audit scope, minus gated Fresh-entity UX):**
+
+| Item | Status |
+|------|--------|
+| IdPolicy semantic oracles (`idpolicy/*.owl`) | Done — `ontocore-obo` + `tests/protege_port_idpolicy.rs` |
+| `catalog-v001.xml` import redirects | Done — `xml_catalog` + `resolve_import_document` + `PORT_W4` |
+| Fixture hardening (`twoEq`, AmbiguousName, version IRI) | Done |
+| Expanded Foundry JSON stress | Done — `obofoundry_expanded.json` |
+| Fresh-entity / IdRange / Edge product ports | Still SKIP (no auto-ID UX) |
+
+**Still not useful from Desktop:** OSGi bundle tests, Mac AWT, PreferencesManager, SelectionPlane/PopupMenuId, JVM suite runner, byte-identical XML.
 
 ---
 

@@ -22,3 +22,4 @@ extension/server/
 
 # Workspace session / plugin output written by ontocore or the extension
 **/.ontocode/
+/target-msrv/

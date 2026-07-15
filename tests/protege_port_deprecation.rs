@@ -4,16 +4,13 @@
 mod support;
 
 use ontocore_owl::PatchOp;
-use support::protege_port::standard_ns;
 use std::collections::BTreeMap;
+use support::protege_port::standard_ns;
 
 fn ns_dep() -> BTreeMap<String, String> {
     let mut ns = standard_ns();
     ns.insert("ex".to_string(), "http://example.org/dep#".to_string());
-    ns.insert(
-        "IAO".to_string(),
-        "http://purl.obolibrary.org/obo/IAO_".to_string(),
-    );
+    ns.insert("IAO".to_string(), "http://purl.obolibrary.org/obo/IAO_".to_string());
     ns
 }
 
@@ -29,10 +26,7 @@ ex:Old a owl:Class .
     let person = "http://example.org/dep#Old";
     let (_dir, _path, catalog) = support::apply_and_reindex(
         ttl,
-        &[PatchOp::SetDeprecated {
-            entity_iri: person.to_string(),
-            value: true,
-        }],
+        &[PatchOp::SetDeprecated { entity_iri: person.to_string(), value: true }],
         &ns_dep(),
     );
     let e = catalog.find_entity(person).expect("entity");
@@ -52,10 +46,7 @@ ex:Old a owl:Class ;
     let person = "http://example.org/dep#Old";
     let (_dir, _path, catalog) = support::apply_and_reindex(
         ttl,
-        &[PatchOp::SetDeprecated {
-            entity_iri: person.to_string(),
-            value: false,
-        }],
+        &[PatchOp::SetDeprecated { entity_iri: person.to_string(), value: false }],
         &ns_dep(),
     );
     let e = catalog.find_entity(person).expect("entity");
@@ -81,10 +72,7 @@ ex:New a owl:Class .
     let (_dir, path, catalog) = support::apply_and_reindex(
         ttl,
         &[
-            PatchOp::SetDeprecated {
-                entity_iri: old.to_string(),
-                value: true,
-            },
+            PatchOp::SetDeprecated { entity_iri: old.to_string(), value: true },
             PatchOp::AddAnnotation {
                 entity_iri: old.to_string(),
                 predicate: replaced_by.to_string(),
@@ -118,17 +106,9 @@ ex:New a owl:Class .
     });
     let text = std::fs::read_to_string(&path).expect("read");
     assert!(
-        in_detail
-            || in_raw
-            || text.contains("IAO_0100001")
-            || text.contains("IAO:0100001"),
+        in_detail || in_raw || text.contains("IAO_0100001") || text.contains("IAO:0100001"),
         "expected replaced-by annotation; detail={:?} raw={:?} text={text}",
         detail.annotations,
-        catalog
-            .data()
-            .annotations
-            .iter()
-            .filter(|a| a.subject == old)
-            .collect::<Vec<_>>()
+        catalog.data().annotations.iter().filter(|a| a.subject == old).collect::<Vec<_>>()
     );
 }

@@ -36,7 +36,7 @@ objective of the phases below.
 | **v0.23** | D (reason + SWRL) | 5–6 | EPIC-004, EPIC-005 | BLOCKER_04, BLOCKER_05 | Complete |
 | **v0.24** | D (services) | 7 | EPIC-006, EPIC-007 | BLOCKER_06, BLOCKER_07 | Shipped |
 | **v0.25** | E + F | 8–9 | EPIC-008–011 | BLOCKER_08–011 | Shipped / Complete on main pending tag |
-| **v0.26** | F (test port) | — | Protégé JUnit behavioral port | BLOCKER_11 (corpus) | In progress |
+| **v0.26** | F (test port) | — | Protégé JUnit behavioral port | BLOCKER_11 (corpus) | Shipped |
 | **1.0.0-rc** | Stabilize | 10 | — | — | Planned |
 | **1.0.0** | Ship | — | — | [PARITY_RELEASE_GATE.md](../03_PARITY/PARITY_RELEASE_GATE.md) | Planned |
 
@@ -306,7 +306,7 @@ status automatically verifiable in CI.
 
 # v0.26 — Protégé Desktop test port
 
-**Status:** In progress\
+**Status:** Shipped\
 **Theme:** Port portable Protégé Desktop JUnit behaviors into OntoCode
 Rust semantic oracles (rewrite specs — do not run the JVM suite).
 
@@ -319,7 +319,7 @@ Rust semantic oracles (rewrite specs — do not run the JVM suite).
 ## Deliverables
 
 -   Full upstream test-class inventory tagged `PORT_W1` / `PORT_W2` /
-    `PORT_W3` / `SKIP` / `COVERED`
+    `PORT_W3` / `PORT_W4` / `SKIP` / `COVERED`
 -   Wave 1 oracle suites: hierarchy, merge, deprecation, history,
     axiom location, refs/defined-class, parsers/IDs
 -   Wave 2 presentation suites: render/escape/prefix/IRI + annotation
@@ -327,13 +327,15 @@ Rust semantic oracles (rewrite specs — do not run the JVM suite).
 -   Wave 3 util suites: abbreviate, ISO8601, lexical replace, markdown
     entity links, annotation-property order; OBO Foundry registry JSON
     (vendored fixture)
+-   Follow-ons: IdPolicy semantic parse; `catalog-v001.xml` redirects
+    (`PORT_W4`); fixture hardening; expanded Foundry stress
 -   Synthetic fixtures under `examples/protege-roundtrip/ported/`
 -   `scripts/validate-protege-test-port.py` + CI wiring
 
 ## Exit criteria
 
--   Every `PORT_W1` / `PORT_W2` / `PORT_W3` row has `ontocode_tests` paths
-    that exist (or an explicit `gap`)
+-   Every `PORT_W1` / `PORT_W2` / `PORT_W3` / `PORT_W4` row has
+    `ontocode_tests` paths that exist (or an explicit `gap`)
 -   `cargo test -p ontocode --test protege_port_*` green
 -   Webview annotation link + annotation-order Vitest green
 

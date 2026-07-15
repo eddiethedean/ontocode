@@ -132,6 +132,7 @@ mod tests {
                 path: PathBuf::from("a.ttl"),
                 format: OntologyFormat::Turtle,
                 base_iri: None,
+                version_iri: None,
                 imports: vec![],
                 namespaces: BTreeMap::new(),
                 parse_status: ParseStatus::Ok,

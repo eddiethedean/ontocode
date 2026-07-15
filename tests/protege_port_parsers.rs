@@ -5,8 +5,8 @@
 mod support;
 
 use ontocore_owl::PatchOp;
-use support::protege_port::{copy_ported_workspace, index_workspace, standard_ns};
 use std::collections::BTreeMap;
+use support::protege_port::{copy_ported_workspace, index_workspace, standard_ns};
 
 #[test]
 fn parsers_ontology_iri_from_turtle_versioned_fixture() {
@@ -24,10 +24,10 @@ fn parsers_ontology_iri_from_turtle_versioned_fixture() {
         "expected versioned ontology IRI, got {iri} (id={})",
         doc.id
     );
-    let text = std::fs::read_to_string(&doc.path).expect("read");
-    assert!(
-        text.contains("owl:versionIRI") || text.contains("versionIRI"),
-        "fixture should declare version IRI"
+    assert_eq!(
+        doc.version_iri.as_deref(),
+        Some("http://example.org/versioned/1.0.0"),
+        "version IRI should be indexed on OntologyDocument"
     );
 }
 
@@ -42,14 +42,9 @@ fn parsers_ontology_iri_from_rdfxml_versioned_fixture() {
         .find(|d| d.path.ends_with("versioned_ontology.owl"))
         .expect("doc");
     let iri = doc.base_iri.clone().unwrap_or_else(|| doc.id.clone());
+    assert!(iri.contains("example.org/versioned"), "expected ontology IRI from RDF/XML, got {iri}");
     assert!(
-        iri.contains("example.org/versioned"),
-        "expected ontology IRI from RDF/XML, got {iri}"
-    );
-    assert!(
-        catalog
-            .find_entity("http://example.org/versioned#Thing")
-            .is_some(),
+        catalog.find_entity("http://example.org/versioned#Thing").is_some(),
         "Thing class should index from RDF/XML"
     );
 }
@@ -77,9 +72,11 @@ ex:alice a owl:NamedIndividual .
     );
     let hit = catalog.data().axioms.iter().any(|a| {
         a.subject.contains("alice") && (a.object.contains("42") || a.predicate.contains("age"))
-    }) || catalog.data().annotations.iter().any(|a| {
-        a.subject.contains("alice") && a.object.contains("42")
-    });
+    }) || catalog
+        .data()
+        .annotations
+        .iter()
+        .any(|a| a.subject.contains("alice") && a.object.contains("42"));
     assert!(
         hit,
         "expected typed literal 42 indexed; axioms={:?} annotations={:?}",
@@ -106,7 +103,11 @@ name: Sample term
         .data()
         .entities
         .iter()
-        .find(|e| e.obo_id.as_deref() == Some("EX:0001") || e.iri.contains("EX_0001") || e.iri.contains("EX:0001"))
+        .find(|e| {
+            e.obo_id.as_deref() == Some("EX:0001")
+                || e.iri.contains("EX_0001")
+                || e.iri.contains("EX:0001")
+        })
         .expect("EX:0001 entity");
     assert_eq!(entity.obo_id.as_deref(), Some("EX:0001"));
     assert!(
@@ -117,13 +118,31 @@ name: Sample term
 }
 
 #[test]
+fn parsers_ambiguous_name_ontology_iri_not_file_base() {
+    let (dir, _) = copy_ported_workspace("ambiguous_name.owl");
+    let catalog = index_workspace(dir.path());
+    let doc = catalog
+        .data()
+        .documents
+        .iter()
+        .find(|d| d.path.ends_with("ambiguous_name.owl"))
+        .expect("doc");
+    let iri = doc.base_iri.clone().unwrap_or_else(|| doc.id.clone());
+    assert!(
+        iri.contains("right.owl") || iri.contains("example.org/right"),
+        "ontology IRI should be the declared rdf:about, not the Ambiguous file base; got {iri}"
+    );
+    assert!(
+        !iri.contains("Ambiguous"),
+        "must not prefer Ambiguous xml:base over ontology IRI; got {iri}"
+    );
+}
+
+#[test]
 fn parsers_idranges_minimal_fixture_loads() {
     let (dir, _) = copy_ported_workspace("idranges_minimal.ttl");
     let catalog = index_workspace(dir.path());
-    assert!(
-        !catalog.data().documents.is_empty(),
-        "idranges fixture should parse as a document"
-    );
+    assert!(!catalog.data().documents.is_empty(), "idranges fixture should parse as a document");
     let doc = &catalog.data().documents[0];
     assert_eq!(
         doc.parse_status,
@@ -139,10 +158,8 @@ fn parsers_set_version_iri_patch() {
 @prefix owl: <http://www.w3.org/2002/07/owl#> .
 <http://example.org/v> a owl:Ontology .
 "#;
-    let ns: BTreeMap<String, String> = BTreeMap::from([(
-        "owl".to_string(),
-        "http://www.w3.org/2002/07/owl#".to_string(),
-    )]);
+    let ns: BTreeMap<String, String> =
+        BTreeMap::from([("owl".to_string(), "http://www.w3.org/2002/07/owl#".to_string())]);
     let (dir, path, _) = support::apply_and_reindex(
         ttl,
         &[PatchOp::SetVersionIri {

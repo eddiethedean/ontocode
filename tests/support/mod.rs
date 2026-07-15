@@ -27,10 +27,7 @@ pub fn apply_and_reindex(
     let path = dir.path().join("patched.ttl");
     std::fs::write(&path, ttl).expect("write ttl");
     if patches.is_empty() {
-        let catalog = IndexBuilder::new()
-            .workspace(dir.path())
-            .build()
-            .expect("reindex");
+        let catalog = IndexBuilder::new().workspace(dir.path()).build().expect("reindex");
         return (dir, path, catalog);
     }
     let catalog = reapply_and_reindex(dir.path(), &path, patches, namespaces);

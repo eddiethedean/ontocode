@@ -8,6 +8,7 @@ tags:
   - SKIP
   - COVERED
   - PORT_W3
+  - PORT_W4
 entries:
   - class: MacUIUtil_TestCase
     module: protege-editor-core
@@ -268,8 +269,7 @@ entries:
     case_themes:
       - "GO idranges parse / validation errors"
     ontocode_tests:
-      - tests/protege_port_parsers.rs
-    gap: "OntoCode has no first-class idranges product API; fixture load + ontology-id extract covered"
+      - tests/protege_port_idpolicy.rs
   - class: IdPolicyParser_EmptyRangesList_TestCase
     module: protege-editor-owl
     path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/idrange/IdPolicyParser_EmptyRangesList_TestCase.java
@@ -278,8 +278,7 @@ entries:
     case_themes:
       - "GO idranges parse / validation errors"
     ontocode_tests:
-      - tests/protege_port_parsers.rs
-    gap: "OntoCode has no first-class idranges product API; fixture load + ontology-id extract covered"
+      - tests/protege_port_idpolicy.rs
   - class: IdPolicyParser_MissingIdDigitCount_TestCase
     module: protege-editor-owl
     path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/idrange/IdPolicyParser_MissingIdDigitCount_TestCase.java
@@ -288,8 +287,7 @@ entries:
     case_themes:
       - "GO idranges parse / validation errors"
     ontocode_tests:
-      - tests/protege_port_parsers.rs
-    gap: "OntoCode has no first-class idranges product API; fixture load + ontology-id extract covered"
+      - tests/protege_port_idpolicy.rs
   - class: IdPolicyParser_MissingIdPrefix_TestCase
     module: protege-editor-owl
     path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/idrange/IdPolicyParser_MissingIdPrefix_TestCase.java
@@ -298,8 +296,7 @@ entries:
     case_themes:
       - "GO idranges parse / validation errors"
     ontocode_tests:
-      - tests/protege_port_parsers.rs
-    gap: "OntoCode has no first-class idranges product API; fixture load + ontology-id extract covered"
+      - tests/protege_port_idpolicy.rs
   - class: IdPolicyParser_MissingPolicyFor_TestCase
     module: protege-editor-owl
     path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/idrange/IdPolicyParser_MissingPolicyFor_TestCase.java
@@ -308,8 +305,7 @@ entries:
     case_themes:
       - "GO idranges parse / validation errors"
     ontocode_tests:
-      - tests/protege_port_parsers.rs
-    gap: "OntoCode has no first-class idranges product API; fixture load + ontology-id extract covered"
+      - tests/protege_port_idpolicy.rs
   - class: IdRange_TestCase
     module: protege-editor-owl
     path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/idrange/IdRange_TestCase.java
@@ -344,15 +340,21 @@ entries:
   - class: Folder_IT
     module: protege-editor-owl
     path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/library/Folder_IT.java
-    tag: SKIP
+    tag: PORT_W4
     area: catalog
-    notes: "Protégé FolderGroupManager / protege.xmlcatalog"
+    case_themes:
+      - "catalog-v001.xml URI redirect for local imports"
+    ontocode_tests:
+      - tests/protege_port_catalog.rs
   - class: XmlBaseTest
     module: protege-editor-owl
     path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/library/XmlBaseTest.java
-    tag: SKIP
+    tag: PORT_W4
     area: catalog
-    notes: "Protégé XML catalog base"
+    case_themes:
+      - "xml:base relative uri resolution in catalog"
+    ontocode_tests:
+      - tests/protege_port_catalog.rs
   - class: IdentifiersDotOrg_IT
     module: protege-editor-owl
     path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/identifiers/IdentifiersDotOrg_IT.java

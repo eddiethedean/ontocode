@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<!-- Protégé-test-inspired AmbiguousName: ontology IRI differs from xml:base / file name.
+     Upstream: protege-editor-owl/.../ontologies/AmbiguousName.owl (truncated). -->
+<!DOCTYPE rdf:RDF [
+    <!ENTITY owl "http://www.w3.org/2002/07/owl#" >
+    <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
+    <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
+]>
+<rdf:RDF xmlns="http://example.org/Ambiguous.owl#"
+     xml:base="http://example.org/Ambiguous.owl"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:owl="http://www.w3.org/2002/07/owl#">
+    <owl:Ontology rdf:about="http://example.org/right.owl"/>
+    <owl:Class rdf:about="http://example.org/right.owl#Thing"/>
+</rdf:RDF>

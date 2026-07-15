@@ -113,6 +113,7 @@ mod tests {
             path: Path::new(&format!("{id}.ttl")).to_path_buf(),
             format: OntologyFormat::Turtle,
             base_iri: base_iri.map(str::to_string),
+            version_iri: None,
             imports: vec![],
             namespaces: BTreeMap::new(),
             parse_status: ParseStatus::Ok,

@@ -74,6 +74,7 @@ mod tests {
             path: Path::new("a.ttl").to_path_buf(),
             format: OntologyFormat::Turtle,
             base_iri: Some("http://example.org/people".to_string()),
+            version_iri: None,
             imports: vec![],
             namespaces: BTreeMap::new(),
             parse_status: ParseStatus::Ok,

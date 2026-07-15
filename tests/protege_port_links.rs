@@ -42,20 +42,13 @@ fn links_omim_and_omimps() {
 
 #[test]
 fn links_orphanet_isbn_wikipedia() {
-    assert!(extract_links("Orphanet: 558")[0]
-        .url
-        .contains("Expert=558"));
+    assert!(extract_links("Orphanet: 558")[0].url.contains("Expert=558"));
     assert_eq!(
         extract_links("ISBN:0123456789")[0].url,
         "http://www.isbnsearch.org/isbn/0123456789"
     );
-    assert_eq!(
-        extract_links("Wikipedia:Ontology")[0].url,
-        "https://wikipedia.org/wiki/Ontology"
-    );
-    assert!(extract_links("WikipediaVersioned:Ontology")[0]
-        .url
-        .contains("title=Ontology"));
+    assert_eq!(extract_links("Wikipedia:Ontology")[0].url, "https://wikipedia.org/wiki/Ontology");
+    assert!(extract_links("WikipediaVersioned:Ontology")[0].url.contains("title=Ontology"));
 }
 
 #[test]

@@ -16,7 +16,7 @@ from parity_common import ROOT  # noqa: E402
 import yaml  # noqa: E402
 
 INVENTORY = ROOT / "parity" / "protege-test-port.yaml"
-PORT_TAGS = ("PORT_W1", "PORT_W2", "PORT_W3")
+PORT_TAGS = ("PORT_W1", "PORT_W2", "PORT_W3", "PORT_W4")
 
 
 def main() -> int:

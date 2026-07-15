@@ -20,15 +20,9 @@ fn merge_rewrites_subclass_and_removes_source() {
     assert!(plan.warnings.is_empty(), "unexpected warnings: {:?}", plan.warnings);
     apply_refactor_plan(&plan, false, dir.path()).expect("apply merge");
 
-    let catalog = IndexBuilder::new()
-        .workspace(dir.path())
-        .build()
-        .expect("reindex");
+    let catalog = IndexBuilder::new().workspace(dir.path()).build().expect("reindex");
     assert!(catalog.find_entity(keep).is_some(), "Keep must remain");
-    assert!(
-        catalog.find_entity(merge).is_none(),
-        "Merge entity declaration should be gone"
-    );
+    assert!(catalog.find_entity(merge).is_none(), "Merge entity declaration should be gone");
     assert_parent_of(&catalog, child, keep);
 
     let keep_entity = catalog.find_entity(keep).expect("keep");

@@ -1,0 +1,223 @@
+{
+  "@context": "http://obofoundry.github.io/registry/context.jsonld",
+  "ontologies": [
+    {
+      "id": "bfo",
+      "title": "Basic Formal Ontology",
+      "activity_status": "active",
+      "ontology_purl": "http://purl.obolibrary.org/obo/bfo.owl",
+      "contact": {
+        "label": "Contact BFO",
+        "email": "bfo@example.org"
+      },
+      "license": {
+        "label": "CC-BY",
+        "url": "http://creativecommons.org/licenses/by/4.0/"
+      }
+    },
+    {
+      "id": "go",
+      "title": "Gene Ontology",
+      "activity_status": "active",
+      "ontology_purl": "http://purl.obolibrary.org/obo/go.owl"
+    },
+    {
+      "id": "chebi",
+      "title": "Chemical Entities of Biological Interest",
+      "activity_status": "active",
+      "ontology_purl": "http://purl.obolibrary.org/obo/chebi.owl"
+    },
+    {
+      "id": "cl",
+      "title": "Cell Ontology",
+      "activity_status": "active",
+      "ontology_purl": "http://purl.obolibrary.org/obo/cl.owl",
+      "contact": {
+        "label": "Contact CL",
+        "email": "cl@example.org"
+      }
+    },
+    {
+      "id": "uberon",
+      "title": "Uberon multi-species anatomy ontology",
+      "activity_status": "active",
+      "ontology_purl": "http://purl.obolibrary.org/obo/uberon.owl",
+      "license": {
+        "label": "CC-BY",
+        "url": "http://creativecommons.org/licenses/by/4.0/"
+      }
+    },
+    {
+      "id": "ro",
+      "title": "Relation Ontology",
+      "activity_status": "active",
+      "ontology_purl": "http://purl.obolibrary.org/obo/ro.owl"
+    },
+    {
+      "id": "iao",
+      "title": "Information Artifact Ontology",
+      "activity_status": "active",
+      "ontology_purl": "http://purl.obolibrary.org/obo/iao.owl",
+      "contact": {
+        "label": "Contact IAO",
+        "email": "iao@example.org"
+      }
+    },
+    {
+      "id": "oba",
+      "title": "Ontology of Biological Attributes",
+      "activity_status": "active",
+      "ontology_purl": "http://purl.obolibrary.org/obo/oba.owl"
+    },
+    {
+      "id": "hp",
+      "title": "Human Phenotype Ontology",
+      "activity_status": "active",
+      "ontology_purl": "http://purl.obolibrary.org/obo/hp.owl",
+      "license": {
+        "label": "CC-BY",
+        "url": "http://creativecommons.org/licenses/by/4.0/"
+      }
+    },
+    {
+      "id": "mondo",
+      "title": "Mondo Disease Ontology",
+      "activity_status": "active",
+      "ontology_purl": "http://purl.obolibrary.org/obo/mondo.owl",
+      "contact": {
+        "label": "Contact MONDO",
+        "email": "mondo@example.org"
+      }
+    },
+    {
+      "id": "ecto",
+      "title": "Environmental conditions, treatments and exposures ontology",
+      "activity_status": "active",
+      "ontology_purl": "http://purl.obolibrary.org/obo/ecto.owl"
+    },
+    {
+      "id": "envo",
+      "title": "Environment Ontology",
+      "activity_status": "active",
+      "ontology_purl": "http://purl.obolibrary.org/obo/envo.owl"
+    },
+    {
+      "id": "pato",
+      "title": "Phenotype And Trait Ontology",
+      "activity_status": "active",
+      "ontology_purl": "http://purl.obolibrary.org/obo/pato.owl",
+      "contact": {
+        "label": "Contact PATO",
+        "email": "pato@example.org"
+      },
+      "license": {
+        "label": "CC-BY",
+        "url": "http://creativecommons.org/licenses/by/4.0/"
+      }
+    },
+    {
+      "id": "pr",
+      "title": "Protein Ontology",
+      "activity_status": "active",
+      "ontology_purl": "http://purl.obolibrary.org/obo/pr.owl"
+    },
+    {
+      "id": "so",
+      "title": "Sequence types and features ontology",
+      "activity_status": "active",
+      "ontology_purl": "http://purl.obolibrary.org/obo/so.owl"
+    },
+    {
+      "id": "vo",
+      "title": "Vaccine Ontology",
+      "activity_status": "active",
+      "ontology_purl": "http://purl.obolibrary.org/obo/vo.owl",
+      "contact": {
+        "label": "Contact VO",
+        "email": "vo@example.org"
+      }
+    },
+    {
+      "id": "obi",
+      "title": "Ontology for Biomedical Investigations",
+      "activity_status": "active",
+      "ontology_purl": "http://purl.obolibrary.org/obo/obi.owl",
+      "license": {
+        "label": "CC-BY",
+        "url": "http://creativecommons.org/licenses/by/4.0/"
+      }
+    },
+    {
+      "id": "fbbt",
+      "title": "Drosophila anatomy",
+      "activity_status": "active",
+      "ontology_purl": "http://purl.obolibrary.org/obo/fbbt.owl"
+    },
+    {
+      "id": "wbbt",
+      "title": "C. elegans Gross Anatomy Ontology",
+      "activity_status": "active",
+      "ontology_purl": "http://purl.obolibrary.org/obo/wbbt.owl",
+      "contact": {
+        "label": "Contact WBBT",
+        "email": "wbbt@example.org"
+      }
+    },
+    {
+      "id": "ido",
+      "title": "Infectious Disease Ontology",
+      "activity_status": "active",
+      "ontology_purl": "http://purl.obolibrary.org/obo/ido.owl"
+    },
+    {
+      "id": "ogms",
+      "title": "Ontology for General Medical Science",
+      "activity_status": "active",
+      "ontology_purl": "http://purl.obolibrary.org/obo/ogms.owl",
+      "license": {
+        "label": "CC-BY",
+        "url": "http://creativecommons.org/licenses/by/4.0/"
+      }
+    },
+    {
+      "id": "doid",
+      "title": "Human Disease Ontology",
+      "activity_status": "active",
+      "ontology_purl": "http://purl.obolibrary.org/obo/doid.owl",
+      "contact": {
+        "label": "Contact DOID",
+        "email": "doid@example.org"
+      }
+    },
+    {
+      "id": "symp",
+      "title": "Symptom Ontology",
+      "activity_status": "active",
+      "ontology_purl": "http://purl.obolibrary.org/obo/symp.owl"
+    },
+    {
+      "id": "ncbitaxon",
+      "title": "NCBI organismal classification",
+      "activity_status": "active",
+      "ontology_purl": "http://purl.obolibrary.org/obo/ncbitaxon.owl"
+    },
+    {
+      "id": "obsolete-demo",
+      "title": "Obsolete Demo Ontology",
+      "activity_status": "obsolete",
+      "contact": {
+        "label": "Contact OBSOLETE-DEMO",
+        "email": "obsolete-demo@example.org"
+      },
+      "license": {
+        "label": "CC-BY",
+        "url": "http://creativecommons.org/licenses/by/4.0/"
+      }
+    },
+    {
+      "id": "sparse",
+      "activity_status": "active"
+    }
+  ],
+  "_comment": "Synthetic expanded OBO Foundry-shaped registry for OntoCode Wave 3/4 stress tests; not a live fetch."
+}

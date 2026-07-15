@@ -1,0 +1,9 @@
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix ex: <http://example.org/main#> .
+
+<http://example.org/main> a owl:Ontology ;
+    owl:imports <http://example.org/imported/remote-lib> .
+
+ex:MainClass a owl:Class ;
+    rdfs:subClassOf <http://example.org/lib#LibClass> .

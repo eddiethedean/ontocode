@@ -1,0 +1,14 @@
+@prefix ex: <http://example.org/twoeq#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+# Protégé-test-inspired twoEq hierarchy (A ≡ B); truncated for OntoCode oracles.
+# Upstream: protege-editor-owl/.../ontologies/tree/twoEq.owl
+
+<http://example.org/twoeq> a owl:Ontology .
+
+ex:A a owl:Class .
+ex:B a owl:Class ;
+    owl:equivalentClass ex:A .
+ex:C a owl:Class ;
+    rdfs:subClassOf ex:A .

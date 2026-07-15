@@ -116,12 +116,63 @@ fn resolve_import_doc<'a>(
     import_iri: &str,
 ) -> Option<&'a ontocore_core::OntologyDocument> {
     let norm = normalize_iri(import_iri);
-    catalog.data().documents.iter().find(|d| {
+    if let Some(doc) = catalog.data().documents.iter().find(|d| {
         document_matches_ontology_id(import_iri, d)
             || d.base_iri.as_ref().is_some_and(|b| normalize_iri(b) == norm || b == import_iri)
             || normalize_iri(&d.id) == norm
             || d.id == import_iri
-    })
+    }) {
+        return Some(doc);
+    }
+    // Protégé catalog-v001.xml / Oasis URI redirects (local only).
+    resolve_import_via_xml_catalog(catalog, import_iri)
+}
+
+/// Public import resolve: ontology IRI match, then workspace `catalog-v001.xml` redirects.
+pub fn resolve_import_document<'a>(
+    catalog: &'a OntologyCatalog,
+    import_iri: &str,
+) -> Option<&'a ontocore_core::OntologyDocument> {
+    resolve_import_doc(catalog, import_iri)
+}
+
+fn resolve_import_via_xml_catalog<'a>(
+    catalog: &'a OntologyCatalog,
+    import_iri: &str,
+) -> Option<&'a ontocore_core::OntologyDocument> {
+    use std::collections::BTreeSet;
+    let mut roots = BTreeSet::new();
+    for doc in &catalog.data().documents {
+        if let Some(parent) = doc.path.parent() {
+            roots.insert(parent.to_path_buf());
+            if let Some(grand) = parent.parent() {
+                roots.insert(grand.to_path_buf());
+            }
+        }
+    }
+    for root in roots {
+        let Ok(xml) = ontocore_catalog::load_workspace_xml_catalogs(&root) else {
+            continue;
+        };
+        if xml.uri_entries.is_empty() && xml.rewrite_entries.is_empty() {
+            continue;
+        }
+        let Some(target) = xml.resolve(import_iri) else {
+            continue;
+        };
+        if let Some(doc) = find_doc_by_path(catalog, &target) {
+            return Some(doc);
+        }
+        // Match by file name when relative redirect didn't canonicalize
+        if let Some(name) = target.file_name() {
+            if let Some(doc) =
+                catalog.data().documents.iter().find(|d| d.path.file_name() == Some(name))
+            {
+                return Some(doc);
+            }
+        }
+    }
+    None
 }
 
 fn is_prefix_declaration_line(line: &str) -> bool {

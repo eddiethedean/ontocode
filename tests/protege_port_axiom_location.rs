@@ -5,10 +5,10 @@
 mod support;
 
 use ontocore_owl::PatchOp;
+use std::collections::BTreeMap;
 use support::protege_port::{
     apply_patches_reindex, copy_ported_tree, index_workspace, standard_ns,
 };
-use std::collections::BTreeMap;
 
 fn home_ns() -> BTreeMap<String, String> {
     let mut ns = standard_ns();
@@ -21,30 +21,21 @@ fn axiom_location_entities_carry_owning_ontology_id() {
     let dir = copy_ported_tree("imports_home");
     let catalog = index_workspace(dir.path());
 
-    let main = catalog
-        .find_entity("http://example.org/home#MainClass")
-        .expect("MainClass");
-    let lib = catalog
-        .find_entity("http://example.org/home#LibClass")
-        .expect("LibClass");
+    let main = catalog.find_entity("http://example.org/home#MainClass").expect("MainClass");
+    let lib = catalog.find_entity("http://example.org/home#LibClass").expect("LibClass");
     assert_ne!(
         main.ontology_id, lib.ontology_id,
         "entities in different documents should have distinct ontology_id"
     );
 
     let docs = &catalog.data().documents;
-    assert!(
-        docs.len() >= 2,
-        "expected main+lib documents, got {}",
-        docs.len()
-    );
+    assert!(docs.len() >= 2, "expected main+lib documents, got {}", docs.len());
     let main_doc = docs.iter().find(|d| d.path.ends_with("main.ttl")).expect("main.ttl");
     let lib_doc = docs.iter().find(|d| d.path.ends_with("lib.ttl")).expect("lib.ttl");
     assert!(
-        main_doc
-            .imports
-            .iter()
-            .any(|i| i.contains("home/lib") || i == &lib_doc.id || i == "http://example.org/home/lib"),
+        main_doc.imports.iter().any(|i| i.contains("home/lib")
+            || i == &lib_doc.id
+            || i == "http://example.org/home/lib"),
         "main should import lib; imports={:?} lib.id={}",
         main_doc.imports,
         lib_doc.id
@@ -63,10 +54,7 @@ fn axiom_location_patch_targets_active_document() {
     let catalog = apply_patches_reindex(
         dir.path(),
         &main_path,
-        &[PatchOp::AddSubClassOf {
-            entity_iri: child.clone(),
-            parent_iri: parent.clone(),
-        }],
+        &[PatchOp::AddSubClassOf { entity_iri: child.clone(), parent_iri: parent.clone() }],
         &ns,
     );
 
@@ -95,10 +83,7 @@ fn axiom_location_subject_definition_stays_in_lib_when_patching_lib() {
     let catalog = apply_patches_reindex(
         dir.path(),
         &lib_path,
-        &[PatchOp::AddSubClassOf {
-            entity_iri: child.clone(),
-            parent_iri: parent.clone(),
-        }],
+        &[PatchOp::AddSubClassOf { entity_iri: child.clone(), parent_iri: parent.clone() }],
         &ns,
     );
     let lib_entity = catalog.find_entity(&child).expect("LibClass");

@@ -47,10 +47,7 @@ fn copy_dir_recursive(src: &Path, dst: &Path) -> std::io::Result<()> {
 }
 
 pub fn index_workspace(workspace: &Path) -> OntologyCatalog {
-    IndexBuilder::new()
-        .workspace(workspace)
-        .build()
-        .expect("index workspace")
+    IndexBuilder::new().workspace(workspace).build().expect("index workspace")
 }
 
 pub fn standard_ns() -> BTreeMap<String, String> {
@@ -70,20 +67,14 @@ pub fn apply_patches_reindex(
     namespaces: &BTreeMap<String, String>,
 ) -> OntologyCatalog {
     let result = ontocore_owl::apply_patches(path, patches, false, namespaces).expect("apply");
-    assert!(
-        result.applied,
-        "expected patches applied; diagnostics={:?}",
-        result.diagnostics
-    );
+    assert!(result.applied, "expected patches applied; diagnostics={:?}", result.diagnostics);
     index_workspace(workspace)
 }
 
 pub fn assert_parent_of(catalog: &OntologyCatalog, child: &str, parent: &str) {
     let h = catalog.class_hierarchy();
     assert!(
-        h.parents
-            .get(child)
-            .is_some_and(|parents| parents.iter().any(|p| p == parent)),
+        h.parents.get(child).is_some_and(|parents| parents.iter().any(|p| p == parent)),
         "expected {child} parent {parent}; parents={:?}",
         h.parents.get(child)
     );
@@ -91,10 +82,7 @@ pub fn assert_parent_of(catalog: &OntologyCatalog, child: &str, parent: &str) {
 
 pub fn assert_not_parent_of(catalog: &OntologyCatalog, child: &str, parent: &str) {
     let h = catalog.class_hierarchy();
-    let still = h
-        .parents
-        .get(child)
-        .is_some_and(|parents| parents.iter().any(|p| p == parent));
+    let still = h.parents.get(child).is_some_and(|parents| parents.iter().any(|p| p == parent));
     assert!(!still, "did not expect {child} parent {parent}");
 }
 

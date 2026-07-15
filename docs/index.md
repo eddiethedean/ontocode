@@ -22,15 +22,15 @@ Index and explore OWL/RDF/OBO, run queries, refactors, and reasoning — in VS C
 
 <p class="oc-hero-ctas">
   <a class="oc-hero-cta" href="guides/first-success/">First success (~10 min) →</a>
-  <a class="oc-hero-cta" href="install/" style="margin-left:0.75rem">Install →</a>
+  <a class="oc-hero-cta" href="SHIPPED/" style="margin-left:0.75rem">Evaluate →</a>
 </p>
 
-<p class="oc-hero-subcta"><a href="SHIPPED/">What ships today</a> · <a href="guides/versions-and-channels/">Versions &amp; channels</a> · <a href="known-limitations/">Known limitations</a> · Latest tagged: <strong>v0.25.0</strong></p>
+<p class="oc-hero-subcta"><a href="install/">Install</a> · <a href="guides/versions-and-channels/">Versions &amp; channels</a> · <a href="known-limitations/">Known limitations</a> · Latest tagged: <strong>v0.25.0</strong></p>
 
 <div class="oc-hero-links">
+  <a href="ontocode/">OntoCode overview</a>
   <a href="ontocode/feature-tour/">Feature tour</a>
   <a href="glossary/">Glossary</a>
-  <a href="install/">Install</a>
 </div>
 
 </div>
@@ -106,11 +106,20 @@ Index and explore OWL/RDF/OBO, run queries, refactors, and reasoning — in VS C
 
 === "CLI (Linux x64)"
 
-    Prefer the [release tarball](https://github.com/eddiethedean/ontocode/releases/tag/v0.25.0) — verify `SHA256SUMS`, then:
+    Prefer the [release tarball](https://github.com/eddiethedean/ontocode/releases/tag/v0.25.0). Full download → extract → validate steps: [CI integration](ci-integration.md). After the binary is on your `PATH` (or use `./ontocore-v0.25.0-x86_64-unknown-linux-gnu`):
 
     ```bash
-    ontocore query /path/to/ontologies "SELECT * FROM classes"
-    ontocore validate /path/to/ontologies
+    VERSION=0.25.0
+    ASSET="ontocore-v${VERSION}-x86_64-unknown-linux-gnu.tar.gz"
+    BIN="ontocore-v${VERSION}-x86_64-unknown-linux-gnu"
+    curl -fsSL -o "${ASSET}" \
+      "https://github.com/eddiethedean/ontocode/releases/download/v${VERSION}/${ASSET}"
+    curl -fsSL -o SHA256SUMS \
+      "https://github.com/eddiethedean/ontocode/releases/download/v${VERSION}/SHA256SUMS"
+    grep "${ASSET}" SHA256SUMS | sha256sum -c -
+    tar xzf "${ASSET}"
+    chmod +x "${BIN}"
+    ./"${BIN}" validate /path/to/ontologies
     ```
 
 === "CLI (macOS / Windows — cargo)"

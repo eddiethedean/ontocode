@@ -22,7 +22,7 @@
 | `cargo install ontocore-lsp` + `ontocode.lspPath` | Yes | Yes | Yes | Yes (1.88+) |
 | Build from source (`package-extension.sh`) | Yes | Yes | Yes | Yes + Node 20 |
 
-CLI install options (separate from the extension): [Install](install.md) · [CLI & CI detail](getting-started.md).
+CLI install options (separate from the extension): [Install](install.md) · [Install CLI & CI (detail)](install-cli-ci.md).
 
 ## Option A — VS Code Marketplace (recommended)
 

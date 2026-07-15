@@ -16,7 +16,7 @@ ontocore validate /path/to/ontologies
 
 **Linux CI:** prefer the [release binary](../ci-integration.md) over `cargo install` on every job.
 
-[:octicons-arrow-right-24: CLI getting started](../getting-started.md)
+[:octicons-arrow-right-24: Install CLI & CI (detail)](../install-cli-ci.md)
 
 ## CLI workflows
 

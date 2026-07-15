@@ -27,7 +27,10 @@ The public site navigation is defined in [`mkdocs.yml`](https://github.com/eddie
 
 1. [Contributing](contributing.md)
 2. [Internals](internals.md)
-3. [Engineering docs on GitHub](engineering.md) — UI specs, platform targets, Cursor prompts
+3. [Testing matrix](guides/testing-matrix.md) · [Debugging](debugging.md)
+4. [Releasing](releasing.md)
+5. APIs: [CLI reference](cli-reference.md) · [LSP API](lsp-api.md) · [Plugins](guides/plugins.md) · [Webview protocol](webview-protocol.md)
+6. [Engineering docs on GitHub](engineering.md) — UI specs, platform targets, Cursor prompts
 
 ---
 
@@ -48,12 +51,12 @@ Deep planning docs (`docs/ui/`, `docs/platform/`, `docs/cursor-prompts/`, `docs/
 | Section | Start here |
 |---------|------------|
 | **Get started** | [First success](guides/first-success.md) → [Install](install.md) (optional path chooser: [start.md](start.md)) |
-| **Use OntoCode** | [Feature tour](ontocode/feature-tour.md) |
+| **Use OntoCode** | [Overview](ontocode/index.md) → [Feature tour](ontocode/feature-tour.md) |
 | **Use OntoCore** | [OntoCore overview](ontocore/index.md) · [Examples](examples/index.md) |
 | **Reference** | [CLI](cli-reference.md) · [Rust API](ontocore/rust-api.md) · [LSP API](lsp-api.md) · [docs.rs ontocore](https://docs.rs/ontocore) |
 | **Evaluate** | [What ships today](SHIPPED.md) · [Enterprise eval](guides/enterprise-eval.md) · [Week-2 playbook](guides/enterprise-week-2.md) |
 | **Help** | [FAQ](faq.md) · [Troubleshooting](troubleshooting.md) · [Support](support.md) |
-| **Contribute** | [Contributing](contributing.md) · [Plugin policy](guides/plugin-policy.md) · [Engineering](engineering.md) |
+| **Contribute** | [Contributing](contributing.md) · [Plugin policy](guides/plugin-policy.md) · [CLI](cli-reference.md) · [LSP](lsp-api.md) · [Engineering](engineering.md) |
 
 ---
 

@@ -17,7 +17,7 @@ ontocore-plugin = "0.25"
 Enable via the `ontocore` façade feature:
 
 ```toml
-ontocore = { version = "0.24", features = ["plugins"] }
+ontocore = { version = "0.25", features = ["plugins"] }
 ```
 
 Reserved future kinds (`editor`, `language_service`, `tool_window`) and AI providers are documented but not hosted until a later release.

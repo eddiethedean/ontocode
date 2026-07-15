@@ -4,7 +4,7 @@
 
 Release CLI tarballs are **Linux x64 only** (`x86_64-unknown-linux-gnu`). On **macOS** and **Windows**, install from crates.io with Rust. On **Linux arm64** (and other non-x64 targets), there is no tarball — use `cargo install` below or the LSP bundled in the VSIX ([platform compatibility](platform-compatibility.md)).
 
-Canonical pin: **`0.25.0`** ([TAGGED_RELEASE](../TAGGED_RELEASE)). See also [Install CLI & CI (detail)](../getting-started.md) and [CI integration](../ci-integration.md) (Linux CI prefers the release tarball).
+Canonical pin: **`0.25.0`** ([TAGGED_RELEASE](../TAGGED_RELEASE)). See also [Install CLI & CI (detail)](../install-cli-ci.md) and [CI integration](../ci-integration.md) (Linux CI prefers the release tarball).
 
 ## Prerequisites
 
@@ -64,6 +64,11 @@ ontocore query /path/to/your/ontologies "SELECT * FROM classes"
 | Browse / edit in the IDE | [VS Code extension](../vscode-install.md) |
 | Local CI-like validate/query without VS Code | This CLI install |
 | Linux CI in GitHub Actions | [Release tarball](../ci-integration.md) (faster than compile) |
+| Custom `ontocode.lspPath` without compiling | Prebuilt **`ontocore-lsp-*`** archives on [GitHub Releases](https://github.com/eddiethedean/ontocode/releases/tag/v0.25.0) (macOS, Windows, Linux x64/arm64) — set `ontocode.lspPath` to the extracted binary (trusted workspace) |
+
+## Optional: prebuilt language server (skip `cargo install` for LSP)
+
+Release assets include platform-specific `ontocore-lsp` binaries (for example `ontocore-lsp-*-apple-darwin.tar.gz`, `ontocore-lsp-*-pc-windows-msvc.zip`, Linux gnu/musl and arm64 variants). Download, verify against `SHA256SUMS`, extract, and point `ontocode.lspPath` at the binary. Most users should keep the **bundled** LSP from the VSIX and skip this.
 
 ## Troubleshooting
 
@@ -77,7 +82,7 @@ ontocore query /path/to/your/ontologies "SELECT * FROM classes"
 
 ## Related
 
-- [Getting started (all paths)](../getting-started.md)
+- [Install CLI & CI (detail)](../install-cli-ci.md)
 - [Which artifact?](which-artifact.md)
 - [Release integrity](../release-integrity.md)
 - [Versions and channels](versions-and-channels.md)

@@ -2,7 +2,7 @@
 
 A visual and structural overview of the OntoCode VS Code IDE. For hands-on setup, start with [First success (~10 min)](../guides/first-success.md).
 
-Capability truth: [What ships today](../SHIPPED.md) · [Known limitations](../known-limitations.md) · [What's new in v0.18](../migration/v0.18.md).
+Capability truth: [What ships today](../SHIPPED.md) · [Known limitations](../known-limitations.md) · [What's new in v0.25](../migration/v0.25.md).
 
 ![Explorer and Entity Inspector](../assets/screenshots/explorer-inspector.png)
 
@@ -49,10 +49,11 @@ Command Palette → **OntoCode: Open Query Workbench**
 
 - **Catalog SQL (subset)** — virtual tables (`classes`, `properties`, `diagnostics`, …). Not full SQL — no `JOIN` / `ORDER BY` / `LIMIT`. Prefer **SPARQL** for graph patterns.
 - **SPARQL mode** — graph patterns over indexed triples
+- **DL mode** — Manchester class expressions (Instances / Subclasses / Superclasses / Equivalents); shipped v0.24+ — [DL Query honesty](../guides/dl-query.md)
 - **Schema browser** — browse tables/columns; insert names into the editor
-- Export results to CSV or JSON; history and saved queries
+- Export results to CSV or JSON; history and saved queries; **Open as graph** for result visualization (v0.25)
 
-Guide: [Query Workbench](query-workbench.md) · [SQL reference](../sql-reference.md)
+Guide: [Query Workbench](query-workbench.md) · [SQL reference](../sql-reference.md) · [DL Query](../guides/dl-query.md)
 
 ## Manchester editor (React)
 
@@ -62,14 +63,16 @@ Guide: [Manchester editor](manchester-editor.md)
 
 ## Graph panels (React)
 
-| Command | Graph |
-|---------|-------|
+| Command / kind | Graph |
+|----------------|-------|
 | **Open Class Graph** | Subclass neighborhood around a class |
 | **Open Property Graph** | Property domain/range neighborhood |
+| **Object / data property graphs** | Dedicated property graphs (v0.25) |
+| **Individual / dependency / query-result / refactor-preview** | Additional graph kinds (v0.25) |
 | **Open Import Graph** | Ontology import dependencies |
 | **Open Neighborhood Graph** | Mixed entity neighborhood |
 
-Click nodes to jump back to the Entity Inspector. Export graph JSON/CSV from the sidebar; Expand refreshes depth for large neighborhoods.
+Click nodes to jump back to the Entity Inspector. Use filters, search dimming, keyboard nav, and Graph|List alternate. Export graph JSON/CSV from the sidebar; Expand refreshes depth for large neighborhoods.
 
 Guide: [Graph view](graph-view.md)
 
@@ -107,9 +110,9 @@ Guide: [Manage Imports](manage-imports.md)
 
 ## Plugins and preferences
 
-Installed workspace plugins can contribute inspector cards, UI views, and preferences (v0.14–v0.16+). Open plugin views from the Command Palette; preferences appear in the OntoCode preferences hub.
+Installed workspace plugins can contribute inspector cards, UI views, preferences, and context actions (**Plugin SDK 1.0**). Open plugin views from the Command Palette; preferences appear in the OntoCode preferences hub. Provider pickers cover reasoner / query / refactor / graph actions.
 
-Guide: [Plugins](../guides/plugins.md)
+Guide: [Plugins](../guides/plugins.md) · [Plugin policy](../guides/plugin-policy.md)
 
 ## Turtle semantic highlighting and diagnostics
 

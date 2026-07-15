@@ -17,11 +17,11 @@ The following modules are **documented and intended to stabilize** toward 1.0:
 | Semantic diff | `ontocore-diff` | `DiffResult`, `format_diff_*` |
 | Docs export | `ontocore-docs` | `export_workspace`, hierarchy/property renderers |
 | OWL / OBO patch | `ontocore-owl`, `ontocore-obo` | Patch op JSON shapes |
-| Plugin host (MVP) | `ontocore-plugin` | Manifest schema, `PluginHost` — **experimental** until 1.0 |
+| Plugin host (SDK 1.0 wire) | `ontocore-plugin` | Manifest schema, `PluginHost` — wire frozen as SDK 1.0; marketplace/owlmake remain product **1.0** — [Plugin policy](plugin-policy.md) |
 
-**May still change pre-1.0:** internal indexer modules, LSP field additions, webview `postMessage` types (ship with extension), SQL column additions, plugin trait signatures.
+**May still change pre-1.0:** internal indexer modules, LSP field additions, webview `postMessage` types (ship with extension), SQL column additions (additive).
 
-**Frozen at 1.0 (target):** CLI command names, exit codes, stable Rust types above, documented LSP `ontocore/*` methods, semver-stable plugin API.
+**Frozen at 1.0 (product target):** CLI command names, exit codes, stable Rust types above, documented LSP `ontocore/*` methods, curated plugin marketplace. **Already frozen as Plugin SDK 1.0:** TOML + subprocess JSON wire (`api_version = "1"`).
 
 ## Stability tiers
 
@@ -30,7 +30,7 @@ The following modules are **documented and intended to stabilize** toward 1.0:
 | **A — Stable enough for CI** | `ontocore validate`, `query`, `sparql`, `classify`, `realize`, `check-instance`, `dl-query`, `refactor` (incl. merge/replace), `diff`, `docs`, `patch`, `robot`, `plugins`, `workflow` CLI | High for **commands and exit codes** | Pin with `cargo install ontocore-cli --locked --version 0.25.0`. Exit codes documented in [workspace limits](../workspace-limits.md). No `ontocore swrl` CLI — SWRL via IDE/LSP/patches. |
 | **B — Documented, may evolve** | LSP custom methods (`ontocore/*`) | Medium | Wire format in [LSP API](../lsp-api.md) and [JSON Schema](../lsp-protocol.schema.json). Minor releases may add fields or methods. |
 | **C — Library APIs** | `ontocore` and `ontocore-*` Rust crates | Medium-low | Public types used by CLI/LSP are more stable than internal modules. Pin exact versions in `Cargo.toml`. |
-| **D — Experimental** | Plugin author traits, SHACL full validation, MCP, Python/TS SDKs | Low | Plugin host **shipped v0.14–v0.17** — see [Plugin authoring](plugins.md). Stable ecosystem API is **v1.0**. |
+| **D — Experimental / product-1.0** | Curated plugin marketplace, production owlmake, SHACL full validation, MCP, Python/TS SDKs | Low until product **1.0** | Plugin **SDK 1.0** wire is frozen today — see [Plugin authoring](plugins.md) and [Plugin policy](plugin-policy.md). |
 
 ## What we commit to before v1.0
 

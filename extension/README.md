@@ -19,7 +19,7 @@
 | What ships today | [SHIPPED](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) |
 | Known limitations | [Known limitations](https://ontocode-vs.readthedocs.io/en/latest/known-limitations/) |
 | Install options (VSIX, offline) | [Install VS Code](https://ontocode-vs.readthedocs.io/en/latest/vscode-install/) |
-| CLI / CI / Rust crates | [Install CLI & CI](https://ontocode-vs.readthedocs.io/en/latest/getting-started/) |
+| CLI / CI / Rust crates | [Install CLI & CI (detail)](https://ontocode-vs.readthedocs.io/en/latest/install-cli-ci/) |
 | Full documentation | [Read the Docs](https://ontocode-vs.readthedocs.io/en/latest/) |
 | Extension overview | [VS Code extension docs](https://ontocode-vs.readthedocs.io/en/latest/ontocode/vscode-extension/) |
 

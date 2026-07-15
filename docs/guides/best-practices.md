@@ -38,7 +38,7 @@ Examples: [CI integration](../ci-integration.md)
 2. Bundled language server works in Restricted Mode — **Trust** only if you set custom `ontocode.lspPath` or `ontocode.robotPath`
 3. Edit in Entity Inspector or Manchester editor (`.ttl`, `.obo`, `.owl`/`.rdf`, `.owx`)
 4. Run **Index Workspace** after bulk file changes
-5. Use **Query Workbench** for SQL/SPARQL (not Protégé DL Query — [dl-query.md](dl-query.md))
+5. Use **Query Workbench** for SQL/SPARQL and **DL mode** for Manchester class-expression queries ([dl-query.md](dl-query.md) — honesty limits vs Protégé DL Query / HermiT)
 
 ## Protégé teams
 

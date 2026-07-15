@@ -87,7 +87,8 @@ plugins:
         guides/graph-visualization.md: ontocode/graph-view.md
         guides/vscode-extension.md: ontocode/vscode-extension.md
         # Legacy install entry points → canonical Install page
-        # (getting-started.md and vscode-install.md remain as detail pages)
+        # (vscode-install.md remains a detail page; getting-started → install-cli-ci)
+        getting-started.md: install-cli-ci.md
 
 extra_css:
   - stylesheets/extra.css
@@ -123,12 +124,13 @@ nav:
       - Versions and channels: guides/versions-and-channels.md
       - Which artifact?: guides/which-artifact.md
       - More install detail:
-          - Install CLI & CI (not the IDE tutorial): getting-started.md
+          - Install CLI & CI (not the IDE tutorial): install-cli-ci.md
           - VS Code install (detail): vscode-install.md
           - Install CLI (macOS/Windows): guides/install-cli.md
   - Use OntoCode:
+      - Overview: ontocode/index.md
       - Feature tour: ontocode/feature-tour.md
-      - Overview: ontocode/vscode-extension.md
+      - Extension detail: ontocode/vscode-extension.md
       - Author:
           - Authoring (Turtle): authoring.md
           - OBO authoring: ontocode/obo-authoring.md

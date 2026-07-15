@@ -151,7 +151,6 @@ Run OWL classification via OntoLogos 1.0.0.
 ```bash
 ontocore classify ./ontologies --profile el
 ontocore classify . --profile rl --format json
-ontocore classify . --profile el --no-auto-profile
 ```
 
 **Expected output (json):** `consistent: true`, `unsatisfiable: []`, `profile_used`, `duration_ms` when ontology is consistent.
@@ -159,7 +158,7 @@ ontocore classify . --profile el --no-auto-profile
 | Flag | Default | Description |
 |------|---------|-------------|
 | `--profile` | `el` | `el`, `rl`, `rdfs`, `dl`, `auto` (OntoLogos 1.0) |
-| `--auto-profile` | `true` | Emit profile-detection warnings |
+| `--auto-profile` | enabled | Emit profile-detection warnings (default on; the current clap flag does not expose a separate disable switch) |
 | `--format` | `text` | `text` or `json` |
 
 **Exit:** 0 when consistent (no unsatisfiable classes); non-zero on unsatisfiable classes or reasoner error.
@@ -441,7 +440,7 @@ Markdown `index.md` includes **Class hierarchy** and **Property index** sections
 
 ### `plugins`
 
-Discover and run workspace plugins from `.ontocore/plugins/*.toml`. See [Plugin authoring guide](guides/plugins.md).
+Discover, inspect, enable/disable, and run workspace plugins from `.ontocore/plugins/*.toml`. See [Plugin authoring guide](guides/plugins.md) (SDK 1.0).
 
 #### `plugins list`
 
@@ -450,22 +449,47 @@ ontocore plugins list [workspace]
 ontocore plugins list . --format json
 ```
 
-**Result (text):** one line per plugin (`id`, `kind`, `version`). **Result (json):** array of plugin descriptors.
+**Result (text):** one line per plugin (`id`, `kind`, `version`). **Result (json):** array of plugin descriptors (includes lifecycle fields such as `state`, `enabled`, `depends_on`, `activation` when present).
 
 **Exit:** 0 on success; non-zero on discovery/host failure.
+
+#### `plugins info`
+
+```bash
+ontocore plugins info <plugin_id> [workspace]
+ontocore plugins info ontocode.naming-validator . --format json
+```
+
+Shows lifecycle and dependency info: `state`, `activation`, `enabled`, `depends_on`, `manifest_path`.
+
+**Exit:** 0 on success; non-zero if the plugin id is unknown or host discovery fails.
+
+#### `plugins enable` / `plugins disable`
+
+```bash
+ontocore plugins enable <plugin_id> [workspace]
+ontocore plugins disable <plugin_id> [workspace]
+```
+
+`enable` activates the plugin (and dependents per activation policy). `disable` cascade-deactivates dependents.
+
+**Exit:** 0 on success; non-zero on host/policy failure.
 
 #### `plugins run`
 
 ```bash
-ontocore plugins run <plugin_id> [--action validate|export|workflow] [--step <name>] [workspace]
+ontocore plugins run <plugin_id> [--action <name>] [--step <name>] [--query <text>] [--iri <iri>] [workspace]
 ontocore plugins run ontocode.naming-validator --action validate .
+ontocore plugins run my.query --action query.run --query 'SELECT short_name FROM classes' .
 ```
 
 | Flag | Default | Description |
 |------|---------|-------------|
 | `plugin_id` | *(required)* | Plugin id from manifest |
-| `--action` | `validate` | `validate`, `export`, or `workflow` |
+| `--action` | `validate` | `validate`, `export`, `workflow`, `reasoner.classify`, `query.run`, `refactor.preview`, `graph.build` |
 | `--step` | — | Workflow step when `--action workflow` |
+| `--query` | — | Query text for `query.run` |
+| `--iri` | — | Focus/root IRI for `refactor.preview` or `graph.build` |
 | `--format` | `text` | `text` or `json` |
 
 **Exit:** 0 on success; non-zero on host/action failure or plugin-reported failure.
@@ -491,7 +515,7 @@ ontocore workflow --plugin owlmake --step qc [workspace]
 - [Plugin authoring guide](guides/plugins.md)
 - [Refactoring guide](guides/refactoring.md)
 - [Examples: refactoring](examples/refactoring.md)
-- [Install CLI & CI (detail)](getting-started.md)
+- [Install CLI & CI (detail)](install-cli-ci.md)
 - [CI integration](ci-integration.md)
 - [Errors reference](errors.md)
 - [What ships today](SHIPPED.md)

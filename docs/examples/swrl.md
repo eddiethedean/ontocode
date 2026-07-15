@@ -47,7 +47,7 @@ When SWRL rules are present, DL/Auto classify may materialize them before taxono
 
 ## Related
 
-- [Patch reference — SWRL](../patch-reference.md#swrl-operations-v023)
+- [Patch reference — SWRL](../patch-reference.md#swrl-operations-v024)
 - [Reasoner guide](../guides/reasoner.md)
 - [Realize cookbook](realize.md)
 - [Migration v0.23](../migration/v0.23.md)

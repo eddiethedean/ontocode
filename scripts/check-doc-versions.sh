@@ -42,11 +42,11 @@ if ! grep -F -- "--version ${TAGGED_VERSION}" README.md >/dev/null; then
 else
   echo "ok: README public install pin"
 fi
-if ! grep -F -- "--version ${TAGGED_VERSION}" docs/getting-started.md >/dev/null; then
-  echo "FAIL: getting-started install pin — expected --version ${TAGGED_VERSION}" >&2
+if ! grep -F -- "--version ${TAGGED_VERSION}" docs/install-cli-ci.md >/dev/null; then
+  echo "FAIL: install-cli-ci install pin — expected --version ${TAGGED_VERSION}" >&2
   fail=1
 else
-  echo "ok: getting-started install pin"
+  echo "ok: install-cli-ci install pin"
 fi
 if ! grep -F -- "--version ${TAGGED_VERSION}" docs/install.md >/dev/null; then
   echo "FAIL: install.md public pin — expected --version ${TAGGED_VERSION}" >&2
@@ -289,7 +289,7 @@ else
 fi
 USER_FACING_DOCS=(
   docs/faq.md
-  docs/getting-started.md
+  docs/install-cli-ci.md
   docs/guides/production-readiness.md
   docs/guides/rust-library.md
   docs/concepts.md
@@ -864,14 +864,14 @@ if [[ "$PREV_MINOR_MAJOR" == "0" ]] && [[ "$PREV_MINOR_MINOR" -ge 17 ]]; then
 fi
 
 # Stale release-tag guidance (must say current minor, not an older one)
-if rg -q 'latest \*\*v0\.15\.x\*\* tag|latest \*\*v0\.14\.x\*\* tag|latest \*\*v0\.16\.x\*\* tag' docs/getting-started.md docs/guides README.md extension 2>/dev/null; then
+if rg -q 'latest \*\*v0\.15\.x\*\* tag|latest \*\*v0\.14\.x\*\* tag|latest \*\*v0\.16\.x\*\* tag' docs/install-cli-ci.md docs/guides README.md extension 2>/dev/null; then
   echo "FAIL: stale v0.14/v0.15/v0.16 release tag reference in install docs (expected v${MINOR_VERSION}.x)" >&2
-  rg -n 'latest \*\*v0\.1[4-6]\.x\*\* tag' docs/getting-started.md docs/guides README.md extension 2>/dev/null || true
+  rg -n 'latest \*\*v0\.1[4-6]\.x\*\* tag' docs/install-cli-ci.md docs/guides README.md extension 2>/dev/null || true
   fail=1
 else
   echo "ok: no stale v0.14–v0.16 release tag references"
 fi
-check_file_contains "docs/getting-started.md" "latest \\*\\*v${TAGGED_MINOR}\\.x\\*\\* tag" "getting-started Path D current tag"
+check_file_contains "docs/install-cli-ci.md" "latest \\*\\*v${TAGGED_MINOR}\\.x\\*\\* tag" "install-cli-ci Path D current tag"
 check_file_contains "docs/guides/which-artifact.md" "ontocore = \"${TAGGED_MINOR}\"" "which-artifact crate pin"
 check_file_contains "docs/guides/api-stability.md" "Published crates use \\*\\*${TAGGED_MINOR}\\.x\\*\\*" "api-stability published crates minor"
 check_file_contains "docs/ci-integration.md" "VERSION=${TAGGED_VERSION}" "ci-integration release binary pin"
@@ -1347,6 +1347,42 @@ if [[ "$TAGGED_MINOR" =~ ^0\.([0-9]+)$ ]]; then
     check_file_contains "docs/guides/enterprise-week-2.md" "Enterprise week-2" "enterprise week-2 playbook"
     check_file_contains "docs/guides/plugin-policy.md" "Plugin SDK 1.0 compatibility policy" "plugin policy page"
     check_file_contains "docs/internals.md" "\*\*v${TAGGED_MINOR}\*\*" "internals LSP tagged release"
+
+    # Adoption-audit truth guards (HP-* from docs adoption plan)
+    if grep -qiE 'tag pending' docs/SHIPPED.md 2>/dev/null; then
+      echo "FAIL: docs/SHIPPED.md must not say 'tag pending' for a tagged release" >&2
+      fail=1
+    else
+      echo "ok: SHIPPED has no 'tag pending'"
+    fi
+    if grep -qE 'ontocore-owl = "0\.(1[0-9]|2[0-4])"' docs/guides/rust-library.md 2>/dev/null; then
+      echo "FAIL: docs/guides/rust-library.md has stale ontocore-owl pin (expected ${TAGGED_MINOR})" >&2
+      fail=1
+    else
+      echo "ok: rust-library ontocore-owl pin not stale"
+    fi
+    check_file_contains "docs/guides/rust-library.md" "ontocore-owl = \"${TAGGED_MINOR}\"" "rust-library ontocore-owl pin"
+    check_file_contains "docs/cli-reference.md" "plugins info" "cli-reference plugins info"
+    check_file_contains "docs/cli-reference.md" "plugins enable" "cli-reference plugins enable"
+    if grep -qE 'DL Query UI → \*\*v0\.2[0-9]\*\*|DL Query UI → \*\*v0\.25\*\*' docs/guides/protege-coexistence.md docs/guides/protege-migration.md 2>/dev/null; then
+      echo "FAIL: Protégé guides still claim DL Query UI is future" >&2
+      fail=1
+    else
+      echo "ok: Protégé guides do not defer DL Query UI"
+    fi
+    if [[ -f docs/getting-started.md ]]; then
+      echo "FAIL: docs/getting-started.md must remain renamed to install-cli-ci.md (use mkdocs redirect)" >&2
+      fail=1
+    else
+      echo "ok: getting-started.md removed (install-cli-ci.md is canonical)"
+    fi
+    check_file_contains "docs/install-cli-ci.md" "Install CLI & CI \\(detail\\)" "install-cli-ci title"
+    if grep -qiE 'Marketplace and Open VSX publishes are manual' docs/faq.md docs/guides/versions-and-channels.md 2>/dev/null; then
+      echo "FAIL: FAQ/versions still claim Open VSX is always manual" >&2
+      fail=1
+    else
+      echo "ok: Open VSX wording not stuck on always-manual"
+    fi
   fi
 fi
 

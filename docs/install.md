@@ -76,7 +76,7 @@ Write-back: **`.ttl`**, **`.obo`**, **`.owl`/`.rdf`**, **`.owx`**. XML is semant
 
 | Topic | Doc |
 |-------|-----|
-| Full CLI / CI install matrix (all paths) | [Install CLI & CI (detail)](getting-started.md) |
+| Full CLI / CI install matrix (all paths) | [Install CLI & CI (detail)](install-cli-ci.md) |
 | VS Code options (offline, Restricted Mode) | [vscode-install.md](vscode-install.md) |
 | Release integrity | [release-integrity.md](release-integrity.md) |
 | Platform support | [platform-compatibility.md](guides/platform-compatibility.md) |

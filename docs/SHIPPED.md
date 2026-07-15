@@ -159,7 +159,7 @@ Remaining 1.0 targets: [known limitations](known-limitations.md) · [Protégé v
 
 ## What's next
 
-Forward milestones: UX/parity verify (**v0.25**), Protégé-competitive release (**1.0**). See **[Platform roadmap](roadmap.md)** · **[Known limitations](known-limitations.md)**.
+Forward milestones: v0.25 train epics done on branch (tag pending); Protégé-competitive release (**1.0**). See **[Platform roadmap](roadmap.md)** · **[Known limitations](known-limitations.md)**.
 
 ## Where to learn more
 

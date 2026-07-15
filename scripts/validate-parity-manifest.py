@@ -1,60 +1,35 @@
 #!/usr/bin/env python3
-"""Validate parity/protege-desktop-parity.yaml against schema and matrix coverage."""
+"""Validate parity/protege-desktop-parity.yaml (schema, matrix IDs, evidence paths).
+
+Usage:
+  python3 scripts/validate-parity-manifest.py           # schema + matrix IDs
+  python3 scripts/validate-parity-manifest.py --paths   # also evidence/path checks
+"""
 
 from __future__ import annotations
 
+import argparse
 import re
 import sys
 from pathlib import Path
 
-try:
-    import yaml
-except ImportError:
-    print("error: PyYAML required (pip install pyyaml)", file=sys.stderr)
-    sys.exit(2)
+# Allow `python scripts/validate-parity-manifest.py` without installing a package.
+sys.path.insert(0, str(Path(__file__).resolve().parent))
 
-ROOT = Path(__file__).resolve().parent.parent
-MANIFEST = ROOT / "parity" / "protege-desktop-parity.yaml"
-MATRIX = ROOT / "docs" / "protege-parity" / "03_PARITY" / "PARITY_MATRIX.md"
-
-VALID_PRIORITIES = {"P0", "P1", "P2"}
-VALID_STATUSES = {
-    "COMPLETE",
-    "PARTIAL",
-    "NOT_IMPLEMENTED",
-    "BLOCKED",
-    "VERIFIED",
-}
-REQUIRED_FIELDS = {
-    "id",
-    "area",
-    "title",
-    "priority",
-    "status",
-    "owner",
-    "source_files",
-    "test_ids",
-    "acceptance_criteria",
-    "github_issue",
-    "documentation",
-}
+from parity_common import (  # noqa: E402
+    MANIFEST,
+    MATRIX,
+    REQUIRED_FIELDS,
+    ROOT,
+    VALID_PRIORITIES,
+    VALID_STATUSES,
+    evidence_errors,
+    load_manifest,
+    matrix_ids,
+)
 
 
-def matrix_ids() -> set[str]:
-    text = MATRIX.read_text(encoding="utf-8")
-    return set(re.findall(r"\bPAR-[A-Z]+-\d{3}\b", text))
-
-
-def load_manifest() -> dict:
-    if not MANIFEST.is_file():
-        raise FileNotFoundError(f"missing manifest: {MANIFEST}")
-    data = yaml.safe_load(MANIFEST.read_text(encoding="utf-8"))
-    if not isinstance(data, dict):
-        raise ValueError("manifest root must be a mapping")
-    return data
-
-
-def validate() -> list[str]:
+def validate_schema() -> list[str]:
     errors: list[str] = []
     data = load_manifest()
 
@@ -116,8 +91,24 @@ def validate() -> list[str]:
 
 
 def main() -> int:
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument(
+        "--paths",
+        action="store_true",
+        help="Also validate evidence completeness and path existence",
+    )
+    args = parser.parse_args()
+
     try:
-        errors = validate()
+        errors = validate_schema()
+        if args.paths and not errors:
+            errors.extend(evidence_errors())
+        elif args.paths and errors:
+            # Still report evidence if schema mostly loads.
+            try:
+                errors.extend(evidence_errors())
+            except Exception:
+                pass
     except Exception as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
@@ -128,7 +119,11 @@ def main() -> int:
             print(f"  - {err}", file=sys.stderr)
         return 1
 
-    print(f"ok: {MANIFEST.relative_to(ROOT)} ({len(load_manifest()['requirements'])} requirements)")
+    n = len(load_manifest()["requirements"])
+    mode = "schema+paths" if args.paths else "schema"
+    print(f"ok: {MANIFEST.relative_to(ROOT)} ({n} requirements, {mode})")
+    if not MATRIX.is_file():
+        print(f"warning: matrix missing at {MATRIX}", file=sys.stderr)
     return 0
 
 

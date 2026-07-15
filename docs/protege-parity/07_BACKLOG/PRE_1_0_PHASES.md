@@ -35,7 +35,7 @@ objective of the phases below.
 | **v0.22** | C (OWL 2) | 4 | EPIC-002 | BLOCKER_02 | Planned |
 | **v0.23** | D (reason + SWRL) | 5–6 | EPIC-004, EPIC-005 | BLOCKER_04, BLOCKER_05 | Complete |
 | **v0.24** | D (services) | 7 | EPIC-006, EPIC-007 | BLOCKER_06, BLOCKER_07 | Shipped |
-| **v0.25** | E + F | 8–9 | EPIC-008–011 | BLOCKER_08–011 | Planned |
+| **v0.25** | E + F | 8–9 | EPIC-008–011 | BLOCKER_08–011 | Complete (branch) |
 | **1.0.0-rc** | Stabilize | 10 | — | — | Planned |
 | **1.0.0** | Ship | — | — | [PARITY_RELEASE_GATE.md](../03_PARITY/PARITY_RELEASE_GATE.md) | Planned |
 
@@ -265,6 +265,7 @@ P0 refactoring and query/search parity after the semantic core stabilizes.
 
 # v0.25 — UX completion + executable verification
 
+**Status:** Complete on `v0.25` branch (EPIC-008–011; tag pending)\
 **P0 phase:** E (User Experience) + F (Verification)\
 **Stages:** 8–9\
 **Theme:** Visualization, plugin SDK freeze, accessibility, and automated parity gates.

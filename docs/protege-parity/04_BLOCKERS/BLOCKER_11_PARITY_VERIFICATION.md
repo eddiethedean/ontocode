@@ -2,9 +2,9 @@
 
 # Blocker 11 --- Executable Parity Verification
 
-**Status:** P0 Release Blocker\
+**Status:** Resolved for v0.25 (EPIC-011) — verification machinery VERIFIED; Gate 3 (all P0 VERIFIED) deferred to 1.0.0-rc `--strict-release`\
 **Priority:** Critical\
-**Target Release:** OntoCode 1.0.0
+**Target Release:** OntoCode 1.0.0 / infrastructure delivered in **v0.25**
 
 ------------------------------------------------------------------------
 

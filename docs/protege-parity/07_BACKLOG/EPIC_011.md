@@ -4,7 +4,7 @@
 
 **Epic ID:** EPIC-011\
 **GitHub:** https://github.com/eddiethedean/ontocode/issues/257\
-**Status:** Planned\
+**Status:** Done for v0.25 (`PAR-TST-001` VERIFIED; Gate 3 hard-fail deferred to 1.0.0-rc)\
 **Priority:** P0 (Release Blocking)\
 **Target Release:** v0.19 (skeleton), v0.25 (complete)
 
@@ -12,12 +12,16 @@
 
 # Objective
 
-Track parity verification work required for Protégé Desktop parity.
+Make Protégé Desktop parity status continuously verifiable via the
+machine-readable manifest, evidence path checks, metrics generation, and
+CI release-gate reporting.
 
 ------------------------------------------------------------------------
 
 # Related Documents
 
 -   ../04_BLOCKERS/BLOCKER_11_PARITY_VERIFICATION.md
+-   ../03_PARITY/PARITY_RELEASE_GATE.md
+-   ../03_PARITY/PARITY_METRICS.md
 -   EPIC_INDEX.md
 -   PRE_1_0_PHASES.md

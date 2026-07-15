@@ -25,6 +25,7 @@ Upgrade notes between OntoCode / OntoCore releases.
 | v0.21.0 → v0.22.0 | [Migration v0.21 → v0.22](v0.22.md) — complete OWL 2 authoring |
 | v0.22.0 → v0.23.0 | [Migration v0.22 → v0.23](v0.23.md) — reasoning parity + SWRL |
 | v0.23.0 → v0.24.0 | [Migration v0.23 → v0.24](v0.24.md) — refactoring + DL Query |
+| v0.24.0 → v0.25.0 | [Migration v0.24 → v0.25](v0.25.md) — viz + Plugin SDK 1.0 + a11y + parity CI |
 
 Pre-1.0: library APIs, LSP JSON, and SQL virtual table columns may change between minor releases. See [API stability](../guides/api-stability.md) and [workspace limits](../workspace-limits.md).
 

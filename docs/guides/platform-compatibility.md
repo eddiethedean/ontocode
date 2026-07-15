@@ -1,6 +1,6 @@
 # Platform and VS Code compatibility
 
-Supported platforms and environments for OntoCode **v0.24.0** (latest tagged). This page states **what is documented and tested in project CI** — not a formal certification.
+Supported platforms and environments for OntoCode **v0.25.0** (latest tagged). This page states **what is documented and tested in project CI** — not a formal certification.
 
 Canonical matrix: [What ships today](../SHIPPED.md).
 
@@ -38,7 +38,7 @@ No separate LSP install required for standard Marketplace, Open VSX, or VSIX use
 | macOS | **No** — use `cargo install ontocore-cli --locked` |
 | Windows | **No** — use `cargo install` or CI on Linux runners |
 
-Pin version: `VERSION=0.24.0` — [getting started](../getting-started.md).
+Pin version: `VERSION=0.25.0` — [getting started](../getting-started.md).
 
 ## `cargo install` prerequisites
 

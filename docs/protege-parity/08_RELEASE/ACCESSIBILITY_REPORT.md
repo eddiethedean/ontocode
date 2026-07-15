@@ -20,7 +20,7 @@ certification remains deferred (BLOCKER_10 Phase 4).
 
 | Metric | Result |
 |--------|--------|
-| Release Version | v0.25 train (crates still 0.24.x until release bump) |
+| Release Version | v0.25.0 |
 | Assessment Date | 2026-07-15 |
 | Overall Accessibility Status | **PASS** (owned surfaces) |
 | Standard Evaluated | WCAG 2.2 AA (where applicable) |

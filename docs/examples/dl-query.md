@@ -36,4 +36,4 @@ ontocore dl-query fixtures 'ex:Person and ex:hasRole some ex:Clinician' \
 
 ## CI tip
 
-Pin CLI with `--version 0.24.0` (or the release tarball for Linux x64). Treat results as OntoLogos-backed — dual-check critical audits against Protégé when required.
+Pin CLI with `--version 0.25.0` (or the release tarball for Linux x64). Treat results as OntoLogos-backed — dual-check critical audits against Protégé when required.

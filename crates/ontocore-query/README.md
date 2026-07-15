@@ -7,7 +7,7 @@ SQL-like virtual tables and SPARQL query engine for [OntoCore](https://github.co
 ## Install
 
 ```toml
-ontocore-query = "0.24"
+ontocore-query = "0.25"
 ```
 
 ## Quick example

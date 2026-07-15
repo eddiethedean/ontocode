@@ -1,6 +1,6 @@
 # Evaluating OntoCode for your organization
 
-This page helps security, platform, and ontology teams decide whether OntoCode **v0.24.0** (latest tagged) fits your workflow. It is honest about **what ships today** vs the v1.0 Protégé-competitive target.
+This page helps security, platform, and ontology teams decide whether OntoCode **v0.25.0** (latest tagged) fits your workflow. It is honest about **what ships today** vs the v1.0 Protégé-competitive target.
 
 Canonical capability matrix: [What ships today](../SHIPPED.md).
 
@@ -29,7 +29,7 @@ Prefer Protégé or other tools (or wait for v1.0) if you need:
 | [Protégé coexistence](protege-coexistence.md) | Ontology teams — split workflow with Protégé |
 | [Plugin authoring](plugins.md) | Platform — v0.16+ plugin API (permissions, views, preferences, context actions), manifests, subprocess plugins |
 
-## What ships today (v0.24.0)
+## What ships today (v0.25.0)
 
 | Capability | Status |
 |------------|--------|
@@ -64,9 +64,9 @@ Prefer Protégé or other tools (or wait for v1.0) if you need:
 | Realization / instance checking (`realize`, `check-instance`) | **Shipped** (v0.23) |
 | SWRL rule browser / editor / validate | **Shipped** (v0.23; DLSafe) |
 | Engine-level reasoner cancel | **Shipped** (v0.23) |
-| DL Query (Workbench DL mode, CLI `dl-query`, LSP) | **Shipped** (v0.24) — [honesty notes](dl-query.md) |
-| Refactor merge / replace (CLI + IDE; multi-format rename) | **Shipped** (v0.24) |
-| Workspace search LSP (`ontocore/search`) | **Shipped** (v0.24) |
+| DL Query (Workbench DL mode, CLI `dl-query`, LSP) | **Shipped** (v0.25) — [honesty notes](dl-query.md) |
+| Refactor merge / replace (CLI + IDE; multi-format rename) | **Shipped** (v0.25) |
+| Workspace search LSP (`ontocore/search`) | **Shipped** (v0.25) |
 
 Full gap analysis for evaluators: [Known limitations](../known-limitations.md) · [What ships today](../SHIPPED.md) · [Protégé decision](protege-decision.md).
 

@@ -52,7 +52,7 @@ Follow the [first success core path](../guides/first-success.md) if anything is 
 | Class hierarchy tab | **Classes** explorer; toggle **asserted / inferred / combined** after reasoner |
 | Entity editor (labels, parents) | **Entity Inspector** (`.ttl`, `.obo`, `.owl`/`.rdf`, `.owx`) |
 | Manchester syntax | **Manchester editor** panel |
-| DL query tab | **Query Workbench** — SQL catalog tables or SPARQL (**not** Protégé DL Query syntax; DL Query UI → **v0.24**) |
+| DL query tab | **Query Workbench** — SQL catalog tables or SPARQL (**not** Protégé DL Query syntax; DL Query UI → **v0.25**) |
 | Reasoner (HermiT, etc.) | **Start / Synchronize / Classify / Consistency / Realize** — EL/RL/RDFS/DL/auto via OntoLogos (not certified HermiT-identical); **Stop** requests engine cancel |
 | Explanations | **Explanation** panel (unsat; DL-native steps where available; stale banner after reindex) |
 | SWRLTab | **Rule Browser** / **Rule Editor** (author + validate; DLSafe materialize on classify) |
@@ -67,7 +67,7 @@ Follow the [first success core path](../guides/first-success.md) if anything is 
 ## Day 3 — Validate in CI
 
 ```yaml
-- run: cargo install ontocore-cli --locked --version 0.24.0
+- run: cargo install ontocore-cli --locked --version 0.25.0
 - run: ontocore validate ./src/ontologies
 ```
 

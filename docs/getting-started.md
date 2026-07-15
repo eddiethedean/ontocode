@@ -10,13 +10,13 @@ Quick paths to success (5–30 min depending on install method) with OntoCore (C
     A cold Rust toolchain may take **15–30+ minutes** to compile OntoCore on first run. The VS Code extension bundles `ontocore-lsp` and does not require Rust. **Linux x64 CI should prefer the release tarball** ([CI integration](ci-integration.md)) over `cargo install`.
 
 !!! note "Linux arm64 and non-x64"
-    Prebuilt CLI tarballs are **`x86_64-unknown-linux-gnu` only**. On Linux arm64 (and other unsupported targets), use `cargo install ontocore-cli --locked --version 0.24.0` or the language server bundled in the VSIX — see [platform compatibility](guides/platform-compatibility.md).
+    Prebuilt CLI tarballs are **`x86_64-unknown-linux-gnu` only**. On Linux arm64 (and other unsupported targets), use `cargo install ontocore-cli --locked --version 0.25.0` or the language server bundled in the VSIX — see [platform compatibility](guides/platform-compatibility.md).
 
 ## Install matrix (CLI)
 
 | Method | Linux x64 | macOS | Windows | Needs Rust? |
 |--------|-----------|-------|---------|-------------|
-| `cargo install ontocore-cli --locked --version 0.24.0` | Yes | Yes | Yes | Yes (1.88+) |
+| `cargo install ontocore-cli --locked --version 0.25.0` | Yes | Yes | Yes | Yes (1.88+) |
 | Release CLI tarball (`ontocore-v*-x86_64-unknown-linux-gnu`) | Yes | No | No | No |
 | Git clone + `cargo run --` | Yes | Yes | Yes | Yes (1.88+) |
 
@@ -79,10 +79,10 @@ The `fixtures/` directory is included in the repository for examples and tests.
 ## Path C — `cargo install` (no clone)
 
 ```bash
-cargo install ontocore-cli --locked --version 0.24.0
+cargo install ontocore-cli --locked --version 0.25.0
 ```
 
-**Version pinning:** Always pin an exact release in CI with `--version 0.24.0` (see [TAGGED_RELEASE](TAGGED_RELEASE)). Prefer `--locked` for reproducible crates.io installs — see [API stability](guides/api-stability.md) and [release integrity](release-integrity.md). For a longer macOS/Windows walkthrough, see [Install CLI](guides/install-cli.md).
+**Version pinning:** Always pin an exact release in CI with `--version 0.25.0` (see [TAGGED_RELEASE](TAGGED_RELEASE)). Prefer `--locked` for reproducible crates.io installs — see [API stability](guides/api-stability.md) and [release integrity](release-integrity.md). For a longer macOS/Windows walkthrough, see [Install CLI](guides/install-cli.md).
 
 Use **your own ontology directory** — there is no `fixtures/` folder outside a clone:
 
@@ -96,14 +96,14 @@ ontocore validate /path/to/your/ontologies
 
 **CLI pre-builds are Linux x64 only.** On macOS or Windows, use Path C (`cargo install ontocore-cli`) or install the VS Code extension (bundled LSP).
 
-1. Open [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) for the latest **v0.24.x** tag.
+1. Open [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) for the latest **v0.25.x** tag.
 2. **For CLI on Linux x64:** download `ontocore-v<version>-x86_64-unknown-linux-gnu.tar.gz`.
-3. **For VS Code (any supported OS):** download `ontocode-v0.24.0.vsix` (pattern: `ontocode-v<version>.vsix`) — see [vscode-install.md](vscode-install.md).
+3. **For VS Code (any supported OS):** download `ontocode-v0.25.0.vsix` (pattern: `ontocode-v<version>.vsix`) — see [vscode-install.md](vscode-install.md).
 4. Verify with `SHA256SUMS` — see [release-integrity.md](release-integrity.md).
-5. Extract and run (Linux example; replace `0.24.0` with your tag):
+5. Extract and run (Linux example; replace `0.25.0` with your tag):
 
 ```bash
-VERSION=0.24.0
+VERSION=0.25.0
 ASSET="ontocore-v${VERSION}-x86_64-unknown-linux-gnu.tar.gz"
 BIN="ontocore-v${VERSION}-x86_64-unknown-linux-gnu"
 tar xzf "${ASSET}"
@@ -114,11 +114,11 @@ chmod +x "${BIN}"
 
 > **Note:** The extracted binary is versioned (not plain `ontocore`). CLI release tarballs are **Linux x64 only**; macOS/Windows users should use `cargo install ontocore-cli` or the bundled LSP inside the VSIX.
 
-For VS Code, install the `ontocode-v*.vsix` from the same release (example: `ontocode-v0.24.0.vsix`).
+For VS Code, install the `ontocode-v*.vsix` from the same release (example: `ontocode-v0.25.0.vsix`).
 
 ### Air-gapped / offline install
 
-1. Download `ontocode-v0.24.0.vsix` (pattern: `ontocode-v<version>.vsix`) and optional Linux CLI tarball from [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) on a connected machine.
+1. Download `ontocode-v0.25.0.vsix` (pattern: `ontocode-v<version>.vsix`) and optional Linux CLI tarball from [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) on a connected machine.
 2. Transfer the VSIX (and `SHA256SUMS` / `NOTICES`) to the offline environment.
 3. In VS Code: **Extensions → … → Install from VSIX…**
 4. For CLI without crates.io: use the Linux tarball (Path D) or vendor a `cargo vendor` / internal crates mirror — see [Enterprise deployment](guides/enterprise-deployment.md).

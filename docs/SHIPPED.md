@@ -1,12 +1,12 @@
-# What ships today (v0.24.0 — latest tagged)
+# What ships today (v0.25.0 — latest tagged)
 
 > **Canonical capability matrix.** Update this page on every release. Design specs under [Project](design/README.md) may describe future targets — check here for what is actually available.
 >
 > **Format write-back truth:** this page and [Supported formats](supported-formats.md) are the source of truth. Tier-1 user docs (README, Home, First success, FAQ, Evaluate pack, LSP/patch/CLI refs) must match them — see [Releasing — Tier-1 capability truth](releasing.md#documentation-sync-checklist-every-release).
 >
-> **Latest tagged release: v0.24.0** (crates.io, GitHub Releases; Marketplace/Open VSX may lag — see [Versions & channels](guides/versions-and-channels.md)). Pin installs: `cargo install ontocore-cli --locked --version 0.24.0`.
+> **Latest tagged release: v0.25.0** (crates.io, GitHub Releases; Marketplace/Open VSX may lag — see [Versions & channels](guides/versions-and-channels.md)). Pin installs: `cargo install ontocore-cli --locked --version 0.25.0`.
 
-**Latest tagged: v0.24.0** · [v0.24 migration](migration/v0.24.md) · [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md)
+**Latest tagged: v0.25.0** · [v0.25 migration](migration/v0.25.md) · [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md)
 
 ## Products
 
@@ -15,7 +15,7 @@
 | **OntoCode** | VS Code IDE — explorer, React inspector, graphs (asserted/inferred modes), Query Workbench (SQL/SPARQL/DL), Manchester editor, refactor preview, reasoner, explanation panel, plugin commands/views/preferences/context actions |
 | **OntoCore** | Rust semantic workspace engine — `ontocore` façade, `ontocore-*` crates, `ontocore` CLI, `ontocore-lsp`, plugin host |
 
-## Capability matrix (v0.24.0 tagged)
+## Capability matrix (v0.25.0 tagged)
 
 | Capability | VS Code | CLI |
 |------------|---------|-----|
@@ -82,7 +82,16 @@
 > **¹ Rename / merge / replace:** format-specific IRI remaps (XML re-serialize; OBO id/reference rewrite). Other refactor ops stay Turtle-first.  
 > Deeper capability grid (Manchester, refactor, XML re-serialize): [Capabilities by format](guides/capabilities-by-format.md).
 
-## New in v0.24.0 (latest tagged)
+## New in v0.25.0 (latest tagged)
+
+| Capability | Status |
+|------------|--------|
+| Graph visualization parity (expanded kinds, filters, virtualized React Flow, Open as graph) | Shipped |
+| Plugin SDK 1.0 (lifecycle, providers, CLI enable/disable, compat harness) | Shipped |
+| Accessibility parity (focus trap, live announcer, axe Vitest, ACCESSIBILITY_REPORT) | Shipped |
+| Parity verification CI (evidence paths, release-gate metrics, YAML→docs sync) | Shipped |
+
+## Previously in v0.24.0
 
 | Capability | Status |
 |------------|--------|

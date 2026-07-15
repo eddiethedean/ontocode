@@ -30,7 +30,7 @@
 
 ## Master checklist — Product Roadmap 2.0
 
-Every item from [PRODUCT_ROADMAP_2.0.md](PRODUCT_ROADMAP_2.0.md), with release assignment. **Shipped** = available in the tagged release named in the Target column (current public pin: **v0.24.0**).
+Every item from [PRODUCT_ROADMAP_2.0.md](PRODUCT_ROADMAP_2.0.md), with release assignment. **Shipped** = available in the tagged release named in the Target column (current public pin: **v0.25.0**).
 
 | UI phase | Deliverable | Status | Target release | Spec |
 |----------|-------------|--------|----------------|------|

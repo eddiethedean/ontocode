@@ -301,19 +301,16 @@ impl<'a> GraphBuilder<'a> {
         edges: &mut Vec<GraphEdge>,
         truncated: &mut bool,
         filters: &GraphFilters,
-        source: String,
-        target: String,
-        kind: String,
-        inferred: bool,
+        edge: GraphEdge,
     ) {
-        if !self.relationship_allowed(&kind, filters) {
+        if !self.relationship_allowed(&edge.kind, filters) {
             return;
         }
         if edges.len() >= MAX_GRAPH_EDGES {
             *truncated = true;
             return;
         }
-        edges.push(GraphEdge { source, target, kind, inferred });
+        edges.push(edge);
     }
 
     fn build_class_graph(&self, request: &GraphRequest) -> Result<GraphPayload, String> {
@@ -335,10 +332,12 @@ impl<'a> GraphBuilder<'a> {
                 &mut edges,
                 &mut truncated,
                 &request.filters,
-                edge.child.clone(),
-                edge.parent.clone(),
-                "sub_class_of".to_string(),
-                false,
+                GraphEdge {
+                    source: edge.child.clone(),
+                    target: edge.parent.clone(),
+                    kind: "sub_class_of".to_string(),
+                    inferred: false,
+                },
             );
         }
 
@@ -363,10 +362,12 @@ impl<'a> GraphBuilder<'a> {
                         &mut edges,
                         &mut truncated,
                         &request.filters,
-                        edge.child.clone(),
-                        edge.parent.clone(),
-                        "sub_class_of".to_string(),
-                        true,
+                        GraphEdge {
+                            source: edge.child.clone(),
+                            target: edge.parent.clone(),
+                            kind: "sub_class_of".to_string(),
+                            inferred: true,
+                        },
                     );
                 }
             }
@@ -428,10 +429,12 @@ impl<'a> GraphBuilder<'a> {
                 &mut edges,
                 &mut truncated,
                 &request.filters,
-                axiom.subject.clone(),
-                axiom.object.clone(),
-                edge_kind.to_string(),
-                false,
+                GraphEdge {
+                    source: axiom.subject.clone(),
+                    target: axiom.object.clone(),
+                    kind: edge_kind.to_string(),
+                    inferred: false,
+                },
             );
         }
 
@@ -467,10 +470,12 @@ impl<'a> GraphBuilder<'a> {
                 &mut payload.edges,
                 &mut truncated,
                 &request.filters,
-                axiom.subject.clone(),
-                axiom.object.clone(),
-                "sub_property_of".to_string(),
-                false,
+                GraphEdge {
+                    source: axiom.subject.clone(),
+                    target: axiom.object.clone(),
+                    kind: "sub_property_of".to_string(),
+                    inferred: false,
+                },
             );
         }
 
@@ -539,10 +544,12 @@ impl<'a> GraphBuilder<'a> {
                         &mut edges,
                         &mut truncated,
                         &request.filters,
-                        src.clone(),
-                        tgt.clone(),
-                        "imports".to_string(),
-                        false,
+                        GraphEdge {
+                            source: src.clone(),
+                            target: tgt.clone(),
+                            kind: "imports".to_string(),
+                            inferred: false,
+                        },
                     );
                     if visited.insert(tgt.clone()) {
                         queue.push_back(tgt.clone());
@@ -563,10 +570,12 @@ impl<'a> GraphBuilder<'a> {
                     &mut edges,
                     &mut truncated,
                     &request.filters,
-                    src.clone(),
-                    tgt.clone(),
-                    "imports".to_string(),
-                    false,
+                    GraphEdge {
+                        source: src.clone(),
+                        target: tgt.clone(),
+                        kind: "imports".to_string(),
+                        inferred: false,
+                    },
                 );
             }
         }
@@ -657,10 +666,12 @@ impl<'a> GraphBuilder<'a> {
                     &mut payload.edges,
                     &mut truncated,
                     &request.filters,
-                    window[0].clone(),
-                    window[1].clone(),
-                    format!("{edge_kind_prefix}_result"),
-                    false,
+                    GraphEdge {
+                        source: window[0].clone(),
+                        target: window[1].clone(),
+                        kind: format!("{edge_kind_prefix}_result"),
+                        inferred: false,
+                    },
                 );
             }
         }
@@ -779,10 +790,12 @@ impl<'a> GraphBuilder<'a> {
                     &mut edges,
                     &mut truncated,
                     &request.filters,
-                    src.clone(),
-                    tgt.clone(),
-                    kind.clone(),
-                    *inferred,
+                    GraphEdge {
+                        source: src.clone(),
+                        target: tgt.clone(),
+                        kind: kind.clone(),
+                        inferred: *inferred,
+                    },
                 );
                 if visited.insert(tgt.clone()) {
                     queue.push_back((tgt.clone(), d + 1));

@@ -2,13 +2,14 @@ use crate::index_worker::IndexWorker;
 use crate::positions::{byte_col_to_utf16, utf16_offset_to_byte};
 use crate::protocol::{
     ApplyAxiomPatchParams, ApplyAxiomPatchResult, ApplyRefactorParams, ApplyRefactorResult,
-    CatalogSnapshot, CheckInstanceParams, CheckInstanceResult, DiagnosticSummary, FindUsagesParams,
-    FindUsagesResult, GetEntityParams, GetEntityResult, GetExplanationParams, GetExplanationResult,
-    GetGraphResult, IndexWorkspaceParams, IndexWorkspaceResult, ListPluginsResult,
-    ListSqlSchemaResult, ListSwrlRulesResult, LspErrorPayload, ManchesterCompletions,
-    ParseManchesterParams, ParseManchesterResult, ParseSwrlRuleParams, ParseSwrlRuleResult,
-    PreviewRefactorParams, PreviewRefactorResult, QueryParams, RunPluginParams, RunPluginResult,
-    RunReasonerParams, RunReasonerResult, RunRobotParams, RunRobotResult, SemanticDiffParams,
+    CatalogSnapshot, CheckInstanceParams, CheckInstanceResult, DiagnosticSummary, DlQueryParams,
+    DlQueryResult, FindUsagesParams, FindUsagesResult, GetEntityParams, GetEntityResult,
+    GetExplanationParams, GetExplanationResult, GetGraphResult, IndexWorkspaceParams,
+    IndexWorkspaceResult, ListPluginsResult, ListSqlSchemaResult, ListSwrlRulesResult,
+    LspErrorPayload, ManchesterCompletions, ParseManchesterParams, ParseManchesterResult,
+    ParseSwrlRuleParams, ParseSwrlRuleResult, PreviewRefactorParams, PreviewRefactorResult,
+    QueryParams, RunPluginParams, RunPluginResult, RunReasonerParams, RunReasonerResult,
+    RunRobotParams, RunRobotResult, SearchParams, SearchResult, SemanticDiffParams,
     SemanticDiffResult, SparqlParams, SwrlRuleListItem, TabularQueryResult, UsageSummary,
     ValidateSwrlRuleParams, ValidateSwrlRuleResult,
 };
@@ -33,8 +34,8 @@ use ontocore_diff::{
     diff_git_refs_with_catalogs, discover_repo_root, format_diff_pr_summary, DiffResult,
 };
 use ontocore_reasoner::{
-    classify, explain_alternatives, ExplanationRequest, ReasonerId, ReasonerSnapshot,
-    WorkspaceInputLoader,
+    classify, explain_alternatives, run_dl_query, DlQueryMode, ExplanationRequest, ReasonerId,
+    ReasonerSnapshot, WorkspaceInputLoader,
 };
 use ontocore_refactor::{
     apply_refactor_plan_checked_with_overrides, find_usages_with_overrides, plans_equivalent,
@@ -884,6 +885,47 @@ pub fn handle_get_entity(
         .ok_or_else(LspErrorPayload::not_indexed)?
 }
 
+/// Entity search over the indexed catalog (same matching as `Workspace::search`).
+pub fn handle_search(
+    state: &ServerState,
+    params: SearchParams,
+) -> Result<SearchResult, LspErrorPayload> {
+    let needle = params.query.to_ascii_lowercase();
+    let limit = params.limit.unwrap_or(100).min(500);
+    if needle.is_empty() {
+        return Ok(SearchResult { entities: Vec::new() });
+    }
+    state
+        .with_catalog(|catalog| {
+            let hierarchy = catalog.class_hierarchy();
+            let mut matches: Vec<ontocore_catalog::EntityDetail> = catalog
+                .data()
+                .entities
+                .iter()
+                .filter(|entity| entity_matches_search_term(entity, &needle))
+                .filter_map(|entity| catalog.entity_detail_with_hierarchy(&entity.iri, &hierarchy))
+                .collect();
+            matches.sort_by(|a, b| a.entity.short_name.cmp(&b.entity.short_name));
+            matches.dedup_by(|a, b| a.entity.iri == b.entity.iri);
+            matches.truncate(limit);
+            Ok(SearchResult { entities: matches })
+        })
+        .ok_or_else(LspErrorPayload::not_indexed)?
+}
+
+fn entity_matches_search_term(entity: &ontocore_core::Entity, needle: &str) -> bool {
+    if entity.iri.to_ascii_lowercase().contains(needle) {
+        return true;
+    }
+    if entity.short_name.to_ascii_lowercase().contains(needle) {
+        return true;
+    }
+    if entity.obo_id.as_ref().is_some_and(|id| id.to_ascii_lowercase().contains(needle)) {
+        return true;
+    }
+    entity.labels.iter().any(|label| label.to_ascii_lowercase().contains(needle))
+}
+
 pub fn handle_get_graph(
     state: &ServerState,
     params: GraphRequest,
@@ -1557,6 +1599,41 @@ pub fn handle_sparql(
         .ok_or_else(LspErrorPayload::not_indexed)?
 }
 
+pub fn handle_dl_query(
+    state: &ServerState,
+    params: DlQueryParams,
+) -> Result<DlQueryResult, LspErrorPayload> {
+    let ops_lock = state.ops_lock();
+    let _guard = ops_lock.lock().map_err(|e| LspErrorPayload::reasoner_failed(e.to_string()))?;
+    let profile = ReasonerId::parse(&params.profile)
+        .map_err(|e| LspErrorPayload::reasoner_failed(e.to_string()))?;
+    let mode = match params.mode.to_ascii_lowercase().as_str() {
+        "asserted" => DlQueryMode::Asserted,
+        _ => DlQueryMode::Inferred,
+    };
+    let input = load_reasoner_input(state)?;
+    let namespaces = resolve_namespaces_for_dl_query(state, params.document_uri.as_deref())?;
+    let result = run_dl_query(profile, &input, &params.expression, &namespaces, mode)
+        .map_err(|e| LspErrorPayload::reasoner_failed(e.to_string()))?;
+    Ok(DlQueryResult {
+        expression: result.expression,
+        normalized: result.normalized,
+        query_class_iri: result.query_class_iri,
+        subclasses: result.subclasses,
+        superclasses: result.superclasses,
+        equivalents: result.equivalents,
+        instances: result.instances,
+        profile: result.profile,
+        mode: match result.mode {
+            DlQueryMode::Asserted => "asserted".to_string(),
+            DlQueryMode::Inferred => "inferred".to_string(),
+        },
+        duration_ms: result.duration_ms,
+        warnings: result.warnings,
+        diagnostics: result.diagnostics,
+    })
+}
+
 pub fn handle_parse_manchester(
     state: &ServerState,
     params: ParseManchesterParams,
@@ -2048,6 +2125,41 @@ fn resolve_namespaces_for_manchester(
                 .map(|d| d.namespaces.clone())
         })
         .flatten()
+        .ok_or_else(LspErrorPayload::not_indexed)
+}
+
+fn resolve_namespaces_for_dl_query(
+    state: &ServerState,
+    document_uri: Option<&str>,
+) -> Result<std::collections::BTreeMap<String, String>, LspErrorPayload> {
+    if let Some(uri) = document_uri {
+        let path = state
+            .resolve_lsp_document_uri(uri)
+            .map_err(|e| LspErrorPayload::reasoner_failed(e.to_string()))?;
+        if let Some(ns) = state
+            .with_catalog(|catalog| {
+                catalog
+                    .data()
+                    .documents
+                    .iter()
+                    .find(|d| ontocore_core::paths_refer_to_same(&d.path, &path))
+                    .map(|d| d.namespaces.clone())
+            })
+            .flatten()
+        {
+            return Ok(ns);
+        }
+    }
+    state
+        .with_catalog(|catalog| {
+            let mut namespaces = std::collections::BTreeMap::new();
+            for doc in &catalog.data().documents {
+                for (prefix, iri) in &doc.namespaces {
+                    namespaces.entry(prefix.clone()).or_insert_with(|| iri.clone());
+                }
+            }
+            namespaces
+        })
         .ok_or_else(LspErrorPayload::not_indexed)
 }
 
@@ -2682,6 +2794,16 @@ pub fn handle_custom_request(
         "ontocore/sparql" => {
             let params: SparqlParams = parse_custom_params(params)?;
             let result = handle_sparql(state, params)?;
+            serde_json::to_value(result).map_err(|e| LspErrorPayload::index_failed(e.to_string()))
+        }
+        "ontocore/dlQuery" => {
+            let params: DlQueryParams = parse_custom_params(params)?;
+            let result = handle_dl_query(state, params)?;
+            serde_json::to_value(result).map_err(|e| LspErrorPayload::index_failed(e.to_string()))
+        }
+        "ontocore/search" => {
+            let params: SearchParams = parse_custom_params(params)?;
+            let result = handle_search(state, params)?;
             serde_json::to_value(result).map_err(|e| LspErrorPayload::index_failed(e.to_string()))
         }
         "ontocore/parseManchester" => {

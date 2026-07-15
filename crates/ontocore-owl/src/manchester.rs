@@ -1118,7 +1118,7 @@ impl ManchesterParser {
     }
 }
 
-pub(crate) fn class_expression_to_turtle_value(
+pub fn class_expression_to_turtle_value(
     expr: &ClassExpression<RcStr>,
     namespaces: &BTreeMap<String, String>,
     indent: usize,

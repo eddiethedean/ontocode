@@ -7,6 +7,7 @@ mod adapter;
 mod auto;
 mod cache;
 mod dl;
+mod dl_query;
 mod el;
 mod error;
 mod explain;
@@ -24,6 +25,7 @@ pub use abox::{
 };
 pub use adapter::{ReasonerAdapter, ReasonerId, ReasonerProfile};
 pub use cache::{ReasonerCache, ReasonerCacheStore};
+pub use dl_query::{run_dl_query, DlQueryMode, DlQueryResult, DL_QUERY_CLASS_IRI};
 pub use error::{ReasonerError, Result};
 pub use input::{ReasonerInput, WorkspaceInputLoader};
 pub use result::{

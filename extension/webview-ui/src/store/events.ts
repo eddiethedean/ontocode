@@ -2,7 +2,7 @@ import type { CurrentFocus, QueryResultSnapshot } from "./types";
 
 export type WorkspaceEvent =
   | { type: "FocusChanged"; focus: CurrentFocus }
-  | { type: "QueryExecuted"; result: QueryResultSnapshot; language: "sql" | "sparql" }
+  | { type: "QueryExecuted"; result: QueryResultSnapshot; language: "sql" | "sparql" | "dl" }
   | { type: "ReasoningCompleted"; profile: string; unsatisfiable: string[] }
   | { type: "RefactorPreviewReady" }
   | { type: "RefactorCleared" };

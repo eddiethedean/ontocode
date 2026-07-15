@@ -3,6 +3,7 @@ import {
   Callout,
   CodeEditor,
   FormField,
+  IriList,
   Panel,
   PanelHeader,
   Select,
@@ -13,6 +14,7 @@ import { SchemaBrowser } from "../components/SchemaBrowser";
 import { useWorkspaceHost } from "../context/HostContext";
 import { useWorkspaceStore } from "../store";
 import {
+  DlQueryResult,
   HostMessage,
   isHostMessage,
   SavedQuery,
@@ -23,6 +25,34 @@ import type { WorkspaceProps } from "../workspaces/types";
 const STARTER_SQL = "SELECT short_name, labels FROM classes";
 const STARTER_SPARQL =
   "PREFIX ex: <http://example.org/people#>\nSELECT ?s ?p ?o WHERE { ?s ?p ?o } LIMIT 10";
+const STARTER_DL = "Person";
+
+type QueryMode = "sql" | "sparql" | "dl";
+type DlTab = "instances" | "subclasses" | "superclasses" | "equivalents";
+type DlAssertMode = "inferred" | "asserted";
+
+function starterFor(mode: QueryMode): string {
+  if (mode === "sql") {
+    return STARTER_SQL;
+  }
+  if (mode === "sparql") {
+    return STARTER_SPARQL;
+  }
+  return STARTER_DL;
+}
+
+function dlTabItems(result: DlQueryResult, tab: DlTab): string[] {
+  switch (tab) {
+    case "instances":
+      return result.instances;
+    case "subclasses":
+      return result.subclasses;
+    case "superclasses":
+      return result.superclasses;
+    case "equivalents":
+      return result.equivalents;
+  }
+}
 
 export function QueryWorkbenchPanel(_props?: WorkspaceProps): JSX.Element {
   const host = useWorkspaceHost();
@@ -40,9 +70,12 @@ export function QueryWorkbenchPanel(_props?: WorkspaceProps): JSX.Element {
   const [runId, setRunId] = useState(0);
   const runIdRef = useRef(0);
   const pendingRunsRef = useRef(
-    new Map<number, { mode: "sql" | "sparql"; text: string }>()
+    new Map<number, { mode: QueryMode; text: string }>()
   );
   const result = useWorkspaceStore((s) => s.query.lastResult);
+  const [dlResult, setDlResult] = useState<DlQueryResult | null>(null);
+  const [dlTab, setDlTab] = useState<DlTab>("instances");
+  const [dlMode, setDlMode] = useState<DlAssertMode>("inferred");
 
   useEffect(() => {
     runIdRef.current = runId;
@@ -72,7 +105,16 @@ export function QueryWorkbenchPanel(_props?: WorkspaceProps): JSX.Element {
           return;
         }
         setError(msg.error ?? "");
-        if (msg.result) {
+        if (msg.dlResult) {
+          setDlResult(msg.dlResult);
+          setQueryResult(null);
+          const ran = pendingRunsRef.current.get(msg.runId);
+          pendingRunsRef.current.delete(msg.runId);
+          if (ran) {
+            addQueryHistory({ language: ran.mode, text: ran.text });
+          }
+        } else if (msg.result) {
+          setDlResult(null);
           const snapshot = {
             columns: msg.result.columns,
             rows: msg.result.rows.map((row) =>
@@ -87,6 +129,7 @@ export function QueryWorkbenchPanel(_props?: WorkspaceProps): JSX.Element {
             addQueryHistory({ language: ran.mode, text: ran.text });
           }
         } else {
+          setDlResult(null);
           setQueryResult(null);
           pendingRunsRef.current.delete(msg.runId);
         }
@@ -96,26 +139,42 @@ export function QueryWorkbenchPanel(_props?: WorkspaceProps): JSX.Element {
     return () => window.removeEventListener("message", handler);
   }, [host, setQueryResult, addQueryHistory]);
 
+  const openEntity = useCallback(
+    (iri: string) => {
+      host.postToCore({ type: "openEntity", iri });
+    },
+    [host]
+  );
+
   const run = useCallback(() => {
     const id = runIdRef.current + 1;
     runIdRef.current = id;
     setRunId(id);
     setError("");
     setQueryResult(null);
+    setDlResult(null);
     pendingRunsRef.current.set(id, { mode, text });
     host.postToCore({
       type: "runQuery",
       mode,
       text,
       runId: id,
+      ...(mode === "dl" ? { dlMode } : {}),
     });
-  }, [host, mode, text, setQueryResult]);
+  }, [host, mode, text, dlMode, setQueryResult]);
+
+  const editorLabel =
+    mode === "sql"
+      ? "SQL query"
+      : mode === "sparql"
+        ? "SPARQL query"
+        : "Manchester class expression";
 
   return (
     <Panel>
       <PanelHeader
         title="Query Workbench"
-        subtitle="Run SQL or SPARQL against the indexed ontology catalog."
+        subtitle="Run SQL, SPARQL, or DL Query against the indexed ontology."
       />
 
       <Toolbar>
@@ -124,13 +183,16 @@ export function QueryWorkbenchPanel(_props?: WorkspaceProps): JSX.Element {
             <Select
               value={mode}
               onChange={(e) => {
-                const m = e.target.value as "sql" | "sparql";
+                const m = e.target.value as QueryMode;
                 setQueryLanguage(m);
-                setQueryText(m === "sql" ? STARTER_SQL : STARTER_SPARQL);
+                setQueryText(starterFor(m));
+                setDlResult(null);
+                setQueryResult(null);
               }}
             >
               <option value="sql">SQL</option>
               <option value="sparql">SPARQL</option>
+              <option value="dl">DL Query</option>
             </Select>
           </FormField>
           {mode === "sql" ? (
@@ -148,6 +210,17 @@ export function QueryWorkbenchPanel(_props?: WorkspaceProps): JSX.Element {
                     {t}
                   </option>
                 ))}
+              </Select>
+            </FormField>
+          ) : null}
+          {mode === "dl" ? (
+            <FormField label="Reasoning">
+              <Select
+                value={dlMode}
+                onChange={(e) => setDlMode(e.target.value as DlAssertMode)}
+              >
+                <option value="inferred">Inferred</option>
+                <option value="asserted">Asserted</option>
               </Select>
             </FormField>
           ) : null}
@@ -169,6 +242,7 @@ export function QueryWorkbenchPanel(_props?: WorkspaceProps): JSX.Element {
                 name,
                 mode,
                 text,
+                ...(mode === "dl" ? { dlMode } : {}),
               });
             }}
           >
@@ -213,7 +287,7 @@ export function QueryWorkbenchPanel(_props?: WorkspaceProps): JSX.Element {
       ) : null}
 
       <CodeEditor
-        label={mode === "sql" ? "SQL query" : "SPARQL query"}
+        label={editorLabel}
         value={text}
         onChange={(e) => setQueryText(e.target.value)}
         rows={12}
@@ -228,6 +302,9 @@ export function QueryWorkbenchPanel(_props?: WorkspaceProps): JSX.Element {
                 if (item) {
                   setQueryLanguage(item.mode);
                   setQueryText(item.text);
+                  if (item.mode === "dl") {
+                    setDlMode(item.dlMode === "asserted" ? "asserted" : "inferred");
+                  }
                 }
               }}
             >
@@ -246,6 +323,9 @@ export function QueryWorkbenchPanel(_props?: WorkspaceProps): JSX.Element {
                 if (item) {
                   setQueryLanguage(item.mode);
                   setQueryText(item.text);
+                  if (item.mode === "dl") {
+                    setDlMode(item.dlMode === "asserted" ? "asserted" : "inferred");
+                  }
                 }
               }}
             >
@@ -262,7 +342,42 @@ export function QueryWorkbenchPanel(_props?: WorkspaceProps): JSX.Element {
 
       {error ? <Callout variant="error">{error}</Callout> : null}
 
-      {result ? (
+      {dlResult ? (
+        <div className="results">
+          {(dlResult.warnings?.length ?? 0) > 0 || (dlResult.diagnostics?.length ?? 0) > 0 ? (
+            <Callout variant="warning">
+              {[...(dlResult.diagnostics ?? []), ...(dlResult.warnings ?? [])].join(" · ")}
+            </Callout>
+          ) : null}
+          <p className="oc-muted oc-results-banner">
+            {dlResult.normalized} · {dlResult.mode} · {dlResult.duration_ms} ms
+          </p>
+          <Toolbar>
+            <ToolbarGroup>
+              {(
+                [
+                  ["instances", "Instances"],
+                  ["subclasses", "Subclasses"],
+                  ["superclasses", "Superclasses"],
+                  ["equivalents", "Equivalents"],
+                ] as const
+              ).map(([id, label]) => (
+                <button
+                  key={id}
+                  type="button"
+                  className={dlTab === id ? undefined : "secondary"}
+                  onClick={() => setDlTab(id)}
+                >
+                  {label} ({dlTabItems(dlResult, id).length})
+                </button>
+              ))}
+            </ToolbarGroup>
+          </Toolbar>
+          <IriList items={dlTabItems(dlResult, dlTab)} onSelect={openEntity} />
+        </div>
+      ) : null}
+
+      {!dlResult && result ? (
         <div className="results">
           {result.truncated ? (
             <p className="oc-muted oc-results-banner">Results truncated at server row limit.</p>

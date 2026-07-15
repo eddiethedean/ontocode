@@ -4,7 +4,7 @@ Short pointer to platform planning docs.
 
 ## Forward plan (v0.12 → v1.2+)
 
-The canonical roadmap — all release phases from v0.1 through post-1.2, including v0.12 authoring parity, v0.13 platform hardening, v0.14 plugin host, the Protégé 1.0 objective, ontology toolchain integration (owlmake, ROBOT/ODK), language bindings, and the v1.2 toolchain platform — lives in **[Platform roadmap](../roadmap.md)**.
+The canonical roadmap — all release phases from v0.1 through post-1.2, including v0.12 authoring parity, v0.13 platform hardening, v0.14 plugin host, the Protégé 1.0 objective, ontology toolchain integration (owlmake, ROBOT/ODK), language bindings, the v1.2 toolchain platform, and the **v1.3+ webapp path (hosted OntoCode Web + React app no-backend via WASM)** — lives in **[Platform roadmap](../roadmap.md)** ([full GitHub ROADMAP.md](https://github.com/eddiethedean/ontocode/blob/main/ROADMAP.md)).
 
 ## Shipped milestones (v0.1–v0.9)
 

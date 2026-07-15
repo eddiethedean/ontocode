@@ -1,4 +1,4 @@
-import { SavedQuery, TabularQueryResult } from "../lsp/protocol";
+import { DlQueryResult, SavedQuery, TabularQueryResult } from "../lsp/protocol";
 
 export const SQL_TABLES = [
   "ontologies",
@@ -21,6 +21,26 @@ export const STARTER_SQL = "SELECT short_name, labels FROM classes";
 export const STARTER_SPARQL =
   "PREFIX ex: <http://example.org/people#>\nSELECT ?s ?p ?o WHERE { ?s ?p ?o } LIMIT 10";
 
+export const STARTER_DL = "Person";
+
+/** Flatten DL Query hits into a tabular shape for CSV export. */
+export function dlQueryToTabular(result: DlQueryResult): TabularQueryResult {
+  const rows: Array<Record<string, string>> = [];
+  for (const iri of result.instances) {
+    rows.push({ kind: "instance", iri });
+  }
+  for (const iri of result.subclasses) {
+    rows.push({ kind: "subclass", iri });
+  }
+  for (const iri of result.superclasses) {
+    rows.push({ kind: "superclass", iri });
+  }
+  for (const iri of result.equivalents) {
+    rows.push({ kind: "equivalent", iri });
+  }
+  return { columns: ["kind", "iri"], rows };
+}
+
 export function exportResultCsv(result: TabularQueryResult): string {
   const header = result.columns.join(",");
   const lines = result.rows.map((row) =>
@@ -35,7 +55,7 @@ export function exportResultCsv(result: TabularQueryResult): string {
   return [header, ...lines].join("\n");
 }
 
-export function exportResultJson(result: TabularQueryResult): string {
+export function exportResultJson(result: TabularQueryResult | DlQueryResult): string {
   return JSON.stringify(result, null, 2);
 }
 
@@ -45,12 +65,18 @@ export function mergeHistory(
   limit: number
 ): SavedQuery[] {
   const filtered = history.filter(
-    (h) => !(h.mode === entry.mode && h.text === entry.text)
+    (h) =>
+      !(
+        h.mode === entry.mode &&
+        h.text === entry.text &&
+        (h.dlMode ?? undefined) === (entry.dlMode ?? undefined)
+      )
   );
-  return [{ name: entry.name, mode: entry.mode, text: entry.text }, ...filtered].slice(
-    0,
-    limit
-  );
+  const next: SavedQuery = { name: entry.name, mode: entry.mode, text: entry.text };
+  if (entry.mode === "dl" && entry.dlMode) {
+    next.dlMode = entry.dlMode;
+  }
+  return [next, ...filtered].slice(0, limit);
 }
 
 export function upsertSavedQuery(

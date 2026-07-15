@@ -1,6 +1,6 @@
-# OntoCore LSP API (v0.23)
+# OntoCore LSP API (v0.24)
 
-> **Status:** Documents behavior in **OntoCore v0.23.0**. Pre-1.0 APIs may change.
+> **Status:** Documents behavior in **OntoCore v0.24.0**. Pre-1.0 APIs may change.
 > Canonical feature list: [What ships today](SHIPPED.md).
 
 This document describes **what ships today** in `ontocore-lsp`. For the **v1.0 target** (extended plugin methods), see [LSP_SPEC.md](design/LSP_SPEC.md).
@@ -9,7 +9,7 @@ This document describes **what ships today** in `ontocore-lsp`. For the **v1.0 t
 
 If you are integrating OntoCore outside VS Code (custom editor, scripts, automation), treat the JSON schema as the **canonical, machine-readable contract** for this release:
 
-- **LSP JSON Schema:** [`lsp-protocol.schema.json`](lsp-protocol.schema.json) (ships with product **v0.23.0**)
+- **LSP JSON Schema:** [`lsp-protocol.schema.json`](lsp-protocol.schema.json) (ships with product **v0.24.0**)
 
 ### Schema vs product version
 
@@ -20,7 +20,7 @@ The schema file is the wire contract for the **current product release**. Until 
 Until v1.0, minor releases may change request/response fields.
 For stable integrations:
 
-- Pin OntoCore to **0.23.0** in your tooling.
+- Pin OntoCore to **0.24.0** in your tooling.
 - Prefer consuming `lsp-protocol.schema.json` from the same tagged release you deploy.
 
 ## Wire format
@@ -30,7 +30,7 @@ LSP JSON uses **snake_case** for enums serialized from Rust (`EntityKind`, `Pars
 **Reference links (implementation):**
 
 - Types: [`protocol.rs` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/crates/ontocore-lsp/src/protocol.rs)
-- JSON Schema: [`lsp-protocol.schema.json`](lsp-protocol.schema.json) — query, patch, reasoner, refactor, graph, semantic diff, schema browser, PR summary, plugin payloads, explanation alternatives.
+- JSON Schema: [`lsp-protocol.schema.json`](lsp-protocol.schema.json) — query, DL Query, search, patch, reasoner, refactor, graph, semantic diff, schema browser, PR summary, plugin payloads, SWRL, explanation alternatives.
 - Handlers: [`handlers.rs` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/crates/ontocore-lsp/src/handlers.rs)
 - Extension client: [`client.ts` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/extension/src/lsp/client.ts)
 
@@ -423,9 +423,15 @@ Build a refactor plan without writing files.
 | `kind` | Fields |
 |--------|--------|
 | `rename_iri` | `from_iri`, `to_iri` |
+| `merge_entities` | `keep_iri`, `merge_iri` |
+| `replace_entity` | `from_iri`, `to_iri` |
 | `migrate_namespace` | `from_base`, `to_base` |
 | `move_entity` | `entity_iri`, `target_file` |
-| `extract_module` | `entity_iris[]`, `output_file`, `leave_stub?` |
+| `extract_module` | `entity_iris[]`, `output_file`, `leave_stub?`, `locality?` |
+| `move_axioms` | `entity_iri`, `target_file`, `statement_indexes?`, `exclude_primary?` |
+| `merge_ontologies` | `source_paths[]`, `target_file` |
+| `flatten_imports` | `ontology_file` |
+| `cleanup_imports` | `ontology_file` |
 
 **Result:** `RefactorPlan` — `{ changes: FileChange[], warnings: string[] }` where each change has `path`, `preview_text`, `original_text`, and `hunks`.
 
@@ -614,6 +620,50 @@ Plugin diagnostics use `code` values like `plugin:<id>:<code>` and LSP `source` 
 **Errors:** `NOT_INDEXED`, `INDEX_FAILED` (plugin not found, missing permission, unsupported action, subprocess failure, or export error)
 
 `getCatalogSnapshot` includes plugin diagnostics merged after index (same wire codes).
+
+### `ontocore/dlQuery` (v0.24+)
+
+Run a Manchester **class expression** DL Query (instances / subclasses / superclasses / equivalents). Named classes use hierarchy + realization; anonymous expressions inject a temporary equivalent class (never written to disk).
+
+**Params:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `expression` | string | Manchester class expression |
+| `profile` | string? | Reasoner profile (default `dl`) |
+| `mode` | string? | `inferred` (default) or `asserted` |
+| `document_uri` | string? | Optional document for prefix context |
+
+**Result:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `expression` | string | Input expression |
+| `normalized` | string | Normalized form |
+| `query_class_iri` | string | Named class or temporary query class IRI |
+| `subclasses` / `superclasses` / `equivalents` / `instances` | string[] | Hit IRIs |
+| `profile` / `mode` | string | Profile and query mode used |
+| `duration_ms` | integer | Elapsed time |
+| `warnings` / `diagnostics` | string[] | Optional messages |
+
+**Errors:** `NOT_INDEXED`, `REASONER_FAILED`, `INVALID_PARAMS`, `MANCHESTER_INVALID`
+
+Honesty notes: [DL Query guide](guides/dl-query.md) · cookbook: [examples/dl-query.md](examples/dl-query.md).
+
+### `ontocore/search` (v0.24+)
+
+Workspace entity search for QuickPick / live search UIs.
+
+**Params:**
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `query` | string | Search text (short name / IRI substring) |
+| `limit` | integer? | Max hits (default 100, capped at 500) |
+
+**Result:** `{ entities: EntityDetail[] }`
+
+**Errors:** `NOT_INDEXED`
 
 ### `ontocore/checkInstance` (v0.23+)
 

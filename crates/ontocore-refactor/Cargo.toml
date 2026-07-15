@@ -17,6 +17,8 @@ include = ["src/**/*", "Cargo.toml", "README.md", "LICENSE-MIT", "LICENSE-APACHE
 ontocore-catalog = { workspace = true }
 ontocore-core = { workspace = true }
 ontocore-owl = { workspace = true }
+ontocore-obo = { workspace = true }
+ontocore-swrl = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 thiserror.workspace = true
 

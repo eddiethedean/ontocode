@@ -24,6 +24,24 @@ ontocore refactor rename /path/to/ontologies \
   --to 'http://example.org/people#Human'
 ```
 
+## Merge entities
+
+```bash
+ontocore refactor merge /path/to/ontologies \
+  --keep 'http://example.org/people#Person' \
+  --merge 'http://example.org/people#Human' \
+  --preview
+```
+
+## Replace entity references
+
+```bash
+ontocore refactor replace /path/to/ontologies \
+  --from 'http://example.org/people#OldName' \
+  --to 'http://example.org/people#NewName' \
+  --preview
+```
+
 ## Migrate namespace
 
 ```bash
@@ -48,6 +66,7 @@ ontocore refactor extract /path/to/ontologies \
   --entities 'http://example.org/people#Person,http://example.org/people#Student' \
   --out /path/to/ontologies/core.ttl \
   --leave-stub \
+  --locality \
   --preview
 ```
 

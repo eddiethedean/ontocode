@@ -12,6 +12,8 @@ import {
   assertIndexWorkspaceResult,
   assertApplyPatchResult,
   assertTabularQueryResult,
+  assertDlQueryResult,
+  assertSearchResult,
   assertParseManchesterResult,
   assertRunReasonerResult,
   assertGetExplanationResult,
@@ -30,47 +32,51 @@ import {
   ApplyAxiomPatchClientResult,
   ApplyAxiomPatchParams,
   ApplyPatchResult,
+  ApplyRefactorResult,
   CatalogSnapshot,
+  CreateOntologyParams,
+  CreateOntologyResult,
+  DeleteImpactParams,
+  DeleteImpactResult,
+  DlQueryParams,
+  DlQueryResult,
+  ExportOntologyParams,
+  ExportOntologyResult,
+  FindUsagesResult,
+  GetDialogSchemaResult,
   GetEntityResult,
   GetExplanationParams,
   GetExplanationResult,
   GetGraphParams,
   GetGraphResult,
   IndexWorkspaceResult,
+  ListCommandsResult,
+  ListPluginsResult,
   ListSwrlRulesResult,
   ParseManchesterParams,
   ParseManchesterResult,
   ParseSwrlRuleParams,
   ParseSwrlRuleResult,
+  PreviewRefactorResult,
+  RefactorPlan,
+  RefactorRequest,
+  RunPluginParams,
+  RunPluginResult,
   RunReasonerParams,
   RunReasonerResult,
   RunRobotParams,
   RunRobotResult,
-  TabularQueryResult,
-  FindUsagesResult,
-  RefactorRequest,
-  PreviewRefactorResult,
-  RefactorPlan,
-  ValidateSwrlRuleParams,
-  ValidateSwrlRuleResult,
-  ApplyRefactorResult,
+  SearchParams,
+  SearchResult,
   SemanticDiffParams,
   SemanticDiffResult,
-  ListPluginsResult,
-  RunPluginParams,
-  RunPluginResult,
-  ListCommandsResult,
-  WorkspaceUiStateParams,
-  WorkspaceUiState,
-  GetDialogSchemaResult,
-  CreateOntologyParams,
-  CreateOntologyResult,
-  ExportOntologyParams,
-  ExportOntologyResult,
   SetActiveOntologyParams,
   SetActiveOntologyResult,
-  DeleteImpactParams,
-  DeleteImpactResult,
+  TabularQueryResult,
+  ValidateSwrlRuleParams,
+  ValidateSwrlRuleResult,
+  WorkspaceUiState,
+  WorkspaceUiStateParams,
 } from "./protocol";
 import { focusRelay } from "../focus/focusRelay";
 import {
@@ -400,6 +406,20 @@ export async function runSparqlQuery(
 ): Promise<TabularQueryResult> {
   const result = await ontcoreRequest<unknown>("ontocore/sparql", { query });
   return assertTabularQueryResult(result);
+}
+
+export async function runDlQuery(
+  params: DlQueryParams
+): Promise<DlQueryResult> {
+  const result = await ontcoreRequest<unknown>("ontocore/dlQuery", params);
+  return assertDlQueryResult(result);
+}
+
+export async function searchEntities(
+  params: SearchParams
+): Promise<SearchResult> {
+  const result = await ontcoreRequest<unknown>("ontocore/search", params);
+  return assertSearchResult(result);
 }
 
 export async function parseManchester(

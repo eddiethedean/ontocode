@@ -1,0 +1,16 @@
+@prefix ex: <http://example.org/swrl#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://example.org/swrl> a owl:Ontology .
+
+ex:Person a owl:Class .
+ex:Human a owl:Class .
+ex:Pet a owl:Class .
+ex:hasPet a owl:ObjectProperty ;
+    rdfs:domain ex:Person ;
+    rdfs:range ex:Pet .
+
+<http://example.org/swrl> <http://ontocode.dev/ns#swrlRule> "{\"id\":\"person-to-human\",\"body\":[{\"kind\":\"class\",\"class\":\"http://example.org/swrl#Person\",\"arg\":{\"variable\":\"x\"}},{\"kind\":\"object_property\",\"property\":\"http://example.org/swrl#hasPet\",\"subject\":{\"variable\":\"x\"},\"object\":{\"variable\":\"y\"}}],\"head\":[{\"kind\":\"class\",\"class\":\"http://example.org/swrl#Human\",\"arg\":{\"variable\":\"x\"}}],\"enabled\":true}"^^<http://www.w3.org/2001/XMLSchema#string> .

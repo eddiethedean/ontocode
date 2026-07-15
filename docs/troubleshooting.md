@@ -78,17 +78,17 @@ Patches write the **source file on disk** first (`.ttl` or `.obo`), then update 
 
 **Fix:**
 
-1. Pin the latest tagged release from [docs/TAGGED_RELEASE](https://github.com/eddiethedean/ontocode/blob/main/docs/TAGGED_RELEASE) (currently **0.23.0**):
+1. Pin the latest tagged release from [docs/TAGGED_RELEASE](https://github.com/eddiethedean/ontocode/blob/main/docs/TAGGED_RELEASE) (currently **0.24.0**):
 
    ```bash
-   cargo install ontocore-cli --locked --version 0.23.0
+   cargo install ontocore-cli --locked --version 0.24.0
    ```
 
-2. For release tarballs, download assets from the matching tag (e.g. `v0.23.0`). Prefer the tagged release over docs that may preview a future minor on `main`.
+2. For release tarballs, download assets from the matching tag (e.g. `v0.24.0`). Prefer the tagged release over docs that may preview a future minor on `main`.
 
-3. Ensure `~/.cargo/bin` is on your `PATH` — see [getting started](getting-started.md).
+3. Ensure Cargo’s bin directory is on your `PATH` — see [Install CLI](guides/install-cli.md).
 
-Marketplace / Open VSX extension versions may also lag `main` — check the extension version in VS Code **Extensions** view.
+Marketplace / Open VSX extension versions may lag a brand-new GitHub tag briefly — check the installed extension version in **Extensions**, or install the release VSIX from [GitHub Releases](https://github.com/eddiethedean/ontocode/releases).
 
 ## CLI: `ontocore query ./fixtures` fails
 
@@ -102,10 +102,12 @@ ontocore query /path/to/your/ontologies "SELECT * FROM classes"
 
 | Symptom | Fix |
 |---------|-----|
-| `ontocore: command not found` after `cargo install` | Add `~/.cargo/bin` to your `PATH` — see [Install CLI & CI](getting-started.md#prerequisites) |
+| `ontocore: command not found` after `cargo install` | **Unix/macOS:** add `$HOME/.cargo/bin` to `PATH`. **Windows (PowerShell):** `$env:Path += ";$env:USERPROFILE\.cargo\bin"` then open a new terminal — see [Install CLI](guides/install-cli.md) |
 | `cargo install` fails with MSRV / edition error | Run `rustup update stable`; require Rust **1.88+** (`rustc --version`) |
-| `cargo install` network / crates.io errors | Retry with `--locked`; pin `--version 0.23.0` in CI |
+| `cargo install` network / crates.io errors | Retry with `--locked`; pin `--version 0.24.0` in CI |
 | Release tarball on macOS/Windows | CLI pre-builds are **Linux x64 only** — use `cargo install` or the VSIX extension |
+| macOS Gatekeeper blocks bundled `ontocore-lsp` | Prefer Marketplace install; for sideloaded VSIX see [VS Code install](vscode-install.md) (`xattr -d com.apple.quarantine` when needed) |
+| Corporate Marketplace blocked / lag | Install `ontocode-v0.24.0.vsix` from [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) — [VS Code install](vscode-install.md) |
 | `ontocore diff HEAD..WORKTREE` fails | Run from a **git repository** root containing ontology files |
 
 ## CLI: `validate` exits non-zero

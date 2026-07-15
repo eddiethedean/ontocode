@@ -1,6 +1,6 @@
 # Capabilities by format
 
-> **Latest tagged: v0.23.0** — matrix truth: [Supported formats](../supported-formats.md) · [What ships today](../SHIPPED.md).
+> **Latest tagged: v0.24.0** — matrix truth: [Supported formats](../supported-formats.md) · [What ships today](../SHIPPED.md).
 
 One-page view of what each format can do in OntoCode / OntoCore. Prefer this when deciding whether to keep Turtle, OBO, or Protégé-style XML.
 
@@ -14,10 +14,13 @@ One-page view of what each format can do in OntoCode / OntoCore. Prefer this whe
 | Create / delete entities | Yes | Limited OBO term ops | Yes (core ops) | Yes (core ops) | No |
 | Manchester apply (rich class expressions) | Yes (richest) | No | Limited (named ops via patches) | Limited | No |
 | HasKey / DisjointUnion / RBox / ABox (v0.22) | Yes | No | Yes (mutate / re-serialize) | Yes | No |
-| Refactor apply (rename, migrate, move, extract) | Yes | No | No | No | No |
+| Refactor apply (rename, merge, replace) | Yes | Yes¹ | Yes¹ | Yes¹ | No |
+| Refactor apply (move, extract, ontology merge, flatten/cleanup) | Yes | No | No | No | No |
 | Manage Imports (add/remove) | Yes | — | Yes | Yes | No |
 | Semantic re-serialize on save | No (span surgery) | Stanza-preserving | **Yes** (whole document) | **Yes** | — |
 | Protégé byte-identical layout | N/A | N/A | No | No | — |
+
+¹ Semantic remap + re-serialize (XML ADR-0021) or OBO id/reference rewrite — not byte-identical for XML.
 
 ## When to pick which format
 

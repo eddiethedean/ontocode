@@ -9,6 +9,7 @@ import {
   listPlugins,
   previewRefactor,
   runReasoner,
+  searchEntities,
 } from "../lsp/client";
 import { requirePatchFullySynced } from "../lsp/patchFeedback";
 import type {
@@ -123,24 +124,57 @@ export function registerV017Commands(
   command("ontocode.exportOntology", () => runExport(false));
 
   command("ontocode.searchEntities", async () => {
-    const snapshot = await getCatalogSnapshot();
-    const picked = await vscode.window.showQuickPick(
-      snapshot.entities.map((entity) => ({
-        label: entity.labels[0] || entity.short_name || entity.iri,
-        description: entity.kind.replace(/_/g, " "),
-        detail: entity.iri,
-        iri: entity.iri,
-      })),
-      {
-        title: "Search Ontology Entities",
-        matchOnDescription: true,
-        matchOnDetail: true,
+    type PickItem = vscode.QuickPickItem & { iri: string };
+    const qp = vscode.window.createQuickPick<PickItem>();
+    qp.title = "Search Ontology Entities";
+    qp.placeholder = "Type to search by name, label, or IRI…";
+    qp.matchOnDescription = true;
+    qp.matchOnDetail = true;
+    let seq = 0;
+    qp.onDidChangeValue((value) => {
+      const my = ++seq;
+      const trimmed = value.trim();
+      if (!trimmed) {
+        qp.items = [];
+        return;
       }
-    );
-    if (picked) {
-      focusRelay.setEntityFocus(picked.iri, "search");
-      await vscode.commands.executeCommand("ontocode.openEntity", picked.iri);
-    }
+      qp.busy = true;
+      void searchEntities({ query: trimmed, limit: 100 })
+        .then((result) => {
+          if (my !== seq) {
+            return;
+          }
+          qp.items = result.entities.map((detail) => ({
+            label: detail.entity.labels[0] || detail.entity.short_name || detail.entity.iri,
+            description: detail.entity.kind.replace(/_/g, " "),
+            detail: detail.entity.iri,
+            iri: detail.entity.iri,
+          }));
+        })
+        .catch((err: unknown) => {
+          if (my !== seq) {
+            return;
+          }
+          qp.items = [];
+          const message = err instanceof Error ? err.message : String(err);
+          void vscode.window.showErrorMessage(`OntoCode: search failed — ${message}`);
+        })
+        .finally(() => {
+          if (my === seq) {
+            qp.busy = false;
+          }
+        });
+    });
+    qp.onDidAccept(() => {
+      const picked = qp.selectedItems[0];
+      if (picked) {
+        focusRelay.setEntityFocus(picked.iri, "search");
+        void vscode.commands.executeCommand("ontocode.openEntity", picked.iri);
+      }
+      qp.hide();
+    });
+    qp.onDidHide(() => qp.dispose());
+    qp.show();
   });
 
   command("ontocode.openPreferences", async () => {

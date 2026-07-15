@@ -1,17 +1,18 @@
 # Find your path (optional)
 
 > **Most users:** go straight to **[First success (~10 min)](guides/first-success.md)**.  
-> **Install (extension + optional CLI):** **[Install](install.md)** · Linux x64 CI tarball: **[CI integration](ci-integration.md)**.  
+> **Install (extension + optional CLI):** **[Install](install.md)**.  
 > **Evaluators:** **[What ships today](SHIPPED.md)**.
 
-This page is a secondary chooser. Prefer the Home CTAs or the **Get started** tab.
+This page is a **secondary chooser** kept for legacy links. Prefer the Home CTAs or the **Get started** tab.
 
 ## Which artifact?
 
 | I want to… | Start here |
 |------------|------------|
-| Edit ontologies in VS Code | [First success](guides/first-success.md) · [Install](install.md) |
-| Validate / query in CI | Linux x64 tarball → [CI integration](ci-integration.md); else [Install](install.md) |
+| Edit ontologies in VS Code / Cursor | [First success](guides/first-success.md) |
+| Install options (extension, VSIX, CLI) | [Install](install.md) |
+| Validate / query in CI | Linux x64 tarball → [CI integration](ci-integration.md); else [Install CLI detail](getting-started.md) |
 | Embed in Rust | [Rust library guide](guides/rust-library.md) |
 | Compare products in detail | [Which artifact](guides/which-artifact.md) |
 
@@ -25,49 +26,10 @@ Read [Known limitations](known-limitations.md) before a large evaluation.
 
 Canonical matrix: [What ships today](SHIPPED.md) · [Known limitations](known-limitations.md).
 
-## Path A — VS Code IDE (recommended for most users)
+## Recommended sequence (IDE users)
 
-1. **Complete the tutorial:** [First success (~10 min)](guides/first-success.md)
-2. **Confirm your formats:** [Supported formats](supported-formats.md)
-3. **Learn the core workflows:**
-   - Editing: [Authoring guide](authoring.md)
-   - Query: [Query Workbench](ontocode/query-workbench.md)
-   - Reasoning: [Reasoner guide](guides/reasoner.md)
-   - Imports: [Manage Imports](ontocode/manage-imports.md)
+1. [First success (~10 min)](guides/first-success.md)
+2. [Supported formats](supported-formats.md)
+3. [Query Workbench](ontocode/query-workbench.md) · [DL Query honesty](guides/dl-query.md) · [Reasoner](guides/reasoner.md)
 
-**Then (optional):** [Feature tour](ontocode/feature-tour.md) · [Install options](vscode-install.md) · [Manchester editor](ontocode/manchester-editor.md) · [Refactoring](guides/refactoring.md)
-
-If something doesn’t work:
-
-- [Troubleshooting](troubleshooting.md)
-- [FAQ](faq.md)
-- [Support and contact](support.md)
-
-## Path B — CI / CLI (recommended for automation and evaluation)
-
-1. **Install + run your first command:** [Install CLI & CI (detail)](getting-started.md)
-2. **Run a CI gate locally:**
-   - `ontocore validate /path/to/ontologies`
-   - Optional: `ontocore classify /path/to/ontologies --profile el --format json`
-3. **Wire into CI:** [CI integration](ci-integration.md)
-4. **Know your limits:** [Workspace limits](workspace-limits.md) and [Performance and sizing](guides/performance-sizing.md)
-5. **Decide what’s safe to automate:** [Automation and stability](automation-stability.md)
-
-If you plan to embed OntoCore or integrate via LSP:
-
-- Rust: [Rust library guide](guides/rust-library.md)
-- LSP: [LSP API](lsp-api.md) (and [schema](lsp-protocol.schema.json))
-
-## If you’re evaluating adoption
-
-Read these in order:
-
-1. [What ships today](SHIPPED.md)
-2. [Known limitations](known-limitations.md)
-3. [Enterprise evaluation](guides/enterprise-eval.md)
-4. [Production readiness](guides/production-readiness.md)
-5. [Security policy](security.md)
-
-## Supported since v0.10+
-
-- **Multi-root workspaces:** All workspace folders are indexed on open. Manual **Index Workspace** may prompt you to pick a folder when multiple roots are open.
+CLI / scripting detail (not required for the IDE tutorial): [Install CLI & CI](getting-started.md).

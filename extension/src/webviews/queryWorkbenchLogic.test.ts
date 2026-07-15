@@ -1,4 +1,5 @@
 import {
+  dlQueryToTabular,
   exportResultCsv,
   mergeHistory,
   shouldDeliverQueryResult,
@@ -45,4 +46,42 @@ test("upsertSavedQuery replaces same name", () => {
   );
   assert.equal(saved.length, 1);
   assert.equal(saved[0]?.mode, "sparql");
+});
+
+test("upsertSavedQuery accepts dl mode", () => {
+  const saved = upsertSavedQuery([], {
+    name: "q-dl",
+    mode: "dl",
+    text: "Person and hasPet some Animal",
+    dlMode: "asserted",
+  });
+  assert.equal(saved[0]?.mode, "dl");
+  assert.equal(saved[0]?.dlMode, "asserted");
+});
+
+test("mergeHistory preserves dlMode", () => {
+  const history = mergeHistory(
+    [],
+    { name: "dl", mode: "dl", text: "Person", dlMode: "asserted" },
+    5
+  );
+  assert.equal(history[0]?.dlMode, "asserted");
+});
+
+test("dlQueryToTabular flattens tabs", () => {
+  const tabular = dlQueryToTabular({
+    expression: "Person",
+    normalized: "Person",
+    query_class_iri: "http://example.org#Person",
+    instances: ["http://example.org#Alice"],
+    subclasses: ["http://example.org#Student"],
+    superclasses: ["http://example.org#Agent"],
+    equivalents: [],
+    profile: "dl",
+    mode: "inferred",
+    duration_ms: 1,
+  });
+  assert.deepEqual(tabular.columns, ["kind", "iri"]);
+  assert.equal(tabular.rows.length, 3);
+  assert.equal(tabular.rows[0]?.kind, "instance");
 });

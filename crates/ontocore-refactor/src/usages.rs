@@ -258,6 +258,36 @@ pub fn find_usages_with_overrides(
         }
     }
 
+    // SWRL JSON annotation references (inside string literals).
+    for doc in &data.documents {
+        if doc.format != OntologyFormat::Turtle || doc.parse_status != ParseStatus::Ok {
+            continue;
+        }
+        let Ok(text) = read_source_text(&doc.path, document_overrides) else {
+            continue;
+        };
+        for (rule_idx, rule) in
+            ontocore_swrl::rules_from_turtle_document(&text).into_iter().enumerate()
+        {
+            if rule.referenced_iris().iter().any(|iri| iri == target_iri) {
+                let key = (doc.path.clone(), UsageKind::SwrlReference, format!("swrl-{rule_idx}"));
+                if seen.insert(key) {
+                    usages.push(Usage {
+                        iri: rule.id.clone().unwrap_or_else(|| format!("rule-{rule_idx}")),
+                        referenced_iri: target_iri.to_string(),
+                        file: doc.path.clone(),
+                        line: None,
+                        column: None,
+                        start_byte: None,
+                        end_byte: None,
+                        kind: UsageKind::SwrlReference,
+                        context: format!("SWRL rule {}", rule.id.as_deref().unwrap_or("anonymous")),
+                    });
+                }
+            }
+        }
+    }
+
     usages.sort_by(|a, b| {
         a.file
             .cmp(&b.file)

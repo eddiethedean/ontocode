@@ -24,46 +24,165 @@ pub fn preview_rename_iri(
 
     let mut file_changes: BTreeMap<PathBuf, FileChange> = BTreeMap::new();
     let mut warnings = Vec::new();
+    let from_obo = catalog.find_entity(from_iri).and_then(|e| e.obo_id.clone());
+    let to_obo = catalog.find_entity(to_iri).and_then(|e| e.obo_id.clone()).or_else(|| {
+        // Derive local id from IRIs when renaming within the same OBO namespace.
+        short_obo_id_from_iri(to_iri).or_else(|| {
+            from_obo.as_ref().map(|_| {
+                short_obo_id_from_iri(to_iri).unwrap_or_else(|| {
+                    to_iri.rsplit(['#', '/']).next().unwrap_or(to_iri).to_string()
+                })
+            })
+        })
+    });
 
     for doc in &catalog.data().documents {
-        if doc.format != OntologyFormat::Turtle || doc.parse_status != ParseStatus::Ok {
+        if doc.parse_status != ParseStatus::Ok {
             if text_contains_iri(doc, from_iri, document_overrides) {
-                warnings
-                    .push(format!("skipping non-Turtle or errored file: {}", doc.path.display()));
+                warnings.push(format!("skipping errored file: {}", doc.path.display()));
             }
             continue;
         }
         let original = read_source_text(&doc.path, document_overrides)?;
-        if !original.contains(from_iri)
-            && !contains_prefixed_ref(&original, from_iri, &doc.namespaces)
-        {
+        let preview = match doc.format {
+            OntologyFormat::Turtle => {
+                if !original.contains(from_iri)
+                    && !contains_prefixed_ref(&original, from_iri, &doc.namespaces)
+                {
+                    continue;
+                }
+                let (mut preview_text, raw_hunks) =
+                    replace_iri_in_text(&original, from_iri, to_iri, &doc.namespaces);
+                let (swrl_text, swrl_hits) =
+                    ontocore_swrl::rewrite_swrl_iris_in_turtle(&preview_text, from_iri, to_iri);
+                if swrl_hits > 0 {
+                    preview_text = swrl_text;
+                    warnings.push(format!(
+                        "rewrote {swrl_hits} SWRL rule(s) in {}",
+                        doc.path.display()
+                    ));
+                }
+                if preview_text == original {
+                    continue;
+                }
+                let hunks: Vec<Hunk> = raw_hunks
+                    .into_iter()
+                    .map(|(start, end, old_text, new_text)| Hunk {
+                        start_byte: start as u64,
+                        end_byte: end as u64,
+                        old_text,
+                        new_text,
+                    })
+                    .collect();
+                file_changes.insert(
+                    doc.path.clone(),
+                    FileChange {
+                        path: doc.path.clone(),
+                        preview_text,
+                        original_text: original,
+                        hunks,
+                    },
+                );
+                continue;
+            }
+            OntologyFormat::Owl | OntologyFormat::RdfXml => {
+                if !original.contains(from_iri) {
+                    continue;
+                }
+                match ontocore_owl::remap_entity_iri_in_xml_text(
+                    &original,
+                    "rdfxml",
+                    from_iri,
+                    to_iri,
+                    &doc.namespaces,
+                ) {
+                    Ok(text) => text,
+                    Err(e) => {
+                        warnings.push(format!("skipping RDF/XML {}: {e}", doc.path.display()));
+                        continue;
+                    }
+                }
+            }
+            OntologyFormat::OwlXml => {
+                if !original.contains(from_iri) {
+                    continue;
+                }
+                match ontocore_owl::remap_entity_iri_in_xml_text(
+                    &original,
+                    "owlxml",
+                    from_iri,
+                    to_iri,
+                    &doc.namespaces,
+                ) {
+                    Ok(text) => text,
+                    Err(e) => {
+                        warnings.push(format!("skipping OWL/XML {}: {e}", doc.path.display()));
+                        continue;
+                    }
+                }
+            }
+            OntologyFormat::Obo => {
+                let from_id =
+                    from_obo.clone().or_else(|| short_obo_id_from_iri(from_iri)).unwrap_or_else(
+                        || from_iri.rsplit(['#', '/']).next().unwrap_or(from_iri).to_string(),
+                    );
+                let to_id =
+                    to_obo.clone().or_else(|| short_obo_id_from_iri(to_iri)).unwrap_or_else(|| {
+                        to_iri.rsplit(['#', '/']).next().unwrap_or(to_iri).to_string()
+                    });
+                if !original.contains(&from_id) {
+                    continue;
+                }
+                match ontocore_obo::remap_obo_id_in_text(&original, &from_id, &to_id) {
+                    Ok(text) => text,
+                    Err(e) => {
+                        warnings.push(format!("skipping OBO {}: {e}", doc.path.display()));
+                        continue;
+                    }
+                }
+            }
+            other => {
+                if text_contains_iri(doc, from_iri, document_overrides) {
+                    warnings.push(format!(
+                        "skipping unsupported format {} in {}",
+                        other.as_str(),
+                        doc.path.display()
+                    ));
+                }
+                continue;
+            }
+        };
+
+        if preview == original {
             continue;
         }
-        let (preview_text, raw_hunks) =
-            replace_iri_in_text(&original, from_iri, to_iri, &doc.namespaces);
-        if preview_text == original {
-            continue;
-        }
-        let hunks: Vec<Hunk> = raw_hunks
-            .into_iter()
-            .map(|(start, end, old_text, new_text)| Hunk {
-                start_byte: start as u64,
-                end_byte: end as u64,
-                old_text,
-                new_text,
-            })
-            .collect();
-        file_changes.insert(
-            doc.path.clone(),
-            FileChange { path: doc.path.clone(), preview_text, original_text: original, hunks },
-        );
+        file_changes
+            .insert(doc.path.clone(), whole_file_change(doc.path.clone(), original, preview));
     }
 
     if file_changes.is_empty() {
-        warnings.push(format!("no Turtle files changed for IRI {from_iri}"));
+        warnings.push(format!("no files changed for IRI {from_iri}"));
     }
 
-    Ok(RefactorPlan { changes: file_changes.into_values().collect(), warnings })
+    Ok(RefactorPlan {
+        changes: file_changes.into_values().collect(),
+        warnings,
+        ..Default::default()
+    }
+    .with_metrics([from_iri, to_iri]))
+}
+
+fn short_obo_id_from_iri(iri: &str) -> Option<String> {
+    // Common OBO IRIs: http://purl.obolibrary.org/obo/EX_001 → EX:001
+    let local = iri.rsplit(['#', '/']).next()?;
+    if local.contains('_') && !local.contains(':') {
+        let (ns, id) = local.split_once('_')?;
+        return Some(format!("{ns}:{id}"));
+    }
+    if local.contains(':') {
+        return Some(local.to_string());
+    }
+    None
 }
 
 pub fn preview_merge_entities(
@@ -86,33 +205,110 @@ pub fn preview_merge_entities(
 
     let mut changes = BTreeMap::new();
     for doc in &catalog.data().documents {
-        if doc.format != OntologyFormat::Turtle || doc.parse_status != ParseStatus::Ok {
+        if doc.parse_status != ParseStatus::Ok {
             if text_contains_iri(doc, merge_iri, document_overrides) {
-                warnings
-                    .push(format!("skipping non-Turtle or errored file: {}", doc.path.display()));
+                warnings.push(format!("skipping errored file: {}", doc.path.display()));
             }
             continue;
         }
 
         let original = read_source_text(&doc.path, document_overrides)?;
-        if !original.contains(merge_iri)
-            && !contains_prefixed_ref(&original, merge_iri, &doc.namespaces)
-        {
-            continue;
-        }
+        let preview_text = match doc.format {
+            OntologyFormat::Turtle => {
+                if !original.contains(merge_iri)
+                    && !contains_prefixed_ref(&original, merge_iri, &doc.namespaces)
+                {
+                    continue;
+                }
+                let namespaces = ontocore_owl::namespaces_for_text(&original, &doc.namespaces);
+                let short = ontocore_owl::short_name_from_iri(merge_iri);
+                let mut declaration_ranges = ontocore_owl::all_entity_statement_ranges(
+                    &original,
+                    merge_iri,
+                    &short,
+                    &namespaces,
+                );
+                declaration_ranges.sort_by_key(|range| std::cmp::Reverse(range.start));
 
-        let namespaces = ontocore_owl::namespaces_for_text(&original, &doc.namespaces);
-        let short = ontocore_owl::short_name_from_iri(merge_iri);
-        let mut declaration_ranges =
-            ontocore_owl::all_entity_statement_ranges(&original, merge_iri, &short, &namespaces);
-        declaration_ranges.sort_by_key(|range| std::cmp::Reverse(range.start));
+                let mut without_merge_declaration = original.clone();
+                for range in declaration_ranges {
+                    without_merge_declaration
+                        .replace_range(range.start as usize..range.end as usize, "");
+                }
+                let (mut preview_text, _) = replace_iri_in_text(
+                    &without_merge_declaration,
+                    merge_iri,
+                    keep_iri,
+                    &doc.namespaces,
+                );
+                let (swrl_text, swrl_hits) =
+                    ontocore_swrl::rewrite_swrl_iris_in_turtle(&preview_text, merge_iri, keep_iri);
+                if swrl_hits > 0 {
+                    preview_text = swrl_text;
+                    warnings.push(format!(
+                        "rewrote {swrl_hits} SWRL rule(s) in {}",
+                        doc.path.display()
+                    ));
+                }
+                preview_text
+            }
+            OntologyFormat::Owl | OntologyFormat::RdfXml | OntologyFormat::OwlXml => {
+                if !original.contains(merge_iri) {
+                    continue;
+                }
+                let fmt = if doc.format == OntologyFormat::OwlXml { "owlxml" } else { "rdfxml" };
+                match ontocore_owl::remap_entity_iri_in_xml_text(
+                    &original,
+                    fmt,
+                    merge_iri,
+                    keep_iri,
+                    &doc.namespaces,
+                ) {
+                    Ok(text) => text,
+                    Err(e) => {
+                        warnings.push(format!("skipping {} {}: {e}", fmt, doc.path.display()));
+                        continue;
+                    }
+                }
+            }
+            OntologyFormat::Obo => {
+                let from_id = catalog
+                    .find_entity(merge_iri)
+                    .and_then(|e| e.obo_id.clone())
+                    .or_else(|| short_obo_id_from_iri(merge_iri))
+                    .unwrap_or_else(|| {
+                        merge_iri.rsplit(['#', '/']).next().unwrap_or(merge_iri).to_string()
+                    });
+                let to_id = catalog
+                    .find_entity(keep_iri)
+                    .and_then(|e| e.obo_id.clone())
+                    .or_else(|| short_obo_id_from_iri(keep_iri))
+                    .unwrap_or_else(|| {
+                        keep_iri.rsplit(['#', '/']).next().unwrap_or(keep_iri).to_string()
+                    });
+                if !original.contains(&from_id) {
+                    continue;
+                }
+                match ontocore_obo::remap_obo_id_in_text(&original, &from_id, &to_id) {
+                    Ok(text) => text,
+                    Err(e) => {
+                        warnings.push(format!("skipping OBO {}: {e}", doc.path.display()));
+                        continue;
+                    }
+                }
+            }
+            other => {
+                if text_contains_iri(doc, merge_iri, document_overrides) {
+                    warnings.push(format!(
+                        "skipping unsupported format {} in {}",
+                        other.as_str(),
+                        doc.path.display()
+                    ));
+                }
+                continue;
+            }
+        };
 
-        let mut without_merge_declaration = original.clone();
-        for range in declaration_ranges {
-            without_merge_declaration.replace_range(range.start as usize..range.end as usize, "");
-        }
-        let (preview_text, _) =
-            replace_iri_in_text(&without_merge_declaration, merge_iri, keep_iri, &doc.namespaces);
         if preview_text == original {
             continue;
         }
@@ -122,11 +318,11 @@ pub fn preview_merge_entities(
     }
 
     if changes.is_empty() {
-        warnings
-            .push(format!("no Turtle files changed for entity merge {merge_iri} -> {keep_iri}"));
+        warnings.push(format!("no files changed for entity merge {merge_iri} -> {keep_iri}"));
     }
 
-    Ok(RefactorPlan { changes: changes.into_values().collect(), warnings })
+    Ok(RefactorPlan { changes: changes.into_values().collect(), warnings, ..Default::default() }
+        .with_metrics([keep_iri, merge_iri]))
 }
 
 pub fn preview_replace_entity(
@@ -150,32 +346,109 @@ pub fn preview_replace_entity(
     let mut changes = BTreeMap::new();
     let mut warnings = Vec::new();
     for doc in &catalog.data().documents {
-        if doc.format != OntologyFormat::Turtle || doc.parse_status != ParseStatus::Ok {
+        if doc.parse_status != ParseStatus::Ok {
             if text_contains_iri(doc, from_iri, document_overrides) {
-                warnings
-                    .push(format!("skipping non-Turtle or errored file: {}", doc.path.display()));
+                warnings.push(format!("skipping errored file: {}", doc.path.display()));
             }
             continue;
         }
 
         let original = read_source_text(&doc.path, document_overrides)?;
-        if !original.contains(from_iri)
-            && !contains_prefixed_ref(&original, from_iri, &doc.namespaces)
-        {
-            continue;
-        }
+        let preview_text = match doc.format {
+            OntologyFormat::Turtle => {
+                if !original.contains(from_iri)
+                    && !contains_prefixed_ref(&original, from_iri, &doc.namespaces)
+                {
+                    continue;
+                }
+                let namespaces = ontocore_owl::namespaces_for_text(&original, &doc.namespaces);
+                let declaration_start =
+                    ontocore_owl::entity_primary_block_range(&original, from_iri, &namespaces)
+                        .map(|range| range.start as usize);
+                let mut preview_text = replace_iri_preserving_subject(
+                    &original,
+                    from_iri,
+                    to_iri,
+                    &doc.namespaces,
+                    declaration_start,
+                );
+                let (swrl_text, swrl_hits) =
+                    ontocore_swrl::rewrite_swrl_iris_in_turtle(&preview_text, from_iri, to_iri);
+                if swrl_hits > 0 {
+                    preview_text = swrl_text;
+                    warnings.push(format!(
+                        "rewrote {swrl_hits} SWRL rule(s) in {}",
+                        doc.path.display()
+                    ));
+                }
+                preview_text
+            }
+            OntologyFormat::Owl | OntologyFormat::RdfXml | OntologyFormat::OwlXml => {
+                if !original.contains(from_iri) {
+                    continue;
+                }
+                // Existing-target replace on XML remaps all mentions (incl. declaration).
+                warnings.push(format!(
+                    "non-Turtle replace rewrites all IRI mentions in {}",
+                    doc.path.display()
+                ));
+                let fmt = if doc.format == OntologyFormat::OwlXml { "owlxml" } else { "rdfxml" };
+                match ontocore_owl::remap_entity_iri_in_xml_text(
+                    &original,
+                    fmt,
+                    from_iri,
+                    to_iri,
+                    &doc.namespaces,
+                ) {
+                    Ok(text) => text,
+                    Err(e) => {
+                        warnings.push(format!("skipping {} {}: {e}", fmt, doc.path.display()));
+                        continue;
+                    }
+                }
+            }
+            OntologyFormat::Obo => {
+                let from_id = catalog
+                    .find_entity(from_iri)
+                    .and_then(|e| e.obo_id.clone())
+                    .or_else(|| short_obo_id_from_iri(from_iri))
+                    .unwrap_or_else(|| {
+                        from_iri.rsplit(['#', '/']).next().unwrap_or(from_iri).to_string()
+                    });
+                let to_id = catalog
+                    .find_entity(to_iri)
+                    .and_then(|e| e.obo_id.clone())
+                    .or_else(|| short_obo_id_from_iri(to_iri))
+                    .unwrap_or_else(|| {
+                        to_iri.rsplit(['#', '/']).next().unwrap_or(to_iri).to_string()
+                    });
+                if !original.contains(&from_id) {
+                    continue;
+                }
+                warnings.push(format!(
+                    "non-Turtle replace rewrites all IRI mentions in {}",
+                    doc.path.display()
+                ));
+                match ontocore_obo::remap_obo_id_in_text(&original, &from_id, &to_id) {
+                    Ok(text) => text,
+                    Err(e) => {
+                        warnings.push(format!("skipping OBO {}: {e}", doc.path.display()));
+                        continue;
+                    }
+                }
+            }
+            other => {
+                if text_contains_iri(doc, from_iri, document_overrides) {
+                    warnings.push(format!(
+                        "skipping unsupported format {} in {}",
+                        other.as_str(),
+                        doc.path.display()
+                    ));
+                }
+                continue;
+            }
+        };
 
-        let namespaces = ontocore_owl::namespaces_for_text(&original, &doc.namespaces);
-        let declaration_start =
-            ontocore_owl::entity_primary_block_range(&original, from_iri, &namespaces)
-                .map(|range| range.start as usize);
-        let preview_text = replace_iri_preserving_subject(
-            &original,
-            from_iri,
-            to_iri,
-            &doc.namespaces,
-            declaration_start,
-        );
         if preview_text == original {
             continue;
         }
@@ -185,11 +458,11 @@ pub fn preview_replace_entity(
     }
 
     if changes.is_empty() {
-        warnings
-            .push(format!("no Turtle files changed for entity replacement {from_iri} -> {to_iri}"));
+        warnings.push(format!("no files changed for entity replacement {from_iri} -> {to_iri}"));
     }
 
-    Ok(RefactorPlan { changes: changes.into_values().collect(), warnings })
+    Ok(RefactorPlan { changes: changes.into_values().collect(), warnings, ..Default::default() }
+        .with_metrics([from_iri, to_iri]))
 }
 
 fn replace_iri_preserving_subject(
@@ -331,7 +604,8 @@ pub fn preview_migrate_namespace(
         warnings.push(format!("no Turtle files changed for namespace migration {from} -> {to}"));
     }
 
-    Ok(RefactorPlan { changes: changes.into_values().collect(), warnings })
+    Ok(RefactorPlan { changes: changes.into_values().collect(), warnings, ..Default::default() }
+        .with_metrics([from, to]))
 }
 
 fn is_prefix_declaration_line(line: &str) -> bool {
@@ -476,12 +750,55 @@ pub fn preview_refactor(
                 workspace_roots,
             )
         }
-        crate::model::RefactorRequest::ExtractModule { entity_iris, output_file, leave_stub } => {
-            preview_extract_module(
+        crate::model::RefactorRequest::ExtractModule {
+            entity_iris,
+            output_file,
+            leave_stub,
+            locality,
+        } => preview_extract_module(
+            catalog,
+            entity_iris,
+            output_file,
+            *leave_stub,
+            *locality,
+            document_overrides,
+            workspace_roots,
+        ),
+        crate::model::RefactorRequest::MoveAxioms {
+            entity_iri,
+            target_file,
+            statement_indexes,
+            exclude_primary,
+        } => preview_move_axioms(
+            catalog,
+            entity_iri,
+            target_file,
+            statement_indexes,
+            *exclude_primary,
+            document_overrides,
+            workspace_roots,
+        ),
+        crate::model::RefactorRequest::MergeOntologies { source_paths, target_file } => {
+            crate::ontology::preview_merge_ontologies(
                 catalog,
-                entity_iris,
-                output_file,
-                *leave_stub,
+                source_paths,
+                target_file,
+                document_overrides,
+                workspace_roots,
+            )
+        }
+        crate::model::RefactorRequest::FlattenImports { ontology_file } => {
+            crate::ontology::preview_flatten_imports(
+                catalog,
+                ontology_file,
+                document_overrides,
+                workspace_roots,
+            )
+        }
+        crate::model::RefactorRequest::CleanupImports { ontology_file } => {
+            crate::ontology::preview_cleanup_imports(
+                catalog,
+                ontology_file,
                 document_overrides,
                 workspace_roots,
             )
@@ -632,7 +949,167 @@ pub fn preview_move_entity(
             },
         ],
         warnings,
-    })
+        ..Default::default()
+    }
+    .with_metrics([entity_iri]))
+}
+
+/// Move selected subject statements for `entity_iri` into `target_file`.
+pub fn preview_move_axioms(
+    catalog: &OntologyCatalog,
+    entity_iri: &str,
+    target_file: &Path,
+    statement_indexes: &[usize],
+    exclude_primary: bool,
+    document_overrides: &HashMap<PathBuf, String>,
+    workspace_roots: &[PathBuf],
+) -> Result<RefactorPlan> {
+    require_path_in_workspace(target_file, workspace_roots)?;
+    catalog
+        .find_entity(entity_iri)
+        .ok_or_else(|| RefactorError::EntityNotFound(entity_iri.to_string()))?;
+    let Some(source_doc) = catalog.entity_document(entity_iri) else {
+        return Err(RefactorError::EntityNotFound(entity_iri.to_string()));
+    };
+    if source_doc.format != OntologyFormat::Turtle || source_doc.parse_status != ParseStatus::Ok {
+        return Err(RefactorError::Invalid(
+            "move axioms currently supports Turtle documents only".to_string(),
+        ));
+    }
+    let source_canon = canonical_path(&source_doc.path);
+    let target_canon = canonical_path(target_file);
+    if source_canon == target_canon {
+        return Err(RefactorError::Invalid(
+            "target file must differ from the source document".to_string(),
+        ));
+    }
+
+    let source_text = read_source_text(&source_doc.path, document_overrides)?;
+    let namespaces = ontocore_owl::namespaces_for_text(&source_text, &source_doc.namespaces);
+    let short = ontocore_owl::short_name_from_iri(entity_iri);
+    let ranges =
+        ontocore_owl::all_entity_statement_ranges(&source_text, entity_iri, &short, &namespaces);
+    if ranges.is_empty() {
+        return Err(RefactorError::Invalid(format!(
+            "no Turtle statements found for entity {entity_iri}"
+        )));
+    }
+
+    let primary = ontocore_owl::entity_primary_block_range(&source_text, entity_iri, &namespaces);
+    let selectable: Vec<(usize, ontocore_owl::ByteRange)> = ranges
+        .into_iter()
+        .enumerate()
+        .filter(|(_, range)| {
+            if !exclude_primary {
+                return true;
+            }
+            primary.map(|p| p.start != range.start || p.end != range.end).unwrap_or(true)
+        })
+        .collect();
+
+    if selectable.is_empty() {
+        return Err(RefactorError::Invalid(
+            "no movable axiom statements (only primary declaration remains)".to_string(),
+        ));
+    }
+
+    let chosen: Vec<ontocore_owl::ByteRange> = if statement_indexes.is_empty() {
+        selectable.into_iter().map(|(_, r)| r).collect()
+    } else {
+        let mut out = Vec::new();
+        for idx in statement_indexes {
+            let Some((_, range)) = selectable.iter().find(|(i, _)| *i == *idx) else {
+                return Err(RefactorError::Invalid(format!(
+                    "statement index {idx} out of range for entity {entity_iri}"
+                )));
+            };
+            out.push(*range);
+        }
+        out
+    };
+
+    let mut warnings = Vec::new();
+    let mut blocks = Vec::new();
+    let mut source_without = source_text.clone();
+    let mut ordered = chosen;
+    ordered.sort_by_key(|r| std::cmp::Reverse(r.start));
+    for range in &ordered {
+        let block = source_text[range.start as usize..range.end as usize].trim().to_string();
+        if !block.is_empty() {
+            blocks.push(block);
+        }
+        source_without.replace_range(range.start as usize..range.end as usize, "");
+    }
+    while source_without.contains("\n\n\n") {
+        source_without = source_without.replace("\n\n\n", "\n\n");
+    }
+    blocks.reverse();
+    let moved_text = blocks.join("\n\n");
+    if moved_text.is_empty() {
+        return Err(RefactorError::Invalid("selected statements produced empty move".to_string()));
+    }
+
+    let target_original = if target_file.exists() {
+        read_source_text(target_file, document_overrides)?
+    } else {
+        String::new()
+    };
+    let prefix_lines: Vec<String> = source_text
+        .lines()
+        .filter(|line| is_prefix_declaration_line(line))
+        .map(str::to_string)
+        .collect();
+    let target_prefix_names: BTreeSet<String> =
+        target_original.lines().filter_map(prefix_declaration_name).map(str::to_string).collect();
+    let mut missing_prefixes = Vec::new();
+    for line in &prefix_lines {
+        let Some(name) = prefix_declaration_name(line) else {
+            continue;
+        };
+        if !target_prefix_names.contains(name) {
+            missing_prefixes.push(line.clone());
+        }
+    }
+    let inserted = if missing_prefixes.is_empty() {
+        String::new()
+    } else {
+        warnings.push(format!(
+            "added {} missing @prefix declaration(s) to {}",
+            missing_prefixes.len(),
+            target_file.display()
+        ));
+        format!("{}\n\n", missing_prefixes.join("\n"))
+    };
+    let target_preview = if target_original.is_empty() {
+        format!("{inserted}{moved_text}\n")
+    } else {
+        format!("{target_original}\n\n{inserted}{moved_text}\n")
+    };
+
+    Ok(RefactorPlan {
+        changes: vec![
+            FileChange {
+                path: source_doc.path.clone(),
+                preview_text: source_without,
+                original_text: source_text,
+                hunks: vec![],
+            },
+            FileChange {
+                path: target_file.to_path_buf(),
+                preview_text: target_preview.clone(),
+                original_text: target_original,
+                hunks: vec![Hunk {
+                    start_byte: 0,
+                    end_byte: 0,
+                    old_text: String::new(),
+                    new_text: format!("{inserted}{moved_text}"),
+                }],
+            },
+        ],
+        warnings,
+        ..Default::default()
+    }
+    .with_metrics([entity_iri]))
 }
 
 pub fn preview_extract_module(
@@ -640,6 +1117,7 @@ pub fn preview_extract_module(
     entity_iris: &[String],
     output_file: &Path,
     leave_stub: bool,
+    locality: bool,
     document_overrides: &HashMap<PathBuf, String>,
     workspace_roots: &[PathBuf],
 ) -> Result<RefactorPlan> {
@@ -649,11 +1127,25 @@ pub fn preview_extract_module(
         return Err(RefactorError::Invalid("no entities selected".to_string()));
     }
 
+    let expanded: Vec<String> = if locality {
+        crate::ontology::expand_signature_locality(catalog, entity_iris)
+    } else {
+        entity_iris.to_vec()
+    };
+    let entity_iris = &expanded;
+
     let mut blocks = Vec::new();
     let mut removals: Vec<EntityRemoval> = Vec::new();
     let mut source_texts: BTreeMap<PathBuf, String> = BTreeMap::new();
     let mut prefix_lines = BTreeSet::new();
     let mut warnings = Vec::new();
+    if locality {
+        warnings.push(format!(
+            "locality expansion selected {} entit{}",
+            entity_iris.len(),
+            if entity_iris.len() == 1 { "y" } else { "ies" }
+        ));
+    }
 
     for iri in entity_iris {
         let entity =
@@ -780,7 +1272,8 @@ pub fn preview_extract_module(
         warnings.push("left deprecated stubs in source files".to_string());
     }
 
-    Ok(RefactorPlan { changes, warnings })
+    Ok(RefactorPlan { changes, warnings, ..Default::default() }
+        .with_metrics(entity_iris.iter().map(|s| s.as_str())))
 }
 
 #[cfg(test)]

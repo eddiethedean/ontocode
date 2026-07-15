@@ -54,7 +54,7 @@ export function RefactorPreviewPanel(_props?: WorkspaceProps): JSX.Element {
     <Panel>
       <PanelHeader
         title="Refactor preview"
-        subtitle={`${plan.changes.length} file${plan.changes.length === 1 ? "" : "s"} affected`}
+        subtitle={`${plan.changes.length} file${plan.changes.length === 1 ? "" : "s"} · ${plan.affected_entity_count ?? 0} entities · ${plan.affected_axiom_count ?? 0} axioms`}
       />
 
       {plan.warnings?.length ? (

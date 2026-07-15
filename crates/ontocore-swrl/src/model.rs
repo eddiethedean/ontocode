@@ -78,6 +78,77 @@ impl SwrlRule {
         out.dedup();
         out
     }
+
+    /// Rewrite absolute IRIs in the rule (`from` → `to`). Returns `true` if anything changed.
+    pub fn remap_iri(&mut self, from: &str, to: &str) -> bool {
+        if from == to {
+            return false;
+        }
+        let mut changed = false;
+        for atom in self.body.iter_mut().chain(self.head.iter_mut()) {
+            if remap_atom(atom, from, to) {
+                changed = true;
+            }
+        }
+        if let Some(id) = &mut self.id {
+            if id == from {
+                *id = to.to_string();
+                changed = true;
+            }
+        }
+        changed
+    }
+}
+
+fn remap_atom(atom: &mut SwrlAtom, from: &str, to: &str) -> bool {
+    let mut changed = false;
+    let replace = |s: &mut String| {
+        if s.as_str() == from {
+            *s = to.to_string();
+            true
+        } else {
+            false
+        }
+    };
+    match atom {
+        SwrlAtom::Class { class, arg } => {
+            changed |= replace(class);
+            if let SwrlIArg::Individual(i) = arg {
+                changed |= replace(i);
+            }
+        }
+        SwrlAtom::ObjectProperty { property, subject, object } => {
+            changed |= replace(property);
+            if let SwrlIArg::Individual(i) = subject {
+                changed |= replace(i);
+            }
+            if let SwrlIArg::Individual(i) = object {
+                changed |= replace(i);
+            }
+        }
+        SwrlAtom::DataProperty { property, subject, .. } => {
+            changed |= replace(property);
+            if let SwrlIArg::Individual(i) = subject {
+                changed |= replace(i);
+            }
+        }
+        SwrlAtom::SameIndividual { left: a, right: b }
+        | SwrlAtom::DifferentIndividuals { left: a, right: b } => {
+            if let SwrlIArg::Individual(i) = a {
+                changed |= replace(i);
+            }
+            if let SwrlIArg::Individual(i) = b {
+                changed |= replace(i);
+            }
+        }
+        SwrlAtom::BuiltIn { predicate, .. } => {
+            changed |= replace(predicate);
+        }
+        SwrlAtom::DataRange { range, .. } => {
+            changed |= replace(range);
+        }
+    }
+    changed
 }
 
 fn atom_short(atom: &SwrlAtom) -> String {

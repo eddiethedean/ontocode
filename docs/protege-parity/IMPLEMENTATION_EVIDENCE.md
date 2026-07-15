@@ -108,14 +108,17 @@ Every parity feature should reference:
   PAR-QRY-001    SPARQL       IMPLEMENTED       ontocore-query      lib.rs           ✓       TBD     ✓       Query
                  query                                                                                       workbench.
 
-  PAR-QRY-002    DL Query     PARTIAL           ---                 ---              ✓       TBD     ✓       Target
-                 workflow                                                                                    v0.24.
+  PAR-QRY-002    DL Query     VERIFIED          ontocore-reasoner   dl_query.rs      ✓       ✓       ✓       v0.24.0
+                 workflow                       lsp / extension                              Workbench DL;
+                                                                                                             CLI/LSP.
 
   PAR-SWRL-001   SWRL         VERIFIED          ontocore-swrl       lib.rs           ✓       ✓       ✓       v0.23.0
                                                                                                              Rule Browser.
 
-  PAR-REF-001    Semantic     PARTIAL           ontocore-refactor   lib.rs           ✓       TBD     ✓       Target
-                 refactoring                                                                                 v0.24.
+  PAR-REF-001    Semantic     VERIFIED          ontocore-refactor   lib.rs,          ✓       ✓       ✓       v0.24
+                 refactoring                                        rename.rs,                               rename/merge/replace
+                                                                    ontology.rs                              multi-format;
+                                                                                                             move/extract Turtle-first.
 
   PAR-VIS-001    Graph        PARTIAL           extension           graph webview    ✓       TBD     ✓       Target
                  visualization                                                                               v0.25.

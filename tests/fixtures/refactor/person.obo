@@ -1,0 +1,16 @@
+format-version: 1.2
+ontology: ex
+
+[Term]
+id: EX:001
+name: Person
+is_a: EX:000 ! root
+
+[Term]
+id: EX:002
+name: Child
+is_a: EX:001 ! Person
+
+[Term]
+id: EX:000
+name: root

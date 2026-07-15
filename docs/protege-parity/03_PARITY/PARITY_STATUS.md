@@ -95,10 +95,10 @@ from the parity manifest.
 # Next Engineering Milestones
 
 1.  Complete OWL 2 authoring (v0.22)
-2.  Reasoning parity + SWRL (v0.23)
+2.  Reasoning parity + SWRL (v0.24)
 3.  Semantic services completion (v0.24)
-4.  Reasoning enhancements (v0.23)
-5.  SWRL implementation (v0.23)
+4.  Reasoning enhancements (v0.24)
+5.  SWRL implementation (v0.24)
 6.  Full automated parity validation (v0.25)
 7.  Release readiness review
 

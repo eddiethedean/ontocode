@@ -4,7 +4,7 @@ Guide for teams using Protégé today and evaluating OntoCode **v0.23**. A [firs
 
 Canonical capability matrix: [What ships today](../SHIPPED.md). Decision matrix: [Protégé vs OntoCode](protege-decision.md). Gap analysis for adopters: [Known limitations](../known-limitations.md).
 
-## Use OntoCode for (v0.23)
+## Use OntoCode for (v0.24)
 
 | Workflow | Status |
 |----------|--------|
@@ -20,7 +20,7 @@ Canonical capability matrix: [What ships today](../SHIPPED.md). Decision matrix:
 | CI lint (`ontocore validate`) | Shipped — suitable for production CI |
 | EL/RL/RDFS/DL classification | Shipped |
 | OWL 2 DL classification (`dl` / `auto` profiles) | Shipped (OntoLogos 1.x; not certified HermiT-identical) |
-| Realization / instance checking (ABox) | Shipped (v0.23) |
+| Realization / instance checking (ABox) | Shipped (v0.24) |
 | SWRL rule browser / editor / validate | Shipped (v0.23; DLSafe) |
 | Inferred hierarchy toggle | Shipped (after reasoner run) |
 | OBO format index + `obo_id` in explorer | Shipped |

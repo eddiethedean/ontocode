@@ -16,8 +16,10 @@ include = ["src/**/*", "Cargo.toml", "README.md", "LICENSE-MIT", "LICENSE-APACHE
 [dependencies]
 ontocore-catalog = { workspace = true }
 ontocore-core = { workspace = true }
+ontocore-owl = { workspace = true }
 ontocore-parser = { workspace = true }
 ontocore-swrl = { workspace = true }
+horned-owl.workspace = true
 ontologos-bridge = { workspace = true }
 ontologos-core.workspace = true
 ontologos-dl.workspace = true

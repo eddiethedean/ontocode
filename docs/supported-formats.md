@@ -1,6 +1,6 @@
 # Supported ontology formats
 
-> **Latest tagged release: v0.23.0** — canonical capability matrix: [What ships today](SHIPPED.md).
+> **Latest tagged release: v0.24.0** — canonical capability matrix: [What ships today](SHIPPED.md).
 
 This page is the canonical reference for **what OntoCode/OntoCore can do with each file format** today.
 
@@ -23,7 +23,8 @@ This page is the canonical reference for **what OntoCode/OntoCore can do with ea
 | TriG | `.trig` | Yes | Yes | No (read-only) | No |
 
 > **OBO versioning:** patch engine write-back since **v0.12**; Entity Inspector write-back since **v0.13**.  
-> **XML write-back (v0.21):** Horned full-document re-serialize; semantic fidelity, not byte-identical formatting ([ADR-0021](design/adr/0021-deterministic-xml-serializers.md)).
+> **XML write-back (v0.21):** Horned full-document re-serialize; semantic fidelity, not byte-identical formatting ([ADR-0021](design/adr/0021-deterministic-xml-serializers.md)).  
+> **Refactor:** rename / merge / replace also rewrite RDF/XML, OWL/XML, and OBO (v0.24); move / extract / ontology-merge ops stay Turtle-first — see [Capabilities by format](guides/capabilities-by-format.md).
 
 ## Why some formats remain read-only
 

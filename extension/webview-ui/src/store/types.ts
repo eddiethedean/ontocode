@@ -39,13 +39,13 @@ export interface QueryResultSnapshot {
 
 export interface QueryHistoryEntry {
   id: string;
-  language: "sql" | "sparql";
+  language: "sql" | "sparql" | "dl";
   text: string;
   executedAt: number;
 }
 
 export interface QueryState {
-  language: "sql" | "sparql";
+  language: "sql" | "sparql" | "dl";
   text: string;
   lastResult: QueryResultSnapshot | null;
   history: QueryHistoryEntry[];

@@ -15,9 +15,13 @@
 >
 > **Contributor crate layout:** [Implementation architecture](design/ARCHITECTURE.md) (internal modules only).
 >
-> **Latest tagged: v0.23.0** — v0.23 ships today. OntoCode (VS Code) + OntoCore (CLI/LSP/library). Turtle + OBO + RDF/XML + OWL/XML write-back; complete OWL 2 authoring (HasKey, DisjointUnion, RBox/ABox expansions, datatype defs, axiom annotations, Manchester not/value/Self/OneOf); EL–DL reasoning via Ontologos; plugin host; semantic diff; workspace runtime. Canonical matrix: [What ships today](SHIPPED.md). Planned work: [roadmap hub](roadmap-hub.md).
-> **Planned v1.0:** stable plugin API, full workflow plugin integration, language SDKs, MCP server. See [Platform roadmap](roadmap.md).
+> **Latest tagged: v0.24.0** — v0.24 ships today. OntoCode (VS Code) + OntoCore (CLI/LSP/library).
+>
+> **Planned v1.0:** stable plugin API, full workflow plugin integration, language SDKs, MCP server. See [Platform roadmap](roadmap.md) ([full ROADMAP.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/ROADMAP.md)).
+>
 > **Planned post-1.0:** OntoStudio desktop, AI-native workflows — [UI roadmap mapping](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/ROADMAP_MAPPING.md).
+>
+> **Implementers only:** `docs/design/`, `docs/platform/`, and `docs/ui/` architecture specs are engineering targets — not the product capability matrix. Use [What ships today](SHIPPED.md) for adoption decisions.
 
 ```
 External Workflow Plugins (v0.17)  ← subprocess workflow plugins; API v1 (permissions, views, preferences)

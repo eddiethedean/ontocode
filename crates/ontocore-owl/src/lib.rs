@@ -10,6 +10,7 @@ mod load;
 pub mod manchester;
 mod mutate;
 pub mod patch;
+mod remap;
 mod serialize;
 mod span;
 mod turtle_lex;
@@ -20,15 +21,17 @@ pub use compare::{compare_bridges, compare_ontologies, SemanticDiff};
 pub use error::{OwlError, Result};
 pub use load::{load_from_quads, load_owx_text, load_turtle_text, supports_horned_load};
 pub use manchester::{
-    class_expression_to_manchester, class_expression_to_turtle_fragment, data_range_to_manchester,
-    data_range_to_turtle_term, expression_tree_json, parse_class_expression, parse_data_range,
-    ManchesterDiagnostic, ManchesterParseOutput,
+    class_expression_to_manchester, class_expression_to_turtle_fragment,
+    class_expression_to_turtle_value, data_range_to_manchester, data_range_to_turtle_term,
+    expression_tree_json, parse_class_expression, parse_data_range, ManchesterDiagnostic,
+    ManchesterParseOutput,
 };
 pub use mutate::{apply_patches_to_ontology, apply_patches_to_ontology_with_ns};
 pub use patch::{
     apply_patches, apply_patches_to_text, atomic_write, is_safe_iri, validate_prefix,
     ApplyPatchResult, PatchDiagnostic, PatchEntityKind, PatchOp,
 };
+pub use remap::{remap_entity_iri, remap_entity_iri_in_xml_text};
 pub use serialize::{
     load_owl_xml_ontology, load_rdf_xml_ontology, serialize_owl_xml, serialize_rdf_xml,
 };

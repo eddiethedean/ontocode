@@ -2,7 +2,7 @@
 
 OntoCode and OntoCore publish several roadmap documents. **Use this page to pick the right one** — they serve different audiences and must not be read as a single capability list.
 
-**Current release:** v0.23.0 · [What ships today](SHIPPED.md)
+**Current release:** v0.24.0 · [What ships today](SHIPPED.md)
 
 ## Which document should I read?
 
@@ -12,7 +12,7 @@ OntoCode and OntoCore publish several roadmap documents. **Use this page to pick
 | Learn **canonical terminology** | [Glossary](glossary.md) |
 | **Implement** OntoUI / workspaces (v0.13–v0.14) | [Platform overview](https://github.com/eddiethedean/ontocode/blob/main/docs/platform/OVERVIEW.md) · [Plugin authoring](guides/plugins.md) · [Cursor prompts](https://github.com/eddiethedean/ontocode/blob/main/docs/cursor-prompts/README.md) |
 | **Implement Protégé parity** (v0.20–1.0 next) | [Protégé parity program](https://github.com/eddiethedean/ontocode/blob/main/docs/protege-parity/README.md) · [Pre-1.0 phases](https://github.com/eddiethedean/ontocode/blob/main/docs/protege-parity/07_BACKLOG/PRE_1_0_PHASES.md) · [Execution order](https://github.com/eddiethedean/ontocode/blob/main/docs/protege-parity/05_IMPLEMENTATION/EXECUTION_ORDER.md) |
-| Understand **platform direction** (releases v0.14 → v1.2) | [Platform roadmap](roadmap.md) · [ROADMAP.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/ROADMAP.md) |
+| Understand **platform direction** (releases through post-1.0) | **[ROADMAP.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/ROADMAP.md)** (canonical) · RTD summary [Platform roadmap](roadmap.md) |
 | Map **UI design specs** to release phases | [UI roadmap mapping](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/ROADMAP_MAPPING.md) — master checklist |
 | See **UI phases with milestones** | [Product Roadmap 2.0](https://github.com/eddiethedean/ontocode/blob/main/docs/ui/PRODUCT_ROADMAP_2.0.md) |
 | Read **product/platform ADRs** | [adr/README.md](adr/README.md) |
@@ -51,6 +51,6 @@ flowchart TB
 
 ## Current release
 
-**v0.23.0** — see [Migration v0.22.0 → v0.23.0](migration/v0.23.md), [Migration v0.21.0 → v0.22.0](migration/v0.22.md), and [Changelog](changelog.md).
+**v0.24.0** — see [Migration v0.22.0 → v0.24.0](migration/v0.23.md), [Migration v0.21.0 → v0.22.0](migration/v0.22.md), and [Changelog](changelog.md).
 
 > **Design docs under `docs/platform/`, `docs/ui/`, `docs/protege-parity/`, and `docs/PROTEGE_REVERSE_ENGINEERING/` are not a shipped feature list.** Evaluators and procurement should use [SHIPPED.md](SHIPPED.md) and [Known limitations](known-limitations.md) only — ignore internal parity percentage assessments on GitHub.

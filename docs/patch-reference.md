@@ -1,6 +1,6 @@
-# Patch reference (OntoCore v0.23)
+# Patch reference (OntoCore v0.24)
 
-> **Status:** Documents behavior in **OntoCore v0.23**. Pre-1.0 APIs may change.
+> **Status:** Documents behavior in **OntoCore v0.24**. Pre-1.0 APIs may change.
 > Canonical feature list: [What ships today](SHIPPED.md).
 
 Patch write-back uses a JSON array of patch operations. The CLI (`ontocore patch`) and LSP (`ontocore/applyAxiomPatch`) accept the same envelope; operation sets differ by file extension.
@@ -85,7 +85,7 @@ Supported formats: **Turtle (`.ttl`)**, **OBO (`.obo`)**, **RDF/XML (`.owl`/`.rd
 | `add_datatype_definition` / `remove_…` | `datatype_iri`, `manchester` | Yes | Yes | Datatype ≡ data range |
 | `add_axiom_annotation` / `remove_…` | `axiom_op`, `subject_iri`, `related_iri?`, `predicate`, `value` | Yes | Yes* | Annotate an axiom (*XML: `sub_class_of`, `disjoint_with`) |
 
-### SWRL operations (v0.23)
+### SWRL operations (v0.24)
 
 SWRL rules are stored as ontology annotations (`ontocore:swrlRule` JSON). Prefer the Rule Browser / Rule Editor in VS Code for interactive authoring; use patches for CI and scripts.
 
@@ -316,7 +316,7 @@ Method: `ontocore/applyAxiomPatch`
 
 See [lsp-api.md](lsp-api.md) and [authoring.md](authoring.md).
 
-## Limitations (v0.23)
+## Limitations (v0.24)
 
 - Write-back: **Turtle (`.ttl`), OBO (`.obo`), RDF/XML (`.owl`/`.rdf`), OWL/XML (`.owx`)**; JSON-LD and line-oriented RDF are read-only. XML is semantic re-serialize — [OWL/XML write-back](guides/owl-xml-workflow.md)
 - Prefix manager ops are **Turtle-only**; XML write-back returns a clear error

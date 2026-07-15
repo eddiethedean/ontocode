@@ -1,13 +1,14 @@
 use crate::handlers::{
     handle_apply_axiom_patch, handle_apply_refactor, handle_create_ontology, handle_delete_impact,
     handle_export_ontology, handle_find_usages, handle_get_catalog_snapshot, handle_get_entity,
-    handle_goto_definition, handle_hover, handle_query, handle_references, handle_sparql,
-    handle_standard_request, handle_workspace_symbol, StandardRequestOutcome,
+    handle_goto_definition, handle_hover, handle_query, handle_references, handle_search,
+    handle_sparql, handle_standard_request, handle_workspace_symbol, StandardRequestOutcome,
 };
 use crate::index_worker::IndexWorker;
 use crate::protocol::{
     ApplyAxiomPatchParams, ApplyRefactorParams, CreateOntologyParams, DeleteImpactParams,
-    ExportOntologyParams, FindUsagesParams, GetEntityParams, QueryParams, SparqlParams,
+    ExportOntologyParams, FindUsagesParams, GetEntityParams, QueryParams, SearchParams,
+    SparqlParams,
 };
 use crate::state::{path_to_uri, ServerState};
 use crossbeam_channel::unbounded;
@@ -306,6 +307,22 @@ fn workspace_symbol_finds_person() {
         panic!("expected flat symbols");
     };
     assert!(symbols.iter().any(|s| s.name == "Person"));
+}
+
+#[test]
+fn search_finds_person_by_short_name() {
+    let state = indexed_state();
+    let result = handle_search(&state, SearchParams { query: "Person".into(), limit: Some(50) })
+        .expect("search");
+    assert!(result.entities.iter().any(|e| e.entity.short_name == "Person"));
+}
+
+#[test]
+fn search_empty_query_returns_no_hits() {
+    let state = indexed_state();
+    let result =
+        handle_search(&state, SearchParams { query: "".into(), limit: None }).expect("search");
+    assert!(result.entities.is_empty());
 }
 
 #[test]

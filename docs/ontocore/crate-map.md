@@ -10,7 +10,7 @@ OntoCore is currently implemented by the `ontocore-*` crates. The [`ontocore`](h
 
 ```toml
 [dependencies]
-ontocore = "0.23"
+ontocore = "0.24"
 # Optional: ontocore = { version = "0.19", features = ["lsp", "plugins"] }
 ```
 
@@ -32,7 +32,7 @@ use ontocore::catalog::IndexBuilder;  // lower-level
 | `ontocore-edit` | Semantic transaction apply path (v0.20) |
 | `ontocore-diagnostics` | Lint rules |
 | `ontocore-reasoner` | OntoLogos classification facade |
-| `ontocore-swrl` | SWRL rule IR, validation, Turtle helpers (v0.23) |
+| `ontocore-swrl` | SWRL rule IR, validation, Turtle helpers (v0.24) |
 | `ontocore-refactor` | Workspace refactoring |
 | `ontocore-diff` | Semantic catalog diff, git compare |
 | `ontocore-docs` | Markdown/HTML documentation export |

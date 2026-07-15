@@ -66,6 +66,70 @@ describe("QueryWorkbenchPanel", () => {
     );
   });
 
+  it("switches to DL mode with Manchester starter and asserted toggle", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<QueryWorkbenchPanel />);
+
+    await user.selectOptions(screen.getAllByRole("combobox")[0], "dl");
+
+    expect(screen.getByRole("textbox")).toHaveValue("Person");
+    expect(screen.getByText("Manchester class expression")).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "Inferred" })).toBeInTheDocument();
+    expect(screen.getByRole("option", { name: "Asserted" })).toBeInTheDocument();
+  });
+
+  it("runs DL query with asserted mode", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<QueryWorkbenchPanel />);
+
+    await user.selectOptions(screen.getAllByRole("combobox")[0], "dl");
+    const reasoningSelect = screen.getAllByRole("combobox")[1];
+    await user.selectOptions(reasoningSelect, "asserted");
+    await user.click(screen.getByRole("button", { name: "Run" }));
+
+    expect(lastPostedMessage()).toMatchObject({
+      type: "runQuery",
+      mode: "dl",
+      text: "Person",
+      dlMode: "asserted",
+      runId: 1,
+    });
+  });
+
+  it("renders DL result tabs and posts openEntity on IRI click", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<QueryWorkbenchPanel />);
+
+    await user.selectOptions(screen.getAllByRole("combobox")[0], "dl");
+    await user.click(screen.getByRole("button", { name: "Run" }));
+    const runId = (lastPostedMessage() as { runId: number }).runId;
+
+    postHostMessage({
+      type: "queryResult",
+      runId,
+      dlResult: {
+        expression: "Person",
+        normalized: "Person",
+        query_class_iri: "http://example.org#Person",
+        instances: ["http://example.org#Alice"],
+        subclasses: ["http://example.org#Student"],
+        superclasses: [],
+        equivalents: [],
+        profile: "dl",
+        mode: "inferred",
+        duration_ms: 12,
+      },
+    });
+
+    expect(await screen.findByRole("button", { name: "Instances (1)" })).toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Subclasses (1)" })).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: /Alice/ }));
+    expect(lastPostedMessage()).toMatchObject({
+      type: "openEntity",
+      iri: "http://example.org#Alice",
+    });
+  });
+
   it("displays tabular results from host", async () => {
     renderWithProviders(<QueryWorkbenchPanel />);
 
@@ -164,6 +228,46 @@ describe("QueryWorkbenchPanel", () => {
     await user.selectOptions(historySelect as HTMLSelectElement, "0");
     expect(screen.getByRole("textbox")).toHaveValue("SELECT ?s WHERE { ?s ?p ?o }");
     expect(screen.getAllByRole("combobox")[0]).toHaveValue("sparql");
+  });
+
+  it("restores asserted dlMode from saved DL query", async () => {
+    const user = userEvent.setup();
+    renderWithProviders(<QueryWorkbenchPanel />);
+    postHostMessage({
+      type: "queryInit",
+      saved: savedQueries,
+      history: [],
+      sqlTables: [],
+    });
+    await screen.findByRole("option", { name: "People asserted (dl)" });
+
+    const savedSelect = screen
+      .getByRole("option", { name: "People asserted (dl)" })
+      .closest("select");
+    expect(savedSelect).not.toBeNull();
+    await user.selectOptions(savedSelect as HTMLSelectElement, "1");
+
+    expect(screen.getAllByRole("combobox")[0]).toHaveValue("dl");
+    expect(screen.getByRole("textbox")).toHaveValue("Person");
+    expect(screen.getAllByRole("combobox")[1]).toHaveValue("asserted");
+  });
+
+  it("saves DL query with dlMode", async () => {
+    const user = userEvent.setup();
+    vi.spyOn(window, "prompt").mockReturnValue("DL people");
+
+    renderWithProviders(<QueryWorkbenchPanel />);
+    await user.selectOptions(screen.getAllByRole("combobox")[0], "dl");
+    await user.selectOptions(screen.getAllByRole("combobox")[1], "asserted");
+    await user.click(screen.getByRole("button", { name: "Save" }));
+
+    expect(lastPostedMessage()).toMatchObject({
+      type: "saveQuery",
+      name: "DL people",
+      mode: "dl",
+      text: "Person",
+      dlMode: "asserted",
+    });
   });
 
   it("exports JSON results", async () => {

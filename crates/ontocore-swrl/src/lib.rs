@@ -9,7 +9,10 @@ pub use builtins::{is_supported_builtin, SUPPORTED_BUILTINS, SWRLB_NS};
 pub use model::{
     SwrlAtom, SwrlDArg, SwrlDiagnostic, SwrlIArg, SwrlRule, SwrlRuleSummary, SwrlSeverity,
 };
-pub use turtle::{parse_swrl_rule_json, rule_to_turtle_fragment, rules_from_turtle_document};
+pub use turtle::{
+    parse_swrl_rule_json, rewrite_swrl_iris_in_turtle, rule_to_turtle_fragment,
+    rules_from_turtle_document,
+};
 pub use validate::validate_rule;
 
 use thiserror::Error;

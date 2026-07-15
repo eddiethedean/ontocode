@@ -276,6 +276,8 @@ async function runRefactorPreview(
   const plan: RefactorPlan = {
     changes: result.changes,
     warnings: result.warnings,
+    affected_entity_count: result.affected_entity_count,
+    affected_axiom_count: result.affected_axiom_count,
   };
   if (plan.changes.length === 0) {
     void vscode.window.showWarningMessage(

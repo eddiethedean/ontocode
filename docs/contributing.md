@@ -121,7 +121,7 @@ Look for GitHub labels `good first issue` and `docs`. Useful first PRs:
 - **Java 11+** and **[ROBOT](http://robot.obolibrary.org/)** on `PATH` — optional; needed only for manual `ontocore robot` / ROBOT interop development (not required for `cargo test --workspace`)
 - **Python 3.12** — for MkDocs doc site (`pip install -r docs/requirements.txt`)
 
-> **Canonical contributor guide:** Edit [`docs/contributing.md`](contributing.md) first (Read the Docs). Keep this page in sync as the **GitHub mirror** — not a second independent source of truth.
+> **Canonical contributor guide (this page):** Edit [`docs/contributing.md`](contributing.md) for Read the Docs, then sync root [`CONTRIBUTING.md`](https://github.com/eddiethedean/ontocode/blob/main/CONTRIBUTING.md) on GitHub. Do not treat them as independent sources of truth.
 
 ## Build and test
 

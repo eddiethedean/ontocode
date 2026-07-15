@@ -1,6 +1,6 @@
 # Known limitations
 
-> **Latest tagged release: v0.23.0.** Pin CI to a tagged version from [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) or crates.io — see [What ships today](SHIPPED.md) and [Versions & channels](guides/versions-and-channels.md). **Not a full Protégé replacement today** — coexistence and pilot workflows are the supported path until **1.0**.
+> **Latest tagged release: v0.24.0.** Pin CI to a tagged version from [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) or crates.io — see [What ships today](SHIPPED.md) and [Versions & channels](guides/versions-and-channels.md). **Not a full Protégé replacement today** — coexistence and pilot workflows are the supported path until **1.0**.
 
 Honest limits for evaluators and new users.
 
@@ -37,11 +37,15 @@ Plugin host **MVP shipped** (manifest, permissions, views, preferences, context 
 
 ## API stability (pre-1.0)
 
-Published crates are **0.23.x**. Library APIs, LSP JSON, and SQL table columns may change between minor releases until v1.0. Pin in CI: `cargo install ontocore-cli --locked --version 0.23.0`.
+Published crates are **0.24.x**. Library APIs, LSP JSON, and SQL table columns may change between minor releases until v1.0. Pin in CI: `cargo install ontocore-cli --locked --version 0.24.0`.
 
 ## Reasoning
 
-EL / RL / RDFS / DL classification ships via **Ontologos 1.x** (crates pinned in the workspace). Explanations are **DL-first** for the DL profile (with EL/RL/RDFS alternatives). Realization and instance checking ship in v0.23. **Stop** sets an engine cancel flag and ignores late results. See [Reasoner guide](guides/reasoner.md).
+EL / RL / RDFS / DL classification ships via **Ontologos 1.x** (crates pinned in the workspace). Explanations are **DL-first** for the DL profile (with EL/RL/RDFS alternatives). Realization and instance checking ship in v0.23. **DL Query** (Workbench DL mode, `ontocore dl-query`, LSP `ontocore/dlQuery`) ships in v0.24. **Stop** sets an engine cancel flag and ignores late results. See [Reasoner guide](guides/reasoner.md) and [DL Query](guides/dl-query.md).
+
+## Refactoring
+
+**Rename / merge / replace** apply to Turtle, RDF/XML (`.owl`/`.rdf`), OWL/XML (`.owx`), and OBO (semantic re-serialize for XML — ADR-0021; OBO id/reference rewrite). **Move entity/axioms**, **module extract**, and **ontology merge / flatten / cleanup imports** remain **Turtle-first** (non-Turtle files skipped with warnings). See [What ships today](SHIPPED.md) and [v0.24 migration](migration/v0.24.md).
 
 ## Layout persistence
 
@@ -53,11 +57,12 @@ Graphs may be **truncated** (badge in the Graph panel). Prefer narrower search, 
 
 ## When not to use OntoCode today
 
-- You need **Protégé DL Query tab** syntax (class expressions with Instances / Subclasses / Superclasses tabs) — Query Workbench is SQL catalog + SPARQL only; dedicated DL Query UI is **v0.24** — [DL Query vs Query Workbench](guides/dl-query.md).
 - You need **byte-identical OWL/XML or RDF/XML** that matches Protégé layout — OntoCode re-serializes for semantic fidelity (ADR-0021); use Protégé when layout identity matters.
 - You need **JSON-LD / TriG / N-Triples write-back** — still read-only; use Turtle or convert.
+- You need **move / extract / ontology-merge refactor on non-Turtle files** — those operations stay Turtle-first (rename/merge/replace already multi-format). See [v0.24 migration](migration/v0.24.md).
 - You need **full SQL analytics** — use SPARQL or an external store.
 - You need a **stable plugin marketplace API** without scaffolding — wait for v1.0 or keep Protégé plugins — [Plugin policy](guides/plugin-policy.md).
 - You need **WebProtégé collaboration** — out of scope until post-1.0.
+- You need **HermiT-identical** DL explanations or certified Protégé+HermiT equivalence — dual-tool checks remain recommended for critical audits.
 
 More: [Start here](start.md) · [Protégé migration](guides/protege-migration.md) · [Protégé decision](guides/protege-decision.md) · [FAQ](faq.md)

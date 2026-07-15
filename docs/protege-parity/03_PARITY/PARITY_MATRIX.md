@@ -88,13 +88,14 @@ Every parity claim must be traceable to this matrix.
 
   PAR-QRY-001    Query           SPARQL              P0         COMPLETE          IMPLEMENTATION_EVIDENCE    Query tests        
 
-  PAR-QRY-002    Query           DL Query workflow   P1         PARTIAL           Audit                      UI tests           
+  PAR-QRY-002    Query           DL Query workflow   P1         VERIFIED          IMPLEMENTATION_EVIDENCE    UI + CLI tests      v0.24 Workbench DL
 
   PAR-SWRL-001   SWRL            Rule                P0         NOT_IMPLEMENTED   Audit                      Missing            Major blocker
                                  authoring/editing                                                                              
 
-  PAR-REF-001    Refactoring     Semantic            P0         PARTIAL           IMPLEMENTATION_EVIDENCE    Refactor tests     Turtle-centric
-                                 refactoring                                                                                    
+  PAR-REF-001    Refactoring     Semantic            P0         VERIFIED          IMPLEMENTATION_EVIDENCE    Refactor tests     rename/merge/replace
+                                 refactoring                                                                                    multi-format; move/
+                                                                                                                                extract Turtle-first
 
   PAR-VIS-001    Visualization   Graph parity        P1         PARTIAL           Audit                      UI tests           
 

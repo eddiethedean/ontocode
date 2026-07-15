@@ -33,8 +33,8 @@ objective of the phases below.
 | **v0.20** | B | 2 | EPIC-003 | BLOCKER_03 | Complete (branch) |
 | **v0.21** | C (formats) | 3 | EPIC-001, EPIC-020 | BLOCKER_01, format audit | Shipped |
 | **v0.22** | C (OWL 2) | 4 | EPIC-002 | BLOCKER_02 | Planned |
-**v0.23** | D (reason + SWRL) | 5–6 | EPIC-004, EPIC-005 | BLOCKER_04, BLOCKER_05 | Complete |
-| **v0.24** | D (services) | 7 | EPIC-006, EPIC-007 | BLOCKER_06, BLOCKER_07 | Planned |
+| **v0.23** | D (reason + SWRL) | 5–6 | EPIC-004, EPIC-005 | BLOCKER_04, BLOCKER_05 | Complete |
+| **v0.24** | D (services) | 7 | EPIC-006, EPIC-007 | BLOCKER_06, BLOCKER_07 | Shipped |
 | **v0.25** | E + F | 8–9 | EPIC-008–011 | BLOCKER_08–011 | Planned |
 | **1.0.0-rc** | Stabilize | 10 | — | — | Planned |
 | **1.0.0** | Ship | — | — | [PARITY_RELEASE_GATE.md](../03_PARITY/PARITY_RELEASE_GATE.md) | Planned |
@@ -231,6 +231,7 @@ execution workflows.
 
 # v0.24 — Semantic services completion
 
+**Status:** Shipped (v0.24.0)\
 **P0 phase:** D (Semantic Services — refactor + query slice)\
 **Stage:** 7\
 **Theme:** Advanced ontology engineering workflows on a stable semantic core.

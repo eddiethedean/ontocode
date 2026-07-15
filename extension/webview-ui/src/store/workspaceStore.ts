@@ -39,7 +39,7 @@ export interface WorkspaceStoreActions {
   navigationBack: () => CurrentFocus | null;
   navigationForward: () => CurrentFocus | null;
   pushNavigation: (focus: CurrentFocus) => void;
-  setQueryLanguage: (language: "sql" | "sparql") => void;
+  setQueryLanguage: (language: "sql" | "sparql" | "dl") => void;
   setQueryText: (text: string) => void;
   setQueryResult: (result: QueryResultSnapshot | null) => void;
   addQueryHistory: (entry: Omit<QueryHistoryEntry, "id" | "executedAt">) => void;

@@ -119,12 +119,13 @@ nav:
   - Get started:
       - "First success (~10 min)": guides/first-success.md
       - Install: install.md
-      - Install CLI & CI (detail): getting-started.md
-      - VS Code install (detail): vscode-install.md
-      - Install CLI (macOS/Windows): guides/install-cli.md
-      - Which artifact?: guides/which-artifact.md
       - Supported formats: supported-formats.md
       - Versions and channels: guides/versions-and-channels.md
+      - Which artifact?: guides/which-artifact.md
+      - More install detail:
+          - Install CLI & CI (not the IDE tutorial): getting-started.md
+          - VS Code install (detail): vscode-install.md
+          - Install CLI (macOS/Windows): guides/install-cli.md
   - Use OntoCode:
       - Feature tour: ontocode/feature-tour.md
       - Overview: ontocode/vscode-extension.md
@@ -164,6 +165,7 @@ nav:
           - Query cookbook: examples/queries.md
           - Sample patches: examples/patches.md
           - Refactoring: examples/refactoring.md
+          - DL Query: examples/dl-query.md
           - Classify: examples/classify.md
           - Realize / instance check: examples/realize.md
           - SWRL: examples/swrl.md
@@ -200,6 +202,11 @@ nav:
       - API stability (pre-1.0): guides/api-stability.md
       - Procurement appendix: guides/procurement-appendix.md
       - Release timeline: guides/release-timeline.md
+      - Direction:
+          - Vision: vision.md
+          - Architecture: architecture.md
+          - Roadmap hub: roadmap-hub.md
+          - Platform roadmap: roadmap.md
   - Help:
       - FAQ: faq.md
       - Glossary: glossary.md
@@ -211,9 +218,10 @@ nav:
       - Changelog: changelog.md
       - Migrations:
           - Migration index: migration/README.md
+          - v0.23.0 → v0.24.0: migration/v0.24.md
           - v0.22.0 → v0.23.0: migration/v0.23.md
-          - v0.20.0 → v0.21.0: migration/v0.21.md
           - v0.21.0 → v0.22.0: migration/v0.22.md
+          - v0.20.0 → v0.21.0: migration/v0.21.md
           - v0.19.0 → v0.20.0: migration/v0.20.md
           - v0.18.2 → v0.19.0: migration/v0.19.md
           - v0.18.1 → v0.18.2: migration/v0.18.2.md
@@ -237,11 +245,6 @@ nav:
       - Plugin policy: guides/plugin-policy.md
       - Internals: internals.md
       - Documentation index: documentation-index.md
-      - Direction:
-          - Vision: vision.md
-          - Architecture: architecture.md
-          - Roadmap hub: roadmap-hub.md
-          - Platform roadmap: roadmap.md
       - Licenses: design/LICENSES.md
       - Engineering docs (GitHub): engineering.md
 extra:

@@ -194,3 +194,4 @@ Every parity requirement should map to:
 -   PARITY_GAP_ANALYSIS.md
 -   IMPLEMENTATION_EVIDENCE.md
 -   PARITY_RELEASE_GATE.md
+-   PROTEGE_TEST_PORT.md

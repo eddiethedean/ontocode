@@ -1,0 +1,7 @@
+@prefix ex: <http://example.org/versioned#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+
+<http://example.org/versioned> a owl:Ontology ;
+    owl:versionIRI <http://example.org/versioned/1.0.0> .
+
+ex:Thing a owl:Class .

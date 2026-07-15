@@ -179,6 +179,7 @@ if [[ "$PARALLEL" == "0" ]]; then
   run_step "rustfmt" cargo fmt --all -- --check
   run_step "documentation version sync" ./scripts/check-doc-versions.sh
   run_step "parity manifest validation" python3 scripts/validate-parity-manifest.py --paths
+  run_step "protege test-port inventory" python3 scripts/validate-protege-test-port.py
   run_step "parity release-gate report" python3 scripts/check-parity-release-gate.py
   run_step "parity docs sync" python3 scripts/generate-parity-docs.py --check
   run_rust_and_extension_steps
@@ -193,6 +194,7 @@ else
   run_bg_step "documentation version sync" "doc-versions" ./scripts/check-doc-versions.sh
   run_bg_step "parity verification (EPIC-011)" "parity-manifest" bash -c '
     python3 scripts/validate-parity-manifest.py --paths &&
+    python3 scripts/validate-protege-test-port.py &&
     python3 scripts/check-parity-release-gate.py &&
     python3 scripts/generate-parity-docs.py --check
   '

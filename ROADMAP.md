@@ -30,7 +30,7 @@ After 1.0, the roadmap shifts from parity to modernization.
 |----------|------|
 | [SHIPPED.md](docs/SHIPPED.md) | **Canonical capability matrix** — what is available in the current release |
 | [protege-parity/](docs/protege-parity/README.md) | **1.0 engineering program** — scope, blockers, release gates |
-| [PRE_1_0_PHASES.md](docs/protege-parity/07_BACKLOG/PRE_1_0_PHASES.md) | **Pre-1.0 release phases** — v0.19–v0.25 → 1.0.0 |
+| [PRE_1_0_PHASES.md](docs/protege-parity/07_BACKLOG/PRE_1_0_PHASES.md) | **Pre-1.0 release phases** — v0.19–v0.26 → 1.0.0 |
 | [ROADMAP_MAPPING.md](docs/ui/ROADMAP_MAPPING.md) | **UI specs ↔ releases** — master checklist for all Product Roadmap 2.0 items |
 | [design/ROADMAP.md](docs/design/ROADMAP.md) | Per-crate engineering detail for **shipped** v0.1–v0.11 milestones |
 | [PROTEGE_PARITY.md](docs/design/PROTEGE_PARITY.md) | Historical v0.18 P0/P1/P2 checklist (superseded for planning) |
@@ -84,7 +84,7 @@ Web foundation       Team workspaces          Cloud collaboration
 | **C — Platform & authoring** | v0.9–v0.12 | Shipped | OntoCore identity, semantic workspace, authoring parity |
 | **D — OntoUI platform** | v0.13–v0.14 | Shipped | v0.13: WorkspaceStore, focus relay; v0.14: plugin host MVP |
 | **E — Desktop UX shell gate** | v0.15–v0.18 | Shipped | Menus, layouts, workflows, migration readiness (not full parity) |
-| **F — Full Protégé parity path** | v0.19–v0.25 | In progress (v0.19–v0.25 shipped; 1.0.0-rc next) | Semantic core → formats → OWL 2 → reason/SWRL → services → verify |
+| **F — Full Protégé parity path** | v0.19–v0.26 | In progress (v0.19–v0.25 shipped; v0.26 Protégé test port; 1.0.0-rc next) | Semantic core → formats → OWL 2 → reason/SWRL → services → verify → Protégé JUnit behavioral port |
 | **G — Protégé replacement** | 1.0.0 | Planned | Daily OWL/OBO engineering without Protégé |
 | **H — Ecosystem** | v1.1–v1.2 | Planned | SDKs, AI, toolchain & collaboration |
 | **I — Webapp platform** | v1.3–v1.5+ | Planned | Browser-first ontology engineering: hosted webapp, React app (no backend) via WASM, team workspaces, cloud collaboration |
@@ -116,7 +116,8 @@ Web foundation       Team workspaces          Cloud collaboration
 | 23 | v0.23 | F | Shipped | 5† | Reasoning parity + SWRL |
 | 24 | v0.24 | F | Shipped | 3†, 6† | Refactoring + DL Query parity |
 | 25 | v0.25 | F | Shipped | 4†, 8† | Viz + plugin SDK 1.0 + a11y + parity CI |
-| 26 | 1.0.0-rc | F | Planned | — | Stabilize; all P0 VERIFIED |
+| 26 | v0.26 | F | In progress | — | Protégé Desktop JUnit behavioral test port (Wave 1) |
+| 27 | 1.0.0-rc | F | Planned | — | Stabilize; all P0 VERIFIED |
 | 27 | v1.0 | G | Planned | 1–6 exit, 9† | Protégé-competitive release |
 | 28 | v1.1 | H | Planned | 7, 2†, 3†, 4†, 8†, 9† | Language bindings & AI primitives |
 | 29 | v1.2 | H | Planned | 9, 10, 11 | Ontology toolchain platform |
@@ -644,6 +645,21 @@ See [migration/v0.22.md](docs/migration/v0.22.md).
 **Blockers:** [BLOCKER_08](docs/protege-parity/04_BLOCKERS/BLOCKER_08_VISUALIZATION.md)–[BLOCKER_11](docs/protege-parity/04_BLOCKERS/BLOCKER_11_PARITY_VERIFICATION.md)
 
 See [migration/v0.25.md](docs/migration/v0.25.md) and [SHIPPED.md](docs/SHIPPED.md).
+
+---
+
+### v0.26 — Protégé Desktop test port (in progress)
+
+**Theme:** Port portable Protégé Desktop JUnit behaviors into OntoCode Rust semantic oracles (not a JVM suite runner).
+
+| Area | Deliverables |
+|------|--------------|
+| **OntoCore / tests** | Inventory [`parity/protege-test-port.yaml`](parity/protege-test-port.yaml); Wave 1 suites `tests/protege_port_*.rs`; fixtures under [`examples/protege-roundtrip/ported/`](examples/protege-roundtrip/ported/) |
+| **Verification** | [`scripts/validate-protege-test-port.py`](scripts/validate-protege-test-port.py); CI + local CI wiring; `PAR-*` `test_ids` linkage |
+
+**Exit criteria:** Every `PORT_W1` inventory row has OntoCode tests (or an explicit `gap`); Wave 1 suites green in CI.
+
+**Docs:** [PROTEGE_TEST_PORT.md](docs/protege-parity/03_PARITY/PROTEGE_TEST_PORT.md)
 
 ---
 

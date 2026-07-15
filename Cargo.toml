@@ -71,6 +71,8 @@ ontocore-obo = { workspace = true }
 ontocore-swrl = { workspace = true }
 ontocore-plugin = { workspace = true }
 ontocore-plugin-builtins = { workspace = true }
+ontocore-refactor = { workspace = true }
+ontocore-edit = { workspace = true }
 serde_json.workspace = true
 fastobo.workspace = true
 tempfile = "3"

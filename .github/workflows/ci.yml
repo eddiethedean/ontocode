@@ -45,6 +45,9 @@ jobs:
       - name: Validate parity manifest (schema + paths)
         run: python3 scripts/validate-parity-manifest.py --paths
 
+      - name: Validate Protégé test-port inventory
+        run: python3 scripts/validate-protege-test-port.py
+
       - name: Parity release-gate report (infra)
         run: python3 scripts/check-parity-release-gate.py
 

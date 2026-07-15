@@ -1,0 +1,14 @@
+@prefix idrange: <http://purl.obolibrary.org/obo/ro/idrange/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+<http://purl.obolibrary.org/obo/go/go-idranges.owl> a owl:Ontology .
+
+idrange:1 a owl:Datatype ;
+    rdfs:label "idrange 1" ;
+    owl:equivalentClass [
+        a rdfs:Datatype ;
+        owl:onDatatype xsd:integer ;
+        owl:withRestrictions ( [ xsd:minInclusive "1"^^xsd:integer ] [ xsd:maxInclusive "9999"^^xsd:integer ] )
+    ] .

@@ -1,0 +1,37 @@
+{
+  "schema_version": "0.1",
+  "baseline": "0.18.2",
+  "target": "1.0.0",
+  "P0": {
+    "total": 15,
+    "verified": 6,
+    "complete": 7,
+    "partial": 2,
+    "not_implemented": 0,
+    "blocked": 0,
+    "verified_pct": 40.0,
+    "complete_or_verified_pct": 86.7
+  },
+  "P1": {
+    "total": 4,
+    "verified": 4,
+    "complete": 0,
+    "partial": 0,
+    "not_implemented": 0,
+    "blocked": 0,
+    "verified_pct": 100.0,
+    "complete_or_verified_pct": 100.0
+  },
+  "P2": {
+    "total": 0,
+    "verified": 0,
+    "complete": 0,
+    "partial": 0,
+    "not_implemented": 0,
+    "blocked": 0,
+    "verified_pct": 0.0,
+    "complete_or_verified_pct": 0.0
+  },
+  "release_ready": false,
+  "gate3_p0_verified": false
+}

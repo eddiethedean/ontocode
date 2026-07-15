@@ -134,10 +134,10 @@ Every parity feature should reference:
                                                                     DialogShell,                             EPIC-010 focus/
                                                                     panels + axe                             SR + axe harness.
 
-  PAR-TST-001    Parity       PARTIAL           parity/             protege-desktop- ---     ✓       ✓       v0.19:
-                 verification                   scripts             parity.yaml,                        manifest
-                                                                                        validate-parity-       skeleton +
-                                                                                        manifest.py            CI validator.
+  PAR-TST-001    Parity       VERIFIED          parity/scripts      validate +       ✓       ✓       ✓       v0.25
+                 verification                                       release-gate +                           EPIC-011 path
+                                                                    generate-docs                            checks, metrics,
+                                                                                                             Gate 3 report.
   -------------------------------------------------------------------------------------------------------------------------
 
 ------------------------------------------------------------------------

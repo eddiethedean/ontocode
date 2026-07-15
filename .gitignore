@@ -10,6 +10,7 @@
 /mutants.out.old/
 /mutants.out/
 /site/
+/site-e1/
 /target/
 __pycache__/
 extension/*.vsix

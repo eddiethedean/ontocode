@@ -94,7 +94,7 @@ Every item from [PRODUCT_ROADMAP_2.0.md](PRODUCT_ROADMAP_2.0.md), with release a
 | **8** | Inspector card API | Planned | v0.14 | [PLUGIN_API_SPEC.md](PLUGIN_API_SPEC.md) |
 | **8** | AI provider API | Planned | v1.1 | [PLUGIN_API_SPEC.md](PLUGIN_API_SPEC.md) |
 | **8** | Reasoner provider API | Planned | v0.14 | [PLUGIN_API_SPEC.md](PLUGIN_API_SPEC.md) |
-| **8** | SDK and examples | Planned | v0.14 | [design/PLUGIN_SPEC.md](../design/PLUGIN_SPEC.md) |
+| **8** | SDK and examples | Shipped | v0.25 | [guides/plugins.md](../guides/plugins.md) · TOML+subprocess SDK 1.0; marketplace/AI remain later |
 | **9** | Semantic diff | Shipped | v0.10+ | [COLLABORATION.md](COLLABORATION.md) |
 | **9** | Review workspace | Planned | v1.0 / Post-1.2 | [COLLABORATION.md](COLLABORATION.md) |
 | **9** | GitHub integration | Planned | v1.2 | [COLLABORATION.md](COLLABORATION.md) |

@@ -847,7 +847,7 @@ pub fn handle_run_plugin(
     params: RunPluginParams,
 ) -> Result<RunPluginResult, LspErrorPayload> {
     let workspace = state.effective_index_root().ok_or_else(LspErrorPayload::not_indexed)?;
-    let host = ontocore_plugin_builtins::load_plugin_host(&workspace)
+    let mut host = ontocore_plugin_builtins::load_plugin_host(&workspace)
         .map_err(|e| LspErrorPayload::index_failed(e.to_string()))?;
     state
         .with_catalog(|catalog| {
@@ -858,6 +858,8 @@ pub fn handle_run_plugin(
                 None,
                 params.step.as_deref(),
                 params.view_id.as_deref(),
+                params.query.as_deref(),
+                params.focus_iri.as_deref(),
             )
             .map(|result| RunPluginResult {
                 diagnostics: result.diagnostics.iter().map(DiagnosticSummary::from).collect(),
@@ -865,6 +867,15 @@ pub fn handle_run_plugin(
                 logs: result.logs,
                 view_html: result.view_html,
                 success: result.success,
+                result: result.result,
+                columns: result.columns,
+                rows: result.rows,
+                unsatisfiable: result.unsatisfiable,
+                affected_iris: result.affected_iris,
+                root_iris: result.root_iris,
+                graph_kind: result.graph_kind,
+                hints: result.hints,
+                profile: result.profile,
             })
             .map_err(|e| LspErrorPayload::index_failed(e.to_string()))
         })

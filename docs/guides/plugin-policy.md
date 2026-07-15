@@ -1,6 +1,6 @@
-# Plugin policy (pre-1.0)
+# Plugin SDK 1.0 compatibility policy
 
-OntoCore ships a **plugin host MVP** (manifests, subprocess plugins, reference plugins). This page states the **product policy** — not how to author a plugin. For authoring, see [Plugin authoring](plugins.md).
+OntoCore ships **Plugin SDK 1.0** as a frozen TOML + subprocess JSON host. This page states the **product policy** — not how to author a plugin. For authoring, see [Plugin authoring](plugins.md).
 
 ## Support stance
 
@@ -8,25 +8,43 @@ OntoCore ships a **plugin host MVP** (manifests, subprocess plugins, reference p
 |-------|--------|
 | Commercial plugin support | **Not offered** — community / GitHub issues |
 | Marketplace / app store | **None** — no curated marketplace SLA |
-| Compatibility promise | Host and manifest schema may change between **0.x** minors; pin OntoCore/OntoCode together |
+| Compatibility promise | Within major version **1.x**, the wire contract (`api_version = "1"`) is **additive**; breaking removals require a new major |
 | Security review | Third-party plugins run as **subprocesses** with declared permissions — treat untrusted plugins as untrusted code |
-| Stability target | Semver-stable plugin ecosystem API is a **v1.0** goal — [API stability](api-stability.md) |
+| Stability target | **SDK 1.0** is the stable plugin ecosystem API — see [API stability](api-stability.md) |
 
-## What is supported today
+## What must not change in 1.x
 
-- Built-in and reference plugins shipped with the repo
-- Local manifests discovered by CLI / LSP when enabled
-- Documented MVP APIs in [Plugin authoring](plugins.md)
+- Manifest root shape: `[plugin]`, `[capabilities]`, `[config]`, `[[ui.*]]`
+- Frozen wire: `api_version = "1"`
+- Subprocess invocation: `<entry> <action> --workspace <path> …` with JSON stdout
+- Existing actions: `validate`, `export`, `workflow`, `ui-view`
+- Permission string ids (`workspace.read`, `external_process`, …)
+
+## What may be added in 1.x (non-breaking)
+
+- New optional manifest fields (ignored by older hosts)
+- New optional JSON stdout fields
+- New provider actions (`reasoner.classify`, `query.run`, `refactor.preview`, `graph.build`)
+- New hosted `kind` values documented as hosted; reserved kinds stay rejected until promoted
+
+## Deprecation
+
+Fields or actions marked deprecated remain for at least one minor release before removal, and only leave in a **major** bump.
+
+## Migration from v0.14–v0.24 authoring
+
+Manifests written for OntoCore **v0.16+** remain valid. New provider kinds (`reasoner`, `query`, `refactor`, `graph`) and `depends_on` / `activation` are **opt-in**.
 
 ## What is not promised
 
-- Binary compatibility across OntoCore minors without rebuilds
+- Binary ABI / in-process Rust trait stability across majors
+- Java Protégé plugin compatibility
 - Guaranteed availability of community plugins
-- Parity with Protégé’s plugin marketplace
+- Marketplace or remote code execution
 
 ## Enterprise guidance
 
-Treat plugins as **internal tooling**: pin versions, review manifests, and keep a rollback path that disables third-party plugins. See [Production readiness](production-readiness.md) and [Security](../security.md).
+Treat plugins as **internal tooling**: pin versions, review manifests, and keep a rollback path (`ontocore plugins disable <id>` writes `.ontocore/plugin-disabled.json`). See [Production readiness](production-readiness.md) and [Security](../security.md).
 
 ## Related
 

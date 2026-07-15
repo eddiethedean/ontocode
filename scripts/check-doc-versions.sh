@@ -1080,7 +1080,7 @@ check_file_contains "docs/guides/lsp-hello-world.md" "ontocore-lsp" "lsp hello-w
 check_file_contains "mkdocs.yml" "guides/extension-development.md" "mkdocs extension development guide"
 check_file_contains "mkdocs.yml" "guides/lsp-hello-world.md" "mkdocs lsp hello-world guide"
 check_file_contains "docs/guides/extension-development.md" "extension/" "extension development guide"
-check_file_contains "crates/ontocore-plugin/README.md" "Experimental" "plugin README experimental banner"
+check_file_contains "crates/ontocore-plugin/README.md" "Plugin SDK 1.0" "plugin README SDK 1.0 banner"
 check_file_contains "crates/ontocore-obo/README.md" "ontocore-obo" "ontocore-obo README"
 
 # errors.md must reference current release
@@ -1345,7 +1345,7 @@ if [[ "$TAGGED_MINOR" =~ ^0\.([0-9]+)$ ]]; then
     check_file_contains "docs/cli-reference.md" "No \`ontocore swrl\` command" "cli-reference SWRL absence note"
     check_file_contains "docs/guides/dl-query.md" "Not Protégé DL Query" "dl-query honesty page"
     check_file_contains "docs/guides/enterprise-week-2.md" "Enterprise week-2" "enterprise week-2 playbook"
-    check_file_contains "docs/guides/plugin-policy.md" "Plugin policy" "plugin policy page"
+    check_file_contains "docs/guides/plugin-policy.md" "Plugin SDK 1.0 compatibility policy" "plugin policy page"
     check_file_contains "docs/internals.md" "\*\*v${TAGGED_MINOR}\*\*" "internals LSP tagged release"
   fi
 fi

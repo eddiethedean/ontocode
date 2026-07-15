@@ -1,0 +1,12 @@
+[plugin]
+name = "demo-refactor"
+version = "0.1.0"
+kind = "refactor"
+id = "org.example.demo-refactor"
+api_version = "1"
+entry = "demo_providers.sh"
+activation = "on_command"
+permissions = ["workspace.read", "external_process"]
+
+[capabilities]
+refactor = true

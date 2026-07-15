@@ -908,6 +908,10 @@ export interface PluginCapabilities {
   release: boolean;
   diagnostics: boolean;
   export: boolean;
+  reasoner?: boolean;
+  query?: boolean;
+  refactor?: boolean;
+  graph?: boolean;
 }
 
 export interface PluginDescriptor {
@@ -917,11 +921,15 @@ export interface PluginDescriptor {
   kind: string;
   api_version?: string;
   permissions?: string[];
+  depends_on?: string[];
+  activation?: string;
+  state?: string;
   capabilities: PluginCapabilities;
   manifest_path: string;
   ui: PluginUiContributions;
   in_process: boolean;
   disabled?: boolean;
+  enabled?: boolean;
 }
 
 export interface ListPluginsResult {
@@ -933,6 +941,8 @@ export interface RunPluginParams {
   action?: string;
   step?: string;
   view_id?: string;
+  query?: string;
+  focus_iri?: string;
 }
 
 export interface RunPluginResult {
@@ -941,4 +951,13 @@ export interface RunPluginResult {
   logs?: string;
   view_html?: string;
   success: boolean;
+  result?: unknown;
+  columns?: string[];
+  rows?: string[][];
+  unsatisfiable?: string[];
+  affected_iris?: string[];
+  root_iris?: string[];
+  graph_kind?: string;
+  hints?: string[];
+  profile?: string;
 }

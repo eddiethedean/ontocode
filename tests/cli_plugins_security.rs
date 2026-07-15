@@ -241,9 +241,18 @@ export = true
 
     let catalog =
         IndexBuilder::new().workspace(workspace.clone()).build().expect("index workspace");
-    let host = load_plugin_host(&workspace).expect("load plugin host");
+    let mut host = load_plugin_host(&workspace).expect("load plugin host");
     let result = host
-        .run_plugin_action("org.example.eviloutpaths", "export", Some(&catalog), None, None, None)
+        .run_plugin_action(
+            "org.example.eviloutpaths",
+            "export",
+            Some(&catalog),
+            None,
+            None,
+            None,
+            None,
+            None,
+        )
         .expect("run export plugin");
 
     // Only the in-workspace relative path should survive the jail.
@@ -282,9 +291,18 @@ fn in_process_export_default_writes_under_workspace_not_cwd() {
 
     let catalog =
         IndexBuilder::new().workspace(workspace.clone()).build().expect("index workspace");
-    let host = load_plugin_host(&workspace).expect("load plugin host");
+    let mut host = load_plugin_host(&workspace).expect("load plugin host");
     let result = host
-        .run_plugin_action("ontocode.markdown-export", "export", Some(&catalog), None, None, None)
+        .run_plugin_action(
+            "ontocode.markdown-export",
+            "export",
+            Some(&catalog),
+            None,
+            None,
+            None,
+            None,
+            None,
+        )
         .expect("run markdown export");
     assert!(result.success);
 

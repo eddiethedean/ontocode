@@ -249,17 +249,44 @@ enum PluginCommands {
         #[arg(long, value_enum, default_value_t = OutputFormat::Text)]
         format: OutputFormat,
     },
+    /// Show plugin lifecycle and dependency info
+    Info {
+        /// Plugin id
+        plugin_id: String,
+        #[arg(default_value = ".")]
+        workspace: PathBuf,
+        #[arg(long, value_enum, default_value_t = OutputFormat::Text)]
+        format: OutputFormat,
+    },
+    /// Enable a disabled plugin (activates dependents per activation policy)
+    Enable {
+        plugin_id: String,
+        #[arg(default_value = ".")]
+        workspace: PathBuf,
+    },
+    /// Disable a plugin and cascade-deactivate dependents
+    Disable {
+        plugin_id: String,
+        #[arg(default_value = ".")]
+        workspace: PathBuf,
+    },
     /// Run a plugin action
     Run {
         /// Plugin id
         plugin_id: String,
         #[arg(default_value = ".")]
         workspace: PathBuf,
-        /// Action: validate, export, workflow
+        /// Action: validate, export, workflow, reasoner.classify, query.run, refactor.preview, graph.build
         #[arg(long, default_value = "validate")]
         action: String,
         #[arg(long)]
         step: Option<String>,
+        /// Query text for `query.run`
+        #[arg(long)]
+        query: Option<String>,
+        /// Focus / root IRI for refactor.preview or graph.build
+        #[arg(long)]
+        iri: Option<String>,
         #[arg(long, value_enum, default_value_t = OutputFormat::Text)]
         format: OutputFormat,
     },
@@ -920,21 +947,55 @@ fn main() -> Result<()> {
                         }
                         for p in plugins {
                             println!(
-                                "{} {} ({}) — validate={} export={} in_process={}",
+                                "{} {} ({}) state={} — validate={} export={} reasoner={} query={} refactor={} graph={} in_process={}",
                                 p.id,
                                 p.version,
                                 p.kind,
+                                p.state,
                                 p.capabilities.validate,
                                 p.capabilities.export,
+                                p.capabilities.reasoner,
+                                p.capabilities.query,
+                                p.capabilities.refactor,
+                                p.capabilities.graph,
                                 p.in_process
                             );
                         }
                     }
                 }
             }
-            PluginCommands::Run { workspace, plugin_id, action, step, format } => {
-                let catalog = build_catalog(&workspace)?;
+            PluginCommands::Info { workspace, plugin_id, format } => {
                 let host = load_plugin_host(&workspace)?;
+                let info = host
+                    .plugin_info(&plugin_id)
+                    .with_context(|| format!("plugin not found: {plugin_id}"))?;
+                match format {
+                    OutputFormat::Json => println!("{}", serde_json::to_string_pretty(&info)?),
+                    _ => {
+                        println!("{} {} ({})", info.id, info.version, info.kind);
+                        println!("  state: {}", info.state);
+                        println!("  activation: {}", info.activation);
+                        println!("  enabled: {}", info.enabled);
+                        println!("  depends_on: {}", info.depends_on.join(", "));
+                        println!("  manifest: {}", info.manifest_path);
+                    }
+                }
+            }
+            PluginCommands::Enable { workspace, plugin_id } => {
+                let mut host = load_plugin_host(&workspace)?;
+                host.enable_plugin(&plugin_id)
+                    .with_context(|| format!("enable failed for {plugin_id}"))?;
+                println!("enabled {plugin_id} (state={})", host.state_of(&plugin_id).as_str());
+            }
+            PluginCommands::Disable { workspace, plugin_id } => {
+                let mut host = load_plugin_host(&workspace)?;
+                host.disable_plugin(&plugin_id)
+                    .with_context(|| format!("disable failed for {plugin_id}"))?;
+                println!("disabled {plugin_id}");
+            }
+            PluginCommands::Run { workspace, plugin_id, action, step, query, iri, format } => {
+                let catalog = build_catalog(&workspace)?;
+                let mut host = load_plugin_host(&workspace)?;
                 let result = host
                     .run_plugin_action(
                         &plugin_id,
@@ -943,6 +1004,8 @@ fn main() -> Result<()> {
                         None,
                         step.as_deref(),
                         None,
+                        query.as_deref(),
+                        iri.as_deref(),
                     )
                     .with_context(|| format!("plugin run failed for {plugin_id}"))?;
                 match format {
@@ -956,6 +1019,18 @@ fn main() -> Result<()> {
                         }
                         if !result.output_paths.is_empty() {
                             println!("output: {}", result.output_paths.join(", "));
+                        }
+                        if let Some(cols) = &result.columns {
+                            println!("columns: {}", cols.join(", "));
+                        }
+                        if let Some(unsat) = &result.unsatisfiable {
+                            println!("unsatisfiable: {}", unsat.join(", "));
+                        }
+                        if let Some(iris) = &result.affected_iris {
+                            println!("affected: {}", iris.join(", "));
+                        }
+                        if let Some(kind) = &result.graph_kind {
+                            println!("graph_kind: {kind}");
                         }
                     }
                 }

@@ -6,10 +6,15 @@ Canonical capability matrix: [What ships today](../SHIPPED.md).
 
 ## When not to use OntoCode (today)
 
-Prefer Protégé or other tools (or wait for v1.0) if you need:
+Prefer Protégé or other tools (or wait for product **1.0**) if you need any of the following. Full list: [Known limitations](../known-limitations.md).
 
 - Full **SQL** analytics (JOINs, aggregates) — only SQL-like virtual tables ship today
-- A **stable, semver-guaranteed plugin API** or production owlmake integration without subprocess scaffolding — plugin host **MVP shipped in v0.14**; stable ecosystem API planned **v1.0**
+- **Byte-identical** OWL/XML or RDF/XML that matches Protégé layout
+- **JSON-LD / TriG / N-Triples write-back** (read-only today)
+- A **curated plugin marketplace** or **production owlmake** without accepting the subprocess SDK — Plugin **SDK 1.0** freezes the wire contract today; marketplace/owlmake hardening remain product **1.0** — [Plugin policy](plugin-policy.md)
+- **HermiT-identical** DL explanations or certified Protégé+HermiT equivalence
+- **WebProtégé** collaboration
+- Move / extract / ontology-merge refactor on **non-Turtle** files (rename/merge/replace already multi-format)
 
 ## Enterprise documentation pack
 
@@ -27,7 +32,7 @@ Prefer Protégé or other tools (or wait for v1.0) if you need:
 | [Release timeline (non-commitment)](release-timeline.md) | Planning — v0.9/v1.0 goals without fixed dates |
 | [LGPL compliance](lgpl-compliance.md) | Legal — horned-owl obligations |
 | [Protégé coexistence](protege-coexistence.md) | Ontology teams — split workflow with Protégé |
-| [Plugin authoring](plugins.md) | Platform — v0.16+ plugin API (permissions, views, preferences, context actions), manifests, subprocess plugins |
+| [Plugin authoring](plugins.md) | Platform — Plugin SDK 1.0 (frozen wire, lifecycle, providers); see [Plugin policy](plugin-policy.md) |
 
 ## What ships today (v0.25.0)
 
@@ -55,7 +60,7 @@ Prefer Protégé or other tools (or wait for v1.0) if you need:
 | Manage Imports UI + import patch ops | **Shipped** (v0.11) |
 | `ontocore docs` export | **Shipped** (v0.11) |
 | Open VSX / Cursor marketplace | **Shipped** (v0.11) |
-| Plugin host (`ontocore plugins`, LSP `listPlugins`/`runPlugin`) | **Shipped** (v0.14) |
+| Plugin host (`ontocore plugins`, LSP `listPlugins`/`runPlugin`) | **Shipped** (SDK 1.0 wire freeze in v0.25) |
 | Plugin permissions + UI views (`api_version = "1"`) | **Shipped** (v0.15) |
 | Explanation alternatives + staleness detection | **Shipped** (v0.15) |
 | Graph asserted/inferred/combined modes | **Shipped** (v0.15) |
@@ -86,7 +91,7 @@ Full gap analysis for evaluators: [Known limitations](../known-limitations.md) �
 | `ontocode.lspPath` | Trusted workspaces only; ignored in VS Code Restricted Mode |
 | Resource limits | [workspace-limits.md](../workspace-limits.md) — file count, size, triple caps |
 | Telemetry | **No telemetry**. AI features are opt-in per [ADR-0010](../design/adr/0010-ai-features-opt-in.md) (not shipped) |
-| Supply chain | SHA256 checksums on release artifacts; `cargo audit` in CI. **Code signing not shipped.** Open VSX publish is automated on release; **VS Code Marketplace publish is manual** ([releasing](../releasing.md)). |
+| Supply chain | SHA256 checksums on release artifacts; `cargo audit` in CI. **Code signing not shipped.** Open VSX publishes automatically when `OVSX_PAT` is set; **VS Code Marketplace publish is always manual**. Either store may lag the GitHub tag ([releasing](../releasing.md)). |
 
 ## Licensing
 

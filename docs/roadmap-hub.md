@@ -51,6 +51,6 @@ flowchart TB
 
 ## Current release
 
-**v0.25.0** — see [Migration v0.22.0 → v0.25.0](migration/v0.23.md), [Migration v0.21.0 → v0.22.0](migration/v0.22.md), and [Changelog](changelog.md).
+**v0.25.0** — see [Migration v0.24.0 → v0.25.0](migration/v0.25.md), [Migration v0.23.0 → v0.24.0](migration/v0.24.md), and [Changelog](changelog.md).
 
 > **Design docs under `docs/platform/`, `docs/ui/`, `docs/protege-parity/`, and `docs/PROTEGE_REVERSE_ENGINEERING/` are not a shipped feature list.** Evaluators and procurement should use [SHIPPED.md](SHIPPED.md) and [Known limitations](known-limitations.md) only — ignore internal parity percentage assessments on GitHub.

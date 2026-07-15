@@ -4,9 +4,9 @@ Continue after the [first-week Protégé migration](protege-migration.md) and [p
 
 ## Goals
 
-1. Prove **DL / realize / SWRL** on a **representative** corpus (not only fixtures).
+1. Prove **DL / realize / SWRL / DL Query** on a **representative** corpus (not only fixtures).
 2. Define **rollback** criteria before wider rollout.
-3. Keep Protégé for workflows OntoCode still marks as not supported (especially DL Query).
+3. Keep Protégé for workflows OntoCode still marks as not supported (byte-identical XML, HermiT identity, Protégé-only plugins) — see [known limitations](../known-limitations.md) and [DL Query honesty](dl-query.md).
 
 ## Day plan (suggest ~5 working days)
 
@@ -35,7 +35,7 @@ Fail the pilot (or pause IDE-only edits) if any of:
 - Unsatisfiable-class false positives vs dual-tool baseline on agreed corpora
 - SWRL materialize changes ABox/TBox in ways reviewers cannot explain
 - Workspace exceeds [limits](../workspace-limits.md) or CI timeouts become routine
-- Authors need Protégé DL Query daily with no coexistence plan — [dl-query.md](dl-query.md)
+- Authors need Protégé DL Query daily **and** cannot accept OntoCode’s [DL Query honesty limits](dl-query.md) / HermiT dual-check plan
 
 ## Related
 

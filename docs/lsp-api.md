@@ -502,17 +502,24 @@ Returns discovered workspace plugins from `.ontocore/plugins/*.toml` plus built-
 | `id` | string | Plugin id |
 | `name` | string | Display name |
 | `version` | string | Manifest version |
-| `kind` | string | `validator`, `exporter`, `workflow`, … |
+| `kind` | string | `validator`, `exporter`, `workflow`, `reasoner`, `query`, `refactor`, `graph`, … |
 | `manifest_path` | string | Absolute path to manifest TOML |
-| `capabilities` | object | `build`, `validate`, `release`, `diagnostics`, `export` flags |
-| `permissions` | array | **(v0.15+)** Declared permission strings (`workspace.read`, `workspace.write`, `external_process`) |
-| `api_version` | string? | **(v0.15+)** Manifest API version (e.g. `"1"`) |
+| `capabilities` | object | Legacy capability flags (`build`, `validate`, `release`, `diagnostics`, `export`) where declared |
+| `permissions` | array | Declared permission strings (`workspace.read`, `workspace.write`, `external_process`, …) |
+| `api_version` | string? | Manifest API version (e.g. `"1"` for SDK 1.0) |
+| `state` | string | Lifecycle state (**SDK 1.0**) |
+| `enabled` | boolean | Whether the plugin is enabled (**SDK 1.0**) |
+| `depends_on` | array | Plugin ids this plugin depends on (**SDK 1.0**) |
+| `activation` | string | Activation policy (**SDK 1.0**) |
 | `ui.commands` | array | `{ id, title, scope? }` palette contributions |
-| `ui.views` | array | **(v0.15+)** `{ id, title }` dockable view contributions |
+| `ui.views` | array | `{ id, title }` dockable view contributions |
 | `ui.inspector_cards` | array | `{ id, title, applies_to, command? }` inspector slots |
 | `in_process` | boolean | `true` for built-in reference plugins |
 
 **Errors:** `NOT_INDEXED`, `INDEX_FAILED` (discovery/host failure)
+
+!!! note "Error codes"
+    Per-method error codes are documented in prose and [errors.md](errors.md). A machine-checkable enum in `lsp-protocol.schema.json` is a follow-up (not yet shipped).
 
 ### `ontocore/listCommands` (v0.17+)
 

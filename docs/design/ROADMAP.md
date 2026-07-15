@@ -4,7 +4,7 @@
 
 > **Per-crate engineering detail for shipped milestones.** Canonical full release phase plan (v0.1–post-1.2): [Platform roadmap](../roadmap.md). Ecosystem overview: [Architecture](../architecture.md) · [Vision](../vision.md).
 
-> v1.0 exit bar: [PROTEGE_PARITY.md](PROTEGE_PARITY.md) — all **P0** items green.
+> v1.0 exit bar: [protege-parity program](https://github.com/eddiethedean/ontocode/blob/main/docs/protege-parity/README.md) (GitHub). [PROTEGE_PARITY.md](PROTEGE_PARITY.md) is **historical** — do not use it as the live exit checklist.
 >
 > **Dependencies:** [DEPENDENCY_MATRIX.md](DEPENDENCY_MATRIX.md) · [ADR-0016](adr/0016-dependency-first-implementation.md)
 

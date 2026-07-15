@@ -38,7 +38,7 @@ No separate LSP install required for standard Marketplace, Open VSX, or VSIX use
 | macOS | **No** — use `cargo install ontocore-cli --locked` |
 | Windows | **No** — use `cargo install` or CI on Linux runners |
 
-Pin version: `VERSION=0.25.0` — [getting started](../getting-started.md).
+Pin version: `VERSION=0.25.0` — [Install CLI & CI (detail)](../install-cli-ci.md).
 
 ## `cargo install` prerequisites
 

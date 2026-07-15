@@ -12,7 +12,7 @@ The **Query Workbench** is an OntoCode React panel for running **SQL-like** cata
 ## Open the workbench
 
 1. **Command Palette** (`Ctrl+Shift+P` / `Cmd+Shift+P`) → **OntoCode: Open Query Workbench**
-2. Or follow the optional **Query the workspace** section in [First success in 10 minutes](../guides/first-success.md)
+2. Or open Query Workbench from the Command Palette after [First success](../guides/first-success.md) and run `SELECT short_name FROM classes`
 
 ## Modes
 

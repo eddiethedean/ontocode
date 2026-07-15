@@ -8,7 +8,7 @@ Migration guides: [Migration index](migration/README.md)
 
 ## [0.25.0] - 2026-07-15
 
-**v0.25.0** — UX completion + executable verification (`PAR-VIS-001` / `PAR-PLG-001` / `PAR-ACC-001` / `PAR-TST-001`): graph visualization parity, Plugin SDK 1.0, accessibility for OntoCode-owned webviews, parity CI release gates. See [CHANGELOG.md](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) and [migration/v0.25.md](migration/v0.25.md).
+**v0.25.0** — **Adopters:** expanded graphs, Plugin SDK 1.0 (author against frozen wire; marketplace still product 1.0), a11y for owned webviews, parity CI gates. See [migration/v0.25.md](migration/v0.25.md). Engineering: `PAR-VIS-001` / `PAR-PLG-001` / `PAR-ACC-001` / `PAR-TST-001` — full [CHANGELOG.md](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md).
 
 ## [0.24.0] - 2026-07-14
 

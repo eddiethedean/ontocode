@@ -31,13 +31,13 @@ If Marketplace / Open VSX is behind GitHub, install the release VSIX for the tag
 | Cursor | [Open VSX](https://open-vsx.org/extension/ontocode/ontocode) or the same VSIX |
 | CLI (pinned) | `cargo install ontocore-cli --locked --version 0.25.0` |
 | CLI (Linux, no compile) | `ontocore-v0.25.0-x86_64-unknown-linux-gnu.tar.gz` from GitHub Releases |
-| Tutorial files (offline) | `ontocode-tutorial.zip` from the same GitHub Release |
+| Tutorial files (offline) | Prefer the curl/PowerShell samples in [First success](first-success.md). Optional: `ontocode-tutorial.zip` from the same GitHub Release when attached |
 
 Always pin: bare `cargo install ontocore-cli` resolves to the **latest** crates.io version and can jump without your review.
 
 ## When Marketplace lags GitHub
 
-Marketplace and Open VSX publishes are **manual** steps after the release workflow finishes (see [Marketplace publish](../marketplace-publish.md)). Stores can lag the GitHub tag by hours or longer.
+Marketplace publish is always **manual** after the release workflow finishes. **Open VSX** publishes automatically when `OVSX_PAT` is set (see [Marketplace publish](../marketplace-publish.md)). Either store can lag the GitHub tag by hours or longer.
 
 ### Playbook: store version ≠ latest tag
 

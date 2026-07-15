@@ -1,6 +1,6 @@
 # Migrating from Protégé — first week
 
-This guide helps ontology teams adopt OntoCode **v0.23** alongside or instead of [Protégé](https://protege.stanford.edu/). For a capability comparison, see [Protégé vs OntoCode](protege-decision.md) and [What ships today](../SHIPPED.md).
+This guide helps ontology teams adopt OntoCode **v0.25** alongside or instead of [Protégé](https://protege.stanford.edu/). For a capability comparison, see [Protégé vs OntoCode](protege-decision.md) and [What ships today](../SHIPPED.md).
 
 ## Before you start
 
@@ -15,12 +15,13 @@ This guide helps ontology teams adopt OntoCode **v0.23** alongside or instead of
 
 - **Byte-identical OWL/XML or RDF/XML layout** after save
 - A **full DL axiom catalog UI** for every axiom kind and format
-- Protégé-specific plugins or a stable marketplace API (OntoCode plugin host is MVP; semver-stable API is **v1.0**)
+- Protégé-specific plugins or a **curated plugin marketplace** (OntoCode Plugin SDK 1.0 freezes the subprocess wire today; marketplace remains product **1.0** — [Plugin policy](plugin-policy.md))
 - WebProtégé-style live collaboration
+- **HermiT-identical** DL explanations (OntoLogos is not certified HermiT-identical)
 
-Many teams use **both**: Protégé for heavy axiom authoring or Protégé-only plugins, OntoCode for browse, light edit, lint, diff, reasoning, and CI. See [Protégé coexistence](protege-coexistence.md).
+Many teams use **both**: Protégé for heavy axiom authoring or Protégé-only plugins, OntoCode for browse, light edit, lint, diff, reasoning, DL Query, and CI. See [Protégé coexistence](protege-coexistence.md).
 
-## Honest desktop known gaps (v0.23 tagged)
+## Honest desktop known gaps (v0.25 tagged)
 
 See [Versions & channels](versions-and-channels.md) if Marketplace lags behind the GitHub Release VSIX.
 
@@ -28,10 +29,10 @@ See [Versions & channels](versions-and-channels.md) if Marketplace lags behind t
 |-----|--------|
 | Byte-identical OWL/XML · RDF/XML layout | Re-serialize only (write-back shipped v0.21) — [owl-xml-workflow](owl-xml-workflow.md) |
 | Multi-step semantic undo | Partial workspace runtime (v0.20); full history → **v1.0** |
-| Full OntoGraf filter/layout suite | Partial graphs shipped; polish → **v1.0** |
+| Full OntoGraf filter/layout suite | Partial graphs shipped (v0.25 parity expanded); polish → **v1.0** |
 | Explain all inference kinds (not only unsat) | Unsat explanations shipped |
 | Mid-classify thread kill on the Rust reasoner | Client cancel + ignore late results (v0.18); server may finish CPU work |
-| Stable plugin marketplace API | **v1.0** |
+| Curated plugin marketplace / production owlmake | **Product 1.0** (SDK 1.0 wire is frozen today) |
 
 Full matrix: [known-limitations](../known-limitations.md) · [SHIPPED](../SHIPPED.md).
 
@@ -47,16 +48,16 @@ Follow the [first success core path](../guides/first-success.md) if anything is 
 
 ## Day 2 — Map Protégé habits to OntoCode
 
-| In Protégé | In OntoCode v0.23 |
+| In Protégé | In OntoCode v0.25 |
 |------------|-------------------|
 | Class hierarchy tab | **Classes** explorer; toggle **asserted / inferred / combined** after reasoner |
 | Entity editor (labels, parents) | **Entity Inspector** (`.ttl`, `.obo`, `.owl`/`.rdf`, `.owx`) |
 | Manchester syntax | **Manchester editor** panel |
-| DL query tab | **Query Workbench** — SQL catalog tables or SPARQL (**not** Protégé DL Query syntax; DL Query UI → **v0.25**) |
+| DL query tab | **Query Workbench → DL mode** (or CLI `ontocore dl-query`) — [honesty notes](dl-query.md); not full Protégé tab / HermiT identity |
 | Reasoner (HermiT, etc.) | **Start / Synchronize / Classify / Consistency / Realize** — EL/RL/RDFS/DL/auto via OntoLogos (not certified HermiT-identical); **Stop** requests engine cancel |
 | Explanations | **Explanation** panel (unsat; DL-native steps where available; stale banner after reindex) |
 | SWRLTab | **Rule Browser** / **Rule Editor** (author + validate; DLSafe materialize on classify) |
-| OWLViz / OntoGraf | **Class / property / import / neighborhood** graphs (asserted/inferred/combined) |
+| OWLViz / OntoGraf | **Class / property / import / neighborhood** graphs (asserted/inferred/combined; v0.25 kinds expanded) |
 | Imports | **Manage Imports** panel |
 | Preferences | OntoCode settings + plugin preference pages |
 | Active ontology | **Active Ontology** selector (multi-root supported) |

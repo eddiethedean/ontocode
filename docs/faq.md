@@ -35,7 +35,7 @@ Pin to the tagged release in [`docs/TAGGED_RELEASE`](https://github.com/eddiethe
 
 **Why might Marketplace lag GitHub Releases?**
 
-Marketplace and Open VSX publishes are manual after the release workflow. Prefer the GitHub Release VSIX when you need a specific tag immediately.
+Marketplace publish is always **manual** after the release workflow. **Open VSX** publishes automatically when `OVSX_PAT` is configured on the release workflow; either store may still lag the GitHub tag by hours or longer. Prefer the GitHub Release VSIX when you need a specific tag immediately.
 
 **Can I edit Protégé `.owl` / RDF/XML in place?**
 
@@ -57,7 +57,7 @@ The `fixtures/` directory exists only in a git clone. Use your own ontology path
 ontocore query /path/to/your/ontologies "SELECT * FROM classes"
 ```
 
-See [getting-started.md](getting-started.md). Always pin with `--version 0.25.0` in CI so you do not surprise-upgrade.
+See [Install CLI & CI (detail)](install-cli-ci.md). Always pin with `--version 0.25.0` in CI so you do not surprise-upgrade.
 
 **Do I need Rust to use VS Code?**
 

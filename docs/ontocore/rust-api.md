@@ -41,7 +41,7 @@ Generated API documentation is published on [docs.rs](https://docs.rs/ontocore):
 | `ontocore-docs` | [docs.rs/ontocore-docs](https://docs.rs/ontocore-docs) |
 | `ontocore-refactor` | [docs.rs/ontocore-refactor](https://docs.rs/ontocore-refactor) |
 | `ontocore-edit` | [docs.rs/ontocore-edit](https://docs.rs/ontocore-edit) |
-| `ontocore-plugin` | [docs.rs/ontocore-plugin](https://docs.rs/ontocore-plugin) (experimental; plugin host MVP in v0.14) |
+| `ontocore-plugin` | [docs.rs/ontocore-plugin](https://docs.rs/ontocore-plugin) (Plugin SDK 1.0 wire; see [Plugin policy](../guides/plugin-policy.md)) |
 | `ontocore-cli` | [docs.rs/ontocore-cli](https://docs.rs/ontocore-cli) |
 
 Search all crates: [crates.io search?q=ontocore](https://crates.io/search?q=ontocore).

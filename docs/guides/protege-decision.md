@@ -2,10 +2,10 @@
 
 Use this page to decide **when OntoCode fits**, **when to keep Protégé**, and **when to run both**. It reflects **v0.25.0** (latest tagged) — see [What ships today](../SHIPPED.md). A [first-week migration guide](protege-migration.md) ships today; extended round-trip playbooks are planned for **v1.0**.
 
-!!! note "Non-goals today (v0.24)"
+!!! note "Non-goals today (v0.25)"
     - **WebProtégé-style collaboration** — out of scope until post-1.0
     - **Byte-identical Protégé OWL/XML / RDF/XML layout** — OntoCode re-serializes for semantic fidelity ([ADR-0021](../design/adr/0021-deterministic-xml-serializers.md)); write-back itself **ships** in v0.21
-    - **Stable semver-guaranteed third-party plugin marketplace API** — plugin host MVP shipped; ecosystem hardening is v1.0
+    - **Curated plugin marketplace / production owlmake** — Plugin SDK 1.0 freezes the wire contract today; marketplace hardening is product **1.0** — [Plugin policy](plugin-policy.md)
     - **Language SDKs** (Python/TypeScript ontology clients) — embed via Rust `ontocore`, CLI, or LSP instead
     - **Certified HermiT-identical results** — OntoLogos DL is not certified HermiT-identical; dual-tool check critical audits
 
@@ -23,7 +23,7 @@ Use this page to decide **when OntoCode fits**, **when to keep Protégé**, and 
 | Enterprise requires vendor SLA / SOC 2 | **Defer** or run limited CI pilot — [Production readiness](production-readiness.md) |
 | Air-gapped VS Code + internal artifact mirror | **Pilot** — [Enterprise deployment](enterprise-deployment.md) |
 
-## Capability comparison (v0.24 tagged)
+## Capability comparison (v0.25 tagged)
 
 | Capability | Protégé | OntoCode v0.25 | Notes |
 |------------|---------|----------------|-------|

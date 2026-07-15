@@ -34,7 +34,7 @@ Source of truth: **[docs/SHIPPED.md](SHIPPED.md)** and **[docs/supported-formats
 
 ### Full sync (after Tier-1)
 
-- [ ] [docs/getting-started.md](getting-started.md) — release binary examples / `cargo install` pin
+- [ ] [docs/install-cli-ci.md](install-cli-ci.md) — release binary examples / `cargo install` pin
 - [ ] [docs/errors.md](errors.md) / [docs/workspace-limits.md](workspace-limits.md) — behavior changes
 - [ ] [docs/guides/production-evidence.md](guides/production-evidence.md) — self-benchmark protocol
 - [ ] [docs/guides/governance.md](guides/governance.md) — sustainability / support policy
@@ -56,7 +56,8 @@ Source of truth: **[docs/SHIPPED.md](SHIPPED.md)** and **[docs/supported-formats
 - [ ] [docs/design/ARCHITECTURE.md](design/ARCHITECTURE.md) / [OWL_AUTHORING_SPEC.md](design/OWL_AUTHORING_SPEC.md) — shipped vs target banners
 - [ ] [docs/design/LICENSES.md](design/LICENSES.md) — dependency sections
 - [ ] Run `./scripts/build-docs.sh` locally before tagging
-- [ ] Build tutorial pack: `./scripts/package-tutorial-zip.sh` and attach `ontocode-tutorial.zip` to the GitHub Release
+- [ ] Build tutorial pack: `./scripts/package-tutorial-zip.sh` and **attach** `ontocode-tutorial.zip` to the GitHub Release
+- [ ] **Verify** the Release page lists `ontocode-tutorial.zip` (or temporarily hedge First success / versions-and-channels so offline users are not told the zip is always present)
 - [ ] Ensure **CI is green on the release commit** before tagging (the release workflow **requires** a successful `ci.yml` run on that SHA; it does not re-run the full test suite)
 
 ## Tag and publish

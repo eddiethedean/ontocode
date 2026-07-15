@@ -70,7 +70,7 @@ let result = ws.classify(ReasonerId::El)?;
 [dependencies]
 ontocore = "0.25"
 ontocore-edit = "0.25"
-ontocore-owl = "0.21"
+ontocore-owl = "0.25"
 ```
 
 See [Semantic transactions](#semantic-transactions-ontocore-edit) below.
@@ -165,5 +165,5 @@ Dependency: `ontocore-edit = "0.25"`. Full API: [Rust API — semantic transacti
 |------|-----|
 | Method reference | [Rust API](../ontocore/rust-api.md) |
 | Error types | [Errors](../errors.md#rust-library-errors) |
-| CLI instead of embed | [Install CLI & CI](../getting-started.md) |
+| CLI instead of embed | [Install CLI & CI (detail)](../install-cli-ci.md) |
 | Stability expectations | [API stability](api-stability.md) |

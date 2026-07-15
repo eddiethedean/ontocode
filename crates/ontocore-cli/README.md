@@ -39,7 +39,7 @@ Semantic diff compares catalogs from git refs, directories, or workspace snapsho
 
 - [Rust & CLI docs](https://ontocode-vs.readthedocs.io/en/latest/guides/rust-crates/)
 - [CLI reference](https://ontocode-vs.readthedocs.io/en/latest/cli-reference/)
-- [Getting started](https://ontocode-vs.readthedocs.io/en/latest/getting-started/)
+- [Install CLI & CI (detail)](https://ontocode-vs.readthedocs.io/en/latest/install-cli-ci/)
 - [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/)
 
 See [crates.io](https://crates.io/crates/ontocore-cli) for the latest published version.

@@ -59,3 +59,12 @@ OntoCode owns UI and marketplace packaging. OntoCore owns indexing, queries, dia
 | What ships today | [SHIPPED](../SHIPPED.md) |
 | Webview protocol | [Webview protocol](../webview-protocol.md) |
 | LSP API (OntoCore) | [OntoCore LSP](../ontocore/lsp.md) |
+
+## Next steps
+
+| Goal | Document |
+|------|----------|
+| First success tutorial | [First success](../guides/first-success.md) |
+| Section overview | [OntoCode overview](index.md) |
+| Feature tour | [Feature tour](feature-tour.md) |
+| Engine / CLI | [OntoCore overview](../ontocore/index.md) |

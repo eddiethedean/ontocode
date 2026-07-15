@@ -19,9 +19,7 @@ For offline VSIX installs, see [Install VS Code](../vscode-install.md).
 
 ### 2. Open a folder
 
-**Offline:** download `ontocode-tutorial.zip` (and optionally `ontocode-v0.25.0.vsix`) from the [v0.25.0 GitHub Release](https://github.com/eddiethedean/ontocode/releases/tag/v0.25.0).
-
-**Online:**
+**Canonical (online):** download the three sample files below, then **File → Open Folder…**.
 
 === "macOS / Linux"
 
@@ -41,14 +39,18 @@ For offline VSIX installs, see [Install VS Code](../vscode-install.md).
     Invoke-WebRequest -Uri https://raw.githubusercontent.com/eddiethedean/ontocode/v0.25.0/examples/obo-workflow/demo.obo -OutFile demo.obo
     ```
 
-Or browse [v0.25.0 fixtures](https://github.com/eddiethedean/ontocode/tree/v0.25.0/fixtures). Then **File → Open Folder…** and select that folder.
+**Offline / optional pack:** If the [v0.25.0 GitHub Release](https://github.com/eddiethedean/ontocode/releases/tag/v0.25.0) includes `ontocode-tutorial.zip`, unzip it and open that folder (also download `ontocode-v0.25.0.vsix` for offline extension install). Built with `./scripts/package-tutorial-zip.sh`. **If the zip is missing**, use the curl/PowerShell commands above or open `fixtures/` from a clone.
+
+Or browse [v0.25.0 fixtures](https://github.com/eddiethedean/ontocode/tree/v0.25.0/fixtures).
 
 !!! note "Workspace Trust"
     The **bundled** language server works in Restricted Mode. **Trust** the folder only if you set custom `ontocode.lspPath` or `ontocode.robotPath`.
 
 ### 3. Browse the explorer
 
-1. Click the **OntoCode** Activity Bar icon (or run **OntoCode: Index Workspace**).
+![OntoCode explorer with Classes and Entity Inspector](../assets/screenshots/explorer-inspector.png)
+
+1. Click the **OntoCode** Activity Bar icon (ontology / book-like icon on the left sidebar; or run **OntoCode: Index Workspace**).
 2. Expand **Ontologies**, then **Classes** / **Properties** / **Individuals**.
 3. Click **`Person`** to open the **Entity Inspector**.
 
@@ -75,7 +77,7 @@ If trees stay empty: run **OntoCode: Index Workspace**, then check **View → Ou
 | Manchester axioms | [Manchester editor](../ontocode/manchester-editor.md) |
 | Reason / realize / SWRL | [Reasoner](reasoner.md) · [Realize](../examples/realize.md) · [SWRL](../examples/swrl.md) |
 | Refactor / graphs / OBO / XML | [Feature tour](../ontocode/feature-tour.md) · [OBO authoring](../ontocode/obo-authoring.md) · [OWL/XML write-back](owl-xml-workflow.md) |
-| CLI / CI | [Install CLI & CI](../getting-started.md) · [CI integration](../ci-integration.md) |
+| CLI / CI | [Install CLI & CI (detail)](../install-cli-ci.md) · [CI integration](../ci-integration.md) |
 | Fit check | [Known limitations](../known-limitations.md) · [What ships today](../SHIPPED.md) |
 
 ## Troubleshooting

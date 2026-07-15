@@ -33,7 +33,7 @@ Interactive editing does **not** need the CLI — use the [VS Code / Cursor exte
 
 ## Plugins and owlmake
 
-Plugin host **MVP shipped** (manifest, permissions, views, preferences, context actions). A **stable, semver-guaranteed plugin API** and full production [owlmake](https://github.com/INCATools/owlmake) integration are **v1.0** targets. See [Plugin authoring](guides/plugins.md) and [API stability](guides/api-stability.md).
+Plugin **SDK 1.0** freezes the TOML + subprocess JSON wire (`api_version = "1"`) — safe to author against today. A curated marketplace, commercial support, and production [owlmake](https://github.com/INCATools/owlmake) workflow integration remain **product 1.0** goals. See [Plugin authoring](guides/plugins.md) and [Plugin policy](guides/plugin-policy.md).
 
 ## API stability (pre-1.0)
 
@@ -61,7 +61,7 @@ Graphs may be **truncated** (badge in the Graph panel). Prefer narrower search, 
 - You need **JSON-LD / TriG / N-Triples write-back** — still read-only; use Turtle or convert.
 - You need **move / extract / ontology-merge refactor on non-Turtle files** — those operations stay Turtle-first (rename/merge/replace already multi-format). See [v0.24 migration](migration/v0.24.md).
 - You need **full SQL analytics** — use SPARQL or an external store.
-- You need a **stable plugin marketplace API** without scaffolding — wait for v1.0 or keep Protégé plugins — [Plugin policy](guides/plugin-policy.md).
+- You need a **curated plugin marketplace** or **production owlmake** without accepting the subprocess SDK — wait for product **1.0** or keep Protégé plugins — [Plugin policy](guides/plugin-policy.md) (wire contract is already frozen as SDK 1.0).
 - You need **WebProtégé collaboration** — out of scope until post-1.0.
 - You need **HermiT-identical** DL explanations or certified Protégé+HermiT equivalence — dual-tool checks remain recommended for critical audits.
 

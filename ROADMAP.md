@@ -20,7 +20,7 @@ Every feature before 1.0 should answer one question:
 
 After 1.0, the roadmap shifts from parity to modernization.
 
->  **Not a Protégé replacement today.** v0.25 supports pilot and coexistence workflows — not org-wide Protégé retirement. See [What ships today](docs/SHIPPED.md) and [Known limitations](docs/known-limitations.md).
+>  **Not a Protégé replacement today.** v0.26 supports pilot and coexistence workflows — not org-wide Protégé retirement. See [What ships today](docs/SHIPPED.md) and [Known limitations](docs/known-limitations.md).
 
 ---
 
@@ -39,7 +39,7 @@ After 1.0, the roadmap shifts from parity to modernization.
 | [PRODUCT_ROADMAP_2.0.md](docs/ui/PRODUCT_ROADMAP_2.0.md) | UI phases with milestone acceptance criteria |
 | [ui/README.md](docs/ui/README.md) | Product design specification pack (UX, design system, OntoStudio target) |
 
-**Current release:** v0.25.0
+**Current release:** v0.26.0
 
 ---
 
@@ -48,8 +48,8 @@ After 1.0, the roadmap shifts from parity to modernization.
 ### Timeline
 
 ```text
-SHIPPED (v0.1–v0.25) ─────────────────────────────────────────────────►
-v0.1–v0.4          v0.5–v0.8              v0.9–v0.12           v0.13–v0.25
+SHIPPED (v0.1–v0.26) ─────────────────────────────────────────────────►
+v0.1–v0.4          v0.5–v0.8              v0.9–v0.12           v0.13–v0.26
 Engine foundation    IDE depth                Platform & authoring   OntoUI → formats → OWL 2
   │                    │                        │                      │
   Foundation           Query, reason,           Identity, diff,      UX shell + semantic txn
@@ -58,6 +58,7 @@ Engine foundation    IDE depth                Platform & authoring   OntoUI → 
                                                                        + reasoning/SWRL (v0.23)
                                                                        + refactor/DL Query (v0.24)
                                                                        + viz/SDK/a11y/CI (v0.25)
+                                                                       + Protégé test port (v0.26)
 
 PLANNED (1.0.0-rc → 1.0) ─────────────────────────────────────────────►
 1.0.0-rc → 1.0.0
@@ -118,12 +119,12 @@ Web foundation       Team workspaces          Cloud collaboration
 | 25 | v0.25 | F | Shipped | 4†, 8† | Viz + plugin SDK 1.0 + a11y + parity CI |
 | 26 | v0.26 | F | Shipped | — | Protégé Desktop JUnit behavioral test port (Waves 1–4) |
 | 27 | 1.0.0-rc | F | Planned | — | Stabilize; all P0 VERIFIED |
-| 27 | v1.0 | G | Planned | 1–6 exit, 9† | Protégé-competitive release |
-| 28 | v1.1 | H | Planned | 7, 2†, 3†, 4†, 8†, 9† | Language bindings & AI primitives |
-| 29 | v1.2 | H | Planned | 9, 10, 11 | Ontology toolchain platform |
-| 30 | v1.3 | I | Planned | 10, 12† | Webapp foundation + React app (no backend) |
-| 31 | v1.4 | I | Planned | 9, 12 | Team workspaces |
-| 32 | v1.5+ | I | Planned | 9, 12 | Cloud collaboration + governance |
+| 28 | v1.0 | G | Planned | 1–6 exit, 9† | Protégé-competitive release |
+| 29 | v1.1 | H | Planned | 7, 2†, 3†, 4†, 8†, 9† | Language bindings & AI primitives |
+| 30 | v1.2 | H | Planned | 9, 10, 11 | Ontology toolchain platform |
+| 31 | v1.3 | I | Planned | 10, 12† | Webapp foundation + React app (no backend) |
+| 32 | v1.4 | I | Planned | 9, 12 | Team workspaces |
+| 33 | v1.5+ | I | Planned | 9, 12 | Cloud collaboration + governance |
 
 †Partial scope in this release (remainder in later releases). Full mapping: [ROADMAP_MAPPING.md](docs/ui/ROADMAP_MAPPING.md).
 
@@ -650,6 +651,8 @@ See [migration/v0.25.md](docs/migration/v0.25.md) and [SHIPPED.md](docs/SHIPPED.
 
 ### v0.26 — Protégé Desktop test port (shipped)
 
+**Released:** v0.26.0 (2026-07-15)
+
 **Theme:** Port portable Protégé Desktop JUnit behaviors into OntoCode Rust semantic oracles (not a JVM suite runner).
 
 | Area | Deliverables |
@@ -672,6 +675,8 @@ See [migration/v0.25.md](docs/migration/v0.25.md) and [SHIPPED.md](docs/SHIPPED.
 | Fresh-entity / IdRange / Edge product ports | Still SKIP (no auto-ID UX) |
 
 **Still not useful from Desktop:** OSGi bundle tests, Mac AWT, PreferencesManager, SelectionPlane/PopupMenuId, JVM suite runner, byte-identical XML.
+
+See [migration/v0.26.md](docs/migration/v0.26.md) and [SHIPPED.md](docs/SHIPPED.md).
 
 ---
 

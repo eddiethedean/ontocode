@@ -1,10 +1,10 @@
 # Protégé coexistence
 
-Guide for teams using Protégé today and evaluating OntoCode **v0.25**. A [first-week migration guide](protege-migration.md) ships today. RDF/XML and OWL/XML write-back **shipped in v0.21** (semantic re-serialize, not byte-identical); v0.22 completes OWL 2 authoring depth; **v0.23** adds realization, instance checking, and SWRL; **v0.24** adds DL Query — see [OWL/XML write-back](owl-xml-workflow.md), [DL Query](dl-query.md), [What ships today](../SHIPPED.md), and [roadmap](../roadmap.md).
+Guide for teams using Protégé today and evaluating OntoCode **v0.26**. A [first-week migration guide](protege-migration.md) ships today. RDF/XML and OWL/XML write-back **shipped in v0.21** (semantic re-serialize, not byte-identical); v0.22 completes OWL 2 authoring depth; **v0.23** adds realization, instance checking, and SWRL; **v0.24** adds DL Query — see [OWL/XML write-back](owl-xml-workflow.md), [DL Query](dl-query.md), [What ships today](../SHIPPED.md), and [roadmap](../roadmap.md).
 
 Canonical capability matrix: [What ships today](../SHIPPED.md). Decision matrix: [Protégé vs OntoCode](protege-decision.md). Gap analysis for adopters: [Known limitations](../known-limitations.md).
 
-## Use OntoCode for (v0.25)
+## Use OntoCode for (v0.26)
 
 | Workflow | Status |
 |----------|--------|
@@ -17,7 +17,7 @@ Canonical capability matrix: [What ships today](../SHIPPED.md). Decision matrix:
 | Workspace refactoring (rename, migrate namespace, move, extract) | Shipped (Turtle; preview + apply) |
 | SQL/SPARQL queries over workspace | Shipped |
 | DL Query (Workbench DL mode, CLI, LSP) | Shipped (v0.24+) — [honesty notes](dl-query.md) |
-| Graph visualization (class, property, import, neighborhood, and v0.25 kinds) | Shipped |
+| Graph visualization (class, property, import, neighborhood, and v0.26 kinds) | Shipped |
 | CI lint (`ontocore validate`) | Shipped — suitable for production CI |
 | EL/RL/RDFS/DL classification | Shipped |
 | OWL 2 DL classification (`dl` / `auto` profiles) | Shipped (OntoLogos 1.x; not certified HermiT-identical) |
@@ -28,7 +28,7 @@ Canonical capability matrix: [What ships today](../SHIPPED.md). Decision matrix:
 | ROBOT CLI in CI (`ontocore robot`) | Shipped (requires Java + `robot` on PATH) |
 | Multi-root VS Code workspaces | Shipped (all folders indexed) |
 | Semantic diff (CLI / LSP / panel) | Shipped |
-| Plugin SDK 1.0 (manifest, lifecycle, providers) | Shipped (v0.25) |
+| Plugin SDK 1.0 (manifest, lifecycle, providers) | Shipped (v0.26) |
 
 ## Keep Protégé for (today)
 

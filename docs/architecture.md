@@ -15,7 +15,7 @@
 >
 > **Contributor crate layout:** [Implementation architecture](design/ARCHITECTURE.md) (internal modules only).
 >
-> **Latest tagged: v0.25.0** — v0.25 ships today. OntoCode (VS Code) + OntoCore (CLI/LSP/library).
+> **Latest tagged: v0.26.0** — v0.26 ships today. OntoCode (VS Code) + OntoCore (CLI/LSP/library).
 >
 > **Planned v1.0:** curated plugin marketplace, production owlmake integration, language SDKs, MCP server. Plugin **SDK 1.0** wire is frozen today — [Plugin policy](guides/plugin-policy.md). See [Platform roadmap](roadmap.md) ([full ROADMAP.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/ROADMAP.md)).
 >
@@ -83,7 +83,7 @@ Reusable semantic workspace platform: index, query, diagnostics, refactoring, an
 
 **Plugin platform status:**
 
-- **Shipped (SDK 1.0 / v0.25):** frozen wire contract — workspace manifest discovery, reference plugins, CLI/LSP hooks, subprocess workflow runner, UI views/commands/preferences/context actions, lifecycle (`depends_on` / `activation`), provider actions (see [Plugin authoring](guides/plugins.md)).
+- **Shipped (SDK 1.0 / v0.26):** frozen wire contract — workspace manifest discovery, reference plugins, CLI/LSP hooks, subprocess workflow runner, UI views/commands/preferences/context actions, lifecycle (`depends_on` / `activation`), provider actions (see [Plugin authoring](guides/plugins.md)).
 - **Product 1.0 targets:** curated marketplace/discovery and production owlmake hardening.
 
 OntoCore is **not** a workflow engine; build, release, and QC automation should live in external tools and workflow plugins rather than becoming core engine dependencies.

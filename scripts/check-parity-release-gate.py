@@ -3,7 +3,7 @@
 
 Always evaluates infrastructure (evidence paths) and prints Gate 3 readiness.
 Exit codes:
-  0 — infra OK (Gate 3 may still be open at v0.25)
+  0 — infra OK (Gate 3 may still be open at v0.26)
   1 — infra failures (missing paths / incomplete evidence) OR --strict-release
       when not all P0 are VERIFIED
 
@@ -63,7 +63,7 @@ def format_report(metrics: dict, infra_errors: list[str]) -> str:
     lines.append("")
     lines.append(
         "Note: Gate 3 hard-fail is --strict-release (1.0.0-rc)."
-        " v0.25 CI requires infrastructure OK only."
+        " v0.26 CI requires infrastructure OK only."
     )
     return "\n".join(lines)
 

@@ -6,6 +6,10 @@ Migration guides: [Migration index](migration/README.md)
 
 ## [Unreleased]
 
+## [0.26.0] - 2026-07-15
+
+**v0.26.0** — Protégé Desktop JUnit behavioral test port (Waves 1–4): edit oracles, annotation linkification + property order, `catalog-v001.xml` redirects, IdPolicy, Foundry registry parse, ontology `version_iri`. See [CHANGELOG.md](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) and [migration/v0.26.md](migration/v0.26.md).
+
 ## [0.25.0] - 2026-07-15
 
 **v0.25.0** — **Adopters:** expanded graphs, Plugin SDK 1.0 (author against frozen wire; marketplace still product 1.0), a11y for owned webviews, parity CI gates. See [migration/v0.25.md](migration/v0.25.md). Engineering: `PAR-VIS-001` / `PAR-PLG-001` / `PAR-ACC-001` / `PAR-TST-001` — full [CHANGELOG.md](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md).

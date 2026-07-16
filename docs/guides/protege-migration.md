@@ -1,6 +1,6 @@
 # Migrating from Protégé — first week
 
-This guide helps ontology teams adopt OntoCode **v0.25** alongside or instead of [Protégé](https://protege.stanford.edu/). For a capability comparison, see [Protégé vs OntoCode](protege-decision.md) and [What ships today](../SHIPPED.md).
+This guide helps ontology teams adopt OntoCode **v0.26** alongside or instead of [Protégé](https://protege.stanford.edu/). For a capability comparison, see [Protégé vs OntoCode](protege-decision.md) and [What ships today](../SHIPPED.md).
 
 ## Before you start
 
@@ -21,7 +21,7 @@ This guide helps ontology teams adopt OntoCode **v0.25** alongside or instead of
 
 Many teams use **both**: Protégé for heavy axiom authoring or Protégé-only plugins, OntoCode for browse, light edit, lint, diff, reasoning, DL Query, and CI. See [Protégé coexistence](protege-coexistence.md).
 
-## Honest desktop known gaps (v0.25 tagged)
+## Honest desktop known gaps (v0.26 tagged)
 
 See [Versions & channels](versions-and-channels.md) if Marketplace lags behind the GitHub Release VSIX.
 
@@ -29,7 +29,7 @@ See [Versions & channels](versions-and-channels.md) if Marketplace lags behind t
 |-----|--------|
 | Byte-identical OWL/XML · RDF/XML layout | Re-serialize only (write-back shipped v0.21) — [owl-xml-workflow](owl-xml-workflow.md) |
 | Multi-step semantic undo | Partial workspace runtime (v0.20); full history → **v1.0** |
-| Full OntoGraf filter/layout suite | Partial graphs shipped (v0.25 parity expanded); polish → **v1.0** |
+| Full OntoGraf filter/layout suite | Partial graphs shipped (v0.26 parity expanded); polish → **v1.0** |
 | Explain all inference kinds (not only unsat) | Unsat explanations shipped |
 | Mid-classify thread kill on the Rust reasoner | Client cancel + ignore late results (v0.18); server may finish CPU work |
 | Curated plugin marketplace / production owlmake | **Product 1.0** (SDK 1.0 wire is frozen today) |
@@ -48,7 +48,7 @@ Follow the [first success core path](../guides/first-success.md) if anything is 
 
 ## Day 2 — Map Protégé habits to OntoCode
 
-| In Protégé | In OntoCode v0.25 |
+| In Protégé | In OntoCode v0.26 |
 |------------|-------------------|
 | Class hierarchy tab | **Classes** explorer; toggle **asserted / inferred / combined** after reasoner |
 | Entity editor (labels, parents) | **Entity Inspector** (`.ttl`, `.obo`, `.owl`/`.rdf`, `.owx`) |
@@ -57,7 +57,7 @@ Follow the [first success core path](../guides/first-success.md) if anything is 
 | Reasoner (HermiT, etc.) | **Start / Synchronize / Classify / Consistency / Realize** — EL/RL/RDFS/DL/auto via OntoLogos (not certified HermiT-identical); **Stop** requests engine cancel |
 | Explanations | **Explanation** panel (unsat; DL-native steps where available; stale banner after reindex) |
 | SWRLTab | **Rule Browser** / **Rule Editor** (author + validate; DLSafe materialize on classify) |
-| OWLViz / OntoGraf | **Class / property / import / neighborhood** graphs (asserted/inferred/combined; v0.25 kinds expanded) |
+| OWLViz / OntoGraf | **Class / property / import / neighborhood** graphs (asserted/inferred/combined; v0.26 kinds expanded) |
 | Imports | **Manage Imports** panel |
 | Preferences | OntoCode settings + plugin preference pages |
 | Active ontology | **Active Ontology** selector (multi-root supported) |
@@ -68,7 +68,7 @@ Follow the [first success core path](../guides/first-success.md) if anything is 
 ## Day 3 — Validate in CI
 
 ```yaml
-- run: cargo install ontocore-cli --locked --version 0.25.0
+- run: cargo install ontocore-cli --locked --version 0.26.0
 - run: ontocore validate ./src/ontologies
 ```
 

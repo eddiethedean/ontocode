@@ -1,6 +1,6 @@
 # Capabilities by format
 
-> **Latest tagged: v0.25.0** — matrix truth: [Supported formats](../supported-formats.md) · [What ships today](../SHIPPED.md).
+> **Latest tagged: v0.26.0** — matrix truth: [Supported formats](../supported-formats.md) · [What ships today](../SHIPPED.md).
 
 One-page view of what each format can do in OntoCode / OntoCore. Prefer this when deciding whether to keep Turtle, OBO, or Protégé-style XML.
 

@@ -1,6 +1,6 @@
 # OntoCore + OntoCode Documentation Package
 
-> **Note:** This folder contains **engineering specs, ADRs, and shipped milestone detail**. Canonical platform direction lives in **[Vision](../vision.md)**, **[Architecture](../architecture.md)**, and **[Roadmap](../roadmap.md)** ([full ROADMAP.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/ROADMAP.md)). For **what ships in v0.25.0**, see [What ships today](../SHIPPED.md).
+> **Note:** This folder contains **engineering specs, ADRs, and shipped milestone detail**. Canonical platform direction lives in **[Vision](../vision.md)**, **[Architecture](../architecture.md)**, and **[Roadmap](../roadmap.md)** ([full ROADMAP.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/ROADMAP.md)). For **what ships in v0.26.0**, see [What ships today](../SHIPPED.md).
 
 ## Documentation layers
 

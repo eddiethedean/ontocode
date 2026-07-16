@@ -1,6 +1,6 @@
 # Evaluating OntoCode for your organization
 
-This page helps security, platform, and ontology teams decide whether OntoCode **v0.25.0** (latest tagged) fits your workflow. It is honest about **what ships today** vs the v1.0 Protégé-competitive target.
+This page helps security, platform, and ontology teams decide whether OntoCode **v0.26.0** (latest tagged) fits your workflow. It is honest about **what ships today** vs the v1.0 Protégé-competitive target.
 
 Canonical capability matrix: [What ships today](../SHIPPED.md).
 
@@ -34,7 +34,7 @@ Prefer Protégé or other tools (or wait for product **1.0**) if you need any of
 | [Protégé coexistence](protege-coexistence.md) | Ontology teams — split workflow with Protégé |
 | [Plugin authoring](plugins.md) | Platform — Plugin SDK 1.0 (frozen wire, lifecycle, providers); see [Plugin policy](plugin-policy.md) |
 
-## What ships today (v0.25.0)
+## What ships today (v0.26.0)
 
 | Capability | Status |
 |------------|--------|
@@ -60,7 +60,7 @@ Prefer Protégé or other tools (or wait for product **1.0**) if you need any of
 | Manage Imports UI + import patch ops | **Shipped** (v0.11) |
 | `ontocore docs` export | **Shipped** (v0.11) |
 | Open VSX / Cursor marketplace | **Shipped** (v0.11) |
-| Plugin host (`ontocore plugins`, LSP `listPlugins`/`runPlugin`) | **Shipped** (SDK 1.0 wire freeze in v0.25) |
+| Plugin host (`ontocore plugins`, LSP `listPlugins`/`runPlugin`) | **Shipped** (SDK 1.0 wire freeze in v0.26) |
 | Plugin permissions + UI views (`api_version = "1"`) | **Shipped** (v0.15) |
 | Explanation alternatives + staleness detection | **Shipped** (v0.15) |
 | Graph asserted/inferred/combined modes | **Shipped** (v0.15) |

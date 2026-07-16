@@ -11,17 +11,17 @@ Plugin host for OntoCore:
 - Provider actions: validate, export, workflow, UI view, reasoner, query, refactor, graph
 
 ```toml
-ontocore-plugin = "0.25"
+ontocore-plugin = "0.26"
 ```
 
 Enable via the `ontocore` façade feature:
 
 ```toml
-ontocore = { version = "0.25", features = ["plugins"] }
+ontocore = { version = "0.26", features = ["plugins"] }
 ```
 
 Reserved future kinds (`editor`, `language_service`, `tool_window`) and AI providers are documented but not hosted until a later release.
 
 Historical design notes only (do not implement from): [PLUGIN_SPEC.md](../../docs/design/PLUGIN_SPEC.md).
 
-**Current crate version: 0.25.0 (SDK 1.0 surface)**
+**Current crate version: 0.26.0 (SDK 1.0 surface)**

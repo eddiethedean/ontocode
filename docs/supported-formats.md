@@ -1,6 +1,6 @@
 # Supported ontology formats
 
-> **Latest tagged release: v0.25.0** — canonical capability matrix: [What ships today](SHIPPED.md).
+> **Latest tagged release: v0.26.0** — canonical capability matrix: [What ships today](SHIPPED.md).
 
 This page is the canonical reference for **what OntoCode/OntoCore can do with each file format** today.
 

@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.26.0] - 2026-07-15
+## [0.26.0] - 2026-07-16
 
 **For pilots / adopters:** Protégé Desktop **behavioral** parity corpus (Waves 1–4) — hierarchy/merge/deprecation/history oracles, annotation linkification + property order in the IDE, `catalog-v001.xml` import redirects, IdPolicy parse, ontology `version_iri`. No format write-back regression vs v0.25 — [migration/v0.26.md](docs/migration/v0.26.md).
 
@@ -27,6 +27,10 @@ v0.26.0 — Protégé Desktop JUnit behavioral test port (Waves 1–4).
 
 - Workspace package and all `ontocore-*` crates bumped to **0.26.0**; extension and webview UI **0.26.0**
 - Parity manifest `test_ids` linkage for Protégé-ported suites; Gate 3 hard-fail remains `--strict-release` at **1.0.0-rc**
+
+### Fixed
+
+- OBO merge/replace no longer leaves duplicate `id:` stanzas (merge removes the merge stanza then remaps refs; replace-when-target-exists remaps refs only) ([#367](https://github.com/eddiethedean/ontocode/issues/367))
 
 ## [0.25.0] - 2026-07-15
 

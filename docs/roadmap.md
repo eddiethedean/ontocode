@@ -507,7 +507,7 @@ See [SHIPPED.md](SHIPPED.md) · [migration/v0.25.md](migration/v0.25.md) · full
 
 ### v0.26 — Protégé Desktop test port (shipped)
 
-**Released:** v0.26.0 (2026-07-15)
+**Released:** v0.26.0 (2026-07-16)
 
 **Theme:** Port portable Protégé Desktop JUnit behaviors into OntoCode Rust semantic oracles (not a JVM suite runner).
 

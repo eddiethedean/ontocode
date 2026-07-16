@@ -6,9 +6,9 @@ Migration guides: [Migration index](migration/README.md)
 
 ## [Unreleased]
 
-## [0.26.0] - 2026-07-15
+## [0.26.0] - 2026-07-16
 
-**v0.26.0** — Protégé Desktop JUnit behavioral test port (Waves 1–4): edit oracles, annotation linkification + property order, `catalog-v001.xml` redirects, IdPolicy, Foundry registry parse, ontology `version_iri`. See [CHANGELOG.md](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) and [migration/v0.26.md](migration/v0.26.md).
+**v0.26.0** — Protégé Desktop JUnit behavioral test port (Waves 1–4): edit oracles, annotation linkification + property order, `catalog-v001.xml` redirects, IdPolicy, Foundry registry parse, ontology `version_iri`; OBO merge/replace duplicate-`id:` fix. See [CHANGELOG.md](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) and [migration/v0.26.md](migration/v0.26.md).
 
 ## [0.25.0] - 2026-07-15
 

@@ -6,7 +6,7 @@ Planning ranges for OntoCode / OntoCore. **These are product goals, not contract
 
 | Version | Status | Date (changelog) |
 |---------|--------|------------------|
-| **0.26.0** | Current (tagged) | 2026-07-15 |
+| **0.26.0** | Current (tagged) | 2026-07-16 |
 | **0.25.0** | Previous | 2026-07-15 |
 | **0.24.0** | Previous | 2026-07-14 |
 | **0.23.0** | Previous | 2026-07-14 |
@@ -45,7 +45,7 @@ Pre-1.0: minor releases may change library APIs, LSP JSON, and SQL virtual table
 | **v0.23** | Reasoning parity + SWRL (realize, instance check, Rule Browser/Editor) | **Shipped** (2026-07-14) |
 | **v0.24** | Refactoring + DL Query parity | **Shipped** (2026-07-14) |
 | **v0.25** | Viz + plugin SDK 1.0 + a11y + parity CI | **Shipped** (2026-07-15) |
-| **v0.26** | Protégé Desktop JUnit behavioral test port (Waves 1–4) | **Shipped** (2026-07-15) |
+| **v0.26** | Protégé Desktop JUnit behavioral test port (Waves 1–4) | **Shipped** (2026-07-16) |
 | **v1.0** | Protégé-competitive OWL + OBO in VS Code; full axiom catalog; curated plugin marketplace + production owlmake | Planned |
 
 Canonical forward plan: [Platform roadmap](../roadmap.md). Engineering milestone history: [Milestones (shipped)](../design/ROADMAP.md).

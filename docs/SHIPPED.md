@@ -1,12 +1,12 @@
-# What ships today (v0.25.0 — latest tagged)
+# What ships today (v0.26.0 — latest tagged)
 
 > **Canonical capability matrix.** Update this page on every release. Design specs under [Project](design/README.md) may describe future targets — check here for what is actually available.
 >
 > **Format write-back truth:** this page and [Supported formats](supported-formats.md) are the source of truth. Tier-1 user docs (README, Home, First success, FAQ, Evaluate pack, LSP/patch/CLI refs) must match them — see [Releasing — Tier-1 capability truth](releasing.md#documentation-sync-checklist-every-release).
 >
-> **Latest tagged release: v0.25.0** (crates.io, GitHub Releases; Marketplace/Open VSX may lag — see [Versions & channels](guides/versions-and-channels.md)). Pin installs: `cargo install ontocore-cli --locked --version 0.25.0`.
+> **Latest tagged release: v0.26.0** (crates.io, GitHub Releases; Marketplace/Open VSX may lag — see [Versions & channels](guides/versions-and-channels.md)). Pin installs: `cargo install ontocore-cli --locked --version 0.26.0`.
 
-**Latest tagged: v0.25.0** · [v0.25 migration](migration/v0.25.md) · [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md)
+**Latest tagged: v0.26.0** · [v0.26 migration](migration/v0.26.md) · [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md)
 
 ## Products
 
@@ -15,7 +15,7 @@
 | **OntoCode** | VS Code IDE — explorer, React inspector, graphs (asserted/inferred modes), Query Workbench (SQL/SPARQL/DL), Manchester editor, refactor preview, reasoner, explanation panel, plugin commands/views/preferences/context actions |
 | **OntoCore** | Rust semantic workspace engine — `ontocore` façade, `ontocore-*` crates, `ontocore` CLI, `ontocore-lsp`, plugin host |
 
-## Capability matrix (v0.25.0 tagged)
+## Capability matrix (v0.26.0 tagged)
 
 | Capability | VS Code | CLI |
 |------------|---------|-----|
@@ -51,7 +51,10 @@
 | OBO format index + `obo_id` in explorer | Yes | `ontocore inspect` |
 | ROBOT interop | — | `ontocore robot validate\|merge\|report` |
 | Diagnostics / lint | Problems panel | `ontocore validate` |
-| Hover, go-to-definition, symbols, find references, rename | Yes | — |
+| Hover, go-to-definition, symbols, find references, rename | Yes (hover linkifies labels/comments) | — |
+| Annotation hyperlinks + Protégé-default annotation-property order | Yes (Entity Inspector) | — |
+| `catalog-v001.xml` import redirects | Yes (index / resolve) | via workspace index |
+| Ontology `version_iri` | Yes (inspector / catalog) | `ontocore inspect` / catalog |
 | Turtle completion (prefix, QName, IRI) | Yes (LSP) | — |
 | Diagnostic quick fixes (code actions) | Yes | — |
 | Turtle imports add/remove | Yes (Manage Imports panel) | `ontocore patch` (`add_import`, `remove_import`) |
@@ -82,7 +85,18 @@
 > **¹ Rename / merge / replace:** format-specific IRI remaps (XML re-serialize; OBO id/reference rewrite). Other refactor ops stay Turtle-first.  
 > Deeper capability grid (Manchester, refactor, XML re-serialize): [Capabilities by format](guides/capabilities-by-format.md).
 
-## New in v0.25.0 (latest tagged)
+## New in v0.26.0 (latest tagged)
+
+| Capability | Status |
+|------------|--------|
+| Protégé Desktop behavioral test port (Waves 1–4 oracles + inventory CI) | Shipped |
+| Annotation linkification (LSP hover + Entity Inspector) | Shipped |
+| Protégé-default annotation-property order (Entity Inspector) | Shipped |
+| `catalog-v001.xml` import redirects | Shipped |
+| IdPolicy parse + OBO Foundry registry JSON (vendored; no live HTTP) | Shipped |
+| Ontology `version_iri` on documents | Shipped |
+
+## Previously in v0.25.0
 
 | Capability | Status |
 |------------|--------|
@@ -141,7 +155,7 @@
 | Token-aware type / characteristic detection (ignores comment substrings) | Yes |
 | `SetOntologyIri` rewrites `rdf:type owl:Ontology` in place | Yes |
 
-Full user-facing delta for the latest tagged release: [CHANGELOG 0.25.0](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md#0250---2026-07-15).
+Full user-facing delta for the latest tagged release: [CHANGELOG 0.26.0](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md#0260---2026-07-16).
 
 ## Release history
 
@@ -168,7 +182,7 @@ Remaining 1.0 targets: [known limitations](known-limitations.md) · [Protégé v
 
 ## What's next
 
-Forward: Protégé-competitive release (**1.0**). **v0.25.0** is the current tagged release. See **[Platform roadmap](roadmap.md)** · **[Known limitations](known-limitations.md)**.
+Forward: Protégé-competitive release (**1.0**). **v0.26.0** is the current tagged release. See **[Platform roadmap](roadmap.md)** · **[Known limitations](known-limitations.md)**.
 
 ## Where to learn more
 

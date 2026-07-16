@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.26.0] - 2026-07-16
+
+**For pilots / adopters:** Protégé Desktop **behavioral** parity corpus (Waves 1–4) — hierarchy/merge/deprecation/history oracles, annotation linkification + property order in the IDE, `catalog-v001.xml` import redirects, IdPolicy parse, ontology `version_iri`. No format write-back regression vs v0.25 — [migration/v0.26.md](docs/migration/v0.26.md).
+
+v0.26.0 — Protégé Desktop JUnit behavioral test port (Waves 1–4).
+
+### Added
+
+- Protégé Desktop test-port inventory ([`parity/protege-test-port.yaml`](parity/protege-test-port.yaml)) with `PORT_W1`–`PORT_W4` / `SKIP` / `COVERED` tags and `scripts/validate-protege-test-port.py` CI wiring
+- Wave 1 oracle suites: hierarchy, merge, deprecation, history/change algebra, axiom location, refs/defined-class, parsers/IDs, IdPolicy (`tests/protege_port_*.rs` + fixtures under `examples/protege-roundtrip/ported/`)
+- Wave 2 presentation helpers: render/escape/prefix/IRI (`ontocore-owl` `render`) and annotation link extractors (`ontocore-owl` `links`); LSP hover linkification; Entity Inspector annotation hyperlinks
+- Wave 3 utils: abbreviate, ISO8601, lexical replace, markdown entity links, annotation-property order (`ontocore-owl` `util` + Inspector sort); OBO Foundry registry JSON parse (`ontocore-obo` `obofoundry`, vendored fixtures)
+- Wave 4: `catalog-v001.xml` import redirects (`ontocore-catalog` `xml_catalog` + `resolve_import_document`)
+- `OntologyDocument.version_iri` and related parser oracles
+- Migration guide: [docs/migration/v0.26.md](docs/migration/v0.26.md)
+
+### Changed
+
+- Workspace package and all `ontocore-*` crates bumped to **0.26.0**; extension and webview UI **0.26.0**
+- Parity manifest `test_ids` linkage for Protégé-ported suites; Gate 3 hard-fail remains `--strict-release` at **1.0.0-rc**
+
+### Fixed
+
+- OBO merge/replace no longer leaves duplicate `id:` stanzas (merge removes the merge stanza then remaps refs; replace-when-target-exists remaps refs only) ([#367](https://github.com/eddiethedean/ontocode/issues/367))
+
 ## [0.25.0] - 2026-07-15
 
 **For pilots / adopters:** richer graphs (more kinds, filters, keyboard nav), frozen **Plugin SDK 1.0** (lifecycle + providers + `plugins info|enable|disable`), accessibility improvements for OntoCode-owned webviews, and parity CI release gates. No format write-back regression vs v0.24 — [migration/v0.25.md](docs/migration/v0.25.md).

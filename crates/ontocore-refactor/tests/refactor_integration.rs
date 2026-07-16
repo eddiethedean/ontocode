@@ -327,11 +327,51 @@ is_a: EX:001 ! From
     let preview = &plan.changes[0].preview_text;
     assert!(preview.contains("is_a: EX:002"), "{preview}");
     assert!(!preview.contains("is_a: EX:001"), "{preview}");
-    assert!(
-        plan.warnings.iter().any(|w| w.contains("non-Turtle replace")),
-        "expected non-Turtle replace warning: {:?}",
-        plan.warnings
+    // Source stanza preserved; no duplicate keep id (#367).
+    assert!(preview.contains("id: EX:001"), "{preview}");
+    assert_eq!(
+        preview.lines().filter(|l| l.trim() == "id: EX:002").count(),
+        1,
+        "duplicate id: EX:002: {preview}"
     );
+    assert!(preview.contains("name: From"), "{preview}");
+}
+
+#[test]
+fn merge_entities_removes_obo_merge_stanza_without_duplicate_ids() {
+    let tmp = TempDir::new().unwrap();
+    let ws = tmp.path();
+    std::fs::write(
+        ws.join("merge.obo"),
+        "\
+format-version: 1.2
+ontology: ex
+
+[Term]
+id: EX:001
+name: A
+
+[Term]
+id: EX:002
+name: B
+is_a: EX:001
+",
+    )
+    .unwrap();
+    let catalog = build_catalog(ws);
+    let keep = "http://purl.obolibrary.org/obo/EX_002";
+    let merge = "http://purl.obolibrary.org/obo/EX_001";
+    let plan = preview_merge_entities(&catalog, keep, merge, &empty_overrides()).expect("merge");
+    assert!(!plan.changes.is_empty());
+    let preview = &plan.changes[0].preview_text;
+    assert!(!preview.contains("id: EX:001"), "{preview}");
+    assert!(!preview.contains("name: A"), "{preview}");
+    assert_eq!(
+        preview.lines().filter(|l| l.trim() == "id: EX:002").count(),
+        1,
+        "duplicate id after merge: {preview}"
+    );
+    assert!(preview.contains("id: EX:002"), "{preview}");
 }
 
 #[test]

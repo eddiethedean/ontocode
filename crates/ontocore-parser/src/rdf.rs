@@ -34,6 +34,7 @@ pub type Result<T> = std::result::Result<T, ParseError>;
 pub struct ParsedOntology {
     pub ontology_id: String,
     pub base_iri: Option<String>,
+    pub version_iri: Option<String>,
     pub imports: Vec<String>,
     pub namespaces: BTreeMap<String, String>,
     pub entities: Vec<Entity>,
@@ -160,6 +161,7 @@ fn empty_parsed_ontology(ontology_id: &str) -> ParsedOntology {
     ParsedOntology {
         ontology_id: ontology_id.to_string(),
         base_iri: None,
+        version_iri: None,
         imports: Vec::new(),
         namespaces: BTreeMap::new(),
         entities: Vec::new(),
@@ -309,6 +311,7 @@ pub(crate) fn assemble_parsed_ontology(
     ParsedOntology {
         ontology_id: ontology_id.to_string(),
         base_iri,
+        version_iri: None,
         imports: Vec::new(),
         namespaces: namespaces.clone(),
         entities,
@@ -456,6 +459,7 @@ fn empty_result(
     ParsedOntology {
         ontology_id: ontology_id.to_string(),
         base_iri: namespaces.values().next().cloned(),
+        version_iri: None,
         imports: Vec::new(),
         namespaces: namespaces.clone(),
         entities: Vec::new(),
@@ -490,6 +494,7 @@ struct OntologyBuilder {
     axioms: Vec<Axiom>,
     imports: BTreeSet<String>,
     ontology_iris: BTreeSet<String>,
+    version_iris: BTreeSet<String>,
     triple_count: usize,
     axiom_counter: usize,
 }
@@ -504,6 +509,7 @@ impl OntologyBuilder {
             axioms: Vec::new(),
             imports: BTreeSet::new(),
             ontology_iris: BTreeSet::new(),
+            version_iris: BTreeSet::new(),
             triple_count: 0,
             axiom_counter: 0,
         }
@@ -544,6 +550,11 @@ impl OntologyBuilder {
 
         if quad.predicate == OWL::imports() {
             self.imports.insert(object.clone());
+            return;
+        }
+
+        if quad.predicate == OWL::version_iri() {
+            self.version_iris.insert(object.clone());
             return;
         }
 
@@ -645,6 +656,8 @@ impl OntologyBuilder {
             .or_else(|| self.namespaces.get("").cloned())
             .or_else(|| self.namespaces.values().next().cloned());
 
+        let version_iri = self.version_iris.iter().next().cloned();
+
         let ontology_id = if let Some(iri) = self.ontology_iris.iter().next() {
             iri.clone()
         } else {
@@ -708,6 +721,7 @@ impl OntologyBuilder {
         Ok(ParsedOntology {
             ontology_id,
             base_iri,
+            version_iri,
             imports: self.imports.into_iter().collect(),
             namespaces: self.namespaces.clone(),
             entities,

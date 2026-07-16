@@ -17,6 +17,7 @@ Fixtures were introduced in v0.12 and expanded through the v0.22 OWL 2 authoring
 | `annotations.ttl` | Turtle | Custom annotation properties |
 | `owl2-keys.ttl` | Turtle | HasKey, inverseOf, DisjointUnion |
 | `owl2-abox.ttl` | Turtle | sameAs, AllDifferent, NegativePropertyAssertion |
+| `ported/` | Various | Protégé JUnit **behavioral** fixtures (v0.26 test port) — see [`ported/README.md`](ported/README.md) |
 
 Provenance: minimal Protégé Desktop exports shaped for OntoCode regression (not byte-identical to any single Protégé save). Semantic round-trip is verified via `ontocore_owl::compare_ontologies`, not string equality (see ADR-0021).
 

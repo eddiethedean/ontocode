@@ -200,6 +200,9 @@ pub struct OntologyDocument {
     pub path: PathBuf,
     pub format: OntologyFormat,
     pub base_iri: Option<String>,
+    /// `owl:versionIRI` when declared on the ontology.
+    #[serde(default)]
+    pub version_iri: Option<String>,
     pub imports: Vec<String>,
     pub namespaces: BTreeMap<String, String>,
     pub parse_status: ParseStatus,

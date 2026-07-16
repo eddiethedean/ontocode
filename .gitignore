@@ -10,6 +10,7 @@
 /mutants.out.old/
 /mutants.out/
 /site/
+/site-e1/
 /target/
 __pycache__/
 extension/*.vsix
@@ -21,3 +22,4 @@ extension/server/
 
 # Workspace session / plugin output written by ontocore or the extension
 **/.ontocode/
+/target-msrv/

@@ -63,6 +63,7 @@ Paths below are relative to this directory (`docs/protege-parity/`).
 -   `03_PARITY/PARITY_STATUS.md`
 -   `03_PARITY/PARITY_ACCEPTANCE_CRITERIA.md`
 -   `03_PARITY/PARITY_TEST_PLAN.md`
+-   `03_PARITY/PROTEGE_TEST_PORT.md` — Protégé Desktop JUnit → OntoCode oracle port (v0.26)
 -   `03_PARITY/PARITY_RELEASE_GATE.md`
 
 ## Engineering Blockers (`04_BLOCKERS/`)

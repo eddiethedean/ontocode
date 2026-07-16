@@ -53,13 +53,15 @@ requirements:
     test_ids:
       - tests/owl_patch_oracles.rs
       - tests/protege_roundtrip.rs
+      - tests/protege_port_history.rs
       - crates/ontocore-edit/tests/transaction.rs
     acceptance_criteria: []
     github_issue: https://github.com/eddiethedean/ontocode/issues/247
     documentation:
       - docs/protege-parity/IMPLEMENTATION_EVIDENCE.md
+      - docs/protege-parity/03_PARITY/PROTEGE_TEST_PORT.md
       - docs/patch-reference.md
-    notes: Turtle apply routed through ontocore-edit Transaction (v0.20)
+    notes: Turtle apply routed through ontocore-edit Transaction (v0.20); v0.26 history/change-algebra port
   - id: PAR-FMT-002
     area: Formats
     title: OBO semantic round-trip
@@ -139,6 +141,12 @@ requirements:
       - extension/webview-ui/src/panels/EntityInspector.tsx
     test_ids:
       - tests/owl2_authoring.rs
+      - tests/protege_port_hierarchy.rs
+      - tests/protege_port_deprecation.rs
+      - tests/protege_port_history.rs
+      - tests/protege_port_axiom_location.rs
+      - tests/protege_port_refs.rs
+      - tests/protege_port_parsers.rs
       - owl2_turtle_patch_add_has_key_and_same_individual
       - owl2_turtle_patch_abox_negative_and_same
       - owl2_xml_mutate_supports_domain_characteristic_and_rejects_prefix
@@ -154,9 +162,10 @@ requirements:
     documentation:
       - docs/protege-parity/06_SUBSYSTEMS/OWL2_AUTHORING.md
       - docs/protege-parity/06_SUBSYSTEMS/OWL2_AUTHORING_GAPS.md
+      - docs/protege-parity/03_PARITY/PROTEGE_TEST_PORT.md
       - docs/migration/v0.22.md
       - docs/patch-reference.md
-    notes: Implemented v0.22
+    notes: Implemented v0.22; v0.26 Protégé Wave 1 behavioral ports
   - id: PAR-WS-001
     area: Workspace
     title: Persistent workspace semantics
@@ -289,13 +298,16 @@ requirements:
       - crates/ontocore-swrl/src/turtle.rs
     test_ids:
       - crates/ontocore-refactor/tests/refactor_integration.rs
+      - tests/protege_port_merge.rs
+      - tests/protege_port_refs.rs
       - crates/ontocore-owl/src/remap.rs
       - crates/ontocore-obo/src/remap.rs
     acceptance_criteria: []
     github_issue: https://github.com/eddiethedean/ontocode/issues/252
     documentation:
       - docs/protege-parity/IMPLEMENTATION_EVIDENCE.md
-    notes: Shipped v0.24 — rename/merge/replace on Turtle + RDF/XML + OWL/XML + OBO; move/extract/ontology-merge/flatten stay Turtle-first
+      - docs/protege-parity/03_PARITY/PROTEGE_TEST_PORT.md
+    notes: Shipped v0.24 — rename/merge/replace on Turtle + RDF/XML + OWL/XML + OBO; move/extract/ontology-merge/flatten stay Turtle-first; v0.26 Protégé merge/refs ports
   - id: PAR-VIS-001
     area: Visualization
     title: Graph parity
@@ -389,8 +401,25 @@ requirements:
       - scripts/generate-parity-docs.py
     test_ids:
       - scripts/validate-parity-manifest.py
+      - scripts/validate-protege-test-port.py
       - scripts/check-parity-release-gate.py
       - scripts/generate-parity-docs.py
+      - parity/protege-test-port.yaml
+      - tests/protege_port_hierarchy.rs
+      - tests/protege_port_merge.rs
+      - tests/protege_port_deprecation.rs
+      - tests/protege_port_history.rs
+      - tests/protege_port_axiom_location.rs
+      - tests/protege_port_refs.rs
+      - tests/protege_port_parsers.rs
+      - tests/protege_port_idpolicy.rs
+      - tests/protege_port_render.rs
+      - tests/protege_port_links.rs
+      - tests/protege_port_utils.rs
+      - tests/protege_port_obofoundry.rs
+      - tests/protege_port_catalog.rs
+      - extension/webview-ui/src/utils/annotationLinks.test.ts
+      - extension/webview-ui/src/utils/annotationOrder.test.ts
     acceptance_criteria:
       - docs/protege-parity/04_BLOCKERS/BLOCKER_11_PARITY_VERIFICATION.md
       - docs/protege-parity/03_PARITY/PARITY_RELEASE_GATE.md
@@ -399,5 +428,6 @@ requirements:
       - docs/protege-parity/04_BLOCKERS/BLOCKER_11_PARITY_VERIFICATION.md
       - docs/protege-parity/03_PARITY/PARITY_METRICS.md
       - docs/protege-parity/03_PARITY/PARITY_RELEASE_GATE.md
+      - docs/protege-parity/03_PARITY/PROTEGE_TEST_PORT.md
       - docs/protege-parity/IMPLEMENTATION_EVIDENCE.md
-    notes: v0.25 EPIC-011 — schema+path validation, metrics, Gate 3 report; --strict-release defers full P0 VERIFIED to 1.0.0-rc
+    notes: v0.25 EPIC-011 — schema+path validation, metrics, Gate 3 report; --strict-release defers full P0 VERIFIED to 1.0.0-rc; v0.26 Protégé Wave 1–4 behavioral ports

@@ -1,8 +1,8 @@
 # Protégé vs OntoCode decision matrix
 
-Use this page to decide **when OntoCode fits**, **when to keep Protégé**, and **when to run both**. It reflects **v0.25.0** (latest tagged) — see [What ships today](../SHIPPED.md). A [first-week migration guide](protege-migration.md) ships today; extended round-trip playbooks are planned for **v1.0**.
+Use this page to decide **when OntoCode fits**, **when to keep Protégé**, and **when to run both**. It reflects **v0.26.0** (latest tagged) — see [What ships today](../SHIPPED.md). A [first-week migration guide](protege-migration.md) ships today; extended round-trip playbooks are planned for **v1.0**.
 
-!!! note "Non-goals today (v0.25)"
+!!! note "Non-goals today (v0.26)"
     - **WebProtégé-style collaboration** — out of scope until post-1.0
     - **Byte-identical Protégé OWL/XML / RDF/XML layout** — OntoCode re-serializes for semantic fidelity ([ADR-0021](../design/adr/0021-deterministic-xml-serializers.md)); write-back itself **ships** in v0.21
     - **Curated plugin marketplace / production owlmake** — Plugin SDK 1.0 freezes the wire contract today; marketplace hardening is product **1.0** — [Plugin policy](plugin-policy.md)
@@ -23,9 +23,9 @@ Use this page to decide **when OntoCode fits**, **when to keep Protégé**, and 
 | Enterprise requires vendor SLA / SOC 2 | **Defer** or run limited CI pilot — [Production readiness](production-readiness.md) |
 | Air-gapped VS Code + internal artifact mirror | **Pilot** — [Enterprise deployment](enterprise-deployment.md) |
 
-## Capability comparison (v0.25 tagged)
+## Capability comparison (v0.26 tagged)
 
-| Capability | Protégé | OntoCode v0.25 | Notes |
+| Capability | Protégé | OntoCode v0.26 | Notes |
 |------------|---------|----------------|-------|
 | OWL 2 DL classification | Yes | Yes (`dl` / `auto` via OntoLogos 1.x) | Not certified HermiT-identical — [Reasoner guide](reasoner.md) |
 | Realization / instance checking | Yes | Yes | CLI `realize` / `check-instance`; Reasoner panel (shipped v0.23) |
@@ -51,7 +51,7 @@ Use this page to decide **when OntoCode fits**, **when to keep Protégé**, and 
 
 ### Path A — CI only (lowest risk)
 
-1. Pin `ontocore-cli` **0.25.0** in Linux CI
+1. Pin `ontocore-cli` **0.26.0** in Linux CI
 2. Gate merges with `ontocore validate`
 3. Optional: `ontocore classify --profile el` when ontology is EL; `ontocore dl-query` for class-expression checks
 4. Keep Protégé on engineer desktops unchanged

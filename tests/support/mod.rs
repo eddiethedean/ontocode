@@ -4,6 +4,8 @@ use std::collections::BTreeMap;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
+pub mod protege_port;
+
 pub fn fixture_workspace() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("fixtures")
 }
@@ -14,6 +16,7 @@ pub fn fixture_catalog() -> OntologyCatalog {
 }
 
 /// Write `ttl` to a temp workspace, apply patches to disk, reindex via Horned/`IndexBuilder`.
+/// Empty `patches` writes the source unchanged and indexes (treats as applied).
 #[allow(dead_code)]
 pub fn apply_and_reindex(
     ttl: &str,
@@ -23,6 +26,10 @@ pub fn apply_and_reindex(
     let dir = tempfile::tempdir().expect("tempdir");
     let path = dir.path().join("patched.ttl");
     std::fs::write(&path, ttl).expect("write ttl");
+    if patches.is_empty() {
+        let catalog = IndexBuilder::new().workspace(dir.path()).build().expect("reindex");
+        return (dir, path, catalog);
+    }
     let catalog = reapply_and_reindex(dir.path(), &path, patches, namespaces);
     (dir, path, catalog)
 }

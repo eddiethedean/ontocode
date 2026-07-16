@@ -1,0 +1,691 @@
+schema_version: 0.1
+upstream: "https://github.com/protegeproject/protege"
+upstream_ref: master
+purpose: "Inventory of Protégé Desktop JUnit suites tagged for OntoCode behavioral port (v0.26). Not a JVM runner."
+tags:
+  - PORT_W1
+  - PORT_W2
+  - SKIP
+  - COVERED
+  - PORT_W3
+  - PORT_W4
+entries:
+  - class: MacUIUtil_TestCase
+    module: protege-editor-core
+    path: protege-editor-core/src/test/java/org/protege/editor/core/platform/apple/MacUIUtil_TestCase.java
+    tag: SKIP
+    area: ui
+    notes: "Swing FileDialog / macOS AWT"
+  - class: PreferencesTest
+    module: protege-editor-core
+    path: protege-editor-core/src/test/java/org/protege/editor/core/prefs/PreferencesTest.java
+    tag: SKIP
+    area: prefs
+    notes: "Protégé PreferencesManager"
+  - class: PopupMenuId_TestCase
+    module: protege-editor-core
+    path: protege-editor-core/src/test/java/org/protege/editor/core/ui/menu/PopupMenuId_TestCase.java
+    tag: SKIP
+    area: ui
+    notes: "UI identity value object"
+  - class: StringAbbreviator_TestCase
+    module: protege-editor-core
+    path: protege-editor-core/src/test/java/org/protege/editor/core/util/StringAbbreviator_TestCase.java
+    tag: PORT_W3
+    area: util
+    case_themes:
+      - "string abbreviation"
+    ontocode_tests:
+      - tests/protege_port_utils.rs
+    notes: "Wave 3 implemented"
+  - class: BundleInfo_TestCase
+    module: protege-launcher
+    path: protege-launcher/src/test/java/org/protege/osgi/framework/BundleInfo_TestCase.java
+    tag: SKIP
+    area: osgi
+  - class: BundleSearchPath_TestCase
+    module: protege-launcher
+    path: protege-launcher/src/test/java/org/protege/osgi/framework/BundleSearchPath_TestCase.java
+    tag: SKIP
+    area: osgi
+  - class: SymbolicName_TestCase
+    module: protege-launcher
+    path: protege-launcher/src/test/java/org/protege/osgi/framework/SymbolicName_TestCase.java
+    tag: SKIP
+    area: osgi
+  - class: AssertedClassHierarchyTest
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/hierarchy/AssertedClassHierarchyTest.java
+    tag: PORT_W1
+    area: hierarchy
+    case_themes:
+      - "subclass children/parents after add/remove"
+      - "simpleLoop cycle"
+      - "twoParents multi-parent"
+      - "GCI edge cases"
+    ontocode_tests:
+      - tests/protege_port_hierarchy.rs
+  - class: CollectingHierarchyListener
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/hierarchy/CollectingHierarchyListener.java
+    tag: SKIP
+    area: hierarchy
+    helper: true
+    notes: "Test double helper, not a suite"
+  - class: DataPropertyHierarchyProvider_TestCase
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/hierarchy/DataPropertyHierarchyProvider_TestCase.java
+    tag: PORT_W1
+    area: hierarchy
+    case_themes:
+      - "data property SubDataPropertyOf parents/children"
+    ontocode_tests:
+      - tests/protege_port_hierarchy.rs
+  - class: ObjectPropertyHierarchyProvider_TestCase
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/hierarchy/ObjectPropertyHierarchyProvider_TestCase.java
+    tag: PORT_W1
+    area: hierarchy
+    case_themes:
+      - "object property SubObjectPropertyOf parents/children"
+    ontocode_tests:
+      - tests/protege_port_hierarchy.rs
+  - class: CreateHierarchyChangeGenerator_TestCase
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/hierarchy/tabbed/CreateHierarchyChangeGenerator_TestCase.java
+    tag: PORT_W1
+    area: hierarchy
+    case_themes:
+      - "tabbed hierarchy edges → SubClassOf axioms"
+    ontocode_tests:
+      - tests/protege_port_hierarchy.rs
+  - class: Edge_TestCase
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/hierarchy/tabbed/Edge_TestCase.java
+    tag: SKIP
+    area: hierarchy
+    case_themes:
+      - "edge value object equality"
+    gap: "Trivial VO; covered indirectly by tabbed hierarchy ports"
+  - class: TabbedIndentedHierarchyParser_TestCase
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/hierarchy/tabbed/TabbedIndentedHierarchyParser_TestCase.java
+    tag: PORT_W1
+    area: hierarchy
+    case_themes:
+      - "parse indented text → parent/child edges"
+    ontocode_tests:
+      - tests/protege_port_hierarchy.rs
+  - class: HistoryTest
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/history/HistoryTest.java
+    tag: PORT_W1
+    area: history
+    case_themes:
+      - "multi-ontology undo/redo of axiom add/remove"
+    ontocode_tests:
+      - tests/protege_port_history.rs
+      - crates/ontocore-edit/tests/transaction.rs
+  - class: ChangeListMinimizer_TestCase
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/ChangeListMinimizer_TestCase.java
+    tag: PORT_W1
+    area: history
+    case_themes:
+      - "add+remove cancel"
+      - "preserve non-axiom changes"
+    ontocode_tests:
+      - tests/protege_port_history.rs
+  - class: MergeEntitiesChangeListGenerator_TestCase
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/merge/MergeEntitiesChangeListGenerator_TestCase.java
+    tag: PORT_W1
+    area: merge
+    case_themes:
+      - "IRI replace"
+      - "rdfs:label → altLabel/synonym"
+      - "delete source declaration"
+    ontocode_tests:
+      - tests/protege_port_merge.rs
+      - crates/ontocore-refactor/tests/refactor_integration.rs
+  - class: EntityDeprecator_TestCase
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/deprecation/EntityDeprecator_TestCase.java
+    tag: PORT_W1
+    area: deprecation
+    case_themes:
+      - "owl:deprecated"
+      - "replaced-by annotation"
+      - "reason annotation"
+    ontocode_tests:
+      - tests/protege_port_deprecation.rs
+      - tests/owl_patch_oracles.rs
+  - class: GOProfile_TestCase
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/deprecation/GOProfile_TestCase.java
+    tag: PORT_W1
+    area: deprecation
+    case_themes:
+      - "GO-style deprecation annotations"
+    ontocode_tests:
+      - tests/protege_port_deprecation.rs
+    gap: "Full GO YAML profile policy not a first-class OntoCode product surface; semantic annotations covered"
+  - class: OBIProfile_TestCase
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/deprecation/OBIProfile_TestCase.java
+    tag: PORT_W1
+    area: deprecation
+    case_themes:
+      - "OBI-style deprecation annotations"
+    ontocode_tests:
+      - tests/protege_port_deprecation.rs
+    gap: "OBI profile YAML not first-class; annotation pattern covered"
+  - class: ActiveOntologyLocationStrategy_TestCase
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/axiom/ActiveOntologyLocationStrategy_TestCase.java
+    tag: PORT_W1
+    area: axiom_location
+    case_themes:
+      - "new axioms land in active ontology"
+    ontocode_tests:
+      - tests/protege_port_axiom_location.rs
+  - class: SubjectDefinitionLocationStrategy_TestCase
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/axiom/SubjectDefinitionLocationStrategy_TestCase.java
+    tag: PORT_W1
+    area: axiom_location
+    case_themes:
+      - "axiom home by subject definition ontology in imports closure"
+    ontocode_tests:
+      - tests/protege_port_axiom_location.rs
+  - class: FreshAxiomLocation_TestCase
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/axiom/FreshAxiomLocation_TestCase.java
+    tag: PORT_W1
+    area: axiom_location
+    case_themes:
+      - "fresh axiom location enum/config"
+    ontocode_tests:
+      - tests/protege_port_axiom_location.rs
+  - class: FreshActionStrategySelector_TestCase
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/axiom/FreshActionStrategySelector_TestCase.java
+    tag: SKIP
+    area: axiom_location
+    case_themes:
+      - "strategy selection"
+    gap: "Protégé-specific strategy selector wiring"
+  - class: ReferenceFinder_TestCase
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/util/ReferenceFinder_TestCase.java
+    tag: PORT_W1
+    area: refs
+    case_themes:
+      - "find axioms/usages mentioning entity"
+    ontocode_tests:
+      - tests/protege_port_refs.rs
+      - crates/ontocore-refactor/tests/refactor_integration.rs
+  - class: DefinedClassPredicate_TestCase
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/util/DefinedClassPredicate_TestCase.java
+    tag: PORT_W1
+    area: refs
+    case_themes:
+      - "EquivalentClasses / DisjointUnion defined-class predicate"
+    ontocode_tests:
+      - tests/protege_port_refs.rs
+  - class: OWLLiteralParser_TestCase
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/parser/OWLLiteralParser_TestCase.java
+    tag: PORT_W1
+    area: parsers
+    case_themes:
+      - "lexical → typed literals"
+    ontocode_tests:
+      - tests/protege_port_parsers.rs
+  - class: OboUtilities_TestCase
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/util/OboUtilities_TestCase.java
+    tag: PORT_W1
+    area: parsers
+    case_themes:
+      - "OBO id ↔ IRI"
+    ontocode_tests:
+      - tests/protege_port_parsers.rs
+  - class: RDFExtractorTest
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/repository/RDFExtractorTest.java
+    tag: PORT_W1
+    area: parsers
+    case_themes:
+      - "OntologyIRI/VersionIRI from RDF/XML vs TTL"
+    ontocode_tests:
+      - tests/protege_port_parsers.rs
+  - class: IdPolicyParser_GO_TestCase
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/idrange/IdPolicyParser_GO_TestCase.java
+    tag: PORT_W1
+    area: parsers
+    case_themes:
+      - "GO idranges parse / validation errors"
+    ontocode_tests:
+      - tests/protege_port_idpolicy.rs
+  - class: IdPolicyParser_EmptyRangesList_TestCase
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/idrange/IdPolicyParser_EmptyRangesList_TestCase.java
+    tag: PORT_W1
+    area: parsers
+    case_themes:
+      - "GO idranges parse / validation errors"
+    ontocode_tests:
+      - tests/protege_port_idpolicy.rs
+  - class: IdPolicyParser_MissingIdDigitCount_TestCase
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/idrange/IdPolicyParser_MissingIdDigitCount_TestCase.java
+    tag: PORT_W1
+    area: parsers
+    case_themes:
+      - "GO idranges parse / validation errors"
+    ontocode_tests:
+      - tests/protege_port_idpolicy.rs
+  - class: IdPolicyParser_MissingIdPrefix_TestCase
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/idrange/IdPolicyParser_MissingIdPrefix_TestCase.java
+    tag: PORT_W1
+    area: parsers
+    case_themes:
+      - "GO idranges parse / validation errors"
+    ontocode_tests:
+      - tests/protege_port_idpolicy.rs
+  - class: IdPolicyParser_MissingPolicyFor_TestCase
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/idrange/IdPolicyParser_MissingPolicyFor_TestCase.java
+    tag: PORT_W1
+    area: parsers
+    case_themes:
+      - "GO idranges parse / validation errors"
+    ontocode_tests:
+      - tests/protege_port_idpolicy.rs
+  - class: IdRange_TestCase
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/idrange/IdRange_TestCase.java
+    tag: SKIP
+    area: parsers
+    case_themes:
+      - "IdRange VO"
+    gap: "Value object; no OntoCode idranges product API"
+  - class: DocumentFormatMapper_TestCase
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/DocumentFormatMapper_TestCase.java
+    tag: COVERED
+    area: formats
+    ontocode_tests:
+      - tests/protege_roundtrip.rs
+      - crates/ontocore-owl/src/serialize.rs
+    notes: "Format routing already covered by OntoCode write-back oracles"
+  - class: AnnotationProvider_TestCase
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/annotation/AnnotationProvider_TestCase.java
+    tag: COVERED
+    area: annotations
+    ontocode_tests:
+      - tests/owl_patch_oracles.rs
+    notes: "AddAnnotation/RemoveAnnotation PatchOps"
+  - class: NoOpReasoner_TestCase
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/inference/NoOpReasoner_TestCase.java
+    tag: SKIP
+    area: reasoner
+    notes: "Use OntoLogos / tests/reasoner_*.rs"
+  - class: Folder_IT
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/library/Folder_IT.java
+    tag: PORT_W4
+    area: catalog
+    case_themes:
+      - "catalog-v001.xml URI redirect for local imports"
+    ontocode_tests:
+      - tests/protege_port_catalog.rs
+  - class: XmlBaseTest
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/library/XmlBaseTest.java
+    tag: PORT_W4
+    area: catalog
+    case_themes:
+      - "xml:base relative uri resolution in catalog"
+    ontocode_tests:
+      - tests/protege_port_catalog.rs
+  - class: IdentifiersDotOrg_IT
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/identifiers/IdentifiersDotOrg_IT.java
+    tag: SKIP
+    area: network
+    notes: "Live HTTP fragile"
+  - class: OboFoundryContact_TestCase
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/obofoundry/OboFoundryContact_TestCase.java
+    tag: PORT_W3
+    area: obofoundry
+    case_themes:
+      - "registry JSON model"
+    ontocode_tests:
+      - tests/protege_port_obofoundry.rs
+    notes: "Wave 3 implemented"
+  - class: OboFoundryEntry_TestCase
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/obofoundry/OboFoundryEntry_TestCase.java
+    tag: PORT_W3
+    area: obofoundry
+    case_themes:
+      - "registry JSON model"
+    ontocode_tests:
+      - tests/protege_port_obofoundry.rs
+    notes: "Wave 3 implemented"
+  - class: OboFoundryLicenseDetails_TestCase
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/obofoundry/OboFoundryLicenseDetails_TestCase.java
+    tag: PORT_W3
+    area: obofoundry
+    case_themes:
+      - "registry JSON model"
+    ontocode_tests:
+      - tests/protege_port_obofoundry.rs
+    notes: "Wave 3 implemented"
+  - class: OboFoundryRegistry_TestCase
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/obofoundry/OboFoundryRegistry_TestCase.java
+    tag: PORT_W3
+    area: obofoundry
+    case_themes:
+      - "registry JSON model"
+    ontocode_tests:
+      - tests/protege_port_obofoundry.rs
+    notes: "Wave 3 implemented"
+  - class: OboFoundryRegistryParser_IT
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/obofoundry/OboFoundryRegistryParser_IT.java
+    tag: PORT_W3
+    area: obofoundry
+    case_themes:
+      - "parse OboFoundry.json"
+    ontocode_tests:
+      - tests/protege_port_obofoundry.rs
+    notes: "Wave 3 implemented"
+  - class: Prefix_TestCase
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/prefix/Prefix_TestCase.java
+    tag: PORT_W2
+    area: rendering
+    case_themes:
+      - "prefix match"
+    ontocode_tests:
+      - tests/protege_port_render.rs
+    notes: "Wave 2 implemented"
+  - class: PrefixNameRenderer_TestCase
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/prefix/PrefixNameRenderer_TestCase.java
+    tag: PORT_W2
+    area: rendering
+    case_themes:
+      - "prefix render"
+    ontocode_tests:
+      - tests/protege_port_render.rs
+    notes: "Wave 2 implemented"
+  - class: IRIExpanderTestCase
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/conf/IRIExpanderTestCase.java
+    tag: PORT_W2
+    area: rendering
+    case_themes:
+      - "IRI expand"
+    ontocode_tests:
+      - tests/protege_port_render.rs
+    notes: "Wave 2 implemented"
+  - class: PrefixMapping_TestCase
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/ui/prefix/PrefixMapping_TestCase.java
+    tag: PORT_W2
+    area: rendering
+    case_themes:
+      - "prefix mapping VO"
+    ontocode_tests:
+      - tests/protege_port_render.rs
+    notes: "Wave 2 implemented"
+  - class: OWLEntityRendererImpl_TestCase
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/ui/renderer/OWLEntityRendererImpl_TestCase.java
+    tag: PORT_W2
+    area: rendering
+    case_themes:
+      - "entity display names"
+      - "built-in prefixes"
+    ontocode_tests:
+      - tests/protege_port_render.rs
+    notes: "Wave 2 implemented"
+  - class: RenderingEscapeUtils_TestCase
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/ui/renderer/RenderingEscapeUtils_TestCase.java
+    tag: PORT_W2
+    area: rendering
+    case_themes:
+      - "Manchester escape"
+    ontocode_tests:
+      - tests/protege_port_render.rs
+    notes: "Wave 2 implemented"
+  - class: DOILinkExtractor_TestCase
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/ui/renderer/DOILinkExtractor_TestCase.java
+    tag: PORT_W2
+    area: rendering
+    case_themes:
+      - "annotation hyperlink regex"
+    ontocode_tests:
+      - tests/protege_port_links.rs
+      - extension/webview-ui/src/utils/annotationLinks.test.ts
+    notes: "Wave 2 implemented"
+  - class: ISBN10LinkExtractor_TestCase
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/ui/renderer/ISBN10LinkExtractor_TestCase.java
+    tag: PORT_W2
+    area: rendering
+    case_themes:
+      - "annotation hyperlink regex"
+    ontocode_tests:
+      - tests/protege_port_links.rs
+      - extension/webview-ui/src/utils/annotationLinks.test.ts
+    notes: "Wave 2 implemented"
+  - class: OMIMLinkExtractor_TestCase
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/ui/renderer/OMIMLinkExtractor_TestCase.java
+    tag: PORT_W2
+    area: rendering
+    case_themes:
+      - "annotation hyperlink regex"
+    ontocode_tests:
+      - tests/protege_port_links.rs
+    notes: "Wave 2 implemented"
+  - class: OMIMPSLinkExtractor_TestCase
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/ui/renderer/OMIMPSLinkExtractor_TestCase.java
+    tag: PORT_W2
+    area: rendering
+    case_themes:
+      - "annotation hyperlink regex"
+    ontocode_tests:
+      - tests/protege_port_links.rs
+    notes: "Wave 2 implemented"
+  - class: ORCIDLinkExtractor_TestCase
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/ui/renderer/ORCIDLinkExtractor_TestCase.java
+    tag: PORT_W2
+    area: rendering
+    case_themes:
+      - "annotation hyperlink regex"
+    ontocode_tests:
+      - tests/protege_port_links.rs
+    notes: "Wave 2 implemented"
+  - class: OrphanetLinkExtractor_TestCase
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/ui/renderer/OrphanetLinkExtractor_TestCase.java
+    tag: PORT_W2
+    area: rendering
+    case_themes:
+      - "annotation hyperlink regex"
+    ontocode_tests:
+      - tests/protege_port_links.rs
+    notes: "Wave 2 implemented"
+  - class: PubMedLinkExtractor_TestCase
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/ui/renderer/PubMedLinkExtractor_TestCase.java
+    tag: PORT_W2
+    area: rendering
+    case_themes:
+      - "annotation hyperlink regex"
+    ontocode_tests:
+      - tests/protege_port_links.rs
+    notes: "Wave 2 implemented"
+  - class: RegExBasedLinkExtractor_TestCase
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/ui/renderer/RegExBasedLinkExtractor_TestCase.java
+    tag: PORT_W2
+    area: rendering
+    case_themes:
+      - "annotation hyperlink regex"
+    ontocode_tests:
+      - tests/protege_port_links.rs
+    notes: "Wave 2 implemented"
+  - class: WikipediaLinkExtractor_TestCase
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/ui/renderer/WikipediaLinkExtractor_TestCase.java
+    tag: PORT_W2
+    area: rendering
+    case_themes:
+      - "annotation hyperlink regex"
+    ontocode_tests:
+      - tests/protege_port_links.rs
+    notes: "Wave 2 implemented"
+  - class: WikipediaVersionedLinkExtractor_TestCase
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/ui/renderer/WikipediaVersionedLinkExtractor_TestCase.java
+    tag: PORT_W2
+    area: rendering
+    case_themes:
+      - "annotation hyperlink regex"
+    ontocode_tests:
+      - tests/protege_port_links.rs
+    notes: "Wave 2 implemented"
+  - class: OWLEntitySelectionModel_OWLClass_TestCase
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/selection/OWLEntitySelectionModel_OWLClass_TestCase.java
+    tag: SKIP
+    area: selection
+    notes: "Protégé selection model"
+  - class: OWLSelectionModelImpl_TestCase
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/selection/OWLSelectionModelImpl_TestCase.java
+    tag: SKIP
+    area: selection
+  - class: SelectionPlaneImpl_TestCase
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/selection/SelectionPlaneImpl_TestCase.java
+    tag: SKIP
+    area: selection
+  - class: DefaultUserNameProvider_TestCase
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/user/DefaultUserNameProvider_TestCase.java
+    tag: SKIP
+    area: prefs
+  - class: OrcidPreferencesManager_TestCase
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/user/OrcidPreferencesManager_TestCase.java
+    tag: SKIP
+    area: prefs
+  - class: Orcid_TestCase
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/user/Orcid_TestCase.java
+    tag: PORT_W2
+    area: prefs
+    case_themes:
+      - "ORCID parse/validate"
+    ontocode_tests:
+      - tests/protege_port_links.rs
+    notes: "Wave 2 implemented"
+  - class: UserNamePreferencesManager_TestCase
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/user/UserNamePreferencesManager_TestCase.java
+    tag: SKIP
+    area: prefs
+  - class: AnnotationPropertyComparator_TestCase
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/entity/AnnotationPropertyComparator_TestCase.java
+    tag: PORT_W3
+    area: util
+    case_themes:
+      - "annotation property sort order"
+    ontocode_tests:
+      - tests/protege_port_utils.rs
+      - extension/webview-ui/src/utils/annotationOrder.test.ts
+    notes: "Wave 3 implemented"
+  - class: MarkdownRenderer_TestCase
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/entity/MarkdownRenderer_TestCase.java
+    tag: PORT_W3
+    area: rendering
+    case_themes:
+      - "markdown render"
+    ontocode_tests:
+      - tests/protege_port_utils.rs
+    notes: "Wave 3 implemented"
+  - class: ISO8601Formatter_TestCase
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/util/ISO8601Formatter_TestCase.java
+    tag: PORT_W3
+    area: util
+    case_themes:
+      - "ISO8601 format"
+    ontocode_tests:
+      - tests/protege_port_utils.rs
+    notes: "Wave 3 implemented"
+  - class: IriSplitter_TestCase
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/util/IriSplitter_TestCase.java
+    tag: PORT_W2
+    area: util
+    case_themes:
+      - "IRI fragment/namespace split"
+    ontocode_tests:
+      - tests/protege_port_render.rs
+    notes: "Wave 2 implemented"
+  - class: LiteralLexicalValueReplacer_TestCase
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/model/util/LiteralLexicalValueReplacer_TestCase.java
+    tag: PORT_W3
+    area: util
+    case_themes:
+      - "literal lexical replace"
+    ontocode_tests:
+      - tests/protege_port_utils.rs
+    notes: "Wave 3 implemented"
+  - class: OWLPropertyAssertionRowComparator_TestCase
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/ui/OWLPropertyAssertionRowComparator_TestCase.java
+    tag: SKIP
+    area: ui
+    case_themes:
+      - "assertion row sort"
+    gap: "UI row comparator; no equivalent surface"
+  - class: Breadcrumb_TestCase
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/ui/breadcrumb/Breadcrumb_TestCase.java
+    tag: SKIP
+    area: ui
+    case_themes:
+      - "breadcrumb path VO"
+    gap: "Breadcrumb VO; no Protégé breadcrumb product surface"
+  - class: JunitUtil
+    module: protege-editor-owl
+    path: protege-editor-owl/src/test/java/org/protege/editor/owl/util/JunitUtil.java
+    tag: SKIP
+    area: util
+    helper: true
+    notes: "Debug dump helper"

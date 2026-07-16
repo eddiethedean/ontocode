@@ -1384,7 +1384,7 @@ if [[ "$TAGGED_MINOR" =~ ^0\.([0-9]+)$ ]]; then
       echo "ok: Open VSX wording not stuck on always-manual"
     fi
 
-    # Docs trust fixes (post-v0.25 re-audit)
+    # Docs trust fixes (post-v0.26 re-audit)
     if grep -qE -- '--prefix[= ]' docs/examples/dl-query.md 2>/dev/null; then
       echo "FAIL: docs/examples/dl-query.md must not document --prefix (flag does not exist)" >&2
       fail=1

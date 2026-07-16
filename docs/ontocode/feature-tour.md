@@ -1,8 +1,8 @@
-# OntoCode feature tour (current: v0.25)
+# OntoCode feature tour (current: v0.26)
 
 A visual and structural overview of the OntoCode VS Code IDE. For hands-on setup, start with [First success (~10 min)](../guides/first-success.md).
 
-Capability truth: [What ships today](../SHIPPED.md) · [Known limitations](../known-limitations.md) · [What's new in v0.25](../migration/v0.25.md).
+Capability truth: [What ships today](../SHIPPED.md) · [Known limitations](../known-limitations.md) · [What's new in v0.26](../migration/v0.26.md).
 
 ![Explorer and Entity Inspector](../assets/screenshots/explorer-inspector.png)
 
@@ -51,7 +51,7 @@ Command Palette → **OntoCode: Open Query Workbench**
 - **SPARQL mode** — graph patterns over indexed triples
 - **DL mode** — Manchester class expressions (Instances / Subclasses / Superclasses / Equivalents); shipped v0.24+ — [DL Query honesty](../guides/dl-query.md)
 - **Schema browser** — browse tables/columns; insert names into the editor
-- Export results to CSV or JSON; history and saved queries; **Open as graph** for result visualization (v0.25)
+- Export results to CSV or JSON; history and saved queries; **Open as graph** for result visualization (v0.26)
 
 Guide: [Query Workbench](query-workbench.md) · [SQL reference](../sql-reference.md) · [DL Query](../guides/dl-query.md)
 
@@ -67,8 +67,8 @@ Guide: [Manchester editor](manchester-editor.md)
 |----------------|-------|
 | **Open Class Graph** | Subclass neighborhood around a class |
 | **Open Property Graph** | Property domain/range neighborhood |
-| **Object / data property graphs** | Dedicated property graphs (v0.25) |
-| **Individual / dependency / query-result / refactor-preview** | Additional graph kinds (v0.25) |
+| **Object / data property graphs** | Dedicated property graphs (v0.26) |
+| **Individual / dependency / query-result / refactor-preview** | Additional graph kinds (v0.26) |
 | **Open Import Graph** | Ontology import dependencies |
 | **Open Neighborhood Graph** | Mixed entity neighborhood |
 

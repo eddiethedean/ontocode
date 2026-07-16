@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<catalog prefer="public" xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
+    <group id="Folder Repository" prefer="public" xml:base="">
+        <uri name="http://example.org/imported/remote-lib" uri="lib.ttl"/>
+    </group>
+</catalog>

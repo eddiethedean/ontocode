@@ -1,0 +1,10 @@
+@prefix ex: <http://example.org/tree#> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+
+ex:Ontology a owl:Ontology .
+
+ex:Parent1 a owl:Class .
+ex:Parent2 a owl:Class .
+ex:Child a owl:Class ;
+    rdfs:subClassOf ex:Parent1 , ex:Parent2 .

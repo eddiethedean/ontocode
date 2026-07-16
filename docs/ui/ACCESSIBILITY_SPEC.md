@@ -61,7 +61,7 @@ AI outputs must be readable, structured, and navigable.
 
 ## 8. Testing
 
-Shipped for v0.25 (EPIC-010):
+Shipped for v0.26 (EPIC-010):
 
 - automated axe-core checks in `extension/webview-ui/src/a11y/accessibility.test.tsx` (serious/critical)
 - focus-trap unit tests + DialogShell Escape/restore

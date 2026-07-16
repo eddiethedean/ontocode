@@ -20,7 +20,7 @@ pub use error::{RefactorError, Result};
 pub use model::{FileChange, Hunk, RefactorPlan, RefactorRequest, Usage, UsageKind};
 pub use ontology::{
     expand_signature_locality, preview_cleanup_imports, preview_flatten_imports,
-    preview_merge_ontologies,
+    preview_merge_ontologies, resolve_import_document,
 };
 pub use rename::{
     preview_extract_module, preview_merge_entities, preview_migrate_namespace, preview_move_axioms,

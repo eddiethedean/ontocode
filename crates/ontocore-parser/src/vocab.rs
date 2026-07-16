@@ -31,6 +31,10 @@ impl OWL {
         NamedNodeRef::new_unchecked("http://www.w3.org/2002/07/owl#imports")
     }
 
+    pub fn version_iri() -> NamedNodeRef<'static> {
+        NamedNodeRef::new_unchecked("http://www.w3.org/2002/07/owl#versionIRI")
+    }
+
     pub fn deprecated() -> NamedNodeRef<'static> {
         NamedNodeRef::new_unchecked("http://www.w3.org/2002/07/owl#deprecated")
     }

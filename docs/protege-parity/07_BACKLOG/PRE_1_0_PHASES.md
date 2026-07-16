@@ -12,7 +12,7 @@
 # Purpose
 
 This document maps the Protégé parity program onto **versioned pre-1.0
-releases** (v0.19–v0.25, then 1.0.0-rc, then 1.0.0).
+releases** (v0.19–v0.26, then 1.0.0-rc, then 1.0.0).
 
 It is the single entry point for contributors implementing parity work
 before 1.0.0. Engineering sequencing detail lives in
@@ -35,7 +35,8 @@ objective of the phases below.
 | **v0.22** | C (OWL 2) | 4 | EPIC-002 | BLOCKER_02 | Planned |
 | **v0.23** | D (reason + SWRL) | 5–6 | EPIC-004, EPIC-005 | BLOCKER_04, BLOCKER_05 | Complete |
 | **v0.24** | D (services) | 7 | EPIC-006, EPIC-007 | BLOCKER_06, BLOCKER_07 | Shipped |
-| **v0.25** | E + F | 8–9 | EPIC-008–011 | BLOCKER_08–011 | Shipped / Complete on main pending tag |
+| **v0.25** | E + F | 8–9 | EPIC-008–011 | BLOCKER_08–011 | Shipped |
+| **v0.26** | F (test port) | — | Protégé JUnit behavioral port | BLOCKER_11 (corpus) | Shipped |
 | **1.0.0-rc** | Stabilize | 10 | — | — | Planned |
 | **1.0.0** | Ship | — | — | [PARITY_RELEASE_GATE.md](../03_PARITY/PARITY_RELEASE_GATE.md) | Planned |
 
@@ -265,7 +266,7 @@ P0 refactoring and query/search parity after the semantic core stabilizes.
 
 # v0.25 — UX completion + executable verification
 
-**Status:** Shipped / Complete on main pending tag (EPIC-008–011)\
+**Status:** Shipped\
 **P0 phase:** E (User Experience) + F (Verification)\
 **Stages:** 8–9\
 **Theme:** Visualization, plugin SDK freeze, accessibility, and automated parity gates.
@@ -300,6 +301,43 @@ status automatically verifiable in CI.
 -   All P0 workflows are keyboard accessible
 -   Every P0 requirement has automated evidence in CI
 -   Release readiness is objective and reproducible
+
+------------------------------------------------------------------------
+
+# v0.26 — Protégé Desktop test port
+
+**Status:** Shipped\
+**Theme:** Port portable Protégé Desktop JUnit behaviors into OntoCode
+Rust semantic oracles (rewrite specs — do not run the JVM suite).
+
+## Primary documents
+
+-   [PROTEGE_TEST_PORT.md](../03_PARITY/PROTEGE_TEST_PORT.md)
+-   [`parity/protege-test-port.yaml`](../../../parity/protege-test-port.yaml)
+-   [BLOCKER_11_PARITY_VERIFICATION.md](../04_BLOCKERS/BLOCKER_11_PARITY_VERIFICATION.md)
+
+## Deliverables
+
+-   Full upstream test-class inventory tagged `PORT_W1` / `PORT_W2` /
+    `PORT_W3` / `PORT_W4` / `SKIP` / `COVERED`
+-   Wave 1 oracle suites: hierarchy, merge, deprecation, history,
+    axiom location, refs/defined-class, parsers/IDs
+-   Wave 2 presentation suites: render/escape/prefix/IRI + annotation
+    link extractors (LSP hover + Entity Inspector)
+-   Wave 3 util suites: abbreviate, ISO8601, lexical replace, markdown
+    entity links, annotation-property order; OBO Foundry registry JSON
+    (vendored fixture)
+-   Follow-ons: IdPolicy semantic parse; `catalog-v001.xml` redirects
+    (`PORT_W4`); fixture hardening; expanded Foundry stress
+-   Synthetic fixtures under `examples/protege-roundtrip/ported/`
+-   `scripts/validate-protege-test-port.py` + CI wiring
+
+## Exit criteria
+
+-   Every `PORT_W1` / `PORT_W2` / `PORT_W3` / `PORT_W4` row has
+    `ontocode_tests` paths that exist (or an explicit `gap`)
+-   `cargo test -p ontocode --test protege_port_*` green
+-   Webview annotation link + annotation-order Vitest green
 
 ------------------------------------------------------------------------
 

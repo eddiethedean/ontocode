@@ -889,34 +889,32 @@ fn remove_swrl_rule_json(text: &mut String, ontology_iri: &str, rule_json: &str)
             "SWRL ontology IRI is unsafe for Turtle write-back: {ontology_iri:?}"
         )));
     }
-    let compact = serde_json::from_str::<serde_json::Value>(rule_json)
-        .map(|v| serde_json::to_string(&v).unwrap_or_else(|_| rule_json.to_string()))
-        .unwrap_or_else(|_| rule_json.to_string());
-    let escaped = escape_turtle_string(&compact);
-    let needle = format!("<{ontology_iri}> <{ONTOCORE_SWRL_PRED}> \"{escaped}\"");
+    let target = serde_json::from_str::<serde_json::Value>(rule_json).ok();
     let mut out = String::new();
     let mut removed = false;
     for line in text.lines() {
-        if !removed && line.contains(&needle) {
-            removed = true;
-            continue;
+        if !removed {
+            if let Some(literal) = swrl_rule_literal_on_line(line, ontology_iri) {
+                let matches = match (&target, serde_json::from_str::<serde_json::Value>(&literal)) {
+                    (Some(want), Ok(got)) => want == &got,
+                    _ => {
+                        // Fall back to exact / compacted string match for non-JSON literals.
+                        let compact = serde_json::from_str::<serde_json::Value>(rule_json)
+                            .map(|v| {
+                                serde_json::to_string(&v).unwrap_or_else(|_| rule_json.to_string())
+                            })
+                            .unwrap_or_else(|_| rule_json.to_string());
+                        literal == rule_json || literal == compact
+                    }
+                };
+                if matches {
+                    removed = true;
+                    continue;
+                }
+            }
         }
         out.push_str(line);
         out.push('\n');
-    }
-    if !removed {
-        // Fallback: try original escaping for rules written before compacting.
-        let legacy = rule_json.replace('\\', "\\\\").replace('"', "\\\"");
-        let legacy_needle = format!("<{ontology_iri}> <{ONTOCORE_SWRL_PRED}> \"{legacy}\"");
-        out.clear();
-        for line in text.lines() {
-            if !removed && line.contains(&legacy_needle) {
-                removed = true;
-                continue;
-            }
-            out.push_str(line);
-            out.push('\n');
-        }
     }
     if !removed {
         return Err(OwlError::PatchInvalid(format!(
@@ -925,6 +923,46 @@ fn remove_swrl_rule_json(text: &mut String, ontology_iri: &str, rule_json: &str)
     }
     *text = out;
     Ok(())
+}
+
+/// Extract the JSON string literal from an `ontocore:swrlRule` triple line for `ontology_iri`.
+fn swrl_rule_literal_on_line(line: &str, ontology_iri: &str) -> Option<String> {
+    let subj = format!("<{ontology_iri}>");
+    let pred = format!("<{ONTOCORE_SWRL_PRED}>");
+    let trimmed = line.trim();
+    if !(trimmed.contains(&subj) && trimmed.contains(&pred)) {
+        return None;
+    }
+    let after_pred = trimmed.split(&pred).nth(1)?.trim_start();
+    if !after_pred.starts_with('"') {
+        return None;
+    }
+    let mut out = String::new();
+    let bytes = after_pred.as_bytes();
+    let mut i = 1usize;
+    while i < bytes.len() {
+        match bytes[i] {
+            b'\\' if i + 1 < bytes.len() => {
+                match bytes[i + 1] {
+                    b'"' => out.push('"'),
+                    b'\\' => out.push('\\'),
+                    b'n' => out.push('\n'),
+                    b't' => out.push('\t'),
+                    c => {
+                        out.push('\\');
+                        out.push(c as char);
+                    }
+                }
+                i += 2;
+            }
+            b'"' => return Some(out),
+            c => {
+                out.push(c as char);
+                i += 1;
+            }
+        }
+    }
+    None
 }
 
 fn prefix_declaration_name(line: &str) -> Option<&str> {

@@ -41,4 +41,5 @@ pub use runner::{
 };
 pub use swrl_run::{
     classify_with_swrl, inject_swrl_from_turtle, input_has_swrl_rules, ontology_has_swrl_rules,
+    prepare_swrl_ontology,
 };

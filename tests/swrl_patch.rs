@@ -183,3 +183,43 @@ ex:Human a owl:Class .
     let text = added.preview_text.expect("text");
     assert_eq!(rules_from_turtle_document(&text).len(), 1);
 }
+
+#[test]
+fn remove_swrl_matches_despite_json_key_order() {
+    // #356 — Rule Browser emits struct field order; stored literal may differ.
+    let ontology_iri = "http://example.org/swrl";
+    let stored = r#"{"enabled":true,"head":[{"kind":"class","class":"http://example.org/swrl#Human","arg":{"variable":"x"}}],"body":[{"kind":"class","class":"http://example.org/swrl#Person","arg":{"variable":"x"}}],"id":"r1"}"#;
+    let browser = r#"{"id":"r1","body":[{"kind":"class","class":"http://example.org/swrl#Person","arg":{"variable":"x"}}],"head":[{"kind":"class","class":"http://example.org/swrl#Human","arg":{"variable":"x"}}],"enabled":true}"#;
+    let compact =
+        serde_json::to_string(&serde_json::from_str::<serde_json::Value>(stored).unwrap()).unwrap();
+    let escaped = compact.replace('\\', "\\\\").replace('"', "\\\"");
+    let initial = format!(
+        r#"@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix ex: <http://example.org/swrl#> .
+
+<{ontology_iri}> a owl:Ontology .
+<{ontology_iri}> <http://ontocode.dev/ns#swrlRule> "{escaped}" .
+
+ex:Person a owl:Class .
+ex:Human a owl:Class .
+"#
+    );
+    let ns = BTreeMap::new();
+    let removed = apply_patches_to_text(
+        &initial,
+        &[PatchOp::RemoveSwrlRule {
+            ontology_iri: ontology_iri.to_string(),
+            rule_json: browser.to_string(),
+        }],
+        false,
+        &ns,
+    )
+    .expect("remove with reordered keys");
+    assert!(removed.applied, "semantic JSON match should remove the rule");
+    let after = removed.preview_text.expect("text");
+    assert!(
+        rules_from_turtle_document(&after).is_empty(),
+        "rule should be gone after semantic remove"
+    );
+}
+

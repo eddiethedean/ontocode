@@ -50,7 +50,11 @@ pub fn validate_rule(rule: &SwrlRule) -> Vec<SwrlDiagnostic> {
         }
     }
 
+    for atom in &rule.body {
+        warn_non_executable_atom(atom, false, &mut diags);
+    }
     for atom in &rule.head {
+        warn_non_executable_atom(atom, true, &mut diags);
         if matches!(atom, SwrlAtom::BuiltIn { .. }) {
             diags.push(SwrlDiagnostic {
                 code: "swrl_builtin_in_head".into(),
@@ -62,6 +66,31 @@ pub fn validate_rule(rule: &SwrlRule) -> Vec<SwrlDiagnostic> {
     }
 
     diags
+}
+
+fn warn_non_executable_atom(atom: &SwrlAtom, in_head: bool, diags: &mut Vec<SwrlDiagnostic>) {
+    let where_ = if in_head { "head" } else { "body" };
+    match atom {
+        SwrlAtom::BuiltIn { predicate, .. } => {
+            diags.push(SwrlDiagnostic {
+                code: "swrl_builtin_not_executable".into(),
+                severity: SwrlSeverity::Warning,
+                message: format!(
+                    "BuiltIn atom ({predicate}) in rule {where_} is not injected into Ontologos materialization; the rule will be skipped at classify"
+                ),
+            });
+        }
+        SwrlAtom::DataRange { range, .. } => {
+            diags.push(SwrlDiagnostic {
+                code: "swrl_datarange_not_executable".into(),
+                severity: SwrlSeverity::Warning,
+                message: format!(
+                    "DataRange atom ({range}) in rule {where_} is not injected into Ontologos materialization; the rule will be skipped at classify"
+                ),
+            });
+        }
+        _ => {}
+    }
 }
 
 fn check_atom(atom: &SwrlAtom, diags: &mut Vec<SwrlDiagnostic>, _in_head: bool) {
@@ -86,7 +115,7 @@ fn check_atom(atom: &SwrlAtom, diags: &mut Vec<SwrlDiagnostic>, _in_head: bool) 
                 code: "swrl_unsupported_builtin".into(),
                 severity: SwrlSeverity::Warning,
                 message: format!(
-                    "built-in {predicate} is not in the OntoCode v0.23 supported registry"
+                    "built-in {predicate} is not in the OntoCode supported swrlb: registry"
                 ),
             });
         }
@@ -219,5 +248,53 @@ mod tests {
         };
         let d = validate_rule(&rule);
         assert!(d.iter().any(|x| x.code == "swrl_empty_iri"));
+    }
+
+    #[test]
+    fn warns_builtin_and_datarange_not_executable() {
+        let rule = SwrlRule {
+            id: None,
+            body: vec![
+                SwrlAtom::Class {
+                    class: "http://ex#A".into(),
+                    arg: SwrlIArg::Variable("x".into()),
+                },
+                SwrlAtom::BuiltIn {
+                    predicate: "http://www.w3.org/2003/11/swrlb#equal".into(),
+                    args: vec![],
+                },
+                SwrlAtom::DataRange {
+                    range: "http://www.w3.org/2001/XMLSchema#string".into(),
+                    arg: crate::model::SwrlDArg::Variable("x".into()),
+                },
+            ],
+            head: vec![SwrlAtom::Class {
+                class: "http://ex#B".into(),
+                arg: SwrlIArg::Variable("x".into()),
+            }],
+            enabled: true,
+        };
+        let d = validate_rule(&rule);
+        assert!(d.iter().any(|x| x.code == "swrl_builtin_not_executable"));
+        assert!(d.iter().any(|x| x.code == "swrl_datarange_not_executable"));
+    }
+
+    #[test]
+    fn foreign_namespace_builtin_is_unsupported() {
+        let rule = SwrlRule {
+            id: None,
+            body: vec![SwrlAtom::BuiltIn {
+                predicate: "http://evil.example/equal".into(),
+                args: vec![],
+            }],
+            head: vec![SwrlAtom::Class {
+                class: "http://ex#B".into(),
+                arg: SwrlIArg::Variable("x".into()),
+            }],
+            enabled: true,
+        };
+        let d = validate_rule(&rule);
+        assert!(d.iter().any(|x| x.code == "swrl_unsupported_builtin"));
+        assert!(d.iter().any(|x| x.code == "swrl_builtin_not_executable"));
     }
 }

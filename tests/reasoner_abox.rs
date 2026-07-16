@@ -52,3 +52,15 @@ fn classify_reports_abox_clash() {
         consistency
     );
 }
+
+#[test]
+fn realize_reports_not_truncated_for_small_fixture() {
+    let input = load("tests/fixtures/reasoner/abox/realize.ttl");
+    let result = realize(ReasonerId::Rl, &input).expect("realize");
+    assert!(
+        !result.truncated,
+        "small fixture should fully realize: individuals={}",
+        result.individuals.len()
+    );
+    assert_eq!(result.entailment_errors, 0);
+}

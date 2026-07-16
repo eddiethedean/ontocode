@@ -39,3 +39,53 @@ fn rules_from_fixture_ttl() {
     assert_eq!(rules[0].body.len(), 2);
     assert_eq!(rules[0].head.len(), 1);
 }
+
+#[test]
+fn foreign_namespace_builtin_rejected() {
+    let json = r#"{
+      "id": "evil",
+      "body": [
+        {
+          "kind": "built_in",
+          "predicate": "http://evil.example/equal",
+          "args": [{ "variable": "x" }, { "variable": "y" }]
+        }
+      ],
+      "head": [
+        { "kind": "class", "class": "http://example.org/swrl#Human", "arg": { "variable": "x" } }
+      ],
+      "enabled": true
+    }"#;
+    let rule = parse_swrl_rule_json(json).expect("parse");
+    let diags = validate_rule(&rule);
+    assert!(
+        diags.iter().any(|d| d.code == "swrl_unsupported_builtin"),
+        "expected unsupported builtin: {diags:?}"
+    );
+}
+
+#[test]
+fn builtin_atom_warns_not_executable() {
+    let json = r#"{
+      "id": "eq",
+      "body": [
+        { "kind": "class", "class": "http://example.org/swrl#Person", "arg": { "variable": "x" } },
+        {
+          "kind": "built_in",
+          "predicate": "http://www.w3.org/2003/11/swrlb#equal",
+          "args": [{ "variable": "x" }, { "variable": "y" }]
+        }
+      ],
+      "head": [
+        { "kind": "class", "class": "http://example.org/swrl#Human", "arg": { "variable": "x" } }
+      ],
+      "enabled": true
+    }"#;
+    let rule = parse_swrl_rule_json(json).expect("parse");
+    let diags = validate_rule(&rule);
+    assert!(
+        diags.iter().any(|d| d.code == "swrl_builtin_not_executable"),
+        "expected not-executable warning: {diags:?}"
+    );
+}
+

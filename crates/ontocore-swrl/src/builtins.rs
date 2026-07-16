@@ -26,10 +26,11 @@ pub const SUPPORTED_BUILTINS: &[&str] = &[
 ];
 
 pub fn is_supported_builtin(predicate_iri: &str) -> bool {
-    let local = predicate_iri
-        .strip_prefix(SWRLB_NS)
-        .or_else(|| predicate_iri.rsplit(['#', '/']).next())
-        .unwrap_or(predicate_iri);
+    // Require the SWRLB namespace (#363). Foreign IRIs that only share a local name
+    // (e.g. `http://evil.example/equal`) must not validate as supported.
+    let Some(local) = predicate_iri.strip_prefix(SWRLB_NS) else {
+        return false;
+    };
     SUPPORTED_BUILTINS.contains(&local)
 }
 

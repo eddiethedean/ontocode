@@ -67,6 +67,13 @@ pub struct RealizationResult {
     pub profile_used: String,
     pub individuals: Vec<RealizationEntry>,
     pub duration_ms: u64,
+    /// `true` when the individual list or entailment budget was hit, or some
+    /// entailment checks failed (#359 / #361). Incomplete — not a full realization.
+    #[serde(default)]
+    pub truncated: bool,
+    /// Count of non-cancel entailment check failures treated as incomplete (#361).
+    #[serde(default)]
+    pub entailment_errors: usize,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]

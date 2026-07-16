@@ -11,8 +11,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 **For pilots / adopters:** Protégé Desktop **behavioral** parity corpus (Waves 1–4) — hierarchy/merge/deprecation/history oracles, annotation linkification + property order in the IDE, `catalog-v001.xml` import redirects, IdPolicy parse, ontology `version_iri`. No format write-back regression vs v0.25 — [migration/v0.26.md](docs/migration/v0.26.md).
 
-v0.26.0 — Protégé Desktop JUnit behavioral test port (Waves 1–4).
-
 ### Added
 
 - Protégé Desktop test-port inventory ([`parity/protege-test-port.yaml`](parity/protege-test-port.yaml)) with `PORT_W1`–`PORT_W4` / `SKIP` / `COVERED` tags and `scripts/validate-protege-test-port.py` CI wiring

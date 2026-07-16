@@ -85,6 +85,18 @@ Enterprises requiring contractual SLAs should treat OntoCode as **internal OSS a
 | Telemetry? | **None** shipped |
 | Code-signed binaries? | **Not yet** — SHA256 only ([release integrity](../release-integrity.md)) |
 
+### What we will not claim (and signing timeline)
+
+| Claim | Status |
+|-------|--------|
+| Commercial SLA / paid support | **Not offered** — no planned window until after 1.0 productization |
+| SOC 2 / ISO 27001 | **Not claimed** — no certification program in flight |
+| HIPAA BAA | **Not offered** |
+| Vendor-hosted SaaS telemetry | **None shipped**; local-first by default |
+| Code-signed VSIX / CLI | **Not yet** — releases publish `SHA256SUMS` only. Signing is a **post-1.0** hardening candidate, not a near-term commitment |
+
+Use [Procurement appendix](procurement-appendix.md) for questionnaires.
+
 ## Reference architecture (pilot)
 
 ```text

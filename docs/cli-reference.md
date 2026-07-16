@@ -10,6 +10,29 @@ cargo install ontocore-cli --locked --version 0.26.0
 
 From a git clone, use `cargo run --` instead of `ontocore`.
 
+## Commands at a glance
+
+| Command | Purpose |
+|---------|---------|
+| `new` | Scaffold Turtle or OBO ontology file |
+| `index` | Index workspace (catalog stats) |
+| `inspect` | Index + diagnostic summary |
+| `validate` | Run diagnostics (CI gate) |
+| `query` | Catalog SQL |
+| `sparql` | SPARQL over indexed triples |
+| `patch` | Apply JSON patch ops |
+| `classify` | Reasoner classification |
+| `explain` | Unsatisfiability explanation |
+| `realize` | Realize individuals |
+| `check-instance` | Instance check |
+| `dl-query` | Manchester DL Query |
+| `diff` | Semantic diff |
+| `docs` | Export Markdown/HTML docs |
+| `refactor …` | Rename / merge / replace / move / extract / … |
+| `robot …` | ROBOT CLI wrappers |
+| `plugins …` | Plugin list/info/enable/disable/run |
+| `workflow` | External workflow plugin step |
+
 ## Global output formats
 
 Several commands accept `--format text|json|csv` (where noted). Default is `text`.

@@ -90,14 +90,13 @@ plugins:
       minify_html: !ENV [ENABLE_MKDOCS_MINIFY, READTHEDOCS, false]
   - redirects:
       redirect_maps:
-        guides/start-here.md: start.md
+        guides/start-here.md: guides/first-success.md
         guides/query-workbench.md: ontocode/query-workbench.md
         guides/manchester-editor.md: ontocode/manchester-editor.md
         guides/graph-visualization.md: ontocode/graph-view.md
         guides/vscode-extension.md: ontocode/vscode-extension.md
-        # Legacy install entry points → canonical Install page
-        # (vscode-install.md remains a detail page; getting-started → install-cli-ci)
-        getting-started.md: install-cli-ci.md
+        # Legacy “getting started” bookmarks → IDE tutorial (not cargo CLI)
+        getting-started.md: guides/first-success.md
 
 extra_css:
   - stylesheets/extra.css

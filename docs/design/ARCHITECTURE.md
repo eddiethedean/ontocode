@@ -32,7 +32,7 @@ The architecture must support:
 - Reasoner integration
 - Safe write-back to source files
 - Semantic diffing
-- Plugin ecosystem (v0.14 MVP; v0.15 permissions/views; full workflow integration v1.0)
+- Plugin ecosystem (**Plugin SDK 1.0** frozen; full workflow marketplace integration still **v1.0**)
 
 ## 2. High-Level Architecture
 
@@ -57,7 +57,7 @@ External Workflow Plugins (not core)     owlmake · ROBOT/ODK adapters
 |       OntoCore Core       |
 | catalog/query/diagnostics |
 | diff/docs/reasoner/robot  |
-| plugin platform (v0.14 MVP; v0.15 API extensions) |
+| plugin platform (SDK 1.0; marketplace/workflows v1.0) |
 +------+--------+-----------+
        |        |           |
        v        v           v

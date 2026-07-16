@@ -1,6 +1,6 @@
 # SHACL Validation Specification (v1.0 P1)
 
-> **Status:** target design (P1 per [PROTEGE_PARITY.md](PROTEGE_PARITY.md))
+> **Status: Target design — not shipped.** Do **not** implement from this page as if SHACL were available in OntoCode today. Capability truth: [What ships today](../SHIPPED.md) · [Known limitations](../known-limitations.md). Historical P1 framing: [PROTEGE_PARITY.md](PROTEGE_PARITY.md).
 >
 > Native Rust SHACL via [`rudof`](https://crates.io/crates/rudof) (shapes-rs) — not an in-tree SHACL engine ([ADR-0016](adr/0016-dependency-first-implementation.md)).
 

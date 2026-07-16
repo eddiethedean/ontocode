@@ -16,6 +16,17 @@ Single entry point for security, platform, and legal questionnaires. Start with 
 | **Editable formats** | Turtle, OBO, RDF/XML, OWL/XML write-back; XML is semantic re-serialize (not Protégé byte-identical); JSON-LD / TriG / N-Triples read-only |
 | **CLI prebuilds** | Linux x64 only; macOS/Windows use `cargo install` or bundled VSIX LSP |
 
+### Non-claims (procurement)
+
+| Topic | Answer |
+|-------|--------|
+| Commercial support / SLA | **Not offered** |
+| SOC 2 / ISO 27001 | **No** |
+| Code-signed binaries | **Not yet** (SHA256 only) — signing is post-1.0 candidate, not committed |
+| HIPAA BAA | **No** |
+
+Details: [Production readiness](production-readiness.md) § Support and compliance.
+
 ## Detailed guides (by topic)
 
 | Topic | Document |

@@ -65,4 +65,4 @@ Graphs may be **truncated** (badge in the Graph panel). Prefer narrower search, 
 - You need **WebProtégé collaboration** — out of scope until post-1.0.
 - You need **HermiT-identical** DL explanations or certified Protégé+HermiT equivalence — dual-tool checks remain recommended for critical audits.
 
-More: [Start here](start.md) · [Protégé migration](guides/protege-migration.md) · [Protégé decision](guides/protege-decision.md) · [FAQ](faq.md)
+More: [First success (~10 min)](guides/first-success.md) · [Protégé migration](guides/protege-migration.md) · [Protégé decision](guides/protege-decision.md) · [FAQ](faq.md)

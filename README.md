@@ -1,6 +1,6 @@
 # OntoCode
 
-**OntoCode** edits OWL/RDF/OBO ontologies in VS Code. Install the [extension](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) (publisher **OntoCode**, id `ontocode.ontocode`), open a folder of `.ttl` / `.obo` / `.owl` files, and use the **OntoCode** activity bar.
+**OntoCode** edits OWL/RDF/OBO ontologies in VS Code (**1.85+**). Install the [extension](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) (publisher **OntoCode**, id `ontocode.ontocode`), open a folder of `.ttl` / `.obo` / `.owl` files, and use the **OntoCode** activity bar.
 
 **Next:** [First success (~10 min)](https://ontocode-vs.readthedocs.io/en/latest/guides/first-success/) — no clone required.
 
@@ -90,7 +90,7 @@ cargo run -- validate fixtures
 
 Platform docs: [Vision](https://ontocode-vs.readthedocs.io/en/latest/vision/) · [Architecture](ARCHITECTURE.md) · [Roadmap hub](https://ontocode-vs.readthedocs.io/en/latest/roadmap-hub/) · [Protégé vs OntoCode](https://ontocode-vs.readthedocs.io/en/latest/guides/protege-decision/)
 
-**v0.26.0** ships the Protégé Desktop behavioral test port (Waves 1–4): edit oracles, annotation linkification + property order, `catalog-v001.xml` redirects, IdPolicy, and ontology `version_iri`. See [SHIPPED](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/), [v0.26 migration](docs/migration/v0.26.md).
+**v0.26.0** adds Protégé-aligned edit/hierarchy oracles, annotation linkification, `catalog-v001.xml` redirects, and IdPolicy support. **Not a Protégé replacement** — see [Known limitations](https://ontocode-vs.readthedocs.io/en/latest/known-limitations/). Engineering detail: [SHIPPED](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/), [v0.26 migration](docs/migration/v0.26.md).
 
 ## Development
 

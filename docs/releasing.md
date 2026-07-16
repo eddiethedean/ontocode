@@ -5,11 +5,11 @@ Maintainer checklist for publishing crates, binaries, and the VS Code extension.
 ## Version bump
 
 1. Update `[workspace.package].version` in root [Cargo.toml on GitHub](https://github.com/eddiethedean/ontocode/blob/main/Cargo.toml)
-2. Update **`docs/TAGGED_RELEASE`** in the release commit that cuts that tag — public install pins must equal the **published** GitHub Release version (never bump pins on a working branch before the tag exists)
+2. Update **`docs/TAGGED_RELEASE`** in the release commit that cuts that tag — public install pins must equal the **published** GitHub Release version (never bump pins on a working branch before the tag exists; push the tag the **same day** you merge the ship commit)
 3. Update `extension/package.json` and `extension/webview-ui/package.json` `version`
-3. Update [CHANGELOG.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) and [docs/changelog.md](changelog.md)
-4. Regenerate [NOTICES on GitHub](https://github.com/eddiethedean/ontocode/blob/main/NOTICES) if dependencies changed (`cargo license` recommended)
-5. Sync user-facing docs (see checklist below)
+4. Update [CHANGELOG.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) and [docs/changelog.md](changelog.md)
+5. Regenerate [NOTICES on GitHub](https://github.com/eddiethedean/ontocode/blob/main/NOTICES) if dependencies changed (`cargo license` recommended)
+6. Sync user-facing docs (see checklist below)
 
 ## Documentation sync checklist (every release)
 
@@ -29,8 +29,9 @@ Source of truth: **[docs/SHIPPED.md](SHIPPED.md)** and **[docs/supported-formats
 - [ ] [docs/troubleshooting.md](troubleshooting.md), [docs/vscode-install.md](vscode-install.md), [docs/start.md](start.md)
 - [ ] [docs/patch-reference.md](patch-reference.md), [docs/cli-reference.md](cli-reference.md), [docs/lsp-api.md](lsp-api.md)
 - [ ] [docs/roadmap.md](roadmap.md) + [ROADMAP.md](https://github.com/eddiethedean/ontocode/blob/main/ROADMAP.md) — tagged release must be **Shipped**, not Planned
-- [ ] [docs/migration/README.md](migration/README.md) + this release’s `docs/migration/vN.md`
+- [ ] [docs/migration/README.md](migration/README.md) + this release’s `docs/migration/vN.md` (current minor only — do not re-list every historical migration here)
 - [ ] Run `./scripts/check-doc-versions.sh` (also enforced in CI) — includes stale write-back claim greps
+- [ ] After the tag exists: `./scripts/check-tagged-release-published.sh` (First success raw URLs + `docs/TAGGED_RELEASE` vs `git tag`)
 
 ### Full sync (after Tier-1)
 
@@ -49,8 +50,6 @@ Source of truth: **[docs/SHIPPED.md](SHIPPED.md)** and **[docs/supported-formats
 - [ ] [docs/ontocode/feature-tour.md](ontocode/feature-tour.md), [graph-view.md](ontocode/graph-view.md), [semantic-diff.md](ontocode/semantic-diff.md), [obo-workflow.md](guides/obo-workflow.md), [robot-interop.md](guides/robot-interop.md)
 - [ ] [docs/authoring.md](authoring.md), [docs/concepts.md](concepts.md), [docs/ontocore/lsp.md](ontocore/lsp.md)
 - [ ] Crate README “Current version” / `--version` pins (`crates/ontocore*`)
-- [ ] [docs/migration/v0.20.md](migration/v0.20.md) — when applicable
-- [ ] [docs/migration/v0.21.md](migration/v0.21.md) — RDF/XML + OWL/XML write-back (add a row for each new minor)
 - [ ] [docs/guides/plugins.md](guides/plugins.md) — plugin authoring when plugin surface changes
 - [ ] [docs/design/PROTEGE_PARITY.md](design/PROTEGE_PARITY.md) — status columns if features shipped (banner if historical)
 - [ ] [docs/design/ARCHITECTURE.md](design/ARCHITECTURE.md) / [OWL_AUTHORING_SPEC.md](design/OWL_AUTHORING_SPEC.md) — shipped vs target banners
@@ -59,6 +58,7 @@ Source of truth: **[docs/SHIPPED.md](SHIPPED.md)** and **[docs/supported-formats
 - [ ] Build tutorial pack: `./scripts/package-tutorial-zip.sh` and **attach** `ontocode-tutorial.zip` to the GitHub Release
 - [ ] **Verify** the Release page lists `ontocode-tutorial.zip` (or temporarily hedge First success / versions-and-channels so offline users are not told the zip is always present)
 - [ ] Ensure **CI is green on the release commit** before tagging (the release workflow **requires** a successful `ci.yml` run on that SHA; it does not re-run the full test suite)
+- [ ] Immediately after `git push origin vX.Y.Z`: run `./scripts/check-tagged-release-published.sh` and confirm GitHub Release / crates.io / Marketplace (manual) progress
 
 ## Tag and publish
 

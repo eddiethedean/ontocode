@@ -5,6 +5,8 @@
 [![Open VSX](https://img.shields.io/open-vsx/v/ontocode/ontocode)](https://open-vsx.org/extension/ontocode/ontocode)
 [![VS Code Marketplace](https://vsmarketplacebadges.dev/version/ontocode.ontocode.svg?label=VS%20Code%20Marketplace)](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode)
 
+**Primary path:** [Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) (or [Open VSX](https://open-vsx.org/extension/ontocode/ontocode) for Cursor) → [First success (~10 min)](guides/first-success.md).
+
 > **Multi-root workspaces (v0.10+):** All workspace folders are indexed on open. **OntoCode: Index Workspace** may prompt you to pick a folder when multiple roots are open.
 
 ## Prerequisites
@@ -33,16 +35,14 @@ CLI install options (separate from the extension): [Install](install.md) · [Ins
 
 For a full walkthrough, see [First success in 10 minutes](guides/first-success.md).
 
-**Sample ontology files:** prefer the curl/PowerShell commands in [First success](guides/first-success.md). Optional: if the [v0.26.0 GitHub Release](https://github.com/eddiethedean/ontocode/releases/tag/v0.26.0) includes `ontocode-tutorial.zip` (built with `./scripts/package-tutorial-zip.sh`), unzip and open that folder. **If the zip is missing**, use First success curl commands or open `fixtures/` from a clone.
-
-> **Multi-root workspaces (v0.10+):** All workspace folders are indexed on open. **OntoCode: Index Workspace** may prompt you to pick a folder when multiple roots are open.
+**Sample ontology files:** prefer the curl/PowerShell commands in [First success](guides/first-success.md). Optional: if the [v0.26.0 GitHub Release](https://github.com/eddiethedean/ontocode/releases/tag/v0.26.0) lists `ontocode-tutorial.zip` among assets, unzip and open that folder. **If the zip is missing**, use First success curl commands or open `fixtures/` from a clone.
 
 ## Option B — GitHub Release VSIX (offline / air-gapped)
 
 1. Open [GitHub Releases](https://github.com/eddiethedean/ontocode/releases) and download the latest `ontocode-v*.vsix` (example: `ontocode-v0.26.0.vsix`).
 2. In VS Code: **Extensions** → **…** menu → **Install from VSIX…**
 3. Verify against `SHA256SUMS` — see [release-integrity.md](release-integrity.md).
-4. Open a folder containing ontology files (`.ttl`, `.obo`, `.owl`, `.rdf`, `.owx`, `.jsonld`, `.nt`, `.nq`, `.trig`).
+4. Open a folder containing ontology files (`.ttl`, `.obo`, `.owl`, `.rdf`, `.owx` editable; `.jsonld`, `.nt`, `.nq`, `.trig` browse/query only).
 
 Release VSIX packages bundle `ontocore-lsp` for Linux, macOS, and Windows.
 

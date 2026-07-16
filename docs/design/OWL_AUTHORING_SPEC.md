@@ -1,11 +1,10 @@
 # OWL Authoring Specification (v1.0)
 
-> **Status: Target spec for v1.0.** Partial implementation ships in **v0.5** — see [What ships today](../SHIPPED.md) and [authoring.md](../authoring.md) for the current Manchester MVP and Turtle patch write-back.
+> **Status: Historical / target UX for remaining v1.0 polish.** Do **not** implement from this page as if authoring were still an MVP.
 >
-> Depends on [ADR-0013](adr/0013-dual-stack-oxigraph-horned-owl.md) (Horned-OWL layer),
-> [ADR-0006](adr/0006-patch-based-write-back.md) (patch write-back), and
-> [DEPENDENCY_MATRIX.md](DEPENDENCY_MATRIX.md).
-> Tracked in [PROTEGE_PARITY.md](PROTEGE_PARITY.md) P0.
+> **Shipped today:** complete OWL 2 authoring (`PAR-OWL-001`, v0.22+), Turtle/OBO/RDF/XML/OWL/XML write-back, Manchester editor, Entity Inspector — see [What ships today](../SHIPPED.md), [authoring.md](../authoring.md), and [Supported formats](../supported-formats.md).
+>
+> This document remains useful for target UX gaps vs Protégé. Depends on [ADR-0013](adr/0013-dual-stack-oxigraph-horned-owl.md), [ADR-0006](adr/0006-patch-based-write-back.md), and [DEPENDENCY_MATRIX.md](DEPENDENCY_MATRIX.md).
 
 ## 1. Purpose
 

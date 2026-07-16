@@ -14,17 +14,7 @@ const ONTOCORE_SWRL_PRED: &str = "http://ontocode.dev/ns#swrlRule";
 /// Classify with SWRL materialization when the ontology contains SWRL rules.
 pub fn classify_with_swrl(input: &ReasonerInput) -> Result<ClassificationResult> {
     let started = Instant::now();
-    let mut ontology = input.ontology.clone();
-    // Prefer rules already injected at WorkspaceInputLoader time; re-inject from live
-    // overrides only when the store is still empty (e.g. load path missed Turtle).
-    let authored = if ontology.swrl_rules().is_empty() {
-        inject_authored_swrl_from_input(&mut ontology, input)
-    } else {
-        0
-    };
-    let report = ontologos_swrl::materialize_swrl_rules(&mut ontology)
-        .map_err(|e| ReasonerError::Classify(format!("SWRL materialization: {e}")))?;
-
+    let (ontology, mut warnings) = prepare_swrl_ontology(input)?;
     let (taxonomy, _) = ontologos_swrl::classify_with_swrl(&ontology)
         .map_err(|e| ReasonerError::Classify(format!("SWRL classify: {e}")))?;
 
@@ -34,16 +24,66 @@ pub fn classify_with_swrl(input: &ReasonerInput) -> Result<ClassificationResult>
     let unsatisfiable = inferred.unsatisfiable.clone();
     let new_inferences = new_inferences(&input.asserted_hierarchy, &inferred.edges);
 
-    let mut warnings = Vec::new();
-    if authored > 0 {
-        warnings.push(ReasonerWarning {
-            code: "swrl_authored_injected".into(),
-            message: format!(
-                "injected {authored} OntoCode-authored SWRL rule(s) from ontocore:swrlRule annotations"
-            ),
-            suggested_profile: None,
-        });
+    // Consistency must run on the *materialized* ontology (#358), not the pre-SWRL input.
+    let mut consistent = unsatisfiable.is_empty();
+    if let Ok(detail) = crate::abox::check_full_consistency(
+        &ontology,
+        crate::adapter::ReasonerId::Dl,
+        &unsatisfiable,
+    ) {
+        consistent = detail.consistent;
+        for clash in &detail.abox_clashes {
+            warnings.push(ReasonerWarning {
+                code: "abox_clash".into(),
+                message: clash.clone(),
+                suggested_profile: None,
+            });
+        }
+        if !detail.complete {
+            warnings.push(ReasonerWarning {
+                code: "consistency_incomplete".into(),
+                message: "consistency check did not complete (budget or cancel)".into(),
+                suggested_profile: None,
+            });
+        }
     }
+
+    Ok(ClassificationResult {
+        profile_used: "swrl".to_string(),
+        consistent,
+        unsatisfiable,
+        inferred,
+        new_inferences,
+        warnings,
+        duration_ms: started.elapsed().as_millis() as u64,
+        subsumption_count: taxonomy.subsumption_count(),
+        inferred_axiom_count: taxonomy.subsumption_count(),
+    })
+}
+
+/// Clone input ontology, inject authored rules, and materialize SWRL inferences.
+///
+/// Returns the post-materialization ontology plus inject/materialize warnings.
+pub fn prepare_swrl_ontology(input: &ReasonerInput) -> Result<(Ontology, Vec<ReasonerWarning>)> {
+    let mut ontology = input.ontology.clone();
+    let mut warnings = Vec::new();
+    // Prefer rules already injected at WorkspaceInputLoader time; re-inject from live
+    // overrides only when the store is still empty (e.g. load path missed Turtle).
+    if ontology.swrl_rules().is_empty() {
+        let (authored, inject_warnings) = inject_authored_swrl_from_input(&mut ontology, input);
+        warnings.extend(inject_warnings);
+        if authored > 0 {
+            warnings.push(ReasonerWarning {
+                code: "swrl_authored_injected".into(),
+                message: format!(
+                    "injected {authored} OntoCode-authored SWRL rule(s) from ontocore:swrlRule annotations"
+                ),
+                suggested_profile: None,
+            });
+        }
+    }
+    let report = ontologos_swrl::materialize_swrl_rules(&mut ontology)
+        .map_err(|e| ReasonerError::Classify(format!("SWRL materialization: {e}")))?;
     if report.inferences_added > 0 || report.rules_found > 0 {
         warnings.push(ReasonerWarning {
             code: "swrl_materialized".into(),
@@ -54,18 +94,7 @@ pub fn classify_with_swrl(input: &ReasonerInput) -> Result<ClassificationResult>
             suggested_profile: None,
         });
     }
-
-    Ok(ClassificationResult {
-        profile_used: "swrl".to_string(),
-        consistent: unsatisfiable.is_empty(),
-        unsatisfiable,
-        inferred,
-        new_inferences,
-        warnings,
-        duration_ms: started.elapsed().as_millis() as u64,
-        subsumption_count: taxonomy.subsumption_count(),
-        inferred_axiom_count: taxonomy.subsumption_count(),
-    })
+    Ok((ontology, warnings))
 }
 
 /// True when Ontologos already has SWRL rules on the ontology.
@@ -83,28 +112,51 @@ fn input_mentions_authored_swrl(input: &ReasonerInput) -> bool {
 }
 
 /// Inject authored SWRL from live document overrides into the Ontologos store.
-pub fn inject_authored_swrl_from_input(ontology: &mut Ontology, input: &ReasonerInput) -> usize {
+pub fn inject_authored_swrl_from_input(
+    ontology: &mut Ontology,
+    input: &ReasonerInput,
+) -> (usize, Vec<ReasonerWarning>) {
     let mut injected = 0usize;
+    let mut warnings = Vec::new();
     for text in input.document_overrides.values() {
-        injected += inject_swrl_from_turtle(ontology, text);
+        let (n, w) = inject_swrl_from_turtle(ontology, text);
+        injected += n;
+        warnings.extend(w);
     }
-    injected
+    (injected, warnings)
 }
 
 /// Parse `ontocore:swrlRule` JSON literals from Turtle and push convertible rules.
-pub fn inject_swrl_from_turtle(ontology: &mut Ontology, text: &str) -> usize {
+///
+/// Returns `(injected_count, warnings)`. Rules with BuiltIn/DataRange atoms are skipped
+/// with an explicit warning (#357) instead of silently disappearing.
+pub fn inject_swrl_from_turtle(
+    ontology: &mut Ontology,
+    text: &str,
+) -> (usize, Vec<ReasonerWarning>) {
     let mut injected = 0usize;
+    let mut warnings = Vec::new();
     for rule in ontocore_swrl::rules_from_turtle_document(text) {
         if !rule.enabled {
             continue;
         }
-        if let Ok(converted) = convert_authored_rule(ontology, &rule) {
-            if ontology.push_swrl_rule(converted).is_ok() {
-                injected += 1;
+        let rule_id = rule.id.as_deref().unwrap_or("<anonymous>");
+        match convert_authored_rule(ontology, &rule) {
+            Ok(converted) => {
+                if ontology.push_swrl_rule(converted).is_ok() {
+                    injected += 1;
+                }
+            }
+            Err(e) => {
+                warnings.push(ReasonerWarning {
+                    code: "swrl_rule_skipped".into(),
+                    message: format!("enabled SWRL rule {rule_id} was not injected: {e}"),
+                    suggested_profile: None,
+                });
             }
         }
     }
-    injected
+    (injected, warnings)
 }
 
 fn convert_authored_rule(

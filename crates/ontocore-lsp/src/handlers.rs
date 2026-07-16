@@ -1881,8 +1881,18 @@ pub fn handle_run_reasoner_lsp(
     }
 
     // Enrich with ABox realization / consistency (best-effort; keep TBox snapshot on failure).
+    // For SWRL classify, consistency/realize must use the post-materialization ontology (#358).
+    let enrich_ontology = if classification.profile_used == "swrl" {
+        match ontocore_reasoner::prepare_swrl_ontology(&input) {
+            Ok((ont, _)) => ont,
+            Err(_) => input.ontology.clone(),
+        }
+    } else {
+        input.ontology.clone()
+    };
+
     match ontocore_reasoner::check_full_consistency(
-        &input.ontology,
+        &enrich_ontology,
         profile,
         &classification.unsatisfiable,
     ) {
@@ -1905,7 +1915,11 @@ pub fn handle_run_reasoner_lsp(
         return Err(LspErrorPayload::reasoner_failed("Reasoner run cancelled".to_string()));
     }
 
-    let realization = match ontocore_reasoner::realize(profile, &input) {
+    let realization = match ontocore_reasoner::realize(profile, &{
+        let mut enrich_input = input.clone();
+        enrich_input.ontology = enrich_ontology.clone();
+        enrich_input
+    }) {
         Ok(r) => Some(r),
         Err(ontocore_reasoner::ReasonerError::Cancelled) => {
             ontocore_reasoner::clear_cancel_flag();
@@ -1916,6 +1930,20 @@ pub fn handle_run_reasoner_lsp(
     };
     if let Some(ref realization) = realization {
         snapshot.realization = Some(realization.clone());
+        if realization.truncated {
+            snapshot.warnings.push(ontocore_reasoner::ReasonerWarning {
+                code: "realization_truncated".into(),
+                message: if realization.entailment_errors > 0 {
+                    format!(
+                        "realization incomplete: truncated and {} entailment check error(s)",
+                        realization.entailment_errors
+                    )
+                } else {
+                    "realization incomplete: individual or entailment budget reached".into()
+                },
+                suggested_profile: None,
+            });
+        }
         drain_reasoner_cancel_notifications(message_rx, deferred, state);
         if enrich_cancelled(&cancel_flag, state) {
             ontocore_reasoner::clear_cancel_flag();
@@ -1923,7 +1951,7 @@ pub fn handle_run_reasoner_lsp(
             return Err(LspErrorPayload::reasoner_failed("Reasoner run cancelled".to_string()));
         }
         match ontocore_reasoner::inferred_assertions_from_realization(
-            &input.ontology,
+            &enrich_ontology,
             profile,
             realization,
         ) {
@@ -1939,6 +1967,10 @@ pub fn handle_run_reasoner_lsp(
 
     ontocore_reasoner::clear_cancel_flag();
     state.set_reasoner_cancel_flag(None);
+    // Persist enriched snapshot so cache hits keep realization/consistency (#355).
+    let _ = state.reasoner_cache_mut(|cache| {
+        cache.update_snapshot(&input.content_hash, profile, snapshot.clone());
+    });
     state.set_reasoner_snapshot(snapshot.clone());
     state.clear_reasoner_dirty();
 

@@ -271,8 +271,10 @@ pub fn realize(ontology: &Ontology, id: ReasonerId) -> Result<RealizationResult>
     let mut individuals = named_individuals(ontology)?;
     let classes = named_classes(ontology)?;
 
+    let mut truncated = false;
     if individuals.len() > MAX_REALIZE_INDIVIDUALS {
         individuals.truncate(MAX_REALIZE_INDIVIDUALS);
+        truncated = true;
     }
 
     // Build hierarchy parents from asserted structure.
@@ -287,7 +289,8 @@ pub fn realize(ontology: &Ontology, id: ReasonerId) -> Result<RealizationResult>
 
     let mut entries = Vec::new();
     let mut entailment_checks = 0usize;
-    for (ind_id, ind_iri) in &individuals {
+    let mut entailment_errors = 0usize;
+    'individuals: for (ind_id, ind_iri) in &individuals {
         if cancel_requested() {
             return Err(ReasonerError::Cancelled);
         }
@@ -316,7 +319,8 @@ pub fn realize(ontology: &Ontology, id: ReasonerId) -> Result<RealizationResult>
                 continue;
             }
             if entailment_checks >= MAX_REALIZE_ENTAILMENT_CHECKS {
-                break;
+                truncated = true;
+                break 'individuals;
             }
             entailment_checks += 1;
             match check_class_assertion(&mut reasoner, ind_iri, class_iri) {
@@ -325,8 +329,11 @@ pub fn realize(ontology: &Ontology, id: ReasonerId) -> Result<RealizationResult>
                 }
                 Ok(false) => {}
                 Err(ReasonerError::Cancelled) => return Err(ReasonerError::Cancelled),
-                // Non-cancel entailment failures: skip candidate rather than abort whole realize.
-                Err(_) => {}
+                // Non-cancel entailment failures: count as incomplete, do not treat as not-entailed (#361).
+                Err(_) => {
+                    entailment_errors += 1;
+                    truncated = true;
+                }
             }
         }
 
@@ -344,6 +351,7 @@ pub fn realize(ontology: &Ontology, id: ReasonerId) -> Result<RealizationResult>
         });
 
         if entailment_checks >= MAX_REALIZE_ENTAILMENT_CHECKS {
+            truncated = true;
             break;
         }
     }
@@ -352,6 +360,8 @@ pub fn realize(ontology: &Ontology, id: ReasonerId) -> Result<RealizationResult>
         profile_used: id.as_str().to_string(),
         individuals: entries,
         duration_ms: started.elapsed().as_millis() as u64,
+        truncated,
+        entailment_errors,
     })
 }
 

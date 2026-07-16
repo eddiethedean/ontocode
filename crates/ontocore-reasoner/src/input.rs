@@ -74,10 +74,10 @@ impl WorkspaceInputLoader {
             };
             merge_ontology(&mut ontology, loaded)?;
             if let Some(ref text) = override_text {
-                crate::swrl_run::inject_swrl_from_turtle(&mut ontology, text);
+                let _ = crate::swrl_run::inject_swrl_from_turtle(&mut ontology, text);
             } else if matches!(file.format, OntologyFormat::Turtle) {
                 if let Ok(text) = std::fs::read_to_string(&file.path) {
-                    crate::swrl_run::inject_swrl_from_turtle(&mut ontology, &text);
+                    let _ = crate::swrl_run::inject_swrl_from_turtle(&mut ontology, &text);
                 }
             }
         }
@@ -100,7 +100,7 @@ impl WorkspaceInputLoader {
             };
             let loaded = load_workspace_file(path, format, Some(text), &file_stub)?;
             merge_ontology(&mut ontology, loaded)?;
-            crate::swrl_run::inject_swrl_from_turtle(&mut ontology, text);
+            let _ = crate::swrl_run::inject_swrl_from_turtle(&mut ontology, text);
         }
 
         let asserted_hierarchy = asserted_hierarchy_from_ontology(&ontology);

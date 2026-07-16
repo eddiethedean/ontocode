@@ -44,11 +44,14 @@ pub fn classify(
         }
     }
     let adapter = adapter_for(profile)?;
-    let mut result = if crate::swrl_run::input_has_swrl_rules(input)
-        && matches!(profile, ReasonerId::Dl | ReasonerId::Auto)
-    {
+    let swrl_present = crate::swrl_run::input_has_swrl_rules(input);
+    let mut used_swrl = false;
+    let mut result = if swrl_present && matches!(profile, ReasonerId::Dl | ReasonerId::Auto) {
         match crate::swrl_run::classify_with_swrl(input) {
-            Ok(r) => r,
+            Ok(r) => {
+                used_swrl = true;
+                r
+            }
             Err(e) => {
                 warnings.push(crate::result::ReasonerWarning {
                     code: "swrl_classify_failed".to_string(),
@@ -61,27 +64,42 @@ pub fn classify(
             }
         }
     } else {
+        if swrl_present {
+            // #360 — non-DL/Auto profiles must not silently ignore SWRL.
+            warnings.push(crate::result::ReasonerWarning {
+                code: "swrl_skipped_for_profile".to_string(),
+                message: format!(
+                    "SWRL rules are present but profile '{}' does not run SWRL materialization; use profile 'dl' or 'auto'",
+                    profile.as_str()
+                ),
+                suggested_profile: Some("dl".to_string()),
+            });
+        }
         adapter.classify(input)?
     };
-    if let Ok(detail) =
-        crate::abox::check_full_consistency(&input.ontology, profile, &result.unsatisfiable)
-    {
-        result.consistent = detail.consistent;
-        if !detail.abox_clashes.is_empty() {
-            for clash in &detail.abox_clashes {
+    // When SWRL materialization ran, consistency was already checked on the
+    // post-materialization ontology inside classify_with_swrl (#358).
+    if !used_swrl {
+        if let Ok(detail) =
+            crate::abox::check_full_consistency(&input.ontology, profile, &result.unsatisfiable)
+        {
+            result.consistent = detail.consistent;
+            if !detail.abox_clashes.is_empty() {
+                for clash in &detail.abox_clashes {
+                    warnings.push(crate::result::ReasonerWarning {
+                        code: "abox_clash".to_string(),
+                        message: clash.clone(),
+                        suggested_profile: None,
+                    });
+                }
+            }
+            if !detail.complete {
                 warnings.push(crate::result::ReasonerWarning {
-                    code: "abox_clash".to_string(),
-                    message: clash.clone(),
+                    code: "consistency_incomplete".to_string(),
+                    message: "consistency check did not complete (budget or cancel)".into(),
                     suggested_profile: None,
                 });
             }
-        }
-        if !detail.complete {
-            warnings.push(crate::result::ReasonerWarning {
-                code: "consistency_incomplete".to_string(),
-                message: "consistency check did not complete (budget or cancel)".into(),
-                suggested_profile: None,
-            });
         }
     }
     result.warnings.extend(warnings);

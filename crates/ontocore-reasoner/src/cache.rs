@@ -98,6 +98,23 @@ impl ReasonerCacheStore {
         self.insert(cache);
         snapshot
     }
+
+    /// Persist an enriched snapshot (realization / consistency) after ABox enrich (#355).
+    pub fn update_snapshot(
+        &mut self,
+        content_hash: &str,
+        profile: ReasonerId,
+        snapshot: ReasonerSnapshot,
+    ) -> bool {
+        let key = (content_hash.to_string(), profile.as_str().to_string());
+        if let Some(entry) = self.entries.get_mut(&key) {
+            entry.classification.consistent = snapshot.consistent;
+            entry.snapshot = snapshot;
+            true
+        } else {
+            false
+        }
+    }
 }
 
 #[cfg(test)]
@@ -146,5 +163,26 @@ mod tests {
         assert_eq!(store.len(), 1);
         assert!(store.get("b", ReasonerId::El).is_some());
         assert!(store.get("a", ReasonerId::El).is_none());
+    }
+
+    #[test]
+    fn update_snapshot_preserves_realization() {
+        let mut store = ReasonerCacheStore::new();
+        let mut snapshot = store.store_classification(
+            dummy_input("h"),
+            ReasonerId::Dl,
+            dummy_classification("dl"),
+        );
+        assert!(snapshot.realization.is_none());
+        snapshot.realization = Some(crate::result::RealizationResult {
+            profile_used: "dl".into(),
+            individuals: Vec::new(),
+            duration_ms: 1,
+            truncated: false,
+            entailment_errors: 0,
+        });
+        assert!(store.update_snapshot("h", ReasonerId::Dl, snapshot.clone()));
+        let cached = store.get("h", ReasonerId::Dl).expect("cached");
+        assert!(cached.snapshot.realization.is_some());
     }
 }

@@ -1,6 +1,8 @@
 # OBO & ROBOT Interop Specification (v1.0)
 
-> **Status:** target design (P0 for biomedical compete per [PROTEGE_PARITY.md](PROTEGE_PARITY.md))
+> **Status: Target design for remaining interop.** Do **not** implement from this page as product truth.
+>
+> **Shipped today:** OBO index + write-back, ROBOT CLI wrappers, OBO workflows — see [What ships today](../SHIPPED.md), [OBO workflows](../guides/obo-workflow.md), and [ROBOT interop](../guides/robot-interop.md). Historical P0 framing: [PROTEGE_PARITY.md](PROTEGE_PARITY.md).
 >
 > OntoCore does **not** reimplement ROBOT or ODK — it wraps the official ROBOT CLI today and integrates external workflow plugins (such as [owlmake](https://github.com/INCATools/owlmake)) for future Java-free pipelines.
 

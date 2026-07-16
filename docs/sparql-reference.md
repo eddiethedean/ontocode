@@ -17,6 +17,18 @@ cargo run -- sparql fixtures "SELECT ?s ?p ?o WHERE { ?s ?p ?o } LIMIT 5"
 
 **Source of truth:** [`sparql.rs` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/crates/ontocore-query/src/sparql.rs) (Oxigraph SPARQL engine).
 
+## Query forms
+
+| Form | Supported? | Result shape |
+|------|------------|--------------|
+| `SELECT` | **Yes** | Tabular `columns` + `rows` |
+| `ASK` | **Yes** | Single row column `boolean` (`true`/`false`) |
+| `CONSTRUCT` | **No** | Error: graph results not supported |
+| `DESCRIBE` | **No** | Error: graph results not supported |
+| SPARQL Update (`INSERT`/`DELETE`/…) | **No** | Error: updates not supported — use patches |
+
+Engine: [Oxigraph](https://github.com/oxigraph/oxigraph) via [`sparql.rs`](https://github.com/eddiethedean/ontocode/blob/main/crates/ontocore-query/src/sparql.rs).
+
 ## Behavior
 
 - Queries run against triples parsed from all indexed files in the workspace
@@ -41,6 +53,9 @@ SELECT ?label WHERE { ex:Person rdfs:label ?label }
 # All triples (limited)
 ontocore sparql fixtures "SELECT ?s ?p ?o WHERE { ?s ?p ?o } LIMIT 5"
 
+# ASK
+ontocore sparql fixtures "ASK { <http://example.org/people#Person> a owl:Class }"
+
 # Labels for a known IRI
 ontocore sparql fixtures "SELECT ?label WHERE { <http://example.org/people#Person> rdfs:label ?label }"
 
@@ -53,12 +68,15 @@ ontocore sparql fixtures "SELECT ?s ?p ?o WHERE { ?s ?p ?o } LIMIT 3" --format j
 
 More examples: [query cookbook](examples/queries.md).
 
-## Limits
+## Limits and failure modes
 
-| Limit | Value |
-|-------|-------|
-| Query string size | 1 MiB (`MAX_QUERY_BYTES`) |
+| Limit / failure | Behavior |
+|-----------------|----------|
+| Query string size | 1 MiB (`MAX_QUERY_BYTES`) — larger queries error |
 | Result rows | 100,000 (silently truncated; LSP sets `truncated: true`) |
+| `CONSTRUCT` / `DESCRIBE` | Hard error (graph results unsupported) |
+| SPARQL Update | Hard error (read-only queries only) |
+| Parse / engine errors | Surfaced as `QUERY_FAILED` / SPARQL error strings |
 
 See [workspace-limits.md](workspace-limits.md).
 

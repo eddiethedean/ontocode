@@ -114,8 +114,8 @@ See [ADR-0019](design/adr/0019-obo-write-back.md). Ops use `term_id` (OBO id, e.
 | `op` | Required fields | Description |
 |------|-----------------|-------------|
 | `set_name` | `term_id`, `value` | Set term name |
-| `add_synonym` | `term_id`, `value`, `scope` | Add synonym (`exact`, `related`, …) |
-| `remove_synonym` | `term_id`, `value` | Remove synonym |
+| `add_synonym` | `term_id`, `value`, `scope` | Add synonym. Write **`scope` as OBO uppercase** (`EXACT`, `RELATED`, `BROAD`, `NARROW`). |
+| `remove_synonym` | `term_id`, `value`, `scope?` | Remove synonym. Optional `scope` disambiguates when multiple synonyms share the same text; matching is **case-insensitive**. |
 | `add_def` | `term_id`, `value` | Add definition |
 | `remove_def` | `term_id` | Remove definition |
 | `add_xref` | `term_id`, `xref` | Add xref |

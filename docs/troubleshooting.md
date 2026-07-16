@@ -58,12 +58,12 @@ flowchart TD
 ## VS Code: cannot edit in inspector
 
 - Write-back applies to **Turtle (`.ttl`), OBO (`.obo`), RDF/XML (`.owl`/`.rdf`), and OWL/XML (`.owx`)** (v0.21+). See [Supported formats](supported-formats.md). JSON-LD and line-oriented RDF are read-only. XML is semantic re-serialize — [OWL/XML write-back](guides/owl-xml-workflow.md).
-- Entity must be declared in an indexed `.ttl` or `.obo` file in the workspace.
-- See [OBO authoring](ontocode/obo-authoring.md).
+- Entity must be declared in an indexed editable file (`.ttl`, `.obo`, `.owl`/`.rdf`, or `.owx`) in the workspace.
+- See [OBO authoring](ontocode/obo-authoring.md) and [OWL/XML write-back](guides/owl-xml-workflow.md).
 
 ## VS Code: patch or Manchester apply did not stick
 
-Patches write the **source file on disk** first (`.ttl` or `.obo`), then update the language server’s open-buffer copy:
+Patches write the **source file on disk** first (`.ttl`, `.obo`, `.owl`/`.rdf`, or `.owx`), then update the language server’s open-buffer copy. XML formats are **semantic re-serialize** — see [OWL/XML and RDF/XML write-back](guides/owl-xml-workflow.md):
 
 1. If the editor still shows old text, accept or re-apply the workspace edit, or reload the file from disk.
 2. If you had **unsaved** local edits that conflicted, review the file on disk — the server applied against its buffer/disk snapshot.

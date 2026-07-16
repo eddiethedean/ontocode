@@ -32,6 +32,8 @@ Download: [patches.json](patches.json)
 
 ## OBO patches (v0.12)
 
+Write synonym `scope` as OBO uppercase (`EXACT`, `RELATED`, …). See [patch reference](../patch-reference.md).
+
 ```json
 [
   {

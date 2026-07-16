@@ -39,7 +39,7 @@ For offline VSIX installs, see [Install VS Code](../vscode-install.md).
     Invoke-WebRequest -Uri https://raw.githubusercontent.com/eddiethedean/ontocode/v0.26.0/examples/obo-workflow/demo.obo -OutFile demo.obo
     ```
 
-**Offline / optional pack:** If the [v0.26.0 GitHub Release](https://github.com/eddiethedean/ontocode/releases/tag/v0.26.0) includes `ontocode-tutorial.zip`, unzip it and open that folder (also download `ontocode-v0.26.0.vsix` for offline extension install). Built with `./scripts/package-tutorial-zip.sh`. **If the zip is missing**, use the curl/PowerShell commands above or open `fixtures/` from a clone.
+**Offline / optional pack:** Prefer the curl/PowerShell commands above. An `ontocode-tutorial.zip` is attached only when listed on the [v0.26.0 GitHub Release](https://github.com/eddiethedean/ontocode/releases/tag/v0.26.0) assets (built with `./scripts/package-tutorial-zip.sh`). For offline extension install, download `ontocode-v0.26.0.vsix` from that Release when present. **If the zip is missing**, use the commands above or open `fixtures/` from a clone.
 
 Or browse [v0.26.0 fixtures](https://github.com/eddiethedean/ontocode/tree/v0.26.0/fixtures).
 

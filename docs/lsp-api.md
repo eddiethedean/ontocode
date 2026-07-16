@@ -5,6 +5,41 @@
 
 This document describes **what ships today** in `ontocore-lsp`. For the **v1.0 target** (extended plugin methods), see [LSP_SPEC.md](design/LSP_SPEC.md).
 
+## Methods at a glance
+
+| Method | Status | Since |
+|--------|--------|-------|
+| `textDocument/completion` | Shipped | v0.11 |
+| `textDocument/codeAction` | Shipped | v0.11 |
+| `textDocument/hover` | Shipped | early |
+| `textDocument/definition` | Shipped | early |
+| `textDocument/rename` / `prepareRename` | Shipped | rename path |
+| `textDocument/semanticTokens/full` | Shipped | v0.13 |
+| `ontocore/indexWorkspace` | Shipped | early |
+| `ontocore/getCatalogSnapshot` | Shipped | early |
+| `ontocore/getEntity` | Shipped | early |
+| `ontocore/query` | Shipped | v0.5 |
+| `ontocore/sparql` | Shipped | v0.5 |
+| `ontocore/parseManchester` | Shipped | v0.5 |
+| `ontocore/applyAxiomPatch` | Shipped | early |
+| `ontocore/runReasoner` | Shipped (+ `$/cancelRequest`) | early |
+| `ontocore/getExplanation` | Shipped | v0.15 |
+| `ontocore/getGraph` | Shipped | v0.7 |
+| `ontocore/runRobot` | Shipped | v0.7 |
+| `ontocore/findUsages` | Shipped | v0.8 |
+| `ontocore/previewRefactor` / `applyRefactor` | Shipped | v0.8 |
+| `ontocore/semanticDiff` | Shipped | v0.10 |
+| `ontocore/listSqlSchema` | Shipped | v0.13 |
+| `ontocore/listPlugins` / `runPlugin` | Shipped | v0.14 |
+| `ontocore/listCommands` | Shipped | v0.17 |
+| `ontocore/getWorkspaceUiState` | Shipped | v0.17 |
+| `ontocore/getDialogSchema` | Shipped | v0.17 |
+| `ontocore/createOntology` / `exportOntology` / `setActiveOntology` / `deleteImpact` | Shipped | v0.17 |
+| `ontocore/dlQuery` / `search` | Shipped | v0.24 |
+| `ontocore/checkInstance` | Shipped | v0.23 |
+| `ontocore/listSwrlRules` / `validateSwrlRule` / `parseSwrlRule` | Shipped | v0.23 |
+| `ontocore/realize` | **Not an LSP method** — use CLI | — |
+
 ## Start with the schema (recommended)
 
 If you are integrating OntoCore outside VS Code (custom editor, scripts, automation), treat the JSON schema as the **canonical, machine-readable contract** for this release:
@@ -348,6 +383,24 @@ Run OWL classification via OntoLogos 1.0.0 (`el`, `rl`, `rdfs`, `dl`, `auto`).
 | `snapshot` | Full `ReasonerSnapshot` (also attached to subsequent `getCatalogSnapshot`) |
 
 **Errors:** `NOT_INDEXED`, `REASONER_FAILED`
+
+#### Cancelling a reasoner run (`$/cancelRequest`)
+
+Long `ontocore/runReasoner` calls honor the standard LSP notification [`$/cancelRequest`](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/#cancelRequest) while classification (and enrich steps) run.
+
+**Client:** send a notification (not a request):
+
+```json
+{ "jsonrpc": "2.0", "method": "$/cancelRequest", "params": { "id": <request-id-of-runReasoner> } }
+```
+
+**Server behavior:**
+
+- Marks the matching in-flight reasoner request cancelled
+- Returns a JSON-RPC error for that `runReasoner` call with `data.code` = `REASONER_FAILED` and message `Reasoner run cancelled`
+- Does **not** update the reasoner snapshot on cancel (a cancelled run leaves the previous snapshot unchanged)
+
+Cancel only applies to the active reasoner request id. Unrelated inbox messages received during classify are deferred and processed after the wait loop resumes.
 
 ### `ontocore/getExplanation` (v0.15+)
 
@@ -733,6 +786,11 @@ Custom method failures return `LspErrorPayload` in the JSON-RPC error `data` fie
 | `recoverable` | Whether the client can retry |
 | `user_action` | Suggested user action (optional) |
 
-## Not implemented yet (see LSP_SPEC)
+## Still planned (see LSP_SPEC)
 
-`textDocument/prepareRename` returns a range when the cursor is on a renameable IRI/QName. Additional LSP features remain planned — see [LSP_SPEC.md](design/LSP_SPEC.md). `textDocument/completion` for Turtle shipped in v0.11; semantic tokens and `listSqlSchema` shipped in v0.13. For semantic diff UX in VS Code, see [Semantic diff guide](ontocode/semantic-diff.md).
+These remain **target** items in [LSP_SPEC.md](design/LSP_SPEC.md) — they are **not** shipped as first-class LSP methods today:
+
+- Dedicated LSP `ontocore/realize` (use CLI `ontocore realize` / `check-instance` instead)
+- Additional standard LSP surfaces called out as future in LSP_SPEC (beyond completion, codeAction, semantic tokens, rename/prepareRename, hover, definition)
+
+**Already shipped** (do not treat as gaps): `textDocument/completion` (v0.11), semantic tokens + `listSqlSchema` (v0.13), `prepareRename` / rename for IRI/QName, semantic diff (`ontocore/semanticDiff` + [Semantic diff guide](ontocode/semantic-diff.md)).

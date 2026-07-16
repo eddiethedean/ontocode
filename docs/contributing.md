@@ -6,6 +6,8 @@ Thank you for contributing. This repository contains:
 - **OntoCode** — VS Code extension under `extension/`
 - **User guides** — install, SQL, and LSP API under `docs/`
 
+**AI / agent contributors:** start with [AGENTS.md on GitHub](https://github.com/eddiethedean/ontocode/blob/main/AGENTS.md) (SHIPPED-first; do not implement from `docs/design/` targets).
+
 ### Docs-only contributors (~15 minutes)
 
 **No Rust or Node required** for documentation-only PRs. Expect **under one hour** end-to-end including review prep:

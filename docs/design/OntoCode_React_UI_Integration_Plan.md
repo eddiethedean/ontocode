@@ -1,6 +1,8 @@
 # OntoCode React UI Integration Plan
 
-> **Status:** Planned — foundation lands in **v0.7a**; panel migration continues through **v1.0**.
+> **Status: Historical.** React + Vite foundation and panel migration **shipped** (v0.7a–v0.13+). Do **not** treat this as a current implementation plan.
+>
+> **Shipped today:** React webviews (inspector, graphs, Query Workbench, Manchester, reasoner, explanation, refactor preview, semantic diff, imports) — see [What ships today](../SHIPPED.md) and [Webview protocol](../webview-protocol.md).
 >
 > **Related:** [ROADMAP.md](ROADMAP.md) · [ADR-0017](adr/0017-react-webview-ui.md) · [ARCHITECTURE.md](ARCHITECTURE.md) §5
 

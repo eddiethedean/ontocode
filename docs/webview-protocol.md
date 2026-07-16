@@ -1,14 +1,29 @@
-# Webview message protocol (v0.13 foundation; v0.17 panels)
+# Webview message protocol (v0.26)
 
 Typed messages between the VS Code extension host (`extension/src/webviews/`) and the React app (`extension/webview-ui/`).
 
-> **Scope:** This page documents the **focus-relay and panel `postMessage` contract** introduced in v0.13. v0.17 adds DialogShell panels (new ontology, prefix manager, metrics, about, etc.) that reuse the same host ↔ React channel patterns; treat new panel ids as additive. For shipped UI capabilities, see [SHIPPED.md](SHIPPED.md).
+> **Scope:** Focus-relay and panel `postMessage` contract (introduced v0.13; DialogShell and later panels are additive). **Capability truth:** [SHIPPED.md](SHIPPED.md). Keep TypeScript types in sync: `extension/src/webviews/messages.ts` ↔ `extension/webview-ui/src/messages.ts`.
 
 ## Panel selection
 
-Webviews load `webview-ui/dist` with query param `?panel=`:
+Webviews load `webview-ui/dist` with query param `?panel=` (`PanelKind`):
 
-`inspector` | `graph` | `smoke` | `refactorPreview` | `queryWorkbench` | `manchesterEditor` | `semanticDiff` | `imports` | `prefixManager` | `newOntology` | `metrics` | `about` (and other DialogShell panels)
+| Panel id | Surface |
+|----------|---------|
+| `inspector` | Entity Inspector |
+| `graph` | Graph view |
+| `queryWorkbench` | Query Workbench (SQL / SPARQL / DL) |
+| `manchesterEditor` | Manchester axiom editor |
+| `refactorPreview` | Refactor preview |
+| `semanticDiff` | Semantic diff |
+| `imports` | Manage Imports |
+| `reasoner` | Reasoner panel |
+| `explanation` | Unsatisfiability explanation |
+| `ruleBrowser` / `ruleEditor` | SWRL Rule Browser / Editor (v0.23+) |
+| `prefixManager` / `newOntology` / `metrics` / `about` | DialogShell panels (v0.17+) |
+| `smoke` | Internal smoke test panel |
+
+**Host-only (not React `?panel=`):** tree views, native VS Code dialogs, and some plugin-contributed commands/views — see [Plugin authoring](guides/plugins.md).
 
 ## Host → React (v0.13 focus relay)
 
@@ -127,6 +142,24 @@ Example host message:
 ```
 
 See [Manage Imports guide](ontocode/manage-imports.md).
+
+### Reasoner / explanation
+
+| type | payload |
+|------|---------|
+| `reasonerSyncRunId` | `{ runId }` |
+| `reasonerResult` | reasoner run summary / error (host-defined fields) |
+| `reasonerRunCancelled` | `{ runId }` — user or `$/cancelRequest` cancelled the run |
+| `explanationResult` | explanation payload for unsatisfiable class |
+
+### SWRL Rule Browser / Editor (v0.23+)
+
+| type | payload |
+|------|---------|
+| `swrlRuleInit` | rule editor bootstrap (IRI, body/head JSON, replace vs add) |
+| `swrlRuleValidation` | `{ seq, result?, error? }` |
+
+React → Host for rules: validate/apply via `applyPatch` with `add_swrl_rule` / `replace_swrl_rule` (and related) ops — [patch reference](patch-reference.md) · [SWRL examples](examples/swrl.md).
 
 ## React → Host
 

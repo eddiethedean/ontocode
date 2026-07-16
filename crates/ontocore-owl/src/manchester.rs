@@ -27,6 +27,15 @@ pub fn parse_class_expression(
     input: &str,
     namespaces: &BTreeMap<String, String>,
 ) -> Result<ManchesterParseOutput> {
+    parse_class_expression_with_datatypes(input, namespaces, &std::collections::BTreeSet::new())
+}
+
+/// Parse Manchester with an optional set of known datatype IRIs (DeclareDatatype / definitions).
+pub fn parse_class_expression_with_datatypes(
+    input: &str,
+    namespaces: &BTreeMap<String, String>,
+    known_datatypes: &std::collections::BTreeSet<String>,
+) -> Result<ManchesterParseOutput> {
     let trimmed = input.trim();
     if trimmed.is_empty() {
         return Err(OwlError::ManchesterInvalid("empty expression".to_string()));
@@ -40,7 +49,7 @@ pub fn parse_class_expression(
     }
 
     let build = Build::default();
-    let expression = ast_to_class_expression(&ast, &build, namespaces)?;
+    let expression = ast_to_class_expression(&ast, &build, namespaces, known_datatypes)?;
     let normalized = class_expression_to_manchester(&expression, namespaces);
     let tree = expression_tree_json(&expression, namespaces);
     Ok(ManchesterParseOutput { normalized, expression, tree, diagnostics: Vec::new() })
@@ -264,6 +273,7 @@ fn ast_to_class_expression(
     ast: &ManchesterAst,
     build: &Build<RcStr>,
     namespaces: &BTreeMap<String, String>,
+    known_datatypes: &std::collections::BTreeSet<String>,
 ) -> Result<ClassExpression<RcStr>> {
     match ast {
         ManchesterAst::Class(iri) => {
@@ -272,10 +282,11 @@ fn ast_to_class_expression(
         }
         ManchesterAst::Some { property, filler } => {
             let prop_iri = resolve_term_iri(property, namespaces)?;
-            if let Some(dr) = filler_as_data_range(filler, build, namespaces)? {
+            if let Some(dr) = filler_as_data_range(filler, build, namespaces, known_datatypes)? {
                 Ok(ClassExpression::DataSomeValuesFrom { dp: build.data_property(prop_iri), dr })
             } else {
-                let bce = Box::new(ast_to_class_expression(filler, build, namespaces)?);
+                let bce =
+                    Box::new(ast_to_class_expression(filler, build, namespaces, known_datatypes)?);
                 Ok(ClassExpression::ObjectSomeValuesFrom {
                     ope: ObjectPropertyExpression::ObjectProperty(build.object_property(prop_iri)),
                     bce,
@@ -284,10 +295,11 @@ fn ast_to_class_expression(
         }
         ManchesterAst::Only { property, filler } => {
             let prop_iri = resolve_term_iri(property, namespaces)?;
-            if let Some(dr) = filler_as_data_range(filler, build, namespaces)? {
+            if let Some(dr) = filler_as_data_range(filler, build, namespaces, known_datatypes)? {
                 Ok(ClassExpression::DataAllValuesFrom { dp: build.data_property(prop_iri), dr })
             } else {
-                let bce = Box::new(ast_to_class_expression(filler, build, namespaces)?);
+                let bce =
+                    Box::new(ast_to_class_expression(filler, build, namespaces, known_datatypes)?);
                 Ok(ClassExpression::ObjectAllValuesFrom {
                     ope: ObjectPropertyExpression::ObjectProperty(build.object_property(prop_iri)),
                     bce,
@@ -295,25 +307,30 @@ fn ast_to_class_expression(
             }
         }
         ManchesterAst::And(items) => {
-            let exprs: Result<Vec<_>> =
-                items.iter().map(|i| ast_to_class_expression(i, build, namespaces)).collect();
+            let exprs: Result<Vec<_>> = items
+                .iter()
+                .map(|i| ast_to_class_expression(i, build, namespaces, known_datatypes))
+                .collect();
             Ok(ClassExpression::ObjectIntersectionOf(exprs?))
         }
         ManchesterAst::Or(items) => {
-            let exprs: Result<Vec<_>> =
-                items.iter().map(|i| ast_to_class_expression(i, build, namespaces)).collect();
+            let exprs: Result<Vec<_>> = items
+                .iter()
+                .map(|i| ast_to_class_expression(i, build, namespaces, known_datatypes))
+                .collect();
             Ok(ClassExpression::ObjectUnionOf(exprs?))
         }
         ManchesterAst::Min { n, property, filler } => {
             let prop_iri = resolve_term_iri(property, namespaces)?;
-            if let Some(dr) = filler_as_data_range(filler, build, namespaces)? {
+            if let Some(dr) = filler_as_data_range(filler, build, namespaces, known_datatypes)? {
                 Ok(ClassExpression::DataMinCardinality {
                     n: *n,
                     dp: build.data_property(prop_iri),
                     dr,
                 })
             } else {
-                let bce = Box::new(ast_to_class_expression(filler, build, namespaces)?);
+                let bce =
+                    Box::new(ast_to_class_expression(filler, build, namespaces, known_datatypes)?);
                 Ok(ClassExpression::ObjectMinCardinality {
                     n: *n,
                     ope: ObjectPropertyExpression::ObjectProperty(build.object_property(prop_iri)),
@@ -323,14 +340,15 @@ fn ast_to_class_expression(
         }
         ManchesterAst::Max { n, property, filler } => {
             let prop_iri = resolve_term_iri(property, namespaces)?;
-            if let Some(dr) = filler_as_data_range(filler, build, namespaces)? {
+            if let Some(dr) = filler_as_data_range(filler, build, namespaces, known_datatypes)? {
                 Ok(ClassExpression::DataMaxCardinality {
                     n: *n,
                     dp: build.data_property(prop_iri),
                     dr,
                 })
             } else {
-                let bce = Box::new(ast_to_class_expression(filler, build, namespaces)?);
+                let bce =
+                    Box::new(ast_to_class_expression(filler, build, namespaces, known_datatypes)?);
                 Ok(ClassExpression::ObjectMaxCardinality {
                     n: *n,
                     ope: ObjectPropertyExpression::ObjectProperty(build.object_property(prop_iri)),
@@ -340,14 +358,15 @@ fn ast_to_class_expression(
         }
         ManchesterAst::Exactly { n, property, filler } => {
             let prop_iri = resolve_term_iri(property, namespaces)?;
-            if let Some(dr) = filler_as_data_range(filler, build, namespaces)? {
+            if let Some(dr) = filler_as_data_range(filler, build, namespaces, known_datatypes)? {
                 Ok(ClassExpression::DataExactCardinality {
                     n: *n,
                     dp: build.data_property(prop_iri),
                     dr,
                 })
             } else {
-                let bce = Box::new(ast_to_class_expression(filler, build, namespaces)?);
+                let bce =
+                    Box::new(ast_to_class_expression(filler, build, namespaces, known_datatypes)?);
                 Ok(ClassExpression::ObjectExactCardinality {
                     n: *n,
                     ope: ObjectPropertyExpression::ObjectProperty(build.object_property(prop_iri)),
@@ -356,7 +375,7 @@ fn ast_to_class_expression(
             }
         }
         ManchesterAst::Not(inner) => {
-            let ce = ast_to_class_expression(inner, build, namespaces)?;
+            let ce = ast_to_class_expression(inner, build, namespaces, known_datatypes)?;
             Ok(ClassExpression::ObjectComplementOf(Box::new(ce)))
         }
         ManchesterAst::HasValue { property, individual } => {
@@ -390,8 +409,9 @@ fn ast_to_class_expression(
 
 fn filler_as_data_range(
     filler: &ManchesterAst,
-    build: &Build<RcStr>,
+    _build: &Build<RcStr>,
     namespaces: &BTreeMap<String, String>,
+    known_datatypes: &std::collections::BTreeSet<String>,
 ) -> Result<Option<DataRange<RcStr>>> {
     match filler {
         ManchesterAst::Class(term) => {
@@ -399,13 +419,12 @@ fn filler_as_data_range(
             // (avoid treating class fillers such as owl:Thing as DataRanges).
             let base = term.split('[').next().unwrap_or(term).trim();
             let iri = resolve_term_iri(base, namespaces)?;
-            if !looks_like_datatype_iri(&iri, base) {
+            if !looks_like_datatype_iri(&iri, base, known_datatypes) {
                 return Ok(None);
             }
-            match parse_data_range(term, namespaces) {
-                Ok(dr) => Ok(Some(dr)),
-                Err(_) => Ok(Some(DataRange::Datatype(build.datatype(iri)))),
-            }
+            // Facet/parse failures must surface (#335) — do not silently degrade to bare Datatype.
+            let dr = parse_data_range(term, namespaces)?;
+            Ok(Some(dr))
         }
         _ => Ok(None),
     }
@@ -758,7 +777,11 @@ fn iri_to_curie_or_full(iri: &str, namespaces: &BTreeMap<String, String>) -> Str
     format!("<{iri}>")
 }
 
-fn looks_like_datatype_iri(iri: &str, original: &str) -> bool {
+fn looks_like_datatype_iri(
+    iri: &str,
+    original: &str,
+    known_datatypes: &std::collections::BTreeSet<String>,
+) -> bool {
     iri.starts_with("http://www.w3.org/2001/XMLSchema#")
         || iri.starts_with("http://www.w3.org/1999/02/22-rdf-syntax-ns#")
             && (iri.ends_with("PlainLiteral")
@@ -769,6 +792,7 @@ fn looks_like_datatype_iri(iri: &str, original: &str) -> bool {
         || iri == "http://www.w3.org/2002/07/owl#real"
         || iri == "http://www.w3.org/2002/07/owl#rational"
         || original.starts_with("xsd:")
+        || known_datatypes.contains(iri)
 }
 
 fn resolve_term_iri(term: &str, namespaces: &BTreeMap<String, String>) -> Result<String> {
@@ -1682,6 +1706,18 @@ mod tests {
         ]);
         let out = parse_class_expression("ex:age some xsd:integer", &ns).expect("data some");
         assert!(matches!(out.expression, ClassExpression::DataSomeValuesFrom { .. }));
+    }
+
+    #[test]
+    fn parse_data_some_with_known_custom_datatype() {
+        // #335
+        let ns = BTreeMap::from([("ex".to_string(), "http://example.org/".to_string())]);
+        let known = std::collections::BTreeSet::from(["http://example.org/SSN".to_string()]);
+        let out = parse_class_expression_with_datatypes("ex:hasSSN some ex:SSN", &ns, &known)
+            .expect("custom datatype filler");
+        assert!(matches!(out.expression, ClassExpression::DataSomeValuesFrom { .. }));
+        let as_class = parse_class_expression("ex:hasSSN some ex:SSN", &ns).expect("no known");
+        assert!(matches!(as_class.expression, ClassExpression::ObjectSomeValuesFrom { .. }));
     }
 
     #[test]

@@ -62,7 +62,12 @@ pub fn remap_entity_iri_in_xml_text(
             serialize_rdf_xml(&ont)
         }
         "owlxml" | "owx" => {
-            let (mut ont, mut ns) = load_owl_xml_ontology(source)?;
+            let (mut ont, mut ns, incomplete) = load_owl_xml_ontology(source)?;
+            if incomplete {
+                return Err(OwlError::LoadFailed(
+                    "OWL/XML parse incomplete; refusing IRI remap write-back".into(),
+                ));
+            }
             for (k, v) in namespaces {
                 ns.entry(k.clone()).or_insert_with(|| v.clone());
             }

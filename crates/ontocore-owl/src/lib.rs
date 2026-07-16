@@ -30,8 +30,8 @@ pub use load::{load_from_quads, load_owx_text, load_turtle_text, supports_horned
 pub use manchester::{
     class_expression_to_manchester, class_expression_to_turtle_fragment,
     class_expression_to_turtle_value, data_range_to_manchester, data_range_to_turtle_term,
-    expression_tree_json, parse_class_expression, parse_data_range, ManchesterDiagnostic,
-    ManchesterParseOutput,
+    expression_tree_json, parse_class_expression, parse_class_expression_with_datatypes,
+    parse_data_range, ManchesterDiagnostic, ManchesterParseOutput,
 };
 pub use mutate::{apply_patches_to_ontology, apply_patches_to_ontology_with_ns};
 pub use patch::{

@@ -2359,7 +2359,7 @@ fn remove_axiom_annotation(
                     && block.contains(annotated_property)
                     && block.contains(&target)
                     && block.contains(&ann_pred)
-                    && block.contains(lexical)
+                    && axiom_block_has_exact_annotation_value(block, &ann_pred, lexical)
                 {
                     let mut remove_end = end;
                     let after = text[end..].trim_start();
@@ -2385,6 +2385,31 @@ fn remove_axiom_annotation(
         i = advance_turtle_scan(bytes, i, &mut state);
     }
     Err(OwlError::ManchesterInvalid("no matching axiom annotation".to_string()))
+}
+
+fn axiom_block_has_exact_annotation_value(block: &str, ann_pred: &str, lexical: &str) -> bool {
+    // `find_predicate_token` skips nested `[...]` content; strip the outer blank-node brackets.
+    let inner =
+        block.strip_prefix('[').and_then(|s| s.trim_end().strip_suffix(']')).unwrap_or(block);
+    let norm_value = normalize_ws(lexical);
+    let mut search_from = 0;
+    while let Some(pred_pos) = find_predicate_token(inner, search_from, ann_pred) {
+        for (obj_start, obj_end) in objects_in_predicate_value(inner, pred_pos, ann_pred) {
+            let obj_text = inner[obj_start..obj_end].trim();
+            if let Some(got) = turtle_literal_lexical_value(obj_text) {
+                if normalize_ws(&got) == norm_value {
+                    return true;
+                }
+            } else {
+                let bare = obj_text.trim().trim_matches(|c| c == '<' || c == '>');
+                if normalize_ws(bare) == norm_value {
+                    return true;
+                }
+            }
+        }
+        search_from = pred_pos + 1;
+    }
+    false
 }
 
 fn remove_predicate_triples(
@@ -4485,5 +4510,55 @@ ex:p3 a owl:ObjectProperty .
         // Full pairwise for 3 properties = 3 triples (p1-p2, p1-p3, p2-p3).
         let count = preview.matches("owl:propertyDisjointWith").count();
         assert_eq!(count, 3, "expected 3 pairwise disjoint triples, got {count}: {preview}");
+    }
+
+    #[test]
+    fn remove_axiom_annotation_exact_value_not_substring() {
+        // #349 — "x" must not delete the "xy" axiom annotation block.
+        let ttl = r#"@prefix ex: <http://example.org/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+ex:A a owl:Class ;
+    rdfs:subClassOf ex:B .
+ex:B a owl:Class .
+[
+    a owl:Axiom ;
+    owl:annotatedSource ex:A ;
+    owl:annotatedProperty rdfs:subClassOf ;
+    owl:annotatedTarget ex:B ;
+    rdfs:comment "xy"
+] .
+[
+    a owl:Axiom ;
+    owl:annotatedSource ex:A ;
+    owl:annotatedProperty rdfs:subClassOf ;
+    owl:annotatedTarget ex:B ;
+    rdfs:comment "x"
+] .
+"#;
+        let ns = BTreeMap::from([
+            ("ex".into(), "http://example.org/".into()),
+            ("owl".into(), "http://www.w3.org/2002/07/owl#".into()),
+            ("rdfs".into(), "http://www.w3.org/2000/01/rdf-schema#".into()),
+            ("rdf".into(), "http://www.w3.org/1999/02/22-rdf-syntax-ns#".into()),
+        ]);
+        let result = apply_patches_to_text(
+            ttl,
+            &[PatchOp::RemoveAxiomAnnotation {
+                axiom_op: "sub_class_of".into(),
+                subject_iri: "http://example.org/A".into(),
+                related_iri: Some("http://example.org/B".into()),
+                predicate: "rdfs:comment".into(),
+                value: "x".into(),
+            }],
+            true,
+            &ns,
+        )
+        .expect("remove exact x");
+        assert!(result.diagnostics.is_empty(), "unexpected diagnostics: {:?}", result.diagnostics);
+        let preview = result.preview_text.expect("preview should change");
+        assert!(preview.contains("\"xy\""), "must keep xy block: {preview}");
+        assert!(!preview.contains("rdfs:comment \"x\""), "must remove exact x: {preview}");
     }
 }

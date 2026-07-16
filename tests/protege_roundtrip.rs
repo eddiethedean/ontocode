@@ -210,7 +210,7 @@ fn protege_roundtrip_owx_edit_parent_reload() {
     .expect("apply parent change to OWL/XML");
 
     let text = std::fs::read_to_string(&path).expect("read");
-    let (ont, _) = ontocore_owl::load_owl_xml_ontology(&text).expect("reload");
+    let (ont, _, _) = ontocore_owl::load_owl_xml_ontology(&text).expect("reload");
     let bridge = ontocore_owl::bridge_ontology(ont, "doc", &text, &ns);
     assert!(bridge.entities.iter().any(|e| e.iri == dept));
     assert!(

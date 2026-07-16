@@ -1593,10 +1593,61 @@ fn remove_iri_list_axiom(
     members: &[String],
     namespaces: &BTreeMap<String, String>,
 ) -> Result<()> {
+    let ns = crate::span::namespaces_for_text(text, namespaces);
+    let want: std::collections::BTreeSet<_> = members.iter().cloned().collect();
+    // Prefer exact serialized order first (common case).
     let terms: Vec<String> =
-        members.iter().map(|p| iri_to_turtle_term(p, namespaces)).collect::<Result<Vec<_>>>()?;
+        members.iter().map(|p| iri_to_turtle_term(p, &ns)).collect::<Result<Vec<_>>>()?;
     let list_obj = format!("( {} )", terms.join(" "));
-    remove_predicate_object_any_statement(text, subject_iri, predicate, &list_obj, namespaces)
+    if remove_predicate_object_any_statement(text, subject_iri, predicate, &list_obj, &ns).is_ok() {
+        return Ok(());
+    }
+    // Fall back to set equality so Inspector reorder / reverse property lists match (#351).
+    let short = short_name_from_iri(subject_iri);
+    let ranges = all_entity_statement_ranges(text, subject_iri, &short, &ns);
+    if ranges.is_empty() {
+        return Err(OwlError::EntityNotFound(subject_iri.to_string()));
+    }
+    for range in ranges {
+        let block = &text[range.start as usize..range.end as usize];
+        let mut search_from = 0;
+        while let Some(pred_pos) = find_predicate_token(block, search_from, predicate) {
+            for (obj_start, obj_end) in objects_in_predicate_value(block, pred_pos, predicate) {
+                let obj = block[obj_start..obj_end].trim();
+                if let Some(got) = parse_turtle_iri_list(obj, &ns) {
+                    let got_set: std::collections::BTreeSet<_> = got.into_iter().collect();
+                    if got_set == want {
+                        let (remove_start, remove_end) =
+                            extend_removal_span(block, pred_pos, predicate, obj_start, obj_end);
+                        let mut new_block = String::new();
+                        new_block.push_str(&block[..remove_start]);
+                        new_block.push_str(&block[remove_end..]);
+                        let cleaned = cleanup_block_separators(&new_block);
+                        replace_range(text, range, &cleaned);
+                        return Ok(());
+                    }
+                }
+            }
+            search_from = pred_pos + 1;
+        }
+    }
+    Err(OwlError::ManchesterInvalid(format!("no matching {predicate} axiom")))
+}
+
+fn parse_turtle_iri_list(
+    object: &str,
+    namespaces: &BTreeMap<String, String>,
+) -> Option<Vec<String>> {
+    let trimmed = object.trim();
+    if !trimmed.starts_with('(') || !trimmed.ends_with(')') {
+        return None;
+    }
+    let inner = &trimmed[1..trimmed.len() - 1];
+    let mut members = Vec::new();
+    for term in tokenize_turtle_terms(inner) {
+        members.push(expand_turtle_term_to_iri(&term, namespaces)?);
+    }
+    Some(members)
 }
 
 fn add_pairwise_property_axioms(
@@ -1610,9 +1661,12 @@ fn add_pairwise_property_axioms(
             "{predicate} requires at least two properties"
         )));
     }
-    for window in properties.windows(2) {
-        let other = iri_to_turtle_term(&window[1], namespaces)?;
-        add_object_triple(text, &window[0], predicate, &other, namespaces)?;
+    // Full pairwise closure (not windows(2)) — required for n-ary Disjoint*Properties (#394).
+    for i in 0..properties.len() {
+        for j in (i + 1)..properties.len() {
+            let other = iri_to_turtle_term(&properties[j], namespaces)?;
+            add_object_triple(text, &properties[i], predicate, &other, namespaces)?;
+        }
     }
     Ok(())
 }
@@ -1628,10 +1682,38 @@ fn remove_pairwise_property_axioms(
             "{predicate} requires at least two properties"
         )));
     }
-    for window in properties.windows(2) {
-        remove_predicate_iri_object(text, &window[0], predicate, &window[1], namespaces)?;
+    let mut changed = false;
+    for i in 0..properties.len() {
+        for j in (i + 1)..properties.len() {
+            if remove_predicate_iri_object(
+                text,
+                &properties[i],
+                predicate,
+                &properties[j],
+                namespaces,
+            )
+            .is_ok()
+            {
+                changed = true;
+            }
+            if remove_predicate_iri_object(
+                text,
+                &properties[j],
+                predicate,
+                &properties[i],
+                namespaces,
+            )
+            .is_ok()
+            {
+                changed = true;
+            }
+        }
     }
-    Ok(())
+    if changed {
+        Ok(())
+    } else {
+        Err(OwlError::ManchesterInvalid(format!("no matching {predicate} axiom")))
+    }
 }
 
 fn add_pairwise_individual_axioms(
@@ -4343,5 +4425,65 @@ ex:B a owl:Class .
         assert!(preview.contains("owl:Axiom"));
         assert!(preview.contains("owl:annotatedSource") && preview.contains("owl:annotatedTarget"));
         assert!(preview.contains("explained"));
+    }
+
+    #[test]
+    fn remove_has_key_matches_reversed_property_list() {
+        // #351 — HasKey property order is a set for authoring UX.
+        let ttl = r#"@prefix ex: <http://example.org/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+ex:Person a owl:Class ;
+    owl:hasKey ( ex:p2 ex:p1 ) .
+ex:p1 a owl:ObjectProperty .
+ex:p2 a owl:ObjectProperty .
+"#;
+        let ns = BTreeMap::from([
+            ("ex".into(), "http://example.org/".into()),
+            ("owl".into(), "http://www.w3.org/2002/07/owl#".into()),
+        ]);
+        let removed = apply_patches_to_text(
+            ttl,
+            &[PatchOp::RemoveHasKey {
+                class_iri: "http://example.org/Person".into(),
+                properties: vec!["http://example.org/p1".into(), "http://example.org/p2".into()],
+            }],
+            true,
+            &ns,
+        )
+        .expect("remove reversed hasKey");
+        let out = removed.preview_text.expect("preview");
+        assert!(!out.contains("owl:hasKey"), "expected hasKey removed: {out}");
+    }
+
+    #[test]
+    fn add_disjoint_object_properties_emits_full_pairwise_closure() {
+        // #394 — n-ary DisjointObjectProperties needs all pairs, not windows(2).
+        let ttl = r#"@prefix ex: <http://example.org/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+ex:p1 a owl:ObjectProperty .
+ex:p2 a owl:ObjectProperty .
+ex:p3 a owl:ObjectProperty .
+"#;
+        let ns = BTreeMap::from([
+            ("ex".into(), "http://example.org/".into()),
+            ("owl".into(), "http://www.w3.org/2002/07/owl#".into()),
+        ]);
+        let result = apply_patches_to_text(
+            ttl,
+            &[PatchOp::AddDisjointObjectProperties {
+                properties: vec![
+                    "http://example.org/p1".into(),
+                    "http://example.org/p2".into(),
+                    "http://example.org/p3".into(),
+                ],
+            }],
+            true,
+            &ns,
+        )
+        .expect("add disjoint props");
+        let preview = result.preview_text.expect("preview");
+        // Full pairwise for 3 properties = 3 triples (p1-p2, p1-p3, p2-p3).
+        let count = preview.matches("owl:propertyDisjointWith").count();
+        assert_eq!(count, 3, "expected 3 pairwise disjoint triples, got {count}: {preview}");
     }
 }

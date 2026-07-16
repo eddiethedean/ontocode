@@ -178,9 +178,17 @@ fn apply_one(
             let vpe = properties
                 .iter()
                 .map(|p| {
-                    horned_owl::model::PropertyExpression::ObjectPropertyExpression(
-                        ObjectPropertyExpression::ObjectProperty(build.object_property(p.as_str())),
-                    )
+                    if is_declared_data_property(ont, p) {
+                        horned_owl::model::PropertyExpression::DataProperty(
+                            build.data_property(p.as_str()),
+                        )
+                    } else {
+                        horned_owl::model::PropertyExpression::ObjectPropertyExpression(
+                            ObjectPropertyExpression::ObjectProperty(
+                                build.object_property(p.as_str()),
+                            ),
+                        )
+                    }
                 })
                 .collect();
             ont.insert(Component::HasKey(horned_owl::model::HasKey {
@@ -216,13 +224,7 @@ fn apply_one(
             Ok(())
         }
         PatchOp::RemoveInverseObjectProperties { property_iri, inverse_iri } => {
-            let target = AnnotatedComponent::from(Component::InverseObjectProperties(
-                horned_owl::model::InverseObjectProperties(
-                    build.object_property(property_iri.as_str()),
-                    build.object_property(inverse_iri.as_str()),
-                ),
-            ));
-            let _ = ont.take(&target);
+            remove_inverse_object_properties(ont, property_iri, inverse_iri);
             Ok(())
         }
         PatchOp::AddEquivalentObjectProperties { properties } => {
@@ -779,45 +781,38 @@ fn remove_annotation_assertions(
     predicate: &str,
     value: Option<&str>,
 ) -> usize {
-    let to_remove: Vec<_> = ont
-        .i()
-        .annotation_assertion()
-        .filter(|ax| {
-            let subj = match &ax.subject {
-                AnnotationSubject::IRI(iri) => iri.to_string(),
-                _ => return false,
-            };
-            if subj != entity_iri {
-                return false;
-            }
-            if ax.ann.ap.to_string() != predicate {
-                return false;
-            }
-            if let Some(v) = value {
-                match &ax.ann.av {
-                    AnnotationValue::Literal(Literal::Simple { literal }) => {
-                        literal == v || json_literals_equivalent(literal, v)
-                    }
-                    AnnotationValue::Literal(Literal::Language { literal, .. }) => {
-                        literal == v || json_literals_equivalent(literal, v)
-                    }
-                    AnnotationValue::Literal(Literal::Datatype { literal, .. }) => {
-                        literal == v || json_literals_equivalent(literal, v)
-                    }
-                    _ => false,
+    let taken = take_all_matching(ont, ComponentKind::AnnotationAssertion, |c| {
+        let Component::AnnotationAssertion(ax) = c else {
+            return false;
+        };
+        let subj = match &ax.subject {
+            AnnotationSubject::IRI(iri) => iri.to_string(),
+            _ => return false,
+        };
+        if subj != entity_iri {
+            return false;
+        }
+        if ax.ann.ap.to_string() != predicate {
+            return false;
+        }
+        if let Some(v) = value {
+            match &ax.ann.av {
+                AnnotationValue::Literal(Literal::Simple { literal }) => {
+                    literal == v || json_literals_equivalent(literal, v)
                 }
-            } else {
-                true
+                AnnotationValue::Literal(Literal::Language { literal, .. }) => {
+                    literal == v || json_literals_equivalent(literal, v)
+                }
+                AnnotationValue::Literal(Literal::Datatype { literal, .. }) => {
+                    literal == v || json_literals_equivalent(literal, v)
+                }
+                _ => false,
             }
-        })
-        .cloned()
-        .collect();
-    let count = to_remove.len();
-    for ax in to_remove {
-        let cmp = AnnotatedComponent::from(Component::AnnotationAssertion(ax));
-        let _ = ont.take(&cmp);
-    }
-    count
+        } else {
+            true
+        }
+    });
+    taken.len()
 }
 
 fn json_literals_equivalent(a: &str, b: &str) -> bool {
@@ -830,27 +825,47 @@ fn json_literals_equivalent(a: &str, b: &str) -> bool {
     }
 }
 
+/// Take components whose logical axiom matches `pred`, including axiom annotations (#382).
+fn take_all_matching(
+    ont: &mut ComponentMappedOntology<RcStr, RcAnnotatedComponent>,
+    kind: ComponentKind,
+    mut pred: impl FnMut(&Component<RcStr>) -> bool,
+) -> Vec<AnnotatedComponent<RcStr>> {
+    let targets: Vec<_> =
+        ont.i().component_for_kind(kind).filter(|ac| pred(&ac.component)).cloned().collect();
+    targets.into_iter().filter_map(|ac| ont.take(&ac)).collect()
+}
+
+fn iri_set(iris: &[String]) -> std::collections::BTreeSet<&str> {
+    iris.iter().map(String::as_str).collect()
+}
+
+fn property_expr_iri(pe: &horned_owl::model::PropertyExpression<RcStr>) -> Option<String> {
+    match pe {
+        horned_owl::model::PropertyExpression::ObjectPropertyExpression(
+            ObjectPropertyExpression::ObjectProperty(op),
+        ) => Some(op.to_string()),
+        horned_owl::model::PropertyExpression::DataProperty(dp) => Some(dp.to_string()),
+        _ => None,
+    }
+}
+
 fn remove_subclass_of(
     ont: &mut ComponentMappedOntology<RcStr, RcAnnotatedComponent>,
     entity_iri: &str,
     parent_iri: &str,
 ) {
-    let to_remove: Vec<_> = ont
-        .i()
-        .sub_class_of()
-        .filter(|ax| {
-            matches!(&ax.sub, ClassExpression::Class(Class(iri)) if iri.to_string() == entity_iri)
-                && matches!(
-                    &ax.sup,
-                    ClassExpression::Class(Class(iri)) if iri.to_string() == parent_iri
-                )
-        })
-        .cloned()
-        .collect();
-    for ax in to_remove {
-        let cmp = AnnotatedComponent::from(Component::SubClassOf(ax));
-        let _ = ont.take(&cmp);
-    }
+    let _ = take_all_matching(ont, ComponentKind::SubClassOf, |c| {
+        matches!(
+            c,
+            Component::SubClassOf(ax)
+                if matches!(&ax.sub, ClassExpression::Class(Class(iri)) if iri.to_string() == entity_iri)
+                    && matches!(
+                        &ax.sup,
+                        ClassExpression::Class(Class(iri)) if iri.to_string() == parent_iri
+                    )
+        )
+    });
 }
 
 fn remove_class_assertion(
@@ -858,21 +873,17 @@ fn remove_class_assertion(
     entity_iri: &str,
     class_iri: &str,
 ) {
-    let to_remove: Vec<_> = ont
-        .i()
-        .class_assertion()
-        .filter(|ax| {
-            ax.i.to_string() == entity_iri
-                && matches!(
-                    &ax.ce,
-                    ClassExpression::Class(Class(iri)) if iri.to_string() == class_iri
-                )
-        })
-        .cloned()
-        .collect();
-    for ax in to_remove {
-        let _ = ont.take(&AnnotatedComponent::from(Component::ClassAssertion(ax)));
-    }
+    let _ = take_all_matching(ont, ComponentKind::ClassAssertion, |c| {
+        matches!(
+            c,
+            Component::ClassAssertion(ax)
+                if ax.i.to_string() == entity_iri
+                    && matches!(
+                        &ax.ce,
+                        ClassExpression::Class(Class(iri)) if iri.to_string() == class_iri
+                    )
+        )
+    });
 }
 
 fn remove_has_key(
@@ -880,29 +891,21 @@ fn remove_has_key(
     class_iri: &str,
     properties: &[String],
 ) {
-    let to_remove: Vec<_> = ont
-        .i()
-        .has_key()
-        .filter(|ax| {
-            matches!(
-                &ax.ce,
-                ClassExpression::Class(Class(iri)) if iri.to_string() == class_iri
-            ) && ax.vpe.len() == properties.len()
-                && ax.vpe.iter().zip(properties.iter()).all(|(pe, want)| match pe {
-                    horned_owl::model::PropertyExpression::ObjectPropertyExpression(
-                        ObjectPropertyExpression::ObjectProperty(op),
-                    ) => op.to_string() == *want,
-                    horned_owl::model::PropertyExpression::DataProperty(dp) => {
-                        dp.to_string() == *want
-                    }
-                    _ => false,
-                })
-        })
-        .cloned()
-        .collect();
-    for ax in to_remove {
-        let _ = ont.take(&AnnotatedComponent::from(Component::HasKey(ax)));
-    }
+    let want = iri_set(properties);
+    let _ = take_all_matching(ont, ComponentKind::HasKey, |c| {
+        let Component::HasKey(ax) = c else {
+            return false;
+        };
+        if !matches!(
+            &ax.ce,
+            ClassExpression::Class(Class(iri)) if iri.to_string() == class_iri
+        ) {
+            return false;
+        }
+        let got: std::collections::BTreeSet<String> =
+            ax.vpe.iter().filter_map(property_expr_iri).collect();
+        got.len() == want.len() && want.iter().all(|w| got.iter().any(|g| g == w))
+    });
 }
 
 fn remove_disjoint_union(
@@ -910,95 +913,103 @@ fn remove_disjoint_union(
     class_iri: &str,
     members: &[String],
 ) {
-    let to_remove: Vec<_> = ont
-        .i()
-        .disjoint_union()
-        .filter(|ax| {
-            ax.0.to_string() == class_iri
-                && ax.1.len() == members.len()
-                && ax.1.iter().zip(members.iter()).all(|(ce, want)| {
-                    matches!(ce, ClassExpression::Class(Class(iri)) if iri.to_string() == *want)
+    let want = iri_set(members);
+    let _ = take_all_matching(ont, ComponentKind::DisjointUnion, |c| {
+        let Component::DisjointUnion(ax) = c else {
+            return false;
+        };
+        if ax.0.to_string() != class_iri {
+            return false;
+        }
+        let got: std::collections::BTreeSet<String> =
+            ax.1.iter()
+                .filter_map(|ce| match ce {
+                    ClassExpression::Class(Class(iri)) => Some(iri.to_string()),
+                    _ => None,
                 })
-        })
-        .cloned()
-        .collect();
-    for ax in to_remove {
-        let _ = ont.take(&AnnotatedComponent::from(Component::DisjointUnion(ax)));
-    }
+                .collect();
+        got.len() == want.len() && want.iter().all(|w| got.iter().any(|g| g == w))
+    });
+}
+
+fn remove_inverse_object_properties(
+    ont: &mut ComponentMappedOntology<RcStr, RcAnnotatedComponent>,
+    property_iri: &str,
+    inverse_iri: &str,
+) {
+    let _ = take_all_matching(ont, ComponentKind::InverseObjectProperties, |c| {
+        matches!(
+            c,
+            Component::InverseObjectProperties(inv)
+                if (inv.0.to_string() == property_iri && inv.1.to_string() == inverse_iri)
+                    || (inv.0.to_string() == inverse_iri && inv.1.to_string() == property_iri)
+        )
+    });
 }
 
 fn remove_equivalent_object_properties(
     ont: &mut ComponentMappedOntology<RcStr, RcAnnotatedComponent>,
     properties: &[String],
 ) {
-    let to_remove: Vec<_> = ont
-        .i()
-        .equivalent_object_properties()
-        .filter(|ax| property_exprs_match(&ax.0, properties))
-        .cloned()
-        .collect();
-    for ax in to_remove {
-        let _ = ont.take(&AnnotatedComponent::from(Component::EquivalentObjectProperties(ax)));
-    }
+    let _ = take_all_matching(
+        ont,
+        ComponentKind::EquivalentObjectProperties,
+        |c| matches!(c, Component::EquivalentObjectProperties(ax) if property_exprs_match(&ax.0, properties)),
+    );
 }
 
 fn remove_disjoint_object_properties(
     ont: &mut ComponentMappedOntology<RcStr, RcAnnotatedComponent>,
     properties: &[String],
 ) {
-    let to_remove: Vec<_> = ont
-        .i()
-        .disjoint_object_properties()
-        .filter(|ax| property_exprs_match(&ax.0, properties))
-        .cloned()
-        .collect();
-    for ax in to_remove {
-        let _ = ont.take(&AnnotatedComponent::from(Component::DisjointObjectProperties(ax)));
-    }
+    let _ = take_all_matching(
+        ont,
+        ComponentKind::DisjointObjectProperties,
+        |c| matches!(c, Component::DisjointObjectProperties(ax) if property_exprs_match(&ax.0, properties)),
+    );
 }
 
 fn property_exprs_match(ops: &[ObjectPropertyExpression<RcStr>], properties: &[String]) -> bool {
-    ops.len() == properties.len()
-        && ops.iter().zip(properties.iter()).all(|(ope, want)| match ope {
-            ObjectPropertyExpression::ObjectProperty(op) => op.to_string() == *want,
-            _ => false,
+    let want = iri_set(properties);
+    let got: std::collections::BTreeSet<String> = ops
+        .iter()
+        .filter_map(|ope| match ope {
+            ObjectPropertyExpression::ObjectProperty(op) => Some(op.to_string()),
+            _ => None,
         })
+        .collect();
+    got.len() == want.len() && want.iter().all(|w| got.iter().any(|g| g == w))
+}
+
+fn data_property_iris_match(
+    props: &[horned_owl::model::DataProperty<RcStr>],
+    properties: &[String],
+) -> bool {
+    let want = iri_set(properties);
+    let got: std::collections::BTreeSet<String> = props.iter().map(|dp| dp.to_string()).collect();
+    got.len() == want.len() && want.iter().all(|w| got.iter().any(|g| g == w))
 }
 
 fn remove_equivalent_data_properties(
     ont: &mut ComponentMappedOntology<RcStr, RcAnnotatedComponent>,
     properties: &[String],
 ) {
-    let to_remove: Vec<_> = ont
-        .i()
-        .equivalent_data_properties()
-        .filter(|ax| {
-            ax.0.len() == properties.len()
-                && ax.0.iter().zip(properties.iter()).all(|(dp, want)| dp.to_string() == *want)
-        })
-        .cloned()
-        .collect();
-    for ax in to_remove {
-        let _ = ont.take(&AnnotatedComponent::from(Component::EquivalentDataProperties(ax)));
-    }
+    let _ = take_all_matching(
+        ont,
+        ComponentKind::EquivalentDataProperties,
+        |c| matches!(c, Component::EquivalentDataProperties(ax) if data_property_iris_match(&ax.0, properties)),
+    );
 }
 
 fn remove_disjoint_data_properties(
     ont: &mut ComponentMappedOntology<RcStr, RcAnnotatedComponent>,
     properties: &[String],
 ) {
-    let to_remove: Vec<_> = ont
-        .i()
-        .disjoint_data_properties()
-        .filter(|ax| {
-            ax.0.len() == properties.len()
-                && ax.0.iter().zip(properties.iter()).all(|(dp, want)| dp.to_string() == *want)
-        })
-        .cloned()
-        .collect();
-    for ax in to_remove {
-        let _ = ont.take(&AnnotatedComponent::from(Component::DisjointDataProperties(ax)));
-    }
+    let _ = take_all_matching(
+        ont,
+        ComponentKind::DisjointDataProperties,
+        |c| matches!(c, Component::DisjointDataProperties(ax) if data_property_iris_match(&ax.0, properties)),
+    );
 }
 
 fn remove_sub_object_property_of(
@@ -1006,25 +1017,21 @@ fn remove_sub_object_property_of(
     property_iri: &str,
     parent_iri: &str,
 ) {
-    let to_remove: Vec<_> = ont
-        .i()
-        .sub_object_property_of()
-        .filter(|ax| {
-            matches!(
-                &ax.sub,
-                horned_owl::model::SubObjectPropertyExpression::ObjectPropertyExpression(
-                    ObjectPropertyExpression::ObjectProperty(op)
-                ) if op.to_string() == property_iri
-            ) && matches!(
-                &ax.sup,
-                ObjectPropertyExpression::ObjectProperty(op) if op.to_string() == parent_iri
-            )
-        })
-        .cloned()
-        .collect();
-    for ax in to_remove {
-        let _ = ont.take(&AnnotatedComponent::from(Component::SubObjectPropertyOf(ax)));
-    }
+    let _ = take_all_matching(ont, ComponentKind::SubObjectPropertyOf, |c| {
+        matches!(
+            c,
+            Component::SubObjectPropertyOf(ax)
+                if matches!(
+                    &ax.sub,
+                    horned_owl::model::SubObjectPropertyExpression::ObjectPropertyExpression(
+                        ObjectPropertyExpression::ObjectProperty(op)
+                    ) if op.to_string() == property_iri
+                ) && matches!(
+                    &ax.sup,
+                    ObjectPropertyExpression::ObjectProperty(op) if op.to_string() == parent_iri
+                )
+        )
+    });
 }
 
 fn remove_sub_data_property_of(
@@ -1032,15 +1039,13 @@ fn remove_sub_data_property_of(
     property_iri: &str,
     parent_iri: &str,
 ) {
-    let to_remove: Vec<_> = ont
-        .i()
-        .sub_data_property_of()
-        .filter(|ax| ax.sub.to_string() == property_iri && ax.sup.to_string() == parent_iri)
-        .cloned()
-        .collect();
-    for ax in to_remove {
-        let _ = ont.take(&AnnotatedComponent::from(Component::SubDataPropertyOf(ax)));
-    }
+    let _ = take_all_matching(ont, ComponentKind::SubDataPropertyOf, |c| {
+        matches!(
+            c,
+            Component::SubDataPropertyOf(ax)
+                if ax.sub.to_string() == property_iri && ax.sup.to_string() == parent_iri
+        )
+    });
 }
 
 fn remove_negative_object_property_assertion(
@@ -1049,22 +1054,18 @@ fn remove_negative_object_property_assertion(
     property_iri: &str,
     target_iri: &str,
 ) {
-    let to_remove: Vec<_> = ont
-        .i()
-        .negative_object_property_assertion()
-        .filter(|ax| {
-            ax.from.to_string() == entity_iri
-                && ax.to.to_string() == target_iri
-                && matches!(
-                    &ax.ope,
-                    ObjectPropertyExpression::ObjectProperty(op) if op.to_string() == property_iri
-                )
-        })
-        .cloned()
-        .collect();
-    for ax in to_remove {
-        let _ = ont.take(&AnnotatedComponent::from(Component::NegativeObjectPropertyAssertion(ax)));
-    }
+    let _ = take_all_matching(ont, ComponentKind::NegativeObjectPropertyAssertion, |c| {
+        matches!(
+            c,
+            Component::NegativeObjectPropertyAssertion(ax)
+                if ax.from.to_string() == entity_iri
+                    && ax.to.to_string() == target_iri
+                    && matches!(
+                        &ax.ope,
+                        ObjectPropertyExpression::ObjectProperty(op) if op.to_string() == property_iri
+                    )
+        )
+    });
 }
 
 fn remove_negative_data_property_assertion(
@@ -1073,40 +1074,47 @@ fn remove_negative_data_property_assertion(
     property_iri: &str,
     value: &str,
 ) {
-    let to_remove: Vec<_> = ont
-        .i()
-        .negative_data_property_assertion()
-        .filter(|ax| {
-            ax.from.to_string() == entity_iri
-                && ax.dp.to_string() == property_iri
-                && match &ax.to {
-                    Literal::Simple { literal } => literal == value,
-                    Literal::Language { literal, .. } => literal == value,
-                    Literal::Datatype { literal, .. } => literal == value,
-                }
-        })
-        .cloned()
-        .collect();
-    for ax in to_remove {
-        let _ = ont.take(&AnnotatedComponent::from(Component::NegativeDataPropertyAssertion(ax)));
-    }
+    let _ = take_all_matching(ont, ComponentKind::NegativeDataPropertyAssertion, |c| {
+        matches!(
+            c,
+            Component::NegativeDataPropertyAssertion(ax)
+                if ax.from.to_string() == entity_iri
+                    && ax.dp.to_string() == property_iri
+                    && match &ax.to {
+                        Literal::Simple { literal } => literal == value,
+                        Literal::Language { literal, .. } => literal == value,
+                        Literal::Datatype { literal, .. } => literal == value,
+                    }
+        )
+    });
 }
 
 fn remove_same_individual(
     ont: &mut ComponentMappedOntology<RcStr, RcAnnotatedComponent>,
     individuals: &[String],
 ) {
-    let to_remove: Vec<_> = ont
-        .i()
-        .same_individual()
-        .filter(|ax| {
-            ax.0.len() == individuals.len()
-                && ax.0.iter().zip(individuals.iter()).all(|(i, want)| i.to_string() == *want)
-        })
-        .cloned()
-        .collect();
-    for ax in to_remove {
-        let _ = ont.take(&AnnotatedComponent::from(Component::SameIndividual(ax)));
+    let want = iri_set(individuals);
+    let taken = take_all_matching(ont, ComponentKind::SameIndividual, |c| {
+        let Component::SameIndividual(ax) = c else {
+            return false;
+        };
+        let members: std::collections::BTreeSet<String> =
+            ax.0.iter().map(|i| i.to_string()).collect();
+        want.iter().all(|w| members.iter().any(|m| m == w))
+    });
+    for ac in taken {
+        let Component::SameIndividual(ax) = ac.component else {
+            continue;
+        };
+        let remaining: Vec<_> =
+            ax.0.iter().filter(|i| !want.contains(i.to_string().as_str())).cloned().collect();
+        if remaining.len() >= 2 {
+            let mut rewritten = AnnotatedComponent::from(Component::SameIndividual(
+                horned_owl::model::SameIndividual(remaining),
+            ));
+            rewritten.ann = ac.ann;
+            ont.insert(rewritten);
+        }
     }
 }
 
@@ -1114,25 +1122,27 @@ fn remove_different_individuals(
     ont: &mut ComponentMappedOntology<RcStr, RcAnnotatedComponent>,
     individuals: &[String],
 ) {
-    let want: std::collections::BTreeSet<&str> = individuals.iter().map(String::as_str).collect();
-    let candidates: Vec<_> = ont
-        .i()
-        .different_individuals()
-        .filter(|ax| {
-            let members: std::collections::BTreeSet<String> =
-                ax.0.iter().map(|i| i.to_string()).collect();
-            want.iter().all(|w| members.iter().any(|m| m == w))
-        })
-        .cloned()
-        .collect();
-    for ax in candidates {
+    let want = iri_set(individuals);
+    let taken = take_all_matching(ont, ComponentKind::DifferentIndividuals, |c| {
+        let Component::DifferentIndividuals(ax) = c else {
+            return false;
+        };
+        let members: std::collections::BTreeSet<String> =
+            ax.0.iter().map(|i| i.to_string()).collect();
+        want.iter().all(|w| members.iter().any(|m| m == w))
+    });
+    for ac in taken {
+        let Component::DifferentIndividuals(ax) = ac.component else {
+            continue;
+        };
         let remaining: Vec<_> =
             ax.0.iter().filter(|i| !want.contains(i.to_string().as_str())).cloned().collect();
-        let _ = ont.take(&AnnotatedComponent::from(Component::DifferentIndividuals(ax)));
         if remaining.len() >= 2 {
-            ont.insert(Component::DifferentIndividuals(horned_owl::model::DifferentIndividuals(
-                remaining,
-            )));
+            let mut rewritten = AnnotatedComponent::from(Component::DifferentIndividuals(
+                horned_owl::model::DifferentIndividuals(remaining),
+            ));
+            rewritten.ann = ac.ann;
+            ont.insert(rewritten);
         }
     }
 }
@@ -1403,96 +1413,66 @@ fn remove_characteristic(
 ) {
     match kind {
         CharacteristicKind::Functional => {
-            let ops: Vec<_> = ont
-                .i()
-                .functional_object_property()
-                .filter(|ax| ope_mentions(&ax.0, entity_iri))
-                .cloned()
-                .collect();
-            for ax in ops {
-                let _ =
-                    ont.take(&AnnotatedComponent::from(Component::FunctionalObjectProperty(ax)));
-            }
-            let dps: Vec<_> = ont
-                .i()
-                .functional_data_property()
-                .filter(|ax| ax.0.to_string() == entity_iri)
-                .cloned()
-                .collect();
-            for ax in dps {
-                let _ = ont.take(&AnnotatedComponent::from(Component::FunctionalDataProperty(ax)));
-            }
+            let _ = take_all_matching(ont, ComponentKind::FunctionalObjectProperty, |c| {
+                matches!(
+                    c,
+                    Component::FunctionalObjectProperty(ax) if ope_mentions(&ax.0, entity_iri)
+                )
+            });
+            let _ = take_all_matching(ont, ComponentKind::FunctionalDataProperty, |c| {
+                matches!(
+                    c,
+                    Component::FunctionalDataProperty(ax) if ax.0.to_string() == entity_iri
+                )
+            });
         }
         CharacteristicKind::InverseFunctional => {
-            let ops: Vec<_> = ont
-                .i()
-                .inverse_functional_object_property()
-                .filter(|ax| ope_mentions(&ax.0, entity_iri))
-                .cloned()
-                .collect();
-            for ax in ops {
-                let _ = ont.take(&AnnotatedComponent::from(
-                    Component::InverseFunctionalObjectProperty(ax),
-                ));
-            }
+            let _ = take_all_matching(ont, ComponentKind::InverseFunctionalObjectProperty, |c| {
+                matches!(
+                    c,
+                    Component::InverseFunctionalObjectProperty(ax) if ope_mentions(&ax.0, entity_iri)
+                )
+            });
         }
         CharacteristicKind::Transitive => {
-            let ops: Vec<_> = ont
-                .i()
-                .transitive_object_property()
-                .filter(|ax| ope_mentions(&ax.0, entity_iri))
-                .cloned()
-                .collect();
-            for ax in ops {
-                let _ =
-                    ont.take(&AnnotatedComponent::from(Component::TransitiveObjectProperty(ax)));
-            }
+            let _ = take_all_matching(ont, ComponentKind::TransitiveObjectProperty, |c| {
+                matches!(
+                    c,
+                    Component::TransitiveObjectProperty(ax) if ope_mentions(&ax.0, entity_iri)
+                )
+            });
         }
         CharacteristicKind::Symmetric => {
-            let ops: Vec<_> = ont
-                .i()
-                .symmetric_object_property()
-                .filter(|ax| ope_mentions(&ax.0, entity_iri))
-                .cloned()
-                .collect();
-            for ax in ops {
-                let _ = ont.take(&AnnotatedComponent::from(Component::SymmetricObjectProperty(ax)));
-            }
+            let _ = take_all_matching(ont, ComponentKind::SymmetricObjectProperty, |c| {
+                matches!(
+                    c,
+                    Component::SymmetricObjectProperty(ax) if ope_mentions(&ax.0, entity_iri)
+                )
+            });
         }
         CharacteristicKind::Asymmetric => {
-            let ops: Vec<_> = ont
-                .i()
-                .asymmetric_object_property()
-                .filter(|ax| ope_mentions(&ax.0, entity_iri))
-                .cloned()
-                .collect();
-            for ax in ops {
-                let _ =
-                    ont.take(&AnnotatedComponent::from(Component::AsymmetricObjectProperty(ax)));
-            }
+            let _ = take_all_matching(ont, ComponentKind::AsymmetricObjectProperty, |c| {
+                matches!(
+                    c,
+                    Component::AsymmetricObjectProperty(ax) if ope_mentions(&ax.0, entity_iri)
+                )
+            });
         }
         CharacteristicKind::Reflexive => {
-            let ops: Vec<_> = ont
-                .i()
-                .reflexive_object_property()
-                .filter(|ax| ope_mentions(&ax.0, entity_iri))
-                .cloned()
-                .collect();
-            for ax in ops {
-                let _ = ont.take(&AnnotatedComponent::from(Component::ReflexiveObjectProperty(ax)));
-            }
+            let _ = take_all_matching(ont, ComponentKind::ReflexiveObjectProperty, |c| {
+                matches!(
+                    c,
+                    Component::ReflexiveObjectProperty(ax) if ope_mentions(&ax.0, entity_iri)
+                )
+            });
         }
         CharacteristicKind::Irreflexive => {
-            let ops: Vec<_> = ont
-                .i()
-                .irreflexive_object_property()
-                .filter(|ax| ope_mentions(&ax.0, entity_iri))
-                .cloned()
-                .collect();
-            for ax in ops {
-                let _ =
-                    ont.take(&AnnotatedComponent::from(Component::IrreflexiveObjectProperty(ax)));
-            }
+            let _ = take_all_matching(ont, ComponentKind::IrreflexiveObjectProperty, |c| {
+                matches!(
+                    c,
+                    Component::IrreflexiveObjectProperty(ax) if ope_mentions(&ax.0, entity_iri)
+                )
+            });
         }
     }
 }
@@ -1502,23 +1482,23 @@ fn remove_ontology_annotation(
     predicate: &str,
     value: &str,
 ) {
-    let to_remove: Vec<_> = ont
-        .i()
-        .ontology_annotation()
-        .filter(|ax| {
-            ax.0.ap.to_string() == predicate
-                && match &ax.0.av {
-                    AnnotationValue::Literal(Literal::Simple { literal }) => literal == value,
-                    AnnotationValue::Literal(Literal::Language { literal, .. }) => literal == value,
-                    AnnotationValue::Literal(Literal::Datatype { literal, .. }) => literal == value,
-                    _ => false,
-                }
-        })
-        .cloned()
-        .collect();
-    for ax in to_remove {
-        let _ = ont.take(&AnnotatedComponent::from(Component::OntologyAnnotation(ax)));
-    }
+    let _ = take_all_matching(ont, ComponentKind::OntologyAnnotation, |c| {
+        matches!(
+            c,
+            Component::OntologyAnnotation(ax)
+                if ax.0.ap.to_string() == predicate
+                    && match &ax.0.av {
+                        AnnotationValue::Literal(Literal::Simple { literal }) => literal == value,
+                        AnnotationValue::Literal(Literal::Language { literal, .. }) => {
+                            literal == value
+                        }
+                        AnnotationValue::Literal(Literal::Datatype { literal, .. }) => {
+                            literal == value
+                        }
+                        _ => false,
+                    }
+        )
+    });
 }
 
 fn remove_complex_subclass_of(
@@ -1526,18 +1506,14 @@ fn remove_complex_subclass_of(
     entity_iri: &str,
     ce: &ClassExpression<RcStr>,
 ) {
-    let to_remove: Vec<_> = ont
-        .i()
-        .sub_class_of()
-        .filter(|ax| {
-            matches!(&ax.sub, ClassExpression::Class(Class(iri)) if iri.to_string() == entity_iri)
-                && &ax.sup == ce
-        })
-        .cloned()
-        .collect();
-    for ax in to_remove {
-        let _ = ont.take(&AnnotatedComponent::from(Component::SubClassOf(ax)));
-    }
+    let _ = take_all_matching(ont, ComponentKind::SubClassOf, |c| {
+        matches!(
+            c,
+            Component::SubClassOf(ax)
+                if matches!(&ax.sub, ClassExpression::Class(Class(iri)) if iri.to_string() == entity_iri)
+                    && &ax.sup == ce
+        )
+    });
 }
 
 fn remove_equivalent_class(
@@ -1545,34 +1521,27 @@ fn remove_equivalent_class(
     entity_iri: &str,
     ce: &ClassExpression<RcStr>,
 ) {
-    let to_remove: Vec<_> = ont
-        .i()
-        .equivalent_class()
-        .filter(|ax| {
-            ax.0.iter().any(|c| {
-                matches!(c, ClassExpression::Class(Class(iri)) if iri.to_string() == entity_iri)
-            }) && ax.0.iter().any(|c| c == ce)
-        })
-        .cloned()
-        .collect();
-    for ax in to_remove {
-        let _ = ont.take(&AnnotatedComponent::from(Component::EquivalentClasses(ax)));
-    }
+    let _ = take_all_matching(ont, ComponentKind::EquivalentClasses, |c| {
+        matches!(
+            c,
+            Component::EquivalentClasses(ax)
+                if ax.0.iter().any(|c| {
+                    matches!(c, ClassExpression::Class(Class(iri)) if iri.to_string() == entity_iri)
+                }) && ax.0.iter().any(|c| c == ce)
+        )
+    });
 }
 
 fn remove_all_equivalent_classes_for(
     ont: &mut ComponentMappedOntology<RcStr, RcAnnotatedComponent>,
     entity_iri: &str,
 ) {
-    let to_remove: Vec<_> = ont
-        .i()
-        .equivalent_class()
-        .filter(|ax| ax.0.iter().any(|ce| class_expr_mentions(ce, entity_iri)))
-        .cloned()
-        .collect();
-    for ax in to_remove {
-        let _ = ont.take(&AnnotatedComponent::from(Component::EquivalentClasses(ax)));
-    }
+    let _ = take_all_matching(ont, ComponentKind::EquivalentClasses, |c| {
+        matches!(
+            c,
+            Component::EquivalentClasses(ax) if ax.0.iter().any(|ce| class_expr_mentions(ce, entity_iri))
+        )
+    });
 }
 
 fn remove_disjoint_class(
@@ -1580,19 +1549,15 @@ fn remove_disjoint_class(
     entity_iri: &str,
     other_iri: &str,
 ) {
-    let to_remove: Vec<_> = ont
-        .i()
-        .disjoint_class()
-        .filter(|ax| {
-            let has_a = ax.0.iter().any(|ce| class_expr_mentions(ce, entity_iri));
-            let has_b = ax.0.iter().any(|ce| class_expr_mentions(ce, other_iri));
-            has_a && has_b && ax.0.len() == 2
-        })
-        .cloned()
-        .collect();
-    for ax in to_remove {
-        let _ = ont.take(&AnnotatedComponent::from(Component::DisjointClasses(ax)));
-    }
+    let _ = take_all_matching(ont, ComponentKind::DisjointClasses, |c| {
+        matches!(
+            c,
+            Component::DisjointClasses(ax)
+                if ax.0.len() == 2
+                    && ax.0.iter().any(|ce| class_expr_mentions(ce, entity_iri))
+                    && ax.0.iter().any(|ce| class_expr_mentions(ce, other_iri))
+        )
+    });
 }
 
 fn remove_domain(
@@ -1600,24 +1565,20 @@ fn remove_domain(
     entity_iri: &str,
     class_iri: &str,
 ) {
-    let ops: Vec<_> = ont
-        .i()
-        .object_property_domain()
-        .filter(|ax| ope_mentions(&ax.ope, entity_iri) && class_expr_mentions(&ax.ce, class_iri))
-        .cloned()
-        .collect();
-    for ax in ops {
-        let _ = ont.take(&AnnotatedComponent::from(Component::ObjectPropertyDomain(ax)));
-    }
-    let dps: Vec<_> = ont
-        .i()
-        .data_property_domain()
-        .filter(|ax| ax.dp.to_string() == entity_iri && class_expr_mentions(&ax.ce, class_iri))
-        .cloned()
-        .collect();
-    for ax in dps {
-        let _ = ont.take(&AnnotatedComponent::from(Component::DataPropertyDomain(ax)));
-    }
+    let _ = take_all_matching(ont, ComponentKind::ObjectPropertyDomain, |c| {
+        matches!(
+            c,
+            Component::ObjectPropertyDomain(ax)
+                if ope_mentions(&ax.ope, entity_iri) && class_expr_mentions(&ax.ce, class_iri)
+        )
+    });
+    let _ = take_all_matching(ont, ComponentKind::DataPropertyDomain, |c| {
+        matches!(
+            c,
+            Component::DataPropertyDomain(ax)
+                if ax.dp.to_string() == entity_iri && class_expr_mentions(&ax.ce, class_iri)
+        )
+    });
 }
 
 fn remove_range(
@@ -1625,30 +1586,24 @@ fn remove_range(
     entity_iri: &str,
     range_iri: &str,
 ) {
-    let ops: Vec<_> = ont
-        .i()
-        .object_property_range()
-        .filter(|ax| ope_mentions(&ax.ope, entity_iri) && class_expr_mentions(&ax.ce, range_iri))
-        .cloned()
-        .collect();
-    for ax in ops {
-        let _ = ont.take(&AnnotatedComponent::from(Component::ObjectPropertyRange(ax)));
-    }
-    let dps: Vec<_> = ont
-        .i()
-        .data_property_range()
-        .filter(|ax| {
-            ax.dp.to_string() == entity_iri
-                && matches!(
-                    &ax.dr,
-                    DataRange::Datatype(dt) if dt.to_string() == range_iri
-                )
-        })
-        .cloned()
-        .collect();
-    for ax in dps {
-        let _ = ont.take(&AnnotatedComponent::from(Component::DataPropertyRange(ax)));
-    }
+    let _ = take_all_matching(ont, ComponentKind::ObjectPropertyRange, |c| {
+        matches!(
+            c,
+            Component::ObjectPropertyRange(ax)
+                if ope_mentions(&ax.ope, entity_iri) && class_expr_mentions(&ax.ce, range_iri)
+        )
+    });
+    let _ = take_all_matching(ont, ComponentKind::DataPropertyRange, |c| {
+        matches!(
+            c,
+            Component::DataPropertyRange(ax)
+                if ax.dp.to_string() == entity_iri
+                    && matches!(
+                        &ax.dr,
+                        DataRange::Datatype(dt) if dt.to_string() == range_iri
+                    )
+        )
+    });
 }
 
 fn remove_property_chain(
@@ -1656,25 +1611,21 @@ fn remove_property_chain(
     entity_iri: &str,
     properties: &[String],
 ) {
-    let to_remove: Vec<_> = ont
-        .i()
-        .sub_object_property_of()
-        .filter(|ax| {
-            matches!(
-                &ax.sup,
-                ObjectPropertyExpression::ObjectProperty(op) if op.to_string() == entity_iri
-            ) && match &ax.sub {
-                horned_owl::model::SubObjectPropertyExpression::ObjectPropertyChain(chain) => {
-                    property_exprs_match(chain, properties)
+    let _ = take_all_matching(ont, ComponentKind::SubObjectPropertyOf, |c| {
+        matches!(
+            c,
+            Component::SubObjectPropertyOf(ax)
+                if matches!(
+                    &ax.sup,
+                    ObjectPropertyExpression::ObjectProperty(op) if op.to_string() == entity_iri
+                ) && match &ax.sub {
+                    horned_owl::model::SubObjectPropertyExpression::ObjectPropertyChain(chain) => {
+                        property_exprs_match(chain, properties)
+                    }
+                    _ => false,
                 }
-                _ => false,
-            }
-        })
-        .cloned()
-        .collect();
-    for ax in to_remove {
-        let _ = ont.take(&AnnotatedComponent::from(Component::SubObjectPropertyOf(ax)));
-    }
+        )
+    });
 }
 
 fn remove_object_property_assertion(
@@ -1683,22 +1634,18 @@ fn remove_object_property_assertion(
     property_iri: &str,
     target_iri: &str,
 ) {
-    let to_remove: Vec<_> = ont
-        .i()
-        .object_property_assertion()
-        .filter(|ax| {
-            ax.from.to_string() == entity_iri
-                && ax.to.to_string() == target_iri
-                && matches!(
-                    &ax.ope,
-                    ObjectPropertyExpression::ObjectProperty(op) if op.to_string() == property_iri
-                )
-        })
-        .cloned()
-        .collect();
-    for ax in to_remove {
-        let _ = ont.take(&AnnotatedComponent::from(Component::ObjectPropertyAssertion(ax)));
-    }
+    let _ = take_all_matching(ont, ComponentKind::ObjectPropertyAssertion, |c| {
+        matches!(
+            c,
+            Component::ObjectPropertyAssertion(ax)
+                if ax.from.to_string() == entity_iri
+                    && ax.to.to_string() == target_iri
+                    && matches!(
+                        &ax.ope,
+                        ObjectPropertyExpression::ObjectProperty(op) if op.to_string() == property_iri
+                    )
+        )
+    });
 }
 
 fn remove_data_property_assertion(
@@ -1707,23 +1654,19 @@ fn remove_data_property_assertion(
     property_iri: &str,
     value: &str,
 ) {
-    let to_remove: Vec<_> = ont
-        .i()
-        .data_property_assertion()
-        .filter(|ax| {
-            ax.from.to_string() == entity_iri
-                && ax.dp.to_string() == property_iri
-                && match &ax.to {
-                    Literal::Simple { literal } => literal == value,
-                    Literal::Language { literal, .. } => literal == value,
-                    Literal::Datatype { literal, .. } => literal == value,
-                }
-        })
-        .cloned()
-        .collect();
-    for ax in to_remove {
-        let _ = ont.take(&AnnotatedComponent::from(Component::DataPropertyAssertion(ax)));
-    }
+    let _ = take_all_matching(ont, ComponentKind::DataPropertyAssertion, |c| {
+        matches!(
+            c,
+            Component::DataPropertyAssertion(ax)
+                if ax.from.to_string() == entity_iri
+                    && ax.dp.to_string() == property_iri
+                    && match &ax.to {
+                        Literal::Simple { literal } => literal == value,
+                        Literal::Language { literal, .. } => literal == value,
+                        Literal::Datatype { literal, .. } => literal == value,
+                    }
+        )
+    });
 }
 
 fn remove_datatype_definition(
@@ -1731,15 +1674,13 @@ fn remove_datatype_definition(
     datatype_iri: &str,
     range: &DataRange<RcStr>,
 ) {
-    let to_remove: Vec<_> = ont
-        .i()
-        .datatype_definition()
-        .filter(|ax| ax.kind.to_string() == datatype_iri && &ax.range == range)
-        .cloned()
-        .collect();
-    for ax in to_remove {
-        let _ = ont.take(&AnnotatedComponent::from(Component::DatatypeDefinition(ax)));
-    }
+    let _ = take_all_matching(ont, ComponentKind::DatatypeDefinition, |c| {
+        matches!(
+            c,
+            Component::DatatypeDefinition(ax)
+                if ax.kind.to_string() == datatype_iri && &ax.range == range
+        )
+    });
 }
 
 fn annotation_value_matches(av: &AnnotationValue<RcStr>, value: &str) -> bool {
@@ -2194,5 +2135,200 @@ mod tests {
         assert_eq!(ont.i().datatype_definition().count(), 1);
         let def = ont.i().datatype_definition().next().expect("def");
         assert!(matches!(def.range, DataRange::DatatypeRestriction(_, _)));
+    }
+
+    #[test]
+    fn remove_annotated_subclass_of_takes_full_component() {
+        // #382 — Remove* must take AnnotatedComponent including axiom annotations.
+        let source = r#"<?xml version="1.0"?>
+<rdf:RDF xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+    <owl:Ontology rdf:about="http://example.org/ont"/>
+    <owl:Class rdf:about="http://example.org/ont#A"/>
+    <owl:Class rdf:about="http://example.org/ont#B"/>
+</rdf:RDF>"#;
+        let (mut ont, _) = load_rdf_xml_ontology(source).expect("load");
+        apply_patches_to_ontology(
+            &mut ont,
+            &[
+                PatchOp::AddSubClassOf {
+                    entity_iri: "http://example.org/ont#A".into(),
+                    parent_iri: "http://example.org/ont#B".into(),
+                },
+                PatchOp::AddAxiomAnnotation {
+                    axiom_op: "sub_class_of".into(),
+                    subject_iri: "http://example.org/ont#A".into(),
+                    related_iri: Some("http://example.org/ont#B".into()),
+                    predicate: "http://www.w3.org/2000/01/rdf-schema#comment".into(),
+                    value: "annotated parent".into(),
+                },
+            ],
+        )
+        .expect("add annotated subclass");
+        assert_eq!(ont.i().sub_class_of().count(), 1);
+        apply_patches_to_ontology(
+            &mut ont,
+            &[PatchOp::RemoveSubClassOf {
+                entity_iri: "http://example.org/ont#A".into(),
+                parent_iri: "http://example.org/ont#B".into(),
+            }],
+        )
+        .expect("remove annotated subclass");
+        assert_eq!(ont.i().sub_class_of().count(), 0);
+    }
+
+    #[test]
+    fn remove_same_individual_pairwise_from_nary_and_reverse_order() {
+        // #331 — Inspector pairwise remove + reverse-order binary match.
+        let source = r#"<?xml version="1.0"?>
+<rdf:RDF xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+    <owl:Ontology rdf:about="http://example.org/ont"/>
+    <owl:NamedIndividual rdf:about="http://example.org/ont#a"/>
+    <owl:NamedIndividual rdf:about="http://example.org/ont#b"/>
+    <owl:NamedIndividual rdf:about="http://example.org/ont#c"/>
+</rdf:RDF>"#;
+        let (mut ont, _) = load_rdf_xml_ontology(source).expect("load");
+        apply_patches_to_ontology(
+            &mut ont,
+            &[PatchOp::AddSameIndividual {
+                individuals: vec![
+                    "http://example.org/ont#a".into(),
+                    "http://example.org/ont#b".into(),
+                    "http://example.org/ont#c".into(),
+                ],
+            }],
+        )
+        .expect("add n-ary same");
+        assert_eq!(ont.i().same_individual().count(), 1);
+        apply_patches_to_ontology(
+            &mut ont,
+            &[PatchOp::RemoveSameIndividual {
+                individuals: vec![
+                    "http://example.org/ont#b".into(),
+                    "http://example.org/ont#a".into(),
+                ],
+            }],
+        )
+        .expect("pairwise remove");
+        // a,b removed → only c left → axiom dropped
+        assert_eq!(ont.i().same_individual().count(), 0);
+
+        apply_patches_to_ontology(
+            &mut ont,
+            &[PatchOp::AddSameIndividual {
+                individuals: vec![
+                    "http://example.org/ont#a".into(),
+                    "http://example.org/ont#b".into(),
+                ],
+            }],
+        )
+        .expect("add binary");
+        apply_patches_to_ontology(
+            &mut ont,
+            &[PatchOp::RemoveSameIndividual {
+                individuals: vec![
+                    "http://example.org/ont#b".into(),
+                    "http://example.org/ont#a".into(),
+                ],
+            }],
+        )
+        .expect("reverse-order remove");
+        assert_eq!(ont.i().same_individual().count(), 0);
+    }
+
+    #[test]
+    fn remove_inverse_object_properties_is_order_insensitive() {
+        // #334
+        let source = r#"<?xml version="1.0"?>
+<rdf:RDF xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+    <owl:Ontology rdf:about="http://example.org/ont"/>
+    <owl:ObjectProperty rdf:about="http://example.org/ont#hasParent"/>
+    <owl:ObjectProperty rdf:about="http://example.org/ont#hasChild"/>
+</rdf:RDF>"#;
+        let (mut ont, _) = load_rdf_xml_ontology(source).expect("load");
+        apply_patches_to_ontology(
+            &mut ont,
+            &[PatchOp::AddInverseObjectProperties {
+                property_iri: "http://example.org/ont#hasParent".into(),
+                inverse_iri: "http://example.org/ont#hasChild".into(),
+            }],
+        )
+        .expect("add inverse");
+        apply_patches_to_ontology(
+            &mut ont,
+            &[PatchOp::RemoveInverseObjectProperties {
+                property_iri: "http://example.org/ont#hasChild".into(),
+                inverse_iri: "http://example.org/ont#hasParent".into(),
+            }],
+        )
+        .expect("remove reverse card");
+        assert_eq!(ont.i().inverse_object_properties().count(), 0);
+    }
+
+    #[test]
+    fn add_has_key_uses_data_property_when_declared() {
+        // #332
+        let source = r#"<?xml version="1.0"?>
+<rdf:RDF xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+    <owl:Ontology rdf:about="http://example.org/ont"/>
+    <owl:Class rdf:about="http://example.org/ont#Person"/>
+    <owl:DatatypeProperty rdf:about="http://example.org/ont#hasSSN"/>
+</rdf:RDF>"#;
+        let (mut ont, _) = load_rdf_xml_ontology(source).expect("load");
+        apply_patches_to_ontology(
+            &mut ont,
+            &[PatchOp::AddHasKey {
+                class_iri: "http://example.org/ont#Person".into(),
+                properties: vec!["http://example.org/ont#hasSSN".into()],
+            }],
+        )
+        .expect("add has key");
+        let ax = ont.i().has_key().next().expect("has key");
+        assert!(matches!(
+            ax.vpe.as_slice(),
+            [horned_owl::model::PropertyExpression::DataProperty(dp)]
+                if dp.to_string() == "http://example.org/ont#hasSSN"
+        ));
+    }
+
+    #[test]
+    fn remove_has_key_matches_property_order_as_set() {
+        // #351
+        let source = r#"<?xml version="1.0"?>
+<rdf:RDF xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+    <owl:Ontology rdf:about="http://example.org/ont"/>
+    <owl:Class rdf:about="http://example.org/ont#Person"/>
+    <owl:ObjectProperty rdf:about="http://example.org/ont#p1"/>
+    <owl:ObjectProperty rdf:about="http://example.org/ont#p2"/>
+</rdf:RDF>"#;
+        let (mut ont, _) = load_rdf_xml_ontology(source).expect("load");
+        apply_patches_to_ontology(
+            &mut ont,
+            &[PatchOp::AddHasKey {
+                class_iri: "http://example.org/ont#Person".into(),
+                properties: vec![
+                    "http://example.org/ont#p2".into(),
+                    "http://example.org/ont#p1".into(),
+                ],
+            }],
+        )
+        .expect("add");
+        apply_patches_to_ontology(
+            &mut ont,
+            &[PatchOp::RemoveHasKey {
+                class_iri: "http://example.org/ont#Person".into(),
+                properties: vec![
+                    "http://example.org/ont#p1".into(),
+                    "http://example.org/ont#p2".into(),
+                ],
+            }],
+        )
+        .expect("remove reversed");
+        assert_eq!(ont.i().has_key().count(), 0);
     }
 }

@@ -74,9 +74,13 @@ pub fn load_rdf_xml_ontology(
 }
 
 /// Load OWL/XML source into a mutable component-mapped ontology plus prefix map.
+///
+/// The third return value is `true` when an RDF projection round-trip reports incompleteness
+/// (same policy as catalog `load_owx_text` / #383).
 pub fn load_owl_xml_ontology(
     source: &str,
-) -> Result<(ComponentMappedOntology<RcStr, RcAnnotatedComponent>, BTreeMap<String, String>)> {
+) -> Result<(ComponentMappedOntology<RcStr, RcAnnotatedComponent>, BTreeMap<String, String>, bool)>
+{
     use horned_owl::io::owx::reader::read as read_owx;
     use horned_owl::ontology::set::SetOntology;
 
@@ -88,7 +92,11 @@ pub fn load_owl_xml_ontology(
         namespaces.insert(prefix.clone(), iri.clone());
     }
     let mapped: ComponentMappedOntology<RcStr, RcAnnotatedComponent> = set_ont.into();
-    Ok((mapped, namespaces))
+    let incomplete = match serialize_rdf_xml(&mapped) {
+        Ok(rdf) => load_rdf_xml_ontology(&rdf).map(|(_, inc)| inc).unwrap_or(true),
+        Err(_) => true,
+    };
+    Ok((mapped, namespaces, incomplete))
 }
 
 #[cfg(test)]
@@ -110,9 +118,10 @@ mod tests {
     #[test]
     fn owl_xml_roundtrip_preserves_department() {
         let src = include_str!("../../../examples/protege-roundtrip/example.owx");
-        let (ont, ns) = load_owl_xml_ontology(src).expect("load");
+        let (ont, ns, incomplete) = load_owl_xml_ontology(src).expect("load");
+        assert!(!incomplete);
         let out = serialize_owl_xml(&ont, &ns).expect("serialize");
-        let (again, _) = load_owl_xml_ontology(&out).expect("reload");
+        let (again, _, _) = load_owl_xml_ontology(&out).expect("reload");
         let bridge = crate::bridge_ontology(again, "doc", &out, &BTreeMap::new());
         assert!(bridge.entities.iter().any(|e| e.short_name == "Department"));
     }

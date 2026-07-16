@@ -26,25 +26,34 @@ pub fn apply_xml_patches_to_text(
                     "RDF/XML load incomplete; refusing write-back to avoid data loss".into(),
                 ));
             }
+            let before = serialize_rdf_xml(&ont)?;
             let diagnostics = apply_patches_to_ontology_with_ns(&mut ont, patches, namespaces)?;
-            let text = serialize_rdf_xml(&ont)?;
+            let after = serialize_rdf_xml(&ont)?;
+            let changed = before != after;
             Ok(ApplyPatchResult {
-                applied: !preview_only,
-                preview_text: Some(text),
+                applied: changed && !preview_only,
+                preview_text: Some(if changed { after } else { source.to_string() }),
                 diagnostics,
                 document_path: None,
             })
         }
         OntologyFormat::OwlXml => {
-            let (mut ont, mut ns) = load_owl_xml_ontology(source)?;
+            let (mut ont, mut ns, incomplete) = load_owl_xml_ontology(source)?;
+            if incomplete {
+                return Err(OwlError::LoadFailed(
+                    "OWL/XML load incomplete; refusing write-back to avoid data loss".into(),
+                ));
+            }
             for (k, v) in namespaces {
                 ns.entry(k.clone()).or_insert_with(|| v.clone());
             }
+            let before = serialize_owl_xml(&ont, &ns)?;
             let diagnostics = apply_patches_to_ontology_with_ns(&mut ont, patches, namespaces)?;
-            let text = serialize_owl_xml(&ont, &ns)?;
+            let after = serialize_owl_xml(&ont, &ns)?;
+            let changed = before != after;
             Ok(ApplyPatchResult {
-                applied: !preview_only,
-                preview_text: Some(text),
+                applied: changed && !preview_only,
+                preview_text: Some(if changed { after } else { source.to_string() }),
                 diagnostics,
                 document_path: None,
             })

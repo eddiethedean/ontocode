@@ -1,7 +1,6 @@
 //! Apply PatchOp mutations onto a Horned ontology (v0.21+ XML write-back).
 
 use crate::error::{OwlError, Result};
-use crate::manchester::parse_class_expression;
 use crate::patch::{PatchDiagnostic, PatchEntityKind, PatchOp};
 use horned_owl::model::{
     AnnotatedComponent, Annotation, AnnotationAssertion, AnnotationSubject, AnnotationValue, Build,
@@ -71,6 +70,7 @@ fn apply_one(
 ) -> std::result::Result<(), String> {
     match patch {
         PatchOp::CreateEntity { entity_iri, kind } => {
+            require_safe_iri(entity_iri)?;
             let cmp = match kind {
                 PatchEntityKind::Class => {
                     Component::DeclareClass(DeclareClass(build.class(entity_iri.as_str())))
@@ -97,6 +97,7 @@ fn apply_one(
             Ok(())
         }
         PatchOp::DeleteEntity { entity_iri } => {
+            require_safe_iri(entity_iri)?;
             remove_entity_components(ont, entity_iri);
             Ok(())
         }
@@ -127,7 +128,9 @@ fn apply_one(
             Ok(())
         }
         PatchOp::AddAnnotation { entity_iri, predicate, value } => {
-            insert_literal_annotation(ont, build, entity_iri, predicate, value);
+            require_safe_iri(entity_iri)?;
+            require_safe_iri(predicate)?;
+            insert_annotation(ont, build, entity_iri, predicate, value)?;
             Ok(())
         }
         PatchOp::RemoveAnnotation { entity_iri, predicate, value } => {
@@ -146,10 +149,12 @@ fn apply_one(
             Ok(())
         }
         PatchOp::AddImport { import_iri, .. } => {
+            require_safe_iri(import_iri)?;
             ont.insert(Component::Import(Import(build.iri(import_iri.as_str()))));
             Ok(())
         }
         PatchOp::RemoveImport { import_iri, .. } => {
+            require_safe_iri(import_iri)?;
             let target =
                 AnnotatedComponent::from(Component::Import(Import(build.iri(import_iri.as_str()))));
             let _ = ont.take(&target);
@@ -372,10 +377,11 @@ fn apply_one(
             ))
         }
         PatchOp::AddOntologyAnnotation { predicate, value, .. } => {
+            require_safe_iri(predicate)?;
             ont.insert(Component::OntologyAnnotation(horned_owl::model::OntologyAnnotation(
                 Annotation {
                     ap: build.annotation_property(predicate.as_str()),
-                    av: AnnotationValue::Literal(Literal::Simple { literal: value.clone() }),
+                    av: annotation_av_from_value(build, value)?,
                 },
             )));
             Ok(())
@@ -385,7 +391,7 @@ fn apply_one(
             Ok(())
         }
         PatchOp::AddComplexSubClassOf { entity_iri, manchester } => {
-            let ce = parse_manchester_ce(manchester, namespaces)?;
+            let ce = parse_manchester_ce(ont, manchester, namespaces)?;
             ont.insert(Component::SubClassOf(SubClassOf {
                 sub: ClassExpression::Class(build.class(entity_iri.as_str())),
                 sup: ce,
@@ -393,12 +399,12 @@ fn apply_one(
             Ok(())
         }
         PatchOp::RemoveComplexSubClassOf { entity_iri, manchester } => {
-            let ce = parse_manchester_ce(manchester, namespaces)?;
+            let ce = parse_manchester_ce(ont, manchester, namespaces)?;
             remove_complex_subclass_of(ont, entity_iri, &ce);
             Ok(())
         }
         PatchOp::AddEquivalentClass { entity_iri, manchester } => {
-            let ce = parse_manchester_ce(manchester, namespaces)?;
+            let ce = parse_manchester_ce(ont, manchester, namespaces)?;
             ont.insert(Component::EquivalentClasses(horned_owl::model::EquivalentClasses(vec![
                 ClassExpression::Class(build.class(entity_iri.as_str())),
                 ce,
@@ -406,13 +412,13 @@ fn apply_one(
             Ok(())
         }
         PatchOp::RemoveEquivalentClass { entity_iri, manchester } => {
-            let ce = parse_manchester_ce(manchester, namespaces)?;
+            let ce = parse_manchester_ce(ont, manchester, namespaces)?;
             remove_equivalent_class(ont, entity_iri, &ce);
             Ok(())
         }
         PatchOp::SetEquivalentClass { entity_iri, manchester } => {
             remove_all_equivalent_classes_for(ont, entity_iri);
-            let ce = parse_manchester_ce(manchester, namespaces)?;
+            let ce = parse_manchester_ce(ont, manchester, namespaces)?;
             ont.insert(Component::EquivalentClasses(horned_owl::model::EquivalentClasses(vec![
                 ClassExpression::Class(build.class(entity_iri.as_str())),
                 ce,
@@ -476,12 +482,13 @@ fn apply_one(
                         || crate::manchester::parse_data_range(range_iri, namespaces).is_ok()))
             {
                 let dr = crate::manchester::parse_data_range(range_iri, namespaces)
-                    .unwrap_or_else(|_| DataRange::Datatype(build.datatype(range_iri.as_str())));
+                    .map_err(|e| e.to_string())?;
                 ont.insert(Component::DataPropertyRange(horned_owl::model::DataPropertyRange {
                     dp: build.data_property(entity_iri.as_str()),
                     dr,
                 }));
             } else {
+                require_safe_iri(range_iri)?;
                 ont.insert(Component::ObjectPropertyRange(
                     horned_owl::model::ObjectPropertyRange {
                         ope: ObjectPropertyExpression::ObjectProperty(
@@ -494,7 +501,7 @@ fn apply_one(
             Ok(())
         }
         PatchOp::RemoveRange { entity_iri, range_iri } => {
-            remove_range(ont, entity_iri, range_iri);
+            remove_range(ont, entity_iri, range_iri, namespaces);
             Ok(())
         }
         PatchOp::SetFunctional { entity_iri, value } => {
@@ -765,14 +772,25 @@ fn insert_literal_annotation(
     predicate: &str,
     value: &str,
 ) {
+    let _ = insert_annotation(ont, build, entity_iri, predicate, value);
+}
+
+fn insert_annotation(
+    ont: &mut ComponentMappedOntology<RcStr, RcAnnotatedComponent>,
+    build: &Build<RcStr>,
+    entity_iri: &str,
+    predicate: &str,
+    value: &str,
+) -> std::result::Result<(), String> {
     let ann = Annotation {
         ap: build.annotation_property(predicate),
-        av: AnnotationValue::Literal(Literal::Simple { literal: value.to_string() }),
+        av: annotation_av_from_value(build, value)?,
     };
     ont.insert(Component::AnnotationAssertion(AnnotationAssertion {
         subject: AnnotationSubject::IRI(build.iri(entity_iri)),
         ann,
     }));
+    Ok(())
 }
 
 fn remove_annotation_assertions(
@@ -795,21 +813,9 @@ fn remove_annotation_assertions(
         if ax.ann.ap.to_string() != predicate {
             return false;
         }
-        if let Some(v) = value {
-            match &ax.ann.av {
-                AnnotationValue::Literal(Literal::Simple { literal }) => {
-                    literal == v || json_literals_equivalent(literal, v)
-                }
-                AnnotationValue::Literal(Literal::Language { literal, .. }) => {
-                    literal == v || json_literals_equivalent(literal, v)
-                }
-                AnnotationValue::Literal(Literal::Datatype { literal, .. }) => {
-                    literal == v || json_literals_equivalent(literal, v)
-                }
-                _ => false,
-            }
-        } else {
-            true
+        match value {
+            Some(v) => annotation_value_matches(&ax.ann.av, v),
+            None => true,
         }
     });
     taken.len()
@@ -1302,12 +1308,33 @@ fn individual_mentions(ind: &Individual<RcStr>, entity_iri: &str) -> bool {
 }
 
 fn parse_manchester_ce(
+    ont: &ComponentMappedOntology<RcStr, RcAnnotatedComponent>,
     manchester: &str,
     namespaces: &BTreeMap<String, String>,
 ) -> std::result::Result<ClassExpression<RcStr>, String> {
-    parse_class_expression(manchester, namespaces)
+    let known = declared_datatype_iris(ont);
+    crate::manchester::parse_class_expression_with_datatypes(manchester, namespaces, &known)
         .map(|out| out.expression)
         .map_err(|e| e.to_string())
+}
+
+fn declared_datatype_iris(
+    ont: &ComponentMappedOntology<RcStr, RcAnnotatedComponent>,
+) -> std::collections::BTreeSet<String> {
+    let mut out: std::collections::BTreeSet<String> =
+        ont.i().declare_datatype().map(|d| d.0.to_string()).collect();
+    for ax in ont.i().datatype_definition() {
+        out.insert(ax.kind.to_string());
+    }
+    out
+}
+
+fn require_safe_iri(iri: &str) -> std::result::Result<(), String> {
+    if crate::patch::is_safe_iri(iri) {
+        Ok(())
+    } else {
+        Err(format!("IRI contains characters that cannot be safely written: {iri:?}"))
+    }
 }
 
 fn is_declared_data_property(
@@ -1486,17 +1513,7 @@ fn remove_ontology_annotation(
         matches!(
             c,
             Component::OntologyAnnotation(ax)
-                if ax.0.ap.to_string() == predicate
-                    && match &ax.0.av {
-                        AnnotationValue::Literal(Literal::Simple { literal }) => literal == value,
-                        AnnotationValue::Literal(Literal::Language { literal, .. }) => {
-                            literal == value
-                        }
-                        AnnotationValue::Literal(Literal::Datatype { literal, .. }) => {
-                            literal == value
-                        }
-                        _ => false,
-                    }
+                if ax.0.ap.to_string() == predicate && annotation_value_matches(&ax.0.av, value)
         )
     });
 }
@@ -1585,6 +1602,7 @@ fn remove_range(
     ont: &mut ComponentMappedOntology<RcStr, RcAnnotatedComponent>,
     entity_iri: &str,
     range_iri: &str,
+    namespaces: &BTreeMap<String, String>,
 ) {
     let _ = take_all_matching(ont, ComponentKind::ObjectPropertyRange, |c| {
         matches!(
@@ -1593,16 +1611,23 @@ fn remove_range(
                 if ope_mentions(&ax.ope, entity_iri) && class_expr_mentions(&ax.ce, range_iri)
         )
     });
+    let parsed = crate::manchester::parse_data_range(range_iri, namespaces).ok();
     let _ = take_all_matching(ont, ComponentKind::DataPropertyRange, |c| {
-        matches!(
-            c,
-            Component::DataPropertyRange(ax)
-                if ax.dp.to_string() == entity_iri
-                    && matches!(
-                        &ax.dr,
-                        DataRange::Datatype(dt) if dt.to_string() == range_iri
-                    )
-        )
+        let Component::DataPropertyRange(ax) = c else {
+            return false;
+        };
+        if ax.dp.to_string() != entity_iri {
+            return false;
+        }
+        if matches!(&ax.dr, DataRange::Datatype(dt) if dt.to_string() == range_iri) {
+            return true;
+        }
+        if let Some(want) = parsed.as_ref() {
+            if &ax.dr == want {
+                return true;
+            }
+        }
+        data_range_display_match(&ax.dr, range_iri)
     });
 }
 
@@ -1684,28 +1709,44 @@ fn remove_datatype_definition(
 }
 
 fn annotation_value_matches(av: &AnnotationValue<RcStr>, value: &str) -> bool {
+    let trimmed = value.trim();
+    let bare = trimmed.strip_prefix('<').and_then(|s| s.strip_suffix('>')).unwrap_or(trimmed);
     match av {
-        AnnotationValue::Literal(Literal::Simple { literal }) => literal == value,
-        AnnotationValue::Literal(Literal::Language { literal, .. }) => literal == value,
-        AnnotationValue::Literal(Literal::Datatype { literal, .. }) => literal == value,
-        AnnotationValue::IRI(iri) => iri.to_string() == value,
+        AnnotationValue::Literal(Literal::Simple { literal }) => {
+            literal == trimmed || literal == bare || json_literals_equivalent(literal, trimmed)
+        }
+        AnnotationValue::Literal(Literal::Language { literal, .. }) => {
+            literal == trimmed || literal == bare || json_literals_equivalent(literal, trimmed)
+        }
+        AnnotationValue::Literal(Literal::Datatype { literal, .. }) => {
+            literal == trimmed || literal == bare || json_literals_equivalent(literal, trimmed)
+        }
+        AnnotationValue::IRI(iri) => {
+            let s = iri.to_string();
+            s == trimmed || s == bare
+        }
         _ => false,
     }
 }
 
-fn annotation_av_from_value(build: &Build<RcStr>, value: &str) -> AnnotationValue<RcStr> {
+fn annotation_av_from_value(
+    build: &Build<RcStr>,
+    value: &str,
+) -> std::result::Result<AnnotationValue<RcStr>, String> {
     let trimmed = value.trim();
     if let Some(inner) = trimmed.strip_prefix('<').and_then(|s| s.strip_suffix('>')) {
-        return AnnotationValue::IRI(build.iri(inner.trim()));
+        require_safe_iri(inner.trim())?;
+        return Ok(AnnotationValue::IRI(build.iri(inner.trim())));
     }
     if (trimmed.starts_with("http://")
         || trimmed.starts_with("https://")
         || trimmed.starts_with("urn:"))
         && !trimmed.contains(' ')
     {
-        return AnnotationValue::IRI(build.iri(trimmed));
+        require_safe_iri(trimmed)?;
+        return Ok(AnnotationValue::IRI(build.iri(trimmed)));
     }
-    AnnotationValue::Literal(Literal::Simple { literal: trimmed.to_string() })
+    Ok(AnnotationValue::Literal(Literal::Simple { literal: trimmed.to_string() }))
 }
 
 const AXIOM_ANN_SUPPORTED: &str = "sub_class_of, disjoint_with, equivalent_class, domain, range, \
@@ -1726,7 +1767,7 @@ fn mutate_axiom_annotation(
 ) -> std::result::Result<(), String> {
     let ann = Annotation {
         ap: build.annotation_property(predicate),
-        av: annotation_av_from_value(build, value),
+        av: annotation_av_from_value(build, value)?,
     };
     let kind = match axiom_op {
         "sub_class_of" => ComponentKind::SubClassOf,
@@ -1887,9 +1928,9 @@ fn mutate_axiom_annotation(
             "no matching {axiom_op} axiom found for axiom annotation on {subject_iri}"
         ));
     }
-    if targets.len() > 1 && related.is_empty() {
+    if targets.len() > 1 {
         return Err(format!(
-            "ambiguous {axiom_op} axiom annotation on {subject_iri}: {} matches; supply related_iri",
+            "ambiguous {axiom_op} axiom annotation on {subject_iri}: {} matches; supply a more specific related_iri or axiom identity",
             targets.len()
         ));
     }
@@ -2330,5 +2371,149 @@ mod tests {
         )
         .expect("remove reversed");
         assert_eq!(ont.i().has_key().count(), 0);
+    }
+
+    #[test]
+    fn add_and_remove_faceted_data_range() {
+        // #333
+        let source = r#"<?xml version="1.0"?>
+<rdf:RDF xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema#">
+    <owl:Ontology rdf:about="http://example.org/ont"/>
+    <owl:DatatypeProperty rdf:about="http://example.org/ont#age"/>
+</rdf:RDF>"#;
+        let (mut ont, _) = load_rdf_xml_ontology(source).expect("load");
+        let mut ns = BTreeMap::new();
+        ns.insert("xsd".into(), "http://www.w3.org/2001/XMLSchema#".into());
+        apply_patches_to_ontology_with_ns(
+            &mut ont,
+            &[PatchOp::AddRange {
+                entity_iri: "http://example.org/ont#age".into(),
+                range_iri: "xsd:integer[>= 0]".into(),
+            }],
+            &ns,
+        )
+        .expect("add faceted range");
+        assert_eq!(ont.i().data_property_range().count(), 1);
+        apply_patches_to_ontology_with_ns(
+            &mut ont,
+            &[PatchOp::RemoveRange {
+                entity_iri: "http://example.org/ont#age".into(),
+                range_iri: "xsd:integer[>= 0]".into(),
+            }],
+            &ns,
+        )
+        .expect("remove faceted range");
+        assert_eq!(ont.i().data_property_range().count(), 0);
+    }
+
+    #[test]
+    fn remove_iri_valued_entity_annotation() {
+        // #339
+        let source = r#"<?xml version="1.0"?>
+<rdf:RDF xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+     xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+    <owl:Ontology rdf:about="http://example.org/ont"/>
+    <owl:Class rdf:about="http://example.org/ont#A"/>
+</rdf:RDF>"#;
+        let (mut ont, _) = load_rdf_xml_ontology(source).expect("load");
+        apply_patches_to_ontology(
+            &mut ont,
+            &[PatchOp::AddAnnotation {
+                entity_iri: "http://example.org/ont#A".into(),
+                predicate: "http://www.w3.org/2000/01/rdf-schema#seeAlso".into(),
+                value: "http://example.org/other".into(),
+            }],
+        )
+        .expect("add iri ann");
+        assert_eq!(ont.i().annotation_assertion().count(), 1);
+        apply_patches_to_ontology(
+            &mut ont,
+            &[PatchOp::RemoveAnnotation {
+                entity_iri: "http://example.org/ont#A".into(),
+                predicate: "http://www.w3.org/2000/01/rdf-schema#seeAlso".into(),
+                value: "http://example.org/other".into(),
+            }],
+        )
+        .expect("remove iri ann");
+        assert_eq!(ont.i().annotation_assertion().count(), 0);
+    }
+
+    #[test]
+    fn create_entity_rejects_unsafe_iri() {
+        // #338
+        let source = r#"<?xml version="1.0"?>
+<rdf:RDF xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+    <owl:Ontology rdf:about="http://example.org/ont"/>
+</rdf:RDF>"#;
+        let (mut ont, _) = load_rdf_xml_ontology(source).expect("load");
+        let err = apply_patches_to_ontology(
+            &mut ont,
+            &[PatchOp::CreateEntity {
+                entity_iri: "http://example.org/bad>iri".into(),
+                kind: PatchEntityKind::Class,
+            }],
+        );
+        assert!(err.is_err());
+    }
+
+    #[test]
+    fn ambiguous_axiom_annotation_errors_even_with_related_iri() {
+        // #340
+        let source = r#"<?xml version="1.0"?>
+<rdf:RDF xmlns:owl="http://www.w3.org/2002/07/owl#"
+     xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+    <owl:Ontology rdf:about="http://example.org/ont"/>
+    <owl:Class rdf:about="http://example.org/ont#A"/>
+    <owl:Class rdf:about="http://example.org/ont#B"/>
+    <owl:Class rdf:about="http://example.org/ont#C"/>
+    <owl:Class rdf:about="http://example.org/ont#D"/>
+</rdf:RDF>"#;
+        let (mut ont, _) = load_rdf_xml_ontology(source).expect("load");
+        apply_patches_to_ontology(
+            &mut ont,
+            &[
+                PatchOp::AddDisjointClass {
+                    entity_iri: "http://example.org/ont#A".into(),
+                    other_iri: "http://example.org/ont#B".into(),
+                },
+                PatchOp::AddDisjointClass {
+                    entity_iri: "http://example.org/ont#A".into(),
+                    other_iri: "http://example.org/ont#C".into(),
+                },
+            ],
+        )
+        .expect("add two disjoints sharing A");
+        // Force a second disjoint that also mentions A and B by inserting n-ary manually is hard;
+        // related_iri=B with two binary disjoints only matching A+B is one. Add A-B twice via
+        // Equivalent-style isn't valid. Instead annotate with related that matches both if we
+        // only filter subject: use related empty ambiguity is already covered — for related set
+        // but multi-match, insert two DisjointClasses both containing A and B via Horned.
+        use horned_owl::model::{Build, Class, ClassExpression, Component};
+        let build = Build::new_rc();
+        ont.insert(Component::DisjointClasses(horned_owl::model::DisjointClasses(vec![
+            ClassExpression::Class(Class(build.iri("http://example.org/ont#A"))),
+            ClassExpression::Class(Class(build.iri("http://example.org/ont#B"))),
+            ClassExpression::Class(Class(build.iri("http://example.org/ont#C"))),
+        ])));
+        ont.insert(Component::DisjointClasses(horned_owl::model::DisjointClasses(vec![
+            ClassExpression::Class(Class(build.iri("http://example.org/ont#A"))),
+            ClassExpression::Class(Class(build.iri("http://example.org/ont#B"))),
+            ClassExpression::Class(Class(build.iri("http://example.org/ont#D"))),
+        ])));
+        let err = apply_patches_to_ontology(
+            &mut ont,
+            &[PatchOp::AddAxiomAnnotation {
+                axiom_op: "disjoint_with".into(),
+                subject_iri: "http://example.org/ont#A".into(),
+                related_iri: Some("http://example.org/ont#B".into()),
+                predicate: "http://www.w3.org/2000/01/rdf-schema#comment".into(),
+                value: "note".into(),
+            }],
+        );
+        assert!(err.is_err(), "expected ambiguity error, got {err:?}");
     }
 }

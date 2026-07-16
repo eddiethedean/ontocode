@@ -8,7 +8,7 @@ Honesty and limits: [DL Query guide](../guides/dl-query.md).
 
 Expressions accept **prefix:local** QNames (resolved from indexed ontology prefixes) or angle-bracket IRIs `<http://…>`. There is **no** `--prefix` CLI flag. Prefer `<…>` when several files bind the same short prefix (for example both tutorial fixtures use `ex:`).
 
-Samples use the repo [`fixtures/`](https://github.com/eddiethedean/ontocode/tree/v0.26.0/fixtures) corpus. Flags: `--profile`, `--mode`, `--format` only — [CLI reference](../cli-reference.md).
+Samples use the repo [`fixtures/`](https://github.com/eddiethedean/ontocode/tree/v0.26.1/fixtures) corpus. Flags: `--profile`, `--mode`, `--format` only — [CLI reference](../cli-reference.md).
 
 ## Named class (inferred)
 
@@ -21,7 +21,7 @@ ontocore dl-query '<http://example.org/clinic#ClinicPerson>' fixtures \
   --format json
 ```
 
-(`ex:` comes from [`complex-classes.ttl`](https://github.com/eddiethedean/ontocode/blob/v0.26.0/fixtures/complex-classes.ttl).)
+(`ex:` comes from [`complex-classes.ttl`](https://github.com/eddiethedean/ontocode/blob/v0.26.1/fixtures/complex-classes.ttl).)
 
 ## Asserted instances
 
@@ -44,4 +44,4 @@ ontocore dl-query \
 
 ## CI tip
 
-Pin CLI with `--version 0.26.0` (or the release tarball for Linux x64). Treat results as OntoLogos-backed — dual-check critical audits against Protégé when required.
+Pin CLI with `--version 0.26.1` (or the release tarball for Linux x64). Treat results as OntoLogos-backed — dual-check critical audits against Protégé when required.

@@ -45,7 +45,7 @@ LSP clients can call `ontocore/runRobot` — see [LSP API](../lsp-api.md).
 
 ```yaml
 - name: Install OntoCore
-  run: cargo install ontocore-cli --locked --version 0.26.0
+  run: cargo install ontocore-cli --locked --version 0.26.1
 
 - name: OntoCore validate
   run: ontocore validate ./ontologies

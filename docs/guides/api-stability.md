@@ -27,7 +27,7 @@ The following modules are **documented and intended to stabilize** toward 1.0:
 
 | Tier | Surface | Stability | Notes |
 |------|---------|-----------|-------|
-| **A — Stable enough for CI** | `ontocore validate`, `query`, `sparql`, `classify`, `realize`, `check-instance`, `dl-query`, `refactor` (incl. merge/replace), `diff`, `docs`, `patch`, `robot`, `plugins`, `workflow` CLI | High for **commands and exit codes** | Pin with `cargo install ontocore-cli --locked --version 0.26.0`. Exit codes documented in [workspace limits](../workspace-limits.md). No `ontocore swrl` CLI — SWRL via IDE/LSP/patches. |
+| **A — Stable enough for CI** | `ontocore validate`, `query`, `sparql`, `classify`, `realize`, `check-instance`, `dl-query`, `refactor` (incl. merge/replace), `diff`, `docs`, `patch`, `robot`, `plugins`, `workflow` CLI | High for **commands and exit codes** | Pin with `cargo install ontocore-cli --locked --version 0.26.1`. Exit codes documented in [workspace limits](../workspace-limits.md). No `ontocore swrl` CLI — SWRL via IDE/LSP/patches. |
 | **B — Documented, may evolve** | LSP custom methods (`ontocore/*`) | Medium | Wire format in [LSP API](../lsp-api.md) and [JSON Schema](../lsp-protocol.schema.json). Minor releases may add fields or methods. |
 | **C — Library APIs** | `ontocore` and `ontocore-*` Rust crates | Medium-low | Public types used by CLI/LSP are more stable than internal modules. Pin exact versions in `Cargo.toml`. |
 | **D — Experimental / product-1.0** | Curated plugin marketplace, production owlmake, SHACL full validation, MCP, Python/TS SDKs | Low until product **1.0** | Plugin **SDK 1.0** wire is frozen today — see [Plugin authoring](plugins.md) and [Plugin policy](plugin-policy.md). |
@@ -51,7 +51,7 @@ The following modules are **documented and intended to stabilize** toward 1.0:
 **CI / ops:**
 
 ```bash
-cargo install ontocore-cli --locked --version 0.26.0
+cargo install ontocore-cli --locked --version 0.26.1
 ```
 
 **Rust embedding:**
@@ -61,7 +61,7 @@ ontocore = "0.26"
 ontocore-core = "0.26"
 ```
 
-**VS Code:** install OntoCode **0.26.0** (latest tagged) from Marketplace, Open VSX, or a release VSIX — the bundled `ontocore-lsp` matches the extension version.
+**VS Code:** install OntoCode **0.26.1** (latest tagged) from Marketplace, Open VSX, or a release VSIX — the bundled `ontocore-lsp` matches the extension version.
 
 ## Enterprise evaluation
 

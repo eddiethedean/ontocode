@@ -6,7 +6,7 @@ Planning ranges for OntoCode / OntoCore. **These are product goals, not contract
 
 | Version | Status | Date (changelog) |
 |---------|--------|------------------|
-| **0.26.0** | Current (tagged) | 2026-07-16 |
+| **0.26.1** | Current (tagged) | 2026-07-16 |
 | **0.25.0** | Previous | 2026-07-15 |
 | **0.24.0** | Previous | 2026-07-14 |
 | **0.23.0** | Previous | 2026-07-14 |

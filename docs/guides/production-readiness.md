@@ -1,6 +1,6 @@
 # Production readiness and pilot criteria
 
-This page states what OntoCode / OntoCore **v0.26.0** (latest tagged) is appropriate for in production-like environments. It is not legal advice and does not replace your organization's risk review.
+This page states what OntoCode / OntoCore **v0.26.1** (latest tagged) is appropriate for in production-like environments. It is not legal advice and does not replace your organization's risk review.
 
 Canonical capability matrix: [What ships today](../SHIPPED.md). Follow-on pilot weeks: [Enterprise week-2 playbook](enterprise-week-2.md).
 
@@ -8,7 +8,7 @@ Canonical capability matrix: [What ships today](../SHIPPED.md). Follow-on pilot 
 
 | Level | Version | Meaning |
 |-------|---------|---------|
-| **Pre-1.0** | **0.26.x (latest tagged)** | Pin `cargo install ontocore-cli --locked --version 0.26.0` in CI. Library APIs may change until [v1.0](../design/v1.0_BACKLOG.md). |
+| **Pre-1.0** | **0.26.x (latest tagged)** | Pin `cargo install ontocore-cli --locked --version 0.26.1` in CI. Library APIs may change until [v1.0](../design/v1.0_BACKLOG.md). |
 | **Stable CI gates** | 0.26.x | `ontocore validate`, `ontocore classify`, `ontocore realize`, `ontocore check-instance`, and `ontocore diff` are documented for CI — see [workspace limits](../workspace-limits.md). |
 | **In development** | Next unreleased minor on `main` | May preview upcoming work — pin installs to [TAGGED_RELEASE](../TAGGED_RELEASE), not workspace `Cargo.toml`. |
 | **v1.0 target** | Planned | Protégé-competitive OWL 2 DL + OBO in VS Code — [Protégé vs OntoCode](protege-decision.md); capability truth: [SHIPPED](../SHIPPED.md) + [known limitations](../known-limitations.md). |
@@ -61,7 +61,7 @@ Suggested pilot duration: **4–8 weeks** with 3–10 engineers on one ontology 
 | LSP `ontocore/*` JSON | May change pre-1.0 |
 | Rust `ontocore-*` crate APIs | May change pre-1.0 |
 
-Pin CLI version in CI: release binary with `VERSION=0.26.0` or `cargo install ontocore-cli --locked --version 0.26.0`.
+Pin CLI version in CI: release binary with `VERSION=0.26.1` or `cargo install ontocore-cli --locked --version 0.26.1`.
 
 ## Support and incident response
 

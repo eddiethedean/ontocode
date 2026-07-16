@@ -5,7 +5,7 @@ The `ontocore` binary indexes ontology workspaces and exposes query, validation,
 Install (pin latest tagged release):
 
 ```bash
-cargo install ontocore-cli --locked --version 0.26.0
+cargo install ontocore-cli --locked --version 0.26.1
 ```
 
 From a git clone, use `cargo run --` instead of `ontocore`.

@@ -6,6 +6,10 @@ Migration guides: [Migration index](migration/README.md)
 
 ## [Unreleased]
 
+## [0.26.1] - 2026-07-16
+
+**v0.26.1** — OWL remove/match semantics and annotation/range/XML write-back fixes (Inspector reliability). See [CHANGELOG.md](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) and [migration/v0.26.1.md](migration/v0.26.1.md).
+
 ## [0.26.0] - 2026-07-16
 
 **v0.26.0** — Protégé Desktop JUnit behavioral test port (Waves 1–4): edit oracles, annotation linkification + property order, `catalog-v001.xml` redirects, IdPolicy, Foundry registry parse, ontology `version_iri`; OBO merge/replace duplicate-`id:` fix. See [CHANGELOG.md](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) and [migration/v0.26.md](migration/v0.26.md).

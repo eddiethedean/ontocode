@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.26.1] - 2026-07-16
+
+**For pilots / adopters:** OWL Inspector write-back reliability — remove/match semantics, annotation/range handling, and XML mutate safety. No format write-back regression vs v0.26.0 — [migration/v0.26.1.md](docs/migration/v0.26.1.md).
+
+### Fixed
+
+- XML/Horned `Remove*` takes full `AnnotatedComponent`s (axiom annotations) so annotated removals no longer silently no-op ([#382](https://github.com/eddiethedean/ontocode/issues/382), [#408](https://github.com/eddiethedean/ontocode/pull/408))
+- SameIndividual / InverseObjectProperties / HasKey / DisjointUnion set- and order-insensitive matching for Inspector pairwise cards ([#331](https://github.com/eddiethedean/ontocode/issues/331), [#334](https://github.com/eddiethedean/ontocode/issues/334), [#351](https://github.com/eddiethedean/ontocode/issues/351))
+- `AddHasKey` uses `DataProperty` when declared; Turtle `Disjoint*Properties` emits full pairwise closure ([#332](https://github.com/eddiethedean/ontocode/issues/332), [#394](https://github.com/eddiethedean/ontocode/issues/394))
+- `RemoveRange` matches Manchester/faceted DataRanges; `AddRange` errors on parse failure ([#333](https://github.com/eddiethedean/ontocode/issues/333), [#409](https://github.com/eddiethedean/ontocode/pull/409))
+- Known DeclareDatatype / DatatypeDefinition IRIs as data fillers; facet errors not swallowed ([#335](https://github.com/eddiethedean/ontocode/issues/335))
+- XML `applied` only when serialize output changes; unsafe IRIs rejected; incomplete OWL/XML parses refused ([#337](https://github.com/eddiethedean/ontocode/issues/337), [#338](https://github.com/eddiethedean/ontocode/issues/338), [#383](https://github.com/eddiethedean/ontocode/issues/383))
+- IRI-valued annotation remove; ambiguous axiom annotation always errors; Turtle axiom-annotation exact lexical match ([#339](https://github.com/eddiethedean/ontocode/issues/339), [#340](https://github.com/eddiethedean/ontocode/issues/340), [#349](https://github.com/eddiethedean/ontocode/issues/349))
+
+### Changed
+
+- Workspace package and all `ontocore-*` crates bumped to **0.26.1**; extension and webview UI **0.26.1**
+
 ## [0.26.0] - 2026-07-16
 
 **For pilots / adopters:** Protégé Desktop **behavioral** parity corpus (Waves 1–4) — hierarchy/merge/deprecation/history oracles, annotation linkification + property order in the IDE, `catalog-v001.xml` import redirects, IdPolicy parse, ontology `version_iri`. No format write-back regression vs v0.25 — [migration/v0.26.md](docs/migration/v0.26.md).

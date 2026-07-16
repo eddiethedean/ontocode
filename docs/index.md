@@ -7,7 +7,7 @@ hide:
 <div class="oc-hero">
 
 <div class="oc-hero-badges">
-  <span class="oc-badge oc-badge--accent">Latest tagged v0.26.0</span>
+  <span class="oc-badge oc-badge--accent">Latest tagged v0.26.1</span>
   <span class="oc-badge">VS Code</span>
   <span class="oc-badge">CLI · LSP</span>
 </div>
@@ -24,7 +24,7 @@ Index and explore OWL/RDF/OBO, run queries, refactors, and reasoning — in VS C
   <a class="oc-hero-cta" href="guides/first-success/">First success (~10 min) →</a>
 </p>
 
-<p class="oc-hero-subcta"><a href="SHIPPED/">Evaluate · What ships today</a> · <a href="install/">Install</a> · <a href="guides/versions-and-channels/">Versions &amp; channels</a> · <a href="known-limitations/">Known limitations</a> · Latest tagged: <strong>v0.26.0</strong></p>
+<p class="oc-hero-subcta"><a href="SHIPPED/">Evaluate · What ships today</a> · <a href="install/">Install</a> · <a href="guides/versions-and-channels/">Versions &amp; channels</a> · <a href="known-limitations/">Known limitations</a> · Latest tagged: <strong>v0.26.1</strong></p>
 
 <div class="oc-hero-links">
   <a href="ontocode/">OntoCode overview</a>
@@ -92,7 +92,7 @@ Index and explore OWL/RDF/OBO, run queries, refactors, and reasoning — in VS C
 
 ## What ships today
 
-**Latest tagged: v0.26.0.** Full capability matrix: **[What ships today](SHIPPED.md)**. For channel lag (Marketplace vs crates.io vs docs), see [Versions & channels](guides/versions-and-channels.md).
+**Latest tagged: v0.26.1.** Full capability matrix: **[What ships today](SHIPPED.md)**. For channel lag (Marketplace vs crates.io vs docs), see [Versions & channels](guides/versions-and-channels.md).
 
 ## Quick start
 
@@ -105,14 +105,14 @@ Index and explore OWL/RDF/OBO, run queries, refactors, and reasoning — in VS C
 
 === "CLI (Linux x64)"
 
-    Prefer the [release tarball](https://github.com/eddiethedean/ontocode/releases/tag/v0.26.0). Full download → extract → validate steps: [CI integration](ci-integration.md).
+    Prefer the [release tarball](https://github.com/eddiethedean/ontocode/releases/tag/v0.26.1). Full download → extract → validate steps: [CI integration](ci-integration.md).
 
 === "CLI (macOS / Windows — cargo)"
 
     Requires Rust **1.88+**. Windows: [MSVC Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/). macOS: Xcode Command Line Tools (`xcode-select --install`). First compile: **15–30+ minutes**. See [Install CLI](guides/install-cli.md).
 
     ```bash
-    cargo install ontocore-cli --locked --version 0.26.0
+    cargo install ontocore-cli --locked --version 0.26.1
     ontocore validate /path/to/ontologies
     ```
 

@@ -37,6 +37,14 @@ fn dl_query_parses_complex_expression() {
     .expect("complex dl query");
     assert!(!result.normalized.is_empty());
     assert!(!result.query_class_iri.is_empty());
+    // Patient ⊑ ∃hasRecord.MedicalRecord, so after Q ≡ CE Patient must be a subclass of Q (#366).
+    assert!(
+        result.subclasses.iter().any(|iri| iri.ends_with("#Patient") || iri.contains("Patient")),
+        "expected Patient among subclasses of anonymous CE, got subclasses={:?} equivalents={:?} warnings={:?}",
+        result.subclasses,
+        result.equivalents,
+        result.warnings
+    );
 }
 
 #[test]

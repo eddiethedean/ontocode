@@ -20,4 +20,4 @@ pub use obofoundry::{
     OboFoundryRegistry,
 };
 pub use patch::OboPatchOp;
-pub use remap::remap_obo_id_in_text;
+pub use remap::{merge_obo_id_in_text, remap_obo_id_in_text, replace_obo_id_refs_in_text};

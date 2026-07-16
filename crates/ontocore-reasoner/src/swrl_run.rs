@@ -26,9 +26,11 @@ pub fn classify_with_swrl(input: &ReasonerInput) -> Result<ClassificationResult>
 
     // Consistency must run on the *materialized* ontology (#358), not the pre-SWRL input.
     let mut consistent = unsatisfiable.is_empty();
-    if let Ok(detail) =
-        crate::abox::check_full_consistency(&ontology, crate::adapter::ReasonerId::Dl, &unsatisfiable)
-    {
+    if let Ok(detail) = crate::abox::check_full_consistency(
+        &ontology,
+        crate::adapter::ReasonerId::Dl,
+        &unsatisfiable,
+    ) {
         consistent = detail.consistent;
         for clash in &detail.abox_clashes {
             warnings.push(ReasonerWarning {
@@ -62,9 +64,7 @@ pub fn classify_with_swrl(input: &ReasonerInput) -> Result<ClassificationResult>
 /// Clone input ontology, inject authored rules, and materialize SWRL inferences.
 ///
 /// Returns the post-materialization ontology plus inject/materialize warnings.
-pub fn prepare_swrl_ontology(
-    input: &ReasonerInput,
-) -> Result<(Ontology, Vec<ReasonerWarning>)> {
+pub fn prepare_swrl_ontology(input: &ReasonerInput) -> Result<(Ontology, Vec<ReasonerWarning>)> {
     let mut ontology = input.ontology.clone();
     let mut warnings = Vec::new();
     // Prefer rules already injected at WorkspaceInputLoader time; re-inject from live
@@ -150,9 +150,7 @@ pub fn inject_swrl_from_turtle(
             Err(e) => {
                 warnings.push(ReasonerWarning {
                     code: "swrl_rule_skipped".into(),
-                    message: format!(
-                        "enabled SWRL rule {rule_id} was not injected: {e}"
-                    ),
+                    message: format!("enabled SWRL rule {rule_id} was not injected: {e}"),
                     suggested_profile: None,
                 });
             }
@@ -239,10 +237,7 @@ fn convert_darg(ontology: &mut Ontology, arg: &ontocore_swrl::SwrlDArg) -> Resul
                 ),
                 None => None,
             };
-            Ok(SwrlDArg::Literal {
-                lexical: lexical.clone(),
-                datatype,
-            })
+            Ok(SwrlDArg::Literal { lexical: lexical.clone(), datatype })
         }
     }
 }

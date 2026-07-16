@@ -168,8 +168,11 @@ mod tests {
     #[test]
     fn update_snapshot_preserves_realization() {
         let mut store = ReasonerCacheStore::new();
-        let mut snapshot =
-            store.store_classification(dummy_input("h"), ReasonerId::Dl, dummy_classification("dl"));
+        let mut snapshot = store.store_classification(
+            dummy_input("h"),
+            ReasonerId::Dl,
+            dummy_classification("dl"),
+        );
         assert!(snapshot.realization.is_none());
         snapshot.realization = Some(crate::result::RealizationResult {
             profile_used: "dl".into(),

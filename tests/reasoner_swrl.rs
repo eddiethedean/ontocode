@@ -15,10 +15,7 @@ fn load_swrl_fixture() -> ontocore_reasoner::ReasonerInput {
 #[test]
 fn el_profile_warns_when_swrl_present() {
     let input = load_swrl_fixture();
-    assert!(
-        ontocore_reasoner::input_has_swrl_rules(&input),
-        "fixture should contain SWRL"
-    );
+    assert!(ontocore_reasoner::input_has_swrl_rules(&input), "fixture should contain SWRL");
     let result = classify(ReasonerId::El, &input, false).expect("classify");
     assert!(
         result.warnings.iter().any(|w| w.code == "swrl_skipped_for_profile"),
@@ -67,11 +64,7 @@ fn inject_skips_builtin_rules_with_warning() {
     let before = ontology.swrl_rules().len();
     let (injected, warnings) = inject_swrl_from_turtle(&mut ontology, &text);
     assert_eq!(injected, 0, "BuiltIn rules must not inject");
-    assert_eq!(
-        ontology.swrl_rules().len(),
-        before,
-        "store must not grow on skipped BuiltIn rule"
-    );
+    assert_eq!(ontology.swrl_rules().len(), before, "store must not grow on skipped BuiltIn rule");
     assert!(
         warnings.iter().any(|w| w.code == "swrl_rule_skipped"),
         "expected swrl_rule_skipped: {warnings:?}"

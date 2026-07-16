@@ -77,6 +77,7 @@ pub fn load_rdf_xml_ontology(
 ///
 /// The third return value is `true` when an RDF projection round-trip reports incompleteness
 /// (same policy as catalog `load_owx_text` / #383).
+#[allow(clippy::type_complexity)]
 pub fn load_owl_xml_ontology(
     source: &str,
 ) -> Result<(ComponentMappedOntology<RcStr, RcAnnotatedComponent>, BTreeMap<String, String>, bool)>

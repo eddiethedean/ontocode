@@ -88,4 +88,3 @@ fn builtin_atom_warns_not_executable() {
         "expected not-executable warning: {diags:?}"
     );
 }
-

@@ -222,4 +222,3 @@ ex:Human a owl:Class .
         "rule should be gone after semantic remove"
     );
 }
-

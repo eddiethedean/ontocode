@@ -289,7 +289,8 @@ pub fn preview_merge_entities(
                 if !original.contains(&from_id) {
                     continue;
                 }
-                match ontocore_obo::remap_obo_id_in_text(&original, &from_id, &to_id) {
+                // Delete merge stanza then remap refs (#367) — matches Turtle merge.
+                match ontocore_obo::merge_obo_id_in_text(&original, &from_id, &to_id) {
                     Ok(text) => text,
                     Err(e) => {
                         warnings.push(format!("skipping OBO {}: {e}", doc.path.display()));
@@ -425,11 +426,8 @@ pub fn preview_replace_entity(
                 if !original.contains(&from_id) {
                     continue;
                 }
-                warnings.push(format!(
-                    "non-Turtle replace rewrites all IRI mentions in {}",
-                    doc.path.display()
-                ));
-                match ontocore_obo::remap_obo_id_in_text(&original, &from_id, &to_id) {
+                // Preserve source `id:` stanza; remap refs only (#367) — matches Turtle.
+                match ontocore_obo::replace_obo_id_refs_in_text(&original, &from_id, &to_id) {
                     Ok(text) => text,
                     Err(e) => {
                         warnings.push(format!("skipping OBO {}: {e}", doc.path.display()));

@@ -5,11 +5,12 @@ use crate::serialize::{
     load_owl_xml_ontology, load_rdf_xml_ontology, serialize_owl_xml, serialize_rdf_xml,
 };
 use horned_owl::model::{
-    AnnotatedComponent, Annotation, AnnotationAssertion, AnnotationSubject, AnnotationValue, Build,
-    Class, ClassAssertion, ClassExpression, Component, DataPropertyAssertion, DataRange,
-    DeclareClass, DeclareDataProperty, DeclareNamedIndividual, DeclareObjectProperty, Individual,
-    MutableOntology, NamedIndividual, ObjectPropertyAssertion, ObjectPropertyExpression,
-    RcAnnotatedComponent, RcStr, SubClassOf,
+    AnnotatedComponent, Annotation, AnnotationAssertion, AnnotationSubject, AnnotationValue, Atom,
+    Build, Class, ClassAssertion, ClassExpression, Component, DArgument, DataPropertyAssertion,
+    DataRange, DeclareClass, DeclareDataProperty, DeclareNamedIndividual, DeclareObjectProperty,
+    FacetRestriction, IArgument, Individual, Literal, MutableOntology, NamedIndividual,
+    ObjectPropertyAssertion, ObjectPropertyExpression, PropertyExpression, RcAnnotatedComponent,
+    RcStr, SubClassOf, Variable,
 };
 use horned_owl::ontology::component_mapped::ComponentMappedOntology;
 use std::collections::BTreeMap;
@@ -89,6 +90,19 @@ fn remap_annotated(
     AnnotatedComponent { component, ann }
 }
 
+fn remap_iri(
+    iri: &horned_owl::model::IRI<RcStr>,
+    from: &str,
+    to: &str,
+    build: &Build<RcStr>,
+) -> horned_owl::model::IRI<RcStr> {
+    if iri.to_string() == from {
+        build.iri(to)
+    } else {
+        iri.clone()
+    }
+}
+
 fn remap_component(
     c: &Component<RcStr>,
     from: &str,
@@ -96,17 +110,42 @@ fn remap_component(
     build: &Build<RcStr>,
 ) -> Component<RcStr> {
     match c {
+        Component::OntologyID(id) => Component::OntologyID(horned_owl::model::OntologyID {
+            iri: id.iri.as_ref().map(|i| remap_iri(i, from, to, build)),
+            viri: id.viri.as_ref().map(|i| remap_iri(i, from, to, build)),
+        }),
+        Component::DocIRI(doc) => {
+            Component::DocIRI(horned_owl::model::DocIRI(remap_iri(&doc.0, from, to, build)))
+        }
+        Component::OntologyAnnotation(ann) => Component::OntologyAnnotation(
+            horned_owl::model::OntologyAnnotation(remap_annotation(&ann.0, from, to, build)),
+        ),
+        Component::Import(imp) => {
+            if imp.0.to_string() == from {
+                Component::Import(horned_owl::model::Import(build.iri(to)))
+            } else {
+                c.clone()
+            }
+        }
         Component::DeclareClass(DeclareClass(cls)) => {
             Component::DeclareClass(DeclareClass(remap_class(cls, from, to, build)))
         }
         Component::DeclareObjectProperty(d) => Component::DeclareObjectProperty(
             DeclareObjectProperty(remap_object_property(&d.0, from, to, build)),
         ),
+        Component::DeclareAnnotationProperty(d) => {
+            Component::DeclareAnnotationProperty(horned_owl::model::DeclareAnnotationProperty(
+                remap_annotation_property(&d.0, from, to, build),
+            ))
+        }
         Component::DeclareDataProperty(d) => Component::DeclareDataProperty(DeclareDataProperty(
             remap_data_property(&d.0, from, to, build),
         )),
         Component::DeclareNamedIndividual(d) => Component::DeclareNamedIndividual(
             DeclareNamedIndividual(remap_named_individual(&d.0, from, to, build)),
+        ),
+        Component::DeclareDatatype(d) => Component::DeclareDatatype(
+            horned_owl::model::DeclareDatatype(remap_datatype(&d.0, from, to, build)),
         ),
         Component::SubClassOf(ax) => Component::SubClassOf(SubClassOf {
             sub: remap_class_expression(&ax.sub, from, to, build),
@@ -122,52 +161,10 @@ fn remap_component(
                 ax.0.iter().map(|ce| remap_class_expression(ce, from, to, build)).collect(),
             ))
         }
-        Component::ClassAssertion(ax) => Component::ClassAssertion(ClassAssertion {
-            ce: remap_class_expression(&ax.ce, from, to, build),
-            i: remap_individual(&ax.i, from, to, build),
-        }),
-        Component::ObjectPropertyAssertion(ax) => {
-            Component::ObjectPropertyAssertion(ObjectPropertyAssertion {
-                ope: remap_ope(&ax.ope, from, to, build),
-                from: remap_individual(&ax.from, from, to, build),
-                to: remap_individual(&ax.to, from, to, build),
-            })
-        }
-        Component::DataPropertyAssertion(ax) => {
-            Component::DataPropertyAssertion(DataPropertyAssertion {
-                dp: remap_data_property(&ax.dp, from, to, build),
-                from: remap_individual(&ax.from, from, to, build),
-                to: ax.to.clone(),
-            })
-        }
-        Component::AnnotationAssertion(ax) => Component::AnnotationAssertion(AnnotationAssertion {
-            subject: remap_annotation_subject(&ax.subject, from, to, build),
-            ann: remap_annotation(&ax.ann, from, to, build),
-        }),
-        Component::ObjectPropertyDomain(ax) => {
-            Component::ObjectPropertyDomain(horned_owl::model::ObjectPropertyDomain {
-                ope: remap_ope(&ax.ope, from, to, build),
-                ce: remap_class_expression(&ax.ce, from, to, build),
-            })
-        }
-        Component::ObjectPropertyRange(ax) => {
-            Component::ObjectPropertyRange(horned_owl::model::ObjectPropertyRange {
-                ope: remap_ope(&ax.ope, from, to, build),
-                ce: remap_class_expression(&ax.ce, from, to, build),
-            })
-        }
-        Component::DataPropertyDomain(ax) => {
-            Component::DataPropertyDomain(horned_owl::model::DataPropertyDomain {
-                dp: remap_data_property(&ax.dp, from, to, build),
-                ce: remap_class_expression(&ax.ce, from, to, build),
-            })
-        }
-        Component::DataPropertyRange(ax) => {
-            Component::DataPropertyRange(horned_owl::model::DataPropertyRange {
-                dp: remap_data_property(&ax.dp, from, to, build),
-                dr: remap_data_range(&ax.dr, from, to, build),
-            })
-        }
+        Component::DisjointUnion(ax) => Component::DisjointUnion(horned_owl::model::DisjointUnion(
+            remap_class(&ax.0, from, to, build),
+            ax.1.iter().map(|ce| remap_class_expression(ce, from, to, build)).collect(),
+        )),
         Component::SubObjectPropertyOf(ax) => {
             Component::SubObjectPropertyOf(horned_owl::model::SubObjectPropertyOf {
                 sub: match &ax.sub {
@@ -185,15 +182,170 @@ fn remap_component(
                 sup: remap_ope(&ax.sup, from, to, build),
             })
         }
-        Component::Import(imp) => {
-            let iri = imp.0.to_string();
-            if iri == from {
-                Component::Import(horned_owl::model::Import(build.iri(to)))
-            } else {
-                c.clone()
-            }
+        Component::EquivalentObjectProperties(ax) => {
+            Component::EquivalentObjectProperties(horned_owl::model::EquivalentObjectProperties(
+                ax.0.iter().map(|ope| remap_ope(ope, from, to, build)).collect(),
+            ))
         }
-        other => other.clone(),
+        Component::DisjointObjectProperties(ax) => {
+            Component::DisjointObjectProperties(horned_owl::model::DisjointObjectProperties(
+                ax.0.iter().map(|ope| remap_ope(ope, from, to, build)).collect(),
+            ))
+        }
+        Component::InverseObjectProperties(ax) => {
+            Component::InverseObjectProperties(horned_owl::model::InverseObjectProperties(
+                remap_object_property(&ax.0, from, to, build),
+                remap_object_property(&ax.1, from, to, build),
+            ))
+        }
+        Component::ObjectPropertyDomain(ax) => {
+            Component::ObjectPropertyDomain(horned_owl::model::ObjectPropertyDomain {
+                ope: remap_ope(&ax.ope, from, to, build),
+                ce: remap_class_expression(&ax.ce, from, to, build),
+            })
+        }
+        Component::ObjectPropertyRange(ax) => {
+            Component::ObjectPropertyRange(horned_owl::model::ObjectPropertyRange {
+                ope: remap_ope(&ax.ope, from, to, build),
+                ce: remap_class_expression(&ax.ce, from, to, build),
+            })
+        }
+        Component::FunctionalObjectProperty(ax) => Component::FunctionalObjectProperty(
+            horned_owl::model::FunctionalObjectProperty(remap_ope(&ax.0, from, to, build)),
+        ),
+        Component::InverseFunctionalObjectProperty(ax) => {
+            Component::InverseFunctionalObjectProperty(
+                horned_owl::model::InverseFunctionalObjectProperty(remap_ope(
+                    &ax.0, from, to, build,
+                )),
+            )
+        }
+        Component::ReflexiveObjectProperty(ax) => Component::ReflexiveObjectProperty(
+            horned_owl::model::ReflexiveObjectProperty(remap_ope(&ax.0, from, to, build)),
+        ),
+        Component::IrreflexiveObjectProperty(ax) => Component::IrreflexiveObjectProperty(
+            horned_owl::model::IrreflexiveObjectProperty(remap_ope(&ax.0, from, to, build)),
+        ),
+        Component::SymmetricObjectProperty(ax) => Component::SymmetricObjectProperty(
+            horned_owl::model::SymmetricObjectProperty(remap_ope(&ax.0, from, to, build)),
+        ),
+        Component::AsymmetricObjectProperty(ax) => Component::AsymmetricObjectProperty(
+            horned_owl::model::AsymmetricObjectProperty(remap_ope(&ax.0, from, to, build)),
+        ),
+        Component::TransitiveObjectProperty(ax) => Component::TransitiveObjectProperty(
+            horned_owl::model::TransitiveObjectProperty(remap_ope(&ax.0, from, to, build)),
+        ),
+        Component::SubDataPropertyOf(ax) => {
+            Component::SubDataPropertyOf(horned_owl::model::SubDataPropertyOf {
+                sub: remap_data_property(&ax.sub, from, to, build),
+                sup: remap_data_property(&ax.sup, from, to, build),
+            })
+        }
+        Component::EquivalentDataProperties(ax) => {
+            Component::EquivalentDataProperties(horned_owl::model::EquivalentDataProperties(
+                ax.0.iter().map(|dp| remap_data_property(dp, from, to, build)).collect(),
+            ))
+        }
+        Component::DisjointDataProperties(ax) => {
+            Component::DisjointDataProperties(horned_owl::model::DisjointDataProperties(
+                ax.0.iter().map(|dp| remap_data_property(dp, from, to, build)).collect(),
+            ))
+        }
+        Component::DataPropertyDomain(ax) => {
+            Component::DataPropertyDomain(horned_owl::model::DataPropertyDomain {
+                dp: remap_data_property(&ax.dp, from, to, build),
+                ce: remap_class_expression(&ax.ce, from, to, build),
+            })
+        }
+        Component::DataPropertyRange(ax) => {
+            Component::DataPropertyRange(horned_owl::model::DataPropertyRange {
+                dp: remap_data_property(&ax.dp, from, to, build),
+                dr: remap_data_range(&ax.dr, from, to, build),
+            })
+        }
+        Component::FunctionalDataProperty(ax) => Component::FunctionalDataProperty(
+            horned_owl::model::FunctionalDataProperty(remap_data_property(&ax.0, from, to, build)),
+        ),
+        Component::DatatypeDefinition(ax) => {
+            Component::DatatypeDefinition(horned_owl::model::DatatypeDefinition {
+                kind: remap_datatype(&ax.kind, from, to, build),
+                range: remap_data_range(&ax.range, from, to, build),
+            })
+        }
+        Component::HasKey(ax) => Component::HasKey(horned_owl::model::HasKey {
+            ce: remap_class_expression(&ax.ce, from, to, build),
+            vpe: ax.vpe.iter().map(|pe| remap_property_expression(pe, from, to, build)).collect(),
+        }),
+        Component::SameIndividual(ax) => {
+            Component::SameIndividual(horned_owl::model::SameIndividual(
+                ax.0.iter().map(|i| remap_individual(i, from, to, build)).collect(),
+            ))
+        }
+        Component::DifferentIndividuals(ax) => {
+            Component::DifferentIndividuals(horned_owl::model::DifferentIndividuals(
+                ax.0.iter().map(|i| remap_individual(i, from, to, build)).collect(),
+            ))
+        }
+        Component::ClassAssertion(ax) => Component::ClassAssertion(ClassAssertion {
+            ce: remap_class_expression(&ax.ce, from, to, build),
+            i: remap_individual(&ax.i, from, to, build),
+        }),
+        Component::ObjectPropertyAssertion(ax) => {
+            Component::ObjectPropertyAssertion(ObjectPropertyAssertion {
+                ope: remap_ope(&ax.ope, from, to, build),
+                from: remap_individual(&ax.from, from, to, build),
+                to: remap_individual(&ax.to, from, to, build),
+            })
+        }
+        Component::NegativeObjectPropertyAssertion(ax) => {
+            Component::NegativeObjectPropertyAssertion(
+                horned_owl::model::NegativeObjectPropertyAssertion {
+                    ope: remap_ope(&ax.ope, from, to, build),
+                    from: remap_individual(&ax.from, from, to, build),
+                    to: remap_individual(&ax.to, from, to, build),
+                },
+            )
+        }
+        Component::DataPropertyAssertion(ax) => {
+            Component::DataPropertyAssertion(DataPropertyAssertion {
+                dp: remap_data_property(&ax.dp, from, to, build),
+                from: remap_individual(&ax.from, from, to, build),
+                to: remap_literal(&ax.to, from, to, build),
+            })
+        }
+        Component::NegativeDataPropertyAssertion(ax) => Component::NegativeDataPropertyAssertion(
+            horned_owl::model::NegativeDataPropertyAssertion {
+                dp: remap_data_property(&ax.dp, from, to, build),
+                from: remap_individual(&ax.from, from, to, build),
+                to: remap_literal(&ax.to, from, to, build),
+            },
+        ),
+        Component::AnnotationAssertion(ax) => Component::AnnotationAssertion(AnnotationAssertion {
+            subject: remap_annotation_subject(&ax.subject, from, to, build),
+            ann: remap_annotation(&ax.ann, from, to, build),
+        }),
+        Component::SubAnnotationPropertyOf(ax) => {
+            Component::SubAnnotationPropertyOf(horned_owl::model::SubAnnotationPropertyOf {
+                sub: remap_annotation_property(&ax.sub, from, to, build),
+                sup: remap_annotation_property(&ax.sup, from, to, build),
+            })
+        }
+        Component::AnnotationPropertyDomain(ax) => {
+            Component::AnnotationPropertyDomain(horned_owl::model::AnnotationPropertyDomain {
+                ap: remap_annotation_property(&ax.ap, from, to, build),
+                iri: remap_iri(&ax.iri, from, to, build),
+            })
+        }
+        Component::AnnotationPropertyRange(ax) => {
+            Component::AnnotationPropertyRange(horned_owl::model::AnnotationPropertyRange {
+                ap: remap_annotation_property(&ax.ap, from, to, build),
+                iri: remap_iri(&ax.iri, from, to, build),
+            })
+        }
+        Component::Rule(rule) => Component::Rule(horned_owl::model::Rule {
+            head: rule.head.iter().map(|a| remap_atom(a, from, to, build)).collect(),
+            body: rule.body.iter().map(|a| remap_atom(a, from, to, build)).collect(),
+        }),
     }
 }
 
@@ -208,6 +360,9 @@ fn remap_annotation(
         av: match &ann.av {
             AnnotationValue::IRI(iri) if iri.to_string() == from => {
                 AnnotationValue::IRI(build.iri(to))
+            }
+            AnnotationValue::Literal(lit) => {
+                AnnotationValue::Literal(remap_literal(lit, from, to, build))
             }
             other => other.clone(),
         },
@@ -275,6 +430,19 @@ fn remap_data_property(
     }
 }
 
+fn remap_datatype(
+    dt: &horned_owl::model::Datatype<RcStr>,
+    from: &str,
+    to: &str,
+    build: &Build<RcStr>,
+) -> horned_owl::model::Datatype<RcStr> {
+    if dt.to_string() == from {
+        build.datatype(to)
+    } else {
+        dt.clone()
+    }
+}
+
 fn remap_named_individual(
     i: &NamedIndividual<RcStr>,
     from: &str,
@@ -315,6 +483,116 @@ fn remap_ope(
                 p, from, to, build,
             ))
         }
+    }
+}
+
+fn remap_property_expression(
+    pe: &PropertyExpression<RcStr>,
+    from: &str,
+    to: &str,
+    build: &Build<RcStr>,
+) -> PropertyExpression<RcStr> {
+    match pe {
+        PropertyExpression::ObjectPropertyExpression(ope) => {
+            PropertyExpression::ObjectPropertyExpression(remap_ope(ope, from, to, build))
+        }
+        PropertyExpression::DataProperty(dp) => {
+            PropertyExpression::DataProperty(remap_data_property(dp, from, to, build))
+        }
+        PropertyExpression::AnnotationProperty(ap) => {
+            PropertyExpression::AnnotationProperty(remap_annotation_property(ap, from, to, build))
+        }
+    }
+}
+
+fn remap_literal(
+    lit: &Literal<RcStr>,
+    from: &str,
+    to: &str,
+    build: &Build<RcStr>,
+) -> Literal<RcStr> {
+    match lit {
+        Literal::Datatype { literal, datatype_iri } => Literal::Datatype {
+            literal: literal.clone(),
+            datatype_iri: remap_iri(datatype_iri, from, to, build),
+        },
+        other => other.clone(),
+    }
+}
+
+fn remap_variable(
+    v: &Variable<RcStr>,
+    from: &str,
+    to: &str,
+    build: &Build<RcStr>,
+) -> Variable<RcStr> {
+    if v.0.to_string() == from {
+        build.variable(to)
+    } else {
+        v.clone()
+    }
+}
+
+fn remap_iargument(
+    arg: &IArgument<RcStr>,
+    from: &str,
+    to: &str,
+    build: &Build<RcStr>,
+) -> IArgument<RcStr> {
+    match arg {
+        IArgument::Individual(i) => IArgument::Individual(remap_individual(i, from, to, build)),
+        IArgument::Variable(v) => IArgument::Variable(remap_variable(v, from, to, build)),
+    }
+}
+
+fn remap_dargument(
+    arg: &DArgument<RcStr>,
+    from: &str,
+    to: &str,
+    build: &Build<RcStr>,
+) -> DArgument<RcStr> {
+    match arg {
+        DArgument::Literal(l) => DArgument::Literal(remap_literal(l, from, to, build)),
+        DArgument::Variable(v) => DArgument::Variable(remap_variable(v, from, to, build)),
+    }
+}
+
+fn remap_atom(atom: &Atom<RcStr>, from: &str, to: &str, build: &Build<RcStr>) -> Atom<RcStr> {
+    match atom {
+        Atom::BuiltInAtom { pred, args } => Atom::BuiltInAtom {
+            pred: remap_iri(pred, from, to, build),
+            args: args.iter().map(|a| remap_dargument(a, from, to, build)).collect(),
+        },
+        Atom::ClassAtom { pred, arg } => Atom::ClassAtom {
+            pred: remap_class_expression(pred, from, to, build),
+            arg: remap_iargument(arg, from, to, build),
+        },
+        Atom::DataPropertyAtom { pred, args } => Atom::DataPropertyAtom {
+            pred: remap_data_property(pred, from, to, build),
+            args: (
+                remap_dargument(&args.0, from, to, build),
+                remap_dargument(&args.1, from, to, build),
+            ),
+        },
+        Atom::DataRangeAtom { pred, arg } => Atom::DataRangeAtom {
+            pred: remap_data_range(pred, from, to, build),
+            arg: remap_dargument(arg, from, to, build),
+        },
+        Atom::DifferentIndividualsAtom(a, b) => Atom::DifferentIndividualsAtom(
+            remap_iargument(a, from, to, build),
+            remap_iargument(b, from, to, build),
+        ),
+        Atom::ObjectPropertyAtom { pred, args } => Atom::ObjectPropertyAtom {
+            pred: remap_ope(pred, from, to, build),
+            args: (
+                remap_iargument(&args.0, from, to, build),
+                remap_iargument(&args.1, from, to, build),
+            ),
+        },
+        Atom::SameIndividualAtom(a, b) => Atom::SameIndividualAtom(
+            remap_iargument(a, from, to, build),
+            remap_iargument(b, from, to, build),
+        ),
     }
 }
 
@@ -386,7 +664,7 @@ fn remap_class_expression(
         },
         ClassExpression::DataHasValue { dp, l } => ClassExpression::DataHasValue {
             dp: remap_data_property(dp, from, to, build),
-            l: l.clone(),
+            l: remap_literal(l, from, to, build),
         },
         ClassExpression::DataMinCardinality { n, dp, dr } => ClassExpression::DataMinCardinality {
             n: *n,
@@ -415,14 +693,29 @@ fn remap_data_range(
     build: &Build<RcStr>,
 ) -> DataRange<RcStr> {
     match dr {
-        DataRange::Datatype(dt) => {
-            if dt.to_string() == from {
-                DataRange::Datatype(build.datatype(to))
-            } else {
-                dr.clone()
-            }
+        DataRange::Datatype(dt) => DataRange::Datatype(remap_datatype(dt, from, to, build)),
+        DataRange::DataIntersectionOf(v) => DataRange::DataIntersectionOf(
+            v.iter().map(|d| remap_data_range(d, from, to, build)).collect(),
+        ),
+        DataRange::DataUnionOf(v) => {
+            DataRange::DataUnionOf(v.iter().map(|d| remap_data_range(d, from, to, build)).collect())
         }
-        other => other.clone(),
+        DataRange::DataComplementOf(inner) => {
+            DataRange::DataComplementOf(Box::new(remap_data_range(inner, from, to, build)))
+        }
+        DataRange::DataOneOf(lits) => {
+            DataRange::DataOneOf(lits.iter().map(|l| remap_literal(l, from, to, build)).collect())
+        }
+        DataRange::DatatypeRestriction(dt, facets) => DataRange::DatatypeRestriction(
+            remap_datatype(dt, from, to, build),
+            facets
+                .iter()
+                .map(|f| FacetRestriction {
+                    f: f.f.clone(),
+                    l: remap_literal(&f.l, from, to, build),
+                })
+                .collect(),
+        ),
     }
 }
 
@@ -453,5 +746,95 @@ mod tests {
         assert!(out.contains("http://example.org#Human"), "{out}");
         assert!(!out.contains("http://example.org#Person"), "{out}");
         assert!(out.contains("http://example.org#Patient"), "{out}");
+    }
+
+    #[test]
+    fn remaps_inverse_functional_sameas_haskey() {
+        let src = r#"<?xml version="1.0"?>
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:owl="http://www.w3.org/2002/07/owl#"
+         xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+  <owl:ObjectProperty rdf:about="http://example.org#P">
+    <rdf:type rdf:resource="http://www.w3.org/2002/07/owl#FunctionalProperty"/>
+    <owl:inverseOf rdf:resource="http://example.org#Q"/>
+  </owl:ObjectProperty>
+  <owl:ObjectProperty rdf:about="http://example.org#Q"/>
+  <owl:Class rdf:about="http://example.org#C">
+    <owl:hasKey rdf:parseType="Collection">
+      <rdf:Description rdf:about="http://example.org#P"/>
+    </owl:hasKey>
+  </owl:Class>
+  <owl:NamedIndividual rdf:about="http://example.org#a">
+    <owl:sameAs rdf:resource="http://example.org#b"/>
+  </owl:NamedIndividual>
+  <owl:NamedIndividual rdf:about="http://example.org#b"/>
+</rdf:RDF>
+"#;
+        let out = remap_entity_iri_in_xml_text(
+            src,
+            "rdfxml",
+            "http://example.org#P",
+            "http://example.org#RenamedP",
+            &BTreeMap::new(),
+        )
+        .expect("remap P");
+        assert!(out.contains("http://example.org#RenamedP"), "{out}");
+        assert!(
+            !out.contains("rdf:about=\"http://example.org#P\"")
+                && !out.contains("rdf:resource=\"http://example.org#P\""),
+            "old P IRI must not remain as about/resource: {out}"
+        );
+    }
+
+    #[test]
+    fn remaps_nested_datatype_restriction() {
+        // Build ontology in-memory so we do not depend on RDF/XML DatatypeRestriction parsing.
+        let build = Build::new_rc();
+        let mut ont = ComponentMappedOntology::<RcStr, RcAnnotatedComponent>::default();
+        let my_dt = build.datatype("http://example.org#MyDt");
+        ont.insert(Component::DeclareDatatype(horned_owl::model::DeclareDatatype(my_dt.clone())));
+        ont.insert(Component::SubClassOf(SubClassOf {
+            sub: ClassExpression::Class(build.class("http://example.org#Restricted")),
+            sup: ClassExpression::DataSomeValuesFrom {
+                dp: build.data_property("http://example.org#dp"),
+                dr: DataRange::DatatypeRestriction(my_dt, Vec::new()),
+            },
+        }));
+        let n = remap_entity_iri(&mut ont, "http://example.org#MyDt", "http://example.org#NewDt")
+            .expect("remap");
+        assert!(n >= 1, "expected at least one component rewritten");
+        let mut saw_new = false;
+        let mut saw_old = false;
+        for ac in ont.i() {
+            match &ac.component {
+                Component::DeclareDatatype(d) => {
+                    let s = d.0.to_string();
+                    if s.contains("NewDt") {
+                        saw_new = true;
+                    }
+                    if s.contains("MyDt") {
+                        saw_old = true;
+                    }
+                }
+                Component::SubClassOf(ax) => {
+                    let ClassExpression::DataSomeValuesFrom { dr, .. } = &ax.sup else {
+                        continue;
+                    };
+                    let DataRange::DatatypeRestriction(dt, _) = dr else {
+                        continue;
+                    };
+                    let s = dt.to_string();
+                    if s.contains("NewDt") {
+                        saw_new = true;
+                    }
+                    if s.contains("MyDt") {
+                        saw_old = true;
+                    }
+                }
+                _ => {}
+            }
+        }
+        assert!(saw_new, "expected NewDt after remap");
+        assert!(!saw_old, "MyDt must not remain");
     }
 }

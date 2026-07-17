@@ -13,6 +13,42 @@ const BUILTIN_ROOTS: &[&str] = &[
     "http://www.w3.org/2000/01/rdf-schema#Resource",
 ];
 
+/// True when `object` looks like a Manchester/restriction expression rather than a bare IRI.
+fn is_complex_class_expression(object: &str) -> bool {
+    let trimmed = object.trim();
+    if trimmed.is_empty() {
+        return false;
+    }
+    // Absolute / angle-bracket IRIs and plain CURIEs are named parents.
+    if trimmed.starts_with('<') && trimmed.ends_with('>') {
+        return false;
+    }
+    if trimmed.contains("://") {
+        return false;
+    }
+    // Restriction / Manchester operators (and whitespace-separated expressions).
+    let lower = trimmed.to_ascii_lowercase();
+    if lower.contains(" some ")
+        || lower.contains(" only ")
+        || lower.contains(" value ")
+        || lower.contains(" min ")
+        || lower.contains(" max ")
+        || lower.contains(" exactly ")
+        || lower.contains(" and ")
+        || lower.contains(" or ")
+        || lower.contains(" not ")
+        || lower.starts_with("not ")
+    {
+        return true;
+    }
+    // Parentheses or commas typically mark complex expressions, not bare IRIs/CURIEs.
+    if trimmed.contains('(') || trimmed.contains(')') {
+        return true;
+    }
+    // Bare CURIE / local name without operators → named (possibly unresolved) parent.
+    false
+}
+
 pub fn orphan_classes(
     data: &DiagnosticInput<'_>,
     source: &dyn Fn(&Path) -> String,
@@ -50,7 +86,13 @@ pub fn orphan_classes(
                 .filter(|a| a.axiom_kind == AXIOM_KIND_SUB_CLASS_OF && a.subject == class.iri)
                 .map(|a| a.object.as_str())
                 .collect();
-            !parents.iter().any(|p| entity_iris.contains(p) || BUILTIN_ROOTS.contains(p))
+            // Named catalog/builtin parents OR complex/Manchester parents count
+            // as taxonomic structure (#401).
+            !parents.iter().any(|p| {
+                entity_iris.contains(p)
+                    || BUILTIN_ROOTS.contains(p)
+                    || is_complex_class_expression(p)
+            })
         };
         if !is_orphan {
             continue;
@@ -195,6 +237,59 @@ mod tests {
         assert!(
             !diags.iter().any(|d| d.entity_iri.as_deref() == Some("http://ex/Thing")),
             "root with children should not be orphan"
+        );
+    }
+
+    #[test]
+    fn class_with_only_restriction_parent_is_not_orphan() {
+        let documents = vec![OntologyDocument {
+            id: "doc-1".to_string(),
+            path: Path::new("test.ttl").to_path_buf(),
+            format: OntologyFormat::Turtle,
+            base_iri: Some("http://ex/".to_string()),
+            version_iri: None,
+            imports: vec![],
+            namespaces: BTreeMap::new(),
+            parse_status: ParseStatus::Ok,
+            content_hash: "h".to_string(),
+            modified_time: 0,
+            parse_message: None,
+            parse_error_location: None,
+        }];
+        let entities = vec![Entity {
+            iri: "http://ex/A".to_string(),
+            short_name: "A".to_string(),
+            kind: EntityKind::Class,
+            ontology_id: "doc-1".to_string(),
+            source_location: Default::default(),
+            labels: vec![],
+            comments: vec![],
+            deprecated: false,
+            obo_id: None,
+            characteristics: Default::default(),
+        }];
+        let axioms = vec![ontocore_core::Axiom {
+            id: "a1".to_string(),
+            ontology_id: "doc-1".to_string(),
+            subject: "http://ex/A".to_string(),
+            predicate: "subClassOf".to_string(),
+            object: "ex:p some ex:B".to_string(),
+            axiom_kind: AXIOM_KIND_SUB_CLASS_OF.to_string(),
+            source_location: Default::default(),
+            annotations: Vec::new(),
+        }];
+        let input = DiagnosticInput {
+            documents: &documents,
+            entities: &entities,
+            annotations: &[],
+            axioms: &axioms,
+            namespaces: &[],
+            imports: &[],
+        };
+        let diags = orphan_classes(&input, &empty_source);
+        assert!(
+            diags.is_empty(),
+            "restriction parents should not flag orphan_class: {diags:?}"
         );
     }
 }

@@ -4,6 +4,7 @@ import {
   clearSelfWritesForTests,
   isSelfWrite,
   noteSelfWrite,
+  noteSelfWrites,
   SELF_WRITE_TTL_MS,
 } from "./selfWriteGuard";
 import {
@@ -29,6 +30,15 @@ describe("selfWriteGuard (#293)", () => {
     clearSelfWritesForTests();
     noteSelfWrite("/ws/a.ttl", 1000, 100);
     assert.equal(isSelfWrite("/ws/b.ttl", 150), false);
+  });
+
+  it("notes every path from a refactor plan (#396)", () => {
+    clearSelfWritesForTests();
+    const t0 = 2_000_000;
+    noteSelfWrites(["/ws/a.ttl", "/ws/b.owl"], SELF_WRITE_TTL_MS, t0);
+    assert.equal(isSelfWrite("/ws/a.ttl", t0 + 10), true);
+    assert.equal(isSelfWrite("/ws/b.owl", t0 + 10), true);
+    assert.equal(isSelfWrite("/ws/c.ttl", t0 + 10), false);
   });
 });
 

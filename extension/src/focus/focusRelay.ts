@@ -47,12 +47,22 @@ class FocusRelayService {
 
   setFocus(
     input: Omit<CurrentFocus, "timestamp"> & { timestamp?: number },
-    options?: { broadcast?: boolean }
+    options?: { broadcast?: boolean; force?: boolean }
   ): CurrentFocus {
     const focus: CurrentFocus = {
       ...input,
       timestamp: input.timestamp ?? Date.now(),
     };
+    // Reject stale stamps so late syncHost / panel posts cannot overwrite newer
+    // focus (align with webview hydrateFocus; #402).
+    if (
+      !options?.force &&
+      this.focus &&
+      typeof this.focus.timestamp === "number" &&
+      focus.timestamp < this.focus.timestamp
+    ) {
+      return this.focus;
+    }
     this.focus = focus;
     for (const listener of this.listeners) {
       listener(focus);

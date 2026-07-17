@@ -27,7 +27,7 @@ import {
   assertRunPluginResult,
 } from "./protocolGuards";
 import { patchSyncCancelledMessage } from "./patchFeedback";
-import { noteSelfWrite } from "../workspace/selfWriteGuard";
+import { noteSelfWrite, noteSelfWrites } from "../workspace/selfWriteGuard";
 import {
   ApplyAxiomPatchClientResult,
   ApplyAxiomPatchParams,
@@ -568,12 +568,25 @@ export async function applyRefactor(
   request: RefactorRequest,
   previewOnly = false
 ): Promise<ApplyRefactorResult> {
+  // Suppress external-change recovery for OntoCode's own refactor writes (#396).
+  const notePlanWrites = (): void => {
+    if (previewOnly) {
+      return;
+    }
+    noteSelfWrites(plan.changes.map((change) => change.path));
+  };
+  notePlanWrites();
   const result = await ontcoreRequest<unknown>("ontocore/applyRefactor", {
     plan,
     request,
     preview_only: previewOnly,
   });
-  return assertApplyRefactorResult(result);
+  const applied = assertApplyRefactorResult(result);
+  if (!previewOnly && applied.files_written > 0) {
+    notePlanWrites();
+    focusRelay.markReasoningDirty();
+  }
+  return applied;
 }
 
 export async function semanticDiff(

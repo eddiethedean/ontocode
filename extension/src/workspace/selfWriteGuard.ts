@@ -19,6 +19,17 @@ export function noteSelfWrite(
   }
 }
 
+/** Mark multiple paths (e.g. refactor plan files) as self-writes (#396). */
+export function noteSelfWrites(
+  fsPaths: readonly string[],
+  ttlMs: number = SELF_WRITE_TTL_MS,
+  now: number = Date.now()
+): void {
+  for (const fsPath of fsPaths) {
+    noteSelfWrite(fsPath, ttlMs, now);
+  }
+}
+
 /** True when `fsPath` was recently written by OntoCode and should not trigger recovery. */
 export function isSelfWrite(fsPath: string, now: number = Date.now()): boolean {
   const key = pathIdentityKey(fsPath);

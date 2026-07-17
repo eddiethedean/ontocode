@@ -69,19 +69,27 @@ function withTimestamp(
   };
 }
 
+/** Sync inspector/graph/explorer slices when focus is an entity (#352). */
+function entityFocusSliceUpdates(
+  focus: CurrentFocus
+): Pick<WorkspaceStoreState, "inspector" | "graph" | "explorer"> | null {
+  if (focus.kind !== "entity") {
+    return null;
+  }
+  return {
+    inspector: { entityIri: focus.id },
+    graph: { rootIri: focus.id },
+    explorer: { highlightedIri: focus.id },
+  };
+}
+
 export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
   ...initialWorkspaceState,
 
   setFocus(focusInput) {
     const focus = withTimestamp(focusInput);
-    set({ focus });
-    if (focus.kind === "entity") {
-      set({
-        inspector: { entityIri: focus.id },
-        graph: { rootIri: focus.id },
-        explorer: { highlightedIri: focus.id },
-      });
-    }
+    const slices = entityFocusSliceUpdates(focus);
+    set({ focus, ...(slices ?? {}) });
     get().pushNavigation(focus);
     emitWorkspaceEvent({ type: "FocusChanged", focus });
   },
@@ -104,7 +112,8 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
     }
     const index = navigation.index - 1;
     const focus = navigation.stack[index]?.focus ?? null;
-    set({ navigation: { ...navigation, index }, focus });
+    const slices = focus ? entityFocusSliceUpdates(focus) : null;
+    set({ navigation: { ...navigation, index }, focus, ...(slices ?? {}) });
     if (focus) {
       emitWorkspaceEvent({ type: "FocusChanged", focus });
     }
@@ -118,7 +127,8 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
     }
     const index = navigation.index + 1;
     const focus = navigation.stack[index]?.focus ?? null;
-    set({ navigation: { ...navigation, index }, focus });
+    const slices = focus ? entityFocusSliceUpdates(focus) : null;
+    set({ navigation: { ...navigation, index }, focus, ...(slices ?? {}) });
     if (focus) {
       emitWorkspaceEvent({ type: "FocusChanged", focus });
     }
@@ -271,14 +281,8 @@ export const useWorkspaceStore = create<WorkspaceStore>((set, get) => ({
         return;
       }
     }
-    set({ focus });
-    if (focus?.kind === "entity") {
-      set({
-        inspector: { entityIri: focus.id },
-        graph: { rootIri: focus.id },
-        explorer: { highlightedIri: focus.id },
-      });
-    }
+    const slices = focus ? entityFocusSliceUpdates(focus) : null;
+    set({ focus, ...(slices ?? {}) });
   },
 
   reset() {

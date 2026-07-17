@@ -28,17 +28,23 @@ export class WorkspaceTransactionManager {
     if (this.pending) {
       throw new Error("A workspace transaction is already in progress");
     }
-    // Sync registry before assert so cold-start / post-NOT_INDEXED edits work (#301).
-    try {
-      await ontologyRegistry.syncFromCatalog();
-    } catch (err) {
-      if (!isNotIndexedError(err)) {
-        throw err;
-      }
-    }
-    ontologyRegistry.assertEditable(documentPath);
+    // Reserve before await so concurrent begin() cannot overwrite (#386).
     this.pending = { documentUri, documentPath, patches, label };
-    return this.pending;
+    try {
+      // Sync registry before assert so cold-start / post-NOT_INDEXED edits work (#301).
+      try {
+        await ontologyRegistry.syncFromCatalog();
+      } catch (err) {
+        if (!isNotIndexedError(err)) {
+          throw err;
+        }
+      }
+      ontologyRegistry.assertEditable(documentPath);
+      return this.pending;
+    } catch (err) {
+      this.pending = undefined;
+      throw err;
+    }
   }
 
   async commit(): Promise<ApplyAxiomPatchClientResult> {

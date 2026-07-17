@@ -427,10 +427,16 @@ pub fn atomic_write(path: &Path, contents: &str) -> Result<()> {
     let nanos = SystemTime::now().duration_since(UNIX_EPOCH).map(|d| d.as_nanos()).unwrap_or(0);
     let stem = path.file_name().and_then(|s| s.to_str()).unwrap_or("file");
     let tmp_path = parent.join(format!(".ontocode-{stem}-{nanos}.tmp"));
-    {
+    // Best-effort remove temp on mid-write failure (#343).
+    let write_result = (|| -> Result<()> {
         let mut file = fs::File::create(&tmp_path)?;
         file.write_all(contents.as_bytes())?;
         file.sync_all()?;
+        Ok(())
+    })();
+    if let Err(e) = write_result {
+        let _ = fs::remove_file(&tmp_path);
+        return Err(e);
     }
     replace_file(&tmp_path, path)?;
     Ok(())
@@ -2010,9 +2016,12 @@ fn parse_all_different_members(
     let inner = &block[list_start + 1..list_end];
     let mut members = Vec::new();
     for term in tokenize_turtle_terms(inner) {
-        if let Some(iri) = expand_turtle_term_to_iri(&term, namespaces) {
-            members.push(iri);
-        }
+        let Some(iri) = expand_turtle_term_to_iri(&term, namespaces) else {
+            return Err(OwlError::PatchInvalid(format!(
+                "AllDifferent member cannot be expanded (undeclared prefix?): {term}"
+            )));
+        };
+        members.push(iri);
     }
     Ok(Some(members))
 }
@@ -4424,6 +4433,44 @@ ex:dave a owl:NamedIndividual .
         assert!(
             !out3.contains("distinctMembers ( ex:alice") && !out3.contains("ex:alice ex:bob"),
             "removed members must leave the list: {out3}"
+        );
+    }
+
+    #[test]
+    fn remove_different_individuals_fails_closed_on_unexpanded_curie() {
+        let ttl = r#"@prefix ex: <http://example.org/> .
+@prefix owl: <http://www.w3.org/2002/07/owl#> .
+ex:a a owl:NamedIndividual .
+ex:b a owl:NamedIndividual .
+ex:d a owl:NamedIndividual .
+[] a owl:AllDifferent ;
+    owl:distinctMembers ( ex:a ex:b other:c ex:d ) .
+"#;
+        let ns = BTreeMap::from([
+            ("ex".into(), "http://example.org/".into()),
+            ("owl".into(), "http://www.w3.org/2002/07/owl#".into()),
+        ]);
+        let result = apply_patches_to_text(
+            ttl,
+            &[PatchOp::RemoveDifferentIndividuals {
+                individuals: vec!["http://example.org/a".into(), "http://example.org/b".into()],
+            }],
+            true,
+            &ns,
+        )
+        .expect("preview path returns ApplyPatchResult");
+        assert!(!result.applied, "undeclared other:c must not apply: {:?}", result.diagnostics);
+        assert!(
+            result.diagnostics.iter().any(|d| {
+                d.message.contains("cannot be expanded") || d.message.contains("other:c")
+            }),
+            "expected expansion diagnostic: {:?}",
+            result.diagnostics
+        );
+        let preview = result.preview_text.unwrap_or_default();
+        assert!(
+            preview.contains("other:c") && preview.contains("owl:AllDifferent"),
+            "must not drop unexpanded members: {preview}"
         );
     }
 

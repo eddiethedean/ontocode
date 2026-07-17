@@ -475,10 +475,16 @@ pub fn atomic_write(path: &Path, contents: &str) -> Result<()> {
     let nanos = SystemTime::now().duration_since(UNIX_EPOCH).map(|d| d.as_nanos()).unwrap_or(0);
     let stem = path.file_name().and_then(|s| s.to_str()).unwrap_or("file");
     let tmp_path = parent.join(format!(".ontocode-{stem}-{nanos}.tmp"));
-    {
+    // Best-effort remove temp on mid-write failure (#343).
+    let write_result = (|| -> Result<()> {
         let mut file = fs::File::create(&tmp_path).map_err(|e| OboError::Io(e.to_string()))?;
         file.write_all(contents.as_bytes()).map_err(|e| OboError::Io(e.to_string()))?;
         file.sync_all().map_err(|e| OboError::Io(e.to_string()))?;
+        Ok(())
+    })();
+    if let Err(e) = write_result {
+        let _ = fs::remove_file(&tmp_path);
+        return Err(e);
     }
     replace_file(&tmp_path, path).map_err(|e| OboError::Io(e.to_string()))?;
     Ok(())

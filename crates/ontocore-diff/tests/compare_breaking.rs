@@ -197,3 +197,91 @@ fn owl_same_as_links_renamed_entities() {
         diff.entity_changes
     );
 }
+
+#[test]
+fn removed_same_as_does_not_count_as_rename() {
+    let dir = tempfile::tempdir().unwrap();
+    let base_path = dir.path().join("base.ttl");
+    std::fs::write(
+        &base_path,
+        "@prefix ex: <http://ex/> .\n\
+         @prefix owl: <http://www.w3.org/2002/07/owl#> .\n\
+         ex:Old a owl:NamedIndividual, owl:Class ;\n\
+           owl:sameAs ex:New .\n\
+         ex:New a owl:NamedIndividual, owl:Class .\n",
+    )
+    .unwrap();
+    let head_path = dir.path().join("head.ttl");
+    std::fs::write(
+        &head_path,
+        "@prefix ex: <http://ex/> .\n\
+         @prefix owl: <http://www.w3.org/2002/07/owl#> .\n\
+         ex:New a owl:NamedIndividual, owl:Class .\n",
+    )
+    .unwrap();
+    let base = IndexBuilder::new()
+        .workspace(dir.path())
+        .only_paths(vec![base_path])
+        .build()
+        .expect("base");
+    let head = IndexBuilder::new()
+        .workspace(dir.path())
+        .only_paths(vec![head_path])
+        .build()
+        .expect("head");
+    let diff = diff_catalogs(&base, &head);
+    assert!(
+        !diff.entity_changes.iter().any(|c| c.kind == EntityChangeKind::Renamed),
+        "removed sameAs must not invent Renamed: {:?}",
+        diff.entity_changes
+    );
+}
+
+#[test]
+fn axiom_diff_is_per_ontology_id() {
+    let dir = tempfile::tempdir().unwrap();
+    let a_path = dir.path().join("a.ttl");
+    let b_path = dir.path().join("b.ttl");
+    let shared = "@prefix ex: <http://ex/> .\n\
+         @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n\
+         @prefix owl: <http://www.w3.org/2002/07/owl#> .\n\
+         ex:A a owl:Class .\n\
+         ex:B a owl:Class .\n\
+         ex:A rdfs:subClassOf ex:B .\n";
+    std::fs::write(&a_path, shared).unwrap();
+    std::fs::write(&b_path, shared).unwrap();
+    let base = IndexBuilder::new()
+        .workspace(dir.path())
+        .only_paths(vec![a_path.clone(), b_path.clone()])
+        .build()
+        .expect("base");
+    // Head keeps the axiom only in b.ttl.
+    std::fs::write(
+        &a_path,
+        "@prefix ex: <http://ex/> .\n\
+         @prefix owl: <http://www.w3.org/2002/07/owl#> .\n\
+         ex:A a owl:Class .\n\
+         ex:B a owl:Class .\n",
+    )
+    .unwrap();
+    let head = IndexBuilder::new()
+        .workspace(dir.path())
+        .only_paths(vec![a_path, b_path])
+        .build()
+        .expect("head");
+    let diff = diff_catalogs(&base, &head);
+    assert!(
+        diff.axiom_changes.iter().any(|a| {
+            a.axiom_kind == AXIOM_KIND_SUB_CLASS_OF
+                && a.change == "removed"
+                && a.subject.contains("A")
+        }),
+        "per-document axiom removal must appear: {:?}",
+        diff.axiom_changes
+    );
+    assert!(
+        diff.breaking_changes.iter().any(|b| matches!(b.reason, BreakingReason::RemovedSuperclass)),
+        "expected RemovedSuperclass breaking change: {:?}",
+        diff.breaking_changes
+    );
+}

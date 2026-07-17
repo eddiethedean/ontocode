@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.26.1] - 2026-07-16
 
-**For pilots / adopters:** OWL Inspector write-back reliability — remove/match semantics, annotation/range handling, and XML mutate safety. No format write-back regression vs v0.26.0 — [migration/v0.26.1.md](docs/migration/v0.26.1.md).
+**For pilots / adopters:** OWL Inspector write-back reliability, reasoner/SWRL/DL Query honesty, plugin + ROBOT path-jail hardening, and LSP/editor/catalog fixes. No format write-back regression vs v0.26.0 — [migration/v0.26.1.md](docs/migration/v0.26.1.md).
 
 ### Fixed
 
@@ -20,6 +20,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Known DeclareDatatype / DatatypeDefinition IRIs as data fillers; facet errors not swallowed ([#335](https://github.com/eddiethedean/ontocode/issues/335))
 - XML `applied` only when serialize output changes; unsafe IRIs rejected; incomplete OWL/XML parses refused ([#337](https://github.com/eddiethedean/ontocode/issues/337), [#338](https://github.com/eddiethedean/ontocode/issues/338), [#383](https://github.com/eddiethedean/ontocode/issues/383))
 - IRI-valued annotation remove; ambiguous axiom annotation always errors; Turtle axiom-annotation exact lexical match ([#339](https://github.com/eddiethedean/ontocode/issues/339), [#340](https://github.com/eddiethedean/ontocode/issues/340), [#349](https://github.com/eddiethedean/ontocode/issues/349))
+- SWRL/reasoner honesty: inject skips, consistency signals, and realization reporting ([#410](https://github.com/eddiethedean/ontocode/pull/410))
+- DL Query equivalents / asserted instances under equivalence; realize errors as warnings; CLI `--workspace` clap layout ([#370](https://github.com/eddiethedean/ontocode/issues/370)–[#373](https://github.com/eddiethedean/ontocode/issues/373), [#375](https://github.com/eddiethedean/ontocode/issues/375), [#411](https://github.com/eddiethedean/ontocode/pull/411))
+- Plugin host: `ui_view` requires `workspace.write`; jail violations → diagnostics + `success: false`; truncated stdio; exec TOCTOU ([#347](https://github.com/eddiethedean/ontocode/issues/347), [#348](https://github.com/eddiethedean/ontocode/issues/348), [#388](https://github.com/eddiethedean/ontocode/issues/388), [#404](https://github.com/eddiethedean/ontocode/issues/404), [#412](https://github.com/eddiethedean/ontocode/pull/412))
+- XML catalog `nextCatalog` cycle/depth jail + size-capped reads; OBO `inverse_of` / `domain` / `range` remap; CRLF preserve ([#374](https://github.com/eddiethedean/ontocode/issues/374), [#387](https://github.com/eddiethedean/ontocode/issues/387), [#392](https://github.com/eddiethedean/ontocode/issues/392), [#393](https://github.com/eddiethedean/ontocode/issues/393), [#413](https://github.com/eddiethedean/ontocode/pull/413))
+- LSP/editor: `.owx` document sync; IRI tokens allow `.`; annotation/axiom predicate usages; semantic tokens UTF-16 ([#384](https://github.com/eddiethedean/ontocode/issues/384), [#397](https://github.com/eddiethedean/ontocode/issues/397), [#398](https://github.com/eddiethedean/ontocode/issues/398), [#403](https://github.com/eddiethedean/ontocode/issues/403), [#414](https://github.com/eddiethedean/ontocode/pull/414))
+- ROBOT subprocess timeout; rewrite jailed path args to absolute; create/export refuse symlink/TOCTOU escapes ([#341](https://github.com/eddiethedean/ontocode/issues/341), [#346](https://github.com/eddiethedean/ontocode/issues/346), [#353](https://github.com/eddiethedean/ontocode/issues/353), [#354](https://github.com/eddiethedean/ontocode/issues/354), [#415](https://github.com/eddiethedean/ontocode/pull/415))
 
 ### Changed
 

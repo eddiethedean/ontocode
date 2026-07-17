@@ -12,7 +12,7 @@ export class ExternalChangeRecovery {
   private pending = new Map<string, Promise<ExternalChangeChoice>>();
 
   register(context: vscode.ExtensionContext): void {
-    const pattern = "**/*.{ttl,owl,rdf,obo,jsonld,nt,nq,trig}";
+    const pattern = "**/*.{ttl,owl,rdf,owx,obo,jsonld,nt,nq,trig}";
     const watcher = vscode.workspace.createFileSystemWatcher(pattern);
     watcher.onDidChange((uri) => void this.handleExternalChange(uri, "change"));
     watcher.onDidCreate((uri) => void this.handleExternalChange(uri, "create"));

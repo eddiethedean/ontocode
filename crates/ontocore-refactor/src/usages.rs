@@ -59,6 +59,22 @@ pub fn find_usages_with_overrides(
                 }
             }
         }
+        if axiom.predicate == target_iri {
+            if let Some(doc) =
+                document_for_ontology_id(data.documents.as_slice(), &axiom.ontology_id)
+            {
+                let key =
+                    (doc.path.clone(), UsageKind::AxiomPredicate, format!("{}-pred", axiom.id));
+                if seen.insert(key) {
+                    usages.push(usage_from_axiom(
+                        doc.path.clone(),
+                        target_iri,
+                        axiom,
+                        UsageKind::AxiomPredicate,
+                    ));
+                }
+            }
+        }
         if axiom.object == target_iri || is_named_ref(&axiom.object, target_iri) {
             if let Some(doc) =
                 document_for_ontology_id(data.documents.as_slice(), &axiom.ontology_id)
@@ -102,6 +118,34 @@ pub fn find_usages_with_overrides(
                         end_byte: ann.source_location.end_byte,
                         kind: UsageKind::AnnotationSubject,
                         context: format!("annotation subject {}", ann.predicate),
+                    });
+                }
+            }
+        }
+        if ann.predicate == target_iri {
+            if let Some(doc) = document_for_ontology_id(data.documents.as_slice(), &ann.ontology_id)
+            {
+                let key = (
+                    doc.path.clone(),
+                    UsageKind::AnnotationPredicate,
+                    format!(
+                        "{}-{}-{}-pred",
+                        ann.subject,
+                        ann.predicate,
+                        ann.source_location.line.unwrap_or(0),
+                    ),
+                );
+                if seen.insert(key) {
+                    usages.push(Usage {
+                        iri: ann.subject.clone(),
+                        referenced_iri: target_iri.to_string(),
+                        file: doc.path.clone(),
+                        line: ann.source_location.line,
+                        column: ann.source_location.column,
+                        start_byte: ann.source_location.start_byte,
+                        end_byte: ann.source_location.end_byte,
+                        kind: UsageKind::AnnotationPredicate,
+                        context: format!("annotation predicate {}", ann.predicate),
                     });
                 }
             }
@@ -357,5 +401,34 @@ mod tests {
         let line = "ex:PersonType a owl:Class .";
         assert!(!is_token_match_at(line, "ex:Person", line.find("ex:Person").unwrap()));
         assert!(is_token_match_at(line, "ex:PersonType", line.find("ex:PersonType").unwrap()));
+    }
+
+    #[test]
+    fn find_usages_includes_annotation_predicate() {
+        // #398
+        use ontocore_catalog::IndexBuilder;
+
+        let dir = tempfile::tempdir().unwrap();
+        std::fs::write(
+            dir.path().join("ann.ttl"),
+            concat!(
+                "@prefix ex: <http://example.org#> .\n",
+                "@prefix owl: <http://www.w3.org/2002/07/owl#> .\n",
+                "ex:seeAlsoProp a owl:AnnotationProperty .\n",
+                "ex:Person a owl:Class ;\n",
+                "  ex:seeAlsoProp ex:Other .\n",
+            ),
+        )
+        .unwrap();
+        let catalog = IndexBuilder::new().workspace(dir.path()).build().expect("index");
+        let pred = "http://example.org#seeAlsoProp";
+        let usages = find_usages(&catalog, pred);
+        assert!(
+            usages.iter().any(|u| matches!(
+                u.kind,
+                UsageKind::AnnotationPredicate | UsageKind::AxiomPredicate
+            )),
+            "must include predicate kind, not only declaration: {usages:?}"
+        );
     }
 }

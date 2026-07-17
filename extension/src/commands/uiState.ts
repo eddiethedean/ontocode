@@ -1,7 +1,7 @@
 import * as vscode from "vscode";
 import { focusRelay } from "../focus/focusRelay";
 
-const ONTOLOGY_EXTENSIONS = /\.(ttl|owl|rdf|jsonld|json-ld|nt|nq|trig|obo)$/i;
+const ONTOLOGY_EXTENSIONS = /\.(ttl|owl|rdf|owx|jsonld|json-ld|nt|nq|trig|obo)$/i;
 
 export function isOntologyDocument(document: vscode.TextDocument): boolean {
   return document.uri.scheme === "file" && ONTOLOGY_EXTENSIONS.test(document.uri.fsPath);

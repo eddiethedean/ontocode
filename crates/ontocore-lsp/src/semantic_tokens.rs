@@ -34,6 +34,11 @@ pub fn handle_semantic_tokens_full(
     Some(SemanticTokensResult::Tokens(SemanticTokens { result_id: None, data: tokens }))
 }
 
+/// LSP semantic-token lengths / columns are UTF-16 code units (#403).
+fn utf16_len(s: &str) -> u32 {
+    s.chars().map(|c| c.len_utf16() as u32).sum()
+}
+
 fn tokenize_turtle(text: &str) -> Vec<SemanticToken> {
     let mut out = Vec::new();
     let mut line = 0u32;
@@ -53,15 +58,17 @@ fn tokenize_turtle(text: &str) -> Vec<SemanticToken> {
             while i < bytes.len() && bytes[i] != b'\n' {
                 i += 1;
             }
-            push_token(&mut out, line, col, (i - start) as u32, TOKEN_COMMENT);
-            col += (i - start) as u32;
+            let len = utf16_len(&text[start..i]);
+            push_token(&mut out, line, col, len, TOKEN_COMMENT);
+            col += len;
             continue;
         }
         if b == b'"' || b == b'\'' {
-            let len = scan_string(&bytes[i..]);
-            push_token(&mut out, line, col, len as u32, TOKEN_STRING);
-            i += len;
-            col += len as u32;
+            let byte_len = scan_string(&bytes[i..]);
+            let len = utf16_len(&text[i..i + byte_len]);
+            push_token(&mut out, line, col, len, TOKEN_STRING);
+            i += byte_len;
+            col += len;
             continue;
         }
         if b == b'<' {
@@ -73,8 +80,9 @@ fn tokenize_turtle(text: &str) -> Vec<SemanticToken> {
             if i < bytes.len() {
                 i += 1;
             }
-            push_token(&mut out, line, col, (i - start) as u32, TOKEN_IRI);
-            col += (i - start) as u32;
+            let len = utf16_len(&text[start..i]);
+            push_token(&mut out, line, col, len, TOKEN_IRI);
+            col += len;
             continue;
         }
         if is_ident_start(b) {
@@ -91,12 +99,15 @@ fn tokenize_turtle(text: &str) -> Vec<SemanticToken> {
             } else {
                 TOKEN_KEYWORD
             };
-            push_token(&mut out, line, col, (i - start) as u32, kind);
-            col += (i - start) as u32;
+            let len = utf16_len(word);
+            push_token(&mut out, line, col, len, kind);
+            col += len;
             continue;
         }
-        i += 1;
-        col += 1;
+        // Advance one Unicode scalar (not one UTF-8 byte) so columns stay UTF-16-correct.
+        let ch = text[i..].chars().next().expect("non-empty slice");
+        i += ch.len_utf8();
+        col += ch.len_utf16() as u32;
     }
     out
 }
@@ -120,15 +131,17 @@ fn tokenize_obo(text: &str) -> Vec<SemanticToken> {
             while i < bytes.len() && bytes[i] != b'\n' {
                 i += 1;
             }
-            push_token(&mut out, line, col, (i - start) as u32, TOKEN_COMMENT);
-            col += (i - start) as u32;
+            let len = utf16_len(&text[start..i]);
+            push_token(&mut out, line, col, len, TOKEN_COMMENT);
+            col += len;
             continue;
         }
         if b == b'"' {
-            let len = scan_string(&bytes[i..]);
-            push_token(&mut out, line, col, len as u32, TOKEN_STRING);
-            i += len;
-            col += len as u32;
+            let byte_len = scan_string(&bytes[i..]);
+            let len = utf16_len(&text[i..i + byte_len]);
+            push_token(&mut out, line, col, len, TOKEN_STRING);
+            i += byte_len;
+            col += len;
             continue;
         }
         if is_ident_start(b) {
@@ -143,15 +156,19 @@ fn tokenize_obo(text: &str) -> Vec<SemanticToken> {
                 {
                     i += 1;
                 }
-                push_token(&mut out, line, col, (i - start) as u32, TOKEN_KEYWORD);
+                let len = utf16_len(&text[start..i]);
+                push_token(&mut out, line, col, len, TOKEN_KEYWORD);
+                col += len;
             } else {
-                push_token(&mut out, line, col, (i - start) as u32, TOKEN_NAMESPACE);
+                let len = utf16_len(&text[start..i]);
+                push_token(&mut out, line, col, len, TOKEN_NAMESPACE);
+                col += len;
             }
-            col += (i - start) as u32;
             continue;
         }
-        i += 1;
-        col += 1;
+        let ch = text[i..].chars().next().expect("non-empty slice");
+        i += ch.len_utf8();
+        col += ch.len_utf16() as u32;
     }
     out
 }
@@ -308,6 +325,17 @@ mod tests {
         let text = "@prefix ex: <http://example.org/> .\nex:A a <http://example.org/B> .";
         let tokens = tokenize_turtle(text);
         assert!(tokens.iter().any(|t| t.token_type == TOKEN_IRI));
+    }
+
+    #[test]
+    fn turtle_string_token_length_is_utf16_not_utf8_bytes() {
+        // #403 — CJK label must report UTF-16 length (3 chars → 3 units), not UTF-8 byte count.
+        let text = r#"ex:C rdfs:label "日本語" ."#;
+        let tokens = tokenize_turtle(text);
+        let absolute = decode_absolute_positions(&tokens);
+        let string_tok = absolute.iter().find(|t| t.3 == TOKEN_STRING).expect("string token");
+        // `"日本語"` = quote + 3 BMP chars + quote → 5 UTF-16 units (not 11 UTF-8 bytes).
+        assert_eq!(string_tok.2, 5, "absolute={absolute:?}");
     }
 
     #[test]

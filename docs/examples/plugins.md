@@ -2,7 +2,7 @@
 
 CLI recipes for discovering and running workspace plugins. Authoring: [Plugin authoring](../guides/plugins.md) · Policy: [Plugin policy](../guides/plugin-policy.md).
 
-From a git clone, use `cargo run --` or an installed `ontocore`. Samples below use [`examples/plugin-workspace/`](https://github.com/eddiethedean/ontocode/tree/v0.26.1/examples/plugin-workspace).
+From a git clone, use `cargo run --` or an installed `ontocore`. Samples below use [`examples/plugin-workspace/`](https://github.com/eddiethedean/ontocode/tree/v0.26.2/examples/plugin-workspace).
 
 ## List and inspect
 

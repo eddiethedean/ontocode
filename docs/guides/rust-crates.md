@@ -9,7 +9,7 @@
 ## Quick start
 
 ```bash
-cargo install ontocore-cli --locked --version 0.26.1
+cargo install ontocore-cli --locked --version 0.26.2
 ontocore query /path/to/ontologies "SELECT * FROM classes"
 ontocore validate /path/to/ontologies
 ```

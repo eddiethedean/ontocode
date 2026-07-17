@@ -25,23 +25,23 @@ For offline VSIX installs, see [Install VS Code](../vscode-install.md).
 
     ```bash
     mkdir ontocode-tutorial && cd ontocode-tutorial
-    curl -fsSLO https://raw.githubusercontent.com/eddiethedean/ontocode/v0.26.1/fixtures/example.ttl
-    curl -fsSLO https://raw.githubusercontent.com/eddiethedean/ontocode/v0.26.1/fixtures/complex-classes.ttl
-    curl -fsSLO https://raw.githubusercontent.com/eddiethedean/ontocode/v0.26.1/examples/obo-workflow/demo.obo
+    curl -fsSLO https://raw.githubusercontent.com/eddiethedean/ontocode/v0.26.2/fixtures/example.ttl
+    curl -fsSLO https://raw.githubusercontent.com/eddiethedean/ontocode/v0.26.2/fixtures/complex-classes.ttl
+    curl -fsSLO https://raw.githubusercontent.com/eddiethedean/ontocode/v0.26.2/examples/obo-workflow/demo.obo
     ```
 
 === "Windows (PowerShell)"
 
     ```powershell
     mkdir ontocode-tutorial; cd ontocode-tutorial
-    Invoke-WebRequest -Uri https://raw.githubusercontent.com/eddiethedean/ontocode/v0.26.1/fixtures/example.ttl -OutFile example.ttl
-    Invoke-WebRequest -Uri https://raw.githubusercontent.com/eddiethedean/ontocode/v0.26.1/fixtures/complex-classes.ttl -OutFile complex-classes.ttl
-    Invoke-WebRequest -Uri https://raw.githubusercontent.com/eddiethedean/ontocode/v0.26.1/examples/obo-workflow/demo.obo -OutFile demo.obo
+    Invoke-WebRequest -Uri https://raw.githubusercontent.com/eddiethedean/ontocode/v0.26.2/fixtures/example.ttl -OutFile example.ttl
+    Invoke-WebRequest -Uri https://raw.githubusercontent.com/eddiethedean/ontocode/v0.26.2/fixtures/complex-classes.ttl -OutFile complex-classes.ttl
+    Invoke-WebRequest -Uri https://raw.githubusercontent.com/eddiethedean/ontocode/v0.26.2/examples/obo-workflow/demo.obo -OutFile demo.obo
     ```
 
-**Offline / optional pack:** Prefer the curl/PowerShell commands above. An `ontocode-tutorial.zip` is attached only when listed on the [v0.26.1 GitHub Release](https://github.com/eddiethedean/ontocode/releases/tag/v0.26.1) assets (built with `./scripts/package-tutorial-zip.sh`). For offline extension install, download `ontocode-v0.26.1.vsix` from that Release when present. **If the zip is missing**, use the commands above or open `fixtures/` from a clone.
+**Offline / optional pack:** Prefer the curl/PowerShell commands above. An `ontocode-tutorial.zip` is attached only when listed on the [v0.26.2 GitHub Release](https://github.com/eddiethedean/ontocode/releases/tag/v0.26.2) assets (built with `./scripts/package-tutorial-zip.sh`). For offline extension install, download `ontocode-v0.26.2.vsix` from that Release when present. **If the zip is missing**, use the commands above or open `fixtures/` from a clone.
 
-Or browse [v0.26.1 fixtures](https://github.com/eddiethedean/ontocode/tree/v0.26.1/fixtures).
+Or browse [v0.26.2 fixtures](https://github.com/eddiethedean/ontocode/tree/v0.26.2/fixtures).
 
 !!! note "Workspace Trust"
     The **bundled** language server works in Restricted Mode. **Trust** the folder only if you set custom `ontocode.lspPath` or `ontocode.robotPath`.

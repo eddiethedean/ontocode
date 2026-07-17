@@ -12,7 +12,7 @@ Command-line interface for [OntoCore](https://github.com/eddiethedean/ontocode) 
 ## Install (pinned)
 
 ```bash
-cargo install ontocore-cli --locked --version 0.26.1
+cargo install ontocore-cli --locked --version 0.26.2
 ```
 
 ## Linux x64 without Rust

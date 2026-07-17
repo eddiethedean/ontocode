@@ -16,7 +16,7 @@ Re-exported from the `ontocore` façade as `ontocore::obo` for patch operations.
 - [OBO workflows](https://ontocode-vs.readthedocs.io/en/latest/guides/obo-workflow/)
 - [docs.rs](https://docs.rs/ontocore-obo)
 
-**Current version: 0.26.1**
+**Current version: 0.26.2**
 
 ## License
 

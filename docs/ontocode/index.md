@@ -2,7 +2,7 @@
 
 **OntoCode** is the VS Code / Cursor IDE for OWL, RDF, and OBO — explorer, React Entity Inspector, Query Workbench (SQL / SPARQL / DL), graphs, reasoner, refactor preview, and plugin UI — powered by **OntoCore**.
 
-**Latest tagged: v0.26.1** · [Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) · [Open VSX](https://open-vsx.org/extension/ontocode/ontocode)
+**Latest tagged: v0.26.2** · [Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) · [Open VSX](https://open-vsx.org/extension/ontocode/ontocode)
 
 Start here if you have not installed yet: **[First success (~10 min)](../guides/first-success.md)**.
 

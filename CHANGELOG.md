@@ -7,6 +7,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.26.2] - 2026-07-17
+
+**For pilots / adopters:** host focus/transaction integrity, refactor self-write suppression, and residual invert / SPARQL / orphan-diagnostic fixes. No format write-back regression vs v0.26.1 — [migration/v0.26.2.md](docs/migration/v0.26.2.md).
+
+### Fixed
+
+- Host `focusRelay.setFocus` rejects older timestamps (aligns with webview hydrate) ([#402](https://github.com/eddiethedean/ontocode/issues/402), [#417](https://github.com/eddiethedean/ontocode/pull/417))
+- WorkspaceStore navigation back/forward syncs inspector / graph / explorer slices ([#352](https://github.com/eddiethedean/ontocode/issues/352))
+- `applyRefactor` registers self-writes and marks reasoning dirty like patches ([#396](https://github.com/eddiethedean/ontocode/issues/396))
+- `WorkspaceTransactionManager.begin` reserves pending before await (concurrent begin TOCTOU) ([#386](https://github.com/eddiethedean/ontocode/issues/386))
+- `RemoveSynonym` with recorded scope inverts to `AddSynonym` ([#400](https://github.com/eddiethedean/ontocode/issues/400))
+- SPARQL update detector classifies `USING` / `USING NAMED` forms ([#399](https://github.com/eddiethedean/ontocode/issues/399))
+- `orphan_classes` no longer false-positives classes whose only parents are restrictions ([#401](https://github.com/eddiethedean/ontocode/issues/401))
+
+### Changed
+
+- Workspace package and all `ontocore-*` crates bumped to **0.26.2**; extension and webview UI **0.26.2**
+
 ## [0.26.1] - 2026-07-16
 
 **For pilots / adopters:** OWL Inspector write-back reliability, reasoner/SWRL/DL Query honesty, plugin + ROBOT path-jail hardening, and LSP/editor/catalog fixes. No format write-back regression vs v0.26.0 — [migration/v0.26.1.md](docs/migration/v0.26.1.md).

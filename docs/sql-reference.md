@@ -1,6 +1,6 @@
 # Catalog SQL query reference (OntoCore v0.26)
 
-> **Status:** Documents behavior in **OntoCore v0.26.1**. Pre-1.0 APIs may change.
+> **Status:** Documents behavior in **OntoCore v0.26.2**. Pre-1.0 APIs may change.
 > Canonical feature list: [What ships today](SHIPPED.md) · [Known limitations](known-limitations.md).
 
 !!! warning "Not full SQL"

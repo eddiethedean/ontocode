@@ -6,6 +6,10 @@ Migration guides: [Migration index](migration/README.md)
 
 ## [Unreleased]
 
+## [0.26.2] - 2026-07-17
+
+**v0.26.2** — host focus/transaction integrity, refactor self-write suppression, and residual invert / SPARQL / orphan-diagnostic fixes. See [CHANGELOG.md](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) and [migration/v0.26.2.md](migration/v0.26.2.md).
+
 ## [0.26.1] - 2026-07-16
 
 **v0.26.1** — OWL Inspector write-back fixes plus reasoner/SWRL/DL Query honesty, plugin + ROBOT path-jail hardening, and LSP/editor/catalog bugfixes. See [CHANGELOG.md](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) and [migration/v0.26.1.md](migration/v0.26.1.md).

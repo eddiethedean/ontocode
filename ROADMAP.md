@@ -39,7 +39,7 @@ After 1.0, the roadmap shifts from parity to modernization.
 | [PRODUCT_ROADMAP_2.0.md](docs/ui/PRODUCT_ROADMAP_2.0.md) | UI phases with milestone acceptance criteria |
 | [ui/README.md](docs/ui/README.md) | Product design specification pack (UX, design system, OntoStudio target) |
 
-**Current release:** v0.26.1
+**Current release:** v0.26.2
 
 ---
 
@@ -651,7 +651,7 @@ See [migration/v0.25.md](docs/migration/v0.25.md) and [SHIPPED.md](docs/SHIPPED.
 
 ### v0.26 — Protégé Desktop test port (shipped)
 
-**Released:** v0.26.1 (2026-07-16)
+**Released:** v0.26.2 (2026-07-17)
 
 **Theme:** Port portable Protégé Desktop JUnit behaviors into OntoCode Rust semantic oracles (not a JVM suite runner).
 

@@ -38,7 +38,9 @@ pub use patch::{
     apply_patches, apply_patches_to_text, atomic_write, is_safe_iri, validate_prefix,
     ApplyPatchResult, PatchDiagnostic, PatchEntityKind, PatchOp,
 };
-pub use remap::{remap_entity_iri, remap_entity_iri_in_xml_text};
+pub use remap::{
+    merge_entity_iri, merge_entity_iri_in_xml_text, remap_entity_iri, remap_entity_iri_in_xml_text,
+};
 pub use render::{
     escape_manchester_rendering, expand_prefixed_iri, match_prefix, render_as_curie,
     render_entity_iri, split_iri, unescape_manchester_rendering,

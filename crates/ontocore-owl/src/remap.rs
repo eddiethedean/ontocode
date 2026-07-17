@@ -79,6 +79,141 @@ pub fn remap_entity_iri_in_xml_text(
     }
 }
 
+/// Merge `merge_iri` into `keep_iri`: drop subject-owned components for the merge
+/// entity, then remap remaining mentions (Turtle/OBO-aligned; #369).
+///
+/// Returns `(removed, remapped)` component counts.
+pub fn merge_entity_iri(
+    ont: &mut ComponentMappedOntology<RcStr, RcAnnotatedComponent>,
+    keep_iri: &str,
+    merge_iri: &str,
+) -> Result<(usize, usize)> {
+    if keep_iri == merge_iri {
+        return Ok((0, 0));
+    }
+    let removed = remove_subject_owned_components(ont, merge_iri);
+    let remapped = remap_entity_iri(ont, merge_iri, keep_iri)?;
+    Ok((removed, remapped))
+}
+
+/// Load RDF/XML or OWL/XML, merge entities with Turtle delete-then-remap semantics, re-serialize.
+pub fn merge_entity_iri_in_xml_text(
+    source: &str,
+    format: &str,
+    keep_iri: &str,
+    merge_iri: &str,
+    namespaces: &BTreeMap<String, String>,
+) -> Result<String> {
+    match format {
+        "rdfxml" | "rdf" | "owl" => {
+            let (mut ont, incomplete) = load_rdf_xml_ontology(source)?;
+            if incomplete {
+                return Err(OwlError::LoadFailed(
+                    "RDF/XML parse incomplete; refusing entity merge write-back".into(),
+                ));
+            }
+            merge_entity_iri(&mut ont, keep_iri, merge_iri)?;
+            serialize_rdf_xml(&ont)
+        }
+        "owlxml" | "owx" => {
+            let (mut ont, mut ns, incomplete) = load_owl_xml_ontology(source)?;
+            if incomplete {
+                return Err(OwlError::LoadFailed(
+                    "OWL/XML parse incomplete; refusing entity merge write-back".into(),
+                ));
+            }
+            for (k, v) in namespaces {
+                ns.entry(k.clone()).or_insert_with(|| v.clone());
+            }
+            merge_entity_iri(&mut ont, keep_iri, merge_iri)?;
+            serialize_owl_xml(&ont, &ns)
+        }
+        other => Err(OwlError::SerializeFailed(format!("unsupported XML format: {other}"))),
+    }
+}
+
+/// Drop Horned components that correspond to Turtle statements *about* `entity_iri`
+/// (declaration + axioms with that entity as primary subject), leaving object-position
+/// mentions for a subsequent remap.
+fn remove_subject_owned_components(
+    ont: &mut ComponentMappedOntology<RcStr, RcAnnotatedComponent>,
+    entity_iri: &str,
+) -> usize {
+    let to_remove: Vec<_> = ont
+        .i()
+        .iter()
+        .filter(|ac| component_is_subject_owned(&ac.component, entity_iri))
+        .cloned()
+        .collect();
+    let n = to_remove.len();
+    for ac in to_remove {
+        let _ = ont.take(&ac);
+    }
+    n
+}
+
+fn named_class_is(ce: &ClassExpression<RcStr>, iri: &str) -> bool {
+    matches!(ce, ClassExpression::Class(Class(c)) if c.to_string() == iri)
+}
+
+fn named_individual_is(ind: &Individual<RcStr>, iri: &str) -> bool {
+    matches!(ind, Individual::Named(NamedIndividual(n)) if n.to_string() == iri)
+}
+
+fn ope_is_named(ope: &ObjectPropertyExpression<RcStr>, iri: &str) -> bool {
+    matches!(ope, ObjectPropertyExpression::ObjectProperty(p) if p.to_string() == iri)
+}
+
+fn component_is_subject_owned(c: &Component<RcStr>, entity_iri: &str) -> bool {
+    match c {
+        Component::DeclareClass(d) => d.0.to_string() == entity_iri,
+        Component::DeclareObjectProperty(d) => d.0.to_string() == entity_iri,
+        Component::DeclareDataProperty(d) => d.0.to_string() == entity_iri,
+        Component::DeclareNamedIndividual(d) => d.0.to_string() == entity_iri,
+        Component::DeclareAnnotationProperty(d) => d.0.to_string() == entity_iri,
+        Component::DeclareDatatype(d) => d.0.to_string() == entity_iri,
+        Component::AnnotationAssertion(ax) => {
+            matches!(&ax.subject, AnnotationSubject::IRI(i) if i.to_string() == entity_iri)
+        }
+        // Binary LHS / primary subject only — object-position mentions stay for remap.
+        Component::SubClassOf(ax) => named_class_is(&ax.sub, entity_iri),
+        Component::SubObjectPropertyOf(ax) => match &ax.sub {
+            horned_owl::model::SubObjectPropertyExpression::ObjectPropertyExpression(ope) => {
+                ope_is_named(ope, entity_iri)
+            }
+            horned_owl::model::SubObjectPropertyExpression::ObjectPropertyChain(_) => false,
+        },
+        Component::SubDataPropertyOf(ax) => ax.sub.to_string() == entity_iri,
+        Component::SubAnnotationPropertyOf(ax) => ax.sub.to_string() == entity_iri,
+        Component::ObjectPropertyDomain(ax) => ope_is_named(&ax.ope, entity_iri),
+        Component::ObjectPropertyRange(ax) => ope_is_named(&ax.ope, entity_iri),
+        Component::DataPropertyDomain(ax) => ax.dp.to_string() == entity_iri,
+        Component::DataPropertyRange(ax) => ax.dp.to_string() == entity_iri,
+        Component::AnnotationPropertyDomain(ax) => ax.ap.to_string() == entity_iri,
+        Component::AnnotationPropertyRange(ax) => ax.ap.to_string() == entity_iri,
+        Component::FunctionalObjectProperty(ax) => ope_is_named(&ax.0, entity_iri),
+        Component::InverseFunctionalObjectProperty(ax) => ope_is_named(&ax.0, entity_iri),
+        Component::ReflexiveObjectProperty(ax) => ope_is_named(&ax.0, entity_iri),
+        Component::IrreflexiveObjectProperty(ax) => ope_is_named(&ax.0, entity_iri),
+        Component::SymmetricObjectProperty(ax) => ope_is_named(&ax.0, entity_iri),
+        Component::AsymmetricObjectProperty(ax) => ope_is_named(&ax.0, entity_iri),
+        Component::TransitiveObjectProperty(ax) => ope_is_named(&ax.0, entity_iri),
+        Component::FunctionalDataProperty(ax) => ax.0.to_string() == entity_iri,
+        Component::DatatypeDefinition(ax) => ax.kind.to_string() == entity_iri,
+        Component::HasKey(ax) => named_class_is(&ax.ce, entity_iri),
+        Component::DisjointUnion(ax) => ax.0.to_string() == entity_iri,
+        Component::ClassAssertion(ax) => named_individual_is(&ax.i, entity_iri),
+        Component::ObjectPropertyAssertion(ax) => named_individual_is(&ax.from, entity_iri),
+        Component::NegativeObjectPropertyAssertion(ax) => named_individual_is(&ax.from, entity_iri),
+        Component::DataPropertyAssertion(ax) => named_individual_is(&ax.from, entity_iri),
+        Component::NegativeDataPropertyAssertion(ax) => named_individual_is(&ax.from, entity_iri),
+        // InverseOf is subject-owned when the left property is the merge entity.
+        Component::InverseObjectProperties(ax) => ax.0.to_string() == entity_iri,
+        // N-ary / object-position-only axioms are remapped, not deleted.
+        _ => false,
+    }
+}
+
 fn remap_annotated(
     ac: &AnnotatedComponent<RcStr>,
     from: &str,
@@ -746,6 +881,57 @@ mod tests {
         assert!(out.contains("http://example.org#Human"), "{out}");
         assert!(!out.contains("http://example.org#Person"), "{out}");
         assert!(out.contains("http://example.org#Patient"), "{out}");
+    }
+
+    #[test]
+    fn merge_deletes_subject_axioms_then_remaps_refs() {
+        // Keep + Merge(with label + parent) + Child⊑Merge — merge must not absorb
+        // Merge's label/parent onto Keep (#369).
+        let src = r#"<?xml version="1.0"?>
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:owl="http://www.w3.org/2002/07/owl#"
+         xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+  <owl:Class rdf:about="http://example.org#Keep">
+    <rdfs:label>Keep</rdfs:label>
+  </owl:Class>
+  <owl:Class rdf:about="http://example.org#Merge">
+    <rdfs:label>MergeLabel</rdfs:label>
+    <rdfs:subClassOf rdf:resource="http://example.org#Parent"/>
+  </owl:Class>
+  <owl:Class rdf:about="http://example.org#Parent"/>
+  <owl:Class rdf:about="http://example.org#Child">
+    <rdfs:subClassOf rdf:resource="http://example.org#Merge"/>
+  </owl:Class>
+</rdf:RDF>
+"#;
+        let out = merge_entity_iri_in_xml_text(
+            src,
+            "rdfxml",
+            "http://example.org#Keep",
+            "http://example.org#Merge",
+            &BTreeMap::new(),
+        )
+        .expect("merge");
+        assert!(out.contains("http://example.org#Keep"), "{out}");
+        assert!(out.contains("http://example.org#Child"), "{out}");
+        assert!(!out.contains("http://example.org#Merge"), "merge IRI must be gone: {out}");
+        assert!(!out.contains("MergeLabel"), "merge-owned label must not absorb onto Keep: {out}");
+        // Child⊑Merge remapped to Child⊑Keep; Keep must not gain Parent via absorb.
+        let keep_block_has_parent = out.contains("rdf:about=\"http://example.org#Keep\"")
+            && out
+                .split("rdf:about=\"http://example.org#Keep\"")
+                .nth(1)
+                .map(|rest| {
+                    let end = rest.find("<owl:Class").unwrap_or(rest.len());
+                    rest[..end].contains("http://example.org#Parent")
+                })
+                .unwrap_or(false);
+        assert!(!keep_block_has_parent, "Keep must not absorb Merge⊑Parent: {out}");
+        assert!(
+            out.contains("http://example.org#Child")
+                && out.contains("rdf:resource=\"http://example.org#Keep\""),
+            "Child must reference Keep: {out}"
+        );
     }
 
     #[test]

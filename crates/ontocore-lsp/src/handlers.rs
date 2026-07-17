@@ -681,6 +681,17 @@ pub fn handle_create_ontology(
         std::fs::create_dir_all(parent)
             .map_err(|e| LspErrorPayload::index_failed(e.to_string()))?;
     }
+    // #354: re-validate after mkdir so a TOCTOU parent symlink cannot escape the jail.
+    let path = validate_workspace_scope_any(std::path::Path::new(&params.path), &roots)
+        .map_err(LspErrorPayload::invalid_params)?;
+    if let Ok(meta) = std::fs::symlink_metadata(&path) {
+        if meta.file_type().is_symlink() {
+            return Err(LspErrorPayload::invalid_params(format!(
+                "refusing to write through symlink: {}",
+                path.display()
+            )));
+        }
+    }
     let format = params
         .format
         .as_deref()
@@ -758,7 +769,33 @@ pub fn handle_export_ontology(
                     std::fs::create_dir_all(parent)
                         .map_err(|err| LspErrorPayload::robot_failed(err.to_string()))?;
                 }
-                std::fs::copy(&source, &output)
+                // #354: re-validate after mkdir (parent symlink TOCTOU).
+                let output =
+                    validate_workspace_scope_any(std::path::Path::new(&params.output_path), &roots)
+                        .map_err(LspErrorPayload::invalid_params)?;
+                // #353: refuse leaf symlink; exclusive/non-following write instead of fs::copy.
+                if let Ok(meta) = std::fs::symlink_metadata(&output) {
+                    if meta.file_type().is_symlink() {
+                        return Err(LspErrorPayload::robot_failed(format!(
+                            "refusing to write through symlink: {}",
+                            output.display()
+                        )));
+                    }
+                }
+                let bytes = std::fs::read(&source)
+                    .map_err(|err| LspErrorPayload::robot_failed(err.to_string()))?;
+                let mut opts = std::fs::OpenOptions::new();
+                opts.write(true);
+                if output.exists() {
+                    opts.truncate(true);
+                } else {
+                    opts.create_new(true);
+                }
+                let mut file = opts
+                    .open(&output)
+                    .map_err(|err| LspErrorPayload::robot_failed(err.to_string()))?;
+                use std::io::Write;
+                file.write_all(&bytes)
                     .map_err(|err| LspErrorPayload::robot_failed(err.to_string()))?;
                 Ok(crate::protocol::ExportOntologyResult {
                     output_path: output.display().to_string(),
@@ -1150,18 +1187,19 @@ pub fn handle_run_robot(
     }
     let mut args = vec![params.subcommand];
     args.extend(params.args);
-    jail_robot_path_args(&roots, &args).map_err(LspErrorPayload::robot_failed)?;
+    // #346: rewrite path operands to absolute jailed paths (do not rely on process CWD).
+    let args = jail_robot_path_args(&roots, &args).map_err(LspErrorPayload::robot_failed)?;
     index_worker.run_robot_sync(params.robot_path, args).map_err(LspErrorPayload::robot_failed)
 }
 
-/// Reject ROBOT file operands that escape the workspace jail.
+/// Jail ROBOT file operands and rewrite them to absolute paths under the workspace (#346).
 ///
 /// Handles separate `--input path`, `--input=path`, attached short forms (`-i/path`),
 /// and multi-operand flags such as `--query <query> <output>`.
 fn jail_robot_path_args(
     workspace_roots: &[std::path::PathBuf],
     args: &[String],
-) -> Result<(), String> {
+) -> Result<Vec<String>, String> {
     /// How many path operands a flag still requires / may accept.
     #[derive(Clone, Copy)]
     struct PathExpect {
@@ -1192,13 +1230,19 @@ fn jail_robot_path_args(
         }
     }
 
-    fn jail_path(workspace_roots: &[std::path::PathBuf], value: &str) -> Result<(), String> {
+    fn jail_path(
+        workspace_roots: &[std::path::PathBuf],
+        value: &str,
+    ) -> Result<std::path::PathBuf, String> {
         ontocore_core::validate_workspace_scope_any(std::path::Path::new(value), workspace_roots)
-            .map(|_| ())
     }
 
+    let mut out = args.to_vec();
     let mut expect: Option<PathExpect> = None;
-    for arg in args.iter().skip(1) {
+    // Index loop: rewrite `out[idx]` in place while tracking multi-operand path flags.
+    #[allow(clippy::needless_range_loop)]
+    for idx in 1..out.len() {
+        let arg = out[idx].clone();
         if let Some(pending) = expect.as_mut() {
             if arg.starts_with('-') {
                 if pending.min > 0 {
@@ -1206,7 +1250,8 @@ fn jail_robot_path_args(
                 }
                 expect = None;
             } else {
-                jail_path(workspace_roots, arg)?;
+                let abs = jail_path(workspace_roots, &arg)?;
+                out[idx] = abs.display().to_string();
                 pending.min = pending.min.saturating_sub(1);
                 pending.max = pending.max.saturating_sub(1);
                 if pending.max == 0 {
@@ -1222,16 +1267,17 @@ fn jail_robot_path_args(
             {
                 // Handles `--input=/abs` and `-i=/abs` (short `=` was previously
                 // mis-parsed as attached value `=/abs` and jailed as relative).
-                jail_path(workspace_roots, value)?;
+                let abs = jail_path(workspace_roots, value)?;
+                out[idx] = format!("{flag}={}", abs.display());
                 continue;
             }
         }
 
-        if let Some(pending) = path_expect_for_long_flag(arg) {
+        if let Some(pending) = path_expect_for_long_flag(&arg) {
             expect = Some(pending);
             continue;
         }
-        if let Some(pending) = path_expect_for_short_flag(arg) {
+        if let Some(pending) = path_expect_for_short_flag(&arg) {
             expect = Some(pending);
             continue;
         }
@@ -1247,7 +1293,8 @@ fn jail_robot_path_args(
             }
         });
         if let Some((flag, value)) = attached_short {
-            jail_path(workspace_roots, value)?;
+            let abs = jail_path(workspace_roots, value)?;
+            out[idx] = format!("{flag}{}", abs.display());
             // Attached short form supplies the first path; optional second path may follow.
             if let Some(mut pending) = path_expect_for_short_flag(flag) {
                 pending.min = pending.min.saturating_sub(1);
@@ -1270,13 +1317,14 @@ fn jail_robot_path_args(
             || arg.ends_with(".rq")
             || arg.ends_with(".ru");
         if looks_like_path && !arg.starts_with('-') {
-            jail_path(workspace_roots, arg)?;
+            let abs = jail_path(workspace_roots, &arg)?;
+            out[idx] = abs.display().to_string();
         }
     }
     if expect.is_some_and(|e| e.min > 0) {
         return Err("ROBOT path flag is missing a path argument".to_string());
     }
-    Ok(())
+    Ok(out)
 }
 
 pub fn handle_apply_axiom_patch(
@@ -3382,6 +3430,34 @@ mod tests {
             output.display().to_string(),
         ];
         jail_robot_path_args(&roots, &args).expect("in-workspace query pair");
+    }
+
+    #[test]
+    fn jail_robot_rewrites_relative_paths_to_absolute() {
+        // #346 — jail must return absolute operands so ROBOT does not use LSP CWD.
+        let dir = tempfile::tempdir().unwrap();
+        let roots = vec![dir.path().to_path_buf()];
+        std::fs::write(dir.path().join("in.ttl"), "").unwrap();
+        let args = vec![
+            "convert".to_string(),
+            "--input".to_string(),
+            "in.ttl".to_string(),
+            "--output".to_string(),
+            "out.owl".to_string(),
+        ];
+        let rewritten = jail_robot_path_args(&roots, &args).expect("relative paths in workspace");
+        assert!(
+            PathBuf::from(&rewritten[2]).is_absolute(),
+            "input must be absolute: {}",
+            rewritten[2]
+        );
+        assert!(
+            PathBuf::from(&rewritten[4]).is_absolute(),
+            "output must be absolute: {}",
+            rewritten[4]
+        );
+        assert!(rewritten[2].contains("in.ttl"), "unexpected rewritten input: {}", rewritten[2]);
+        assert!(rewritten[4].contains("out.owl"), "unexpected rewritten output: {}", rewritten[4]);
     }
 
     #[test]

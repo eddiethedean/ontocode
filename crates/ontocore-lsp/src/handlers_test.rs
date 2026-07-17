@@ -851,6 +851,42 @@ fn export_ontology_writes_under_workspace_not_cwd() {
 }
 
 #[test]
+#[cfg(unix)]
+fn export_ontology_fallback_rejects_leaf_symlink() {
+    // #353 — do not follow a post-validate leaf symlink via fs::copy.
+    let workspace = tempfile::tempdir().unwrap();
+    let outside = tempfile::tempdir().unwrap();
+    let source = workspace.path().join("source.ttl");
+    std::fs::write(
+        &source,
+        "@prefix owl: <http://www.w3.org/2002/07/owl#> .\n\n<http://example.org/ont> a owl:Ontology .\n",
+    )
+    .unwrap();
+    let output = workspace.path().join("out.ttl");
+    let outside_target = outside.path().join("pwn.ttl");
+    std::os::unix::fs::symlink(&outside_target, &output).unwrap();
+
+    let state = ServerState::new();
+    state.set_workspace_roots(vec![workspace.path().to_path_buf()]).expect("set workspace");
+
+    let err = handle_export_ontology(
+        &state,
+        ExportOntologyParams {
+            source_path: source.display().to_string(),
+            output_path: output.display().to_string(),
+            format: Some("ttl".into()),
+        },
+    )
+    .expect_err("leaf symlink output must be rejected");
+    assert!(
+        err.message.contains("symlink") || err.message.contains("outside"),
+        "unexpected error: {}",
+        err.message
+    );
+    assert!(!outside_target.exists(), "must not write through symlink outside workspace");
+}
+
+#[test]
 fn reasoner_classify_releases_ops_lock_during_classify() {
     use crate::handlers::handle_run_reasoner_lsp;
     use crate::protocol::RunReasonerParams;

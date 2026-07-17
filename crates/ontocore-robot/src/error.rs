@@ -11,6 +11,9 @@ pub enum RobotError {
     #[error("ROBOT exited with status {code}: {stderr}")]
     Failed { code: i32, stderr: String },
 
+    #[error("ROBOT timed out after {0}s")]
+    TimedOut(u64),
+
     #[error("{0}")]
     Run(String),
 }

@@ -1,7 +1,9 @@
 use crate::error::{Result, RobotError};
-use std::io::ErrorKind;
+use std::io::{ErrorKind, Read};
 use std::path::{Component, Path};
-use std::process::Command;
+use std::process::{Child, Command, Stdio};
+use std::thread;
+use std::time::{Duration, Instant};
 
 #[derive(Debug)]
 pub struct RobotOutput {
@@ -12,6 +14,9 @@ pub struct RobotOutput {
 
 const ALLOWED_SUBCOMMANDS: &[&str] =
     &["validate-profile", "validate", "merge", "report", "reason", "query", "convert"];
+
+/// Default kill deadline for ROBOT subprocesses (#341).
+pub const DEFAULT_ROBOT_TIMEOUT_SECS: u64 = 300;
 
 /// Resolve a ROBOT executable. Explicit paths must be named `robot` / `robot.cmd` / `robot.bat`.
 pub fn detect_robot(explicit_path: Option<&str>) -> Result<String> {
@@ -48,6 +53,14 @@ fn robot_exists_on_path(name: &str) -> bool {
 }
 
 pub fn run_robot(robot_path: Option<&str>, args: &[String]) -> Result<RobotOutput> {
+    run_robot_with_timeout(robot_path, args, Duration::from_secs(DEFAULT_ROBOT_TIMEOUT_SECS))
+}
+
+pub(crate) fn run_robot_with_timeout(
+    robot_path: Option<&str>,
+    args: &[String],
+    timeout: Duration,
+) -> Result<RobotOutput> {
     if let Some(sub) = args.first() {
         let base = sub.split_whitespace().next().unwrap_or(sub);
         if !ALLOWED_SUBCOMMANDS.contains(&base) {
@@ -60,11 +73,83 @@ pub fn run_robot(robot_path: Option<&str>, args: &[String]) -> Result<RobotOutpu
         return Err(RobotError::Run("ROBOT requires a subcommand".to_string()));
     }
     let robot = detect_robot(robot_path)?;
-    let output = Command::new(&robot).args(args).output()?;
-    let exit_code = output.status.code().unwrap_or(1);
-    let stdout = String::from_utf8_lossy(&output.stdout).into_owned();
-    let stderr = String::from_utf8_lossy(&output.stderr).into_owned();
-    Ok(RobotOutput { exit_code, stdout, stderr })
+    let mut cmd = Command::new(&robot);
+    cmd.args(args).stdin(Stdio::null()).stdout(Stdio::piped()).stderr(Stdio::piped());
+    configure_process_group(&mut cmd);
+    let mut child = cmd.spawn()?;
+    let mut stdout = child.stdout.take().expect("stdout piped");
+    let mut stderr = child.stderr.take().expect("stderr piped");
+    let out_handle = thread::spawn(move || {
+        let mut buf = Vec::new();
+        stdout.read_to_end(&mut buf).map(|_| buf)
+    });
+    let err_handle = thread::spawn(move || {
+        let mut buf = Vec::new();
+        stderr.read_to_end(&mut buf).map(|_| buf)
+    });
+
+    let deadline = Instant::now() + timeout;
+    loop {
+        match child.try_wait() {
+            Ok(Some(status)) => {
+                let out = out_handle
+                    .join()
+                    .map_err(|_| RobotError::Run("stdout reader panicked".into()))?
+                    .map_err(RobotError::Io)?;
+                let err = err_handle
+                    .join()
+                    .map_err(|_| RobotError::Run("stderr reader panicked".into()))?
+                    .map_err(RobotError::Io)?;
+                return Ok(RobotOutput {
+                    exit_code: status.code().unwrap_or(1),
+                    stdout: String::from_utf8_lossy(&out).into_owned(),
+                    stderr: String::from_utf8_lossy(&err).into_owned(),
+                });
+            }
+            Ok(None) => {
+                if Instant::now() >= deadline {
+                    kill_robot_tree(&mut child);
+                    let _ = child.wait();
+                    let _ = out_handle.join();
+                    let _ = err_handle.join();
+                    return Err(RobotError::TimedOut(timeout.as_secs().max(1)));
+                }
+                thread::sleep(Duration::from_millis(25));
+            }
+            Err(e) => {
+                kill_robot_tree(&mut child);
+                let _ = child.wait();
+                let _ = out_handle.join();
+                let _ = err_handle.join();
+                return Err(RobotError::Io(e));
+            }
+        }
+    }
+}
+
+fn configure_process_group(cmd: &mut Command) {
+    #[cfg(unix)]
+    {
+        use std::os::unix::process::CommandExt;
+        cmd.process_group(0);
+    }
+    let _ = cmd;
+}
+
+fn kill_robot_tree(child: &mut Child) {
+    #[cfg(unix)]
+    {
+        let pgid = child.id() as i32;
+        // SAFETY: kill(-pgid) signals the process group created via process_group(0).
+        let group_kill = unsafe { libc::kill(-pgid, libc::SIGKILL) };
+        if group_kill != 0 {
+            let _ = child.kill();
+        }
+    }
+    #[cfg(not(unix))]
+    {
+        let _ = child.kill();
+    }
 }
 
 pub fn robot_validate(robot_path: Option<&str>, ontology_path: &Path) -> Result<RobotOutput> {
@@ -199,5 +284,26 @@ mod tests {
     fn path_probe_skips_missing_binary_without_which() {
         // ensure robot_exists_on_path returns false for a nonsense name (no panic / which).
         assert!(!robot_exists_on_path("ontocode-definitely-missing-robot-bin-xyz"));
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn robot_timeout_kills_hanging_binary() {
+        use std::os::unix::fs::PermissionsExt;
+
+        let dir = tempfile::tempdir().unwrap();
+        let robot = dir.path().join("robot");
+        std::fs::write(&robot, "#!/bin/sh\nsleep 999\n").unwrap();
+        let mut perms = std::fs::metadata(&robot).unwrap().permissions();
+        perms.set_mode(0o755);
+        std::fs::set_permissions(&robot, perms).unwrap();
+
+        let err = run_robot_with_timeout(
+            Some(robot.to_str().unwrap()),
+            &[String::from("validate")],
+            Duration::from_millis(400),
+        )
+        .expect_err("must time out");
+        assert!(matches!(err, RobotError::TimedOut(_)), "got {err:?}");
     }
 }

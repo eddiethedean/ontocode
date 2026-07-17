@@ -31,7 +31,7 @@ If Marketplace / Open VSX is behind GitHub, install the release VSIX for the tag
 | Cursor | [Open VSX](https://open-vsx.org/extension/ontocode/ontocode) or the same VSIX |
 | CLI (pinned) | `cargo install ontocore-cli --locked --version 0.26.2` |
 | CLI (Linux, no compile) | `ontocore-v0.26.2-x86_64-unknown-linux-gnu.tar.gz` from GitHub Releases |
-| Tutorial files (offline) | Prefer the curl/PowerShell samples in [First success](first-success.md). Optional: `ontocode-tutorial.zip` from the same GitHub Release when attached |
+| Tutorial files (offline) | [`ontocode-tutorial.zip`](https://github.com/eddiethedean/ontocode/releases/download/v0.26.2/ontocode-tutorial.zip) on the same GitHub Release (or curl samples in [First success](first-success.md)) |
 
 Always pin: bare `cargo install ontocore-cli` resolves to the **latest** crates.io version and can jump without your review.
 

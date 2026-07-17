@@ -34,10 +34,10 @@ Use this page to decide **when OntoCode fits**, **when to keep Protégé**, and 
 | OBO authoring | Native | Native write-back | Patch engine since v0.12; Entity Inspector since v0.13 |
 | RDF/XML in-place editing | Yes | Yes (semantic re-serialize) | Not byte-identical to Protégé — [OWL/XML write-back](owl-xml-workflow.md) |
 | OWL/XML in-place editing | Yes | Yes (semantic re-serialize) | Core ops; Manchester/refactor limited |
-| Manchester axiom editing | Full | MVP subset | Disjoint + property chains shipped (v0.12); richest on Turtle |
+| Manchester axiom editing | Full | OWL 2 Manchester on Turtle (v0.22) | Richest on Turtle; XML core ops — [SHIPPED Manchester scope](../SHIPPED.md#manchester-scope-v022) |
 | Disjoint classes | Yes | Yes (v0.9) | Via Manchester / patch JSON |
 | Property chain editing | Yes | Yes (v0.12) | Inspector + patch JSON |
-| OBO format | Native | Index + write-back | v0.12 inspector + patch |
+| OBO format | Native | Index + write-back | Patch engine since **v0.12**; Entity Inspector since **v0.13** |
 | ROBOT integration | Common | CLI wrapper | Java + `robot` required |
 | SQL/SPARQL over repo | Plugins / external | Built-in workbench + CLI | |
 | DL Query tab | Native | Query Workbench **DL** mode + CLI `dl-query` + LSP | Manchester class expressions; see [DL Query honesty](dl-query.md) |

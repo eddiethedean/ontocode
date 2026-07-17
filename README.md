@@ -17,10 +17,12 @@
 
 ## Start here
 
+**Primary path:** Install the [VS Code extension](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) → **[First success (~10 min)](https://ontocode-vs.readthedocs.io/en/latest/guides/first-success/)**.
+
 | I want to… | Start here |
 |------------|------------|
 | **Edit ontologies in VS Code** | **[First success (~10 min)](https://ontocode-vs.readthedocs.io/en/latest/guides/first-success/)** |
-| Validate or query in CI | **Linux x64:** release tarball → [CI guide](https://ontocode-vs.readthedocs.io/en/latest/ci-integration/). **macOS/Windows:** [Install CLI](https://ontocode-vs.readthedocs.io/en/latest/guides/install-cli/) (`cargo install` 15–30+ min) |
+| **CI / automation only** | **Linux x64:** release tarball → [CI guide](https://ontocode-vs.readthedocs.io/en/latest/ci-integration/). **macOS/Windows:** [Install CLI](https://ontocode-vs.readthedocs.io/en/latest/guides/install-cli/) (`cargo install` 15–30+ min — not needed for the IDE) |
 | Decide if it fits | [Known limitations](https://ontocode-vs.readthedocs.io/en/latest/known-limitations/) · [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) · [Versions & channels](https://ontocode-vs.readthedocs.io/en/latest/guides/versions-and-channels/) · [Evaluate pack](https://ontocode-vs.readthedocs.io/en/latest/guides/enterprise-eval/) |
 | Try examples | [Examples](https://ontocode-vs.readthedocs.io/en/latest/examples/) · repo [`examples/`](examples/) |
 | Embed in Rust | [Rust library guide](https://ontocode-vs.readthedocs.io/en/latest/guides/rust-library/) |
@@ -56,18 +58,21 @@ Evaluators: use [What ships today](https://ontocode-vs.readthedocs.io/en/latest/
 
 ## Quick start
 
-**VS Code:** Install [OntoCode](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) → open a folder of **`.ttl` / `.obo` / `.owl` / `.rdf` / `.owx`** (editable) or JSON-LD / TriG / N-Triples (browse/query only) → click the **OntoCode** activity bar. Edit in the Entity Inspector. XML write-back is semantic re-serialize — see [OWL/XML and RDF/XML write-back](https://ontocode-vs.readthedocs.io/en/latest/guides/owl-xml-workflow/) and [Supported formats](https://ontocode-vs.readthedocs.io/en/latest/supported-formats/). OntoCode’s **bundled** language server runs in trusted and Restricted Mode; **Trust** only if you set custom `ontocode.lspPath` or `ontocode.robotPath`.
+**VS Code:** Install [OntoCode](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) → open a folder of **`.ttl` / `.obo` / `.owl` / `.rdf` / `.owx`** (editable) or JSON-LD / TriG / N-Triples (browse/query only) → click the **OntoCode** activity bar. Edit in the Entity Inspector. XML write-back is semantic re-serialize — see [OWL/XML and RDF/XML write-back](https://ontocode-vs.readthedocs.io/en/latest/guides/owl-xml-workflow/) and [Supported formats](https://ontocode-vs.readthedocs.io/en/latest/supported-formats/).
 
-**CLI (Linux x64 CI):** [CI integration](https://ontocode-vs.readthedocs.io/en/latest/ci-integration/) — download tarball, verify checksums, run the versioned binary.
+> **Workspace Trust:** The **bundled** language server works in Restricted Mode. **Do not Trust the workspace** unless you configured `ontocode.lspPath` or `ontocode.robotPath`.
 
-**CLI (macOS/Windows or from source):** [Install CLI](https://ontocode-vs.readthedocs.io/en/latest/guides/install-cli/). Cold `cargo install` may take **15–30+ minutes** (Rust 1.88+).
+**CI / automation only (not required for the IDE):**
+
+- **Linux x64:** [CI integration](https://ontocode-vs.readthedocs.io/en/latest/ci-integration/) — download tarball, verify checksums, run the versioned binary.
+- **macOS/Windows or from source:** [Install CLI](https://ontocode-vs.readthedocs.io/en/latest/guides/install-cli/). Cold `cargo install` may take **15–30+ minutes** (Rust 1.88+).
 
 ```bash
 cargo install ontocore-cli --locked --version 0.26.2
 ontocore validate /path/to/ontologies
 ```
 
-**CLI (clone):**
+**From a clone (same smoke command everywhere):**
 
 ```bash
 git clone https://github.com/eddiethedean/ontocode.git && cd ontocode

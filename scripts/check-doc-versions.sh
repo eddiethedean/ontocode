@@ -1404,11 +1404,11 @@ if [[ "$TAGGED_MINOR" =~ ^0\.([0-9]+)$ ]]; then
     else
       echo "ok: faq/architecture plugin stability wording"
     fi
-    if ! grep -qiE 'If (the zip is )?missing|if .*includes.*ontocode-tutorial\.zip' docs/vscode-install.md 2>/dev/null; then
-      echo "FAIL: docs/vscode-install.md must hedge tutorial zip as optional/missing-safe" >&2
+    if ! grep -qiE 'ontocode-tutorial\.zip' docs/vscode-install.md 2>/dev/null; then
+      echo "FAIL: docs/vscode-install.md must mention ontocode-tutorial.zip" >&2
       fail=1
     else
-      echo "ok: vscode-install tutorial zip hedge"
+      echo "ok: vscode-install tutorial zip"
     fi
     if grep -qiE 'Quick paths to success|Path A — VS Code' docs/install-cli-ci.md 2>/dev/null; then
       echo "FAIL: install-cli-ci.md still has IDE Path A / quick paths (CLI-only page)" >&2

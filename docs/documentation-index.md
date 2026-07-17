@@ -8,20 +8,21 @@ The public site navigation is defined in [`mkdocs.yml`](https://github.com/eddie
 
 ## Recommended reading order
 
+### New users
+
+1. [First success](guides/first-success.md)
+2. [Your next steps (day 2)](guides/day-2.md)
+3. [Feature tour](ontocode/feature-tour.md)
+4. [Supported formats](supported-formats.md)
+5. [Ontology concepts](concepts.md) (if new to OWL)
+
 ### Evaluators and adopters
 
 1. [What ships today](SHIPPED.md)
 2. [Known limitations](known-limitations.md)
-3. [Glossary](glossary.md)
-4. [First success (~10 min)](guides/first-success.md)
+3. [First success (~10 min)](guides/first-success.md)
+4. [Ontology concepts](concepts.md) (domain primer) · [Glossary](glossary.md) (product terms)
 5. [Roadmap hub](roadmap-hub.md)
-
-### New users
-
-1. [First success](guides/first-success.md)
-2. [Feature tour](ontocode/feature-tour.md)
-3. [Supported formats](supported-formats.md)
-4. Optional path chooser: [start.md](start.md)
 
 ### Contributors
 
@@ -29,7 +30,7 @@ The public site navigation is defined in [`mkdocs.yml`](https://github.com/eddie
 2. [Architecture tour](guides/architecture-tour.md) · [Internals](internals.md)
 3. [Testing matrix](guides/testing-matrix.md) · [Debugging](debugging.md)
 4. [Releasing](releasing.md)
-5. APIs: [CLI reference](cli-reference.md) · [LSP API](lsp-api.md) · [Plugins](guides/plugins.md) · [Webview protocol](webview-protocol.md)
+5. APIs: [CLI reference](cli-reference.md) · [LSP API](lsp-api.md) · [Patch JSON](patch-reference.md) · [Catalog SQL](sql-reference.md) · [SPARQL](sparql-reference.md) · [Errors](errors.md) · [Plugins](guides/plugins.md) · [Webview protocol](webview-protocol.md)
 6. [Engineering docs on GitHub](engineering.md) — UI specs, platform targets, Cursor prompts
 
 ---
@@ -50,10 +51,10 @@ Deep planning docs (`docs/ui/`, `docs/platform/`, `docs/cursor-prompts/`, `docs/
 
 | Section | Start here |
 |---------|------------|
-| **Get started** | [First success](guides/first-success.md) → [Install](install.md) (optional path chooser: [start.md](start.md)) |
+| **Get started** | [First success](guides/first-success.md) → [Your next steps](guides/day-2.md) → [Install](install.md) → [Documentation index](documentation-index.md) |
 | **Use OntoCode** | [Overview](ontocode/index.md) → [Feature tour](ontocode/feature-tour.md) |
 | **Use OntoCore** | [OntoCore overview](ontocore/index.md) · [Examples](examples/index.md) |
-| **Reference** | [CLI](cli-reference.md) · [Rust API](ontocore/rust-api.md) · [LSP API](lsp-api.md) · [docs.rs ontocore](https://docs.rs/ontocore) |
+| **Reference** | [CLI](cli-reference.md) · [Rust API](ontocore/rust-api.md) · [LSP API](lsp-api.md) · [Patch](patch-reference.md) · [SQL](sql-reference.md) · [SPARQL](sparql-reference.md) · [Errors](errors.md) · [docs.rs ontocore](https://docs.rs/ontocore) |
 | **Evaluate** | [What ships today](SHIPPED.md) · [Enterprise eval](guides/enterprise-eval.md) · [Week-2 playbook](guides/enterprise-week-2.md) |
 | **Help** | [FAQ](faq.md) · [Troubleshooting](troubleshooting.md) · [Support](support.md) |
 | **Contribute** | [Contributing](contributing.md) · [Plugin policy](guides/plugin-policy.md) · [CLI](cli-reference.md) · [LSP](lsp-api.md) · [Engineering](engineering.md) |

@@ -12,7 +12,7 @@
 ## Prerequisites
 
 - **VS Code 1.85+** (see [platform compatibility](guides/platform-compatibility.md))
-- OntoCode’s **bundled** language server runs in trusted and Restricted Mode. **Trust the workspace** only if you set custom `ontocode.lspPath` or `ontocode.robotPath` — those settings are ignored when the folder is untrusted.
+- OntoCode’s **bundled** language server runs in trusted and Restricted Mode. **Do not Trust the workspace** unless you configured `ontocode.lspPath` or `ontocode.robotPath` — those settings are ignored when the folder is untrusted.
 
 ## Install matrix
 
@@ -30,12 +30,12 @@ CLI install options (separate from the extension): [Install](install.md) · [Ins
 
 1. Install [OntoCode from the Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) (or [Open VSX](https://open-vsx.org/extension/ontocode/ontocode) for Cursor). If the store lags the latest GitHub tag, use the VSIX under Option B — see [Versions and channels](guides/versions-and-channels.md).
 2. **File → Open Folder…** and choose a directory with ontology files.
-3. OntoCode’s **bundled** language server runs without Trust; **Trust** only if you need custom `ontocode.lspPath` / `ontocode.robotPath`.
+3. OntoCode’s **bundled** language server runs without Trust; **do not Trust** unless you need custom `ontocode.lspPath` / `ontocode.robotPath`.
 4. Open the **OntoCode** activity bar and browse ontologies, classes, properties, individuals, and **Diagnostics**.
 
 For a full walkthrough, see [First success in 10 minutes](guides/first-success.md).
 
-**Sample ontology files:** prefer the curl/PowerShell commands in [First success](guides/first-success.md). Optional: if the [v0.26.2 GitHub Release](https://github.com/eddiethedean/ontocode/releases/tag/v0.26.2) lists `ontocode-tutorial.zip` among assets, unzip and open that folder. **If the zip is missing**, use First success curl commands or open `fixtures/` from a clone.
+**Sample ontology files:** prefer the curl/PowerShell commands in [First success](guides/first-success.md). Offline: download [`ontocode-tutorial.zip`](https://github.com/eddiethedean/ontocode/releases/download/v0.26.2/ontocode-tutorial.zip) from the [v0.26.2 GitHub Release](https://github.com/eddiethedean/ontocode/releases/tag/v0.26.2), unzip, and open that folder — or open `fixtures/` from a clone.
 
 ## Option B — GitHub Release VSIX (offline / air-gapped)
 
@@ -64,7 +64,7 @@ Install the generated `.vsix` via **Install from VSIX…**, or press **F5** in V
 Use this only when the bundled server is missing or you are developing the LSP:
 
 ```bash
-cargo install ontocore-lsp --locked
+cargo install ontocore-lsp --locked --version 0.26.2
 ```
 
 Set **OntoCode: Lsp Path** (`ontocode.lspPath`) to the absolute path of your `ontocore-lsp` binary. **Trusted workspaces only** — ignored in Restricted Mode.
@@ -77,7 +77,7 @@ Set **OntoCode: Lsp Path** (`ontocode.lspPath`) to the absolute path of your `on
 
 1. Open **Extensions** in Cursor and search for **OntoCode** (publisher `ontocode`).
 2. Install **OntoCode** (`ontocode.ontocode`).
-3. Open a folder with ontology files. OntoCode’s **bundled** language server works in trusted and Restricted Mode — **Trust** only if you set custom `ontocode.lspPath` or `ontocode.robotPath`.
+3. Open a folder with ontology files. OntoCode’s **bundled** language server works in trusted and Restricted Mode — **do not Trust** unless you configured `ontocode.lspPath` or `ontocode.robotPath`.
 
 If OntoCode does not appear in search (before v0.11 or if Open VSX sync is delayed):
 

@@ -41,6 +41,18 @@ SPARQL over indexed triples: [sparql-reference.md](sparql-reference.md).
 
 > **Warning:** Both SQL and SPARQL silently truncate at 100,000 rows. The CLI does not exit non-zero for truncation. LSP responses set `truncated: true`. Do not use row counts as strict CI gates without checking [workspace-limits.md](workspace-limits.md).
 
+## Failure modes
+
+| Situation | Behavior |
+|-----------|----------|
+| Unsupported SQL (`JOIN`, `ORDER BY`, `LIKE`, `NOT`, parentheses, …) | CLI exit non-zero; LSP `QUERY_FAILED` |
+| Unknown table or column | Parse/eval error (non-zero / `QUERY_FAILED`) |
+| `OR` without parentheses | Left-to-right boolean combination only — write simpler `WHERE` or use SPARQL |
+| `SELECT *` with **zero rows** | Still returns column headers (schema) — empty body |
+| Empty workspace / not indexed | Index first (`ontocore index` / Index Workspace) |
+
+See [Errors reference](errors.md) (`query` exit row) and [Query cookbook](examples/queries.md).
+
 ## Virtual tables and columns
 
 ### `ontologies`

@@ -36,44 +36,11 @@ Prefer Protégé or other tools (or wait for product **1.0**) if you need any of
 
 ## What ships today (v0.26.2)
 
-| Capability | Status |
-|------------|--------|
-| Browse OWL/RDF in VS Code | Shipped |
-| Turtle (`.ttl`) write-back (labels, parents, create/delete) | Shipped |
-| CLI SQL/SPARQL queries and `validate` for CI | Shipped |
-| Inline diagnostics (Problems panel) | Shipped |
-| Query workbench + Manchester editor in VS Code | Shipped |
-| EL/RL/RDFS/DL reasoning + inferred hierarchy | **Shipped** (OntoLogos 1.x) |
-| OWL 2 DL classification (`dl` / `auto` profiles) | **Shipped** (OntoLogos 1.x; not certified HermiT-identical) |
-| Explanations (OntoLogos) | **Shipped** (DL-first on DL; EL/RL/RDFS alternatives where supported) |
-| React entity inspector + graph visualization | **Shipped** |
-| OBO format index + `obo_id` in explorer | **Shipped** |
-| OBO write-back in VS Code + CLI (`ontocore-obo`) | **Shipped** (engine v0.12; inspector v0.13) |
-| Turtle domain/range/chains/individual assertions | **Shipped** (v0.12) |
-| OWL/XML · RDF/XML catalog (`.owl`, `.owx`) | **Shipped** (read v0.12; write-back v0.21) |
-| RDF/XML + OWL/XML write-back (semantic re-serialize) | **Shipped** (v0.21; OWL 2 mutate depth expanded in v0.22) |
-| ROBOT CLI interop (`ontocore robot`, LSP `runRobot`) | **Shipped** (requires Java + `robot` on PATH) |
-| Full OWL 2 DL axiom catalog (all axiom kinds editable) | **Partial** (richest on Turtle; XML core ops) |
-| Semantic diff | **Shipped** (v0.10 — CLI, LSP, VS Code panel) |
-| Incremental indexing + multi-root workspaces | **Shipped** (v0.10) |
-| Turtle completion + diagnostic quick fixes | **Shipped** (v0.11) |
-| Manage Imports UI + import patch ops | **Shipped** (v0.11) |
-| `ontocore docs` export | **Shipped** (v0.11) |
-| Open VSX / Cursor marketplace | **Shipped** (v0.11) |
-| Plugin host (`ontocore plugins`, LSP `listPlugins`/`runPlugin`) | **Shipped** (SDK 1.0 wire freeze in v0.26) |
-| Plugin permissions + UI views (`api_version = "1"`) | **Shipped** (v0.15) |
-| Explanation alternatives + staleness detection | **Shipped** (v0.15) |
-| Graph asserted/inferred/combined modes | **Shipped** (v0.15) |
-| Reference plugins (naming validator, Markdown exporter, SHACL scaffold) | **Shipped** (v0.14) |
-| owlmake workflow scaffold (`ontocore workflow run`) | **Shipped** (v0.14 — subprocess; not production-hardened) |
-| Realization / instance checking (`realize`, `check-instance`) | **Shipped** (v0.23) |
-| SWRL rule browser / editor / validate | **Shipped** (v0.23; DLSafe) |
-| Engine-level reasoner cancel | **Shipped** (v0.23) |
-| DL Query (Workbench DL mode, CLI `dl-query`, LSP) | **Shipped** (v0.24) — [honesty notes](dl-query.md) |
-| Refactor merge / replace (CLI + IDE; multi-format rename) | **Shipped** (v0.24) |
-| Workspace search LSP (`ontocore/search`) | **Shipped** (v0.24) |
+Use the canonical matrix: **[What ships today](../SHIPPED.md)**. Do not maintain a second capability table here — it drifts.
 
-Full gap analysis for evaluators: [Known limitations](../known-limitations.md) · [What ships today](../SHIPPED.md) · [Protégé decision](protege-decision.md).
+Highlights for evaluators: Turtle/OBO/RDF/XML/OWL/XML write-back; Query Workbench (SQL subset + SPARQL + DL); EL–DL reasoner + realize; multi-format rename/merge/replace; Plugin SDK 1.0 wire; semantic diff. Gaps: [Known limitations](../known-limitations.md) · [Protégé decision](protege-decision.md) · [DL Query honesty](dl-query.md).
+
+**Out of scope for questionnaires:** OntoCode is a **local-first** IDE/CLI — there is **no** product IdP/SSO, RBAC, or vendor SLA. Commercial support is community OSS only. See [Production readiness](production-readiness.md) and [Governance](governance.md).
 
 ## Deployment model
 

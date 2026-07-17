@@ -39,6 +39,12 @@ Do **not** treat `docs/design/*` target specs, `docs/protege-parity/`, or `docs/
 |------|-----|
 | Formats / write-back | [docs/supported-formats.md](docs/supported-formats.md) |
 | First-time user | [docs/guides/first-success.md](docs/guides/first-success.md) |
+| Day-2 IDE path | [docs/guides/day-2.md](docs/guides/day-2.md) |
 | LSP wire API | [docs/lsp-api.md](docs/lsp-api.md) + `docs/lsp-protocol.schema.json` |
 | Patches | [docs/patch-reference.md](docs/patch-reference.md) |
 | CLI | [docs/cli-reference.md](docs/cli-reference.md) |
+| Catalog SQL | [docs/sql-reference.md](docs/sql-reference.md) |
+| SPARQL | [docs/sparql-reference.md](docs/sparql-reference.md) |
+| Errors / exits | [docs/errors.md](docs/errors.md) |
+| Plugins | [docs/guides/plugins.md](docs/guides/plugins.md) |
+| Rust API | [docs/ontocore/rust-api.md](docs/ontocore/rust-api.md) |

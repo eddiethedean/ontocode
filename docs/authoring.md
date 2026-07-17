@@ -3,7 +3,7 @@
 > **Status:** Documents behavior in **OntoCore v0.26.2**. Pre-1.0 APIs may change.
 > Canonical feature list: [What ships today](SHIPPED.md).
 
-OntoCode provides **Turtle, OBO, RDF/XML, and OWL/XML write-back** for simple edits and **Manchester** for complex class expressions — without Protégé.
+OntoCode provides **Turtle, OBO, RDF/XML, and OWL/XML write-back** for simple edits and **Manchester** for complex class expressions. It is **not** a full Protégé replacement — see [Known limitations](known-limitations.md) and [Protégé coexistence](guides/protege-coexistence.md).
 
 ## Supported operations
 
@@ -61,7 +61,7 @@ For complex class expressions (restrictions, `and`/`or`, cardinality):
 6. **Validate** shows parse diagnostics and an expression tree.
 7. **Preview** shows the Turtle fragment; **Apply** writes the patch.
 
-Manchester scope: named classes, `and`/`or`, `some`/`only`, `min`/`max`/`exact` cardinality, nesting, and **DisjointClasses** via IRI patch ops. Domain, range, and **property chains** are editable via inspector and patch JSON (v0.13).
+Manchester covers OWL 2 class expressions used in complex `SubClassOf` / `EquivalentClasses` on Turtle — including `and` / `or` / `not`, `some` / `only` / `value` / `Self`, OneOf `{…}`, `min` / `max` / `exact` cardinality, nested restrictions, and data restrictions on XSD types (see [SHIPPED — Manchester scope](SHIPPED.md#manchester-scope-v022)). **DisjointClasses**, domain/range, and **property chains** are editable via inspector and patch JSON. XML write-back supports core ops; richest Manchester authoring remains **Turtle-first**.
 
 ## Manage Imports (v0.11)
 
@@ -89,8 +89,8 @@ For multi-file changes (rename IRI, namespace migration, move entity, extract mo
 
 Run **OntoCode: Open Query Workbench** from the Command Palette.
 
-- Toggle **SQL** or **SPARQL** mode
-- Run queries against the indexed workspace
+- Toggle **SQL**, **SPARQL**, or **DL Query** mode
+- Run queries against the indexed workspace (DL mode: Manchester class expressions — [DL Query honesty](guides/dl-query.md))
 - Export results as CSV or JSON
 - Save named queries and reload from history
 - Use the virtual table dropdown for SQL table names

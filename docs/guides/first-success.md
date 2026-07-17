@@ -39,12 +39,12 @@ For offline VSIX installs, see [Install VS Code](../vscode-install.md).
     Invoke-WebRequest -Uri https://raw.githubusercontent.com/eddiethedean/ontocode/v0.26.2/examples/obo-workflow/demo.obo -OutFile demo.obo
     ```
 
-**Offline / optional pack:** Prefer the curl/PowerShell commands above. An `ontocode-tutorial.zip` is attached only when listed on the [v0.26.2 GitHub Release](https://github.com/eddiethedean/ontocode/releases/tag/v0.26.2) assets (built with `./scripts/package-tutorial-zip.sh`). For offline extension install, download `ontocode-v0.26.2.vsix` from that Release when present. **If the zip is missing**, use the commands above or open `fixtures/` from a clone.
+**Offline pack:** Prefer the curl/PowerShell commands above when you have network access. For offline sample files, download [`ontocode-tutorial.zip`](https://github.com/eddiethedean/ontocode/releases/download/v0.26.2/ontocode-tutorial.zip) from the [v0.26.2 GitHub Release](https://github.com/eddiethedean/ontocode/releases/tag/v0.26.2), unzip, and **File → Open Folder…**. For offline extension install, download `ontocode-v0.26.2.vsix` from that Release. Alternatively open `fixtures/` from a clone.
 
 Or browse [v0.26.2 fixtures](https://github.com/eddiethedean/ontocode/tree/v0.26.2/fixtures).
 
-!!! note "Workspace Trust"
-    The **bundled** language server works in Restricted Mode. **Trust** the folder only if you set custom `ontocode.lspPath` or `ontocode.robotPath`.
+!!! tip "Workspace Trust"
+    The **bundled** language server works in Restricted Mode. **Do not Trust the workspace** unless you configured `ontocode.lspPath` or `ontocode.robotPath`.
 
 ### 3. Browse the explorer
 
@@ -73,11 +73,12 @@ If trees stay empty: run **OntoCode: Index Workspace**, then check **View → Ou
 
 | Next | Link |
 |------|------|
+| **Your next steps (day 2)** | Edit → query → reason → CI — [Your next steps](day-2.md) |
 | Query Workbench | Run `SELECT short_name FROM classes` — [Query Workbench](../ontocode/query-workbench.md) |
 | Manchester axioms | [Manchester editor](../ontocode/manchester-editor.md) |
 | Reason / realize / SWRL | [Reasoner](reasoner.md) · [Realize](../examples/realize.md) · [SWRL](../examples/swrl.md) |
 | Refactor / graphs / OBO / XML | [Feature tour](../ontocode/feature-tour.md) · [OBO authoring](../ontocode/obo-authoring.md) · [OWL/XML write-back](owl-xml-workflow.md) |
-| CLI / CI | [Install CLI & CI (detail)](../install-cli-ci.md) · [CI integration](../ci-integration.md) |
+| CLI / CI (optional) | [Install](../install.md) · [CI integration](../ci-integration.md) |
 | Fit check | [Known limitations](../known-limitations.md) · [What ships today](../SHIPPED.md) |
 
 ## Troubleshooting

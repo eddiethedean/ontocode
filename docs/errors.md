@@ -8,12 +8,16 @@ Unified catalog of error codes, exit behavior, and failure modes for OntoCore **
 |---------|--------|---------------|
 | `ontocore index` | Index succeeded | Index/parse/I/O failure |
 | `ontocore inspect` | Index succeeded | Index/parse/I/O failure |
+| `ontocore new` | Ontology created | Path exists (without `--force`), IRI validation failure, I/O |
 | `ontocore validate` | No diagnostic **errors** (warnings/info allowed; includes plugin validators) | One or more diagnostic **errors** (core or plugin) |
 | `ontocore query` | Query succeeded | Parse error, unsupported SQL, I/O failure |
 | `ontocore sparql` | Query succeeded (results may be truncated at row cap) | Parse error, I/O failure |
+| `ontocore dl-query` | Query succeeded | Manchester parse error, reasoner error, I/O |
 | `ontocore patch` | Patch applied or preview succeeded | Invalid patch, unsupported format, I/O failure |
 | `ontocore classify` | Consistent ontology (no unsatisfiable classes) | Unsatisfiable classes, reasoner error, I/O failure |
 | `ontocore explain` | Explanation produced | Class not found, explanation unavailable, reasoner error |
+| `ontocore realize` | Realization succeeded | Reasoner error, I/O |
+| `ontocore check-instance` | Instance **entailed** | **Not entailed**, or reasoner error |
 | `ontocore refactor` (subcommands) | Preview or apply succeeded | Invalid request, path outside workspace, I/O failure |
 | `ontocore diff` | Diff succeeded | Git/parse/I/O failure, invalid ref token |
 | `ontocore docs` | Export succeeded | Index, plugin export, or I/O failure |

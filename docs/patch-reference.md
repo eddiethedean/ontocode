@@ -7,7 +7,24 @@ Patch write-back uses a JSON array of patch operations. The CLI (`ontocore patch
 
 Supported formats: **Turtle (`.ttl`)**, **OBO (`.obo`)**, **RDF/XML (`.owl`/`.rdf`)**, **OWL/XML (`.owx`)**. XML uses full-document re-serialize ([ADR-0021](design/adr/0021-deterministic-xml-serializers.md)). See [Supported formats](supported-formats.md).
 
-**Apply path (v0.20):** inbound patch JSON is wrapped as an `ontocore_edit::Transaction` and applied through format adapters (`TurtleAdapter` / `OboAdapter`) before the existing `apply_patches_to_text` engines run. Legacy patch arrays remain accepted; an optional forward envelope `{ "transaction": { "changes": [...] } }` is also supported.
+**Apply path (v0.20):** inbound patch JSON is wrapped as an `ontocore_edit::Transaction` and applied through format adapters (`TurtleAdapter` / `OboAdapter`) before the existing `apply_patches_to_text` engines run. Legacy patch arrays remain accepted; an optional forward envelope `{ "transaction": { "changes": [...] } }` is also supported:
+
+```json
+{
+  "transaction": {
+    "changes": [
+      {
+        "document_uri": "file:///path/to/ontology.ttl",
+        "patches": [
+          { "op": "add_label", "entity_iri": "http://ex#Person", "value": "Human" }
+        ]
+      }
+    ]
+  }
+}
+```
+
+Most callers still pass a bare JSON **array** of ops (CLI `--file` / LSP `patches`).
 
 **Source of truth:** [`patch.rs` on GitHub](https://github.com/eddiethedean/ontocode/blob/main/crates/ontocore-owl/src/patch.rs)
 
@@ -316,13 +333,14 @@ Method: `ontocore/applyAxiomPatch`
 
 See [lsp-api.md](lsp-api.md) and [authoring.md](authoring.md).
 
-## Limitations (v0.24)
+## Limitations (v0.26)
 
 - Write-back: **Turtle (`.ttl`), OBO (`.obo`), RDF/XML (`.owl`/`.rdf`), OWL/XML (`.owx`)**; JSON-LD and line-oriented RDF are read-only. XML is semantic re-serialize — [OWL/XML write-back](guides/owl-xml-workflow.md)
+- **OBO:** patch ops edit an existing `term_id` — there is **no** create-term / new-stanza op (create terms in the file or via other tools, then patch)
 - Prefix manager ops are **Turtle-only**; XML write-back returns a clear error
 - Simple `add_sub_class_of` parent must be a **named class IRI**; use Manchester ops (`add_complex_sub_class_of`, `add_equivalent_class`, etc.) for class expressions
 - XML axiom annotations cover the same `axiom_op` set as Turtle (`sub_class_of`, `domain`/`range`, property hierarchy / inverse / equiv / disjoint, same/different individuals, …). Identity is named-entity based; supply `related_iri` when multiple axioms match. Annotation values may be Simple literals or IRIs (`<iri>` / absolute URL)
 - Datatype definitions accept Manchester DataRanges (`xsd:integer[>= 0]`, `{…}`, `and`/`or`/`not`) on Turtle and XML
 - Catalog `getEntity` lists HasKey, DisjointUnion, RBox/ABox families, datatype definitions, and nested axiom annotations on axiom cards
-- Manchester coverage includes restriction constructors (`some`/`only`/`min`/`max`/`exactly`, `not`, `value`, `Self`, one-of, data facets) — see [OWL2 authoring gaps](https://github.com/eddiethedean/ontocode/blob/main/docs/protege-parity/06_SUBSYSTEMS/OWL2_AUTHORING_GAPS.md)
+- Manchester coverage includes restriction constructors (`some`/`only`/`min`/`max`/`exactly`, `not`, `value`, `Self`, one-of, data facets) — see [SHIPPED Manchester scope](SHIPPED.md#manchester-scope-v022)
 - Patch engine uses targeted text edits on Turtle/OBO; unusual formatting may need manual review. XML always full-document re-serialize.

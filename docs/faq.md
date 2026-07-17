@@ -81,7 +81,7 @@ Command Palette → **OntoCode: Open Query Workbench**. See [Query Workbench](on
 
 **Does OntoCode support Protégé-style DL Query?**
 
-**Yes (v0.24+).** Query Workbench **DL** mode runs Manchester class expressions with Instances / Subclasses / Superclasses / Equivalents tabs. Also: CLI `ontocore dl-query` and LSP `ontocore/dlQuery`. SQL and SPARQL modes remain available. See [DL Query](guides/dl-query.md).
+**Partially (v0.24+).** Query Workbench **DL** mode runs Manchester class expressions with Instances / Subclasses / Superclasses / Equivalents tabs (also CLI `ontocore dl-query` and LSP `ontocore/dlQuery`). It is Protégé-*inspired*, **not** HermiT-identical — see [DL Query honesty](guides/dl-query.md). SQL and SPARQL modes remain separate.
 
 **How do I edit complex axioms?**
 
@@ -98,9 +98,9 @@ Since **v0.10**, the language server indexes **all workspace folders** on open. 
 **`failed to start language server`**
 
 - Check **Output → OntoCore Language Server** and uninstall duplicate OntoCode versions.
-- OntoCode’s **bundled** language server works in trusted and Restricted Mode. **Trust** only if you set custom `ontocode.lspPath` or `ontocode.robotPath`.
-- Set `ontocode.lspPath` to a local `ontocore-lsp` binary (`cargo install ontocore-lsp`) when debugging a custom build — trusted workspaces only.
-- See [vscode-install.md](vscode-install.md) and [troubleshooting.md](troubleshooting.md).
+- OntoCode’s **bundled** language server works in trusted and Restricted Mode. **Do not Trust the workspace** unless you configured `ontocode.lspPath` or `ontocode.robotPath`.
+- Set `ontocode.lspPath` to a local `ontocore-lsp` binary (`cargo install ontocore-lsp --locked --version 0.26.2`) when debugging a custom build — trusted workspaces only.
+- See [vscode-install.md](vscode-install.md) and [Troubleshooting](troubleshooting.md) (symptom table).
 
 **Does `ontocode.autoIndexOnOpen` do anything?**
 

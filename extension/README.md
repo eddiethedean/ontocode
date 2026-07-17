@@ -3,14 +3,16 @@
 [![VS Code Marketplace](https://vsmarketplacebadges.dev/version/ontocode.ontocode.svg?label=VS%20Code%20Marketplace)](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode)
 [![Open VSX](https://img.shields.io/open-vsx/v/ontocode/ontocode)](https://open-vsx.org/extension/ontocode/ontocode)
 
-**Ontology IDE for VS Code** — browse, edit Turtle/OBO/RDF/XML/OWL/XML, query, reason (EL–DL), validate, and diff OWL/RDF/OBO ontologies.
+**Ontology IDE for VS Code** — browse and edit Turtle/OBO/RDF/XML/OWL/XML, query, reason, validate, and diff. **Not a full Protégé replacement** — see [Known limitations](https://ontocode-vs.readthedocs.io/en/latest/known-limitations/) and [What ships today](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/).
 
 **Current release: v0.26.2**
 
 ## Start here
 
 1. Install from the [Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) or [Open VSX](https://open-vsx.org/extension/ontocode/ontocode) (Cursor).
-2. Follow **[First success (~10 min)](https://ontocode-vs.readthedocs.io/en/latest/guides/first-success/)** on Read the Docs.
+2. Follow **[First success (~10 min)](https://ontocode-vs.readthedocs.io/en/latest/guides/first-success/)** on Read the Docs (sample files + edit `Person`).
+
+You do **not** need to Trust the workspace for the default bundled language server.
 
 ## Docs
 
@@ -19,19 +21,19 @@
 | What ships today | [SHIPPED](https://ontocode-vs.readthedocs.io/en/latest/SHIPPED/) |
 | Known limitations | [Known limitations](https://ontocode-vs.readthedocs.io/en/latest/known-limitations/) |
 | Install options (VSIX, offline) | [Install VS Code](https://ontocode-vs.readthedocs.io/en/latest/vscode-install/) |
-| CLI / CI / Rust crates | [Install CLI & CI (detail)](https://ontocode-vs.readthedocs.io/en/latest/install-cli-ci/) |
+| CLI / CI / Rust crates (optional) | [Install CLI & CI (detail)](https://ontocode-vs.readthedocs.io/en/latest/install-cli-ci/) |
 | Full documentation | [Read the Docs](https://ontocode-vs.readthedocs.io/en/latest/) |
 | Extension overview | [VS Code extension docs](https://ontocode-vs.readthedocs.io/en/latest/ontocode/vscode-extension/) |
 
 > **Editable today:** Turtle (`.ttl`), OBO (`.obo`), RDF/XML (`.owl`/`.rdf`), and OWL/XML (`.owx`). XML is semantic re-serialize (not Protégé byte-identical). JSON-LD / TriG / N-Triples remain read-only.
 
-> **Names:** **OntoCode** = this extension. **OntoCore** = Rust engine (`ontocore-cli`, `ontocore-lsp`). Install the CLI with `cargo install ontocore-cli`, not `ontocode`.
+> **Names:** **OntoCode** = this extension. **OntoCore** = Rust engine (`ontocore-cli`, `ontocore-lsp`). Install the CLI with `cargo install ontocore-cli`, not `ontocode`. Most IDE users never need the CLI.
 
 ## Features (summary)
 
-Explorer, Entity Inspector, Query Workbench (SQL subset + SPARQL + DL), Manchester editor, graphs, reasoner (EL–DL, realize / instance check), SWRL Rule Browser/Editor, semantic diff, Manage Imports, refactoring preview, Plugin SDK 1.0.
+Explorer, Entity Inspector, Query Workbench (SQL subset + SPARQL + DL), Manchester editor, graphs, reasoner (EL–DL profiles, realize / instance check), SWRL Rule Browser/Editor, semantic diff, Manage Imports, refactoring preview, Plugin SDK 1.0 (frozen wire — marketplace still product 1.0).
 
-Details: [Feature tour](https://ontocode-vs.readthedocs.io/en/latest/ontocode/feature-tour/) · [Supported formats](https://ontocode-vs.readthedocs.io/en/latest/supported-formats/)
+Details: [Feature tour](https://ontocode-vs.readthedocs.io/en/latest/ontocode/feature-tour/) · [Supported formats](https://ontocode-vs.readthedocs.io/en/latest/supported-formats/) · [Protégé vs OntoCode](https://ontocode-vs.readthedocs.io/en/latest/guides/protege-decision/)
 
 ## Development
 

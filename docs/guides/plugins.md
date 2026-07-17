@@ -154,25 +154,43 @@ Plugins with an `entry` binary are invoked as:
 
 Supported actions: `validate`, `export`, `workflow`, `ui-view`, `reasoner.classify`, `query.run`, `refactor.preview`, `graph.build`.
 
-Stdout must be JSON. Existing fields remain; provider fields are additive:
+Stdout must be a single JSON object. Field tables by action:
+
+| Action | Required / typical stdout fields |
+|--------|----------------------------------|
+| `validate` | `diagnostics` (array of `{ severity, message, file?, line?, column? }`) |
+| `export` | `output_paths` (workspace-relative paths written) |
+| `workflow` | `logs` optional; exit via process status |
+| `ui-view` | `view_html` (HTML fragment for the dockable panel) |
+| `reasoner.classify` | `unsatisfiable` (IRI array), `profile` optional |
+| `query.run` | `columns` (string array), `rows` (array of arrays) |
+| `refactor.preview` | `affected_iris`, `hints` |
+| `graph.build` | `graph_kind`, `root_iris` |
+
+Common optional fields on any response: `logs`, `result` (opaque object).
+
+Example (`query.run`):
 
 ```json
 {
-  "diagnostics": [],
-  "output_paths": [],
-  "logs": "optional",
-  "view_html": "<h1>optional</h1>",
-  "unsatisfiable": ["http://ex/Unsat"],
-  "profile": "plugin-stub",
   "columns": ["iri", "label"],
   "rows": [["http://ex/A", "A"]],
-  "affected_iris": ["http://ex/A"],
-  "hints": ["rename tip"],
-  "graph_kind": "plugin_neighborhood",
-  "root_iris": ["http://ex/A"],
-  "result": {}
+  "logs": "optional"
 }
 ```
+
+There is no separate JSON Schema file yet — treat this table as the wire contract for `api_version = "1"`.
+
+## Adding an in-process (host-builtin) Rust plugin
+
+Subprocess plugins are the **supported third-party path**. In-process plugins ship inside the OntoCore workspace (e.g. naming / markdown-export / SHACL):
+
+1. Add a crate under `crates/ontocore-plugin-*` implementing the host plugin traits used by `ontocore-plugin` / `ontocore-plugin-builtins`.
+2. Register it in the builtins aggregator (`ontocore-plugin-builtins`) so CLI/LSP discovery lists it.
+3. Add a workspace fixture under `examples/plugin-workspace/` and a row in [testing matrix](testing-matrix.md) / `cargo test -p <crate>`.
+4. Document the plugin id in the reference table below.
+
+Do **not** copy sketches from [design/PLUGIN_SPEC.md](https://github.com/eddiethedean/ontocode/blob/main/docs/design/PLUGIN_SPEC.md) — that file is historical.
 
 Reference in-process plugins:
 

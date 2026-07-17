@@ -51,8 +51,8 @@ flowchart TD
 
 1. Check **Output → OntoCore Language Server** for the exact error.
 2. Uninstall duplicate OntoCode extension versions.
-3. OntoCode’s **bundled** language server works in trusted and Restricted Mode. **Trust** the workspace only if you set custom `ontocode.lspPath` or `ontocode.robotPath` (Restricted Mode ignores those settings).
-4. Set `ontocode.lspPath` to a local `ontocore-lsp` binary (`cargo install ontocore-lsp`) — trusted workspaces only.
+3. OntoCode’s **bundled** language server works in trusted and Restricted Mode. **Do not Trust the workspace** unless you configured `ontocode.lspPath` or `ontocode.robotPath` (Restricted Mode ignores those settings).
+4. Set `ontocode.lspPath` to a local `ontocore-lsp` binary (`cargo install ontocore-lsp --locked --version 0.26.2`) — trusted workspaces only.
 5. See [Install VS Code](vscode-install.md#troubleshooting).
 
 ## VS Code: cannot edit in inspector

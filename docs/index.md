@@ -24,7 +24,7 @@ Index and explore OWL/RDF/OBO, run queries, refactors, and reasoning — in VS C
   <a class="oc-hero-cta" href="guides/first-success/">First success (~10 min) →</a>
 </p>
 
-<p class="oc-hero-subcta"><a href="SHIPPED/">Evaluate · What ships today</a> · <a href="install/">Install</a> · <a href="guides/versions-and-channels/">Versions &amp; channels</a> · <a href="known-limitations/">Known limitations</a> · Latest tagged: <strong>v0.26.2</strong></p>
+<p class="oc-hero-subcta"><a href="SHIPPED/">Evaluate · What ships today</a> · <a href="install/">Install</a> · <a href="guides/day-2/">Your next steps</a> · <a href="guides/versions-and-channels/">Versions &amp; channels</a> · <a href="known-limitations/">Known limitations</a> · Latest tagged: <strong>v0.26.2</strong></p>
 
 <div class="oc-hero-links">
   <a href="ontocode/">OntoCode overview</a>
@@ -36,9 +36,12 @@ Index and explore OWL/RDF/OBO, run queries, refactors, and reasoning — in VS C
 
 <div class="oc-callout" markdown>
 
-**Primary path:** **[First success (~10 min)](guides/first-success.md)** — install the extension, open sample ontologies, browse and edit. No clone required.
+**Primary path:** **[First success (~10 min)](guides/first-success.md)** — install the extension, open sample ontologies, browse and edit. No clone required. Then **[Your next steps](guides/day-2.md)**.
 
-**Also:** [Install](install.md) · [Examples](examples/index.md) · [Feature tour](ontocode/feature-tour.md) · [What ships today](SHIPPED.md)
+!!! tip "Docs vs Marketplace"
+    Read the Docs `latest` may describe work **after** the last tag. Pins and Marketplace follow [`docs/TAGGED_RELEASE`](https://github.com/eddiethedean/ontocode/blob/main/docs/TAGGED_RELEASE) (**0.26.2**). See [Versions & channels](guides/versions-and-channels.md).
+
+**Also:** [Install](install.md) · [Examples](examples/index.md) · [Feature tour](ontocode/feature-tour.md) · [What ships today](SHIPPED.md) · [Documentation index](documentation-index.md)
 
 ![OntoCode product tour](assets/screenshots/product-tour.gif)
 
@@ -72,13 +75,13 @@ Index and explore OWL/RDF/OBO, run queries, refactors, and reasoning — in VS C
 
     [:octicons-arrow-right-24: First success tutorial](guides/first-success.md)
 
--   :material-console:{ .lg .middle } **Rust & CLI**
+-   :material-console:{ .lg .middle } **CI / CLI only**
 
     ---
 
-    `cargo install ontocore-cli`, embed `ontocore` / `ontocore-*` crates, validate and classify in CI.
+    Validate and classify in CI (Linux tarball preferred). `cargo install` is optional and can take 15–30+ minutes — most IDE users never need it.
 
-    [:octicons-arrow-right-24: Install](install.md)
+    [:octicons-arrow-right-24: Install (CI / CLI)](install.md)
 
 -   :material-clipboard-check-outline:{ .lg .middle } **Evaluate adoption**
 
@@ -100,28 +103,26 @@ Index and explore OWL/RDF/OBO, run queries, refactors, and reasoning — in VS C
 
     1. Install the **OntoCode extension** from the [Marketplace](https://marketplace.visualstudio.com/items?itemName=ontocode.ontocode) or [Open VSX](https://open-vsx.org/extension/ontocode/ontocode) (for Cursor)
     2. **File → Open Folder…** with **`.ttl` / `.obo` / `.owl` / `.rdf` / `.owx`** (editable) — JSON-LD / TriG / N-Triples are browse/query only ([Supported formats](supported-formats.md))
-    3. OntoCode’s **bundled** language server indexes in Restricted Mode — **Trust** only if you set custom `ontocode.lspPath` or `ontocode.robotPath`
+    3. The **bundled** language server indexes in Restricted Mode — **do not Trust the workspace** unless you set custom `ontocode.lspPath` or `ontocode.robotPath`
     4. Open the **OntoCode** activity bar → browse **Classes** → click an entity
 
-=== "CLI (Linux x64)"
+=== "CI / CLI (optional)"
 
-    Prefer the [release tarball](https://github.com/eddiethedean/ontocode/releases/tag/v0.26.2). Full download → extract → validate steps: [CI integration](ci-integration.md).
+    Most IDE users skip this. Prefer the [Linux x64 release tarball](https://github.com/eddiethedean/ontocode/releases/tag/v0.26.2) for CI — [CI integration](ci-integration.md).
 
-=== "CLI (macOS / Windows — cargo)"
-
-    Requires Rust **1.88+**. Windows: [MSVC Build Tools](https://visualstudio.microsoft.com/visual-cpp-build-tools/). macOS: Xcode Command Line Tools (`xcode-select --install`). First compile: **15–30+ minutes**. See [Install CLI](guides/install-cli.md).
+    macOS/Windows `cargo install` needs Rust **1.88+** and often takes **15–30+ minutes** — [Install CLI](guides/install-cli.md):
 
     ```bash
     cargo install ontocore-cli --locked --version 0.26.2
     ontocore validate /path/to/ontologies
     ```
 
-=== "CLI (clone)"
+    From a clone:
 
     ```bash
     git clone https://github.com/eddiethedean/ontocode.git
     cd ontocode
-    cargo run -- query fixtures "SELECT * FROM classes"
+    cargo run -- validate fixtures
     ```
 
 ## Documentation map

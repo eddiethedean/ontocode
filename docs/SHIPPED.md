@@ -96,64 +96,9 @@
 | IdPolicy parse + OBO Foundry registry JSON (vendored; no live HTTP) | Shipped |
 | Ontology `version_iri` on documents | Shipped |
 
-## Previously in v0.25.0
+## Earlier releases (still shipped)
 
-| Capability | Status |
-|------------|--------|
-| Graph visualization parity (expanded kinds, filters, virtualized React Flow, Open as graph) | Shipped |
-| Plugin SDK 1.0 (lifecycle, providers, CLI enable/disable, compat harness) | Shipped |
-| Accessibility parity (focus trap, live announcer, axe Vitest, ACCESSIBILITY_REPORT) | Shipped |
-| Parity verification CI (evidence paths, release-gate metrics, YAML→docs sync) | Shipped |
-
-## Previously in v0.24.0
-
-| Capability | Status |
-|------------|--------|
-| DL Query (Workbench DL mode, CLI, LSP) | Shipped |
-| Workspace search LSP (`ontocore/search`) | Shipped |
-| Rename / merge / replace (Turtle + RDF/XML + OWL/XML + OBO) | Shipped |
-| Move axioms / ontology merge | Shipped (Turtle-first) |
-| Flatten / cleanup imports; locality module extract | Shipped (Turtle-first) |
-| SWRL-aware rename / merge / replace | Shipped (Turtle SWRL JSON; XML remaps structured IRI when present) |
-| Refactor plan impact metrics | Shipped |
-
-## Previously in v0.23.0
-
-| Capability | Status |
-|------------|--------|
-| ABox realization + instance checking | Shipped |
-| Full consistency semantics + ABox clashes | Shipped |
-| Native DL explanations (DL-first) | Shipped |
-| Engine-level cancel + reasoner dirty sync | Shipped |
-| SWRL validate / author / Rule Browser-Editor | Shipped (DLSafe + builtin registry) |
-| Ontologos SWRL materialize on classify | Shipped when rules present |
-
-## Previously in v0.22.0
-
-| Capability | Status |
-|------------|--------|
-| Complete OWL 2 authoring (`PAR-OWL-001`) | Shipped |
-| Manchester `not` / `value` / `Self` / OneOf / data restrictions | Shipped |
-| HasKey / DisjointUnion / RBox / negatives / SameIndividual / datatypes / axiom annotations | Shipped |
-
-## Previously in v0.21.0
-
-| Capability | Status |
-|------------|--------|
-| RDF/XML (`.owl` / `.rdf`) write-back via Horned serializers | Yes |
-| OWL/XML (`.owx`) write-back via Horned serializers | Yes |
-| Cross-format semantic comparator + Protégé edit/save/reload fixtures | Yes |
-| Editable gates lifted for CLI / LSP / catalog / extension inspector | Yes |
-| Session/TM, OBO/XML, focus, SQL, sameAs/prefix, plugin, Windows-path bug-fix cluster | Yes |
-
-## Previously in v0.20.0
-
-| Capability | Status |
-|------------|--------|
-| Workspace runtime (registry, dirty/save, transactions, session persistence, external-change recovery) | Yes |
-| Turtle patch matching for lang-tagged / typed literals and `<IRI>` object forms | Yes |
-| Token-aware type / characteristic detection (ignores comment substrings) | Yes |
-| `SetOntologyIri` rewrites `rdf:type owl:Ontology` in place | Yes |
+Capability history for **v0.25 … v0.12** (graphs, Plugin SDK 1.0, a11y, DL Query, multi-format rename/merge/replace, realization, SWRL, complete OWL 2 / Manchester authoring, XML write-back, workspace runtime, …) lives in the [CHANGELOG](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) and [migration index](migration/README.md). The matrix at the top of this page is the source of truth for **what works today**.
 
 Full user-facing delta for the latest tagged release: [CHANGELOG 0.26.2](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md#0262---2026-07-17).
 

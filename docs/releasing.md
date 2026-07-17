@@ -55,8 +55,8 @@ Source of truth: **[docs/SHIPPED.md](SHIPPED.md)** and **[docs/supported-formats
 - [ ] [docs/design/ARCHITECTURE.md](design/ARCHITECTURE.md) / [OWL_AUTHORING_SPEC.md](design/OWL_AUTHORING_SPEC.md) — shipped vs target banners
 - [ ] [docs/design/LICENSES.md](design/LICENSES.md) — dependency sections
 - [ ] Run `./scripts/build-docs.sh` locally before tagging
-- [ ] Build tutorial pack: `./scripts/package-tutorial-zip.sh` and **attach** `ontocode-tutorial.zip` to the GitHub Release
-- [ ] **Verify** the Release page lists `ontocode-tutorial.zip` (or temporarily hedge First success / versions-and-channels so offline users are not told the zip is always present)
+- [ ] Build tutorial pack: `./scripts/package-tutorial-zip.sh` and **attach** `ontocode-tutorial.zip` to the GitHub Release (required — First success / versions-and-channels link the asset)
+- [ ] **Verify** the Release page lists `ontocode-tutorial.zip`
 - [ ] Ensure **CI is green on the release commit** before tagging (the release workflow **requires** a successful `ci.yml` run on that SHA; it does not re-run the full test suite)
 - [ ] Immediately after `git push origin vX.Y.Z`: run `./scripts/check-tagged-release-published.sh` and confirm GitHub Release / crates.io / Marketplace (manual) progress
 

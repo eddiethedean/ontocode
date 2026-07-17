@@ -1,9 +1,15 @@
 # DL Query
 
-!!! note "Not Protégé DL Query for SQL/SPARQL modes"
-    Query Workbench **SQL** and **SPARQL** modes are still not Protégé’s DL Query tab. Use the dedicated **DL** mode (or CLI / LSP) for Manchester class-expression queries with Instances / Subclasses / Superclasses / Equivalents.
+!!! note "Honesty — Protégé-inspired, not HermiT-identical"
+    Query Workbench **DL** mode is Protégé-*inspired*: Manchester class expression → **Instances** / **Subclasses** / **Superclasses** / **Equivalents**. It is **not** HermiT’s DL Query tab.
 
-OntoCode ships **Protégé-style DL Query** in Query Workbench **DL** mode (**v0.24+**): Manchester class expressions with **Instances** / **Subclasses** / **Superclasses** / **Equivalents** result tabs (asserted or inferred).
+    - Classification uses **OntoLogos** profiles (`el` / `dl` / `rl` / `rdfs` / `auto`) — not certified HermiT-identical.
+    - Some Protégé tab UX and edge cases differ; dual-tool check critical audits.
+    - **Not Protégé DL Query** for Workbench **SQL** and **SPARQL** modes — use dedicated **DL** mode (or CLI / LSP) for class-expression queries.
+
+    See [Known limitations](../known-limitations.md) and [Reasoner guide](reasoner.md).
+
+OntoCode ships DL Query in Query Workbench **DL** mode (**v0.24+**): Manchester class expressions with the four result tabs above (asserted or inferred).
 
 ## What ships
 
@@ -39,7 +45,13 @@ ontocore dl-query "Person and hasPet some Dog" --workspace /path/to/ontologies -
 
 See [CLI reference](../cli-reference.md) and [v0.24 migration](../migration/v0.24.md).
 
-## Protégé coexistence
+## Gaps vs Protégé DL Query
+
+| Expectation | OntoCode today |
+|-------------|----------------|
+| HermiT-identical classification | No — OntoLogos profiles; dual-tool check when required |
+| Full Protégé DL Query tab UX | Partial — four result tabs; not a pixel clone |
+| SQL/SPARQL as “DL Query” | No — use dedicated **DL** mode |
 
 Keep Protégé when you need HermiT-identical behavior or other gaps in [Known limitations](../known-limitations.md). See [Protégé coexistence](protege-coexistence.md) and [Migrating from Protégé](protege-migration.md).
 

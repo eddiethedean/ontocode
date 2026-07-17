@@ -12,6 +12,9 @@
 !!! tip "Most IDE users never need Rust"
     The OntoCode extension bundles `ontocore-lsp`. Install the extension and skip the CLI unless you need `ontocore` for CI, scripting, or validation outside the editor.
 
+!!! tip "Docs vs Marketplace"
+    Read the Docs `latest` may describe work **after** the last tag. Pins follow [`docs/TAGGED_RELEASE`](TAGGED_RELEASE) (**0.26.2**). See [Versions & channels](guides/versions-and-channels.md).
+
 !!! warning "Wrong crate name"
     The GitHub repo is `ontocode`. The CLI crate is **`ontocore-cli`** (`ontocore` binary). Do **not** run `cargo install ontocode`.
 

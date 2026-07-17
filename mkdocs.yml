@@ -127,10 +127,12 @@ nav:
   - Home: index.md
   - Get started:
       - "First success (~10 min)": guides/first-success.md
+      - "Your next steps (day 2)": guides/day-2.md
       - Install: install.md
       - Supported formats: supported-formats.md
       - Versions and channels: guides/versions-and-channels.md
       - Which artifact?: guides/which-artifact.md
+      - Documentation index: documentation-index.md
       - More install detail:
           - Install CLI & CI (not the IDE tutorial): install-cli-ci.md
           - VS Code install (detail): vscode-install.md
@@ -220,8 +222,8 @@ nav:
           - Platform roadmap: roadmap.md
   - Help:
       - FAQ: faq.md
-      - Glossary: glossary.md
       - Ontology concepts: concepts.md
+      - Glossary: glossary.md
       - Troubleshooting: troubleshooting.md
       - Support and contact: support.md
       - Migrating from Protégé: guides/protege-migration.md
@@ -259,7 +261,6 @@ nav:
       - Marketplace publish: marketplace-publish.md
       - Plugin policy: guides/plugin-policy.md
       - Internals: internals.md
-      - Documentation index: documentation-index.md
       - Licenses: design/LICENSES.md
       - Engineering docs (GitHub): engineering.md
 extra:

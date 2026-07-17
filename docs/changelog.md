@@ -8,7 +8,7 @@ Migration guides: [Migration index](migration/README.md)
 
 ## [0.26.2] - 2026-07-17
 
-**v0.26.2** — host focus/transaction integrity, refactor self-write suppression, and residual invert / SPARQL / orphan-diagnostic fixes. See [CHANGELOG.md](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) and [migration/v0.26.2.md](migration/v0.26.2.md).
+**v0.26.2** — host focus/transaction integrity, semantic-diff/edit/query correctness, exhaustive XML/OWL IRI remap, aligned merge semantics across formats, and residual invert / SPARQL / orphan-diagnostic fixes. See [CHANGELOG.md](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) and [migration/v0.26.2.md](migration/v0.26.2.md).
 
 ## [0.26.1] - 2026-07-16
 

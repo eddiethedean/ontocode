@@ -9,7 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.26.2] - 2026-07-17
 
-**For pilots / adopters:** host focus/transaction integrity, refactor self-write suppression, and residual invert / SPARQL / orphan-diagnostic fixes. No format write-back regression vs v0.26.1 — [migration/v0.26.2.md](docs/migration/v0.26.2.md).
+**For pilots / adopters:** host focus/transaction integrity, semantic-diff/edit/query correctness, exhaustive XML/OWL IRI remap, aligned merge semantics across formats, and residual invert / SPARQL / orphan-diagnostic fixes. No format write-back regression vs v0.26.1 — [migration/v0.26.2.md](docs/migration/v0.26.2.md).
 
 ### Fixed
 
@@ -20,6 +20,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `RemoveSynonym` with recorded scope inverts to `AddSynonym` ([#400](https://github.com/eddiethedean/ontocode/issues/400))
 - SPARQL update detector classifies `USING` / `USING NAMED` forms ([#399](https://github.com/eddiethedean/ontocode/issues/399))
 - `orphan_classes` no longer false-positives classes whose only parents are restrictions ([#401](https://github.com/eddiethedean/ontocode/issues/401))
+- Semantic diff axiom/annotation keys include `ontology_id`; rename detection requires added `owl:sameAs` / `skos:exactMatch` ([#395](https://github.com/eddiethedean/ontocode/issues/395), [#389](https://github.com/eddiethedean/ontocode/issues/389), [#419](https://github.com/eddiethedean/ontocode/pull/419))
+- AllDifferent rewrite fails closed when a list member CURIE cannot expand ([#350](https://github.com/eddiethedean/ontocode/issues/350))
+- `atomic_write` best-effort removes `.tmp` on mid-write I/O failure (OWL + OBO) ([#343](https://github.com/eddiethedean/ontocode/issues/343))
+- `createOntology` rejects format/extension mismatches (e.g. `ttl` under `.owl`) ([#342](https://github.com/eddiethedean/ontocode/issues/342))
+- `SELECT *` with zero rows still returns table schema columns ([#385](https://github.com/eddiethedean/ontocode/issues/385))
+- SWRL rule list dedupes on document + canonical rule JSON ([#362](https://github.com/eddiethedean/ontocode/issues/362))
+- XML/OWL IRI remap covers all Horned `Component` kinds and recursive `DataRange` ([#368](https://github.com/eddiethedean/ontocode/issues/368), [#376](https://github.com/eddiethedean/ontocode/issues/376), [#420](https://github.com/eddiethedean/ontocode/pull/420))
+- Entity merge uses delete-then-remap across Turtle, OBO, and XML (merge-owned axioms no longer absorbed onto Keep in RDF/XML) ([#369](https://github.com/eddiethedean/ontocode/issues/369), [#421](https://github.com/eddiethedean/ontocode/pull/421))
 
 ### Changed
 

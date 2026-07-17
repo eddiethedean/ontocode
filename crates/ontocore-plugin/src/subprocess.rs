@@ -11,6 +11,8 @@ use thiserror::Error;
 // These can be made configurable later once a stable plugin settings surface exists.
 const DEFAULT_TIMEOUT_SECS: u64 = 60;
 const MAX_STDIO_BYTES: usize = 1024 * 1024; // 1 MiB per stream
+/// Max bytes of stderr/stdout embedded in user-facing error strings (#388).
+const ERROR_SNIPPET_MAX: usize = 512;
 
 #[derive(Debug, Error)]
 pub enum SubprocessError {
@@ -49,18 +51,17 @@ pub fn resolve_entry_path(
         plugin.manifest_path.parent().unwrap_or(Path::new(".")).join(entry)
     };
     validate_binary_path(&path)?;
+    // #404: jail-check and execute the *canonical* path so a retargeted symlink
+    // between check and spawn cannot escape the workspace.
+    let resolved =
+        path.canonicalize().map_err(|_| SubprocessError::NotFound(path.display().to_string()))?;
     if let Some(root) = infer_workspace_root(&plugin.manifest_path) {
-        // Prevent invoking binaries outside the workspace root.
         let root = root.canonicalize().unwrap_or(root);
-        let resolved = path.canonicalize().unwrap_or(path.clone());
         if !ontocore_core::is_path_within(&root, &resolved) {
             return Err(SubprocessError::PathNotAllowed(path.display().to_string()));
         }
     }
-    if !path.exists() {
-        return Err(SubprocessError::NotFound(path.display().to_string()));
-    }
-    Ok(path)
+    Ok(resolved)
 }
 
 fn infer_workspace_root(manifest_path: &Path) -> Option<std::path::PathBuf> {
@@ -95,6 +96,23 @@ fn read_capped(mut reader: impl Read, cap: usize) -> Result<Vec<u8>, SubprocessE
         buf.extend_from_slice(&chunk[..n]);
     }
     Ok(buf)
+}
+
+/// Truncate captured stdio for error strings so LSP/CLI do not embed megabytes (#388).
+fn summarize_stdio(bytes: &[u8]) -> String {
+    let text = String::from_utf8_lossy(bytes);
+    let trimmed = text.trim();
+    if trimmed.is_empty() {
+        return String::new();
+    }
+    if trimmed.len() <= ERROR_SNIPPET_MAX {
+        return trimmed.to_string();
+    }
+    let mut end = ERROR_SNIPPET_MAX;
+    while end > 0 && !trimmed.is_char_boundary(end) {
+        end -= 1;
+    }
+    format!("{}… (truncated)", &trimmed[..end])
 }
 
 fn configure_process_group(cmd: &mut Command) {
@@ -172,12 +190,12 @@ pub(crate) fn run_plugin_subprocess_with_timeout(
                 })??;
 
                 if !status.success() {
-                    let stderr = String::from_utf8_lossy(&err);
-                    return Err(SubprocessError::RunFailed(format!(
-                        "exit {}: {}",
-                        status.code().unwrap_or(-1),
-                        stderr.trim()
-                    )));
+                    let snippet = summarize_stdio(&err);
+                    return Err(SubprocessError::RunFailed(if snippet.is_empty() {
+                        format!("exit {}", status.code().unwrap_or(-1))
+                    } else {
+                        format!("exit {}: {snippet}", status.code().unwrap_or(-1))
+                    }));
                 }
 
                 let stdout = String::from_utf8_lossy(&out);
@@ -185,7 +203,7 @@ pub(crate) fn run_plugin_subprocess_with_timeout(
                     return Ok(PluginOutput::default());
                 }
                 return serde_json::from_str(stdout.trim()).map_err(|e| {
-                    SubprocessError::InvalidOutput(format!("{e}: {}", stdout.trim()))
+                    SubprocessError::InvalidOutput(format!("{e}: {}", summarize_stdio(&out)))
                 });
             }
             Ok(None) => {
@@ -220,6 +238,129 @@ mod tests {
         let data = vec![b'a'; 33];
         let err = read_capped(Cursor::new(data), 32).unwrap_err();
         matches!(err, SubprocessError::OutputTooLarge(32));
+    }
+
+    #[test]
+    fn summarize_stdio_truncates_long_output() {
+        let long = "x".repeat(ERROR_SNIPPET_MAX + 80);
+        let summary = summarize_stdio(long.as_bytes());
+        assert!(summary.contains("truncated"));
+        assert!(summary.len() < long.len());
+        assert!(summary.starts_with("xxx"));
+    }
+
+    #[test]
+    fn summarize_stdio_preserves_short_output() {
+        assert_eq!(summarize_stdio(b"  boom  "), "boom");
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn resolve_entry_path_returns_canonical_target() {
+        // #404
+        use std::os::unix::fs::PermissionsExt;
+
+        let dir = tempfile::tempdir().expect("tempdir");
+        let workspace = dir.path().join("ws");
+        std::fs::create_dir_all(workspace.join(".ontocore/plugins")).expect("plugins dir");
+
+        let real_bin = workspace.join("real_plugin.sh");
+        std::fs::write(&real_bin, "#!/bin/sh\necho '{}'\n").expect("write real");
+        let mut perms = std::fs::metadata(&real_bin).expect("metadata").permissions();
+        perms.set_mode(0o755);
+        std::fs::set_permissions(&real_bin, perms).expect("chmod");
+
+        let link = workspace.join(".ontocore/plugins/helper");
+        std::os::unix::fs::symlink(&real_bin, &link).expect("symlink");
+
+        let manifest_path = workspace.join(".ontocore/plugins/link.toml");
+        let manifest_toml = r#"[plugin]
+name = "link"
+version = "0.1.0"
+kind = "validator"
+id = "org.example.link"
+api_version = "1"
+entry = "helper"
+permissions = ["workspace.read","workspace.write","external_process"]
+
+[capabilities]
+validate = true
+"#;
+        std::fs::write(&manifest_path, manifest_toml).expect("write manifest");
+        let plugin = DiscoveredPlugin {
+            manifest: parse_manifest(manifest_toml).expect("parse"),
+            manifest_path,
+        };
+
+        let resolved = resolve_entry_path(&plugin).expect("resolve");
+        let expected = real_bin.canonicalize().expect("canonical real");
+        assert_eq!(resolved, expected, "must exec canonical path, not symlink");
+    }
+
+    #[cfg(unix)]
+    #[test]
+    fn subprocess_error_truncates_long_stderr() {
+        // #388
+        use std::os::unix::fs::PermissionsExt;
+
+        let dir = tempfile::tempdir().expect("tempdir");
+        let workspace = dir.path().join("ws");
+        std::fs::create_dir_all(workspace.join(".ontocore/plugins")).expect("plugins dir");
+
+        let plugin_bin = workspace.join("noisy_fail.sh");
+        std::fs::write(
+            &plugin_bin,
+            r#"#!/bin/sh
+# Avoid depending on python being present.
+i=0
+while [ "$i" -lt 2048 ]; do
+  printf S >&2
+  i=$((i+1))
+done
+exit 1
+"#,
+        )
+        .expect("write plugin");
+        let mut perms = std::fs::metadata(&plugin_bin).expect("metadata").permissions();
+        perms.set_mode(0o755);
+        std::fs::set_permissions(&plugin_bin, perms).expect("chmod");
+
+        let manifest_path = workspace.join(".ontocore/plugins/noisy.toml");
+        let manifest_toml = format!(
+            r#"[plugin]
+name = "noisy"
+version = "0.1.0"
+kind = "validator"
+id = "org.example.noisy"
+api_version = "1"
+entry = "{}"
+permissions = ["workspace.read","workspace.write","external_process"]
+
+[capabilities]
+validate = true
+"#,
+            plugin_bin.display()
+        );
+        std::fs::write(&manifest_path, &manifest_toml).expect("write manifest");
+        let plugin = DiscoveredPlugin {
+            manifest: parse_manifest(&manifest_toml).expect("parse"),
+            manifest_path,
+        };
+
+        let err = run_plugin_subprocess(
+            &plugin,
+            SubprocessRequest {
+                action: "validate",
+                workspace: &workspace,
+                step: None,
+                extra_args: &[],
+            },
+        )
+        .expect_err("must fail");
+        let msg = err.to_string();
+        assert!(msg.contains("truncated"), "stderr must be truncated with marker: {msg}");
+        assert!(msg.len() < 900, "error string must stay small, got len={}", msg.len());
+        assert!(!msg.contains(&"S".repeat(2048)), "full stderr must not appear in error");
     }
 
     #[cfg(unix)]

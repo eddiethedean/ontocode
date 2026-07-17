@@ -5,7 +5,7 @@ kind = "ui"
 id = "org.example.demo-ui-view"
 api_version = "1"
 entry = "demo_ui_view.sh"
-permissions = ["workspace.read", "external_process"]
+permissions = ["workspace.read", "workspace.write", "external_process"]
 
 [[ui.views]]
 id = "demo.view"

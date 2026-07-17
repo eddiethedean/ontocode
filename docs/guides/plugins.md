@@ -75,11 +75,11 @@ permissions = ["workspace.read", "workspace.write", "external_process"]
 | Permission | Required for |
 |------------|--------------|
 | `workspace.read` | Validate, export, providers, list plugins |
-| `workspace.write` | Workspace writes; **required for subprocess `validate`** |
+| `workspace.write` | Workspace writes; **required for subprocess `validate` and `ui_view`** |
 | `external_process` | Subprocess `entry` binaries |
 | `network` / `filesystem.*` | Declared for trust UI; deny-by-default escapes are still jailed |
 
-Manifests that omit `permissions` receive backward-compatible defaults (`workspace.read`, and `external_process` when `entry` is set). Those defaults are **not** sufficient for subprocess `validate` — declare `workspace.write` as well.
+Manifests that omit `permissions` receive backward-compatible defaults (`workspace.read`, and `external_process` when `entry` is set). Those defaults are **not** sufficient for subprocess `validate` or `ui_view` — declare `workspace.write` as well.
 
 ## Quick start
 

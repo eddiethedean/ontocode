@@ -101,13 +101,15 @@ pub struct RunPluginResult {
 impl RunPluginResult {
     fn from_output(plugin_id: &str, workspace: &Path, output: PluginOutput, success: bool) -> Self {
         let output = jail_output_paths(plugin_id, workspace, output);
+        let has_violations = !output.violations.is_empty();
         let diags = wire_to_diagnostics(plugin_id, workspace, output.clone());
         Self {
             diagnostics: diags,
             output_paths: output.output_paths,
             logs: output.logs,
             view_html: output.view_html,
-            success,
+            // #348: jail violations must not report silent success.
+            success: success && !has_violations,
             result: output.result,
             columns: output.columns,
             rows: output.rows,
@@ -733,6 +735,8 @@ impl PluginHost {
             "ui_view" => {
                 let plugin = self.find_plugin(plugin_id)?;
                 Self::ensure_permission(plugin, plugin_id, PluginPermission::WorkspaceRead)?;
+                // #347: subprocess ui_view can mutate the workspace — require write like validate.
+                Self::ensure_permission(plugin, plugin_id, PluginPermission::WorkspaceWrite)?;
                 Self::ensure_permission(plugin, plugin_id, PluginPermission::ExternalProcess)?;
                 let view = view_id.ok_or_else(|| {
                     PluginHostError::UnsupportedAction(
@@ -828,7 +832,20 @@ fn provider_graph_result(mut result: GraphProviderResult) -> RunPluginResult {
 }
 
 fn wire_to_diagnostics(plugin_id: &str, workspace: &Path, output: PluginOutput) -> Vec<Diagnostic> {
-    output.diagnostics.into_iter().map(|d| d.into_diagnostic(plugin_id, workspace)).collect()
+    let mut diags: Vec<_> =
+        output.diagnostics.into_iter().map(|d| d.into_diagnostic(plugin_id, workspace)).collect();
+    // #348: surface path-jail violations as error diagnostics (not silent drops).
+    for violation in output.violations {
+        diags.push(plugin_diagnostic(
+            plugin_id,
+            "path_jail",
+            DiagnosticSeverity::Error,
+            violation,
+            workspace.to_path_buf(),
+            None,
+        ));
+    }
+    diags
 }
 
 fn load_disabled_ids(workspace: &Path) -> HashSet<String> {

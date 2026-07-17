@@ -33,10 +33,7 @@ pub fn is_sparql_update(sparql: &str) -> bool {
         }
         // Skip USING / USING NAMED <graph> (SPARQL Update dataset clause; #399).
         if upper.starts_with("USING")
-            && upper
-                .as_bytes()
-                .get(5)
-                .is_none_or(|b| b.is_ascii_whitespace())
+            && upper.as_bytes().get(5).is_none_or(|b| b.is_ascii_whitespace())
         {
             rest = skip_using_clause(rest);
             continue;
@@ -84,10 +81,7 @@ fn skip_using_clause(rest: &str) -> &str {
     let after_using = rest.get(5..).unwrap_or("").trim_start();
     let after_using_upper = upper.get(5..).unwrap_or("").trim_start();
     let body = if after_using_upper.starts_with("NAMED")
-        && after_using_upper
-            .as_bytes()
-            .get(5)
-            .is_none_or(|b| b.is_ascii_whitespace() || *b == b'<')
+        && after_using_upper.as_bytes().get(5).is_none_or(|b| b.is_ascii_whitespace() || *b == b'<')
     {
         after_using.get(5..).unwrap_or("").trim_start()
     } else {

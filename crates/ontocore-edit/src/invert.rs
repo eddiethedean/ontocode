@@ -395,15 +395,13 @@ pub fn invert_obo_patch_op(op: &OboPatchOp) -> Result<OboPatchOp> {
             value: value.clone(),
             scope: Some(scope.clone()),
         },
-        OboPatchOp::RemoveSynonym {
-            term_id,
-            value,
-            scope: Some(scope),
-        } => OboPatchOp::AddSynonym {
-            term_id: term_id.clone(),
-            value: value.clone(),
-            scope: scope.clone(),
-        },
+        OboPatchOp::RemoveSynonym { term_id, value, scope: Some(scope) } => {
+            OboPatchOp::AddSynonym {
+                term_id: term_id.clone(),
+                value: value.clone(),
+                scope: scope.clone(),
+            }
+        }
         OboPatchOp::RemoveSynonym { scope: None, .. } => {
             return Err(EditError::NotInvertible(
                 "remove_synonym inverse requires recorded prior scope".into(),

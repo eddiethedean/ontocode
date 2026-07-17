@@ -287,9 +287,6 @@ mod tests {
             imports: &[],
         };
         let diags = orphan_classes(&input, &empty_source);
-        assert!(
-            diags.is_empty(),
-            "restriction parents should not flag orphan_class: {diags:?}"
-        );
+        assert!(diags.is_empty(), "restriction parents should not flag orphan_class: {diags:?}");
     }
 }

@@ -7,8 +7,9 @@ use crate::explain::{
 use crate::hierarchy::subclass_edges_from_ontology;
 use crate::input::ReasonerInput;
 use crate::result::{
-    build_inferred_hierarchy, detect_unsatisfiable_classes, new_inferences, taxonomy_to_iri_edges,
-    unsatisfiable_iris, ClassificationResult, ExplanationRequest, ExplanationResult,
+    build_inferred_hierarchy, detect_unsatisfiable_classes, new_inferences,
+    taxonomy_equivalence_clusters, taxonomy_to_iri_edges, unsatisfiable_iris, ClassificationResult,
+    ExplanationRequest, ExplanationResult,
 };
 use ontologos_core::{EngineKind, Ontology, Profile, Reasoner};
 use ontologos_facade::ClassifyOutcome;
@@ -67,6 +68,8 @@ impl ReasonerAdapter for AutoAdapter {
             ClassifyOutcome::Taxonomy(taxonomy) => {
                 let iri_edges = taxonomy_to_iri_edges(&input.ontology, &taxonomy)
                     .map_err(ReasonerError::Classify)?;
+                let equivalences = taxonomy_equivalence_clusters(&input.ontology, &taxonomy)
+                    .map_err(ReasonerError::Classify)?;
                 let reported = unsatisfiable_iris(&input.ontology, &taxonomy)
                     .map_err(ReasonerError::Classify)?;
                 let inferred =
@@ -85,6 +88,7 @@ impl ReasonerAdapter for AutoAdapter {
                     duration_ms: started.elapsed().as_millis() as u64,
                     subsumption_count: taxonomy.subsumption_count(),
                     inferred_axiom_count: taxonomy.subsumption_count(),
+                    equivalences,
                 })
             }
             ClassifyOutcome::Rdfs(report) => {
@@ -107,6 +111,7 @@ impl ReasonerAdapter for AutoAdapter {
                     duration_ms: started.elapsed().as_millis() as u64,
                     subsumption_count: iri_edges.len(),
                     inferred_axiom_count: report.inferred_total(),
+                    equivalences: Vec::new(),
                 })
             }
             ClassifyOutcome::Rl(report) => {
@@ -129,6 +134,7 @@ impl ReasonerAdapter for AutoAdapter {
                     duration_ms: started.elapsed().as_millis() as u64,
                     subsumption_count: iri_edges.len(),
                     inferred_axiom_count: report.inferred_total(),
+                    equivalences: Vec::new(),
                 })
             }
             _ => {

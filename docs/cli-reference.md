@@ -109,14 +109,14 @@ ontocore sparql fixtures "SELECT ?s ?p ?o WHERE { ?s ?p ?o } LIMIT 10"
 Run a Protégé-style DL Query (Manchester class expression). See [DL Query](guides/dl-query.md).
 
 ```bash
-ontocore dl-query "Person and hasPet some Dog" fixtures --profile dl
-ontocore dl-query "Person" . --mode asserted --format json
+ontocore dl-query "Person and hasPet some Dog" --workspace fixtures --profile dl
+ontocore dl-query "Person" --mode asserted --format json
 ```
 
 | Argument / flag | Default | Description |
 |-----------------|---------|-------------|
 | `expression` | *(required)* | Manchester class expression (prefer full IRIs) |
-| `workspace` | `.` | Workspace directory |
+| `--workspace` | `.` | Workspace directory |
 | `--profile` | `dl` | Reasoner profile |
 | `--mode` | `inferred` | `inferred` or `asserted` |
 | `--format` | `text` | `text` or `json` |

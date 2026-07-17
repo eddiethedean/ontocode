@@ -3,8 +3,8 @@ use crate::error::{ReasonerError, Result};
 use crate::explain::explain_unsatisfiable_dl;
 use crate::input::ReasonerInput;
 use crate::result::{
-    build_inferred_hierarchy, new_inferences, taxonomy_to_iri_edges, unsatisfiable_iris,
-    ClassificationResult, ExplanationRequest, ExplanationResult,
+    build_inferred_hierarchy, new_inferences, taxonomy_equivalence_clusters, taxonomy_to_iri_edges,
+    unsatisfiable_iris, ClassificationResult, ExplanationRequest, ExplanationResult,
 };
 use ontologos_dl::DlClassifier;
 use std::time::Instant;
@@ -28,6 +28,8 @@ impl ReasonerAdapter for DlAdapter {
 
         let iri_edges =
             taxonomy_to_iri_edges(&input.ontology, &taxonomy).map_err(ReasonerError::Classify)?;
+        let equivalences = taxonomy_equivalence_clusters(&input.ontology, &taxonomy)
+            .map_err(ReasonerError::Classify)?;
         let reported =
             unsatisfiable_iris(&input.ontology, &taxonomy).map_err(ReasonerError::Classify)?;
         let inferred = build_inferred_hierarchy(&iri_edges, &reported, &input.asserted_hierarchy);
@@ -44,6 +46,7 @@ impl ReasonerAdapter for DlAdapter {
             duration_ms: started.elapsed().as_millis() as u64,
             subsumption_count: taxonomy.subsumption_count(),
             inferred_axiom_count: taxonomy.subsumption_count(),
+            equivalences,
         })
     }
 

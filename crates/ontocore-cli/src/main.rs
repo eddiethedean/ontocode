@@ -160,7 +160,7 @@ enum Commands {
         /// Manchester class expression
         expression: String,
         /// Workspace directory
-        #[arg(default_value = ".")]
+        #[arg(long, default_value = ".")]
         workspace: PathBuf,
         #[arg(long, default_value = "dl")]
         profile: String,

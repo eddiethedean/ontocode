@@ -3,8 +3,8 @@
 use crate::error::{ReasonerError, Result};
 use crate::input::ReasonerInput;
 use crate::result::{
-    build_inferred_hierarchy, new_inferences, taxonomy_to_iri_edges, unsatisfiable_iris,
-    ClassificationResult, ReasonerWarning,
+    build_inferred_hierarchy, new_inferences, taxonomy_equivalence_clusters, taxonomy_to_iri_edges,
+    unsatisfiable_iris, ClassificationResult, ReasonerWarning,
 };
 use ontologos_core::{EntityKind, Ontology, SwrlAtom, SwrlDArg, SwrlIArg, SwrlRule};
 use std::time::Instant;
@@ -19,6 +19,8 @@ pub fn classify_with_swrl(input: &ReasonerInput) -> Result<ClassificationResult>
         .map_err(|e| ReasonerError::Classify(format!("SWRL classify: {e}")))?;
 
     let iri_edges = taxonomy_to_iri_edges(&ontology, &taxonomy).map_err(ReasonerError::Classify)?;
+    let equivalences =
+        taxonomy_equivalence_clusters(&ontology, &taxonomy).map_err(ReasonerError::Classify)?;
     let reported = unsatisfiable_iris(&ontology, &taxonomy).map_err(ReasonerError::Classify)?;
     let inferred = build_inferred_hierarchy(&iri_edges, &reported, &input.asserted_hierarchy);
     let unsatisfiable = inferred.unsatisfiable.clone();
@@ -58,6 +60,7 @@ pub fn classify_with_swrl(input: &ReasonerInput) -> Result<ClassificationResult>
         duration_ms: started.elapsed().as_millis() as u64,
         subsumption_count: taxonomy.subsumption_count(),
         inferred_axiom_count: taxonomy.subsumption_count(),
+        equivalences,
     })
 }
 

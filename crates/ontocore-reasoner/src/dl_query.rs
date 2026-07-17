@@ -8,6 +8,7 @@ use horned_owl::model::ClassExpression;
 use ontocore_catalog::ClassHierarchy;
 use ontocore_owl::{class_expression_to_turtle_value, parse_class_expression};
 use ontologos_bridge::{core_to_triples_all, merge_triples_into_ontology};
+use ontologos_core::Ontology;
 use ontologos_parser::load_ontology;
 use serde::{Deserialize, Serialize};
 use std::collections::{BTreeMap, BTreeSet};
@@ -68,20 +69,30 @@ pub fn run_dl_query(
         (DL_QUERY_CLASS_IRI.to_string(), augmented, w)
     };
 
-    let (hierarchy, profile_used, realization) = match mode {
+    let (hierarchy, profile_used, realization, equiv_clusters) = match mode {
         DlQueryMode::Asserted => {
-            (query_input.asserted_hierarchy.clone(), "asserted".to_string(), None)
+            (query_input.asserted_hierarchy.clone(), "asserted".to_string(), None, Vec::new())
         }
         DlQueryMode::Inferred => {
             let classification = classify(profile, &query_input, true)?;
-            let realization = realize(profile, &query_input).ok();
-            collect_inferred(&classification, realization, profile)
+            let realization = match realize(profile, &query_input) {
+                Ok(result) => Some(result),
+                Err(err) => {
+                    // #371: do not treat realize failures as empty Instances.
+                    warnings.push(format!(
+                        "realization unavailable; Instances may be incomplete: {err}"
+                    ));
+                    None
+                }
+            };
+            collect_inferred(&classification, realization)
         }
     };
 
     let mut subclasses = collect_descendants(&hierarchy, &query_iri);
     let mut superclasses = collect_ancestors(&hierarchy, &query_iri);
-    let mut equivalents = collect_equivalents(&hierarchy, &query_iri);
+    let mut equivalents =
+        collect_equivalents(&hierarchy, &query_input.ontology, &query_iri, &equiv_clusters);
     subclasses.retain(|iri| iri != &query_iri && iri != DL_QUERY_CLASS_IRI);
     superclasses.retain(|iri| {
         iri != &query_iri
@@ -89,6 +100,11 @@ pub fn run_dl_query(
             && iri != "http://www.w3.org/2002/07/owl#Thing"
     });
     equivalents.retain(|iri| iri != &query_iri && iri != DL_QUERY_CLASS_IRI);
+
+    // #372: Protégé-style — equivalents only under Equivalents, not Sub/Super.
+    let equiv_set: BTreeSet<_> = equivalents.iter().cloned().collect();
+    subclasses.retain(|iri| !equiv_set.contains(iri));
+    superclasses.retain(|iri| !equiv_set.contains(iri));
 
     let mut instances = Vec::new();
     if let Some(realization) = realization {
@@ -143,12 +159,17 @@ impl ReasonerInput {
 fn collect_inferred(
     classification: &ClassificationResult,
     realization: Option<RealizationResult>,
-    _profile: ReasonerId,
-) -> (ClassHierarchy, String, Option<RealizationResult>) {
-    (classification.inferred.combined.clone(), classification.profile_used.clone(), realization)
+) -> (ClassHierarchy, String, Option<RealizationResult>, Vec<Vec<String>>) {
+    (
+        classification.inferred.combined.clone(),
+        classification.profile_used.clone(),
+        realization,
+        classification.equivalences.clone(),
+    )
 }
 
-/// Collect individuals with an asserted type of `class_iri` or any asserted descendant.
+/// Collect individuals with an asserted type of `class_iri`, an asserted equivalent,
+/// or any asserted descendant of those classes (#373).
 fn asserted_instances_of_class(
     input: &ReasonerInput,
     hierarchy: &ClassHierarchy,
@@ -157,6 +178,15 @@ fn asserted_instances_of_class(
     let mut class_iris: BTreeSet<String> =
         collect_descendants(hierarchy, class_iri).into_iter().collect();
     class_iris.insert(class_iri.to_string());
+    close_under_asserted_equivalents(&input.ontology, &mut class_iris);
+    // Descendants of equivalents (and equivalents of descendants) matter too.
+    let seeds: Vec<String> = class_iris.iter().cloned().collect();
+    for seed in seeds {
+        for child in collect_descendants(hierarchy, &seed) {
+            class_iris.insert(child);
+        }
+    }
+    close_under_asserted_equivalents(&input.ontology, &mut class_iris);
 
     let mut out = BTreeSet::new();
     for iri in &class_iris {
@@ -190,6 +220,23 @@ fn asserted_instances_of_class(
     }
 
     out.into_iter().collect()
+}
+
+fn close_under_asserted_equivalents(ontology: &Ontology, class_iris: &mut BTreeSet<String>) {
+    let seeds: Vec<String> = class_iris.iter().cloned().collect();
+    for seed in seeds {
+        let Some(id) = ontology.lookup_entity(&seed) else {
+            continue;
+        };
+        let Some(equivs) = ontology.equivalents_of(id) else {
+            continue;
+        };
+        for eid in equivs {
+            if let Ok(iri) = crate::result::entity_iri(ontology, *eid) {
+                class_iris.insert(iri);
+            }
+        }
+    }
 }
 
 fn named_class_iri(expr: &ClassExpression<horned_owl::model::RcStr>) -> Option<String> {
@@ -294,8 +341,36 @@ fn collect_ancestors(hierarchy: &ClassHierarchy, root: &str) -> Vec<String> {
     out.into_iter().collect()
 }
 
-fn collect_equivalents(hierarchy: &ClassHierarchy, root: &str) -> Vec<String> {
+/// Equivalents = mutual SubClassOf ∩ ∪ asserted `equivalents_of` ∪ taxonomy clusters (#370).
+fn collect_equivalents(
+    hierarchy: &ClassHierarchy,
+    ontology: &Ontology,
+    root: &str,
+    inferred_clusters: &[Vec<String>],
+) -> Vec<String> {
     let descendants: BTreeSet<_> = collect_descendants(hierarchy, root).into_iter().collect();
     let ancestors: BTreeSet<_> = collect_ancestors(hierarchy, root).into_iter().collect();
-    descendants.intersection(&ancestors).cloned().collect()
+    let mut out: BTreeSet<String> = descendants.intersection(&ancestors).cloned().collect();
+
+    if let Some(id) = ontology.lookup_entity(root) {
+        if let Some(equivs) = ontology.equivalents_of(id) {
+            for eid in equivs {
+                if let Ok(iri) = crate::result::entity_iri(ontology, *eid) {
+                    out.insert(iri);
+                }
+            }
+        }
+    }
+
+    for cluster in inferred_clusters {
+        if cluster.iter().any(|iri| iri == root) {
+            for iri in cluster {
+                if iri != root {
+                    out.insert(iri.clone());
+                }
+            }
+        }
+    }
+
+    out.into_iter().collect()
 }

@@ -152,6 +152,7 @@ mod tests {
             duration_ms: 0,
             subsumption_count: 0,
             inferred_axiom_count: 0,
+            equivalences: Vec::new(),
         }
     }
 

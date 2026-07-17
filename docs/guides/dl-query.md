@@ -34,7 +34,7 @@ Related query surfaces:
 ## CLI
 
 ```bash
-ontocore dl-query "Person and hasPet some Dog" /path/to/ontologies --profile dl
+ontocore dl-query "Person and hasPet some Dog" --workspace /path/to/ontologies --profile dl
 ```
 
 See [CLI reference](../cli-reference.md) and [v0.24 migration](../migration/v0.24.md).

@@ -75,7 +75,7 @@ Selecting an entity in the explorer updates **Current Focus** across open React 
 ```bash
 ontocore query . "SELECT short_name, labels FROM classes"
 ontocore sparql . "SELECT ?s ?p ?o WHERE { ?s ?p ?o } LIMIT 10"
-ontocore dl-query "Person and hasPet some Dog" . --profile dl
+ontocore dl-query "Person and hasPet some Dog" --profile dl
 ```
 
 See [Rust & CLI guide](../guides/rust-crates.md).

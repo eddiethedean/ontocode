@@ -44,6 +44,7 @@ impl ReasonerAdapter for RdfsAdapter {
             duration_ms: started.elapsed().as_millis() as u64,
             subsumption_count: iri_edges.len(),
             inferred_axiom_count: report.inferred_total(),
+            equivalences: Vec::new(),
         })
     }
 

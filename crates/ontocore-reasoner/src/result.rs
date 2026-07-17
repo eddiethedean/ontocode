@@ -30,6 +30,10 @@ pub struct ClassificationResult {
     pub duration_ms: u64,
     pub subsumption_count: usize,
     pub inferred_axiom_count: usize,
+    /// Equivalence clusters from taxonomy classifiers (EL/DL/SWRL).
+    /// Empty for RL/RDFS paths that do not produce taxonomy clusters.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub equivalences: Vec<Vec<String>>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -274,6 +278,29 @@ pub fn taxonomy_to_iri_edges(
             Ok((child, parent))
         })
         .collect()
+}
+
+/// Convert taxonomy equivalence clusters to IRI vectors (skip singleton / empty).
+pub fn taxonomy_equivalence_clusters(
+    ontology: &ontologos_core::Ontology,
+    taxonomy: &ontologos_core::Taxonomy,
+) -> Result<Vec<Vec<String>>, String> {
+    let mut out = Vec::new();
+    for cluster in &taxonomy.equivalences {
+        if cluster.len() < 2 {
+            continue;
+        }
+        let mut iris = Vec::with_capacity(cluster.len());
+        for id in cluster {
+            iris.push(entity_iri(ontology, *id)?);
+        }
+        iris.sort();
+        iris.dedup();
+        if iris.len() >= 2 {
+            out.push(iris);
+        }
+    }
+    Ok(out)
 }
 
 pub fn entity_iri(

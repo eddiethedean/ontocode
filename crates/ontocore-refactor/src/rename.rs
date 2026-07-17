@@ -257,11 +257,12 @@ pub fn preview_merge_entities(
                     continue;
                 }
                 let fmt = if doc.format == OntologyFormat::OwlXml { "owlxml" } else { "rdfxml" };
-                match ontocore_owl::remap_entity_iri_in_xml_text(
+                // Delete merge-owned axioms then remap refs (#369) — matches Turtle/OBO.
+                match ontocore_owl::merge_entity_iri_in_xml_text(
                     &original,
                     fmt,
-                    merge_iri,
                     keep_iri,
+                    merge_iri,
                     &doc.namespaces,
                 ) {
                     Ok(text) => text,

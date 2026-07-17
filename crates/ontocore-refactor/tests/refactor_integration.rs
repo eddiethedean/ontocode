@@ -273,8 +273,14 @@ fn merge_entities_rewrites_rdf_xml() {
 <rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
          xmlns:owl="http://www.w3.org/2002/07/owl#"
          xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
-  <owl:Class rdf:about="http://example.org#Keep"/>
-  <owl:Class rdf:about="http://example.org#Merge"/>
+  <owl:Class rdf:about="http://example.org#Keep">
+    <rdfs:label>Keep</rdfs:label>
+  </owl:Class>
+  <owl:Class rdf:about="http://example.org#Merge">
+    <rdfs:label>MergeLabel</rdfs:label>
+    <rdfs:subClassOf rdf:resource="http://example.org#Parent"/>
+  </owl:Class>
+  <owl:Class rdf:about="http://example.org#Parent"/>
   <owl:Class rdf:about="http://example.org#Child">
     <rdfs:subClassOf rdf:resource="http://example.org#Merge"/>
   </owl:Class>
@@ -294,8 +300,73 @@ fn merge_entities_rewrites_rdf_xml() {
     let preview = &plan.changes[0].preview_text;
     assert!(preview.contains("http://example.org#Keep"), "{preview}");
     assert!(preview.contains("http://example.org#Child"), "{preview}");
-    // Merge IRI should be gone after remap.
     assert!(!preview.contains("http://example.org#Merge"), "{preview}");
+    // Delete-then-remap (#369): merge-owned axioms must not absorb onto Keep.
+    assert!(!preview.contains("MergeLabel"), "{preview}");
+    assert!(
+        preview.contains("rdf:resource=\"http://example.org#Keep\""),
+        "Child⊑Merge must remap to Keep: {preview}"
+    );
+}
+
+#[test]
+fn merge_entities_ttl_and_rdf_xml_agree_on_delete_semantics() {
+    let ttl = concat!(
+        "@prefix ex: <http://example.org#> .\n",
+        "@prefix owl: <http://www.w3.org/2002/07/owl#> .\n",
+        "@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .\n\n",
+        "ex:Keep a owl:Class ; rdfs:label \"Keep\" .\n",
+        "ex:Merge a owl:Class ; rdfs:label \"MergeLabel\" ; rdfs:subClassOf ex:Parent .\n",
+        "ex:Parent a owl:Class .\n",
+        "ex:Child a owl:Class ; rdfs:subClassOf ex:Merge .\n",
+    );
+    let owl = r#"<?xml version="1.0"?>
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+         xmlns:owl="http://www.w3.org/2002/07/owl#"
+         xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#">
+  <owl:Class rdf:about="http://example.org#Keep">
+    <rdfs:label>Keep</rdfs:label>
+  </owl:Class>
+  <owl:Class rdf:about="http://example.org#Merge">
+    <rdfs:label>MergeLabel</rdfs:label>
+    <rdfs:subClassOf rdf:resource="http://example.org#Parent"/>
+  </owl:Class>
+  <owl:Class rdf:about="http://example.org#Parent"/>
+  <owl:Class rdf:about="http://example.org#Child">
+    <rdfs:subClassOf rdf:resource="http://example.org#Merge"/>
+  </owl:Class>
+</rdf:RDF>
+"#;
+
+    let tmp = TempDir::new().unwrap();
+    let ws = tmp.path();
+    std::fs::write(ws.join("merge.ttl"), ttl).unwrap();
+    std::fs::write(ws.join("merge.owl"), owl).unwrap();
+    let catalog = build_catalog(ws);
+    let plan = preview_merge_entities(
+        &catalog,
+        "http://example.org#Keep",
+        "http://example.org#Merge",
+        &empty_overrides(),
+    )
+    .expect("merge");
+    assert_eq!(plan.changes.len(), 2, "expected ttl + owl changes: {:?}", plan.warnings);
+
+    for change in &plan.changes {
+        let preview = &change.preview_text;
+        assert!(!preview.contains("MergeLabel"), "{}: {preview}", change.path.display());
+        assert!(
+            !preview.contains("http://example.org#Merge") && !preview.contains("ex:Merge"),
+            "{}: merge IRI must be gone: {preview}",
+            change.path.display()
+        );
+        // Survivor keeps its label; Child parent remapped to Keep.
+        assert!(
+            preview.contains("Keep") || preview.contains("\"Keep\""),
+            "{}: {preview}",
+            change.path.display()
+        );
+    }
 }
 
 #[test]

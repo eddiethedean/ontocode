@@ -8,7 +8,7 @@ Migration guides: [Migration index](migration/README.md)
 
 ## [0.26.1] - 2026-07-16
 
-**v0.26.1** — OWL remove/match semantics and annotation/range/XML write-back fixes (Inspector reliability). See [CHANGELOG.md](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) and [migration/v0.26.1.md](migration/v0.26.1.md).
+**v0.26.1** — OWL Inspector write-back fixes plus reasoner/SWRL/DL Query honesty, plugin + ROBOT path-jail hardening, and LSP/editor/catalog bugfixes. See [CHANGELOG.md](https://github.com/eddiethedean/ontocode/blob/main/CHANGELOG.md) and [migration/v0.26.1.md](migration/v0.26.1.md).
 
 ## [0.26.0] - 2026-07-16
 

@@ -260,6 +260,13 @@ export = true
     let p = std::path::PathBuf::from(&result.output_paths[0]);
     let root = workspace.canonicalize().expect("canonical root");
     assert!(is_path_within(&root, &p), "output path must be jailed within workspace");
+    // #348: rejected paths must fail the run and surface diagnostics.
+    assert!(!result.success, "jail violations must not report success");
+    assert!(
+        result.diagnostics.iter().any(|d| d.message.contains("rejected plugin output path")),
+        "expected path_jail diagnostics: {:?}",
+        result.diagnostics
+    );
 }
 
 #[test]
@@ -318,5 +325,73 @@ fn in_process_export_default_writes_under_workspace_not_cwd() {
     assert!(
         !cwd.path().join(".ontocore/plugin-out").exists(),
         "must not write .ontocore/plugin-out under process CWD"
+    );
+}
+
+#[test]
+fn subprocess_ui_view_requires_workspace_write() {
+    // #347
+    let dir = tempfile::tempdir().expect("tempdir");
+    let workspace = dir.path().join("ws");
+    std::fs::create_dir_all(workspace.join(".ontocore/plugins")).expect("plugins dir");
+    std::fs::write(workspace.join("demo.ttl"), "@prefix ex: <http://ex/> .\nex:Ok a owl:Class .\n")
+        .expect("write demo.ttl");
+
+    let plugin_bin = workspace.join("ui_view_ro.sh");
+    std::fs::write(
+        &plugin_bin,
+        r#"#!/bin/sh
+echo '{"view_html":"<p>hi</p>"}'"#,
+    )
+    .expect("write plugin");
+    #[cfg(unix)]
+    {
+        use std::os::unix::fs::PermissionsExt;
+        let mut perms = std::fs::metadata(&plugin_bin).expect("metadata").permissions();
+        perms.set_mode(0o755);
+        std::fs::set_permissions(&plugin_bin, perms).expect("chmod");
+    }
+
+    let manifest = format!(
+        r#"[plugin]
+name = "ui-ro"
+version = "0.1.0"
+kind = "ui"
+id = "org.example.ui-ro"
+api_version = "1"
+entry = "{}"
+permissions = ["workspace.read","external_process"]
+
+[[ui.views]]
+id = "demo.view"
+title = "Demo"
+kind = "dock"
+"#,
+        plugin_bin.display()
+    );
+    std::fs::write(workspace.join(".ontocore/plugins/ui_ro.toml"), manifest.as_bytes())
+        .expect("write manifest");
+
+    let catalog =
+        IndexBuilder::new().workspace(workspace.clone()).build().expect("index workspace");
+    let mut host = load_plugin_host(&workspace).expect("load plugin host");
+    let err = host
+        .run_plugin_action(
+            "org.example.ui-ro",
+            "ui_view",
+            Some(&catalog),
+            None,
+            None,
+            Some("demo.view"),
+            None,
+            None,
+        )
+        .expect_err("ui_view without workspace.write must fail (#347)");
+    let msg = err.to_string();
+    assert!(
+        msg.contains("workspace.write")
+            || msg.contains("WorkspaceWrite")
+            || msg.contains("Missing"),
+        "expected missing write permission, got {msg}"
     );
 }

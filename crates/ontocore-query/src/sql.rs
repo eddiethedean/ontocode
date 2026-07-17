@@ -95,7 +95,7 @@ fn execute_select(catalog: &OntologyCatalog, select: Box<Select>) -> Result<Quer
         rows.push(row);
     }
 
-    let (columns, projected_rows) = project_rows(&select.projection, &rows)?;
+    let (columns, projected_rows) = project_rows(&select.projection, &rows, &table_name)?;
     Ok(QueryResult { columns, rows: projected_rows, truncated })
 }
 
@@ -359,10 +359,23 @@ fn projection_columns(projection: &[SelectItem]) -> Result<Vec<ProjectionCol>> {
     Ok(columns)
 }
 
-fn project_rows(projection: &[SelectItem], rows: &[Row]) -> Result<(Vec<String>, Vec<Row>)> {
+fn project_rows(
+    projection: &[SelectItem],
+    rows: &[Row],
+    table: &str,
+) -> Result<(Vec<String>, Vec<Row>)> {
     if projection.len() == 1 && matches!(projection[0], SelectItem::Wildcard(_)) {
-        let columns = rows.first().map(|r| r.keys().cloned().collect()).unwrap_or_default();
-        return Ok((columns, rows.to_vec()));
+        if let Some(first) = rows.first() {
+            let columns = first.keys().cloned().collect();
+            return Ok((columns, rows.to_vec()));
+        }
+        // Zero rows: still return the table schema so clients get headers (#385).
+        let columns = list_sql_tables()
+            .into_iter()
+            .find(|t| t.name == table)
+            .map(|t| t.columns.into_iter().map(|c| c.name).collect())
+            .unwrap_or_default();
+        return Ok((columns, Vec::new()));
     }
 
     let columns_spec = projection_columns(projection)?;
@@ -629,6 +642,16 @@ mod tests {
         let result = run_sql(&catalog, "SELECT * FROM entities").expect("select *");
         assert!(result.columns.iter().any(|c| c == "obo_id"));
         assert!(result.rows.iter().all(|r| r.contains_key("obo_id")));
+    }
+
+    #[test]
+    fn select_star_zero_rows_still_returns_schema_columns() {
+        let catalog = fixture_catalog();
+        let result = run_sql(&catalog, "SELECT * FROM classes WHERE short_name = '__none__'")
+            .expect("empty select *");
+        assert!(result.rows.is_empty());
+        assert!(!result.columns.is_empty(), "empty SELECT * must still report schema columns");
+        assert!(result.columns.iter().any(|c| c == "iri" || c == "short_name"));
     }
 
     #[test]

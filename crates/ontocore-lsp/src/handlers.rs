@@ -697,6 +697,29 @@ pub fn handle_create_ontology(
         .as_deref()
         .unwrap_or_else(|| path.extension().and_then(|e| e.to_str()).unwrap_or("ttl"));
     let format_key = format.to_ascii_lowercase();
+    // Reject explicit format/extension mismatches (e.g. format=ttl under *.owl; #342).
+    if let Some(ext) = path.extension().and_then(|e| e.to_str()).map(|s| s.to_ascii_lowercase()) {
+        let ext_implies = match ext.as_str() {
+            "ttl" | "turtle" => Some("turtle"),
+            "obo" => Some("obo"),
+            "owl" | "rdf" => Some("rdfxml"),
+            "owx" => Some("owx"),
+            _ => None,
+        };
+        let content_kind = match format_key.as_str() {
+            "ttl" | "turtle" => "turtle",
+            "obo" => "obo",
+            other => other,
+        };
+        if let Some(implied) = ext_implies {
+            if implied != content_kind {
+                return Err(LspErrorPayload::invalid_params(format!(
+                    "createOntology format {format_key:?} does not match path extension .{ext}; \
+                     use a matching extension (.ttl/.obo) or a matching format"
+                )));
+            }
+        }
+    }
     let content = match format_key.as_str() {
         "obo" => {
             let mut s = format!("format-version: 1.2\nontology: {}\n", params.ontology_iri);
@@ -1763,12 +1786,17 @@ fn collect_swrl_rules_from_text(
     let ontology_iri = ontology_iri_from_turtle(text);
     for (index, rule) in ontocore_swrl::rules_from_turtle_document(text).into_iter().enumerate() {
         let summary = rule.summary(index);
-        let key =
-            format!("{}|{}|{}", document_uri.as_deref().unwrap_or(""), summary.id, summary.label);
+        let rule_json = serde_json::to_string(&rule).ok();
+        // Dedupe on document + canonical rule JSON so distinct bodies that share
+        // id/summary label are not collapsed (#362).
+        let key = format!(
+            "{}|{}",
+            document_uri.as_deref().unwrap_or(""),
+            rule_json.as_deref().unwrap_or(summary.id.as_str())
+        );
         if !seen.insert(key) {
             continue;
         }
-        let rule_json = serde_json::to_string(&rule).ok();
         rules.push(SwrlRuleListItem {
             id: summary.id,
             label: summary.label,

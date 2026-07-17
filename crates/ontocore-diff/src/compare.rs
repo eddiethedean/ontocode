@@ -100,9 +100,10 @@ fn detect_renames(result: &mut DiffResult) {
             if drop_added.contains(&a.iri) {
                 continue;
             }
-            // Require a structural link — shared labels alone are not enough (#20).
+            // Require a newly added structural identity link (#20 / #389).
             let sameas = result.annotation_changes.iter().any(|ann| {
-                (ann.predicate.contains("sameAs") || ann.predicate.ends_with("#sameAs"))
+                ann.change == "added"
+                    && is_rename_link_predicate(&ann.predicate)
                     && ((ann.subject == r.iri && ann.object == a.iri)
                         || (ann.subject == a.iri && ann.object == r.iri))
             });
@@ -125,11 +126,22 @@ fn detect_renames(result: &mut DiffResult) {
     });
 }
 
+/// Exact identity-link predicates used for rename detection (#389).
+fn is_rename_link_predicate(pred: &str) -> bool {
+    matches!(
+        pred,
+        "http://www.w3.org/2002/07/owl#sameAs"
+            | "owl:sameAs"
+            | "http://www.w3.org/2004/02/skos/core#exactMatch"
+            | "skos:exactMatch"
+    )
+}
+
 #[derive(Eq, PartialEq, Ord, PartialOrd, Clone)]
-struct AnnotationKey(String, String, String);
+struct AnnotationKey(String, String, String, String);
 
 fn annotation_key(a: &Annotation) -> AnnotationKey {
-    AnnotationKey(a.subject.clone(), a.predicate.clone(), a.object.clone())
+    AnnotationKey(a.ontology_id.clone(), a.subject.clone(), a.predicate.clone(), a.object.clone())
 }
 
 fn diff_annotations(base: &OntologyCatalog, head: &OntologyCatalog, result: &mut DiffResult) {
@@ -161,10 +173,16 @@ fn diff_annotations(base: &OntologyCatalog, head: &OntologyCatalog, result: &mut
 }
 
 #[derive(Eq, PartialEq, Ord, PartialOrd, Clone)]
-struct AxiomKey(String, String, String, String);
+struct AxiomKey(String, String, String, String, String);
 
 fn axiom_key(a: &Axiom) -> AxiomKey {
-    AxiomKey(a.axiom_kind.clone(), a.subject.clone(), a.predicate.clone(), a.object.clone())
+    AxiomKey(
+        a.ontology_id.clone(),
+        a.axiom_kind.clone(),
+        a.subject.clone(),
+        a.predicate.clone(),
+        a.object.clone(),
+    )
 }
 
 fn diff_axioms(base: &OntologyCatalog, head: &OntologyCatalog, result: &mut DiffResult) {

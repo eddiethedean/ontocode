@@ -23,7 +23,7 @@ pub use graph::{
 pub use incremental::IncrementalStats;
 pub use xml_catalog::{
     discover_workspace_catalogs, load_workspace_xml_catalogs, load_xml_catalog, parse_xml_catalog,
-    XmlCatalog, XmlCatalogError,
+    parse_xml_catalog_in_workspace, XmlCatalog, XmlCatalogError,
 };
 
 use ontocore_core::{

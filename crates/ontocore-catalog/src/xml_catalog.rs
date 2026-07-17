@@ -1,8 +1,12 @@
 //! Oasis / Protégé `catalog-v001.xml` IRI → local path redirects.
 
-use std::collections::BTreeMap;
+use ontocore_core::{is_path_within, read_to_string_capped, MAX_FILE_BYTES};
+use std::collections::{BTreeMap, BTreeSet};
 use std::path::{Path, PathBuf};
 use thiserror::Error;
+
+/// Maximum `nextCatalog` nesting depth (cycle-safe bound).
+const MAX_NEXTCATALOG_DEPTH: usize = 32;
 
 #[derive(Debug, Clone, PartialEq, Eq, Error)]
 pub enum XmlCatalogError {
@@ -59,7 +63,57 @@ impl XmlCatalog {
 }
 
 /// Parse a Protégé/Oasis catalog XML document.
+///
+/// Nested `nextCatalog` entries are jailed to the catalog file's parent directory
+/// (use [`parse_xml_catalog_in_workspace`] when a workspace root is known).
 pub fn parse_xml_catalog(path: &Path, xml: &str) -> Result<XmlCatalog, XmlCatalogError> {
+    let jail = path.parent().map(Path::to_path_buf);
+    parse_xml_catalog_inner(path, xml, jail.as_deref(), &mut Vec::new(), &mut BTreeSet::new(), 0)
+}
+
+/// Parse a catalog, jailing nested `nextCatalog` loads under `workspace_root`.
+pub fn parse_xml_catalog_in_workspace(
+    path: &Path,
+    xml: &str,
+    workspace_root: &Path,
+) -> Result<XmlCatalog, XmlCatalogError> {
+    parse_xml_catalog_inner(
+        path,
+        xml,
+        Some(workspace_root),
+        &mut Vec::new(),
+        &mut BTreeSet::new(),
+        0,
+    )
+}
+
+fn parse_xml_catalog_inner(
+    path: &Path,
+    xml: &str,
+    jail_root: Option<&Path>,
+    stack: &mut Vec<PathBuf>,
+    loaded: &mut BTreeSet<PathBuf>,
+    depth: usize,
+) -> Result<XmlCatalog, XmlCatalogError> {
+    if depth > MAX_NEXTCATALOG_DEPTH {
+        return Err(XmlCatalogError::Parse(format!(
+            "nextCatalog nesting exceeds limit ({MAX_NEXTCATALOG_DEPTH}) at {}",
+            path.display()
+        )));
+    }
+    let identity = path.canonicalize().unwrap_or_else(|_| path.to_path_buf());
+    if stack.iter().any(|p| p == &identity) {
+        return Err(XmlCatalogError::Parse(format!(
+            "nextCatalog cycle detected at {}",
+            path.display()
+        )));
+    }
+    if loaded.contains(&identity) {
+        // Already fully processed in this load — skip without error (DAG / diamond).
+        return Ok(XmlCatalog { catalog_path: path.to_path_buf(), ..Default::default() });
+    }
+    stack.push(identity.clone());
+
     let mut catalog = XmlCatalog { catalog_path: path.to_path_buf(), ..Default::default() };
     // Prefer xml:base on catalog/group when present
     let mut active_base: Option<String> = None;
@@ -93,27 +147,58 @@ pub fn parse_xml_catalog(path: &Path, xml: &str) -> Result<XmlCatalog, XmlCatalo
             };
             catalog.rewrite_entries.push((start, rewrite));
         } else if local == "nextCatalog" {
-            // Nested catalogs: optional; load relative catalog if present adjacent
             if let Some(next) = attrs.get("catalog") {
                 let next_path = catalog.absolutize(next);
-                if next_path.is_file() {
-                    let text = std::fs::read_to_string(&next_path)
-                        .map_err(|e| XmlCatalogError::Io(e.to_string()))?;
-                    let nested = parse_xml_catalog(&next_path, &text)?;
-                    for (k, v) in nested.uri_entries {
-                        catalog.uri_entries.entry(k).or_insert(v);
-                    }
-                    catalog.rewrite_entries.extend(nested.rewrite_entries);
-                }
+                load_nested_catalog(&mut catalog, &next_path, jail_root, stack, loaded, depth + 1)?;
             }
         }
     }
+    stack.pop();
+    loaded.insert(identity);
     Ok(catalog)
 }
 
-/// Load and parse a catalog file from disk.
+fn load_nested_catalog(
+    catalog: &mut XmlCatalog,
+    next_path: &Path,
+    jail_root: Option<&Path>,
+    stack: &mut Vec<PathBuf>,
+    loaded: &mut BTreeSet<PathBuf>,
+    depth: usize,
+) -> Result<(), XmlCatalogError> {
+    if !next_path.is_file() {
+        return Ok(());
+    }
+    let resolved = next_path
+        .canonicalize()
+        .map_err(|e| XmlCatalogError::Io(format!("{}: {e}", next_path.display())))?;
+    if let Some(root) = jail_root {
+        let root = root.canonicalize().unwrap_or_else(|_| root.to_path_buf());
+        if !is_path_within(&root, &resolved) {
+            return Err(XmlCatalogError::Parse(format!(
+                "nextCatalog path escapes workspace jail ({}): {}",
+                root.display(),
+                next_path.display()
+            )));
+        }
+    }
+    if loaded.contains(&resolved) {
+        return Ok(());
+    }
+    let text = read_to_string_capped(&resolved, MAX_FILE_BYTES)
+        .map_err(|e| XmlCatalogError::Io(e.to_string()))?;
+    let nested = parse_xml_catalog_inner(&resolved, &text, jail_root, stack, loaded, depth)?;
+    for (k, v) in nested.uri_entries {
+        catalog.uri_entries.entry(k).or_insert(v);
+    }
+    catalog.rewrite_entries.extend(nested.rewrite_entries);
+    Ok(())
+}
+
+/// Load and parse a catalog file from disk (size-capped).
 pub fn load_xml_catalog(path: &Path) -> Result<XmlCatalog, XmlCatalogError> {
-    let text = std::fs::read_to_string(path).map_err(|e| XmlCatalogError::Io(e.to_string()))?;
+    let text = read_to_string_capped(path, MAX_FILE_BYTES)
+        .map_err(|e| XmlCatalogError::Io(e.to_string()))?;
     parse_xml_catalog(path, &text)
 }
 
@@ -147,7 +232,9 @@ pub fn load_workspace_xml_catalogs(root: &Path) -> Result<XmlCatalog, XmlCatalog
     let mut merged =
         XmlCatalog { catalog_path: root.join("catalog-v001.xml"), ..Default::default() };
     for path in paths {
-        let cat = load_xml_catalog(&path)?;
+        let text = read_to_string_capped(&path, MAX_FILE_BYTES)
+            .map_err(|e| XmlCatalogError::Io(e.to_string()))?;
+        let cat = parse_xml_catalog_in_workspace(&path, &text, root)?;
         merged.catalog_path = path;
         for (k, v) in cat.uri_entries {
             merged.uri_entries.insert(k, v);
@@ -283,5 +370,88 @@ mod tests {
         let path = Path::new("/tmp/catalog-v001.xml");
         let cat = parse_xml_catalog(path, xml).unwrap();
         assert_eq!(cat.resolve_uri("http://example.org/a").as_deref(), Some("lib/a.ttl"));
+    }
+
+    #[test]
+    fn next_catalog_cycle_errors() {
+        // #392
+        let dir = tempfile::tempdir().unwrap();
+        let a = dir.path().join("a.xml");
+        let b = dir.path().join("b.xml");
+        std::fs::write(
+            &a,
+            r#"<catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
+  <nextCatalog catalog="b.xml"/>
+</catalog>"#,
+        )
+        .unwrap();
+        std::fs::write(
+            &b,
+            r#"<catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
+  <nextCatalog catalog="a.xml"/>
+</catalog>"#,
+        )
+        .unwrap();
+        let text = std::fs::read_to_string(&a).unwrap();
+        let err = parse_xml_catalog(&a, &text).expect_err("cycle");
+        assert!(err.to_string().contains("cycle"), "{err}");
+    }
+
+    #[test]
+    fn next_catalog_outside_workspace_errors() {
+        // #393
+        let dir = tempfile::tempdir().unwrap();
+        let workspace = dir.path().join("ws");
+        let outside = dir.path().join("outside");
+        std::fs::create_dir_all(&workspace).unwrap();
+        std::fs::create_dir_all(&outside).unwrap();
+        let secret = outside.join("secret.xml");
+        std::fs::write(
+            &secret,
+            r#"<catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
+  <uri name="http://evil" uri="x.ttl"/>
+</catalog>"#,
+        )
+        .unwrap();
+        let catalog = workspace.join("catalog-v001.xml");
+        std::fs::write(
+            &catalog,
+            format!(
+                r#"<catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
+  <nextCatalog catalog="{}"/>
+</catalog>"#,
+                secret.display()
+            ),
+        )
+        .unwrap();
+        let text = std::fs::read_to_string(&catalog).unwrap();
+        let err = parse_xml_catalog_in_workspace(&catalog, &text, &workspace)
+            .expect_err("must reject outside path");
+        assert!(err.to_string().contains("escapes") || err.to_string().contains("jail"), "{err}");
+    }
+
+    #[test]
+    fn next_catalog_relative_inside_workspace_ok() {
+        let dir = tempfile::tempdir().unwrap();
+        let workspace = dir.path().join("ws");
+        std::fs::create_dir_all(workspace.join("lib")).unwrap();
+        std::fs::write(
+            workspace.join("lib/nested.xml"),
+            r#"<catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
+  <uri name="http://example.org/n" uri="n.ttl"/>
+</catalog>"#,
+        )
+        .unwrap();
+        let catalog = workspace.join("catalog-v001.xml");
+        std::fs::write(
+            &catalog,
+            r#"<catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog">
+  <nextCatalog catalog="lib/nested.xml"/>
+</catalog>"#,
+        )
+        .unwrap();
+        let text = std::fs::read_to_string(&catalog).unwrap();
+        let cat = parse_xml_catalog_in_workspace(&catalog, &text, &workspace).expect("nested");
+        assert_eq!(cat.resolve_uri("http://example.org/n").as_deref(), Some("n.ttl"));
     }
 }

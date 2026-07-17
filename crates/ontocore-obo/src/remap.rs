@@ -6,8 +6,10 @@ use std::collections::BTreeSet;
 /// Remap `from_id` → `to_id` in an OBO document (id lines and common reference tags).
 ///
 /// Handles `id:`, `is_a:`, `intersection_of:`, `union_of:`, `disjoint_from:`,
-/// `relationship:` (second token), and `replaced_by:` / `consider:` fields.
+/// `relationship:` (second token), `inverse_of:` / `domain:` / `range:` (typedef),
+/// and `replaced_by:` / `consider:` fields.
 /// Validates the result with fastobo and rejects duplicate `id:` values.
+/// Preserves the document's dominant newline style (LF vs CRLF).
 pub fn remap_obo_id_in_text(text: &str, from_id: &str, to_id: &str) -> Result<String> {
     remap_obo_id_in_text_inner(text, from_id, to_id, RemapIdMode::Rename)
 }
@@ -47,6 +49,15 @@ enum RemapIdMode {
     RefsOnly,
 }
 
+/// Dominant newline sequence in `text` (`\r\n` if present, else `\n`).
+fn detect_newline(text: &str) -> &'static str {
+    if text.contains("\r\n") {
+        "\r\n"
+    } else {
+        "\n"
+    }
+}
+
 fn remap_obo_id_in_text_inner(
     text: &str,
     from_id: &str,
@@ -59,14 +70,19 @@ fn remap_obo_id_in_text_inner(
     if from_id.is_empty() || to_id.is_empty() {
         return Err(OboError::PatchInvalid("empty OBO id".into()));
     }
+    let nl = detect_newline(text);
     let mut out = String::with_capacity(text.len());
-    for line in text.lines() {
-        out.push_str(&remap_obo_line(line, from_id, to_id, mode));
-        out.push('\n');
-    }
-    // Preserve final newline absence when source had none.
-    if !text.ends_with('\n') && out.ends_with('\n') {
-        out.pop();
+    if text.is_empty() {
+        // fall through to validate
+    } else {
+        for piece in text.split_inclusive('\n') {
+            let has_ending = piece.ends_with('\n');
+            let body = piece.trim_end_matches(['\n', '\r']);
+            out.push_str(&remap_obo_line(body, from_id, to_id, mode));
+            if has_ending {
+                out.push_str(nl);
+            }
+        }
     }
     assert_unique_obo_ids(&out)?;
     fastobo::from_str(&out).map_err(|e| OboError::Parse(e.to_string()))?;
@@ -89,9 +105,9 @@ fn remap_obo_line(line: &str, from: &str, to: &str, mode: RemapIdMode) -> String
             RemapIdMode::Rename => remap_first_id_token(rest, from, to),
             RemapIdMode::RefsOnly => None,
         },
-        "is_a" | "disjoint_from" | "replaced_by" | "consider" | "union_of" => {
-            remap_first_id_token(rest, from, to)
-        }
+        // #374: typedef reference tags
+        "is_a" | "disjoint_from" | "replaced_by" | "consider" | "union_of" | "inverse_of"
+        | "domain" | "range" => remap_first_id_token(rest, from, to),
         "intersection_of" => remap_intersection_of(rest, from, to),
         "relationship" => remap_relationship(rest, from, to),
         _ => None,
@@ -354,5 +370,48 @@ is_a: EX:001 ! From
 
     fn count_id_lines(text: &str, id: &str) -> usize {
         text.lines().filter(|l| obo_id_line_token(l) == Some(id)).count()
+    }
+
+    #[test]
+    fn remaps_typedef_inverse_domain_range() {
+        // #374
+        let src = "\
+format-version: 1.2
+ontology: ex
+
+[Typedef]
+id: EX:rel
+name: related_to
+inverse_of: EX:001
+domain: EX:001
+range: EX:002
+
+[Term]
+id: EX:001
+name: A
+
+[Term]
+id: EX:002
+name: B
+";
+        let out = remap_obo_id_in_text(src, "EX:001", "EX:010").expect("remap");
+        assert!(out.contains("id: EX:010"), "{out}");
+        assert!(out.contains("inverse_of: EX:010"), "{out}");
+        assert!(out.contains("domain: EX:010"), "{out}");
+        assert!(!out.contains("inverse_of: EX:001"), "{out}");
+        assert!(!out.contains("domain: EX:001"), "{out}");
+        assert!(out.contains("range: EX:002"), "{out}");
+    }
+
+    #[test]
+    fn remap_preserves_crlf_newlines() {
+        // #387
+        let src = "format-version: 1.2\r\nontology: ex\r\n\r\n[Term]\r\nid: EX:001\r\nname: A\r\n";
+        let out = remap_obo_id_in_text(src, "EX:001", "EX:010").expect("remap");
+        assert!(out.contains("\r\n"), "must keep CRLF: {out:?}");
+        assert!(!out.replace("\r\n", "").contains('\n') || out.contains("\r\n"));
+        assert!(out.contains("id: EX:010"));
+        // Every newline should be CRLF, not bare LF.
+        assert_eq!(out.matches("\r\n").count(), out.matches('\n').count());
     }
 }

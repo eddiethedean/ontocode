@@ -58,6 +58,29 @@ describe("workspaceStore", () => {
     expect(useWorkspaceStore.getState().focus?.id).toBe("A");
   });
 
+  it("navigation back/forward syncs inspector/graph/explorer slices (#352)", () => {
+    const store = useWorkspaceStore.getState();
+    store.setFocus({ kind: "entity", id: "A", source: "t" });
+    store.setFocus({ kind: "entity", id: "B", source: "t" });
+    expect(useWorkspaceStore.getState().inspector.entityIri).toBe("B");
+    expect(useWorkspaceStore.getState().graph.rootIri).toBe("B");
+    expect(useWorkspaceStore.getState().explorer.highlightedIri).toBe("B");
+
+    store.navigationBack();
+    let state = useWorkspaceStore.getState();
+    expect(state.focus?.id).toBe("A");
+    expect(state.inspector.entityIri).toBe("A");
+    expect(state.graph.rootIri).toBe("A");
+    expect(state.explorer.highlightedIri).toBe("A");
+
+    store.navigationForward();
+    state = useWorkspaceStore.getState();
+    expect(state.focus?.id).toBe("B");
+    expect(state.inspector.entityIri).toBe("B");
+    expect(state.graph.rootIri).toBe("B");
+    expect(state.explorer.highlightedIri).toBe("B");
+  });
+
   it("reset restores initial state", () => {
     useWorkspaceStore.getState().setFocus({
       kind: "entity",

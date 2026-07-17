@@ -74,4 +74,45 @@ describe("focusRelay", () => {
     assert.equal(hostA.messages.length, 1);
     assert.equal(hostB.messages.length, 1);
   });
+
+  it("rejects older timestamps so stale setFocus cannot win (#402)", () => {
+    const host = mockHost();
+    focusRelay.registerHost(host);
+    focusRelay.setFocus({
+      kind: "entity",
+      id: "http://example.org#Newer",
+      source: "explorer",
+      timestamp: 100,
+    });
+    host.messages.length = 0;
+    const kept = focusRelay.setFocus({
+      kind: "entity",
+      id: "http://example.org#Stale",
+      source: "inspector",
+      timestamp: 50,
+    });
+    assert.equal(kept.id, "http://example.org#Newer");
+    assert.equal(focusRelay.getFocus()?.id, "http://example.org#Newer");
+    assert.equal(host.messages.length, 0);
+  });
+
+  it("force option overwrites even with an older timestamp (#402)", () => {
+    focusRelay.setFocus({
+      kind: "entity",
+      id: "http://example.org#Newer",
+      source: "explorer",
+      timestamp: 100,
+    });
+    const forced = focusRelay.setFocus(
+      {
+        kind: "entity",
+        id: "http://example.org#Forced",
+        source: "session",
+        timestamp: 1,
+      },
+      { force: true }
+    );
+    assert.equal(forced.id, "http://example.org#Forced");
+    assert.equal(focusRelay.getFocus()?.id, "http://example.org#Forced");
+  });
 });

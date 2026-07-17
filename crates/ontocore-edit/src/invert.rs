@@ -395,7 +395,14 @@ pub fn invert_obo_patch_op(op: &OboPatchOp) -> Result<OboPatchOp> {
             value: value.clone(),
             scope: Some(scope.clone()),
         },
-        OboPatchOp::RemoveSynonym { .. } => {
+        OboPatchOp::RemoveSynonym { term_id, value, scope: Some(scope) } => {
+            OboPatchOp::AddSynonym {
+                term_id: term_id.clone(),
+                value: value.clone(),
+                scope: scope.clone(),
+            }
+        }
+        OboPatchOp::RemoveSynonym { scope: None, .. } => {
             return Err(EditError::NotInvertible(
                 "remove_synonym inverse requires recorded prior scope".into(),
             ));
@@ -472,12 +479,30 @@ mod tests {
     }
 
     #[test]
-    fn remove_synonym_and_add_def_are_not_invertible() {
+    fn remove_synonym_with_scope_inverts_to_add() {
+        let inverted = invert_obo_patch_op(&OboPatchOp::RemoveSynonym {
+            term_id: "EX:1".into(),
+            value: "alias".into(),
+            scope: Some("RELATED".into()),
+        })
+        .expect("invert");
+        assert_eq!(
+            inverted,
+            OboPatchOp::AddSynonym {
+                term_id: "EX:1".into(),
+                value: "alias".into(),
+                scope: "RELATED".into(),
+            }
+        );
+    }
+
+    #[test]
+    fn remove_synonym_without_scope_and_add_def_are_not_invertible() {
         assert!(matches!(
             invert_obo_patch_op(&OboPatchOp::RemoveSynonym {
                 term_id: "EX:1".into(),
                 value: "alias".into(),
-                scope: Some("RELATED".into()),
+                scope: None,
             }),
             Err(EditError::NotInvertible(_))
         ));

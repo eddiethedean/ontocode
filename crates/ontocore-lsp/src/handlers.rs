@@ -3193,7 +3193,23 @@ fn extract_token_span_at(line: &str, ch: usize) -> (usize, usize, String) {
 }
 
 fn is_iri_char(b: u8) -> bool {
-    b.is_ascii_alphanumeric() || matches!(b, b':' | b'#' | b'/' | b'_' | b'-')
+    // Include `.` and common IRI path/query characters (#397).
+    b.is_ascii_alphanumeric()
+        || matches!(
+            b,
+            b':' | b'#'
+                | b'/'
+                | b'_'
+                | b'-'
+                | b'.'
+                | b'?'
+                | b'='
+                | b'&'
+                | b'%'
+                | b'+'
+                | b'~'
+                | b'@'
+        )
 }
 
 fn expand_iri_token(content: &str, token: &str) -> Option<String> {
@@ -3249,6 +3265,16 @@ mod tests {
         let pos = Position { line: 1, character: 3 };
         let iri = iri_at_position(content, pos).expect("iri");
         assert_eq!(iri, "http://example.org/people#Person");
+    }
+
+    #[test]
+    fn iri_at_position_resolves_angle_bracket_iri_with_dots() {
+        // #397 — `.` must not split absolute IRIs.
+        let content = "ex:Person a owl:Class ; rdfs:seeAlso <http://example.org/Person> .";
+        let start = content.find("http://example.org/Person").expect("iri");
+        let pos = Position { line: 0, character: (start + "http://example".len()) as u32 };
+        let iri = iri_at_position(content, pos).expect("full iri");
+        assert_eq!(iri, "http://example.org/Person");
     }
 
     #[test]

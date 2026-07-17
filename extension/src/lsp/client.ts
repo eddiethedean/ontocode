@@ -115,11 +115,11 @@ export async function startLanguageClient(
       documentSelector: [
         { scheme: "file", language: "turtle" },
         { scheme: "file", language: "obo" },
-        { scheme: "file", pattern: "**/*.{ttl,owl,rdf,jsonld,json-ld,nt,nq,trig,obo}" },
+        { scheme: "file", pattern: "**/*.{ttl,owl,rdf,owx,jsonld,json-ld,nt,nq,trig,obo}" },
       ],
       synchronize: {
         fileEvents: vscode.workspace.createFileSystemWatcher(
-          "**/*.{ttl,owl,rdf,jsonld,json-ld,nt,nq,trig,obo}"
+          "**/*.{ttl,owl,rdf,owx,jsonld,json-ld,nt,nq,trig,obo}"
         ),
       },
       outputChannelName: "OntoCore Language Server",

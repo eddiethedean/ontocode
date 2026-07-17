@@ -1372,6 +1372,8 @@ dependencies = [
 name = "ontocore-robot"
 version = "0.26.1"
 dependencies = [
+ "libc",
+ "tempfile",
  "thiserror 2.0.18",
 ]
 
